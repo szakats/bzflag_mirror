@@ -22,6 +22,9 @@ Classes to draw the boxes in the world
 #
 from DisplayList import *
 from OpenGL.GL import *
+from OpenGL.GL.ARB.multitexture import *
+from BZFlag.UI import GLExtension
+
 
 class BoxSides(DisplayList):
     textureName = 'boxwall.png'
@@ -80,17 +83,24 @@ class BoxSides(DisplayList):
 
 
 class BoxTops(DisplayList):
-    textureName = 'boxtops.png'
+    textureNames = ('concrete_base.png', 'concrete_overlay.png')
     def set(self, polygon, base, height):
         self.polygon = polygon
         self.base = base
         self.height = height
+        self.render.textures[1].texEnv = GL_BLEND
 
     def drawSide(self):
         glBegin(GL_POLYGON)
-        for vertex in self.polygon:
-            glTexCoord2f(vertex[0] / 2, vertex[1] / 2)
-            glVertex2f(*vertex)
+        if GLExtension.multitexture:
+            for vertex in self.polygon:
+                glMultiTexCoord2fARB(GL_TEXTURE0_ARB, vertex[0] / 62, vertex[1] / 62)
+                glMultiTexCoord2fARB(GL_TEXTURE1_ARB, vertex[0] / 10,  vertex[1] / 10)
+                glVertex2f(*vertex)
+        else:
+            for vertex in self.polygon:
+                glTexCoord2f(vertex[0] / 2, vertex[1] / 2)
+                glVertex2f(*vertex)
         glEnd()
 
     def drawToList(self):

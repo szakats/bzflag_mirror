@@ -35,6 +35,7 @@ class Texture:
     """Represents an OpenGL texture, optionally loaded from disk in any format supported by PIL"""
     def __init__(self, name=None):
         self.texture = glGenTextures(1)
+        self.texEnv = GL_REPLACE
         if name:
             self.loadFile(name)
 
@@ -105,6 +106,7 @@ class Texture:
         global currentTexture
         if self != currentTexture:
             glBindTexture(GL_TEXTURE_2D, self.texture)
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, self.texEnv)
             currentTexture = self
 
 
