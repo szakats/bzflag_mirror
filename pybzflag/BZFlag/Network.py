@@ -156,25 +156,12 @@ class BaseSocket:
         struct.unmarshall(packed)
         return struct
 
-    def readMessage(self, msgModule):
-        """Read a message, using the supplied module full of Message subclasses."""
-        header = self.readStruct(Common.MessageHeader)
-        if not header:
-            return None
-        if header.length > 0:
-            body = self.read(header.length)
-            if not body:
-                # Save the header for later if we can't read the body yet
-                self.unread(header)
-                return None
-        else:
-            body = ''
+    def lookupMessage(self, msgModule, id):
         try:
-            msgClass = Common.getMessageDict(msgModule)[header.id]
+            return Common.getMessageDict(msgModule)[id]
         except KeyError:
             raise Errors.ProtocolWarning("Received %s byte message with unknown type 0x%04X in %s" %
                                          (header.length, header.id, msgModule.__name__))
-        return msgClass(str(header) + body)
 
 
 class TCPSocket(BaseSocket):
@@ -253,6 +240,21 @@ class TCPSocket(BaseSocket):
             # Not available for sending yet
             pass
 
+    def readMessage(self, msgModule):
+        """Read a message, using the supplied module full of Message subclasses."""
+        header = self.readStruct(Common.MessageHeader)
+        if not header:
+            return None
+        if header.length > 0:
+            body = self.read(header.length)
+            if not body:
+                # Save the header for later if we can't read the body yet
+                self.unread(header)
+                return None
+        else:
+            body = ''
+        return self.lookupMessage(msgModule, header.id)(str(header) + body)
+
 
 class UDPSocket(BaseSocket):
     """Concrete UDP socket that includes unbuffered send and receive.
@@ -270,6 +272,12 @@ class UDPSocket(BaseSocket):
 
     def unread(self, data):
         pass
+
+    def readMessage(self, msgModule):
+        """Read a message, using the supplied module full of Message subclasses."""
+        packet = self.read()
+        header = Common.MessageHeader(packet)
+        return self.lookupMessage(msgModule, header.id)(packet)
 
 
 class Endpoint:

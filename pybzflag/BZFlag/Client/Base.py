@@ -129,7 +129,6 @@ class BaseClient(Network.Endpoint):
         #       at least one message from us over UDP.
         self.udp.connect(self.tcp.remoteHost, msg.port)
         self.udp.write(self.outgoing.MsgUDPLinkEstablished())
-        
         self.onConnectUDP()
 
     def onMsgNetworkRelay(self, msg):
