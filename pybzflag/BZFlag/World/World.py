@@ -126,6 +126,7 @@ class World:
         self.blocks.append(block)
         if isinstance(block, WorldObjects.Style):
             self.style = block
+            self.size  = (block.worldSize, block.worldSize)
         if isinstance(block, WorldObjects.TeleporterLink):
             self.teleporterLinks.append(block)
         if isinstance(block, WorldObjects.Teleporter):

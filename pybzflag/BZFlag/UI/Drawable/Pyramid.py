@@ -81,10 +81,10 @@ class Pyramid(DisplayList):
         flip = 'flipZ' in self.pyramid.options
         if flip:
             poly.reverse()
-            z = self.pyramid.center[2]
-            z2 = self.pyramid.center[2] - self.pyramid.size[2]
+            z2 = self.pyramid.center[2]
+            z  = self.pyramid.center[2] + self.pyramid.size[2]
         else:
-            z = self.pyramid.center[2]
+            z  = self.pyramid.center[2]
             z2 = self.pyramid.center[2] + self.pyramid.size[2]
 
         # Base
