@@ -23,45 +23,56 @@ A class to draw a sky cube at various times of day
 from DisplayList import *
 from OpenGL.GL import *
 
+
+colorScheme = {
+    'sunrise': ( (0.04, 0.04, 0.08, 1),
+                 (0.04, 0.04, 0.08, 1),
+                 (0.04, 0.04, 0.08, 1),
+                 (0.04, 0.04, 0.08, 1),
+                 (0.47, 0.12, 0.08, 1),
+                 (0.04, 0.04, 0.08, 1) ),
+
+    'sunset': ( (0.04, 0.04, 0.08, 1),
+                (0.04, 0.04, 0.08, 1),
+                (0.04, 0.04, 0.08, 1),
+                (0.04, 0.04, 0.08, 1),
+                (0.47, 0.12, 0.08, 1),
+                (0.04, 0.04, 0.08, 1) ),
+
+    'night': ( (0.04, 0.04, 0.08, 1),
+               (0.04, 0.04, 0.08, 1),
+               (0.04, 0.04, 0.08, 1),
+               (0.04, 0.04, 0.08, 1),
+               (0.04, 0.04, 0.08, 1),
+               (0.04, 0.04, 0.08, 1) ),
+
+    'twilight': ( (0.04, 0.04, 0.08, 1),
+                  (0.04, 0.04, 0.08, 1),
+                  (0.04, 0.04, 0.08, 1),
+                  (0.04, 0.04, 0.08, 1),
+                  (0.30, 0.12, 0.08, 1),
+                  (0.04, 0.04, 0.08, 1) ),
+
+    'morning': ( (0.25, 0.55, 0.86, 1),
+                 (0.43, 0.75, 0.95, 1),
+                 (0.43, 0.75, 0.95, 1),
+                 (0.43, 0.75, 0.95, 1),
+                 (0.43, 0.75, 0.95, 1),
+                 (0.25, 0.55, 0.86, 1), ),
+
+    'evening': ( (0.25, 0.55, 0.86, 1),
+                 (0.43, 0.75, 0.95, 1),
+                 (0.43, 0.75, 0.95, 1),
+                 (0.43, 0.75, 0.95, 1),
+                 (0.43, 0.75, 0.95, 1),
+                 (0.25, 0.55, 0.86, 1), ),
+    }
+        
+        
 class Sky(DisplayList):
     def __init__(self):
         DisplayList.__init__(self)
         self.time = 'sunrise'
-
-        self.color = {}
-        self.color['sunrise'] = []
-        self.color['sunrise'].append((0.04, 0.04, 0.08, 1))
-        self.color['sunrise'].append((0.04, 0.04, 0.08, 1))
-        self.color['sunrise'].append((0.04, 0.04, 0.08, 1))
-        self.color['sunrise'].append((0.04, 0.04, 0.08, 1))
-        self.color['sunrise'].append((0.47, 0.12, 0.08, 1))
-        self.color['sunrise'].append((0.04, 0.04, 0.08, 1))
-	self.color['sunset'] = self.color['sunrise']
-
-        self.color['night'] = []
-        self.color['night'].append((0.04, 0.04, 0.08, 1))
-        self.color['night'].append((0.04, 0.04, 0.08, 1))
-        self.color['night'].append((0.04, 0.04, 0.08, 1))
-        self.color['night'].append((0.04, 0.04, 0.08, 1))
-        self.color['night'].append((0.04, 0.04, 0.08, 1))
-        self.color['night'].append((0.04, 0.04, 0.08, 1))
-
-        self.color['twilight'] = []
-        self.color['twilight'].append((0.04, 0.04, 0.08, 1))
-        self.color['twilight'].append((0.04, 0.04, 0.08, 1))
-        self.color['twilight'].append((0.04, 0.04, 0.08, 1))
-        self.color['twilight'].append((0.04, 0.04, 0.08, 1))
-        self.color['twilight'].append((0.30, 0.12, 0.08, 1))
-        self.color['twilight'].append((0.04, 0.04, 0.08, 1))
-
-	self.color['morning'] = []
-        self.color['morning'].append((0.25, 0.55, 0.86, 1))
-        self.color['morning'].append((0.43, 0.75, 0.95, 1))
-        self.color['morning'].append((0.43, 0.75, 0.95, 1))
-        self.color['morning'].append((0.43, 0.75, 0.95, 1))
-        self.color['morning'].append((0.43, 0.75, 0.95, 1))
-        self.color['morning'].append((0.25, 0.55, 0.86, 1))
-	self.color['evening'] = self.color['morning']
 
     def drawToList(self, rstate):
         pass
