@@ -73,7 +73,7 @@ class ArraySurface(GLDrawable):
         self.prepareIndices()
 
     def prepareIndices(self):
-        """Prepare an array with indices into the vertex array for GL_TRIANGLES,
+        """Prepare an array with indices into the vertex array for GL_QUADS,
            Note that these indices correspond to the vertex array only after it
            has been flattened with reshape().
            """
@@ -81,15 +81,10 @@ class ArraySurface(GLDrawable):
         (height, width) = self.vertices.shape[:2]
         for x in xrange(width - 1):
             for y in xrange(height - 1):
-                # The four points in this grid square probably aren't planar, so
-                # we need to split it into two triangles rather than using GL_QUADS.
                 indices.append(x + y * width)
                 indices.append((x+1) + y * width)
-                indices.append(x + (y+1) * width)
-                
-                indices.append(x + (y+1) * width)
-                indices.append((x+1) + y * width)
                 indices.append((x+1) + (y+1) * width)
+                indices.append(x + (y+1) * width)
         self.indices = array(indices)
 
     def draw(self, rstate):
@@ -98,7 +93,7 @@ class ArraySurface(GLDrawable):
         glNormalPointerd(reshape(calcVertexNormals(self.vertices), (-1, 3)))
         glEnable(GL_VERTEX_ARRAY)
         glEnable(GL_NORMAL_ARRAY)
-        glDrawElementsui(GL_TRIANGLES, self.indices)
+        glDrawElementsui(GL_QUADS, self.indices)
         glDisable(GL_VERTEX_ARRAY)
         glDisable(GL_NORMAL_ARRAY)
 

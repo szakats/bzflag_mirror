@@ -15,7 +15,7 @@ class AnchorAffector(SpringSystem.Affector):
 class ClothObject:
     def __init__(self):
         self.cloth = SpringSystem.Cloth(self.getInitialState())
-        self.cloth.add(SpringSystem.ConstantAccelAffector, (0.001, 0.001, -0.01))
+        self.cloth.add(SpringSystem.ConstantAccelAffector, (0.01, 0.001, -0.01))
         self.cloth.add(AnchorAffector)
 
         self.time = Animated.Timekeeper()
