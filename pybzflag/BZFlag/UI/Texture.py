@@ -111,8 +111,8 @@ class Texture:
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
         if GLExtension.maxAnisotropy > 1:
-            glTexParameterf(self.target, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)        
-        
+            glTexParameterf(self.target, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)
+
     def setRepeat(self, repeat=True):
         Texture.bind(self)
         if repeat:
@@ -164,7 +164,7 @@ class AnimatedTexture:
     def __init__(self, name):
         (filename, framerate) = name.split(":")
         framerate = float(framerate)
-        
+
         # Try to load texture frames. An error on the
         # first frame is fatal, but an error after that simply stops the loading.
         self.frames = []
@@ -270,7 +270,7 @@ class DynamicTexture(Texture):
             # This rendering expired, set the dirty flag and get a new expiration duration
             self.newExpiration()
             self.dirty = True
-        
+
     def drawFrame(self):
         """Draw function called by our viewport"""
         self.integrate(self.time.step())
@@ -281,6 +281,11 @@ class DynamicTexture(Texture):
         self.rendered = True
         self.renderLifetime = 0
 
+        ## Uncomment this to show the textures as they're stored
+        #self.viewport.display.flip()
+        #import time
+        #time.sleep(1)
+
     def render(self):
         """Render the texture. By default this calls the draw() method to draw
            the texture's contents into our viewport, then reads that viewport back.
@@ -289,7 +294,7 @@ class DynamicTexture(Texture):
            """
         self.draw()
         self.loadBackbuffer(self.viewport.size, format=self.format)
-        
+
 
 class Cache:
     """Keeps track of which textures are already loaded, so we never
@@ -301,7 +306,7 @@ class Cache:
     def load(self, name):
         if not self.textures.has_key(name):
             filename = Util.dataFile(name)
-            
+
             # If the texture name has a % in it, it is a format specifier
             # for loading animated textures from a sequence of stills.
             if filename.find("%") >= 0:

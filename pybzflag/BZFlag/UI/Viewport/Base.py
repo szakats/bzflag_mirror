@@ -22,6 +22,7 @@ An abstract base class defining the Viewport interface
 #
 
 from BZFlag import Event
+import copy
 
 __all__ = ('Viewport',)
 
@@ -30,10 +31,9 @@ class Viewport:
     """Abstract base class for a viewport. Defines events and methods
        that all viewports must support.
        """
-    def __init__(self, eventLoop):
+    def __init__(self, eventLoop, size):
         self.eventLoop = eventLoop
         Event.attach(self, 'onFrame', 'onSetupFrame', 'onDrawFrame', 'onFinishFrame', 'onResize')
-
         self.renderSequence = [
             self.onSetupFrame,
             self.onDrawFrame,
@@ -41,25 +41,89 @@ class Viewport:
             ]
         self.visible = True
 
-        # For subviews created with region()
         self.parent = None
         self.rootView = self
+        self.children = []
+
+        self.rect = None
+        self.rectExp = None
+        self.size = None
+        self.setRect((0,0) + size)
 
     def render(self):
         if self.visible and self.size[0] > 0 and self.size[1] > 0:
             for f in self.renderSequence:
                 f()
 
+    def setRect(self, rect):
+        """Set this viewport's size and position rectangle.
+           The provided rectangle can optionally be a function called to
+           calculate the viewport's rectangle any time updateRect is called.
+           """
+        if callable(rect):
+            self.rectExp = rect
+        else:
+            self.rectExp = lambda: rect
+        self.updateRect()
+
+    def updateRect(self):
+        """Actually resize the viewport, calculating a rectangle using the
+           expression stored by setRect().
+           """
+        newRect = self.rectExp()
+        if newRect != self.rect:
+            self.rect = newRect
+            if self.parent:
+                self.rect = (self.rect[0] + self.parent.rect[0],
+                             self.rect[1] + self.parent.rect[1],
+                             self.rect[2],
+                             self.rect[3])
+            self.size = self.rect[2:]
+            self.onResize()
+            for child in self.children:
+                child.updateRect()
+
     def setCaption(self, title):
         """Set the window caption on the viewport, if applicable"""
         pass
 
-    def region(self, rect):
+    def region(self, rect, renderLink='after'):
         """Return a new Viewport that identifies the given rectangular subviewport.
-           rect is allowed to either be a list specifying a rectangle, or a callable
-           object that returns such a list. If possible the callable should be lazily
-           evaluated, but that behaviour depends on the subclass.
+           As in setRect, the rectangle can also be a function that returns a viewport,
+           to be reevaluated when a parent viewport changes size.
+
+           renderLink controls how this region is linked into its parent's rendering
+           sequence. 'after' inserts it after all other entries, 'before' before all
+           others, None doesn't insert it.
            """
-        pass
+        sub = copy.copy(self)
+        sub.parent = self
+        sub.children = []
+        self.children.append(sub)
+        sub.setRect(rect)
+
+        # Disconnect events and the renderSequence from the parent
+        sub.onSetupFrame  = Event.Event()
+        sub.onDrawFrame   = Event.Event()
+        sub.onFinishFrame = Event.Event()
+        sub.onResize      = Event.Event()
+        sub.renderSequence = [sub.onSetupFrame,
+                              sub.onDrawFrame,
+                              sub.onFinishFrame]
+
+        if renderLink == 'after':
+            # Stick it in our render sequence right before our onFinishFrame which flips the buffer
+            # This should be safe for nesting viewport regions-  and the last entry will always be
+            # the root viewport's onFinishFrame event.
+            self.rootView.renderSequence = self.rootView.renderSequence[:-1] + \
+                                           [sub.render] + \
+                                           self.rootView.renderSequence[-1:]
+
+        if renderLink == 'before':
+            self.rootView.renderSequence = [sub.render] + self.rootView.renderSequence
+
+        # Ignore the caption on sub-viewports
+        sub.setCaption = lambda title: None
+        return sub
 
 ### The End ###

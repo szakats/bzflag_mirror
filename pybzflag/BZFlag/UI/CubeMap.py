@@ -163,9 +163,4 @@ class CubeMap(Texture.DynamicTexture):
         #                 self.viewport.rect[3],
         #                 0)
 
-        ## Uncomment this to show the cube map textures as they're stored
-        #self.viewport.display.flip()
-        #import time
-        #time.sleep(1)
-
 ### The End ###

@@ -32,7 +32,10 @@ class PygameViewport(Viewport):
        events, and is subclassed below for 3D rendering via pygame.
        """
     def __init__(self, eventLoop, size=(640,480), targetFrameRate=100, resizable=True):
-        Viewport.__init__(self, eventLoop)
+        pygame.display.init()
+        self.display = pygame.display
+        self.resizable = resizable
+        Viewport.__init__(self, eventLoop, size)
 
         # Add event handlers for all the pygame events we can find
         for i in xrange(100):
@@ -40,10 +43,6 @@ class PygameViewport(Viewport):
             if name != "Unknown":
                 Event.attach(self, 'on' + name)
 
-        pygame.display.init()
-        self.display = pygame.display
-        self.resizable = resizable
-        self.resize(size)
         self.init()
         self.frameTimer = None
         self.setTargetFrameRate(targetFrameRate)
@@ -59,10 +58,9 @@ class PygameViewport(Viewport):
             flags |= pygame.RESIZABLE
         return flags
 
-    def resize(self, size):
-        self.screen = self.display.set_mode(size, self.getModeFlags())
-        self.size = size
-        self.onResize()
+    def onResize(self):
+        if not self.parent:
+            self.screen = self.display.set_mode(self.size, self.getModeFlags())
 
     def setCaption(self, title):
         pygame.display.set_caption(title)
@@ -107,22 +105,15 @@ class PygameViewport(Viewport):
         self.eventLoop.stop()
 
     def onVideoResize(self, event):
-        self.resize(event.size)
+        self.setRect(self.rect[:2] + event.size)
 
-    def region(self, rect):
+    def region(self, rect, renderLink='after'):
         """Return a class that represents a rectangular subsection of this viewport.
-           This performs a shallow copy on ourselves, then subsurfaces its screen.
+           In addition to what Viewport.region() does, this sets our screen to be
+           a subsurface of the original screen.
            """
-        if callable(rect):
-            rect = rect
-
-        sub = copy.copy(self)
+        sub = Viewport.region(rect, renderLink)
         sub.screen = self.secreen.subsurface(rect)
-        sub.size = rect[2:]
-        sub.parent = self
-
-        # Ignore the caption on sub-viewports
-        sub.setCaption = lambda title: None
         return sub
 
 ### The End ###

@@ -30,11 +30,12 @@ that it only ever be invoked once per frame, it might be a good cantidate to go 
 
 from __future__ import division
 from Pygame import PygameViewport
+from Base import Viewport
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from BZFlag.UI import GLExtension
 from BZFlag import Event
-import pygame, copy
+import pygame
 
 
 class OpenGLViewport(PygameViewport):
@@ -46,8 +47,6 @@ class OpenGLViewport(PygameViewport):
         self.nearClip    = 0.1
         self.farClip     = 2500.0
         self.fov         = 45.0
-        self.rectExp     = [0,0] + list(self.size)  # A function or list specifying our relative viewport
-        self.rect        = self.rectExp             # Our absolute viewport
 
         # Set up some common OpenGL defaults
         glClearDepth(1.0)
@@ -60,29 +59,11 @@ class OpenGLViewport(PygameViewport):
         # By default we use ClearedMode.
         self.mode = ClearedMode()
         self.onSetupFrame.observe(lambda: self.mode.setupFrame())
-
-        def onResize():
-            self.rectExp = [0,0] + list(self.size)
-        self.onResize.observe(onResize)
-
         self.onSetupFrame.observe(self.configureOpenGL)
 
     def onFinishFrame(self):
         self.mode.finishFrame()
         PygameViewport.onFinishFrame(self)
-
-    def evalViewport(self):
-        """Evaluate our viewport if necessary, and set up our 'size' and 'viewport' members"""
-        if callable(self.rectExp):
-            v = self.rectExp()
-        else:
-            v = self.rectExp
-        if self.parent:
-            v = (v[0] + self.parent.rect[0],
-                 v[1] + self.parent.rect[1],
-                 v[2], v[3])
-        self.rect = v
-        self.size = v[2:]
 
     def configureOpenGL(self):
         glViewport(*self.rect)
@@ -105,57 +86,21 @@ class OpenGLViewport(PygameViewport):
     def getModeFlags(self):
         return PygameViewport.getModeFlags(self) | pygame.OPENGL
 
-    def resize(self, size):
+    def onResize(self):
         """Before setting our display mode, set up any OpenGL attributes we need"""
-        self.setGLAttributes()
-        PygameViewport.resize(self, size)
+        PygameViewport.onResize(self)
+        if not self.parent:
+            self.setGLAttributes()
 
     def setGLAttributes(self):
-        """A hook allowing subclasses the ability to set OpenGL attributes before initializing the context"""
+        """A hook allowing subclasses the ability to set OpenGL
+           attributes before initializing the context
+           """
         pass
 
-    def render(self):
-        """Reevaluate our viewport, then do the usual rendering sequence"""
-        self.evalViewport()
-        PygameViewport.render(self)
-
     def region(self, rect, renderLink='after'):
-        """Return a class that represents a rectangular subsection of this viewport.
-           To maintain something resembling OpenGL state integrity, it disconnects
-           the region's rendering events from ours and appends them to our rendering
-           sequence.
-
-           In addition to a rectangle, this function can accept a function that
-           will be lazily evaluated to a rectangle each frame. This makes it possible
-           to create regions with animated or dynamically sized positions.
-
-           renderLink controls how this region is linked into its parent's rendering
-           sequence. 'after' inserts it after all other entries, 'before' before all
-           others, None doesn't insert it.
-           """
-        sub = copy.copy(self)
-        sub.parent = self
-        sub.rectExp = rect
-        sub.onSetupFrame  = Event.Event(sub.configureOpenGL)
-        sub.onDrawFrame   = Event.Event()
-        sub.onFinishFrame = Event.Event()
-        sub.renderSequence = [sub.onSetupFrame,
-                              sub.onDrawFrame,
-                              sub.onFinishFrame]
-
-        if renderLink == 'after':
-            # Stick it in our render sequence right before our onFinishFrame which flips the buffer
-            # This should be safe for nesting viewport regions-  and the last entry will always be
-            # the root viewport's onFinishFrame event.
-            self.rootView.renderSequence = self.rootView.renderSequence[:-1] + \
-                                           [sub.render] + \
-                                           self.rootView.renderSequence[-1:]
-
-        if renderLink == 'before':
-            self.rootView.renderSequence = [sub.render] + self.rootView.renderSequence
-
-        # Ignore the caption on sub-viewports
-        sub.setCaption = lambda title: None
+        sub = Viewport.region(self, rect, renderLink)
+        sub.onSetupFrame.observe(self.configureOpenGL)
         return sub
 
 
