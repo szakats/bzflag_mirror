@@ -26,53 +26,54 @@ from OpenGL.GL import *
 class TestWidget(DisplayList):
     def set(self, center):
         self.center = center
+        self.overlay = True
 
     def drawToList(self):
         size = 0.2
         glPushMatrix()
-	glLoadIdentity()
         glColor3f(1.0, 0.0, 0.0)
         # lower left corner
-	glTranslatef(*self.center)
-	glBegin(GL_QUADS)
+        glTranslatef(*self.center)
+        glBegin(GL_QUADS)
         # front
-	glNormal3f(0, 0, -1)
-	glVertex3f(-size, size, -size)
-	glVertex3f(size, size, -size)
-	glVertex3f(size, -size, -size)
-	glVertex3f(-size, -size, -size)
-	# back
-	glNormal3f(0, 0, 1)
-	glVertex3f(size, size, size)
-	glVertex3f(-size, size, size)
-	glVertex3f(-size, -size, size)
-	glVertex3f(size, -size, size)
+        glNormal3f(0, 0, -1)
+        glVertex3f(-size, size, -size)
+        glVertex3f(size, size, -size)
+        glVertex3f(size, -size, -size)
+        glVertex3f(-size, -size, -size)
+        # back
+        glNormal3f(0, 0, 1)
+        glVertex3f(size, size, size)
+        glVertex3f(-size, size, size)
+        glVertex3f(-size, -size, size)
+        glVertex3f(size, -size, size)
         # top
-	glNormal3f(0, 1, 0)
-	glVertex3f(-size, size, -size)
-	glVertex3f(-size, size, size)
-	glVertex3f(size, size, size)
-	glVertex3f(size, size, -size)
+        glNormal3f(0, 1, 0)
+        glVertex3f(-size, size, -size)
+        glVertex3f(-size, size, size)
+        glVertex3f(size, size, size)
+        glVertex3f(size, size, -size)
         # bottom
-	glNormal3f(0, -1, 0)
-	glVertex3f(-size, -size, -size)
-	glVertex3f(size, -size, -size)
-	glVertex3f(size, -size, size)
-	glVertex3f(-size, -size, size)
+        glNormal3f(0, -1, 0)
+        glVertex3f(-size, -size, -size)
+        glVertex3f(size, -size, -size)
+        glVertex3f(size, -size, size)
+        glVertex3f(-size, -size, size)
         # left
-	glNormal3f(-1, 0, 0)
-	glVertex3f(-size, -size, size)
-	glVertex3f(-size, size, size)
-	glVertex3f(-size, size, -size)
-	glVertex3f(-size, -size, -size)
+        glNormal3f(-1, 0, 0)
+        glVertex3f(-size, -size, size)
+        glVertex3f(-size, size, size)
+        glVertex3f(-size, size, -size)
+        glVertex3f(-size, -size, -size)
         # right
-	glNormal3f(1, 0, 0)
-	glVertex3f(size, -size, -size)
-	glVertex3f(size, size, -size)
-	glVertex3f(size, size, size)
-	glVertex3f(size, -size, size)
-	glEnd()
-	glColor3f(1.0, 1.0, 1.0)
-	glPopMatrix()
+        glNormal3f(1, 0, 0)
+        glVertex3f(size, -size, -size)
+        glVertex3f(size, size, -size)
+        glVertex3f(size, size, size)
+        glVertex3f(size, -size, size)
+        glEnd()
+        glColor3f(1.0, 1.0, 1.0)
+        glPopMatrix()
+
 
 ### The End ###

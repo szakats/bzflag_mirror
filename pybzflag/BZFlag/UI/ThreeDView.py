@@ -113,7 +113,7 @@ class TextureGroup(Drawable.DisplayList):
     def init(self):
         """Don't rebuild the list on init"""
         pass
-    
+
     def drawToList(self):
         for drawable in self.drawables:
             if hasattr(drawable, 'drawToList'):
@@ -204,13 +204,30 @@ class BlendedRenderPass(BasicRenderPass):
 
     def filter(self, drawable):
         return drawable.blended
-    
+
     def render(self):
         glEnable(GL_BLEND)
         BasicRenderPass.render(self)
         glDisable(GL_BLEND)
-    
-            
+
+
+class OverlayRenderPass(BasicRenderPass):
+    """A rendering pass that draws objects overlaid on the current scene."""
+    filterPriority = 20
+    renderPriority = 80
+
+    def filter(self, drawable):
+        return drawable.overlay
+
+    def render(self):
+        glPushMatrix()
+	glLoadIdentity()
+	glTranslatef(0, 0, -10)
+	glClear(GL_DEPTH_BUFFER_BIT)
+	BasicRenderPass.render(self)
+	glPopMatrix()
+
+
 class Scene:
     """Set of all the objects this view sees, organized into rendering passes
        and sorted by texture. Multiple rendering passes are necessary to deal
@@ -221,7 +238,7 @@ class Scene:
     def __init__(self, game):
         self.game = game
         self.objects = {}
-        self.passes = [BasicRenderPass(), BlendedRenderPass()]
+        self.passes = [BasicRenderPass(), BlendedRenderPass(), OverlayRenderPass()]
         game.world.onLoad.observe(self.reloadWorld)
         self.reloadWorld()
 
@@ -252,7 +269,7 @@ class Scene:
         # Give each rendering pass a chance to preprocess
         for rpass in self.passes:
             rpass.preprocess()
-                
+
     def render(self):
         """Render the scene to the current OpenGL context"""
         glDisable(GL_BLEND)

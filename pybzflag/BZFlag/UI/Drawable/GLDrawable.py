@@ -42,6 +42,7 @@ class GLDrawable:
         else:
             self.texture = None
         self.blended = False
+        self.overlay = False
 
     def draw(self):
         pass

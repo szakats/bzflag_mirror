@@ -95,7 +95,7 @@ class MouseGrab:
             self.homePos = None
 
     def handleMotion(self, event):
-        if event.buttons[self.button-1]:
+        if self.homePos:
             # Snap the mouse back to the position it was clicked at.
             # This generates an event, so we have to rummage through the event
             # queue and discard it, putting all the other events back.
@@ -151,7 +151,7 @@ class MouseWheel(Event.Event):
         elif event.button == 5 and self.modifiers.test():
             self(-self.scale)
 
-                
+
 class Viewing:
     """A controller for ThreeDView that provides rotation and panning through
        the level. This alone makes a good world viewer, and it is used as the

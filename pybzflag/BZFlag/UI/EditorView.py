@@ -32,10 +32,10 @@ def attach(game, eventLoop):
     viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
 
     view3d   = ThreeDView.ThreeDView(game, viewport)
-    view3d.scene.objects[Widgetness()] = [TestWidget((3.9, -2.8, -8))]
-    view3d.scene.objects[Widgetness()] = [TestWidget((-3.9, -2.8, -8))]
-    view3d.scene.objects[Widgetness()] = [TestWidget((3.9, 2.8, -8))]
-    view3d.scene.objects[Widgetness()] = [TestWidget((-3.9, 2.8, -8))]
+    view3d.scene.objects[Widgetness()] = [TestWidget((5, -3.5, 0))]
+    view3d.scene.objects[Widgetness()] = [TestWidget((-5, -3.5, 0))]
+    view3d.scene.objects[Widgetness()] = [TestWidget((5, 3.5, 0))]
+    view3d.scene.objects[Widgetness()] = [TestWidget((-5, 3.5, 0))]
     view3d.scene.preprocess()
     ThreeDControl.Editing(view3d, viewport)
 
