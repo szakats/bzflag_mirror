@@ -17,7 +17,7 @@ class Wind:
         # Wind, with speed and direction varying over time with a perlin noise function
         self.vector = Animated.Vector(Animated.PerlinNoise(persistence = 0.8,
                                                            octaves     = 7,
-                                                           amplitude   = 0.8,
+                                                           amplitude   = 0.5,
                                                            frequency   = 0.001,
                                                            ))
 

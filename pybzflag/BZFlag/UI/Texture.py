@@ -31,6 +31,10 @@ from OpenGL.GL.EXT.texture_filter_anisotropic import *
 import copy, math
 
 
+class TextureException(Exception):
+    pass
+
+
 class Texture:
     """Represents an OpenGL texture, optionally loaded from disk in any format supported by PIL"""
     def __init__(self, name=None):
@@ -197,11 +201,12 @@ class DynamicTexture(Texture):
         self.maxSize = maxSize
         self.viewport = None
         self.dirty = True
+        self.rendered = False
 
     def bind(self, rstate=None):
         """The first time we're bound we add a new viewport that renders our texture"""
-        if rstate and not self.viewport:
-            self.setupViewport(rstate)
+        if not self.rendered:
+            raise TextureException("Attempt to bind a DynamicTexture before it has been rendered")
         Texture.bind(self, rstate)
 
     def getTextureRect(self, viewport):
@@ -217,7 +222,7 @@ class DynamicTexture(Texture):
         return fsize
 
     def setupViewport(self, rstate):
-        """Set up a viewport region and rendering state for this texture to use"""
+        """Attach this dynamic texture to a viewport and rendering state"""
         self.rstate = copy.copy(rstate)
         self.viewport = self.rstate.viewport.region(
             self.getTextureRect(self.rstate.viewport), renderLink='before')
@@ -229,6 +234,7 @@ class DynamicTexture(Texture):
             return
         self.render()
         self.dirty = False
+        self.rendered = True
 
     def render(self):
         """Render the texture. By default this calls the draw() method to draw
