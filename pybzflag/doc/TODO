@@ -1,8 +1,8 @@
 Todo list, in no particular order:
 
-  - Clean up the Pyramid code- move cube map reflections into a new rendering pass so 
-    the modelview matrix only has to be inverted once, clean up binding of CubeMap
-    instance with a View to render.
+  - Fix texture binding for cube maps. It causes an OpenGL invalid operation error, I'm not sure
+    why. Currently these exceptions are being ignored in CubeMap.py, and all pyramids end up
+    sharing one cube map.
 
   - Convert observers and render sequence callbacks to use weak references so it's possible
     to properly delete objects that register callbacks.

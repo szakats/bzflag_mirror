@@ -29,7 +29,6 @@ from BZFlag import Util, Animated
 from BZFlag.UI import GLExtension
 from OpenGL.GL.EXT.texture_filter_anisotropic import *
 
-
 # Keep track of the current OpenGL texture in each target, to reduce the number of binds we do
 currentTexture = {}
 
@@ -115,13 +114,15 @@ class Texture:
         except:
             pass
 
-    def bind(self, rstate=None):
+    def bind(self, rstate=None, target=None):
         """Bind this texture to self.target in the current OpenGL context"""
         global currentTexture
-        if self != currentTexture.setdefault(self.target, None):
-            glBindTexture(self.target, self.texture)
+        if not target:
+            target = self.target
+        if self != currentTexture.setdefault(target, None):
+            glBindTexture(target, self.texture)
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, self.texEnv)
-            currentTexture[self.target] = self
+            currentTexture[target] = self
 
 
 class AnimatedTexture:

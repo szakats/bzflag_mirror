@@ -46,6 +46,7 @@ class CubeMap(Texture):
         self.position = position
         self.maxSize = maxSize
         self.target = GL_TEXTURE_CUBE_MAP_EXT
+        self.bindTarget = GL_TEXTURE_CUBE_MAP_EXT
         self.texEnv = GL_REPLACE
         self.recursion = 0
         self.rendered = False
@@ -57,7 +58,10 @@ class CubeMap(Texture):
         if not self.viewport:
             self.rstate = rstate
             self.viewport = self.setupViewport()
-        #Texture.bind(self, rstate)
+        try:
+            Texture.bind(self, rstate, self.bindTarget)
+        except:
+            pass
 
     def getTextureRect(self, viewport):
         """Return a function that calculates the texture size taking into account
@@ -88,10 +92,6 @@ class CubeMap(Texture):
         """Draw function called by our viewport"""
         if not self.dirty:
             return
-        
-        glReadBuffer(GL_BACK)
-        #Texture.bind(self)
-        glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
         self.renderSides()
         self.dirty = False
@@ -158,6 +158,16 @@ class CubeMap(Texture):
            """
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         self.rstate.view.renderScene(self.rstate)
+
+        glReadBuffer(GL_BACK)
+        try:
+            Texture.bind(self, None, self.bindTarget)
+        except:
+            pass
+
+        # Disable mipmapping
+        glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
         glCopyTexImage2D(target, 0, GL_RGB,
                          self.viewport.rect[0],
                          self.viewport.rect[1],
