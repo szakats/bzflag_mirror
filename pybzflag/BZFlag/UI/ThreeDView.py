@@ -40,7 +40,7 @@ class Camera:
     def __init__(self):
         self.position  = (0, 0, 4.0)
         self.distance  = 900
-        self.azimuth   = 0
+        self.azimuth   = 180
         self.elevation = -75
 
     def load(self):
@@ -134,7 +134,7 @@ class ThreeDView:
         self.viewport = viewport
         self.camera = Camera()
         self.light0 = Light(GL_LIGHT0)
-#        self.light1 = Light(GL_LIGHT1)
+        self.light1 = Light(GL_LIGHT1)
         self.scene = Scene(game)
 
         # Initialize the opengl view
@@ -142,10 +142,10 @@ class ThreeDView:
         self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
         self.light0.position = (400, 400, 400, 1.0)
         self.light0.set()
-#        self.light1.ambient  = (0.85, 0.85, 0.85, 1.0)
-#        self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
-#        self.light1.position = (0, 0, 400, 1.0)
-#        self.light1.set()
+        self.light1.ambient  = (0.85, 0.85, 0.85, 1.0)
+        self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
+        self.light1.position = (0, 0, 400, 1.0)
+        self.light1.set()
 
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_NORMALIZE)
@@ -234,10 +234,8 @@ class ThreeDController:
 		(x, y, z) = view.camera.position
 		xscale = math.cos((view.camera.azimuth) * 3.1415926 / 180)
 		yscale = math.sin((view.camera.azimuth) * 3.1415926 / 180)
-		print 'xscale =',xscale
-		print 'yscale =',yscale
-		y += event.rel[0] * xscale
-		x += event.rel[1] * yscale
+		x += event.rel[0] * xscale - event.rel[1] * yscale
+		y += event.rel[0] * yscale - event.rel[1] * xscale
 		view.camera.position = (x, y, z)
 	      return
 	    if modifiers.alt:
