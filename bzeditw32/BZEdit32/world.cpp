@@ -535,7 +535,7 @@ bool CWorld::Write(const char *szFileName)
 		return false;
 
 	file << "# World built with bzedit32 world class, available at\n";
-	file << "# http://www.artemisgames.com/bzedit\n\n";
+	file << "# http://www.sourceforge.net/projects/bzflag\n\n";
 
 	trObjectMap::iterator	itr = m_vObjList.begin();
 	while(itr !=m_vObjList.end())
