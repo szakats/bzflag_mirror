@@ -243,16 +243,21 @@ class StatefulClient(BaseClient):
         self.flagIdToClass = {}
         self.flagClassToId = {}
         flagDict = Flag.getDict()
+        unknownFlags = []
         for i in xrange(msg.numFlags):
             flag = Common.FlagNegotiationID()
             flag.read(data)
             try:
                 cls = flagDict[flag.abbreviation]
             except KeyError:
-                raise Errors.ProtocolError("Server returned an unknown flag after negotiation")
+                unknownFlags.append(flag.abbreviation)
             self.flagIdToClass[flag.id] = cls
             self.flagClassToId[cls] = flag.id
         self.onNegotiateFlags()
+        if unknownFlags:
+            raise Errors.ProtocolWarning(
+                "Server knows about the following flags that we don't: %s" %
+                " ".join(unknownFlags))
 
     def onNegotiateFlags(self):
         """Immediately after flag negotiation we usually want to start downloading
