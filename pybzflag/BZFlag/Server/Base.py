@@ -109,7 +109,7 @@ class BaseServer(Network.Endpoint):
 
         # Create a class to contain our client info, and file
         # it by ID, TCP socket, and by address.
-        info = self.clientInfoClass(server, clientId, clientSocket)
+        info = self.clientInfoClass(self, clientId, clientSocket)
         self.clientsByID[info.id] = info
         self.clientsBySocket[info.socket] = info
 

@@ -255,7 +255,10 @@ class TCPSocket(BaseSocket):
                 return None
         else:
             body = ''
-        return self.lookupMessage(msgModule, header.id)(str(header) + body)
+        cls = self.lookupMessage(msgModule, header.id)
+        msg = cls(str(header) + body)
+        msg.fromModule = msgModule
+        return msg
 
 
 class UDPSocket(BaseSocket):
@@ -291,6 +294,7 @@ class UDPSocket(BaseSocket):
         msg = self.lookupMessage(msgModule, header.id)(packet)
         if msg:
             msg.fromAddress = address
+        msg.fromModule = msgModule
         return msg
 
 
@@ -374,6 +378,7 @@ class Endpoint:
         msg = socket.readMessage(self.incoming)
         if msg:
             msg.socket = socket
+            msg.protocol = socket.protocol
             msg.eventLoop = eventLoop
             self.dispatchMessage(msg)
 

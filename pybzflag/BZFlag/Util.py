@@ -21,8 +21,6 @@ Small utilities that don't seem to fit anywhere else :)
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from StringIO import StringIO
-
 
 def getSubclassDict(module, baseClass, keyAttribute, cacheName='contentsDict'):
     """Return a dictionary of all the base classes of baseClass in module,
@@ -43,9 +41,11 @@ def getSubclassDict(module, baseClass, keyAttribute, cacheName='contentsDict'):
         setattr(module, cacheName, d)
     return getattr(module, cacheName)
 
-def hexDump(value, bytesPerLine=16, wordSize=2):
-    src = StringIO(value)
-    dest = StringIO()
+
+def hexDump(src, dest, bytesPerLine=16, wordSize=2):
+    """A pretty standard hex dumper routine.
+       Dumps the stream 'src' to the stream 'dest'
+       """
     addr = 0
     while 1:
         srcLine = src.read(bytesPerLine)
@@ -75,7 +75,62 @@ def hexDump(value, bytesPerLine=16, wordSize=2):
         for i in xrange(bytesPerLine - len(srcLine)):
             dest.write(" ")
         dest.write("\n")
-    return dest.getvalue()
 
+
+def messageDump(msg, f, showContents=True, keyColumnWidth=25):
+    """Dump a message in human readable form to the stream 'f'."""
+    from BZFlag import Protocol
+    from StringIO import StringIO
+
+    name = msg.__class__.__name__
+
+    # If the message was received with Network.Socket.readMessage,
+    # we can determine where it came from by its fromModule attribute
+    direction = ''
+    try:
+        from BZFlag.Protocol import FromServer, ToServer
+        if msg.fromModule == ToServer:
+            direction = "-->"
+        elif msg.fromModule == FromServer:
+            direction = "<--"
+    except AttributeError:
+        pass
+
+    f.write("%s %s\n" % (direction, name))
+    if not showContents:
+        return
+    
+    # Recursively build a list of (key,value) tuples that will be displayed
+    # to represent a message. This handles traversing into substructures
+    # like FlagUpdate.
+    def buildKeys(object, prefix=""):
+        keys = object.__dict__.keys()
+        keys.sort()
+        lst = []
+        for key in keys:
+            if key[0] != '_' and not key in ('eventLoop', 'socket', 'header', 'fromModule'):
+                value = object.__dict__[key]
+                if isinstance(value, Protocol.Struct):
+                    lst.extend(buildKeys(value, prefix + key + "."))
+                else:
+                    lst.append((prefix + key, value))
+        return lst
+
+    for (key, value) in buildKeys(msg):
+        if key == 'data':
+            # Special decoding for 'data' members- do a hex dump
+            d = StringIO()
+            hexDump(StringIO(value), d)
+            value = ("%d bytes\n" % len(value)) + d.getvalue()
+        else:
+            # Let python decode everything else
+            value = repr(value)
+                
+        # Handle printing multiline values properly
+        lines = value.split("\n")
+        print ("%%%ss: %%s" % keyColumnWidth) % (key, lines[0])
+        for line in lines[1:]:
+            if line:
+                f.write(" " * (keyColumnWidth + 2) + line + "\n")
 
 ### The End ###
