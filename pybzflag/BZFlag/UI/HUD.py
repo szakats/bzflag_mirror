@@ -82,6 +82,4 @@ class Text:
         glLoadIdentity()
         size = self.viewport.size
 
-        GLText.draw((0, size[1]), self.text, (1,1,0,1))
-
 ### The End ###
