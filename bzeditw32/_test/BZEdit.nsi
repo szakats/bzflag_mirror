@@ -7,7 +7,7 @@
 ;
 
 !define VER_MAJOR 1.6
-!define VER_MINOR .1a
+!define VER_MINOR .2
 
 ; Main Installer Options
 Name "BZEdit"
