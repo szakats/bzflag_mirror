@@ -182,8 +182,8 @@ void CBaseObject::WriteStdData ( ostream &stream )
 	if (m_iGroupID != -1)
 		stream << "#!group " <<  m_iGroupID << " " << m_sGroupName.c_str() << endl;
 
-	stream << "position " << m_rPosition.x << ' ' << m_rPosition.y << ' ' << m_rPosition.z << endl;
-	stream << "rotation " << m_fAngle << endl;
+	stream << "	position " << m_rPosition.x << ' ' << m_rPosition.y << ' ' << m_rPosition.z << endl;
+	stream << "	rotation " << m_fAngle << endl;
 }
 
 void CBaseObject::WriteStdData ( char *data )
@@ -210,7 +210,7 @@ void CBaseObject::WriteStdData ( char *data )
 		strcat(data,szTemp);
 	}
 
-	sprintf(szTemp,"position  %f %f %f\nrotation  %f\n",m_rPosition.x,m_rPosition.y,m_rPosition.z,m_fAngle);
+	sprintf(szTemp,"\tposition  %f %f %f\n\trotation  %f\n",m_rPosition.x,m_rPosition.y,m_rPosition.z,m_fAngle);
 	strcat(data,szTemp);
 }
 

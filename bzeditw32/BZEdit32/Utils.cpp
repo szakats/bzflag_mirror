@@ -29,17 +29,29 @@ bool GetLine( char** data, char* line )
 	line[0] = NULL;
 	char	*pPtr = *data, *pOut = line;
 
+	bool bGotAChar = false;
+
 	while (*pPtr != '\n')
 	{
-		*pOut= *pPtr;
+		if (bGotAChar || !isspace(*pPtr))	// clear any leading spaces
+		{
+			*pOut= *pPtr;
+			pOut++;
+		}
+
+		if (!isspace(*pPtr))
+			bGotAChar = true;
+
 		if (*pPtr == NULL)
+		{
+			*pOut = NULL;
 			return false;
+		}
 
 		pPtr++;
-		pOut++;
 	}
 	pPtr++;
-	pOut;
+//	pOut;
 
 	*data = pPtr;
 	*pOut = NULL;

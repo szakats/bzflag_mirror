@@ -197,7 +197,7 @@ void Box::Render( bool transparent, bool bSelected, int iName )
 void Box::Write(ostream &stream)
 {
 	WriteStdData(stream);
-	stream << "size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
+	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
 	stream << "end" << endl;
 	stream << endl;
 }
@@ -207,7 +207,7 @@ void Box::Write( char *data )
 	char	szTemp[1024] = {0};
 
 	WriteStdData(data);
-	sprintf(szTemp,"size %f %f %f\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z);
+	sprintf(szTemp,"\tsize %f %f %f\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z);
 	strcat(data,szTemp);
 }
 
@@ -309,7 +309,7 @@ void Pyramid::Render( bool transparent, bool bSelected, int iName )
 void Pyramid::Write(ostream &stream)
 {
 	WriteStdData(stream);
-	stream << "size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
+	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
 	stream << "end" << endl;
 	stream << endl;
 }
@@ -319,7 +319,7 @@ void Pyramid::Write( char *data )
 	char	szTemp[1024] = {0};
 
 	WriteStdData(data);
-	sprintf(szTemp,"size %f %f %f\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z);
+	sprintf(szTemp,"\tsize %f %f %f\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z);
 	strcat(data,szTemp);
 }
 
@@ -443,8 +443,8 @@ void Teleporter::Render(bool transparent, bool bSelected, int iName )
 void Teleporter::Write(ostream &stream)
 {
 	WriteStdData(stream);
-	stream << "size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
-	stream << "border " << border << endl;
+	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
+	stream << "	border " << border << endl;
 	stream << "end" << endl;
 	stream << endl;
 }
@@ -454,7 +454,7 @@ void Teleporter::Write( char *data )
 	char	szTemp[1024] = {0};
 
 	WriteStdData(data);
-	sprintf(szTemp,"size %f %f %f\nborder %f\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z,border);
+	sprintf(szTemp,"\tsize %f %f %f\n\tborder %f\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z,border);
 	strcat(data,szTemp);
 }
 
@@ -712,8 +712,8 @@ bool Base::GetItemInfo ( char  *szName, int &iData )
 void Base::Write(ostream &stream)
 {
 	WriteStdData(stream);
-	stream << "size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
-	stream << "color " << color << endl;
+	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
+	stream << "	color " << color << endl;
 	stream << "end" << endl;
 	stream << endl;
 }
@@ -723,7 +723,7 @@ void Base::Write( char *data )
 	char	szTemp[1024] = {0};
 
 	WriteStdData(data);
-	sprintf(szTemp,"size %f %f %f\ncolor %d\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z,color);
+	sprintf(szTemp,"\tsize %f %f %f\n\tcolor %d\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z,color);
 	strcat(data,szTemp);
 }
 
@@ -909,8 +909,8 @@ void Link::Write(ostream &stream)
 	if (m_iGroupID != -1)
 		stream << "#!group " <<  m_iGroupID << ' ' << m_sGroupName.c_str() << endl;
 
-	stream << "from " << from_side << endl;
-	stream << "to " << to_side << endl;
+	stream << "	from " << from_side << endl;
+	stream << "	to " << to_side << endl;
 	stream << "end" << endl;
 	stream << endl;
 }
@@ -934,7 +934,7 @@ void Link::Write( char *data )
 	}
 
 	char szData[256];
-	sprintf(szData,"from %d\nto %d\nend\n\n",from_side,to_side);
+	sprintf(szData,"\tfrom %d\n\tto %d\nend\n\n",from_side,to_side);
 	strcat(data,szData);
 }
 
