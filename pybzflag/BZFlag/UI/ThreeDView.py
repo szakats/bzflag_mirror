@@ -79,13 +79,15 @@ class Scene:
         self.game = game
         self.objects = {}
         self.passes = [{}, {}]
+        game.world.onLoad.observe(self.reloadWorld)
+        self.reloadWorld()
 
-        def onLoadWorld():
-            for block in self.game.world.blocks:
-                if isinstance(block, WorldObjects.WorldObject):
-                    self.objects[block] = block.getGLDrawables()
-            self.rebuildTexmap()
-        game.world.onLoad.observe(onLoadWorld)
+    def reloadWorld(self):
+        """Rebuild the internal scene structures from the game's world"""
+        for block in self.game.world.blocks:
+            if isinstance(block, WorldObjects.WorldObject):
+                self.objects[block] = block.getGLDrawables()
+        self.rebuildTexmap()
 
     def rebuildTexmap(self):
         """Rebuilds the mapping from texture to object, used to sort objects
