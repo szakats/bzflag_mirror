@@ -4,7 +4,7 @@ from BZFlag import Event
 
 # Viewport, view, and event loop setup
 loop = Event.EventLoop()
-viewport = Viewport.OpenGLViewport(loop, (800,600), 1000)
+viewport = Viewport.OpenGLViewport(loop, (800,600))
 view = ThreeDRender.View(viewport)
 control = ThreeDControl.Viewing(view, viewport)
 

@@ -87,7 +87,7 @@ class Flag:
 
 if __name__ == '__main__':
     loop = Event.EventLoop()
-    viewport = Viewport.OpenGLViewport(loop, (800,600), 1000)
+    viewport = Viewport.OpenGLViewport(loop, (800,600))
     view = ThreeDRender.View(viewport)
     control = ThreeDControl.Viewing(view, viewport)
     viewport.setCaption("Cloth Simulation Test")

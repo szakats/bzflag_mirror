@@ -79,8 +79,8 @@ class FrequencyCounter:
        """
     def __init__(self, event,
                  filterMinSamples = 32,
-                 filterMaxSamples = 2048,
-                 filterSeconds    = 5,
+                 filterMaxSamples = 1024,
+                 filterSeconds    = 2,
                  timeKeeper       = None):
         self.filterMinSamples = filterMinSamples
         self.filterSeconds = filterSeconds

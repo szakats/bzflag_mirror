@@ -4,7 +4,7 @@ from BZFlag.UI import Viewport, GLNoise, Texture, ThreeDRender, ThreeDControl, D
 from BZFlag import Animated
 
 loop = EventLoop()
-viewport = Viewport.OpenGLViewport(loop, (800,600), 1000)
+viewport = Viewport.OpenGLViewport(loop, (800,600))
 viewport.setCaption("OpenGL Noise Experiment")
 view = ThreeDRender.View(viewport)
 ThreeDControl.Viewing(view, viewport)

@@ -31,7 +31,7 @@ class PygameViewport(Viewport):
     """A basic viewport for 2D pygame rendering. This handles all pygame
        events, and is subclassed below for 3D rendering via pygame.
        """
-    def __init__(self, eventLoop, size=(640,480), targetFrameRate=100, resizable=True):
+    def __init__(self, eventLoop, size=(640,480), targetFrameRate=None, resizable=True):
         pygame.display.init()
         pygame.key.set_repeat(500, 30)
 
@@ -70,16 +70,25 @@ class PygameViewport(Viewport):
     def setTargetFrameRate(self, rate):
         """Set the target frame rate. This is how often the main loop will
            try to call us for rendering, using a PeriodicTimer.
-           A rate of 'None' will disable continuous rendering.
+           A rate of 0 will disable continuous rendering, a rate of None will
+           render as fast as possible.
            """
         self.targetFrameRate = rate
         if self.frameTimer:
             self.eventLoop.remove(self.frameTimer)
+
         if rate:
+            # Limit the rendering rate
             self.frameTimer = Event.PeriodicTimer(1.0 / rate, self.onFrame)
-            self.eventLoop.add(self.frameTimer)
+        elif rate is None:
+            # Render as fast as possible within certain limits, but still leave some CPU for other events
+            self.frameTimer = Event.ContinuousTimer(self.onFrame)
         else:
+            # No continuous rendering
             self.frameTimer = None
+
+        if self.frameTimer:
+            self.eventLoop.add(self.frameTimer)
 
     def onFrame(self):
         """This event is called by the PeriodicTimer to poll for events and

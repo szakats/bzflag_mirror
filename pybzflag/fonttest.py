@@ -9,7 +9,7 @@ from OpenGL.GL import *
 
 # Create a new orthogonal mode viewport
 loop = EventLoop()
-viewport = Viewport.OpenGLViewport(loop, (640,480), 1000)
+viewport = Viewport.OpenGLViewport(loop, (640,480))
 viewport.setCaption("Font Test")
 viewport.fov = None
 

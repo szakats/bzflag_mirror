@@ -159,6 +159,16 @@ class PeriodicTimer(Timer):
             return 1
 
 
+class ContinuousTimer(Timer):
+    """A timer that goes off every event loop iteration"""
+    def __init__(self, handler):
+        self.handler = handler
+        self.activationTime = 0
+
+    def poll(self, now):
+        self.activate()
+
+
 class EventLoop:
     def __init__(self):
         # No polling by default. This can be changed to a duration
