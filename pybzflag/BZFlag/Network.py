@@ -332,7 +332,8 @@ def asyncRequest(eventLoop, host, port, request, callback):
     def handler(sock, eventLoop):
         received = sock.read()
         if received is not None:
-            callback(received)
+            if callback:
+                callback(received)
             eventLoop.remove(sock)
             sock.close()
     sock.handler = handler

@@ -1,6 +1,8 @@
 """ BZFlag.Meta.Client
 
-Client interface for the metaserver.
+Client interface for the metaserver. The metaserver is a centeral resource
+for finding information about BZFlag servers. This client can retrieve
+server lists and update the central server list.
 """
 #
 # Python BZFlag Protocol Package
@@ -22,131 +24,103 @@ Client interface for the metaserver.
 #
 
 import BZFlag
-
-listServerURL = None
-
-def getListServerURL():
-    """Looks up the current list server URL from bzflag.org"""
-    global listServerURL
-    if not listServerURL:
-        import urllib2
-        return urllib2.urlopen("http://bzflag.org/list-server.txt").read().strip()
-    return listServerURL
+from BZFlag import Network, Errors
+import urlparse
+from BZFlag.Meta.ServerInfo import ServerInfo
 
 
-class ServerInfo:
-    """Represents information about one BZFlag server"""
-    def __init__(self, specifier=None):
-        self.name = None
-        self.version = None
-        self.gameinfo = None
-        self.ip = None
-        self.title = None
-        if specifier:
-            from BZFlag.Protocol import Common
-            import binascii
-            (self.name, self.version, self.gameinfo, self.ip, self.title) = specifier.split(" ",4)
-            self.gameinfo = Common.GameInfo(binascii.a2b_hex(self.gameinfo))
-
-    def __str__(self):
-        return self.name
-
-    def info(self):
-        s  = "        Name: %s\n" % self.name
-        s += "       Title: %s\n" % self.title
-        s += "     Version: %s\n" % self.version
-        s += "          IP: %s\n" % self.ip
-        s += "   Game Info: "
-        firstKey = 1
-        keys = self.gameinfo.__dict__.keys()
-        keys.sort()
-        for key in keys:
-            if firstKey:
-                firstKey = 0
-            else:
-                s += "              "
-            s += "%s = %s\n" % (key, self.gameinfo.__dict__[key])
-        return s
+# The file at this URL contains the URL for the BZFlag metaserver
+metaMetaURL = "http://bzflag.org/list-server.txt"
 
 
-class ListServer:
-    """List server abstract base class. This should be subclassed with either
-       a local list server implementation or some glue for talking to a remote
-       list server.
+metaURL = None
+def getMetaserverURL(eventLoop, callback):
+    """Contact the meta-meta-server to find the URL for the metaserver.
+       call the provided callback with the URL once we find it.
        """
-    def add(self, name, build, version, gameinfo, title):
-        """Add a server to the list. Note that the server will be tested for
-           connectivity before actially appearing in the listings. If the port
-           is None it is omitted from the listing and the default is assumed.
+    global metaMetaURL, metaURL
+    if metaURL:
+        callback(metaURL)
+    else:
+        # Stick together an HTTP request, with responseHandler called when it comes back.
+        def responseHandler(response):
+            lines = [line.strip() for line in response.strip().split("\n")]
+            if lines[0] != "HTTP/1.1 200 OK":
+                raise Errors.NetworkException("Meta-meta-server returned status '%s'" % lines[0])
+            metaURL = lines[-1]
+            callback(metaURL)
+        parsed = urlparse.urlparse(metaMetaURL)
+        Network.asyncRequest(eventLoop, parsed[1], 80,
+                             "GET %s HTTP/1.1\nHost: %s\nUser-Agent: %s/%s\n\n" %
+                             (parsed[2], parsed[1], BZFlag.name, BZFlag.version),
+                             responseHandler)
+
+
+class MetaClient:
+    """Client for the BZFlag metaserver"""
+    def __init__(self, eventLoop, url=None):
+        self.eventLoop = eventLoop
+        self.url = url
+
+    def command(self, line, callback=None):
+        """Send a generic metaserver command, giving the results
+           to the supplied callback when they come in.
            """
-        pass
+        # This turns into two distinct asynchronous steps- looking
+        # up the metaserver URL (which is cached), and actually
+        # performing the request to the metaserver.
 
-    def remove(self, name):
-        pass
-
-    def setPlayerCounts(self, name, counts):
-        """Set player counts. A dictionary of player counts indexed by color
-           should be supplied. Counts not in the dictionary will be assumed zero.
-           """
-        pass
-
-    def list(self):
-        """Returns a list of ServerInfo classes"""
-        pass
-
-
-class RemoteListServer(ListServer):
-    """Implementation of a ListServer that connects to a remote bzfls process"""
-    def __init__(self, url):
-        # Normally we'd use urlparse for this, but it has wacky defaults
-        # for URL schemes it doesn't recognize.
-        self.host = url.split("/")[2]
-
-    def command(self, line):
-        """Send a generic bzfls command, returning the results"""
-        import BZFlag.Network
-        s = BZFlag.Network.Socket()
-        s.connect(self.host, 5156)
         if type(line) == type(()) or type(line) == type([]):
             line = " ".join(map(str, line))
-        s.write("%s\n\n" % line)
-        response = s.read()
-        s.close()
-        return response
+        line += "\n\n"
 
-    def add(self, name, build, version, gameinfo, title):
-        self.command(("ADD", name, build, version, gameinfo, title))
+        def performRequest(url):
+            # Normally we'd use urlparse for this, but it has wacky defaults
+            # for URL schemes it doesn't recognize.
+            host = url.split("/")[2]
+            Network.asyncRequest(self.eventLoop, host, 5156, line, callback)
 
-    def remove(self, name):
-        self.command(("REMOVE", name))
+        if self.url:
+            # We're overriding the meta-meta-server's URL
+            performRequest(url)
+        else:
+            getMetaserverURL(self.eventLoop, performRequest)
 
-    def setPlayerCounts(self, name, counts):
-        self.command(("SETNUM",
+    def add(self, serverInfo, callback=None):
+        self.command(("ADD",
+                      serverInfo.name,
+                      serverInfo.build,
+                      serverInfo.version,
+                      serverInfo.gameinfo,
+                      serverInfo.title),
+                     callback)
+
+    def remove(self, name, callback=None):
+        self.command(("REMOVE", name), callback)
+
+    def setPlayerCounts(self, name, counts, callback=None):
+        self.command(("SETNUM", name,
                       counts.get("rogue",0),
                       counts.get("red",0),
                       counts.get("green",0),
                       counts.get("blue",0),
-                      counts.get("purple",0)))
+                      counts.get("purple",0)),
+                     callback)
 
-    def list(self):
-        servers = []
-        for line in self.command("LIST").split("\n"):
-            line = line.strip()
-            if line:
-                servers.append(ServerInfo(line))
-        return servers
-
-    def filteredList(self, version=BZFlag.protocolVersion):
-        """Return a list of only the servers compatible with a specified
-           version, defaulting to our current protocol version.
+    def list(self, callback, filterVersion=BZFlag.protocolVersion):
+        """Downloads a list of all active BZFlag servers, filtered
+           to the given protocol version. None will retrieve all
+           servers, even if they aren't compatible with this package.
            """
-        def versionFilter(server):
-            return server.version == version
-        return filter(versionFilter, self.list())
-
-
-def getDefault():
-    """Factory for a default list server object"""
-    return RemoteListServer(getListServerURL())
+        def responseParser(response):
+            servers = []
+            for line in response.split("\n"):
+                line = line.strip()
+                if line:
+                    serverInfo = ServerInfo(line)
+                    if serverInfo.version == filterVersion or not filterVersion:
+                        servers.append(serverInfo)
+            callback(servers)
+        self.command("LIST", responseParser)
 
 ### The End ###

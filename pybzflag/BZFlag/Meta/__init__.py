@@ -22,34 +22,7 @@ server that stores information about other servers.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import BZFlag
-from BZFlag import Network
-import urlparse
-
-
-# The file at this URL contains the URL for the BZFlag metaserver
-metaMetaURL = "http://bzflag.org/list-server.txt"
-
-
-# The URL of the metaserver, which will be retrieved by getMetaserverURL()
-metaURL = None
-
-def getMetaserverURL(eventLoop, callback):
-    """Contact the meta-meta-server to find the URL for the metaserver.
-       call the provided callback with the URL once we find it.
-       """
-    global metaMetaURL, metaURL
-    if metaURL:
-        callback(metaURL)
-    else:
-        # Stick together an HTTP request, with responseHandler called when it comes back.
-        def responseHandler(response):
-            metaURL = response.strip().split("\n")[-1].strip()
-            callback(metaURL)
-        parsed = urlparse.urlparse(metaMetaURL)
-        Network.asyncRequest(eventLoop, parsed[1], 80,
-                             "GET %s HTTP/1.1\nHost: %s\nUser-Agent: %s/%s\n\n" %
-                             (parsed[2], parsed[1], BZFlag.name, BZFlag.version),
-                             responseHandler)
+from Client import *
+from ServerInfo import *
 
 ### The End ###
