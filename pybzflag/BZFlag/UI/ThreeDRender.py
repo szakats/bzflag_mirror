@@ -381,7 +381,6 @@ class BackgroundRenderPass(BasicRenderPass):
         # This preserves the camera's location, but keeps it centered at 0,0,0
         rotation = Numeric.identity(4, Numeric.Float32)
         rotation[:3,:3] = glGetFloatv(GL_MODELVIEW_MATRIX)[:3,:3]
-        rotation[3,3] = 1
         glLoadMatrixf(rotation)
 
         glDepthMask(0)
