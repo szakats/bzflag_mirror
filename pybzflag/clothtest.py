@@ -30,9 +30,9 @@ class Flag:
         self.surf.render.static = False
         self.surf.render.textures = (Texture.load("water.jpeg"),)
 
-#        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.04))
-#        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (1, 0.001, 0.3))
-#        self.cloth.add(AnchorAffector)
+        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.04))
+        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (1, 0.001, 0.3))
+        self.cloth.add(AnchorAffector)
 
     def getInitialState(self):
         def xcoord(x,y):

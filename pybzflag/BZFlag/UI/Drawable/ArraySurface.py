@@ -59,6 +59,7 @@ class ArraySurface(GLDrawable):
         self.crossProducts = zeros((height-1, width-1, 3), self.vertices.typecode())
         self.gridNormals = zeros(self.crossProducts.shape, self.vertices.typecode())
         self.normals = zeros(self.vertices.shape, self.vertices.typecode())
+        self.interleaved = zeros(self.vertices.shape[:-1] + (8,), self.vertices.typecode())
 
     def prepareIndices(self):
         """Prepare an array with indices into the vertex array for triangle stripss.
@@ -96,12 +97,11 @@ class ArraySurface(GLDrawable):
     def draw(self, rstate):
         """Calculate normals and blast our triangle strips out to OpenGL"""
         self.prepareNormals()
-
-        interleaved = zeros(self.vertices.shape[:-1] + (8,), Float32)
-        interleaved[:,:,:2]  = self.texcoords
-        interleaved[:,:,2:5] = self.normals
-        interleaved[:,:,5:]  = self.vertices
-        glInterleavedArrays(GL_T2F_N3F_V3F, 0, interleaved.tostring())
+        
+        self.interleaved[:,:,:2]  = self.texcoords
+        self.interleaved[:,:,2:5] = self.normals
+        self.interleaved[:,:,5:]  = self.vertices
+        glInterleavedArrays(GL_T2F_N3F_V3F, 0, self.interleaved.tostring())
 
         # We want to draw both sides of the surface. This will have OpenGL
         # automatically flip the surface normals when drawing the back side
@@ -113,5 +113,6 @@ class ArraySurface(GLDrawable):
 
         glEnable(GL_CULL_FACE)
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0)
+
 
 ### The End ###
