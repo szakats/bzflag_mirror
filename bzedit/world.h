@@ -9,6 +9,7 @@
 class World : public vector<Element> {
   public:
     World();
+    World(World &w);
     ~World();
     void render(Camera &c);
     void render_targets(Camera &c);
@@ -19,7 +20,9 @@ class World : public vector<Element> {
     bool append(char *filename);
     bool write(char *filename);
     Element getElementByName(string name);
+    World operator = (World &w);
   private:
+    void sort();
     GnomePixmap *boxicon;
     GnomePixmap *pyricon;
     GnomePixmap *telicon;

@@ -49,6 +49,8 @@ gint chborder(GtkWidget *sbborder, gpointer data);
 gint chname(GtkWidget *enname, gpointer data);
 gint showlist(GtkWidget *window, gpointer data);
 gint testw(GtkWidget *button, gpointer data);
+gint sellink(GtkCList *clist, gint row, gint column, GdkEventButton *event, gpointer data);
+gint unsellink(GtkCList *clist, gint row, gint column, GdkEventButton *event, gpointer data);
 gint linkok(GtkWidget *button, Element *link);
 
 static GnomeUIInfo file_menu[] = {

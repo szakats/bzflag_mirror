@@ -359,6 +359,9 @@ void MainWindow::showLinkWin(Element *link) {
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(sw1), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
   gtk_widget_show(sw1);
   clist1 = gtk_clist_new_with_titles(2, titles);
+  gtk_object_set_data(GTK_OBJECT(clist1), "selection", 0);
+  gtk_signal_connect(GTK_OBJECT(clist1), "select-row", GTK_SIGNAL_FUNC(MW::sellink), NULL);
+  gtk_signal_connect(GTK_OBJECT(clist1), "unselect-row", GTK_SIGNAL_FUNC(MW::unsellink), NULL);
   world->buildTeleporterList(clist1);
   gtk_widget_show(clist1);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(sw1), clist1);
@@ -367,12 +370,18 @@ void MainWindow::showLinkWin(Element *link) {
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(sw2), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
   gtk_widget_show(sw2);
   clist2 = gtk_clist_new_with_titles(2, titles);
+  gtk_object_set_data(GTK_OBJECT(clist2), "selection", 0);
+  gtk_signal_connect(GTK_OBJECT(clist2), "select-row", GTK_SIGNAL_FUNC(MW::sellink), NULL);
+  gtk_signal_connect(GTK_OBJECT(clist2), "unselect-row", GTK_SIGNAL_FUNC(MW::unsellink), NULL);
   world->buildTeleporterList(clist2);
   gtk_widget_show(clist2);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(sw2), clist2);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), sw2, TRUE, TRUE, 0);
 
   ok = gnome_stock_button(GNOME_STOCK_BUTTON_OK);
+  gtk_object_set_data(GTK_OBJECT(ok), "clist1", clist1);
+  gtk_object_set_data(GTK_OBJECT(ok), "clist2", clist2);
+  gtk_object_set_data(GTK_OBJECT(ok), "dialog", dialog);
   gtk_widget_show(ok);
   gtk_signal_connect(GTK_OBJECT(ok), "clicked", GTK_SIGNAL_FUNC(MW::linkok), link);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), ok, TRUE, TRUE, 0);
@@ -751,7 +760,46 @@ gint testw(GtkWidget *button, gpointer data) {
   return TRUE;
 }
 
+gint sellink(GtkCList *clist, gint row, gint column, GdkEventButton *event, gpointer data) {
+  gtk_object_set_data(GTK_OBJECT(clist), "selection", (gpointer) (row + 1));
+  return TRUE;
+}
+
+gint unsellink(GtkCList *clist, gint row, gint column, GdkEventButton *event, gpointer data) {
+  gtk_object_set_data(GTK_OBJECT(clist), "selection", 0);
+}
+
 gint linkok(GtkWidget *button, Element *link) {
+  GtkWidget *clist1 = GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(button), "clist1"));
+  GtkWidget *clist2 = GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(button), "clist2"));
+  GtkWidget *dialog = GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(button), "dialog"));
+  char **text;
+  int selection1 = (int) gtk_object_get_data(GTK_OBJECT(clist1), "selection") - 1;
+  int selection2 = (int) gtk_object_get_data(GTK_OBJECT(clist2), "selection") - 1;
+  string name1, name2;
+  int side1, side2;
+  if(selection1 == -1 || selection2 == -1) {
+    GtkWidget *err = gnome_dialog_new("Error", GNOME_STOCK_BUTTON_OK, NULL);
+    GtkWidget *errl = gtk_label_new("link attributes must be selected");
+    gtk_widget_show(errl);
+    gtk_box_pack_start(GTK_BOX(GNOME_DIALOG(err)->vbox), errl, TRUE, TRUE, 0);
+    gnome_dialog_set_parent(GNOME_DIALOG(err), GTK_WINDOW(dialog));
+    gnome_dialog_run_and_close(GNOME_DIALOG(err));
+    return FALSE;
+  }
+  gtk_clist_get_text(GTK_CLIST(clist1), selection1, 0, text);
+  name1 = text[0];
+  gtk_clist_get_text(GTK_CLIST(clist1), selection1, 1, text);
+  side1 = atoi(text[0]);
+  gtk_clist_get_text(GTK_CLIST(clist2), selection2, 0, text);
+  name2 = text[0];
+  gtk_clist_get_text(GTK_CLIST(clist2), selection2, 1, text);
+  side2 = atoi(text[0]);
+  link->l->set_from(name1);
+  link->l->set_from_side(side1);
+  link->l->set_to(name2);
+  link->l->set_to_side(side2);
+  gtk_widget_destroy(dialog);
   return TRUE;
 }
 

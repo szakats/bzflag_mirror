@@ -10,6 +10,14 @@ World::World() {
   lnkicon = GNOME_PIXMAP(gnome_pixmap_new_from_file("/usr/local/share/bzedit/data/lnkicon.png"));
 }
 
+World::World(World &w) {
+  boxicon = w.boxicon;
+  pyricon = w.pyricon;
+  telicon = w.telicon;
+  lnkicon = w.lnkicon;
+  (vector<Element>) (*this) = (vector<Element>) w;
+}
+
 World::~World() {
   gtk_widget_destroy(GTK_WIDGET(boxicon));
   gtk_widget_destroy(GTK_WIDGET(pyricon));
@@ -45,6 +53,7 @@ void World::render_targets(Camera &c) {
 }
 
 void World::buildList(GtkWidget *clist) {
+//  sort();
   gchar *text[] = {"", NULL};
   
   gtk_clist_freeze(GTK_CLIST(clist));
@@ -453,4 +462,42 @@ Element World::getElementByName(string name) {
       return (*this)[i];
   }
   return Element();
+}
+
+void World::sort() {
+  World neww;
+
+  for(int i = 0; i < size(); i++) {
+    if((*this)[i].type == Element::BOX) {
+      neww.push_back((*this)[i]);
+    }
+  }
+  for(int i = 0; i < size(); i++) {
+    if((*this)[i].type == Element::PYRAMID) {
+      neww.push_back((*this)[i]);
+    }
+  }
+  for(int i = 0; i < size(); i++) {
+    if((*this)[i].type == Element::TELEPORTER) {
+      neww.push_back((*this)[i]);
+    }
+  }
+  for(int i = 0; i < size(); i++) {
+    if((*this)[i].type == Element::LINK) {
+    }
+  }
+  neww.boxicon = boxicon;
+  neww.pyricon = pyricon;
+  neww.telicon = telicon;
+  neww.lnkicon = lnkicon;
+  *this = neww;
+}
+
+World World::operator = (World &w) {
+  boxicon = w.boxicon;
+  pyricon = w.pyricon;
+  telicon = w.telicon;
+  lnkicon = w.lnkicon;
+  (vector<Element>) (*this) = (vector<Element>) w;
+  return *this;
 }
