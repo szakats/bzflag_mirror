@@ -24,7 +24,6 @@ OpenGL drawing definitions for various world objects
 from OpenGL.GL import *
 from BZFlag.UI.Texture import Texture
 from BZFlag import Util
-import math
 
 
 def cross(a, b):
@@ -114,7 +113,7 @@ class BaseTops(DisplayList):
     def drawToList(self, team, center, angle, size):
         self.team = team
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle
         self.size = size
         glPushMatrix()
         glTranslatef(*self.center)
@@ -149,7 +148,7 @@ class Wall(DisplayList):
     textureName = 'wall.png'
     def drawToList(self, center, angle, size):
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle
         self.size = size
         glPushMatrix()
         glTranslatef(*self.center)
@@ -173,7 +172,7 @@ class BoxSides(DisplayList):
     textureName = 'boxwall.png'
     def drawToList(self, center, angle, size):
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle
         self.size = size
         glPushMatrix()
         glTranslatef(*self.center)
@@ -227,7 +226,7 @@ class BoxTops(DisplayList):
     textureName = 'boxtops.png'
     def drawToList(self, center, angle, size):
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle
         self.size = size
         glPushMatrix()
         glTranslatef(*self.center)
@@ -262,7 +261,7 @@ class Pyramid(DisplayList):
     def drawToList(self, center, angle, size, flip):
         # FIXME - respect flipz
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle
         self.size = size;
         self.flip = flip;
         glPushMatrix()
@@ -324,7 +323,7 @@ class Pyramid(DisplayList):
 class TeleporterField(DisplayList):
     def drawToList(self, center, angle, size):
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle
         self.size = size
         self.blended = True
         glPushMatrix()
@@ -353,7 +352,7 @@ class TeleporterBorder(DisplayList):
     textureName = 'caution.png'
     def drawToList(self, center, angle, size, border):
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle
         self.size = size
         self.border = border
         glPushMatrix()

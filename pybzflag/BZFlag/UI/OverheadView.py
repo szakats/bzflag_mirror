@@ -21,10 +21,9 @@ A 2D overhead view of the game, implemented using pygame.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import math
+import math, BZFlag, colorsys
 import BZFlag
 from BZFlag import Event
-import colorsys
 
 
 colorScheme = {
@@ -172,8 +171,9 @@ class OverheadView:
                 if height < 0:
                     height = 0
                 size = height/4 + 6
-                heading = (pos[0] + math.cos(-player.motion.azimuth)*size,
-                           pos[1] + math.sin(-player.motion.azimuth)*size)
+                radians = -player.motion.azimuth * math.pi / 180
+                heading = (pos[0] + math.cos(radians)*size,
+                           pos[1] + math.sin(radians)*size)
                 pygame.draw.circle(surface, bg, pos, size-1)
                 pygame.draw.circle(surface, color, pos, size, 1)
                 pygame.draw.line(surface, color, pos, heading)

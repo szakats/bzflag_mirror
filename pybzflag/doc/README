@@ -14,6 +14,10 @@ this using pydoc.
 
 -- Requirements
 
+Python 2.2 or later is required. There are several 2.2-only features used
+by PyBZFlag, but the most notable is that nested scopes are used extensively
+in its event handling system and HUD layout.
+
 The core PyBZFlag modules only require the python standard library.
 However, most of the graphical code requires pygame (http://pygame.org)
 and the Python Imaging Library (http://www.pythonware.com/products/pil/)

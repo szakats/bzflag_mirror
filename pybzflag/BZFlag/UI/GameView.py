@@ -22,7 +22,7 @@ the full in-game experience.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag.UI import Viewport, ThreeDView, RadarView
+from BZFlag.UI import Viewport, ThreeDView, RadarView, Layout
 from OpenGL.GL import *
 
 
@@ -69,14 +69,10 @@ def attach(game, eventLoop):
     view3d   = ThreeDView.ThreeDView(game, viewport)
     ThreeDView.ThreeDController(view3d, viewport)
 
-    hud = viewport.region(lambda: (10, 10,
-                                   viewport.size[0] - 20,
-                                   viewport.size[1] * 0.3))
+    hud = viewport.region(Layout.Rect(viewport).margin(0.01).bottom(0.3))
     HUDBorderView(hud)
 
-    RadarView.RadarView(game, hud.region(lambda: (10, 10,
-                                                  hud.size[1] - 20,
-                                                  hud.size[1] - 20)))
+    RadarView.RadarView(game, hud.region(Layout.Rect(hud).left(100)))
 
     return viewport
 

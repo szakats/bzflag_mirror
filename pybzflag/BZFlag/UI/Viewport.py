@@ -46,9 +46,32 @@ class Viewport:
        """
     def __init__(self, eventLoop):
         self.eventLoop = eventLoop
+        Event.attach(self, 'onFrame', 'onSetupFrame', 'onDrawFrame', 'onFinishFrame', 'onResize')
+
+        self.renderSequence = [
+            self.onSetupFrame,
+            self.onDrawFrame,
+            self.onFinishFrame,
+            ]
+
+        # For subviews created with region()
+        self.parent = None
+        self.rootView = self
+
+    def render(self):
+        for f in self.renderSequence:
+            f()
 
     def setCaption(self, title):
         """Set the window caption on the viewport, if applicable"""
+        pass
+
+    def region(self, rect):
+        """Return a new Viewport that identifies the given rectangular subviewport.
+           rect is allowed to either be a list specifying a rectangle, or a callable
+           object that returns such a list. If possible the callable should be lazily
+           evaluated, but that behaviour depends on the subclass.
+           """
         pass
 
 
@@ -60,22 +83,11 @@ class PygameViewport(Viewport):
         import pygame
         Viewport.__init__(self, eventLoop)
 
-        # Add event handlers for all our builtin events, and all the pygame events we can find
-        Event.attach(self, 'onFrame', 'onSetupFrame', 'onDrawFrame', 'onFinishFrame', 'onResize')
+        # Add event handlers for all the pygame events we can find
         for i in xrange(100):
             name = pygame.event.event_name(i)
             if name != "Unknown":
                 Event.attach(self, 'on' + name)
-
-        self.renderSequence = [
-            self.onSetupFrame,
-            self.onDrawFrame,
-            self.onFinishFrame,
-            ]
-
-        # For subviews created with region()
-        self.parent = None
-        self.rootView = self
 
         pygame.init()
         self.display = pygame.display
@@ -124,8 +136,7 @@ class PygameViewport(Viewport):
         import pygame
         for event in pygame.event.get():
             self.onEvent(event)
-        for f in self.renderSequence:
-            f()
+        self.render()
 
     def onFinishFrame(self):
         """Default onFinishFrame handler that flips the pygame buffers"""
@@ -145,6 +156,9 @@ class PygameViewport(Viewport):
         """Return a class that represents a rectangular subsection of this viewport.
            This performs a shallow copy on ourselves, then subsurfaces its screen.
            """
+        if callable(rect):
+            rect = rect
+
         sub = copy.copy(self)
         sub.screen = self.secreen.subsurface(rect)
         sub.size = rect[2:]
@@ -199,7 +213,7 @@ class OpenGLViewport(PygameViewport):
                  v[2], v[3])
         self.viewport = v
         self.size = v[2:]
-        
+
         GL.glViewport(*v)
         GL.glMatrixMode(GL.GL_PROJECTION)
         GL.glLoadIdentity()
