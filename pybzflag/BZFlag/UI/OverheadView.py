@@ -112,6 +112,10 @@ def simpleClient(client, size=(600,600), viewClass=OverheadView):
             view.render(screen)
             pygame.display.flip()
 
+    # FIXME: We need a real timer system
+    client.eventLoop.pollTime = 0.01
+    client.eventLoop.onPoll.observe(updateView)
+
     # Start up pygame when we first get world data
     global view, screen
     view = screen = None

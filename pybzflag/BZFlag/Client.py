@@ -22,6 +22,7 @@ in subclasses.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 # 
+#  Hi micah, I love you!
 import BZFlag
 from BZFlag import Network, Protocol, Errors, Player, Game, World, Util
 from BZFlag.Protocol import FromServer, ToServer, Common
@@ -80,9 +81,15 @@ class BaseClient:
 
     def setOptions(self, **options):
         self.options.update(options)
+
+        if 'eventLoop' in options.keys():
+            self.eventLoop = options['eventLoop']
+        else:
+            self.eventLoop = Network.EventLoop()
+
         if 'server' in options.keys():
             self.connect(options['server'])
-
+            
     def getSupportedOptions(self):
         return self.options.keys()
 
@@ -99,6 +106,7 @@ class BaseClient:
         self.tcp = Network.Socket()
         self.tcp.connect(server, Common.defaultPort)
         self.tcp.setBlocking(0)
+        self.eventLoop.registerSocket(self.tcp)
 
         # Until we establish a UDP connection, we'll need to send
         # normally-multicasted messages over TCP
@@ -111,6 +119,7 @@ class BaseClient:
     def disconnect(self):
         if self.tcp:
             self.tcp.close()
+            self.eventLoop.unregisterSocket(self.tcp)
             self.tcp = None
         if self.udp:
             self.udp.close()
@@ -119,25 +128,8 @@ class BaseClient:
         self.connected = 0
         self.onDisconnect()
 
-    def getSockets(self):
-        """Returns a list of sockets the client expects
-           incoming data on. This is meant to be used with the
-           Network.EventLoop class or compatible.
-           """
-        sockets = []
-        if self.tcp:
-            sockets.append(self.tcp)
-        if self.udp:
-            sockets.append(self.udp)
-        return sockets
-
     def run(self):
-        """A simple built-in event loop, for those not wanting
-           to integrate the BZFlag client into an existing event
-           loop using the above getSockets() and the sockets'
-           poll() method.
-           """
-        Network.EventLoop().run(self.getSockets())
+        self.eventLoop.run()
 
     def handleHelloPacket(self, socket, eventLoop):
         """This is a callback used to handle incoming socket

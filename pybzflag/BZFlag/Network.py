@@ -24,7 +24,7 @@ links.
 # 
 
 from BZFlag.Protocol import Common
-from BZFlag import Protocol, Errors
+from BZFlag import Protocol, Errors, Util
 import socket, select, sys
 
 
@@ -167,18 +167,31 @@ class Socket:
 
 
 class EventLoop:
-    def run(self, sockets):
+    def __init__(self):
+        # No polling by default. This can be changed to a duration
+        # between polls, or to zero to poll continuously.
+        self.pollTime = None
+        Util.initEvents(self, 'onPoll')
+        self.sockets = []
+
+    def registerSocket(self, socket):
+        self.sockets.append(socket)
+
+    def unregisterSocket(self, socket):
+        self.sockets.remove(socket)
+    
+    def run(self):
         self.running = 1
 
         # Make a dictionary for quickly detecting which socket has activity
         selectDict = {}
-        for socket in sockets:
+        for socket in self.sockets:
             selectable = socket.getSelectable()
             selectDict[selectable] = socket
         selectables = selectDict.keys()
             
         while self.running:
-            (iwtd, owtd, ewtd) = select.select(selectables, [], [])
+            (iwtd, owtd, ewtd) = select.select(selectables, [], [], self.pollTime)
             readyList = iwtd + owtd + ewtd
             for ready in readyList:
                 try:
@@ -187,9 +200,10 @@ class EventLoop:
                     # Catch nonfatal exceptions
                     import sys
                     print "*** %s : %s" % (sys.exc_info()[1].__class__.__name__, sys.exc_info()[1])
+            self.onPoll()
 
     def stop(self):
-        self.running = 0
+        self.running = 0        
 
 ### The End ###
         
