@@ -150,7 +150,8 @@ class Style(Block):
     entries = [
         # This first field is the size, but since this is the only
         # block that has it, we'll just treat it as a magical constant.
-        ConstStructEntry(UInt16, 28,  Errors.ProtocolError("Bad size in world style block")),
+        ConstStructEntry(UInt16, 30,  Errors.ProtocolError("Bad size in world style block")),
+        ConstStructEntry(UInt16, 1,   Errors.ProtocolError("Bad version in world size block")),
         StructEntry(Float,            'worldSize',            800.0),
         StructEntry(Common.GameStyle, 'gameStyle',            []),
         StructEntry(UInt16,           'players',              20),
@@ -162,6 +163,12 @@ class Style(Block):
         StructEntry(UInt16,           'shakeWins',            22155),
         StructEntry(UInt32,           'serverTime',           0),
         ]
+
+ObjectOptions = Bitfield(UInt8, {
+    'driveThrough':  0x01,
+    'shootThrough':  0x02,
+    'flipZ':         0x04,
+    })
 
 class TeamBase(WorldObject):
     textName = 'base'
@@ -192,8 +199,7 @@ class Box(WorldObject):
         StructEntry(Common.Vector3,   'center',       [0,0,0]),
         StructEntry(Float,            'angle',        0),
         StructEntry(Common.Vector3,   'size',         [1,1,1]),
-        StructEntry(UInt8,            'driveThrough', 0),
-        StructEntry(UInt8,            'shootThrough', 0),
+        StructEntry(ObjectOptions,    'options',      0),
         ]
 
 class Pyramid(WorldObject):
@@ -203,9 +209,7 @@ class Pyramid(WorldObject):
         StructEntry(Common.Vector3,   'center',       [0,0,0]),
         StructEntry(Float,            'angle',        0),
         StructEntry(Common.Vector3,   'size',         [1,1,1]),
-        StructEntry(UInt8,            'driveThrough', 0),
-        StructEntry(UInt8,            'shootThrough', 0),
-        StructEntry(UInt8,            'flipZ',        0),
+        StructEntry(ObjectOptions,    'options',      0),
         ]
 
 class Teleporter(WorldObject):
@@ -215,8 +219,7 @@ class Teleporter(WorldObject):
         StructEntry(Common.Vector3,   'center',       [0,0,0]),
         StructEntry(Float,            'angle',        0),
         StructEntry(Common.Vector3,   'size',         [1,1,1]),
-        StructEntry(UInt8,            'driveThrough', 0),
-        StructEntry(UInt8,            'shootThrough', 0),
+        StructEntry(ObjectOptions,    'options',      0),
         StructEntry(Float,            'border',       1.0),
         ]
 

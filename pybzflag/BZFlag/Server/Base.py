@@ -97,4 +97,21 @@ class BaseServer(Network.Endpoint):
                 # Already disconnected
                 pass
 
+    def onMsgNetworkRelay(self, msg):
+        """This is sent by the client when it can't do multicast.
+           Since we don't do multicast yet, ignore this.
+           """
+        pass
+
+    def onMsgSetTTL(self, msg):
+        """Also ignored because we don't do multicast"""
+        pass
+
+    def onMsgUDPLinkRequest(self, msg):
+        msg.socket.write(self.outgoing.MsgUDPLinkRequest(port = 1234))
+
+    def onMsgUDPLinkEstablished(self, msg):
+        pass
+
+
 ### The End ###
