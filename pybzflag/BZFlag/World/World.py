@@ -187,26 +187,8 @@ class Cache:
 
 def load(name):
     """Load a world 'ingelligently' from the given name.
-       The name can be:
-       
-          - A generator name from the World.Generator module,
-            with optional parameters. Note that this is
-            evaluated as a python expression, so world names
-            should not be sent here from an untrusted source.
-            An alternate syntax with no parenthesis is also
-            provided for convenience on the command line.
-            Note that the alternate format sacrifices
-            predictability for terseness, so if you have trouble
-            with it, try the normal format.
-            
-            Examples:
-               Random(randomHeights=True, size=1000)
-               text:bunnyhunt.bzw,size=450
-               random
-               empty
-
-          - A local file name, URL name, or file-like object
-            to be passed to the Text world generator.
+       See the Help() world generator or the '-w help'
+       command line option for more information about this format.
        """
     from BZFlag.World import Generator
     import re

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
-# Simple viewer for BZFlag world files. Give a .bzw file on the command line.
+# Simple viewer for BZFlag world files. Give any valid world name on the
+# command line. A world name of 'help' prints information about the name format.
 #
 from BZFlag import World, Game, UI, CommandLine
 from BZFlag.Event import EventLoop

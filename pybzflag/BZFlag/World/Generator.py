@@ -1,6 +1,8 @@
 """ BZFlag.World.Generator
 
-Implements factory functions for automatically generating various worlds
+Implements factory functions for automatically generating various worlds.
+All generator objects in this model should be in __all__, and have help
+strings properly formatted for the Help() generator.
 """
 #
 # Python BZFlag Protocol Package
@@ -26,12 +28,19 @@ from BZFlag.World import Scale
 from BZFlag.Protocol import WorldObjects
 from BZFlag import Util, Errors
 
-__all__ = ['Empty', 'Random', 'Text', 'Binary', 'Heightmap']
+__all__ = ['Empty', 'Random', 'Text', 'Binary', 'Heightmap', 'Help']
 
 
 def Empty(size=Scale.WorldSize,
           wallHeight=Scale.WallHeight,
           ):
+    """
+    Generate a world with no pyramids or blocks, only walls.
+    
+    Keyword arguments:
+        size       : Distance along each side of the generated square world
+        wallHeight : Height of the world's walls
+    """
     w = World()
     w.erase()
     w.storeSkeletonHeader(size=size, wallHeight=wallHeight)
@@ -49,9 +58,21 @@ def Random(size          = Scale.WorldSize,
            boxHeight     = 6.0 * Scale.MuzzleHeight,
            citySize      = 5,
            ):
-    """The defaults here produce the same results as bzfs.cxx's builtin
-       random world generator, but it's a bit more flexible.
-       """
+    """
+    Generate a traditional random world. The defaults use the
+    same random world algorithm as bzfs proper, but it can
+    be tweaked to a much greater extent.
+
+    Keyword arguments:
+        size          : Distance along each side of the generated square world
+        wallHeight    : Height of the world's walls
+        randomHeights : Boolean, enable randomly varying object heights
+        pyrBase       : Base size for pyramids
+        pyrHeight     : Height for pyramids
+        boxBase       : Base size for boxes
+        boxHeight     : Height for boxes
+        citySize      : Determines the number of total pyramids and blocks
+    """
     from random import random
     import math
 
@@ -85,9 +106,16 @@ def Text(name,
          size       = Scale.WorldSize,
          wallHeight = Scale.WallHeight,
          ):
-    """Load a world from a text file. 'name' can be a file name,
-       URI name, or a file-like object.
-       """
+    """
+    Load a world from a text file. This is the default world format.
+
+    Positional arguments:
+        name : File or URI containing the world
+
+    Keyword arguments:
+        size       : Distance along each side of the generated square world
+        wallHeight : Height of the world's walls
+    """
     from xreadlines import xreadlines
     import re
     
@@ -134,9 +162,13 @@ def Text(name,
 
 
 def Binary(name):
-    """Load a world from a binary file. 'name' can be a file name,
-       URI name, or a file-like object.
-       """
+    """
+    Load a world from a binary file. This is the world format used in
+    transit from server to client, and used in the client's world cache.
+
+    Positional arguments:
+        name : File or URI containing the binary world
+    """
     from BZFlag.Protocol import Common
     
     blockDict = Common.getMessageDict(WorldObjects)
@@ -177,11 +209,20 @@ def Heightmap(name,
               wallHeight    = Scale.WallHeight,
               boxHeight     = 20.0 * Scale.MuzzleHeight,
               ):
-    """Uses the given image file to make a heightmapped world.
-       This is very silly and nobody should use this except
-       as an example and a proof-of-concept.
-       Requires PIL.
-       """
+    """
+    Uses the given image file to make a heightmapped world.
+    This is very silly and nobody should use this except
+    as an example and a proof-of-concept.
+    Requires PIL.
+
+    Positional arguments:
+        name : File or URI containing the heightmap, in any format PIL supports
+
+    Keyword arguments:
+        size       : Distance along each side of the generated square world
+        wallHeight : Height of the world's walls
+        boxHeight  : Maximum box height, corresponding to a fully white pixel 
+    """
     import Image
     f = Util.autoFile(name, "rb")
     img = Image.open(f).convert("L")   # Convert to grayscale
@@ -211,5 +252,45 @@ def Heightmap(name,
     return w
 
 
+def Help():
+    """
+    Displays information about the world name format and
+    usage for all world generators, then exits.
+    """
+    import sys
+    print """-- World names
+
+World names can take one of four forms:
+
+  - A local filename
+    Example:
+       foo.bzw
+
+  - A URI (http, ftp, file, or anything supported by urllib2)
+    Example:
+       http://example.com/bz/world.bzw
+
+  - A python expression for a world generator.
+    Examples:
+       Random()
+       Text("foo.bzw", size=1000)
+
+  - A modified syntax for python expressions that doesn't
+    require quoting on the command line. It consists of
+    a non-case-sensitive function name, a colon, then a
+    comma-separated list of arguments. Arguments that can't
+    be parsed as-is will automatically be quoted.
+    Examples:
+       text:foo.bzw,size=1000
+       random
+       Random:citySize=10
+
+Supported world generators:
+"""
+    for genName in __all__:
+        gen = globals()[genName]
+        print "  - %s" % genName
+        print gen.__doc__[1:]
+    sys.exit(0)
 
 ### The End ###
