@@ -63,10 +63,14 @@ def attach(game, eventLoop):
     view3d   = ThreeDView.ThreeDView(game, viewport)
     ThreeDView.ThreeDController(view3d, viewport)
 
-    hud = viewport.region((50,50,600,200))
+    hud = viewport.region(lambda: (10, 10,
+                                   viewport.size[0] - 20,
+                                   viewport.size[1] * 0.3))
     HUDBorderView(hud)
 
-    RadarView.RadarView(game, hud.region((10,10,180,180)))
+    RadarView.RadarView(game, hud.region(lambda: (10, 10,
+                                                  hud.size[1] - 20,
+                                                  hud.size[1] - 20)))
 
     return viewport
 

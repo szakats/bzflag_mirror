@@ -157,10 +157,11 @@ class OpenGLViewport(PygameViewport):
     def init(self):
         from OpenGL import GL
 
-        self.viewOrigin = (0,0)
-        self.nearClip   = 3.0
-        self.farClip    = 2500.0
-        self.fov        = 45.0
+        self.nearClip    = 3.0
+        self.farClip     = 2500.0
+        self.fov         = 45.0
+        self.viewportExp = [0,0] + list(self.size) # A function or list specifying our relative viewport
+        self.viewport    = self.viewportExp        # Our absolute viewport
 
         # Set up some common OpenGL defaults
         GL.glClearColor(0.0, 0.0, 0.0, 0.0)
@@ -175,11 +176,28 @@ class OpenGLViewport(PygameViewport):
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         self.onSetupFrame.observe(onSetupFrame)
 
+        def onResize():
+            self.viewportExp = [0,0] + list(self.size)
+        self.onResize.observe(onResize)
+
         self.onSetupFrame.observe(self.configureOpenGL)
 
     def configureOpenGL(self):
         from OpenGL import GL, GLU
-        GL.glViewport(*(self.viewOrigin + self.size))
+
+        # Evaluate our viewport if necessary, and set it up
+        if callable(self.viewportExp):
+            v = self.viewportExp()
+        else:
+            v = self.viewportExp
+        if self.parent:
+            v = (v[0] + self.parent.viewport[0],
+                 v[1] + self.parent.viewport[1],
+                 v[2], v[3])
+        self.viewport = v
+        self.size = v[2:]
+        
+        GL.glViewport(*v)
         GL.glMatrixMode(GL.GL_PROJECTION)
         GL.glLoadIdentity()
         if self.fov:
@@ -193,22 +211,19 @@ class OpenGLViewport(PygameViewport):
         import pygame
         return PygameViewport.getModeFlags(self) | pygame.OPENGL
 
-    def setViewport(self, rect):
-        self.viewOrigin = rect[:2]
-        self.size = rect[2:]
-
     def region(self, rect):
         """Return a class that represents a rectangular subsection of this viewport.
            To maintain something resembling OpenGL state integrity, it disconnects
            the region's rendering events from ours and appends them to our rendering
            sequence.
+
+           In addition to a rectangle, this function can accept a function that
+           will be lazily evaluated to a rectangle each frame. This makes it possible
+           to create regions with animated or dynamically sized positions.
            """
         sub = copy.copy(self)
         sub.parent = self
-        sub.setViewport((self.viewOrigin[0] + rect[0],
-                         self.viewOrigin[1] + rect[1],
-                         rect[2],
-                         rect[3]))
+        sub.viewportExp = rect
         sub.onSetupFrame  = Event.Event(sub.configureOpenGL)
         sub.onDrawFrame   = Event.Event()
         sub.onFinishFrame = Event.Event()
