@@ -47,7 +47,7 @@ class Flag:
         # running the cloth simulation inside an array in glInterleavedArrays
         # format, so it never has to be copied before rendering.
         self.surf = Drawable.SurfaceArray(self.resolution, GL_T2F_N3F_V3F)
-        self.cloth.attachState(self.surf.vertices)
+        self.cloth.attachDrawable(self.surf)
         self.surf.texcoords[...] = pointGrid((0,0), (0,1), (1,0), self.resolution).astype(Float32)
 
         self.surf.render.static = False

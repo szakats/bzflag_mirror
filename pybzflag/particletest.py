@@ -14,12 +14,11 @@ class GlowSphere(Drawable.ParticleArray):
         self.model = ParticleSystem.Newtonian(Geometry.pointGrid(
             (-gridRadius, -gridRadius, 0), (gridRadius*2,0,0), (0,gridRadius*2,0), (resolution, resolution)))
 
-        Drawable.ParticleArray.__init__(self, self.model.state.shape[:-1], 1)
-        self.model.attachState(self.vertices)
+        Drawable.ParticleArray.__init__(self, self.model.state.shape[:-1])
+        self.model.attachDrawable(self)
         self.time = Animated.Timekeeper()
 
         self.sizes *= particleDiameter
-        self.model.velocity[10,10] = (0,0,0.5)
 
         self.render.static = False
         self.render.blended = True

@@ -78,6 +78,13 @@ class Model:
         array[...] = self.state
         self.state = array
 
+    def attachDrawable(self, drawable):
+        """Attach this model to a drawable that supports the 'vertices' attribute.
+           This may be extended in subclasses to attach other properties of the model,
+           such as colors or particle sizes.
+           """
+        self.attachState(drawable.vertices)
+
 
 class Affector:
     """Abstract base class for an object that affects a simulation model"""
@@ -112,7 +119,7 @@ class FixedIntegrationModel(Model):
         self.dt += dt
         nSteps = 0
         while self.dt > 0:
-            Model.integrate(self, self.stepTime)
+            Model.integrate(self, self.stepSize)
             self.dt -= self.stepTime
             nSteps += 1
         return nSteps
