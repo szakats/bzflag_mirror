@@ -164,6 +164,14 @@ class MsgWantWHash(Common.Message):
 class MsgNull(Common.Message):
     messageId = 0x0000
 
+class MsgTeleport(Common.Message):
+    messageId = 0x7470
+    entries = [
+        StructEntry(Common.PlayerId, 'playerId'),
+        StructEntry(UInt16,          'fromId'),
+        StructEntry(UInt16,          'toId'),
+        ]
+
 
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgPlayerUpdate = Common.MsgPlayerUpdate
