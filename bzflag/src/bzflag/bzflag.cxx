@@ -113,7 +113,7 @@ static BzfString	getConfigFileName()
 #if !defined(_WIN32)
 
   BzfString name;
-  struct passwd* pwent = getpwnam(cuserid(NULL));
+  struct passwd* pwent = getpwuid(getuid());
   if (pwent && pwent->pw_dir) {
     name += BzfString(pwent->pw_dir);
     name += "/";
@@ -130,7 +130,20 @@ static BzfString	getConfigFileName()
 
 #else /* !defined(_WIN32) */
 
-  return BzfString("bzflag.bzc");
+  BzfString name;
+  char windir[MAX_PATH];
+  if (GetWindowsDirectory(windir, sizeof(windir)) != 0) {
+    name = windir;
+  }
+  else if (getenv("HOMEPATH")) {
+    name += getenv("HOMEPATH");
+  }
+  else {
+    name = "C:";
+  }
+
+  name += "\\bzflag.bzc";
+  return name;
 
 #endif /* !defined(_WIN32) */
 }
@@ -139,7 +152,7 @@ static BzfString	getConfigFileName()
 static BzfString	getConfigFileName2()
 {
   BzfString name;
-  struct passwd* pwent = getpwnam(cuserid(NULL));
+  struct passwd* pwent = getpwuid(getuid());
   if (pwent && pwent->pw_dir) {
     name += BzfString(pwent->pw_dir);
     name += "/";
@@ -207,6 +220,8 @@ static void		setVisual(BzfVisual* visual,
 static void		usage()
 {
   printFatalError("usage: %s"
+	" [-3dfx]"
+	" [-no3dfx]"
 	" [-anonymous]"
 	" [-callsign <call-sign>]"
 	" [-directory <data-directory>]"
@@ -214,6 +229,7 @@ static void		usage()
 	" [-geometry <geometry-spec>]"
 	" [-interface <interface>]"
 	" [-latitude <latitude>] [-longitude <longitude>]"
+	" [-list <server-list-url>] [-nolist]"
 	" [-multisample]"
 	" [-mute]"
 	" [-port <server-port>]"
@@ -262,7 +278,9 @@ static void		parse(int argc, char** argv,
     else if (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "-echo") == 0) {
       echoToConsole = True;
     }
-    else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "-help") == 0) {
+    else if (strcmp(argv[i], "-h") == 0 ||
+	     strcmp(argv[i], "-help") == 0 ||
+	     strcmp(argv[i], "--help") == 0) {
       usage();
     }
     else if (strcmp(argv[i], "-g") == 0 || strcmp(argv[i], "-geometry") == 0) {
@@ -317,6 +335,23 @@ static void		parse(int argc, char** argv,
 	usage();
       }
       resources.addValue("longitude", argv[i]);
+    }
+    else if (strcmp(argv[i], "-list") == 0) {
+      if (++i == argc) {
+	printFatalError("Missing argument for %s.", argv[i-1]);
+	usage();
+      }
+      if (strcmp(argv[i], "default") == 0) {
+	resources.removeValue("list");
+      }
+      else {
+	startupInfo.listServerURL = argv[i];
+	resources.addValue("list", argv[i]);
+      }
+    }
+    else if (strcmp(argv[i], "-nolist") == 0) {
+      startupInfo.listServerURL = "";
+      resources.addValue("list", "");
     }
     else if (strcmp(argv[i], "-m") == 0 ||
 		strcmp(argv[i], "-mute") == 0) {
@@ -384,7 +419,32 @@ static void		parse(int argc, char** argv,
 	printFatalError("Using maximum ttl of %d.", startupInfo.ttl);
       }
     }
-    else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "-version") == 0) {
+    else if (strcmp(argv[i], "-v") == 0 ||
+	     strcmp(argv[i], "-version") == 0 ||
+	     strcmp(argv[i], "--version") == 0) {
+#if defined(ALPHA_RELEASE) || defined(BETA_RELEASE)
+      printFatalError("BZFLAG client, version %d.%d%c build %d %s\n"
+#else
+      printFatalError("BZFLAG client, version %d.%d%c\n"
+#endif
+		"  protocol %c.%d%c",
+		(VERSION / 10000000) % 100,
+		(VERSION / 100000) % 100,
+		(char)('a' - 1 + (VERSION / 1000) % 100),
+#if defined(ALPHA_RELEASE) || defined(BETA_RELEASE)
+		VERSION % 1000,
+#if defined(ALPHA_RELEASE)
+		"Alpha",
+#elif defined(BETA_RELEASE)
+		"Beta",
+#else
+		"",
+#endif
+#endif
+		ServerVersion[4],
+		atoi(ServerVersion + 5),
+		ServerVersion[7]);
+#if 0
       cout << "BZFLAG client, version " <<
 		(VERSION / 10000000) % 100 << "." <<
 		(VERSION / 100000) % 100 <<
@@ -404,11 +464,26 @@ static void		parse(int argc, char** argv,
       cout << "  protocol " << ServerVersion[4] << ".";
       if (ServerVersion[5] != '0') cout << ServerVersion[5];
       cout << ServerVersion[6] << (char)tolower(ServerVersion[7]) << endl;
+#endif
 
       exit(0);
     }
     else if (strcmp(argv[i], "-window") == 0) {
       resources.addValue("window", "");
+    }
+    else if (strcmp(argv[i], "-3dfx") == 0 || strcmp(argv[i], "-3Dfx") == 0) {
+#if !defined(__linux__)
+      putenv("MESA_GLX_FX=fullscreen");
+#else
+      setenv("MESA_GLX_FX", "fullscreen", 1);
+#endif
+    }
+    else if (strcmp(argv[i], "-no3dfx") == 0 || strcmp(argv[i], "-no3Dfx") == 0) {
+#if !defined(__linux__)
+      putenv("MESA_GLX_FX=");
+#else
+      unsetenv("MESA_GLX_FX");
+#endif
     }
 #ifdef DEBUG
     else if (strcmp(argv[i], "-date") == 0) {
@@ -535,6 +610,7 @@ void			dumpResources(BzfDisplay* display,
   }
   if (strlen(startupInfo.multicastInterface) != 0)
     db.addValue("interface", startupInfo.multicastInterface);
+  db.addValue("list", startupInfo.listServerURL);
   if (isSoundOpen()) {
     char buf[20];
     sprintf(buf, "%d", getSoundVolume());
@@ -554,6 +630,12 @@ void			dumpResources(BzfDisplay* display,
     db.addValue("zbuffer",  "disable");
   else
     db.addValue("zbuffer",  renderer.useZBuffer() ? "yes" : "no");
+
+  if (renderer.getWindow().getWindow()->hasGammaControl()) {
+    char buf[20];
+    sprintf(buf, "%f", renderer.getWindow().getWindow()->getGamma());
+    db.addValue("gamma", buf);
+  }
 
   db.addValue("quality", configQualityValues[renderer.useQuality()]);
   if (display->getResolution() != -1 &&
@@ -611,8 +693,8 @@ static boolean		needsFullscreen()
 
   // fullscreen if view is not default
   BzfString value = db.getValue("view");
-  for (int i = 1; i < sizeof(configViewValues) /
-			sizeof(configViewValues[0]); i++)
+  for (int i = 1; i < (int)(sizeof(configViewValues) /
+			sizeof(configViewValues[0])); i++)
     if (value == configViewValues[i])
       return True;
 
@@ -769,7 +851,8 @@ int			main(int argc, char** argv)
   if (!anonymous) {
     const char* hostname = Address::getHostName();
 #if !defined(_WIN32)
-    const char* username = cuserid(NULL);
+    struct passwd* pwent = getpwuid(getuid());
+    const char* username = pwent ? pwent->pw_name : NULL;
 #else /* !defined(_WIN32) */
     char username[256];
     DWORD usernameLen = sizeof(username);
@@ -787,27 +870,12 @@ int			main(int argc, char** argv)
   // make platform factory
   PlatformFactory* platformFactory = PlatformFactory::getInstance();
 
-  // get video format from configuration if running on windows.
-  // if not, we'll set the video format later.  don't set the
-  // format if running in a window.
-  BzfString videoFormat;
-#if defined(_WIN32)
-  if (db.hasValue("window"))
-    videoFormat = "window";
-  else if (db.hasValue("resolution"))
-    videoFormat = db.getValue("resolution");
-#endif /* defined(_WIN32) */
-
   // open display
-  display = platformFactory->createDisplay(NULL, videoFormat);
+  display = platformFactory->createDisplay(NULL, NULL);
   if (!display) {
     printFatalError("Can't open display.  Exiting.");
     return 1;
   }
-
-  // set data directory if user specified
-  if (db.hasValue("directory"))
-    PlatformFactory::getMedia()->setMediaDirectory(db.getValue("directory"));
 
   // choose visual
   BzfVisual* visual = platformFactory->createVisual(display);
@@ -821,14 +889,15 @@ int			main(int argc, char** argv)
   }
   window->setTitle("bzflag");
 
+  // set data directory if user specified
+  if (db.hasValue("directory"))
+    PlatformFactory::getMedia()->setMediaDirectory(db.getValue("directory"));
+
   // set window size (we do it here because the OpenGL context isn't yet bound)
-  const boolean useFullscreen = needsFullscreen();
-  if (useFullscreen)
-    window->setFullscreen();
-  else
-    window->setSize(640, 480);
+  boolean setPosition = False, setSize = False;
+  int x = 0, y = 0, w = 0, h = 0;
   if (db.hasValue("geometry")) {
-    int w, h, x, y, count;
+    int count = 0;
     char xs, ys;
     BzfString geometry = db.getValue("geometry");
     if (geometry == "default" ||
@@ -837,24 +906,51 @@ int			main(int argc, char** argv)
 	w < 0 || h < 0) {
       db.removeValue("geometry");
     }
-    else if (count == 6 && xs != '-' && xs != '+' && ys != '-' && ys != '+') {
+    else if (count == 6 && ((xs != '-' && xs != '+') ||
+				(ys != '-' && ys != '+'))) {
       db.removeValue("geometry");
     }
     else {
+      setSize = True;
       if (w < 640) w = 640;
       if (h < 400) h = 400;
       if (count == 6) {
 	if (xs == '-') x = display->getWidth() - x - w;
 	if (ys == '-') y = display->getHeight() - y - h;
-	window->setPosition(x, y);
+	setPosition = True;
       }
-      window->setSize(w, h);
+
+      // must call this before setFullscreen() is called
+      display->setPassthroughSize(w, h);
     }
   }
 
+  // set window size (we do it here because the OpenGL context isn't yet
+  // bound and 3Dfx passthrough cards use the window size to determine
+  // the resolution to use)
+  const boolean useFullscreen = needsFullscreen();
+  if (useFullscreen) {
+    // tell window to be fullscreen
+    window->setFullscreen();
+
+    // set the size if one was requested.  this overrides the default
+    // size (which is the display or passthrough size).
+    if (setSize)
+      window->setSize(w, h);
+  }
+  else if (setSize) {
+    window->setSize(w, h);
+  }
+  else {
+    window->setSize(640, 480);
+  }
+  if (setPosition)
+    window->setPosition(x, y);
+
   // now make the main window wrapper.  this'll cause the OpenGL context
   // to be bound for the first time.
-  MainWindow mainWindow(window);
+  MainWindow* pmainWindow = new MainWindow(window);
+  MainWindow& mainWindow = *pmainWindow;
   // set fullscreen again so MainWindow object knows it's full screen
   if (useFullscreen)
     mainWindow.setFullscreen();
@@ -894,6 +990,12 @@ int			main(int argc, char** argv)
       db.addValue("fakecursor", "yes");
   }
 
+  // set gamma if set in resources and we have gamma control
+  if (db.hasValue("gamma")) {
+    if (mainWindow.getWindow()->hasGammaControl())
+      mainWindow.getWindow()->setGamma((float)atof(db.getValue("gamma")));
+  }
+
   // make scene renderer
   SceneRenderer renderer(mainWindow);
 
@@ -915,8 +1017,8 @@ int			main(int argc, char** argv)
       renderer.setZBufferSplit(db.getValue("zbuffersplit") == "yes");
     if (db.hasValue("texture")) {
       BzfString value = db.getValue("texture");
-      for (int i = 0; i < sizeof(configFilterValues) /
-			sizeof(configFilterValues[0]); i++)
+      for (int i = 0; i < (int)(sizeof(configFilterValues) /
+				sizeof(configFilterValues[0])); i++)
 	if (value == configFilterValues[i]) {
 	  OpenGLTexture::setFilter((OpenGLTexture::Filter)i);
 	  break;
@@ -925,8 +1027,8 @@ int			main(int argc, char** argv)
     }
     if (db.hasValue("quality")) {
       BzfString value = db.getValue("quality");
-      for (int i = 0; i < sizeof(configQualityValues) /
-			sizeof(configQualityValues[0]); i++)
+      for (int i = 0; i < (int)(sizeof(configQualityValues) /
+				sizeof(configQualityValues[0])); i++)
 	if (value == configQualityValues[i]) {
 	  renderer.setQuality(i);
 	  break;
@@ -937,8 +1039,8 @@ int			main(int argc, char** argv)
     if (db.hasValue("view")) {
       renderer.setViewType(SceneRenderer::Normal);
       BzfString value = db.getValue("view");
-      for (int i = 0; i < sizeof(configViewValues) /
-			sizeof(configViewValues[0]); i++)
+      for (int i = 0; i < (int)(sizeof(configViewValues) /
+				sizeof(configViewValues[0])); i++)
 	if (value == configViewValues[i]) {
 	  renderer.setViewType((SceneRenderer::ViewType)i);
 	  break;
@@ -971,6 +1073,10 @@ int			main(int argc, char** argv)
     mainWindow.setQuadrant(MainWindow::UpperRight);
 #endif
 
+  // set server list URL
+  if (db.hasValue("list"))
+    startupInfo.listServerURL = db.getValue("list");
+
   // start playing
   startPlaying(display, renderer, db, &startupInfo);
 
@@ -978,8 +1084,11 @@ int			main(int argc, char** argv)
   dumpResources(display, renderer);
 
   // shut down
-  closeSound();
+  display->setDefaultResolution();
+  delete pmainWindow;
+  delete window;
   delete visual;
+  closeSound();
   delete display;
   delete platformFactory;
 
