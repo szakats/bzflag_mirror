@@ -83,12 +83,17 @@ class BoxSides(DisplayList):
 
 
 class BoxTops(DisplayList):
+    # Use two concrete textures if we have multitexturing, if not
+    # fall back to the old box tops texture.
     textureNames = ('concrete_base.png', 'concrete_overlay.png')
+    textureName = 'boxtops.png'
+    
     def set(self, polygon, base, height):
         self.polygon = polygon
         self.base = base
         self.height = height
-        self.render.textures[1].texEnv = GL_BLEND
+        if GLExtension.multitexture:
+            self.render.textures[1].texEnv = GL_BLEND
 
     def drawSide(self):
         glBegin(GL_POLYGON)

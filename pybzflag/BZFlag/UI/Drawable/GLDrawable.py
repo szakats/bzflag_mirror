@@ -25,7 +25,7 @@ second rendering pass.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-from BZFlag.UI import Texture
+from BZFlag.UI import Texture, GLExtension
 
 __all__ = ['GLDrawable', 'RenderSettings']
 
@@ -65,10 +65,11 @@ class GLDrawable:
 
     def loadTextures(self):
         textures = []
-        if self.textureName:
+        if self.textureNames and GLExtension.multitexture:
+            for name in self.textureNames:
+                textures.append(Texture.load(name))
+        elif self.textureName:
             textures.append(Texture.load(self.textureName))
-        for name in self.textureNames:
-            textures.append(Texture.load(name))
         self.render.textures = tuple(textures)
 
     def parent(self, parent):
