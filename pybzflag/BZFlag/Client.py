@@ -131,6 +131,9 @@ class BaseClient:
     def run(self):
         self.eventLoop.run()
 
+    def onDisconnect(self):
+        self.eventLoop.stop()
+
     def handleHelloPacket(self, socket, eventLoop):
         """This is a callback used to handle incoming socket
            data when we're expecting a hello packet.

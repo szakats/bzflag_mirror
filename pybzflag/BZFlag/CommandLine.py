@@ -31,63 +31,78 @@ optik.STD_HELP_OPTION.help    = "Shows this help message and exits."
 optik.STD_VERSION_OPTION.help = "Shows the version number and exits."
 
 
-def client(clientClass=Client.PlayerClient, argv=sys.argv, **extraDefaults):
-    """Provide a command line interface for creating a Client instance,
-       given a Client subclass to use and a list of default option values.
+class ClientParser(optik.OptionParser):
+    """OptionParser subclass to assist with creating Client instances
+       using a standard set of command line options.
        """
-    parser = optik.OptionParser()
-    clientInst = clientClass()
-    availableOpts = clientInst.options.keys()
+    def __init__(self, clientClass=Client.PlayerClient, **extraDefaults):
+        """Provide a command line interface for creating a Client instance,
+           given a Client subclass to use and a list of default option values.
+           """
+        optik.OptionParser.__init__(self)
+        self.clientInst = clientClass()
+        availableOpts = self.clientInst.options.keys()
 
-    defaults = {
-        'team': 'rogue',
-        'email': 'PyBZFlag',
-        'playerType': 'tank',
-        }
-    defaults.update(extraDefaults)
+        defaults = {
+            'team': 'rogue',
+            'email': 'PyBZFlag',
+            'playerType': 'tank',
+            }
+        defaults.update(extraDefaults)
 
-    def add(*names, **kw):
-        """Wrapper around parser.add_option that enforces our conventions about defaults"""
-        default = defaults.get(kw['dest'])
-        kw['default'] = default
-        if default is not None:
-            kw['help'] += " [%s]" % default
-        parser.add_option(*names, **kw)
+        def add(*names, **kw):
+            """Wrapper around self.add_option that enforces our conventions about defaults"""
+            default = defaults.get(kw['dest'])
+            kw['default'] = default
+            if default is not None:
+                kw['help'] += " [%s]" % default
+            self.add_option(*names, **kw)
 
-    ### Add command line options for supported client options
+        ### Add command line options for supported client options
 
-    if 'server' in availableOpts:
-        add("-s", "--server", dest="server", metavar="HOST",
-            help="Sets the BZFlag server to connect to on startup.")
+        if 'server' in availableOpts:
+            add("-s", "--server", dest="server", metavar="HOST",
+                help="Sets the BZFlag server to connect to on startup.")
 
-    if 'identity' in availableOpts:
-        add("-c", "--call-sign", dest="callSign", metavar="NAME",
-            help="Sets the player callsign to use when joining.")
-        add("-t", "--team", dest="team", metavar="COLOR",
-            help="Sets the team to join.")
-        add("-e", "--email", dest="email", metavar="ADDRESS",
-            help="Sets the optional email address to send when joining.")
-        add("-p", "--player-type", dest="playerType", metavar="TYPE",
-            help="Sets the player type to join the game as. This can be 'tank', 'observer', or 'computer'.")
+        if 'identity' in availableOpts:
+            add("-c", "--call-sign", dest="callSign", metavar="NAME",
+                help="Sets the player callsign to use when joining.")
+            add("-t", "--team", dest="team", metavar="COLOR",
+                help="Sets the team to join.")
+            add("-e", "--email", dest="email", metavar="ADDRESS",
+                help="Sets the optional email address to send when joining.")
+            add("-p", "--player-type", dest="playerType", metavar="TYPE",
+                help="Sets the player type to join the game as. This can be 'tank', 'observer', or 'computer'.")
+    def parse(self, argv=sys.argv):
+        (values, args)  = self.parse_args(argv[1:])
+        values = values.__dict__
+        options = {}
 
-    (values, args)  = parser.parse_args(argv[1:])
-    values = values.__dict__
-    options = {}
+        ### Convert command line options that we have into client options
 
-    ### Convert command line options that we have into client options
+        try:
+            options['server'] = values['server']
+        except KeyError:
+            pass
 
-    try:
-        options['server'] = values['server']
-    except KeyError:
-        pass
+        try:
+            options['identity'] = Player.Identity(
+                values['callSign'], values['team'], values['email'], values['playerType'])
+        except KeyError:
+            pass
 
-    try:
-        options['identity'] = Player.Identity(
-            values['callSign'], values['team'], values['email'], values['playerType'])
-    except KeyError:
-        pass
+        self.clientInst.cmdLineValues = values
+        self.clientInst.cmdLineArgs = args
+        self.clientInst.setOptions(**options)
+        return self.clientInst
 
-    clientInst.setOptions(**options)
-    return clientInst
+
+def client(clientClass=Client.PlayerClient, argv=sys.argv, **extraDefaults):
+    """Convenience function for instantiating a ClientParser
+       and immediately parsing args with it, for the case when you don't
+       need to add any extra options.
+       """
+    parser = ClientParser(clientClass, **extraDefaults)
+    return parser.parse(argv)
 
 ### The End ###

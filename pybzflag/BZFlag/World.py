@@ -22,7 +22,7 @@ and saving worlds in binary and text formats.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag.Protocol import BinaryWorld, Common
+from BZFlag.Protocol import WorldObjects, Common
 from BZFlag import Errors
 import os
 
@@ -112,14 +112,14 @@ class World:
         self.sceneClass = sceneClass
         self.erase()
 
-    def loadBinary(self, bin):
+    def loadBinary(self, f):
         """Load a binary world from the supplied file-like object"""
-        blockDict = Common.getMessageDict(BinaryWorld)
+        blockDict = Common.getMessageDict(WorldObjects)
         self.erase()
         while 1:
             # Read the block header
-            header = BinaryWorld.BlockHeader()
-            packedHeader = bin.read(header.getSize())
+            header = WorldObjects.BlockHeader()
+            packedHeader = f.read(header.getSize())
             if len(packedHeader) < header.getSize():
                 raise Errors.ProtocolError("Premature end of binary world data")
             header.unmarshall(packedHeader)
@@ -130,17 +130,22 @@ class World:
             except KeyError:
                 raise Errors.ProtocolError(
                     "Unknown block type 0x%04X in binary world data" % header.id)
-            if isinstance(block, BinaryWorld.EndOfData):
+            if isinstance(block, WorldObjects.EndOfData):
                 break
 
             # Read the block body
-            packedBody = bin.read(block.getSize() - len(packedHeader))
+            packedBody = f.read(block.getSize() - len(packedHeader))
             if len(packedBody) < (block.getSize() - len(packedHeader)):
                 raise Errors.ProtocolError("Incomplete block in binary world data")
             block.unmarshall(packedHeader + packedBody)
             self.storeBlock(block)
         self.postprocess()
 
+    def saveText(self, f):
+        """Save a text world to the supplied file-like object"""
+        for block in self.blocks:
+            if isinstance(block, WorldObjects.WorldObject):
+                block.textWrite(f)
 
     def erase(self):
         """Reset all internal structures, prepare to load a world"""
@@ -156,15 +161,15 @@ class World:
            """
         # File this block in the appropriate lists
         self.blocks.append(block)
-        if isinstance(block, BinaryWorld.Style):
+        if isinstance(block, WorldObjects.Style):
             self.gameStyle = block
             # Use a 2D size to make it easy to support non-square worlds in the future
             self.size = (block.worldSize, block.worldSize)
         if hasattr(block, 'center'):
             self.scene.add(block)
-        if isinstance(block, BinaryWorld.TeleporterLink):
+        if isinstance(block, WorldObjects.TeleporterLink):
             self.teleporterLinks.append(block)
-        if isinstance(block, BinaryWorld.Teleporter):
+        if isinstance(block, WorldObjects.Teleporter):
             self.teleporters.append(block)
 
     def postprocess(self):
