@@ -34,24 +34,24 @@ class AnaglyphView(View):
         """Render the view to the given surface. This includes the game
            world, with transient objects such as players and flags
            """
-	eyesep = 12.5
-	angle = math.atan(eyesep / self.camera.distance)
+        eyesep = 12.5
+        angle = math.atan(eyesep / self.camera.distance)
         # draw left eye (blue-green)
-	self.camera.azimuthOffset = -angle
+        self.camera.azimuthOffset = -angle
+        glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE)
+        self.camera.load()
+        self.light0.set()
+        self.light1.set()
+        self.scene.render()
+        glClear(GL_DEPTH_BUFFER_BIT)
+        # draw right eye (red)
+        self.camera = self.camera
+        self.camera.azimuthOffset = angle
         glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_FALSE)
         self.camera.load()
         self.light0.set()
         self.light1.set()
         self.scene.render()
-	glClear(GL_DEPTH_BUFFER_BIT)
-        # draw right eye (red)
-	self.camera = self.camera
-	self.camera.azimuthOffset = angle
-        glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE)
-        self.camera.load()
-	self.light0.set()
-	self.light1.set()
-        self.scene.render()
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)
 
 ### The End ###
