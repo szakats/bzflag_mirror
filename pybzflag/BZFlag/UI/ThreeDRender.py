@@ -465,7 +465,7 @@ class Scene:
         glEnable(GL_CULL_FACE)
         glEnable(GL_COLOR_MATERIAL)
 	glEnable(GL_LIGHTING)
-        glDisable(GL_LINE_SMOOTH)
+        glEnable(GL_LINE_SMOOTH)
         glColor4f(1,1,1,1)
 
         for rpass in self.passes:

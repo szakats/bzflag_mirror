@@ -30,6 +30,7 @@ from Teleporter import *
 from Base import *
 from ArraySurface import *
 from TestWidget import *
+from Vector import *
 from Box import detectBoxDrawables
 from Pyramid import detectPyramidDrawables
 import VRML

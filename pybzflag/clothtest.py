@@ -8,8 +8,12 @@ from BZFlag.Geometry import *
 
 
 class Wind:
-    """Global object for simulating wind"""
+    """Global object for simulating wind. Can also be used as a scene
+       object to draw the current wind state for debuggative purposes.
+       """
     def __init__(self):
+        self.drawables = None
+        
         # Wind, with speed and direction varying over time with a perlin noise function
         self.vector = Animated.Vector(Animated.PerlinNoise(persistence = 0.1,
                                                            amplitude = 1,
@@ -17,6 +21,11 @@ class Wind:
         
     def integrate(self, dt):
         self.vector.integrate(dt)
+
+    def getDrawables(self):
+        if not self.drawables:
+            self.drawables = [Drawable.Vector(self.vector)]
+        return self.drawables
         
 
 class Flag:
@@ -102,6 +111,7 @@ if __name__ == '__main__':
     time = Animated.Timekeeper()
     wind = Wind()
     flag = Flag(wind)
+    view.scene.add(wind)
     view.scene.add(flag)
 
     # Update the simulation each frame
