@@ -66,60 +66,60 @@ class VertexArray(object):
         self.colors    = None
 
         if format == GL_V2F:
-            self.interleaved = zeros(shape + (2,), Float32)
+            self.interleaved = zeros(shape + (2,), Float32, savespace=True)
             self.vertices    = self.interleaved
 
         elif format == GL_V3F:
-            self.interleaved = zeros(shape + (3,), Float32)
+            self.interleaved = zeros(shape + (3,), Float32, savespace=True)
             self.vertices    = self.interleaved
 
         elif format == GL_C3F_V3F:
-            self.interleaved = zeros(shape + (6,), Float32)
+            self.interleaved = zeros(shape + (6,), Float32, savespace=True)
             self.colors      = self.interleaved[..., 0:3]
             self.vertices    = self.interleaved[..., 3:6]
 
         elif format == GL_N3F_V3F:
-            self.interleaved = zeros(shape + (6,), Float32)
+            self.interleaved = zeros(shape + (6,), Float32, savespace=True)
             self.normals     = self.interleaved[..., 0:3]
             self.vertices    = self.interleaved[..., 3:6]
 
         elif format == GL_C4F_N3F_V3F:
-            self.interleaved = zeros(shape + (10,), Float32)
+            self.interleaved = zeros(shape + (10,), Float32, savespace=True)
             self.colors      = self.interleaved[..., 0:4]
             self.normals     = self.interleaved[..., 4:7]
             self.vertices    = self.interleaved[..., 7:10]
 
         elif format == GL_T2F_V3F:
-            self.interleaved = zeros(shape + (5,), Float32)
+            self.interleaved = zeros(shape + (5,), Float32, savespace=True)
             self.texcoords   = self.interleaved[..., 0:2]
             self.vertices    = self.interleaved[..., 2:5]
 
         elif format == GL_T4F_V4F:
-            self.interleaved = zeros(shape + (5,), Float32)
+            self.interleaved = zeros(shape + (5,), Float32, savespace=True)
             self.texcoords   = self.interleaved[..., 0:4]
             self.vertices    = self.interleaved[..., 4:8]
 
         elif format == GL_T2F_C3F_V3F:
-            self.interleaved = zeros(shape + (8,), Float32)
+            self.interleaved = zeros(shape + (8,), Float32, savespace=True)
             self.texcoords   = self.interleaved[..., 0:2]
             self.colors      = self.interleaved[..., 2:5]
             self.vertices    = self.interleaved[..., 5:8]
 
         elif format == GL_T2F_N3F_V3F:
-            self.interleaved = zeros(shape + (8,), Float32)
+            self.interleaved = zeros(shape + (8,), Float32, savespace=True)
             self.texcoords   = self.interleaved[..., 0:2]
             self.normals     = self.interleaved[..., 2:5]
             self.vertices    = self.interleaved[..., 5:8]
 
         elif format == GL_T2F_C4F_N3F_V3F:
-            self.interleaved = zeros(shape + (12,), Float32)
+            self.interleaved = zeros(shape + (12,), Float32, savespace=True)
             self.texcoords   = self.interleaved[..., 0:2]
             self.colors      = self.interleaved[..., 2:6]
             self.normals     = self.interleaved[..., 6:9]
             self.vertices    = self.interleaved[..., 9:12]
 
         elif format == GL_T4F_C4F_N3F_V4F:
-            self.interleaved = zeros(shape + (15,), Float32)
+            self.interleaved = zeros(shape + (15,), Float32, savespace=True)
             self.texcoords   = self.interleaved[..., 0:4]
             self.colors      = self.interleaved[..., 4:8]
             self.normals     = self.interleaved[..., 8:11]

@@ -70,8 +70,8 @@ class SoftwareParticleRenderer(VertexArray):
         self.texcoords[...,3,:] = (0,1)
 
         # Create point color and position arrays
-        self.points      = zeros(shape + (3,), Float32)
-        self.pointColors = ones(shape + (4,), Float32)
+        self.points      = zeros(shape + (3,), Float32, savespace=True)
+        self.pointColors = ones(shape + (4,), Float32, savespace=True)
 
     def draw(self, rstate):
         # Stretch our point colors over each whole quad
@@ -79,6 +79,16 @@ class SoftwareParticleRenderer(VertexArray):
         self.colors[...,1,:] = self.pointColors
         self.colors[...,2,:] = self.pointColors
         self.colors[...,3,:] = self.pointColors
+
+        # Billboard ourselves some quads from the point positions and sizes
+        radius = self.pointDiameter/2
+        modelview = glGetFloatv(GL_MODELVIEW_MATRIX).flat
+        up    = take(modelview, (1,5,9)) * radius
+        right = take(modelview, (0,4,8)) * radius
+        self.vertices[...,0,:] = self.points - right - up;
+        self.vertices[...,1,:] = self.points + right - up;
+        self.vertices[...,2,:] = self.points + right + up;
+        self.vertices[...,3,:] = self.points - right + up;
 
         self.bind()
         glDrawArrays(GL_QUADS, 0, self.numVertices)
