@@ -53,7 +53,6 @@ class BaseServer(Network.Endpoint):
     def listen(self, interface):
         self.tcp = Network.Socket()
         self.tcp.listen(interface, Protocol.Common.defaultPort)
-        self.tcp.setBlocking(0)
         self.tcp.handler = self.handleConnection
         self.eventLoop.add(self.tcp)
 
@@ -75,7 +74,6 @@ class BaseServer(Network.Endpoint):
         hello = self.outgoing.HelloPacket(version = BZFlag.protocolVersion,
                                           clientId = clientId)
         self.eventLoop.add(clientSocket)
-        clientSocket.setBlocking(0)
         clientSocket.handler = self.handleMessage
         clientSocket.write(hello)
         self.onConnect(clientSocket)

@@ -227,15 +227,26 @@ class EventLoop:
                 # This waits until either a socket has activity, or
                 # our pollTime has expired and we need to check timers
                 try:
-                    (iwtd, owtd, ewtd) = self.select(self.selectDict.keys(), [], [], pollTime)
+                    # Interrupt if we can read from any socket
+                    iwtd = self.selectDict.keys()
+                    # Only interrupt if we can write on sockets that need to write
+                    owtd = []
+                    for s in iwtd:
+                        if self.selectDict[s].needsWrite():
+                            owtd.append(s)
+                    (iwtd, owtd, ewtd) = self.select(iwtd, owtd, [], pollTime)
                 except select.error:
                     raise Errors.ConnectionLost()
 
-                # Poll available sockets
-                readyList = iwtd + owtd + ewtd
-                for ready in readyList:
+                # Poll available sockets, for reading and for writing
+                for ready in iwtd:
                     try:
-                        self.selectDict[ready].poll(self)
+                        self.selectDict[ready].pollRead(self)
+                    except Errors.NonfatalException:
+                        self.onNonfatalException(sys.exc_info())
+                for ready in owtd:
+                    try:
+                        self.selectDict[ready].pollWrite(self)
                     except Errors.NonfatalException:
                         self.onNonfatalException(sys.exc_info())
 

@@ -1,6 +1,6 @@
-""" BZFlag.ListServer
+""" BZFlag.Meta.Client
 
-Abstraction for the BZFlag server list server.
+Client interface for the metaserver.
 """
 #
 # Python BZFlag Protocol Package

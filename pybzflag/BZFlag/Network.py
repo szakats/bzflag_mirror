@@ -34,34 +34,33 @@ class Socket:
        """
     def __init__(self, protocol='TCP'):
         self.readBuffer = ''
+        self.writeBuffer = ''
         if protocol:
             self.socket = getattr(self, "new%sSocket" % protocol)()
 
     def newTCPSocket(self):
         tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.setNodelay(tcp)
+        self.setBlocking(tcp)
         return tcp
         
     def newUDPSocket(self):
         return socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    def setNodelay(self, s):
+    def setNodelay(self, s, flag=1):
         # Disable the Nagle algorithm. This is necessary to get
         # anything near reasonable latency when sending small packets.
         s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
+    def setBlocking(self, s, flag=0):
+        s.setblocking(flag)
 
     def close(self):
         self.socket.close()
         self.socket = None
 
-    def setBlocking(self, flag):
-        self.socket.setblocking(flag)
-
     def write(self, data):
-        try:
-            self.socket.send(str(data))
-        except socket.error:
-            raise Errors.ConnectionLost()
+        self.writeBuffer += str(data)
 
     def recv(self, size):
         """Low-level recv() wrapper that just provides a little error handling."""
@@ -80,15 +79,22 @@ class Socket:
            receiving fixed size messages.
            """
         if size is None:
-            # Keep reading until there's no more to read
-            received = self.readBuffer
-            self.readBuffer = ''
+            # Keep reading until there's no more to read.
+            # Only return data if we've read everything and
+            # the connection's closed. If we're waiting for
+            # more data, keep it buffered until the last chunk.
             try:
                 while 1:
-                    received += self.recv(bufferSize)
+                    chunk = self.recv(bufferSize)
+                    if not chunk:
+                        return None
+                    self.readBuffer += chunk
             except Errors.ConnectionLost:
                 pass
+            received = self.readBuffer
+            self.readBuffer = ''
             return received
+
         elif size != 0:
             # Read the amount specified, first from our
             # local read buffer then from the socket itself.
@@ -102,6 +108,7 @@ class Socket:
             received = self.readBuffer[:size]
             self.readBuffer = self.readBuffer[size:]
             return received
+        
         else:
             # Zero size
             return ''
@@ -121,7 +128,12 @@ class Socket:
         if host.find(":") >= 0:
             (host, port) = host.split(":")
             port = int(port)
-        self.socket.connect((host, port))
+        try:
+            self.socket.connect((host, port))
+        except socket.error:
+            # "Operation now in progress" isn't an error
+            if sys.exc_info()[1][0] != 115:
+                raise
 
     def listen(self, host, port=None):
         """The arguments for this are processed just like for connect(),
@@ -150,9 +162,10 @@ class Socket:
         s = Socket(None)
         (s.socket, s.address) = self.socket.accept()
         self.setNodelay(s.socket)
+        self.setBlocking(s.socket)
         return s
 
-    def poll(self, eventLoop):
+    def pollRead(self, eventLoop):
         """This is designed for event driven programming with
            one or more sockets. The event loop should call this
            method when it detects activity on the socket, then
@@ -163,11 +176,29 @@ class Socket:
            """
         self.handler(self, eventLoop)
 
+    def pollWrite(self, eventLoop):
+        """As with pollWrite, this is called if needsWrite() returns true
+           and we can write to the socket without blocking.
+           """
+        try:
+            bytes = self.socket.send(self.writeBuffer)
+            if not bytes:
+                raise Errors.ConnectionLost()
+            self.writeBuffer = self.writeBuffer[bytes:]
+        except socket.error:
+            pass
+
     def getSelectable(self):
         """Return an object for this socket that can be passed
            to select()
            """
         return self.socket.fileno()
+
+    def needsWrite(self):
+        """Return true if the socket needs to write data. It will
+           be placed in the select queue for writing.
+           """
+        return len(self.writeBuffer) > 0
 
     def readStruct(self, structClass):
         struct = structClass()
@@ -286,5 +317,25 @@ class Endpoint:
 
     def onUnhandledMessage(self, msg):
         raise Errors.ProtocolWarning("Unhandled message %s" % msg.__class__.__name__)
+
+
+def asyncRequest(eventLoop, host, port, request, callback):
+    """Using the given event loop, send 'request' to the given host and port,
+       calling 'callback' with the entire response after the server closes the connection.
+       This is designed for HTTP and similar protocols that make one request per connection.
+       'host' may contain a port number using host:port notation, in which case it will
+       override 'port'.
+       """
+    sock = Socket()
+    sock.connect(host, port)
+    sock.write(request)
+    def handler(sock, eventLoop):
+        received = sock.read()
+        if received is not None:
+            callback(received)
+            eventLoop.remove(sock)
+            sock.close()
+    sock.handler = handler
+    eventLoop.add(sock)
 
 ### The End ###

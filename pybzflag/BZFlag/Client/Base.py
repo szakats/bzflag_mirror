@@ -61,7 +61,6 @@ class BaseClient(Network.Endpoint):
             self.disconnect()
         self.tcp = Network.Socket()
         self.tcp.connect(server, Protocol.Common.defaultPort)
-        self.tcp.setBlocking(0)
         self.eventLoop.add(self.tcp)
 
         # Until we establish a UDP connection, we'll need to send
