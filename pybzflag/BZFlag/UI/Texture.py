@@ -47,7 +47,6 @@ class Texture:
         """Load the texture from a PIL image"""
         if image.mode == "RGBA":
             string = image.tostring('raw', 'RGBA', 0, -1)
-            print repr(string[3 + 100*4])
             self.loadRaw(image.size, string, GL_RGBA, 4)
         elif image.mode == "RGB":
             string = image.tostring('raw', 'RGB', 0, -1)
