@@ -18,9 +18,6 @@ Package=<4>
     Project_Dep_Name geometry
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name mediafile
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name net
     End Project Dependency
     Begin Project Dependency
@@ -35,26 +32,23 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name scene
     End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "bzfls"=.\bzfls.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
     Begin Project Dependency
-    Project_Dep_Name mplatform
+    Project_Dep_Name common
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name view
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name game
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name ui
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name math
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name shape
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name collision
+    Project_Dep_Name net
     End Project Dependency
 }}}
 
@@ -74,92 +68,11 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name net
     End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name platform
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name game
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name math
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name collision
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name shape
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name region
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "bzgview"=.\bzgview.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name common
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name ogl
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name scene
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name geometry
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name platform
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name mediafile
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name mplatform
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name math
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name net
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "collision"=.\collision.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
 }}}
 
 ###############################################################################
 
 Project: "common"=.\common.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "game"=.\game.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -183,19 +96,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "math"=.\math.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "mediafile"=.\mediafile.dsp - Package Owner=<4>
+Project: "installer"=.\installer.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -204,20 +105,14 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name zlib
+    Project_Dep_Name bzflag
     End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "mplatform"=.\mplatform.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
+    Begin Project Dependency
+    Project_Dep_Name bzfs
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name bzfls
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -270,67 +165,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "region"=.\region.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "scene"=.\scene.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "shape"=.\shape.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "ui"=.\ui.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "view"=.\view.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "zlib"=.\zlib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

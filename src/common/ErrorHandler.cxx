@@ -1,9 +1,9 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -12,41 +12,41 @@
 
 #include "ErrorHandler.h"
 #include <stdio.h>
-#include <string>
+#include <stdarg.h>
+#include "bzfio.h"
 #if defined(_WIN32)
 #include <windows.h>
 #endif
 #include "common.h"
+#include "BundleMgr.h"
+#include "Bundle.h"
 
-static ErrorCallback		errorCallback = NULL;
+static ErrorCallback	errorCallback = NULL;
 
-ErrorCallback			setErrorCallback(ErrorCallback cb)
+ErrorCallback		setErrorCallback(ErrorCallback cb)
 {
-	ErrorCallback oldErrorCallback = errorCallback;
-	errorCallback = cb;
-	return oldErrorCallback;
+  ErrorCallback oldErrorCallback = errorCallback;
+  errorCallback = cb;
+  return oldErrorCallback;
 }
 
-
-void					printError(const char* fmt, ...)
+void			printError(const std::string &fmt, const std::vector<std::string> *parms)
 {
-	va_list args;
-	va_start(args, fmt);
-	std::string buffer = string_util::vformat(fmt, args);
-	va_end(args);
+  std::string msg;
+  Bundle *pBdl = BundleMgr::getCurrentBundle();
+  if (!pBdl)
+    return;
 
-	if (errorCallback) {
-		(*errorCallback)(buffer.c_str());
-	}
+  if ((parms != NULL) && (parms->size() > 0))
+    msg = pBdl->formatMessage(fmt, parms);
+  else
+    msg = pBdl->getLocalString(fmt);
+
+  if (errorCallback) (*errorCallback)(msg.c_str());
 #if defined(_WIN32)
-	else {
-		OutputDebugString(buffer.c_str());
-		OutputDebugString("\n");
-	}
+  else { OutputDebugString(msg.c_str()); OutputDebugString("\n"); }
 #else
-	else {
-		fprintf(stderr, "%s\n", buffer.c_str());
-	}
+  else fprintf(stderr, "%s\n", msg.c_str());
 #endif
 }
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

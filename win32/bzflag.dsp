@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /vmg /GX /O2 /I "..\include" /I "..\src\game" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /D VERSION=10801001 /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\include" /I "..\win32" /D "_WINDOWS" /D "WIN32" /D "NDEBUG" /D "_MBCS" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -51,17 +51,22 @@ RSC=rc.exe
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
+# ADD BSC32 /nologo /o"../src/bzflag/bzflag.bsc"
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 vorbis_static.lib ogg_static.lib vorbisenc_static.lib vorbisfile_static.lib dsound.lib winmm.lib wsock32.lib glu32.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /map /machine:I386 /nodefaultlib:"libcmt.lib"
+# ADD LINK32 ws2_32.lib dsound.lib winmm.lib glu32.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /pdb:"../src/bzflag/bzflag.pdb" /machine:I386 /out:"..\src\bzflag\bzflag.exe"
+# SUBTRACT LINK32 /pdb:none
+# Begin Special Build Tool
+SOURCE="$(InputPath)"
+PostBuild_Cmds=copy ..\src\bzflag\*.exe ..\*.exe
+# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "bzflag - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "bzflag___Win32_Debug"
-# PROP BASE Intermediate_Dir "bzflag___Win32_Debug"
+# PROP BASE Output_Dir "Debug"
+# PROP BASE Intermediate_Dir "Debug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
@@ -70,17 +75,23 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /vmg /GX /ZI /Od /I "..\include" /I "..\src\game" /D "_WINDOWS" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D VERSION=10801001 /Fd"Debug/bzflag.pdb" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\include" /I "..\win32" /D "_WINDOWS" /D "WIN32" /D "_DEBUG" /D "_MBCS" /FD /GZ /c
+# SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
+# ADD BSC32 /nologo /o"../src/bzflag/Debug/bzflag.bsc"
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 vorbis_static.lib ogg_static.lib vorbisfile_static.lib dsound.lib winmm.lib wsock32.lib glu32.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /nodefaultlib:"libcmt.lib" /pdbtype:sept
+# ADD LINK32 ws2_32.lib dsound.lib winmm.lib glu32.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /pdb:"../src/bzflag/Debug/bzflag.pdb" /debug /machine:I386 /out:"..\src\bzflag\Debug\bzflag.exe" /pdbtype:sept
+# SUBTRACT LINK32 /pdb:none
+# Begin Special Build Tool
+SOURCE="$(InputPath)"
+PostBuild_Cmds=copy ..\src\bzflag\debug\*.exe ..\*.exe	copy ..\src\bzflag\debug\*.pdb ..\*.pdb	copy debug\*.pdb ..\*.pdb
+# End Special Build Tool
 
 !ENDIF 
 
@@ -93,6 +104,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=..\src\bzflag\BackgroundRenderer.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\bzflag\bzflag.cxx
 # End Source File
 # Begin Source File
@@ -101,7 +116,11 @@ SOURCE=..\src\bzflag\bzflag.rc
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\bzflag\CommandsSearch.cxx
+SOURCE=..\src\bzflag\ControlPanel.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\bzflag\daylight.cxx
 # End Source File
 # Begin Source File
 
@@ -109,7 +128,19 @@ SOURCE=..\src\bzflag\DeadPlayer.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\bzflag\HUDManager.cxx
+SOURCE=..\src\bzflag\HUDDialog.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\bzflag\HUDRenderer.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\bzflag\HUDui.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\bzflag\KeyMap.cxx
 # End Source File
 # Begin Source File
 
@@ -117,7 +148,19 @@ SOURCE=..\src\bzflag\LocalPlayer.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\bzflag\MainWindow.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\bzflag\menus.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\bzflag\Player.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\bzflag\PlayerLink.cxx
 # End Source File
 # Begin Source File
 
@@ -125,11 +168,35 @@ SOURCE=..\src\bzflag\playing.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\bzflag\RadarRenderer.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\bzflag\Region.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\bzflag\RemotePlayer.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\bzflag\RenderNode.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\bzflag\resources.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\bzflag\RobotPlayer.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\bzflag\SceneBuilder.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\bzflag\SceneRenderer.cxx
 # End Source File
 # Begin Source File
 
@@ -145,31 +212,16 @@ SOURCE=..\src\bzflag\ShotStrategy.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\bzflag\SoundManager.cxx
+SOURCE=..\src\bzflag\sound.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\bzflag\ViewItemHUD.cxx
+SOURCE=..\src\bzflag\stars.cxx
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\bzflag\ViewItemPlayerScene.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\ViewItemPWR.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\ViewItemRadar.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\ViewItems.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\ViewItemScoreboard.cxx
+SOURCE=..\src\bzflag\texture.cxx
 # End Source File
 # Begin Source File
 
@@ -181,75 +233,11 @@ SOURCE=..\src\bzflag\World.cxx
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\include\Address.h
+SOURCE=..\src\bzflag\BackgroundRenderer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\BaseBuilding.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\BoundingBox.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\BoxBuilding.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\BzfDisplay.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\BzfEvent.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\bzfgl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\bzfio.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\BzfVisual.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\BzfWindow.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\CallbackList.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\CommandManager.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\CommandReader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\CommandsSearch.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\CommandsStandard.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\common.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\ConfigFileManager.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\ConfigFileReader.h
+SOURCE=..\src\bzflag\ControlPanel.h
 # End Source File
 # Begin Source File
 
@@ -261,31 +249,19 @@ SOURCE=..\src\bzflag\DeadPlayer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\ErrorHandler.h
+SOURCE=..\src\bzflag\HUDDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\FileManager.h
+SOURCE=..\src\bzflag\HUDRenderer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\game\Flag.h
+SOURCE=..\src\bzflag\HUDui.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\game\global.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\HUDManager.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\Intersect.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\KeyManager.h
+SOURCE=..\src\bzflag\KeyMap.h
 # End Source File
 # Begin Source File
 
@@ -293,67 +269,11 @@ SOURCE=..\src\bzflag\LocalPlayer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\math3D.h
+SOURCE=..\src\bzflag\MainWindow.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\mathr.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\MediaFile.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\Menu.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\MenuManager.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\MenuReader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\MessageBuffer.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\MessageManager.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\Obstacle.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\OpenGLGState.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\OpenGLTexFont.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\OpenGLTexture.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\Pack.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\game\Ping.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\PlatformFactory.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\PlatformMediaFactory.h
+SOURCE=..\src\bzflag\menus.h
 # End Source File
 # Begin Source File
 
@@ -369,11 +289,7 @@ SOURCE=..\src\bzflag\playing.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\game\Protocol.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\PyramidBuilding.h
+SOURCE=..\src\bzflag\RadarRenderer.h
 # End Source File
 # Begin Source File
 
@@ -385,7 +301,7 @@ SOURCE=..\src\bzflag\RemotePlayer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\resource.h
+SOURCE=..\src\bzflag\resources.h
 # End Source File
 # Begin Source File
 
@@ -394,110 +310,6 @@ SOURCE=..\src\bzflag\RobotPlayer.h
 # Begin Source File
 
 SOURCE=..\src\bzflag\SceneBuilder.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneManager.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\SceneManager.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNode.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeAnimate.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeBaseTransform.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeBillboard.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeChoice.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeGeometry.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeGroup.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeGState.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeLight.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeLOD.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeMatrixTransform.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeMetadata.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeParameters.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeParticleSystem.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodePrimitive.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodes.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeSelector.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeSphereTransform.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneNodeTransform.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneReader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneVisitor.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneVisitorBaseRender.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneVisitorParams.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\SceneVisitorRender.h
 # End Source File
 # Begin Source File
 
@@ -517,92 +329,16 @@ SOURCE=..\src\bzflag\sound.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\bzflag\SoundManager.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\StateDatabase.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\game\Team.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\Teleporter.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TimeBomb.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TimeKeeper.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\View.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\ViewFrustum.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\ViewItemHUD.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\ViewItemPlayerScene.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\ViewItemPWR.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\ViewItemRadar.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\ViewItems.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\ViewItemScene.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzflag\ViewItemScoreboard.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\ViewManager.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\ViewReader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\WallObstacle.h
+SOURCE=..\src\bzflag\texture.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\bzflag\World.h
 # End Source File
-# Begin Source File
-
-SOURCE=..\include\XMLTree.h
-# End Source File
 # End Group
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-# Begin Source File
-
-SOURCE=..\src\bzflag\bzflag.bmp
-# End Source File
 # Begin Source File
 
 SOURCE=..\src\bzflag\bzflag.ico

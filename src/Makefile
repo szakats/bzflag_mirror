@@ -1,5 +1,5 @@
 # bzflag
-# Copyright (c) 1993 - 2002 Tim Riker
+# Copyright (c) 1993 - 2001 Tim Riker
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
@@ -18,29 +18,17 @@ COMMONPREF = src
 include $(DEPTH)/Make-common
 
 SUBDIRS =				\
-	bzfrelay			\
 	common				\
-	game				\
-	zlib				\
-	platform			\
 	net				\
-	bzfls				\
-	math				\
-	shape				\
-	region				\
-	collision			\
 	bzfs				\
-	mediafile			\
+	bzfls				\
 	geometry			\
 	obstacle			\
-	scene				\
 	ogl				\
-	ui				\
-	view				\
-	mplatform			\
+	scene				\
+	platform			\
 	bzflag				\
-					\
-	bzgview				\
+	bzfrelay			\
 	$(NULL)
 
 targets:

@@ -1,9 +1,9 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -236,9 +236,6 @@ int			parseCommand(char* cmd, char** cmdArgs, int* numArgs)
 	if (*cmd == 0)
 	    break;
 
-	if (*cmd == '#')
-		return -1;
-
 	// starts with a quote?
 	const bool quoted = (*cmd == '\"');
 	if (quoted)
@@ -393,10 +390,7 @@ int main(int argc, char** argv)
     while (fgets(cmd, sizeof(cmd), inFile)) {
 	// parse command line
 	int numArgs = sizeof(cmdArgs) / sizeof(cmdArgs[0]);
-	int pcInfo = parseCommand(cmd, cmdArgs, &numArgs);
-	if (pcInfo < 0)
-		continue;
-	if (pcInfo > 0)
+	if (parseCommand(cmd, cmdArgs, &numArgs) != 0)
 	    return 1;
 
 	// execute
@@ -496,4 +490,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

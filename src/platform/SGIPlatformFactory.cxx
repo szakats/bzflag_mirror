@@ -1,9 +1,9 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -11,56 +11,52 @@
  */
 
 #include "SGIPlatformFactory.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/syssgi.h>
-#include <unistd.h>
+#include "SGIDisplay.h"
+#include "XVisual.h"
+#include "XWindow.h"
+#include "SGIMedia.h"
 
-PlatformFactory*		PlatformFactory::getInstance()
+PlatformFactory*	PlatformFactory::getInstance()
 {
-	if (instance == NULL)
-		instance = new SGIPlatformFactory;
-	return instance;
+  if (!instance) instance = new SGIPlatformFactory;
+  return instance;
 }
 
-SGIPlatformFactory::SGIPlatformFactory() :
-								secondsPerTick(0.0),
-								clockZero(0),
-								iotimer_addr(NULL)
+SGIPlatformFactory::SGIPlatformFactory()
 {
-	// prepare high resolution timer
-	unsigned int cycleval;
-	const ptrdiff_t addr = syssgi(SGI_QUERY_CYCLECNTR, &cycleval);
-	if (addr != -1) {
-		const int poffmask = getpagesize() - 1;
-		const __psunsigned_t phys_addr = (__psunsigned_t)addr;
-		const __psunsigned_t raddr = phys_addr & ~poffmask;
-		int fd = open("/dev/mmem", O_RDONLY);
-		iotimer_addr = (volatile unsigned int *)mmap(0, poffmask, PROT_READ,
-								MAP_PRIVATE, fd, (off_t)raddr);
-		iotimer_addr = (unsigned int *)((__psunsigned_t)iotimer_addr +
-												(phys_addr & poffmask));
-#ifdef SGI_CYCLECNTR_SIZE
-		if ((int)syssgi(SGI_CYCLECNTR_SIZE) > 32)
-			iotimer_addr++;
-#endif
-		secondsPerTick = 1.0e-12 * (double)cycleval;
-		clockZero      = *iotimer_addr;
-	}
+  // do nothing
 }
 
 SGIPlatformFactory::~SGIPlatformFactory()
 {
-	// do nothing
+  // do nothing
 }
 
-double					SGIPlatformFactory::getClock() const
+BzfDisplay*		SGIPlatformFactory::createDisplay(
+				const char* name, const char*)
 {
-	if (iotimer_addr == NULL)
-		return UnixPlatformFactory::getClock();
-	else
-		return secondsPerTick * (double)(*iotimer_addr - clockZero);
+  XDisplay* display = new XDisplay(name, new SGIDisplayMode);
+  if (!display || !display->isValid()) {
+    delete display;
+    return NULL;
+  }
+  return display;
 }
-// ex: shiftwidth=4 tabstop=4
+
+BzfVisual*		SGIPlatformFactory::createVisual(
+				const BzfDisplay* display)
+{
+  return new XVisual((const XDisplay*)display);
+}
+
+BzfWindow*		SGIPlatformFactory::createWindow(
+				const BzfDisplay* display, BzfVisual* visual)
+{
+  return new XWindow((const XDisplay*)display, (XVisual*)visual);
+}
+
+BzfMedia*		SGIPlatformFactory::createMedia()
+{
+  return new SGIMedia;
+}
+// ex: shiftwidth=2 tabstop=8

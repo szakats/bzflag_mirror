@@ -1,29 +1,29 @@
 # BZFlag rpm spec file
 #
-# Copyright (c) 1993 - 2002 Tim Riker
+# Copyright (c) 1993 - 2003 Tim Riker
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
-# named LICENSE that should have accompanied this file.
+# named COPYING that should have accompanied this file.
 #
 # THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
 # IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 # WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 %define name bzflag
-%define version 1.7e5
+%define version 1.7g3
 %define release 1
 
-%define bzbindir	/usr/X11R6/bin
+%define bzbindir	/usr/bin
 %define bzdatadir	/usr/share/%{name}/
-%define bzmandir	/usr/share/man
-%define bzdocdir	/usr/share/doc/%{name}-%{version}
+%define bzmandir	/usr/man
+# %define bzdocdir	/usr/share/doc/%{name}-%{version}
 
 name:		%{name}
 version:	%{version}
 release:	%{release}
 group:		Recreation/Action
-copyright:	Copyright (c) 1993 - 2002 Tim Riker
+copyright:	Copyright (c) 1993 - 2003 Tim Riker
 packager:	Tim Riker <Tim@Rikers.org>
 url:		http://BZFlag.org/
 summary:	multiplayer 3D tank battle game
@@ -46,43 +46,31 @@ styles are available.
 %setup -q
 
 %build
-%ifarch ppc
-make linux-ppc
-%else
 %ifarch i386 i486 i586 i686
-make linux-i386
+CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS"	\
+	./configure --prefix=/usr --enable-robots	\
+	--host=i386-pc-linux-gnu
 %else
-make linux
+CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS"	\
+	./configure --prefix=/usr --enable-robots
 %endif
-%endif
-make ACXXOPTS="$RPM_OPT_FLAGS" ACOPTS="$RPM_OPT_FLAGS"		\
-	INSTALL_DATA_DIR=%{bzdatadir}				\
-	all
+
+make
 
 %install
-rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{bzdocdir}
-mkdir -p $RPM_BUILD_ROOT%{bzbindir}
-mkdir -p $RPM_BUILD_ROOT%{bzdatadir}
-mkdir -p $RPM_BUILD_ROOT%{bzmandir}/man6
-mkdir -p $RPM_BUILD_ROOT/usr/X11R6/bin
-install -m644 package/rpm/README.linux $RPM_BUILD_ROOT%{bzdocdir}/README
-install -m644 LICENSE $RPM_BUILD_ROOT%{bzdocdir}
-install -m644 man/*.6 $RPM_BUILD_ROOT%{bzmandir}/man6
-gzip $RPM_BUILD_ROOT%{bzmandir}/man6/*.6
-install -m644 data/*.rgb data/*.wav $RPM_BUILD_ROOT%{bzdatadir}
-# note bzfls/bzfrelay/bzfs might want to live in /usr/bin/
-install bin/* $RPM_BUILD_ROOT%{bzbindir}
+make DESTDIR=$RPM_BUILD_ROOT install-strip
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+[ ${RPM_BUILD_ROOT} != "/" ] && rm -rf ${RPM_BUILD_ROOT}
 
 # note -- bzflag must be setuid root to use 3Dfx drivers without /dev/3dfx
 %files
 %defattr(-,root,root)
-%dir %{bzdocdir}
+# %dir %{bzdocdir}
 %dir %{bzdatadir}
 %dir %{bzdatadir}/*
-%doc %{bzdocdir}/*
+%{bzdatadir}/*
+%{bzdatadir}/l10n/*
+# %doc %{bzdocdir}/*
 %doc %{bzmandir}/man6/*
-%attr(755,root,root) /usr/X11R6/bin/*
+%attr(755,root,root) %{bzbindir}/*

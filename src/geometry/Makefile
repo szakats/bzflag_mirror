@@ -1,5 +1,5 @@
 # bzflag
-# Copyright (c) 1993 - 2002 Tim Riker
+# Copyright (c) 1993 - 2001 Tim Riker
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
@@ -15,9 +15,27 @@ include $(DEPTH)/Make-common
 TARGETS  = $(LIBDIR)/libGeometry.a
 
 CXXFILES =				\
-	BoundingBox.cxx			\
-	Intersect.cxx			\
 	ViewFrustum.cxx			\
+	Ray.cxx				\
+	SceneNode.cxx			\
+	WallSceneNode.cxx		\
+	QuadWallSceneNode.cxx		\
+	TriWallSceneNode.cxx		\
+	PolyWallSceneNode.cxx		\
+	EighthDimSceneNode.cxx		\
+	EighthDBaseSceneNode.cxx	\
+	EighthDBoxSceneNode.cxx		\
+	EighthDPyrSceneNode.cxx		\
+	ShellSceneNode.cxx		\
+	TracerSceneNode.cxx		\
+	PTSceneNode.cxx			\
+	BoltSceneNode.cxx		\
+	LaserSceneNode.cxx		\
+	SphereSceneNode.cxx		\
+	FlagSceneNode.cxx		\
+	FlagWarpSceneNode.cxx		\
+	TankSceneNode.cxx		\
+	BillboardSceneNode.cxx		\
 	$(NULL)
 
 targets: $(TARGETS)

@@ -37,43 +37,44 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release"
+# PROP Output_Dir "..\lib\Release"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /W3 /vmg /GX /O2 /I "..\include" /D "NDEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D VERSION=10801001 /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\include" /I "..\win32" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
+# ADD BSC32 /nologo /o"../src/obsacle/obstacle.bsc"
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\src\obstacle\obstacle.lib"
 
 !ELSEIF  "$(CFG)" == "obstacle - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "obstacle___Win32_Debug"
-# PROP BASE Intermediate_Dir "obstacle___Win32_Debug"
+# PROP BASE Output_Dir "Debug"
+# PROP BASE Intermediate_Dir "Debug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug"
+# PROP Output_Dir "..\lib\Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /vmg /GX /ZI /Od /I "..\include" /D "_LIB" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D VERSION=10801001 /Fd"Debug/obstacle.pdb" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\include" /I "..\win32" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FD /GZ /c
+# SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
+# ADD BSC32 /nologo /o"../src/obstacle/obstacle.bsc"
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\src\obsacle\Debug\obstacle.lib"
 
 !ENDIF 
 
@@ -91,6 +92,10 @@ SOURCE=..\src\obstacle\BaseBuilding.cxx
 # Begin Source File
 
 SOURCE=..\src\obstacle\BoxBuilding.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\obstacle\Intersect.cxx
 # End Source File
 # Begin Source File
 
@@ -122,6 +127,18 @@ SOURCE=..\include\BoxBuilding.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\bzfgl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\bzfio.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\BzfString.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\common.h
 # End Source File
 # Begin Source File
@@ -130,15 +147,11 @@ SOURCE=..\include\Intersect.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\math3D.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\mathr.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\Obstacle.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\OpenGLGState.h
 # End Source File
 # Begin Source File
 
@@ -146,11 +159,35 @@ SOURCE=..\include\PyramidBuilding.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\QuadWallSceneNode.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\Ray.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\RenderNode.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\SceneNode.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\Teleporter.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\TriWallSceneNode.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\WallObstacle.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\WallSceneNode.h
 # End Source File
 # End Group
 # End Target

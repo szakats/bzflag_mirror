@@ -1,5 +1,5 @@
 # bzflag
-# Copyright (c) 1993 - 2002 Tim Riker
+# Copyright (c) 1993 - 2001 Tim Riker
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
@@ -17,7 +17,11 @@ TARGETS  = $(LIBDIR)/libPlatform.a
 
 CXXFILES =				\
 	PlatformFactory.cxx		\
-	TimeKeeper.cxx			\
+	BzfDisplay.cxx			\
+	BzfVisual.cxx			\
+	BzfWindow.cxx			\
+	BzfMedia.cxx			\
+	wave.cxx			\
 	$(PCXXFILES)			\
 	$(NULL)
 

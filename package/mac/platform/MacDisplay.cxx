@@ -214,4 +214,4 @@ void MacDisplay::getKey (BzfKeyEvent &bzf_key, EventRecord &event_rec) const {
 
   }
 }
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

@@ -1,77 +1,68 @@
-to do / idea list for bzflag
-----------------------------
+to do list for bzflag
+---------------------
 
-* new UDP-only network code:
-   Use a single port only; provide better lag statistics
-   (latency and jitter). Should pack several small messages into
-   one UDP packet to reduce header overhead. For clients with
-   low bandwidth, an automatic throttling of bulk messages could
-   reduce lag.
+* remove MsgClientVersion as it contains
+   the wrong version anyway
 
-* flag negotiation at connect
-   Server tells the client exactly what flags are going to appear,
-   thus allowing flag changes in minor version updates (if the
-   server uses flags that the client doesn't, kill)
+* build a prototype(4) for bsd, solaris
 
-* player database in bzfls:
-   The idea is to allow players to register their callsign. 
-   Whoever want to use that callsign has to authenticate himself
-   (implemented by a simple public key scheme). Furthermore, a
-   karma system, where each player can rate another player.
-   'Nice' players should get high karma value this way, whereas
-   cheaters get bad karma. Servers can be set up to require a minum
-   karma level.
+* fix up irix idb
 
-* bzfls should only speak http
-   initial url should handle redirection via http redirects. web
-   proxy should be supported for the request. Response should be
-   in xml removing bitfields.
+* build a tar as output that supports "rpm -tb <tar>"
 
-* bzfls should require server admin email in order to list a server.
-   This data should not be published. Admins should be encouraged,
-   as they are now, to add the email to the comments as well.
+* one tcp port. Tim Riker is working on this code. 1.7e4
+  included playerid mangling support to get ready for this.
 
-* client-side world cache to speed up joining;
-   could be based on MD5 hashes (+ size?)
+* break the net compatibility to allow some fixes
+   including:
 
-* split bzfs.cxx into several files, make bzfs more modular 
+* player ids to one byte synced on server and clients
 
-* server should probably track approx. player position;
-   can detect some cheats this way; server knows where to drop
-   flag when client crashes
+* ipv6 support
 
-* add ability to change server settings at runtime,
-   e.g. switch flags on/off
+* version as strings as in 1.9.0-cvs20030604
 
-* add auto-kicking of idle players as a server option
+* if we stay with tcp/udp then use the same ports for the
+   udp pipe as for the tcp pipe on both client and server
 
-* encourage server admins to provide an email contact by adding
-   an option to bzfs
+* consider using ENet http://enet.cubik.org/ for
+   the network protocol
 
-* enable readline-like editing to the console: should be able to recall
-   previous commands, edit the curent line and do tab-completion for
-   commands and variables
+* encapsulate stuff requiring platform #ifdef's:
+   networking API into libNet.a.
+   fork/exec (used in menus.cxx) into libPlatform.a
+   file system stuff (dir delimiter, etc.)
+   user name stuff
 
-* windows makefiles
-   currently have microsoft visual c++ projects only
+* consider moving to LGPL instead of GPL
 
-* create robots as separate binaries and allow either the
+* clean up libraries that could be reused by other games
+
+* allow the worlds to be resized as a server option
+
+* implement texture cache on client and have server offer
+   new textures as part of the world.
+
+* allow loadable meshes as "tanks"
+
+* supply tank "meshes" from the server
+
+* allow client to choose a mesh from the server list
+
+* implement one way cross server teleporters
+
+* implement a visual "server list" game server
+
+* auto-generated dependency support in makefiles
+   manual dependencies cause too much trouble
+
+* move robots to separate binaries and allow either the
    client or server to exec them. Have a server option
-   to keep n players in the game which auto spawns/kills enough
-   bots to do it. Bot player type is just a bit. bots get all
-   message types.
+   to keep n players in the game which auto spawns/kills
+   enough bots to do it. Get rid of bot player type
+   completely. bots should get all message types.
 
-* smart robots
-  robot API - libbzflag anyone?
-
-* change basic server config to a file
-   more complicated server options
-   allow overrides with --option=value
-
-* real collision detection
-
-* new enhanced worlds
-   downloadable textures, sounds, etc
+* smarter robots
 
 * add type of shot (normal, gm, sw, etc) to killed message
 
@@ -85,16 +76,12 @@ to do / idea list for bzflag
    making them visible within a certain range.  another
    possibility is damage before destruction.
 
+* radio chat:
+   allow players to communicate via low-quality audio.
+   already some support built into the server for this.
+
 * pre-game waiting room:
    provide a means for players to gather before and after
    a game.  basic text chat facilities.  allows players
    to wait for enough players for a game and to discuss
-   strategy, etc. Would also be useful for timed matches, e.g.
-   in a tournament.
-
-* inter-server teleporters:
-   lead from one server to another. If the other end exists,
-   exit from that portal. If not, do a normal game join.
-
-* spectator mode. Possibly only through a relay server
-  so as to not load down the normal server.
+   strategy, etc.  could build this into bzfs easily.

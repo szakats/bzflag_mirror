@@ -1,5 +1,5 @@
 # bzflag
-# Copyright (c) 1993 - 2002 Tim Riker
+# Copyright (c) 1993 - 2001 Tim Riker
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
@@ -18,13 +18,13 @@
 # increase build number for every potentially released build.
 # must change this in MSDev project, too.
 #
-VERSION = 10801001
+VERSION = 10705005
 
 #
 # version id string and build number.  these should be consistent with
 # VERSION.
 #
-VERSIONID = 1.8a1
+VERSIONID = 1.7e5
 
 #
 # uncomment this to build in an expiration date (month/day/year)
@@ -37,3 +37,8 @@ VERSIONID = 1.8a1
 ifdef DEBUG
 DEBUG_RENDERING = -DDEBUG_RENDERING
 endif
+
+#
+# uncomment to enable robot tanks
+#
+ROBOTS = -DROBOT

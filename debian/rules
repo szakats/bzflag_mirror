@@ -13,12 +13,18 @@ build-stamp:
 	dh_testdir
 
 	# Add here commands to compile the package.
+	# compile for i486 cause GL on i386 is hopeless
+	echo DEB_BUILD_OPTIONS=$(DEB_BUILD_OPTIONS)
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	./configure --enable-debug --prefix=/usr
+else
 	case $(DEB_BUILD_ARCH) in \
-		i386) $(MAKE) linux-i386;; \
-		powerpc) $(MAKE) linux-ppc;; \
-		*) $(MAKE) linux;; \
+		i386) ./configure --prefix=/usr --host=i486-pc-linux-gnu ;; \
+		*) ./configure --prefix=/usr ;; \
 	esac
-	$(MAKE) INSTALL_DATA_DIR=/usr/share/bzflag all
+endif
+
+	$(MAKE)
 
 	touch build-stamp
 
@@ -28,7 +34,7 @@ clean:
 	rm -f build-stamp
 
 	# Add here commands to clean up after the build process.
-	-$(MAKE) pristine
+	-$(MAKE) distclean
 
 	dh_clean
 
@@ -60,7 +66,7 @@ bzflag: build
 	# copy files into debian/$@/ here
 	cp -pr data/[^C]* debian/$@/usr/share/bzflag/
 	cp -p man/bzflag.6 debian/$@/usr/share/man/man6/
-	cp -p bin/bzflag debian/$@/usr/games/
+	cp -p src/bzflag/bzflag debian/$@/usr/games/
 #	dh_installdebconf -p$@
 	dh_installdocs -p$@
 	dh_installmenu -p$@
@@ -68,7 +74,9 @@ bzflag: build
 	dh_installinfo -p$@
 #	dh_undocumented -p$@
 	dh_installchangelogs -p$@
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
 	dh_strip -p$@
+endif
 	dh_link -p$@
 	dh_compress -p$@
 	dh_fixperms -p$@
@@ -88,7 +96,7 @@ bzflag-server: build
 	dh_installdirs -p$@
 	# copy files into debian/$@/ here
 	cp -p man/bzfs.6 man/bzfrelay.6 man/bzfls.6 debian/$@/usr/share/man/man6
-	cp -p bin/bzfs bin/bzfrelay bin/bzfls misc/bzfquery.pl debian/$@/usr/games
+	cp -p src/bzfs/bzfs src/bzfrelay/bzfrelay src/bzfls/bzfls misc/bzfquery.pl debian/$@/usr/games
 	chmod a+rx debian/$@/usr/games/bzfquery.pl
 #	dh_installdebconf -p$@
 	dh_installdocs -p$@
@@ -103,7 +111,9 @@ bzflag-server: build
 	dh_installinfo -p$@
 #	dh_undocumented -p$@ bzfquery.pl.6
 	dh_installchangelogs -p$@
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
 	dh_strip -p$@
+endif
 	dh_link -p$@
 	dh_compress -p$@
 	dh_fixperms -p$@
