@@ -7,6 +7,14 @@ World::World() {
   boxicon = GNOME_PIXMAP(gnome_pixmap_new_from_file("/usr/local/share/bzedit/data/boxicon.png"));
   pyricon = GNOME_PIXMAP(gnome_pixmap_new_from_file("/usr/local/share/bzedit/data/pyricon.png"));
   telicon = GNOME_PIXMAP(gnome_pixmap_new_from_file("/usr/local/share/bzedit/data/telicon.png"));
+  lnkicon = GNOME_PIXMAP(gnome_pixmap_new_from_file("/usr/local/share/bzedit/data/lnkicon.png"));
+}
+
+World::~World() {
+  gtk_widget_destroy(GTK_WIDGET(boxicon));
+  gtk_widget_destroy(GTK_WIDGET(pyricon));
+  gtk_widget_destroy(GTK_WIDGET(telicon));
+  gtk_widget_destroy(GTK_WIDGET(lnkicon));
 }
 
 void World::render(Camera &c) {
@@ -22,6 +30,8 @@ void World::render(Camera &c) {
   it = begin();
   while(it != end()) {
     it->render(c, (transparent && (!it->selected)));
+    if(it->type == Element::LINK && it->selected)
+      it->l->render(c, this);
     it++;
   }
 }
@@ -51,6 +61,8 @@ void World::buildList(GtkWidget *clist) {
       gtk_clist_set_pixtext(GTK_CLIST(clist), row, 0, it->name.c_str(), 8, pyricon->pixmap, pyricon->mask);
     } else if(it->type == Element::TELEPORTER) {
       gtk_clist_set_pixtext(GTK_CLIST(clist), row, 0, it->name.c_str(), 8, telicon->pixmap, telicon->mask);
+    } else if(it->type == Element::LINK) {
+      gtk_clist_set_pixtext(GTK_CLIST(clist), row, 0, it->name.c_str(), 8, lnkicon->pixmap, lnkicon->mask);
     } else {
       gtk_clist_set_text(GTK_CLIST(clist), row, 0, "Unknown object type!");
     }
@@ -59,6 +71,31 @@ void World::buildList(GtkWidget *clist) {
     }
     it++;
     row++;
+  }
+  gtk_clist_thaw(GTK_CLIST(clist));
+}
+
+void World::buildTeleporterList(GtkWidget *clist) {
+  gchar *text[] = {"", "", NULL};
+
+  gtk_clist_freeze(GTK_CLIST(clist));
+  gtk_clist_clear(GTK_CLIST(clist));
+  for(int i = 0; i < size(); i++) {
+    if((*this)[i].type == Element::TELEPORTER) {
+      gtk_clist_append(GTK_CLIST(clist), text);
+      gtk_clist_append(GTK_CLIST(clist), text);
+    }
+  }
+  int row = 0;
+  for(int i = 0; i < size(); i++) {
+    if((*this)[i].type == Element::TELEPORTER) {
+      gtk_clist_set_text(GTK_CLIST(clist), row, 0, (*this)[i].name.c_str());
+      gtk_clist_set_text(GTK_CLIST(clist), row, 1, "0");
+      row++;
+      gtk_clist_set_text(GTK_CLIST(clist), row, 0, (*this)[i].name.c_str());
+      gtk_clist_set_text(GTK_CLIST(clist), row, 1, "1");
+      row++;
+    }
   }
   gtk_clist_thaw(GTK_CLIST(clist));
 }
@@ -101,6 +138,8 @@ void World::uniqueName(Element &el) {
     base = "pyramid";
   } else if(el.type == Element::TELEPORTER) {
     base = "teleporter";
+  } else if(el.type == Element::LINK) {
+    base = "link";
   } else {
     base = "unknown";
   }
@@ -182,9 +221,7 @@ bool World::load(char *filename) {
 	el->name = nextname;
 	nextname = "";
       }
-      cout << "uniqueName()\n";
       uniqueName(*el);
-      cout << "pushBack()\n";
       push_back(*el);
       delete el;
       continue;

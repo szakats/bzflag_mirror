@@ -7,4 +7,5 @@ data1_DATA = boxwall.tga \
 	    wall.tga \
 	    boxicon.png \
 	    pyricon.png \
-	    telicon.png
+	    telicon.png \
+	    lnkicon.png

@@ -169,7 +169,7 @@ bzedit_SOURCES =  	bzedit.cpp 	element.cpp 	objects.cpp 	ui_edit.cpp 	ui_main.cp
 bzedit_LDADD =  	@GNOME_LIBS@ 	@GTK_LIBS@ 	@GTKGL_LIBS@ 	@GL_LIBS@
 
 
-EXTRA_DIST =  	data/boxicon.png 	data/boxwall.tga 	data/caution.tga 	data/ground.tga 	data/pyricon.png 	data/pyrwall.tga 	data/roof.tga 	data/telicon.png 	data/wall.tga 	help/index.html 	help/intro.html 	help/mainwin.html 	help/topic.dat
+EXTRA_DIST =  	data/boxicon.png 	data/boxwall.tga 	data/caution.tga 	data/ground.tga 	data/lnkicon.png 	data/pyricon.png 	data/pyrwall.tga 	data/roof.tga 	data/telicon.png 	data/wall.tga 	help/index.html 	help/intro.html 	help/mainwin.html 	help/topic.dat
 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs

@@ -78,13 +78,19 @@ class Link {
     Link operator = (const Link &r);
     void render(Camera &c, World *w);
     void set_from(string from);
+    void set_from_side(int from_side);
     void set_to(string to);
+    void set_to_side(int from_side);
     string get_from();
+    int get_from_side();
     string get_to();
+    int get_to_side();
     friend ostream & operator << (ostream &dest, Link &src);
   protected:
     string from;
+    int from_side;
     string to;
+    int to_side;
 };
 
 #endif

@@ -40,6 +40,7 @@ EXTRA_DIST = \
 	data/boxwall.tga \
 	data/caution.tga \
 	data/ground.tga \
+	data/lnkicon.png \
 	data/pyricon.png \
 	data/pyrwall.tga \
 	data/roof.tga \

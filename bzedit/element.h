@@ -6,8 +6,7 @@
 
 class Element {
   public:
-//    enum {BOX, PYRAMID, TELEPORTER, LINK, NONE} type;
-    enum {BOX, PYRAMID, TELEPORTER, NONE} type;
+    enum {BOX, PYRAMID, TELEPORTER, LINK, NONE} type;
     Box *b;
     Pyramid *p;
     Teleporter *t;
@@ -22,7 +21,15 @@ class Element {
     void makeBox();
     void makePyramid();
     void makeTeleporter();
+    void makeLink();
     void render(Camera &c, bool transparent);
+    float get_px();
+    float get_py();
+    float get_pz();
+    float get_angle();
+    float get_sx();
+    float get_sy();
+    float get_sz();
     friend ostream & operator << (ostream & dest, Element &src);
 };
 

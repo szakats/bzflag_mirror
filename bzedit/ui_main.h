@@ -29,6 +29,7 @@ gint importok(GtkWidget *button, GtkFileSelection *fsel);
 gint abox(GtkWidget *window, gpointer data);
 gint apyr(GtkWidget *window, gpointer data);
 gint atel(GtkWidget *window, gpointer data);
+gint alnk(GtkWidget *window, gpointer data);
 gint undo(GtkWidget *window, gpointer data);
 gint redo(GtkWidget *window, gpointer data);
 gint cut(GtkWidget *window, gpointer data);
@@ -48,6 +49,7 @@ gint chborder(GtkWidget *sbborder, gpointer data);
 gint chname(GtkWidget *enname, gpointer data);
 gint showlist(GtkWidget *window, gpointer data);
 gint testw(GtkWidget *button, gpointer data);
+gint linkok(GtkWidget *button, Element *link);
 
 static GnomeUIInfo file_menu[] = {
   GNOMEUIINFO_MENU_NEW_WINDOW_ITEM(MW::neww, NULL),
@@ -62,9 +64,10 @@ static GnomeUIInfo file_menu[] = {
   GNOMEUIINFO_END
 };
 static GnomeUIInfo eAdd_menu[] = {
-  GNOMEUIINFO_ITEM_STOCK("Box", "Add a box to the current world", MW::abox, GNOME_STOCK_MENU_BOOK_RED),
-  GNOMEUIINFO_ITEM_STOCK("Pyramid", "Add a pyramid to the current world", MW::apyr, GNOME_STOCK_MENU_BOOK_BLUE),
-  GNOMEUIINFO_ITEM_STOCK("Teleporter", "Add a teleporter to the current world", MW::atel, GNOME_STOCK_MENU_BOOK_YELLOW),
+  GNOMEUIINFO_ITEM_NONE("Box", "Add a box to the current world", MW::abox),
+  GNOMEUIINFO_ITEM_NONE("Pyramid", "Add a pyramid to the current world", MW::apyr),
+  GNOMEUIINFO_ITEM_NONE("Teleporter", "Add a teleporter to the current world", MW::atel),
+  GNOMEUIINFO_ITEM_NONE("Link", "Add a link to the current world", MW::alnk),
   GNOMEUIINFO_END
 };
 static GnomeUIInfo edit_menu[] = {
@@ -128,6 +131,7 @@ class MainWindow {
     void addEW(EditWindow *ew);
     void showList();
     void setWorld(World *world);
+    void showLinkWin(Element *link);
     World *getWorld();
     GtkWidget *getWindow();
     ListWindow &getListWindow();

@@ -441,7 +441,9 @@ ostream & operator << (ostream &dest, Teleporter &src) {
 
 Link::Link() {
   from = "";
+  from_side = 0;
   to = "";
+  to_side = 0;
 }
 
 Link::Link(const Link &r) {
@@ -456,24 +458,95 @@ Link Link::operator = (const Link &r) {
 }
 
 void Link::render(Camera &c, World *w) {
+  if(from == "" || to == "") {
+    return;
+  }
   Element fromE = w->getElementByName(from);
   Element toE = w->getElementByName(to);
+  if(fromE.type == Element::NONE || toE.type == Element::NONE)
+    return;
+  glDisable(GL_TEXTURE_2D);
+  glEnable(GL_COLOR_MATERIAL);
+
+  // in
+  glLoadIdentity();
+  c.setup();
+  glTranslatef(fromE.get_px(), fromE.get_py(), fromE.get_pz());
+  glRotatef(fromE.get_angle(), 0, 0, 1);
+  if(from_side == 1)
+    glRotatef(180, 0, 0, 1);
+  glColor3f(0.0, 1.0, 0.0);
+  glBegin(GL_TRIANGLES); {
+    // arrow head
+    glVertex3f(-fromE.get_sx() / 2 - 0.1, -8, fromE.get_sz() / 2);
+    glVertex3f(-fromE.get_sx() / 2 - 0.1, -4, fromE.get_sz() / 2 + 2);
+    glVertex3f(-fromE.get_sx() / 2 - 0.1, -4, fromE.get_sz() / 2 - 2);
+    // arrow tail
+    glVertex3f(-fromE.get_sx() / 2 - 0.1, -4, fromE.get_sz() / 2 - 1);
+    glVertex3f(-fromE.get_sx() / 2 - 0.1, -4, fromE.get_sz() / 2 + 1);
+    glVertex3f(-fromE.get_sx() / 2 - 0.1, 0,  fromE.get_sz() / 2 + 1);
+    glVertex3f(-fromE.get_sx() / 2 - 0.1, 0,  fromE.get_sz() / 2 + 1);
+    glVertex3f(-fromE.get_sx() / 2 - 0.1, 0,  fromE.get_sz() / 2 - 1);
+    glVertex3f(-fromE.get_sx() / 2 - 0.1, -4, fromE.get_sz() / 2 - 1);
+  } glEnd();
+
+  // out
+  glLoadIdentity();
+  c.setup();
+  glTranslatef(toE.get_px(), toE.get_py(), toE.get_pz());
+  glRotatef(toE.get_angle(), 0, 0, 1);
+  if(to_side == 1)
+    glRotatef(180, 0, 0, 1);
+  glColor3f(1.0, 0.0, 0.0);
+  glBegin(GL_TRIANGLES); {
+    // arrow head
+    glVertex3f(-toE.get_sx() / 2 - 0.1, -8, toE.get_sz() / 2);
+    glVertex3f(-toE.get_sx() / 2 - 0.1, -4, toE.get_sz() / 2 + 2);
+    glVertex3f(-toE.get_sx() / 2 - 0.1, -4, toE.get_sz() / 2 - 2);
+    // arrow tail
+    glVertex3f(-toE.get_sx() / 2 - 0.1, -4, toE.get_sz() / 2 - 1);
+    glVertex3f(-toE.get_sx() / 2 - 0.1, -4, toE.get_sz() / 2 + 1);
+    glVertex3f(-toE.get_sx() / 2 - 0.1, 0,  toE.get_sz() / 2 + 1);
+    glVertex3f(-toE.get_sx() / 2 - 0.1, 0,  toE.get_sz() / 2 + 1);
+    glVertex3f(-toE.get_sx() / 2 - 0.1, 0,  toE.get_sz() / 2 - 1);
+    glVertex3f(-toE.get_sx() / 2 - 0.1, -4, toE.get_sz() / 2 - 1);
+  } glEnd();
+
+  glColor3f(1.0, 1.0, 1.0);
+  glDisable(GL_COLOR_MATERIAL);
+  glEnable(GL_TEXTURE_2D);
 }
 
 void Link::set_from(string from) {
   this->from = from;
 }
 
+void Link::set_from_side(int from_side) {
+  this->from_side = from_side;
+}
+
 void Link::set_to(string to) {
   this->to = to;
+}
+
+void Link::set_to_side(int to_side) {
+  this->to_side = to_side;
 }
 
 string Link::get_from() {
   return from;
 }
 
+int Link::get_from_side() {
+  return from_side;
+}
+
 string Link::get_to() {
   return to;
+}
+
+int Link::get_to_side() {
+  return to_side;
 }
 
 ostream & operator << (ostream &dest, Link &src) {

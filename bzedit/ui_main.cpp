@@ -24,6 +24,7 @@ MainWindow::MainWindow() {
   gtk_object_set_data(GTK_OBJECT(MW::eAdd_menu[0].widget), "main_window", this);
   gtk_object_set_data(GTK_OBJECT(MW::eAdd_menu[1].widget), "main_window", this);
   gtk_object_set_data(GTK_OBJECT(MW::eAdd_menu[2].widget), "main_window", this);
+  gtk_object_set_data(GTK_OBJECT(MW::eAdd_menu[3].widget), "main_window", this);
   gtk_object_set_data(GTK_OBJECT(MW::edit_menu[0].widget), "main_window", this);
   gtk_object_set_data(GTK_OBJECT(MW::edit_menu[1].widget), "main_window", this);
   gtk_object_set_data(GTK_OBJECT(MW::edit_menu[3].widget), "main_window", this);
@@ -347,6 +348,42 @@ ListWindow &MainWindow::getListWindow() {
   return lw;
 }
 
+void MainWindow::showLinkWin(Element *link) {
+  GtkWidget *dialog, *ok, *cancel, *vbox, *hbox;
+  GtkWidget *sw1, *sw2, *clist1, *clist2;
+  gchar *titles[2] = {"Teleporter", "Side"};
+
+  dialog = gtk_dialog_new();
+  
+  sw1 = gtk_scrolled_window_new(NULL, NULL);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(sw1), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_widget_show(sw1);
+  clist1 = gtk_clist_new_with_titles(2, titles);
+  world->buildTeleporterList(clist1);
+  gtk_widget_show(clist1);
+  gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(sw1), clist1);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), sw1, TRUE, TRUE, 0);
+  sw2 = gtk_scrolled_window_new(NULL, NULL);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(sw2), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_widget_show(sw2);
+  clist2 = gtk_clist_new_with_titles(2, titles);
+  world->buildTeleporterList(clist2);
+  gtk_widget_show(clist2);
+  gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(sw2), clist2);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), sw2, TRUE, TRUE, 0);
+
+  ok = gnome_stock_button(GNOME_STOCK_BUTTON_OK);
+  gtk_widget_show(ok);
+  gtk_signal_connect(GTK_OBJECT(ok), "clicked", GTK_SIGNAL_FUNC(MW::linkok), link);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), ok, TRUE, TRUE, 0);
+  cancel = gnome_stock_button(GNOME_STOCK_BUTTON_CANCEL);
+  gtk_widget_show(cancel);
+  gtk_signal_connect_object(GTK_OBJECT(cancel), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), GTK_OBJECT(dialog));
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), cancel, TRUE, TRUE, 0);
+  gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+  gtk_widget_show(dialog);
+}
+
 namespace MW {
 
 gint quit(GtkWidget *window, gpointer data) {
@@ -495,8 +532,24 @@ gint atel(GtkWidget *window, gpointer data) {
   teleporter.selected = true;
   mainWin->getWorld()->uniqueName(teleporter);
   mainWin->getWorld()->push_back(teleporter);
-  mainWin->getWorld()->buildList(list);
   mainWin->update(MW::SPINVALUES | MW::LIST | MW::EDITWINS | MW::LIST);
+  return TRUE;
+}
+
+gint alnk(GtkWidget *window, gpointer data) {
+  MainWindow *mainWin = (MainWindow *) gtk_object_get_data(GTK_OBJECT(window), "main_window");
+  ListWindow &lw = mainWin->getListWindow();
+  GtkWidget *list = lw.getList();
+  Element link;
+  link.makeLink();
+  for(unsigned int i = 0; i < mainWin->getWorld()->size(); i++) {
+    (*(mainWin->getWorld()))[i].selected = false;
+  }
+  link.selected = true;
+  mainWin->getWorld()->uniqueName(link);
+  mainWin->getWorld()->push_back(link);
+  mainWin->update(MW::SPINVALUES | MW::LIST | MW::EDITWINS | MW::LIST);
+  mainWin->showLinkWin(&(*mainWin->getWorld())[mainWin->getWorld()->size() - 1]);
   return TRUE;
 }
 
@@ -695,6 +748,10 @@ gint testw(GtkWidget *button, gpointer data) {
   strcpy(filename, "/tmp/bzedit-XXXXXX");
   mktemp(filename);
   cout << "Writing world file to " << filename << "...\n";
+  return TRUE;
+}
+
+gint linkok(GtkWidget *button, Element *link) {
   return TRUE;
 }
 

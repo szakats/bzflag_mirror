@@ -9,9 +9,11 @@
 class World : public vector<Element> {
   public:
     World();
+    ~World();
     void render(Camera &c);
     void render_targets(Camera &c);
     void buildList(GtkWidget *clist);
+    void buildTeleporterList(GtkWidget *clist);
     void uniqueName(Element &el);
     bool load(char *filename);
     bool append(char *filename);
@@ -21,6 +23,7 @@ class World : public vector<Element> {
     GnomePixmap *boxicon;
     GnomePixmap *pyricon;
     GnomePixmap *telicon;
+    GnomePixmap *lnkicon;
     Ground ground;
     Walls walls;
 };
