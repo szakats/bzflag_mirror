@@ -27,6 +27,9 @@ CStdObjectInfoPanel::CStdObjectInfoPanel(CWnd* pParent /*=NULL*/)
 	m_fZRot = 0.0f;
 	m_fZScale = 0.0f;
 	m_fBorderValue = 0.0f;
+	m_bFlipZ = FALSE;
+	m_bShootThru = FALSE;
+	m_bDriveThru = FALSE;
 	//}}AFX_DATA_INIT
 
 	m_bShowBorder = false;
@@ -38,6 +41,9 @@ void CStdObjectInfoPanel::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CStdObjectInfoPanel)
+	DDX_Control(pDX, IDC_DRIVE_THRU, m_oDriveThruCB);
+	DDX_Control(pDX, IDC_SHOOT_THRU, m_oShootThruCB);
+	DDX_Control(pDX, IDC_FLIPZ, m_oFlipZCB);
 	DDX_Control(pDX, IDC_TEAM_LIST, m_cTeamList);
 	DDX_Control(pDX, IDC_TEAM_LABEL, m_cTeamLabel);
 	DDX_Control(pDX, IDC_BORDER_LABEL, m_oBorderLabel);
@@ -50,6 +56,9 @@ void CStdObjectInfoPanel::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_ZROT, m_fZRot);
 	DDX_Text(pDX, IDC_ZSCALE, m_fZScale);
 	DDX_Text(pDX, IDC_BORDER, m_fBorderValue);
+	DDX_Check(pDX, IDC_FLIPZ, m_bFlipZ);
+	DDX_Check(pDX, IDC_SHOOT_THRU, m_bShootThru);
+	DDX_Check(pDX, IDC_DRIVE_THRU, m_bDriveThru);
 	//}}AFX_DATA_MAP
 }
 

@@ -12,6 +12,9 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#include <io.h>
+#include <direct.h>
+
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
 
@@ -19,9 +22,8 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWnd)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	//{{AFX_MSG_MAP(CMainFrame)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-		//    DO NOT EDIT what you see in these blocks of generated code !
 	ON_WM_CREATE()
+	ON_WM_MENUSELECT()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -44,6 +46,14 @@ CMainFrame::CMainFrame()
 
 CMainFrame::~CMainFrame()
 {
+	std::vector<HMODULE>::iterator itr = m_vPluginHandles.begin();
+
+	while (itr != m_vPluginHandles.end())
+	{
+		FreeLibrary(*itr);
+		itr++;
+	}
+	m_vPluginHandles.clear();
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -104,6 +114,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	DockControlBar(&m_wndItemBar);//,AFX_IDW_DOCKBAR_TOP ,&rRect);
 
+	LoadPlugins();
 	return 0;
 }
 
@@ -136,3 +147,128 @@ void CMainFrame::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame message handlers
 
+void CMainFrame::LoadPlugins ( void )
+{
+	// load up all the plugins
+
+	char	szPath[512];
+	char	searchstr[512];
+	GetModuleFileName(AfxGetInstanceHandle(),szPath,512);
+
+	if (strrchr(szPath,'\\') != NULL)
+		*(strrchr(szPath,'\\')+1) = NULL;
+
+	strcat(szPath,"plugins\\");
+
+	strcpy(searchstr,szPath);
+	strcat(searchstr,"*.dll");
+	
+	m_vPluginHandles.clear();
+
+	struct _finddata_t fileInfo;
+	long	hFile;
+
+	char	FilePath[1024];
+
+	bool	bDone = false;
+
+	int		iFiles = 0;
+
+	hFile = _findfirst(searchstr,&fileInfo);
+
+	HMODULE		hLib;
+
+	CMenu* menu_bar = GetMenu();
+	if (!menu_bar)
+		return;
+
+	int iCount = menu_bar->GetMenuItemCount();
+	CMenu* pluginsMenu = menu_bar->GetSubMenu(3); 
+	if (!pluginsMenu)
+		return;
+
+	iCount = pluginsMenu->GetMenuItemCount();
+
+	int	iErr,(*lpProc)(char*);
+
+	if (hFile != -1)
+	{
+		while (!bDone)
+		{
+			if ( (strcmp(fileInfo.name,".") != 0) && (strcmp(fileInfo.name,"..") != 0))
+			{
+				if ( !(fileInfo.attrib & _A_SUBDIR ))
+				{
+					strcpy(FilePath,szPath);
+					strcat(FilePath,"\\");
+					strcat(FilePath,fileInfo.name);
+
+					hLib = LoadLibrary(FilePath);
+					if (hLib)
+					{
+						lpProc = (int (__cdecl *)(char*))GetProcAddress(hLib, "init_plugin");
+						if (lpProc)
+						{
+							char name[512];
+							iErr = lpProc(name);
+
+							if (iErr == 0)
+							{
+								pluginsMenu->InsertMenu(iFiles,MF_BYCOMMAND|MF_STRING,iFiles,name);
+								iFiles++;
+
+								m_vPluginHandles.push_back(hLib);
+							}
+						}
+					}
+				}
+				if (_findnext(hFile,&fileInfo) == -1)
+					bDone = true;
+			}
+		}
+	}
+}
+
+BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam) 
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+		if (HIWORD(wParam) ==0)
+		{
+			int iItem = LOWORD(wParam);
+
+			if (iItem < m_vPluginHandles.size())
+			{
+				int	iErr,(*lpProc)(void*);
+
+				lpProc = (int (__cdecl *)(void*))GetProcAddress(m_vPluginHandles[iItem], "run_plugin");
+				if (lpProc)
+				{
+					iErr = lpProc(NULL);
+				}
+			}
+		}
+	return CFrameWnd::OnCommand(wParam, lParam);
+}
+
+BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) 
+{
+	// TODO: Add your specialized code here and/or call the base class
+	
+	return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
+}
+
+void CMainFrame::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu) 
+{
+	if ((nFlags & MF_SYSMENU) || (nFlags & MF_POPUP)  )
+	{
+		CMenu	*pMenu = GetMenu()->GetSubMenu(3);
+		if (pMenu->GetSafeHmenu()== hSysMenu)
+		{
+			int i =10;
+
+			i++;
+		}
+	}
+	CFrameWnd::OnMenuSelect(nItemID, nFlags, hSysMenu);
+}

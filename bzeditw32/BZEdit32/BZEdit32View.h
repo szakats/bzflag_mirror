@@ -53,11 +53,13 @@ public:
 	public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 	protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -69,7 +71,6 @@ public:
 #endif
 
 protected:
-
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CBZEdit32View)
@@ -131,6 +132,7 @@ protected:
 	afx_msg void OnUpdateLinkButton(CCmdUI* pCmdUI);
 	afx_msg void OnBaseButton();
 	afx_msg void OnUpdateBaseButton(CCmdUI* pCmdUI);
+	afx_msg void OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

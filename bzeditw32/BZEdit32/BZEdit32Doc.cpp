@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "BZEdit32.h"
+#include "api.h"
 
 #include "BZEdit32Doc.h"
 #include "Objects.h"
@@ -13,6 +14,21 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+// API funks
+CWorld			*pTheWorld = NULL;
+CBZEdit32Doc	*pTheDoc = NULL;
+
+void SetTheWorld ( CWorld *pWorld )
+{
+	pTheWorld = pWorld;
+}
+
+void SetTheDoc ( CBZEdit32Doc *pDoc )
+{
+	pTheDoc = pDoc;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // CBZEdit32Doc
@@ -80,6 +96,10 @@ BOOL CBZEdit32Doc::OnNewDocument()
 
 	m_oWorld.SetTextureMan(&m_oTexMan);
 	m_oWorld.Init();
+
+	SetTheWorld ( &m_oWorld );
+	SetTheDoc ( this );
+
 	return TRUE;
 }
 
@@ -461,4 +481,208 @@ BOOL CBZEdit32Doc::SaveModified()
 		SetModifiedFlag(false);
 	}
 	return TRUE;//CDocument::SaveModified();
+}
+
+// API
+void UpdateWorld ( void )
+{
+	pTheDoc->UpdateAllViews(NULL);
+}
+
+void SetDocDirty ( void )
+{
+	pTheDoc->SetModifiedFlag(true);
+}
+
+int GetObjectCount ( void )
+{
+	return pTheWorld->Size();
+}
+
+int AddObject ( const char *szClass )
+{
+	return pTheWorld->AddObject(szClass);
+}
+
+int DupeObject ( int iID )
+{
+	return pTheWorld->DupeObject(iID);
+}
+
+void RemoveObject ( int iID )
+{
+	pTheWorld->RemoveObject(iID);
+}
+
+int GetSelectedObject ( void )
+{
+	return pTheWorld->GetSelItem();
+}
+
+bool GetObjectClass(  int iID, char *szClass )
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+	
+	strcpy(szClass,pObject->GetTypeName());
+	return true;
+}
+
+bool GetObjectName ( int iID, char *szName )
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+	
+	strcpy(szName,pObject->GetItemName());
+	return true;
+}
+
+bool GetObjectPos ( int iID, float *afPos )
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+	
+	afPos[0] = pObject->GetPos().x;
+	afPos[1] = pObject->GetPos().y;
+	afPos[2] = pObject->GetPos().z;
+	return true;
+}
+
+bool GetObjectRot ( int iID, float *pfRot )
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+	
+	pfRot[0] = pObject->GetRotAngle();
+	return true;
+}
+
+bool GetObjectScale ( int iID, float *afScale )
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+	
+	afScale[0] = pObject->GetScale().x;
+	afScale[1] = pObject->GetScale().y;
+	afScale[2] = pObject->GetScale().z;
+	return true;
+}
+
+bool SetObjectName ( int iID, char *szName )
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+	
+	pObject->SetItemName(szName);
+	return true;
+}
+
+bool SetObjectPos ( int iID, float *afPos )
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+	
+	pObject->SetXPos(afPos[0]);
+	pObject->SetYPos(afPos[1]);
+	pObject->SetZPos(afPos[2]);
+	return true;
+}
+
+bool SetObjectRot ( int iID, float fRot )
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+	
+	pObject->SetRotAngle(fRot);
+	return true;
+}
+
+bool SetObjectScale ( int iID, float *afScale )
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+	
+	pObject->SetXScale(afScale[0]);
+	pObject->SetXScale(afScale[1]);
+	pObject->SetXScale(afScale[2]);
+	return true;
+}
+
+bool ApplyObjectChanges ( int iID )
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+	pObject->Init();
+	return true;
+}
+
+bool GetObjectInfoI ( int iID, char *szLabel, int *data)
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+
+	pObject->GetItemInfo(szLabel,*data);
+	return true;
+}
+
+bool GetObjectInfoF ( int iID, char *szLabel, float *data)
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+
+	pObject->GetItemInfo(szLabel,*data);
+	return true;
+}
+
+bool GetObjectInfoS ( int iID, char *szLabel, char *data)
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+
+	pObject->GetItemInfo(szLabel,data);
+	return true;
+}
+
+
+bool SetObjectInfoI ( int iID, char *szLabel, int *data)
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+
+	pObject->SetItemInfo(szLabel,*data);
+	return true;
+}
+
+bool SetObjectInfoF ( int iID, char *szLabel, float *data)
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+
+	pObject->SetItemInfo(szLabel,*data);
+	return true;
+}
+
+bool SetObjectInfoS ( int iID, char *szLabel, char *data)
+{
+	CBaseObject *pObject = pTheWorld->GetObject(iID);
+	if (!pObject)
+		return false;
+
+	pObject->GetItemInfo(szLabel,data);
+	return true;
 }

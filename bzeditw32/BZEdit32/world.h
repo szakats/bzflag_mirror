@@ -11,8 +11,6 @@
 #include <string>
 #include <iostream.h>
 
-#include "TextureMngr.h"
-#include "Model.h"
 #include "3dtypes.h"
 
 //#include "objects.h"
@@ -24,6 +22,8 @@
 inline  bool operator < (const std::string &s1,const std::string &s2) { return (s1.compare(s2)<0);}
 
 class CWorld;
+class CTextureManager;
+class CModelManager;
 
 class CBaseObject
 {
@@ -147,6 +147,10 @@ protected:
     bool			m_bSelected;
 	int				m_iTypeID;
 	void			*m_pInterface;
+
+	bool			m_bDriveThru;
+	bool			m_bShootThru;
+	bool			m_bFlipZ;
 	
 	bool StdDataField ( char *data );
 

@@ -12,6 +12,9 @@
 #include "objects.h"
 #include "world.h"
 #include "StdObjectInfoPanel.h"
+#include "TextureMngr.h"
+#include "Model.h"
+
 
 // object case class
 CBaseObject::CBaseObject()
@@ -70,6 +73,10 @@ void CBaseObject::SetDefalutData ( void )
 
 	m_bVisible = true;
 	m_bSelected = false;
+
+	m_bDriveThru = false;
+	m_bShootThru = false;
+	m_bFlipZ = false;
 }
 
 bool CBaseObject::Init ( void )

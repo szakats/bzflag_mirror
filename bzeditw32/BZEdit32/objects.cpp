@@ -198,6 +198,11 @@ void Box::Write(ostream &stream)
 {
 	WriteStdData(stream);
 	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
+	if (m_bDriveThru)
+		stream << "	drivethrough" << endl;
+	if (m_bShootThru)
+		stream << "	shootthrough" << endl;
+
 	stream << "end" << endl;
 	stream << endl;
 }
@@ -207,7 +212,15 @@ void Box::Write( char *data )
 	char	szTemp[1024] = {0};
 
 	WriteStdData(data);
-	sprintf(szTemp,"\tsize %f %f %f\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z);
+	sprintf(szTemp,"\tsize %f %f %f\n",m_rScale.x,m_rScale.y,m_rScale.z);
+
+	if (m_bDriveThru)
+		sprintf(szTemp,"\tdrivethrough\n");
+	if (m_bShootThru)
+		sprintf(szTemp,"\tshootthrough\n");
+		
+	sprintf(szTemp,"end\n\n");
+
 	strcat(data,szTemp);
 }
 
@@ -310,6 +323,13 @@ void Pyramid::Write(ostream &stream)
 {
 	WriteStdData(stream);
 	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
+	if (m_bDriveThru)
+		stream << "	drivethrough" << endl;
+	if (m_bShootThru)
+		stream << "	shootthrough" << endl;
+	if (m_bFlipZ)
+		stream << "	flipZ" << endl;
+
 	stream << "end" << endl;
 	stream << endl;
 }

@@ -88,6 +88,9 @@
 #define IDC_TRANS_FRAME                 1074
 #define IDC_ROTATE                      1075
 #define IDC_TRANS_W_ROT                 1076
+#define IDC_DRIVE_THRU                  1077
+#define IDC_SHOOT_THRU                  1078
+#define IDC_FLIPZ                       1079
 #define IDC_Z_ROT_LABEL                 1080
 #define IDC_Z_ROT_TE                    1081
 #define ID_VIEW_GRID                    32771
@@ -131,6 +134,7 @@
 #define ID_BASE_BUTTON                  32815
 #define ID_UTILTY_DUPEANDFLIPX          32816
 #define ID_UTILTY_DUPEANDFLIPY          32817
+#define ID_PLUGINS_DUMMY                32818
 
 // Next default values for new objects
 // 
@@ -138,8 +142,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        147
-#define _APS_NEXT_COMMAND_VALUE         32818
-#define _APS_NEXT_CONTROL_VALUE         1077
+#define _APS_NEXT_COMMAND_VALUE         32819
+#define _APS_NEXT_CONTROL_VALUE         1080
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

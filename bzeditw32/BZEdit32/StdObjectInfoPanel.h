@@ -22,6 +22,9 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CStdObjectInfoPanel)
 	enum { IDD = IDD_STD_INFO_DLOG };
+	CButton	m_oDriveThruCB;
+	CButton	m_oShootThruCB;
+	CButton	m_oFlipZCB;
 	CComboBox	m_cTeamList;
 	CStatic	m_cTeamLabel;
 	CStatic	m_oBorderLabel;
@@ -34,6 +37,9 @@ public:
 	float	m_fZRot;
 	float	m_fZScale;
 	float	m_fBorderValue;
+	BOOL	m_bFlipZ;
+	BOOL	m_bShootThru;
+	BOOL	m_bDriveThru;
 	//}}AFX_DATA
 
 

@@ -80,6 +80,7 @@ BEGIN_MESSAGE_MAP(CBZEdit32View, CView)
 	ON_UPDATE_COMMAND_UI(ID_LINK_BUTTON, OnUpdateLinkButton)
 	ON_COMMAND(ID_BASE_BUTTON, OnBaseButton)
 	ON_UPDATE_COMMAND_UI(ID_BASE_BUTTON, OnUpdateBaseButton)
+	ON_WM_MENUSELECT()
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CView::OnFilePrint)
@@ -346,6 +347,9 @@ int CBZEdit32View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_oElemListDlog.Create(IDD_ELEMENT_LIST_DLOG,this);
 
 	m_bDrawGrid= true;
+
+//	LoadPlugins();
+	
 	return 0;	
 }
 
@@ -358,6 +362,7 @@ void CBZEdit32View::OnDestroy()
 		m_oElemListDlog.DestroyWindow();
 
 	m_oEngine.Kill();	
+
 
 	CView::OnDestroy();	
 }
@@ -1037,4 +1042,26 @@ void CBZEdit32View::OnBaseButton()
 void CBZEdit32View::OnUpdateBaseButton(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(GetDocument()->m_oWorld.GetFactory("Base") != NULL);	
+}
+
+BOOL CBZEdit32View::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) 
+{
+	// TODO: Add your specialized code here and/or call the base class
+	
+	return CView::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
+}
+
+BOOL CBZEdit32View::OnCommand(WPARAM wParam, LPARAM lParam) 
+{
+	// TODO: Add your specialized code here and/or call the base class
+	
+	return CView::OnCommand(wParam, lParam);
+}
+
+void CBZEdit32View::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu) 
+{
+	CView::OnMenuSelect(nItemID, nFlags, hSysMenu);
+	
+	// TODO: Add your message handler code here
+	
 }
