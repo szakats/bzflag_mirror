@@ -19,24 +19,36 @@ time = Animated.Timekeeper()
 spin = Animated.Value(0, Animated.Velocity(-180))
 
 def drawFrame():
+    # Gradient
+    glLoadIdentity()
+    glDisable(GL_TEXTURE_2D)
+    glBegin(GL_QUADS)
+    glColor3f(1,1,1)
+    glVertex2f(0,0)
+    glVertex2f(viewport.size[0],0)
+    glColor3f(0,0,0)
+    glVertex2f(viewport.size[0],viewport.size[1])
+    glVertex2f(0,viewport.size[1])
+    glEnd()
+
     glLoadIdentity()
     glTranslatef(0,viewport.size[1],0)
-
     glColor3f(1,1,1)
-    f.draw("Boing! This is the default size.\n")
+    f.draw("Boing! This is the default size. Alignment test:\n")
+    f.draw("WWWWWWWWWWWWWWWWWWWWWWWWWWWW\n")
+    f.draw("W   iiiii\n\n")
     glColor3f(1,1,0.5)
-    f.draw("This is size 50", 50)
+    f.draw("50 pixels high", 50)
 
     glLoadIdentity()
     glTranslatef(viewport.size[0]/2, viewport.size[1]/2, 0)
     glRotatef(spin.value, 0,0,1)
     spin.integrate(time.step())
-
     f.drawCentered("Spinny-widget")
 
     glLoadIdentity()
     glTranslatef(viewport.size[0]/2, viewport.size[1]/4, 0)
-
+    glColor3f(0,0,0)
     f.drawCentered("Not-so-spinny-widget",15)
 
 Util.showFrameRate(viewport)

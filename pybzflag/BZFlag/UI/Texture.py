@@ -47,10 +47,18 @@ class Texture:
         string = image.tostring('raw', 'RGBA', 0, -1)
         self.loadRaw(image.size, string, GL_RGBA)
 
-    def loadSurface(self, surface):
+    def loadSurface(self, surface, monochrome=False):
         """Load the texture from a pygame surface"""
-        string = pygame.image.tostring(surface, "RGB", True)
-        self.loadRaw(surface.get_size(), string, GL_RGB)
+        if monochrome:
+            # pygame doesn't support monochrome, so the fastest way
+            # appears to be using PIL to do the conversion.
+            string = pygame.image.tostring(surface, "RGB")
+            image = Image.fromstring("RGB", surface.get_size(), string).convert("L")
+            string = image.tostring('raw', 'L', 0, -1)
+            self.loadRaw(surface.get_size(), string, GL_LUMINANCE, GL_INTENSITY4)
+        else:
+            string = pygame.image.tostring(surface, "RGB", True)
+            self.loadRaw(surface.get_size(), string, GL_RGB)
 
     def loadRaw(self, size, string, format, components=3):
         """Load a raw image from the given string. 'format' is a constant such as

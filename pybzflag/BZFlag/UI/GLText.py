@@ -57,17 +57,21 @@ class Glyph:
         self.page.updateTexture()
         self.page.texture.bind()
 
+        # This offset ensures we draw to the center of pixels
+        # rather than having our texels split across two pixels.
+        offset = 0.25
+
         v = (self.size[0] * size / self.size[1], size)
         t = self.texCoords
         glBegin(GL_QUADS)
         glTexCoordf(t[0],t[1])
-        glVertex2f(0.5, 0.5 - v[1])
+        glVertex2f(offset, offset - v[1])
         glTexCoordf(t[0]+t[2],t[1])
-        glVertex2f(v[0] + 0.5, 0.5 - v[1])
+        glVertex2f(v[0] + offset, offset - v[1])
         glTexCoordf(t[0]+t[2],t[1]+t[3])
-        glVertex2f(v[0] + 0.5, 0.5)
+        glVertex2f(v[0] + offset, offset)
         glTexCoordf(t[0],t[1]+t[3])
-        glVertex2f(0.5, 0.5)
+        glVertex2f(offset, offset)
         glEnd()
         glTranslatef(v[0], 0, 0)
 
@@ -88,7 +92,11 @@ class FontPage:
         """If necessary, update the texture from the surface"""
         if not self.textureDirty:
             return
-        self.texture.loadSurface(self.surface)
+        self.texture.loadSurface(self.surface, monochrome=True)
+#        self.texture.loadFile("test.png")
+#        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+#        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+
         self.textureDirty = False
 
     def allocRect(self, size):
@@ -206,6 +214,7 @@ class Font:
         glDisable(GL_BLEND)
         glDisable(GL_COLOR_MATERIAL)
         glDisable(GL_DEPTH_TEST)
+        glEnable(GL_BLEND)
 
         rendered = self.findRendered(size)
         magnification = size / rendered.size
