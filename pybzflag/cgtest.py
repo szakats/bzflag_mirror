@@ -21,3 +21,21 @@ print 'LAST LISTING----%s----' % cgGetLastListing(context)
 print '---- PROGRAM BEGIN ----'
 print cgGetProgramString(program, CG_COMPILED_PROGRAM)
 print '---- PROGRAM END ----'
+
+cgGLLoadProgram(program)
+CheckCGError()
+
+Kd = cgGetNamedParameter(program, 'Kd')
+CheckCGError()
+
+modelViewProj = cgGetNamedParameter(program, 'ModelViewProj')
+CheckCGError()
+
+testColor = cgGetNamedParameter(program, 'IN.TestColor')
+CheckCGError()
+
+
+# do drawing loop
+
+cgDestroyProgram(program)
+cgDestroyContext(context)
