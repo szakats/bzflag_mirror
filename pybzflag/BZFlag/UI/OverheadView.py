@@ -104,10 +104,9 @@ def worldToImage(world, size, oversample=2, colors=colorScheme):
 
 class OverheadView:
     """Shows an overhead view of the BZFlag game, renderable to a pygame
-       surface. Note that this observes the game state rather than the
+       viewport. Note that this observes the game state rather than the
        client, so it should be usable on either client or server side.
        """
-
     def __init__(self, game, viewport):
         self.game = game
         self.viewport = viewport
