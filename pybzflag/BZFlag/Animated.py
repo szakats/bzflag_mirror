@@ -25,7 +25,6 @@ physical models or other formulas.
 
 from __future__ import division
 import time, math
-from BZFlag import Noise
 from Numeric import *
 
 
@@ -318,6 +317,7 @@ class PerlinNoise:
        natural-looking noise in up to 3 dimensions.
        """
     def __init__(self, amplitude=1, frequency=1, offset=0, octaves=3, persistence=0.5, seed=0):
+        from BZFlag import Noise
         self.amplitude = amplitude
         self.frequency = frequency
         self.offset = offset

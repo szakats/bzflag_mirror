@@ -18,19 +18,20 @@ Python 2.2 or later is required. There are several recent python features used
 by PyBZFlag, but the most notable is that nested scopes are used extensively
 in its event handling system and HUD layout.
 
-The core PyBZFlag modules only require the python standard library.
-However, most of the graphical code requires pygame (http://pygame.org)
-and the Python Imaging Library (http://www.pythonware.com/products/pil/)
-3D views require PyOpenGL (http://pyopengl.sourceforge.net/)
+PyBZFlag uses the Numeric module extensively to perform the fast calculations
+necessary for real-time 3D graphics and game state updates, and is required for
+nearly all applications of PyBZFlag.
 
-The list of available UI modules in --help will reflect the dependencies
-currently installed.
+The graphical PyBZFlag modules all require pygame (http://pygame.org) and the
+Python Imaging Library (http://pythonware.com/products/pil/)
+
+The 3D modules require PyOpenGL (http://pyopengl.sourceforge.net) and the
+RandomArray companion module to Numeric.
 
 -- Contacts
 
-This was mostly written by Micah Dowty <micah@picogui.org>.
-Also try the #bzflag IRC channel on irc.freenode.net, Micah is
-usually there as "scanline".
+There is no web site, mailing list, or IRC channel for this project yet.
+See the AUTHORS file for information about the people responsible.
 
 --- The End ---
 
