@@ -2,24 +2,24 @@
 
 A 2D overhead view of the game, implemented using pygame.
 """
-# 
+#
 # Python BZFlag Protocol Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
-# 
+#
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2.1 of the License, or (at your option) any later version.
-#  
+#
 #  This library is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-# 
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
 
 import pygame, math
 from pygame.locals import *
@@ -36,7 +36,7 @@ class OverheadView:
         'Teleporter': '#FFFF80',
         'player':     'white',
       }
-    
+
     def __init__(self, game):
         self.game = game
         self.cachedWorld = None
@@ -52,7 +52,7 @@ class OverheadView:
         for key in self.colorScheme:
             convertedColors[key] = pygame.color.Color(self.colorScheme[key])
         self.colorScheme = convertedColors
-        
+
     def worldToView(self, point):
         """Convert world coordinates to view coordinates in pixels"""
         return ((point[0] / self.game.world.size[0] + 0.5) * self.size[0],
@@ -63,15 +63,15 @@ class OverheadView:
            So far this will only return quadrilaterals.
            """
         # Create four vertices from the object's extents
-        poly = ((object.center[0] - object.size[0]/2,
-                 object.center[1] - object.size[1]/2),
-                (object.center[0] + object.size[0]/2,
-                 object.center[1] - object.size[1]/2),
-                (object.center[0] + object.size[0]/2,
-                 object.center[1] + object.size[1]/2),
-                (object.center[0] - object.size[0]/2,
-                 object.center[1] + object.size[1]/2))
-        
+        poly = ((object.center[0] - object.size[0],
+                 object.center[1] - object.size[1]),
+                (object.center[0] + object.size[0],
+                 object.center[1] - object.size[1]),
+                (object.center[0] + object.size[0],
+                 object.center[1] + object.size[1]),
+                (object.center[0] - object.size[0],
+                 object.center[1] + object.size[1]))
+
         # Rotate the polygon by the object's angle
         cos = math.cos(object.angle)
         sin = math.sin(object.angle)
@@ -125,7 +125,7 @@ def simpleClient(client, size=(600,600), viewClass=OverheadView):
        consisting only of an OverheadView.
        """
     import time
-    
+
     # Update the view regularly
     global lastUpdate
     lastUpdate = None
@@ -137,7 +137,7 @@ def simpleClient(client, size=(600,600), viewClass=OverheadView):
             if lastUpdate:
                 client.game.integrate(time.time() - lastUpdate)
             lastUpdate = now
-            
+
             view.render(screen)
             pygame.display.flip()
 
@@ -157,7 +157,5 @@ def simpleClient(client, size=(600,600), viewClass=OverheadView):
             view = OverheadView(client.game)
             updateView()
     client.onLoadWorld.observe(initPygame)
-    
+
 ### The End ###
-        
-    
