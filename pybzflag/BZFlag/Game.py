@@ -99,7 +99,7 @@ class Game:
         info.maxPlayerScore = 0
         info.maxTeamScore   = 0
         info.maxTime        = 0
-        
+
         info.rogueCount  = 0
         info.redCount    = 0
         info.greenCount  = 0
@@ -111,7 +111,5 @@ class Game:
         info.blueMax     = 20
         info.purpleMax   = 20
         return info
-
-    
 
 ### The End ###

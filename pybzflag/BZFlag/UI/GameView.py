@@ -63,10 +63,10 @@ class Setup:
         self.logo = HUD.Text(self.viewport.region(remaining), BZFlag.name,
                              shadow=True, color=(1,1,0,1), fontSize=35)
 
-    def setupFrame():
-        hudSize.integrate(time.step())
+    def setupFrame(self):
+        self.hudSize.integrate(self.time.step())
 
-    def keyDown(event):
+    def keyDown(self, event):
         if event.unicode == " ":
             if hudSize.f.target == fullHudSize:
                 hudSize.f.target = 0
