@@ -158,16 +158,17 @@ class EventLoop:
         self.nextTimerActivation = None
         self.selectDict = {}
 
+    def updateSelectDict(self):
+        """Make a dictionary for quickly detecting which socket has activity"""
+        self.selectDict = {}
+        for socket in self.sockets:
+            selectable = socket.getSelectable()
+            self.selectDict[selectable] = socket
+
     def add(self, item):
         if isinstance(item, Network.Socket):
             self.sockets.append(item)
-
-            # Make a dictionary for quickly detecting which socket has activity
-            self.selectDict = {}
-            for socket in self.sockets:
-                selectable = socket.getSelectable()
-                self.selectDict[selectable] = socket
-            
+            self.updateSelectDict()
         elif isinstance(item, Timer):
             self.timers.append(item)
             item.setEventLoop(self)
@@ -179,8 +180,10 @@ class EventLoop:
     def remove(self, item):
         if isinstance(item, Network.Socket):
             self.sockets.remove(item)
+            self.updateSelectDict()
         elif isinstance(item, Timer):
             self.timers.remove(item)
+            self.updateNextTimerActivation()
         else:
             raise TypeError("Only Sockets and Timers are supported by this event loop")
 

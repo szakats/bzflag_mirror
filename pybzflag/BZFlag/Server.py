@@ -72,7 +72,7 @@ class BaseServer(Network.Endpoint):
         clientSocket.id = clientId
         self.clients[clientId] = clientSocket
         hello = self.outgoing.HelloPacket(version = BZFlag.protocolVersion,
-                                          clientId = self.getNewClientID())
+                                          clientId = clientId)
         self.eventLoop.add(clientSocket)
         clientSocket.setBlocking(0)
         clientSocket.handler = self.handleMessage
