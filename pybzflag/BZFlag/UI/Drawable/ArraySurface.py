@@ -126,5 +126,4 @@ class ArraySurface(GLDrawable):
         glEnable(GL_CULL_FACE)
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0)
 
-
 ### The End ###
