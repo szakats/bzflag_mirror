@@ -25,8 +25,10 @@ from OpenGL.GL import *
 
 class Ground(DisplayList):
     textureName = 'ground.png'
-    def drawToList(self, size):
+    def set(self, size):
         self.size = size / 2
+
+    def drawToList(self):
         glPushMatrix()
         glDisable(GL_CULL_FACE)
         glBegin(GL_QUADS)

@@ -24,7 +24,7 @@ A 3d scene renderer similar to BZFlag proper
 import pygame, BZFlag
 from pygame.locals import *
 from BZFlag.World import WorldObjects
-from BZFlag.UI import Texture
+from BZFlag.UI import Texture, Drawable
 from BZFlag import Event, Animated
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -102,6 +102,27 @@ class Light:
         glEnable(self.lightnum)
 
 
+class TextureGroup(Drawable.DisplayList):
+    """A container for all the objects drawn in the same texture, compiled
+       into a display list for speedy rendering of static worlds.
+       """
+    def __init__(self, drawables=[]):
+        self.drawables = drawables
+        Drawable.DisplayList.__init__(self)
+
+    def init(self):
+        """Don't rebuild the list on init"""
+        pass
+    
+    def drawToList(self):
+        for drawable in self.drawables:
+            print drawable
+            if hasattr(drawable, 'drawToList'):
+                drawable.drawToList()
+            else:
+                drawable.draw()
+
+            
 class Scene:
     """Set of all the objects this view sees, organized into rendering passes
        and sorted by texture. Multiple rendering passes are necessary to deal
@@ -131,14 +152,29 @@ class Scene:
             for drawable in drawables:
                 if drawable.blended:
                     if self.passes[1].has_key(drawable.texture):
-                        self.passes[1][drawable.texture].append(drawable.draw)
+                        self.passes[1][drawable.texture].drawables.append(drawable)
                     else:
-                        self.passes[1][drawable.texture] = [drawable.draw]
+                        self.passes[1][drawable.texture] = TextureGroup([drawable])
                 else:
                     if self.passes[0].has_key(drawable.texture):
-                        self.passes[0][drawable.texture].append(drawable.draw)
+                        self.passes[0][drawable.texture].drawables.append(drawable)
                     else:
-                        self.passes[0][drawable.texture] = [drawable.draw]
+                        self.passes[0][drawable.texture] = TextureGroup([drawable])
+        for p in self.passes:
+            for texgroup in p.values():
+                texgroup.buildList()
+                
+    def renderPass(self, p):
+        """Perform one render pass- iterates through each texture group in the pass,
+           binding the pass' texture and drawing the texture group.
+           """
+        for (texture, group) in p.items():
+            if texture is None:
+                glDisable(GL_TEXTURE_2D)
+            else:
+                glEnable(GL_TEXTURE_2D)
+                texture.bind()
+            group.draw()
 
     def render(self):
         """Render the scene to the current OpenGL context"""
@@ -151,21 +187,9 @@ class Scene:
         glDisable(GL_LINE_SMOOTH)
         glColor4f(1,1,1,1)
 
-        for texture in self.passes[0].keys():
-            glDisable(GL_TEXTURE_2D)
-            if texture != None:
-                glEnable(GL_TEXTURE_2D)
-                texture.bind()
-            for drawFunc in self.passes[0][texture]:
-                drawFunc()
+        self.renderPass(self.passes[0])
         glEnable(GL_BLEND)
-        for texture in self.passes[1].keys():
-            glDisable(GL_TEXTURE_2D)
-            if texture != None:
-                glEnable(GL_TEXTURE_2D)
-                texture.bind()
-            for drawFunc in self.passes[1][texture]:
-                drawFunc()
+        self.renderPass(self.passes[0])
 
 
 class ThreeDView:

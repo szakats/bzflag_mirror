@@ -25,10 +25,12 @@ from OpenGL.GL import *
 
 class BoxSides(DisplayList):
     textureName = 'boxwall.png'
-    def drawToList(self, center, angle, size):
+    def set(self, center, angle, size):
         self.center = center
         self.angle = angle
         self.size = size
+
+    def drawToList(self):
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -79,10 +81,12 @@ class BoxSides(DisplayList):
 
 class BoxTops(DisplayList):
     textureName = 'boxtops.png'
-    def drawToList(self, center, angle, size):
+    def set(self, center, angle, size):
         self.center = center
         self.angle = angle
         self.size = size
+
+    def drawToList(self):
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)

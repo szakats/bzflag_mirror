@@ -25,11 +25,13 @@ from OpenGL.GL import *
 
 
 class BaseTops(DisplayList):
-    def drawToList(self, team, center, angle, size):
+    def set(self, team, center, angle, size):
         self.team = team
         self.center = center
         self.angle = angle
         self.size = size
+
+    def drawToList(self):
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)

@@ -28,24 +28,32 @@ class DisplayList(GLDrawable):
     def __init__(self, *args, **kw):
         GLDrawable.__init__(self)
         self.list = glGenLists(1)
-        self.init(*args, **kw)
+        self.set(*args, **kw)
+        self.init()
 
-    def init(self, *args, **kw):
+    def set(self):
+        """Subclasses should use this to change the drawable's state.
+           It is called before init(), with the same parameters the class
+           was constructed with.
+           """
+        pass
+
+    def init(self):
         """Called on init after setting up the display list. By default this
            builds the display lists, but this hook lets subclasses override that.
            """
-        self.buildList(*args, **kw)
+        self.buildList()
 
     def __del__(self):
-        if hasattr(self, 'list'):
+        try:
             glDeleteLists(self.list, 1)
+        except:
+            pass
 
-    def buildList(self, *args, **kw):
-        """Rebuild this object's display list. Arguments depend on the
-           subclass' drawToList mehtod's arguments.
-           """
+    def buildList(self):
+        """Rebuild this object's display list."""
         glNewList(self.list, GL_COMPILE)
-        self.drawToList(*args, **kw)
+        self.drawToList()
         glEndList()
 
     def drawToList(self):

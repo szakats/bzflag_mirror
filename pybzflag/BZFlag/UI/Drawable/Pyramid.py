@@ -31,20 +31,21 @@ def cross(a, b):
 
 class Pyramid(DisplayList):
     textureName = 'pyrwall.png'
-    def drawToList(self, center, angle, size, flip):
-        # FIXME - respect flipz
+    def set(self, center, angle, size, flip):
         self.center = center
         self.angle = angle
         self.size = size
         self.flip = flip
+
+    def drawToList(self):
         z = 0
         z2 = self.size[2]
-        if flip:
+        if self.flip:
             z = self.size[2]
             z2 = 0
         glPushMatrix()
         glTranslatef(*self.center)
-        if flip:
+        if self.flip:
             glFrontFace(GL_CW)
             glTranslatef(0, 0, -self.size[2])
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -98,7 +99,7 @@ class Pyramid(DisplayList):
         glTexCoord2f(self.size[1] / 2, 0)
         glVertex3f(-self.size[0], self.size[1], z)
         glEnd()
-        if flip:
+        if self.flip:
             glFrontFace(GL_CCW)
         glPopMatrix()
 

@@ -25,11 +25,13 @@ from OpenGL.GL import *
 
 
 class TeleporterField(DisplayList):
-    def drawToList(self, center, angle, size):
+    def set(self, center, angle, size):
         self.center = center
         self.angle = angle
         self.size = size
         self.blended = True
+
+    def drawToList(self, center, angle, size):
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -56,11 +58,13 @@ class TeleporterField(DisplayList):
 
 class TeleporterBorder(DisplayList):
     textureName = 'caution.png'
-    def drawToList(self, center, angle, size, border):
+    def set(self, center, angle, size, border):
         self.center = center
         self.angle = angle
         self.size = size
         self.border = border
+
+    def drawToList(self):
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -187,6 +191,5 @@ class TeleporterBorder(DisplayList):
         glVertex3f(self.border / 2, -self.size[1] - self.border, 0);
         glEnd()
         glPopMatrix()
-
 
 ### The End ###
