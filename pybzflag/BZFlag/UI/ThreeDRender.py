@@ -137,6 +137,24 @@ class TextureGroup(Drawable.DisplayList):
                 drawable.draw()
 
 
+class PickingState:
+    """Holds render state information specific to picking. This is passed
+       to render passes when doing a picking render, so the passes can tag
+       all their objects with names.
+       """
+    def __init__(self):
+        self.nextName = 1
+        self.names = {}
+
+    def name(self, drawable):
+        """Move to the next OpenGL name ID, and associate it with the
+           given drawable object.
+           """
+        self.names[self.nextName] = drawable
+        glLoadName(self.nextName)
+        self.nextName += 1
+
+
 class RenderPass:
     """A rendering pass defines the highest level of grouping for drawables.
        Rendering passes should separate blended and unblended objects, or
@@ -149,7 +167,10 @@ class RenderPass:
     def __init__(self):
         self.erase()
 
-    def render(self, names = None, curname = None):
+    def render(self, picking=None):
+        """Run this rendering pass- if picking is not none, this is a picking render
+           and all objects shoudl be given names.
+           """
         pass
 
     def filter(self, drawable):
@@ -199,11 +220,16 @@ class BasicRenderPass(RenderPass):
         for texgroup in self.textureGroups.itervalues():
             texgroup.buildList()
 
-    def render(self, names = None, curname = None):
+    def render(self, picking=None):
         """Perform one render pass- iterates through each texture group in the pass,
            binding the pass' texture and drawing the texture group.
            """
-        if names == None:
+        if picking:
+            for (texture, group) in self.textureGroups.iteritems():
+                for drawable in group.drawables:
+                    picking.name(drawable)
+                    drawable.draw()
+        else:
             for (texture, group) in self.textureGroups.iteritems():
                 if texture is None:
                     glDisable(GL_TEXTURE_2D)
@@ -211,13 +237,6 @@ class BasicRenderPass(RenderPass):
                     glEnable(GL_TEXTURE_2D)
                     texture.bind()
                 group.draw()
-        else:
-            for (texture, group) in self.textureGroups.iteritems():
-                for drawable in group.drawables:
-                    names[curname] = drawable
-                    glLoadName(curname)
-                    drawable.draw()
-                    curname += 1
 
 
 class BlendedRenderPass(BasicRenderPass):
@@ -228,9 +247,9 @@ class BlendedRenderPass(BasicRenderPass):
     def filter(self, drawable):
         return drawable.blended
 
-    def render(self, names = None, curname = None):
+    def render(self, picking=None):
         glEnable(GL_BLEND)
-        BasicRenderPass.render(self, names, curname)
+        BasicRenderPass.render(self, picking)
         glDisable(GL_BLEND)
 
 
@@ -242,9 +261,9 @@ class OverlayRenderPass(BasicRenderPass):
     def filter(self, drawable):
         return drawable.overlay
 
-    def render(self, names = None, curname = None):
+    def render(self, picking=None):
         glClear(GL_DEPTH_BUFFER_BIT)
-        BasicRenderPass.render(self, names, curname)
+        BasicRenderPass.render(self, picking)
 
 
 class Scene:
@@ -324,10 +343,9 @@ class Scene:
         viewport.setProjectionMatrix()
         glMatrixMode(GL_MODELVIEW)
 
-        names = {}
-        curname = 1
+        picking = PickingState()
         for rpass in self.passes:
-            rpass.render(names, curname)
+            rpass.render(picking)
 
         glMatrixMode(GL_PROJECTION)
         glPopMatrix()
@@ -341,7 +359,7 @@ class Scene:
                 if hit[1] < depth:
                     depth = hit[1]
                     choose = hit[2]
-            return names[choose[0]].object
+            return picking.names[choose[0]].object
         return None
 
 class View:
