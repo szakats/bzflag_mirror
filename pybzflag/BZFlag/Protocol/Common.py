@@ -245,6 +245,18 @@ class MsgShotEnd(Message):
         StructEntry(UInt16,   'reason'),
         ]
 
+class MsgSetTTL(Message):
+    messageId = 0x7474
+    entries = [
+        StructEntry(UInt16, 'ttl'),
+        ]
+
+class MsgUDPLinkRequest(Message):
+    messageId = 0x6f66
+    entries = [
+        StructEntry(UInt16, 'port'),
+        ]
+
 
 class FlagNegotiationID(Struct):
     entries = [

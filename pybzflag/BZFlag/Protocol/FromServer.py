@@ -178,16 +178,12 @@ class MsgScore(Common.Message):
         StructEntry(UInt16,          'teamKills'),
         ]
 
-class MsgSetTTL(Common.Message):
-    messageId = 0x7474
-    entries = [
-        StructEntry(UInt16, 'ttl'),
-        ]
 
-
+MsgUDPLinkRequest = Common.MsgUDPLinkRequest
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgShotBegin = Common.MsgShotBegin
 MsgShotEnd = Common.MsgShotEnd
 MsgPlayerUpdate = Common.MsgPlayerUpdate
+MsgSetTTL = Common.MsgSetTTL
 
 ### The End ###

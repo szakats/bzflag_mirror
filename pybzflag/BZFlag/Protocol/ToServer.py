@@ -101,9 +101,16 @@ class MsgDropFlag(Common.Message):
         StructEntry(Common.Vector3, 'position'),
         ]
 
+class MsgUDPLinkEstablished(Common.Message):
+    messageId = 0x6f67
+    entries = [
+        StructEntry(UInt16, 'queueUpdate'),
+        ]
 
+MsgUDPLinkRequest = Common.MsgUDPLinkRequest
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgShotBegin = Common.MsgShotBegin
 MsgPlayerUpdate = Common.MsgPlayerUpdate
+MsgSetTTL = Common.MsgSetTTL
 
 ### The End ###

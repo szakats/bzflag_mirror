@@ -193,7 +193,8 @@ class Socket:
         try:
             msgClass = Common.getMessageDict(msgModule)[header.id]
         except KeyError:
-            raise Errors.ProtocolWarning("Received unknown message type 0x%04X" % header.id)
+            raise Errors.ProtocolWarning("Received %s byte message with unknown type 0x%04X in %s" %
+                                         (header.length, header.id, msgModule.__name__))
         return msgClass(str(header) + body)
 
 
