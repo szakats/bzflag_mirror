@@ -28,12 +28,35 @@ that it only ever be invoked once per frame, it might be a good cantidate to go 
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from PygameViewport import PygameViewport
+from Pygame import PygameViewport
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from BZFlag.UI import GLExtension
 from BZFlag import Event
 import pygame, copy
+
+
+class ViewportMode:
+    """Abstract base class for a mode that affects the rendering
+       initialization and completion of an entire viewport.
+       """
+    def setupFrame(self):
+        """Called during the viewport's onSetupFrame event"""
+        pass
+
+    def finishFrame(self):
+        """Called during the viewport's onFinishFrame event, before the page flip"""
+        pass
+
+
+class ClearedMode(ViewportMode):
+    """A viewport mode in which the color buffer is cleared each frame"""
+    def __init__(self, clearColor=(0,0,0,1)):
+        glClearColor(*clearColor)
+
+    def setupFrame(self):
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        
 
 
 class OpenGLViewport(PygameViewport):
@@ -47,9 +70,10 @@ class OpenGLViewport(PygameViewport):
         self.fov         = 45.0
         self.rectExp     = [0,0] + list(self.size)  # A function or list specifying our relative viewport
         self.rect        = self.rectExp             # Our absolute viewport
+        self.clearColor  = (0,0,0,1)
+
         self.wireframe   = False
         self.wireframeClearColor = (0.5, 0.5, 0.5, 1)
-        self.clearColor  = (0,0,0,1)
 
         # Set up some common OpenGL defaults
         glClearDepth(1.0)
