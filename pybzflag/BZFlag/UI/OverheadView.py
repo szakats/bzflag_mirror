@@ -35,7 +35,7 @@ class OverheadView:
         'Pyramid':    '#1b8de3',
         'Teleporter': '#FFFF80',
         'player':     'white',
-        'flag':       'green',
+        'flag':       'white',
       }
 
     def __init__(self, game):
@@ -118,6 +118,8 @@ class OverheadView:
         color = self.colorScheme['player']
         for player in self.game.players.values():
             if 'alive' in player.status:
+                # Draw a circle with black background and colored outline,
+                # with a line indicating the tank's current heading.
                 pos = self.worldToView(player.motion.position)
                 height = player.motion.position[2]
                 if height < 0:
@@ -133,8 +135,11 @@ class OverheadView:
         color = self.colorScheme['flag']
         for flag in self.game.flags.values():
             if 'onGround' == flag.status:
+                # Draw a little cross
+                radius = 2
                 pos = self.worldToView(flag.motion.position)
-                pygame.draw.circle(surface, color, pos, 3, 1)
+                pygame.draw.line(surface, color, (pos[0]-radius, pos[1]), (pos[0]+radius, pos[1]))
+                pygame.draw.line(surface, color, (pos[0], pos[1]-radius), (pos[0], pos[1]+radius))
 
     def renderShots(self, surface):
         pass
