@@ -4,7 +4,7 @@
 #
 from BZFlag.Game import Game
 from BZFlag.UI import OverheadView
-from BZFlag.Network import EventLoop
+from BZFlag.Event import EventLoop
 import sys
 
 game = Game()
