@@ -37,7 +37,7 @@ def showMessage(msg):
         return
     if options['show'] and not name in options['show']:
         return
-    Util.messageDump(msg, sys.stdout, not options['names'])
+    msg.dump(sys.stdout, not options['names'])
 server.onAnyMessage.observe(showMessage)
 client.onAnyMessage.observe(showMessage)
 

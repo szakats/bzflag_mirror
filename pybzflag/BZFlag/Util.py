@@ -77,68 +77,6 @@ def hexDump(src, dest, bytesPerLine=16, wordSize=2):
         dest.write("\n")
 
 
-def messageDump(msg, f, showContents=True, keyColumnWidth=25):
-    """Dump a message in human readable form to the stream 'f'."""
-    from BZFlag import Protocol
-    from StringIO import StringIO
-
-    name = msg.__class__.__name__
-
-    # If the message was received with Network.Socket.readMessage,
-    # we can determine where it came from by its fromModule attribute
-    direction = ''
-    try:
-        from BZFlag.Protocol import FromServer, ToServer
-        if msg.fromModule == ToServer:
-            direction = "-->"
-        elif msg.fromModule == FromServer:
-            direction = "<--"
-    except AttributeError:
-        pass
-
-    f.write("%s %s\n" % (direction, name))
-    if not showContents:
-        return
-
-    # Attributes for us to ignore. These are generally things we annotate the message
-    # with later. Note that this isn't a list of all such annotations- most notably,
-    # 'protocol' is omitted since it's very useful to have in message dumps.
-    ignoreList = ('eventLoop', 'socket', 'header', 'fromModule', 'fromAddress', 'client')
-    
-    # Recursively build a list of (key,value) tuples that will be displayed
-    # to represent a message. This handles traversing into substructures
-    # like FlagUpdate.
-    def buildKeys(object, prefix=""):
-        keys = object.__dict__.keys()
-        keys.sort()
-        lst = []
-        for key in keys:
-            if key[0] != '_' and not key in ignoreList:
-                value = object.__dict__[key]
-                if isinstance(value, Protocol.Struct):
-                    lst.extend(buildKeys(value, prefix + key + "."))
-                else:
-                    lst.append((prefix + key, value))
-        return lst
-
-    for (key, value) in buildKeys(msg):
-        if key == 'data':
-            # Special decoding for 'data' members- do a hex dump
-            d = StringIO()
-            hexDump(StringIO(value), d)
-            value = ("%d bytes\n" % len(value)) + d.getvalue()
-        else:
-            # Let python decode everything else
-            value = repr(value)
-                
-        # Handle printing multiline values properly
-        lines = value.split("\n")
-        print ("%%%ss: %%s" % keyColumnWidth) % (key, lines[0])
-        for line in lines[1:]:
-            if line:
-                f.write(" " * (keyColumnWidth + 2) + line + "\n")
-
-
 def proxy(server, client):
     """Set up a proxy between the server and client.
        Currently this only works correctly when there is one client
