@@ -19,5 +19,5 @@ def message(msg):
     print "<%s> %s" % (msg.fromId, msg.message)
 client.onMsgMessage.observe(message)
 
-ui.attach(client.game, client.eventLoop)
+ui = ui.Setup(client.game, client.eventLoop)
 client.run()

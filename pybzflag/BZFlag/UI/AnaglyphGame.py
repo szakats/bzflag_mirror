@@ -37,11 +37,11 @@ class AnaglyphGame(AnaglyphView):
         viewport.onDrawFrame.observe(game.update)
 
 
-def attach(game, eventLoop):
-    from BZFlag.UI import Viewport, ThreeDControl
-    viewport = Viewport.OpenGLViewport(eventLoop, (800, 600))
-    view = AnaglyphGame(game, viewport)
-    ThreeDControl.Viewing(view, viewport)
-    return viewport
+class Setup:
+    def __init__(self, game, eventLoop):
+        from BZFlag.UI import Viewport, ThreeDControl
+        self.viewport = Viewport.OpenGLViewport(eventLoop, (800, 600))
+        self.view = AnaglyphGame(game, self.viewport)
+        self.control = ThreeDControl.Viewing(self.view, self.viewport)
 
 ### The End ###

@@ -40,13 +40,13 @@ def find(name):
     return __import__(nameMap[name], globals(), locals())
 
 
-def attach(name, *args, **kw):
+def Setup(name, *args, **kw):
     """Attach a UI to a game state and event loop, given the UI's name
        followed by the parameters normally passed to its attach method.
        """
     if name:
         module = find(name)
-        return module.attach(*args, **kw)
+        return module.Setup(*args, **kw)
 
 
 def list():
@@ -57,9 +57,10 @@ def list():
 class Any:
     """A helper class for implementing optional UIs in command line
        apps. This class can be handed to CommandLine.Parse(), and the
-       UI will automatically be added to the command line. This class'
-       attach() method can then be called, and if the UI was enabled
-       on the command line, the proper one will attach.
+       UI will automatically be added to the command line.
+       Whichever UI is selected on the command line then will have its
+       Setup class instantiated, attaching it to the current game state
+       and event loop.
        """
     def __init__(self):
         self.options = {
@@ -69,7 +70,7 @@ class Any:
     def setOptions(self, **options):
         self.options.update(options)
 
-    def attach(self, *args, **kw):
-        return attach(self.options['ui'], *args, **kw)
+    def Setup(self, *args, **kw):
+        return Setup(self.options['ui'], *args, **kw)
 
 ### The End ###

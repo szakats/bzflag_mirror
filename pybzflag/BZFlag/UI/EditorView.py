@@ -25,6 +25,7 @@ and ThreeDControl.Editing.
 from BZFlag.UI import Viewport, ThreeDView, ThreeDControl
 from BZFlag.UI.Drawable import TestWidget
 
+
 class Widgetness:
     def __init__(self):
         self.drawables = None
@@ -38,20 +39,20 @@ class Widgetness:
                 drawable.parent(self)
         return self.drawables
 
-def attach(game, eventLoop):
-    viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
 
-    view3d   = ThreeDView.ThreeDView(game, viewport)
-    widget = Widgetness()
-    view3d.scene.objects[widget] = widget.getGLDrawables((4.5, -3.5, -10))
-    widget = Widgetness()
-    view3d.scene.objects[widget] = widget.getGLDrawables((-4.5, -3.5, -10))
-    widget = Widgetness()
-    view3d.scene.objects[widget] = widget.getGLDrawables((4.5, 3.5, -10))
-    widget = Widgetness()
-    view3d.scene.objects[widget] = widget.getGLDrawables((-4.5, 3.5, -10))
-    ThreeDControl.Editing(view3d, viewport)
+class Setup:
+    def __init__(self, game, eventLoop):
+        self.viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
 
-    return viewport
+        self.view   = ThreeDView.ThreeDView(game, self.viewport)
+        widget = Widgetness()
+        self.view.scene.objects[widget] = widget.getGLDrawables((4.5, -3.5, -10))
+        widget = Widgetness()
+        self.view.scene.objects[widget] = widget.getGLDrawables((-4.5, -3.5, -10))
+        widget = Widgetness()
+        self.view.scene.objects[widget] = widget.getGLDrawables((4.5, 3.5, -10))
+        widget = Widgetness()
+        self.view.scene.objects[widget] = widget.getGLDrawables((-4.5, 3.5, -10))
+        ThreeDControl.Editing(self.view, self.viewport)
 
 ### The End ###

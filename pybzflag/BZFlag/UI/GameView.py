@@ -27,47 +27,47 @@ import BZFlag, sys
 from BZFlag import Animated
 
 
-def attach(game, eventLoop):
-    viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
-    time = Animated.Timekeeper()
-    padding = 10
-    fullHudSize = 0.3
+class Setup:
+    def __init__(self, game, eventLoop):
+        self.viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
+        time = Animated.Timekeeper()
+        padding = 10
+        fullHudSize = 0.3
 
-    # 3D view in the root viewport
-    view3d   = ThreeDView.ThreeDView(game, viewport)
-    ThreeDControl.Viewing(view3d, viewport)
-    remaining = Layout.Rect(viewport).margin(padding)
+        # 3D view in the root viewport
+        self.view = ThreeDView.ThreeDView(game, self.viewport)
+        self.control = ThreeDControl.Viewing(self.view, self.viewport)
+        remaining = Layout.Rect(self.viewport).margin(padding)
 
-    # HUD panel along the bottom of the screen, with animated resize
-    hudSize = Animated.Value(Animated.SigmoidApproach(fullHudSize, 15, (0, fullHudSize)), fullHudSize)
-    def onSetupFrame():
-        hudSize.integrate(time.step())
-    def onKeyDown(event):
-        if event.unicode == " ":
-            if hudSize.f.target == fullHudSize:
-                hudSize.f.target = 0
-            else:
-                hudSize.f.target = fullHudSize
-    viewport.onSetupFrame.observe(onSetupFrame)
-    viewport.onKeyDown.observe(onKeyDown)
-    (remaining, hudRect) = remaining.hSplit(lambda r: (1-hudSize.value) * r[3])
+        # HUD panel along the bottom of the screen, with animated resize
+        hudSize = Animated.Value(Animated.SigmoidApproach(fullHudSize, 15, (0, fullHudSize)), fullHudSize)
+        def onSetupFrame():
+            hudSize.integrate(time.step())
+        def onKeyDown(event):
+            if event.unicode == " ":
+                if hudSize.f.target == fullHudSize:
+                    hudSize.f.target = 0
+                else:
+                    hudSize.f.target = fullHudSize
+        self.viewport.onSetupFrame.observe(onSetupFrame)
+        self.viewport.onKeyDown.observe(onKeyDown)
+        (remaining, hudRect) = remaining.hSplit(lambda r: (1-hudSize.value) * r[3])
 
-    hudPanel = viewport.region(hudRect)
-    HUD.Panel(hudPanel)
+        hudPanel = self.viewport.region(hudRect)
+        self.panel = HUD.Panel(hudPanel)
 
-    # Stick a radar in the left side of the HUD panel. The lambda expression
-    # lazily evaluates the panel's height and uses it as a width for the left
-    # split, keeping the radar square. The rest of the panel gets used for messages.
-    (radarRect, messageRect) = Layout.Rect(hudPanel).vSplit(lambda r: r[3])
-    RadarView.RadarView(game, hudPanel.region(radarRect.margin(2)))
+        # Stick a radar in the left side of the HUD panel. The lambda expression
+        # lazily evaluates the panel's height and uses it as a width for the left
+        # split, keeping the radar square. The rest of the panel gets used for messages.
+        (radarRect, messageRect) = Layout.Rect(hudPanel).vSplit(lambda r: r[3])
+        self.radar = RadarView.RadarView(game, hudPanel.region(radarRect.margin(2)))
 
-    # Redirect our stdout to this text panel
-    sys.stdout = HUD.ScrolledText(hudPanel.region(messageRect.margin(2)))
-    print BZFlag.about
+        # Redirect our stdout to this text panel
+        sys.stdout = HUD.ScrolledText(hudPanel.region(messageRect.margin(2)))
+        print BZFlag.about
 
-    # Logo-thingy!
-    HUD.Text(viewport.region(remaining), BZFlag.name,
-             shadow=True, color=(1,1,0,1), fontSize=35)
-    return viewport
+        # Logo-thingy!
+        self.logo = HUD.Text(self.viewport.region(remaining), BZFlag.name,
+                             shadow=True, color=(1,1,0,1), fontSize=35)
 
 ### The End ###

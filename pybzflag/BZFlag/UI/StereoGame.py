@@ -25,6 +25,7 @@ from BZFlag.UI import Viewport, ThreeDView, ThreeDControl, Layout
 from BZFlag.UI.StereoView import RightCamera
 import BZFlag, math
 
+
 class StereoGame:
     """Shows a side-by-side stereo view of the BZFlag game, renderable
        to an OpenGLViewport.
@@ -35,7 +36,10 @@ class StereoGame:
         ThreeDControl.Viewing(self.lefteye, viewport)
         self.righteye.camera = RightCamera(self.lefteye.camera, 30)
 
-def attach(game, eventLoop):
-    viewport = Viewport.OpenGLViewport(eventLoop, (1600, 600))
-    view = StereoGame(game, viewport)
-    return viewport
+
+class Setup:
+    def __init__(self, game, eventLoop):
+        self.viewport = Viewport.OpenGLViewport(eventLoop, (1600, 600))
+        self.view = StereoGame(game, self.viewport)
+
+### The End ###

@@ -71,5 +71,5 @@ class ChatThread(Thread):
 cthread = ChatThread()
 client.onEnterGame.observe(cthread.start)
 
-ui.attach(client.game, client.eventLoop)
+ui = ui.Setup(client.game, client.eventLoop)
 client.run()

@@ -20,7 +20,7 @@ game = Game.Game()
 loop = EventLoop()
 game.world.clone(World.load(ui.cmdLineArgs[0]))
 
-viewport = ui.attach(game, loop)
+ui = ui.Setup(game, loop)
 loop.run()
 
 

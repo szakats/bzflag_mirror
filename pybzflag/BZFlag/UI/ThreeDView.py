@@ -129,6 +129,7 @@ class ThreeDView(ThreeDRender.View):
        This can be used for observer views, 1st person game views, and editing.
        """
     def __init__(self, game, viewport):
+        self.game = game
         ThreeDRender.View.__init__(self, viewport, Scene(game))
         viewport.setCaption("%s 3D View" % BZFlag.name)
 
@@ -138,15 +139,15 @@ class ThreeDView(ThreeDRender.View):
         viewport.onDrawFrame.observe(self.drawFrame)
 
     def drawFrame(self):
-        game.update()
+        self.game.update()
         self.scene.update()
 
 
-def attach(game, eventLoop):
-    from BZFlag.UI import Viewport, ThreeDControl
-    viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
-    view = ThreeDView(game, viewport)
-    ThreeDControl.Viewing(view, viewport)
-    return viewport
+class Setup:
+    def __init__(self, game, eventLoop):
+        from BZFlag.UI import Viewport, ThreeDControl
+        self.viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
+        self.view = ThreeDView(game, self.viewport)
+        self.control = ThreeDControl.Viewing(self.view, self.viewport)
 
 ### The End ###

@@ -151,7 +151,7 @@ class Scene:
             layerHeight = (maxZ - minZ) / numRadarLayers
             layerObjects = []
             currentLayerZ = minZ
-            
+
             for object in colorGroup:
                 if object.center[2] > currentLayerZ + layerHeight:
                     # Exceeded the current layer's height, get a new layer
@@ -167,7 +167,7 @@ class Scene:
             color = layer.color
             glColor4f(color[0], color[1], color[2], colorScale(layer.z, viewHeight))
             layer.draw(rstate)
-            
+
 
 class RadarView:
     """An overhead view implemented using OpenGL, optionally tracking
@@ -236,10 +236,10 @@ class RadarView:
         glPopMatrix()
 
 
-def attach(game, eventLoop):
-    from BZFlag.UI.Viewport import OpenGLViewport
-    viewport = OpenGLViewport(eventLoop, (512,512))
-    RadarView(game, viewport)
-    return viewport
+class Setup:
+    def __init__(self, game, eventLoop):
+        from BZFlag.UI.Viewport import OpenGLViewport
+        self.viewport = OpenGLViewport(eventLoop, (512,512))
+        self.view = RadarView(game, self.viewport)
 
 ### The End ###
