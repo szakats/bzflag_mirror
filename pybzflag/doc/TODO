@@ -29,12 +29,6 @@ Todo list, in no particular order:
   - Add gamma correction to GLText so that the alpha blending doesn't look hideous
     when drawing light text on a dark background.
 
-  - Add a way to remove observer clients easily. Perhaps it could be required that observer
-    clients are bound methods, then there could be a way to remove all observer clients
-    bound to a specific class instance.
-
-  - Draw players in the ThreeDView
-
   - Write more documentation :)
 
   - Complete the Unicode support in GLText. This means deleting rarely used texture pages
@@ -50,9 +44,5 @@ Todo list, in no particular order:
   - fix resizing: what might be an SDL bug is causing the window to get stuck
     resizing to its original size when using a WM or equivalent that does
     opaque resizing. Known to break under sawfish, win32, and OS X.
-
-  - Better textures/lighting possibly, maybe multitexturing so long range
-    views don't look so boring and the 'grass' isn't so bad. This is supposed
-    to be protocol-compatible with BZFlag, but doesn't have to look just like it :)
 
   - In OverheadView, update using dirty rectangles for lower CPU usage
