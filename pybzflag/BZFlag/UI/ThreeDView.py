@@ -25,6 +25,7 @@ import pygame, math
 from pygame.locals import *
 from BZFlag import Event
 from BZFlag.World import Scene, WorldObjects
+from BZFlag.UI import Texture
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
@@ -57,7 +58,7 @@ class Light:
     glLightfv(self.lightnum, GL_AMBIENT, self.ambient)
     glLightfv(self.lightnum, GL_DIFFUSE, self.diffuse)
     glLightfv(self.lightnum, GL_POSITION, self.position)
-    glEnable(GL_LIGHT0)
+    glEnable(self.lightnum)
 
 
 class Scene:
@@ -85,7 +86,8 @@ class Scene:
 
   def render(self):
     for texture in self.passes.keys():
-# bind texture
+      if texture != None:
+        texture.bind()
       for drawable in self.passes[texture]:
 	drawable.draw()
 
@@ -109,8 +111,8 @@ class ThreeDView:
     """Initialize the opengl view"""
     self.size = surface.get_size()
 
-    self.scenelight.ambient  = (0.5, 0.5, 0.5, 1.0)
-    self.scenelight.diffuse  = (0.75, 0.75, 0.75, 1.0)
+    self.scenelight.ambient  = (0.85, 0.85, 0.85, 1.0)
+    self.scenelight.diffuse  = (0.85, 0.85, 0.85, 1.0)
     self.scenelight.position = (400, 400, 400, 1.0)
     self.scenelight.set()
 
@@ -118,6 +120,7 @@ class ThreeDView:
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_NORMALIZE)
     glEnable(GL_CULL_FACE)
+    glEnable(GL_LIGHTING)
 
     glClearColor(0.0, 0.0, 0.0, 0.0)
     glClearDepth(1.0)

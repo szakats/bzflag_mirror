@@ -215,11 +215,12 @@ class Wall(WorldObject):
     class WallDrawable(GLDrawable):
         def __init__(self, center, angle, size):
 	    import OpenGL.GL
+	    import BZFlag.UI.Texture
 	    GLDrawable.__init__(self)
 	    self.center = center
 	    self.angle = angle
 	    self.size = size
-	    self.texture = 'wall'
+	    self.texture = BZFlag.UI.Texture.Texture('data/wall.png')
 	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
 	    OpenGL.GL.glPushMatrix()
 	    OpenGL.GL.glTranslatef(*self.center)
@@ -227,13 +228,13 @@ class Wall(WorldObject):
 	    OpenGL.GL.glDisable(OpenGL.GL.GL_CULL_FACE)
 	    OpenGL.GL.glColor3f(1.0, 1.0, 1.0)
 	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLE_STRIP)
-#	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glTexCoord2f(0, 0)
 	    OpenGL.GL.glVertex3f(0, -self.size[1], 0)
-#	    OpenGL.GL.glTexCoord2f(0, 1)
+	    OpenGL.GL.glTexCoord2f(0, 1)
 	    OpenGL.GL.glVertex3f(0, -self.size[1], self.size[2])
-#	    OpenGL.GL.glTexCoord2f()
+	    OpenGL.GL.glTexCoord2f((self.size[1] * 2) / self.size[2], 0)
 	    OpenGL.GL.glVertex3f(0, self.size[1], 0)
-#	    OpenGL.GL.glTexCoord2f()
+	    OpenGL.GL.glTexCoord2f((self.size[1] * 2) / self.size[2], 1)
 	    OpenGL.GL.glVertex3f(0, self.size[1], self.size[2])
 	    OpenGL.GL.glEnd()
 	    OpenGL.GL.glEnable(OpenGL.GL.GL_CULL_FACE)
