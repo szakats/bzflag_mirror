@@ -21,9 +21,76 @@ A 2D overhead view of the game, implemented using pygame.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import pygame, math
-from pygame.locals import *
+import math
 from BZFlag import Event
+
+
+colorScheme = {
+    'background':    (88,  112, 88 ),
+    'outline':       (0,   0,   0  ),
+    'Box':           (188, 187, 167),
+    'Pyramid':       (165, 169, 183),
+    'Wall':          (255, 255, 0  ),
+    'Teleporter':    (255, 255, 128),
+    'playerOutline': (255, 255, 255),
+    'flag':          (255, 255, 255),
+    'roguePlayer':   (0,   0,   0  ),
+    'redPlayer':     (128, 0,   0  ),
+    'greenPlayer':   (0,   128, 0  ),
+    'bluePlayer':    (0,   0,   128),
+    'purplePlayer':  (96,  0,   144),
+    'rabbitPlayer':  (128, 128, 128),
+    'baseOutline':   (0  , 0  , 0  ),
+    'redBase':       (128, 0,   0  ),
+    'greenBase':     (0,   128, 0  ),
+    'blueBase':      (0,   0,   128),
+    'purpleBase':    (96,  0,   144),
+    }
+
+
+def coordWorldToView(size, world, point):
+    """Convert world coordinates to view coordinates in pixels"""
+    return (( point[0] * 0.98 / world.size[0] + 0.5) * size[0],
+            (-point[1] * 0.98 / world.size[1] + 0.5) * size[1])
+
+
+def worldToImage(world, size, oversample=2, colors=colorScheme):
+    """Render a world to a PIL image, using oversampling
+       to overcome PIL's lack of antialiased primitives.
+       """
+    import Image, ImageDraw
+    img = Image.new("RGB", (size[0]*oversample, size[1]*oversample), colors['background'])
+    draw = ImageDraw.Draw(img)
+    toView = lambda point: coordWorldToView(img.size, world, point)
+
+    for object in world.blocks:
+        objClassName = object.__class__.__name__
+        if objClassName == 'TeamBase':
+            # Color the bases by team
+            draw.polygon(map(toView, object.toPolygon()),
+                         outline = colors['baseOutline'],
+                         fill = colors[object.team + 'Base'])
+        else:
+            # Default representation
+            color = colorScheme.get(objClassName, None)
+            if color:
+                poly = map(toView, object.toPolygon())
+                if len(poly) > 2:
+                    # Shade the color according to height
+                    try:
+                        h = object.center[2] + object.size[2]
+                        shade = 1 - (3/h)
+                        color = (color[0] * shade,
+                                 color[1] * shade,
+                                 color[2] * shade)
+                    except AttributeError:
+                        pass
+                    draw.polygon(poly, fill=color, outline=colors['outline'])
+                else:
+                    # 2D objects, 1D in overhead. This only includes walls at the moment.
+                    draw.line(poly, fill=color)
+    
+    return img.resize(size, Image.ANTIALIAS)
 
 
 class OverheadView:
@@ -31,26 +98,6 @@ class OverheadView:
        surface. Note that this observes the game state rather than the
        client, so it should be usable on either client or server side.
        """
-    colorScheme = {
-        'background':    (88,  112, 88 ),
-        'Box':           (188, 187, 167),
-        'Pyramid':       (27,  141, 227),
-        'Wall':          (255, 255, 0  ),
-        'Teleporter':    (255, 255, 128),
-        'playerOutline': (255, 255, 255),
-        'flag':          (255, 255, 255),
-        'roguePlayer':   (0,   0,   0  ),
-        'redPlayer':     (128, 0,   0  ),
-        'greenPlayer':   (0,   128, 0  ),
-        'bluePlayer':    (0,   0,   128),
-        'purplePlayer':  (96,  0,   144),
-        'rabbitPlayer':  (128, 128, 128),
-        'baseOutline':   (0  , 0  , 0  ),
-        'redBase':       (128, 0,   0  ),
-        'greenBase':     (0,   128, 0  ),
-        'blueBase':      (0,   0,   128),
-        'purpleBase':    (96,  0,   144),
-      }
 
     def __init__(self, game):
         self.game = game
@@ -61,37 +108,11 @@ class OverheadView:
             self.cachedWorld = None
         game.world.onLoad.observe(onLoadWorld)
 
-    def worldToView(self, point):
-        """Convert world coordinates to view coordinates in pixels"""
-        return (( point[0] * 0.98 / self.game.world.size[0] + 0.5) * self.size[0],
-                (-point[1] * 0.98 / self.game.world.size[1] + 0.5) * self.size[1])
-
-    def renderWorld(self, surface):
-        """Render the game world to the given surface."""
-        surface.fill(self.colorScheme['background'])
-        for object in self.game.world.blocks:
-            objClassName = object.__class__.__name__
-            if objClassName == 'TeamBase':
-                # Color the bases by team
-                color = self.colorScheme[object.team + 'Base']
-                outline = self.colorScheme['baseOutline']
-                poly = map(self.worldToView, object.toPolygon())
-                pygame.draw.polygon(surface, color, poly)
-                pygame.draw.lines(surface, outline, 1, poly)
-            else:
-                # Default representation
-                color = self.colorScheme.get(objClassName, None)
-                if color:
-                    poly = map(self.worldToView, object.toPolygon())
-                    if len(poly) > 2:
-                        pygame.draw.polygon(surface, color, poly)
-                    else:
-                        pygame.draw.line(surface, color, poly[0], poly[1])
-
     def render(self, surface):
         """Render the overhead view to the given surface. This includes the
            game world, with transient objects such as players and flags overlaid on top.
            """
+        import pygame
         self.size = surface.get_size()
 
         # Since the game world doesn't usually change, we cache a rendered version of it.
@@ -106,11 +127,12 @@ class OverheadView:
         self.renderShots(surface)
 
     def renderPlayers(self, surface):
-        color = self.colorScheme['playerOutline']
+        import pygame
+        color = colorScheme['playerOutline']
         for player in self.game.players.values():
             if 'alive' in player.status:
                 # Pick player color based on team
-                bg = self.colorScheme[player.identity.team + "Player"]
+                bg = colorScheme[player.identity.team + "Player"]
 
                 # Draw a circle with black background and colored outline,
                 # with a line indicating the tank's current heading.
@@ -126,7 +148,8 @@ class OverheadView:
                 pygame.draw.line(surface, color, pos, heading)
 
     def renderFlags(self, surface):
-        color = self.colorScheme['flag']
+        import pygame
+        color = colorScheme['flag']
         for flag in self.game.flags.values():
             if 'onGround' == flag.status:
                 # Draw a little cross
@@ -141,6 +164,7 @@ class OverheadView:
 
 def attach(game, eventLoop, size=(512,512), viewClass=OverheadView, targetFrameRate=30):
     """Set up a window with only an overhead view, on the given game and event loop"""
+    import pygame
 
     # Update the view regularly
     def updateView():
