@@ -13,14 +13,14 @@ class Wind:
        """
     def __init__(self):
         self.drawables = None
-        
+
         # Wind, with speed and direction varying over time with a perlin noise function
         self.vector = Animated.Vector(Animated.PerlinNoise(persistence = 0.8,
                                                            octaves     = 7,
                                                            amplitude   = 0.8,
                                                            frequency   = 0.01,
                                                            ))
-        
+
     def integrate(self, dt):
         self.vector.integrate(dt)
 
@@ -28,7 +28,7 @@ class Wind:
         if not self.drawables:
             self.drawables = [Drawable.Vector(self.vector)]
         return self.drawables
-        
+
 
 class Flag:
     """Scene object simulating one flag"""
@@ -40,7 +40,7 @@ class Flag:
         self.size = (8,6)
         self.origin = (0,4.5)
         self.resolution = (20,20)
-        
+
         self.pole = Drawable.VRML.load("flagpole.wrl")
         self.cloth = SpringSystem.Cloth(self.getInitialState())
 
