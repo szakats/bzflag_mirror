@@ -23,8 +23,8 @@ sync with that of a central server.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from Base import BaseClient
-from Stateful import StatefulClient
-from Player import PlayerClient
+from Base import *
+from Stateful import *
+from Player import *
 
 ### The End ###

@@ -1,7 +1,7 @@
-""" BZFlag.World
+""" BZFlag.World.World
 
-Implementation of BZFlag's world database. This includes loading
-and saving worlds in binary and text formats.
+Abstraction for BZFlag's world format. This class can load and
+save worlds to text and binary formats, storing them in a Scene class.
 """
 #
 # Python BZFlag Protocol Package
@@ -27,50 +27,7 @@ from BZFlag import Errors, Util
 import os, re, math, md5
 from xreadlines import xreadlines
 from StringIO import StringIO
-
-
-class Scene:
-    """Abstract base class for a scene manager. This class provides
-       a way to store scene objects and later provide iterators for
-       sorting or selecting geometry based on different criteria
-
-       Right now this only supports iterating through all available
-       objects. New iterators will be added as needed, but it is
-       expected that we will need iterators for finding objects that
-       intersect with geometry, and for sorting objects by Z order.
-       """
-    def add(self, block):
-        pass
-
-    def __iter__(self):
-        """Scene subclasses must support python's iterator protocol
-           for iterating through all available objects.
-           """
-        pass
-
-
-class SceneList:
-    """Implementation of Scene using a flat list"""
-    def __init__(self):
-        self.list = []
-
-    def add(self, block):
-        self.list.append(block)
-
-    def __iter__(self):
-        scene = self
-        class Iterator:
-            def __init__(self):
-                self.index = 0
-            def __iter__(self):
-                return self
-            def next(self):
-                if self.index >= len(scene.list):
-                    raise StopIteration
-                item = scene.list[self.index]
-                self.index += 1
-                return item
-        return Iterator()
+from BZFlag.World.Scene import SceneList
 
 
 class TeleporterSide:
@@ -98,14 +55,7 @@ class World:
        """
     def __init__(self, sceneClass=SceneList):
         self.sceneClass = sceneClass
-        self.generateEmpty()
-
-    def generateEmpty(self):
-        """Generate an empty world"""
         self.erase()
-        self.storeSkeletonHeader()
-        self.storeSkeletonFooter()
-        self.postprocess()
 
     def loadBinary(self, f):
         """Load a binary world from the supplied file-like object"""

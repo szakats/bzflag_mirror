@@ -1,8 +1,6 @@
-""" BZFlag.Server
+""" BZFlag.World.Generator
 
-Package providing a collection of classes implementing the BZFlag server.
-The server is fundamentally responsible for allowing a group of clients
-to interact with a game state object.
+Implements factory functions for automatically generating various worlds
 """
 #
 # Python BZFlag Protocol Package
@@ -23,8 +21,16 @@ to interact with a game state object.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from Base import *
-from Stateful import *
-from Standard import *
+from BZFlag.World.World import World
+
+
+def Empty():
+    w = World()
+    w.erase()
+    w.storeSkeletonHeader()
+    w.storeSkeletonFooter()
+    w.postprocess()
+    return w
+
 
 ### The End ###
