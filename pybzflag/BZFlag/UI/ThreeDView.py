@@ -181,6 +181,15 @@ class ThreeDController:
           distance.f.target = 1500
     viewport.onMouseButtonDown.observe(onMouseButtonDown)
 
+    def onKeyDown(event):
+      # f - toggle fullscreen
+      if event.unicode == "f":
+        viewport.display.toggle_fullscreen()
+      # q - quit
+      if event.unicode == "q":
+        viewport.eventLoop.stop()
+    viewport.onKeyDown.observe(onKeyDown)
+
 
 def attach(game, eventLoop):
     from BZFlag.UI.Viewport import OpenGLViewport
