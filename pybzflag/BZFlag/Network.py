@@ -62,6 +62,8 @@ class Socket:
     def write(self, data):
         # Queue it, plus try to send it. If we can't send
         # it yet, it will stay in the queue until it can be sent.
+        # The call to pollWrite() is a good idea in any case,
+        # and required for UDP since select() will never poke us.
         self.writeBuffer += str(data)
         self.pollWrite()
 
