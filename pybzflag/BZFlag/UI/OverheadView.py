@@ -42,6 +42,11 @@ class OverheadView:
         'bluePlayer':    (0,   0,   128),
         'purplePlayer':  (96,  0,   144),
         'rabbitPlayer':  (128, 128, 128),
+        'baseOutline':   (0  , 0  , 0  ),
+        'redBase':       (128, 0,   0  ),
+        'greenBase':     (0,   128, 0  ),
+        'blueBase':      (0,   0,   128),
+        'purpleBase':    (96,  0,   144),
       }
 
     def __init__(self, game):
@@ -62,10 +67,20 @@ class OverheadView:
         """Render the game world to the given surface."""
         surface.fill(self.colorScheme['background'])
         for object in self.game.world.scene:
-            color = self.colorScheme.get(object.__class__.__name__, None)
-            if color:
+            objClassName = object.__class__.__name__
+            if objClassName == 'TeamBase':
+                # Color the bases by team
+                color = self.colorScheme[object.team + 'Base']
+                outline = self.colorScheme['baseOutline']
                 poly = map(self.worldToView, object.toPolygon())
                 pygame.draw.polygon(surface, color, poly)
+                pygame.draw.lines(surface, outline, 1, poly)
+            else:
+                # Default representation
+                color = self.colorScheme.get(objClassName, None)
+                if color:
+                    poly = map(self.worldToView, object.toPolygon())
+                    pygame.draw.polygon(surface, color, poly)
 
     def render(self, surface):
         """Render the overhead view to the given surface. This includes the

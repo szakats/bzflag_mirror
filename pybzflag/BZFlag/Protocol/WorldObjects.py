@@ -83,6 +83,8 @@ class WorldObject(Block):
                 self.fromSide = int(args[0])
             elif keyword == 'to':
                 self.toSide = int(args[0])
+            elif keyword == 'color':
+                self.team = Common.TeamColor.dict[int(args[0])]
             elif keyword == 'end':
                 break
             else:
@@ -109,6 +111,8 @@ class WorldObject(Block):
             f.write("from %s\n" % self.fromSide)
         if hasattr(self, 'toSide'):
             f.write("to %s\n" % self.toSide)
+        if hasattr(self, 'team'):
+            f.write("color %s\n" % Common.TeamColor.reverseDict(self.team))
         f.write("end\n\n")
         
     def toPolygon(self):
@@ -157,13 +161,14 @@ class Style(Block):
         ]
 
 class TeamBase(WorldObject):
+    textName = 'base'
     messageId = 0x6261
     entries = [
         StructEntry(Common.TeamColor, 'team'),
         StructEntry(Common.Vector3,   'center', [0,0,0]),
         StructEntry(Float,            'angle',  0),
         StructEntry(Common.Vector2,   'size',   [1,1,1]),
-        StructEntry(Common.Vector3,   'safety'),
+        StructEntry(Common.Vector3,   'safety', [0,0,0]),
         ]
 
 class Wall(WorldObject):
