@@ -22,6 +22,7 @@ A 2D overhead view of the game, implemented using pygame.
 #
 
 import math
+import BZFlag
 from BZFlag import Event
 import colorsys
 
@@ -107,14 +108,21 @@ class OverheadView:
        client, so it should be usable on either client or server side.
        """
 
-    def __init__(self, game):
+    def __init__(self, game, viewport):
         self.game = game
+        self.viewport = viewport
         self.cachedWorld = None
 
         # When the world is reloaded, invalidate our cached rendering of it
         def onLoadWorld():
             self.cachedWorld = None
         game.world.onLoad.observe(onLoadWorld)
+
+        # Set ourselves up to render to the given viewport
+        viewport.setCaption("%s Overhead View" % BZFlag.name)
+        def onDrawFrame():
+            self.render(viewport.screen)
+        viewport.onDrawFrame.observe(onDrawFrame)
 
     def worldToView(self, point):
         return coordWorldToView(self.size, self.game.world, point)
@@ -185,25 +193,8 @@ class OverheadView:
         pass
 
 
-def attach(game, eventLoop, size=(512,512), targetFrameRate=30):
-    """Set up a window with only an overhead view, on the given game and event loop"""
-    import pygame
-
-    # Update the view regularly
-    def updateView():
-        global view, screen
-        if view:
-            game.update()
-            view.render(screen)
-            pygame.display.flip()
-    eventLoop.add(Event.PeriodicTimer(1.0 / targetFrameRate, updateView))
-
-    # Start up pygame and init the view
-    global view, screen
-    pygame.init()
-    screen = pygame.display.set_mode(size)
-    pygame.display.set_caption("BZFlag Overhead View")
-    view = OverheadView(game)
-    updateView()
+def attach(game, eventLoop):
+    from BZFlag.UI.Viewport import PygameView
+    OverheadView(game, PygameView(eventLoop, (512,512)))
 
 ### The End ###
