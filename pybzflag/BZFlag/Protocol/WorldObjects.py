@@ -45,6 +45,21 @@ class Block(Common.Message):
     messageId = None
 
 
+class GLDrawable:
+    def __init__(self):
+    	import OpenGL.GL
+        self.list = OpenGL.GL.glGenLists(1)
+
+    def createList(self):
+        pass
+
+    def draw(self):
+        pass
+
+    def drawWithName(self, name):
+        pass
+
+
 class WorldObject(Block):
     """Building on the Struct and Message functionality, this base
        class adds methods for serializing to text.
@@ -52,11 +67,11 @@ class WorldObject(Block):
     # The section name used in text mode. None indicates that
     # the object should not be saved in text mode.
     textName = None
-    
+
     def __init__(self, packed=None, **kw):
         self.unknownMapKeywords = {}
         Block.__init__(self, packed, **kw)
-    
+
     def textRead(self, lines):
         """This accepts a list of text lines, with comments and
            leading/trailing whitespace already stripped out. Note that
@@ -114,7 +129,7 @@ class WorldObject(Block):
         if hasattr(self, 'team'):
             f.write("color %s\n" % Common.TeamColor.reverseDict(self.team))
         f.write("end\n\n")
- 
+
     def toUntransformedPolygon(self):
         # Create four vertices from our extents
         return ((-self.size[0],
@@ -125,11 +140,11 @@ class WorldObject(Block):
                   self.size[1]),
                 (-self.size[0],
                   self.size[1]))
-    
+
     def toPolygon(self):
         """Return a 2D polygon representation of this object, as a tuple of tuples."""
         poly = self.toUntransformedPolygon()
-        
+
         # Rotate the polygon by our angle
         cos = math.cos(-self.angle)
         sin = math.sin(-self.angle)
@@ -144,7 +159,10 @@ class WorldObject(Block):
                     point[1] + self.center[1])
         return map(translate, poly)
 
-        
+    def getGLDrawables(self):
+        return GLDrawable()
+
+
 class Style(Block):
     messageId = 0x7374
     entries = [
@@ -188,7 +206,7 @@ class Wall(WorldObject):
         StructEntry(Float,            'angle',  0),
         StructEntry(Common.Vector2,   'size',   [1,1]),
         ]
-    
+
     def toUntransformedPolygon(self):
         return ((0, -self.size[0]), (0, self.size[0]))
 
