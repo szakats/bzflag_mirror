@@ -94,7 +94,7 @@ class NoiseTexture(Texture.DynamicTexture):
         Texture.DynamicTexture.__init__(self, size)
         self.factory = factory
         self.angle = factory.angle
-        self.format = GL_LUMINANCE
+        self.format = GL_INTENSITY8
         factory.angle += factory.rotationSpeed
 
     def draw(self):
@@ -282,7 +282,7 @@ class PerlinTexture(Texture.DynamicTexture):
         self.noise = noise
         Texture.DynamicTexture.__init__(self, size,
                                         meanExpiration = 1/renderRate)
-        self.format = GL_LUMINANCE
+        self.format = GL_INTENSITY8
 
     def attachRenderState(self, rstate):
         Texture.DynamicTexture.attachRenderState(self, rstate)
@@ -328,10 +328,12 @@ class CloudTexture(MappedPerlinTexture):
     """Perlin noise with mapping applied to create a cloud-like texture"""
     def map(self, y):
         try:
-            return log((y-0.5) * 70 + 1) * 0.27
+            return log((y-0.3) * 70 + 1) * 0.27
         except ValueError:
             return 0
 
+    def bind(self, rstate):
+        MappedPerlinTexture.bind(self,rstate)
 
 ### The End ###
 

@@ -22,7 +22,7 @@ class TestObject:
         ground.render.blended = True
         ground.render.textures = (GLNoise.CloudTexture(),)
         self.drawables = [ground]
-    
+
     def getDrawables(self):
         return self.drawables
 
