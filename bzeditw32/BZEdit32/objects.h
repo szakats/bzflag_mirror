@@ -2,7 +2,7 @@
 #define __OBJECTS_H__
 
 #include "camera.h"
-#include <iostream.h>
+#include <iostream>
 #include <string>
 #include "TextureMngr.h"
 #include "Model.h"
@@ -50,7 +50,7 @@ public:
 
 	virtual void Render(bool transparent = false, bool bSelected = false, int iName = -1);
 
-	virtual void Write( ostream &Stream );
+	virtual void Write( std::ostream &Stream );
 	virtual void Write( char *data );
 	virtual bool Read( char *data );
 
@@ -77,7 +77,7 @@ public:
 
 	virtual void Render(bool transparent = false, bool bSelected = false, int iName = -1);
 
-	virtual void Write( ostream &Stream );
+	virtual void Write( std::ostream &Stream );
 	virtual void Write( char *data );
 	virtual bool Read( char *data );
 	virtual void* GetIcon ( void );
@@ -98,7 +98,7 @@ public:
 
 	virtual void Render(bool transparent = false, bool bSelected = false, int iName = -1);
 
-	virtual void Write( ostream &Stream );
+	virtual void Write( std::ostream &Stream );
 	virtual void Write( char *data );
 	virtual bool Read( char *data );
 	virtual void* GetIcon ( void );
@@ -134,7 +134,7 @@ public:
 
 	virtual void Render(bool transparent = false, bool bSelected = false, int iName = -1);
 
-	virtual void Write( ostream &Stream );
+	virtual void Write( std::ostream &Stream );
 	virtual void Write( char *data );
 	virtual bool Read( char *data );
 	virtual void* GetIcon ( void );
@@ -169,7 +169,7 @@ public:
 
 	virtual void Render(bool transparent = false, bool bSelected = false, int iName = -1);
 
-	virtual void Write( ostream &Stream );
+	virtual void Write( std::ostream &Stream );
 	virtual void Write( char *data );
 	virtual	bool Read( char *data );
 	virtual void* GetIcon ( void );

@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include <math.h>
-#include <fstream.h>
+#include <fstream>
 #include "Utils.h"
 #include "objects.h"
 #include "world.h"
@@ -182,21 +182,21 @@ bool CBaseObject::StdDataField ( char *line )
 	return true;
 }
 
-void CBaseObject::WriteStdData ( ostream &stream )
+void CBaseObject::WriteStdData ( std::ostream &stream )
 {
 	char	szName[512];
 	strcpy(szName,m_sTypeName.c_str());
 	strlwr(szName);
-	stream << szName << endl;
+	stream << szName << std::endl;
 
 	if (m_sItemName.size()>0)
-		stream << "name " << m_sItemName.c_str() << endl;
+		stream << "name " << m_sItemName.c_str() << std::endl;
 
 	if (m_iGroupID != -1)
-		stream << "#!group " <<  m_iGroupID << " " << m_sGroupName.c_str() << endl;
+		stream << "#!group " <<  m_iGroupID << " " << m_sGroupName.c_str() << std::endl;
 
-	stream << "	position " << m_rPosition.x << ' ' << m_rPosition.y << ' ' << m_rPosition.z << endl;
-	stream << "	rotation " << m_fAngle << endl;
+	stream << "	position " << m_rPosition.x << ' ' << m_rPosition.y << ' ' << m_rPosition.z << std::endl;
+	stream << "	rotation " << m_fAngle << std::endl;
 }
 
 void CBaseObject::WriteStdData ( char *data )
@@ -306,8 +306,8 @@ void CBaseObject::ApplyEdit ( void )
 	m_rScale.z = ((CStdObjectInfoPanel*)m_pInterface)->m_fZScale;
 
 	m_fAngle = ((CStdObjectInfoPanel*)m_pInterface)->m_fZRot;
-	m_bShootThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bShootThru;
-	m_bDriveThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bDriveThru;
+	m_bShootThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bShootThru != 0;
+	m_bDriveThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bDriveThru != 0;
 
 	Init();
 }
@@ -523,9 +523,9 @@ bool CWorld::Write(const char *szFileName)
 	if (m_vObjList.size() <1) // never ever ever save a blank map, it's bad
 		return false;
 
-	fstream file;
+	std::fstream file;
 
-	file.open(szFileName, ios::out);
+	file.open(szFileName, std::ios::out);
 
 	if(!file)
 		return false;

@@ -194,23 +194,23 @@ void Box::Render( bool transparent, bool bSelected, int iName )
 	}
 }
 
-void Box::Write(ostream &stream)
+void Box::Write(std::ostream &stream)
 {
 	WriteStdData(stream);
-	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
+	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << std::endl;
 
         if (m_bDriveThru && m_bShootThru)
-          	stream << "	passable" << endl;
+          	stream << "	passable" << std::endl;
         else
         {
 	if (m_bDriveThru)
-		stream << "	drivethrough" << endl;
+		stream << "	drivethrough" << std::endl;
 	if (m_bShootThru)
-		stream << "	shootthrough" << endl;
+		stream << "	shootthrough" << std::endl;
         }
 
-	stream << "end" << endl;
-	stream << endl;
+	stream << "end" << std::endl;
+	stream << std::endl;
 }
 
 void Box::Write( char *data )
@@ -330,22 +330,22 @@ void Pyramid::Render( bool transparent, bool bSelected, int iName )
 	}
 }
 
-void Pyramid::Write(ostream &stream)
+void Pyramid::Write(std::ostream &stream)
 {
 	WriteStdData(stream);
-	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
+	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << std::endl;
         if (m_bDriveThru && m_bShootThru)
-            stream << "	passable" << endl;
+            stream << "	passable" << std::endl;
         else
         {
 	if (m_bDriveThru)
-		stream << "	drivethrough" << endl;
+		stream << "	drivethrough" << std::endl;
 	if (m_bShootThru)
-		stream << "	shootthrough" << endl;
+		stream << "	shootthrough" << std::endl;
         }
 
-	stream << "end" << endl;
-	stream << endl;
+	stream << "end" << std::endl;
+	stream << std::endl;
 }
 
 void Pyramid::Write( char *data )
@@ -488,22 +488,22 @@ void Teleporter::Render(bool transparent, bool bSelected, int iName )
 	}
 }
 
-void Teleporter::Write(ostream &stream)
+void Teleporter::Write(std::ostream &stream)
 {
 	WriteStdData(stream);
-	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
-	stream << "	border " << border << endl;
+	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << std::endl;
+	stream << "	border " << border << std::endl;
         if (m_bDriveThru && m_bShootThru)
-            stream << "	passable" << endl;
+            stream << "	passable" << std::endl;
         else
         {
 	if (m_bDriveThru)
-		stream << "	drivethrough" << endl;
+		stream << "	drivethrough" << std::endl;
 	if (m_bShootThru)
-		stream << "	shootthrough" << endl;
+		stream << "	shootthrough" << std::endl;
         }
-	stream << "end" << endl;
-	stream << endl;
+	stream << "end" << std::endl;
+	stream << std::endl;
 }
 
 void Teleporter::Write( char *data )
@@ -706,7 +706,7 @@ bool Base::Init( void )
 		
 	pModel->SetTexuture(-1);
 
-	float	fTemp = color;
+	float	fTemp = (float)color;
 	pModel->SetItemInfo("Color",&fTemp);
 
 	pModel->Init(m_rPosition,m_rScale,m_fAngle);
@@ -778,22 +778,22 @@ bool Base::GetItemInfo ( char  *szName, int &iData )
 	return false;
 }
 
-void Base::Write(ostream &stream)
+void Base::Write(std::ostream &stream)
 {
 	WriteStdData(stream);
-	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
-	stream << "	color " << color << endl;
+	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << std::endl;
+	stream << "	color " << color << std::endl;
         if (m_bDriveThru && m_bShootThru)
-            stream << "	passable" << endl;
+            stream << "	passable" << std::endl;
         else
         {
 	if (m_bDriveThru)
-		stream << "	drivethrough" << endl;
+		stream << "	drivethrough" << std::endl;
 	if (m_bShootThru)
-		stream << "	shootthrough" << endl;
+		stream << "	shootthrough" << std::endl;
         }
-	stream << "end" << endl;
-	stream << endl;
+	stream << "end" << std::endl;
+	stream << std::endl;
 }
 
 void Base::Write( char *data )
@@ -989,20 +989,20 @@ void Link::Render(bool transparent, bool bSelected, int iName)
 	}
 }
 
-void Link::Write(ostream &stream)
+void Link::Write(std::ostream &stream)
 {
-	stream << "link" << endl;
+	stream << "link" << std::endl;
 
 	if (m_sItemName.size()>0)
-		stream << "#!name " << m_sItemName.c_str() << endl;
+		stream << "#!name " << m_sItemName.c_str() << std::endl;
 
 	if (m_iGroupID != -1)
-		stream << "#!group " <<  m_iGroupID << ' ' << m_sGroupName.c_str() << endl;
+		stream << "#!group " <<  m_iGroupID << ' ' << m_sGroupName.c_str() << std::endl;
 
-	stream << "	from " << from_side << endl;
-	stream << "	to " << to_side << endl;
-	stream << "end" << endl;
-	stream << endl;
+	stream << "	from " << from_side << std::endl;
+	stream << "	to " << to_side << std::endl;
+	stream << "end" << std::endl;
+	stream <<std:: endl;
 }
 
 void Link::Write( char *data )

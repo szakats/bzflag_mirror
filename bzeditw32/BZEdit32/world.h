@@ -1,16 +1,21 @@
 #ifndef __WORLD_H__
 #define __WORLD_H__
 
-#ifdef WIN32
-	#pragma warning( disable : 4786 )  // Disable warning message for stl maps
-	#include <windows.h>
-#endif
-
 #include <vector>
 #include <map>
 #include <string>
-#include <iostream.h>
+#include <ostream>
+#include <iostream>
+#include <fstream>
+#include <iosfwd>
 
+#ifdef WIN32
+#ifndef WINVER
+	#define WINVER 0x0400
+#endif
+	#pragma warning( disable : 4786 )  // Disable warning message for stl maps
+	#include <windows.h>
+#endif
 #include "3dtypes.h"
 
 //#include "objects.h"
@@ -44,7 +49,7 @@ public:
 
 	virtual void Render(bool transparent = false, bool bSelected = false, int iName = -1);
 
-	virtual void Write( ostream &Stream ) { return; }
+	virtual void Write( std::ostream &Stream ) { return; }
 	virtual void Write( char *data ) { return; }
 	virtual bool Read( char *data ) { return false; }
 
@@ -154,7 +159,7 @@ protected:
 	
 	bool StdDataField ( char *data );
 
-	void WriteStdData ( ostream &stream );
+	void WriteStdData ( std::ostream &stream );
 	void WriteStdData ( char *data );
 };
 
