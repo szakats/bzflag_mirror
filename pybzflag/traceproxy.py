@@ -6,11 +6,15 @@
 from BZFlag import CommandLine, Server, Client, Event
 from StringIO import StringIO
 
+
 # Create a server and a client, sharing command line options and event loop
 eventLoop = Event.EventLoop()
-(server, client) = CommandLine.Parser([Server.BaseServer, Client.BaseClient],
-                                      eventLoop = eventLoop
-                                      ).parse()
+argParser = CommandLine.Parser([Server.BaseServer, Client.BaseClient],
+                               eventLoop = eventLoop)
+argParser.add_option("-n", "--names", action="store_true", dest="names",
+                     help="Disables the output of message contents, shows only their names.")
+(server, client) = argParser.parse()
+options = client.cmdLineValues
 
 
 # Trace server connections and disconnections
@@ -70,25 +74,26 @@ def hexDump(value, bytesPerLine=16, wordSize=2):
 # mostly human readable, thanks to the Protocol module.
 def dumpMessage(msg, direction):
     print "%s %s" % (direction, msg.__class__.__name__)
-    keys = msg.__dict__.keys()
-    keys.sort()
-    for key in keys:
-        if key[0] != '_' and not key in ('eventLoop', 'socket', 'header'):
-            value = msg.__dict__[key]
-            if key == 'data':
-                # Special decoding for 'data' members- do a hex dump
-                value = hexDump(value)
-            else:
-                # Let python decode everything else
-                value = repr(value)
+    if not options['names']:
+        keys = msg.__dict__.keys()
+        keys.sort()
+        for key in keys:
+            if key[0] != '_' and not key in ('eventLoop', 'socket', 'header'):
+                value = msg.__dict__[key]
+                if key == 'data':
+                    # Special decoding for 'data' members- do a hex dump
+                    value = hexDump(value)
+                else:
+                    # Let python decode everything else
+                    value = repr(value)
 
-            # Handle printing multiline values properly
-            keyColumnWidth = 15
-            lines = value.split("\n")
-            print ("%%%ss: %%s" % keyColumnWidth) % (key, lines[0])
-            for line in lines[1:]:
-                if line:
-                    print " " * (keyColumnWidth + 2) + line
+                # Handle printing multiline values properly
+                keyColumnWidth = 15
+                lines = value.split("\n")
+                print ("%%%ss: %%s" % keyColumnWidth) % (key, lines[0])
+                for line in lines[1:]:
+                    if line:
+                        print " " * (keyColumnWidth + 2) + line
 
 
 # Set up events to forward messages between
@@ -103,5 +108,6 @@ def onServerMessage(msg):
     client.tcp.write(msg)
     return 1
 server.onAnyMessage.observe(onServerMessage)
+
 
 eventLoop.run()
