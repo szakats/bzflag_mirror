@@ -86,8 +86,18 @@ class ArraySurface(GLDrawable):
         glNormalPointerd(reshape(self.normals, (-1, 3)))
         glEnable(GL_VERTEX_ARRAY)
         glEnable(GL_NORMAL_ARRAY)
+
+        # Draw the front side
         for row in self.indices:
             glDrawElementsui(GL_TRIANGLE_STRIP, row)
+
+        # Draw the back side
+        glCullFace(GL_FRONT)
+        glNormalPointerd(reshape(-self.normals, (-1, 3)))
+        for row in self.indices:
+            glDrawElementsui(GL_TRIANGLE_STRIP, row)
+        glCullFace(GL_BACK)
+            
         glDisable(GL_VERTEX_ARRAY)
         glDisable(GL_NORMAL_ARRAY)
 
