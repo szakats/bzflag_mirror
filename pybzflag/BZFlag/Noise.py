@@ -31,14 +31,14 @@ class PerlinNoise3:
        This is Numeric-friendly, so anywhere you request a value for one input
        coordinate you could also request a value for an n-dimensional array
        of input coordinates.
-       
+
        Constructor parameters:
 
           seed          - The seed is combined with the input vector such that the same seed
                           and vector will produce the same output, but for any vector a different
                           seed will produce different output.
                           A seed of zero will use the current time to produce a random seed.
-          
+
           octaves       - Number of layers (sized at multiples of two) to render noise at. More
                           octaves increase the detail in the noise, but also slow it down.
 
@@ -51,7 +51,7 @@ class PerlinNoise3:
     def __init__(self, seed=0, octaves=3, persistence=0.5, logTableSize=10):
         self.octaves = octaves
         self.persistence = persistence
-        
+
         self.table = Vector3Table(seed, logTableSize)
 
         self.two = array(2, Float32)
@@ -72,7 +72,7 @@ class PerlinNoise3:
            """
         v = asarray(v).astype(Float32)
         intv = v.astype(Int)
-            
+
         # Define a sampling pattern of 8 vertices around intv
         # The last axis of this array will be the vertex, the next-to-last will be the
         # cube point, all other axes are as used by the caller.
@@ -144,7 +144,7 @@ class PerlinNoise3:
             amplitude *= self.persistence
         return result
 
-    
+
 class Vector3Table:
     """A table of random 3D unit vectors generated from a seed.
        The size is specified as the base 2 logarithm of the actual size, since

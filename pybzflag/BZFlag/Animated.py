@@ -62,14 +62,14 @@ class TimeMaster:
             return (0, self.stepNumber)
         else:
             return (self.stepTime, self.stepNumber)
-    
+
     def time(self):
         """Return the current time, according to the master clock"""
         return self.now
 
 defaultTimeMaster = TimeMaster()
 currentTimeMaster = defaultTimeMaster
-    
+
 
 class Timekeeper:
     """A class that keeps track of the amount of time elapsed between steps.
@@ -80,7 +80,7 @@ class Timekeeper:
        """
     def __init__(self):
         self.lastStep = None
-        
+
     def time(self):
         """Return the current time, according to the master clock"""
         global currentTimeMaster
@@ -91,7 +91,7 @@ class Timekeeper:
         global currentTimeMaster
         (step, self.lastStep) = currentTimeMaster.step(self.lastStep)
         return step
-    
+
 
 class FrequencyCounter:
     """Measure the frequency at which a specified event occurs,
@@ -292,7 +292,7 @@ class PeriodicFunction:
         self.cycleTime = (self.cycleTime + dt) % self.period
         return self.f(self.cycleTime / self.period) * \
                (self.range[1] - self.range[0]) + self.range[0]
-    
+
     def f(self, x):
         """Implementation of the periodic function. Should have a domain
            of [0,1] and a range of [0,1], which will be scaled to the values
@@ -323,7 +323,7 @@ class PerlinNoise:
         self.offset = offset
         self.noise = Noise.PerlinNoise3(seed, octaves, persistence)
         self.time = 0
-        
+
     def __call__(self, value, dt, index=None):
         self.time += dt
         if index == 1:
@@ -333,5 +333,5 @@ class PerlinNoise:
         else:
             v = (self.time, 0, 0)
         return self.noise.get(multiply(v, self.frequency)) * self.amplitude + self.offset
-        
+
 ### The End ###
