@@ -25,7 +25,6 @@ import pygame, math, BZFlag
 from pygame.locals import *
 from BZFlag.UI.ThreeDView import *
 from OpenGL.GL import *
-from OpenGL.GLU import *
 import sys
 
 class AnaglyphView(ThreeDView):
