@@ -140,21 +140,9 @@ class ThreeDView:
     def __init__(self, game, viewport):
         self.game = game
         self.viewport = viewport
+       # Initialize the opengl view
         self.camera = Camera()
-        self.light0 = Light(GL_LIGHT0)
-        self.light1 = Light(GL_LIGHT1)
         self.scene = Scene(game)
-
-        # Initialize the opengl view
-        self.light0.ambient  = (0.05, 0.05, 0.05, 1.0)
-        self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
-        self.light0.position = (400, 400, 400, 1.0)
-        self.light0.set()
-        self.light1.ambient  = (0.05, 0.05, 0.05, 1.0)
-        self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
-        self.light1.position = (0, 0, 400, 1.0)
-        self.light1.set()
-
         viewport.setCaption("%s 3D View" % BZFlag.name)
         def onDrawFrame():
             game.update()
@@ -166,8 +154,19 @@ class ThreeDView:
            world, with transient objects such as players and flags
            """
         self.camera.load()
-        self.scene.render()
+        # Set up the light so it is in world space not cam space
+        self.light0 = Light(GL_LIGHT0)
+        self.light1 = Light(GL_LIGHT1)
+        self.light0.ambient  = (0.05, 0.05, 0.05, 1.0)
+        self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
+        self.light0.position = (400, 400, 400, 1.0)
+        self.light0.set()
+        self.light1.ambient  = (0.05, 0.05, 0.05, 1.0)
+        self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
+        self.light1.position = (0, 0, 400, 1.0)
+        self.light1.set()
 
+        self.scene.render()
 
 class ThreeDController:
     """A controller which attaches to the given view and viewport, providing camera control. """
