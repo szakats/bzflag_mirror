@@ -5,13 +5,13 @@ from OpenGL.GL import *
 import math
 
 
-class GlowSphere(Drawable.ParticleArray):
+class GlowSphere(Drawable.SpriteArray):
     """An example particle system that draws glowing balls positioned on the surface of a sphere"""
     textureName = 'spark.png'
 
     def __init__(self, numParticles=100):
         self.model = ParticleSystem.Fountain(numParticles)
-        Drawable.ParticleArray.__init__(self, numParticles)
+        Drawable.SpriteArray.__init__(self, numParticles)
         self.model.attachDrawable(self)
 
         self.time = Animated.Timekeeper()
@@ -24,7 +24,7 @@ class GlowSphere(Drawable.ParticleArray):
         self.model.integrate(self.time.step())
         glDisable(GL_LIGHTING)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE)
-        Drawable.ParticleArray.draw(self, rstate)
+        Drawable.SpriteArray.draw(self, rstate)
         glEnable(GL_LIGHTING)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 

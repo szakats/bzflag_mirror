@@ -1,6 +1,6 @@
-""" BZFlag.UI.Drawable.Particle
+""" BZFlag.UI.Drawable.Sprite
 
-This drawable provides a simple interface for drawing textured particles from
+This drawable provides a simple interface for drawing textured sprites from
 a Numeric array of points. The underlying implementation can change to support
 acceleration via OpenGL extensions like NV_point_sprite.
 """
@@ -39,11 +39,11 @@ GL_COORD_REPLACE_NV       = 0x8862
 GL_POINT_SPRITE_R_MODE_NV = 0x8863
 
 
-__all__ = ('ParticleArray',)
+__all__ = ('SpriteArray',)
 
 
-class ParticleArray(GLDrawable):
-    """A drawable that picks a ParticleRenderer implementation at runtime.
+class SpriteArray(GLDrawable):
+    """A drawable that picks a SpriteRenderer implementation at runtime.
        The goal was to hide most of the differences between software billboarding
        and extensions like NV_point_sprite, but that doesn't turn out to be practical.
        Point sprites will only be used if allowPointSprite is set and they are available.
@@ -64,7 +64,7 @@ class ParticleArray(GLDrawable):
             self.render.textures = (None,None,None) + self.render.textures
             self.renderer = PointSpriteRenderer(shape)
         else:
-            self.renderer = SoftwareParticleRenderer(shape)
+            self.renderer = SoftwareSpriteRenderer(shape)
 
         # Reference public render state
         self.vertices = self.renderer.points
@@ -75,11 +75,11 @@ class ParticleArray(GLDrawable):
         self.renderer.draw(rstate)
 
 
-class SoftwareParticleRenderer(VertexArray):
-    """A ParticleRenderer that does all billboarding in software"""
+class SoftwareSpriteRenderer(VertexArray):
+    """A SpriteRenderer that does all billboarding in software"""
     def __init__(self, shape):
         # This array format is somewhat wasteful, but we need at least T2F, C4F, and V3F :(
-        # We need room for one quad per particle.
+        # We need room for one quad per sprite.
         VertexArray.__init__(self, shape + (4,), GL_T2F_C4F_N3F_V3F)
         self.numVertices = multiply.reduce(self.shape)
 
@@ -116,7 +116,7 @@ class SoftwareParticleRenderer(VertexArray):
 
 
 class PointSpriteRenderer(VertexArray):
-    """A ParticleRenderer that uses the NV_point_sprite extension to accelerate billboarding"""
+    """A SpriteRenderer that uses the NV_point_sprite extension to accelerate billboarding"""
     def __init__(self, shape):
         VertexArray.__init__(self, shape, GL_C4F_N3F_V3F)
         self.numVertices = multiply.reduce(self.shape)
@@ -138,7 +138,7 @@ class PointSpriteRenderer(VertexArray):
         ## FIXME: This isn't correct. It's still yet to be determined whether
         ##        it's possible to get the same size function that normal geometry
         ##        uses. There also appears to be a maximum point sprite size of 64 pixels
-        ##        on my card, which just won't do for some uses of particles.
+        ##        on my card, which just won't do for some uses of sprites.
         #f = 1 / tan(rstate.viewport.fov / 2)
         #glPointParameterfvEXT(GL_POINT_DISTANCE_ATTENUATION_EXT, (0.1, 0, 0))
         #glPointParameterfEXT(GL_POINT_SIZE_MIN_EXT, 0)
@@ -146,7 +146,7 @@ class PointSpriteRenderer(VertexArray):
 
         # Activate GL_COORD_REPLACE_NV only on texture unit 3. According to the
         # implementation notes, this is the only way it will actually be hardware
-        # accelerated on the GeForce 3. ParticleArray helps us out by sticking
+        # accelerated on the GeForce 3. SpriteArray helps us out by sticking
         # None in texture units 0 through 2.
         glActiveTextureARB(GL_TEXTURE3_ARB)
         glTexEnvi(GL_POINT_SPRITE_NV, GL_COORD_REPLACE_NV, GL_TRUE)

@@ -30,7 +30,7 @@ from Teleporter import *
 from Array import *
 from TestWidget import *
 from Vector import *
-from Particle import *
+from Sprite import *
 
 from Box import detectBoxDrawables
 from Pyramid import detectPyramidDrawables
