@@ -25,6 +25,25 @@ texture pages.
 
 import pygame
 from pygame.locals import *
+from BZFlag import Util
+
+
+class RenderedFont:
+    """A single font size and style, rendered to one or more textures"""
+    pass
+
+
+
+class Font:
+    """Represents all sizes of one scalable font."""
+    def __init__(self, filename):
+        pass
+
+    
+        
+def draw(position, text, color=(1,1,1,1)):
+    pass
+
 
 
 ### The End ###

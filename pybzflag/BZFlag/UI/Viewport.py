@@ -60,7 +60,6 @@ class Viewport:
         self.rootView = self
 
     def render(self):
-        self.evalViewport()
         if self.visible and self.size[0] > 0 and self.size[1] > 0:
             for f in self.renderSequence:
                 f()
@@ -231,6 +230,11 @@ class OpenGLViewport(PygameViewport):
     def getModeFlags(self):
         import pygame
         return PygameViewport.getModeFlags(self) | pygame.OPENGL
+
+    def render(self):
+        """Reevaluate our viewport, then do the usual rendering sequence"""
+        self.evalViewport()
+        PygameViewport.render(self)
 
     def region(self, rect):
         """Return a class that represents a rectangular subsection of this viewport.

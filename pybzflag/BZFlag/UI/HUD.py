@@ -22,6 +22,7 @@ Views and utilities for rendering the Heads Up Display
 #
 
 from OpenGL.GL import *
+from BZFlag.UI import GLText
 
 
 class Panel:
@@ -39,7 +40,6 @@ class Panel:
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_TEXTURE_2D)
         glLoadIdentity()
-
         size = self.viewport.size
 
         def square():
@@ -62,5 +62,25 @@ class Panel:
         square()
         glEnd()
 
+
+class Text:
+    """A view that draws a block of text"""
+    def __init__(self, viewport, text=""):
+        self.text = text
+        viewport.fov = None
+        self.viewport = viewport
+        viewport.onDrawFrame.observe(self.render)
+
+    def render(self):
+        glEnable(GL_BLEND)
+        glDisable(GL_LIGHTING)
+        glDisable(GL_CULL_FACE)
+        glDisable(GL_COLOR_MATERIAL)
+        glDisable(GL_DEPTH_TEST)
+        glDisable(GL_TEXTURE_2D)
+        glLoadIdentity()
+        size = self.viewport.size
+
+        GLText.draw((0, size[1]), self.text, (1,1,0,1))
 
 ### The End ###

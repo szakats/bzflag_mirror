@@ -24,6 +24,7 @@ the full in-game experience.
 
 from BZFlag.UI import Viewport, ThreeDView, RadarView, Layout, HUD
 from BZFlag import Animated
+import BZFlag
 
 
 def attach(game, eventLoop):
@@ -62,6 +63,9 @@ def attach(game, eventLoop):
     # Another HUD panel, just for illustrative purposes
     (remaining, fooRect) = remaining.margin(0,0,padding,0).vSplit(0.9)
     HUD.Panel(viewport.region(fooRect))
+
+    # Some text in the remaining area
+    HUD.Text(viewport.region(remaining), BZFlag.name)
 
     return viewport
 
