@@ -26,11 +26,21 @@ view.camera.position = (0,0,0)
 view.camera.distance = 60
 view.camera.jump()
 
+# Read in the VRML file, putting each mesh in a separate object
 r = VRML.Reader(fileName)
+class MeshObject:
+    def __init__(self, name):
+        self.name = name
+    def __repr__(self):
+        return "<%s '%s'>" % (self.__class__.__name__, self.name)
+for (name, drawable) in r.meshes.items():        
+    view.scene.objects[MeshObject(name)] = [drawable]
 
-class ViewerModel:
-    pass
-view.scene.objects[ViewerModel()] = r.meshes.values()
+# Let the user pick objects with the left mouse button, printing the mesh name
+def onMouseButtonDown(event):
+    if event.button == 1:
+        print 'picked: %r' % view.pick(event.pos)
+viewport.onMouseButtonDown.observe(onMouseButtonDown)
 
 view.scene.preprocess()
 loop.run()
