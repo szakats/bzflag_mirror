@@ -4,8 +4,12 @@ Todo list, in no particular order:
 
   - Bots!
 
-  - A 3D client!
-
   - Write a module for generating thumbnails of world files, for sites that index bzflag worlds
 
   - Complete the MVC paradigm by implementing controller classes for the player
+
+  - convert panning & rotation in the 3d view to use the logarithmic approacher
+
+  - fix panning in 3d view
+
+  - fix lighting in 3d view
