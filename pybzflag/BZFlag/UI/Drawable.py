@@ -23,57 +23,34 @@ OpenGL drawing definitions for various world objects
 
 from OpenGL.GL import *
 from BZFlag.UI.Texture import Texture
-import math
 
 
 def cross(a, b):
-    """3-Vector cross product"""
     return (a[2] * b[1] - a[1] * b[2], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
 
 
 class GLDrawable:
-    """Abstract base class for an object that can be drawn to an OpenGL context.
-       This is the basic unit used by the ThreeDView to sort objects by texture,
-       so it is required that the drawable have at most one texture.
-       The blended flag is used to put objects that need blending into a
-       second rendering pass.
-       """
     def __init__(self):
-        self.texture = None
-        self.blended = False
-
-    def draw(self):
-        pass
-
-    def drawWithName(self, name):
-        """Draw the object with the given name. This is used for OpenGL object picking"""
-        pass
-
-
-class DisplayList:
-    """A drawable that stores itself to a display list before rendering"""
-    def __init__(self, *args, **kw):
         self.list = glGenLists(1)
         self.texture = None
         self.blended = False
-        glNewList(self.list, GL_COMPILE)
-        self.initList(*args, **kw)
-        glEndList()
 
     def __del__(self):
         glDeleteLists(self.list, 1)
 
     def draw(self):
-        glCallList(self.list)
+        pass
 
     def drawWithName(self, name):
         pass
 
 
-class Ground(DisplayList):
-    def initList(self, size):
+class Ground(GLDrawable):
+    def __init__(self, size):
+        GLDrawable.__init__(self)
         self.size = size / 2
         self.texture = Texture('data/ground.png')
+        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glDisable(GL_CULL_FACE)
         glBegin(GL_QUADS)
@@ -89,14 +66,20 @@ class Ground(DisplayList):
         glEnd()
         glEnable(GL_CULL_FACE)
         glPopMatrix()
+        glEndList()
+
+    def draw(self):
+        glCallList(self.list)
 
 
-class BaseTops(DisplayList):
-    def initList(self, team, center, angle, size):
+class BaseTops(GLDrawable):
+    def __init__(self, team, center, angle, size):
+        GLDrawable.__init__(self)
         self.team = team
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle * 180 / 3.1415926
         self.size = size
+        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -108,30 +91,36 @@ class BaseTops(DisplayList):
             glColor3f(0.0, 0.0, 1.0)
         if self.team == 'purple':
             glColor3f(1.0, 0.0, 1.0)
-        glBegin(GL_QUADS)
-        # Z+
-        glNormal3f(0, 0, 1);
-        glVertex3f(self.size[0], -self.size[1], self.size[2]);
-        glVertex3f(self.size[0], self.size[1], self.size[2]);
-        glVertex3f(-self.size[0], self.size[1], self.size[2]);
-        glVertex3f(-self.size[0], -self.size[1], self.size[2]);
-        # Z-
-        glNormal3f(0, 0, -1);
-        glVertex3f(-self.size[0], -self.size[1], 0);
-        glVertex3f(-self.size[0], self.size[1], 0);
-        glVertex3f(self.size[0], self.size[1], 0);
-        glVertex3f(self.size[0], -self.size[1], 0);
-        glEnd()
-        glColor3f(1.0, 1.0, 1.0)
-        glPopMatrix()
+            glBegin(GL_QUADS)
+            # Z+
+            glNormal3f(0, 0, 1);
+            glVertex3f(self.size[0], -self.size[1], self.size[2]);
+            glVertex3f(self.size[0], self.size[1], self.size[2]);
+            glVertex3f(-self.size[0], self.size[1], self.size[2]);
+            glVertex3f(-self.size[0], -self.size[1], self.size[2]);
+            # Z-
+            glNormal3f(0, 0, -1);
+            glVertex3f(-self.size[0], -self.size[1], 0);
+            glVertex3f(-self.size[0], self.size[1], 0);
+            glVertex3f(self.size[0], self.size[1], 0);
+            glVertex3f(self.size[0], -self.size[1], 0);
+            glEnd()
+            glColor3f(1.0, 1.0, 1.0)
+            glPopMatrix()
+            glEndList()
+
+    def draw(self):
+        glCallList(self.list)
 
 
-class Wall(DisplayList):
-    def initList(self, center, angle, size):
+class Wall(GLDrawable):
+    def __init__(self, center, angle, size):
+        GLDrawable.__init__(self)
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle * 180 / 3.1415926
         self.size = size
         self.texture = Texture('data/wall.png')
+        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -148,14 +137,20 @@ class Wall(DisplayList):
         glEnd()
         glEnable(GL_CULL_FACE)
         glPopMatrix()
+        glEndList()
+
+    def draw(self):
+        glCallList(self.list)
 
 
-class BoxSides(DisplayList):
-    def initList(self, center, angle, size):
+class BoxSides(GLDrawable):
+    def __init__(self, center, angle, size):
+        GLDrawable.__init__(self)
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle * 180 / 3.1415926
         self.size = size
         self.texture = Texture('data/boxwall.png')
+        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -202,14 +197,20 @@ class BoxSides(DisplayList):
         glVertex3f(-self.size[0], self.size[1], 0)
         glEnd()
         glPopMatrix()
+        glEndList()
+
+    def draw(self):
+        glCallList(self.list)
 
 
-class BoxTops(DisplayList):
-    def initList(self, center, angle, size):
+class BoxTops(GLDrawable):
+    def __init__(self, center, angle, size):
+        GLDrawable.__init__(self)
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle * 180 / 3.1415926
         self.size = size
         self.texture = Texture('data/boxtops.png')
+        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -236,16 +237,22 @@ class BoxTops(DisplayList):
         glVertex3f(self.size[0], -self.size[1], 0)
         glEnd()
         glPopMatrix()
+        glEndList()
+
+    def draw(self):
+        glCallList(self.list)
 
 
-class Pyramid(DisplayList):
-    def initList(self, center, angle, size, flip):
+class Pyramid(GLDrawable):
+    def __init__(self, center, angle, size, flip):
         # FIXME - respect flipz
+        GLDrawable.__init__(self)
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle * 180 / 3.1415926
         self.size = size;
         self.flip = flip;
         self.texture = Texture('data/pyrwall.png')
+        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -300,14 +307,20 @@ class Pyramid(DisplayList):
         glVertex3f(-self.size[0], self.size[1], 0)
         glEnd()
         glPopMatrix()
+        glEndList()
+
+    def draw(self):
+        glCallList(self.list)
 
 
-class TeleporterField(DisplayList):
-    def initList(self, center, angle, size):
+class TeleporterField(GLDrawable):
+    def __init__(self, center, angle, size):
+        GLDrawable.__init__(self)
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle * 180 / 3.1415926
         self.size = size
         self.blended = True
+        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -328,15 +341,21 @@ class TeleporterField(DisplayList):
         glEnd()
         glColor3f(1.0, 1.0, 1.0)
         glPopMatrix()
+        glEndList()
+
+    def draw(self):
+        glCallList(self.list)
 
 
-class TeleporterBorder(DisplayList):
-    def initList(self, center, angle, size, border):
+class TeleporterBorder(GLDrawable):
+    def __init__(self, center, angle, size, border):
+        GLDrawable.__init__(self)
         self.center = center
-        self.angle = angle * 180 / math.pi
+        self.angle = angle * 180 / 3.1415926
         self.size = size
         self.border = border
         self.texture = Texture('data/caution.png')
+        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -463,5 +482,9 @@ class TeleporterBorder(DisplayList):
         glVertex3f(self.border / 2, -self.size[1] - self.border, 0);
         glEnd()
         glPopMatrix()
+        glEndList()
+
+    def draw(self):
+        glCallList(self.list)
 
 ### The End ###
