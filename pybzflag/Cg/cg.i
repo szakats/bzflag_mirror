@@ -1,7 +1,15 @@
-%module Cg
+%module cg
+%{
+#include <cg.h>
+%}
 
-/* context functions */
-extern CGContext *cgCreateContext();
-extern void cgDestroyContext(CGContext*);
-extern bool cgIsContext(CGContext*);
-extern char *cgGetLastListing(CGContext*);
+/* Cg */
+// context functions
+CGcontext cgCreateContext(void);
+void cgDestroyContext(CGcontext);
+int cgIsContext(CGcontext);
+char *cgGetLastListing(CGcontext);
+
+/* CgGL */
+// profile functions
+int cgGLIsProfileSupported(int profile);
