@@ -43,7 +43,7 @@ class StatefulServer(BaseServer):
         self.options.update({
             'world':              None,
             'welcomeMessage':     BZFlag.serverWelcomeMessage,
-            'public':             1,
+            'public':             0,
             'title':              'PyBZFlag Server',
             'publicityInterval':  30 * 60,
             })
