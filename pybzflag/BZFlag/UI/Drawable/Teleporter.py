@@ -127,9 +127,9 @@ class TeleporterBorder(DisplayList):
         glBegin(GL_QUADS)
         # top
         glNormal3f(0.4, 0, 1)
-        glTexCoord2f(0.4, 0.0001)
+        glTexCoord2f(0.4, 1)
         glVertex3f(self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
-        glTexCoord2f(2 * self.border + 2 * self.size[1] + 0.4, 0.0001)
+        glTexCoord2f(2 * self.border + 2 * self.size[1] + 0.4, 1)
         glVertex3f(self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
         glTexCoord2f(2 * self.border + 2 * self.size[1] + 0.4, 0)
         glVertex3f(-self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
