@@ -43,6 +43,7 @@ view.camera.position = (0,0,0)
 view.camera.distance = 60
 view.camera.jump()
 
+viewport.clearColor  = (0.3, 0.3, 0.3, 1)
 
 # Read in the VRML file, putting each mesh in a separate object.
 # Note the abspath()- model and texture names are relative to our data directory

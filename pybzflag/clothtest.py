@@ -77,9 +77,8 @@ if __name__ == '__main__':
     view.camera.distance = 20
     view.camera.jump()
 
-    # Give us some spiffy blue and yellow highlights
+    # Set up some lighting more appropriate for this test
     viewport.clearColor  = (0.3, 0.3, 0.3, 1)
-
     view.resetLighting()
     view.lights[0].enabled  = True
     view.lights[0].diffuse  = (1, 1, 0.98, 1)

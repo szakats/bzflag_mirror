@@ -149,9 +149,9 @@ class Light:
 
     def reset(self):
         self.enabled  = False
-        self.ambient  = (0, 0, 0, 1.0)
-        self.diffuse  = (0, 0, 0, 1.0)
-        self.position = (0, 0, 0, 1.0)
+        self.ambient  = (0, 0, 0, 1)
+        self.diffuse  = (1, 1, 1, 1)
+        self.position = (0, 0, 0, 1)
 
     def set(self):
         """Set up and enable the light in the current OpenGL context"""
@@ -548,7 +548,7 @@ class View:
         self.lights[0].enabled  = True
         self.lights[0].ambient  = (0.25, 0.25, 0.25, 1.0)
         self.lights[0].diffuse  = (0.65, 0.65, 0.65, 1.0)
-        self.lights[0].position = (400, 400, 400, 1.0)
+        self.lights[0].position = (300, 400, 400, 1.0)
 
         self.lights[1].enabled  = True
         self.lights[1].ambient  = (0.05, 0.05, 0.05, 1.0)
