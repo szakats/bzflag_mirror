@@ -103,7 +103,8 @@ class World:
     def generateEmpty(self):
         """Generate an empty world"""
         self.erase()
-        self.storeSkeleton()
+        self.storeSkeletonHeader()
+        self.storeSkeletonFooter()
         self.postprocess()
 
     def loadBinary(self, f):
@@ -179,7 +180,7 @@ class World:
                     section = line
                     sectionLines = []
 
-        self.storeBlock(WorldObjects.EndOfData())
+        self.storeSkeletonFooter()
         self.postprocess()
 
     def saveText(self, f):
@@ -197,7 +198,7 @@ class World:
         self.gameStyle = None
         self.lifetime = 'permanent'     # For client-side world caching
 
-    def storeSkeleton(self):
+    def storeSkeletonHeader(self):
         """Adds required objects to the world that are only present in the binary format"""
         self.storeBlock(WorldObjects.Style())
         self.storeBlock(WorldObjects.Wall(
@@ -208,6 +209,9 @@ class World:
             center = [400, 0, 0],
             angle  = math.pi,
             ))
+
+    def storeSkeletonFooter(self):
+        self.storeBlock(WorldObjects.EndOfData())
 
     def storeBlock(self, block):
         """Store one block class. This will be called while loading a world,

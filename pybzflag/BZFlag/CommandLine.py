@@ -41,6 +41,7 @@ class Parser(optik.OptionParser):
        """
     def __init__(self, cls, **kw):
         optik.OptionParser.__init__(self)
+        self.kw = kw
 
         if type(cls) != type(()) and type(cls) != type([]):
             classes = [cls]
@@ -53,15 +54,6 @@ class Parser(optik.OptionParser):
             self.instances.append(inst)
             availableOpts.extend(inst.options.keys())
 
-        # Separate our keyword args into extra defaults and options
-        # to pass directly to the classes.
-        extraDefaults = {}
-        self.extraOptions = {}
-        for key in kw:
-            if key in availableOpts:
-                extraDefaults[key] = kw[key]
-            else:
-                self.extraOptions[key] = kw[key]
 
         defaults = {
             'team':       'rogue',
@@ -69,7 +61,7 @@ class Parser(optik.OptionParser):
             'playerType': 'tank',
             'interface':  ':%s' % Protocol.Common.defaultPort,
             }
-        defaults.update(extraDefaults)
+        defaults.update(self.kw)
 
         def add(*names, **kw):
             """Wrapper around self.add_option that enforces our conventions about defaults"""
@@ -119,7 +111,7 @@ class Parser(optik.OptionParser):
             except KeyError:
                 pass
 
-        options.update(self.extraOptions)
+        options.update(self.kw)
 
         for inst in self.instances:
             inst.cmdLineValues = values
