@@ -239,7 +239,7 @@ def detectBoxDrawables(box):
     axisRatio = majorAxis / minorAxis
 
     # If the box isn't on the ground and it's fairly flat, assume it's a platform
-    if height < 8:
+    if height < 8 and box.center[2] > 1:
         sides = PlatformSides(box)
 
     # If the box is fairly large and squareish, use a square oil-stain texture
