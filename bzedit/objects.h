@@ -2,8 +2,10 @@
 #define __OBJECTS_H__
 
 #include "camera.h"
-#include <iostream.h>
+#include <iostream>
 #include <string>
+
+using namespace std;
 
 class World;
 

@@ -2,10 +2,12 @@
 #define __MAIN_WINDOW__
 
 #include <gnome.h>
-#include <stl.h>
+#include <string>
 #include "ui_edit.h"
 #include "ui_list.h"
 #include "world.h"
+
+using namespace std;
 
 namespace UI {
 

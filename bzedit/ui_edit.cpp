@@ -1,9 +1,11 @@
 #include "ui_edit.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <iostream.h>
+#include <iostream>
 #include "textures.h"
 #include "ui_main.h"
+
+using namespace std;
 
 namespace UI {
 

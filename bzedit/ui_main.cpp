@@ -1,7 +1,7 @@
 #include "ui_main.h"
 #include <gnome.h>
 #include <stdio.h>
-#include <iostream.h>
+#include <iostream>
 
 namespace UI {
 
@@ -795,7 +795,7 @@ gint testw(GtkWidget *button, gpointer data) {
   // retrieve a temporary filename to write the world to
   char filename[256];
   strcpy(filename, "/tmp/bzedit-XXXXXX");
-  mktemp(filename);
+  mkstemp(filename);
   cout << "Writing world file to " << filename << "...\n";
   return TRUE;
 }
