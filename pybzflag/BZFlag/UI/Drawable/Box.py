@@ -35,16 +35,16 @@ class BoxSides(DisplayList):
         # Default wall
         # This is brick, so we want to make sure we don't end up
         # with a fractional number of bricks. This brick texture has
-        # 5 bricks horizontally and 10 vertically.
-        self.textureNames = ["brick.jpeg"]
+        # 5 bricks vertically and about 5 horizontally.
+        self.textureNames = ["brick.jpeg", "wall_grime.jpeg"]
         numBricks = (int(box.size[0]),
                      int(box.size[1]),
-                     int(box.size[2] * 2))
+                     int(box.size[2]))
         self.texRepeats = (numBricks[0] / 5,
                            numBricks[1] / 5,
-                           numBricks[2] / 10)
-        self.tex2Repeats = (box.size[0] / 2,
-                            box.size[1] / 2,
+                           numBricks[2] / 5)
+        self.tex2Repeats = (box.size[0] / 20,
+                            box.size[1] / 20,
                             1)
 
         # Bridges and platforms
