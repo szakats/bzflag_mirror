@@ -109,9 +109,12 @@ class StatefulServer(BaseServer):
         self.game = Game.Game()
         self.binaryWorld = None
         self.worldBlockSize = 1000
+
         self.options.update({
             'world': None,
             })
+
+        Event.attach(self, 'onAttemptEnter', 'onEnter')
 
         def setOptions(**options):
             if 'world' in options.keys():
@@ -151,6 +154,24 @@ class StatefulServer(BaseServer):
         msg.socket.write(self.outgoing.MsgGetWorld(
             remaining = len(self.binaryWorld) - msg.offset - len(block),
             data = block))
+
+    def onMsgEnter(self, msg):
+        """Sent by the client to request entry into the game.
+           the onEnter event provides a hook for denying the
+           requests. Default is to allow.
+
+           To veto the join request, onEnter should return a string
+           corresponding to one of the Common.RejectionCode values.
+           """
+        reason = self.onAttemptEnter(msg)
+        if reason:
+            # An observer vetoed the request, deny it
+            # using the given reason
+            msg.socket.write(self.outgoing.MsgReject(reason=reason))
+        else:
+            # Accept it. The player is now in the game.
+            msg.socket.write(self.outgoing.MsgAccept())
+            self.onEnter(msg)
 
 
 class StandardServer(StatefulServer):
