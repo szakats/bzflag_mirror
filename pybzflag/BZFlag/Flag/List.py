@@ -174,6 +174,11 @@ class ThiefFlag(FlagBase):
     type         = ['unstable', 'good']
     description  = "Steal flags.  Small and fast but can't kill."
 
+class BurrowFlag(FlagBase):
+    abbreviation = "BU"
+    type         = ['unstable', 'good']
+    description  = "Tank burrows underground, impervious to normal shots, but can be steamrolled by anyone!"
+
 ########################################### Bad flags
 
 class ColorblindnessFlag(FlagBase):
