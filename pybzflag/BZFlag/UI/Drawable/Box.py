@@ -413,7 +413,7 @@ class GrassEdge(Sides):
                            0.95)
         self.tex2Repeats = (self.size[0] / 400,
                            self.size[1] / 400,
-                           1)
+                           0)
 
 
 def detectBoxDrawables(box):
