@@ -41,12 +41,15 @@ def attach(game, eventLoop):
     hudSize = Animated.Value(fullHudSize, Animated.SigmoidApproach(fullHudSize, 15, (0, fullHudSize)))
     def onSetupFrame():
         hudSize.integrate(time.step())
+    toggleOpen = True
     def onKeyDown(event):
         if event.unicode == " ":
-            if hudSize.f.target == fullHudSize:
+            if toggleOpen:
                 hudSize.f.target = 0
+                toggleOpen = False
             else:
                 hudSize.f.target = fullHudSize
+                toggleOpen = True
     viewport.onSetupFrame.observe(onSetupFrame)
     viewport.onKeyDown.observe(onKeyDown)
     (remaining, hudRect) = remaining.hSplit(lambda r: (1-hudSize.value) * r[3])
