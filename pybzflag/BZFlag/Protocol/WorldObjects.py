@@ -30,6 +30,8 @@ from BZFlag.Protocol import Common
 from BZFlag import Errors
 import re, math
 
+def cross(a, b):
+    return (a[2] * b[1] - a[1] * b[2], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
 
 class BlockHeader(Struct):
     entries = [
@@ -422,6 +424,7 @@ class Pyramid(WorldObject):
 	    self.angle = angle * 180 / 3.1415926
 	    self.size = size;
 	    self.flip = flip;
+	    self.texture = BZFlag.UI.Texture.Texture('data/pyrwall.png')
 	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
 	    OpenGL.GL.glPushMatrix()
 	    OpenGL.GL.glTranslatef(*self.center)
@@ -439,11 +442,42 @@ class Pyramid(WorldObject):
 	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], 0)
 	    OpenGL.GL.glEnd()
 	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLES)
-	    # FIXME - implement vector cross product to do this correctly
 	    # X+ side
-	    # X- side
+	    norm = cross((self.size[0], -self.size[1], self.size[2]), (self.size[0] * 2, 0, 0))
+	    OpenGL.GL.glNormal3f(*norm)
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(self.size[0] / 4, self.size[2] / 4)
+	    OpenGL.GL.glVertex3f(0, 0, self.size[2])
+	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
+	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], 0)
 	    # Y+ side
+	    norm = cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0))
+	    OpenGL.GL.glNormal3f(*norm)
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(self.size[1] / 4, self.size[2] / 4)
+	    OpenGL.GL.glVertex3f(0, 0, self.size[2])
+	    OpenGL.GL.glTexCoord2f(self.size[1] / 2, 0)
+	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], 0)
+	    # X- side
+	    norm = cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0))
+	    OpenGL.GL.glNormal3f(*norm)
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(self.size[0] / 4, self.size[2] / 4)
+	    OpenGL.GL.glVertex3f(0, 0, self.size[2])
+	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
+	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], 0)
 	    # Y- side
+	    norm = cross((-self.size[0], self.size[1], self.size[2]), (0, self.size[1] * 2, 0))
+	    OpenGL.GL.glNormal3f(*norm)
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(self.size[1] / 4, self.size[2] / 4)
+	    OpenGL.GL.glVertex3f(0, 0, self.size[2])
+	    OpenGL.GL.glTexCoord2f(self.size[1] / 2, 0)
+	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], 0)
 	    OpenGL.GL.glEnd()
 	    OpenGL.GL.glPopMatrix()
 	    OpenGL.GL.glEndList()
