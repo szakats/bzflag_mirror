@@ -44,7 +44,7 @@ class Sides(DisplayList):
         except IndexError:
             pass
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -176,7 +176,7 @@ class End(DisplayList):
     texScale = 20
     tex2Scale = 300
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         glPushMatrix()
         glTranslatef(0, 0, self.height)
         glNormal3f(0, 0, 1)
@@ -201,7 +201,7 @@ class MetalEnd(DisplayList):
     textureName = 'metal_box.jpeg'
     uvMap = ( (0,0), (1,0), (1,1), (0,1) )
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         glPushMatrix()
         glTranslatef(0, 0, self.height)
         glNormal3f(0, 0, 1)
@@ -251,7 +251,7 @@ class TopDecal(DisplayList):
         self.angle = box.angle
         self.render.decal = True
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         glPushMatrix()
         glNormal3f(0, 0, -1)
         glTranslatef(*self.center)
@@ -339,7 +339,7 @@ class FixedDecal(DisplayList):
         # Compute a normal to the given plane
         self.normal = Vector.normalize(Vector.cross(vx, vy))
         
-    def drawToList(self):
+    def drawToList(self, rstate):
         glNormal3f(*self.normal)
         glBegin(GL_QUADS)
         glTexCoord2f(0,0)

@@ -33,7 +33,7 @@ class Ground(DisplayList):
         self.size = size / 2
         self.render.textures[1].texEnv = GL_MODULATE
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         glPushMatrix()
         glDisable(GL_CULL_FACE)
         glBegin(GL_QUADS)

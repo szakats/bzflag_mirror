@@ -115,7 +115,7 @@ class Texture:
         except:
             pass
 
-    def bind(self, view=None):
+    def bind(self):
         """Bind this texture to self.target in the current OpenGL context"""
         global currentTexture
         if self != currentTexture.setdefault(self.target, None):
@@ -150,7 +150,7 @@ class AnimatedTexture:
             1/framerate * len(self.frames), (0, len(self.frames))))
         self.time = Animated.Timekeeper()
 
-    def bind(self, view=None):
+    def bind(self):
         self.frameNumber.integrate(self.time.step())
         self.frames[int(self.frameNumber.value)].bind()
         

@@ -31,7 +31,7 @@ class BaseTops(DisplayList):
         self.angle = angle
         self.size = size
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)

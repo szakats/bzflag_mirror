@@ -37,7 +37,7 @@ class TeleporterField(DisplayList):
         self.texRepeats = (self.size[2] / (texScale * texAspect),
                            self.size[1] / texScale)
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         glBlendFunc(GL_SRC_ALPHA, GL_ONE)
         glDisable(GL_LIGHTING)
         glPushMatrix()
@@ -80,7 +80,7 @@ class TeleporterBorder(DisplayList):
         self.size = size
         self.border = border
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)

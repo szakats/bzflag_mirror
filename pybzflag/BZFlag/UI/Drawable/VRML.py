@@ -437,7 +437,7 @@ class Mesh(DisplayList):
             del tri.normalTotal
             del tri.normalCounts
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         """Splat out our stored color, matrix, and triangles to a display list"""
         glPushMatrix()
         if self.color:

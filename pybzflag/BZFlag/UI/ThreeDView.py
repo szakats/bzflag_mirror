@@ -81,8 +81,8 @@ class Scene(ThreeDRender.Scene):
        This class observes the current game state, making the necessary updates when
        the world is modified, players move, etc.
        """
-    def __init__(self, view, game):
-        ThreeDRender.Scene.__init__(self, view)
+    def __init__(self, game):
+        ThreeDRender.Scene.__init__(self)
         self.game = game
         self.playerTanks = {}
 
@@ -119,7 +119,7 @@ class ThreeDView(ThreeDRender.View):
        This can be used for observer views, 1st person game views, and editing.
        """
     def __init__(self, game, viewport):
-        ThreeDRender.View.__init__(self, viewport, Scene(self, game))
+        ThreeDRender.View.__init__(self, viewport, Scene(game))
         viewport.setCaption("%s 3D View" % BZFlag.name)
 
         def onDrawFrame():

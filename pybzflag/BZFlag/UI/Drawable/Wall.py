@@ -59,7 +59,7 @@ class WallTop(DisplayList):
         self.angle = wall.angle
         (self.center, self.size) = thickify(wall.center, wall.size, wall.angle)
         
-    def drawToList(self):
+    def drawToList(self, rstate):
         glPushMatrix()
         glTranslatef(*self.center)
         glTranslatef(0, 0, self.size[2])

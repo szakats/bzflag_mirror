@@ -155,7 +155,7 @@ class Pyramid(DisplayList):
         if self.water:
             self.render.blended = True
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         if self.render.blended:
             glColor4f(1, 1, 1, 0.6)
             glDisable(GL_LIGHTING)

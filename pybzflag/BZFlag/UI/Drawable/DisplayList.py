@@ -31,7 +31,7 @@ class DisplayList(GLDrawable):
         GLDrawable.__init__(self)
         self.list = glGenLists(1)
         self.set(*args, **kw)
-        self.init()
+        self.dirty = True
 
     def __setstate__(self, state):
         """This is called to unpickle a DisplayList. We perform the usual
@@ -47,29 +47,26 @@ class DisplayList(GLDrawable):
            """
         pass
 
-    def init(self):
-        """Called on init after setting up the display list. By default this
-           builds the display lists, but this hook lets subclasses override that.
-           """
-        self.buildList()
-
     def __del__(self):
         try:
             glDeleteLists(self.list, 1)
         except:
             pass
 
-    def buildList(self):
+    def buildList(self, rstate):
         """Rebuild this object's display list."""
         glNewList(self.list, GL_COMPILE)
-        self.drawToList()
+        self.drawToList(rstate)
         glEndList()
+        self.dirty = False
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         """Stub where subclasses will do their drawing"""
         pass
 
-    def draw(self):
+    def draw(self, rstate):
+        if self.dirty:
+            self.buildList(rstate)
         glCallList(self.list)
 
 

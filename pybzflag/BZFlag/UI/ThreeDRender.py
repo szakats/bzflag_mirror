@@ -33,6 +33,32 @@ from OpenGL.GL.ARB.multitexture import *
 import sys
 
 
+class RenderState:
+    """Holder for state information passed down to all objects being rendered"""
+    def __init__(self, view):
+        self.view = view
+        self.viewport = view.viewport
+        self.picking = None
+
+
+class PickingState:
+    """Holds render state information specific to picking. This is passed
+       to render passes when doing a picking render, so the passes can tag
+       all their objects with names.
+       """
+    def __init__(self):
+        self.nextName = 1
+        self.names = {}
+
+    def name(self, drawable):
+        """Move to the next OpenGL name ID, and associate it with the
+           given drawable object.
+           """
+        self.names[self.nextName] = drawable
+        glLoadName(self.nextName)
+        self.nextName += 1
+
+
 class Camera:
     """Abstraction for the OpenGL transforms used to set up the camera.
        For 1st person operation, use 'position', 'azimuth' and 'elevation',
@@ -136,45 +162,23 @@ class TextureGroup(Drawable.DisplayList):
         else:
             self.dynamic.append(drawable)
 
-    def init(self):
-        """Don't rebuild the list on init"""
-        pass
-
-    def drawToList(self):
+    def drawToList(self, rstate):
         for drawable in self.static:
-            drawable.drawToList()
+            drawable.drawToList(rstate)
 
-    def draw(self):
-        Drawable.DisplayList.draw(self)
+    def draw(self, rstate):
+        Drawable.DisplayList.draw(self, rstate)
         for drawable in self.dynamic:
-            drawable.draw()
+            drawable.draw(rstate)
 
-    def pickingDraw(self, picking):
+    def pickingDraw(self, rstate):
         """Alternate draw function used in picking, that assigns names to all drawables"""
         for drawable in self.static:
-            picking.name(drawable)
-            drawable.drawToList()
+            rstate.picking.name(drawable)
+            drawable.drawToList(rstate)
         for drawable in self.dynamic:
-            picking.name(drawable)
-            drawable.drawToList()
-
-
-class PickingState:
-    """Holds render state information specific to picking. This is passed
-       to render passes when doing a picking render, so the passes can tag
-       all their objects with names.
-       """
-    def __init__(self):
-        self.nextName = 1
-        self.names = {}
-
-    def name(self, drawable):
-        """Move to the next OpenGL name ID, and associate it with the
-           given drawable object.
-           """
-        self.names[self.nextName] = drawable
-        glLoadName(self.nextName)
-        self.nextName += 1
+            rstate.picking.name(drawable)
+            drawable.drawToList(rstate)
 
 
 class RenderPass:
@@ -186,11 +190,10 @@ class RenderPass:
     # Rendering passes with a higher priority get a chance to filter drawables first
     priority = None
 
-    def __init__(self, view):
-        self.view = view
+    def __init__(self):
         self.erase()
 
-    def render(self, picking=None):
+    def render(self, rstate):
         """Run this rendering pass- if picking is not none, this is a picking render
            and all objects shoudl be given names.
            """
@@ -241,20 +244,20 @@ class BasicRenderPass(RenderPass):
     def preprocess(self):
         """This builds display lists for all our texture groups"""
         for texgroup in self.textureGroups.itervalues():
-            texgroup.buildList()
+            texgroup.dirty = True
 
-    def render(self, picking=None):
+    def render(self, rstate):
         """Perform one render pass- iterates through each texture group in the pass,
            binding the pass' texture and drawing the texture group.
            """
-        if picking:
+        if rstate.picking:
             for group in self.textureGroups.itervalues():
-                group.pickingDraw(picking)
+                group.pickingDraw(rstate)
         else:
             for (textures, group) in self.textureGroups.iteritems():
-                if not picking:
+                if not rstate.picking:
                     self.bindTextures(textures)
-                group.draw()
+                group.draw(rstate)
 
     def bindTextures(self, textures):
         """Bind the given list of 2D textures in the current OpenGL context.
@@ -272,7 +275,7 @@ class BasicRenderPass(RenderPass):
                 for unit in GLExtension.textureUnits:
                     glActiveTextureARB(unit)
                     if texIndex < len(textures):
-                        textures[texIndex].bind(self.view)
+                        textures[texIndex].bind()
                         glEnable(GL_TEXTURE_2D)
                     else:
                         glDisable(GL_TEXTURE_2D)
@@ -280,7 +283,7 @@ class BasicRenderPass(RenderPass):
             else:
                 # No multitexturing, only enable the current texture unit
                 glEnable(GL_TEXTURE_2D)
-                textures[0].bind(self.view)
+                textures[0].bind()
         else:
             if GLExtension.multitexture:
                 # We have multitexturing, make sure all the texture units are disabled
@@ -300,10 +303,10 @@ class BlendedRenderPass(BasicRenderPass):
     def filter(self, drawable):
         return drawable.render.blended
 
-    def render(self, picking=None):
+    def render(self, rstate):
         glDepthMask(0)
         glEnable(GL_BLEND)
-        BasicRenderPass.render(self, picking)
+        BasicRenderPass.render(self, rstate)
         glDisable(GL_BLEND)
         glDepthMask(1)
 
@@ -316,12 +319,12 @@ class DecalRenderPass(BasicRenderPass):
     def filter(self, drawable):
         return drawable.render.decal
 
-    def render(self, picking=None):
+    def render(self, rstate):
         glDepthMask(0)
         glEnable(GL_POLYGON_OFFSET_FILL)
         glEnable(GL_BLEND)
         glPolygonOffset(-2, -4)
-        BasicRenderPass.render(self, picking)
+        BasicRenderPass.render(self, rstate)
         glDisable(GL_BLEND)
         glDisable(GL_POLYGON_OFFSET_FILL)
         glDepthMask(1)
@@ -335,23 +338,51 @@ class OverlayRenderPass(BasicRenderPass):
     def filter(self, drawable):
         return drawable.render.overlay
 
-    def render(self, picking=None):
+    def render(self, rstate): 
         glClear(GL_DEPTH_BUFFER_BIT)
-        BasicRenderPass.render(self, picking)
+        BasicRenderPass.render(self, rstate)
 
+
+class TextureRenderPass(RenderPass):
+    """A rendering pass for dynamic textures that need to use the backbuffer as
+       temporary space. This must come before all passes that should be visible
+       at display flip time. Individual drawables are responsible for clearing
+       the depth and color buffer.
+
+       This is descended from RenderPass rather than BasicRenderPass since it
+       does not need or want texture sorting.
+       """
+    filterPriority = 10
+    renderPriority = 150
+
+    def __init__(self):
+        self.drawables = []
+
+    def filter(self, drawable):
+        return isinstance(drawable, Texture.Texture)
+
+    def add(self, drawable):
+        self.drawables.append(drawable)
+
+    def render(self, rstate):
+        if rstate.picking:
+            return
+        for drawable in self.drawables:
+            drawable.draw(rstate)
+            
 
 class Scene:
     """Set of all the objects this view sees, organized into rendering passes
        and sorted by texture. Multiple rendering passes are necessary to deal
        with blended objects, and texture sorting is an important OpenGL optimization.
        """
-    def __init__(self, view):
-        self.view = view
+    def __init__(self):
         self.erase()
-        self.passes = [BasicRenderPass(view),
-                       BlendedRenderPass(view),
-                       OverlayRenderPass(view),
-                       DecalRenderPass(view)]
+        self.passes = [BasicRenderPass(),
+                       BlendedRenderPass(),
+                       OverlayRenderPass(),
+                       DecalRenderPass(),
+                       TextureRenderPass()]
 
     def erase(self):
         self.objects = {}
@@ -362,8 +393,19 @@ class Scene:
            """
         drawables = object.getDrawables()
         for drawable in drawables:
-            drawable.parent(object)
+            drawable.parent(object)            
         self.objects.setdefault(object, []).extend(drawables)
+
+        # Check for any textures that are also drawables. This supports dynamic
+        # textures that must render themselves before use. It's a bit hackish
+        # to put a special case here, but a lot cleaner than forcing scene objects
+        # to know about drawables required by animated textures.
+        for drawable in drawables:    
+            for texture in drawable.render.textures:
+                if isinstance(texture, Drawable.GLDrawable):
+                    texture.parent(object)
+                    self.objects[object].append(texture)
+                    
 
     def preprocess(self):
         """Rebuilds rendering passes. Currently this is necessary when the world changes."""
@@ -390,7 +432,7 @@ class Scene:
         for rpass in self.passes:
             rpass.preprocess()
 
-    def render(self):
+    def render(self, rstate):
         """Render the scene to the current OpenGL context"""
         glDisable(GL_BLEND)
         glEnable(GL_DEPTH_TEST)
@@ -401,14 +443,15 @@ class Scene:
         glColor4f(1,1,1,1)
 
         for rpass in self.passes:
-            rpass.render()
+            rpass.render(rstate)
 
-    def pick(self, viewport, pos):
+    def pick(self, rstate, pos):
         """Returns the nearest scene object that was rendered at the given screen
            coordinates. If no object was rendered at this postion, returns None.
-           """
+           """        
         # Flip the Y axis to convert from the traditional top-left-based coordinate
         # system to OpenGL's bottom-left-based coordinate system.
+        viewport = rstate.viewport
         pos = (pos[0], viewport.size[1] - pos[1])
 
         glSelectBuffer(len(self.objects) * 4)
@@ -423,9 +466,9 @@ class Scene:
         viewport.setProjectionMatrix()
         glMatrixMode(GL_MODELVIEW)
 
-        picking = PickingState()
+        rstate.picking = PickingState()
         for rpass in self.passes:
-            rpass.render(picking)
+            rpass.render(self, rstate)
 
         glMatrixMode(GL_PROJECTION)
         glPopMatrix()
@@ -439,14 +482,14 @@ class Scene:
                 if hit[1] < depth:
                     depth = hit[1]
                     choose = hit[2]
-            return picking.names[choose[0]].object
+            return rstate.picking.names[choose[0]].object
         return None
 
 class View:
     """A generic 3D view with multiple rendering passes, usable with OpenGLViewport."""
     def __init__(self, viewport, scene=None):
         if not scene:
-            scene = Scene(self)
+            scene = Scene()
         self.viewport = viewport
         self.camera = Camera()
         self.scene = scene
@@ -473,13 +516,12 @@ class View:
         """Set up lighting and render the scene. This is called
            when the camera has already been set up elsewhere.
            """
-        # Set up the light so it is in world space not cam space
         for light in self.lights:
             light.set()
-        self.scene.render()
+        self.scene.render(RenderState(self))
 
     def pick(self, pos):
         self.camera.load()
-        return self.scene.pick(self.viewport, pos)
+        return self.scene.pick(RenderState(self), pos)
 
 ### The End ###

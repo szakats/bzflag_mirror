@@ -41,9 +41,9 @@ class Group(DisplayList):
         self.render = children[0].render
         self.children = children
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         for child in self.children:
-            child.drawToList()
+            child.drawToList(rstate)
 
 
 class Transformer(GLDrawable):
@@ -58,7 +58,7 @@ class Transformer(GLDrawable):
         self.render = copy.copy(child.render)
         self.render.static = False
 
-    def draw(self):
+    def draw(self, rstate):
         glPushMatrix()
         for transform in self.transforms:
             transform.apply()
