@@ -119,10 +119,10 @@ class BaseSocket:
         """Accept an incoming connection on a socket that has been bind()'ed,
            returning a Socket class for the new connection.
            """
-        s = TCPSocket(None)
+        s = TCPSocket()
         (s.socket, s.address) = self.socket.accept()
-        self.setNodelay(s.socket)
-        self.setBlocking(s.socket)
+        self.setNodelay()
+        self.setBlocking()
         return s
 
     def pollRead(self, eventLoop):
@@ -166,6 +166,8 @@ class BaseSocket:
 
 class TCPSocket(BaseSocket):
     """Concrete TCP socket that includes buffered send and receive"""
+    protocol = 'tcp'
+    
     def __init__(self):
         self.readBuffer = ''
         self.writeBuffer = ''
@@ -260,6 +262,8 @@ class UDPSocket(BaseSocket):
     """Concrete UDP socket that includes unbuffered send and receive.
        Here we assume we can send/receive the whole message, or nothing at all.
        """
+    protocol = 'udp'
+
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.setBlocking()

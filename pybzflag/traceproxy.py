@@ -40,7 +40,7 @@ client.onConnect.observe(onClientConnect)
 
 # Dump a message contents to stdout. It should already be
 # mostly human readable, thanks to the Protocol module.
-def dumpMessage(msg, direction):
+def dumpMessage(msg, direction, protocol):
     name = msg.__class__.__name__
 
     # Recursively build a list of (key,value) tuples that will be displayed
@@ -67,7 +67,7 @@ def dumpMessage(msg, direction):
         return
 
     # Always dump the name, but the contents can be disabled
-    print "%s %s" % (direction, name)
+    print "%s %s %s" % (direction, protocol, name)
     if not options['names']:
         for (key, value) in buildKeys(msg):
             if key == 'data':
@@ -89,15 +89,19 @@ def dumpMessage(msg, direction):
 # Set up events to forward messages between
 # client and server, dumping them to stdout
 def onClientMessage(msg):
-    dumpMessage(msg, '<--')
-    server.clients[client.id].write(msg)
+    try:
+        server.clients[client.id].write(msg)
+        dumpMessage(msg, '<--', msg.socket.protocol)
+    except KeyError:
+        pass
     return 1
-client.onAnyMessage.observe(onClientMessage)
+client.onUnhandledMessage.replace(onClientMessage)
+
 def onServerMessage(msg):
-    dumpMessage(msg, '-->')
+    dumpMessage(msg, '-->', msg.socket.protocol)
     client.tcp.write(msg)
     return 1
-server.onAnyMessage.observe(onServerMessage)
+server.onUnhandledMessage.replace(onServerMessage)
 
 
 eventLoop.run()

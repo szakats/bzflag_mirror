@@ -50,6 +50,10 @@ class Event:
     def observe(self, callback):
         self.clients[callback] = 1
 
+    def replace(self, callback):
+        self.clients = {}
+        self.observe(callback)
+
     def unobserve(self, callback):
         del self.clients[callback]
 
@@ -188,7 +192,7 @@ class EventLoop:
             raise TypeError("Only Sockets and Timers are supported by this event loop")
 
     def remove(self, item):
-        if isinstance(item, Network.Socket):
+        if isinstance(item, Network.BaseSocket):
             self.sockets.remove(item)
             self.updateSelectDict()
 
