@@ -5,10 +5,16 @@ from Numeric import *
 from time import time
 
 
+class AnchorAffector(SpringSystem.Affector):
+    def integrate(self, dt):
+        self.model.state[:,0] = self.model.initialState[:,0]
+
+
 class ClothObject:
     def __init__(self):
         self.cloth = SpringSystem.Cloth(self.getInitialState())
-        self.cloth.add(SpringSystem.GravityAffector)
+        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.02))
+        self.cloth.add(AnchorAffector)
 
         self.time = Animated.Timekeeper()
         self.drawables = [Drawable.ArraySurface(self.cloth.state)]

@@ -21,6 +21,7 @@ Spring system based simulation models and affectors
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from Numeric import *
+from BZFlag.Geometry import *
 from BZFlag.World import Scale
 
 
@@ -40,8 +41,10 @@ class Cloth:
     def __init__(self, initialState):
         self.initialState = array(initialState)
         self.state = array(initialState)
+        self.friction = 0.02
         self.velocity = zeros(initialState.shape, initialState.typecode())
         self.affectors = [ClothSpringAffector(self),
+                          FrictionAffector(self),
                           VelocityAffector(self)]
 
     def integrate(self, dt):
@@ -69,14 +72,63 @@ class Affector:
 
 class ClothSpringAffector(Affector):
     """Affector that exerts spring forces on a cloth model"""
+    def integrateSprings(self, dt, span):
+        """Integrate springs with the given x and y span in grid cells"""
+        # Select equally shaped slices centered on each spring from the arrays
+        # we're interested in. Zeroes in span[] have to be special cases here
+        # since -0 does not select an entire axis.
+        # This lets us process all equal-length springs at once.
+        if span[0] and span[1]:
+            pos_s1 = self.model.state[:-span[0], :-span[1]]
+            pos_s2 = self.model.state[span[0]:, span[1]:]
+            vel_s1 = self.model.velocity[:-span[0], :-span[1]]
+            vel_s2 = self.model.velocity[span[0]:, span[1]:]
+            init_s1 = self.model.initialState[:-span[0], :-span[1]]
+            init_s2 = self.model.initialState[span[0]:, span[1]:]
+        elif span[0]:
+            pos_s1 = self.model.state[:-span[0], :]
+            pos_s2 = self.model.state[span[0]:, :]
+            vel_s1 = self.model.velocity[:-span[0], :]
+            vel_s2 = self.model.velocity[span[0]:, :]
+            init_s1 = self.model.initialState[:-span[0], :]
+            init_s2 = self.model.initialState[span[0]:, :]
+        else:
+            pos_s1 = self.model.state[:, :-span[1]]
+            pos_s2 = self.model.state[:, span[1]:]
+            vel_s1 = self.model.velocity[:, :-span[1]]
+            vel_s2 = self.model.velocity[:, span[1]:]
+            init_s1 = self.model.initialState[:, :-span[1]]
+            init_s2 = self.model.initialState[:, span[1]:]
+
+        posVec = pos_s2 - pos_s1
+        currentLength = magnitude(posVec)
+        restLength = magnitude(init_s2 - init_s1)
+        direction = normalize(posVec)
+        extension = currentLength - restLength
+
+        # Apply a force to each mass connected to this spring,
+        # proportional to the spring extension in the spring's direction
+        force = dt * direction * 10 * reshape(repeat(extension, 3), direction.shape)
+        vel_s1 += force
+        vel_s2 -= force
+
     def integrate(self, dt):
-        pass
+        # This links each mass to its eight neighbors
+        self.integrateSprings(dt, (1,0))
+        self.integrateSprings(dt, (0,1))
+        self.integrateSprings(dt, (1,1))
 
 
 class VelocityAffector(Affector):
     """Generic affector for applying velocity to mass positions"""
     def integrate(self, dt):
         add(self.model.state, multiply(self.model.velocity, dt), self.model.state)
+    
+
+class FrictionAffector(Affector):
+    """Generic affector for applying friction to mass velocities"""
+    def integrate(self, dt):
+        multiply(self.model.velocity, 1 - self.model.friction, self.model.velocity)
     
 
 class ConstantAccelAffector(Affector):
@@ -93,6 +145,6 @@ class GravityAffector(ConstantAccelAffector):
     """Generic affector for applying a downward gravity force"""
     def __init__(self, model):
         ConstantAccelAffector.__init__(self, model, (0,0,Scale.Gravity))
-    
-    
+
+
 ### The End ###
