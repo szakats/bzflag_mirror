@@ -41,7 +41,7 @@ class Panel:
         glLoadIdentity()
 
         size = self.viewport.size
-            
+
         def square():
             # Set the square inside our viewport by one
             # pixel so the antialiased lines won't be chopped in half.
