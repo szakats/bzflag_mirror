@@ -172,9 +172,9 @@ class Scene:
         self.dynTexRenderState = Drawable.RenderState(view)
 
         # Go through existing textures and set up any that haven't been already
-        for p in self.passes:
-            for textures in p.textureGroups.keys():
-                for texture in textures:
+        for drawables in self.objects.itervalues():
+            for drawable in drawables:
+                for texture in drawable.render.textures:
                     if hasattr(texture, 'hasRenderState'):
                         if not texture.hasRenderState():
                             texture.attachRenderState(self.dynTexRenderState)
