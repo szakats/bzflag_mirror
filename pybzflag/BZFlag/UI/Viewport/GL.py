@@ -28,6 +28,7 @@ that it only ever be invoked once per frame, it might be a good cantidate to go 
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+from __future__ import division
 from Pygame import PygameViewport
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -222,17 +223,39 @@ class WireframeMode(ClearedMode):
 
 
 class XRayMode(ClearedMode):
-    """A viewport mode that shades the scene afterward according to depth complexity.
-       More opaque shading indicates more pixels have been rendered at that location.
-       The name 'X-Ray Mode' comes from it's ability to see through objects, visually
-       representing their density.
+    """A viewport mode that annotates the scene with information about it's depth complexity.
+       More opaque shading indicates more pixels have been rendered at that location,
+       with overlaid numbers indicating exactly how many. The name 'X-Ray Mode' comes
+       from it's ability to see through objects, visually representing their density.
        """
     clearBuffers = ClearedMode.clearBuffers | GL_STENCIL_BUFFER_BIT
     
-    def __init__(self, clearColor=(0,0,0,1), xRayColor=(1,0,0,1), depthRange=8):
+    def __init__(self, clearColor=(0,0,0,1), xRayColor=(1, 0, 0, 0.8), depthRange=10):
         ClearedMode.__init__(self, clearColor)
         self.xRayColor = xRayColor
         self.depthRange = range(depthRange)
+
+        # Render number textures we'll use to indicate each depth range.
+        # This uses the lower-level FontPage class from GLText to render
+        # each number to a different texture, for tiling fun.
+
+        self.fontName = 'VeraBd.ttf'
+        self.fontSize = 12
+        self.texSize = 16
+        self.texRepeats = (glGetIntegerv(GL_VIEWPORT)[2] / self.texSize,
+                           glGetIntegerv(GL_VIEWPORT)[3] / self.texSize)
+                           
+        from BZFlag.UI import GLText
+        self.depthTextures = {}
+        font = GLText.Font(self.fontName, [self.fontSize]).findRendered(self.fontSize).font
+        for depth in self.depthRange:
+            page = GLText.FontPage(font, (self.texSize, self.texSize))
+            s = str(depth)
+            if depth == self.depthRange[-1]:
+                s += "!"
+            page.pack(s)
+            page.updateTexture()
+            self.depthTextures[depth] = page.texture
 
     def setupFrame(self):
         """Every time a pixel is drawn, increment the stencil buffer"""
@@ -255,21 +278,39 @@ class XRayMode(ClearedMode):
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP)
         glDisable(GL_TEXTURE_2D)
         glDisable(GL_LIGHTING)
+        glDisable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
 
         for value in self.depthRange:
+            # Each iteration we draw over the areas with one particular depth complexity
             if value == self.depthRange[-1]:
                 glStencilFunc(GL_LEQUAL, value, 0xFF)
             else:
                 glStencilFunc(GL_EQUAL, value, 0xFF)
 
-            unitDepth = float(value) / self.depthRange[-1]
-
+            # Color with alpha corresponding to depth
+            unitDepth = float(value) / self.depthRange[-1]            
             glColor4f(self.xRayColor[0],
                       self.xRayColor[1],
                       self.xRayColor[2],
                       self.xRayColor[3] * unitDepth)
             glRectf(-1, -1, 1, 1)
+
+            # Texture to numerically indicate depth
+            self.depthTextures[value].bind()            
+            glEnable(GL_TEXTURE_2D)
+            glColor4f(1,1,1,0.35)
+            glBegin(GL_QUADS)
+            glTexCoord2f(0, 0)
+            glVertex2f(-1, -1)
+            glTexCoord2f(self.texRepeats[0], 0)
+            glVertex2f(1, -1)
+            glTexCoord2f(*self.texRepeats)
+            glVertex2f(1, 1)
+            glTexCoord2f(0, self.texRepeats[1])
+            glVertex2f(-1, 1)
+            glEnd()
+            glDisable(GL_TEXTURE_2D)
         glDisable(GL_STENCIL_TEST)
 
 ### The End ###
