@@ -136,6 +136,9 @@ class Value:
     def integrate(self, dt, index=None):
         self.value = self.f(self.value, dt, index)
 
+    def __float__(self):
+        return float(self.value)
+
 
 class Vector:
     """A vector of Animated.Values.

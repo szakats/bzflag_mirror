@@ -84,8 +84,7 @@ class Texture:
         (w,h) = size
         Texture.bind(self)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_REPEAT)
-        glTexParameteri(self.target, GL_TEXTURE_WRAP_T, GL_REPEAT)
+        self.setRepeat()
         glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
         glTexParameteri(self.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
@@ -93,6 +92,15 @@ class Texture:
         if GLExtension.maxAnisotropy > 1:
             glTexParameterf(self.target, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)
         gluBuild2DMipmaps(self.target, components, w, h, format, GL_UNSIGNED_BYTE, string)
+
+    def setRepeat(self, repeat=True):
+        Texture.bind(self)
+        if repeat:
+            glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_REPEAT)
+            glTexParameteri(self.target, GL_TEXTURE_WRAP_T, GL_REPEAT)
+        else:
+            glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_CLAMP)
+            glTexParameteri(self.target, GL_TEXTURE_WRAP_T, GL_CLAMP)
 
     def __getstate__(self):
         """This method is called when pickling a Texture, to return an object which is
