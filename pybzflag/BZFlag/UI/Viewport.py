@@ -226,6 +226,7 @@ class OpenGLViewport(PygameViewport):
             GL.glOrtho(0,self.size[0],0,self.size[1], -self.farClip, self.farClip)
         GL.glMatrixMode(GL.GL_MODELVIEW)
         GL.glLoadIdentity()
+        GL.glDepthRange(0.01,2000)
 
     def getModeFlags(self):
         import pygame

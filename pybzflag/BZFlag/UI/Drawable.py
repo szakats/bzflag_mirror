@@ -330,6 +330,7 @@ class TeleporterField(DisplayList):
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
         glColor4f(0.0, 0.0, 0.0, 0.3)
+        glDepthMask(0)
         glBegin(GL_QUADS)
         # X+ side
         glNormal3f(1, 0, 0)
@@ -344,6 +345,7 @@ class TeleporterField(DisplayList):
         glVertex3f(-self.size[0] / 2, self.size[1], self.size[2])
         glVertex3f(-self.size[0] / 2, self.size[1], 0)
         glEnd()
+        glDepthMask(1)
         glColor3f(1.0, 1.0, 1.0)
         glPopMatrix()
 
