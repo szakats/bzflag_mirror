@@ -103,9 +103,6 @@ class MsgDropFlag(Common.Message):
 
 class MsgUDPLinkEstablished(Common.Message):
     messageId = 0x6f67
-    entries = [
-        StructEntry(UInt16, 'queueUpdate'),
-        ]
 
 class MsgTeleport(Common.Message):
     messageId = 0x7470
