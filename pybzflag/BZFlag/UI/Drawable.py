@@ -96,6 +96,7 @@ class Ground(DisplayList):
         glDisable(GL_CULL_FACE)
         glBegin(GL_QUADS)
         texRepeats = 60
+        glNormal3f(0, 0, 1);
         glTexCoord2f(0.0, 0.0)
         glVertex3f(self.size, -self.size, 0)
         glTexCoord2f(texRepeats, 0.0)
