@@ -61,13 +61,14 @@ class ParticleArray(GLDrawable):
             self.renderer = SoftwareParticleRenderer(shape, pointDiameter)
 
         # Reference public render state
-        self.points = self.renderer.points
-        self.pointColors = self.renderer.pointColors
-        self.pointDiameter = self.renderer.pointDiameter
+        self.vertices = self.renderer.points
+        self.colors = self.renderer.pointColors
 
     def setPointDiameter(self, d):
         self.renderer.pointDiameter = d
-        self.pointDiameter = d
+
+    def getPointDiameter(self, d):
+        return self.renderer.pointDiameter
 
     def draw(self, rstate):
         self.renderer.draw(rstate)

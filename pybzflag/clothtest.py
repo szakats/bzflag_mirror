@@ -48,9 +48,8 @@ class Flag:
         # running the cloth simulation inside an array in glInterleavedArrays
         # format, so it never has to be copied before rendering.
         self.surf = Drawable.SurfaceArray(self.resolution, GL_T2F_N3F_V3F)
+        self.cloth.attachState(self.surf.vertices)
         self.surf.texcoords[...] = self.getTexCoords()
-        self.surf.vertices[...] = self.cloth.state
-        self.cloth.state = self.surf.vertices
 
         self.surf.render.static = False
         self.surf.render.textures = (Texture.load("superflag.png"),)

@@ -36,14 +36,12 @@ class Model:
         # Initialize arrays for the simulation state
         self.initialState = array(initialState, Float32, savespace=True)
         self.state = array(initialState, Float32, savespace=True)
-        self.velocity = zeros(initialState.shape, Float32, savespace=True)
 
         # Don't add any affectors by default- let subclasses do that
         self.affectors = []
 
     def reset(self):
         self.state[...] = self.initialState
-        self.velocity[...] = 0
 
     def integrate(self, dt):
         """The default integration function just broadcasts the integration
@@ -70,6 +68,25 @@ class Model:
         inst = cls(self, *args, **kw)
         self.affectors.append(inst)
         return inst
+
+    def attachState(self, array):
+        """Copy the model's state into the given array and perform the simulation
+           directly in the array in the future. This is good to save from copying
+           the simulation state when you want to send the simulation's output to a
+           vertex buffer of some sort.
+           """
+        array[...] = self.state
+        self.state = array
+
+
+class Affector:
+    """Abstract base class for an object that affects a simulation model"""
+    def __init__(self, model):
+        self.model = model
+
+    def integrate(self, dt):
+        """Affect the model for one time step"""
+        pass
 
 
 class FixedIntegrationModel(Model):
@@ -129,21 +146,31 @@ class Cloth(FixedIntegrationModel):
         self.friction = friction
         self.stiffness = stiffness
 
+        self.velocity = zeros(initialState.shape, Float32, savespace=True)
+
         # Initial affectors to cover the spring forces,
         # friction, and velocity integration
         self.add(ClothSpringAffector)
         self.add(FrictionAffector)
         self.add(VelocityAffector)
 
+    def reset(self):
+        FixedIntegrationModel.reset(self)
+        self.velocity[...] = 0
 
-class Affector:
-    """Abstract base class for an object that affects a simulation model"""
-    def __init__(self, model):
-        self.model = model
 
-    def integrate(self, dt):
-        """Affect the model for one time step"""
-        pass
+class Newtonian(Model):
+    """A simple model for particles with position, acceleration, velocity, and color.
+       Comes with VelocityAffector pre-installed.
+       """
+    def __init__(self, initialState):
+        Model.__init__(self, initialState)
+        self.velocity = zeros(initialState.shape, Float32, savespace=True)
+        self.add(VelocityAffector)
+
+    def reset(self):
+        Model.reset(self)
+        self.velocity[...] = 0
 
 
 class ClothSpringAffector(Affector):

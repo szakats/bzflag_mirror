@@ -15,9 +15,9 @@ class GlowSphere(Drawable.ParticleArray):
         self.render.blended = True
 
         # Generate some points on a sphere
-        self.points[...] = Noise.randomVectors((numParticles, 3),
-                                               magnitude = sphereDiameter,
-                                               type      = 'f')
+        self.vertices[...] = Noise.randomVectors((numParticles, 3),
+                                                 magnitude = sphereDiameter,
+                                                 type      = 'f')
 
     def draw(self, rstate):
         glDisable(GL_LIGHTING)
@@ -32,7 +32,7 @@ class WigglyGlowSphere(GlowSphere):
         GlowSphere.__init__(self, numParticles=1000)
 
     def draw(self, rstate):
-        self.points += Noise.randomVectors(self.points.shape, magnitude=0.2)
+        self.vertices += Noise.randomVectors(self.vertices.shape, magnitude=0.2)
         GlowSphere.draw(self, rstate)
 
 
