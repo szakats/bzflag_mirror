@@ -49,15 +49,45 @@ class RadarView:
         self.size = surface.get_size()
         glClearColor(0.0, 0.0, 0.0, 0.0)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND)
+        glEnable(GL_LINE_SMOOTH)
         self.configureOpenGL(self.size)
+
+    def colorScale(self, object, viewHeight):
+        """This is the Enhanced Radar (tm) color scaling algorithm from bzflag proper"""
+        z = object.center[2]
+        h = object.size[2]
+        if viewHeight >= z + h:
+            alpha = 1.0 - (viewHeight - (z + h)) / 40.0
+        elif viewHeight <= z:
+            alpha = 1.0 - (z - viewHeight) / 40.0
+        else:
+            alpha = 1.0
+        if alpha < 0.35:
+            alpha = 0.35
+        return alpha
         
     def render(self):
-        glColor3f(1,1,1)
-        glBegin(GL_POLYGON)
-        glVertex3f(0,0,-20)
-        glVertex3f(1,0,-20)
-        glVertex3f(0,1,-20)
-        glEnd()
+        glPushMatrix()
+        glTranslatef(0,0,-1200)
+        for object in self.game.world.blocks:
+            try:
+                glColor4f(0.38, 0.62, 0.62, self.colorScale(object, 0))
+                
+                # Render as a polygon then as an outline to get smoothed edges
+                # without leaving a small crack between the triangles.
+                poly = object.toPolygon()
+                glBegin(GL_POLYGON)
+                for vertex in poly:
+                    glVertex2f(*vertex)
+                glEnd()
+                glBegin(GL_LINE_LOOP)
+                for vertex in poly:
+                    glVertex2f(*vertex)
+                glEnd()
+            except AttributeError:
+                pass
+        glPopMatrix()
 
 
 def attach(game, eventLoop, size=(512,512), targetFrameRate=60):

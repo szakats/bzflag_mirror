@@ -222,7 +222,7 @@ class Wall(WorldObject):
 	    self.texture = 'wall'
 	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
 	    OpenGL.GL.glPushMatrix()
-	    OpenGL.GL.glTranslatef(self.center[0], self.center[1], self.center[2])
+	    OpenGL.GL.glTranslatef(*self.center)
 	    OpenGL.GL.glRotatef(self.angle / 3.1415924 * 180, 0.0, 0.0, 1.0)
 	    OpenGL.GL.glDisable(OpenGL.GL.GL_CULL_FACE)
 	    OpenGL.GL.glColor3f(1.0, 1.0, 1.0)
