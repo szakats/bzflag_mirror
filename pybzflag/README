@@ -4,11 +4,25 @@ This is a suite of Python modules that implement the BZFlag network protocol,
 and provide the auxiliary logic and interfacing necessary to build clients
 and servers that speak the protocol.
 
-Included are a few example programs that make use of the module.
+Included are a few example programs that make use of the module. Try
+them out. Note that the examples that connect to a BZFlag server default
+to localhost, but you can set this with the -s command line option. Try
+the -h or --help option for a full list of command line options supported.
 
-More should be written here when there's more to say...
-For now, read the source to the examples, and read the documentation strings
-embedded in the modules' source.
+There's no real documentation yet, but there is a good bit of
+pseudo-documentation available in the python doc strings. You can extract
+this using pydoc. 
 
--- Micah Dowty <micah@picogui.org>
+-- Requirements
+
+The core PyBZFlag modules only require the python standard library.
+However, the graphical UI modules require pygame. (http://pygame.org)
+
+-- Contacts
+
+This was mostly written by Micah Dowty <micah@picogui.org>.
+Also try the #bzflag IRC channel on irc.freenode.net, Micah is
+usually there as "scanline".
+
+--- The End ---
 
