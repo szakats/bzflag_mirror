@@ -7,7 +7,9 @@ from time import time
 
 class AnchorAffector(SpringSystem.Affector):
     def integrate(self, dt):
-        self.model.state[:,0] = self.model.initialState[:,0]
+        # Pin the cloth up at its two top corners
+        self.model.state[-1,-1] = self.model.initialState[-1,-1]
+        self.model.state[-1,0] = self.model.initialState[-1,0]
 
 
 class ClothObject:

@@ -106,9 +106,13 @@ class ClothSpringAffector(Affector):
         direction = normalize(posVec)
         extension = currentLength - restLength
 
+        # This creates a 2D array of vectors, each with X, Y, and Z
+        # equal to the extension from the corresponding location
+        extensionVector = reshape(repeat(extension, 3, 1), direction.shape)
+
         # Apply a force to each mass connected to this spring,
         # proportional to the spring extension in the spring's direction
-        force = dt * direction * 10 * reshape(repeat(extension, 3), direction.shape)
+        force = dt * direction * 500 * extensionVector
         vel_s1 += force
         vel_s2 -= force
 
