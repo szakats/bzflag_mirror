@@ -408,7 +408,6 @@ class Mesh(DisplayList):
         # To each triangle, add a list for accumulating vertex averages
         for tri in self.triangles:
             tri.normalTotal  = [tri.faceNormal] * 3
-            tri.normalCounts = [1,1,1]
 
         for vertex, uses in self.vertexMap.iteritems():
             # Now we have a list of all the uses of this vertex, as (triangle, index) tuples.
@@ -426,18 +425,13 @@ class Mesh(DisplayList):
                         # These two faces are smooth enough we should combine the normals
                         use1[0].normalTotal[use1[1]] = add(use1[0].normalTotal[use1[1]], use2[0].normals[use2[1]])
                         use2[0].normalTotal[use2[1]] = add(use2[0].normalTotal[use2[1]], use1[0].normals[use1[1]])
-                        use1[0].normalCounts[use1[1]] += 1
-                        use2[0].normalCounts[use2[1]] += 1
         del self.vertexMap
 
         # Now go back and finish the averages by dividing
         for tri in self.triangles:
             for i in range(3):
-                tri.normals[i] = (tri.normalTotal[i][0] / tri.normalCounts[i], 
-                                  tri.normalTotal[i][1] / tri.normalCounts[i],
-                                  tri.normalTotal[i][2] / tri.normalCounts[i])
+                tri.normals[i] = normalize(tri.normalTotal[i])
             del tri.normalTotal
-            del tri.normalCounts
 
     def drawToList(self, rstate):
         """Splat out our stored color, matrix, and triangles to a display list"""

@@ -32,18 +32,33 @@ __all__ = ['ArraySurface']
 class ArraySurface(GLDrawable):
     """Drawable representing a smooth surface composed of a grid of vertices,
        contained in a Numeric array. The array may change between renderings,
-       since normals are recalculated each time draw() is called. If the size
-       of the array changes, prepareIndices() must be called.
-
+       since normals are recalculated each time draw() is called. The size of
+       the array may not change.
+       
        By default this drawable will have the 'static' flag so the rendering
        engine will cache it in a display list. Disabling the static flag will
        cause normals to be recalculated at each rendering, so it will then be
        suitable for dynamic surfaces.
        """
-    def __init__(self, vertices):
+    def __init__(self, vertices, texcoords=None):
         GLDrawable.__init__(self)
         self.vertices = vertices
+        self.texcoords = texcoords
+        if self.texcoords is None:
+            self.texcoords = zeros(vertices.shape, vertices.typecode())
+        
+        if self.vertices.typecode() != Float32 or self.texcoords.typecode() != Float32:
+            raise Exception("ArraySurface requires arrays of type Float32. " +
+                            "'vertices' is of type %s, 'texcoords' is of type %s." %
+                            (self.vertices.typecode(), self.texcoords.typecode()))
+        
         self.prepareIndices()
+
+        # Set up empty arrays of the right size for intermediate results
+        (height, width) = self.vertices.shape[:2]
+        self.crossProducts = zeros((height-1, width-1, 3), self.vertices.typecode())
+        self.gridNormals = zeros(self.crossProducts.shape, self.vertices.typecode())
+        self.normals = zeros(self.vertices.shape, self.vertices.typecode())
 
     def prepareIndices(self):
         """Prepare an array with indices into the vertex array for triangle stripss.
@@ -58,11 +73,6 @@ class ArraySurface(GLDrawable):
                 row.append(x + (y+1) * width)
                 row.append(x + y * width)
             self.indices.append(array(row))
-
-        # Set up empty arrays of the right size for intermediate results
-        self.crossProducts = zeros((height-1, width-1, 3), self.vertices.typecode())
-        self.gridNormals = zeros(self.crossProducts.shape, self.vertices.typecode())
-        self.normals = zeros(self.vertices.shape, self.vertices.typecode())
 
     def prepareNormals(self):
         """Prepare vertex normals for this surface, storing intermediate results
@@ -86,23 +96,28 @@ class ArraySurface(GLDrawable):
     def draw(self, rstate):
         """Calculate normals and blast our triangle strips out to OpenGL"""
         self.prepareNormals()
-        glVertexPointerd(reshape(self.vertices, (-1, 3)))
-        glNormalPointerd(reshape(self.normals, (-1, 3)))
-        glEnable(GL_VERTEX_ARRAY)
-        glEnable(GL_NORMAL_ARRAY)
+        #if self.texcoords:
+        #    texcoord = reshape(self.texcoords, (-1, 2))
+            #glTexCoordPointer(2, GL_DOUBLE, 0, texcoord)
+            #glEnable(GL_TEXTURE_COORD_ARRAY)
+        #glVertexPointerd(reshape(self.vertices, (-1, 3)))
+        #glNormalPointerd(reshape(self.normals, (-1, 3)))
 
-        # Draw the front side
+        interleaved = zeros(self.vertices.shape[:-1] + (2, 3), Float32)
+        interleaved[:,:,0,:]  = self.normals
+        interleaved[:,:,1,:]  = self.vertices
+
+        glInterleavedArrays(GL_N3F_V3F, 0, interleaved.tostring())
+
+        # We want to draw both sides of the surface. This will have OpenGL
+        # automatically flip the surface normals when drawing the back side
+        glDisable(GL_CULL_FACE)
+        glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1)
+        
         for row in self.indices:
             glDrawElementsui(GL_TRIANGLE_STRIP, row)
 
-        # Draw the back side
-        glCullFace(GL_FRONT)
-        glNormalPointerd(reshape(-self.normals, (-1, 3)))
-        for row in self.indices:
-            glDrawElementsui(GL_TRIANGLE_STRIP, row)
-        glCullFace(GL_BACK)
-            
-        glDisable(GL_VERTEX_ARRAY)
-        glDisable(GL_NORMAL_ARRAY)
+        glEnable(GL_CULL_FACE)
+        glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0)
 
 ### The End ###

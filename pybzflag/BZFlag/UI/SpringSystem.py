@@ -41,9 +41,9 @@ class Cloth:
     def __init__(self, initialState, friction=0.02, stiffness=200):
         self.friction = friction
         self.stiffness = stiffness
-        self.initialState = array(initialState)
-        self.state = array(initialState)
-        self.velocity = zeros(initialState.shape, initialState.typecode())
+        self.initialState = array(initialState, Float32, savespace=True)
+        self.state = array(initialState, Float32, savespace=True)
+        self.velocity = zeros(initialState.shape, Float32, savespace=True)
         self.affectors = [ClothSpringAffector(self),
                           FrictionAffector(self),
                           VelocityAffector(self)]
@@ -118,14 +118,15 @@ class ClothSpringAffector(Affector):
         vel_s2 -= force
 
     def integrate(self, dt):
+        # The number of springs and their orientation will determine the
+        # cloth's stiffness and stability. More springs take longer to
+        # simulate, of course.
         self.integrateSprings(dt, (1,0))
         self.integrateSprings(dt, (0,1))
         self.integrateSprings(dt, (1,1))
         self.integrateSprings(dt, (2,0))
-        self.integrateSprings(dt, (2,1))
         self.integrateSprings(dt, (2,2))
         self.integrateSprings(dt, (0,2))
-        self.integrateSprings(dt, (1,2))
 
 
 class VelocityAffector(Affector):

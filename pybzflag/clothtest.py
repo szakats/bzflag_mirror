@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, SpringSystem
+from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, SpringSystem, Texture
 from BZFlag import Event, Util
 from Numeric import *
 from time import time
+from OpenGL.GL import *
 
 
 class AnchorAffector(SpringSystem.Affector):
@@ -12,29 +13,45 @@ class AnchorAffector(SpringSystem.Affector):
         self.model.state[0,0] = self.model.initialState[0,0]
 
 
+class FlagColorizer(Drawable.Transform):
+    def apply(self):
+        glColor3f(0.5,1,0.5)
+
+
 class Flag:
     def __init__(self):
         self.pole = Drawable.VRML.load("flagpole.wrl")
         self.cloth = SpringSystem.Cloth(self.getInitialState())
 
-        self.surf = Drawable.ArraySurface(self.cloth.state)
-        self.surf.render.static = False
+        surf = Drawable.ArraySurface(self.cloth.state, self.getTexCoords())
+        surf.render.static = False
+        surf.render.texture = Texture.load("flag.png")
+        self.transformer = Drawable.Transformer(surf, [FlagColorizer()])
 
-        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.004))
-        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (-1, 0.2, 0))
+        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.04))
+        self.cloth.add(SpringSystem.ClothWindAffector, surf, (-1, 0.001, 0.8))
         self.cloth.add(AnchorAffector)
 
     def getInitialState(self):
         xAxis = arange(0, 8, 0.5)
         yAxis = arange(5, 11, 0.5)
         size = (len(yAxis), len(xAxis))
-        a = zeros(size + (3,), Float)
+        a = zeros(size + (3,), Float32, savespace=True)
         a[:,:,0] += 0 - xAxis
         a[:,:,2] += yAxis[:, NewAxis]
         return a
 
+    def getTexCoords(self):
+        xAxis = arange(0, 8, 0.5)
+        yAxis = arange(5, 11, 0.5)
+        size = (len(yAxis), len(xAxis))
+        a = zeros(size + (2,), Float32, savespace=True)
+        a[:,:,0] += xAxis
+        a[:,:,1] += yAxis[:, NewAxis]
+        return a
+
     def getDrawables(self):
-        return [self.surf] + self.pole.values()
+        return [self.transformer] + self.pole.values()
 
     def update(self):
         # Use a fixed time step for now, since the model gets unstable
@@ -55,12 +72,13 @@ if __name__ == '__main__':
     view.camera.jump()
 
     # Give us some spiffy blue and yellow highlights
+    glClearColor(0.3, 0.3, 0.3, 1)
     view.light0.ambient  = (0,0,0,1)
     view.light0.diffuse  = (0.5,0.5,0.4,1)
-    view.light0.position = (200,20,20,1)
+    view.light0.position = (0,200,200,1)
     view.light1.ambient  = (0,0,0,1)
     view.light1.diffuse  = (0.4,0.4,0.5,1)
-    view.light1.position = (20,200,20,1)
+    view.light1.position = (0,200,200,1)
 
     obj = Flag()
     viewport.onSetupFrame.observe(obj.update)

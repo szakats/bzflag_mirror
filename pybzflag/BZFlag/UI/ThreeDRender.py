@@ -284,6 +284,9 @@ class BasicRenderPass(RenderPass):
                         t.bind(rstate)
                         glEnable(t.target)
                     texIndex += 1
+
+                # Leave the first texture unit active
+                glActiveTextureARB(GLExtension.textureUnits[0])
             else:
                 # No multitexturing, only enable the current texture unit
                 for target in GLExtension.textureTargets:

@@ -50,9 +50,14 @@ class PlayerTransform(Drawable.Transform):
 
     def apply(self):
         m = self.player.motion
+        glPushMatrix()
         glTranslatef(*m.position)
         glRotatef(m.azimuth, 0,0,1)
         glColor3f(*self.color)
+
+    def unapply(self):
+        glColor3f(1,1,1)
+        glPopMatrix()
     
 
 class Tank:
@@ -70,6 +75,7 @@ class Tank:
         self.player = player
         self.transforms = [PlayerTransform(player)]
         self.drawables = [Drawable.Transformer(meshGroup, self.transforms)]
+        self.drawables[0].render.static = False
 
     def getDrawables(self):
         return self.drawables

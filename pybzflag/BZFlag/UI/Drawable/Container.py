@@ -55,22 +55,26 @@ class Transformer(GLDrawable):
         GLDrawable.__init__(self)
         self.child = child
         self.transforms = transforms
+        self.reversedTransforms = transforms[:]
+        self.reversedTransforms.reverse()
         self.render = copy.copy(child.render)
-        self.render.static = False
 
     def draw(self, rstate):
-        glPushMatrix()
         for transform in self.transforms:
             transform.apply()
-        self.child.draw()
-        glColor3f(1,1,1)
-        glPopMatrix()
+        self.child.draw(rstate)
+        for transform in self.reversedTransforms:
+            transform.unapply()
         
 
 class Transform:
     """Abstract base class for transforms designed for use with Transformer"""
     def apply(self):
         """Apply this transform to the current OpenGL state"""
+        pass
+
+    def unapply(self):
+        """Reverse the effects of apply()"""
         pass
 
 ### The End ###
