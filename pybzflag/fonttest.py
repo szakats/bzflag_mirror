@@ -4,7 +4,7 @@
 #
 from BZFlag.UI import Viewport, GLText
 from BZFlag.Event import EventLoop
-from BZFlag import Animated
+from BZFlag import Animated, Util
 from OpenGL.GL import *
 
 # Create a new orthogonal mode viewport
@@ -39,10 +39,7 @@ def drawFrame():
 
     f.drawCentered("Not-so-spinny-widget",15)
 
-# Frame rate counter
-Animated.FrequencyCounter(viewport.onFinishFrame,
-                          lambda hz: "FHz: %.3f (target %.3f)" % (hz, viewport.targetFrameRate))
-
+Util.showFrameRate(viewport)
 viewport.onDrawFrame.observe(drawFrame)
 loop.run()
 

@@ -189,4 +189,11 @@ def dataFile(name):
     import os
     return os.path.join('data', name)
 
+
+def showFrameRate(viewport):
+    """Visually indicate the frame rate the given viewport is rendering at"""
+    from BZFlag import Animated
+    Animated.FrequencyCounter(viewport.onFinishFrame,
+                              lambda hz: "FHz: %.3f (target %.3f)" % (hz, viewport.targetFrameRate))
+
 ### The End ###
