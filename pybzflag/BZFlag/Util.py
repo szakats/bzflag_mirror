@@ -84,6 +84,9 @@ class Proxy:
        from one to the other.
        """
     def __init__(self, server, client):
+        self.server = server
+        self.client = client
+
         # Let the user know when our client connects, and force
         # our server to hand out the same client ID we were given.
         client.onConnect.observe(self.onClientConnect)
@@ -94,17 +97,17 @@ class Proxy:
         server.onUnhandledMessage.replace(self.onServerMessage)
 
     def onClientConnect(self):
-        server.nextClientID = client.id
-        server.clientIDIncrement = 0
+        self.server.nextClientID = self.client.id
+        self.server.clientIDIncrement = 0
 
     def onClientMessage(self, msg):
         try:
-            server.clientsByID[client.id].write(msg, msg.protocol)
+            self.server.clientsByID[self.client.id].write(msg, msg.protocol)
         except KeyError:
             pass
 
     def onServerMessage(self, msg):
-        getattr(client, msg.protocol).write(msg)
+        getattr(self.client, msg.protocol).write(msg)
 
 
 def autoFile(name, mode="r"):
