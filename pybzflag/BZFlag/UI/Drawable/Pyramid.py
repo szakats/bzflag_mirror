@@ -22,11 +22,7 @@ A class for drawing the pyramids in the world
 #
 from DisplayList import *
 from OpenGL.GL import *
-
-
-def cross(a, b):
-    """3-Vector cross product"""
-    return (a[2] * b[1] - a[1] * b[2], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+from BZFlag.Util import cross
 
 
 class Pyramid(DisplayList):

@@ -189,4 +189,9 @@ def dataFile(name):
     import os
     return os.path.join('data', name)
 
+
+def cross(a, b):
+    """3-Vector cross product"""
+    return (a[2] * b[1] - a[1] * b[2], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
 ### The End ###

@@ -50,7 +50,7 @@ it may work with VRML files produced by other modelers.
 from DisplayList import *
 from OpenGL.GL import *
 from BZFlag import Util
-import re
+import re, math
 
 
 lexicalScanner = re.compile(r"""
@@ -339,7 +339,7 @@ class Mesh(DisplayList):
     def drawToList(self):
         polygon = []
         glPushMatrix()
-        glScalef(4,4,4)
+        glScalef(40,40,40)
 
         if self.color:
             glColor4f(*self.color)
@@ -349,6 +349,16 @@ class Mesh(DisplayList):
         # In the VRML vertex list, a -1 indicates the end of a polygon.
         for face in self.faces:
             if face == -1:
+                # Calculate a face normal
+                n = Util.cross((polygon[1][0] - polygon[0][0],
+                                polygon[1][1] - polygon[0][1],
+                                polygon[1][2] - polygon[0][2]),
+                               (polygon[2][0] - polygon[0][0],
+                                polygon[2][1] - polygon[0][1],
+                                polygon[2][2] - polygon[0][2]))
+                s = math.sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2])
+                glNormal3f(n[0]/s, n[1]/s, n[2]/s)
+
                 # Output the buffered polygon
                 glBegin(GL_POLYGON)
                 for vertex in polygon:
