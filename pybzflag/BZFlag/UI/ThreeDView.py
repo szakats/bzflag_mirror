@@ -215,39 +215,28 @@ class ThreeDController:
                 self.zoom(self.keyZoomScale)
             if event.unicode == "=":
                 self.zoom(1/self.keyZoomScale)
-            if event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
-                modifiers.shift = True
-            if event.key == pygame.K_RALT or event.key == pygame.K_LALT:
-                modifiers.alt = True
         viewport.onKeyDown.observe(onKeyDown)
 
-        def onKeyUp(event):
-            if event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
-                modifiers.shift = False
-            if event.key == pygame.K_RALT or event.key == pygame.K_LALT:
-                modifiers.alt = False
-        viewport.onKeyUp.observe(onKeyUp)
-
         def onMouseMotion(event):
-            if modifiers.shift:
-	      if event.buttons[1]:
-		(x, y, z) = view.camera.position
-		xscale = math.cos((view.camera.azimuth) * 3.1415926 / 180)
-		yscale = math.sin((view.camera.azimuth) * 3.1415926 / 180)
-		x += event.rel[0] * xscale - event.rel[1] * yscale
-		y += event.rel[0] * yscale - event.rel[1] * xscale
-		view.camera.position = (x, y, z)
-	      return
-	    if modifiers.alt:
-	      if event.buttons[1]:
-		(x, y, z) = view.camera.position
-		z -= event.rel[1]
-		if z > 0:
-		  z = 0
-		if z < -1000:
-		  z = -1000
-		view.camera.position = (x, y, z)
-	      return
+	    if pygame.key.get_mods() & (pygame.KMOD_RSHIFT | pygame.KMOD_LSHIFT):
+	        if event.buttons[1]:
+		    (x, y, z) = view.camera.position
+	 	    xscale = math.cos((view.camera.azimuth) * 3.1415926 / 180)
+		    yscale = math.sin((view.camera.azimuth) * 3.1415926 / 180)
+		    x += event.rel[0] * xscale - event.rel[1] * yscale
+		    y += event.rel[0] * yscale - event.rel[1] * xscale
+		    view.camera.position = (x, y, z)
+	            return
+	    if pygame.key.get_mods() & (pygame.KMOD_RALT | pygame.KMOD_LALT):
+	        if event.buttons[1]:
+		    (x, y, z) = view.camera.position
+		    z -= event.rel[1]
+		    if z > 0:
+		         z = 0
+		    if z < -1000:
+		         z = -1000
+		    view.camera.position = (x, y, z)
+	            return
             if event.buttons[1]:
                 view.camera.azimuth += event.rel[0] / self.mouseRotateScale
                 view.camera.elevation += event.rel[1] / self.mouseRotateScale
