@@ -30,6 +30,7 @@ class GLDrawable:
   def __init__(self):
     self.list = glGenLists(1)
     self.texture = None
+    self.blended = False
 
   def __del__(self):
     glDeleteLists(self.list, 1)
@@ -308,11 +309,12 @@ class TeleporterField(GLDrawable):
     self.center = center
     self.angle = angle * 180 / 3.1415926
     self.size = size
+    self.blended = True
     glNewList(self.list, GL_COMPILE)
     glPushMatrix()
     glTranslatef(*self.center)
     glRotatef(self.angle, 0.0, 0.0, 1.0)
-    glColor3f(0.1, 0.1, 0.1)
+    glColor4f(0.0, 0.0, 0.0, 0.3)
     glBegin(GL_QUADS)
     # X+ side
     glNormal3f(1, 0, 0)

@@ -66,7 +66,7 @@ class Scene:
     self.game = game
     game.world.onLoad.observe(self.onLoadWorld)
     self.objects = {}
-    self.passes = {}
+    self.passes = [{}, {}]
 
   def onLoadWorld(self):
     for block in self.game.world.blocks:
@@ -77,18 +77,33 @@ class Scene:
   def rebuildTexmap(self):
     for object, drawables in self.objects.items():
       for drawable in drawables:
-	if self.passes.has_key(drawable.texture):
-	    self.passes[drawable.texture].append(drawable)
+	if drawable.blended:
+	  if self.passes[1].has_key(drawable.texture):
+	    self.passes[1][drawable.texture].append(drawable)
+	  else:
+	    self.passes[1][drawable.texture] = [drawable]
 	else:
-	    self.passes[drawable.texture] = [drawable]
+	  if self.passes[0].has_key(drawable.texture):
+	    self.passes[0][drawable.texture].append(drawable)
+	  else:
+	    self.passes[0][drawable.texture] = [drawable]
 
   def render(self):
-    for texture in self.passes.keys():
+    glDisable(GL_BLEND)
+    for texture in self.passes[0].keys():
       glDisable(GL_TEXTURE_2D)
       if texture != None:
 	glEnable(GL_TEXTURE_2D)
         texture.bind()
-      for drawable in self.passes[texture]:
+      for drawable in self.passes[0][texture]:
+	drawable.draw()
+    glEnable(GL_BLEND)
+    for texture in self.passes[1].keys():
+      glDisable(GL_TEXTURE_2D)
+      if texture != None:
+	glEnable(GL_TEXTURE_2D)
+	texture.bind()
+      for drawable in self.passes[1][texture]:
 	drawable.draw()
 
 

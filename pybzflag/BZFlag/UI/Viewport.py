@@ -65,7 +65,7 @@ class PygameViewport(Viewport):
             name = pygame.event.event_name(i)
             if name != "Unknown":
                 Event.attach(self, 'on' + name)
-        
+
         pygame.init()
         self.display = pygame.display
         self.resize(size)
@@ -80,7 +80,7 @@ class PygameViewport(Viewport):
     def getModeFlags(self):
         """A hook for subclasses to override the mode flags used to initialize pygame"""
         import pygame
-        return pygame.DOUBLEBUF | pygame.RESIZABLE 
+        return pygame.DOUBLEBUF | pygame.RESIZABLE
 
     def resize(self, size):
         self.screen = self.display.set_mode(size, self.getModeFlags())
@@ -90,7 +90,7 @@ class PygameViewport(Viewport):
     def setCaption(self, title):
         import pygame
         pygame.display.set_caption(title)
-        
+
     def setTargetFrameRate(self, rate):
         """Set the target frame rate. This is how often the main loop will
            try to call us for rendering, using a PeriodicTimer.
@@ -120,7 +120,7 @@ class PygameViewport(Viewport):
     def onFinishFrame(self):
         """Default onFinishFrame handler that flips the pygame buffers"""
         self.display.flip()
-        
+
     def onEvent(self, event):
         import pygame
         getattr(self, 'on' + pygame.event.event_name(event.type))(event)
