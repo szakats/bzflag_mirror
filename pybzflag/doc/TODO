@@ -43,3 +43,5 @@ Todo list, in no particular order:
     opaque resizing. Known to break under sawfish, win32, and OS X.
 
   - In OverheadView, update using dirty rectangles for lower CPU usage
+
+  - Write a 1-dimensional perlin noise routine to make Animated.PerlinNoise more efficient.
