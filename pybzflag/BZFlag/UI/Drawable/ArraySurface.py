@@ -28,22 +28,15 @@ from Numeric import *
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import GLExtension
 
-# glInterleavedArrays in PyOpenGL leaks memory, this is a workaround
-try:
-    from numeric_gl import *
-except ImportError:
-    raise Exception("Due to a bug in PyOpenGL, you must install the numeric_gl module from " +
-                    "http://py3d.org/files/numeric_gl.tar.gz")
-
 __all__ = ['ArraySurface']
 
- 
+
 class ArraySurface(GLDrawable):
     """Drawable representing a smooth surface composed of a grid of vertices,
        contained in a Numeric array. The array may change between renderings,
        since normals are recalculated each time draw() is called. The size of
        the array may not change.
-       
+
        By default this drawable will have the 'static' flag so the rendering
        engine will cache it in a display list. Disabling the static flag will
        cause normals to be recalculated at each rendering, so it will then be
@@ -55,12 +48,12 @@ class ArraySurface(GLDrawable):
         self.texcoords = texcoords
         if self.texcoords is None:
             self.texcoords = zeros(vertices.shape, vertices.typecode())
-        
+
         if self.vertices.typecode() != Float32 or self.texcoords.typecode() != Float32:
             raise Exception("ArraySurface requires arrays of type Float32. " +
                             "'vertices' is of type %s, 'texcoords' is of type %s." %
                             (self.vertices.typecode(), self.texcoords.typecode()))
-        
+
         self.prepareIndices()
 
         # Set up empty arrays of the right size for intermediate results
@@ -69,6 +62,14 @@ class ArraySurface(GLDrawable):
         self.gridNormals = zeros(self.crossProducts.shape, self.vertices.typecode())
         self.normals = zeros(self.vertices.shape, self.vertices.typecode())
         self.interleaved = zeros(self.vertices.shape[:-1] + (8,), self.vertices.typecode())
+
+        # glInterleavedArrays in PyOpenGL leaks memory, this is a workaround
+        try:
+            from numeric_gl import glInterleavedArrays
+            self.glInterleavedArrays = glInterleavedArrays
+        except ImportError:
+            raise Exception("Due to a bug in PyOpenGL, you must install the numeric_gl module from " +
+                            "http://py3d.org/files/numeric_gl.tar.gz")
 
     def prepareIndices(self):
         """Prepare an array with indices into the vertex array for triangle stripss.
@@ -106,19 +107,19 @@ class ArraySurface(GLDrawable):
     def draw(self, rstate):
         """Calculate normals and blast our triangle strips out to OpenGL"""
         self.prepareNormals()
-        
+
         self.interleaved[:,:,:2]  = self.texcoords
         self.interleaved[:,:,2:5] = self.normals
         self.interleaved[:,:,5:]  = self.vertices
         if GLExtension.multitexture:
             glClientActiveTextureARB(GL_TEXTURE0_ARB)
-        glInterleavedArrays(GL_T2F_N3F_V3F, 0, self.interleaved)
+        self.glInterleavedArrays(GL_T2F_N3F_V3F, 0, self.interleaved)
 
         # We want to draw both sides of the surface. This will have OpenGL
         # automatically flip the surface normals when drawing the back side
         glDisable(GL_CULL_FACE)
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1)
-        
+
         for row in self.indices:
             glDrawElementsui(GL_TRIANGLE_STRIP, row)
 
