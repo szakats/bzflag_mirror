@@ -239,10 +239,18 @@ class AnimatedPerlinNoise:
         self.octaves = []
         period = self.period
         size = self.fundamental
+        viewport = glGetIntegerv(GL_VIEWPORT)
+        
         for i in xrange(self.numOctaves):
+            # Stop adding octaves if they've become too large to render
+            if size > viewport[2] or size > viewport[3]:
+                break
+            
             self.octaves.insert(0, AnimatedNoise((size,size), self.framesPerOctave, period, self.renderer))
             period /= 2
             size   *= 2
+
+
     
 ### The End ###
 

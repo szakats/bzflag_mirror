@@ -31,72 +31,32 @@ from __future__ import division
 from OpenGL.GL.EXT.texture_cube_map import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from BZFlag.UI.Texture import Texture
-import math, copy
+from BZFlag.UI import Texture
 
 
-class CubeMap(Texture):
+class CubeMap(Texture.DynamicTexture):
     """Abstraction for creating and using cube environment maps
        maxSize is the maximum height of the cube in texels.
        The actual height could be limited by viewport size.
        """
-    def __init__(self, position=(0,0,0), maxSize=128):
-        Texture.__init__(self)
-        
+    def __init__(self, position=(0,0,0), maxSize=(128,128)):
+        Texture.DynamicTexture.__init__(self, maxSize)        
         self.position = position
-        self.maxSize = maxSize
         self.target = GL_TEXTURE_CUBE_MAP_EXT
         self.texEnv = GL_REPLACE
-        self.recursion = 0
-        self.rendered = False
-        self.viewport = None
-        self.dirty = True
 
-    def bind(self, rstate):
-        """The first time we're bound we add a new viewport that renders our cube map"""
-        if not self.viewport:
-            # Make a note in our render state that we're rendering to a cube map.
-            # Some objects will want to hide themselves during this process, for example
-            # camera-induced effects and overlay objects.
-            self.rstate = copy.copy(rstate)
-            rstate.cubeMap = self
-            
-            self.viewport = self.setupViewport()
-
-        Texture.bind(self, rstate)
-
-    def getTextureRect(self, viewport):
-        """Return a function that calculates the texture size taking into account
-           our maximum texture size and the given root viewport size.
-           """
-        def fsize():
-            viewMinorAxis = min(viewport.size[0], viewport.size[1])
-            largestPowerOfTwo = pow(2, int(math.log(viewMinorAxis) / math.log(2)))
-            size = self.maxSize
-            if size > largestPowerOfTwo:
-                size = largestPowerOfTwo
-            return (0,0,size,size)
-        return fsize
-
-    def setupViewport(self):
-        """Set up a viewport region in which this texture will be rendered,
-           given the current root viewport.
-           """
-        region = self.rstate.viewport.region(
-            self.getTextureRect(self.rstate.viewport), renderLink='before')
-        region.onDrawFrame.observe(self.drawFrame)
+    def setupViewport(self, rstate):
+        Texture.DynamicTexture.setupViewport(self, rstate)
+        # Make a note in our render state that we're rendering to a cube map.
+        # Some objects will want to hide themselves during this process, for example
+        # camera-induced effects and overlay objects.
+        self.rstate.cubeMap = self
 
         # We must have a 90-degree FOV to render cube maps
-        region.fov = 90
-        return region
+        self.viewport.fov = 90
         
-    def drawFrame(self):
-        """Draw function called by our viewport"""
-        if not self.dirty:
-            return
-
+    def render(self):
         self.renderSides()
-        self.dirty = False
 
     def renderColors(self):
         """For debugging, render solid color to each side of the cube map"""
@@ -162,7 +122,7 @@ class CubeMap(Texture):
         self.rstate.view.renderScene(self.rstate)
 
         glReadBuffer(GL_BACK)
-        Texture.bind(self)
+        self.bind()
 
         glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_CLAMP)

@@ -28,6 +28,7 @@ from OpenGL.GLU import *
 from BZFlag import Util, Animated
 from BZFlag.UI import GLExtension
 from OpenGL.GL.EXT.texture_filter_anisotropic import *
+import copy, math
 
 
 class Texture:
@@ -184,6 +185,59 @@ class AnimatedTexture:
     def bind(self, rstate=None):
         self.frameNumber.integrate(self.time.step())
         self.frames[int(self.frameNumber.value)].bind(rstate)
+
+
+class DynamicTexture(Texture):
+    """Abstract base class for a texture which is captured from an OpenGL rendering.
+       The size given is treated as a preferred size- the actual texture size may
+       be smaller due to viewport size limitations in the current video mode.
+       """
+    def __init__(self, maxSize):
+        Texture.__init__(self)
+        self.maxSize = maxSize
+        self.viewport = None
+        self.dirty = True
+
+    def bind(self, rstate=None):
+        """The first time we're bound we add a new viewport that renders our texture"""
+        if rstate and not self.viewport:
+            self.setupViewport(rstate)
+        Texture.bind(self, rstate)
+
+    def getTextureRect(self, viewport):
+        """Return a function that calculates the texture size taking into account
+           our maximum texture size and the given root viewport size.
+           """
+        def fsize():
+            largestPowerOfTwo = (pow(2, int(math.log(viewport.size[0]) / math.log(2))),
+                                 pow(2, int(math.log(viewport.size[1]) / math.log(2))))
+            return (0,0,
+                    min(self.maxSize[0], largestPowerOfTwo[0]),
+                    min(self.maxSize[1], largestPowerOfTwo[1]))
+        return fsize
+
+    def setupViewport(self, rstate):
+        """Set up a viewport region and rendering state for this texture to use"""
+        self.rstate = copy.copy(rstate)
+        self.viewport = self.rstate.viewport.region(
+            self.getTextureRect(self.rstate.viewport), renderLink='before')
+        self.viewport.onDrawFrame.observe(self.drawFrame)
+        
+    def drawFrame(self):
+        """Draw function called by our viewport"""
+        if not self.dirty:
+            return
+        self.render()
+        self.dirty = False
+
+    def render(self):
+        """Render the texture. By default this calls the draw() method to draw
+           the texture's contents into our viewport, then reads that viewport back.
+           If this default implementation of render() is used, the subclass must
+           provide a draw() function.
+           """
+        self.draw()
+        self.loadBackbuffer(self.viewport.size)
         
 
 class Cache:
