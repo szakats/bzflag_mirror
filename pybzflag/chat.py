@@ -5,11 +5,12 @@
 # Imagine cron jobs spitting uptimes and disk space stats into bzflag
 # so you don't miss out on such things while playing :)
 #
-from BZFlag import CommandLine, Client
+from BZFlag import CommandLine, Client, UI
 from threading import *
 import sys, time
 
-argParser = CommandLine.Parser(Client.PlayerClient, callSign = "@PyChat")
+argParser = CommandLine.Parser(Client.PlayerClient, UI.Any,
+                               callSign = "@PyChat")
 argParser.add_option("-q", "--quiet", action="store_true", dest="quiet",
                      help="Disables the output of connection status messages and protocol warnings.")
 argParser.add_option("-i", "--silent", action="store_true", dest="silent",
@@ -18,7 +19,7 @@ argParser.add_option("-w", "--wait", dest="wait", metavar="SECONDS", default=0,
                      help="Waits the given number of seconds after an EOF before leaving the game.")
 argParser.add_option("-v", "--view", dest="view", action="store_true", 
                      help="Shows an overhead view of the game during chat.")
-client = argParser.parse()
+(client, ui) = argParser.parse()
 
 # Disable warnings by default, enable them below if we're not being quiet
 client.eventLoop.showNonfatalExceptions = 0
@@ -68,8 +69,5 @@ class ChatThread(Thread):
             client.sendMessage(line.rstrip())
 client.onEnterGame.observe(ChatThread().start)
 
-if client.cmdLineValues['view']:
-    from BZFlag.UI import OverheadView
-    OverheadView.attach(client.game, client.eventLoop)
-
+ui.attach(client.game, client.eventLoop)
 client.run()

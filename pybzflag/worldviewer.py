@@ -2,15 +2,15 @@
 #
 # Simple viewer for BZFlag world files. Give a .bzw file on the command line.
 #
-from BZFlag import World, Game
-from BZFlag.UI import OverheadView
+from BZFlag import World, Game, UI, CommandLine
 from BZFlag.Event import EventLoop
 import sys
 
+ui = CommandLine.Parser(UI.Any, ui = 'overhead').parse()
 game = Game.Game()
-game.world = World.load(sys.argv[1])
+game.world = World.load(ui.cmdLineArgs[0])
 loop = EventLoop()
-OverheadView.attach(game, loop)
+ui.attach(game, loop)
 loop.run()
 
 

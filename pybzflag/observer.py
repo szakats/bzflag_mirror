@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-from BZFlag import CommandLine
-from BZFlag.UI import OverheadView
+from BZFlag import CommandLine, UI, Client
 
-client = CommandLine.client(callSign = "@PyObserver")
+(client, ui) = CommandLine.Parser(Client.PlayerClient, UI.Any,
+                                  callSign = "@PyObserver",
+                                  ui = 'overhead').parse()
 
 # Stick some instrumentation in select events
 client.onConnect.trace("Connected.")
@@ -18,6 +19,5 @@ def message(msg):
     print "<%s> %s" % (msg.fromId, msg.message)
 client.onMsgMessage.observe(message)
 
-# Show an overhead view of the world
-OverheadView.attach(client.game, client.eventLoop)
+ui.attach(client.game, client.eventLoop)
 client.run()
