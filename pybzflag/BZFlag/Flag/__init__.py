@@ -48,7 +48,7 @@ class FlagBase:
     type = []
     description = None
 
-    def __init__(self, number):
+    def __init__(self, number=None):
         self.number = number
         self.status = None
         self.owner = None

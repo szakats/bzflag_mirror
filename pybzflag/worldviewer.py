@@ -3,8 +3,11 @@
 # Simple viewer for BZFlag world files
 #
 from BZFlag.World import World
+from BZFlag.Game import Game
+from BZFlag.UI.OverheadView import OverheadView
 
-w = World()
-w.loadText(open("/home/micah/bzflag/worlds/RunRabbitRun.bzw"))
-w.saveBinary(open("foo.bin", "wb"))
+game = Game()
+game.world.loadText(open("/home/micah/bzflag/worlds/RunRabbitRun.bzw"))
+
+
 
