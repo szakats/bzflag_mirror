@@ -43,3 +43,7 @@ Coding guidelines for PyBZFlag:
 
   - All files must end with "### The End ###". Yes, it's silly.
 
+  - Angles should be measured in degrees
+
+  - Screen coordinates should have the origin at the top-left corner
+

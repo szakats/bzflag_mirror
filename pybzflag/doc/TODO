@@ -1,29 +1,25 @@
 Todo list, in no particular order:
 
+  - Add Animated functions for sawtooth, sine, square, and triangle waves. Use
+    the sawtooth wave to replace the hardcoded goop in AnimatedTexture.
+    Functions should take parameters specifying the range and the period of their output.
+
+  - Complete the Unicode support in GLText. This means deleting rarely used texture pages
+    to prevent uncontrolled memory usage, and automatically loading auxiliary fonts
+    when a character can't be located.
+
+  - Standardize the viewport coordinates, top-left should be the origin. This will affect
+    layout and font rendering.
+
   - Finish the server
 
   - Bots!
 
-  - Complete the MVC paradigm by implementing controller classes for the player
-
-  - convert panning & rotation in the 3d view to use the logarithmic approacher
-
-  - fix panning in 3d view
+  - Write a playable client
 
   - fix resizing: what might be an SDL bug is causing the window to get stuck
     resizing to its original size when using a WM or equivalent that does
     opaque resizing. Known to break under sawfish, win32, and OS X.
-
-  - The radar is slow. It needs to use display lists. In order to keep the
-    'enhanced radar' functionality, the world could be split into a fixed
-    number of layers for different heights, then these layers could be stored
-    in separate display lists. To render, each layer would be drawn with a
-    corresponding calculated alpha value.
-
-  - There is a little HUD code now in GameView. This should be expanded and
-    placed in a separate UI.Hud module. It could use some font rendering.
-    Looks like it would be relatively easy to write an FTGL-like font
-    module for python using pygame's freetype wrapper.
 
   - Better textures/lighting possibly, maybe multitexturing so long range
     views don't look so boring and the 'grass' isn't so bad. This is supposed
