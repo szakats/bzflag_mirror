@@ -1,5 +1,5 @@
 # bzflag
-# Copyright (c) 1993 - 2002 Tim Riker
+# Copyright (c) 1993 - 2001 Tim Riker
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
@@ -12,41 +12,16 @@
 DEPTH = ../..
 include $(DEPTH)/Make-common
 
-TARGETS  = $(LIBDIR)/libScene.a
+TARGETS  = $(LIBDIR)/libSceneDB.a
 
 CXXFILES =				\
-	SceneNode.cxx			\
-	SceneNodeAnimate.cxx		\
-	SceneNodeBillboard.cxx		\
-	SceneNodeBaseTransform.cxx	\
-	SceneNodeChoice.cxx		\
-	SceneNodeFieldReader.cxx	\
-	SceneNodeGState.cxx		\
-	SceneNodeGeometry.cxx		\
-	SceneNodeGroup.cxx		\
-	SceneNodeLight.cxx		\
-	SceneNodeLOD.cxx		\
-	SceneNodeMatrixTransform.cxx	\
-	SceneNodeMetadata.cxx		\
-	SceneNodeParameters.cxx		\
-	SceneNodeParticleSystem.cxx	\
-	SceneNodePrimitive.cxx		\
-	SceneNodeSelector.cxx		\
-	SceneNodeSphereTransform.cxx	\
-	SceneNodeTransform.cxx		\
-	SceneVisitor.cxx		\
-	SceneVisitorParams.cxx		\
-	SceneVisitorFind.cxx		\
-	SceneVisitorFindAll.cxx		\
-	SceneVisitorBaseRender.cxx	\
-	SceneVisitorRender.cxx		\
-	SceneVisitorSimpleRender.cxx	\
-	SceneReader.cxx 		\
-	SceneManager.cxx		\
-	daylight.cxx			\
+	SceneDatabase.cxx		\
+	ZSceneDatabase.cxx		\
+	BSPSceneDatabase.cxx		\
 	$(NULL)
 
 targets: $(TARGETS)
 
 $(TARGETS): $(OBJECTS)
 	$(ARF) $@ $?
+

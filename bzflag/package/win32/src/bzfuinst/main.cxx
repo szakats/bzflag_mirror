@@ -1,9 +1,9 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -40,11 +40,10 @@ RMVALUE, "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\bzflag"
 RMVALUE, "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\bzflag", "DisplayName",
 RMKEY,   "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall", "bzflag",
 RMFILE,  "%i\\doc\\README.HTM", "",
-RMFILE,  "%i\\doc\\LICENSE", "",
+RMFILE,  "%i\\doc\\COPYING", "",
 RMDIR,   "%i\\doc", "",
-RMFILE,  "%i\\data\\laser.ogg", "",
 RMFILE,  "%i\\data\\bbolt.rgb", "",
-RMFILE,  "%i\\data\\bbolt.rgb", "",
+RMFILE,  "%i\\data\\blaser.rgb", "",
 RMFILE,  "%i\\data\\boxwall.rgb", "",
 RMFILE,  "%i\\data\\caution.rgb", "",
 RMFILE,  "%i\\data\\clouds.rgb", "",
@@ -54,6 +53,7 @@ RMFILE,  "%i\\data\\fixedmr.rgb", "",
 RMFILE,  "%i\\data\\flag.rgb", "",
 RMFILE,  "%i\\data\\flage.rgb", "",
 RMFILE,  "%i\\data\\gbolt.rgb", "",
+RMFILE,  "%i\\data\\glaser.rgb", "",
 RMFILE,  "%i\\data\\ground.rgb", "",
 RMFILE,  "%i\\data\\helvbi.rgb", "",
 RMFILE,  "%i\\data\\helvbr.rgb", "",
@@ -62,27 +62,37 @@ RMFILE,  "%i\\data\\missile.rgb", "",
 RMFILE,  "%i\\data\\mountain.rgb", "",
 RMFILE,  "%i\\data\\panel.rgb", "",
 RMFILE,  "%i\\data\\pbolt.rgb", "",
+RMFILE,  "%i\\data\\plaser.rgb", "",
 RMFILE,  "%i\\data\\pyrwall.rgb", "",
 RMFILE,  "%i\\data\\rbolt.rgb", "",
+RMFILE,  "%i\\data\\rlaser.rgb", "",
 RMFILE,  "%i\\data\\roof.rgb", "",
 RMFILE,  "%i\\data\\timesbi.rgb", "",
 RMFILE,  "%i\\data\\timesbr.rgb", "",
 RMFILE,  "%i\\data\\title.rgb", "",
 RMFILE,  "%i\\data\\wall.rgb", "",
 RMFILE,  "%i\\data\\ybolt.rgb", "",
-RMFILE,  "%i\\data\\boom.ogg", "",
-RMFILE,  "%i\\data\\explosion.ogg", "",
-RMFILE,  "%i\\data\\fire.ogg", "",
-RMFILE,  "%i\\data\\flag_alert.ogg", "",
-RMFILE,  "%i\\data\\flag_drop.ogg", "",
-RMFILE,  "%i\\data\\flag_grab.ogg", "",
-RMFILE,  "%i\\data\\flag_lost.ogg", "",
-RMFILE,  "%i\\data\\flag_won.ogg", "",
-RMFILE,  "%i\\data\\laser.ogg", "",
-RMFILE,  "%i\\data\\pop.ogg", "",
-RMFILE,  "%i\\data\\ricochet.ogg", "",
-RMFILE,  "%i\\data\\shock.ogg", "",
-RMFILE,  "%i\\data\\teleport.ogg", "",
+RMFILE,  "%i\\data\\ylaser.rgb", "",
+RMFILE,  "%i\\data\\boom.wav", "",
+RMFILE,  "%i\\data\\explosion.wav", "",
+RMFILE,  "%i\\data\\fire.wav", "",
+RMFILE,  "%i\\data\\flag_alert.wav", "",
+RMFILE,  "%i\\data\\flag_drop.wav", "",
+RMFILE,  "%i\\data\\flag_grab.wav", "",
+RMFILE,  "%i\\data\\flag_lost.wav", "",
+RMFILE,  "%i\\data\\flag_won.wav", "",
+RMFILE,  "%i\\data\\jump.wav", "",
+RMFILE,  "%i\\data\\killteam.wav", "",
+RMFILE,  "%i\\data\\land.wav", "",
+RMFILE,  "%i\\data\\laser.wav", "",
+RMFILE,  "%i\\data\\lock.wav", "",
+RMFILE,  "%i\\data\\missile.wav", "",
+RMFILE,  "%i\\data\\phantom.wav", "",
+RMFILE,  "%i\\data\\pop.wav", "",
+RMFILE,  "%i\\data\\ricochet.wav", "",
+RMFILE,  "%i\\data\\shock.wav", "",
+RMFILE,  "%i\\data\\teamgrab.wav", "",
+RMFILE,  "%i\\data\\teleport.wav", "",
 RMDIR,   "%i\\data", "",
 RMLINK,  "bzflag", "",
 RMFILE,  "%i\\bzflag.exe", "",
@@ -387,4 +397,4 @@ int WINAPI		WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 
     return msg.wParam;
 }
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

@@ -1,9 +1,9 @@
 # bzflag
-# Copyright (c) 1993 - 2002 Tim Riker
+# Copyright (c) 1993 - 2003 Tim Riker
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
-# named LICENSE that should have accompanied this file.
+# named COPYING that should have accompanied this file.
 #
 # THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
 # IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -30,7 +30,7 @@ targets: binprep rpmprep
 	rpmversion=`rpm --version | sed -e 's/[^0-9]*\([0-9]*\).*/\1/'`; \
 	if [ $$rpmversion -ge 3 ]; then \
 	  cd $(RPM); rpm -bb --target $(ARCH)-linux \
-			$(RPMBASEDIR)/SPECS/$(SPECFILE); \
+			--rcfile $(RPMRC) $(RPMBASEDIR)/SPECS/$(SPECFILE); \
 	else \
 	  cd $(RPM); rpm -bb --buildarch $(ARCH) \
 			--rcfile $(RPMRC) $(RPMBASEDIR)/SPECS/$(SPECFILE); \
@@ -72,7 +72,7 @@ rpmprep:
 	( if [ $$rpmversion -ge 3 ]; then \
 		echo "%define _topdir $(RPMBASEDIR)"; fi; \
 		cat $(RPM)/$(SPECFILE) ) | \
-		sed -e 's/%setup -q//' \
+		sed -e 's/%setup -q -c//' \
 		-e 's/%define version.*/%define version '$(VERSIONID)/ \
 		-e 's@%define bzdatadir.*@%define bzdatadir '$(INSTALL_DATA_DIR)@ > \
 						$(RPMDIR)/SPECS/$(SPECFILE)

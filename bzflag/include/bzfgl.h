@@ -1,9 +1,9 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -17,7 +17,6 @@
  */
 
 #ifndef BZF_GL_H
-#define BZF_GL_H
 
 #if defined(_WIN32)
 // windows wants to include winsock but we can't allow that.  we
@@ -29,8 +28,14 @@
 #include <windows.h>
 #endif
 
+#if defined(__APPLE__)
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/gl.h>
+#include <GL/glu.h>
+#endif
 
 #endif
 
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

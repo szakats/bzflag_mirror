@@ -1,38 +1,39 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef BZF_REMOTE_PLAYER_H
-#define BZF_REMOTE_PLAYER_H
+#ifndef	BZF_REMOTE_PLAYER_H
+#define	BZF_REMOTE_PLAYER_H
 
+#include "common.h"
 #include "Player.h"
 #include "ShotPath.h"
 
 class RemotePlayer : public Player {
-public:
-	RemotePlayer(PlayerId, TeamColor team,
-							const char* name, const char* email);
-	~RemotePlayer();
+  public:
+			RemotePlayer(const PlayerId&, TeamColor team,
+					const char* name, const char* email);
+			~RemotePlayer();
 
-	void				addShot(const FiringInfo&);
-	ShotPath*			getShot(int index) const;
-	void				updateShots(float dt);
+    void		addShot(const FiringInfo&);
+    ShotPath*		getShot(int index) const;
+    void		updateShots(float dt);
 
-private:
-	bool				doEndShot(int index, bool isHit, float* pos);
+  private:
+    bool		doEndShot(int index, bool isHit, float* pos);
 
-private:
-	int					numShots;
-	RemoteShotPath**	shots;
+  private:
+    int			numShots;
+    RemoteShotPath**	shots;
 };
 
 #endif // BZF_REMOTE_PLAYER_H
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

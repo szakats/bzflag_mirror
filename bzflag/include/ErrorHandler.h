@@ -1,9 +1,9 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -15,12 +15,21 @@
  */
 
 #ifndef BZF_ERROR_HANDLER_H
-#define BZF_ERROR_HANDLER_H
+#define	BZF_ERROR_HANDLER_H
 
-typedef void			(*ErrorCallback)(const char*);
+#ifdef _WIN32
+#pragma warning( 4: 4786 )
+#endif
 
-ErrorCallback			setErrorCallback(ErrorCallback);
-void					printError(const char* fmt, ...);
+#include <vector>
+#include <string>
+#include "common.h"
+#include "Bundle.h"
+
+typedef void		(*ErrorCallback)(const char*);
+
+ErrorCallback		setErrorCallback(ErrorCallback);
+void			printError(const std::string &fmt, const std::vector<std::string> *parms = NULL);
 
 #endif // BZF_ERROR_HANDLER_H
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

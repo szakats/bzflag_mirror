@@ -1,5 +1,5 @@
 # bzflag
-# Copyright (c) 1993 - 2002 Tim Riker
+# Copyright (c) 1993 - 2001 Tim Riker
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
@@ -17,6 +17,8 @@ TARGETS  = $(LIBDIR)/libNet.a
 CXXFILES =				\
 	Address.cxx			\
 	Pack.cxx			\
+	Ping.cxx			\
+	multicast.cxx			\
 	udpnetwork.cxx			\
 	network.cxx			\
 	$(NULL)

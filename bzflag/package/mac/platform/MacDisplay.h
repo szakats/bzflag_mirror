@@ -6,7 +6,7 @@
 #include "BzfDisplay.h"
 #include "BzfEvent.h"
 #include "AList.h"
-#include <string>
+#include "BzfString.h"
 #include "bzfgl.h"
 
 #include <QuickDraw.h>
@@ -67,4 +67,4 @@ class MacDisplay : public BzfDisplay {
 
 #endif // BZF_MACDISPLAY_H
 //BZF_DEFINE_ALIST(MacDisplayResList, MacDisplayRes);
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

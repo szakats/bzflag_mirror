@@ -15,7 +15,7 @@ fi
 #
 # Pick a destination
 #
-dest=/usr/bin
+dest=/usr/local/bzflag
 echo -n "Where would you like bzflag installed? [$dest] "
 read ans
 if [ x$ans != "x" ]; then

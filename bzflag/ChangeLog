@@ -1,9 +1,114 @@
 
 			     BZFlag release notes
 
-BZFlag 1.7e5
-------------
+* add new updates here without heading until a release
 
+BZFlag 1.7g2 "Steely Eyed Banana" (was 1.7g1)
+-------------------------------------------------------
+
+* public release now under LGPL v2.1 - Tim Riker
+* change LICENSE to COPYING - Tim Riker
+* server administration stuff - Jeff Myers, Frank Thilo, David Trowbridge
+* admin-by-keys - Michael Hoffman
+* /help messages - Michael Hoffman, David Trowbridge
+* New super-bullet texture - Justin Zaun, Jeff Mills, David Trowbridge
+* IRIX fixes - David Trowbridge
+* cygwin/mingw32 fixes - Tupone Alfredo
+* Solaris fixes - David Trowbridge
+* OSX Fixes - Sean, David Wollner
+* server list cache - Michael Hoffman
+* E-mail field fixes - Lars Luthman
+* colorized console - Dave R (Trepan), David Trowbridge
+* automake/autoconf - Tupone Alfredo, David Trowbridge, Tim Riker
+* check for unknown message types - Frank Thilo 
+* check incoming TCP for oversized messages and dump player - Frank Thilo
+* multiline server and ad messages with '\n' - Lars Luthman
+* -speedtol server option: specify tolerance for speed kick - Jeff Myers
+* /report server command - Lars Luthman
+* -sl server option: shot limit for flags - Michael Hoffman
+* limit /password tries - Jeff Myers
+* -tftimeout server option - Lars Luthman
+* put observers to the bottom of the scoreboard - Lars Luthman
+* resize mouse boxes - Frank Thilo
+* choose [un]silence - Michael Hoffman, Tim Riker
+* flag on radar/view on/off - Michael Hoffman, Tim Riker
+* -badword server support - Dave Brosius
+* resize radar/msg area - Frank Thilo
+* Drop team flags where player last was on exit - Dave Brosius
+* tanks driving too fast are kicked - Dave Brosius
+* remove non-printable characters in callsign in server - Frank Thilo
+* +f sw{5} syntax to add a bunch of flags - Dave Brosius
+* tanks which jump too high get kicked - Dave Brosius
+* server drops bogus shots (anti cheating) - Tim Riker, Dave Brosius, Frank Thilo
+* i18n support in client - Dave Brosius, Isak Styf
+* Optional config file interface for bzfs settings - Dave Brosius
+* inline editing of text fields (<- ->) Dave Brosius, Frank Thilo
+* extend admin command -> /flag reset unused - Dave Brosius
+
+BZFlag 1.7g0 "Holy Dancing Monkeys" (was 1.7e7)
+-------------------------------------------------------
+
+* -tkkr auto team killer - Dave Brosius
+* world file caching - Colin Bayer, Dave Brosius, others
+* optional tank labels for roaming - Frank Thilo, Tim Riker
+* draw tank lights correctly for (T)(N)(O) tanks - Dave Brosius
+* new GUI options menu - Frank Thilo
+* exclude observers from /idlestats list - Frank Thilo
+* server based scoring - Dave Brosius, Tim Riker
+* max. number of observers now defaults to 3 instead of 0 - Frank Thilo
+* Use high water marks for player cnts to reduce looping - Dave Brosius
+* new bzfs option -tk: team killers do not die - Frank Thilo
+* misc @observer mode fixes - Andrew Greig
+* Improved Mac OS X support - Kevin Avila
+* disallow dud flags (eg jump in a jump world) - Dave Brosius
+* self destruct key, for stuck tanks - Dave Brosius
+* team killers die - Tim Riker
+* increase max player and robot counts - Tim Riker
+* Fix 'Change Key Mapping' arrowkeys - Andrew Greig 
+* show the time in upper right if no flag
+* opacity in config - Dave Brosius, Tim Riker
+* [UN]SILENCE - Dave Brosius, Tim Riker
+* revert lag falling patch - Tim Riker, Dave Brosius
+* teamgrab.wav - Dave Brosius
+* improved texture mapping - unknown
+* possible win32 installer bug - Chris Walters
+* gcc 3.1+ patches - David Trowbridge
+
+BZFlag 1.7e6 or Armoured Smashing Fist 2002 (was 1.7e5)
+-------------------------------------------------------
+
+* new HUD! - David Trowbridge, Tim Riker, many others
+* added temporary bans (minutes) - Dave Brosius
+* Can now build entire win32 installer from VC Workspace - Dave Brosius
+* non-listserver connection gave 0.0.0.0 as host: fixed - Dave Brosius
+* added private messages - Frank Thilo
+* modified / added roaming support for observers - Frank Thilo
+* added /idlekick server option - Frank Thilo
+* fix /ban and add /unban - Frank Thilo
+* allow both -mp # and -mp #,#,#,#,# - Frank Thilo
+* CTF flag returning to base fixes - Frank Thilo
+* sort teams by score, sort in self - janne hassinen, Tim Riker
+* observer hack, should be a team - Frank Thilo
+* /countdown, /lagwarn - Frank Thilo
+* PatchId fixes - Frank Thilo, Tim Riker
+* New lag measurement using pings - Frank Thilo
+* Reassign keyboard menu is now in two columns - Dave Brosius
+* Fix MsgMessage and CLIENTQUERY handling - Frank Thilo
+* -ban - David Trowbridge, Dave Brosius, Tim Riker
+* Mac OSX work - Kevin Avila <kevin@hzsystems.com>
+* -cr random ctf maps - Tim Riker, Frank Thilo
+* bots in building fix - Tim Riker, Harry Dodgson
+* Pause and not responding on HUD - Frank Thilo
+* Message History buffer - Dave Brosius (cleaned by Tim Riker)
+* Nemesis set on direct receive - Frank Thilo
+* LT and RT command line aliases for shell impaired - Tim Riker
+* radar shade flags by altitude - Tim Riker (reworked from Jeremiah)
+* different kill msgs - Sal Gonzalez, Tim Riker
+* brighter radar colors - Tim Riker with much input from others
+* team colored shock wave - Tim Riker
+* team colored lasers - Dave Brosius
+* turn off ctf, if bases not found in world file - Dave Brosius
+* patchid optimization for new clients - Dave Brosius
 * udp request fix for later clients - Tim Riker
 * MsgEnter should not be patched for ID - Frank Thilo
 * Removed superfluous buffer copies in bzfs buffer sends - Dave Brosius

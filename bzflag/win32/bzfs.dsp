@@ -42,23 +42,28 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /vmg /GX /O2 /I "..\include" /I "..\src\game" /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D VERSION=10801001 /FD /c
-# SUBTRACT CPP /YX /Yc /Yu
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\include" /I "..\win32" /D "_CONSOLE" /D "WIN32" /D "NDEBUG" /D "_MBCS" /FD /c
+# SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
+# ADD BSC32 /nologo /o"../src/bzfs/bzfs.bsc"
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
+# ADD LINK32 ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /pdb:"../src/bzfs/bzfs.pdb" /machine:I386 /out:"..\src\bzfs\bzfs.exe"
+# SUBTRACT LINK32 /pdb:none
+# Begin Special Build Tool
+SOURCE="$(InputPath)"
+PostBuild_Cmds=copy ..\src\bzfs\*.exe ..\*.exe
+# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "bzfs - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "bzfs___Win32_Debug"
-# PROP BASE Intermediate_Dir "bzfs___Win32_Debug"
+# PROP BASE Output_Dir "Debug"
+# PROP BASE Intermediate_Dir "Debug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
@@ -67,15 +72,21 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /vmg /GX /ZI /Od /I "..\include" /I "..\src\game" /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D VERSION=10801001 /Fd"Debug/bzfs.pdb" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\include" /I "..\win32" /D "_CONSOLE" /D "WIN32" /D "_DEBUG" /D "_MBCS" /FD /GZ /c
+# SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
+# ADD BSC32 /nologo /o"../src/bzfs/Debug/bzfs.bsc"
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /pdb:"../src/bzfs/Debug/bzfs.pdb" /debug /machine:I386 /out:"..\src\bzfs\Debug\bzfs.exe" /pdbtype:sept
+# SUBTRACT LINK32 /pdb:none
+# Begin Special Build Tool
+SOURCE="$(InputPath)"
+PostBuild_Cmds=copy ..\src\bzfs\debug\*.pdb ..\*.pdb	copy ..\src\bzflag\debug\*.exe ..\*.exe
+# End Special Build Tool
 
 !ENDIF 
 
@@ -90,26 +101,6 @@ LINK32=link.exe
 
 SOURCE=..\src\bzfs\bzfs.cxx
 # End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\WorldFile.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\WorldInfo.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\WorldRegions.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\WorldStandardRandom.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\WorldStandardTeam.cxx
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -120,15 +111,11 @@ SOURCE=..\include\Address.h
 # End Source File
 # Begin Source File
 
-SOURCE="C:\Program Files\Microsoft Visual Studio\VC98\Include\BASETSD.H"
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\bzfio.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\CallbackList.h
+SOURCE=..\include\BzfString.h
 # End Source File
 # Begin Source File
 
@@ -136,27 +123,15 @@ SOURCE=..\include\common.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\ConfigFileManager.h
+SOURCE=..\include\Flag.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\ConfigFileReader.h
+SOURCE=..\include\global.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\game\Flag.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\game\global.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\math3D.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\mathr.h
+SOURCE=..\include\multicast.h
 # End Source File
 # Begin Source File
 
@@ -164,59 +139,15 @@ SOURCE=..\include\Pack.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\game\Ping.h
+SOURCE=..\include\Ping.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\PlatformFactory.h
+SOURCE=..\include\ShotUpdate.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\game\Protocol.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\RegionManagerBase.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\RegionManagerFlagSpawn.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\RegionManagerObstacle.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\RegionReader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\RegionReaderBase.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\RegionReaderFlagSpawn.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\RegionReaderObstacle.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\Shape.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\ShapeBox.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\StateDatabase.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\game\Team.h
+SOURCE=..\include\Team.h
 # End Source File
 # Begin Source File
 
@@ -225,38 +156,6 @@ SOURCE=..\include\TimeBomb.h
 # Begin Source File
 
 SOURCE=..\include\TimeKeeper.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TransformableShape.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TransformedShape.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\WorldFile.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\WorldInfo.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\WorldRegions.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\WorldStandardRandom.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\bzfs\WorldStandardTeam.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\XMLTree.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

@@ -1,9 +1,9 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -14,13 +14,13 @@
  * UPDnetwork socket utility functions
  */
 
-#ifndef BZF_UDPNET_H
-#define BZF_UDPNET_H
+#ifndef	BZF_UDPNET_H
+#define	BZF_UDPNET_H
 
+#include <sys/types.h>
 #include "network.h"
 #include "common.h"
 #include "Address.h"
-#include <sys/types.h>
 
 /* openUDPnetwork:
  *	port:		port number
@@ -31,12 +31,13 @@
  *
  */
 
-int						openUDPNetwork(int port, struct sockaddr_in* addr);
-int						closeUDPNetwork(int fd);
-int						sendUDPNetwork(int fd, const void* buffer,
-							int bufferLength, const struct sockaddr_in*);
-int						recvUDPNetwork(int fd, void* buffer,
-							int bufferLength, struct sockaddr_in*);
+int			openUDPNetwork(int port,
+					struct sockaddr_in* addr);
+int			closeUDPNetwork(int fd);
+int			sendUDPNetwork(int fd, const void* buffer,
+				int bufferLength, const struct sockaddr_in*);
+int			recvUDPNetwork(int fd, void* buffer,
+				int bufferLength, struct sockaddr_in*);
 
 #endif // BZF_UDPNET_H
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

@@ -1,5 +1,5 @@
 # bzflag
-# Copyright (c) 1993 - 2002 Tim Riker
+# Copyright (c) 1993 - 2001 Tim Riker
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
@@ -14,39 +14,18 @@ include $(DEPTH)/Make-common
 
 TARGETS = $(TARGETDIR)/bzfs
 
-CXXFILES =							\
-	bzfs.cxx						\
-	RegionManagerFlagSpawn.cxx		\
-	RegionReaderFlagSpawn.cxx		\
-	RegionManagerObstacle.cxx		\
-	RegionReaderObstacle.cxx		\
-	RegionManagerBase.cxx			\
-	RegionReaderBase.cxx			\
-	WorldRegions.cxx	\
-	WorldInfo.cxx	\
-	WorldFile.cxx	\
-	WorldStandardTeam.cxx	\
-	WorldStandardRandom.cxx	\
+CXXFILES =				\
+	bzfs.cxx			\
 	$(NULL)
 
-LCXXINCS =							\
-	-I$(DEPTH)/src/game				\
+DEPLIBS =				\
+	$(LIBDIR)/libNet.a		\
+	$(LIBDIR)/libCommon.a		\
 	$(NULL)
 
-DEPLIBS =							\
-	$(LIBDIR)/libCollide.a			\
-	$(LIBDIR)/libRegion.a			\
-	$(LIBDIR)/libShape.a			\
-	$(LIBDIR)/libGame.a				\
-	$(LIBDIR)/libPlatform.a			\
-	$(LIBDIR)/libNet.a				\
-	$(LIBDIR)/libMath.a				\
-	$(LIBDIR)/libCommon.a			\
-	$(NULL)
-
-LLDLIBS =							\
-	$(DEPLIBS)						\
-	-lm								\
+LLDLIBS =				\
+	$(DEPLIBS)			\
+	-lm				\
 	$(NULL)
 
 targets: $(TARGETS)

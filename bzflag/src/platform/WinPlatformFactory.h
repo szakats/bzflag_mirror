@@ -1,9 +1,9 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -14,53 +14,32 @@
  *	Factory for Windows platform stuff.
  */
 
-#ifndef BZF_WIN_PLATFORM_FACTORY_H
-#define BZF_WIN_PLATFORM_FACTORY_H
+#ifndef BZF_WINPLATFORM_FACTORY_H
+#define	BZF_WINPLATFORM_FACTORY_H
 
 #include "PlatformFactory.h"
-#include <windows.h>
 
-typedef void (__cdecl *SIG_PF)(int);
+class WinWindow;
 
 class WinPlatformFactory : public PlatformFactory {
-public:
-	WinPlatformFactory();
-	~WinPlatformFactory();
+  public:
+			WinPlatformFactory();
+			~WinPlatformFactory();
 
-	std::istream*			createConfigInStream() const;
-	std::ostream*			createConfigOutStream() const;
-	void				createConsole();
-	void				writeConsole(const char*, bool error);
-	double				getTime() const;
-	double				getClock() const;
-	void				sleep(double timeInSeconds) const;
-	std::string			getUserName() const;
-	void				setEnv(const std::string&, const std::string&);
-	void				unsetEnv(const std::string&);
-	std::string			getEnv(const std::string&) const;
-	void				signalRaise(Signal);
+    BzfDisplay*		createDisplay(const char* name,
+				const char* videoFormat);
+    BzfVisual*		createVisual(const BzfDisplay*);
+    BzfWindow*		createWindow(const BzfDisplay*, BzfVisual*);
 
-protected:
-	SigType				signalInstall(Signal);
-	SigType				signalInstallIgnore(Signal);
-	SigType				signalInstallDefault(Signal);
+  private:
+			WinPlatformFactory(const WinPlatformFactory&);
+    WinPlatformFactory&	operator=(const WinPlatformFactory&);
 
-private:
-	WinPlatformFactory(const WinPlatformFactory&);
-	WinPlatformFactory&	operator=(const WinPlatformFactory&);
+    BzfMedia*		createMedia();
 
-	std::string			getConfigFileName() const;
-	SigType				doSignalInstall(Signal, SIG_PF);
-	static void			onSignal(int);
-	static int			toSigno(Signal);
-	static Signal		fromSigno(int);
-
-private:
-	unsigned int		clockZero;
-	LARGE_INTEGER		qpcZero;
-	double				qpcFrequency;
-	bool				hasConsole;
+  private:
+    static WinWindow*	window;
 };
 
-#endif // BZF_WIN_PLATFORM_FACTORY_H
-// ex: shiftwidth=4 tabstop=4
+#endif // BZF_WINPLATFORM_FACTORY_H
+// ex: shiftwidth=2 tabstop=8

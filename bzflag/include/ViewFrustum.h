@@ -1,9 +1,9 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -14,107 +14,132 @@
  *	Encapsulates a camera.
  */
 
-#ifndef BZF_VIEW_FRUSTUM_H
-#define BZF_VIEW_FRUSTUM_H
+#ifndef	BZF_VIEW_FRUSTUM_H
+#define	BZF_VIEW_FRUSTUM_H
 
 #include "common.h"
-#include "math3D.h"
+#include "bzfgl.h"
+
+// FIXME -- will need a means for off center projections for
+//	looking through teleporters
 
 class ViewFrustum {
-public:
-						ViewFrustum();
-						~ViewFrustum();
+  public:
+			ViewFrustum();
+			~ViewFrustum();
 
-	const float*		getEye() const;
-	const float*		getDirection() const;
-	const float*		getUp() const;
-	const float*		getRight() const;
-	float				getFOVx() const;
-	float				getFOVy() const;
-	float				getNear() const;
-	float				getFar() const;
-	const float*		getViewMatrix() const;
-	const float*		getProjectionMatrix() const;
+    const GLfloat*	getEye() const;
+    const GLfloat*	getDirection() const;
+    const GLfloat*	getUp() const;
+    const GLfloat*	getRight() const;
+    const GLfloat*	getSide(int index) const;
+    const GLfloat*	getFarCorner(int index) const;
+    GLfloat		getNear() const;
+    GLfloat		getFar() const;
+    const GLfloat*	getViewMatrix() const;
+    GLfloat		getFOVx() const;
+    GLfloat		getFOVy() const;
+    const GLfloat*	getProjectionMatrix() const;
+    GLfloat		getEyeDepth(const GLfloat*) const;
+    GLfloat		getAreaFactor() const;
 
-	void				setView(const float* eye, const float* target);
-	void				setProjection(float fovx, float aspectRatio,
-							float m_near, float m_far);
-	void				setOffset(float eyeOffset, float focalPlane);
+    void		setView(const GLfloat* eye, const GLfloat* target);
+    void		setProjection(GLfloat fov, GLfloat m_near, GLfloat m_far,
+					GLint width, GLint height, GLint viewHeight);
+    void		setOffset(GLfloat eyeOffset, GLfloat focalPlane);
 
-	static const Matrix&	getTransform();
+    void		executeProjection() const;
+    void		executeDeepProjection() const;
+    void		executeView() const;
+    void		executeOrientation() const;
+    void		executePosition() const;
+    void		executeBillboard() const;
 
-private:
-	float				eye[3];
-	float				forward[3], right[3], up[3];
-	float				m_near, m_far;
-	float				fovx, fovy;
-	float				viewMatrix[16];
-	float				projectionMatrix[16];
+  private:
+    void		makePlane(const GLfloat* v1, const GLfloat* v2, int);
+
+  private:
+    GLfloat		eye[3];
+    GLfloat		right[3], up[3];
+    GLfloat		plane[5][4];		// pointing in
+    GLfloat		farCorner[4][3];
+    GLfloat		viewMatrix[16];
+    GLfloat		billboardMatrix[16];
+    GLfloat		m_near, m_far;
+    GLfloat		fovx, fovy;
+    GLfloat		areaFactor;
+    GLfloat		projectionMatrix[16];
+    GLfloat		deepProjectionMatrix[16];
 };
 
 //
 // ViewFrustum
 //
 
-inline
-const float*			ViewFrustum::getEye() const
+inline const GLfloat*	ViewFrustum::getEye() const
 {
-	return eye;
+  return eye;
 }
 
-inline
-const float*			ViewFrustum::getDirection() const
+inline const GLfloat*	ViewFrustum::getDirection() const
 {
-	return forward;
+  return plane[0];
 }
 
-inline
-const float*			ViewFrustum::getUp() const
+inline const GLfloat*	ViewFrustum::getSide(int index) const
 {
-	return up;
+  return plane[index];
 }
 
-inline
-const float*			ViewFrustum::getRight() const
+inline const GLfloat*	ViewFrustum::getFarCorner(int index) const
 {
-	return right;
+  return farCorner[index];
 }
 
-inline
-float					ViewFrustum::getFOVx() const
+inline const GLfloat*	ViewFrustum::getUp() const
 {
-	return fovx;
+  return up;
 }
 
-inline
-float					ViewFrustum::getFOVy() const
+inline const GLfloat*	ViewFrustum::getRight() const
 {
-	return fovy;
+  return right;
 }
 
-inline
-float					ViewFrustum::getNear() const
+inline GLfloat		ViewFrustum::getNear() const
 {
-	return m_near;
+  return m_near;
 }
 
-inline
-float					ViewFrustum::getFar() const
+inline GLfloat		ViewFrustum::getFar() const
 {
-	return m_far;
+  return m_far;
 }
 
-inline
-const float*			ViewFrustum::getViewMatrix() const
+inline GLfloat		ViewFrustum::getFOVx() const
 {
-	return viewMatrix;
+  return fovx;
 }
 
-inline
-const float*			ViewFrustum::getProjectionMatrix() const
+inline GLfloat		ViewFrustum::getFOVy() const
 {
-	return projectionMatrix;
+  return fovy;
+}
+
+inline const GLfloat*	ViewFrustum::getViewMatrix() const
+{
+  return viewMatrix;
+}
+
+inline const GLfloat*	ViewFrustum::getProjectionMatrix() const
+{
+  return projectionMatrix;
+}
+
+inline GLfloat		ViewFrustum::getAreaFactor() const
+{
+  return areaFactor;
 }
 
 #endif // BZF_VIEW_FRUSTUM_H
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

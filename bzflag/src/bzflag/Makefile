@@ -1,5 +1,5 @@
 # bzflag
-# Copyright (c) 1993 - 2002 Tim Riker
+# Copyright (c) 1993 - 2001 Tim Riker
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
@@ -15,51 +15,45 @@ include $(DEPTH)/Make-common
 TARGETS = $(TARGETDIR)/bzflag
 
 CXXFILES =				\
-	CommandsSearch.cxx		\
-					\
-	HUDManager.cxx			\
-					\
-	ViewItems.cxx			\
-	ViewItemHUD.cxx			\
-	ViewItemPWR.cxx			\
-	ViewItemRadar.cxx		\
-	ViewItemPlayerScene.cxx		\
-	ViewItemScoreboard.cxx		\
-					\
+	MainWindow.cxx			\
+	ControlPanel.cxx		\
 	World.cxx			\
 	SceneBuilder.cxx		\
+	SceneRenderer.cxx		\
+	BackgroundRenderer.cxx		\
+	RadarRenderer.cxx		\
+	HUDRenderer.cxx			\
+	HUDui.cxx			\
 	ShotPath.cxx			\
 	ShotStrategy.cxx		\
 	Region.cxx			\
+	RenderNode.cxx			\
 	Player.cxx			\
 	playing.cxx			\
 	LocalPlayer.cxx			\
 	RemotePlayer.cxx		\
+	RobotPlayer.cxx			\
 	DeadPlayer.cxx			\
 	ServerLink.cxx			\
-	SoundManager.cxx		\
+	PlayerLink.cxx			\
+	KeyMap.cxx			\
+	daylight.cxx			\
+	texture.cxx			\
+	resources.cxx			\
+	sound.cxx			\
 	bzflag.cxx			\
-	$(NULL)
-
-LCXXINCS =				\
-	-I$(DEPTH)/src/game		\
+	HUDDialog.cxx			\
+	menus.cxx			\
 	$(NULL)
 
 DEPLIBS =				\
-	$(LIBDIR)/libGame.a		\
-	$(LIBDIR)/libMPlatform.a	\
-	$(LIBDIR)/libView.a		\
-	$(LIBDIR)/libUI.a		\
-	$(LIBDIR)/libScene.a		\
-	$(LIBDIR)/libGLKit.a		\
-	$(LIBDIR)/libPlatform.a		\
 	$(LIBDIR)/libNet.a		\
-	$(LIBDIR)/libMediaFile.a	\
-	$(LIBDIR)/libObstacle.a		\
-	$(LIBDIR)/libGeometry.a		\
-	$(LIBDIR)/libMath.a		\
 	$(LIBDIR)/libCommon.a		\
-	$(LIBDIR)/libz.a		\
+	$(LIBDIR)/libObstacle.a		\
+	$(LIBDIR)/libPlatform.a		\
+	$(LIBDIR)/libGLKit.a		\
+	$(LIBDIR)/libSceneDB.a		\
+	$(LIBDIR)/libGeometry.a		\
 	$(NULL)
 
 LLDLIBS =				\
@@ -70,8 +64,6 @@ LLDLIBS =				\
 	$(GL_LIBS)			\
 	$(DISPLAY_LIBS)			\
 	$(WINDOW_LIBS)			\
-	-lpthread			\
-	-ldl				\
 	-lm				\
 	$(NULL)
 

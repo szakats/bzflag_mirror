@@ -14,11 +14,11 @@ double MacMedia::stopwatch (boolean start) { return 0; }
 
 void   MacMedia::sleep     (float   secs ) {}
 
-std::string MacMedia::makePath (const std::string &dir, const std::string &file) const {
+BzfString MacMedia::makePath (const BzfString &dir, const BzfString &file) const {
 
   if (dir.isNull() || file.getString()[0] == ':') return file;
 
-  std::string path = "";
+  BzfString path = "";
   if (dir[0] != ':')
     path += ":";
 
@@ -181,4 +181,4 @@ void    MacMedia::audioSleep (boolean checkLowWater, double maxTime) {
 }
 
 
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

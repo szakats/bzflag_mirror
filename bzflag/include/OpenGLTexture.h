@@ -1,9 +1,9 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -38,122 +38,106 @@
  * <, <=, >, >= define an arbitrary ordering of textures.
  */
 
-#ifndef BZF_OPENGL_TEXTURE_H
-#define BZF_OPENGL_TEXTURE_H
+#ifndef	BZF_OPENGL_TEXTURE_H
+#define	BZF_OPENGL_TEXTURE_H
 
 #include "common.h"
-#include <string>
+#include "bzfgl.h"
 
 class OpenGLTexture {
-public:
-	enum Filter {
-						Off,
-						Nearest,
-						Linear,
-						NearestMipmapNearest,
-						LinearMipmapNearest,
-						NearestMipmapLinear,
-						LinearMipmapLinear,
-						Max = LinearMipmapLinear
-	};
+  public:
+    enum Filter {
+			Off,
+			Nearest,
+			Linear,
+			NearestMipmapNearest,
+			LinearMipmapNearest,
+			NearestMipmapLinear,
+			LinearMipmapLinear,
+			Max = LinearMipmapLinear
+    };
 
-	OpenGLTexture();
-	OpenGLTexture(const std::string& filename,
-							int* width, int* height,
-							Filter maxFilter = Linear,
-							bool repeat = true,
-							int internalFormat = 0);
-	OpenGLTexture(int width, int height,
-							const void* pixels,
-							Filter maxFilter = Linear,
-							bool repeat = true,
-							int internalFormat = 0,
-							bool adoptPixels = false);
-	OpenGLTexture(const OpenGLTexture&);
-	~OpenGLTexture();
-	OpenGLTexture&		operator=(const OpenGLTexture&);
+			OpenGLTexture();
+			OpenGLTexture(int width, int height,
+					const GLvoid* pixels,
+					Filter maxFilter = Linear,
+					bool repeat = true,
+					int internalFormat = 0);
+			OpenGLTexture(const OpenGLTexture&);
+			~OpenGLTexture();
+    OpenGLTexture&	operator=(const OpenGLTexture&);
 
-	bool				operator==(const OpenGLTexture&) const;
-	bool				operator!=(const OpenGLTexture&) const;
-	bool				operator<(const OpenGLTexture&) const;
-	bool				isValid() const;
-	bool				hasAlpha() const;
-	bool				isRepeat() const;
-	bool				isRGB() const;
-	std::string			getFilename() const;
+    bool		operator==(const OpenGLTexture&) const;
+    bool		operator!=(const OpenGLTexture&) const;
+    bool		operator<(const OpenGLTexture&) const;
+    bool		isValid() const;
+    bool		hasAlpha() const;
+    GLuint		getList() const;
 
-	void				execute() const;
+    void		execute() const;
 
-	static Filter		getFilter();
-	static void			setFilter(Filter);
-	static int			getRGBAFormat();
+    static Filter	getFilter();
+    static void		setFilter(Filter);
 
-private:
-	class Rep {
-	public:
-		Rep(const std::string& filename,
-							int width, int height,
-							const void* pixels,
-							int maxFilter,
-							bool repeat,
-							int internalFormat,
-							bool adoptPixels);
-		~Rep();
-		void			setFilter(int filter);
-		void			createObject();
+  private:
+    class Rep {
+      public:
+			Rep(int width, int height,
+					const GLvoid* pixels,
+					int maxFilter,
+					bool repeat,
+					int internalFormat);
+			~Rep();
+	void		setFilter(int filter);
 
-		static Rep*		find(const std::string& filename, Rep* prev);
+      public:
+	int		refCount;
+	GLuint		list;
+	bool		alpha;
+	Rep*		next;
+	static Rep*	first;
 
-	public:
-		int				refCount;
-		const int		width;
-		const int		height;
-		unsigned int	list;
-		bool			alpha;
-		bool			repeat;
-		int				internalFormat;
-		std::string		filename;
-		int				maxFilter;
-		Rep*			next;
-		static Rep*		first;
+      private:
+	void		doInitContext();
+	static void	initContext(void*);
+	static int	getBestFormat(int width, int height,
+					const GLvoid* pixels);
 
-	private:
-		void			destroyObject();
-		static void		initContext(bool, void*);
-		static int		getBestFormat(int width, int height,
-							const void* pixels);
+      private:
+	const int	width;
+	const int	height;
+	GLubyte*	image;
+	bool		repeat;
+	int		internalFormat;
 
-	private:
-		unsigned char*		image;
-		static const int	minifyFilter[];
-		static const int	magnifyFilter[];
-	};
+	int			maxFilter;
+	static const GLenum	minifyFilter[];
+	static const GLenum	magnifyFilter[];
+    };
 
-	void				ref();
-	bool				unref();
-	static void			bind(Rep*);
+    void		ref();
+    bool		unref();
+    static void		bind(Rep*);
 
-private:
-	Rep*				rep;
-	static Filter		filter;
-	static Rep*			lastRep;
+  private:
+    Rep*		rep;
+    static Filter	filter;
+    static Rep*		lastRep;
 };
 
 //
 // OpenGLTexture
 //
 
-inline
-bool					OpenGLTexture::isValid() const
+inline bool		OpenGLTexture::isValid() const
 {
-	return rep != NULL;
+  return rep != NULL;
 }
 
-inline
-bool					OpenGLTexture::hasAlpha() const
+inline bool		OpenGLTexture::hasAlpha() const
 {
-	return rep != NULL && rep->alpha;
+  return rep != NULL && rep->alpha;
 }
 
 #endif // BZF_OPENGL_TEXTURE_H
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8

@@ -1,9 +1,9 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2003 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
@@ -22,54 +22,50 @@
 #define	BZF_INET_ADDR_H
 
 #include <sys/types.h>
-#include "network.h"
+#include <string>
 #include "common.h"
+#include "network.h"
 #include "Pack.h"
 
 typedef struct in_addr	InAddr;			// shorthand
 
 class Address {
-public:
-	Address();
-	Address(const std::string&);
-	Address(const Address&);
-	Address(const InAddr&);		    	// input in nbo
-	Address(const struct sockaddr_in&);	// input in nbo
-	~Address();
-	Address&			operator=(const Address&);
+  public:
+			Address();
+			Address(const std::string&);
+			Address(const Address&);
+			Address(const InAddr&);		    // input in nbo
+			Address(const struct sockaddr_in&); // input in nbo
+			~Address();
+    Address&		operator=(const Address&);
 
-						operator InAddr() const;
-	bool				operator==(const Address&) const;
-	bool				operator!=(const Address&) const;
-	bool				isAny() const;
-	std::string			getDotNotation() const;
+			operator InAddr() const;
+    bool		operator==(const Address&) const;
+    bool		operator!=(const Address&) const;
+    bool		isAny() const;
+    std::string		getDotNotation() const;
 
-	void*				pack(void*) const;
-	void*				unpack(void*);
+    void*		pack(void*) const;
+    void*		unpack(void*);
 
-	static Address		getHostAddress(const char* hostname = NULL);
-	static std::string	getHostByAddress(InAddr);
-	static const char*	getHostName(const char* hostname = NULL);
+    static Address	getHostAddress(const char* hostname = NULL);
+    static std::string	getHostByAddress(InAddr);
+    static const char*	getHostName(const char* hostname = NULL);
 
-private:
-	InAddr				addr;
-	static Address		localAddress;
+  private:
+    InAddr		addr;
+    static Address	localAddress;
 };
 
+const int		PlayerIdPLen = 8;
 
-typedef uint8_t			PlayerId;
-
-const int				PlayerIdPLen = sizeof(PlayerId);
-
-const int				ServerIdPLen = 8;
-
-class ServerId {
+class PlayerId {
   public:
     void*		pack(void*) const;
     void*		unpack(void*);
 
-    bool		operator==(const ServerId&) const;
-    bool		operator!=(const ServerId&) const;
+    bool		operator==(const PlayerId&) const;
+    bool		operator!=(const PlayerId&) const;
 
   public:
     // host and port in network byte order
@@ -79,4 +75,4 @@ class ServerId {
 };
 
 #endif // BZF_INET_ADDR_H
-// ex: shiftwidth=4 tabstop=4
+// ex: shiftwidth=2 tabstop=8
