@@ -174,7 +174,7 @@ def randomArray(shape, seed=None, range=(0,1), type=Float):
         if seed is None:
             RandomArray.seed()
         else:
-            RandomArray.seed(seed+1)
+            RandomArray.seed(seed+1, seed+1)
         return (RandomArray.random(shape) * (range[1]-range[0]) + range[0]).astype(type)
     except ImportError:
         import random

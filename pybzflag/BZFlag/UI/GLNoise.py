@@ -48,7 +48,7 @@ def drawTexRect(destSize, texSize=(1,1)):
     glEnd()
 
 
-class NoiseTexture(Texture.Texture):
+class EntropyTexture(Texture.Texture):
     """A texture filled with unfiltered random noise"""
     def __init__(self, size=(256,256), seed=None):
         Texture.Texture.__init__(self)
@@ -57,12 +57,11 @@ class NoiseTexture(Texture.Texture):
         self.setFilter(GL_NEAREST, GL_NEAREST)
 
 
-class NoiseRenderer:
-    """Renders a NoiseTexture with scaling and rotation to
-       generate a stream of random frames from one source texture.
+class NoiseFactory:
+    """Produces NoiseTextures from one master EntropyTexture.
 
-       texture - The texture to scale and rotate. Generally this should be a
-                 NoiseTexture instance with custom settings.
+       texture - The texture to scale and rotate. Generally this should be an
+                 EntropyTexture instance with custom settings.
 
        scale - Texture coordinate scale
 
@@ -72,7 +71,7 @@ class NoiseRenderer:
        """
     def __init__(self, texture=None, scale=50, rotationDistance=100, rotationSpeed=129):
         if not texture:
-            texture = NoiseTexture()
+            texture = EntropyTexture()
         self.texture = texture
         self.scale = scale
         self.rotationDistance = rotationDistance
@@ -82,25 +81,38 @@ class NoiseRenderer:
     def reset(self):
         self.angle = 0
 
-    def render(self, texture, size):
-        """Render noise into the given texture. This assumes an ortho mode viewport"""
+    def new(self, size):
+        """Return a new noise texture at the given maximum size"""
+        return NoiseTexture(self, size)
 
+
+class NoiseTexture(Texture.DynamicTexture):
+    """A noise texture, rendered by rotating and scaling an EntropyTexture.
+       This class should generally be created via NoiseFactory.
+       """
+    def __init__(self, factory, size):
+        Texture.DynamicTexture.__init__(self, size)
+        self.factory = factory
+        self.angle = factory.angle
+        factory.angle += factory.rotationSpeed
+
+    def render(self):
         # Prepare our texture
         glEnable(GL_TEXTURE_2D)
         glDisable(GL_LIGHTING)
         glDisable(GL_BLEND)
         glColor3f(1,1,1)
-        self.texture.bind()
+        self.factory.texture.bind()
         
         # Rotate the texture matrix
         glMatrixMode(GL_TEXTURE)
         glLoadIdentity()
-        self.angle += self.rotationSpeed
         glRotatef(self.angle, 0,0,1)
-        glTranslatef(-self.rotationDistance, -self.rotationDistance, 0)
+        glTranslatef(-self.factory.rotationDistance,
+                     -self.factory.rotationDistance, 0)
         glMatrixMode(GL_MODELVIEW)
 
-        drawTexRect(size, (self.scale, self.scale))
+        drawTexRect(self.viewport.size, (self.scale, self.scale))
         
         # Clean up
         glMatrixMode(GL_TEXTURE)
@@ -108,21 +120,18 @@ class NoiseRenderer:
         glMatrixMode(GL_MODELVIEW)
         glDisable(GL_TEXTURE_2D)
 
-        # Capture our rendered image
-        texture.loadBackbuffer(size)
-
 
 class AnimatedNoise:
     """Creates multiple frames of noise at the same size, and smoothly blends between them.
        Note that this isn't Perlin noise yet, just uncorrelated noise at a single resolution.
        Multiple AnimatedNoise instances are used to animate Perlin noise.
 
-       This creates numFrames noise frames using the provided renderer at the given size.
+       This creates numFrames noise frames using the provided factory at the given size.
        They are animated over the given period, in seconds.
        """
-    def __init__(self, size, numFrames, period=1, renderer=None):
-        if not renderer:
-            renderer = NoiseRenderer()
+    def __init__(self, size, numFrames, period=1, factory=None):
+        if not factory:
+            factory = NoiseFactory()
             
         self.period = period
         self.size = size
@@ -131,9 +140,7 @@ class AnimatedNoise:
         # Render and store all the frames we'll need
         self.frames = []
         for i in xrange(numFrames):
-            frame = Texture.Texture()
-            renderer.render(frame, size)
-            self.frames.append(frame)
+            self.frames.append(factory.new(size))
 
         # To prevent special cases in looping below, refer back to the first frame after the last frame
         self.frames.append(self.frames[0])
@@ -198,7 +205,7 @@ class AnimatedPerlinNoise:
        - 'fundamental' is the fundamental frequency of the noise in texels
        - 'framesPerOctave' sets the number of noise frames to render at each octave.
          More frames will produce a more detailed animation at the expense of memory.
-       - 'renderer' is a NoiseRenderer instance to use. If None, one will be created.
+       - 'factory' is a NoiseFactory instance to use. If None, one will be created.
        """
     def __init__(self,
                  period          = 50,
@@ -206,16 +213,16 @@ class AnimatedPerlinNoise:
                  numOctaves      = 8,
                  fundamental     = 2,
                  framesPerOctave = 32,
-                 renderer        = None):
-        if not renderer:
-            renderer = NoiseRenderer()
+                 factory         = None):
+        if not factory:
+            factory = NoiseFactory()
         self.period = period
         self.persistence = persistence
         self.octaves = []
         self.numOctaves = numOctaves
         self.fundamental = fundamental
         self.framesPerOctave = framesPerOctave
-        self.renderer = renderer
+        self.factory = factory
 
     def draw(self, size):
         """Draw the octaves, largest first, with alpha blending.
@@ -246,7 +253,7 @@ class AnimatedPerlinNoise:
             if size > viewport[2] or size > viewport[3]:
                 break
             
-            self.octaves.insert(0, AnimatedNoise((size,size), self.framesPerOctave, period, self.renderer))
+            self.octaves.insert(0, AnimatedNoise((size,size), self.framesPerOctave, period, self.factory))
             period /= 2
             size   *= 2
 
