@@ -39,8 +39,8 @@ class Camera:
     def load(self):
         glLoadIdentity()
 	glTranslatef(0, 0, -self.distance)
-	glRotatef(elevation, 1.0, 0.0, 0.0)
-	glRotatef(rotation, 0.0, 0.0, 1.0)
+	glRotatef(self.elevation, 1.0, 0.0, 0.0)
+	glRotatef(self.rotation, 0.0, 0.0, 1.0)
 	if self.isFocused:
 	    glTranslatef(self.focus[0], self.focus[1], self.focus[2])
 
@@ -86,7 +86,7 @@ class ThreeDView:
 	glEnable(GL_LIGHTING);
 	self.configure(self.size)
 
-    def render(self, surface):
+    def render(self):
         """Render the view to the given surface. This includes the game
 	   world, with transient objects such as players and flags"""
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -100,12 +100,13 @@ def attach(game, eventLoop, size=(800,600), targetFrameRate=60):
         global view, screen
 	if view:
 	    game.update()
-	    view.initialize(screen)
+	    view.render()
 	    pygame.display.flip()
     eventLoop.add(Event.PeriodicTimer(1.0 / targetFrameRate, updateView))
 
     global view, screen
     pygame.init()
-    screen = pygame.display.set_mode(size, pygame.OPENGL)
+    screen = pygame.display.set_mode(size, pygame.OPENGL | pygame.DOUBLEBUF)
     view = ThreeDView(game)
+    view.initialize(screen)
     updateView()
