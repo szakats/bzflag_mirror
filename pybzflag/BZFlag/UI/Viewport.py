@@ -110,8 +110,18 @@ class PygameViewport(Viewport):
            rendering, actually performing the rendering, and finishing the frame.
            """
         import pygame
+        
+        # Dispatch events. There's a little complexity here because for
+        # some events we want to ignore all but the last occurance in the queue.
+        import pygame
+        resizeEvent = None
         for event in pygame.event.get():
-            self.onEvent(event)
+            if event.type == pygame.VIDEORESIZE:
+                resizeEvent = event
+            else:
+                self.onEvent(event)
+        if resizeEvent:
+            self.onEvent(resizeEvent)
 
         self.onSetupFrame()
         self.onDrawFrame()
