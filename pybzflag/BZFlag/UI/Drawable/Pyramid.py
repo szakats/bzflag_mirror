@@ -26,7 +26,7 @@ from BZFlag.Vector import cross, normalize
 
 
 class Pyramid(DisplayList):
-    textureName = 'pyrwall.png'
+    textureName = 'blue_concrete.jpeg'
     def set(self, center, angle, size, flip):
         self.center = center
         self.angle = angle
@@ -50,11 +50,11 @@ class Pyramid(DisplayList):
         glNormal3f(0, 0, -1)
         glTexCoord2f(0, 0)
         glVertex3f(-self.size[0], -self.size[1], z)
-        glTexCoord2f(0, self.size[1] / 2)
+        glTexCoord2f(0, self.size[1] / 30)
         glVertex3f(-self.size[0], self.size[1], z)
-        glTexCoord2f(self.size[0] / 2, self.size[1] / 2)
+        glTexCoord2f(self.size[0] / 30, self.size[1] / 30)
         glVertex3f(self.size[0], self.size[1], z)
-        glTexCoord2f(self.size[0] / 2, 0)
+        glTexCoord2f(self.size[0] / 30, 0)
         glVertex3f(self.size[0], -self.size[1], z)
         glEnd()
         glBegin(GL_TRIANGLES)
@@ -63,36 +63,36 @@ class Pyramid(DisplayList):
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
         glVertex3f(-self.size[0], self.size[1], z)
-        glTexCoord2f(self.size[0] / 4, self.size[2] / 4)
+        glTexCoord2f(self.size[0] / 60, self.size[2] / 60)
         glVertex3f(0, 0, z2)
-        glTexCoord2f(self.size[0] / 2, 0)
+        glTexCoord2f(self.size[0] / 30, 0)
         glVertex3f(self.size[0], self.size[1], z)
         # Y+ side
         norm = normalize(cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0)))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
         glVertex3f(self.size[0], self.size[1], z)
-        glTexCoord2f(self.size[1] / 4, self.size[2] / 4)
+        glTexCoord2f(self.size[1] / 60, self.size[2] / 60)
         glVertex3f(0, 0, z2)
-        glTexCoord2f(self.size[1] / 2, 0)
+        glTexCoord2f(self.size[1] / 30, 0)
         glVertex3f(self.size[0], -self.size[1], z)
         # X- side
         norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0)))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
         glVertex3f(self.size[0], -self.size[1], z)
-        glTexCoord2f(self.size[0] / 4, self.size[2] / 4)
+        glTexCoord2f(self.size[0] / 60, self.size[2] / 60)
         glVertex3f(0, 0, z2)
-        glTexCoord2f(self.size[0] / 2, 0)
+        glTexCoord2f(self.size[0] / 30, 0)
         glVertex3f(-self.size[0], -self.size[1], z)
         # Y- side
         norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (0, -self.size[1] * 2, 0)))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
         glVertex3f(-self.size[0], -self.size[1], z)
-        glTexCoord2f(self.size[1] / 4, self.size[2] / 4)
+        glTexCoord2f(self.size[1] / 60, self.size[2] / 60)
         glVertex3f(0, 0, z2)
-        glTexCoord2f(self.size[1] / 2, 0)
+        glTexCoord2f(self.size[1] / 30, 0)
         glVertex3f(-self.size[0], self.size[1], z)
         glEnd()
         if self.flip:

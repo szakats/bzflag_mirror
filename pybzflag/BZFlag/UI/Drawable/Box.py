@@ -29,11 +29,28 @@ import random
 
 
 class BoxSides(DisplayList):
-    textureName = 'boxwall.png'
-    def set(self, center, angle, size):
-        self.center = center
-        self.angle = angle
-        self.size = size
+    def __init__(self, box):
+        # Bridges and platforms
+        if box.size[2] < 10 and box.center[2] > 1:
+            self.textureNames = ["lighted_girder.jpeg"]
+            aspect = 0.6489
+            self.texRepeats = (box.size[0] / (box.size[2] * aspect),
+                               box.size[1] / (box.size[2] * aspect),
+                               1)
+
+        # Default wall
+        else:
+            self.textureNames = ["brick.png"]
+            self.texRepeats = (box.size[0] / 2,
+                               box.size[1] / 2,
+                               box.size[2] / 4)
+
+        DisplayList.__init__(self, box)
+               
+    def set(self, box):
+        self.center = box.center
+        self.angle = box.angle
+        self.size = box.size
 
     def drawToList(self):
         glPushMatrix()
@@ -44,41 +61,41 @@ class BoxSides(DisplayList):
         glNormal3f(0, 1, 0)
         glTexCoord2f(0, 0)
         glVertex3f(-self.size[0], self.size[1], 0)
-        glTexCoord2f(0, self.size[2] / 4)
+        glTexCoord2f(0, self.texRepeats[2])
         glVertex3f(-self.size[0], self.size[1], self.size[2])
-        glTexCoord2f(self.size[0] / 2, self.size[2] / 4)
+        glTexCoord2f(self.texRepeats[0], self.texRepeats[2])
         glVertex3f(self.size[0], self.size[1], self.size[2])
-        glTexCoord2f(self.size[0] / 2, 0)
+        glTexCoord2f(self.texRepeats[0], 0)
         glVertex3f(self.size[0], self.size[1], 0)
         # Y- side
         glNormal3f(0, -1, 0)
         glTexCoord2f(0, 0)
         glVertex3f(self.size[0], -self.size[1], 0)
-        glTexCoord2f(0, self.size[2] / 4)
+        glTexCoord2f(0, self.texRepeats[2])
         glVertex3f(self.size[0], -self.size[1], self.size[2])
-        glTexCoord2f(self.size[0] / 2, self.size[2] / 4)
+        glTexCoord2f(self.texRepeats[0], self.texRepeats[2])
         glVertex3f(-self.size[0], -self.size[1], self.size[2])
-        glTexCoord2f(self.size[0] / 2, 0)
+        glTexCoord2f(self.texRepeats[0], 0)
         glVertex3f(-self.size[0], -self.size[1], 0)
         # X+ side
         glNormal3f(1, 0, 0)
         glTexCoord2f(0, 0)
         glVertex3f(self.size[0], self.size[1], 0)
-        glTexCoord2f(0, self.size[2] / 4)
+        glTexCoord2f(0, self.texRepeats[2])
         glVertex3f(self.size[0], self.size[1], self.size[2])
-        glTexCoord2f(self.size[1] / 2, self.size[2] / 4)
+        glTexCoord2f(self.texRepeats[1], self.texRepeats[2])
         glVertex3f(self.size[0], -self.size[1], self.size[2])
-        glTexCoord2f(self.size[1] / 2, 0)
+        glTexCoord2f(self.texRepeats[1], 0)
         glVertex3f(self.size[0], -self.size[1], 0)
         # X- side
         glNormal3f(-1, 0, 0)
         glTexCoord2f(0, 0)
         glVertex3f(-self.size[0], -self.size[1], 0)
-        glTexCoord2f(0, self.size[2] / 4)
+        glTexCoord2f(0, self.texRepeats[2])
         glVertex3f(-self.size[0], -self.size[1], self.size[2])
-        glTexCoord2f(self.size[1] / 2, self.size[2] / 4)
+        glTexCoord2f(self.texRepeats[1], self.texRepeats[2])
         glVertex3f(-self.size[0], self.size[1], self.size[2])
-        glTexCoord2f(self.size[1] / 2, 0)
+        glTexCoord2f(self.texRepeats[1], 0)
         glVertex3f(-self.size[0], self.size[1], 0)
         glEnd()
         glPopMatrix()
@@ -133,12 +150,14 @@ class BoxTop(DisplayList):
 
 
 class BoxBottom(DisplayList):
-    textureName = 'concrete_light.jpeg'
-    
-    def set(self, polygon, height):
-        self.polygon = polygon
+    def __init__(self, box):
+        self.textureNames = ['concrete_light.jpeg']
+        DisplayList.__init__(self, box)
+               
+    def set(self, box):
+        self.polygon = box.toPolygon()
         self.polygon.reverse()
-        self.height = height
+        self.height = box.center[2]
 
     def drawToList(self):
         glPushMatrix()

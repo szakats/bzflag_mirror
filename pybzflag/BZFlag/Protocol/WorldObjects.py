@@ -244,9 +244,9 @@ class Box(WorldObject):
         from BZFlag.UI import Drawable
         if self.drawables == None:
             self.drawables = [
-                Drawable.BoxSides(self.center, self.angle, self.size),
+                Drawable.BoxSides(self),
                 Drawable.BoxTop(self),
-                Drawable.BoxBottom(self.toPolygon(), self.center[2]),
+                Drawable.BoxBottom(self),
                 ]
             for drawable in self.drawables:
                 drawable.parent(self)
