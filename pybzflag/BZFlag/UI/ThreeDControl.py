@@ -167,7 +167,7 @@ class Viewing:
         self.bind(KeyPress, 'w').observe(self.toggleWireframe)
         self.bind(KeyPress, 'q').observe(self.quit)
         self.bind(KeyPress, pygame.K_ESCAPE).observe(self.quit)
-        self.bind(MouseWheel, 0.1).observe(self.zoom)
+        self.bind(MouseWheel, 0.1, 'any').observe(self.zoom)
         self.bind(KeyAxis, '=', '-', 0.3).observe(self.zoom)
 
         dragButton = 3
