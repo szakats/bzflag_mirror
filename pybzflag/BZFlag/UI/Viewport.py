@@ -149,6 +149,9 @@ class PygameViewport(Viewport):
         sub.screen = self.secreen.subsurface(rect)
         sub.size = rect[2:]
         sub.parent = self
+
+        # Ignore the caption on sub-viewports
+        sub.setCaption = lambda title: None
         return sub
 
 
@@ -237,6 +240,9 @@ class OpenGLViewport(PygameViewport):
 
         # A forceful reminder that we don't manage our own rendering any more
         sub.renderSequence = None
+
+        # Ignore the caption on sub-viewports
+        sub.setCaption = lambda title: None        
         return sub
 
 ### The End ###
