@@ -81,7 +81,7 @@ class PygameViewport(Viewport):
     """A basic viewport for 2D pygame rendering. This handles all pygame
        events, and is subclassed below for 3D rendering via pygame.
        """
-    def __init__(self, eventLoop, size=(640,480), targetFrameRate=60):
+    def __init__(self, eventLoop, size=(640,480), targetFrameRate=60, resizable=True):
         import pygame
         Viewport.__init__(self, eventLoop)
 
@@ -93,6 +93,7 @@ class PygameViewport(Viewport):
 
         pygame.display.init()
         self.display = pygame.display
+        self.resizable = resizable
         self.resize(size)
         self.init()
         self.frameTimer = None
@@ -105,7 +106,10 @@ class PygameViewport(Viewport):
     def getModeFlags(self):
         """A hook for subclasses to override the mode flags used to initialize pygame"""
         import pygame
-        return pygame.DOUBLEBUF | pygame.RESIZABLE
+        flags = pygame.DOUBLEBUF
+        if self.resizable:
+            flags |= pygame.RESIZABLE 
+        return flags
 
     def resize(self, size):
         self.screen = self.display.set_mode(size, self.getModeFlags())
