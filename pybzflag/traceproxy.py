@@ -3,8 +3,7 @@
 # A utility that acts as a BZFlag proxy server, showing all
 # messages in a human readable form.
 #
-from BZFlag import CommandLine, Server, Client, Event, Protocol
-from StringIO import StringIO
+from BZFlag import CommandLine, Server, Client, Event, Protocol, Util
 
 
 # Create a server and a client, sharing command line options and event loop
@@ -44,42 +43,6 @@ client.onConnect.observe(onClientConnect)
 def dumpMessage(msg, direction):
     name = msg.__class__.__name__
 
-    # A hex dump utility used to format 'data' fields
-    def hexDump(value, bytesPerLine=16, wordSize=2):
-        src = StringIO(value)
-        dest = StringIO()
-        addr = 0
-        while 1:
-            srcLine = src.read(bytesPerLine)
-            if not srcLine:
-                break
-
-            # Address
-            dest.write("%04X: " % addr)
-            addr += len(srcLine)
-
-            # Hex values
-            for i in xrange(bytesPerLine):
-                if i < len(srcLine):
-                    dest.write("%02X" % ord(srcLine[i]))
-                else:
-                    dest.write("  ")
-                if not (i+1) % wordSize:
-                    dest.write(" ")
-            dest.write(" ")
-
-            # ASCII representation
-            for byte in srcLine:
-                if ord(byte) >= 32 and ord(byte) < 128:
-                    dest.write(byte)
-                else:
-                    dest.write(".")
-            for i in xrange(bytesPerLine - len(srcLine)):
-                dest.write(" ")
-            dest.write("\n")
-        return dest.getvalue()
-
-
     # Recursively build a list of (key,value) tuples that will be displayed
     # to represent a message. This handles traversing into substructures
     # like FlagUpdate.
@@ -109,7 +72,7 @@ def dumpMessage(msg, direction):
         for (key, value) in buildKeys(msg):
             if key == 'data':
                 # Special decoding for 'data' members- do a hex dump
-                value = ("%d bytes\n" % len(value)) + hexDump(value)
+                value = ("%d bytes\n" % len(value)) + Util.hexDump(value)
             else:
                 # Let python decode everything else
                 value = repr(value)

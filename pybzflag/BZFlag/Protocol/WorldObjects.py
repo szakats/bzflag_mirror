@@ -199,7 +199,7 @@ class Box(WorldObject):
         StructEntry(Common.Vector3,   'center',       [0,0,0]),
         StructEntry(Float,            'angle',        0),
         StructEntry(Common.Vector3,   'size',         [1,1,1]),
-        StructEntry(ObjectOptions,    'options',      0),
+        StructEntry(ObjectOptions,    'options',      []),
         ]
 
 class Pyramid(WorldObject):
@@ -209,7 +209,7 @@ class Pyramid(WorldObject):
         StructEntry(Common.Vector3,   'center',       [0,0,0]),
         StructEntry(Float,            'angle',        0),
         StructEntry(Common.Vector3,   'size',         [1,1,1]),
-        StructEntry(ObjectOptions,    'options',      0),
+        StructEntry(ObjectOptions,    'options',      []),
         ]
 
 class Teleporter(WorldObject):
@@ -219,7 +219,7 @@ class Teleporter(WorldObject):
         StructEntry(Common.Vector3,   'center',       [0,0,0]),
         StructEntry(Float,            'angle',        0),
         StructEntry(Common.Vector3,   'size',         [1,1,1]),
-        StructEntry(ObjectOptions,    'options',      0),
+        StructEntry(ObjectOptions,    'options',      []),
         StructEntry(Float,            'border',       1.0),
         ]
 

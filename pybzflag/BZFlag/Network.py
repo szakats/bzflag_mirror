@@ -32,11 +32,11 @@ class Socket:
     """This is a socket wrapper that can be used for normal socket
        operations, but also supports sending BZFlag messages.
        """
-    def __init__(self, protocol='TCP'):
+    def __init__(self, protocol='tcp'):
         self.readBuffer = ''
         self.writeBuffer = ''
         if protocol:
-            self.socket = getattr(self, "new%sSocket" % protocol)()
+            self.socket = getattr(self, "new%sSocket" % protocol.upper())()
 
     def newTCPSocket(self):
         tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -151,7 +151,11 @@ class Socket:
         self.socket.bind((host, port))
         self.interface = host
         self.port = port
-        self.socket.listen(5)
+        try:
+            self.socket.listen(5)
+        except socket.error:
+            # Can't listen on UDP sockets
+            pass
 
     def accept(self):
         """Accept an incoming connection on a socket that has been bind()'ed,

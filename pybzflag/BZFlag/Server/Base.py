@@ -52,10 +52,14 @@ class BaseServer(Network.Endpoint):
         self.onSetOptions.observe(setOptions)
 
     def listen(self, interface):
-        self.tcp = Network.Socket()
-        self.tcp.listen(interface, Protocol.Common.defaultPort)
+        """Listen for multiple protocols on the same interface and port"""
+        for protocol in ('tcp', 'udp'):
+            s = Network.Socket(protocol)
+            s.listen(interface, Protocol.Common.defaultPort)
+            self.eventLoop.add(s)
+            setattr(self, protocol, s)
         self.tcp.handler = self.handleConnection
-        self.eventLoop.add(self.tcp)
+        self.udp.handler = self.handleMessage
         self.onListen()
 
     def getNewClientID(self):
@@ -87,7 +91,12 @@ class BaseServer(Network.Endpoint):
            safely.
            """
         try:
-            Network.Endpoint.handleMessage(self, socket, eventLoop)
+            if socket == self.udp:
+                print "UDP:"
+                from BZFlag import Util
+                print Util.hexDump(socket.recv(1024))
+            else:
+                Network.Endpoint.handleMessage(self, socket, eventLoop)
         except Errors.ConnectionLost:
             try:
                 del self.clients[socket.id]
@@ -96,6 +105,7 @@ class BaseServer(Network.Endpoint):
             except KeyError:
                 # Already disconnected
                 pass
+
 
     def onMsgNetworkRelay(self, msg):
         """This is sent by the client when it can't do multicast.
@@ -108,10 +118,13 @@ class BaseServer(Network.Endpoint):
         pass
 
     def onMsgUDPLinkRequest(self, msg):
-        msg.socket.write(self.outgoing.MsgUDPLinkRequest(port = 1234))
+        """Client just sent us its UDP port, and wants to know ours"""
+        msg.socket.udpPort = msg.port
+        msg.socket.write(self.outgoing.MsgUDPLinkRequest(port = self.udp.port))
 
     def onMsgUDPLinkEstablished(self, msg):
-        pass
-
+        if not hasattr(msg.socket, 'udpPort'):
+            raise Errors.ProtocolWarning(
+                "Client sent a MsgUDPLinkEstablished without sending MsgUDPLinkRequest")
 
 ### The End ###

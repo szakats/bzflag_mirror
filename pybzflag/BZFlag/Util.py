@@ -21,6 +21,9 @@ Small utilities that don't seem to fit anywhere else :)
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+from StringIO import StringIO
+
+
 def getSubclassDict(module, baseClass, keyAttribute, cacheName='contentsDict'):
     """Return a dictionary of all the base classes of baseClass in module,
        keyed by keyAttribute. This dictionary is cached in the module itself
@@ -39,5 +42,40 @@ def getSubclassDict(module, baseClass, keyAttribute, cacheName='contentsDict'):
                 pass
         setattr(module, cacheName, d)
     return getattr(module, cacheName)
+
+def hexDump(value, bytesPerLine=16, wordSize=2):
+    src = StringIO(value)
+    dest = StringIO()
+    addr = 0
+    while 1:
+        srcLine = src.read(bytesPerLine)
+        if not srcLine:
+            break
+
+        # Address
+        dest.write("%04X: " % addr)
+        addr += len(srcLine)
+
+        # Hex values
+        for i in xrange(bytesPerLine):
+            if i < len(srcLine):
+                dest.write("%02X" % ord(srcLine[i]))
+            else:
+                dest.write("  ")
+            if not (i+1) % wordSize:
+                dest.write(" ")
+        dest.write(" ")
+
+        # ASCII representation
+        for byte in srcLine:
+            if ord(byte) >= 32 and ord(byte) < 128:
+                dest.write(byte)
+            else:
+                dest.write(".")
+        for i in xrange(bytesPerLine - len(srcLine)):
+            dest.write(" ")
+        dest.write("\n")
+    return dest.getvalue()
+
 
 ### The End ###
