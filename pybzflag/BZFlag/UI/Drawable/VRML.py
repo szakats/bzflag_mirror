@@ -272,14 +272,41 @@ class Reader:
         except IndexError:
             pass
 
+    def searchUp(self, id, parents):
+        """Given a parent list, search for the nearest node with the given id. Returns
+           None if a suitable node can't be located.
+           """
+        for parent in parents:
+            for sibling in parent.children:
+                if sibling.id == id:
+                    return sibling
+        return None
+
+    def findName(self, parents):
+        """Find a node's name by searching up the node's ancestors for a non-None name"""
+        for parent in parents:
+            if parent.name:
+                return parent.name
+        return None
+
     def extractMeshes(self, node, parents=()):
         """Recursively traverse a tree of parsed nodes, extracting meshes into Drawables"""
+        newParents = (node,) + parents
+        
         if node.id == 'IndexedFaceSet':
             # We just found some data we can turn into a drawable. Now we just
             # need to search for the matching coordinates, material, name, and matrix.
-            print parents[-1].name
+            name = self.findName(newParents)
+            coords = self.searchUp('Coordinate3', parents)
+            material = self.searchUp('Material', parents)
+            matrix = self.searchUp('MatrixTransform', parents)
+
+            print "\nName: %s" % name
+            print "Coords: %s" % coords
+            print "Material: %s" % material
+            print "Matrix: %s" % matrix
 
         for child in node.children:
-            self.extractMeshes(child, parents + (node,))
+            self.extractMeshes(child, newParents)
             
 ### The End ###
