@@ -6,7 +6,7 @@ Separator {
 	# This matrix was added manually to flip the Y and Z axes, which were backwards in the original model
 	MatrixTransform {
 	matrix
-		1 0 0 0
+	       -1 0 0 0
 		0 0 1 0
 		0 1 0 0
 		0 0 0 1
