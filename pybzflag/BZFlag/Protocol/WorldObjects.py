@@ -253,8 +253,8 @@ class Teleporter(WorldObject):
         StructEntry(Common.Vector3,   'center',       [0,0,0]),
         StructEntry(Float,            'angle',        0),
         StructEntry(Common.Vector3,   'size',         [1,1,1]),
-        StructEntry(ObjectOptions,    'options',      []),
         StructEntry(Float,            'border',       1.0),
+        StructEntry(ObjectOptions,    'options',      []),
         ]
 
     def getGLDrawables(self):
