@@ -80,6 +80,7 @@ class BaseSocket:
                 raise
         self.remoteHost = host
         self.remotePort = port
+        self.setBlocking()
 
     def listen(self, host, port=None):
         """The arguments for this are processed just like for connect(),
@@ -102,6 +103,7 @@ class BaseSocket:
         except socket.error:
             # Can't listen on UDP sockets
             pass
+        self.setBlocking()
 
     def listenOnFirstAvailable(self, port=17200):
         """Listen on the first available port, starting at the given port"""
@@ -173,7 +175,6 @@ class TCPSocket(BaseSocket):
         self.writeBuffer = ''
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.setNodelay()
-        self.setBlocking()
     
     def read(self, size=None, bufferSize=64*1024):
         """High level interface for reading from the socket,
@@ -270,7 +271,6 @@ class UDPSocket(BaseSocket):
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.maxPacketSize = 64*1024
-        self.setBlocking()
 
     def read(self, size=None):
         if not size:
