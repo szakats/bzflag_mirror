@@ -158,7 +158,7 @@ class BaseSocket:
 
     def lookupMessage(self, msgModule, header):
         try:
-            return Common.getMessageDict(msgModule)[id]
+            return Common.getMessageDict(msgModule)[header.id]
         except KeyError:
             raise Errors.ProtocolWarning("Received %s byte message with unknown type 0x%04X in %s" %
                                          (header.length, header.id, msgModule.__name__))
