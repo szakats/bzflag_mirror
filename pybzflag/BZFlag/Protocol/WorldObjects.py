@@ -237,12 +237,7 @@ class Box(WorldObject):
     def getDrawables(self):
         from BZFlag.UI import Drawable
         if self.drawables == None:
-            self.drawables = [
-                Drawable.BoxSides(self),
-                Drawable.BoxTop(self),
-                Drawable.BoxBottom(self),
-                Drawable.BoxDecal(self),
-                ]
+            self.drawables = Drawable.detectBoxDrawables(self)
         return self.drawables
 
 

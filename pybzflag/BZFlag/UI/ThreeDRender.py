@@ -316,7 +316,7 @@ class DecalRenderPass(BasicRenderPass):
         glDepthMask(0)
         glEnable(GL_POLYGON_OFFSET_FILL)
         glEnable(GL_BLEND)
-        glPolygonOffset(-1, -1)
+        glPolygonOffset(-1, -3)
         BasicRenderPass.render(self, picking)
         glDisable(GL_BLEND)
         glDisable(GL_POLYGON_OFFSET_FILL)

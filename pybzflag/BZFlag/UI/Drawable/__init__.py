@@ -26,11 +26,11 @@ from Container import *
 from DisplayList import *
 from Ground import *
 from Wall import *
-from Box import *
 from Pyramid import *
 from Teleporter import *
 from Base import *
 from TestWidget import *
+from Box import detectBoxDrawables
 import VRML
 
 ### The End

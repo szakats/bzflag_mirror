@@ -30,36 +30,8 @@ from BZFlag.World import Scale
 import random
 
 
-class BoxSides(DisplayList):
-    def __init__(self, box):
-        # Default wall
-        # This is brick, so we want to make sure we don't end up
-        # with a fractional number of bricks. This brick texture has
-        # 5 bricks vertically and about 5 horizontally.
-        self.textureNames = ["brick.jpeg", "wall_grime.jpeg"]
-        numBricks = (int(box.size[0]),
-                     int(box.size[1]),
-                     int(box.size[2]))
-        self.texRepeats = (numBricks[0] / 5,
-                           numBricks[1] / 5,
-                           numBricks[2] / 5)
-        self.tex2Repeats = (box.size[0] / 20,
-                            box.size[1] / 20,
-                            1)
-
-        # Bridges and platforms
-        if box.size[2] < 10 and box.center[2] > 1:
-            self.textureNames = ["platform_side.jpeg", "wall_grime.jpeg"]
-            aspect = 8/10
-            self.texRepeats = (box.size[0] / box.size[2] * 2 * aspect,
-                               box.size[1] / box.size[2] * 2 * aspect,
-                               1)
-            self.tex2Repeats = (box.size[0] / 4,
-                                box.size[1] / 4,
-                                1)
-        
-        DisplayList.__init__(self, box)
-               
+class Sides(DisplayList):
+    """Abstract base class for box sides"""
     def set(self, box):
         self.center = box.center
         self.angle = box.angle
@@ -134,17 +106,46 @@ class BoxSides(DisplayList):
         glPopMatrix()
 
 
-class BoxTop(DisplayList):
-    textureNames = ['concrete.jpeg']
+class BrickSides(Sides):
+    """Sides of a standard bzflag brick box"""
+    textureNames = ("brick.jpeg", "wall_grime.jpeg")
+    def __init__(self, box):
+        # This is brick, so we want to make sure we don't end up
+        # with a fractional number of bricks. This brick texture has
+        # 5 bricks vertically and about 5 horizontally.
+        numBricks = (int(box.size[0]),
+                     int(box.size[1]),
+                     int(box.size[2]))
+        self.texRepeats = (numBricks[0] / 5,
+                           numBricks[1] / 5,
+                           numBricks[2] / 5)
+        self.tex2Repeats = (box.size[0] / 20,
+                            box.size[1] / 20,
+                            1)
+        Sides.__init__(self, box)
 
-    def set(self, box):
-        self.polygon = box.toPolygon()
-        self.height = box.center[2] + box.size[2]
 
-        try:
-            self.render.textures[1].texEnv = GL_MODULATE
-        except IndexError:
-            pass
+class PlatformSides(Sides):
+    """Sides of a thin platform box. This makes platforms look like two
+       thin pieces of concrete sandwiching some lighter concrete, with
+       bolts holding it all together. Looks a bit better than a very thin
+       section of brick.
+       """
+    textureNames = ["platform_side.jpeg", "wall_grime.jpeg"]
+    def __init__(self, box):
+        aspect = 8/10
+        self.texRepeats = (box.size[0] / box.size[2] * 2 * aspect,
+                           box.size[1] / box.size[2] * 2 * aspect,
+                           1)
+        self.tex2Repeats = (box.size[0] / 4,
+                            box.size[1] / 4,
+                            1)    
+        Sides.__init__(self, box)
+
+
+class End(DisplayList):
+    """Abstract base class for the top and bottom sides of a box"""
+    textureName = 'concrete.jpeg'
 
     def drawToList(self):
         glPushMatrix()
@@ -159,90 +160,109 @@ class BoxTop(DisplayList):
         glPopMatrix()
 
 
-class BoxBottom(DisplayList):
-    textureName = 'concrete.jpeg'
-               
+class Top(End):
+    def set(self, box):
+        self.polygon = box.toPolygon()
+        self.height = box.center[2] + box.size[2]
+
+
+class Bottom(End):
     def set(self, box):
         self.polygon = box.toPolygon()
         self.polygon.reverse()
         self.height = box.center[2]
 
-    def drawToList(self):
-        glPushMatrix()
-        glTranslatef(0, 0, self.height)
-        glNormal3f(0, 0, -1)
-        glBegin(GL_POLYGON)
-        for vertex in self.polygon:
-            glTexCoord2f(vertex[0] / 30, vertex[1] / 30)
-            glVertex2f(*vertex)
-        glEnd()
-        glPopMatrix()
 
+class TopDecal(DisplayList):
+    """Abstract base class for decals covering the entire top of a box"""
+    texCoords = ( (0,0), (1,0), (1,1), (0,1) )
 
-class BoxDecal(DisplayList):
-    textureName = 'oilstain_1.png'
-               
     def set(self, box):
-        self.polygon = box.toPolygon()
-        self.height = box.center[2] + box.size[2]
+        self.center = box.center
+        self.size = box.size
+        self.angle = box.angle
         self.render.decal = True
 
     def drawToList(self):
-        return
         glPushMatrix()
-        glTranslatef(0, 0, self.height)
         glNormal3f(0, 0, -1)
-        glBegin(GL_POLYGON)
-        for vertex in self.polygon:
-            glTexCoord2f(vertex[0] / 30, vertex[1] / 30)
-            glVertex2f(*vertex)
+        glTranslatef(*self.center)
+        glTranslatef(0, 0, self.size[2])
+        glRotatef(self.angle, 0.0, 0.0, 1.0)
+
+        glBegin(GL_QUADS)
+        glTexCoord2f(*self.texCoords[0])
+        glVertex2f(-self.size[0], -self.size[1])
+        glTexCoord2f(*self.texCoords[1])
+        glVertex2f( self.size[0], -self.size[1])
+        glTexCoord2f(*self.texCoords[2])
+        glVertex2f( self.size[0],  self.size[1])
+        glTexCoord2f(*self.texCoords[3])
+        glVertex2f(-self.size[0],  self.size[1])
         glEnd()
         glPopMatrix()
 
 
-## class BoxDecal(DisplayList):
-##     def __init__(self, box):
-##         self.box = box
-##         self.textureNames = ['concrete.jpeg']
-##         self.tex2Coords = ( (0,0), (1,0), (1,1), (0,1) )
+class OilStain(TopDecal):
+    """A random oil stain decal"""
+    def __init__(self, box):
+        self.textureName = random.choice(('oilstain_1.png',
+                                          'oilstain_2.png',
+                                          'oilstain_3.png'))
+        TopDecal.__init__(self, box)
 
-##         # If the box is fairly large and squareish, use a square oil-stain texture
-##         if box.size[0] > 10 and box.size[1] > 10 and box.size[0] / box.size[1] < 2 and box.size[1] / box.size[0] < 2:
-##             self.textureNames.append(random.choice(('oilstain_1.png',
-##                                                     'oilstain_2.png',
-##                                                     'oilstain_3.png')))
 
-##         # If it's about the same width as a tank, assume it's a bridge and put some tread stains on it
-##         if box.size[0] > Scale.TankWidth and box.size[0] < Scale.TankWidth * 4 and box.size[1] > Scale.TankLength * 2:
-##             self.textureNames.append('treadstain_1.png')
-##             self.tex2Coords = ( (0,0), (0,1), (1,1), (1,0) )
-##         if box.size[1] > Scale.TankWidth and box.size[1] < Scale.TankWidth * 4 and box.size[0] > Scale.TankLength * 2:
-##             self.textureNames.append('treadstain_1.png')
-##             self.tex2Coords = ( (0,0), (1,0), (1,1), (0,1) )
-            
-##         DisplayList.__init__(self, box)
+class TreadStain(TopDecal):
+    """A tread stain decal, aligned to the major axis of the box"""
+    textureName = "treadstain_1.png"
     
-##     def set(self, box):
-##         self.polygon = self.box.toPolygon()
-##         self.height = self.box.center[2] + self.box.size[2]
+    def __init__(self, box):
+        if box.size[1] > box.size[0]:
+            self.texCoords = ( (0,0), (0,1), (1,1), (1,0) )
+        TopDecal.__init__(self, box)
 
-##         try:
-##             self.render.textures[1].texEnv = GL_MODULATE
-##         except IndexError:
-##             pass
 
-##     def drawToList(self):
-##         glPushMatrix()
-##         glTranslatef(0, 0, self.height)
-##         glNormal3f(0, 0, 1)
-##         glBegin(GL_POLYGON)
-##         for i in xrange(4):
-##             vertex = self.polygon[i]
-##             glTexCoord2f(vertex[0] / 20, vertex[1] / 20)
-##             tex2Coord = self.tex2Coords[i]
-##             glMultiTexCoord2fARB(GL_TEXTURE1_ARB, tex2Coord[0], tex2Coord[1])
-##             glVertex2f(*vertex)
-##         glEnd()
-##         glPopMatrix()
+def detectBoxDrawables(box):
+    """Given a box WorldObject, return a list of the drawables that should be used
+       to represent it. This looks at the size and placement of the box to determine
+       which drawables to use to represent it.
+       """
+    sides = None
+    top = None
+    bottom = None
+    drawables = []
+
+    # Calculate a few values based on the box proportions to make the below decisions clearer
+    height = box.size[2]
+    majorAxis = max(box.size[0], box.size[1])
+    minorAxis = min(box.size[0], box.size[1])
+    axisRatio = majorAxis / minorAxis
+
+    # If the box isn't on the ground and it's fairly flat, assume it's a platform
+    if height < 8:
+        sides = PlatformSides(box)
+
+    # If the box is fairly large and squareish, use a square oil-stain texture
+    if minorAxis > 10 and axisRatio < 2:
+        drawables.append(OilStain(box))
+
+    # If the box is about the same width as a tank, put some tread marks on it
+    if minorAxis > Scale.TankWidth and minorAxis < Scale.TankWidth * 4 and majorAxis > Scale.TankWidth * 4:
+        drawables.append(TreadStain(box))
+
+    # Pick defaults for any characteristics we haven't decided on already and return a list
+    if sides:
+        drawables.append(sides)
+    else:
+        drawables.append(BrickSides(box))
+    if top:
+        drawables.append(top)
+    else:
+        drawables.append(Top(box))
+    if bottom:
+        drawables.append(bottom)
+    else:
+        drawables.append(Bottom(box))
+    return drawables
 
 ### The End ###
