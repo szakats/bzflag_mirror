@@ -91,8 +91,8 @@ BOOL CStdObjectInfoPanel::OnInitDialog()
 		m_cTeamLabel.ShowWindow(SW_NORMAL);
 
 		m_cTeamList.SetItemData(m_cTeamList.AddString("Red"),1);
-		m_cTeamList.SetItemData(m_cTeamList.AddString("Green"),3);
-		m_cTeamList.SetItemData(m_cTeamList.AddString("Blue"),2);
+		m_cTeamList.SetItemData(m_cTeamList.AddString("Green"),2);
+		m_cTeamList.SetItemData(m_cTeamList.AddString("Blue"),3);
 		m_cTeamList.SetItemData(m_cTeamList.AddString("Purple"),4);
 
 		m_cTeamList.SetCurSel(0);
