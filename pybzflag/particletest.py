@@ -28,7 +28,7 @@ class Sparks(Drawable.SpriteArray):
         self.model.add(ParticleSystem.LinearFadeAffector,
                        sizeRange = (0, 1),
                        )
-        self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,-0.5))
+        self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,-50))
 
     def draw(self, rstate):
         self.model.integrate(self.time.step())

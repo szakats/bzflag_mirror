@@ -408,12 +408,12 @@ class FrictionAffector(Affector):
 
 class ConstantAccelAffector(Affector):
     """Generic affector for applying a constant acceleration to particles"""
-    def __init__(self, model, vector):
+    def __init__(self, model, acceleration):
         Affector.__init__(self, model)
-        self.vector = vector
+        self.acceleration = asarray(acceleration)
 
     def integrate(self, dt):
-        add(self.model.velocity, self.vector, self.model.velocity)
+        add(self.model.velocity, self.acceleration * dt, self.model.velocity)
 
 
 class ClothWindAffector(Affector):

@@ -55,7 +55,7 @@ class Flag:
 
         # Gravity, plus a small force in the other two axes to keep the springs from
         # lining up perfectly and standing end-on-end.
-        self.cloth.add(ParticleSystem.ConstantAccelAffector, (0.001, 0.001, -0.04))
+        self.cloth.add(ParticleSystem.ConstantAccelAffector, (0.001, 0.001, -1))
 
         # Pin the cloth to the flagpole
         self.cloth.add(ParticleSystem.ClothAnchorAffector, (-1,0), (0,0))
