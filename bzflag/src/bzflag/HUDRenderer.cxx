@@ -88,7 +88,7 @@ BzfString		HUDRenderer::altitudeLabel[20];
 BzfString		HUDRenderer::scoreSpacingLabel("888 (888-888)");
 BzfString		HUDRenderer::scoreLabel("Score");
 BzfString		HUDRenderer::killLabel("Kills");
-BzfString		HUDRenderer::teamScoreLabel("Team");
+BzfString		HUDRenderer::teamScoreLabel("Team Score");
 BzfString		HUDRenderer::playerLabel("Player");
 BzfString		HUDRenderer::restartLabelFormat("Press %s to start");
 BzfString		HUDRenderer::resumeLabel("Press Pause to resume");
@@ -117,7 +117,7 @@ const char*		HUDRenderer::flagHelpString[int(LastFlag) -
 		"Shots are still visible.  Sneak up behind enemies!",
 "Tiny (+T):  Tank is small and can get through small openings.  "
 		"Very hard to hit.",
-"Narrow (+N):  Tank is super thin.  Very hard to hit from front but is"
+"Narrow (+N):  Tank is super thin.  Very hard to hit from front but is "
 		"normal size from side.  Can get through small openings.",
 "SHield (+SH):  Getting hit only drops flag.  Flag flys an extra-long time.",
 "SteamRoller (+SR):  Destroys tanks you touch but you have to get really close.",
@@ -176,11 +176,11 @@ HUDRenderer::HUDRenderer(const BzfDisplay* _display,
   warningColor[1] = 0.0f;
   warningColor[2] = 0.0f;
 
-  composeFont = TextureFont::getTextureFont(TextureFont::TimesBoldItalic, True);
+  composeFont = TextureFont::getTextureFont(TextureFont::FixedBold, True);
   bigFont = TextureFont::getTextureFont(TextureFont::HelveticaBoldItalic, True);
   alertFont = TextureFont::getTextureFont(TextureFont::HelveticaBold, True);
   majorFont = TextureFont::getTextureFont(TextureFont::TimesBold, True);
-  minorFont = TextureFont::getTextureFont(TextureFont::TimesBoldItalic, True);
+  minorFont = TextureFont::getTextureFont(TextureFont::FixedBold, True);
   headingFont = TextureFont::getTextureFont(TextureFont::Fixed, True);
 
   // make sure we're notified when MainWindow resizes
@@ -288,7 +288,7 @@ void			HUDRenderer::resize(boolean firstTime)
       const float x = dx + dy + 2.0f * font.getSpacing();
       const float y = dy;
       composeTypeIn->setLabelWidth(dx);
-      composeTypeIn->setPosition(x, y + dy);
+      composeTypeIn->setPosition(x, y);
       composeTypeIn->setSize(w - x - dy, font.getSpacing());
     }
   }
@@ -340,10 +340,17 @@ void			HUDRenderer::setMinorFontSize(int, int height)
   const float s = (float)height / 28.0f;
   minorFont.setSize(s, s);
 
-  const float spacing = minorFont.getWidth("    ");
-  scoreLabelWidth = minorFont.getWidth(scoreSpacingLabel) + spacing;
-  teamScoreLabelWidth = minorFont.getWidth("Purple Team") + spacing;
-  flagHelpY = minorFont.getDescent() + 10.0f;
+  scoreLabelWidth = minorFont.getWidth(scoreSpacingLabel);
+  killsLabelWidth = minorFont.getWidth(killLabel);
+  teamScoreLabelWidth = minorFont.getWidth(teamScoreLabel);
+  if (scoreLabelWidth > teamScoreLabelWidth)
+    teamScoreLabelWidth = scoreLabelWidth;
+  flagHelpY = composeTypeIn->getFont().getSpacing() + 4.0f +
+			minorFont.getDescent();
+
+  const float spacing = minorFont.getWidth("  ");
+  scoreLabelWidth += spacing;
+  killsLabelWidth += spacing;
 
   // make flag help messages
   for (int i = 0; i < int(LastFlag) - int(FirstFlag) + 1; i++)
@@ -479,7 +486,7 @@ void			HUDRenderer::setComposing(const char* prompt)
       const float x = dx + dy + 2.0f * font.getSpacing();
       const float y = dy;
       composeTypeIn->setLabelWidth(dx);
-      composeTypeIn->setPosition(x, y + dy);
+      composeTypeIn->setPosition(x, y);
       composeTypeIn->setSize(window.getWidth() - x - dy, font.getSpacing());
     }
   }
@@ -561,7 +568,7 @@ BzfString		HUDRenderer::makeHelpString(const char* help) const
 
   // find sections of string not more than maxWidth pixels wide
   // and put them into a BzfString separated by NUL's.
-  const float maxWidth = 2.0f * (float)maxMotionSize;
+  const float maxWidth = 3.0f * (float)maxMotionSize;
   BzfString msg;
   const char* scan = help;
   while (*scan) {
@@ -680,7 +687,6 @@ void			HUDRenderer::renderStatus(SceneRenderer& renderer)
   const float h = majorFont.getSpacing();
   float x = 0.25f * h, y = (float)renderer.getWindow().getViewHeight() - h;
   TeamColor teamIndex = player->getTeam();
-  Team& team = World::getWorld()->getTeam(int(teamIndex));
   FlagId flag = player->getFlag();
 
   // print player name and score in upper left corner in team (radar) color
@@ -770,14 +776,12 @@ void			HUDRenderer::renderScoreboard(SceneRenderer& renderer)
   const float x3 = x2 + scoreLabelWidth;
   const float x5 = (1.0f - 0.01f) * renderer.getWindow().getWidth() -
 							teamScoreLabelWidth;
-  const float x4 = x5 - scoreLabelWidth;
   const float y0 = (float)renderer.getWindow().getViewHeight() -
 				2.0f * alertFont.getSpacing();
   hudColor3fv(messageColor);
   minorFont.draw(scoreLabel, x1, y0);
   minorFont.draw(killLabel, x2, y0);
   minorFont.draw(playerLabel, x3, y0);
-  minorFont.draw(scoreLabel, x4, y0);
   minorFont.draw(teamScoreLabel, x5, y0);
   const float dy = minorFont.getSpacing();
   int y = (int)(y0 - dy);
@@ -803,7 +807,7 @@ void			HUDRenderer::renderScoreboard(SceneRenderer& renderer)
     const Team* team = World::getWorld()->getTeams() + i;
     if (team->activeSize == 0) continue;
     y -= (int)dy;
-    drawTeamScore(i, x4, x5, (float)y);
+    drawTeamScore(i, x5, (float)y);
   }
 }
 
@@ -904,11 +908,11 @@ void			HUDRenderer::renderPlaying(SceneRenderer& renderer)
   // draw flag help
   if (flagHelpClock.isOn()) {
     hudColor3fv(messageColor);
-    y = flagHelpY + (float)flagHelpLines * alertFont.getSpacing();
+    y = flagHelpY + (float)flagHelpLines * minorFont.getSpacing();
     const char* flagHelpBase = flagHelp[flagHelpIndex].getString();
     for (i = 0; i < flagHelpLines; i++) {
-      minorFont.draw(flagHelpBase, (float)(centerx - maxMotionSize), y);
       y -= minorFont.getSpacing();
+      minorFont.draw(flagHelpBase, (float)(centerx - 1.5f * maxMotionSize), y);
       while (*flagHelpBase) flagHelpBase++;
       flagHelpBase++;
     }
@@ -1206,7 +1210,7 @@ void			HUDRenderer::drawPlayerScore(const Player* player,
   if (LocalPlayer::getMyTank() != player)
     sprintf(kills, "%d/%d", player->getLocalWins(), player->getLocalLosses());
   else
-    sprintf(kills, "");
+    strcpy(kills, "");
   sprintf(email, " (%s)", player->getEmailAddress());
 
   const float callSignWidth = minorFont.getWidth(player->getCallSign());
@@ -1228,7 +1232,7 @@ void			HUDRenderer::drawDeadPlayerScore(const Player* player,
 }
 
 void			HUDRenderer::drawTeamScore(int teamIndex,
-					float x1, float x2, float y)
+					float x1, float y)
 {
   char score[40];
   Team& team = World::getWorld()->getTeam(teamIndex);
@@ -1236,5 +1240,4 @@ void			HUDRenderer::drawTeamScore(int teamIndex,
 
   hudColor3fv(Team::getRadarColor((TeamColor)teamIndex));
   minorFont.draw(score, x1, y);
-  minorFont.draw(Team::getName((TeamColor)teamIndex), x2, y);
 }
