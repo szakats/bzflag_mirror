@@ -36,7 +36,7 @@ def attach(game, eventLoop):
     view3d.scene.objects[Widgetness()] = [TestWidget((-3.9, -2.8, -8))]
     view3d.scene.objects[Widgetness()] = [TestWidget((3.9, 2.8, -8))]
     view3d.scene.objects[Widgetness()] = [TestWidget((-3.9, 2.8, -8))]
-    view3d.scene.rebuildTexmap()
+    view3d.scene.preprocess()
     ThreeDControl.Editing(view3d, viewport)
 
     return viewport

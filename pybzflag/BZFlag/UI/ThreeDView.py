@@ -121,6 +121,95 @@ class TextureGroup(Drawable.DisplayList):
             else:
                 drawable.draw()
 
+
+class RenderPass:
+    """A rendering pass defines the highest level of grouping for drawables.
+       Rendering passes should separate blended and unblended objects, or
+       groups of objects that require expensive OpenGL state changes.
+       This is an abstract base class.
+       """
+    # Rendering passes with a higher priority get a chance to filter drawables first
+    priority = None
+
+    def __init__(self):
+        self.erase()
+
+    def render(self):
+        pass
+
+    def filter(self, drawable):
+        """Determine whether the given drawable belongs in this
+           pass, return True or False
+           """
+        pass
+
+    def preprocess(self):
+        """This is called after one or more objects are modified, to perform
+           any necessary preprocessing on the render pass before rendering.
+           """
+        pass
+
+    def add(self, drawable):
+        pass
+
+    def erase(self):
+        """Remove all drawables from this pass"""
+        pass
+
+
+class BasicRenderPass(RenderPass):
+    """A simple render pass for the majority of objects. Sorts objects by texture.
+       This is the lowest priority render pass, and will collect all drawables
+       left over from other passes.
+       """
+    filterPriority = 0
+    renderPriority = 100
+
+    def filter(self, drawable):
+        return True
+
+    def erase(self):
+        self.textureGroups = {}
+
+    def add(self, drawable):
+        """Files the given drawable according to texture group"""
+        groups = self.textureGroups
+        if groups.has_key(drawable.texture):
+            groups[drawable.texture].drawables.append(drawable)
+        else:
+            groups[drawable.texture] = TextureGroup([drawable])
+
+    def preprocess(self):
+        """This builds display lists for all our texture groups"""
+        for texgroup in self.textureGroups.values():
+            texgroup.buildList()
+
+    def render(self):
+        """Perform one render pass- iterates through each texture group in the pass,
+           binding the pass' texture and drawing the texture group.
+           """
+        for (texture, group) in self.textureGroups.items():
+            if texture is None:
+                glDisable(GL_TEXTURE_2D)
+            else:
+                glEnable(GL_TEXTURE_2D)
+                texture.bind()
+            group.draw()
+
+
+class BlendedRenderPass(BasicRenderPass):
+    """A rendering pass that collects blended objects and renders them after most other objects."""
+    filterPriority = 10
+    renderPriority = 90
+
+    def filter(self, drawable):
+        return drawable.blended
+    
+    def render(self):
+        glEnable(GL_BLEND)
+        BasicRenderPass.render(self)
+        glDisable(GL_BLEND)
+    
             
 class Scene:
     """Set of all the objects this view sees, organized into rendering passes
@@ -132,11 +221,7 @@ class Scene:
     def __init__(self, game):
         self.game = game
         self.objects = {}
-
-        self.defaultPass = {}
-        self.blendedPass = {}
-        self.passes = [self.defaultPass, self.blendedPass]
-
+        self.passes = [BasicRenderPass(), BlendedRenderPass()]
         game.world.onLoad.observe(self.reloadWorld)
         self.reloadWorld()
 
@@ -145,39 +230,29 @@ class Scene:
         for block in self.game.world.blocks:
             if isinstance(block, WorldObjects.WorldObject):
                 self.objects[block] = block.getGLDrawables()
-        self.rebuildTexmap()
+        self.preprocess()
 
-    def rebuildTexmap(self):
-        """Rebuilds the mapping from texture to object, used to sort objects
-           by texture within each rendering pass.
-           """
+    def preprocess(self):
+        """Rebuilds rendering passes. Currently this is necessary when the world changes."""
+        # Sort the rendreing passes by decreasing render priority
+        self.passes.sort(lambda a,b: cmp(b.renderPriority, a.renderPriority))
+
+        # Make a list of rendering passes sorted by filter priority
+        filterPasses = self.passes[:]
+        filterPasses.sort(lambda a,b: cmp(b.filterPriority, a.filterPriority))
+
+        # Divy up the drawables into rendering passes using the passes' filter functions
         for object, drawables in self.objects.items():
             for drawable in drawables:
-                rpass = self.defaultPass
-                if drawable.blended:
-                    rpass = self.blendedPass
-                    
-                if rpass.has_key(drawable.texture):
-                    rpass[drawable.texture].drawables.append(drawable)
-                else:
-                    rpass[drawable.texture] = TextureGroup([drawable])
+                for rpass in filterPasses:
+                    if rpass.filter(drawable):
+                        rpass.add(drawable)
+                        break
 
-        for p in self.passes:
-            for texgroup in p.values():
-                texgroup.buildList()
+        # Give each rendering pass a chance to preprocess
+        for rpass in self.passes:
+            rpass.preprocess()
                 
-    def renderPass(self, p):
-        """Perform one render pass- iterates through each texture group in the pass,
-           binding the pass' texture and drawing the texture group.
-           """
-        for (texture, group) in p.items():
-            if texture is None:
-                glDisable(GL_TEXTURE_2D)
-            else:
-                glEnable(GL_TEXTURE_2D)
-                texture.bind()
-            group.draw()
-
     def render(self):
         """Render the scene to the current OpenGL context"""
         glDisable(GL_BLEND)
@@ -189,9 +264,8 @@ class Scene:
         glDisable(GL_LINE_SMOOTH)
         glColor4f(1,1,1,1)
 
-        self.renderPass(self.defaultPass)
-        glEnable(GL_BLEND)
-        self.renderPass(self.blendedPass)
+        for rpass in self.passes:
+            rpass.render()
 
 
 class ThreeDView:
