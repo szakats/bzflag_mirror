@@ -60,15 +60,7 @@ class Event:
     def __call__(self, *args, **kw):
         if self.clients:
             for client in self.clients.keys():
-                try:
-                    r = client(*args, **kw)
-                except TypeError, arg:
-                    # Try to give a more useful error message if the args don't match
-                    if str(arg).startswith("When"):
-                        raise
-                    else:
-                        raise TypeError("When calling observer client %r: %s" %
-                                        (client, arg))
+                r = client(*args, **kw)
                 # Allow the client to abort
                 if r:
                     return r

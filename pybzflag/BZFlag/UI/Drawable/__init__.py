@@ -22,6 +22,7 @@ OpenGL drawables for 3d views
 #
 
 from GLDrawable import *
+from Container import *
 from DisplayList import *
 from Ground import *
 from Wall import *
@@ -30,5 +31,6 @@ from Pyramid import *
 from Teleporter import *
 from Base import *
 from TestWidget import *
+import VRML
 
 ### The End

@@ -22,16 +22,29 @@ A 3d scene renderer similar to BZFlag proper
 #
 
 import BZFlag
-from BZFlag.UI import ThreeDRender
+from BZFlag.UI import ThreeDRender, Drawable
 from BZFlag.Protocol import WorldObjects
-from BZFlag.UI.Drawable import VRML
 
 
 class Tank:
     """A Scene object representing a player's tank"""
     def __init__(self):
-        meshes = VRML.load("tank.wrl")
-        self.drawables = meshes.values()
+        # Load the tank from disk. The tank is divided into separate meshes
+        # for the barrel, turret, body, and each tread.
+        meshes = Drawable.VRML.load("tank.wrl")
+        
+        # Group all the tank's pieces together into one
+        # display list, since we generally move them together.
+        meshGroup = Drawable.Group(meshes.values())
+
+        # Set up a set of transforms we can apply to the tank dynamically
+        self.position = Drawable.Position()
+        self.rotation = Drawable.Rotate()
+        self.color    = Drawable.Colorize()
+        self.transforms = [self.position, self.rotation, self.color]
+
+        # Our final drawable is just a transformer wrapped around our mesh group
+        self.drawables = [Drawable.Transformer(meshGroup, self.transforms)]
         
     def getDrawables(self):
         return self.drawables

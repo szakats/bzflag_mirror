@@ -50,8 +50,13 @@ class GLDrawable:
     def parent(self, parent):
         self.object = parent
 
-    def draw(self, names = None, curname = None):
+    def draw(self):
         pass
 
+    def drawToList(self):
+        """An alternate drawing function may be provided
+           for using this drawable inside a display list
+           """
+        self.draw()
 
 ### The End ###

@@ -131,10 +131,7 @@ class TextureGroup(Drawable.DisplayList):
 
     def drawToList(self):
         for drawable in self.drawables:
-            if hasattr(drawable, 'drawToList'):
-                drawable.drawToList()
-            else:
-                drawable.draw()
+            drawable.drawToList()
 
 
 class PickingState:
