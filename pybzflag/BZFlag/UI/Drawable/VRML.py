@@ -441,6 +441,10 @@ class Mesh(DisplayList):
         if self.matrix:
             glMultMatrixf(self.matrix)
 
+        # Our normals are normalized at this point, but they might be scaled
+        # by the transforms applied to each VRML mesh
+        glEnable(GL_NORMALIZE)
+        
         glBegin(GL_TRIANGLES)
         for tri in self.triangles:
             glNormal3f(*tri.normals[0])
@@ -452,6 +456,7 @@ class Mesh(DisplayList):
         glEnd()
         glPopMatrix()
         glColor4f(1,1,1,1)
+        glDisable(GL_NORMALIZE)
 
 
 class Cache:
