@@ -24,7 +24,7 @@ Controller classes for manipulating 3D views
 import math
 import pygame
 from BZFlag import Animated, Event
-from BZFlag.UI import ThreeDView
+from BZFlag.UI import ThreeDRender
 
 
 class Modifiers:
@@ -160,7 +160,7 @@ class Viewing:
     def __init__(self, view, viewport):
         self.view = view
         self.viewport = viewport
-        self.view.camera = ThreeDView.SmoothedCamera()
+        self.view.camera = ThreeDRender.SmoothedCamera()
         view.camera.position = (0, 0, -20)
 
         self.bind(KeyPress, 'f').observe(self.toggleFullscreen)

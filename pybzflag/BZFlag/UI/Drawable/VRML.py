@@ -49,10 +49,41 @@ it may work with VRML files produced by other modelers.
 
 from DisplayList import *
 from OpenGL.GL import *
-
+from BZFlag import Util
+import re
 
 
 class Reader:
-    """Scans a VRML file, instantiating drawables for all readable meshes"""
+    """Scans a VRML file, instantiating drawables for all readable meshes.
+       The file can be specified as a file object, file name, or URI.
+       """
+    def __init__(self, name):
+        self.encoding = 'utf8'
+        f = Util.autoFile(name)
+        self.parse(f)
+        f.close()
+
+    def parse(self, f):
+        """Parse the given file object as VRML"""
+        while True:
+            line = f.readline().strip()
+
+            # Process the VRML header that sets the version and encoding
+            if line.startswith("#VRML"):
+                self.parseHeader(line)
+                continue
+
+            # Convert to Unicode using the current encoding, strip out comments.
+            # Note that this makes no attempt to handle strings properly, since
+            # none of the data we currently need involves strings.
+            line = unicode(line, self.encoding)
+            line = re.sub("#.*", "", line)
+
+            # Tokenize and resume processing the individual tokens
+            for token in re.split("\s+", line):
+                self.parseToken(token)
+
+    def parseToken(self, token):
+        print token
 
 ### The End ###
