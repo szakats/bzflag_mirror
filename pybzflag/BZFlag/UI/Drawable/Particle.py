@@ -48,7 +48,7 @@ class ParticleArray(GLDrawable):
        and extensions like NV_point_sprite, but that doesn't turn out to be practical.
        Point sprites will only be used if allowPointSprite is set and they are available.
        """
-    def __init__(self, shape, pointDiameter, allowPointSprite=False):
+    def __init__(self, shape, allowPointSprite=False):
         GLDrawable.__init__(self)
 
         if GLExtension.nvPointSprite and allowPointSprite:
@@ -56,19 +56,14 @@ class ParticleArray(GLDrawable):
             # To get hardware acceleration on the GeForce 3, we have to
             # use texture unit 3 rather than 0... odd, eh?
             self.render.textures = (None,None,None) + self.render.textures
-            self.renderer = PointSpriteRenderer(shape, pointDiameter)
+            self.renderer = PointSpriteRenderer(shape)
         else:
-            self.renderer = SoftwareParticleRenderer(shape, pointDiameter)
+            self.renderer = SoftwareParticleRenderer(shape)
 
         # Reference public render state
         self.vertices = self.renderer.points
         self.colors = self.renderer.pointColors
-
-    def setPointDiameter(self, d):
-        self.renderer.pointDiameter = d
-
-    def getPointDiameter(self, d):
-        return self.renderer.pointDiameter
+        self.sizes = self.renderer.pointSizes
 
     def draw(self, rstate):
         self.renderer.draw(rstate)
@@ -76,9 +71,7 @@ class ParticleArray(GLDrawable):
 
 class SoftwareParticleRenderer(VertexArray):
     """A ParticleRenderer that does all billboarding in software"""
-    def __init__(self, shape, pointDiameter):
-        self.pointDiameter = pointDiameter
-
+    def __init__(self, shape):
         # This array format is somewhat wasteful, but we need at least T2F, C4F, and V3F :(
         # We need room for one quad per particle.
         VertexArray.__init__(self, shape + (4,), GL_T2F_C4F_N3F_V3F)
@@ -93,6 +86,7 @@ class SoftwareParticleRenderer(VertexArray):
         # Create point color and position arrays
         self.points      = zeros(shape + (3,), Float32, savespace=True)
         self.pointColors = ones(shape + (4,), Float32, savespace=True)
+        self.pointSizes  = ones(shape, Float32, savespace=True)
 
     def draw(self, rstate):
         # Stretch our point colors over each whole quad
@@ -102,10 +96,10 @@ class SoftwareParticleRenderer(VertexArray):
         self.colors[...,3,:] = self.pointColors
 
         # Billboard ourselves some quads from the point positions and sizes
-        radius = self.pointDiameter/2
         modelview = glGetFloatv(GL_MODELVIEW_MATRIX).flat
-        up    = (take(modelview, (1,5,9)) * radius).astype(Float32)
-        right = (take(modelview, (0,4,8)) * radius).astype(Float32)
+        sizes = reshape(repeat(self.pointSizes, 3), self.points.shape)
+        up    = (take(modelview, (1,5,9)) / 2).astype(Float32) * sizes
+        right = (take(modelview, (0,4,8)) / 2).astype(Float32) * sizes
         self.vertices[...,0,:] = self.points - right - up;
         self.vertices[...,1,:] = self.points + right - up;
         self.vertices[...,2,:] = self.points + right + up;
@@ -117,9 +111,7 @@ class SoftwareParticleRenderer(VertexArray):
 
 class PointSpriteRenderer(VertexArray):
     """A ParticleRenderer that uses the NV_point_sprite extension to accelerate billboarding"""
-    def __init__(self, shape, pointDiameter):
-        self.pointDiameter = pointDiameter
-
+    def __init__(self, shape):
         VertexArray.__init__(self, shape, GL_C4F_N3F_V3F)
         self.numVertices = multiply.reduce(self.shape)
 
@@ -130,9 +122,12 @@ class PointSpriteRenderer(VertexArray):
         # Initialize all our colors to one
         self.colors[...] = ones(self.colors.shape, Float32)
 
+        # We can only store one size
+        self.pointSizes  = ones((1,), Float32, savespace=True)
+
     def draw(self, rstate):
         glEnable(GL_POINT_SPRITE_NV)
-        glPointSize(self.pointDiameter)
+        glPointSize(self.pointSizes[0])
 
         ## FIXME: This isn't correct. It's still yet to be determined whether
         ##        it's possible to get the same size function that normal geometry

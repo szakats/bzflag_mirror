@@ -33,23 +33,22 @@ class Wind:
 class Flag:
     """Scene object simulating one flag"""
     def __init__(self, wind):
-        # Note that the size and origin are in world coordinates along the XZ
-        # plane, and that resolution is in the cloth array. The origin of the
-        # cloth array is at the base of the flag on the pole, with the top
-        # of the array running up the pole.
-        self.size = (8,6)
-        self.origin = (0,4.5)
-        self.resolution = (20,20)
+        # Origin and X/Y vectors for this flag. This positions it in the XZ plane, with the
+        # top of the flag running along the flag pole.
+        self.origin = (0, 0, 4.5)
+        self.vx = (0,0,6)
+        self.vy = (8,0,0)
+        self.resolution = (20, 20)
 
         self.pole = Drawable.VRML.load("flagpole.wrl")
-        self.cloth = ParticleSystem.Cloth(self.getInitialState())
+        self.cloth = ParticleSystem.Cloth(pointGrid(self.origin, self.vx, self.vy, self.resolution))
 
         # Set up a nice efficient SurfaceArray. This actually ends up
         # running the cloth simulation inside an array in glInterleavedArrays
         # format, so it never has to be copied before rendering.
         self.surf = Drawable.SurfaceArray(self.resolution, GL_T2F_N3F_V3F)
         self.cloth.attachState(self.surf.vertices)
-        self.surf.texcoords[...] = self.getTexCoords()
+        self.surf.texcoords[...] = pointGrid((0,0), (0,1), (1,0), self.resolution).astype(Float32)
 
         self.surf.render.static = False
         self.surf.render.textures = (Texture.load("superflag.png"),)
@@ -63,26 +62,6 @@ class Flag:
 
         # Now add the global wind we were given
         self.cloth.add(ParticleSystem.ClothWindAffector, self.surf, wind.vector)
-
-    def getInitialState(self):
-        def xcoord(x,y):
-            return self.origin[0] + self.size[0] * y / float(self.resolution[1]-1)
-        def zcoord(x,y):
-            return self.origin[1] + self.size[1] * x / float(self.resolution[0]-1)
-        a = zeros(self.resolution + (3,), Float)
-        a[:,:,0] = fromfunction(xcoord, self.resolution)
-        a[:,:,2] = fromfunction(zcoord, self.resolution)
-        return a
-
-    def getTexCoords(self):
-        def xf(x,y):
-            return y / float(self.resolution[0]-1)
-        def yf(x,y):
-            return x / float(self.resolution[1]-1)
-        a = zeros(self.resolution + (2,), Float)
-        a[:,:,0] = fromfunction(xf, self.resolution)
-        a[:,:,1] = fromfunction(yf, self.resolution)
-        return a.astype(Float32)
 
     def getDrawables(self):
         return [self.surf] + self.pole.values()

@@ -2,22 +2,27 @@
 from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, ParticleSystem
 from BZFlag import Event, Geometry, Noise, Animated
 from OpenGL.GL import *
+import math
 
 
 class GlowSphere(Drawable.ParticleArray):
     """An example particle system that draws glowing balls positioned on the surface of a sphere"""
     textureName = 'spark.png'
 
-    def __init__(self, numParticles=2500, particleDiameter=5, sphereDiameter=50):
-        Drawable.ParticleArray.__init__(self, (numParticles,), particleDiameter)
+    def __init__(self, numParticles=2500, particleDiameter=5, gridRadius=80):
+        resolution = int(math.sqrt(numParticles))
+        self.model = ParticleSystem.Newtonian(Geometry.pointGrid(
+            (-gridRadius, -gridRadius, 0), (gridRadius*2,0,0), (0,gridRadius*2,0), (resolution, resolution)))
+
+        Drawable.ParticleArray.__init__(self, self.model.state.shape[:-1], 1)
+        self.model.attachState(self.vertices)
         self.time = Animated.Timekeeper()
+
+        self.sizes *= particleDiameter
+        self.model.velocity[10,10] = (0,0,0.5)
 
         self.render.static = False
         self.render.blended = True
-
-        self.model = ParticleSystem.Newtonian(Noise.randomVectors((numParticles, 3),
-                                                                  magnitude = sphereDiameter))
-        self.model.attachState(self.vertices)
 
     def draw(self, rstate):
         self.model.integrate(self.time.step())

@@ -22,12 +22,13 @@ by the Numeric module.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+from __future__ import division
 from Numeric import *
 from LinearAlgebra import *
 import math
 
 __all__ = ['cross', 'magnitude2', 'magnitude', 'normalize', 'vectorAngle',
-           'unitVectorAngle', 'autoVertexNormals']
+           'unitVectorAngle', 'autoVertexNormals', 'pointGrid']
 
 
 def cross(u, v, result=None):
@@ -161,9 +162,14 @@ def pointGrid(origin, vx, vy, resolution):
     origin = asarray(origin)
     vx = asarray(vx)
     vy = asarray(vy)
-    resolution = asarray(resolution)
-    
-    def f(x,y):
-        return origin + vx
+
+    xaxis = reshape(repeat(arange(0.0, resolution[0]) / (resolution[0]-1), len(origin)), (-1, len(origin))) * vx
+    yaxis = reshape(repeat(arange(0.0, resolution[1]) / (resolution[1]-1), len(origin)), (-1, len(origin))) * vy
+
+    array = zeros((len(xaxis), len(yaxis), len(origin)), Float)
+    array += origin
+    array += repeat(xaxis[:,NewAxis,:], len(yaxis), 1)
+    array += yaxis
+    return array
 
 ### The End ###
