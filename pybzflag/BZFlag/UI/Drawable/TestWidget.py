@@ -36,31 +36,37 @@ class TestWidget(DisplayList):
 	glTranslatef(*self.center)
 	glBegin(GL_QUADS)
         # front
+	glNormal3f(0, 0, -1)
 	glVertex3f(-size, size, -size)
 	glVertex3f(size, size, -size)
 	glVertex3f(size, -size, -size)
 	glVertex3f(-size, -size, -size)
 	# back
+	glNormal3f(0, 0, 1)
 	glVertex3f(size, size, size)
 	glVertex3f(-size, size, size)
 	glVertex3f(-size, -size, size)
 	glVertex3f(size, -size, size)
         # top
+	glNormal3f(0, 1, 0)
 	glVertex3f(-size, size, -size)
 	glVertex3f(-size, size, size)
 	glVertex3f(size, size, size)
 	glVertex3f(size, size, -size)
         # bottom
+	glNormal3f(0, -1, 0)
 	glVertex3f(-size, -size, -size)
 	glVertex3f(size, -size, -size)
 	glVertex3f(size, -size, size)
 	glVertex3f(-size, -size, size)
         # left
+	glNormal3f(-1, 0, 0)
 	glVertex3f(-size, -size, size)
 	glVertex3f(-size, size, size)
 	glVertex3f(-size, size, -size)
 	glVertex3f(-size, -size, -size)
         # right
+	glNormal3f(1, 0, 0)
 	glVertex3f(size, -size, -size)
 	glVertex3f(size, size, -size)
 	glVertex3f(size, size, size)
