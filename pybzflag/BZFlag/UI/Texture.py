@@ -26,6 +26,9 @@ import Image, pygame
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from BZFlag import Util, Animated
+from BZFlag.UI import GLExtension
+from OpenGL.GL.EXT.texture_filter_anisotropic import *
+
 
 # Keep track of the current OpenGL texture, to reduce the number of binds we do
 currentTexture = None
@@ -87,6 +90,8 @@ class Texture:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
+        if GLExtension.maxAnisotropy > 1:
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)
         gluBuild2DMipmaps(GL_TEXTURE_2D, components, w, h, format, GL_UNSIGNED_BYTE, string)
 
     def __getstate__(self):

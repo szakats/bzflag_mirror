@@ -23,16 +23,18 @@ then containing those query results in an easy to find place.
 
 multitexture = False
 textureUnits = []
-
+maxAnisotropy = 1.0
 
 def test():
     """Test for extension support."""
-    global multitexture, textureUnits
+    global multitexture, textureUnits, maxAnisotropy
     import OpenGL.GL.ARB.multitexture
+    from OpenGL.GL.EXT import texture_filter_anisotropic
     from OpenGL import GL
 
     # Determine whether we have multitexturing
     multitexture = OpenGL.GL.ARB.multitexture.glInitMultitextureARB()
+    print multitexture
 
     # If we have multitexturing, make a list of supported texture units
     if multitexture:
@@ -44,5 +46,11 @@ def test():
                 unit += 1
         except:
             pass
+
+    # Determine whether we have anisotropic filtering
+    try:
+        maxAnisotropy = GL.glGetFloatv(texture_filter_anisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT)
+    except:
+        maxAnisotropy = 1.0
 
 ### The End ###
