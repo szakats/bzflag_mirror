@@ -5,9 +5,8 @@ and provide the auxiliary logic and interfacing necessary to build clients
 and servers that speak the protocol.
 
 Included are a few example programs that make use of the module. Try
-them out. Note that the examples that connect to a BZFlag server default
-to localhost, but you can set this with the -s command line option. Try
-the -h or --help option for a full list of command line options supported.
+them out. Running them with the -h or --help option gives a full list
+of command line options supported.
 
 There's no real documentation yet, but there is a good bit of
 pseudo-documentation available in the python doc strings. You can extract
@@ -16,7 +15,11 @@ this using pydoc.
 -- Requirements
 
 The core PyBZFlag modules only require the python standard library.
-However, the graphical UI modules require pygame. (http://pygame.org)
+However, most of the graphical code requires pygame (http://pygame.org)
+and the Python Imaging Library (http://www.pythonware.com/products/pil/)
+
+The list of available UI modules in --help will reflect the dependencies
+currently installed.
 
 -- Contacts
 
