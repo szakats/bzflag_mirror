@@ -39,14 +39,4 @@ serverWelcomeMessage = "Welcome to the %s Server (code/%s protocol/%s)" % \
 # Default pathnames
 cachePath = "~/.bzflag-cache"
 
-
-# Start up psyco to accelerate PyBZFlag if it's available
-# This uses psyco's profiler, which means that generally it will take
-# several seconds for the performance to ramp up to its maximum value.
-try:
-    import psyco
-    psyco.profile()
-except ImportError:
-    pass
-
 ### The End ###

@@ -121,6 +121,7 @@ class Clouds(SkyDrawable):
 class Horizon(SkyDrawable):
     """Some mountains and a chasm to cover up the horizon"""
     def drawToList(self, rstate):
+        print "boing"
         VRML.load('sky.wrl')['horizon'].drawToList(rstate)
 
 ### The End ###
