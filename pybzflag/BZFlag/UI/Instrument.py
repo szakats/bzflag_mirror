@@ -21,8 +21,7 @@ Instruments for measuring and displaying quantities
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import Numeric
-from BZFlag import Animated
+import Numeric, time
 from BZFlag.UI import HUD, Layout, GLText
 
 
@@ -76,19 +75,23 @@ class FrequencyCounter:
 
        The value of the counter can be read at any time from the 'value' attribute, in Hz.
        If the filter hasn't collected filterMinSamples samples yet, value will be None.
+
+       An alternate time() function can be provided. The default is to use time.time(),
+       but you may want to use Timekeeper's time() function to measure in game time rather
+       than in wallclock time.
        """
     def __init__(self, event,
                  filterMinSamples = 32,
                  filterMaxSamples = 1024,
                  filterSeconds    = 2,
-                 timeKeeper       = None):
+                 timeFunction     = None):
         self.filterMinSamples = filterMinSamples
         self.filterSeconds = filterSeconds
 
         # Allow overriding our Timekeeper if necessary
-        if not timeKeeper:
-            timeKeeper = Animated.Timekeeper()
-        self.time = timeKeeper
+        if not timeFunction:
+            timeFunction = time.time
+        self.time = timeFunction
 
         # Our filter is a Numeric array configured as a ring buffer, to minimize the
         # overhead of adding and removing samples at the ends.
@@ -104,7 +107,7 @@ class FrequencyCounter:
 
     def trigger(self, *args, **kw):
         """Take a new sample, clear out any old samples, and calculate a new frequency value"""
-        now = self.time.time()
+        now = self.time()
         self.filter.push(now)
         while len(self.filter) > self.filterMinSamples and (now - self.filter.peek()) > self.filterSeconds:
             self.filter.pop()
