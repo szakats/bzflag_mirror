@@ -64,7 +64,7 @@ def drawFrame():
     GLText.drawCentered("bold", fontName="VeraBd.ttf")
 
 viewport.onDrawFrame.observe(drawFrame)
-Instrument.FrameRate(viewport)
+frameRateInstrument = Instrument.FrameRate(viewport)
 loop.run()
 
 
