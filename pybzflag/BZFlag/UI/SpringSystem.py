@@ -23,7 +23,7 @@ Spring system based simulation models and affectors
 from Numeric import *
 from BZFlag.Geometry import *
 from BZFlag.World import Scale
-from BZFlag.UI import Noise
+from BZFlag import Noise
 
 
 class Cloth:
