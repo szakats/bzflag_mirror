@@ -69,7 +69,12 @@ def worldToImage(world, size, oversample=2, colors=colorScheme):
     def zSort(a, b):
         return cmp(a.center[2], b.center[2])
     sorted.sort(zSort)
-    highest = sorted[-1].center[2]
+
+    # Use the world's mean height as a reference point for coloring
+    total = 0
+    for object in sorted:
+        total += object.center[2]
+    heightRef = total / len(sorted)
 
     for object in sorted:
         objClassName = object.__class__.__name__
@@ -88,7 +93,7 @@ def worldToImage(world, size, oversample=2, colors=colorScheme):
                     hsv = list(colorsys.rgb_to_hsv(color[0]/255.0,
                                                    color[1]/255.0,
                                                    color[2]/255.0))
-                    hsv[2] += object.center[2] / highest * 0.6
+                    hsv[2] += object.center[2] / heightRef * 0.1
                     color = colorsys.hsv_to_rgb(*hsv)
                     color = (color[0]*255, color[1]*255, color[2]*255)
                     draw.polygon(poly, fill=color, outline=colors['outline'])
