@@ -58,41 +58,13 @@ class OverheadView:
         return (( point[0] / self.game.world.size[0] + 0.5) * self.size[0],
                 (-point[1] / self.game.world.size[1] + 0.5) * self.size[1])
 
-    def objectToPoly(self, object):
-        """Get a polygon representing the location of an object, given as a tuple of points.
-           So far this will only return quadrilaterals.
-           """
-        # Create four vertices from the object's extents
-        poly = ((-object.size[0],
-                 -object.size[1]),
-                ( object.size[0],
-                 -object.size[1]),
-                ( object.size[0],
-                  object.size[1]),
-                (-object.size[0],
-                  object.size[1]))
-
-        # Rotate the polygon by the object's angle
-        cos = math.cos(-object.angle)
-        sin = math.sin(-object.angle)
-        def rotate(point):
-            return ( cos*point[0] + sin*point[1],
-                    -sin*point[0] + cos*point[1])
-        poly = map(rotate, poly)
-
-        # Translate it to the object's center location
-        def translate(point):
-            return (point[0] + object.center[0],
-                    point[1] + object.center[1])
-        return map(translate, poly)
-
     def renderWorld(self, surface):
         """Render the game world to the given surface."""
         surface.fill(self.colorScheme['background'])
         for object in self.game.world.scene:
             color = self.colorScheme.get(object.__class__.__name__, None)
             if color:
-                poly = map(self.worldToView, self.objectToPoly(object))
+                poly = map(self.worldToView, object.toPolygon())
                 pygame.draw.polygon(surface, color, poly)
 
     def render(self, surface):

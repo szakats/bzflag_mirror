@@ -111,7 +111,33 @@ class WorldObject(Block):
             f.write("to %s\n" % self.toSide)
         f.write("end\n\n")
         
+    def toPolygon(self):
+        """Return a 2D polygon representation of this object, as a tuple of tuples."""
+        # Create four vertices from our extents
+        poly = ((-self.size[0],
+                 -self.size[1]),
+                ( self.size[0],
+                 -self.size[1]),
+                ( self.size[0],
+                  self.size[1]),
+                (-self.size[0],
+                  self.size[1]))
 
+        # Rotate the polygon by our angle
+        cos = math.cos(-self.angle)
+        sin = math.sin(-self.angle)
+        def rotate(point):
+            return ( cos*point[0] + sin*point[1],
+                    -sin*point[0] + cos*point[1])
+        poly = map(rotate, poly)
+
+        # Translate it to our center location
+        def translate(point):
+            return (point[0] + self.center[0],
+                    point[1] + self.center[1])
+        return map(translate, poly)
+
+        
 class Style(Block):
     messageId = 0x7374
     entries = [
