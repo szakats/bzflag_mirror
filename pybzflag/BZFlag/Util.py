@@ -181,4 +181,12 @@ def autoFile(name, mode="r"):
     else:
         return name
 
+
+def dataFile(name):
+    """Given the name of a data file, return its full path.
+       Currently this has a hardcoded data path, it will later be configurable.
+       """
+    import os
+    return os.path.join('data', name)
+
 ### The End ###

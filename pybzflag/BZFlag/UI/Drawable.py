@@ -23,6 +23,7 @@ OpenGL drawing definitions for various world objects
 
 from OpenGL.GL import *
 from BZFlag.UI.Texture import Texture
+from BZFlag import Util
 import math
 
 
@@ -38,8 +39,13 @@ class GLDrawable:
        The blended flag is used to put objects that need blending into a
        second rendering pass.
        """
+    textureName = None
+
     def __init__(self):
-        self.texture = None
+        if self.textureName:
+            self.texture = Texture(Util.dataFile(self.textureName))
+        else:
+            self.texture = None
         self.blended = False
 
     def draw(self):
@@ -50,29 +56,36 @@ class GLDrawable:
         pass
 
 
-class DisplayList:
-    """A drawable that stores itself to a display list before rendering"""
+class DisplayList(GLDrawable):
+    """A drawable that stores itself to a display list before rendering"""    
     def __init__(self, *args, **kw):
+        GLDrawable.__init__(self)
         self.list = glGenLists(1)
-        self.texture = None
-        self.blended = False
+        self.buildList(*args, **kw)
 
     def __del__(self):
         glDeleteLists(self.list, 1)
 
+    def buildList(self, *args, **kw):
+        """Rebuild this object's display list. Arguments depend on the
+           subclass' drawToList mehtod's arguments.
+           """
+        glNewList(self.list, GL_COMPILE)
+        self.drawToList(*args, **kw)
+        glEndList()        
+
+    def drawToList(self):
+        """Stub where subclasses will do their drawing"""
+        pass
+
     def draw(self):
         glCallList(self.list)
 
-    def drawWithName(self, name):
-        pass
-
 
 class Ground(DisplayList):
-    def __init__(self, size):
-        DisplayList.__init__(self)
+    textureName = 'ground.png'
+    def drawToList(self, size):
         self.size = size / 2
-        self.texture = Texture('data/ground.png')
-        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glDisable(GL_CULL_FACE)
         glBegin(GL_QUADS)
@@ -88,17 +101,14 @@ class Ground(DisplayList):
         glEnd()
         glEnable(GL_CULL_FACE)
         glPopMatrix()
-        glEndList()
 
 
 class BaseTops(DisplayList):
-    def __init__(self, team, center, angle, size):
-        DisplayList.__init__(self)
+    def drawToList(self, team, center, angle, size):
         self.team = team
         self.center = center
         self.angle = angle * 180 / math.pi
         self.size = size
-        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -110,33 +120,30 @@ class BaseTops(DisplayList):
             glColor3f(0.0, 0.0, 1.0)
         if self.team == 'purple':
             glColor3f(1.0, 0.0, 1.0)
-            glBegin(GL_QUADS)
-            # Z+
-            glNormal3f(0, 0, 1);
-            glVertex3f(self.size[0], -self.size[1], self.size[2]);
-            glVertex3f(self.size[0], self.size[1], self.size[2]);
-            glVertex3f(-self.size[0], self.size[1], self.size[2]);
-            glVertex3f(-self.size[0], -self.size[1], self.size[2]);
-            # Z-
-            glNormal3f(0, 0, -1);
-            glVertex3f(-self.size[0], -self.size[1], 0);
-            glVertex3f(-self.size[0], self.size[1], 0);
-            glVertex3f(self.size[0], self.size[1], 0);
-            glVertex3f(self.size[0], -self.size[1], 0);
-            glEnd()
-            glColor3f(1.0, 1.0, 1.0)
-            glPopMatrix()
-            glEndList()
+        glBegin(GL_QUADS)
+        # Z+
+        glNormal3f(0, 0, 1);
+        glVertex3f(self.size[0], -self.size[1], self.size[2]);
+        glVertex3f(self.size[0], self.size[1], self.size[2]);
+        glVertex3f(-self.size[0], self.size[1], self.size[2]);
+        glVertex3f(-self.size[0], -self.size[1], self.size[2]);
+        # Z-
+        glNormal3f(0, 0, -1);
+        glVertex3f(-self.size[0], -self.size[1], 0);
+        glVertex3f(-self.size[0], self.size[1], 0);
+        glVertex3f(self.size[0], self.size[1], 0);
+        glVertex3f(self.size[0], -self.size[1], 0);
+        glEnd()
+        glColor3f(1.0, 1.0, 1.0)
+        glPopMatrix()
 
 
 class Wall(DisplayList):
-    def __init__(self, center, angle, size):
-        DisplayList.__init__(self)
+    textureName = 'wall.png'
+    def drawToList(self, center, angle, size):
         self.center = center
         self.angle = angle * 180 / math.pi
         self.size = size
-        self.texture = Texture('data/wall.png')
-        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -153,17 +160,14 @@ class Wall(DisplayList):
         glEnd()
         glEnable(GL_CULL_FACE)
         glPopMatrix()
-        glEndList()
 
 
 class BoxSides(DisplayList):
-    def __init__(self, center, angle, size):
-        DisplayList.__init__(self)
+    textureName = 'boxwall.png'
+    def drawToList(self, center, angle, size):
         self.center = center
         self.angle = angle * 180 / math.pi
         self.size = size
-        self.texture = Texture('data/boxwall.png')
-        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -210,17 +214,14 @@ class BoxSides(DisplayList):
         glVertex3f(-self.size[0], self.size[1], 0)
         glEnd()
         glPopMatrix()
-        glEndList()
 
 
 class BoxTops(DisplayList):
-    def __init__(self, center, angle, size):
-        DisplayList.__init__(self)
+    textureName = 'boxtops.png'
+    def drawToList(self, center, angle, size):
         self.center = center
         self.angle = angle * 180 / math.pi
         self.size = size
-        self.texture = Texture('data/boxtops.png')
-        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -247,19 +248,16 @@ class BoxTops(DisplayList):
         glVertex3f(self.size[0], -self.size[1], 0)
         glEnd()
         glPopMatrix()
-        glEndList()
 
 
 class Pyramid(DisplayList):
-    def __init__(self, center, angle, size, flip):
+    textureName = 'pyrwall.png'
+    def drawToList(self, center, angle, size, flip):
         # FIXME - respect flipz
-        DisplayList.__init__(self)
         self.center = center
         self.angle = angle * 180 / math.pi
         self.size = size;
         self.flip = flip;
-        self.texture = Texture('data/pyrwall.png')
-        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -314,17 +312,14 @@ class Pyramid(DisplayList):
         glVertex3f(-self.size[0], self.size[1], 0)
         glEnd()
         glPopMatrix()
-        glEndList()
 
 
 class TeleporterField(DisplayList):
-    def __init__(self, center, angle, size):
-        DisplayList.__init__(self)
+    def drawToList(self, center, angle, size):
         self.center = center
         self.angle = angle * 180 / math.pi
         self.size = size
         self.blended = True
-        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -345,18 +340,15 @@ class TeleporterField(DisplayList):
         glEnd()
         glColor3f(1.0, 1.0, 1.0)
         glPopMatrix()
-        glEndList()
 
 
 class TeleporterBorder(DisplayList):
-    def __init__(self, center, angle, size, border):
-        DisplayList.__init__(self)
+    textureName = 'caution.png'
+    def drawToList(self, center, angle, size, border):
         self.center = center
         self.angle = angle * 180 / math.pi
         self.size = size
         self.border = border
-        self.texture = Texture('data/caution.png')
-        glNewList(self.list, GL_COMPILE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -483,6 +475,5 @@ class TeleporterBorder(DisplayList):
         glVertex3f(self.border / 2, -self.size[1] - self.border, 0);
         glEnd()
         glPopMatrix()
-        glEndList()
 
 ### The End ###
