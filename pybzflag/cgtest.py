@@ -3,13 +3,18 @@
 # Pretty much a straight translation of the CgGL example distributed with the Cg toolkit
 # this is -not- platform agnostic at the moment
 #
-import pygame, OpenGL.GL, sys
+import OpenGL.GL, sys
+from BZFlag import Event
+from BZFlag.UI import Viewport
 from Cg import *
 
 def CheckCGError():
     error = Cg.cgGetError()
     if error != CG_NO_ERROR:
 	sys.exit('Cg error: %s' % Cg.cgGetErrorString(error))
+
+loop = Event.EventLoop()
+viewport = Viewport.OpenGLViewport(loop, (800, 600))
 
 context = Cg.cgCreateContext()
 CheckCGError()
