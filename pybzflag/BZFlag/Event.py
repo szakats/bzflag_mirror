@@ -23,7 +23,8 @@ into observable and traceable events.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import select
+from BZFlag import Network
+import select, time
 
 
 class Event:
@@ -96,6 +97,55 @@ def attach(cls, *args):
             setattr(cls, arg, Event())
 
 
+class Timer:
+    """Abstract base class for a timer that can be added to the EventLoop"""
+    def poll(self, now):
+        """Check whether this timer should activate, and if so, activate it.
+           'now' is the current time. Return 1 if the timer's activation time changed."""
+        pass
+
+    def getNextActivation(self):
+        """Return the time of next activation"""
+        return self.activationTime
+
+    def setEventLoop(self, eventLoop):
+        """Called by EventLoop to notify this timer when it is added to an event loop"""
+        self.eventLoop = eventLoop
+
+    def activate(self):
+        """The timer should call this function when it goes off"""
+        self.handler()
+        
+
+class OneshotTimer(Timer):
+    """A timer that goes off only once"""
+    def __init__(self, period, handler):
+        self.handler = handler
+        self.activationTime = time.time() + period
+
+    def poll(self, now):
+        if now > self.activationTime:
+            self.activate()
+            self.eventLoop.remove(self)
+
+
+class PeriodicTimer(Timer):
+    """A timer that goes off on regular intervals. If the period
+       is zero, the timer goes off once per event loop iteration.
+       """
+    def __init__(self, period, handler):
+        self.handler = handler
+        self.period = period
+        self.activationTime = time.time() + period
+        
+    def poll(self, now):
+        if now > self.activationTime:
+            self.activate()
+            while self.activationTime < now:
+                self.activationTime += self.period
+            return 1
+
+
 class EventLoop:
     def __init__(self):
         # No polling by default. This can be changed to a duration
@@ -103,13 +153,36 @@ class EventLoop:
         self.pollTime = None
         attach(self, 'onPoll', 'onNonfatalException')
         self.sockets = []
+        self.timers  = []
         self.showNonfatalExceptions = 1
+        self.nextTimerActivation = None
 
-    def registerSocket(self, socket):
-        self.sockets.append(socket)
+    def add(self, item):
+        if isinstance(item, Network.Socket):
+            self.sockets.append(item)
+        elif isinstance(item, Timer):
+            self.timers.append(item)
+            item.setEventLoop(self)
+            self.updateNextTimerActivation()
+        else:
+            raise TypeError("Only Sockets and Timers are supported by this event loop")
 
-    def unregisterSocket(self, socket):
-        self.sockets.remove(socket)
+    def remove(self, item):
+        if isinstance(item, Network.Socket):
+            self.sockets.remove(item)
+        elif isinstance(item, Timer):
+            self.timers.remove(item)
+        else:
+            raise TypeError("Only Sockets and Timers are supported by this event loop")
+
+    def updateNextTimerActivation(self):
+        """Updates time of the next timer activation"""
+        # There are better ways to do this...
+        self.nextTimerActivation = None
+        for timer in self.timers:
+            x = timer.getNextActivation()
+            if self.nextTimerActivation is None or x < self.nextTimerActivation:
+                self.nextTimerActivation = x
 
     def run(self):
         self.running = 1
@@ -122,22 +195,57 @@ class EventLoop:
             selectables = selectDict.keys()
 
             while self.running:
+                # The poll time we'll actually use depends on both pollTime and nextTimerActivation.
+                pollTime = self.pollTime
+                if self.nextTimerActivation is not None:
+                    untilNextTimer = self.nextTimerActivation - time.time()
+                    if untilNextTimer < 0:
+                        untilNextTimer = 0
+                    if pollTime is None:
+                        pollTime = untilNextTimer
+                    else:
+                        if untilNextTimer < pollTime:
+                            pollTime = untilNextTimer
+
+                print pollTime
+
+                # This waits until either a socket has activity, or
+                # our pollTime has expired and we need to check timers
                 try:
-                    (iwtd, owtd, ewtd) = select.select(selectables, [], [], self.pollTime)
+                    (iwtd, owtd, ewtd) = self.select(selectables, [], [], pollTime)
                 except select.error:
                     raise Errors.ConnectionLost()
+
+                # Poll available sockets
                 readyList = iwtd + owtd + ewtd
                 for ready in readyList:
                     try:
                         selectDict[ready].poll(self)
                     except Errors.NonfatalException:
                         self.onNonfatalException(sys.exc_info())
+
+                # Poll timers, updating the time of next activation if necessary
+                now = time.time()
+                timesChanged = 0
+                for timer in self.timers:
+                    if timer.poll(now):
+                        timesChanged = 1
+                if timesChanged:
+                    self.updateNextTimerActivation()
+
+                # Call our generic poll event hook
                 self.onPoll()
         finally:
             self.running = 0
 
     def stop(self):
         self.running = 0
+
+    def select(self, i, o, e, time):
+        """This is a hook for subclasses to easily override the
+           select function that this event loop uses.
+           """
+        return select.select(i, o, e, time)
 
     def onNonfatalException(self, info):
         if self.showNonfatalExceptions:

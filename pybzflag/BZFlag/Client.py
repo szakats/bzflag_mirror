@@ -106,7 +106,7 @@ class BaseClient:
         self.tcp = Network.Socket()
         self.tcp.connect(server, Common.defaultPort)
         self.tcp.setBlocking(0)
-        self.eventLoop.registerSocket(self.tcp)
+        self.eventLoop.add(self.tcp)
 
         # Until we establish a UDP connection, we'll need to send
         # normally-multicasted messages over TCP
@@ -119,10 +119,11 @@ class BaseClient:
     def disconnect(self):
         if self.tcp:
             self.tcp.close()
-            self.eventLoop.unregisterSocket(self.tcp)
+            self.eventLoop.remove(self.tcp)
             self.tcp = None
         if self.udp:
             self.udp.close()
+            self.eventLoop.remove(self.udp)
             self.udp = None
         self.multicast = None
         self.connected = 0
