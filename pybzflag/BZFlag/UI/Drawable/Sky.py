@@ -85,7 +85,7 @@ class ColoredSkyMesh(SkyDrawable):
 class Colors(ColoredSkyMesh):
     """The sky itself, with colors changing over the course of the day"""
     colorTrackOrigin = 32.5
-    colorTrackHeight = 31
+    colorTrackHeight = 30
     meshName         = 'dome'
 
 
@@ -202,7 +202,7 @@ class Mountains(ColoredSkyMesh):
         # texture coordinates in the VRML loader yet, so just fudge
         # something reasonableish with linear mapping.
         glActiveTextureARB(GL_TEXTURE1_ARB)
-        glTexGenfv(GL_S, GL_OBJECT_PLANE, (2, 0, 0, 0))
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (1, 0, 0, 0))
         glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 1, 0))
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
@@ -222,10 +222,10 @@ class Mountains(ColoredSkyMesh):
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 
-class Void(SkyDrawable):
+class Void(ColoredSkyMesh):
     """A whole lot of nothing, right below the mountains"""
-    textureName = 'sky_colors.png'
-    def drawToList(self, rstate):
-        VRML.load('sky.wrl')['void'].drawToList(rstate)
+    colorTrackOrigin = 16.5
+    colorTrackHeight = 7
+    meshName         = 'void'
 
 ### The End ###
