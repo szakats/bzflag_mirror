@@ -81,15 +81,35 @@ class Texture:
         (w,h) = size
         Texture.bind(self)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+        gluBuild2DMipmaps(self.target, components, w, h, format, GL_UNSIGNED_BYTE, string)
+        self.setDefaults()
+
+    def loadBackbuffer(self, size, position=(0,0), format=GL_RGB):
+        """Load this texture from the given location on the backbuffer. This accepts
+           coordinates in PyBZFlag style rather than OpenGL style- the origin is at the top-left
+           corner of the viewport.
+           """
+        glReadBuffer(GL_BACK)
+        Texture.bind(self)
+        viewport = glGetIntegerv(GL_VIEWPORT)
+        glCopyTexImage2D(self.target, 0, format,
+                         position[0], viewport[3] - position[1] - size[1],
+                         size[0], size[1],
+                         0)
+        self.setDefaults()
+
+        # Disable mipmapping, since we're not generating any mipmap levels
+        self.setFilter(GL_LINEAR, GL_LINEAR)
+
+    def setDefaults(self):
+        """Set the default OpenGL options for this texture"""
+        self.setRepeat()
+        self.setFilter()
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
         if GLExtension.maxAnisotropy > 1:
-            glTexParameterf(self.target, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)
-        gluBuild2DMipmaps(self.target, components, w, h, format, GL_UNSIGNED_BYTE, string)
-
-        self.setRepeat()
-        self.setFilter()
-
+            glTexParameterf(self.target, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)        
+        
     def setRepeat(self, repeat=True):
         Texture.bind(self)
         if repeat:
