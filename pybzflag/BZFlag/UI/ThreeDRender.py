@@ -256,13 +256,16 @@ class BasicRenderPass(RenderPass):
         else:
             for (textures, group) in self.textureGroups.iteritems():
                 if not rstate.picking:
-                    self.bindTextures(textures)
+                    self.bindTextures(textures, rstate)
                 group.draw(rstate)
 
-    def bindTextures(self, textures):
+    def bindTextures(self, textures, rstate):
         """Bind the given list of 2D textures in the current OpenGL context.
            If multitexturing is not supported, all but the first texture will
            be ignored.
+
+           This routine is careful that only the texture targets and units specified
+           are enabled, and all others are disabled.
            """
         # Disable all textures if we're in wireframe mode
         wireframe = glGetIntegerv(GL_POLYGON_MODE)[0] == GL_LINE
@@ -274,25 +277,30 @@ class BasicRenderPass(RenderPass):
                 texIndex = 0
                 for unit in GLExtension.textureUnits:
                     glActiveTextureARB(unit)
+                    for target in GLExtension.textureTargets:
+                        glDisable(target)
                     if texIndex < len(textures):
-                        textures[texIndex].bind()
-                        glEnable(GL_TEXTURE_2D)
-                    else:
-                        glDisable(GL_TEXTURE_2D)
+                        t = textures[texIndex]
+                        t.bind(rstate)
+                        glEnable(t.target)
                     texIndex += 1
             else:
                 # No multitexturing, only enable the current texture unit
-                glEnable(GL_TEXTURE_2D)
-                textures[0].bind()
+                for target in GLExtension.textureTargets:
+                    glDisable(target)
+                glEnable(t.target)
+                textures[0].bind(rstate)
         else:
             if GLExtension.multitexture:
                 # We have multitexturing, make sure all the texture units are disabled
                 for unit in GLExtension.textureUnits:
                     glActiveTextureARB(unit)
-                    glDisable(GL_TEXTURE_2D)
+                    for target in GLExtension.textureTargets:
+                        glDisable(target)
             else:
                 # No multitexturing, only disable the current texture unit
-                glDisable(GL_TEXTURE_2D)
+                for target in GLExtension.textureTargets:
+                    glDisable(target)
 
 
 class BlendedRenderPass(BasicRenderPass):
@@ -343,34 +351,6 @@ class OverlayRenderPass(BasicRenderPass):
         BasicRenderPass.render(self, rstate)
 
 
-class TextureRenderPass(RenderPass):
-    """A rendering pass for dynamic textures that need to use the backbuffer as
-       temporary space. This must come before all passes that should be visible
-       at display flip time. Individual drawables are responsible for clearing
-       the depth and color buffer.
-
-       This is descended from RenderPass rather than BasicRenderPass since it
-       does not need or want texture sorting.
-       """
-    filterPriority = 10
-    renderPriority = 150
-
-    def __init__(self):
-        self.drawables = []
-
-    def filter(self, drawable):
-        return isinstance(drawable, Texture.Texture)
-
-    def add(self, drawable):
-        self.drawables.append(drawable)
-
-    def render(self, rstate):
-        if rstate.picking:
-            return
-        for drawable in self.drawables:
-            drawable.draw(rstate)
-            
-
 class Scene:
     """Set of all the objects this view sees, organized into rendering passes
        and sorted by texture. Multiple rendering passes are necessary to deal
@@ -381,8 +361,7 @@ class Scene:
         self.passes = [BasicRenderPass(),
                        BlendedRenderPass(),
                        OverlayRenderPass(),
-                       DecalRenderPass(),
-                       TextureRenderPass()]
+                       DecalRenderPass()]
 
     def erase(self):
         self.objects = {}
@@ -395,17 +374,6 @@ class Scene:
         for drawable in drawables:
             drawable.parent(object)            
         self.objects.setdefault(object, []).extend(drawables)
-
-        # Check for any textures that are also drawables. This supports dynamic
-        # textures that must render themselves before use. It's a bit hackish
-        # to put a special case here, but a lot cleaner than forcing scene objects
-        # to know about drawables required by animated textures.
-        for drawable in drawables:    
-            for texture in drawable.render.textures:
-                if isinstance(texture, Drawable.GLDrawable):
-                    texture.parent(object)
-                    self.objects[object].append(texture)
-                    
 
     def preprocess(self):
         """Rebuilds rendering passes. Currently this is necessary when the world changes."""
@@ -510,15 +478,15 @@ class View:
     def render(self):
         """The main entry point for rendering"""
         self.camera.load()
-        self.renderScene()
+        self.renderScene(RenderState(self))
 
-    def renderScene(self):
+    def renderScene(self, rstate):
         """Set up lighting and render the scene. This is called
            when the camera has already been set up elsewhere.
            """
         for light in self.lights:
             light.set()
-        self.scene.render(RenderState(self))
+        self.scene.render(rstate)
 
     def pick(self, pos):
         self.camera.load()

@@ -83,7 +83,7 @@ class Texture:
         self.format = format
         self.components = components
         (w,h) = size
-        self.bind()
+        Texture.bind(self)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
         glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_REPEAT)
         glTexParameteri(self.target, GL_TEXTURE_WRAP_T, GL_REPEAT)
@@ -115,7 +115,7 @@ class Texture:
         except:
             pass
 
-    def bind(self):
+    def bind(self, rstate=None):
         """Bind this texture to self.target in the current OpenGL context"""
         global currentTexture
         if self != currentTexture.setdefault(self.target, None):
@@ -150,9 +150,9 @@ class AnimatedTexture:
             1/framerate * len(self.frames), (0, len(self.frames))))
         self.time = Animated.Timekeeper()
 
-    def bind(self):
+    def bind(self, rstate=None):
         self.frameNumber.integrate(self.time.step())
-        self.frames[int(self.frameNumber.value)].bind()
+        self.frames[int(self.frameNumber.value)].bind(rstate)
         
 
 class Cache:

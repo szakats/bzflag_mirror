@@ -253,7 +253,7 @@ class OpenGLViewport(PygameViewport):
         self.evalViewport()
         PygameViewport.render(self)
 
-    def region(self, rect):
+    def region(self, rect, renderLink='after'):
         """Return a class that represents a rectangular subsection of this viewport.
            To maintain something resembling OpenGL state integrity, it disconnects
            the region's rendering events from ours and appends them to our rendering
@@ -262,6 +262,10 @@ class OpenGLViewport(PygameViewport):
            In addition to a rectangle, this function can accept a function that
            will be lazily evaluated to a rectangle each frame. This makes it possible
            to create regions with animated or dynamically sized positions.
+
+           renderLink controls how this region is linked into its parent's rendering
+           sequence. 'after' inserts it after all other entries, 'before' before all
+           others, None doesn't insert it.
            """
         sub = copy.copy(self)
         sub.parent = self
@@ -273,12 +277,16 @@ class OpenGLViewport(PygameViewport):
                               sub.onDrawFrame,
                               sub.onFinishFrame]
 
-        # Stick it in our render sequence right before our onFinishFrame which flips the buffer
-        # This should be safe for nesting viewport regions-  and the last entry will always be
-        # the root viewport's onFinishFrame event.
-        self.rootView.renderSequence = self.rootView.renderSequence[:-1] + \
-                                       [sub.render] + \
-                                       self.rootView.renderSequence[-1:]
+        if renderLink == 'after':
+            # Stick it in our render sequence right before our onFinishFrame which flips the buffer
+            # This should be safe for nesting viewport regions-  and the last entry will always be
+            # the root viewport's onFinishFrame event.
+            self.rootView.renderSequence = self.rootView.renderSequence[:-1] + \
+                                           [sub.render] + \
+                                           self.rootView.renderSequence[-1:]
+
+        if renderLink == 'before':
+            self.rootView.renderSequence = [sub.render] + self.rootView.renderSequence
 
         # Ignore the caption on sub-viewports
         sub.setCaption = lambda title: None

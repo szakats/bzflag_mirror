@@ -26,6 +26,7 @@ from OpenGL.GL import *
 from BZFlag import Vector
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import CubeMap, GLExtension
+from OpenGL.GL.EXT.texture_cube_map import *
 
 
 class Pyramid(DisplayList):
@@ -37,6 +38,7 @@ class Pyramid(DisplayList):
         self.uvMap = None
         self.uvMap2 = None
         self.water = False
+        self.envMap = False
 
         # Change the pyramid's texture and mapping depending on its slope
         try:
@@ -50,8 +52,6 @@ class Pyramid(DisplayList):
             # of the texture with its tip at the top-center. The bottom of the pyramid
             # is mapped to a the top-left 1/4 of the texture.
             self.textureNames = ['pillar.jpeg']
-            if GLExtension.cubeMap:
-                self.textureNames.append(CubeMap.CubeMap(Vector.add(center, (0,0,size[2]/2))))
             self.uvMap = ((0,   3/4),
                           (1/4, 3/4),
                           (1/4, 1),
@@ -111,8 +111,7 @@ class Pyramid(DisplayList):
         else:
             # Default pyramid
             self.textureNames = ['black_marble.jpeg']
-            if GLExtension.cubeMap:
-                self.textureNames.append(CubeMap.CubeMap(Vector.add(center, (0,0,size[2]/2))))
+            self.addCubeMap(center, size)
             repeats = (size[0] / 4, size[1] / 4)
 
         if not self.uvMap:
@@ -140,20 +139,28 @@ class Pyramid(DisplayList):
 
         if not self.uvMap2:
             self.uvMap2 = self.uvMap
-                       
         DisplayList.__init__(self, center, angle, size, flip)
+
+    def addCubeMap(self, center, size):
+        """Add a cube environment map to make this pyramid shiny"""
+        if not (GLExtension.cubeMap and GLExtension.multitexture):
+            return
+        position = (center[0],
+                    center[1],
+                    center[2] + size[2]/2)
+        self.textureNames.append(CubeMap.CubeMap(position))
+        self.envMap = True
 
     def set(self, center, angle, size, flip):
         self.center = center
         self.angle = angle
         self.size = size
         self.flip = flip
-        try:
-            self.render.textures[1].texEnv = GL_MODULATE
-        except IndexError:
-            pass
         if self.water:
+            self.render.textures[1].texEnv = GL_MODULATE
             self.render.blended = True
+        else:
+            self.render.textures[1].texEnv = GL_REPLACE
 
     def drawToList(self, rstate):
         if self.render.blended:
@@ -170,6 +177,15 @@ class Pyramid(DisplayList):
             glFrontFace(GL_CW)
             glTranslatef(0, 0, -self.size[2])
         glRotatef(self.angle, 0.0, 0.0, 1.0)
+        if self.envMap:
+            glActiveTextureARB(GL_TEXTURE1_ARB)
+            glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
+            glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
+            glTexGenfv(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
+            glEnable(GL_TEXTURE_GEN_S);
+            glEnable(GL_TEXTURE_GEN_T);
+            glEnable(GL_TEXTURE_GEN_R);
+            glActiveTextureARB(GL_TEXTURE0_ARB)
         glBegin(GL_QUADS)
         # Z- side
         glNormal3f(0, 0, -1)
@@ -236,6 +252,12 @@ class Pyramid(DisplayList):
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[15])
         glVertex3f(-self.size[0], self.size[1], z)
         glEnd()
+        if self.envMap:
+            glActiveTextureARB(GL_TEXTURE1_ARB)
+            glDisable(GL_TEXTURE_GEN_S);
+            glDisable(GL_TEXTURE_GEN_T);
+            glDisable(GL_TEXTURE_GEN_R);
+            glActiveTextureARB(GL_TEXTURE0_ARB)
         if self.flip:
             glFrontFace(GL_CCW)
         glPopMatrix()

@@ -27,11 +27,13 @@ multitexture = None
 textureUnits = None
 maxAnisotropy = None
 cubeMap = None
+textureTargets = None
 
 
 def test():
     """Test for extension support."""
     global multitexture, textureUnits, maxAnisotropy, cubeMap
+    global textureTargets
     import OpenGL.GL.ARB.multitexture
     from OpenGL.GL.EXT import texture_filter_anisotropic
     from OpenGL.GL.EXT import texture_cube_map
@@ -58,9 +60,14 @@ def test():
     except:
         maxAnisotropy = 1.0
 
+    # Start a list of supported texture targets, we'll add to it later
+    textureTargets = [GL.GL_TEXTURE_1D, GL.GL_TEXTURE_2D]
+
     # Test for the cube map extension
     texture_cube_map.glInitTextureCubeMapEXT()
     cubeMap = GL.glGetString(GL.GL_EXTENSIONS).find("GL_EXT_texture_cube_map") >= 0
+    if cubeMap:
+        textureTargets.append(texture_cube_map.GL_TEXTURE_CUBE_MAP_EXT)
 
 
 def disableMultitex():
@@ -73,7 +80,8 @@ def disableMultitex():
         return
     for unit in textureUnits[1:]:
         glActiveTextureARB(unit)
-        glDisable(GL_TEXTURE_2D)
+        for target in textureTargets:
+            glDisable(target)
     glActiveTextureARB(textureUnits[0])
 
 ### The End ###

@@ -31,69 +31,115 @@ from __future__ import division
 from OpenGL.GL.EXT.texture_cube_map import *
 from OpenGL.GL import *
 from BZFlag.UI.Texture import Texture
-from BZFlag.UI.Drawable.GLDrawable import GLDrawable
 import math
 
 
-# A global lock to keep us from rendering any cube maps while we're already rendering one.
-# Not that recursive cube mapping isn't neat, but we are trying to do this in real time.
-renderingCubeMap = False
-
-
-class CubeMap(Texture, GLDrawable):
+class CubeMap(Texture):
     """Abstraction for creating and using cube environment maps
        maxSize is the maximum height of the cube in texels.
        The actual height could be limited by viewport size.
-
-       This class is both a texture and a drawable. It goes into
-       a texture rendering pass that runs before anything else,
-       where it renders the texture. Then later it can be used
-       as a texture in one of the visible rendering passes.
        """
     def __init__(self, position=(0,0,0), maxSize=256):
-        Texture.__init__(self)
-        GLDrawable.__init__(self)
+        Texture.__init__(self, 'data/water.jpeg')
         
         self.position = position
         self.maxSize = maxSize
         self.target = GL_TEXTURE_CUBE_MAP_EXT
+        self.texEnv = GL_REPLACE
         self.recursion = 0
         self.rendered = False
-    
-    def draw(self, rstate):
-        """Renders a cube map at the given position in world
-           coordinates in the supplied ThreeDRender.View instance.
-           This must be done in a rendering pass before everything
-           else in the scene, as it uses the top-left corner of the
-           backbuffer as temporary space.
+        self.viewport = None
+        self.dirty = True
+
+    def bind(self, rstate):
+        """The first time we're bound we add a new viewport that renders our cube map"""
+        if not self.viewport:
+            self.rstate = rstate
+            self.viewport = self.setupViewport()
+        #Texture.bind(self, rstate)
+
+    def getTextureRect(self, viewport):
+        """Return a function that calculates the texture size taking into account
+           our maximum texture size and the given root viewport size.
            """
-        return
+        def fsize():
+            viewMinorAxis = min(viewport.size[0], viewport.size[1])
+            largestPowerOfTwo = pow(2, int(math.log(viewMinorAxis) / math.log(2)))
+            size = self.maxSize
+            if size > largestPowerOfTwo:
+                size = largestPowerOfTwo
+            return (0,0,size,size)
+        return fsize
+
+    def setupViewport(self):
+        """Set up a viewport region in which this texture will be rendered,
+           given the current root viewport.
+           """
+        region = self.rstate.viewport.region(
+            self.getTextureRect(self.rstate.viewport), renderLink='before')
+        region.onDrawFrame.observe(self.drawFrame)
+
+        # We must have a 90-degree FOV to render cube maps
+        region.fov = 90
+        return region
         
-        # Don't allow recursive rendering of cubemaps inside other cubemaps
-        global renderingCubeMap
-        if renderingCubeMap:
+    def drawFrame(self):
+        """Draw function called by our viewport"""
+        if not self.dirty:
             return
-        renderingCubeMap = True
         
-        # Determine the actual size of our texture
-        viewMinorAxis = min(rstate.viewport.size[0], rstate.viewport.size[1])
-        largestPowerOfTwo = pow(2, int(math.log(viewMinorAxis) / math.log(2)))
-        size = self.maxSize
-        if size > largestPowerOfTwo:
-            size = largestPowerOfTwo
+        cameraPos = (-self.position[0],
+                     -self.position[1],
+                     -self.position[2])
+        glReadBuffer(GL_BACK)
 
-        # Create a viewport we can render the texture into
-        #texViewport = rstate.viewport.region((0, 0, size, size))
-        #texViewport.configureOpenGL()
+        glLoadIdentity()
+        glRotatef(-180, 1,0,0)
+        glTranslatef(*cameraPos)
+        self.renderSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT)
 
-        #glLoadIdentity()
-        #glTranslatef(*self.position)
-        glClear(GL_DEPTH_BUFFER_BIT)
-        rstate.view.renderScene()
-        glClear(GL_DEPTH_BUFFER_BIT)
-        rstate.viewport.display.flip()
+        glLoadIdentity()
+        glTranslatef(*cameraPos)
+        self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT)
 
-        #self.rendered = True
-        renderingCubeMap = False
+        glLoadIdentity()
+        glRotatef(-90, 1,0,0)
+        glTranslatef(*cameraPos)
+        self.renderSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT)
+
+        glLoadIdentity()
+        glRotatef(-90, 1,0,0)
+        glRotatef(180, 0,0,1)
+        glTranslatef(*cameraPos)
+        self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT)
+
+        glLoadIdentity()
+        glRotatef(-90, 1,0,0)
+        glRotatef(90, 0,0,1)
+        glTranslatef(*cameraPos)
+        self.renderSide(GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT)
+
+        glLoadIdentity()
+        glRotatef(-90, 1,0,0)
+        glRotatef(270, 0,0,1)
+        glTranslatef(*cameraPos)
+        self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT)
+
+        self.dirty = False
+
+    def renderSide(self, target):
+        """Render one side of the cube map, storing it in the given texture target.
+           The caller is responsible for positioning the camera correctly.
+           """
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        self.rstate.view.renderScene(self.rstate)
+        #Texture.bind(self)
+        glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glCopyTexImage2D(target, 0, GL_RGB,
+                         self.viewport.rect[0],
+                         self.viewport.rect[1],
+                         self.viewport.rect[2],
+                         self.viewport.rect[3],
+                         0)
 
 ### The End ###
