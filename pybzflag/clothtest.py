@@ -28,7 +28,11 @@ class Flag:
 
         self.surf = Drawable.ArraySurface(self.cloth.state, self.getTexCoords())
         self.surf.render.static = False
-        self.surf.render.textures = (Texture.load("water.jpeg"),)
+
+        # The texture has little cutouts on the edge to make the flag look a little
+        # less new, but the flag won't render with blending properly unless we
+        # do z-sorting, which would be a gigantic pain.
+        self.surf.render.textures = (Texture.load("flag.png"),)
 
         self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.04))
         self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (1, 0.001, 0.3))

@@ -30,7 +30,8 @@ from BZFlag import Event, Animated
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GL.ARB.multitexture import *
-import sys
+from OpenGL.GL.EXT.texture_cube_map import *
+import sys, LinearAlgebra
 
 
 class RenderState:
@@ -218,6 +219,9 @@ class RenderPass:
         """Remove all drawables from this pass"""
         pass
 
+    def isEmpty(self):
+        pass
+
 
 class BasicRenderPass(RenderPass):
     """A simple render pass for the majority of objects. Sorts objects by texture.
@@ -245,6 +249,9 @@ class BasicRenderPass(RenderPass):
         """This builds display lists for all our texture groups"""
         for texgroup in self.textureGroups.itervalues():
             texgroup.dirty = True
+
+    def isEmpty(self):
+        return len(self.textureGroups) == 0
 
     def render(self, rstate):
         """Perform one render pass- iterates through each texture group in the pass,
@@ -295,11 +302,7 @@ class BasicRenderPass(RenderPass):
                 textures[0].bind(rstate)
         else:
             if GLExtension.multitexture:
-                # We have multitexturing, make sure all the texture units are disabled
-                for unit in GLExtension.textureUnits:
-                    glActiveTextureARB(unit)
-                    for target in GLExtension.textureTargets:
-                        glDisable(target)
+                GLExtension.disableMultitex()
             else:
                 # No multitexturing, only disable the current texture unit
                 for target in GLExtension.textureTargets:
@@ -354,6 +357,49 @@ class OverlayRenderPass(BasicRenderPass):
         BasicRenderPass.render(self, rstate)
 
 
+class ReflectionRenderPass(DecalRenderPass):
+    """A rendering pass for reflections. Reflections are blended onto reflective
+       objects in a separate pass, and require the texture matrix to be set up as
+       the inverse of the modelview matrix's 3x3 top-left corner.
+       """
+    filterPriority = 10
+    renderPriority = 95
+
+    def filter(self, drawable):
+        return drawable.render.reflection
+
+    def render(self, rstate):
+        # Set up the texture matrix as the modelview inverse
+        m = glGetFloatv(GL_MODELVIEW_MATRIX)
+        glMatrixMode(GL_TEXTURE)
+        m = LinearAlgebra.inverse(m)
+        m[3][0] = 0
+        m[3][1] = 0
+        m[3][2] = 0
+        glLoadMatrixf(m)
+        glMatrixMode(GL_MODELVIEW)
+
+        # Set up texture coordinate generation
+        glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)    
+        glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
+        glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
+        glTexGenfv(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
+        glEnable(GL_TEXTURE_GEN_S)
+        glEnable(GL_TEXTURE_GEN_T)
+        glEnable(GL_TEXTURE_GEN_R)
+
+        # We're blending on top of existing polygons, so use the same tricks as the decal pass
+        DecalRenderPass.render(self, rstate)
+
+        # Clean up
+        glMatrixMode(GL_TEXTURE)
+        glLoadIdentity()
+        glMatrixMode(GL_MODELVIEW)
+        glDisable(GL_TEXTURE_GEN_S)
+        glDisable(GL_TEXTURE_GEN_T)
+        glDisable(GL_TEXTURE_GEN_R)
+
+
 class Scene:
     """Set of all the objects this view sees, organized into rendering passes
        and sorted by texture. Multiple rendering passes are necessary to deal
@@ -364,7 +410,8 @@ class Scene:
         self.passes = [BasicRenderPass(),
                        BlendedRenderPass(),
                        OverlayRenderPass(),
-                       DecalRenderPass()]
+                       DecalRenderPass(),
+                       ReflectionRenderPass()]
 
     def erase(self):
         self.objects = {}
@@ -414,7 +461,8 @@ class Scene:
         glColor4f(1,1,1,1)
 
         for rpass in self.passes:
-            rpass.render(rstate)
+            if not rpass.isEmpty():
+                rpass.render(rstate)
 
     def pick(self, rstate, pos):
         """Returns the nearest scene object that was rendered at the given screen

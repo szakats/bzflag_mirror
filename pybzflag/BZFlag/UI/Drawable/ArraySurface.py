@@ -25,6 +25,8 @@ from GLDrawable import GLDrawable
 from OpenGL.GL import *
 from BZFlag.Geometry import *
 from Numeric import *
+from OpenGL.GL.ARB.multitexture import *
+from BZFlag.UI import GLExtension
 
 __all__ = ['ArraySurface']
 
@@ -101,6 +103,8 @@ class ArraySurface(GLDrawable):
         self.interleaved[:,:,:2]  = self.texcoords
         self.interleaved[:,:,2:5] = self.normals
         self.interleaved[:,:,5:]  = self.vertices
+        if GLExtension.multitexture:
+            glClientActiveTextureARB(GL_TEXTURE0_ARB)
         glInterleavedArrays(GL_T2F_N3F_V3F, 0, self.interleaved.tostring())
 
         # We want to draw both sides of the surface. This will have OpenGL

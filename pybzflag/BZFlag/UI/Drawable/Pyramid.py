@@ -23,279 +23,219 @@ A class for drawing the pyramids in the world
 from __future__ import division
 from DisplayList import *
 from OpenGL.GL import *
-from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import CubeMap, GLExtension
-from OpenGL.GL.EXT.texture_cube_map import *
-from BZFlag.Geometry import *
+from OpenGL.GL.ARB.multitexture import *
 from BZFlag.Geometry import *
 from Numeric import *
-import LinearAlgebra
 
 
 class Pyramid(DisplayList):
+    """A default pyramid, with XY planar texture mapping and a marble texture"""
+    textureName = "black_marble.jpeg"
+    
     def __init__(self, pyramid):
-        center = pyramid.center
-        angle  = pyramid.angle
-        size   = pyramid.size
-        flip   = 'flipZ' in pyramid.options
-        self.uvMap = None
-        self.uvMap2 = None
-        self.water = False
-        self.envMap = False
+        self.uvMap = self.getUVMap(pyramid)
+        self.uvMap2 = self.getUVMap2(pyramid)
+        DisplayList.__init__(self, pyramid)
 
-        # Change the pyramid's texture and mapping depending on its slope
-        try:
-            slope = size[2] / min(size[0], size[1])
-        except ZeroDivisionError:
-            slope = 1e100
+    def getUVMap(self, pyramid):
+        """Default UV map: XY planar"""
+        repeats = (pyramid.size[0] / 4,
+                   pyramid.size[1] / 4)
+        return ((0, 0),
+                (0, repeats[1]),
+                repeats,
+                (repeats[0], 0),
 
-        if slope > 10:
-            # It's a very pointy pyramid - XZ and YZ planar texture mapping
-            # This maps each side of the pyramid to a triangle based at the bottom
-            # of the texture with its tip at the top-center. The bottom of the pyramid
-            # is mapped to a the top-left 1/4 of the texture.
-            self.textureNames = ['pillar.jpeg']
-            self.uvMap = ((0,   3/4),
-                          (1/4, 3/4),
-                          (1/4, 1),
-                          (0,   1),
-                          
-                          (0, 0),
-                          (0.5, 1),
-                          (1, 0),
-                          
-                          (0, 0),
-                          (0.5, 1),
-                          (1, 0),
+                (repeats[0], 0),
+                repeats,
+                (repeats[0]/2, repeats[1]/2),
 
-                          (0, 0),
-                          (0.5, 1),
-                          (1, 0),
+                repeats,
+                (0, repeats[1]),
+                (repeats[0]/2, repeats[1]/2),
 
-                          (0, 0),
-                          (0.5, 1),
-                          (1, 0))
+                (0, repeats[1]),
+                (0, 0),
+                (repeats[0]/2, repeats[1]/2),
+                
+                (0, 0),
+                (repeats[0], 0),
+                (repeats[0]/2, repeats[1]/2))
 
-        elif slope < 0.5 and center[2] > 0:
-            # It's a very flat pyramid. Due to their blue color these are often
-            # used to simulate water- so, let's make it actually look like water.
-            # Texture this in world coordinates so all the water lines up.
-            self.textureNames = ('caustic%02d.jpeg:50.0', 'water.jpeg')
-            poly = pyramid.toPolygon()
-            self.water = True
+    def getUVMap2(self, pyramid):
+        """Returns the UV map for the second texture. This defaults to the same as the first texture"""
+        return self.getUVMap(pyramid)
 
-            def worldMap(scale):
-                texCenter = ((poly[0][0] + poly[2][0]) / 2 / scale,
-                             (poly[0][1] + poly[2][1]) / 2 / scale)
-                return ((poly[0][0]/scale, poly[0][1]/scale),
-                        (poly[1][0]/scale, poly[1][1]/scale),
-                        (poly[2][0]/scale, poly[2][1]/scale),
-                        (poly[3][0]/scale, poly[3][1]/scale),
-                        
-                        (poly[1][0]/scale, poly[1][1]/scale),
-                        texCenter,
-                        (poly[2][0]/scale, poly[2][1]/scale),
-                        
-                        (poly[2][0]/scale, poly[2][1]/scale),
-                        texCenter,
-                        (poly[3][0]/scale, poly[3][1]/scale),
-                        
-                        (poly[3][0]/scale, poly[3][1]/scale),
-                        texCenter,
-                        (poly[0][0]/scale, poly[0][1]/scale),
-                        
-                        (poly[0][0]/scale, poly[0][1]/scale),
-                        texCenter,
-                        (poly[1][0]/scale, poly[1][1]/scale))
+    def set(self, pyramid):
+        self.pyramid = pyramid
 
-            self.uvMap  = worldMap(20)
-            self.uvMap2 = worldMap(200)
-            
-        else:
-            # Default pyramid
-            self.textureNames = ['black_marble.jpeg']
-            self.addCubeMap(center, size)
-            repeats = (size[0] / 4, size[1] / 4)
-
-        if not self.uvMap:
-            # Default UV map: XY planar
-            self.uvMap = ((0, 0),
-                          (0, repeats[1]),
-                          repeats,
-                          (repeats[0], 0),
-                          
-                          (0, repeats[1]),
-                          (repeats[0]/2, repeats[1]/2),
-                          repeats,
-                          
-                          repeats,
-                          (repeats[0]/2, repeats[1]/2),
-                          (repeats[0], 0),
-                          
-                          (repeats[0], 0),
-                          (repeats[0]/2, repeats[1]/2),
-                          (0, 0),
-                          
-                          (0, 0),
-                          (repeats[0]/2, repeats[1]/2),
-                          (0, repeats[1]))
-
-        if not self.uvMap2:
-            self.uvMap2 = self.uvMap
-        DisplayList.__init__(self, center, angle, size, flip)
-
-    def addCubeMap(self, center, size):
-        """Add a cube environment map to make this pyramid shiny"""
-        if not (GLExtension.cubeMap and GLExtension.multitexture):
-            return
-        position = (center[0],
-                    center[1],
-                    center[2] + size[2]/2)
-        self.textureNames.append(CubeMap.CubeMap(position))
-        self.envMap = True
-
-    def set(self, center, angle, size, flip):
-        self.center = center
-        self.angle = angle
-        self.size = size
-        self.flip = flip
-        if self.water:
-            self.render.textures[1].texEnv = GL_MODULATE
-            self.render.blended = True
-        elif len(self.render.textures) > 1:
-            self.render.textures[1].texEnv = GL_REPLACE
-        if self.envMap:
-            self.render.static = False
-
-    def draw(self, rstate):
-        """If we're environment mapping, we need to keep the texture matrix
-           tracking the inverse of the modelview matrix at all times.
-           """
-        glActiveTextureARB(GL_TEXTURE1_ARB)
-        m = glGetFloatv(GL_MODELVIEW_MATRIX)
-        glMatrixMode(GL_TEXTURE)
-        m = LinearAlgebra.inverse(m)
-        m[3][0] = 0
-        m[3][1] = 0
-        m[3][2] = 0
-        glLoadMatrixf(m)
-        glMatrixMode(GL_MODELVIEW)
-        glActiveTextureARB(GL_TEXTURE0_ARB)
-
-        DisplayList.draw(self, rstate)
-
-        glActiveTextureARB(GL_TEXTURE1_ARB)
-        glMatrixMode(GL_TEXTURE)
-        glLoadIdentity()
-        glMatrixMode(GL_MODELVIEW)
-        glActiveTextureARB(GL_TEXTURE0_ARB)
-        
     def drawToList(self, rstate):
-        if self.render.blended:
-            glColor4f(1, 1, 1, 0.6)
-            glDisable(GL_LIGHTING)
-        z = 0
-        z2 = self.size[2]
-        if self.flip:
-            z = self.size[2]
-            z2 = 0
+        poly = self.pyramid.toPolygon()
 
-        glPushMatrix()
-        glTranslatef(*self.center)
-        if self.flip:
+        uvstack = list(self.uvMap)
+        uvstack.reverse()
+        uvstack2 = list(self.uvMap2)
+        uvstack2.reverse()
+        
+        flip = 'flipZ' in self.pyramid.options
+        if flip:
             glFrontFace(GL_CW)
-            glTranslatef(0, 0, -self.size[2])
-        glRotatef(self.angle, 0.0, 0.0, 1.0)
+            z = self.pyramid.center[2]
+            z2 = self.pyramid.center[2] - self.pyramid.size[2]
+        else:
+            z = self.pyramid.center[2]
+            z2 = self.pyramid.center[2] + self.pyramid.size[2]
 
-        if self.envMap:
-            glActiveTextureARB(GL_TEXTURE1_ARB)
-            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
-            
-            glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
-            glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
-            glTexGenfv(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
-            glEnable(GL_TEXTURE_GEN_S)
-            glEnable(GL_TEXTURE_GEN_T)
-            glEnable(GL_TEXTURE_GEN_R)
-            glActiveTextureARB(GL_TEXTURE0_ARB)
-
+        # Base
         glBegin(GL_QUADS)
-        # Z- side
         glNormal3f(0, 0, -1)
-        glTexCoord2f(*self.uvMap[0])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[0])
-        glVertex3f(-self.size[0], -self.size[1], z)
-        glTexCoord2f(*self.uvMap[1])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[1])
-        glVertex3f(-self.size[0], self.size[1], z)
-        glTexCoord2f(*self.uvMap[2])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[2])
-        glVertex3f(self.size[0], self.size[1], z)
-        glTexCoord2f(*self.uvMap[3])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[3])
-        glVertex3f(self.size[0], -self.size[1], z)
+        rpoly = poly[:]
+        rpoly.reverse()
+        for vertex in rpoly:
+            glTexCoord2f(*uvstack.pop())
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *uvstack2.pop())
+            glVertex3f(vertex[0], vertex[1], z)
         glEnd()
+        
+        # Sides
         glBegin(GL_TRIANGLES)
-        # X+ side
-        norm = normalize(cross((self.size[0], -self.size[1], self.size[2]), (self.size[0] * 2, 0, 0)))
-        glNormal3f(*norm)
-        glTexCoord2f(*self.uvMap[4])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[4])
-        glVertex3f(-self.size[0], self.size[1], z)
-        glTexCoord2f(*self.uvMap[5])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[5])
-        glVertex3f(0, 0, z2)
-        glTexCoord2f(*self.uvMap[6])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[6])
-        glVertex3f(self.size[0], self.size[1], z)
-        # Y+ side
-        norm = normalize(cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0)))
-        glNormal3f(*norm)
-        glTexCoord2f(*self.uvMap[7])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[7])    
-        glVertex3f(self.size[0], self.size[1], z)
-        glTexCoord2f(*self.uvMap[8])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[8])
-        glVertex3f(0, 0, z2)
-        glTexCoord2f(*self.uvMap[9])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[9])
-        glVertex3f(self.size[0], -self.size[1], z)
-        # X- side
-        norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0)))
-        glNormal3f(*norm)
-        glTexCoord2f(*self.uvMap[10])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[10])
-        glVertex3f(self.size[0], -self.size[1], z)
-        glTexCoord2f(*self.uvMap[11])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[11])
-        glVertex3f(0, 0, z2)
-        glTexCoord2f(*self.uvMap[12])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[12])
-        glVertex3f(-self.size[0], -self.size[1], z)
-        # Y- side
-        norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (0, -self.size[1] * 2, 0)))
-        glNormal3f(*norm)
-        glTexCoord2f(*self.uvMap[13])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[13])
-        glVertex3f(-self.size[0], -self.size[1], z)
-        glTexCoord2f(*self.uvMap[14])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[14])
-        glVertex3f(0, 0, z2)
-        glTexCoord2f(*self.uvMap[15])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[15])
-        glVertex3f(-self.size[0], self.size[1], z)
+        center = sum(array(poly)) / len(poly)
+        poly.append(poly[0])
+        for i in xrange(len(poly)-1):
+            glTexCoord2f(*uvstack.pop())
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *uvstack2.pop())
+            v1 = (poly[i][0], poly[i][1], z)
+            v2 = (poly[i+1][0], poly[i+1][1], z)
+            v3 = (center[0], center[1], z2)
+            glNormal3f(*normalize(cross(subtract(v2,v1), subtract(v3,v1))))
+            glVertex3f(*v1)
+            glTexCoord2f(*uvstack.pop())
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *uvstack2.pop())
+            glVertex3f(*v2)
+            glTexCoord2f(*uvstack.pop())
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *uvstack2.pop())
+            glVertex3f(*v3)
         glEnd()
-        if self.envMap:
-            glActiveTextureARB(GL_TEXTURE1_ARB)
-            glDisable(GL_TEXTURE_GEN_S)
-            glDisable(GL_TEXTURE_GEN_T)
-            glDisable(GL_TEXTURE_GEN_R)
-            glActiveTextureARB(GL_TEXTURE0_ARB)
-        if self.flip:
-            glFrontFace(GL_CCW)
-        glPopMatrix()
-        if self.render.blended:
-            glEnable(GL_LIGHTING)
-            glColor3f(1,1,1)
+        glFrontFace(GL_CCW)
 
+
+class Pillar(Pyramid):
+    """Alternate textures for very pointy pyramids"""
+    textureName = 'pillar.jpeg'
+
+    def getUVMap(self, pyramid):
+        # This maps each side of the pyramid to a triangle based at the bottom
+        # of the texture with its tip at the top-center. The bottom of the pyramid
+        # is mapped to a the top-left 1/4 of the texture.
+        return ((0,   3/4),
+                (1/4, 3/4),
+                (1/4, 1),
+                (0,   1),
+                
+                (0, 0),
+                (1, 0),
+                (0.5, 1),
+                
+                (0, 0),
+                (1, 0),
+                (0.5, 1),
+
+                (0, 0),
+                (1, 0),
+                (0.5, 1),
+
+                (0, 0),
+                (1, 0),
+                (0.5, 1))
+
+
+
+class Water(Pyramid):
+    """Water pyramid, now with animation!"""
+    textureNames = ('caustic%02d.jpeg:50.0', 'water.jpeg')
+
+    def set(self, pyramid):
+        Pyramid.set(self, pyramid)
+        self.render.blended = True
+
+    def drawToList(self, rstate):
+        # Use texture coordinate generation to texture our pyramid in world coordinates
+        causticScale = 20
+        waterScale = 100
+        glActiveTextureARB(GL_TEXTURE1_ARB)
+        glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (1/waterScale,0,0,0))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0,1/waterScale,0,0))
+        glEnable(GL_TEXTURE_GEN_S)
+        glEnable(GL_TEXTURE_GEN_T)
+        glActiveTextureARB(GL_TEXTURE0_ARB)
+        glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (1/causticScale,0,0,0))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0,1/causticScale,0,0))
+        glEnable(GL_TEXTURE_GEN_S)
+        glEnable(GL_TEXTURE_GEN_T)
+        
+        glColor4f(1,1,1, 0.6)
+        Pyramid.drawToList(self, rstate)
+        glColor4f(1,1,1,1)
+        
+        glActiveTextureARB(GL_TEXTURE1_ARB)
+        glDisable(GL_TEXTURE_GEN_S)
+        glDisable(GL_TEXTURE_GEN_T)
+        glActiveTextureARB(GL_TEXTURE0_ARB)
+        glDisable(GL_TEXTURE_GEN_S)
+        glDisable(GL_TEXTURE_GEN_T)
+        
+
+class Reflection(Pyramid):
+    """A reflective surface applied on top of a normal pyramid"""
+    def __init__(self, pyramid):
+        mapCenter = (pyramid.center[0],
+                     pyramid.center[1],
+                     pyramid.center[2] + pyramid.size[2]/2)        
+        self.textureName = CubeMap.CubeMap(mapCenter)
+        Pyramid.__init__(self, pyramid)
+        self.render.reflection = True
+
+    def drawToList(self, rstate):
+        glColor4f(1,1,1, 0.3)
+        Pyramid.drawToList(self, rstate)
+        glColor4f(1,1,1,1)
+
+
+def detectPyramidDrawables(pyramid):
+    """Given a pyramid WorldObject, return a list of the drawables that should be used
+       to represent it. This looks at the size and placement of the pyramid to determine
+       which drawables to use to represent it.
+       """
+    # Don't try to draw pyramids with a zero size, they will give is a divide by zero later
+    if not (pyramid.size[0] and pyramid.size[1] and pyramid.size[2]):
+        return []
+
+    # Calculate the slope, we'll use this to help decide how to draw the pyramid
+    try:
+        slope = pyramid.size[2] / min(pyramid.size[0], pyramid.size[1])
+    except ZeroDivisionError:
+        slope = 1e100
+
+    if slope > 10:
+        # It's a very pointy pyramid
+        return [Pillar(pyramid)]
+
+    elif slope < 0.5 and pyramid.center[2] > 0:
+        # It's very flat and not touching the ground. These are often used
+        # to simulate water, so make them look that way too :)
+        return [Water(pyramid)]
+
+    elif GLExtension.multitexture and GLExtension.cubeMap:
+        # Draw the default pyramid, but with a shiny finish
+        return [Pyramid(pyramid), Reflection(pyramid)]
+
+    else:
+        # Just the default pyramid
+        return [Pyramid(pyramid)]
+        
 ### The End ###
