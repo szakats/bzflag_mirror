@@ -1,4 +1,4 @@
-""" BZFlag.UI.Noise
+""" BZFlag.Noise
 
 Various methods of generating noise quickly using Numeric
 """
@@ -48,7 +48,7 @@ class PerlinNoise3:
                           produce a noise pattern with more entropy, but will also use more memory.
                           The default should be fine for most purposes.
        """
-    def __init__(self, seed=0, octaves=1, persistence=0.5, logTableSize=10):
+    def __init__(self, seed=0, octaves=3, persistence=0.5, logTableSize=10):
         self.octaves = octaves
         self.persistence = persistence
         
@@ -135,7 +135,7 @@ class PerlinNoise3:
 
     def get(self, v):
         """Using multiple octaves of smoothed noise, generate perlin noise"""
-        result = zeros(v.shape[:-1], Float32, savespace=True)
+        result = zeros(v.shape[:-1], Float)
         fundamental = 1
         amplitude = 1
         for i in xrange(self.octaves):

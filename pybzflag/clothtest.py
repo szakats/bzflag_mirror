@@ -33,11 +33,15 @@ class Flag:
         # lining up perfectly and standing end-on-end.
         self.cloth.add(SpringSystem.ConstantAccelAffector, (0.001, 0.001, -0.04))
 
-        # Wind!
-        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (1,0,0.2), 0.15, 0.15)
-
         # Pin the cloth to the flagpole
         self.cloth.add(SpringSystem.ClothAnchorAffector, (-1,0), (0,0))
+
+        # Wind, with speed and direction varying over time with a perlin noise function
+        self.wind = Animated.Vector(Animated.PerlinNoise(persistence = 0.1,
+                                                         amplitude = 1,
+                                                         frequency = 0.01))
+        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, self.wind)
+
 
     def getInitialState(self):
         def xcoord(x,y):
@@ -63,7 +67,9 @@ class Flag:
         return [self.surf] + self.pole.values()
 
     def update(self):
-        self.cloth.integrate(self.time.step())
+        dt = self.time.step()
+        self.wind.integrate(dt)
+        self.cloth.integrate(dt)
 
 if __name__ == '__main__':
     loop = Event.EventLoop()
@@ -73,7 +79,7 @@ if __name__ == '__main__':
     viewport.setCaption("Cloth Simulation Test")
 
     # Enzoomify the camera toward our object
-    view.camera.position = (5,0,5)
+    view.camera.position = (0,0,5)
     view.camera.distance = 20
     view.camera.jump()
 

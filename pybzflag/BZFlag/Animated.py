@@ -25,6 +25,8 @@ physical models or other formulas.
 
 from __future__ import division
 import time, math
+from BZFlag import Noise
+from Numeric import *
 
 
 class TimeMaster:
@@ -304,8 +306,32 @@ class SineFunction(PeriodicFunction):
     def f(self, x):
         return math.sin(x * math.pi * 2) * 0.5 + 0.5
 
+
 class RampFunction(PeriodicFunction):
     def f(self, x):
         return x
 
+
+class PerlinNoise:
+    """Animation evaluator for perlin noise with a specified amplitude,
+       offset, frequency, number of octaves, and random seed. This produces
+       natural-looking noise in up to 3 dimensions.
+       """
+    def __init__(self, amplitude=1, frequency=1, offset=0, octaves=3, persistence=0.5, seed=0):
+        self.amplitude = amplitude
+        self.frequency = frequency
+        self.offset = offset
+        self.noise = Noise.PerlinNoise3(seed, octaves, persistence)
+        self.time = 0
+        
+    def __call__(self, value, dt, index=None):
+        self.time += dt
+        if index == 1:
+            v = (0, self.time, 0)
+        elif index == 2:
+            v = (0, self.time, 0)
+        else:
+            v = (self.time, 0, 0)
+        return self.noise.get(multiply(v, self.frequency)) * self.amplitude + self.offset
+        
 ### The End ###

@@ -2,12 +2,12 @@
 #
 # Test the perlin noise generator
 #
-from BZFlag.UI import Noise, Viewport
-from BZFlag import Event, Util
+from BZFlag.UI import Viewport
+from BZFlag import Event, Util, Noise
 from Numeric import *
 import pygame
 
-n = Noise.PerlinNoise3(octaves=3)
+n = Noise.PerlinNoise3()
 
 # Make sure the noise generator works on individual vectors
 n.smoothNoise((1,2,3))
