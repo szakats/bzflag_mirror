@@ -62,7 +62,6 @@ class Flag:
         # Now add the global wind we were given
         self.cloth.add(SpringSystem.ClothWindAffector, self.surf, wind.vector)
 
-
     def getInitialState(self):
         def xcoord(x,y):
             return self.origin[0] + self.size[0] * y / float(self.resolution[1]-1)
