@@ -256,7 +256,7 @@ void handleFlagCmd(int t, const char *message)
 
   } else if (strncmp(message + 6, "up", 2) == 0) {
     for (int i = 0; i < numFlags; i++) {
-      if (flag[i].flag.type->flagTeam != ::NoTeam) {
+      if (flag[i].flag.type->flagTeam == ::NoTeam) {
 	// see if someone had grabbed flag.  tell 'em to drop it.
 	const int playerIndex = flag[i].player;
 	if (playerIndex != -1) {
@@ -314,7 +314,7 @@ void handleKickCmd(int t, const char *message)
   const char *victimname = argv[1].c_str();
 
   for (i = 0; i < curMaxPlayers; i++) {
-    if (player[i].fd != NotConnected && strcmp(player[i].callSign, victimname) == 0) {
+    if (player[i].fd != NotConnected && strcasecmp(player[i].callSign, victimname) == 0) {
       break;
     }
   }
@@ -344,6 +344,17 @@ void handleBanlistCmd(int t, const char *)
     return;
   }
   clOptions->acl.sendBans(t);
+  return;
+}
+
+
+void handleHostBanlistCmd(int t, const char *)
+{
+  if (!hasPerm(t, PlayerAccessInfo::banlist)) {
+    sendMessage(ServerPlayer, t, "You do not have permission to run the banlist command");
+    return;
+  }
+  clOptions->acl.sendHostBans(t);
   return;
 }
 
@@ -401,6 +412,59 @@ void handleBanCmd(int t, const char *message)
 }
 
 
+void handleHostBanCmd(int t, const char *message)
+{
+  if (!hasPerm(t, PlayerAccessInfo::ban)) {
+    sendMessage(ServerPlayer, t, "You do not have permission to run the ban command");
+    return;
+  }
+  char reply[MessageLen] = {0};
+
+  std::string msg = message;
+  std::vector<std::string> argv = string_util::tokenize( msg, " \t", 4 );
+
+  if( argv.size() < 2 ){
+    strcpy(reply, "Syntax: /hostban <host pattern> [duration] [reason]");
+    sendMessage(ServerPlayer, t, reply, true);
+    strcpy(reply, "        Please keep in mind that reason is displayed to the user.");
+    sendMessage(ServerPlayer, t, reply, true);
+  }
+  else {
+    int durationInt = 0;
+    std::string hostpat = argv[1];
+    std::string reason;
+
+    if( argv.size() >= 3 )
+      durationInt = string_util::parseDuration(argv[2]);
+
+    if( argv.size() == 4 )
+      reason = argv[3];
+
+    clOptions->acl.hostBan(hostpat, player[t].callSign, durationInt, reason.c_str());
+    clOptions->acl.save();
+#ifdef HAVE_ADNS_H
+    strcpy(reply, "Host pattern added to banlist");
+    char kickmessage[MessageLen];
+    for (int i = 0; i < curMaxPlayers; i++) {
+      if ((player[i].fd != NotConnected) && player[i].hostname && (!clOptions->acl.hostValidate(player[i].hostname))) {
+	sprintf(kickmessage,"You were banned from this server by %s", player[t].callSign);
+	sendMessage(ServerPlayer, i, kickmessage, true);
+	if( reason.length() > 0 ){
+	  sprintf(kickmessage,"Reason given: %s", reason.c_str());
+	  sendMessage(ServerPlayer, i, kickmessage, true);
+	}
+	removePlayer(i, "/hostban");
+      }
+    }
+#else
+    strcpy(reply, "Host pattern added to banlist. WARNING: host patterns not supported in this compilation.");
+#endif
+    sendMessage(ServerPlayer, t, reply, true);
+  }
+  return;
+}
+
+
 void handleUnbanCmd(int t, const char *message)
 {
   if (!hasPerm(t, PlayerAccessInfo::unban)) {
@@ -411,6 +475,24 @@ void handleUnbanCmd(int t, const char *message)
 
   if (clOptions->acl.unban(message + 7)) {
     strcpy(reply, "removed IP pattern");
+    clOptions->acl.save();
+  }
+  else
+    strcpy(reply, "no pattern removed");
+  sendMessage(ServerPlayer, t, reply, true);
+  return;
+}
+
+void handleHostUnbanCmd(int t, const char *message)
+{
+  if (!hasPerm(t, PlayerAccessInfo::unban)) {
+    sendMessage(ServerPlayer, t, "You do not have permission to run the unban command");
+    return;
+  }
+  char reply[MessageLen] = {0};
+
+  if (clOptions->acl.hostUnban(message + 11)) {
+    strcpy(reply, "removed host pattern");
     clOptions->acl.save();
   }
   else
@@ -533,8 +615,15 @@ void handlePlayerlistCmd(int t, const char *)
 
   for (int i = 0; i < curMaxPlayers; i++) {
     if (player[i].state > PlayerInLimbo) {
-      sprintf(reply,"[%d]%-16s: %s%s%s",i,player[i].callSign,
+      sprintf(reply,"[%d]%-16s: %s%s%s%s%s%s",i,player[i].callSign,
 	      player[i].peer.getDotNotation().c_str(),
+#ifdef HAVE_ADNS_H
+	      player[i].hostname ? " (" : "",
+	      player[i].hostname ? player[i].hostname : "",
+	      player[i].hostname ? ")" : "",
+#else
+	      "", "", "",
+#endif
 	      player[i].udpin ? " udp" : "",
 	      player[i].udpout ? "+" : "");
       sendMessage(ServerPlayer, t, reply, true);
@@ -883,8 +972,9 @@ void handleSetgroupCmd(int t, const char *message)
 
     if (userExists(settie)) {
       bool canset = true;
-      if (!hasPerm(t, PlayerAccessInfo::setAll) && !hasPerm(t, PlayerAccessInfo::setPerms)) {
-	canset = hasGroup(player[t].accessInfo, group.c_str());
+      if (!hasPerm(t, PlayerAccessInfo::setAll)) {
+	canset = hasGroup(player[t].accessInfo, group.c_str())
+	  && hasPerm(t, PlayerAccessInfo::setPerms);
       }
       if (!canset) {
 	sendMessage(ServerPlayer, t, "You do not have permission to set this group");
@@ -928,8 +1018,9 @@ void handleRemovegroupCmd(int t, const char *message)
     makeupper(group);
     if (userExists(settie)) {
       bool canset = true;
-      if (!hasPerm(t, PlayerAccessInfo::setAll) && !hasPerm(t, PlayerAccessInfo::setPerms)) {
-	canset = hasGroup(player[t].accessInfo, group.c_str());
+      if (!hasPerm(t, PlayerAccessInfo::setAll)) {
+	canset = hasGroup(player[t].accessInfo, group.c_str())
+	  && hasPerm(t, PlayerAccessInfo::setPerms);
       }
       if (!canset) {
 	sendMessage(ServerPlayer, t, "You do not have permission to remove this group");
@@ -963,7 +1054,10 @@ void handleReloadCmd(int t, const char *)
     sendMessage(ServerPlayer, t, "You do not have permission to run the reload command");
     return;
   }
-
+  
+  // reload the banlist
+  clOptions->acl.load();
+  
   groupAccess.clear();
   userDatabase.clear();
   passwordDatabase.clear();
@@ -1039,7 +1133,7 @@ void handlePollCmd(int t, const char *message)
 
   /* make sure that there is not a poll active already */
   if (arbiter->knowsPoll()) {
-    sprintf(reply,"A poll to %s %s is presently in progress", arbiter->getPollAction().c_str(), arbiter->getPollPlayer().c_str());
+    sprintf(reply,"A poll to %s %s is presently in progress", arbiter->getPollAction().c_str(), arbiter->getPollTarget().c_str());
     sendMessage(ServerPlayer, t, reply, true);
     sendMessage(ServerPlayer, t, "Unable to start a new poll until the current one is over", true);
     return;
@@ -1348,7 +1442,7 @@ void handleVoteCmd(int t, const char *message)
 
   if (!cast) {
     /* player was unable to cast their vote; probably already voted */
-    sprintf(reply,"%s, you have already voted on the poll to %s %s", player[t].callSign, arbiter->getPollAction().c_str(), arbiter->getPollPlayer().c_str());
+    sprintf(reply,"%s, you have already voted on the poll to %s %s", player[t].callSign, arbiter->getPollAction().c_str(), arbiter->getPollTarget().c_str());
     sendMessage(ServerPlayer, t, reply, true);
     return;
   }
@@ -1380,7 +1474,7 @@ void handleVetoCmd(int t, const char * /*message*/)
     return;
   }
 
-  sendMessage(ServerPlayer, t, string_util::format("%s, you have cancelled the poll to %s %s", player[t].callSign, arbiter->getPollAction().c_str(), arbiter->getPollPlayer().c_str()).c_str(), true);
+  sendMessage(ServerPlayer, t, string_util::format("%s, you have cancelled the poll to %s %s", player[t].callSign, arbiter->getPollAction().c_str(), arbiter->getPollTarget().c_str()).c_str(), true);
 
   /* poof */
   arbiter->forgetPoll();

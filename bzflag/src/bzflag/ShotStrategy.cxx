@@ -554,7 +554,7 @@ void			SegmentedShotStrategy::addShot(
     boltSceneNode->setColor(c[0], c[1], c[2]);
     TextureManager &tm = TextureManager::instance();
 	std::string imageName = Team::getImagePrefix(team);
-	imageName +="bolt";
+	imageName += BZDB.get("boltTexture");
     OpenGLTexture *texture = tm.getTexture(imageName.c_str());
     if (texture && texture->isValid())
       boltSceneNode->setTexture(*texture);
@@ -992,7 +992,7 @@ LaserStrategy::LaserStrategy(ShotPath* path) :
 
   TextureManager &tm = TextureManager::instance();
   std::string imageName = Team::getImagePrefix(tmpTeam);
-  imageName +="bolt";
+  imageName += BZDB.get("laserTexture");
   OpenGLTexture *texture = tm.getTexture(imageName.c_str());
 
   for (int i = 0; i < numSegments; i++) {
@@ -1234,7 +1234,11 @@ void			GuidedMissileStrategy::update(float dt)
   Ray ray = Ray(nextPos, newDirection);
 
   // Changed: GM leave smoke trail, call add puff every 3 updates
-  if ((++renderTimes % 3) == 0) addShotPuff(nextPos);
+	if (!BZDB.isTrue("SupressGMSmoke"))
+	{
+		if ((++renderTimes % 3) == 0)
+			addShotPuff(nextPos);
+	}
 
   // get next position
   float shotSpeed = BZDB.eval(StateDatabase::BZDB_SHOTSPEED);

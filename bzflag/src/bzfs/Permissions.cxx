@@ -16,9 +16,11 @@
 
 #include <string>
 #include <fstream>
+#include <algorithm>
 #include <stdlib.h>
 #include "Permissions.h"
 #include "md5.h"
+#include "TextUtils.h"
 
 PlayerAccessMap	groupAccess;
 PlayerAccessMap	userDatabase;
@@ -29,13 +31,7 @@ bool hasGroup(PlayerAccessInfo& info, const std::string &group)
   std::string str = group;
   makeupper(str);
 
-  std::vector<std::string>::iterator itr = info.groups.begin();
-  while (itr != info.groups.end()) {
-    if ((*itr) == str)
-      return true;
-    itr++;
-  }
-  return false;
+  return find(info.groups.begin(), info.groups.end(), str) != info.groups.end();
 }
 
 bool addGroup(PlayerAccessInfo& info, const std::string &group)
@@ -58,15 +54,8 @@ bool removeGroup(PlayerAccessInfo& info, const std::string &group)
   std::string str = group;
   makeupper(str);
 
-  std::vector<std::string>::iterator itr = info.groups.begin();
-  while (itr != info.groups.end()) {
-    if ((*itr) == str) {
-      itr = info.groups.erase(itr);
-      return true;
-    } else
-      itr++;
-  }
-  return false;
+  info.groups.erase(find(info.groups.begin(), info.groups.end(), str));
+  return true;
 }
 
 bool hasPerm(PlayerAccessInfo& info, PlayerAccessInfo::AccessPerm right)
@@ -75,14 +64,12 @@ bool hasPerm(PlayerAccessInfo& info, PlayerAccessInfo::AccessPerm right)
     return false;
   if (info.explicitAllows.test(right))
     return true;
-  std::vector<std::string>::iterator itr = info.groups.begin();
-  PlayerAccessMap::iterator group;
-  while (itr != info.groups.end()) {
-    group = groupAccess.find(*itr);
-    if (group != groupAccess.end())
-      if (group->second.explicitAllows.test(right))
-	return true;
-    itr++;
+
+  for (std::vector<std::string>::iterator itr=info.groups.begin(), end=info.groups.end();
+       itr!=end; ++itr) {
+    PlayerAccessMap::iterator group = groupAccess.find(*itr);
+    if (group != groupAccess.end() && group->second.explicitAllows.test(right))
+      return true;
   }
   return false;
 }
@@ -164,6 +151,7 @@ std::string nameFromPerm(PlayerAccessInfo::AccessPerm perm)
     case PlayerAccessInfo::poll: return "poll";
     case PlayerAccessInfo::vote: return "vote";
     case PlayerAccessInfo::veto: return "veto";
+		case PlayerAccessInfo::adminMessages: return "adminMessages";
     case PlayerAccessInfo::requireIdentify: return "requireIdentify";
   default: return "";
   };
@@ -197,6 +185,7 @@ PlayerAccessInfo::AccessPerm permFromName(const std::string &name)
   if (name == "VOTE") return PlayerAccessInfo::vote;
   if (name == "VETO") return PlayerAccessInfo::veto;
   if (name == "REQUIREIDENTIFY") return PlayerAccessInfo::requireIdentify;
+	if (name == "ADMINMESSAGES") return PlayerAccessInfo::adminMessages;
   return PlayerAccessInfo::lastPerm;
 }
 
@@ -225,13 +214,14 @@ bool readPassFile(const std::string &filename)
 
   std::string line;
   while (std::getline(in, line)) {
-    std::string::size_type colonpos = line.find(':');
-    if (colonpos != std::string::npos) {
-      std::string name = line.substr(0, colonpos);
-      std::string pass = line.substr(colonpos + 1);
-      makeupper(name);
-      setUserPassword(name.c_str(), pass.c_str());
-    }
+    // Should look at an unescaped ':'
+    int colonpos = unescape_lookup(line, '\\', ':');
+    if (colonpos == -1)
+      continue;
+    std::string name = unescape(line.substr(0, colonpos), '\\');
+    std::string pass = line.substr(colonpos + 1);
+    makeupper(name);
+    setUserPassword(name.c_str(), pass.c_str());
   }
 
   return (passwordDatabase.size() > 0);
@@ -244,7 +234,7 @@ bool writePassFile(const std::string &filename)
     return false;
   PasswordMap::iterator itr = passwordDatabase.begin();
   while (itr != passwordDatabase.end()) {
-    out << itr->first << ':' << itr->second << std::endl;
+    out << escape(itr->first, '\\') << ':' << itr->second << std::endl;
     itr++;
   }
   out.close();

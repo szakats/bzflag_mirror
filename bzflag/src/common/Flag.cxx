@@ -23,7 +23,7 @@
 #include "Pack.h"
 
 int FlagType::flagCount = 0;
-FlagSet FlagType::flagSets[NumQualities];
+std::set<FlagType*> *FlagType::flagSets = NULL;
 
 
 // Initialize flag description singletons in our Flags namespace
@@ -235,7 +235,7 @@ FlagSet&		Flag::getBadFlags()
 
 const float*		FlagType::getColor()
 {
-  static const float superColor[3] = { 1.0, 1.0, 1.0 };
+  static const float superColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
   if (flagTeam == NoTeam)
     return superColor;

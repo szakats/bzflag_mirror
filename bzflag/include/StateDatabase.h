@@ -165,11 +165,11 @@ public:
    * now and then.
    */
   void                          setDebug(bool print);
-  
-  /** do we want debug output? 
+
+  /** do we want debug output?
    */
   bool                          getDebug() const;
-  
+
   static const std::string	BZDB_ANGLETOLERANCE;
   static const std::string	BZDB_ANGULARAD;
   static const std::string	BZDB_BOXHEIGHT;
@@ -179,7 +179,7 @@ public:
   static const std::string	BZDB_EXPLODETIME;
   static const std::string	BZDB_FLAGALTITUDE;
   static const std::string	BZDB_FLAGHEIGHT;
-  static const std::string	BZDB_FLAGPOLEWIDTH; 
+  static const std::string	BZDB_FLAGPOLEWIDTH;
   static const std::string	BZDB_FLAGPOLESIZE;
   static const std::string	BZDB_FLAGRADIUS;
   static const std::string	BZDB_GMISSILEANG;
@@ -218,7 +218,6 @@ public:
   static const std::string	BZDB_SHOTSPEED;
   static const std::string	BZDB_SHOTRADIUS;
   static const std::string	BZDB_SHOTRANGE;
-  static const std::string	BZDB_SHOTLENGTH;
   static const std::string	BZDB_SHOTTAILLENGTH;
   static const std::string	BZDB_SRRADIUSMULT;
   static const std::string	BZDB_TANKANGVEL;

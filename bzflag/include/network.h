@@ -72,7 +72,7 @@
 #define SSOType		void*
 #endif
 
-#if defined(__FreeBSD__) || defined(sun)
+#if defined(__FreeBSD__) || defined(sun) || defined(__NetBSD__)
 #define AddrLen		socklen_t
 #endif
 
@@ -103,7 +103,9 @@ int			getErrno();
 
 // turn off == signed/unsigned mismatch.  would rather not, but FD_SET
 // is broken.
+#ifdef _MSC_VER
 #pragma warning(disable: 4018)
+#endif
 
 #define	MAXHOSTNAMELEN	64
 

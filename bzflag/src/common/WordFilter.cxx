@@ -10,12 +10,6 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/* no header other than WordFilter.h should be included here */
-
-#ifdef _MSC_VER
-#pragma warning( 4:4786)
-#endif
-
 // this classes interface
 #include "WordFilter.h"
 
@@ -71,12 +65,12 @@ bool WordFilter::simpleFilter(char *input) const
 
 bool WordFilter::aggressiveFilter(char *input) const
 {
-#ifndef HAVE_REGEX_H
+#if !defined(BUILD_REGEX) && !defined(HAVE_REGEX_H)
 
   std::cerr << "Regular expressions are not available (using the simple filter)" << std::endl;
   return simpleFilter(input);
 
-#else /* HAVE_REGEX_H */
+#else /* BUILD_REGEX || HAVE_REGEX_H */
 
   bool filtered = false;
   regmatch_t match[1];
@@ -131,7 +125,7 @@ bool WordFilter::aggressiveFilter(char *input) const
    * e.g. "bzstring" will match a prefix of "bz" and make "s" get added
    * as a bin to check for during matching.
    */
-  for (ExpCompareSet::iterator i = prefixes.begin(); i != prefixes.end(); ++i) {
+  for (ExpCompareSet::const_iterator i = prefixes.begin(); i != prefixes.end(); ++i) {
     if (regexec(i->compiled, sInput.c_str(), 1, match, 0) == 0) {
       if ( (match[0].rm_eo < inputLength) && isalpha(sInput[match[0].rm_eo]) ) {
 	/* do not forget to make sure this is a true prefix */
@@ -157,7 +151,7 @@ bool WordFilter::aggressiveFilter(char *input) const
     /* look at all of the filters that start with the letter wordIndices[j]
      */
     const unsigned int firstchar = (unsigned char)wordIndices[j];
-    for (ExpCompareSet::iterator i = filters[firstchar].begin();
+    for (ExpCompareSet::const_iterator i = filters[firstchar].begin();
 	 i != filters[firstchar].end(); ++i) {
 
       /* the big kahuna burger processing goes on here */
@@ -176,13 +170,16 @@ bool WordFilter::aggressiveFilter(char *input) const
 //std::cout << "We matched ... ";
 
 	  /* make sure we only match on word boundaries */
-	  if ( (startOffset>1) && (isalpha(sInput[startOffset-1])) ) {
+	  /* ignore apostrophes (decimal 39) to prevent false positives */
+	  if ( (startOffset>1) && 
+	       (isalpha(sInput[startOffset-1]) || 
+		(sInput[startOffset-1] == 39))) {
 
 //std::cout << "but didn't match a word beginning" << std::endl;
 
 	    /* we are in the middle of a word.. see if we can match a prefix before this */
-	    bool foundit =  false;
-	    for (ExpCompareSet::iterator j = prefixes.begin();
+	    bool foundit = false;
+	    for (ExpCompareSet::const_iterator j = prefixes.begin();
 		 j != prefixes.end(); ++j) {
 	      if (regexec(j->compiled, sInput.c_str(), 1, match, 0) == 0) {
 
@@ -217,7 +214,7 @@ bool WordFilter::aggressiveFilter(char *input) const
 
 	    /* we are at the start of a word, but not at the end, try to get to the end */
 	    bool foundit = false;
-	    for (ExpCompareSet::iterator j = suffixes.begin();
+	    for (ExpCompareSet::const_iterator j = suffixes.begin();
 		 j != suffixes.end(); ++j) {
 //std::cout << "checking " << j->word << " against [" << input + endOffset << "]" << std::endl;
 
@@ -283,15 +280,15 @@ bool WordFilter::aggressiveFilter(char *input) const
   } /* iterate over characters */
 
   /* finally filter the input.  only filter actual alphanumerics. */
-  for (unsigned int i=0; i < matchCount; i++) {
+  for (unsigned int l = 0; l < matchCount; l++) {
     /* !!! debug */
 #ifdef DEBUG
     char tmp[256] = {0};
-    strncpy(tmp, input + matchPair[i*2], matchPair[(i*2)+1]);
+    strncpy(tmp, input + matchPair[l*2], matchPair[(l*2)+1]);
     std::cout << "Matched: [" << tmp << "]" << std::endl;
 #endif
 
-    if (filterCharacters(input, matchPair[i*2], matchPair[(i*2)+1]) <= 0) {
+    if (filterCharacters(input, matchPair[l*2], matchPair[(l*2)+1]) <= 0) {
       // XXX with multiple matching, we will be unable to filter overlapping matches
       //      std::cerr << "Unable to filter characters" << std::endl;
       continue;
@@ -301,17 +298,19 @@ bool WordFilter::aggressiveFilter(char *input) const
 
   return filtered;
 
-#endif /* HAVE_REGEX_H */
+#endif /* BUILD_REGEX || HAVE_REGEX_H */
 } // end aggressiveFilter
 
 
 // provides a pointer to a fresh compiled expression for some given expression
+#if !defined(BUILD_REGEX) && !defined(HAVE_REGEX_H)
+regex_t *WordFilter::getCompiledExpression(const std::string &) const
+{
+  return (regex_t *)NULL;
+}
+#else /* BUILD_REGEX || HAVE_REGEX_H */
 regex_t *WordFilter::getCompiledExpression(const std::string &word) const
 {
-#ifndef HAVE_REGEX_H
-  return (regex_t *)NULL;
-
-#else /* HAVE_REGEX_H */
   regex_t *compiledReg;
 
   /* XXX need to convert this to use new/delete */
@@ -329,8 +328,8 @@ regex_t *WordFilter::getCompiledExpression(const std::string &word) const
   }
   return compiledReg;
 
-#endif /* HAVE_REGEX_H */
 }
+#endif /* BUILD_REGEX || HAVE_REGEX_H */
 
 
 std::string WordFilter::l33tspeakSetFromCharacter(const char c) const
@@ -366,7 +365,7 @@ std::string WordFilter::l33tspeakSetFromCharacter(const char c) const
       set = "g96";
       break;
     case 'i':
-      set = "il|!\\/";
+      set = "il1|!\\/";
       break;
     case 'l':
       set = "li1!|\\/";
@@ -766,7 +765,7 @@ WordFilter::~WordFilter(void)
 
 
 // adds an individual word to the filter list
-bool WordFilter::addToFilter(const std::string &word, const std::string &expression)
+bool WordFilter::addToFilter(const std::string &word, const std::string expression)
 {
   long int length = (long int)word.length();
   if (0 >= length) {
@@ -851,10 +850,15 @@ unsigned int WordFilter::loadFromFile(const std::string &fileName, bool verbose)
     */
 
     if (verbose) {
-      std::cout << ".";
+      static int counter=0;
+      if (counter-- <= 0) {
+	std::cout << ".";
+	std::cout.flush();
+	counter=100;
+      }
     }
 
-    bool added = addToFilter(filterWord, "");
+    bool added = addToFilter(filterWord, std::string(""));
     if ((!added) && (verbose)) {
 	std::cout << std::endl << "Word is already added: " << filterWord << std::endl;
     } else {
@@ -899,8 +903,9 @@ void WordFilter::outputFilter(void) const
     for (ExpCompareSet::const_iterator j = filters[i].begin(); \
 	 j != filters[i].end(); \
 	 ++j) {
-      std::cout << count++ << ": " << j->word << std::endl;
-      std::cout << "    " << expressionFromString(j->word) << std::endl;
+      std::string jword = j->word;
+      std::cout << count++ << ": " << jword << std::endl;
+      std::cout << "    " << expressionFromString(jword) << std::endl;
     }
   }
 

@@ -174,6 +174,8 @@ static void		addMessage(const Player* player, const std::string& msg,
 				   bool highlight=false, const char* oldColor=NULL);
 extern void		dumpResources(BzfDisplay*, SceneRenderer&);
 static void		setRobotTarget(RobotPlayer* robot);
+static void   warnAboutMainFlags();
+static void   warnAboutRadarFlags();
 
 enum BlowedUpReason {
   GotKilledMsg,
@@ -383,6 +385,48 @@ static void		hangup(int sig)
 //
 // misc utility routines
 //
+
+
+void        warnAboutMainFlags()
+{
+  // warning message for hidden flags 
+	if (!BZDBCache::displayMainFlags){
+		std::string showFlagsMsg = ColorStrings[YellowColor];
+    showFlagsMsg += "Flags on field hidden, to show them ";
+		std::vector<std::string> keys = KEYMGR.getKeysFromCommand("toggleFlags main", true);
+
+		if (keys.size() != 0) {
+  			showFlagsMsg += "hit \"";
+        showFlagsMsg += ColorStrings[WhiteColor];
+				showFlagsMsg += tolower(keys[0][0]);
+        showFlagsMsg += ColorStrings[YellowColor];
+				showFlagsMsg += "\"";
+		} else {
+			showFlagsMsg += " bind a key to Toggle Flags on Field";
+		}
+		addMessage(NULL, showFlagsMsg);
+	}
+}
+
+void        warnAboutRadarFlags()
+{
+	if (!BZDB.isTrue("displayRadarFlags")){
+    std::string showFlagsMsg = ColorStrings[YellowColor];
+		showFlagsMsg += "Flags on radar hidden, to show them ";
+		std::vector<std::string> keys = KEYMGR.getKeysFromCommand("toggleFlags radar", true);
+
+		if (keys.size() != 0) {
+  			showFlagsMsg += "hit \"";
+        showFlagsMsg += ColorStrings[WhiteColor];
+				showFlagsMsg += tolower(keys[0][0]);
+        showFlagsMsg += ColorStrings[YellowColor];
+				showFlagsMsg += "\"";
+		} else {
+			showFlagsMsg += " bind a key to Toggle Flags on Radar";
+		}
+		addMessage(NULL, showFlagsMsg);
+	}
+}
 
 Player*			lookupPlayer(PlayerId id)
 {
@@ -604,7 +648,7 @@ bool			ComposeDefaultKey::keyPress(const BzfKeyEvent& key)
 
 // try to select the next recipient in the specified direction
 // eventually avoiding robots
-static void selectNextRecipient (bool forward, bool robotIn)
+static void selectNextRecipient(bool forward, bool robotIn)
 {
   const Player *recipient = myTank->getRecipient();
   int rindex;
@@ -1923,15 +1967,16 @@ static void		doMotion()
       mainWindow->getJoyPosition(mx, my);
 
       static const BzfKeyEvent::Button button_map[] = {
-	BzfKeyEvent::LeftMouse,
-	BzfKeyEvent::MiddleMouse,
-	BzfKeyEvent::RightMouse,
+	BzfKeyEvent::BZ_Mouse_Button_1,
+	BzfKeyEvent::BZ_Mouse_Button_2,
+	BzfKeyEvent::BZ_Mouse_Button_3,
 	BzfKeyEvent::BZ_Mouse_Button_4,
 	BzfKeyEvent::BZ_Mouse_Button_5,
 	BzfKeyEvent::BZ_Mouse_Button_6,
 	BzfKeyEvent::BZ_Mouse_Button_7,
 	BzfKeyEvent::BZ_Mouse_Button_8,
 	BzfKeyEvent::BZ_Mouse_Button_9,
+	BzfKeyEvent::BZ_Mouse_Button_10,
 	BzfKeyEvent::F1,
 	BzfKeyEvent::F2,
 	BzfKeyEvent::F3,
@@ -1994,6 +2039,23 @@ static std::string cmdJump(const std::string&, const CommandManager::ArgList& ar
     return "usage: jump";
   if (myTank != NULL)
     myTank->jump();
+  return std::string();
+}
+
+static std::string cmdToggleFlags (const std::string&, const CommandManager::ArgList& args)
+{
+  if (args.size() != 1)
+    return "usage: main|radar";
+  if (args[0] == "main") {
+    CMDMGR.run("toggle displayMainFlags");
+    warnAboutMainFlags();
+  } else if (args[0] == "radar") {
+    CMDMGR.run("toggle displayRadarFlags");
+    warnAboutRadarFlags();
+  } else {
+     return "usage: main|radar";
+  }
+
   return std::string();
 }
 
@@ -2160,7 +2222,7 @@ static std::string cmdSend(const std::string&, const CommandManager::ArgList& ar
 {
   static ComposeDefaultKey composeKeyHandler;
   if (args.size() != 1)
-    return "usage: send {all|team|nemesis|recipient}";
+    return "usage: send {all|team|nemesis|recipient|admin}";
   std::string composePrompt;
   if (args[0] == "all") {
     void* buf = messageMessage;
@@ -2197,8 +2259,12 @@ static std::string cmdSend(const std::string&, const CommandManager::ArgList& ar
       composePrompt += recipient->getCallSign();
       composePrompt += ": ";
     }
+  } else if (args[0] == "admin") {
+    void* buf = messageMessage;
+    buf = nboPackUByte(buf, AdminPlayers);
+    composePrompt = "Send to Admin : ";
   } else {
-    return "usage: send {all|team|nemesis|recipient}";
+    return "usage: send {all|team|nemesis|recipient|admin}";
   }
   messageHistoryIndex = 0;
   hud->setComposing(composePrompt);
@@ -2585,13 +2651,14 @@ struct CommandListItem {
 
 static const CommandListItem commandList[] = {
   { "fire",	&cmdFire,	"fire:  fire a shot" },
+  { "toggleFlags",	&cmdToggleFlags,	"toggleFlags {main|radar}:  turn off/on field or radar flags" },
   { "jump",	&cmdJump,	"jump:  make player jump" },
   { "drop",	&cmdDrop,	"drop:  drop the current flag" },
   { "identify",	&cmdIdentify,	"identify:  identify/lock-on-to player in view" },
   { "restart",	&cmdRestart,	"restart:  restart playing" },
   { "destruct", &cmdDestruct,	"destruct:  self destruct" },
   { "pause",	&cmdPause,	"pause:  pause/resume" },
-  { "send",	&cmdSend,	"send {all|team|nemesis|recipient}:  start composing a message" },
+  { "send",	&cmdSend,	"send {all|team|nemesis|recipient|admin}:  start composing a message" },
 #ifdef SNAPPING
   { "screenshot", &cmdScreenshot, "screenshot:  take a screenshot" },
 #endif
@@ -3709,10 +3776,18 @@ static void		handleServerMessage(bool human, uint16_t code,
     TeamColor dstTeam = PlayerIdToTeam(dst);
     bool toAll = (dst == AllPlayers);
     bool fromServer = (src == ServerPlayer);
+    bool toAdmin = (dst == AdminPlayers);
+    std::string dstName;
 
     const std::string srcName = fromServer ? "SERVER" : (srcPlayer ? srcPlayer->getCallSign() : "(UNKNOWN)");
-    const std::string dstName = dstPlayer ?
-      dstPlayer->getCallSign() : "(UNKNOWN)";
+    
+    if (dstPlayer){
+      dstName = dstPlayer->getCallSign();
+    } else if (toAdmin){
+      dstName = "Admin";
+    } else {
+      dstName = "(UNKNOWN)";
+    }
 
     std::string fullMsg;
 
@@ -3725,7 +3800,9 @@ static void		handleServerMessage(bool human, uint16_t code,
 	break;
       }
     }
+
     if (ignore) {
+#ifdef DEBUG
       // to verify working
       std::string msg2 = "Ignored Msg";
       if (silencePlayers[i] != "*") {
@@ -3734,6 +3811,7 @@ static void		handleServerMessage(bool human, uint16_t code,
 	//if * just echo a generic Ignored
       }
       addMessage(NULL,msg2);
+#endif
       break;
     }
 
@@ -3769,7 +3847,11 @@ static void		handleServerMessage(bool human, uint16_t code,
       if (!strncmp((char*)msg, passwdRequest, strlen(passwdRequest))) {
         const std::string passwdKeys[] = {
           string_util::format("%s@%s:%d", startupInfo.callsign, startupInfo.serverName, startupInfo.serverPort),
-          string_util::format("%s@%s", startupInfo.callsign, startupInfo.serverName)
+          string_util::format("%s:%d", startupInfo.serverName, startupInfo.serverPort),
+          string_util::format("%s@%s", startupInfo.callsign, startupInfo.serverName),
+          string_util::format("%s", startupInfo.serverName),
+          string_util::format("%s", startupInfo.callsign),
+          "@" // catch-all for all callsign/server/ports
         };
 
         for (size_t i = 0; i < countof(passwdKeys); i++) {
@@ -3796,7 +3878,7 @@ static void		handleServerMessage(bool human, uint16_t code,
     std::string origText = std::string((char*)msg);
     std::string text = BundleMgr::getCurrentBundle()->getLocalString(origText);
 
-    if (toAll || srcPlayer == myTank || dstPlayer == myTank ||
+    if (toAll || toAdmin || srcPlayer == myTank || dstPlayer == myTank ||
 	dstTeam == myTank->getTeam()) {
       // message is for me
       std::string colorStr;
@@ -3853,6 +3935,20 @@ static void		handleServerMessage(bool human, uint16_t code,
       }
       else {
 	// team message
+
+	if (toAdmin) {
+
+	  // play a sound on a private message not from self or server
+	  if (!fromServer) {
+	    static TimeKeeper lastMsg = TimeKeeper::getSunGenesisTime();
+	    if (TimeKeeper::getTick() - lastMsg > 2.0f)
+	      playLocalSound( SFX_MESSAGE_ADMIN );
+	    lastMsg = TimeKeeper::getTick();
+	  }
+
+	  fullMsg += "[Admin] ";
+	}
+
 	if (dstTeam != NoTeam) {
 #ifdef BWSUPPORT
 	  fullMsg = "[to ";
@@ -5094,8 +5190,8 @@ static void markOld(std::string &fileName)
     st.wMonth = 1;
     st.wDay = 1;
     SystemTimeToFileTime( &st, &ft );
-    BOOL b = SetFileTime(h, &ft, &ft, &ft);
-    int i = GetLastError();
+    SetFileTime(h, &ft, &ft, &ft);
+    GetLastError();
     CloseHandle(h);
   }
 #else
@@ -5316,6 +5412,18 @@ static bool		enterServer(ServerLink* serverLink, World* world,
 
     case RejectServerFull:
       printError("This game is full.  Try again later.");
+      break;
+      
+    case RejectBadCallsign:
+      printError("The callsign was rejected.  Try a different callsign.");
+      break;
+
+    case RejectRepeatCallsign:
+      printError("The callsign specified is already in use.");
+      break;
+
+    case RejectBadEmail:
+      printError("The e-mail was rejected.  Try a different e-mail.");
       break;
     }
     return false;
@@ -5671,6 +5779,9 @@ static bool		joinGame(const StartupInfo* info,
   hud->setTimeLeft(-1);
   fireButton = false;
   firstLife = true;
+
+  warnAboutMainFlags();
+  warnAboutRadarFlags();
 
   return true;
 }
@@ -6154,7 +6265,9 @@ static void		playingLoop()
 	    player[i]->addShots(scene, colorblind);
 	    overrideTeam = RogueTeam;
 	    if (!colorblind){
-	      if ((player[i]->getFlag() == Flags::Masquerade) && (myTank->getFlag() != Flags::Seer))
+	      if ((player[i]->getFlag() == Flags::Masquerade)
+		  && (myTank->getFlag() != Flags::Seer)
+		  && (myTank->getTeam() != ObserverTeam))
 		overrideTeam = myTank->getTeam();
 	      else
 		overrideTeam = player[i]->getTeam();

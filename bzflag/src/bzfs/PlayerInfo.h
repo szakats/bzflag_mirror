@@ -20,6 +20,10 @@
 #include <sys/socket.h>
 #endif
 
+#ifdef HAVE_ADNS_H
+#include <adns.h>
+#endif
+
 // bzflag library headers
 #include "global.h"
 #include "Permissions.h"
@@ -82,6 +86,12 @@ struct PlayerInfo {
     int fd;
     // peer's network address
     Address peer;
+#ifdef HAVE_ADNS_H
+    // peer's network hostname (malloc/free'd)
+    char *hostname;
+    // adns query state for while we're looking up hostname
+    adns_query adnsQuery;
+#endif
     // current state of player
     ClientState state;
     // type of player
@@ -157,6 +167,9 @@ struct PlayerInfo {
 
     // player played before countdown started
     bool playedEarly;
+
+    // player has autopilot on when server prohibits autopilot
+    bool quellRoger;
 
     // number of times they have tried to /password
     int passwordAttempts;

@@ -40,6 +40,7 @@ EXTRA_DIST = \
 	laser.wav	\
 	lock.wav	\
 	menu_arrow.png	\
+	message_admin.wav	\
 	message_private.wav	\
 	message_team.wav	\
 	missile.png	\
@@ -47,6 +48,9 @@ EXTRA_DIST = \
 	mountain1.png	\
 	mountain2.png	\
 	mountain3.png	\
+	mountain4.png	\
+	mountain5.png	\
+	mountain6.png	\
 	phantom.wav	\
 	pop.wav		\
 	purple_basetop.png	\

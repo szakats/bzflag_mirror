@@ -10,13 +10,15 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/* bzflag special common - 1st one */
+#include "common.h"
+
 #ifdef _MSC_VER
 #pragma warning(4:4786)
 #endif
 
 #include <iostream>
 
-#include <config.h>
 #include "ActionBinding.h"
 #include "CommandManager.h"
 #include "KeyManager.h"
@@ -36,6 +38,7 @@ ActionBinding::ActionBinding() {
   wayToBindActions.insert(std::make_pair(std::string("send team"), press));
   wayToBindActions.insert(std::make_pair(std::string("send nemesis"), press));
   wayToBindActions.insert(std::make_pair(std::string("send recipient"), press));
+  wayToBindActions.insert(std::make_pair(std::string("send admin"), press));
   wayToBindActions.insert(std::make_pair(std::string("toggle displayScore"), press));
   wayToBindActions.insert(std::make_pair(std::string("toggle displayBinoculars"), press));
   wayToBindActions.insert(std::make_pair(std::string("pause"), press));
@@ -44,8 +47,8 @@ ActionBinding::ActionBinding() {
 #endif
   wayToBindActions.insert(std::make_pair(std::string("time backward"), press));
   wayToBindActions.insert(std::make_pair(std::string("time forward"), press));
-  wayToBindActions.insert(std::make_pair(std::string("toggle displayRadarFlags"), press));
-  wayToBindActions.insert(std::make_pair(std::string("toggle displayMainFlags"), press));
+  wayToBindActions.insert(std::make_pair(std::string("toggleFlags radar"), press));
+  wayToBindActions.insert(std::make_pair(std::string("toggleFlags main"), press));
   wayToBindActions.insert(std::make_pair(std::string("silence"), press));
   wayToBindActions.insert(std::make_pair(std::string("toggle displayLabels"), press));
   wayToBindActions.insert(std::make_pair(std::string("destruct"), press));
@@ -93,6 +96,7 @@ ActionBinding::ActionBinding() {
   defaultBinding.insert(std::make_pair(std::string("M"), std::string("send team")));
   defaultBinding.insert(std::make_pair(std::string(","), std::string("send nemesis")));
   defaultBinding.insert(std::make_pair(std::string("."), std::string("send recipient")));
+  defaultBinding.insert(std::make_pair(std::string("Z"), std::string("send admin")));
   defaultBinding.insert(std::make_pair(std::string("S"), std::string("toggle displayScore")));
   defaultBinding.insert(std::make_pair(std::string("B"), std::string("toggle displayBinoculars")));
   defaultBinding.insert(std::make_pair(std::string("Pause"), std::string("pause")));
@@ -102,8 +106,8 @@ ActionBinding::ActionBinding() {
 #endif
   defaultBinding.insert(std::make_pair(std::string("-"), std::string("time backward")));
   defaultBinding.insert(std::make_pair(std::string("="), std::string("time forward")));
-  defaultBinding.insert(std::make_pair(std::string("H"), std::string("toggle displayRadarFlags")));
-  defaultBinding.insert(std::make_pair(std::string("J"), std::string("toggle displayMainFlags")));
+  defaultBinding.insert(std::make_pair(std::string("H"), std::string("toggleFlags radar")));
+  defaultBinding.insert(std::make_pair(std::string("J"), std::string("toggleFlags main")));
   defaultBinding.insert(std::make_pair(std::string("K"), std::string("silence")));
   defaultBinding.insert(std::make_pair(std::string("L"), std::string("toggle displayLabels")));
   defaultBinding.insert(std::make_pair(std::string("Delete"), std::string("destruct")));

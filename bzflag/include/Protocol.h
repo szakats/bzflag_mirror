@@ -41,7 +41,7 @@ const char* const	BroadcastAddress = "224.0.1.2";
 const int		BroadcastPort = 5154;
 
 // URL for default list server
-const char* const	DefaultListServerURL = "http://db.bzflag.org/db/";
+const char* const	DefaultListServerURL = "http://list.bzflag.bz/db/";
 
 // multicast ttl's
 const int		DefaultTTL = 8;
@@ -118,7 +118,7 @@ const uint16_t		MsgPingCodeRequest = 0x0404;
 const uint16_t		RejectBadRequest = 0x0000;
 const uint16_t		RejectBadTeam = 0x0001;
 const uint16_t		RejectBadType = 0x0002;
-//const uint16_t		RejectUnused = 0x0003;
+const uint16_t		RejectBadEmail = 0x0003;
 const uint16_t		RejectTeamFull = 0x0004;
 const uint16_t		RejectServerFull = 0x0005;
 const uint16_t		RejectBadCallsign = 0x0006;

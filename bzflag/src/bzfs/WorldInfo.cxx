@@ -158,8 +158,12 @@ void WorldInfo::addBase(float x, float y, float z, float r, float w, float d, fl
 
 void WorldInfo::addLink(int from, int to)
 {
-  // silently discard links from teleporters that don't exist
-  if (from <= numTeleporters * 2 + 1) {
+  // silently discard links to/from invalid teleporters
+  // and teleporters that don't (yet) exist
+  if ((from < 0) || (from > numTeleporters * 2 + 1) ||
+      (to < 0) || (to > numTeleporters * 2 + 1)) {
+    DEBUG1("Warning: bad teleporter link dropped from=%d to=%d\n", from, to);
+  } else {
     teleporters[from / 2].to[from % 2] = to;
   }
 }
@@ -220,6 +224,10 @@ InBuildingType WorldInfo::inBuilding(WorldInfo::ObstacleLocation **location,
 				     float x, float y, float z, float r,
 				     float height) const
 {
+
+  if (height < Epsilon)
+    height = Epsilon;
+
   int i;
   for (i = 0; i < numBases; i++) {
     if ((bases[i].pos[2] < (z + height))
@@ -236,7 +244,8 @@ InBuildingType WorldInfo::inBuilding(WorldInfo::ObstacleLocation **location,
 	&&	(inRect(boxes[i].pos, boxes[i].rotation, boxes[i].size, x, y, r))) {
       if (location != NULL)
 	*location = &boxes[i];
-      return IN_BOX;
+      if (boxes[i].driveThrough) return IN_BOX_DRIVETHROUGH;
+      else return IN_BOX_NOTDRIVETHROUGH;
     }
   for (i = 0; i < numPyramids; i++) {
     if ((pyramids[i].pos[2] < (z + height))

@@ -69,7 +69,10 @@ Bundle *BundleMgr::getBundle(const std::string &locale, bool setcur /*= true*/)
     path += "_" + locale;
   path += ".po";
 
-#ifdef __APPLE__
+  /* FIXME -- this needs to be in libplatform not here -- causes libcommon
+   * to require corefoundation framework
+   */
+#if defined(__APPLE__)
   // This is MacOS X. Use the CoreFoundation resource location API
   // to find the correct language resource if 'default' is specified.
   if (locale.length() == 7 && locale.compare("default") == 0) {
@@ -116,7 +119,7 @@ bool BundleMgr::getLocaleList(std::vector<std::string> *list) {
   do {
 
 #if (defined(_WIN32) || defined(WIN32))
-    char fileName[255], *end = NULL;
+    char fileName[255];
 
     // Prepare the wildcarded file path to search for and copy it to fileName
     sprintf(fileName, "%s\\l10n\\bzflag_*.po", bundlePath.c_str());
