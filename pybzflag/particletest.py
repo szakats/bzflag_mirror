@@ -23,8 +23,10 @@ class GlowSphere(Drawable.ParticleArray):
 
     def draw(self, rstate):
         glDisable(GL_LIGHTING)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE)
         Drawable.ParticleArray.draw(self, rstate)
         glEnable(GL_LIGHTING)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 
 if __name__ == '__main__':
