@@ -27,7 +27,8 @@ from OpenGL.GL import *
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import GLExtension
 from BZFlag.World import Scale
-from BZFlag import Vector
+from BZFlag.Geometry import *
+from Numeric import *
 import random
 
 
@@ -314,11 +315,11 @@ class FixedDecal(DisplayList):
         self.render.decal = True
 
         # Transform width from world coordinates to plane coordinates
-        width /= Vector.length(vx)
+        width /= magnitude(vx)
         
         # Calculate a height to keep the image aspect ratio correct
         texSize = self.render.textures[0].size
-        height = width * texSize[1] / texSize[0] * Vector.length(vx) / Vector.length(vy)
+        height = width * texSize[1] / texSize[0] * magnitude(vx) / magnitude(vy)
 
         # Compute the amount of the texture to each side of the given position
         leftSize = anchor[0] * width
@@ -327,17 +328,17 @@ class FixedDecal(DisplayList):
         bottomSize = (1 - anchor[1]) * height
 
         # Compute the vertices of a quadrilateral using the given vectors
-        self.quad = (Vector.add(origin, Vector.add(Vector.mul1(vx, position[0] - leftSize),
-                                                   Vector.mul1(vy, position[1] - topSize))),
-                     Vector.add(origin, Vector.add(Vector.mul1(vx, position[0] + rightSize),
-                                                   Vector.mul1(vy, position[1] - topSize))),
-                     Vector.add(origin, Vector.add(Vector.mul1(vx, position[0] + rightSize),
-                                                   Vector.mul1(vy, position[1] + bottomSize))),
-                     Vector.add(origin, Vector.add(Vector.mul1(vx, position[0] - leftSize),
-                                                   Vector.mul1(vy, position[1] + bottomSize))))
+        self.quad = (multiply(vx, position[0] - leftSize) +
+                     multiply(vy, position[1] - topSize) + origin,
+                     multiply(vx, position[0] + rightSize) +
+                     multiply(vy, position[1] - topSize) + origin,
+                     multiply(vx, position[0] + rightSize) +
+                     multiply(vy, position[1] + bottomSize) + origin,
+                     multiply(vx, position[0] - leftSize) +
+                     multiply(vy, position[1] + bottomSize) + origin)
 
         # Compute a normal to the given plane
-        self.normal = Vector.normalize(Vector.cross(vx, vy))
+        self.normal = normalize(cross(vx, vy))
         
     def drawToList(self, rstate):
         glNormal3f(*self.normal)
@@ -362,7 +363,7 @@ class FixedWallDecal(FixedDecal):
 
         # Place the origin at the ground, with X pointing along the wall and Y pointing up
         origin = (edge1[0], edge1[1], box.center[2])
-        vx = Vector.sub((edge2[0], edge2[1], box.center[2]), origin)
+        vx = subtract((edge2[0], edge2[1], box.center[2]), origin)
         vy = (0, 0, box.size[2])
 
         FixedDecal.set(self, origin, vx, vy, width, position, anchor)
@@ -390,8 +391,8 @@ class FixedTopDecal(FixedDecal):
         poly = box.toPolygon()
         height = box.center[2] + box.size[2]
         origin = (poly[0][0], poly[0][1], height)
-        vx = Vector.sub((poly[1][0], poly[1][1], height), origin)
-        vy = Vector.sub((poly[-1][0], poly[-1][1], height), origin)
+        vx = subtract((poly[1][0], poly[1][1], height), origin)
+        vy = subtract((poly[-1][0], poly[-1][1], height), origin)
         FixedDecal.set(self, origin, vx, vy, width, position, anchor)
 
 

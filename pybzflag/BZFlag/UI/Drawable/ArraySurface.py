@@ -23,41 +23,12 @@ array of vertex coordinates. Vertex normals are generated automatically.
 #
 from GLDrawable import GLDrawable
 from OpenGL.GL import *
+from BZFlag.Geometry import *
 from Numeric import *
 
 __all__ = ['ArraySurface']
 
-
-def cross(u, v):
-    """Perform a cross product of each vector in the given 2D array of vectors"""
-    result = zeros(u.shape, u.typecode())
-    ux = u[:,:,0]
-    uy = u[:,:,1]
-    uz = u[:,:,2]
-    vx = v[:,:,0]
-    vy = v[:,:,1]
-    vz = v[:,:,2]
-    result[:,:,0] = uz * vy - uy * vz
-    result[:,:,1] = uz * vx - ux * vz
-    result[:,:,2] = ux * vy - uy * vx
-    return result
-
-
-def magnitude(a):
-    """Calculate the magnitude of each vector in the given 2D array of vectors"""
-    a = a*a
-    result = a[:,:,0]
-    add(result, a[:,:,1], result)
-    add(result, a[:,:,2], result)
-    sqrt(result, result)
-    return result
-
-
-def normalize(a):
-    """Normalize each vector in the given 2D array of vectors"""
-    return a / magnitude(a)[..., NewAxis]
-
-
+ 
 def calcGridNormals(vertices):
     """Calculate a face normal for each grid square in the vertex array. Returns
        an array smaller than the given array by 1 in each dimension, since the
@@ -83,7 +54,7 @@ def calcVertexNormals(vertices):
     result[:-1, -1, :] = grid[:,-1,:]
     result[-1,  -1, :] = grid[-1,-1,:]
     return result
- 
+
 
 class ArraySurface(GLDrawable):
     """Drawable representing a smooth surface composed of a grid of vertices,

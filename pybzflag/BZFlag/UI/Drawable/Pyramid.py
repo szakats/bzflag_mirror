@@ -23,10 +23,12 @@ A class for drawing the pyramids in the world
 from __future__ import division
 from DisplayList import *
 from OpenGL.GL import *
-from BZFlag import Vector
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import CubeMap, GLExtension
 from OpenGL.GL.EXT.texture_cube_map import *
+from BZFlag.Geometry import *
+from BZFlag.Geometry import *
+from Numeric import *
 import LinearAlgebra
 
 
@@ -235,7 +237,7 @@ class Pyramid(DisplayList):
         glEnd()
         glBegin(GL_TRIANGLES)
         # X+ side
-        norm = Vector.normalize(Vector.cross((self.size[0], -self.size[1], self.size[2]), (self.size[0] * 2, 0, 0)))
+        norm = normalize(cross((self.size[0], -self.size[1], self.size[2]), (self.size[0] * 2, 0, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[4])
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[4])
@@ -247,7 +249,7 @@ class Pyramid(DisplayList):
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[6])
         glVertex3f(self.size[0], self.size[1], z)
         # Y+ side
-        norm = Vector.normalize(Vector.cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0)))
+        norm = normalize(cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[7])
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[7])    
@@ -259,7 +261,7 @@ class Pyramid(DisplayList):
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[9])
         glVertex3f(self.size[0], -self.size[1], z)
         # X- side
-        norm = Vector.normalize(Vector.cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0)))
+        norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[10])
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[10])
@@ -271,7 +273,7 @@ class Pyramid(DisplayList):
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[12])
         glVertex3f(-self.size[0], -self.size[1], z)
         # Y- side
-        norm = Vector.normalize(Vector.cross((-self.size[0], self.size[1], self.size[2]), (0, -self.size[1] * 2, 0)))
+        norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (0, -self.size[1] * 2, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[13])
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[13])

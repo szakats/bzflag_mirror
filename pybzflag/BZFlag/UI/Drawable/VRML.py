@@ -49,7 +49,9 @@ but it has successfully loaded files exported by other software.
 
 from DisplayList import *
 from OpenGL.GL import *
-from BZFlag import Vector, Util
+from BZFlag import Util
+from BZFlag.Geometry import *
+from Numeric import *
 import re, math, BZFlag, cPickle, os
 
 
@@ -335,8 +337,8 @@ class Triangle:
            product of AB and AC, then normalizes the result.
            """
         t = self.vertices
-        self.faceNormal = Vector.normalize(Vector.cross(Vector.sub(t[1],t[0]),
-                                                        Vector.sub(t[2],t[0])))
+        self.faceNormal = normalize(cross(subtract(t[1],t[0]),
+                                          subtract(t[2],t[0])))
 
 
 class Mesh(DisplayList):
@@ -420,10 +422,10 @@ class Mesh(DisplayList):
                     use2 = uses[useIndex2]
 
                     # Compare the angle between face normals
-                    if Vector.unitAngle(use1[0].faceNormal, use2[0].faceNormal) < self.creaseAngle:
+                    if unitVectorAngle(use1[0].faceNormal, use2[0].faceNormal) < self.creaseAngle:
                         # These two faces are smooth enough we should combine the normals
-                        use1[0].normalTotal[use1[1]] = Vector.add(use1[0].normalTotal[use1[1]], use2[0].normals[use2[1]])
-                        use2[0].normalTotal[use2[1]] = Vector.add(use2[0].normalTotal[use2[1]], use1[0].normals[use1[1]])
+                        use1[0].normalTotal[use1[1]] = add(use1[0].normalTotal[use1[1]], use2[0].normals[use2[1]])
+                        use2[0].normalTotal[use2[1]] = add(use2[0].normalTotal[use2[1]], use1[0].normals[use1[1]])
                         use1[0].normalCounts[use1[1]] += 1
                         use2[0].normalCounts[use2[1]] += 1
         del self.vertexMap
