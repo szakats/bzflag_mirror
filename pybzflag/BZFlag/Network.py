@@ -182,28 +182,30 @@ class EventLoop:
 
     def run(self):
         self.running = 1
+        try:
+            # Make a dictionary for quickly detecting which socket has activity
+            selectDict = {}
+            for socket in self.sockets:
+                selectable = socket.getSelectable()
+                selectDict[selectable] = socket
+            selectables = selectDict.keys()
 
-        # Make a dictionary for quickly detecting which socket has activity
-        selectDict = {}
-        for socket in self.sockets:
-            selectable = socket.getSelectable()
-            selectDict[selectable] = socket
-        selectables = selectDict.keys()
-
-        while self.running:
-            try:
-                (iwtd, owtd, ewtd) = select.select(selectables, [], [], self.pollTime)
-            except select.error:
-                raise Errors.ConnectionLost()
-            readyList = iwtd + owtd + ewtd
-            for ready in readyList:
+            while self.running:
                 try:
-                    selectDict[ready].poll(self)
-                except Errors.NonfatalException:
-                    # Catch nonfatal exceptions
-                    import sys
-                    print "*** %s : %s" % (sys.exc_info()[1].__class__.__name__, sys.exc_info()[1])
-            self.onPoll()
+                    (iwtd, owtd, ewtd) = select.select(selectables, [], [], self.pollTime)
+                except select.error:
+                    raise Errors.ConnectionLost()
+                readyList = iwtd + owtd + ewtd
+                for ready in readyList:
+                    try:
+                        selectDict[ready].poll(self)
+                    except Errors.NonfatalException:
+                        # Catch nonfatal exceptions
+                        import sys
+                        print "*** %s : %s" % (sys.exc_info()[1].__class__.__name__, sys.exc_info()[1])
+                self.onPoll()
+        finally:
+            self.running = 0
 
     def stop(self):
         self.running = 0

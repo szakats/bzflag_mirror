@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from BZFlag import CommandLine
-import readline
+from threading import *
+import sys
 
 client = CommandLine.client(server     = "localhost",
                             callSign   = "@Jabberwocky")
@@ -25,8 +26,14 @@ def message(msg):
     print "%s %s" % (sender, msg.message)
 client.onMsgMessage.observe(message)
 
-def sayHi():
-    client.sendMessage("Hello")
-client.onEnterGame.observe(sayHi)
+# Thread to read keyboard input and send messages.
+# It would generally be better to do this by making stdin nonblocking,
+# but there's no portable way to do this in pyhton. Threads are slightly
+# more portable :)
+class ChatThread(Thread):
+    def run(self):
+        while client.eventLoop.running:
+            client.sendMessage(sys.stdin.readline().strip())
+client.onEnterGame.observe(ChatThread().start)
 
 client.run()
