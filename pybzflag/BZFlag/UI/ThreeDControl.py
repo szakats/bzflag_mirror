@@ -161,7 +161,7 @@ class Viewing:
         self.viewport = viewport
         self.movieRecorder = None
         self.savedMode = None
-        
+
         self.view.camera = ThreeDRender.SmoothedCamera()
         view.camera.position = (0, 0, 20)
         view.camera.distance  = 900
@@ -177,6 +177,7 @@ class Viewing:
         self.bind(KeyPress, pygame.K_ESCAPE).observe(self.quit)
         self.bind(MouseWheel, 0.1, 'any').observe(self.zoom)
         self.bind(KeyAxis, '=', '-', 0.3).observe(self.zoom)
+        self.bind(KeyAxis, '[', ']', 1).observe(self.fovZoom)
 
         dragButton = 3
         self.bind(MouseGrab, dragButton)
@@ -231,7 +232,7 @@ class Viewing:
             # If we aren't already in another mode we set, save the current mode
             if not self.savedMode:
                 self.savedMode = self.viewport.mode
-            
+
             # Toggle into the new mode
             self.viewport.mode = modeClass(*args, **kw)
 
@@ -245,11 +246,20 @@ class Viewing:
         self.viewport.eventLoop.stop()
 
     def zoom(self, amount):
+        """Zoom the camera by changing the distance from focus"""
         self.view.camera.distance *= math.exp(-amount)
         if self.view.camera.distance < 0.1:
             self.view.camera.distance = 0.1
         if self.view.camera.distance > 1500:
             self.view.camera.distance = 1500
+
+    def fovZoom(self, amount):
+        """Zoom the camera by changing the field of view"""
+        self.view.viewport.fov += amount
+        if self.view.viewport.fov > 175:
+            self.view.viewport.fov = 175
+        if self.view.viewport.fov < 0.1:
+            self.view.viewport.fov = 0.1
 
     def toggleRecorder(self):
         if self.movieRecorder:
@@ -267,7 +277,7 @@ class Viewing:
                 print "*** An exception occurred while trying to start the movie recorder:"
                 print "    %s: %s" % (exc_info[0].__name__, exc_info[1])
                 self.movieRecorder = None
-               
+
 
 class Editing(Viewing):
     """Implement a superset of the Viewing controls, used for editing worlds"""

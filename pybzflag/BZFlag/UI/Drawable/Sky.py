@@ -87,7 +87,7 @@ class Clouds(SkyDrawable):
     def drawToList(self, rstate):
         """Do all the drawing we can in the display list"""
 
-        # Disable lighting, set up blending to use only the texture's alpha
+        # Set up blending to use only the texture's alpha
         # channel, disregarding its color channels
         glColor3f(1,1,1)
         glEnable(GL_BLEND)
@@ -107,7 +107,6 @@ class Clouds(SkyDrawable):
         glDisable(GL_TEXTURE_GEN_T)
         glDisable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glDisable(GL_TEXTURE_2D)
 
     def draw(self, rstate):
         """Animate the texture coordinates every frame"""
@@ -120,7 +119,29 @@ class Clouds(SkyDrawable):
 
 class Horizon(SkyDrawable):
     """Some mountains and a chasm to cover up the horizon"""
+    def __init__(self, *args, **kw):
+        SkyDrawable.__init__(self, *args, **kw)
+        self.render.textures = (GLNoise.CloudTexture(),)
+        self.motion = Animated.Value(Animated.RampFunction(200))
+        self.time = Animated.Timekeeper()
+
     def drawToList(self, rstate):
+        glEnable(GL_BLEND)
+
+        # Set up texture coordinate generation. The plane equations
+        # are set up every frame in draw() to animate the clouds' motion
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (1, 0, 0, 0))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 1, 0))
+        glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glEnable(GL_TEXTURE_GEN_S)
+        glEnable(GL_TEXTURE_GEN_T)
+
         VRML.load('sky.wrl')['horizon'].drawToList(rstate)
+
+        # Cleanup!
+        glDisable(GL_TEXTURE_GEN_S)
+        glDisable(GL_TEXTURE_GEN_T)
+        glDisable(GL_BLEND)
 
 ### The End ###
