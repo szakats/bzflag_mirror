@@ -23,6 +23,7 @@ anything.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
+from BZFlag import Event
 
 class Scene:
     """Abstract base class for a scene manager. This class provides
@@ -34,6 +35,9 @@ class Scene:
        expected that we will need iterators for finding objects that
        intersect with geometry, and for sorting objects by Z order.
        """
+    def __init__(self):
+        Event.attach(self, 'onAddObject', 'onChangeObject')
+
     def add(self, block):
         pass
 
@@ -50,6 +54,7 @@ class SceneList:
         self.list = []
 
     def add(self, block):
+        self.onAddObject()
         self.list.append(block)
 
     def __iter__(self):

@@ -29,15 +29,15 @@ class Ground:
         image = Image.open("ground.png")
 	ix = image.size[0]
 	iy = image.size[1]
-#	image = image.tostring("raw", "RGBA", 0, -1)
-#	self.texture = glGenTextures(1)
-#	glBindTexture(GL_TEXTURE_2D, self.texture)
-#	glPixelStorei(GL_UNPACK_ALIGNMENT,1)
-#	glTexImage2D(GL_TEXTURE_2D, 0, 3, ix, iy, 0, GL_RGBA, GL_UNSIGNED_BYTE, image)
-#	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-#	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-#	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-#	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+	image = image.convert("RGBA").tostring("raw", "RGBA", 0, -1)
+	self.texture = glGenTextures(1)
+	glBindTexture(GL_TEXTURE_2D, self.texture)
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1)
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, ix, iy, 0, GL_RGBA, GL_UNSIGNED_BYTE, image)
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
 	self.list = glGenLists(1)
 	glNewList(self.list, GL_COMPILE)
@@ -63,6 +63,6 @@ class Ground:
     def draw(self):
         glColor3f(1, 1, 1)
 	glEnable(GL_COLOR_MATERIAL)
-#	glBindTexture(self.texture)
+	glBindTexture(GL_TEXTURE_2D, self.texture)
 	glCallList(self.list)
 	glColor3f(1, 1, 1)

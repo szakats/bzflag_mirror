@@ -26,7 +26,6 @@ from pygame.locals import *
 from BZFlag import Event
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from BZFlag.UI.Objects import Ground
 
 class Camera:
     def __init__(self):
@@ -48,9 +47,12 @@ class ThreeDView:
     def __init__(self, game):
         self.game = game
 	self.camera = Camera()
-	self.ground = Ground.Ground()
+	self.game.world.scene.onAddObject.observe(self.onSceneChange)
 
-    def configure(self, size):
+    def onSceneChange:
+        print "scene changed!\n"
+
+    def configureOpenGL(self, size):
 	glViewport(0, 0, size[0], size[1]);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -58,7 +60,7 @@ class ThreeDView:
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-    def initialize(self, surface):
+    def initializeOpenGL(self, surface):
         """Initialize the opengl view"""
 	self.size = surface.get_size()
 
@@ -84,14 +86,16 @@ class ThreeDView:
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHTING);
-	self.configure(self.size)
+	self.configureOpenGL(self.size)
+
+    def renderWorld(self):
+        for object in self.game.world.scene:
 
     def render(self):
         """Render the view to the given surface. This includes the game
 	   world, with transient objects such as players and flags"""
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	self.camera.load()
-	self.ground.draw()
 
 def attach(game, eventLoop, size=(800,600), targetFrameRate=60):
     """Set up a window and opengl context on the given game and event loop"""
@@ -108,5 +112,5 @@ def attach(game, eventLoop, size=(800,600), targetFrameRate=60):
     pygame.init()
     screen = pygame.display.set_mode(size, pygame.OPENGL | pygame.DOUBLEBUF)
     view = ThreeDView(game)
-    view.initialize(screen)
+    view.initializeOpenGL(screen)
     updateView()
