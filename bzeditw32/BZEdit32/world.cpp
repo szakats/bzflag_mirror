@@ -178,7 +178,7 @@ bool CBaseObject::StdDataField ( char *line )
             m_bDriveThru = m_bShootThru = true;
         else if (stricmp(name,"drivethrough") ==0)
             m_bDriveThru = true;
-        else if (stricmp(name,"shoothrough") ==0)
+        else if (stricmp(name,"shootthrough") ==0)
             m_bShootThru = true;
 	else
 		return false;
