@@ -23,8 +23,8 @@ save worlds to text and binary formats, storing them in a Scene class.
 #
 
 from BZFlag.Protocol import WorldObjects
-from BZFlag import Event
-import os, math, md5
+from BZFlag import Event, Errors
+import os, math, md5, sys
 from StringIO import StringIO
 from BZFlag.World import Scale
 
@@ -59,7 +59,10 @@ class World:
     def saveBinary(self, f):
         """Save a binary world to the supplied file-like object"""
         for block in self.blocks:
-            f.write(str(block))
+            try:
+                f.write(str(block))
+            except:
+                raise Errors.ProtocolError("Error saving block %r to binary: %s" % (block, sys.exc_info()[1]))
 
     def saveText(self, f):
         """Save a text world to the supplied file-like object"""

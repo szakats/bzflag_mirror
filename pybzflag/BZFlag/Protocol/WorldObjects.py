@@ -87,11 +87,11 @@ class WorldObject(Block):
             args = tokens[1:]
             self.unknownMapKeywords = {}
             if keyword == 'position':
-                self.center = map(float, args)
+                self.center = map(float, args[:3])
             elif keyword == 'rotation':
                 self.angle = float(args[0]) * math.pi / 180
             elif keyword == 'size':
-                self.size = map(float, args)
+                self.size = map(float, args[:3])
             elif keyword == 'border':
                 self.border = float(args[0])
             elif keyword == 'name':
@@ -231,7 +231,7 @@ class TeamBase(WorldObject):
         StructEntry(Common.TeamColor, 'team'),
         StructEntry(Common.Vector3,   'center', [0,0,0]),
         StructEntry(Float,            'angle',  0),
-        StructEntry(Common.Vector2,   'size',   [1,1,1]),
+        StructEntry(Common.VectorXY,  'size',   [1,1,0]),
         StructEntry(Common.Vector3,   'safety', [0,0,0]),
         ]
 

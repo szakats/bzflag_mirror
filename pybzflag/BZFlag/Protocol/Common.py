@@ -41,6 +41,12 @@ VectorYZ = MappedEntry(Vector2,
                        lambda v2: (0.0, v2[0], v2[1]),
                        lambda v3: (v3[1], v3[2]))
 
+# This is a Vector3 packed into a Vector2 by assuming Z is always zero
+VectorXY = MappedEntry(Vector2,
+                       lambda v2: (v2[0], v2[1], 0.0),
+                       lambda v3: (v3[0], v3[1]))
+
+
 PlayerId = Enum(UInt8, {
     255: None,
     254: 'all',

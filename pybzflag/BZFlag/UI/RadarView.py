@@ -50,6 +50,7 @@ class RadarView:
         self.zoom = 1
         self.center = [0,0,0]
         self.angle = 0
+        self.follow = None
         
     def configureOpenGL(self, size):
         glViewport(0, 0, size[0], size[1])
@@ -120,6 +121,8 @@ class RadarView:
     def renderPlayers(self):
         for player in self.game.players.values():
             if 'alive' in player.status:
+                self.follow = player
+                
                 # Pick player color based on team, alpha based on height
                 try:
                     color = colorScheme[player.identity.team + "Player"]
@@ -129,12 +132,19 @@ class RadarView:
                 glColor4f(color[0], color[1], color[2], self.colorScale(pos[2], 0, 0))
                 self.smoothedPoly(self.polyDot(pos))
 
+    def updateFollowing(self):
+        if self.follow:
+            self.center = self.follow.motion.position
+            self.angle  = - self.follow.motion.azimuth * 180 / math.pi + 90
+            self.zoom   = 2
+
     def render(self):
         glPushMatrix()
         glTranslatef(0,0,-10)
+        self.updateFollowing()
         glScalef(0.01 * self.zoom, 0.01 * self.zoom, 1)
-        glTranslatef(*self.center)
         glRotatef(self.angle, 0,0,1)
+        glTranslatef(-self.center[0], -self.center[1], 0)
         self.renderWorld()
         self.renderPlayers()
         glPopMatrix()
