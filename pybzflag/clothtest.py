@@ -7,8 +7,21 @@ from OpenGL.GL import *
 from BZFlag.Geometry import *
 
 
-class Flag:
+class Wind:
+    """Global object for simulating wind"""
     def __init__(self):
+        # Wind, with speed and direction varying over time with a perlin noise function
+        self.vector = Animated.Vector(Animated.PerlinNoise(persistence = 0.1,
+                                                           amplitude = 1,
+                                                           frequency = 0.01))
+        
+    def integrate(self, dt):
+        self.vector.integrate(dt)
+        
+
+class Flag:
+    """Scene object simulating one flag"""
+    def __init__(self, wind):
         # Note that the size and origin are in world coordinates along the XZ
         # plane, and that resolution is in the cloth array. The origin of the
         # cloth array is at the base of the flag on the pole, with the top
@@ -16,7 +29,6 @@ class Flag:
         self.size = (8,6)
         self.origin = (0,4.5)
         self.resolution = (20,20)
-        self.time = Animated.Timekeeper()
         
         self.pole = Drawable.VRML.load("flagpole.wrl")
         self.cloth = SpringSystem.Cloth(self.getInitialState())
@@ -36,11 +48,8 @@ class Flag:
         # Pin the cloth to the flagpole
         self.cloth.add(SpringSystem.ClothAnchorAffector, (-1,0), (0,0))
 
-        # Wind, with speed and direction varying over time with a perlin noise function
-        self.wind = Animated.Vector(Animated.PerlinNoise(persistence = 0.1,
-                                                         amplitude = 1,
-                                                         frequency = 0.01))
-        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, self.wind)
+        # Now add the global wind we were given
+        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, wind.vector)
 
 
     def getInitialState(self):
@@ -66,10 +75,9 @@ class Flag:
     def getDrawables(self):
         return [self.surf] + self.pole.values()
 
-    def update(self):
-        dt = self.time.step()
-        self.wind.integrate(dt)
+    def integrate(self, dt):
         self.cloth.integrate(dt)
+
 
 if __name__ == '__main__':
     loop = Event.EventLoop()
@@ -90,9 +98,18 @@ if __name__ == '__main__':
     view.lights[0].diffuse  = (1, 1, 0.98, 1)
     view.lights[0].position = (0,-200,200,1)
 
-    obj = Flag()
-    viewport.onSetupFrame.observe(obj.update)
-    view.scene.add(obj)
+    # Create our simulation objects
+    time = Animated.Timekeeper()
+    wind = Wind()
+    flag = Flag(wind)
+    view.scene.add(flag)
+
+    # Update the simulation each frame
+    def update():
+        dt = time.step()
+        wind.integrate(dt)
+        flag.integrate(dt)
+    viewport.onSetupFrame.observe(update)
 
     view.scene.preprocess()
     Util.showFrameRate(viewport)
