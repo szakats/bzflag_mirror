@@ -163,7 +163,7 @@ class MountainTexture(Texture.DynamicTexture):
         glDisable(GL_LINE_SMOOTH)
 
 
-class Horizon(SkyDrawable):
+class Mountains(SkyDrawable):
     """Some mountains and a chasm to cover up the horizon"""
     def __init__(self, *args, **kw):
         SkyDrawable.__init__(self, *args, **kw)
@@ -197,5 +197,12 @@ class Horizon(SkyDrawable):
         glColor3f(1,1,1)
         glDisable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+
+class Void(SkyDrawable):
+    """A whole lot of nothing, right below the mountains"""
+    textureName = 'sky_colors.png'
+    def drawToList(self, rstate):
+        VRML.load('sky.wrl')['void'].drawToList(rstate)
 
 ### The End ###

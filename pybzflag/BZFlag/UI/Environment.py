@@ -36,7 +36,8 @@ class Sky:
         self.drawables = [
             Drawable.Sky.Colors(self),
             Drawable.Sky.Clouds(self),
-            Drawable.Sky.Horizon(self),
+            Drawable.Sky.Mountains(self),
+            Drawable.Sky.Void(self),
             ]
         self.update()
 
