@@ -222,10 +222,7 @@ class OpenGLViewport(PygameViewport):
         # If we have no FOV, set up an orthogonal mode scaled in pixels.
         GL.glMatrixMode(GL.GL_PROJECTION)
         GL.glLoadIdentity()
-        if self.fov:
-            GLU.gluPerspective(self.fov, float(self.size[0]) / self.size[1], self.nearClip, self.farClip)
-        else:
-            GL.glOrtho(0,self.size[0],0,self.size[1], -self.farClip, self.farClip)
+        self.setProjectionMatrix()
         GL.glMatrixMode(GL.GL_MODELVIEW)
         GL.glLoadIdentity()
         GL.glDepthRange(0.01,2000)
@@ -235,6 +232,13 @@ class OpenGLViewport(PygameViewport):
             GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
         else:
             GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
+
+    def setProjectionMatrix(self):
+        from OpenGL import GL, GLU
+        if self.fov:
+            GLU.gluPerspective(self.fov, float(self.size[0]) / self.size[1], self.nearClip, self.farClip)
+        else:
+            GL.glOrtho(0,self.size[0],0,self.size[1], -self.farClip, self.farClip)
 
     def getModeFlags(self):
         import pygame

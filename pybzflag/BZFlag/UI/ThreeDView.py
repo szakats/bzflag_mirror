@@ -214,7 +214,11 @@ class ThreeDView:
         
         glMatrixMode(GL_PROJECTION)
 	glPushMatrix()
-        self.viewport.configureOpenGL()
+        glLoadIdentity()
+        gluPickMatrix(pos[0], pos[1], 5, 5, self.viewport.rect)
+        self.viewport.setProjectionMatrix()
+        glMatrixMode(GL_MODELVIEW)
+        
         self.camera.load()
 
 	names = {}
