@@ -126,7 +126,6 @@ class ThreeDView:
     glClearDepth(1.0)
     glDepthFunc(GL_LESS)
     glShadeModel(GL_SMOOTH)
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
 
