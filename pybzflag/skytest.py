@@ -12,6 +12,7 @@ viewport.setCaption("Sky Test")
 # Move the camera
 view.camera.position = (0,0,0)
 view.camera.distance = 400
+view.camera.elevation = 0
 view.camera.jump()
 
 # Add the sky
