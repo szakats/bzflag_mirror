@@ -22,7 +22,7 @@ of BZFlag-related utilities.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag import optik, Client, Player, Server, Protocol
+from BZFlag import optik, Client, Player, Server, Protocol, UI
 from BZFlag.Protocol import Common
 import sys
 
@@ -40,13 +40,9 @@ class Parser(optik.OptionParser):
        may also be a list of classes- all of them will be used to construct
        a list of command line options.
        """
-    def __init__(self, cls, **extraDefaults):
+    def __init__(self, *classes, **extraDefaults):
         optik.OptionParser.__init__(self)
 
-        if type(cls) != type(()) and type(cls) != type([]):
-            classes = [cls]
-        else:
-            classes = cls
         self.instances = []
         self.defaults = {}
         for c in classes:
@@ -64,7 +60,7 @@ class Parser(optik.OptionParser):
                 return
             default = self.defaults.get(kw['dest'])
             kw['default'] = default
-            if default is not None and default != []:
+            if default is not None and default != [] and str(default):
                 kw['help'] += " [%s]" % default
             self.add_option(*names, **kw)
 
@@ -82,8 +78,9 @@ class Parser(optik.OptionParser):
         add("-o", "--shots", dest="shots", metavar="N", 
             help="Sets the number of shots a player may fire before reloading.")
 
-        add("-w", "--world", dest="world", metavar="FILE",
-            help="Loads a BZFlag world file.")
+        add("-w", "--world", dest="world", metavar="NAME",
+            help="Loads a BZFlag world. NAME can be a local file or one of several" +
+            " other world specifiers. Try a world name of 'help' for more information.")
 
         add("-i", "--interface", dest="interface", metavar="HOST:PORT",
             help="Sets the host and/or the port to listen for clients on.")
@@ -99,6 +96,10 @@ class Parser(optik.OptionParser):
 
         add("-p", "--player-type", dest="playerType", metavar="TYPE",
             help="Sets the player type to join the game as. This can be 'tank', 'observer', or 'computer'.")
+
+        add("-u", "--ui", dest="ui", metavar="NAME",
+            help="Use the given user interface to interact with or view the game. Available UIs: " +
+            ", ".join(UI.list()))
 
 
     def parse(self, argv=sys.argv):

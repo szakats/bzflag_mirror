@@ -8,7 +8,7 @@ import sys
 
 # Create a server and a client, sharing command line options and event loop
 eventLoop = Event.EventLoop()
-argParser = CommandLine.Parser([Server.BaseServer, Client.BaseClient],
+argParser = CommandLine.Parser(Server.BaseServer, Client.BaseClient,
                                eventLoop = eventLoop)
 argParser.add_option("-n", "--names", action="store_true", dest="names",
                      help="Disables the output of message contents, shows only their names.")

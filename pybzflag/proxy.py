@@ -7,7 +7,7 @@ import sys
 
 # Create a server and a client, sharing command line options and event loop
 eventLoop = Event.EventLoop()
-(server, client) = CommandLine.Parser([Server.BaseServer, Client.BaseClient],
+(server, client) = CommandLine.Parser(Server.BaseServer, Client.BaseClient,
                                       eventLoop = eventLoop).parse()
 
 # Trace our connection status

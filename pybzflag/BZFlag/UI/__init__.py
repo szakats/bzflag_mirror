@@ -1,7 +1,8 @@
 """ BZFlag.UI
 
 This is a Python package providing various user interface frontends
-for displaying the game state.
+for displaying the game state. This module contains an interface
+for setting up a UI by name.
 """
 #
 # Python BZFlag Protocol Package
@@ -22,6 +23,55 @@ for displaying the game state.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-# Nothing here yet
+# Map short names to module names
+nameMap = {
+    'overhead': 'OverheadView',
+    '3D':       'ThreeDView',
+    }
+
+
+def find(name):
+    """Given the short name of a UI module, load and return it"""
+    return __import__(nameMap[name], globals(), locals())
+
+
+def attach(name, *args, **kw):
+    """Attach a UI to a game state and event loop, given the UI's name
+       followed by the parameters normally passed to its attach method.
+       """
+    if name:
+        module = find(name)
+        module.attach(*args, **kw)
+
+
+def list():
+    """List the available UIs"""
+    available = []
+    for name in nameMap:
+        try:
+            find(name)
+            available.append(name)
+        except:
+            pass
+    return available
+
+
+class Any:
+    """A helper class for implementing optional UIs in command line
+       apps. This class can be handed to CommandLine.Parse(), and the
+       UI will automatically be added to the command line. This class'
+       attach() method can then be called, and if the UI was enabled
+       on the command line, the proper one will attach.
+       """
+    def __init__(self):
+        self.options = {
+            'ui': None,
+            }
+
+    def setOptions(self, **options):
+        self.options.update(options)
+
+    def attach(self, *args, **kw):
+        attach(self.options['ui'], *args, **kw)
 
 ### The End ###
