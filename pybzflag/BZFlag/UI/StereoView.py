@@ -24,7 +24,7 @@ visualization hardware)
 
 from BZFlag.UI import Viewport, ThreeDView, ThreeDControl, ThreeDRender, Layout, HUD
 import BZFlag, math
-
+from OpenGL.GL import *
 
 class EyeCamera(ThreeDRender.Camera):
     """A camera that will track the location of a master camera, offsetting its azimuth
@@ -53,6 +53,16 @@ class StereoView:
         self.righteye = ThreeDRender.View(viewport.region(Layout.Rect(viewport).right(0.5)), self.scene)
         self.lefteye.camera  = EyeCamera(self, -30)
         self.righteye.camera = EyeCamera(self,  30)
+
+        def setupLeft():
+            if glGetBooleanv(GL_STEREO):
+                glDrawBuffer(GL_LEFT_BACK)
+        self.lefteye.viewport.onDrawFrame.observe(setupLeft)
+
+        def setupRight():
+            if glGetBooleanv(GL_STEREO):
+                glDrawBuffer(GL_RIGHT_BACK)
+        self.righteye.viewport.onDrawFrame.observe(setupRight)
 
 ### The End ###
 

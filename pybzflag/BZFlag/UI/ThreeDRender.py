@@ -91,7 +91,7 @@ class Camera:
         glRotatef(elevation - 90, 1.0, 0.0, 0.0)
         glRotatef(-(azimuth + self.azimuthOffset), 0.0, 0.0, 1.0)
         glTranslatef(*subtract((0,0,0), position))
-        
+
 
 class SmoothedCamera(Camera):
     """Replacement Camera class that smooths all axes with the Animated module"""
@@ -126,12 +126,12 @@ class SmoothedCamera(Camera):
         dt = self.time.step()
         for item in self.animated:
             item.integrate(dt)
-            
+
         self.applyTransform(self.animatedDistance.value,
                             self.animatedElevation.value,
                             self.animatedAzimuth.value,
                             self.animatedPosition.get())
-        
+
 
 class Light:
     """Abstraction for an OpenGL light's position and intensity"""
@@ -360,7 +360,7 @@ class OverlayRenderPass(BasicRenderPass):
     def filter(self, drawable):
         return drawable.render.overlay
 
-    def render(self, rstate): 
+    def render(self, rstate):
         glClear(GL_DEPTH_BUFFER_BIT)
         BasicRenderPass.render(self, rstate)
 
@@ -388,7 +388,7 @@ class ReflectionRenderPass(DecalRenderPass):
         glMatrixMode(GL_MODELVIEW)
 
         # Set up texture coordinate generation
-        glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)    
+        glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
         glTexGenfv(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
@@ -430,7 +430,7 @@ class Scene:
            """
         drawables = object.getDrawables()
         for drawable in drawables:
-            drawable.parent(object)            
+            drawable.parent(object)
         self.objects.setdefault(object, []).extend(drawables)
 
     def preprocess(self):
@@ -475,7 +475,7 @@ class Scene:
     def pick(self, rstate, pos):
         """Returns the nearest scene object that was rendered at the given screen
            coordinates. If no object was rendered at this postion, returns None.
-           """        
+           """
         # Flip the Y axis to convert from the traditional top-left-based coordinate
         # system to OpenGL's bottom-left-based coordinate system.
         viewport = rstate.viewport
@@ -536,7 +536,7 @@ class View:
 
     def defaultLighting(self):
         self.resetLighting()
-        
+
         self.lights[0].enabled  = True
         self.lights[0].ambient  = (0.25, 0.25, 0.25, 1.0)
         self.lights[0].diffuse  = (0.65, 0.65, 0.65, 1.0)
