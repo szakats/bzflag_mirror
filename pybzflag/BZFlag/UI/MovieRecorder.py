@@ -24,28 +24,42 @@ later ported to Crystal Space.
 #
 
 from Numeric import *
+from OpenGL.GL import *
+import os, Image
+from StringIO import StringIO
 
 
 class Recorder:
     """Movie Recorder that attaches to a Viewport and records frames to
        a NuppelVideo file as they're rendered.
        """
-    def __init__(self, viewport, fileTemplate="snapshot%02d.nuv"):
+    def __init__(self, viewport, fileTemplate="snapshot%02d.bzm", frameRate=None):
+        if not frameRate:
+            frameRate = viewport.targetFrameRate
+        self.frameRate = frameRate
         self.viewport = viewport
         self.fileTemplate = fileTemplate
         self.running = False
+        self.encoder = 'JPEG'
+        self.options = {'quality': 98}
 
     def start(self):
+        """Start recording to a new file. Returns a filename if the recording
+           started, or None if this was already recording.
+           """
         if self.running:
             return
-        self.file = open(self.getFilename(), "wb")
-        self.recordHeader()
+        self.fileName = self.getFilename()
+        self.file = open(self.fileName, "wb")
+        self.image = Image.new('RGB', self.viewport.size)
+        self.writeHeader()
 
         # Insert our recorder at the beginning of the render sequence.
         # After the beginning the next frame will have started, but inserting
         # at the end isn't friendly to the way Viewport manages subviewports.
         self.viewport.renderSequence.insert(0, self.recordFrame)
         self.running = True
+        return self.fileName
 
     def stop(self):
         if not self.running:
@@ -56,73 +70,88 @@ class Recorder:
         self.file = None
 
     def getFilename(self):
-        return "boing"
-
-    def recordHeader(self):
-        print "squeegie"
+        """Using our fileTemplate, find the next available filename"""
+        fileNum = 0
+        while os.path.isfile(self.fileTemplate % fileNum):
+            fileNum += 1
+        return self.fileTemplate % fileNum
 
     def recordFrame(self):
-        print "poing"
-
-
-class RGBtoYUV420:
-    """Encapsulation for the RGB to YUV420 colorspace converter.
-       This must be a class because it requires lookup tables.
-       This is ported from rgb2yuv420.cpp in the jetstream/crystalspace
-       movie recorder.
-
-       YUV420 is a planar format, where the U and V planes are half the
-       resolution (1/4 the number of pixels) of the Y plane. This reduces
-       spacial color resolution.
-       """
-    def __init__(self):
-        self.yr =   zeros(256, UInt32, savespace=True)
-        self.yg   = zeros(256, UInt32, savespace=True)
-        self.yb   = zeros(256, UInt32, savespace=True)
-        self.ur   = zeros(256, UInt32, savespace=True)
-        self.ug   = zeros(256, UInt32, savespace=True)
-        self.vg   = zeros(256, UInt32, savespace=True)
-        self.vb   = zeros(256, UInt32, savespace=True)
-        self.ubvr = zeros(256, UInt32, savespace=True)
-
-        for i in xrange(256):
-            isl8 = i << 8
-            yr[i]   = 65.481  * isl8
-            yg[i]   = 128.553 * isl8 + 1048576
-            yb[i]   = 24.966  * isl8
-            ur[i]   = 37.797  * isl8
-            ug[i]   = 74.203  * isl8 + 8388608
-            vg[i]   = 93.786  * isl8 + 8388608
-            vb[i]   = 18.214  * isl8
-            ubvr[i] = 112     * isl8
-
-    def convert(self, r, g, b):
-        """Accepts three Numeric arrays for the red, green, and blue planes.
-           Returns a tuple of 2-D nuemric arrays, for the Y, U, and V plane
-           respectively.
-           Note that for this to work right, the input width and height must
-           be even numbers, and each input plane must be the same size.
+        """Read a raw frame from OpenGL, and use PIL to compress it.
+           PIL will call our write() method for each frame.
            """
-        (width, height) = r.shape[:2]
+        rgb = glReadPixels(self.viewport.rect[0],
+                                 self.viewport.rect[1],
+                                 self.image.size[0],
+                                 self.image.size[1],
+                                 GL_RGB,
+                                 GL_UNSIGNED_BYTE)
+        self.image.fromstring(rgb)
+        self.image.save(self, self.encoder, **self.options)
 
-        # Use some fixed point math and lookup tables to calculate the luminance.
-        # No resampling is performed for the Y channel.
-        y = (take(self.yr, r) + take(self.yg, g) + take(self.yb, b)) >> 16
+    def writeHeader(self):
+        self.file.write("bzmovie %s %s %s %s\n" % (self.image.size[0],
+                                                   self.image.size[1],
+                                                   self.encoder,
+                                                   self.frameRate))
+        
+    def write(self, data):
+        """Store raw frame data as compressed in recordFrame"""
+        self.file.write("%s\n" % len(data))
+        self.file.write(data)
 
-        # Calculate the U and V planes, resampling the input down by 1/2
-        # Numeric's slice operator to the rescue!
-        u = ( -take(self.ur, r[ ::2, ::2]) -take(self.ug, g[ ::2, ::2]) +take(self.ubvr, b[ ::2, ::2])
-              -take(self.ur, r[1::2, ::2]) -take(self.ug, g[1::2, ::2]) +take(self.ubvr, b[1::2, ::2])
-              -take(self.ur, r[1::2,1::2]) -take(self.ug, g[1::2,1::2]) +take(self.ubvr, b[1::2,1::2])
-              -take(self.ur, r[ ::2,1::2]) -take(self.ug, g[ ::2,1::2]) +take(self.ubvr, b[ ::2,1::2]) ) >> 18
 
-        v = (  take(self.ubvr, r[ ::2, ::2]) -take(self.vg, g[ ::2, ::2]) -take(self.vb, b[ ::2, ::2])
-              +take(self.ubvr, r[1::2, ::2]) -take(self.vg, g[1::2, ::2]) -take(self.vb, b[1::2, ::2])
-              +take(self.ubvr, r[1::2,1::2]) -take(self.vg, g[1::2,1::2]) -take(self.vb, b[1::2,1::2])
-              +take(self.ubvr, r[ ::2,1::2]) -take(self.vg, g[ ::2,1::2]) -take(self.vb, b[ ::2,1::2]) ) >> 18
+class Transcoder:
+    """Utility for converting recorded files to a usable format"""
+    def __init__(self, filename):
+        self.file = open(filename, "rb")
+        self.readHeader()
+        self.firstFrame = self.file.tell()
 
-        # Cast everything back to 8 bits
-        return (y.astype(UInt8), u.astype(UInt8), v.astype(UInt8))
+    def readHeader(self):
+        """Read the file's header, storing relevant values"""
+        line = self.file.readline().strip().split(" ")
+        if line[0] != "bzmovie":
+            raise Exception("This doesn't appear to be a bzmovie file")
+        self.size = (int(line[1]), int(line[2]))
+        self.encoder = line[3]
+        self.frameRate = float(line[4])
 
+    def readFrame(self):
+        """Read and decompress a frame"""
+        size = int(self.file.readline().strip())
+        data = self.file.read(size)
+        if not data:
+            return None
+        img = Image.open(StringIO(data))
+
+        # Flip the image vertically as we output it, since it was stored
+        # in OpenGL's bottom-up orientation.
+        return img.tostring('raw', 'RGB', 0, -1)
+
+    def encode(self, options, program="mencoder"):
+        """Feed this recording into mencoder with the given options"""
+
+        # These options set up mplayer to read raw RGB frames. The fourcc there is
+        # hex for ('R', 'G', 'B', 24). All other parameters should be supplied by the caller.
+        # We use popen to pipe video into mencoder's stdin.
+        cmdline = "%s - -rawvideo on:fps=%s:w=%d:h=%d:format=0x52474218:size=%d " % \
+                  (program, self.frameRate, self.size[0], self.size[1], self.size[0] * self.size[1] * 3)
+        cmdline += options
+        
+        print cmdline + "\n"
+        encoder = os.popen(cmdline, 'w')
+
+        frameCount = 0
+        self.file.seek(self.firstFrame)
+        while True:
+            frame = self.readFrame()
+            if frame is None:
+                break
+            frameCount += 1
+            encoder.write(frame)
+
+        stdout.close()
+        stdin.close()
 
 ### The End ###

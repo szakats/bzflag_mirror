@@ -236,11 +236,13 @@ class Viewing:
         if self.movieRecorder:
             self.movieRecorder.stop()
             self.movieRecorder = None
+            print "--- Stopped recording"
         else:
             try:
                 from BZFlag.UI import MovieRecorder
                 self.movieRecorder = MovieRecorder.Recorder(self.viewport)
-                self.movieRecorder.start()
+                filename = self.movieRecorder.start()
+                print "--- Recording video to %s" % filename
             except:
                 exc_info = sys.exc_info()
                 print "*** An exception occurred while trying to start the movie recorder:"
