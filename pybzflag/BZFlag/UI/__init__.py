@@ -30,6 +30,7 @@ nameMap = {
     'radar':    'RadarView',
     'anaglyph':	'AnaglyphView',
     'game':     'GameView',
+    'editor':   'EditorView',
     }
 
 

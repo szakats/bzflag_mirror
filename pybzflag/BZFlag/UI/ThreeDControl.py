@@ -123,4 +123,9 @@ class Viewing:
         if self.view.camera.distance > 1500:
             self.view.camera.distance = 1500
 
+
+class Editing(Viewing):
+    """Implement a superset of the Viewing controls, used for editing worlds"""
+    pass
+
 ### The End ###
