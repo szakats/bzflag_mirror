@@ -34,7 +34,6 @@ def test():
 
     # Determine whether we have multitexturing
     multitexture = OpenGL.GL.ARB.multitexture.glInitMultitextureARB()
-    print multitexture
 
     # If we have multitexturing, make a list of supported texture units
     if multitexture:
