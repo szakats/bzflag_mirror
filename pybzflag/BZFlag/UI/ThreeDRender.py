@@ -269,7 +269,7 @@ class BasicRenderPass(RenderPass):
            """
         # Disable all textures if we're in wireframe mode
         wireframe = glGetIntegerv(GL_POLYGON_MODE)[0] == GL_LINE
-        
+
         if textures and not wireframe:
             if GLExtension.multitexture:
                 # We have multitexturing. Enable and bind the texture units we'll be using,
@@ -291,7 +291,7 @@ class BasicRenderPass(RenderPass):
                 # No multitexturing, only enable the current texture unit
                 for target in GLExtension.textureTargets:
                     glDisable(target)
-                glEnable(t.target)
+                glEnable(textures[0].target)
                 textures[0].bind(rstate)
         else:
             if GLExtension.multitexture:
