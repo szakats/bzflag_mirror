@@ -35,7 +35,8 @@ class Sky:
         self.time = Animated.Timekeeper()
         self.update()
 
-        self.drawables = [Drawable.Sky.Colors(self)]
+        self.drawables = [Drawable.Sky.Colors(self),
+                          Drawable.Sky.Clouds(self)]
 
     def getDrawables(self):
         return self.drawables

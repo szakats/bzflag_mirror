@@ -25,13 +25,12 @@ used in BZFlag.UI.Environment.Sky
 from DisplayList import DisplayList
 from OpenGL.GL import *
 from OpenGL.GLU import *
-import VRML
 from BZFlag import Animated
+from BZFlag.UI import GLNoise
 
 
-class Colors(DisplayList):
-    """The sky itself, with colors changing over the course of the day"""
-    textureName = 'sky_colors.png'
+class SkyDrawable(DisplayList):
+    """Drawable functionality common to all elements of the sky"""
     def set(self, sky):
         self.sky = sky
 
@@ -43,6 +42,10 @@ class Colors(DisplayList):
         # coordinates each frame, so don't cache this drawable in the big render pass display lists
         self.render.static = False
 
+
+class Colors(SkyDrawable):
+    """The sky itself, with colors changing over the course of the day"""
+    textureName = 'sky_colors.png'
     def drawToList(self, rstate):
         """Our display list only holds an inverted sphere and the static
            texture coordinates. Texture coordinates must be adjusted for time
@@ -71,6 +74,33 @@ class Colors(DisplayList):
         # The X axis of our texture is time, representing one day. The Y axis is spacial,
         # stretching from the bottom of the sky sphere to the top.
         glTexGenfv(GL_S, GL_OBJECT_PLANE, (0, 0, 0, self.sky.unitDayTime))
+        DisplayList.draw(self, rstate)
+
+
+class Clouds(SkyDrawable):
+    """Dynamic perlin-noise-based clouds"""
+    def __init__(self, *args, **kw):
+        SkyDrawable.__init__(self, *args, **kw)
+        self.render.textures = (GLNoise.CloudTexture(renderRate=0.001),)
+
+    def drawToList(self, rstate):
+        """Our display list only holds an inverted sphere and the static
+           texture coordinates. Texture coordinates must be adjusted for time
+           of day in draw().
+           """
+        glDisable(GL_LIGHTING)
+        glEnable(GL_BLEND)
+
+        quad = gluNewQuadric()
+        gluQuadricOrientation(quad, GLU_INSIDE)
+        gluSphere(quad, 10, 8, 8)
+
+        glDisable(GL_TEXTURE_GEN_S)
+        glDisable(GL_TEXTURE_GEN_T)
+        glEnable(GL_LIGHTING)
+        glDisable(GL_BLEND)
+
+    def draw(self, rstate):
         DisplayList.draw(self, rstate)
 
 ### The End ###

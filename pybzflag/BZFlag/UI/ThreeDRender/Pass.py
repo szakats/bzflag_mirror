@@ -23,7 +23,7 @@ the available rendering passes with the proper priorities.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag.UI import Drawable, GLExtension
+from BZFlag.UI import Drawable, GLExtension, Texture
 from OpenGL.GL import *
 from OpenGL.GL.ARB.multitexture import *
 import LinearAlgebra, Numeric
@@ -147,7 +147,11 @@ class BasicRenderPass(RenderPass):
         else:
             for (textures, group) in self.textureGroups.iteritems():
                 if not rstate.picking:
-                    self.bindTextures(textures, rstate)
+                    try:
+                        self.bindTextures(textures, rstate)
+                    except Texture.DynamicTextureException:
+                        # The textures this drawable requires aren't ready yet
+                        return
                 group.draw(rstate)
 
     def bindTextures(self, textures, rstate):

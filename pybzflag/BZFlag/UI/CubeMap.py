@@ -66,7 +66,7 @@ class CubeMap(Texture.DynamicTexture):
             Texture.DynamicTexture.bind(self, rstate)
         except Texture.DynamicTextureException:
             pass
-        
+
     def render(self):
         self.renderSides()
 
@@ -81,7 +81,7 @@ class CubeMap(Texture.DynamicTexture):
             (GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT, (1,1,0,1)),
             ):
             glClearColor(*color)
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)       
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             glCopyTexImage2D(target, 0, GL_RGB,
                              self.viewport.rect[0],
                              self.viewport.rect[1],
