@@ -9,7 +9,7 @@ class GlowSphere(Drawable.ParticleArray):
     """An example particle system that draws glowing balls positioned on the surface of a sphere"""
     textureName = 'spark.png'
 
-    def __init__(self, numParticles=500, particleDiameter=5, sphereDiameter=50):
+    def __init__(self, numParticles=2500, particleDiameter=5, sphereDiameter=50):
         Drawable.ParticleArray.__init__(self, (numParticles,), particleDiameter)
 
         self.render.static = False
