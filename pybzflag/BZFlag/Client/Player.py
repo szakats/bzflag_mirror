@@ -22,7 +22,7 @@ include functionality necessary for implementing a player.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 import BZFlag
-from BZFlag import Errors, Event
+from BZFlag import Errors, Event, Player
 from BZFlag.Client.Stateful import StatefulClient
 
 
@@ -35,13 +35,14 @@ class PlayerClient(StatefulClient):
     def init(self):
         StatefulClient.init(self)
         self.options.update({
-            'identity': None,    # A Player.Identity instance
+            'callSign':   None,
+            'team':       'rogue',
+            'email':      'PyBZFlag',
+            'playerType': 'tank',
             })
 
         # We won't have a player instance until we get a MsgAddPlayer
         # back for ourselves and StatefulClient adds it to the Game.
-        # We do need to store the identity used for joining the game
-        # of course.
         self.inGame = 0
         self.player = None
         Event.attach(self, 'onEnterGame', 'onInitPlayer')
@@ -60,7 +61,11 @@ class PlayerClient(StatefulClient):
 
     def enterGame(self):
         msg = self.outgoing.MsgEnter()
-        identity = self.options['identity']
+        identity = Player.Identity(self.options['callSign'],
+                                   self.options['team'],
+                                   self.options['email'],
+                                   self.options['playerType'])
+                                   
         if not identity.callSign:
             raise Errors.ProtocolError("A call sign is required to enter the game")
         msg.playerType = identity.type

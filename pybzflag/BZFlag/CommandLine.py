@@ -23,6 +23,7 @@ of BZFlag-related utilities.
 #
 
 from BZFlag import optik, Client, Player, Server, Protocol
+from BZFlag.Protocol import Common
 import sys
 
 
@@ -39,86 +40,73 @@ class Parser(optik.OptionParser):
        may also be a list of classes- all of them will be used to construct
        a list of command line options.
        """
-    def __init__(self, cls, **kw):
+    def __init__(self, cls, **extraDefaults):
         optik.OptionParser.__init__(self)
-        self.kw = kw
 
         if type(cls) != type(()) and type(cls) != type([]):
             classes = [cls]
         else:
             classes = cls
         self.instances = []
-        availableOpts = []
+        self.defaults = {}
         for c in classes:
             inst = c()
             self.instances.append(inst)
-            availableOpts.extend(inst.options.keys())
+            self.defaults.update(inst.options)
 
-        defaults = {
-            'team':       'rogue',
-            'email':      'PyBZFlag',
-            'playerType': 'tank',
-            'interface':  ':%s' % Protocol.Common.defaultPort,
-            }
-        defaults.update(self.kw)
+        self.defaults.update(extraDefaults)
 
         def add(*names, **kw):
-            """Wrapper around self.add_option that enforces our conventions about defaults"""
-            default = defaults.get(kw['dest'])
+            """Wrapper around self.add_option that enforces our conventions about defaults
+               and disables the option if its destination isn't in our list of available options
+               """
+            if kw['dest'] not in self.defaults.keys():
+                return
+            default = self.defaults.get(kw['dest'])
             kw['default'] = default
-            if default is not None:
+            if default is not None and default != []:
                 kw['help'] += " [%s]" % default
             self.add_option(*names, **kw)
 
-        if 'server' in availableOpts:
-            add("-s", "--server", dest="server", metavar="HOST",
-                help="Sets the BZFlag server to connect to.")
 
-        if 'publicTitle' in availableOpts:
-            add("-p", "--public", dest="publicTitle", metavar="TITLE",
-                help="Publicize the server under the given title.")
+        add("-s", "--server", dest="server", metavar="HOST",
+            help="Sets the BZFlag server to connect to.")
 
-        if 'gameStyle' in availableOpts:
-            add("-g", "--game", dest="gameStyle", metavar="STYLE", action="append",
-                help="Enable the given game style.")
+        add("-p", "--public", dest="publicTitle", metavar="TITLE",
+            help="Publicize the server under the given title.")
 
-        if 'world' in availableOpts:
-            add("-w", "--world", dest="world", metavar="FILE",
-                help="Loads a BZFlag world file.")
+        add("-g", "--game", dest="gameStyle", metavar="STYLE", action="append",
+            help="Enable the given game style. STYLE can be one of %s" %
+            ", ".join(map(repr, Common.GameStyle.dict.keys())))
 
-        if 'interface' in availableOpts:
-            add("-i", "--interface", dest="interface", metavar="HOST:PORT",
-                help="Sets the host and/or the port to listen for clients on.")
+        add("-o", "--shots", dest="shots", metavar="N", 
+            help="Sets the number of shots a player may fire before reloading.")
 
-        if 'identity' in availableOpts:
-            add("-c", "--call-sign", dest="callSign", metavar="NAME",
-                help="Sets the player callsign to use when joining.")
-            add("-t", "--team", dest="team", metavar="COLOR",
-                help="Sets the team to join.")
-            add("-e", "--email", dest="email", metavar="ADDRESS",
-                help="Sets the optional email address to send when joining.")
-            add("-p", "--player-type", dest="playerType", metavar="TYPE",
-                help="Sets the player type to join the game as. This can be 'tank', 'observer', or 'computer'.")
+        add("-w", "--world", dest="world", metavar="FILE",
+            help="Loads a BZFlag world file.")
+
+        add("-i", "--interface", dest="interface", metavar="HOST:PORT",
+            help="Sets the host and/or the port to listen for clients on.")
+        
+        add("-c", "--call-sign", dest="callSign", metavar="NAME",
+            help="Sets the player callsign to use when joining.")
+
+        add("-t", "--team", dest="team", metavar="COLOR",
+            help="Sets the team to join.")
+
+        add("-e", "--email", dest="email", metavar="ADDRESS",
+            help="Sets the optional email address to send when joining.")
+
+        add("-p", "--player-type", dest="playerType", metavar="TYPE",
+            help="Sets the player type to join the game as. This can be 'tank', 'observer', or 'computer'.")
+
+
     def parse(self, argv=sys.argv):
         (values, args)  = self.parse_args(argv[1:])
         values = values.__dict__
         options = {}
-
-        try:
-            options['identity'] = Player.Identity(
-                values['callSign'], values['team'], values['email'], values['playerType'])
-        except KeyError:
-            pass
-
-        for key in ('interface', 'server', 'world', 'publicTitle', 'gameStyle'):
-            try:
-                value = values[key]
-                if value is not None:
-                    options[key] = value
-            except KeyError:
-                pass
-
-        options.update(self.kw)
+        options.update(self.defaults)
+        options.update(values)
 
         for inst in self.instances:
             inst.cmdLineValues = values

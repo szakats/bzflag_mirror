@@ -46,6 +46,7 @@ class StatefulServer(BaseServer):
             'publicTitle':        None,
             'publicityInterval':  30 * 60,
             'gameStyle':          [],
+            'shots':              None,
             })
 
         Event.attach(self, 'onAttemptEnter', 'onEnter', 'onFinishEnter',
@@ -60,6 +61,9 @@ class StatefulServer(BaseServer):
 
             if 'gameStyle' in options.keys():
                 self.game.world.style.gameStyle = options['gameStyle']
+                
+            if 'shots' in options.keys():
+                self.game.world.style.shots = int(options['shots'])
                 
         self.onSetOptions.observe(setOptions)
 

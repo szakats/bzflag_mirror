@@ -249,8 +249,8 @@ class Bitfield(EntryType):
        translating between a bitfield and a list of strings or other
        objects.
        """
-    def __init__(self, baseType, bitMap):
-        """The bitMap should have integer bitmasks as values, with
+    def __init__(self, baseType, dict):
+        """The dict should have integer bitmasks as values, with
            strings or other objects as keys. Note that the bitmasks
            can overlap- all matches for that bitmask will be included
            in the resulting list, so the 'in' operator can be used
@@ -259,13 +259,13 @@ class Bitfield(EntryType):
            are set, not that all of them are set.
            """
         self.baseType = baseType
-        self.bitMap = bitMap
+        self.dict = dict
 
     def unmarshall(self, packed):
         bits = self.baseType.unmarshall(packed)
         matches = []
-        for key in self.bitMap:
-            if bits & self.bitMap[key]:
+        for key in self.dict:
+            if bits & self.dict[key]:
                 matches.append(key)
         return matches
 
@@ -273,7 +273,7 @@ class Bitfield(EntryType):
         bits = 0
         for item in items:
             try:
-                bits |= self.bitMap[item]
+                bits |= self.dict[item]
             except KeyError:
                 pass
         return self.baseType.marshall(bits)
