@@ -33,7 +33,9 @@ client.onMsgMessage.observe(message)
 class ChatThread(Thread):
     def run(self):
         while client.eventLoop.running:
-            client.sendMessage(sys.stdin.readline().strip())
+            line = sys.stdin.readline().strip()
+            if line:
+                client.sendMessage(line)
 client.onEnterGame.observe(ChatThread().start)
 
 client.run()
