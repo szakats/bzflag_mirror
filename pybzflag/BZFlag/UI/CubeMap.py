@@ -38,7 +38,6 @@ class CubeMap(Texture.Texture):
        The actual height could be limited by viewport size.
        """
     def __init__(self, defaultPosition=(0,0,0), maxSize=256):
-        print defaultPosition
         self.defaultPosition = defaultPosition
         self.maxSize = maxSize
     
@@ -53,8 +52,7 @@ class CubeMap(Texture.Texture):
             position = self.defaultPosition
 
     def bind(self, view):
-        print "boing"
-            
+        pass
 
 
 ### The End ###

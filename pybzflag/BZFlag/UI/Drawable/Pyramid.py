@@ -49,7 +49,6 @@ class Pyramid(DisplayList):
             # of the texture with its tip at the top-center. The bottom of the pyramid
             # is mapped to a the top-left 1/4 of the texture.
             self.textureNames = ['pillar.jpeg']
-            print GLExtension.cubeMap
             if GLExtension.cubeMap:
                 self.textureNames.append(CubeMap.CubeMap(Vector.add(center, (0,0,size[2]/2))))
             self.uvMap = ((0,   3/4),
