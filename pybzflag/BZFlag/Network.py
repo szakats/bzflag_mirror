@@ -209,7 +209,7 @@ class EventLoop:
     def stop(self):
         self.running = 0
 
-    def onNonfatalException(info):
+    def onNonfatalException(self, info):
         if self.showNonfatalExceptions:
             print "*** %s : %s" % (info[1].__class__.__name__, info[1])
 
