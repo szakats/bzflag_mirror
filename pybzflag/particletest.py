@@ -36,6 +36,37 @@ class Sparks(Drawable.SpriteArray):
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 
+class Smoke(Drawable.SpriteArray):
+    textureName = 'cloud.png'
+    def __init__(self, position=(0,0,0), numParticles=100):
+        self.model = ParticleSystem.SpriteFountain(numParticles)
+        Drawable.SpriteArray.__init__(self, numParticles, allowPointSprite=False)
+        self.model.attachDrawable(self)
+
+        self.time = Animated.Timekeeper()
+        self.render.static = False
+        self.render.blended = True
+
+        self.model.add(ParticleSystem.RandomEmitter,
+                       spawnRate           = 100,
+                       speedRange          = (4, 5),
+                       direction           = (0, 0, 1),
+                       directionRandomness = 0.2,
+                       position            = position,
+                       )
+        self.model.add(ParticleSystem.LifespanAffector, 1)
+        self.model.add(ParticleSystem.LinearFadeAffector,
+                       sizeRange           = (3, 1),
+                       colorRange          = ((0,0,0,0), (1,1,1,0.5))
+                       )
+
+    def draw(self, rstate):
+        self.model.integrate(self.time.step())
+        glDisable(GL_LIGHTING)
+        Drawable.SpriteArray.draw(self, rstate)
+        glEnable(GL_LIGHTING)
+
+
 if __name__ == '__main__':
     loop = Event.EventLoop()
     viewport = Viewport.OpenGLViewport(loop)
@@ -52,5 +83,6 @@ if __name__ == '__main__':
     view.scene.add(Drawable.Ground(400))
     view.scene.add(Environment.Sky())
     view.scene.add(Sparks((5,0,3)))
+    view.scene.add(Smoke((-5,0,3)))
 
     loop.run()
