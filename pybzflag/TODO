@@ -1,0 +1,19 @@
+Todo list, in no particular order:
+
+  - Implement a Server module
+
+  - Move the representation for world objects out of the view code and into the individual world objects
+    (Maybe rename the BinaryWorld module, since it wouldn't be limited to binary worlds)
+
+  - Write World methods for loading from text files, and for saving to binary files. This would be
+    necessary for a server, and for a map viewer
+
+  - Write a module for generating thumbnails of world files, for sites that index bzflag worlds
+
+  - Complete the MVC paradigm by implementing controller classes for the player
+
+  - Implement proper timer support in the event loop, remove the nasty hack that is used to update views
+
+  - Implement UDP communication
+
+    

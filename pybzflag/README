@@ -1,0 +1,14 @@
+--- PyBZFlag ---
+
+This is a suite of Python modules that implement the BZFlag network protocol,
+and provide the auxiliary logic and interfacing necessary to build clients
+and servers that speak the protocol.
+
+Included are a few example programs that make use of the module.
+
+More should be written here when there's more to say...
+For now, read the source to the examples, and read the documentation strings
+embedded in the modules' source.
+
+-- Micah Dowty <micah@picogui.org>
+
