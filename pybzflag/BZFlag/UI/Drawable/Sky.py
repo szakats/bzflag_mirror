@@ -132,7 +132,7 @@ class MountainTexture(Texture.DynamicTexture):
     """Perlin-noise-based mountain range silhouette"""
     def __init__(self, size=(512,128), noise=None):
         if not noise:
-            noise = Noise.PerlinNoise(octaves=1, fundamental=20)
+            noise = Noise.PerlinNoise(octaves=5, fundamental=10)
         self.noise = noise
         Texture.DynamicTexture.__init__(self, size)
         self.setRepeat(GL_REPEAT, GL_CLAMP)
@@ -152,29 +152,15 @@ class MountainTexture(Texture.DynamicTexture):
         glEnable(GL_LINE_SMOOTH)
         glColor3f(1,1,1)
 
-        def vertices():
-            for i in xrange(len(samples)):
-                glVertex2f(samples[i] * self.viewport.size[0],
-                           (-heights[i]/2 +0.5) * self.viewport.size[1])
-
-        # The mountains themselves
-        glBegin(GL_POLYGON)
-        glVertex2f(0,self.viewport.size[1])
-        vertices()
-        glVertex2f(self.viewport.size[0],self.viewport.size[1])
-        glEnd()
-
-        # Smoothed outline
-        glBegin(GL_LINE_STRIP)
-        vertices()
+        glBegin(GL_LINES)
+        for i in xrange(len(samples)):
+            x = samples[i] * self.viewport.size[0]
+            glVertex2f(x, (-heights[i]/2 +0.5) * self.viewport.size[1])
+            glVertex2f(x, self.viewport.size[1])
         glEnd()
 
         glDisable(GL_BLEND)
         glDisable(GL_LINE_SMOOTH)
-
-        self.viewport.display.flip()
-        import time
-        time.sleep(10)
 
 
 class Horizon(SkyDrawable):
