@@ -6,8 +6,6 @@ Todo list, in no particular order:
 
   - Complete the MVC paradigm by implementing controller classes for the player
 
-  - Implement proper timer support in the event loop, remove the nasty hack that is used to update views
-
   - Implement UDP communication
 
     
