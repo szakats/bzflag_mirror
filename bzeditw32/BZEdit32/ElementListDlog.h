@@ -49,6 +49,12 @@ public:
 
 	void SelectItem ( int iItem );
 
+// Helper functions for setting/getting selection mark of the list control
+
+	int  GetSelectionIndex ( void );
+	
+	void SetSelectionIndex ( int iItem );
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CElementListDlog)

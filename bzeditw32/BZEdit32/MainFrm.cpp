@@ -61,17 +61,29 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
+#if (_MSC_VER < 1200) // VC5-
+	if (!m_wndToolBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP
+		| CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC, AFX_IDW_TOOLBAR) ||
+		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
+#else // VC6+
 	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
 		| /*CBRS_GRIPPER |*/ CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
+#endif
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
 
+#if (_MSC_VER < 1200) // VC5-
+	if (!m_wndItemBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_TOP
+		| CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC, AFX_IDW_TOOLBAR) ||
+		!m_wndItemBar.LoadToolBar(IDR_NEWENT_BAR))
+#else // VC6+
 	if (!m_wndItemBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
 		| /*CBRS_GRIPPER |*/ CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!m_wndItemBar.LoadToolBar(IDR_NEWENT_BAR))
+#endif
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
@@ -91,6 +103,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndToolBar.EnableDocking(CBRS_ALIGN_TOP );
 	m_wndItemBar.EnableDocking(CBRS_ALIGN_TOP );
 
+// Hm, this does not compile under VC5 
+#if (_MSC_VER >= 1200)
 	RECT	rRect;
 
 	rRect.top = 20;
@@ -113,6 +127,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	rRect.bottom = HIWORD(m_wndItemBar.GetToolBarCtrl().GetButtonSize())+20;
 
 	DockControlBar(&m_wndItemBar);//,AFX_IDW_DOCKBAR_TOP ,&rRect);
+#else // _MSC_VER < 1200
+	// still need to do this for VC5
+	DockControlBar(&m_wndToolBar);
+	DockControlBar(&m_wndItemBar);
+#endif
 
 	LoadPlugins();
 	return 0;

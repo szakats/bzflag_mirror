@@ -89,8 +89,7 @@ void CElementListDlog::SelectItem(int iItem )
 	{
 		m_pDoc->m_oWorld.SetSelItem(iItem);
 
-		m_oListCtl.SetItemState(m_oListCtl.GetSelectionMark(),0,LVIS_SELECTED);
-		m_oListCtl.SetSelectionMark(-1);
+		SetSelectionIndex(-1);
 
 		ListSelChange();
 
@@ -138,14 +137,40 @@ void CElementListDlog::SelectItem(int iItem )
 		m_oListCtl.SetItemState(i,0,LVIS_SELECTED);
 	}
 	
-	if (iSelItem != -1)
-	{
-		m_oListCtl.SetSelectionMark(iSelItem);
-		m_oListCtl.SetItemState(iSelItem,0xffff,LVIS_SELECTED);
-	}
+	SetSelectionIndex(iSelItem);
 
 	ListSelChange();
 	m_oListCtl.Invalidate(true);
+}
+
+int CElementListDlog::GetSelectionIndex()
+{
+	#if (_MSC_VER < 1200)
+		// VC5- have to iterate the items
+		for (int item = 0; item < m_oListCtl.GetItemCount(); item++)
+			if (m_oListCtl.GetItemState(item,LVIS_SELECTED))
+				return item;
+		// no selected items?
+		return -1;
+	#else
+		// VC6+ have a nice function to do this for us
+		return m_oListCtl.GetSelectionMark();
+	#endif
+}
+
+void CElementListDlog::SetSelectionIndex( int iItem )
+{
+	// deselect currently selected item
+	m_oListCtl.SetItemState(GetSelectionIndex(),0,LVIS_SELECTED);
+
+	// VC6+ need to set the selection mark
+	#if (_MSC_VER >= 1200)
+		m_oListCtl.SetSelectionMark(iItem);
+	#endif
+
+	// don't set item state for -1 (no item)
+	if (iItem >= 0)
+		m_oListCtl.SetItemState(iItem,0xffff,LVIS_SELECTED);
 }
 
 void CElementListDlog::OnSelchangeElementFilter() 
@@ -155,7 +180,8 @@ void CElementListDlog::OnSelchangeElementFilter()
 
 	int	iCurSel = m_oListFilter.GetCurSel();
 
-	int	iListSel = m_oListCtl.GetSelectionMark();
+	int	iListSel = GetSelectionIndex();
+
 	m_oListCtl.DeleteAllItems();
 
 	CString	ListType;
@@ -200,13 +226,9 @@ void CElementListDlog::OnSelchangeElementFilter()
 	if (iListSel >=m_oListCtl.GetItemCount())
 		iListSel = m_oListCtl.GetItemCount()-1;
 
+	SetSelectionIndex(iListSel);
 	if (iListSel !=-1)
-	{
-		m_oListCtl.SetItemState(iListSel,0xffff,LVIS_SELECTED);
-		m_oListCtl.SetSelectionMark(iListSel);
-
 		m_pDoc->m_oWorld.SetSelItem(m_oListCtl.GetItemData(iListSel));
-	}
 	else
 		m_pDoc->m_oWorld.SetSelItem(-1);
 
@@ -216,7 +238,7 @@ void CElementListDlog::OnSelchangeElementFilter()
 
 void CElementListDlog::ListSelChange ( void )
 {
-	int	iSel = m_oListCtl.GetSelectionMark();
+	int	iSel = GetSelectionIndex();
 	
 	if (iSel != -1)
 		m_pDoc->m_oWorld.SetSelItem(m_oListCtl.GetItemData(iSel));
