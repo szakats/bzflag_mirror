@@ -27,7 +27,7 @@ from BZFlag.UI import GLExtension
 
 
 class Ground(DisplayList):
-    textureNames = ('grass_base.png', 'grass_overlay.jpeg')
+    textureNames = ('grass.jpeg', 'lightmap.jpeg')
 
     def set(self, size):
         self.size = size / 2

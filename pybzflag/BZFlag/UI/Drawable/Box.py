@@ -87,7 +87,7 @@ class BoxSides(DisplayList):
 class BoxTop(DisplayList):
     def __init__(self, box):
         self.box = box
-        self.textureNames = ['concrete.jpeg']
+        self.textureNames = ['concrete_dark.jpeg', 'lightmap.jpeg']
         self.tex2Coords = ( (0,0), (1,0), (1,1), (0,1) )
 
         # If the box is fairly large and squareish, use a square oil-stain texture
@@ -112,6 +112,7 @@ class BoxTop(DisplayList):
 
         try:
             self.render.textures[1].texEnv = GL_MODULATE
+            self.render.textures[2].texEnv = GL_MODULATE
         except IndexError:
             pass
 
@@ -122,16 +123,17 @@ class BoxTop(DisplayList):
         glBegin(GL_POLYGON)
         for i in xrange(4):
             vertex = self.polygon[i]
-            tex2Coord = self.tex2Coords[i]
             glTexCoord2f(vertex[0] / 30, vertex[1] / 30)
-            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, tex2Coord[0], tex2Coord[1])
+            tex2Coord = self.tex2Coords[i]
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, vertex[0] / 400, vertex[1] / 400)
+            glMultiTexCoord2fARB(GL_TEXTURE2_ARB, tex2Coord[0], tex2Coord[1])
             glVertex2f(*vertex)
         glEnd()
         glPopMatrix()
 
 
 class BoxBottom(DisplayList):
-    textureName = 'concrete_underside.jpeg'
+    textureName = 'concrete_light.jpeg'
     
     def set(self, polygon, height):
         self.polygon = polygon
