@@ -10,7 +10,7 @@ of command line options supported.
 
 There's no real documentation yet, but there is a good bit of
 pseudo-documentation available in the python doc strings. You can extract
-this using pydoc. 
+this using pydoc.
 
 -- Requirements
 
@@ -21,6 +21,7 @@ in its event handling system and HUD layout.
 The core PyBZFlag modules only require the python standard library.
 However, most of the graphical code requires pygame (http://pygame.org)
 and the Python Imaging Library (http://www.pythonware.com/products/pil/)
+3D views require PyOpenGL (http://pyopengl.sourceforge.net/)
 
 The list of available UI modules in --help will reflect the dependencies
 currently installed.
