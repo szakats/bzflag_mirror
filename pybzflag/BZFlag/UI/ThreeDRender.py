@@ -152,10 +152,10 @@ class TextureGroup(Drawable.DisplayList):
         """Alternate draw function used in picking, that assigns names to all drawables"""
         for drawable in self.static:
             picking.name(drawable)
-            drawable.draw()
+            drawable.drawToList()
         for drawable in self.dynamic:
             picking.name(drawable)
-            drawable.draw()
+            drawable.drawToList()
 
 
 class PickingState:
@@ -246,7 +246,7 @@ class BasicRenderPass(RenderPass):
            binding the pass' texture and drawing the texture group.
            """
         if picking:
-            for (texture, group) in self.textureGroups.iteritems():
+            for group in self.textureGroups.itervalues():
                 group.pickingDraw(picking)
         else:
             for (texture, group) in self.textureGroups.iteritems():
