@@ -164,5 +164,7 @@ class CubeMap(Texture):
                          self.viewport.rect[2],
                          self.viewport.rect[3],
                          0)
+        glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_CLAMP)
+        glTexParameteri(self.target, GL_TEXTURE_WRAP_T, GL_CLAMP)
 
 ### The End ###
