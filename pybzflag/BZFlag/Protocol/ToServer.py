@@ -96,8 +96,14 @@ class MsgUDPLinkEstablished(Common.Message):
 class MsgTeleport(Common.Message):
     messageId = 0x7470
     entries = [
-        StructEntry(UInt16,          'fromId'),
-        StructEntry(UInt16,          'toId'),
+        StructEntry(UInt16, 'fromId'),
+        StructEntry(UInt16, 'toId'),
+        ]
+
+class MsgPause(Common.Message):
+    messageId = 0x7061
+    entries = [
+        StructEntry(UInt8, 'paused'),
         ]
 
 

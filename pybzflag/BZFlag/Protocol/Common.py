@@ -226,6 +226,7 @@ class MsgPlayerUpdate(Message):
     messageId = 0x7075
     entries = [
         StructEntry(PlayerId,     'id'),
+        StructEntry(UInt32,       'order'),
         StructEntry(PlayerStatus, 'status'),
         StructEntry(Vector3,      'position'),
         StructEntry(Vector3,      'velocity'),
