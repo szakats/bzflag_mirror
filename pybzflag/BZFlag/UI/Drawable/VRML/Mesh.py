@@ -25,6 +25,7 @@ calculating surface normals.
 #
 
 from BZFlag.UI.Drawable.Array import *
+from BZFlag.Geometry import *
 from OpenGL.GL import *
 from Numeric import *
 import os
@@ -32,23 +33,39 @@ import os
 __all__ = ('Mesh',)
 
 
+def getTriangles(indices):
+    """Given a list of indices describing arbitrary-length polygons terminated by -1s,
+       return a list of triangles, each represented as three indices.
+       """
+    tris = []
+    polygon = []
+    for index in indices:
+        if index == -1:
+            # -1 is the end-of-polygon marker. Tesselate any convex polygon into triangles
+            for i in xrange(1, len(polygon)-1):
+                tris.append((polygon[0], polygon[i], polygon[i+1]))
+            polygon = []
+        else:
+            # Toss another vertex on the buffer
+            polygon.append(index)
+    return array(tris)
+
+
 class Mesh(TriangleArrayDisplayList):
     """A drawable mesh model as extracted from the VRML file.
        All relevant VRML nodes should be passed as keyword parameters,
        with their first letter lowercased.
        """
-    creaseAngle = 60
-
     def __init__(self, **nodes):
         # Store vertices
         vertices = reshape(take(nodes['coordinate3'].value['point'],
-                                self.getTriangles(nodes['indexedFaceSet'].value['coordIndex']).flat),
+                                getTriangles(nodes['indexedFaceSet'].value['coordIndex']).flat),
                            (-1, 3, 3))
 
         # Store texture coordinates if we have them
         if nodes.get('textureCoordinate2', None):
             texcoords = reshape(take(nodes['textureCoordinate2'].value['point'],
-                                     self.getTriangles(nodes['indexedFaceSet'].value['textureCoordIndex']).flat),
+                                     getTriangles(nodes['indexedFaceSet'].value['textureCoordIndex']).flat),
                                 (-1, 3, 2))
         else:
             texcoords = None
@@ -56,10 +73,10 @@ class Mesh(TriangleArrayDisplayList):
         # Store normals if we have them, otherwise calculate normals ourselves
         if nodes.get('normal', None):
             normals = reshape(take(nodes['normal'].value['vector'],
-                                    self.getTriangles(nodes['indexedFaceSet'].value['normalIndex']).flat),
+                                    getTriangles(nodes['indexedFaceSet'].value['normalIndex']).flat),
                                (-1, 3, 3))
         else:
-            raise Exception("Automatic normal calculation is broken")
+            normals = autoVertexNormals(vertices)
 
         # Now that we know how much geometry we're dealing with, initialize
         # the TriangleArray and copy our geometry into it.
@@ -109,53 +126,6 @@ class Mesh(TriangleArrayDisplayList):
                 self.render.blended = self.color[3] != 1
         else:
             self.color = None
-
-    def getTriangles(self, indices):
-        """Given a list of indices describing arbitrary-length polygons terminated by -1s,
-           return a list of triangles, each represented as three indices.
-           """
-        tris = []
-        polygon = []
-        for index in indices:
-            if index == -1:
-                # -1 is the end-of-polygon marker. Tesselate any convex polygon into triangles
-                for i in xrange(1, len(polygon)-1):
-                    tris.append((polygon[0], polygon[i], polygon[i+1]))
-                polygon = []
-            else:
-                # Toss another vertex on the buffer
-                polygon.append(index)
-        return array(tris)
-
-##     def postprocess(self):
-##         """After all the triangles have been stored, go back and calculate vertex normals"""
-##         # To each triangle, add a list for accumulating vertex averages
-##         for tri in self.triangles:
-##             tri.normalTotal  = [tri.faceNormal] * 3
-
-##         for vertex, uses in self.vertexMap.iteritems():
-##             # Now we have a list of all the uses of this vertex, as (triangle, index) tuples.
-##             # The triangle has already calculated a face normal for itself. We just have to
-##             # find adjoining faces with a low enough angle between them to smooth.
-
-##             # For every pair of uses...
-##             for useIndex1 in range(len(uses)):
-##                 use1 = uses[useIndex1]
-##                 for useIndex2 in range(useIndex1 + 1, len(uses)):
-##                     use2 = uses[useIndex2]
-
-##                     # Compare the angle between face normals
-##                     if unitVectorAngle(use1[0].faceNormal, use2[0].faceNormal) < self.creaseAngle:
-##                         # These two faces are smooth enough we should combine the normals
-##                         use1[0].normalTotal[use1[1]] = add(use1[0].normalTotal[use1[1]], use2[0].normals[use2[1]])
-##                         use2[0].normalTotal[use2[1]] = add(use2[0].normalTotal[use2[1]], use1[0].normals[use1[1]])
-##         del self.vertexMap
-
-##         # Now go back and finish the averages by dividing
-##         for tri in self.triangles:
-##             for i in range(3):
-##                 tri.normals[i] = normalize(tri.normalTotal[i])
-##             del tri.normalTotal
 
     def drawToList(self, rstate):
         """Splat out our stored color, matrix, and triangles to a display list"""

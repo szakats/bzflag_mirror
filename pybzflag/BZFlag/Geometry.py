@@ -27,7 +27,7 @@ from LinearAlgebra import *
 import math
 
 __all__ = ['cross', 'magnitude2', 'magnitude', 'normalize', 'vectorAngle',
-           'unitVectorAngle']
+           'unitVectorAngle', 'autoVertexNormals']
 
 
 def cross(u, v, result=None):
@@ -42,7 +42,7 @@ def cross(u, v, result=None):
     vx = v[...,0]
     vy = v[...,1]
     vz = v[...,2]
-    
+
     #     [ i  j  k  ]
     # det [ ux uy uz ]
     #     [ vx vy vz ]
@@ -83,6 +83,7 @@ def normalize(a, result=None):
     except:
         return zeros(a.shape, a.typecode())
 
+
 def vectorAngle(a,b):
     """Find the angle between vectors, in degrees"""
     a = asarray(a)
@@ -103,5 +104,46 @@ def unitVectorAngle(a,b):
     except ValueError:
         # acos of equal vectors explodes
         return 0
+
+
+def autoVertexNormals(triangles, creaseAngle=60):
+    """Automatically calculate vertex normals for the given triangle normals.
+       Expects an array with a shape of the form (n, 3, 3), returns an array
+       with the same shape.
+       Polygons with an angle of less than creaseAngle betwen them are smooth shaded,
+       others are flat shaded.
+       """
+    # Calculate normals for each triangle, repeated across all three vertices.
+    # This makes all triangles initially flat shaded.
+    a = triangles[:,0,:]
+    b = triangles[:,1,:]
+    c = triangles[:,2,:]
+    triNormals = cross(b-a, c-a)
+    normalize(triNormals, triNormals)
+    normals = repeat(triNormals[:,NewAxis,...], 3, 1)
+
+    # First we create a dictionary listing each use of a particular vertex.
+    # This maps tuple(vertex) to a list of (triangleIndex, vertexIndex) tuples.
+    uses = {}
+    for i in xrange(len(triangles)):
+        for vertex in xrange(3):
+            uses.setdefault(tuple(triangles[i][vertex]), []).append((i, vertex))
+
+    # Now we go back through our uses dict and find vertices to smooth by averaging
+    for vertex, uses in uses.iteritems():
+        # For every pair of uses...
+        for useIndex1 in range(len(uses)):
+            use1 = uses[useIndex1]
+            for useIndex2 in range(useIndex1 + 1, len(uses)):
+                use2 = uses[useIndex2]
+
+                # Compare the angle between face normals, smoothing them if it's small enough
+                if unitVectorAngle(triNormals[use1[0]], triNormals[use2[0]]) < creaseAngle:
+                    normals[use1[0], use1[1]] += triNormals[use2[0]]
+                    normals[use2[0], use2[1]] += triNormals[use1[0]]
+
+    # Renormalize to finish the averaging between smoothed vertices
+    normalize(normals, normals)
+    return normals
 
 ### The End ###
