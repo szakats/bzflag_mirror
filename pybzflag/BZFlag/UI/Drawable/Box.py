@@ -81,38 +81,27 @@ class BoxSides(DisplayList):
 
 class BoxTops(DisplayList):
     textureName = 'boxtops.png'
-    def set(self, center, angle, size):
-        self.center = center
-        self.angle = angle
-        self.size = size
+    def set(self, polygon, base, height):
+        self.polygon = polygon
+        self.base = base
+        self.height = height
+
+    def drawSide(self):
+        glBegin(GL_POLYGON)
+        for vertex in self.polygon:
+            glTexCoord2f(vertex[0] / 2, vertex[1] / 2)
+            glVertex2f(*vertex)
+        glEnd()
 
     def drawToList(self):
         glPushMatrix()
-        glTranslatef(*self.center)
-        glRotatef(self.angle, 0.0, 0.0, 1.0)
-        glBegin(GL_QUADS)
-        # Z+ side
-        glNormal3f(0, 0, 1)
-        glTexCoord2f(self.size[0] / 2, 0)
-        glVertex3f(self.size[0], -self.size[1], self.size[2])
-        glTexCoord2f(self.size[0] / 2, self.size[1] / 2)
-        glVertex3f(self.size[0], self.size[1], self.size[2])
-        glTexCoord2f(0, self.size[1] / 2)
-        glVertex3f(-self.size[0], self.size[1], self.size[2])
-        glTexCoord2f(0, 0)
-        glVertex3f(-self.size[0], -self.size[1], self.size[2])
-        # Z- side
+        glTranslatef(0, 0, self.base)
         glNormal3f(0, 0, -1)
-        glTexCoord2f(0, 0)
-        glVertex3f(-self.size[0], -self.size[1], 0)
-        glTexCoord2f(0, self.size[1] / 2)
-        glVertex3f(-self.size[0], self.size[1], 0)
-        glTexCoord2f(self.size[0] / 2, self.size[1] / 2)
-        glVertex3f(self.size[0], self.size[1], 0)
-        glTexCoord2f(self.size[0] / 2, 0)
-        glVertex3f(self.size[0], -self.size[1], 0)
-        glEnd()
+        if self.base:
+            self.drawSide()
+        glTranslatef(0, 0, self.height)
+        glNormal3f(0, 0, 1)
+        self.drawSide()
         glPopMatrix()
-
 
 ### The End ###
