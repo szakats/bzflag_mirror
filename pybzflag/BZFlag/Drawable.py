@@ -40,7 +40,7 @@ class GLDrawable:
   def drawWithName(self, name):
     pass
 
-class GroundDrawable(GLDrawable):
+class Ground(GLDrawable):
   def __init__(self, size):
     GLDrawable.__init__(self)
     self.size = size / 2
@@ -65,7 +65,7 @@ class GroundDrawable(GLDrawable):
   def draw(self):
     glCallList(self.list)
 
-class BaseTopsDrawable(GLDrawable):
+class BaseTops(GLDrawable):
   def __init__(self, team, center, angle, size):
     GLDrawable.__init__(self)
     self.team = team
@@ -105,7 +105,7 @@ class BaseTopsDrawable(GLDrawable):
   def draw(self):
     glCallList(self.list)
 
-class WallDrawable(GLDrawable):
+class Wall(GLDrawable):
   def __init__(self, center, angle, size):
     GLDrawable.__init__(self)
     self.center = center
@@ -134,7 +134,7 @@ class WallDrawable(GLDrawable):
   def draw(self):
     glCallList(self.list)
 
-class BoxSidesDrawable(GLDrawable):
+class BoxSides(GLDrawable):
   def __init__(self, center, angle, size):
     GLDrawable.__init__(self)
     self.center = center
@@ -193,7 +193,7 @@ class BoxSidesDrawable(GLDrawable):
   def draw(self):
     glCallList(self.list)
 
-class BoxTopsDrawable(GLDrawable):
+class BoxTops(GLDrawable):
   def __init__(self, center, angle, size):
     GLDrawable.__init__(self)
     self.center = center
@@ -232,7 +232,7 @@ class BoxTopsDrawable(GLDrawable):
   def draw(self):
     glCallList(self.list)
 
-class PyramidDrawable(GLDrawable):
+class Pyramid(GLDrawable):
   def __init__(self, center, angle, size, flip):
     # FIXME - respect flipz
     GLDrawable.__init__(self)
@@ -301,7 +301,7 @@ class PyramidDrawable(GLDrawable):
   def draw(self):
     glCallList(self.list)
 
-class TeleporterFieldDrawable(GLDrawable):
+class TeleporterField(GLDrawable):
   def __init__(self, center, angle, size):
     GLDrawable.__init__(self)
     self.center = center
@@ -333,7 +333,7 @@ class TeleporterFieldDrawable(GLDrawable):
   def draw(self):
     glCallList(self.list)
 
-class TeleporterBorderDrawable(GLDrawable):
+class TeleporterBorder(GLDrawable):
   def __init__(self, center, angle, size, border):
     GLDrawable.__init__(self)
     self.center = center
