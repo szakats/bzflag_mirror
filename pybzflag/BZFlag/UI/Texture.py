@@ -56,7 +56,7 @@ class Texture:
             string = pygame.image.tostring(surface, "RGB")
             image = Image.fromstring("RGB", surface.get_size(), string).convert("L")
             string = image.tostring('raw', 'L', 0, -1)
-            self.loadRaw(surface.get_size(), string, GL_LUMINANCE, GL_INTENSITY4)
+            self.loadRaw(surface.get_size(), string, GL_LUMINANCE, GL_INTENSITY8)
         else:
             string = pygame.image.tostring(surface, "RGB", True)
             self.loadRaw(surface.get_size(), string, GL_RGB)

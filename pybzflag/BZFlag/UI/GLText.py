@@ -40,7 +40,7 @@ from BZFlag.UI.Texture import Texture
 from OpenGL.GL import *
 
 # Default font height, in pixels
-defaultSize = 12
+defaultSize = 14
 
 # Names that can be used in place of actual filenames
 fontAliases = {
@@ -220,7 +220,6 @@ class Font:
         # Prepare the OpenGL state
         glEnable(GL_TEXTURE_2D)
         glDisable(GL_LIGHTING)
-        glDisable(GL_BLEND)
         glDisable(GL_COLOR_MATERIAL)
         glDisable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
