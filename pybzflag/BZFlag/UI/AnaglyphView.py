@@ -36,7 +36,7 @@ class AnaglyphView(View):
            world, with transient objects such as players and flags
            """
 	rstate = Drawable.RenderState(self)
-        eyesep = 12.5
+        eyesep = 25
         angle = math.atan(eyesep / self.camera.distance)
         # draw left eye (blue-green)
         self.camera.azimuthOffset = -angle
