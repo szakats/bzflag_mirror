@@ -33,13 +33,13 @@ class RenderSettings:
     """Settings that affect how ThreeDRender processes a a drawable"""
     def __init__(self):
         self.textures = []
-        self.blended = False
-        self.overlay = False
-        self.static = True
-        self.decal = False
-	self.camera = False
-        self.reflection = False
-        self.background = False
+        self.blended = False      # This primitive uses blending, and should be rendered after solid objects
+        self.overlay = False      # This object is on top of the scene, rather than part of it
+        self.static = True        # This object doesn't change, so it can be cached in a display list
+        self.decal = False        # This object is a decal, to be drawn with a depth offset
+	self.camera = False       # This object is a camera-induced effect
+        self.reflection = False   # This object is a cube-mapped reflection
+        self.background = False   # This object is part of a location-independent background behind the scene
 
     def __repr__(self):
         settings = [key for key in self.__dict__.iterkeys() if key[0] != '_']
@@ -52,7 +52,9 @@ class RenderState:
     def __init__(self, view):
         self.view = view
         self.viewport = view.viewport
-        self.picking = None
+
+        self.picking = None       # This is set when we're doing a picking render, to determine what was clicked
+        self.cubeMap = None       # This is set when we're rendering to a cube-map texture
 
 
 class GLDrawable:

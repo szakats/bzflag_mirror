@@ -32,7 +32,7 @@ from OpenGL.GL.EXT.texture_cube_map import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from BZFlag.UI.Texture import Texture
-import math
+import math, copy
 
 
 class CubeMap(Texture):
@@ -55,8 +55,14 @@ class CubeMap(Texture):
     def bind(self, rstate):
         """The first time we're bound we add a new viewport that renders our cube map"""
         if not self.viewport:
-            self.rstate = rstate
+            # Make a note in our render state that we're rendering to a cube map.
+            # Some objects will want to hide themselves during this process, for example
+            # camera-induced effects and overlay objects.
+            self.rstate = copy.copy(rstate)
+            rstate.cubeMap = self
+            
             self.viewport = self.setupViewport()
+
         Texture.bind(self, rstate)
 
     def getTextureRect(self, viewport):

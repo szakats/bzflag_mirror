@@ -235,6 +235,10 @@ class OverlayRenderPass(BasicRenderPass):
         return drawable.render.overlay
 
     def render(self, rstate):
+        # Don't render overlay objects into environment maps
+        if rstate.cubeMap:
+            return
+
         glClear(GL_DEPTH_BUFFER_BIT)
         BasicRenderPass.render(self, rstate)
 
@@ -323,6 +327,10 @@ class CameraRenderPass(BasicRenderPass):
         return drawable.render.camera
 
     def render(self, rstate):
+        # Don't render camera effects into environment maps
+        if rstate.cubeMap:
+            return
+
         glPushMatrix()
         # Strip out all but the top 3x3 square of the modelview matrix.
         # This preserves the camera's location, but keeps it centered at 0,0,0
