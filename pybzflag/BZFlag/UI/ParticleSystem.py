@@ -1,6 +1,8 @@
-""" BZFlag.UI.SpringSystem
+""" BZFlag.UI.ParticleSystem
 
-Spring system based simulation models and affectors
+Simulation models and affectors based on arrays of points. This includes
+systems that can be simulated similarly, but aren't traditionally considered
+particle systems, like spring and mass simulations.
 """
 #
 # Python BZFlag Package
@@ -91,9 +93,9 @@ class Cloth:
                 # This shouldn't ever happen, but this keeps us from crashing if something goes
                 # terminally wrong with the simulation.
                 self.reset()
-                
+
             self.dt -= self.stepTime
-            nSteps += 1            
+            nSteps += 1
         return nSteps
 
     def add(self, cls, *args, **kw):
@@ -177,13 +179,13 @@ class VelocityAffector(Affector):
     """Generic affector for applying velocity to mass positions"""
     def integrate(self, dt):
         add(self.model.state, multiply(self.model.velocity, dt), self.model.state)
-             
+
 
 class FrictionAffector(Affector):
     """Generic affector for applying friction to mass velocities"""
     def integrate(self, dt):
         multiply(self.model.velocity, 1 - self.model.friction, self.model.velocity)
-    
+
 
 class ConstantAccelAffector(Affector):
     """Generic affector for applying a constant acceleration to masses"""

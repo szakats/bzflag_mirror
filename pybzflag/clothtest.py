@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, SpringSystem, Texture
+from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, ParticleSystem, Texture
 from BZFlag import Event, Animated
 from Numeric import *
 from time import time
@@ -42,7 +42,7 @@ class Flag:
         self.resolution = (20,20)
 
         self.pole = Drawable.VRML.load("flagpole.wrl")
-        self.cloth = SpringSystem.Cloth(self.getInitialState())
+        self.cloth = ParticleSystem.Cloth(self.getInitialState())
 
         # Set up a nice efficient SurfaceArray. This actually ends up
         # running the cloth simulation inside an array in glInterleavedArrays
@@ -57,13 +57,13 @@ class Flag:
 
         # Gravity, plus a small force in the other two axes to keep the springs from
         # lining up perfectly and standing end-on-end.
-        self.cloth.add(SpringSystem.ConstantAccelAffector, (0.001, 0.001, -0.04))
+        self.cloth.add(ParticleSystem.ConstantAccelAffector, (0.001, 0.001, -0.04))
 
         # Pin the cloth to the flagpole
-        self.cloth.add(SpringSystem.ClothAnchorAffector, (-1,0), (0,0))
+        self.cloth.add(ParticleSystem.ClothAnchorAffector, (-1,0), (0,0))
 
         # Now add the global wind we were given
-        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, wind.vector)
+        self.cloth.add(ParticleSystem.ClothWindAffector, self.surf, wind.vector)
 
     def getInitialState(self):
         def xcoord(x,y):
