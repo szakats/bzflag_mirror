@@ -31,8 +31,9 @@ class OverheadView:
        """
     colorScheme = {
         'background': 'black',
-        'Box':        'red',
-        'Pyramid':    'blue',
+        'Box':        '#408080',
+        'Pyramid':    '#80FFFF',
+        'Teleporter': '#FFFF80',
       }
     
     def __init__(self, game):
@@ -85,7 +86,7 @@ class OverheadView:
             color = self.colorScheme.get(object.__class__.__name__, None)
             if color:
                 poly = map(self.worldToView, self.objectToPoly(object))
-                pygame.draw.aalines(surface, color, 1, poly)
+                pygame.draw.polygon(surface, color, poly)
 
     def render(self, surface):
         """Render the overhead view to the given surface. This includes the
