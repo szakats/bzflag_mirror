@@ -9,9 +9,9 @@ import sys
 
 ui = CommandLine.Parser(UI.Any, ui = 'overhead').parse()
 game = Game.Game()
-game.world.clone(World.load(ui.cmdLineArgs[0]))
 loop = EventLoop()
 ui.attach(game, loop)
+game.world.clone(World.load(ui.cmdLineArgs[0]))
 loop.run()
 
 
