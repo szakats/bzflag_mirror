@@ -357,6 +357,12 @@ class Mesh(DisplayList):
             children = nodes['texture2'].children
             assert(children[-1].value == 'filename')
             self.textureName = children[-2].value
+            # Try to sanitize the texture name a bit. This removes surrounding quotes and
+            # converts either DOS-style or UNIX-style slashes to the current OS's separator.
+            if self.textureName[0] == '"' and self.textureName[-1] == '"':
+                self.textureName = self.textureName[1:-1]
+            self.textureName = self.textureName.replace("/", os.sep)
+            self.textureName = self.textureName.replace("\\", os.sep)
             self.loadTextures()
 
         # Store material color if we have it
