@@ -50,7 +50,7 @@ class OverheadView:
         # translates everything into a proper pygame Color.
         convertedColors = {}
         for key in self.colorScheme:
-            convertedColors[key] = Color(self.colorScheme[key])
+            convertedColors[key] = pygame.color.Color(self.colorScheme[key])
         self.colorScheme = convertedColors
         
     def worldToView(self, point):
