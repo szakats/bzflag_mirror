@@ -48,10 +48,13 @@ class Colors(DisplayList):
            texture coordinates. Texture coordinates must be adjusted for time
            of day in draw().
            """
+        # Texture the top half of the sky sphere with our changing gradient,
+        # leaving the bottom half clamped to the horizon.
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)       
         glDisable(GL_LIGHTING)
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 0.05, 0.5))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 0.1, 0))
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
