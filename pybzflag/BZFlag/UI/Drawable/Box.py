@@ -20,6 +20,8 @@ Classes to draw the boxes in the world
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
+
+from __future__ import division
 from DisplayList import *
 from OpenGL.GL import *
 from OpenGL.GL.ARB.multitexture import *
@@ -40,10 +42,16 @@ class BoxSides(DisplayList):
 
         # Default wall
         else:
-            self.textureNames = ["brick.png"]
-            self.texRepeats = (box.size[0] / 2,
-                               box.size[1] / 2,
-                               box.size[2] / 4)
+            # This is brick, so we want to make sure we don't end up
+            # with a fractional number of bricks. This brick texture has
+            # 5 bricks horizontally and 10 vertically.
+            self.textureNames = ["brick.jpeg"]
+            numBricks = (int(box.size[0]),
+                         int(box.size[1]),
+                         int(box.size[2] * 2))
+            self.texRepeats = (numBricks[0] / 5,
+                               numBricks[1] / 5,
+                               numBricks[2] / 10)
 
         DisplayList.__init__(self, box)
                
