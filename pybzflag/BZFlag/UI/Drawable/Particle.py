@@ -22,6 +22,8 @@ acceleration via OpenGL extensions like NV_point_sprite.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
+
+from __future__ import division
 from Array import *
 from GLDrawable import *
 from OpenGL.GL import *
@@ -41,11 +43,15 @@ __all__ = ('ParticleArray',)
 
 
 class ParticleArray(GLDrawable):
-    """A drawable that picks a ParticleRenderer implementation at runtime."""
-    def __init__(self, shape, pointDiameter):
+    """A drawable that picks a ParticleRenderer implementation at runtime.
+       The goal was to hide most of the differences between software billboarding
+       and extensions like NV_point_sprite, but that doesn't turn out to be practical.
+       Point sprites will only be used if allowPointSprite is set and they are available.
+       """
+    def __init__(self, shape, pointDiameter, allowPointSprite=False):
         GLDrawable.__init__(self)
 
-        if GLExtension.nvPointSprite:
+        if GLExtension.nvPointSprite and allowPointSprite:
             # Do hardware accelerated billboarding via NV_point_sprite
             # To get hardware acceleration on the GeForce 3, we have to
             # use texture unit 3 rather than 0... odd, eh?
@@ -127,7 +133,14 @@ class PointSpriteRenderer(VertexArray):
         glEnable(GL_POINT_SPRITE_NV)
         glPointSize(self.pointDiameter)
 
-#        glPointParameterfvEXT(GL_POINT_DISTANCE_ATTENUATION_EXT, (0, 0, 0))
+        ## FIXME: This isn't correct. It's still yet to be determined whether
+        ##        it's possible to get the same size function that normal geometry
+        ##        uses. There also appears to be a maximum point sprite size of 64 pixels
+        ##        on my card, which just won't do for some uses of particles.
+        #f = 1 / tan(rstate.viewport.fov / 2)
+        #glPointParameterfvEXT(GL_POINT_DISTANCE_ATTENUATION_EXT, (0.1, 0, 0))
+        #glPointParameterfEXT(GL_POINT_SIZE_MIN_EXT, 0)
+        #glPointParameterfEXT(GL_POINT_SIZE_MAX_EXT, 8192)
 
         # Activate GL_COORD_REPLACE_NV only on texture unit 3. According to the
         # implementation notes, this is the only way it will actually be hardware
