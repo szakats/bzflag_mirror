@@ -47,4 +47,10 @@ Todo list, in no particular order:
 
   - In OverheadView, update using dirty rectangles for lower CPU usage
 
-  - Write a 1-dimensional perlin noise routine to make Animated.PerlinNoise more efficient.
+  - Write 1D and 2D perlin noise routines, possibly ditching the 3D noise routine.
+    Animated.PerlinNoise really needs a 1D rather than a 3D, and it's looking like since
+    creating the noise in realtime won't be an option, we could store individual octaves
+    of 2D noise and interpolate between them in realtime for our animation. At first
+    I thought this would look bad, but it seems to work for Hugo:
+          http://freespace.virgin.net/hugo.elias/models/m_clouds.htm
+
