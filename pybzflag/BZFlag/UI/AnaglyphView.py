@@ -48,9 +48,11 @@ class AnaglyphView(ThreeDView):
         """Render the view to the given surface. This includes the game
            world, with transient objects such as players and flags
            """
+	eyesep = 100
+	angle = math.atan(eyesep / self.camera.distance)
         # draw left eye (blue-green)
 	self.camera1 = self.camera
-	self.camera1.azimuth -= 1
+	self.camera1.azimuth -= angle
         glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_FALSE)
         self.camera1.load()
         self.light0.set()
@@ -59,7 +61,7 @@ class AnaglyphView(ThreeDView):
 	glClear(GL_DEPTH_BUFFER_BIT)
         # draw right eye (red)
 	self.camera2 = self.camera
-	self.camera2.azimuth += 1
+	self.camera2.azimuth += angle
         glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE)
         self.camera2.load()
 	self.light0.set()
