@@ -139,37 +139,6 @@ class Scene:
                     else:
                         self.passes[0][drawable.texture] = [drawable.draw]
 
-    def pick(self, pos, viewport):
-        """Implementation of View.pick, see that function for details"""
-        glSelectBuffer(len(self.objects) * 4)
-        glRenderMode(GL_SELECT)
-        glInitNames()
-        glPushName(0)
-        glMatrixMode(GL_PROJECTION)
-	glPushMatrix()
-        viewport.configureOpenGL()
-	names = {}
-	curname = 1
-        for object, drawables in self.objects.items():
-	    names[curname] = object
-            glLoadName(curname)
-            curname += 1
-            for drawable in drawables:
-                drawable.draw()
-        glMatrixMode(GL_PROJECTION)
-	glPopMatrix()
-	glMatrixMode(GL_MODELVIEW)
-	hits = glRenderMode(GL_RENDER)
-	if len(hits) > 0:
-	    depth = hits[0][1]
-	    choose = hits[0][2]
-	    for hit in hits:
-	        if hit[1] < depth:
-		    depth = hit[1]
-		    choose = hit[2]
-            return names[choose[0]]
-	return None
-
     def render(self):
         """Render the scene to the current OpenGL context"""
         glDisable(GL_BLEND)
@@ -238,7 +207,40 @@ class ThreeDView:
            of one of the classes defined in BZFlag.Protocol.WorldObjects. If no
            object was rendered at this postion, returns None.
            """
-        return self.scene.pick(pos, self.viewport)
+        glSelectBuffer(len(self.scene.objects) * 4)
+        glRenderMode(GL_SELECT)
+        glInitNames()
+        glPushName(0)
+        
+        glMatrixMode(GL_PROJECTION)
+	glPushMatrix()
+        self.viewport.configureOpenGL()
+        self.camera.load()
+
+	names = {}
+	curname = 1
+        for object, drawables in self.scene.objects.items():
+	    names[curname] = object
+            glLoadName(curname)
+            curname += 1
+            for drawable in drawables:
+                drawable.draw()
+
+        glMatrixMode(GL_PROJECTION)
+	glPopMatrix()
+	glMatrixMode(GL_MODELVIEW)
+
+        hits = glRenderMode(GL_RENDER)
+	if len(hits) > 0:
+	    depth = hits[0][1]
+	    choose = hits[0][2]
+	    for hit in hits:
+	        if hit[1] < depth:
+		    depth = hit[1]
+		    choose = hit[2]
+            return names[choose[0]]
+	return None
+
 
 def attach(game, eventLoop):
     from BZFlag.UI import Viewport, ThreeDControl

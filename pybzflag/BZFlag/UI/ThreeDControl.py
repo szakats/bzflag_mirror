@@ -45,9 +45,6 @@ class Viewing:
         view.camera.position = (0, 0, -20)
 
         def onMouseButtonDown(event):
-	    if event.button == 1:
-	        view.camera.load()
-		print 'picked: %s' % view.pick(event.pos)
             if event.button == 4:
                 self.zoom(1/self.mouseZoomScale)
             if event.button == 5:
@@ -70,6 +67,9 @@ class Viewing:
         viewport.onKeyDown.observe(onKeyDown)
 
         def onMouseMotion(event):
+	    if event.buttons[0]:
+		print 'picked: %r' % view.pick(event.pos)
+
             # Panning - shift-right mouse button
 	    if pygame.key.get_mods() & pygame.KMOD_SHIFT:
 	        if event.buttons[2]:
