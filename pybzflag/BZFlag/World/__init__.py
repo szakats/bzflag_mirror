@@ -26,5 +26,6 @@ random worlds.
 from Scene import *
 from World import *
 from Generator import *
+import Scale
 
 ### The End ###

@@ -28,6 +28,7 @@ import os, re, math, md5
 from xreadlines import xreadlines
 from StringIO import StringIO
 from BZFlag.World.Scene import SceneList
+from BZFlag.World import Scale
 
 
 class TeleporterSide:
@@ -148,7 +149,7 @@ class World:
         self.gameStyle = None
         self.lifetime = 'permanent'     # For client-side world caching
 
-    def storeSkeletonHeader(self, size=800, wallHeight=6.15):
+    def storeSkeletonHeader(self, size=Scale.WorldSize, wallHeight=Scale.WallHeight):
         """Adds required objects to the world that are only present in the binary format"""
         self.storeBlock(WorldObjects.Style(
             worldSize = size

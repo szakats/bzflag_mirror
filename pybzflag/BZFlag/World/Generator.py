@@ -22,15 +22,46 @@ Implements factory functions for automatically generating various worlds
 #
 
 from BZFlag.World.World import World
+from BZFlag.World import Scale
+from BZFlag.Protocol import WorldObjects
+from random import random
+import math
 
 
 def Empty():
     w = World()
     w.erase()
     w.storeSkeletonHeader()
-    w.storeSkeletonFooter()
+    w.storeSkeletonFooter()    
     w.postprocess()
     return w
 
+
+def Random(randomHeights=0):
+    """This is the same random algorithm that bzfs.cxx uses by default"""
+    w = World()
+    w.erase()
+    w.lifetime = 'temporary'
+    w.storeSkeletonHeader()
+
+    def addRandom(cls, height, base):
+        h = height
+        num = int((0.5 + 0.7 * random()) * Scale.CitySize * Scale.CitySize)
+        for i in xrange(num):
+            if randomHeights:
+                h = height * (2.0 * (random() + 0.5))
+            w.storeBlock(cls(
+                center = [Scale.WorldSize * (random() - 0.5),
+                          Scale.WorldSize * (random() - 0.5),
+                          0],
+                angle = 2.0 * math.pi * random(),
+                size = [base, base, h]))
+    
+    addRandom(WorldObjects.Box, Scale.BoxHeight, Scale.BoxBase)
+    addRandom(WorldObjects.Pyramid, Scale.PyrHeight, Scale.PyrBase)
+    
+    w.storeSkeletonFooter()    
+    w.postprocess()
+    return w
 
 ### The End ###

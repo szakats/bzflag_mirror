@@ -38,7 +38,7 @@ class Game:
         self.players = {}    # Indexed by player Id
         self.flags = {}      # Indexed by flag number
         self.teams = {}      # Indexed by color, represented as a string
-        self.world = World.Empty()
+        self.world = World.Random()
         self.lastUpdateTime = None
         Event.attach(self, 'onChangePlayerList', 'onAddPlayer', 'onRemovePlayer',
                      'onLoadWorld', 'onAddFlag')
