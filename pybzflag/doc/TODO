@@ -1,5 +1,12 @@
 Todo list, in no particular order:
 
+  - Use a perlin noise function to generate wind speed and direction, so the cloth won't
+    look 'bumpy' under high-variation winds
+
+  - Sky!
+
+  - Port the jetstream/crystalspace video recorder!
+
   - Fix texture binding for cube maps. It causes an OpenGL invalid operation error, I'm not sure
     why. Currently these exceptions are being ignored in CubeMap.py, and all pyramids end up
     sharing one cube map.
