@@ -8,13 +8,13 @@ from BZFlag.UI import MovieRecorder
 from BZFlag import optik
 import sys, re
 
-parser = optik.OptionParser(usage = "usage: %prog [options] recording.bzw")
+parser = optik.OptionParser(usage = "usage: %prog [options] snapshot.bzm")
 parser.add_option("-o", "--output", metavar="FILE", dest="file",
                   help="Sets the output AVI file")
 parser.add_option("-r", "--resolution", metavar="WIDTHxHEIGHT", dest="resolution",
                   help="Sets the output resolution. Default is 512x384.", default="512x384")
 parser.add_option("-b", "--bitrate", metavar="KBPS", dest="bitrate",
-                  help="Sets the mpeg4 encoder bit rate. Default is 1000.", default=1000)
+                  help="Sets the mpeg4 encoder bit rate. Default is 400kbps.", default=400)
 (options, args) = parser.parse_args()
 
 try:
