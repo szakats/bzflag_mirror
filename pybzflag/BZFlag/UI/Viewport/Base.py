@@ -100,17 +100,18 @@ class Viewport:
         sub.parent = self
         sub.children = []
         self.children.append(sub)
-        sub.setRect(rect)
 
-        # Disconnect events and the renderSequence from the parent
-        sub.onFrame       = Event.Event()
-        sub.onSetupFrame  = Event.Event()
-        sub.onDrawFrame   = Event.Event()
-        sub.onFinishFrame = Event.Event()
-        sub.onResize      = Event.Event()
+        # Disconnect all events and the renderSequence from the parent
+        for attribute, value in sub.__dict__.iteritems():
+            if isinstance(value, Event.Event):
+                Event.attach(sub, attribute)
+
         sub.renderSequence = [sub.onSetupFrame,
                               sub.onDrawFrame,
                               sub.onFinishFrame]
+
+        # We can safely resize the child now that its events are unplugged
+        sub.setRect(rect)
 
         if renderLink == 'after':
             # Stick it in our render sequence right before our onFinishFrame which flips the buffer
