@@ -47,7 +47,10 @@ class Event:
     def __call__(self, *args, **kw):
         if self.clients:
             for client in self.clients:
-                client(*args, **kw)
+                r = client(*args, **kw)
+                # Allow the client to abort
+                if r:
+                    return r
         else:
             # No handlers- can we call the unhandled event callback?
             if self.unhandledCallback:

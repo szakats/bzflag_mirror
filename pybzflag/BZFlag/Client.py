@@ -22,7 +22,7 @@ in subclasses.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 # 
-
+#  Hi micah, I love you!
 import BZFlag
 from BZFlag import Network, Protocol, Errors, Player, Game, World, Util
 from BZFlag.Protocol import FromServer, ToServer, Common
@@ -40,31 +40,52 @@ class BaseClient:
 
          - Low-level socket handlers should be of the form handleFoo()
          - Event handlers for messages should be of the form onMsgFoo()
-         - Event handlers for message replies should be of the form onMsgFooReply()
          - Event handlers for other events should be of the form onFoo()
 
-       Members mentioned in the call to initEvents below are observable.
+       All onFoo() and onMsgFoo() events are observable and traceable,
        See the Util.Event class for more information about this feature.
        """
-    def __init__(self, server=None):
+
+    def __init__(self, **options):
+        """Any options passed to the constructor will be sent to setOptions"""
         self.tcp = None
         self.udp = None
         self.connected = 0
-        Util.initEvents(self, 'onConnect', 'onAnyMessage', 'onUnhandledMessage')
+        self.options = {
+            'server': None,
+            }
+
+        Util.initEvents(self, 'onConnect', 'onAnyMessage', 'onUnhandledMessage',
+                        'onDisconnect')
 
         # Add events for all messages, with onUnhandledMessage as an
         # unhandled event handler.
         for message in Common.getMessageDict(FromServer).values():
-            eventName =  "on%s" % message.__name__
+            eventName = self.getMsgHandlerName(message)
             if hasattr(self, eventName):
                 event = Util.Event(getattr(self, eventName))
             else:
                 event = Util.Event()
             event.unhandledCallback = self.onUnhandledMessage
             setattr(self, eventName, event)
+            
+        self.init()
+        self.setOptions(**options)
 
-        if server:
-            self.connect(server)
+    def getMsgHandlerName(self, messageClass):
+        return "on%s" % messageClass.__name__
+
+    def init(self):
+        """A hook for subclasses to add initialization in the proper sequence"""
+        pass
+
+    def setOptions(self, **options):
+        self.options.update(options)
+        if 'server' in options.keys():
+            self.connect(options['server'])
+
+    def getSupportedOptions(self):
+        return self.options.keys()
 
     def connect(self, server):
         """This does the bare minimum necessary to connect to the
@@ -97,6 +118,7 @@ class BaseClient:
             self.udp = None
         self.multicast = None
         self.connected = 0
+        self.onDisconnect()
 
     def getSockets(self):
         """Returns a list of sockets the client expects
@@ -148,8 +170,7 @@ class BaseClient:
         if msg:
             msg.socket = socket
             msg.eventLoop = eventLoop
-            msgName = msg.__class__.__name__
-            handler = getattr(self, "on%s" % msgName, None)
+            handler = getattr(self, self.getMsgHandlerName(msg.__class__))
             if self.onAnyMessage(msg):
                 return
             handler(msg)
@@ -160,7 +181,6 @@ class BaseClient:
     def onMsgSuperKill(self, msg):
         """The server wants us to die immediately"""
         self.disconnect()
-        msg.eventLoop.stop()
 
     def onMsgLagPing(self, msg):
         """The server is measuring our lag, reply with the same message."""
@@ -177,10 +197,10 @@ class StatefulClient(BaseClient):
     """Extends the BaseClient to keep track of the state of the game
        world, as reported by the server and the other clients.
        """
-    def __init__(self, server=None):
+    def init(self):
+        BaseClient.init(self)
         self.game = Game.Game()
         self.worldCache = None
-        BaseClient.__init__(self, server)
         Util.initEvents(self, 'onLoadWorld', 'onStartWorldDownload')
 
     def onConnect(self):
@@ -285,17 +305,19 @@ class PlayerClient(StatefulClient):
        a player. This includes methods for entering and leaving the
        game, and a method of glueing the client with a frontend that
        provides actual player interaction, or a bot AI.
-       """
-    def __init__(self, server, playerIdentity):
+       """    
+    def init(self):
+        StatefulClient.init(self)
+        self.options.update({
+            'identity': None,    # A Player.Identity instance
+            })
+
         # We won't have a player instance until we get a MsgAddPlayer
         # back for ourselves and StatefulClient adds it to the Game.
         # We do need to store the identity used for joining the game
         # of course.
-        self.player = None
-        self.joinIdentity = playerIdentity
-
         self.inGame = 0
-        StatefulClient.__init__(self, server)
+        self.player = None
         Util.initEvents(self, 'onEnterGame', 'onInitPlayer')
 
         # Set up an observer for the game's onAddPlayer that will set
@@ -311,10 +333,11 @@ class PlayerClient(StatefulClient):
 
     def enterGame(self):
         msg = ToServer.MsgEnter()
-        msg.playerType = self.joinIdentity.type
-        msg.team = self.joinIdentity.team
-        msg.callSign = self.joinIdentity.callSign
-        msg.emailAddress = self.joinIdentity.emailAddress
+        identity = self.options['identity']
+        msg.playerType = identity.type
+        msg.team = identity.team
+        msg.callSign = identity.callSign
+        msg.emailAddress = identity.emailAddress
         self.tcp.write(msg)
 
     def disconnect(self):

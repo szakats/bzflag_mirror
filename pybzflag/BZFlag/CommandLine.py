@@ -22,7 +22,16 @@ of BZFlag-related utilities.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 # 
 
+from BZFlag import optik, Client
+import sys
 
+def client(clientClass=Client.PlayerClient, parserClass=ClientOptionParser, argv=sys.argv):
+    """Provide a command line interface for creating a Client instance,
+       given a Client subclass to use and a list of default option values.
+       """
+    options = parserClass(clientClass).parse_args(argv[1:])
+    clientInst = clientClass(
+    
 
 ### The End ###
         
