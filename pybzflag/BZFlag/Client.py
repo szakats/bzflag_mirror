@@ -130,12 +130,6 @@ class StatefulClient(BaseClient):
         """The server is measuring our lag, reply with the same message."""
         msg.socket.write(msg)
 
-    def onMsgNetworkRelay(self, msg):
-        """The server needs us to use TCP instead of UDP for messages
-           that we'd normally multicast.
-           """
-        self.multicast = self.tcp
-
     def onConnect(self):
         """Immediately after connecting, ask for a world hash so
            we can check our cache for a copy of that world
@@ -144,10 +138,9 @@ class StatefulClient(BaseClient):
 
     def negotiateFlags(self):
         """Send a MsgNegotiateFlags to the server to indicate which
-           flags we know about. Either this will cause a MsgNull to
-           come back indicating that our flag dataset is incomplete,
-           or we will receive a MsgNegotiateFlags back with flag IDs
-           to use for this connection.
+           flags we know about. The server will respond with a
+           MsgNegotiateFlags listing all the flags we need to participate
+           in the game that we don't know about.
            """
         # One character abbreviations must be null-padded to two characters
         def padAbbreviation(str):
@@ -156,46 +149,25 @@ class StatefulClient(BaseClient):
             return str
         flagAbbreviations = map(padAbbreviation, Flag.getDict().keys())
         self.tcp.write(self.outgoing.MsgNegotiateFlags(
-            numFlags = len(flagAbbreviations),
             data = "".join(flagAbbreviations),
             ))
 
-    def onMsgNull(self, msg):
-        """This should only be sent when flag negotiation fails.
-           In fact, this shouldn't be used at all according to the protocol spec.
-           The fact that this message is used for flag negotiaions should be
-           considered a bug in the protocol.
-           """
-        raise Errors.ProtocolError("Flag negotiation failed")
-
     def onMsgNegotiateFlags(self, msg):
-        """Flag negotiation succeeded. This message tells us what IDs we should
-           use to represent each flag over the wire.
-
-           The message's data is a variable length list of FlagNegotiationID
-           structures that map an ID and abbreviation. This looks up those
-           abbreviations in the Flag module and creates dictionaries mapping
-           those classes to IDs and vice versa.
+        """The server responded with a list of flags we need. If it's
+           empty, we're good to go on with the rest of the connection.
            """
         data = StringIO(msg.data)
-        self.flagIdToClass = {}
-        self.flagClassToId = {}
-        flagDict = Flag.getDict()
         unknownFlags = []
-        for i in xrange(msg.numFlags):
-            flag = Protocol.Common.FlagNegotiationID()
-            flag.read(data)
-            try:
-                cls = flagDict[flag.abbreviation]
-            except KeyError:
-                unknownFlags.append(flag.abbreviation)
-            self.flagIdToClass[flag.id] = cls
-            self.flagClassToId[cls] = flag.id
-        self.onNegotiateFlags()
+        for i in xrange(len(msg.data)/2):
+            flag = data.read(2)
+            if flag[1] == chr(0):
+                flag = flag[0]
+            self.unknownFlags.append(flag)
         if unknownFlags:
-            raise Errors.ProtocolWarning(
+            raise Errors.ProtocolError(
                 "Server knows about the following flags that we don't: %s" %
-                " ".join(unknownFlags))
+                ", ".join(unknownFlags))
+        self.onNegotiateFlags()
 
     def onNegotiateFlags(self):
         """Immediately after flag negotiation we usually want to start downloading
@@ -348,6 +320,8 @@ class PlayerClient(StatefulClient):
     def enterGame(self):
         msg = self.outgoing.MsgEnter()
         identity = self.options['identity']
+        if not identity.callSign:
+            raise Errors.ProtocolError("A call sign is required to enter the game")
         msg.playerType = identity.type
         msg.team = identity.team
         msg.callSign = identity.callSign
