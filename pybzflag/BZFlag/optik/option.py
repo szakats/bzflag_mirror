@@ -12,7 +12,7 @@ __revision__ = "$Id$"
 
 import sys
 import types
-from optik.errors import OptionError, OptionValueError
+from BZFlag.optik.errors import OptionError, OptionValueError
 
 # Do the right thing with boolean values for all known Python versions.
 try:

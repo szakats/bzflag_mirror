@@ -12,9 +12,9 @@ __revision__ = "$Id$"
 
 import sys, os
 import types
-from optik.option import Option, NO_DEFAULT
-from optik.help import IndentedHelpFormatter
-from optik.errors import OptionConflictError, OptionValueError, BadOptionError
+from BZFlag.optik.option import Option, NO_DEFAULT
+from BZFlag.optik.help import IndentedHelpFormatter
+from BZFlag.optik.errors import OptionConflictError, OptionValueError, BadOptionError
 
 __all__ = ['SUPPRESS_HELP', 'SUPPRESS_USAGE',
            'STD_HELP_OPTION', 'STD_VERSION_OPTION',

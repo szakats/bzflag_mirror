@@ -139,7 +139,7 @@ class IndentedHelpFormatter (HelpFormatter):
 
     def __init__ (self,
                   indent_increment=2,
-                  max_help_position=24,
+                  max_help_position=30,
                   width=80,
                   short_first=1):
         HelpFormatter.__init__(

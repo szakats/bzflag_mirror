@@ -1,10 +1,9 @@
 #!/usr/bin/env python
+from BZFlag import CommandLine
 
-from BZFlag.Client import PlayerClient
-from BZFlag import Player
-
-client = PlayerClient(server = "localhost",
-                      identity = Player.Identity("Super Observer Duckie", type="observer"))
+client = CommandLine.client(server     = "localhost",
+                            callSign   = "Super Observer Duckie",
+                            playerType = "observer")
 
 # Stick some instrumentation in select events
 client.onConnect.trace("Connected.")
