@@ -54,7 +54,6 @@ import re
 
 
 lexicalScanner = re.compile(r"""
-
     # Keywords
     ((?P<DEF>          DEF)
     |(?P<EXTERNPROTO>  EXTERNPROTO)
@@ -72,8 +71,10 @@ lexicalScanner = re.compile(r"""
     |(?P<field>        field)
 
     # Data types
-    |(?P<float>        ([+/-]?( ([0-9]*\.[0-9]+) ([eE][+\-]?[0-9]+)? )))
-    |(?P<int>          ([+\-]?(([0-9]+)|(0[xX][0-9a-fA-F]+))))
+    |(?P<float>        \-?((\d+\.\d*|\.\d+)([eE][-+]?\d+)?|\d+[eE][-+]?\d+))
+    |(?P<hex>          0[xX][\da-fA-F]*)
+    |(?P<oct>          0[0-7]*)
+    |(?P<dec>          \-?[1-9]\d*)
    
     # Terminal symbols
     |(?P<period>       \.)
@@ -84,9 +85,23 @@ lexicalScanner = re.compile(r"""
     |(?P<closeBracket> \])
 
     # Identifiers
-    |(?P<id>           [^\s]+)    
-    
+    |(?P<id>           [^\s\,\.\{\}\[\]]+)    
     )""", re.VERBOSE | re.UNICODE)
+
+
+tokenReplacements = {
+    'float':   lambda value: ('number', float(value)),
+    'hex':     lambda value: ('number', int(value[2:], 16)),
+    'oct':     lambda value: ('number', int(value, 8)),
+    'dec':     lambda value: ('number', int(value)),
+
+    'TRUE':    lambda value: ('number', True),
+    'FALSE':   lambda value: ('number', False),
+    }
+
+
+class VRMLParseError(Exception):
+    pass
 
 
 class Reader:
@@ -95,17 +110,22 @@ class Reader:
        """
     def __init__(self, name):
         self.encoding = 'utf8'
+        self.parseStack = []
+        self.namespace = {}
         f = Util.autoFile(name)
         self.parse(f)
         f.close()
-
+        self.extractMeshes()
+        
     def parse(self, f):
-        """Parse the given file object as VRML"""
+        """Parse the given file object as VRML. Upon returning, there will
+           be a nested tuple representation of the VRML file in parseStack
+           and a dictionary of the VRML namespace in namespace.
+           """
         while True:
             line = f.readline()
             if not line:
                 break
-            line = line.strip()
 
             # Process the VRML header that sets the version and encoding
             if line.startswith("#VRML"):
@@ -124,7 +144,7 @@ class Reader:
                 for tokenType, tokenValue in token.groupdict().items():
                     if tokenValue is not None:
                         self.parseToken(tokenType, tokenValue)
-
+        
     def parseHeader(self, line):
         """Parse the #VRML header line. This doesn't make any attempt to validate
            the version yet, it just uses it to set the encoding.
@@ -132,6 +152,120 @@ class Reader:
         self.encoding = re.split("\s+", line)[2]
 
     def parseToken(self, type, value):
-        print type, value
+        """Cheesy parser that tries to extract the information we want out of the
+           lexed VRML file without having a full grammar. A full parser would
+           require knowing the data type for all supported attributes, which seems
+           like an awful way to design a format.
+           """
+        # Perform simple token replacements
+        try:
+            (type, value) = tokenReplacements[type](value)
+        except KeyError:
+            pass
 
+        # Toss it onto the stack
+        stack = self.parseStack
+        stack.append((type, value))
+
+        try:
+            # Combine consecutive numbers into vectors
+            if stack[-1][0] == 'number' and stack[-2][0] == 'number':
+                n = stack.pop()
+                stack[-1] = ('vector', [stack[-1][1], n[1]])
+            if stack[-1][0] == 'number' and stack[-2][0] == 'vector':
+                n = stack.pop()
+                stack[-1][1].append(n[1])
+        except IndexError:
+            pass
+
+        try:
+            # If we have a closeBracket on the top of the stack,
+            # condense everything back until the last openBracket into a list.
+            if stack[-1][0] == 'closeBracket':
+                lst = []
+                # Pop values until we hit the openBracket, stuffing a list full
+                # of all the numbers and vectors we find
+                while True:
+                    (type, value) = stack.pop()
+                    if type == 'number' or type == 'vector':
+                        lst.insert(0, value)
+                    elif type == 'openBracket':
+                        break
+                stack.append(('list', lst))
+        except IndexError:
+            pass
+
+        try:
+            # After we reach the end of a section we can go back and figure out
+            # what ended up getting reduced. We try to figure out attributes by
+            # matching name-value pairs.
+            valueTypes = ('list', 'vector', 'number')
+            if stack[-1][0] == 'closeBrace' and stack[-2][0] in valueTypes:
+                attrs = {}
+                while True:
+                    if stack.pop()[0] == 'openBrace':
+                        break
+                    if stack[-1][0] in valueTypes and stack[-2][0] == 'id':
+                        (type, value) = stack.pop()
+                        attrs[stack[-1][1]] = value
+                (type, value) = stack.pop()
+                if type != 'id':
+                    raise VRMLParseError("id token expected before attribute list section, found %s instead" % type)
+                stack.append(('section', (value, attrs)))
+        except IndexError:
+            pass
+
+        try:
+            # Reduce sections ending in non-value types. Usually these are composed
+            # of other sections. We'll just stick the contents into a list.
+            if stack[-1][0] == 'closeBrace':
+                contents = []
+                stack.pop()   # closeBrace
+                while True:
+                    (type, value) = stack.pop()
+                    if type == 'openBrace':
+                        break
+                    contents.append((type, value))
+                (type, value) = stack.pop()
+                if type != 'id':
+                    raise VRMLParseError("id token expected before section, found %s instead" % type)
+                stack.append(('section', (value, contents)))
+        except IndexError:
+            pass
+
+
+        try:
+            # If we have (DEF id section) on the stack now, yank it all off and stow
+            # the section in the VRML namespace. If we have a DEF without an id afterwards,
+            # that's a parse error.
+            if stack[-1][0] == 'section' and stack[-3][0] == 'DEF':
+                section = stack.pop()[1]      # Section contents
+                (type, value) = stack.pop()   # id
+                stack.pop()                   # DEF
+                if type != 'id':
+                    raise VRMLParseError("id token expected after DEF, found %s instead" % type)
+                self.namespace[value] = section
+        except IndexError:
+            pass
+
+        try:
+            # Replace (USE id) with the object from our namespace
+            if stack[-1][0] == 'id' and stack[-2][0] == 'USE':
+                (type, value) = stack.pop()
+                stack.pop()
+                try:
+                    pass
+                    stack.append(self.namespace[value])
+                except KeyError:
+                    raise VRMLParseError("USE of name not previously DEF'ed: %s" % value)
+        except IndexError:
+            pass
+
+    def extractMeshes(self):
+        """After parsing, this rummages through the parse stack looking for IndexedFaceSet
+           sections, and grouping the associated sections into a mesh. These meshes
+           are then instantiated as drawables.
+           """
+        print self.parseStack
+            
 ### The End ###
