@@ -22,9 +22,8 @@ in subclasses.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 # 
-#  Hi micah, I love you!
 import BZFlag
-from BZFlag import Network, Protocol, Errors, Player, Game, World, Util
+from BZFlag import Network, Protocol, Errors, Player, Game, World, Util, Flag
 from BZFlag.Protocol import FromServer, ToServer, Common
 
 
@@ -192,11 +191,51 @@ class StatefulClient(BaseClient):
         BaseClient.init(self)
         self.game = Game.Game()
         self.worldCache = None
-        Util.initEvents(self, 'onLoadWorld', 'onStartWorldDownload')
+        Util.initEvents(self, 'onLoadWorld', 'onStartWorldDownload',
+                        'onNegotiateFlags')
 
     def onConnect(self):
         """Immediately after connecting, ask for a world hash so
            we can check our cache for a copy of that world
+           """
+        self.negotiateFlags()
+
+    def negotiateFlags(self):
+        """Send a MsgNegotiateFlags to the server to indicate which
+           flags we know about. Either this will cause a MsgNull to
+           come back indicating that our flag dataset is incomplete,
+           or we will receive a MsgNegotiateFlags back with flag IDs
+           to use for this connection.
+           """
+        # One character abbreviations must be null-padded to two characters
+        def padAbbreviation(str):
+            if len(str) < 2:
+                return str + chr(0)
+            return str
+        flagAbbreviations = map(padAbbreviation, Flag.getDict().keys())
+        self.tcp.write(ToServer.MsgNegotiateFlags(
+            numFlags = len(flagAbbreviations),
+            data = "".join(flagAbbreviations),
+            ))
+
+    def onMsgNull(self, msg):
+        """This should only be sent when flag negotiation fails.
+           In fact, this shouldn't be used at all according to the protocol spec.
+           The fact that this message is used for flag negotiaions should be
+           considered a bug in the protocol.
+           """
+        raise Errors.ProtocolError("Flag negotiation failed")
+
+    def onMsgNegotiateFlags(self, msg):
+        """Flag negotiation succeeded. This message tells us what IDs we should
+           use to represent each flag over the wire.
+           """
+        #self.onNegotiateFlags()
+
+    def onNegotiateFlags(self):
+        """Immediately after flag negotiation we usually want to start downloading
+           the world. The first step is to get the world hash, so we can see if we
+           have a cached copy of it.
            """
         self.getWorldHash()
 

@@ -161,6 +161,11 @@ class MsgWantWHash(Common.Message):
         StructEntry(StringField(33), 'hash'),
         ]
 
+class MsgNull(Common.Message):
+    messageId = 0x0000
+
+
+MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgPlayerUpdate = Common.MsgPlayerUpdate
 
 ### The End ###

@@ -73,7 +73,9 @@ class FlagBase:
     def __str__(self):
         # If we have an abbreviation that doesn't start with a letter, add some whitespace
         # between it and the alignment so the whole thing doesn't just look like line noise.
-        if abbreviation[0]
+        abbreviation = self.abbreviation
+        if not re.match("[A-Za-z]", abbreviation[0]):
+            abbreviation = " " + abbreviation
         
         return "%s (%s%s):  %s" % (self.getMnemonic(), self.getAlignment(),
                                    abbreviation, self.description)

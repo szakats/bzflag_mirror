@@ -74,6 +74,8 @@ class MsgGetWorld(Common.Message):
 class MsgWantWHash(Common.Message):
     messageId = 0x7768
 
+
+MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgPlayerUpdate = Common.MsgPlayerUpdate
 
 ### The End ###

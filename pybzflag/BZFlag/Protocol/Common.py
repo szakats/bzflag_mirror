@@ -191,7 +191,7 @@ class Message(Struct):
         return Struct.unmarshall(self, packed)
 
     def marshall(self):
-        self.header.length = Struct.getSize(self)
+        self.header.length = self.getSize() - self.header.getSize()
         self.header.id = self.messageId
         return self.header.marshall() + Struct.marshall(self)
 
@@ -224,6 +224,12 @@ class MsgPlayerUpdate(Message):
         StructEntry(Vector3,      'velocity'),
         StructEntry(Float,        'azimuth'),
         StructEntry(Float,        'angularVelocity'),
+        ]
+
+class MsgNegotiateFlags(DataMessage):
+    messageId = 0x6e66
+    entries = [
+        StructEntry(UInt16, 'numFlags'),
         ]
 
     
