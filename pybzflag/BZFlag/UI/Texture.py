@@ -21,23 +21,44 @@ Texture loading utilities
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import Image
+import Image, pygame
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from BZFlag import Util, Animated
 
+# Keep track of the current OpenGL texture, to reduce the number of binds we do
+currentTexture = None
+
 
 class Texture:
-    """Loads a texture from the given filename into OpenGL"""
-    def __init__(self, name):
-        self.image = Image.open(name)
-        self.w = self.image.size[0]
-        self.h = self.image.size[1]
-        self.image = self.image.convert('RGBA')
-        self.image = self.image.tostring('raw', 'RGBA', 0, -1)
-
+    """Represents an OpenGL texture, optionally loaded from disk in any format supported by PIL"""
+    def __init__(self, name=None):
         self.texture = glGenTextures(1)
-        glBindTexture(GL_TEXTURE_2D, self.texture)
+        if name:
+            self.loadFile(name)
+
+    def loadFile(self, name):
+        """Load the texture from disk, using PIL to open the file"""
+        self.loadImage(Image.open(name))
+
+    def loadImage(self, image):
+        """Load the texture from a PIL image"""
+        image = image.convert('RGBA')
+        string = image.tostring('raw', 'RGBA', 0, -1)
+        self.loadRaw(image.size, string, GL_RGBA)
+
+    def loadSurface(self, surface):
+        """Load the texture from a pygame surface"""
+        string = pygame.image.tostring(surface, "RGB", True)
+        self.loadRaw(surface.get_size(), string, GL_RGB)
+
+    def loadRaw(self, size, string, format, components=3):
+        """Load a raw image from the given string. 'format' is a constant such as
+           GL_RGB or GL_RGBA that can be passed to gluBuild2DMipmaps.
+           """
+        self.size = size
+        (w,h) = size
+        self.bind()
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
@@ -45,8 +66,7 @@ class Texture:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, self.w, self.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, self.image)
-        gluBuild2DMipmaps(GL_TEXTURE_2D, 3, self.w, self.h, GL_RGBA, GL_UNSIGNED_BYTE, self.image)
+        gluBuild2DMipmaps(GL_TEXTURE_2D, components, w, h, format, GL_UNSIGNED_BYTE, string)
 
     def __del__(self):
         try:
@@ -56,8 +76,10 @@ class Texture:
 
     def bind(self):
         """Bind this texture to GL_TEXTURE_2D in the current OpenGL context"""
-        glBindTexture(GL_TEXTURE_2D, self.texture)
-
+        global currentTexture
+        if self != currentTexture:
+            glBindTexture(GL_TEXTURE_2D, self.texture)
+            currentTexture = self
 
 class AnimatedTexture:
     """Load a sequence of still images for an animated texture.

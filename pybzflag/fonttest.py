@@ -4,19 +4,44 @@
 #
 from BZFlag.UI import Viewport, GLText
 from BZFlag.Event import EventLoop
+from BZFlag import Animated
+from OpenGL.GL import *
 
 # Create a new orthogonal mode viewport
 loop = EventLoop()
-#viewport = Viewport.OpenGLViewport(loop, (640,480))
-viewport = Viewport.PygameViewport(loop, (640,480))
+viewport = Viewport.OpenGLViewport(loop, (640,480))
 viewport.setCaption("Font Test")
 viewport.fov = None   
 
-f = GLText.Font("VeraBd.ttf")
+f = GLText.Font("Vera.ttf")
+
+time = Animated.Timekeeper()
+spin = Animated.Value(0, Animated.Velocity(-180))
 
 def drawFrame():
-    viewport.screen.blit(f.sizes[20].pages[0].surface, (0,0))
-    #f.draw("Boing")
+    glLoadIdentity()
+    glTranslatef(0,viewport.size[1],0)
+
+    glColor3f(1,1,1)
+    f.draw("Boing! This is the default size.\n")
+    glColor3f(1,1,0.5)
+    f.draw("This is size 50", 50)
+
+    glLoadIdentity()
+    glTranslatef(viewport.size[0]/2, viewport.size[1]/2, 0)
+    glRotatef(spin.value, 0,0,1)
+    spin.integrate(time.step())
+
+    f.drawCentered("Spinny-widget")
+
+    glLoadIdentity()
+    glTranslatef(viewport.size[0]/2, viewport.size[1]/4, 0)
+
+    f.drawCentered("Not-so-spinny-widget",15)
+
+# Frame rate counter
+Animated.FrequencyCounter(viewport.onFinishFrame,
+                          lambda hz: "FHz: %.3f (target %.3f)" % (hz, viewport.targetFrameRate))
 
 viewport.onDrawFrame.observe(drawFrame)
 loop.run()

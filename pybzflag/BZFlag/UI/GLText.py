@@ -3,6 +3,14 @@
 Interface for drawing text in OpenGL. This uses freetype via pygame to
 build texture pages holding glyph images, then it renders individual
 glyphs using those texture pages.
+
+For best results the fonts should be rendered with the viewport in
+ortho mode, with OpenGL units corresponding directly to pixels.
+Other configurations will work, but only with a 1:1 correspondance
+to pixels can this module render with proper hinting.
+
+The origin of a character is always the top-left corner. OpenGL-style
+coordinates are assumed, where 0,0 is at the bottom-left.
 """
 #
 # Python BZFlag Protocol Package
@@ -21,23 +29,47 @@ glyphs using those texture pages.
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
 
+from __future__ import division
 import pygame, string
 from pygame.locals import *
 from BZFlag import Util
+from BZFlag.UI.Texture import Texture
+from OpenGL.GL import *
 
 defaultSize = 20
+
+# Default list of sizes to render fonts at
+defaultSizes = [defaultSize, 64]
 
 
 class Glyph:
     """Positioning information for one glyph on a font page"""
     def __init__(self, rect, page):
-        self.rect = rect
+        self.size = rect[2:]
         self.page = page
-
+        self.texCoords = (rect[0] / self.page.size[0],
+                          (self.page.size[1]-rect[1]-rect[3]) / self.page.size[1],
+                          rect[2] / self.page.size[0],
+                          rect[3] / self.page.size[1])
+            
     def draw(self, size):
-        print self.rect
+        self.page.updateTexture()
+        self.page.texture.bind()
+
+        v = (self.size[0] * size / self.size[1], size)
+        t = self.texCoords
+        glBegin(GL_QUADS)
+        glTexCoordf(t[0],t[1])
+        glVertex2f(0.5, 0.5 - v[1])
+        glTexCoordf(t[0]+t[2],t[1])
+        glVertex2f(v[0] + 0.5, 0.5 - v[1])
+        glTexCoordf(t[0]+t[2],t[1]+t[3])
+        glVertex2f(v[0] + 0.5, 0.5)
+        glTexCoordf(t[0],t[1]+t[3])
+        glVertex2f(0.5, 0.5)
+        glEnd()
+        glTranslatef(v[0], 0, 0)
 
 
 class FontPage:
@@ -49,6 +81,15 @@ class FontPage:
         self.lineHeight = 0
         self.size = size
         self.surface = pygame.Surface(size)
+        self.texture = Texture()
+        self.textureDirty = True
+
+    def updateTexture(self):
+        """If necessary, update the texture from the surface"""
+        if not self.textureDirty:
+            return
+        self.texture.loadSurface(self.surface)
+        self.textureDirty = False
 
     def allocRect(self, size):
         """Allocate space for a rectangle of the given size on the texture.
@@ -86,6 +127,7 @@ class FontPage:
 
         # Render the character and create a Glyph
         self.surface.blit(self.font.render(char, True, (255,255,255), (0,0,0)), allocated)
+        self.textureDirty = True
         return Glyph((allocated[0], allocated[1], glyphSize[0], glyphSize[1]), self)
         
 
@@ -95,11 +137,15 @@ class RenderedFont:
         self.font = pygame.font.Font(filename, size)
         self.pages = [FontPage(self.font)]
         self.glyphs = {}
+        self.size = size
 
         # Preload the pages with common glyphs. This will load anything
         # considered a printable character in the current locale.
-        for char in string.printable:
+        for char in string.digits + string.letters + string.punctuation:
             self.getGlyph(char)
+
+        # We don't store whitespace rendered, but we do need to know how big it is
+        self.spaceSize = self.font.size(" ")
 
     def getGlyph(self, char):
         """Get the associated glyph for a character, either by looking up
@@ -121,7 +167,7 @@ class RenderedFont:
 
 class Font:
     """Represents all sizes of one scalable font."""
-    def __init__(self, name, sizes=[defaultSize]):
+    def __init__(self, name, sizes=defaultSizes):
         filename = Util.dataFile(name)
         self.sizes = {}
         self.sortedSizes = sizes
@@ -129,10 +175,9 @@ class Font:
         for size in sizes:
             self.sizes[size] = RenderedFont(filename, size)
 
-    def draw(self, text, size=defaultSize):
-        """Draw the given text using the current OpenGL transform and color.
-           All glyph escapements will cause the OpenGL modelview matrix to
-           be translated.
+    def findRendered(self, size):
+        """Find a rendered font best suitable for the given size.
+           An exact match is searched for first, then the next largest font.
            """
         try:
             # See if we have the exact size
@@ -148,8 +193,51 @@ class Font:
             # If we didn't have anything big enough, just use the largest size we have
             if not rendered:
                 rendered = self.sizes[self.sortedSizes[-1]]
+        return rendered
 
+    def draw(self, text, size=defaultSize):
+        """Draw the given text using the current OpenGL transform and color.
+           All glyph escapements will cause the OpenGL modelview matrix to
+           be translated.
+           """
+        # Prepare the OpenGL state
+        glEnable(GL_TEXTURE_2D)
+        glDisable(GL_LIGHTING)
+        glDisable(GL_BLEND)
+        glDisable(GL_COLOR_MATERIAL)
+        glDisable(GL_DEPTH_TEST)
+
+        rendered = self.findRendered(size)
+        magnification = size / rendered.size
+
+        glPushMatrix()
         for char in text:
-            rendered.draw(char, size)
+            # Handle whitespace here
+            if char == " ":
+                glTranslatef(rendered.spaceSize[0] * magnification, 0, 0)
+            elif char == "\n":
+                glPopMatrix()
+                glTranslatef(0, -rendered.spaceSize[1] * magnification, 0)
+                glPushMatrix()
+            elif char == "\t":
+                glTranslatef(rendered.spaceSize[0] * 8 * magnification, 0, 0)
+
+            else:
+                rendered.draw(char, size)
+        glPopMatrix()
+
+    def size(self, text, fontSize=defaultSize):
+        """Measure the rendered size of the given text"""
+        rendered = self.findRendered(fontSize)
+        magnification = fontSize / rendered.size
+        unscaled = rendered.font.size(text)
+        return (unscaled[0] * magnification,
+                unscaled[1] * magnification)
+
+    def drawCentered(self, text, fontSize=defaultSize):
+        """Draw text centered around the origin"""
+        size = self.size(text, fontSize)
+        glTranslatef(-size[0]/2, size[1]/2, 0)
+        self.draw(text, fontSize)
 
 ### The End ###
