@@ -24,6 +24,7 @@ This implementation uses pygtk.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+from __future__ import division
 import gtk, threading
 
 
@@ -49,6 +50,8 @@ class Window:
         self.controls = controls
 
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window.set_border_width(8)
+        self.window.set_default_size(600,0)
 
         self.table = gtk.Table(len(controls), 2)
         self.window.add(self.table)
@@ -56,10 +59,12 @@ class Window:
 
         row = 0
         for control in controls:
-            l = gtk.Label(control.name)
-            self.table.attach(l, 0,1, row,row+1, xoptions=0, yoptions=gtk.FILL)
-            self.table.attach(control.widget, 1,2, row,row+1, yoptions=gtk.FILL)
+            l = gtk.Label(control.name + ": ")
+            l.set_alignment(1, 0.75)
+            self.table.attach(l, 0,1, row,row+1, xoptions=gtk.FILL, yoptions=gtk.FILL)
             l.show()
+
+            self.table.attach(control.widget, 1,2, row,row+1, yoptions=gtk.FILL)
             control.widget.show()
             row += 1
 
@@ -75,20 +80,30 @@ class Control:
 
 class Scalar(Control):
     """A control that lets you directly manipulate a scalar value"""
-    def __init__(self, object, attribute, name=None, minimum=0, maximum=1):
-        self.object = object
-        self.attribute = attribute
+    def __init__(self, name, set=None, get=None, minimum=0, maximum=1, initialValue=0, stepSize=None, pageSize=None):
+        self.name = name
+        self.set = set
+        self.get = get
 
         if not name:
             name = "%s.%s" % (object.__class__.__name__, attribute)
 
-        adj = gtk.Adjustment(getattr(object, attribute), minimum, maximum)
+        if get:
+            initialValue = get()
+        if not stepSize:
+            stepSize = (maximum - minimum) / 200
+        if not pageSize:
+            pageSize = (maximum - minimum) / 50
+        adj = gtk.Adjustment(initialValue, minimum, maximum, stepSize, pageSize)
         adj.connect("value_changed", self.update)
 
-        Control.__init__(self, name, gtk.HScale(adj))
+        scale = gtk.HScale(adj)
+        scale.set_digits(3)
+        Control.__init__(self, name, scale)
 
     def update(self, adj):
-        setattr(self.object, self.attribute, adj.value)
+        if self.set:
+            self.set(adj.value)
 
 
 def run(runnable):

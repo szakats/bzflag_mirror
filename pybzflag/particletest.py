@@ -29,7 +29,7 @@ class Sparks(Drawable.SpriteArray):
         self.model.add(ParticleSystem.FountainFadeAffector,
                        sizeRange = (0, 1),
                        )
-        self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,-50))
+        self.constAccel = self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,-50))
 
     def draw(self, rstate):
         self.model.integrate(self.time.step())
@@ -99,8 +99,30 @@ if __name__ == '__main__':
     sparks = Sparks((0,0,3))
     view.scene.add(sparks)
 
-    Tweak.Window(Tweak.Scalar(view.camera, 'distance', maximum=100),
-                 Tweak.Scalar(sparks.emitter, 'spawnRate', maximum=500),
+    Tweak.Window(Tweak.Scalar('Camera distance',
+                              set     = lambda x: setattr(view.camera, 'distance', x),
+                              get     = lambda: view.camera.distance,
+                              maximum = 100),
+                 Tweak.Scalar('Spawn rate',
+                              set     = lambda x: setattr(sparks.emitter, 'spawnRate', x),
+                              get     = lambda: sparks.emitter.spawnRate,
+                              maximum=500),
+                 Tweak.Scalar('Direction randomness',
+                              set     = lambda x: sparks.emitter.setDirection(sparks.emitter.direction, x),
+                              get     = lambda: sparks.emitter.directionRandomness),
+                 Tweak.Scalar('Minimum speed',
+                              set     = lambda x: setattr(sparks.emitter, 'speedRange', (x, sparks.emitter.speedRange[1])),
+                              get     = lambda: sparks.emitter.speedRange[0],
+                              maximum = 100),
+                 Tweak.Scalar('Maximum speed',
+                              set     = lambda x: setattr(sparks.emitter, 'speedRange', (sparks.emitter.speedRange[0], x)),
+                              get     = lambda: sparks.emitter.speedRange[1],
+                              maximum = 100),
+                 Tweak.Scalar('Gravity',
+                              set     = lambda x: put(sparks.constAccel.vector, (2,), x),
+                              get     = lambda: sparks.constAccel.vector[2],
+                              minimum = -100,
+                              maximum = 100),
                  )
 
     Tweak.run(loop)
