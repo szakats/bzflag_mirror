@@ -9,8 +9,8 @@ class GlowSphere(Drawable.SpriteArray):
     """An example particle system that draws glowing balls positioned on the surface of a sphere"""
     textureName = 'spark.png'
 
-    def __init__(self, numParticles=100):
-        self.model = ParticleSystem.Fountain(numParticles)
+    def __init__(self, numParticles=10):
+        self.model = ParticleSystem.SpriteFountain(numParticles)
         Drawable.SpriteArray.__init__(self, numParticles)
         self.model.attachDrawable(self)
 
@@ -18,7 +18,9 @@ class GlowSphere(Drawable.SpriteArray):
         self.render.static = False
         self.render.blended = True
 
-        self.model.add(ParticleSystem.Emitter, 1, 1)
+        self.model.add(ParticleSystem.Emitter, 10)
+        self.model.add(ParticleSystem.LifespanAffector, 0.5)
+        self.model.add(ParticleSystem.LinearFadeAffector, sizeRange=(0,100))
 
     def draw(self, rstate):
         self.model.integrate(self.time.step())

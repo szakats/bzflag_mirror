@@ -22,6 +22,7 @@ particle systems, like spring and mass simulations.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+from __future__ import division
 from Numeric import *
 from BZFlag.Geometry import *
 from BZFlag.World import Scale
@@ -196,13 +197,41 @@ class Fountain(Newtonian):
         self.life[...] = 0
 
 
+class LifespanAffector(Affector):
+    """An affector causing particles to age. The aging rate is set so that
+       barring any other influence on its life value, a particle will last
+       for 'lifespan' seconds.
+       """
+    def __init__(self, model, lifespan):
+        Affector.__init__(self, model)
+        self.ageRate = -1/lifespan
+
+    def integrate(self, dt):
+        add(self.model.life, dt * self.ageRate, self.model.life)
+
+
+class SpriteFountain(Fountain):
+    """A Fountain, extended to support sprite color and size for each particle"""
+    def __init__(self, numParticles):
+        Fountain.__init__(self, numParticles)
+        self.colors = zeros((numParticles, 4), Float32, savespace=True)
+        self.sizes = zeros(numParticles, Float32, savespace=True)
+
+    def attachDrawable(self, drawable):
+        """This is designed with a SpriteArray drawable in mind"""
+        Fountain.attachDrawable(self, drawable)
+        drawable.colors[...] = self.colors
+        self.colors = drawable.colors
+        drawable.sizes[...] = self.sizes
+        self.sizes = drawable.sizes
+
+
 class Emitter(Affector):
     """An affector that scans the model for dead particles and respawns them.
        spawnRate is the maximum particle spawning rate in particles per second.
        """
-    def __init__(self, model, spawnRate, particleLifetime):
+    def __init__(self, model, spawnRate):
         Affector.__init__(self, model)
-        self.particleLifetime = particleLifetime
         self.spawnRate = spawnRate
         self.spawnBudget = 0
 
@@ -238,7 +267,26 @@ class Emitter(Affector):
         return (0,0,0)
 
     def newLife(self, n):
-        return self.particleLifetime
+        """By default particle lifetimes range from 1 to 0"""
+        return 1
+
+
+class LinearFadeAffector(Affector):
+    """Causes particles to shrink and/or change color linearly over the course of their life"""
+    def __init__(self, model, sizeRange=(0,1), colorRange=((0,0,0,0), (1,1,1,1))):
+        Affector.__init__(self, model)
+        self.sizeConst = sizeRange[0]
+        self.sizeCoeff = sizeRange[1] - sizeRange[0]
+        colorRange = asarray(colorRange)
+        self.colorConst = colorRange[0]
+        self.colorCoeff = colorRange[1] - colorRange[0]
+
+    def integrate(self, dt):
+        self.model.sizes[...] = self.model.life * self.sizeCoeff + self.sizeConst
+        self.model.colors[...,0] = self.model.life * self.colorCoeff[...,0] + self.colorConst[...,0]
+        self.model.colors[...,1] = self.model.life * self.colorCoeff[...,1] + self.colorConst[...,1]
+        self.model.colors[...,2] = self.model.life * self.colorCoeff[...,2] + self.colorConst[...,2]
+        self.model.colors[...,3] = self.model.life * self.colorCoeff[...,3] + self.colorConst[...,3]
 
 
 class ClothSpringAffector(Affector):
