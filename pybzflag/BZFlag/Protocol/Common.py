@@ -36,6 +36,11 @@ InAddr = VectorType("!BBBB")
 Vector2 = VectorType("!ff")
 Vector3 = VectorType("!fff")
 
+# This is a Vector3 packed into a Vector2 by assuming X is always zero
+VectorYZ = MappedEntry(Vector2,
+                       lambda v2: (0.0, v2[0], v2[1]),
+                       lambda v3: (v3[1], v3[2]))
+
 PlayerId = Enum(UInt8, {
     255: None,
     254: 'all',

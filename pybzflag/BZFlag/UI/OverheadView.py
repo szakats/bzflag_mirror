@@ -88,19 +88,15 @@ def worldToImage(world, size, oversample=2, colors=colorScheme):
             color = colorScheme.get(objClassName, None)
             if color:
                 poly = map(toView, object.toPolygon())
-                if len(poly) > 2:
-                    # Shade the color according to height
-                    hsv = list(colorsys.rgb_to_hsv(color[0]/255.0,
-                                                   color[1]/255.0,
-                                                   color[2]/255.0))
-                    if heightRef:
-                        hsv[2] += object.center[2] / heightRef * 0.1
-                    color = colorsys.hsv_to_rgb(*hsv)
-                    color = (color[0]*255, color[1]*255, color[2]*255)
-                    draw.polygon(poly, fill=color, outline=colors['outline'])
-                else:
-                    # 2D objects, 1D in overhead. This only includes walls at the moment.
-                    draw.line(poly, fill=color)
+                # Shade the color according to height
+                hsv = list(colorsys.rgb_to_hsv(color[0]/255.0,
+                                               color[1]/255.0,
+                                               color[2]/255.0))
+                if heightRef:
+                    hsv[2] += object.center[2] / heightRef * 0.1
+                color = colorsys.hsv_to_rgb(*hsv)
+                color = (color[0]*255, color[1]*255, color[2]*255)
+                draw.polygon(poly, fill=color, outline=colors['outline'])
     
     return img.resize(size, Image.ANTIALIAS)
 

@@ -94,22 +94,22 @@ class World:
         self.storeBlock(WorldObjects.Wall(
             center = [0, size/2, 0],
             angle  = math.pi * 1.5,
-            size   = [size/2, wallHeight]
+            size   = [0, size/2, wallHeight]
             ))
         self.storeBlock(WorldObjects.Wall(
             center = [size/2, 0, 0],
             angle  = math.pi,
-            size   = [size/2, wallHeight]
+            size   = [0, size/2, wallHeight]
             ))
         self.storeBlock(WorldObjects.Wall(
             center = [0, -size/2, 0],
             angle  = math.pi * 0.5,
-            size   = [size/2, wallHeight]
+            size   = [0, size/2, wallHeight]
             ))
         self.storeBlock(WorldObjects.Wall(
             center = [-size/2, 0, 0],
             angle  = 0,
-            size   = [size/2, wallHeight]
+            size   = [0, size/2, wallHeight]
             ))
 
     def storeSkeletonFooter(self):

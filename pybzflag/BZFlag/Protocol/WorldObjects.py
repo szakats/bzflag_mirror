@@ -209,7 +209,7 @@ class Wall(WorldObject):
     entries = [
         StructEntry(Common.Vector3,   'center', [0,0,0]),
         StructEntry(Float,            'angle',  0),
-        StructEntry(Common.Vector2,   'size',   [1,1]),
+        StructEntry(Common.VectorYZ,  'size',   [0,1,1]),
         ]
 
     class WallDrawable(GLDrawable):
@@ -242,9 +242,6 @@ class Wall(WorldObject):
 	def draw(self):
 	    import OpenGL.GL
 	    OpenGL.GL.glCallList(self.list)
-
-    def toUntransformedPolygon(self):
-        return ((0, -self.size[0]), (0, self.size[0]))
 
     def getGLDrawables(self):
         return [self.WallDrawable(self.center, self.angle, self.size)]

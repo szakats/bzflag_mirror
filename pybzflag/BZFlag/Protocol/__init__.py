@@ -51,7 +51,7 @@ __all__ = [
     'EntryType', 'ScalarType', 'VectorType', 'SubStruct', 'StructEntry',
     'StructPadding', 'Struct', 'Int8', 'UInt8', 'Int16', 'UInt16', 'Int32',
     'UInt32', 'Float', 'Double', 'StringField', 'Enum', 'Bitfield',
-    'ConstStructEntry',
+    'ConstStructEntry', 'MappedEntry',
     ]
 
 
@@ -308,6 +308,27 @@ class StringField(EntryType):
 
     def getSize(self, packed=None):
         return self.length
+
+
+class MappedEntry(EntryType):
+    """An adaptor that applies two mapping functions to an existing
+       EntryType instance. Along with the lambda operator, this provides
+       a quick way to take care of formatting oddities that you just
+       need code to express.
+       """
+    def __init__(self, base, unmarshall, marshall):
+        self.base = base
+        self.unmarshallMap = unmarshall
+        self.marshallMap = marshall
+        
+    def unmarshall(self, packed):
+        return self.unmarshallMap(self.base.unmarshall(packed))
+
+    def marshall(self, object):
+        return self.base.marshall(self.marshallMap(object))
+
+    def getSize(self, packed=None):
+        return self.base.getSize(packed)
 
 
 class Struct:
