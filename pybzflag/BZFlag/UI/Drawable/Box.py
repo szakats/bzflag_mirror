@@ -33,6 +33,8 @@ import random
 
 class Sides(DisplayList):
     """Abstract base class for box sides"""
+    tex2Repeats = None
+    
     def set(self, box):
         self.center = box.center
         self.angle = box.angle
@@ -50,58 +52,74 @@ class Sides(DisplayList):
         # Y+ side
         glNormal3f(0, 1, 0)
         glTexCoord2f(0, 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 0)
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 0)
         glVertex3f(-self.size[0], self.size[1], 0)
         glTexCoord2f(0, self.texRepeats[2])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, self.tex2Repeats[2])
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, self.tex2Repeats[2])
         glVertex3f(-self.size[0], self.size[1], self.size[2])
         glTexCoord2f(self.texRepeats[0], self.texRepeats[2])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[0], self.tex2Repeats[2])
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[0], self.tex2Repeats[2])
         glVertex3f(self.size[0], self.size[1], self.size[2])
         glTexCoord2f(self.texRepeats[0], 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[0], 0)
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[0], 0)
         glVertex3f(self.size[0], self.size[1], 0)
         # Y- side
         glNormal3f(0, -1, 0)
         glTexCoord2f(0, 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 0)
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 0)
         glVertex3f(self.size[0], -self.size[1], 0)
         glTexCoord2f(0, self.texRepeats[2])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, self.tex2Repeats[2])
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, self.tex2Repeats[2])
         glVertex3f(self.size[0], -self.size[1], self.size[2])
         glTexCoord2f(self.texRepeats[0], self.texRepeats[2])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[0], self.tex2Repeats[2])
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[0], self.tex2Repeats[2])
         glVertex3f(-self.size[0], -self.size[1], self.size[2])
         glTexCoord2f(self.texRepeats[0], 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[0], 0)
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[0], 0)
         glVertex3f(-self.size[0], -self.size[1], 0)
         # X+ side
         glNormal3f(1, 0, 0)
         glTexCoord2f(0, 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 0)
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 0)
         glVertex3f(self.size[0], self.size[1], 0)
         glTexCoord2f(0, self.texRepeats[2])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, self.tex2Repeats[2])
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, self.tex2Repeats[2])
         glVertex3f(self.size[0], self.size[1], self.size[2])
         glTexCoord2f(self.texRepeats[1], self.texRepeats[2])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[1], self.tex2Repeats[2])
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[1], self.tex2Repeats[2])
         glVertex3f(self.size[0], -self.size[1], self.size[2])
         glTexCoord2f(self.texRepeats[1], 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[1], 0)
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[1], 0)
         glVertex3f(self.size[0], -self.size[1], 0)
         # X- side
         glNormal3f(-1, 0, 0)
         glTexCoord2f(0, 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 0)
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 0)
         glVertex3f(-self.size[0], -self.size[1], 0)
         glTexCoord2f(0, self.texRepeats[2])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, self.tex2Repeats[2])
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, self.tex2Repeats[2])
         glVertex3f(-self.size[0], -self.size[1], self.size[2])
         glTexCoord2f(self.texRepeats[1], self.texRepeats[2])
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[1], self.tex2Repeats[2])
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[1], self.tex2Repeats[2])
         glVertex3f(-self.size[0], self.size[1], self.size[2])
         glTexCoord2f(self.texRepeats[1], 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[1], 0)
+        if self.tex2Repeats:
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.tex2Repeats[1], 0)
         glVertex3f(-self.size[0], self.size[1], 0)
         glEnd()
         glPopMatrix()
@@ -338,6 +356,27 @@ class FixedTopDecal(FixedDecal):
         FixedDecal.set(self, origin, vx, vy, width, position, anchor)
 
 
+class GrassEdge(Sides):
+    """Grass at the edge of a box sitting on the ground"""
+    textureNames = ('grass_edge.png', 'lightmap.jpeg')
+    
+    def __init__(self, box):
+        Sides.__init__(self,box)
+        self.render.decal = True
+
+    def set(self, box):
+        Sides.set(self, box)
+        self.size = (self.size[0],
+                     self.size[1],
+                     1.5)
+        self.texRepeats = (self.size[0] / 5,
+                           self.size[1] / 5,
+                           1)
+        self.tex2Repeats = (self.size[0] / 400,
+                           self.size[1] / 400,
+                           1)
+
+
 def detectBoxDrawables(box):
     """Given a box WorldObject, return a list of the drawables that should be used
        to represent it. This looks at the size and placement of the box to determine
@@ -357,6 +396,10 @@ def detectBoxDrawables(box):
     # If the box isn't on the ground and it's fairly flat, assume it's a platform
     if height < 8 and box.center[2] > 1:
         sides = PlatformSides(box)
+
+    # If the box is on the ground, add some grass around the edges
+    if box.center[2] == 0:
+        drawables.append(GrassEdge(box))
 
     # If the box is about the same width as a tank, put some tread marks on it...
     if minorAxis > Scale.TankWidth and minorAxis < Scale.TankWidth * 4 and majorAxis > Scale.TankWidth * 4:
