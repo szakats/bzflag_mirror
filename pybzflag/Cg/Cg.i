@@ -10,8 +10,8 @@ int cgIsContext(CGcontext);
 char *cgGetLastListing(CGcontext);
 
 // program functions
-CGprogram cgCreateProgram(CGcontext, CGenum, const char *, CGprofile, const char *,  const char **);
-CGprogram cgCreateProgramFromFile(CGcontext, CGenum, const char *, CGprofile, const char *, const char **);
+CGprogram cgCreateProgram(CGcontext, int, const char *, CGprofile, const char *,  const char **);
+CGprogram cgCreateProgramFromFile(CGcontext, int, const char *, CGprofile, const char *, const char **);
 CGprogram cgCopyProgram(CGprogram);
 void cgDestroyProgram(CGprogram);
 CGprogram cgGetFirstProgram(CGcontext);
@@ -20,14 +20,14 @@ CGcontext cgGetProgramContext(CGprogram);
 int cgIsProgram(CGprogram);
 void cgCompileProgram(CGprogram);
 int cgIsProgramCompiled(CGprogram);
-const char *cgGetProgramString(CGprogram, CGenum);
+const char *cgGetProgramString(CGprogram, int);
 CGprofile cgGetProgramProfile(CGprogram);
 
 // parameter functions
 CGparameter cgGetNamedParameter(CGprogram, const char *);
-CGparameter cgGetFirstParameter(CGprogram, CGenum);
+CGparameter cgGetFirstParameter(CGprogram, int);
 CGparameter cgGetNextParameter(CGparameter);
-CGparameter cgGetFirstLeafParameter(CGprogram, CGenum);
+CGparameter cgGetFirstLeafParameter(CGprogram, int);
 CGparameter cgGetNextLeafParameter(CGparameter);
 CGparameter cgGetFirstStructParameter(CGparameter);
 CGparameter cgGetFirstDependentParameter(CGparameter);
@@ -42,10 +42,10 @@ const char *cgGetParameterSemantic(CGparameter);
 CGresource cgGetParameterResource(CGparameter);
 CGresource cgGetParameterBaseResource(CGparameter);
 unsigned long cgGetParameterResourceIndex(CGparameter);
-CGenum cgGetParameterVariability(CGparameter);
-CGenum cgGetParameterDirection(CGparameter);
+int cgGetParameterVariability(CGparameter);
+int cgGetParameterDirection(CGparameter);
 int cgIsParameterReferenced(CGparameter);
-const double *cgGetParameterValues(CGparameter, CGenum, int *);
+const double *cgGetParameterValues(CGparameter, int, int *);
 int cgGetParameterOrdinalNumber(CGparameter);
 
 // type functions
