@@ -81,7 +81,7 @@ if __name__ == '__main__':
     view.camera.jump()
 
     # Give us some spiffy blue and yellow highlights
-    glClearColor(0.3, 0.3, 0.3, 1)
+    viewport.clearColor  = (0.3, 0.3, 0.3, 1)
     view.light0.ambient  = (0,0,0,1)
     view.light0.diffuse  = (0.5,0.5,0.4,1)
     view.light0.position = (0,-200,200,1)

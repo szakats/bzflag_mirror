@@ -274,10 +274,7 @@ class BasicRenderPass(RenderPass):
            This routine is careful that only the texture targets and units specified
            are enabled, and all others are disabled.
            """
-        # Disable all textures if we're in wireframe mode
-        wireframe = glGetIntegerv(GL_POLYGON_MODE)[0] == GL_LINE
-
-        if textures and not wireframe:
+        if textures:
             if GLExtension.multitexture:
                 # We have multitexturing. Enable and bind the texture units we'll be using,
                 # make sure the rest are disabled.

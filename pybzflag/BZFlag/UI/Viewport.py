@@ -183,12 +183,13 @@ class OpenGLViewport(PygameViewport):
         self.nearClip    = 0.1
         self.farClip     = 2500.0
         self.fov         = 45.0
-        self.rectExp = [0,0] + list(self.size) # A function or list specifying our relative viewport
-        self.rect    = self.rectExp            # Our absolute viewport
+        self.rectExp     = [0,0] + list(self.size)  # A function or list specifying our relative viewport
+        self.rect        = self.rectExp             # Our absolute viewport
         self.wireframe   = False
+        self.wireframeClearColor = (0.5, 0.5, 0.5, 1)
+        self.clearColor  = (0,0,0,1)
 
         # Set up some common OpenGL defaults
-        GL.glClearColor(0, 0, 0, 1)
         GL.glClearDepth(1.0)
         GL.glDepthFunc(GL.GL_LESS)
         GL.glShadeModel(GL.GL_SMOOTH)
@@ -196,7 +197,12 @@ class OpenGLViewport(PygameViewport):
         GL.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST)
 
         def onSetupFrame():
-            GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+            # Always clear in wireframe mode, but in normal mode it can be optional.
+            # Set clearColor to None to disable it.
+            if self.wireframe or self.clearColor:
+                GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+            else:
+                GL.glClear(GL.GL_DEPTH_BUFFER_BIT)
         self.onSetupFrame.observe(onSetupFrame)
 
         def onResize():
@@ -233,8 +239,11 @@ class OpenGLViewport(PygameViewport):
 
         # Enable/disable wireframe on a per-viewport basis
         if self.wireframe:
+            GL.glClearColor(*self.wireframeClearColor)
             GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
         else:
+            if self.clearColor:
+                GL.glClearColor(*self.clearColor)
             GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
 
     def setProjectionMatrix(self):
