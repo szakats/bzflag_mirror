@@ -1,0 +1,94 @@
+""" BZFlag.Client.Player
+
+Provides the PlayerClient class, which extends StatefulClient to
+include functionality necessary for implementing a player.
+"""
+#
+# Python BZFlag Protocol Package
+# Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
+#
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2.1 of the License, or (at your option) any later version.
+#
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public
+#  License along with this library; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+import BZFlag
+from BZFlag import Errors, Event
+from BZFlag.Client.Stateful import StatefulClient
+
+
+class PlayerClient(StatefulClient):
+    """Extends the StatefulClient with functionality for implementing
+       a player. This includes methods for entering and leaving the
+       game, and a method of glueing the client with a frontend that
+       provides actual player interaction, or a bot AI.
+       """
+    def init(self):
+        StatefulClient.init(self)
+        self.options.update({
+            'identity': None,    # A Player.Identity instance
+            })
+
+        # We won't have a player instance until we get a MsgAddPlayer
+        # back for ourselves and StatefulClient adds it to the Game.
+        # We do need to store the identity used for joining the game
+        # of course.
+        self.inGame = 0
+        self.player = None
+        Event.attach(self, 'onEnterGame', 'onInitPlayer')
+
+        # Set up an observer for the game's onAddPlayer that will set
+        # up our player member whenever that MsgAddPlayer is received.
+        def onAddPlayer(game, player):
+            if player.identity.playerId == self.id:
+                self.player = player
+                self.onInitPlayer()
+        self.game.onAddPlayer.observe(onAddPlayer)
+
+    def onLoadWorld(self):
+        self.game.onLoadWorld()
+        self.enterGame()
+
+    def enterGame(self):
+        msg = self.outgoing.MsgEnter()
+        identity = self.options['identity']
+        if not identity.callSign:
+            raise Errors.ProtocolError("A call sign is required to enter the game")
+        msg.playerType = identity.type
+        msg.team = identity.team
+        msg.callSign = identity.callSign
+        msg.emailAddress = identity.emailAddress
+        self.tcp.write(msg)
+
+    def disconnect(self):
+        self.exitGame()
+        StatefulClient.disconnect(self)
+
+    def exitGame(self):
+        self.inGame = 0
+        self.tcp.write(self.outgoing.MsgExit())
+
+    def onMsgAccept(self, msg):
+        """This is called after we try to enterGame, if it's successful."""
+        self.inGame = 1
+        self.onEnterGame()
+
+    def onMsgReject(self, msg):
+        """This is called after we try to enterGame, if we failed."""
+        raise Errors.GameException("Unable to enter the game: %s" % msg.reason)
+
+    def sendMessage(self, message, destination='all'):
+        """Send a message to other players"""
+        self.tcp.write(self.outgoing.MsgMessage(destination = destination,
+                                                message = message))
+
+### The End ###

@@ -1,11 +1,7 @@
-""" BZFlag.Client
+""" BZFlag.Client.Stateful
 
-Provides the BaseClient class, which implements basic communication
-with the server and provides hooks for adding more functionality
-in subclasses.
-
-Provides subclasses providing logic to update the game state,
-and providing player functionality.
+Provides the StatefulClient class, which extends BaseClient to
+support updating a game state and transmitting changes.
 """
 #
 # Python BZFlag Protocol Package
@@ -26,89 +22,9 @@ and providing player functionality.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 import BZFlag
-from BZFlag import Network, Protocol, Errors, Player, Game, World, Event, Flag
+from BZFlag import Errors, Player, Game, World, Event, Flag
 from StringIO import StringIO
-
-
-class BaseClient(Network.Endpoint):
-    """A basic client class that doesn't process any messages."""
-
-    outgoing = Protocol.ToServer
-    incoming = Protocol.FromServer
-    
-    def init(self):
-        Network.Endpoint.init(self)
-        self.connected = 0
-        self.options.update({
-            'server': None,
-            })
-        Event.attach(self, 'onConnect', 'onDisconnect')
-
-        def setOptions(**options):
-            if 'server' in options.keys():
-                self.connect(options['server'])
-        self.onSetOptions.observe(setOptions)
-
-    def connect(self, server):
-        """This does the bare minimum necessary to connect to the
-           BZFlag server. It does not negotiate flags, obtain the
-           world database, or join the game. After this function
-           returns, the client is connected to the server and can
-           receive and transmit messages.
-           """
-        if not server:
-            raise Errors.NetworkException("A server must be specified")
-
-        # Establish the TCP socket
-        if self.tcp:
-            self.disconnect()
-        self.tcp = Network.Socket()
-        self.tcp.connect(server, Protocol.Common.defaultPort)
-        self.tcp.setBlocking(0)
-        self.eventLoop.add(self.tcp)
-
-        # Until we establish a UDP connection, we'll need to send
-        # normally-multicasted messages over TCP
-        self.multicast = self.tcp
-
-        # Now we have to wait for the server's Hello packet,
-        # with the server version and client ID.
-        self.tcp.handler = self.handleHelloPacket
-
-    def disconnect(self):
-        if self.tcp:
-            self.tcp.close()
-            self.eventLoop.remove(self.tcp)
-            self.tcp = None
-        if self.udp:
-            self.udp.close()
-            self.eventLoop.remove(self.udp)
-            self.udp = None
-        self.multicast = None
-        self.connected = 0
-        self.onDisconnect()
-
-    def onDisconnect(self):
-        self.eventLoop.stop()
-
-    def handleHelloPacket(self, socket, eventLoop):
-        """This is a callback used to handle incoming socket
-           data when we're expecting a hello packet.
-           """
-        # We should have just received a Hello packet with
-        # the server version and our client ID.
-        hello = socket.readStruct(self.incoming.HelloPacket)
-        if hello.version != BZFlag.protocolVersion:
-            raise Errors.ProtocolError(
-                "Protocol version mismatch: The server is version " +
-                "'%s', this client is version '%s'." % (
-                hello.version, BZFlag.protocolVersion))
-        self.id = hello.clientId
-
-        # Now we're connected
-        self.connected = 1
-        socket.handler = self.handleMessage
-        self.onConnect()
+from BZFlag.Client.Base import BaseClient
 
 
 class StatefulClient(BaseClient):
@@ -232,7 +148,6 @@ class StatefulClient(BaseClient):
         """Generic handler for all messages that update a flag"""
         try:
             flag = self.game.getFlag(msg.flagNum, Flag.getDict()[msg.update.id])
-            print flag
             flag.updateFromMessage(msg)
         except KeyError:
             raise Errors.ProtocolWarning("Can't update flag number %d with unknown ID %d" %
@@ -270,71 +185,5 @@ class StatefulClient(BaseClient):
     def onMsgTeleport(self, msg):
         # FIXME
         pass
-
-
-class PlayerClient(StatefulClient):
-    """Extends the StatefulClient with functionality for implementing
-       a player. This includes methods for entering and leaving the
-       game, and a method of glueing the client with a frontend that
-       provides actual player interaction, or a bot AI.
-       """
-    def init(self):
-        StatefulClient.init(self)
-        self.options.update({
-            'identity': None,    # A Player.Identity instance
-            })
-
-        # We won't have a player instance until we get a MsgAddPlayer
-        # back for ourselves and StatefulClient adds it to the Game.
-        # We do need to store the identity used for joining the game
-        # of course.
-        self.inGame = 0
-        self.player = None
-        Event.attach(self, 'onEnterGame', 'onInitPlayer')
-
-        # Set up an observer for the game's onAddPlayer that will set
-        # up our player member whenever that MsgAddPlayer is received.
-        def onAddPlayer(game, player):
-            if player.identity.playerId == self.id:
-                self.player = player
-                self.onInitPlayer()
-        self.game.onAddPlayer.observe(onAddPlayer)
-
-    def onLoadWorld(self):
-        self.game.onLoadWorld()
-        self.enterGame()
-
-    def enterGame(self):
-        msg = self.outgoing.MsgEnter()
-        identity = self.options['identity']
-        if not identity.callSign:
-            raise Errors.ProtocolError("A call sign is required to enter the game")
-        msg.playerType = identity.type
-        msg.team = identity.team
-        msg.callSign = identity.callSign
-        msg.emailAddress = identity.emailAddress
-        self.tcp.write(msg)
-
-    def disconnect(self):
-        self.exitGame()
-        StatefulClient.disconnect(self)
-
-    def exitGame(self):
-        self.inGame = 0
-        self.tcp.write(self.outgoing.MsgExit())
-
-    def onMsgAccept(self, msg):
-        """This is called after we try to enterGame, if it's successful."""
-        self.inGame = 1
-        self.onEnterGame()
-
-    def onMsgReject(self, msg):
-        """This is called after we try to enterGame, if we failed."""
-        raise Errors.GameException("Unable to enter the game: %s" % msg.reason)
-
-    def sendMessage(self, message, destination='all'):
-        """Send a message to other players"""
-        self.tcp.write(self.outgoing.MsgMessage(destination = destination,
-                                                message = message))
 
 ### The End ###
