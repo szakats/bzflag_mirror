@@ -30,7 +30,7 @@ from BZFlag import Animated
 class Setup:
     def __init__(self, game, eventLoop):
         self.viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
-        time = Animated.Timekeeper()
+        self.time = Animated.Timekeeper()
         padding = 10
         fullHudSize = 0.3
 
@@ -40,12 +40,13 @@ class Setup:
         remaining = Layout.Rect(self.viewport).margin(padding)
 
         # HUD panel along the bottom of the screen, with animated resize
-        hudSize = Animated.Value(Animated.SigmoidApproach(fullHudSize, 15, (0, fullHudSize)), fullHudSize)
+        self.hudSize = Animated.Value(Animated.SigmoidApproach(fullHudSize, 15, (0, fullHudSize)),
+                                      fullHudSize)
         self.inMotion = False
         self.viewport.onSetupFrame.observe(self.setupFrame)
         self.viewport.onKeyDown.observe(self.keyDown)
 
-        (remaining, hudRect) = remaining.hSplit(lambda r: (1-hudSize.value) * r[3])
+        (remaining, hudRect) = remaining.hSplit(lambda r: (1-self.hudSize.value) * r[3])
         hudPanel = self.viewport.region(hudRect)
         self.panel = HUD.Panel(hudPanel)
 
@@ -68,9 +69,9 @@ class Setup:
 
     def keyDown(self, event):
         if event.unicode == " ":
-            if hudSize.f.target == fullHudSize:
-                hudSize.f.target = 0
+            if self.hudSize.f.target == fullHudSize:
+                self.hudSize.f.target = 0
             else:
-                hudSize.f.target = fullHudSize
+                self.hudSize.f.target = fullHudSize
 
 ### The End ###
