@@ -96,7 +96,6 @@ class CubeMap(Texture):
         self.renderSides()
         self.dirty = False
 
-
     def renderColors(self):
         """For debugging, render solid color to each side of the cube map"""
         for target, color in (
@@ -126,30 +125,30 @@ class CubeMap(Texture):
         glLoadIdentity()
         gluLookAt(0,0,0, 0,0,1,  0,-1,0)
         glTranslatef(*cameraPos)
-        self.renderSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT)
-
-        glLoadIdentity()
-        gluLookAt(0,0,0, 0,0,-1, 1,1,0)
-        glTranslatef(*cameraPos)
-        self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT)
-
-        glLoadIdentity()
-        gluLookAt(0,0,0, 0,-1,0, 0,0,-1)
-        glTranslatef(*cameraPos)
         self.renderSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT)
 
         glLoadIdentity()
-        gluLookAt(0,0,0, 0,1,0, 0,0,-1)
+        gluLookAt(0,0,0, 0,0,-1, 0,-1,0)
         glTranslatef(*cameraPos)
         self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT)
 
         glLoadIdentity()
-        gluLookAt(0,0,0, 1,0,0, 0,0,-1)
+        gluLookAt(0,0,0, 0,1,0, 0,0,1)
+        glTranslatef(*cameraPos)
+        self.renderSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT)
+
+        glLoadIdentity()
+        gluLookAt(0,0,0, 0,-1,0, 0,0,-1)
+        glTranslatef(*cameraPos)
+        self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT)
+
+        glLoadIdentity()
+        gluLookAt(0,0,0, 1,0,0, 0,-1,0)
         glTranslatef(*cameraPos)
         self.renderSide(GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT)
 
         glLoadIdentity()
-        gluLookAt(0,0,0, -1,0,0, 0,0,-1)
+        gluLookAt(0,0,0, -1,0,0, 0,-1,0)
         glTranslatef(*cameraPos)
         self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT)
 

@@ -27,6 +27,7 @@ from BZFlag import Vector
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import CubeMap, GLExtension
 from OpenGL.GL.EXT.texture_cube_map import *
+import LinearAlgebra
 
 
 class Pyramid(DisplayList):
@@ -161,7 +162,32 @@ class Pyramid(DisplayList):
             self.render.blended = True
         elif len(self.render.textures) > 1:
             self.render.textures[1].texEnv = GL_REPLACE
+        if self.envMap:
+            self.render.static = False
 
+    def draw(self, rstate):
+        """If we're environment mapping, we need to keep the texture matrix
+           tracking the inverse of the modelview matrix at all times.
+           """
+        glActiveTextureARB(GL_TEXTURE1_ARB)
+        m = glGetFloatv(GL_MODELVIEW_MATRIX)
+        glMatrixMode(GL_TEXTURE)
+        m = LinearAlgebra.inverse(m)
+        m[3][0] = 0
+        m[3][1] = 0
+        m[3][2] = 0
+        glLoadMatrixf(m)
+        glMatrixMode(GL_MODELVIEW)
+        glActiveTextureARB(GL_TEXTURE0_ARB)
+
+        DisplayList.draw(self, rstate)
+
+        glActiveTextureARB(GL_TEXTURE1_ARB)
+        glMatrixMode(GL_TEXTURE)
+        glLoadIdentity()
+        glMatrixMode(GL_MODELVIEW)
+        glActiveTextureARB(GL_TEXTURE0_ARB)
+        
     def drawToList(self, rstate):
         if self.render.blended:
             glColor4f(1, 1, 1, 0.6)
@@ -181,7 +207,7 @@ class Pyramid(DisplayList):
 
         if self.envMap:
             glActiveTextureARB(GL_TEXTURE1_ARB)
-            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)  # XXXXXX
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
             
             glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
             glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
@@ -191,16 +217,6 @@ class Pyramid(DisplayList):
             glEnable(GL_TEXTURE_GEN_R)
             glActiveTextureARB(GL_TEXTURE0_ARB)
 
-        # XXXXXXX
-        from BZFlag.UI.Drawable import VRML
-        glPushMatrix()
-        glTranslatef(0,0,20)
-        glScalef(4,4,4)
-        for mesh in VRML.load("../extra_media/sphere.wrl").values():
-            mesh.drawToList(rstate)
-        glPopMatrix()
-        glColor3f(1,1,1)
-            
         glBegin(GL_QUADS)
         # Z- side
         glNormal3f(0, 0, -1)

@@ -188,7 +188,7 @@ class OpenGLViewport(PygameViewport):
         self.wireframe   = False
 
         # Set up some common OpenGL defaults
-        GL.glClearColor(0.0, 0.0, 0.0, 0.0)
+        GL.glClearColor(0.2, 0.2, 0.4, 1.0)
         GL.glClearDepth(1.0)
         GL.glDepthFunc(GL.GL_LESS)
         GL.glShadeModel(GL.GL_SMOOTH)
