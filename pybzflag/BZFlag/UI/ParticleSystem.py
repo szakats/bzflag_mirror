@@ -27,7 +27,81 @@ from BZFlag.Geometry import *
 from BZFlag.World import Scale
 
 
-class Cloth:
+class Model:
+    """An abstract particle simulation model. This defines arrays with the
+       model's current state, and manages calling affectors to update the
+       simulation state.
+       """
+    def __init__(self, initialState):
+        # Initialize arrays for the simulation state
+        self.initialState = array(initialState, Float32, savespace=True)
+        self.state = array(initialState, Float32, savespace=True)
+        self.velocity = zeros(initialState.shape, Float32, savespace=True)
+
+        # Don't add any affectors by default- let subclasses do that
+        self.affectors = []
+
+    def reset(self):
+        self.state[...] = self.initialState
+        self.velocity[...] = 0
+
+    def integrate(self, dt):
+        """The default integration function just broadcasts the integration
+           request to each affector in sequence. This catches OverflowErrors
+           and sends them to integrationError().
+           """
+        try:
+            for affector in self.affectors:
+                affector.integrate(self.stepSize)
+        except OverflowError:
+            self.integrationError()
+
+    def integrationError(self):
+        """If our simulation got unstable and exploded. Best we can do now is reset it.
+           This shouldn't ever happen, but this keeps us from crashing if something goes
+           terminally wrong with the simulation.
+           """
+        self.reset()
+
+    def add(self, cls, *args, **kw):
+        """Add an affector to the cloth with the given class and extra
+           arguments. Returns the added affector instance.
+           """
+        inst = cls(self, *args, **kw)
+        self.affectors.append(inst)
+        return inst
+
+
+class FixedIntegrationModel(Model):
+    """A Model subclass which takes fixed size integration steps. This is used for models
+       that can easily become unstable using variable integration steps.
+
+       stepSize      - Size of integration steps taken
+       stepTime      - Wallclock time each integration step corresponds to
+       """
+    def __init__(self, initialState, stepSize, stepTime):
+        self.stepSize = stepSize
+        self.stepTime = stepTime
+        Model.__init__(self, initialState)
+
+        # Time accumulator for keeping track of the temporal error
+        # after taking zero or more integration steps in integrate()
+        self.dt = 0
+
+    def integrate(self, dt):
+        """Convert the caller's timesteps into zero or more fixed-size
+           time steps. Returns the number of integration steps performed.
+           """
+        self.dt += dt
+        nSteps = 0
+        while self.dt > 0:
+            Model.integrate(self, self.stepTime)
+            self.dt -= self.stepTime
+            nSteps += 1
+        return nSteps
+
+
+class Cloth(FixedIntegrationModel):
     """A cloth is a 2D spring system simulation. Its state is
        represented as a 3-axis Numeric array, a 2D array of
        positions for each point mass in the simulation. This can
@@ -51,60 +125,15 @@ class Cloth:
                  stepSize      = 0.04,
                  stepTime      = 0.01,
                  ):
-        self.stepSize = stepSize
-        self.stepTime = stepTime
+        FixedIntegrationModel.__init__(self, initialState, stepSize, stepTime)
         self.friction = friction
         self.stiffness = stiffness
 
-        # Time accumulator for keeping track of the temporal error
-        # after taking zero or more integration steps in integrate()
-        self.dt = 0
-
-        # Initialize arrays for the simulation state
-        self.initialState = array(initialState, Float32, savespace=True)
-        self.state = array(initialState, Float32, savespace=True)
-        self.velocity = zeros(initialState.shape, Float32, savespace=True)
-
         # Initial affectors to cover the spring forces,
         # friction, and velocity integration
-        self.affectors = [ClothSpringAffector(self),
-                          FrictionAffector(self),
-                          VelocityAffector(self)]
-
-    def reset(self):
-        self.state[...] = self.initialState
-        self.velocity[...] = 0
-
-    def integrate(self, dt):
-        """Integrate the spring system. Our simple method of simulation
-           will quickly get unstable if our timestep is too large, so
-           we convert the caller's timesteps into zero or more fixed-size
-           time steps. Returns the number of integration steps performed.
-           """
-        self.dt += dt
-        nSteps = 0
-        while self.dt > 0:
-            try:
-                for affector in self.affectors:
-                    affector.integrate(self.stepSize)
-
-            except OverflowError:
-                # If our simulation got unstable and exploded. Best we can do now is reset it.
-                # This shouldn't ever happen, but this keeps us from crashing if something goes
-                # terminally wrong with the simulation.
-                self.reset()
-
-            self.dt -= self.stepTime
-            nSteps += 1
-        return nSteps
-
-    def add(self, cls, *args, **kw):
-        """Add an affector to the cloth with the given class and extra
-           arguments. Returns the added affector instance.
-           """
-        inst = cls(self, *args, **kw)
-        self.affectors.append(inst)
-        return inst
+        self.add(ClothSpringAffector)
+        self.add(FrictionAffector)
+        self.add(VelocityAffector)
 
 
 class Affector:
