@@ -231,7 +231,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About BZEdit32"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LTEXT           "BZEdit32 Version 1.5.9f11\nwww.artemisgames.com/code/bz/edit\nwww.bzflag.org\nbaflag.sourceforge.com",
+    LTEXT           "BZEdit32 Version 1.5.9f12\nwww.artemisgames.com/code/bz/edit\nwww.bzflag.org\nbaflag.sourceforge.com",
                     IDC_STATIC,180,8,126,53,SS_SUNKEN
     LTEXT           "Copyright (C) 2002 Jeff Myers",IDC_STATIC,208,66,98,8
     CONTROL         139,IDC_STATIC,"Static",SS_BITMAP,7,7,167,67
@@ -378,8 +378,9 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "040904B0"
+        BLOCK "040904b0"
         BEGIN
+            VALUE "Comments", "\0"
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "BZEdit32 MFC Application\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
@@ -387,8 +388,10 @@ BEGIN
             VALUE "LegalCopyright", "Copyright (C) 2001\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "BZEdit32.EXE\0"
+            VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "BZEdit32 Application\0"
             VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
         END
     END
     BLOCK "VarFileInfo"
