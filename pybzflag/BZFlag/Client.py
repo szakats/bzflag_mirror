@@ -260,11 +260,12 @@ class StatefulClient(BaseClient):
 
     def onMsgAddPlayer(self, msg):
         self.game.addPlayer(Player.fromMessage(msg))
-        pass
 
     def onMsgRemovePlayer(self, msg):
         self.game.removePlayer(msg.id)
-        pass
+
+    def onMsgPlayerUpdate(self, msg):
+        self.game.players[msg.id].updateFromMessage(msg)
 
     def onMsgFlagUpdate(self, msg):
         pass
@@ -276,9 +277,6 @@ class StatefulClient(BaseClient):
         pass
 
     def onMsgAlive(self, msg):
-        pass
-
-    def onMsgPlayerUpdate(self, msg):
         pass
 
     def onMsgShotBegin(self, msg):

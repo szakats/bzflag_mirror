@@ -81,6 +81,14 @@ class Player:
     def __str__(self):
         return "%s : %s" % (self.score, self.identity)
 
+    def updateFromMessage(self, msg):
+        """Update the player from a MsgPlayerUpdate"""
+        self.status = msg.status
+        self.motion.position = msg.position
+        self.motion.velocity = msg.velocity
+        self.motion.azimuth = msg.azimuth
+        self.motion.angularVelocity = msg.angularVelocity
+
 
 def fromMessage(msg):
     """Create a new Player class with the information from

@@ -34,6 +34,7 @@ class OverheadView:
         'Box':        '#408080',
         'Pyramid':    '#80FFFF',
         'Teleporter': '#FFFF80',
+        'player':     'white',
       }
     
     def __init__(self, game):
@@ -99,6 +100,24 @@ class OverheadView:
             self.cachedWorld = pygame.Surface(surface.get_size()).convert()
             self.renderWorld(self.cachedWorld)
         surface.blit(self.cachedWorld, (0,0))
+
+        # Now for the objects that change often
+        self.renderFlags(surface)
+        self.renderPlayers(surface)
+        self.renderShots(surface)
+
+    def renderPlayers(self, surface):
+        color = self.colorScheme['player']
+        for player in self.game.players.values():
+            pos = self.worldToView(player.motion.position)
+            pygame.draw.circle(surface, color, pos, 2)
+        pass
+
+    def renderFlags(self, surface):
+        pass
+
+    def renderShots(self, surface):
+        pass
 
 
 def simpleClient(client, size=(600,600), viewClass=OverheadView):
