@@ -27,6 +27,10 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from BZFlag import Event
+from BZFlag.UI import Drawable
+
+# Maximum number of radar laysrs per color, trades off Z accuracy for speed
+numRadarLayers = 8
 
 
 # Color scheme for radar. Objects not found specifically default to None
@@ -41,11 +45,130 @@ colorScheme = {
     }
 
 
+def smoothedPoly(poly):
+    """Render a polygon with smoothed edges. This uses GL_POLYGON to render the
+       interior without cracks between triangles, then GL_LINE_LOOP to render
+       the edges smoothly.
+       """
+    glBegin(GL_POLYGON)
+    for vertex in poly:
+        glVertex2f(*vertex)
+    glEnd()
+    glBegin(GL_LINE_LOOP)
+    for vertex in poly:
+        glVertex2f(*vertex)
+    glEnd()
+
+
+def colorScale(z, viewHeight):
+    """This is the Enhanced Radar (tm) color scaling algorithm from bzflag proper,
+       simplified a little to make the display list optimization possible.
+       """
+    alpha = 1.0 - abs(viewHeight - z) / 40.0
+    if alpha < 0.35:
+        alpha = 0.35
+    return alpha
+
+
+class RadarLayer(Drawable.DisplayList):
+    """To achieve the enhanced radar effect, the world is broken up into
+       several slices each showing a different range of Z values. These
+       slices are then blended together at different alpha values.
+       This class represents one slice that draws a list of pre-sliced
+       world objects.
+       """
+    def drawToList(self, color, z, objects):
+        self.color = color
+        self.z = z
+        for object in objects:
+            smoothedPoly(object.toPolygon())
+
+
+class RegularPolygon(Drawable.DisplayList):
+    """A display-listed regular polygon, used to make dots on the map.
+       Radius is 1 and polygon is at the origin. The drawAt() function
+       scales these at render-time.
+       """
+    def drawToList(self, sides):
+        points = []
+        sideRadians = math.pi * 2 / sides
+        for side in xrange(sides):
+            theta = side * sideRadians
+            points.append((math.cos(theta), math.sin(theta)))
+        smoothedPoly(points)
+
+    def drawAt(self, point, radius):
+        glTranslatef(point[0], point[1], 0)
+        glScalef(radius, radius, 1)
+        self.draw()
+
+
+class Scene:
+    """Manages the internal representation of the world after loading.
+       For the radar, this means a set of OpenGL display lists representing
+       2D views of the world at different heights. These will all be
+       drawn with different alpha values to achieve the enhanced radar effect.
+       """
+    def __init__(self, game):
+        self.game = game
+        game.world.onLoad.observe(self.reloadWorld)
+        self.reloadWorld()
+
+    def reloadWorld(self):
+        """Z-sorts the world and divides it up into layers"""
+
+        # First sort all visible objects by color
+        colors = {}
+        for object in self.game.world.blocks:
+            if hasattr(object, 'center'):
+                try:
+                    color = colorScheme[object.__class__.__name__]
+                except KeyError:
+                    color = colorScheme[None]
+                try:
+                    colors[color].append(object)
+                except KeyError:
+                    colors[color] = [object]
+
+        # Z-sort all the objects in each color
+        def zSort(a, b):
+            return cmp(a.center[2], b.center[2])
+        for colorGroup in colors.values():
+            colorGroup.sort(zSort)
+
+        # Decompose each color group into a number of layers,
+        # depending on the range of Z values present.
+        self.layers = []
+        for color, colorGroup in colors.items():
+            minZ = colorGroup[0].center[2]
+            maxZ = colorGroup[-1].center[2]
+            layerHeight = (maxZ - minZ) / numRadarLayers
+            layerObjects = []
+            currentLayerZ = minZ
+            
+            for object in colorGroup:
+                if object.center[2] > currentLayerZ + layerHeight:
+                    # Exceeded the current layer's height, get a new layer
+                    self.layers.append(RadarLayer(color, currentLayerZ, layerObjects))
+                    layerObjects = []
+                    currentLayerZ += layerHeight
+                layerObjects.append(object)
+            # New layer with remaining objects
+            self.layers.append(RadarLayer(color, currentLayerZ, layerObjects))
+
+    def render(self, viewHeight=0):
+        for layer in self.layers:
+            color = layer.color
+            glColor4f(color[0], color[1], color[2], colorScale(layer.z, viewHeight))
+            layer.draw()
+            
+
 class RadarView:
     """An overhead view implemented using OpenGL, optionally tracking
        the position and orientation of one player.
        """
     def __init__(self, game, viewport):
+        self.scene = Scene(game)
         self.game = game
         self.viewport = viewport
         self.zoom = 0.95
@@ -53,61 +176,13 @@ class RadarView:
         self.angle = 0
         self.follow = None
         viewport.fov = None
+        self.dot = RegularPolygon(8)
 
         viewport.setCaption("%s Radar View" % BZFlag.name)
         def onDrawFrame():
             game.update()
             self.render()
         viewport.onDrawFrame.observe(onDrawFrame)
-
-    def colorScale(self, z, h, viewHeight):
-        """This is the Enhanced Radar (tm) color scaling algorithm from bzflag proper"""
-        if viewHeight >= z + h:
-            alpha = 1.0 - (viewHeight - (z + h)) / 40.0
-        elif viewHeight <= z:
-            alpha = 1.0 - (z - viewHeight) / 40.0
-        else:
-            alpha = 1.0
-        if alpha < 0.35:
-            alpha = 0.35
-        return alpha
-
-    def smoothedPoly(self, poly):
-        """Render a polygon with smoothed edges. This uses GL_POLYGON to render the
-           interior without cracks between triangles, then GL_LINE_LOOP to render
-           the edges smoothly.
-           """
-        glBegin(GL_POLYGON)
-        for vertex in poly:
-            glVertex2f(*vertex)
-        glEnd()
-        glBegin(GL_LINE_LOOP)
-        for vertex in poly:
-            glVertex2f(*vertex)
-        glEnd()
-
-    def polyDot(self, point, dotSize=5):
-        """Convert a point to a polygon that draws a dot at that point.
-           Currently this is always an axis-aligned square.
-           """
-        return ((point[0] - dotSize, point[1] - dotSize),
-                (point[0] + dotSize, point[1] - dotSize),
-                (point[0] + dotSize, point[1] + dotSize),
-                (point[0] - dotSize, point[1] + dotSize))
-
-    def renderWorld(self):
-        for object in self.game.world.blocks:
-            try:
-                try:
-                    color = colorScheme[object.__class__.__name__]
-                except KeyError:
-                    color = colorScheme[None]
-                z = object.center[2]
-                h = object.size[2]
-                glColor4f(color[0], color[1], color[2], self.colorScale(z, h, 0))
-                self.smoothedPoly(object.toPolygon())
-            except AttributeError:
-                pass
 
     def renderPlayers(self):
         # XXX - setting self.follow here is just for testing
@@ -123,13 +198,13 @@ class RadarView:
                 except KeyError:
                     color = colorScheme["player"]
                 pos = player.motion.position
-                glColor4f(color[0], color[1], color[2], self.colorScale(pos[2], 0, 0))
-                self.smoothedPoly(self.polyDot(pos))
+                glColor4f(color[0], color[1], color[2], colorScale(pos[2], self.center[2]))
+                self.dot.drawAt(pos, 5)
 
     def updateFollowing(self):
         if self.follow:
             self.center = self.follow.motion.position
-            self.angle  = - self.follow.motion.azimuth * 180 / math.pi + 90
+            self.angle  = -self.follow.motion.azimuth + 90
             self.zoom   = 2
 
     def render(self):
@@ -141,6 +216,7 @@ class RadarView:
         glDisable(GL_COLOR_MATERIAL)
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_TEXTURE_2D)
+        glEnable(GL_LINE_SMOOTH)
 
         size = self.viewport.size
         glPushMatrix()
@@ -150,7 +226,7 @@ class RadarView:
                  float(self.zoom) / self.game.world.size[1], 1)
         glRotatef(self.angle, 0,0,1)
         glTranslatef(-self.center[0], -self.center[1], 0)
-        self.renderWorld()
+        self.scene.render(self.center[2])
         self.renderPlayers()
         glPopMatrix()
 

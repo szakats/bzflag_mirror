@@ -22,9 +22,9 @@ the full in-game experience.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag.UI import Viewport, ThreeDView, RadarView, Layout, HUD
-from BZFlag import Animated
+from BZFlag.UI import Viewport, ThreeDView, ThreeDControl, RadarView, Layout, HUD
 import BZFlag
+from BZFlag import Animated
 
 
 def attach(game, eventLoop):
@@ -35,7 +35,7 @@ def attach(game, eventLoop):
 
     # 3D view in the root viewport
     view3d   = ThreeDView.ThreeDView(game, viewport)
-    ThreeDView.ThreeDController(view3d, viewport)
+    ThreeDControl.Viewing(view3d, viewport)
     remaining = Layout.Rect(viewport).margin(padding)
 
     # HUD panel along the bottom of the screen, with animated resize

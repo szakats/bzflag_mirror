@@ -181,6 +181,7 @@ class OpenGLViewport(PygameViewport):
         self.fov         = 45.0
         self.viewportExp = [0,0] + list(self.size) # A function or list specifying our relative viewport
         self.viewport    = self.viewportExp        # Our absolute viewport
+        self.wireframe   = False
 
         # Set up some common OpenGL defaults
         GL.glClearColor(0.0, 0.0, 0.0, 0.0)
@@ -189,7 +190,6 @@ class OpenGLViewport(PygameViewport):
         GL.glShadeModel(GL.GL_SMOOTH)
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
         GL.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST)
-        GL.glEnable(GL.GL_LINE_SMOOTH)
 
         def onSetupFrame():
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
@@ -217,6 +217,9 @@ class OpenGLViewport(PygameViewport):
     def configureOpenGL(self):
         from OpenGL import GL, GLU
         GL.glViewport(*self.viewport)
+
+        # Set up the projection matrix with the current viewport size and FOV.
+        # If we have no FOV, set up an orthogonal mode scaled in pixels.
         GL.glMatrixMode(GL.GL_PROJECTION)
         GL.glLoadIdentity()
         if self.fov:
@@ -226,6 +229,12 @@ class OpenGLViewport(PygameViewport):
         GL.glMatrixMode(GL.GL_MODELVIEW)
         GL.glLoadIdentity()
         GL.glDepthRange(0.01,2000)
+
+        # Enable/disable wireframe on a per-viewport basis
+        if self.wireframe:
+            GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+        else:
+            GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
 
     def getModeFlags(self):
         import pygame

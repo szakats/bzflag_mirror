@@ -21,11 +21,11 @@ A 3d scene renderer similar to BZFlag proper
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import pygame, math, BZFlag
+import pygame, BZFlag
 from pygame.locals import *
-from BZFlag import Event, Animated
 from BZFlag.World import WorldObjects
-from BZFlag.UI import Texture
+from BZFlag.UI import Texture, Animated
+from BZFlag import Event
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import sys
@@ -50,6 +50,18 @@ class Camera:
         glRotatef(self.elevation, 1.0, 0.0, 0.0)
         glRotatef(self.azimuth, 0.0, 0.0, 1.0)
         glTranslatef(*self.position)
+
+
+class SmoothedCamera(Camera):
+    """Replacement Camera class that smooths all axes with the Animated module"""
+    def __init__(self):
+        Camera.__init__(self)
+        
+
+    def load(self):
+
+        Camera.load(self)
+
 
 
 class Light:
@@ -114,6 +126,7 @@ class Scene:
         glEnable(GL_CULL_FACE)
         glEnable(GL_COLOR_MATERIAL)
 	glEnable(GL_LIGHTING)
+        glDisable(GL_LINE_SMOOTH)
         glColor4f(1,1,1,1)
 
         for texture in self.passes[0].keys():
@@ -140,7 +153,7 @@ class ThreeDView:
     def __init__(self, game, viewport):
         self.game = game
         self.viewport = viewport
-       # Initialize the opengl view
+        # Initialize the opengl view
         self.camera = Camera()
         self.scene = Scene(game)
         viewport.setCaption("%s 3D View" % BZFlag.name)
@@ -168,102 +181,12 @@ class ThreeDView:
 
         self.scene.render()
 
-class ThreeDController:
-    """A controller which attaches to the given view and viewport, providing camera control. """
-    def __init__(self, view, viewport):
-        self.view = view
-        self.viewport = viewport
-        self.distance = Animated.Value(view.camera.distance,
-                                       Animated.LogApproach(view.camera.distance, 4))
-        self.mouseZoomScale = 1.08
-        self.keyZoomScale = 1.6
-        self.mouseRotateScale = 5.0
-        view.camera.position = (0, 0, -20)
-
-	class modifiers:
-	    pass
-	modifiers.shift = False
-	modifiers.alt = False
-	modifiers.control = False
-
-        time = Animated.Timekeeper()
-        def onSetupFrame():
-            dt = time.step()
-            self.distance.integrate(dt)
-            view.camera.distance = self.distance.value
-        viewport.onSetupFrame.observe(onSetupFrame)
-
-        def onMouseButtonDown(event):
-            if event.button == 4:
-                self.zoom(1/self.mouseZoomScale)
-            if event.button == 5:
-                self.zoom(self.mouseZoomScale)
-        viewport.onMouseButtonDown.observe(onMouseButtonDown)
-
-        def onKeyDown(event):
-            if event.unicode == "f":
-                self.toggleFullscreen()
-            if event.unicode == "q":
-                self.quit()
-            if event.unicode == "-":
-                self.zoom(self.keyZoomScale)
-            if event.unicode == "=":
-                self.zoom(1/self.keyZoomScale)
-        viewport.onKeyDown.observe(onKeyDown)
-
-        def onMouseMotion(event):
-	    if pygame.key.get_mods() & (pygame.KMOD_RSHIFT | pygame.KMOD_LSHIFT):
-	        if event.buttons[1]:
-		    (x, y, z) = view.camera.position
-	 	    xscale = math.cos((-view.camera.azimuth) * math.pi / 180)
-		    yscale = math.sin((-view.camera.azimuth) * math.pi / 180)
-		    x += event.rel[0] * xscale - event.rel[1] * yscale
-		    y += event.rel[0] * yscale - event.rel[1] * xscale
-		    view.camera.position = (x, y, z)
-	            return
-	    if pygame.key.get_mods() & (pygame.KMOD_RALT | pygame.KMOD_LALT):
-	        if event.buttons[1]:
-		    (x, y, z) = view.camera.position
-		    z -= event.rel[1]
-		    if z > 0:
-		         z = 0
-		    if z < -1000:
-		         z = -1000
-		    view.camera.position = (x, y, z)
-	            return
-            if event.buttons[1]:
-                view.camera.azimuth += event.rel[0] / self.mouseRotateScale
-                view.camera.elevation += event.rel[1] / self.mouseRotateScale
-                if view.camera.elevation > 0:
-                    view.camera.elevation = 0
-                if view.camera.elevation < -90:
-                    view.camera.elevation = -90
-        viewport.onMouseMotion.observe(onMouseMotion)
-
-    def toggleFullscreen(self):
-        self.viewport.display.toggle_fullscreen()
-
-    def quit(self):
-        self.viewport.eventLoop.stop()
-
-    def zoom(self, scale):
-        """Sets the camera zoom target to a multiple of its current
-           value. The camera will smoothly track to this distance.
-           """
-        self.distance.f.target *= scale
-        if self.distance.f.target < 0.1:
-            self.distance.f.target = 0.1
-        if self.distance.f.target > 1500:
-            self.distance.f.target = 1500
-
-    def rotate(self, scale):
-        self.rotation.f.target *= scale
 
 def attach(game, eventLoop):
-    from BZFlag.UI.Viewport import OpenGLViewport
-    viewport = OpenGLViewport(eventLoop, (800,600))
+    from BZFlag.UI import OpenGLViewport, ThreeDControl
+    viewport = OpenGLViewport.OpenGLViewport(eventLoop, (800,600))
     view = ThreeDView(game, viewport)
-    ThreeDController(view, viewport)
+    ThreeDControl.Viewing(view, viewport)
     return viewport
 
 ### The End ###

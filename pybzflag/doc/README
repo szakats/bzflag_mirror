@@ -14,7 +14,7 @@ this using pydoc.
 
 -- Requirements
 
-Python 2.2 or later is required. There are several 2.2-only features used
+Python 2.2 or later is required. There are several recent python features used
 by PyBZFlag, but the most notable is that nested scopes are used extensively
 in its event handling system and HUD layout.
 

@@ -78,6 +78,7 @@ class Text:
         glDisable(GL_COLOR_MATERIAL)
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_TEXTURE_2D)
+        glEnable(GL_LINE_SMOOTH)
         glLoadIdentity()
         size = self.viewport.size
 

@@ -98,7 +98,7 @@ class Vector:
        """
     def __init__(self, value, f):
         self.f = f
-        self.set(value)
+        self.values = [Value(v, self.f) for v in value]
 
     def integrate(self, dt):
         for i in xrange(len(self.values)):
@@ -111,7 +111,11 @@ class Vector:
         self.values[i].value = v
 
     def set(self, value):
-        self.values = [Value(v, self.f) for v in value]
+        for i in xrange(len(value)):
+            self.values[i].value = value[i]
+
+    def get(self):
+        return [v.value for v in self.values]
 
 
 class Velocity:

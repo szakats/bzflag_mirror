@@ -49,7 +49,8 @@ class Texture:
         gluBuild2DMipmaps(GL_TEXTURE_2D, 3, self.w, self.h, GL_RGBA, GL_UNSIGNED_BYTE, self.image)
 
     def __del__(self):
-        glDeleteTextures(self.texture)
+        if hasattr(self, 'texture'):
+            glDeleteTextures(self.texture)
 
     def bind(self):
         """Bind this texture to GL_TEXTURE_2D in the current OpenGL context"""

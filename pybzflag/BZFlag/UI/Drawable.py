@@ -69,7 +69,8 @@ class DisplayList(GLDrawable):
         self.buildList(*args, **kw)
 
     def __del__(self):
-        glDeleteLists(self.list, 1)
+        if hasattr(self, 'list'):
+            glDeleteLists(self.list, 1)
 
     def buildList(self, *args, **kw):
         """Rebuild this object's display list. Arguments depend on the
