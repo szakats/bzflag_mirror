@@ -342,6 +342,7 @@ class Mesh(DisplayList):
 
         if self.color:
             glColor4f(*self.color)
+            self.blended = self.color[3] != 1
         if self.matrix:
             glMultMatrixf(self.matrix)
 
