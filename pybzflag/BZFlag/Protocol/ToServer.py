@@ -89,6 +89,12 @@ class MsgKilled(Common.Message):
         StructEntry(UInt16,          'shotId'),
         ]
 
+class MsgGrabFlag(Common.Message):
+    messageId = 0x6766
+    entries = [
+        StructEntry(UInt16,          'flagNum'),
+        ]
+
 
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgShotBegin = Common.MsgShotBegin
