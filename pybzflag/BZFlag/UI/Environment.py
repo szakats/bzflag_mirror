@@ -24,7 +24,7 @@ atmospheric effects like rain.
 #
 
 from __future__ import division
-from BZFlag.UI import Drawable
+from BZFlag.UI import Drawable, GLExtension
 from BZFlag import Animated
 
 
@@ -34,12 +34,19 @@ class Sky:
        """
     def __init__(self):
         self.time = Animated.Timekeeper()
-        self.drawables = [
-            Drawable.Sky.Colors(self),
-            Drawable.Sky.Clouds(self),
-            Drawable.Sky.Mountains(self),
-            Drawable.Sky.Void(self),
-            ]
+        self.drawables = []
+
+        # The color gradient acting as the background for the sky
+        self.drawables.append(Drawable.Sky.Colors(self))
+
+        # Nifty clouds and mountains, but only if we support multitexture
+        if GLExtension.multitexture:
+            self.drawables.append(Drawable.Sky.Clouds(self))
+            self.drawables.append(Drawable.Sky.Mountains(self))
+
+        # Slightly shaded void below the horizon
+        self.drawables.append(Drawable.Sky.Void(self))
+
         self.update()
 
     def getDrawables(self):
