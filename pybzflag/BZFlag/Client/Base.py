@@ -106,7 +106,7 @@ class BaseClient(Network.Endpoint):
         self.id = hello.clientId
 
         # Now we're connected
-        self.connected = 1
+        self.connected = True
         socket.handler = self.handleMessage
         self.onConnect()
 

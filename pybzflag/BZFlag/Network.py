@@ -159,9 +159,8 @@ class Socket:
             # Can't listen on UDP sockets
             pass
 
-    def listenOnFirstAvailable(self, firstPort=17200):
+    def listenOnFirstAvailable(self, port=17200):
         """Listen on the first available port, starting at the given port"""
-        port = 1
         while 1:
             try:
                 self.listen('', port)
