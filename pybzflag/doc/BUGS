@@ -1,0 +1,3 @@
+ - The HUD show/hide animation (triggered by the space bar) no longer works,
+   since viewport sizes are evaluated when the parent resizes rather than every frame
+
