@@ -22,7 +22,7 @@ A class for drawing the pyramids in the world
 #
 from DisplayList import *
 from OpenGL.GL import *
-from BZFlag.Util import cross
+from BZFlag.Vector import cross, normalize
 
 
 class Pyramid(DisplayList):
@@ -59,7 +59,7 @@ class Pyramid(DisplayList):
         glEnd()
         glBegin(GL_TRIANGLES)
         # X+ side
-        norm = cross((self.size[0], -self.size[1], self.size[2]), (self.size[0] * 2, 0, 0))
+        norm = normalize(cross((self.size[0], -self.size[1], self.size[2]), (self.size[0] * 2, 0, 0)))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
         glVertex3f(-self.size[0], self.size[1], z)
@@ -68,7 +68,7 @@ class Pyramid(DisplayList):
         glTexCoord2f(self.size[0] / 2, 0)
         glVertex3f(self.size[0], self.size[1], z)
         # Y+ side
-        norm = cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0))
+        norm = normalize(cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0)))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
         glVertex3f(self.size[0], self.size[1], z)
@@ -77,7 +77,7 @@ class Pyramid(DisplayList):
         glTexCoord2f(self.size[1] / 2, 0)
         glVertex3f(self.size[0], -self.size[1], z)
         # X- side
-        norm = cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0))
+        norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0)))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
         glVertex3f(self.size[0], -self.size[1], z)
@@ -86,7 +86,7 @@ class Pyramid(DisplayList):
         glTexCoord2f(self.size[0] / 2, 0)
         glVertex3f(-self.size[0], -self.size[1], z)
         # Y- side
-        norm = cross((-self.size[0], self.size[1], self.size[2]), (0, -self.size[1] * 2, 0))
+        norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (0, -self.size[1] * 2, 0)))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
         glVertex3f(-self.size[0], -self.size[1], z)

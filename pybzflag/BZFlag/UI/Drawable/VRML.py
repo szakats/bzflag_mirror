@@ -49,7 +49,7 @@ but it has successfully loaded files exported by other software.
 
 from DisplayList import *
 from OpenGL.GL import *
-from BZFlag import Util
+from BZFlag import Vector, Util
 import re, math
 
 
@@ -326,17 +326,14 @@ class Triangle:
         self.calcFaceNormal()
 
     def calcFaceNormal(self):
-        # Calculate a face normal
-        tri = self.vertices
-        n = Util.cross((tri[1][0] - tri[0][0],
-                        tri[1][1] - tri[0][1],
-                        tri[1][2] - tri[0][2]),
-                       (tri[2][0] - tri[0][0],
-                        tri[2][1] - tri[0][1],
-                        tri[2][2] - tri[0][2]))
-        s = math.sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2])
-        self.faceNormal = (n[0]/s, n[1]/s, n[2]/s)
-      
+        """Calculate the face normal for this triangle. If
+           the vertices were named ABC, this takes the cross
+           product of AB and AC, then normalizes the result.
+           """
+        t = self.vertices
+        self.faceNormal = Vector.normalize(Vector.cross(Vector.sub(t[1],t[0]),
+                                                        Vector.sub(t[2],t[0])))
+
 
 class Mesh(DisplayList):
     """A drawable mesh model as extracted from the VRML file.
@@ -387,8 +384,8 @@ class Mesh(DisplayList):
         self.triangles.append(Triangle(tri))
 
     def drawToList(self):
+        """Splat out our stored color, matrix, and triangles to a display list"""
         glPushMatrix()
-
         if self.color:
             glColor4f(*self.color)
         if self.matrix:
