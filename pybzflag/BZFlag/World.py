@@ -158,6 +158,8 @@ class World:
         self.blocks.append(block)
         if isinstance(block, BinaryWorld.Style):
             self.gameStyle = block
+            # Use a 2D size to make it easy to support non-square worlds in the future
+            self.size = (block.worldSize, block.worldSize)
         if hasattr(block, 'center'):
             self.scene.add(block)
         if isinstance(block, BinaryWorld.TeleporterLink):

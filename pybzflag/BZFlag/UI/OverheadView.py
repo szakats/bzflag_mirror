@@ -21,42 +21,109 @@ A 2D overhead view of the game, implemented using pygame.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 # 
 
-import pygame
+import pygame, math
 from pygame.locals import *
 
-class OverheadView(pygame.Surface):
-    """A pygame surface that shows an overhead view of the BZFlag game.
-       Note that this observes the game state rather than the client, so
-       it should be usable on either client or server side.
+class OverheadView:
+    """Shows an overhead view of the BZFlag game, renderable to a pygame
+       surface. Note that this observes the game state rather than the
+       client, so it should be usable on either client or server side.
        """
-    def __init__(self, game, size):
-        print game, size
+    colorScheme = {
+        'background': 'black',
+        'Box':        'red',
+        'Pyramid':    'blue',
+      }
+    
+    def __init__(self, game):
         self.game = game
-        pygame.Surface.__init__(self, size)
+        self.cachedWorld = None
+
+        # When the world is reloaded, invalidate our cached rendering of it
+        def onLoadWorld():
+            self.cachedWorld = None
+        game.onLoadWorld.observe(onLoadWorld)
+
+        # Replace the class colorScheme with an instance version that
+        # translates everything into a proper pygame Color.
+        convertedColors = {}
+        for key in self.colorScheme:
+            convertedColors[key] = Color(self.colorScheme[key])
+        self.colorScheme = convertedColors
+        
+    def worldToView(self, point):
+        """Convert world coordinates to view coordinates in pixels"""
+        return ((point[0] / self.game.world.size[0] + 0.5) * self.size[0],
+                (point[1] / self.game.world.size[1] + 0.5) * self.size[1])
+
+    def objectToPoly(self, object):
+        """Get a polygon representing the location of an object, given as a tuple of points.
+           So far this will only return quadrilaterals.
+           """
+        # Create four vertices from the object's extents
+        poly = ((object.center[0] - object.size[0]/2,
+                 object.center[1] - object.size[1]/2),
+                (object.center[0] + object.size[0]/2,
+                 object.center[1] - object.size[1]/2),
+                (object.center[0] + object.size[0]/2,
+                 object.center[1] + object.size[1]/2),
+                (object.center[0] - object.size[0]/2,
+                 object.center[1] + object.size[1]/2))
+        
+        # Rotate the polygon by the object's angle
+        cos = math.cos(object.angle)
+        sin = math.sin(object.angle)
+        def rotate(point):
+            return ( cos*point[0] + sin*point[1],
+                    -sin*point[0] + cos*point[1])
+        return map(rotate, poly)
+
+    def renderWorld(self, surface):
+        """Render the game world to the given surface."""
+        surface.fill(self.colorScheme['background'])
+        for object in self.game.world.scene:
+            color = self.colorScheme.get(object.__class__.__name__, None)
+            if color:
+                poly = map(self.worldToView, self.objectToPoly(object))
+                pygame.draw.aalines(surface, color, 1, poly)
+
+    def render(self, surface):
+        """Render the overhead view to the given surface. This includes the
+           game world, with transient objects such as players and flags overlaid on top.
+           """
+        self.size = surface.get_size()
+
+        # Since the game world doesn't usually change, we cache a rendered version of it.
+        if (not self.cachedWorld) or self.cachedWorld.get_size() != surface.get_size():
+            self.cachedWorld = pygame.Surface(surface.get_size()).convert()
+            self.renderWorld(self.cachedWorld)
+        surface.blit(self.cachedWorld, (0,0))
 
 
 def simpleClient(client, size=(600,600), viewClass=OverheadView):
     """Set up the supplied client to display a window
        consisting only of an OverheadView.
        """
-
-    # Start up pygame when we get world data
-    screen = None
-    view = None
-    def initPygame():
-        pygame.init()
-        screen = pygame.display.set_mode(size)
-        pygame.display.set_caption("BZFlag Overhead View")
-        view = OverheadView(client.game, size)
-    client.onLoadWorld.observe(initPygame)
-    
     # Update the view regularly
     def updateView():
+        global view, screen
         if view:
-            view.update()
-            screen.blit(view, (0,0))
+            view.render(screen)
             pygame.display.flip()
 
+    # Start up pygame when we first get world data
+    global view, screen
+    view = screen = None
+    def initPygame():
+        global view, screen
+        if not view:
+            pygame.init()
+            screen = pygame.display.set_mode(size)
+            pygame.display.set_caption("BZFlag Overhead View")
+            view = OverheadView(client.game)
+            updateView()
+    client.onLoadWorld.observe(initPygame)
+    
 ### The End ###
         
     
