@@ -165,7 +165,7 @@ class WorldObject(Block):
         return [GLDrawable()]
 
 
-class Style(Block):
+class Style(WorldObject):
     messageId = 0x7374
     entries = [
         # This first field is the size, but since this is the only
@@ -183,6 +183,38 @@ class Style(Block):
         StructEntry(UInt16,           'shakeWins',            22155),
         StructEntry(UInt32,           'serverTime',           0),
         ]
+
+    class GroundDrawable(GLDrawable):
+        def __init__(self, size):
+	    import OpenGL.GL
+	    import BZFlag.UI.Texture
+	    GLDrawable.__init__(self)
+	    self.size = size / 2
+	    self.texture = BZFlag.UI.Texture.Texture('data/ground.png')
+	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
+	    OpenGL.GL.glPushMatrix()
+	    OpenGL.GL.glDisable(OpenGL.GL.GL_CULL_FACE)
+	    OpenGL.GL.glColor3f(1.0, 1.0, 1.0)
+	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
+	    OpenGL.GL.glTexCoord2f(0.0, 0.0)
+	    OpenGL.GL.glVertex3f(self.size, -self.size, 0)
+	    OpenGL.GL.glTexCoord2f(1.0, 0.0)
+	    OpenGL.GL.glVertex3f(-self.size, -self.size, 0)
+	    OpenGL.GL.glTexCoord2f(1.0, 1.0)
+	    OpenGL.GL.glVertex3f(-self.size, self.size, 0)
+	    OpenGL.GL.glTexCoord2f(0.0, 1.0)
+	    OpenGL.GL.glVertex3f(self.size, self.size, 0)
+	    OpenGL.GL.glEnd()
+	    OpenGL.GL.glEnable(OpenGL.GL.GL_CULL_FACE)
+	    OpenGL.GL.glPopMatrix()
+	    OpenGL.GL.glEndList()
+
+	def draw(self):
+	    import OpenGL.GL
+	    OpenGL.GL.glCallList(self.list)
+
+    def getGLDrawables(self):
+        return [self.GroundDrawable(self.worldSize)]
 
 
 ObjectOptions = Bitfield(UInt8, {

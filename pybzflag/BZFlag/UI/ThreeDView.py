@@ -71,6 +71,7 @@ class Scene:
   def onLoadWorld(self):
     print "loading world..."
     for block in self.game.world.blocks:
+      print 'block',id(block),'is a',block.__class__
       if isinstance(block, WorldObjects.WorldObject):
         self.objects[block] = block.getGLDrawables()
     self.rebuildTexmap()
