@@ -23,7 +23,8 @@ A 3d scene renderer that does anaglyph stereo
 
 import pygame, math, BZFlag
 from pygame.locals import *
-from BZFlag.UI.ThreeDView import *
+from BZFlag.UI.ThreeDRender import Light
+from BZFlag.UI.ThreeDView import ThreeDView
 from OpenGL.GL import *
 import sys
 
