@@ -345,6 +345,22 @@ class StatefulClient(BaseClient):
     def onMsgDropFlag(self, msg):
         self.updateFlag(msg)
 
+    def onMsgTeamUpdate(self, msg):
+        # FIXME
+        pass
+
+    def onMsgNewRabbit(self, msg):
+        # FIXME
+        pass
+
+    def onMsgShotBegin(self, msg):
+        # FIXME
+        pass
+
+    def onMsgShotEnd(self, msg):
+        # FIXME
+        pass
+
 
 class PlayerClient(StatefulClient):
     """Extends the StatefulClient with functionality for implementing

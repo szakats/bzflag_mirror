@@ -103,6 +103,7 @@ class FlagBase:
            """
         self.status = msg.update.status
         self.owner = msg.update.owner
+        self.type = msg.update.type
         self.motion.position = msg.update.position
         self.motion.launch = msg.update.launch
         self.motion.landing = msg.update.landing
@@ -115,9 +116,6 @@ class FlagBase:
             self.onDrop(msg.playerId)
         elif msg.__class__ == FromServer.MsgGrabFlag:
             self.onGrab(msg.playerId)
-
-        if not msg.update.type in self.type:
-            raise Errors.ProtocolWarning("Flag type in update doesn't match local flag type")
 
 
 def getDict():
