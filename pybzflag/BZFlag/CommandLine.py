@@ -113,7 +113,9 @@ class Parser(optik.OptionParser):
 
         for key in ('interface', 'server', 'world'):
             try:
-                options[key] = values[key]
+                value = values[key]
+                if value is not None:
+                    options[key] = value
             except KeyError:
                 pass
 
