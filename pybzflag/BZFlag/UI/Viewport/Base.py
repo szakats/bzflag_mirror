@@ -34,21 +34,27 @@ class Viewport:
     def __init__(self, eventLoop, size):
         self.eventLoop = eventLoop
         Event.attach(self, 'onFrame', 'onSetupFrame', 'onDrawFrame', 'onFinishFrame', 'onResize')
-        self.renderSequence = [
-            self.onSetupFrame,
-            self.onDrawFrame,
-            self.onFinishFrame,
-            ]
-        self.visible = True
+        self.resetChildren()
+        self.resetRenderSequence()
 
+        self.visible = True
         self.parent = None
         self.rootView = self
-        self.children = []
 
         self.rect = None
         self.rectExp = None
         self.size = None
         self.setRect((0,0) + size)
+
+    def resetChildren(self):
+        self.children = []
+
+    def resetRenderSequence(self):
+        self.renderSequence = [
+            self.onSetupFrame,
+            self.onDrawFrame,
+            self.onFinishFrame,
+            ]
 
     def render(self):
 #        if not self.parent:
@@ -100,17 +106,14 @@ class Viewport:
            """
         sub = copy.copy(self)
         sub.parent = self
-        sub.children = []
+        sub.resetChildren()
         self.children.append(sub)
 
         # Disconnect all events and the renderSequence from the parent
         for attribute, value in sub.__dict__.iteritems():
             if isinstance(value, Event.Event):
                 setattr(sub, attribute, Event.Event())
-
-        sub.renderSequence = [sub.onSetupFrame,
-                              sub.onDrawFrame,
-                              sub.onFinishFrame]
+        sub.resetRenderSequence()
 
         # We can safely resize the child now that its events are unplugged
         sub.setRect(rect)
@@ -119,13 +122,11 @@ class Viewport:
             # Stick it in our render sequence right before our onFinishFrame which flips the buffer
             # This should be safe for nesting viewport regions-  and the last entry will always be
             # the root viewport's onFinishFrame event.
-            self.rootView.renderSequence = (self.rootView.renderSequence[:-1] +
-#                                           [RenderSequenceProxy(self, sub.render)] + \
-                                            [sub.render] +
-                                            self.rootView.renderSequence[-1:])
+            self.rootView.renderSequence.insert(len(self.rootView.renderSequence) - 1,
+                                                RenderSequenceProxy(self.rootView, sub))
 
         if renderLink == 'before':
-            self.rootView.renderSequence = [sub.render] + self.rootView.renderSequence
+            self.rootView.renderSequence.insert(0, RenderSequenceProxy(self.rootView, sub))
 
         # Ignore the caption on sub-viewports
         sub.setCaption = lambda title: None
@@ -137,14 +138,14 @@ class RenderSequenceProxy:
        a weak reference proxy. When the referenced object is garbage collected,
        the viewport's renderSequence entry corresponding to this proxy is deleted.
        """
-    def __init__(self, viewport, referent):
-        self.viewport = viewport
-        self.ref = weakref(referent, self.unref)
+    def __init__(self, rootViewport, subViewport):
+        self.root = rootViewport
+        self.subRef = weakref.ref(subViewport, self.unref)
 
     def __call__(self, *args, **kw):
-        self.ref()(*args, **kw)
+        self.subRef().render(*args, **kw)
 
     def unref(self, ref):
-        self.viewport.renderSequence.remove(self)
+        self.root.renderSequence.remove(self)
 
 ### The End ###
