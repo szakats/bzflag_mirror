@@ -7,14 +7,15 @@ from BZFlag import Event, Util, Noise
 from Numeric import *
 import pygame
 
-n = Noise.PerlinNoise(3, octaves=1)
-
-# Make sure the noise generator works on individual vectors
-n.get((1,2,3))
+# Test the perlin noise in a few different dimensions on individual vectors
+for dimension in xrange(1, 10):
+    print Noise.PerlinNoise(dimension).get( [1.2] * dimension )
 
 # Create a viewport for displaying animated perlin noise
 loop = Event.EventLoop()
 viewport = Viewport.PygameViewport(loop, (96,96), resizable=False)
+
+n = Noise.PerlinNoise(3)
 
 # Set up the input array for perlin noise with x and y values
 # proportional to the pixel locations. We'll vary the z value every frame.
