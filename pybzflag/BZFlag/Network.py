@@ -191,7 +191,10 @@ class EventLoop:
         selectables = selectDict.keys()
             
         while self.running:
-            (iwtd, owtd, ewtd) = select.select(selectables, [], [], self.pollTime)
+            try:
+                (iwtd, owtd, ewtd) = select.select(selectables, [], [], self.pollTime)
+            except select.error:
+                raise Errors.ConnectionLost()
             readyList = iwtd + owtd + ewtd
             for ready in readyList:
                 try:
