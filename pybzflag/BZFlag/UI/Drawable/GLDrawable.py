@@ -57,7 +57,7 @@ class RenderState:
         self.cubeMap = None       # This is set when we're rendering to a cube-map texture
 
 
-class GLDrawable:
+class GLDrawable(object):
     """Abstract base class for an object that can be drawn to an OpenGL context.
        This is the basic unit used by the ThreeDView to sort objects by texture,
        so it is required that the drawable have at most one texture.

@@ -28,7 +28,7 @@ __all__ = ['DisplayList']
 class DisplayList(GLDrawable):
     """A drawable that stores itself to a display list before rendering"""
     def __init__(self, *args, **kw):
-        GLDrawable.__init__(self)
+        super(DisplayList, self).__init__()
         self.list = glGenLists(1)
         self.set(*args, **kw)
         self.dirty = True

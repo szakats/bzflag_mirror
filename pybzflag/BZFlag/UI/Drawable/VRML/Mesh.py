@@ -24,7 +24,7 @@ calculating surface normals.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag.UI.Drawable.DisplayList import *
+from BZFlag.UI.Drawable.Array import *
 from OpenGL.GL import *
 from Numeric import *
 import os
@@ -32,14 +32,47 @@ import os
 __all__ = ('Mesh',)
 
 
-class Mesh(DisplayList):
+class Mesh(TriangleArrayDisplayList):
     """A drawable mesh model as extracted from the VRML file.
        All relevant VRML nodes should be passed as keyword parameters,
        with their first letter lowercased.
        """
     creaseAngle = 60
 
-    def set(self, **nodes):
+    def __init__(self, **nodes):
+        # Store vertices
+        vertices = reshape(take(nodes['coordinate3'].value['point'],
+                                self.getTriangles(nodes['indexedFaceSet'].value['coordIndex']).flat),
+                           (-1, 3, 3))
+
+        # Store texture coordinates if we have them
+        if nodes.get('textureCoordinate2', None):
+            texcoords = reshape(take(nodes['textureCoordinate2'].value['point'],
+                                     self.getTriangles(nodes['indexedFaceSet'].value['textureCoordIndex']).flat),
+                                (-1, 3, 2))
+        else:
+            texcoords = None
+
+        # Store normals if we have them, otherwise calculate normals ourselves
+        if nodes.get('normal', None):
+            normals = reshape(take(nodes['normal'].value['vector'],
+                                    self.getTriangles(nodes['indexedFaceSet'].value['normalIndex']).flat),
+                               (-1, 3, 3))
+        else:
+            raise Exception("Automatic normal calculation is broken")
+
+        # Now that we know how much geometry we're dealing with, initialize
+        # the TriangleArray and copy our geometry into it.
+        if texcoords:
+            format = GL_T2F_N3F_V3F
+        else:
+            format = GL_N3F_V3F
+        super(Mesh, self).__init__(len(vertices), format)
+        self.vertices[...] = vertices.astype(Float32)
+        self.normals[...] = normals.astype(Float32)
+        if texcoords:
+            self.texcoords[...] = texcoords.astype(Float32)
+
         # Store a mesh matrix if we have one
         if nodes.get('matrixTransform', None):
             self.matrix = nodes['matrixTransform'].value['matrix']
@@ -77,29 +110,6 @@ class Mesh(DisplayList):
         else:
             self.color = None
 
-        # Store texture coordinates if we have them
-        if nodes.get('textureCoordinate2', None):
-            texcoords = reshape(take(nodes['textureCoordinate2'].value['point'],
-                                     self.getTriangles(nodes['indexedFaceSet'].value['textureCoordIndex']).flat),
-                                (-1, 3, 2))
-
-        # Store vertices
-        vertices = reshape(take(nodes['coordinate3'].value['point'],
-                                self.getTriangles(nodes['indexedFaceSet'].value['coordIndex']).flat),
-                           (-1, 3, 3))
-
-        # Store normals if we have them, otherwise calculate normals ourselves
-        if nodes.get('normal', None):
-            normals = reshape(take(nodes['normal'].value['point'],
-                                    self.getTriangles(nodes['indexedFaceSet'].value['normalIndex']).flat),
-                               (-1, 3, 3))
-
-        print texcoords
-#        try:
-#            texCoords = 
-#        for face in 
-#        self.postprocess()
-
     def getTriangles(self, indices):
         """Given a list of indices describing arbitrary-length polygons terminated by -1s,
            return a list of triangles, each represented as three indices.
@@ -117,55 +127,35 @@ class Mesh(DisplayList):
                 polygon.append(index)
         return array(tris)
 
-    def erase(self):
-        """Clear our internal representation of the model"""
-        self.triangles = []
-        self.vertexMap = {}
+##     def postprocess(self):
+##         """After all the triangles have been stored, go back and calculate vertex normals"""
+##         # To each triangle, add a list for accumulating vertex averages
+##         for tri in self.triangles:
+##             tri.normalTotal  = [tri.faceNormal] * 3
 
-    def storeTriangle(self, vertices):
-        """Add a triangle to our internal representation, calculating normals"""
-        # tupleize everything
-        vertices = tuple(map(tuple, vertices))
+##         for vertex, uses in self.vertexMap.iteritems():
+##             # Now we have a list of all the uses of this vertex, as (triangle, index) tuples.
+##             # The triangle has already calculated a face normal for itself. We just have to
+##             # find adjoining faces with a low enough angle between them to smooth.
 
-        # The triangle will calculate its own face normal. It's up to us to
-        # do vertex normals however, because it requires knowledge of the entire mesh.
-        tri = Triangle(vertices)
-        self.triangles.append(tri)
+##             # For every pair of uses...
+##             for useIndex1 in range(len(uses)):
+##                 use1 = uses[useIndex1]
+##                 for useIndex2 in range(useIndex1 + 1, len(uses)):
+##                     use2 = uses[useIndex2]
 
-        # Keep a map of vertices to (triangle, index) tuples
-        self.vertexMap.setdefault(vertices[0], []).append((tri, 0))
-        self.vertexMap.setdefault(vertices[1], []).append((tri, 1))
-        self.vertexMap.setdefault(vertices[2], []).append((tri, 2))
+##                     # Compare the angle between face normals
+##                     if unitVectorAngle(use1[0].faceNormal, use2[0].faceNormal) < self.creaseAngle:
+##                         # These two faces are smooth enough we should combine the normals
+##                         use1[0].normalTotal[use1[1]] = add(use1[0].normalTotal[use1[1]], use2[0].normals[use2[1]])
+##                         use2[0].normalTotal[use2[1]] = add(use2[0].normalTotal[use2[1]], use1[0].normals[use1[1]])
+##         del self.vertexMap
 
-    def postprocess(self):
-        """After all the triangles have been stored, go back and calculate vertex normals"""
-        # To each triangle, add a list for accumulating vertex averages
-        for tri in self.triangles:
-            tri.normalTotal  = [tri.faceNormal] * 3
-
-        for vertex, uses in self.vertexMap.iteritems():
-            # Now we have a list of all the uses of this vertex, as (triangle, index) tuples.
-            # The triangle has already calculated a face normal for itself. We just have to
-            # find adjoining faces with a low enough angle between them to smooth.
-
-            # For every pair of uses...
-            for useIndex1 in range(len(uses)):
-                use1 = uses[useIndex1]
-                for useIndex2 in range(useIndex1 + 1, len(uses)):
-                    use2 = uses[useIndex2]
-
-                    # Compare the angle between face normals
-                    if unitVectorAngle(use1[0].faceNormal, use2[0].faceNormal) < self.creaseAngle:
-                        # These two faces are smooth enough we should combine the normals
-                        use1[0].normalTotal[use1[1]] = add(use1[0].normalTotal[use1[1]], use2[0].normals[use2[1]])
-                        use2[0].normalTotal[use2[1]] = add(use2[0].normalTotal[use2[1]], use1[0].normals[use1[1]])
-        del self.vertexMap
-
-        # Now go back and finish the averages by dividing
-        for tri in self.triangles:
-            for i in range(3):
-                tri.normals[i] = normalize(tri.normalTotal[i])
-            del tri.normalTotal
+##         # Now go back and finish the averages by dividing
+##         for tri in self.triangles:
+##             for i in range(3):
+##                 tri.normals[i] = normalize(tri.normalTotal[i])
+##             del tri.normalTotal
 
     def drawToList(self, rstate):
         """Splat out our stored color, matrix, and triangles to a display list"""
@@ -179,18 +169,8 @@ class Mesh(DisplayList):
         # by the transforms applied to each VRML mesh
         glEnable(GL_NORMALIZE)
 
-        glBegin(GL_TRIANGLES)
-        for tri in self.triangles:
-            glNormal3f(*tri.normals[0])
-            glTexCoord2f(*tri.texcoords[0])
-            glVertex3f(*tri.vertices[0])
-            glNormal3f(*tri.normals[1])
-            glTexCoord2f(*tri.texcoords[1])
-            glVertex3f(*tri.vertices[1])
-            glNormal3f(*tri.normals[2])
-            glTexCoord2f(*tri.texcoords[2])
-            glVertex3f(*tri.vertices[2])
-        glEnd()
+        TriangleArrayDisplayList.drawToList(self, rstate)
+
         glPopMatrix()
         glColor4f(1,1,1,1)
         glDisable(GL_NORMALIZE)

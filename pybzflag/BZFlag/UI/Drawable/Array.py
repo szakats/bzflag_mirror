@@ -1,7 +1,10 @@
-""" BZFlag.UI.Drawable.ArraySurface
+""" BZFlag.UI.Drawable.Array
 
-A Drawable for surfaces generated dynamically from a 2D Numeric
-array of vertex coordinates. Vertex normals are generated automatically.
+Classes providing glInterleavedArrays and Numeric based drawables
+at varying levels of abstraction. VertexArray is a mix-in class
+implementing the low-level glue between glInterleavedArrays and Numeric.
+The other classes build on it by giving the arrays meaning and drawing
+from them.
 """
 #
 # Python BZFlag Package
@@ -21,23 +24,26 @@ array of vertex coordinates. Vertex normals are generated automatically.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-from GLDrawable import GLDrawable
+from GLDrawable import *
+from DisplayList import *
 from OpenGL.GL import *
 from BZFlag.Geometry import *
 from Numeric import *
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import GLExtension
 
-__all__ = ['ArraySurface']
+__all__ = ('VertexArray', 'TriangleArray', 'SurfaceArray', 'TriangleArrayDisplayList')
 
 
-class VertexArray:
+class VertexArray(object):
     """An abstraction for using glInterleavedArrays to efficiently display geometry
        stored into Numeric arrays for vertices, texture coordinates, and normals.
        It doesn't specify how these arrays are rendered.
        Subclasses of VertexArray and GLDrawable are provided to do this.
        """
     def __init__(self, shape, format):
+        super(VertexArray, self).__init__()
+
         # glInterleavedArrays in PyOpenGL leaks memory, this is a workaround
         try:
             from numeric_gl import glInterleavedArrays
@@ -133,7 +139,29 @@ class VertexArray:
         self.glInterleavedArrays(self.format, 0, self.interleaved)
 
 
-class ArraySurface(GLDrawable, VertexArray):
+class TriangleArray(VertexArray, GLDrawable):
+    """A drawable which structures its arrays in groups of three, and draws them as
+       unconnected triangles. This is best for meshes that can't be easily decomposed
+       into triangle strips or other larger primitives.
+       """
+    def __init__(self, size, format):
+        super(TriangleArray, self).__init__((size, 3), format)
+
+    def draw(self, rstate):
+        self.bind()
+        glDrawArrays(GL_TRIANGLES, 0, self.shape[0] * 3)
+
+
+class TriangleArrayDisplayList(TriangleArray, DisplayList):
+    """A triangle array stored in a display list"""
+    def drawToList(self, rstate):
+        TriangleArray.draw(self, rstate)
+
+    def draw(self, rstate):
+        DisplayList.draw(self, rstate)
+
+
+class SurfaceArray(VertexArray, GLDrawable):
     """Drawable representing a smooth surface composed of a grid of vertices,
        contained in a Numeric array. The array may change between renderings,
        since normals are recalculated each time draw() is called. The size of
@@ -144,35 +172,22 @@ class ArraySurface(GLDrawable, VertexArray):
        cause normals to be recalculated at each rendering, so it will then be
        suitable for dynamic surfaces.
        """
-    def __init__(self):
-        GLDrawable.__init__(self)
-        VertexArray.__init__(self)
-        self.vertices = vertices
-        self.texcoords = texcoords
-        if self.texcoords is None:
-            self.texcoords = zeros(vertices.shape, vertices.typecode())
-
-        if self.vertices.typecode() != Float32 or self.texcoords.typecode() != Float32:
-            raise Exception("ArraySurface requires arrays of type Float32. " +
-                            "'vertices' is of type %s, 'texcoords' is of type %s." %
-                            (self.vertices.typecode(), self.texcoords.typecode()))
-
+    def __init__(self, shape, format):
+        super(SurfaceArray, self).__init__(shape, format)
         self.prepareIndices()
 
         # Set up empty arrays of the right size for intermediate results
-        (height, width) = self.vertices.shape[:2]
+        (height, width) = self.shape[:2]
         self.crossProducts = zeros((height-1, width-1, 3), self.vertices.typecode())
         self.gridNormals = zeros(self.crossProducts.shape, self.vertices.typecode())
         self.normals = zeros(self.vertices.shape, self.vertices.typecode())
-        self.interleaved = zeros(self.vertices.shape[:-1] + (8,), self.vertices.typecode())
 
     def prepareIndices(self):
         """Prepare an array with indices into the vertex array for triangle stripss.
-           Note that these indices correspond to the vertex array only after it
-           has been flattened with reshape().
+           Note that these indices correspond to the vertex array in its flattened form.
            """
         self.indices = []
-        (height, width) = self.vertices.shape[:2]
+        (height, width) = self.shape
         for y in xrange(height - 1):
             row = []
             for x in xrange(width - 1):
@@ -202,13 +217,7 @@ class ArraySurface(GLDrawable, VertexArray):
     def draw(self, rstate):
         """Calculate normals and blast our triangle strips out to OpenGL"""
         self.prepareNormals()
-
-        self.interleaved[:,:,:2]  = self.texcoords
-        self.interleaved[:,:,2:5] = self.normals
-        self.interleaved[:,:,5:]  = self.vertices
-        if GLExtension.multitexture:
-            glClientActiveTextureARB(GL_TEXTURE0_ARB)
-        self.glInterleavedArrays(GL_T2F_N3F_V3F, 0, self.interleaved)
+        self.bind()
 
         # We want to draw both sides of the surface. This will have OpenGL
         # automatically flip the surface normals when drawing the back side

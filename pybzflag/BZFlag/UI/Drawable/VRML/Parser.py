@@ -305,6 +305,7 @@ class Reader:
                 material           = self.searchUp('Material', parents),
                 textureCoordinate2 = self.searchUp('TextureCoordinate2', parents),
                 texture2           = self.searchUp('Texture2', parents),
+                normal             = self.searchUp('Normal', parents),
                 )
 
         for child in node.children:
