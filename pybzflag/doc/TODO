@@ -1,5 +1,7 @@
 Todo list, in no particular order:
 
+  - Port the jetstream particle engine (why not?)
+
   - Use a perlin noise function to generate wind speed and direction, so the cloth won't
     look 'bumpy' under high-variation winds
 
