@@ -97,7 +97,8 @@ class ThreeDView:
   def __init__(self, game):
     self.game = game
     self.camera = Camera()
-    self.scenelight = Light(GL_LIGHT0)
+    self.light0 = Light(GL_LIGHT0)
+    self.light1 = Light(GL_LIGHT1)
     self.scene = Scene(game)
 
   def configureOpenGL(self, size):
@@ -112,10 +113,14 @@ class ThreeDView:
     """Initialize the opengl view"""
     self.size = surface.get_size()
 
-    self.scenelight.ambient  = (0.85, 0.85, 0.85, 1.0)
-    self.scenelight.diffuse  = (0.85, 0.85, 0.85, 1.0)
-    self.scenelight.position = (400, 400, 400, 1.0)
-    self.scenelight.set()
+    self.light0.ambient  = (0.85, 0.85, 0.85, 1.0)
+    self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
+    self.light0.position = (400, 400, 400, 1.0)
+    self.light0.set()
+    self.light1.ambient  = (0.85, 0.85, 0.85, 1.0)
+    self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
+    self.light1.position = (0, 0, 400, 1.0)
+    self.light1.set()
 
     glEnable(GL_TEXTURE_2D)
     glEnable(GL_DEPTH_TEST)
