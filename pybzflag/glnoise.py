@@ -12,14 +12,14 @@ ThreeDControl.Viewing(view, viewport)
 viewport.mode = Viewport.GL.ClearedMode((0.25, 0.25, 0.5, 1))
 view.camera.position = (0,0,0)
 view.camera.elevation = 90
-view.camera.distance = 100
+view.camera.distance = 150
 view.camera.jump()
 
 class TestObject:
     def __init__(self):
         ground = Drawable.Ground(400)
         ground.baseTexRepeats = 4
-        ground.render.textures = (GLNoise.PerlinTexture(),)
+        ground.render.textures = (GLNoise.MappedPerlinTexture(),)
         self.drawables = [ground]
     
     def getDrawables(self):

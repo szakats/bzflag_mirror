@@ -213,6 +213,7 @@ class DynamicTexture(Texture):
         self.rstate = None
         self.renderLifetime = 0
         self.time = Animated.Timekeeper()
+        self.format = GL_RGB
         self.newExpiration()
 
     def newExpiration(self):
@@ -287,7 +288,7 @@ class DynamicTexture(Texture):
            provide a draw() function.
            """
         self.draw()
-        self.loadBackbuffer(self.viewport.size)
+        self.loadBackbuffer(self.viewport.size, format=self.format)
         
 
 class Cache:

@@ -94,6 +94,7 @@ class NoiseTexture(Texture.DynamicTexture):
         Texture.DynamicTexture.__init__(self, size)
         self.factory = factory
         self.angle = factory.angle
+        self.format = GL_LUMINANCE
         factory.angle += factory.rotationSpeed
 
     def draw(self):
@@ -223,7 +224,7 @@ class AnimatedPerlinNoise:
     def __init__(self,
                  period          = 50,
                  persistence     = 0.65,
-                 numOctaves      = 6,
+                 numOctaves      = 5,
                  fundamental     = 16,
                  framesPerOctave = 16,
                  factory         = None):
@@ -274,13 +275,14 @@ class AnimatedPerlinNoise:
 
     
 class PerlinTexture(Texture.DynamicTexture):
-    """Perlin noise, rendered to a texture"""
-    def __init__(self, size=(512,512), noise=None):
+    """Perlin noise, rendered to a dynamic texture"""
+    def __init__(self, size=(256,256), noise=None, renderRate=60):
         if not noise:
             noise = AnimatedPerlinNoise()
         self.noise = noise
         Texture.DynamicTexture.__init__(self, size,
-                                        meanExpiration = 1/60)
+                                        meanExpiration = 1/renderRate)
+        self.format = GL_LUMINANCE
 
     def attachRenderState(self, rstate):
         Texture.DynamicTexture.attachRenderState(self, rstate)
@@ -292,6 +294,34 @@ class PerlinTexture(Texture.DynamicTexture):
     def integrate(self, dt):
         self.noise.integrate(dt)
         Texture.DynamicTexture.integrate(self, dt)
+
+
+class MappedPerlinTexture(PerlinTexture):
+    """Abstract base class for a perlin noise texture with a mapping function applied"""
+    def __init__(self, *args, **kw):
+        PerlinTexture.__init__(self, *args, **kw)
+        self.initTables()
+
+    def render(self):
+        """Alternate rendering function that sets up GL_MAP_COLOR tables during the texture copy"""
+        self.draw()        
+        glPixelTransferi(GL_MAP_COLOR, 1)
+        glPixelMapfv(GL_PIXEL_MAP_R_TO_R, self.table)
+        self.loadBackbuffer(self.viewport.size, format=self.format)
+        glPixelTransferi(GL_MAP_COLOR, 0)
+
+    def initTables(self):
+        """Fill mapping tables using our mapping functions"""
+        mapSize = 256
+        self.table = zeros(mapSize, Float32)
+        for i in xrange(mapSize):
+            self.table[i] = self.map(i / (mapSize-1))
+              
+    def map(self, v):
+        """Mapping function. Input and output are grayscale values from 0 to 1.
+           Default is an identity mapping.
+           """
+        return v
 
 ### The End ###
 
