@@ -28,6 +28,13 @@ from Numeric import *
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import GLExtension
 
+# glInterleavedArrays in PyOpenGL leaks memory, this is a workaround
+try:
+    from numeric_gl import *
+except ImportError:
+    raise Exception("Due to a bug in PyOpenGL, you must install the numeric_gl module from " +
+                    "http://py3d.org/files/numeric_gl.tar.gz")
+
 __all__ = ['ArraySurface']
 
  
@@ -105,7 +112,7 @@ class ArraySurface(GLDrawable):
         self.interleaved[:,:,5:]  = self.vertices
         if GLExtension.multitexture:
             glClientActiveTextureARB(GL_TEXTURE0_ARB)
-        glInterleavedArrays(GL_T2F_N3F_V3F, 0, self.interleaved.tostring())
+        glInterleavedArrays(GL_T2F_N3F_V3F, 0, self.interleaved)
 
         # We want to draw both sides of the surface. This will have OpenGL
         # automatically flip the surface normals when drawing the back side
