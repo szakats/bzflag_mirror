@@ -373,6 +373,12 @@ bool Pyramid::Init ( void )
 
 	pModel->SetTexuture(iTexture);
 
+	if ( m_rScale.z < 0 ){
+		m_bFlipZ = TRUE;
+		m_rScale.z = abs(m_rScale.z);
+		m_rScale.x = abs(m_rScale.x);
+	}
+
 	if (m_bFlipZ){
 		m_rTempScale.x = -m_rScale.x;
 		m_rTempScale.y = m_rScale.y;
