@@ -69,6 +69,10 @@ class Cloth:
                           FrictionAffector(self),
                           VelocityAffector(self)]
 
+    def reset(self):
+        self.state[...] = self.initialState
+        self.velocity[...] = 0
+
     def integrate(self, dt):
         """Integrate the spring system. Our simple method of simulation
            will quickly get unstable if our timestep is too large, so
@@ -78,8 +82,16 @@ class Cloth:
         self.dt += dt
         nSteps = 0
         while self.dt > 0:
-            for affector in self.affectors:
-                affector.integrate(self.stepSize)
+            try:
+                for affector in self.affectors:
+                    affector.integrate(self.stepSize)
+
+                # If our simulation got unstable and exploded. Best we can do now is reset it
+            except OverflowError:
+                self.reset()
+            except DivideByZeroError:
+                self.reset()
+                
             self.dt -= self.stepTime
             nSteps += 1
         return nSteps
