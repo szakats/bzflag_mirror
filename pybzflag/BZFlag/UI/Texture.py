@@ -113,7 +113,7 @@ class AnimatedTexture:
             if not self.frames:
                 raise
 
-        self.frameNumber = Animated.Value(0, Animated.RampFunction(
+        self.frameNumber = Animated.Value(Animated.RampFunction(
             1/framerate * len(self.frames), (0, len(self.frames))))
         self.time = Animated.Timekeeper()
 

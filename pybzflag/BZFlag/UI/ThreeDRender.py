@@ -66,14 +66,14 @@ class SmoothedCamera(Camera):
     def __init__(self):
         Camera.__init__(self)
         self.time = Animated.Timekeeper()
-        self.animatedDistance  = Animated.Value (self.distance,
-                                                 Animated.LogApproach(self.distance, 4))
-        self.animatedPosition  = Animated.Vector(self.position,
-                                                 Animated.LogApproach(self.position, 10))
-        self.animatedAzimuth   = Animated.Value (self.azimuth,
-                                                 Animated.LogApproach(self.azimuth, 10))
-        self.animatedElevation = Animated.Value (self.elevation,
-                                                 Animated.LogApproach(self.elevation, 10))
+        self.animatedDistance  = Animated.Value (Animated.LogApproach(self.distance, 4),
+                                                 self.distance)
+        self.animatedPosition  = Animated.Vector(Animated.LogApproach(self.position, 10),
+                                                 self.position)
+        self.animatedAzimuth   = Animated.Value (Animated.LogApproach(self.azimuth, 10),
+                                                 self.azimuth)
+        self.animatedElevation = Animated.Value (Animated.LogApproach(self.elevation, 10),
+                                                 self.elevation)
         self.animated = [self.animatedDistance,
                          self.animatedPosition,
                          self.animatedAzimuth,

@@ -17,6 +17,7 @@ f = GLText.Font("Vera.ttf")
 
 time = Animated.Timekeeper()
 spin = Animated.Value(0, Animated.Velocity(-180))
+zoom = Animated.Value(0, Animated.Velocity(-180))
 
 def drawFrame():
     # Gradient

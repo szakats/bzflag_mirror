@@ -42,7 +42,7 @@ class Motion:
     """Contains information about a player's motion, integrates velocity over time"""
     def __init__(self, position=[0,0,0], azimuth=0, velocity=[0,0,0], angularVelocity=0):
         self.velocity = list(velocity)
-        self.position = Animated.Vector(position, Animated.Velocity(self.velocity))
+        self.position = Animated.Vector(Animated.Velocity(self.velocity), position)
         self.azimuth = azimuth
         self.angularVelocity = angularVelocity
 

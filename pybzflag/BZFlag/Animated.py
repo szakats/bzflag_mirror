@@ -83,7 +83,7 @@ class Value:
        The vector index will always be None if this value isn't used in a vector.
        This module provides several callable classes that be used in place of an actual function.
        """
-    def __init__(self, value, f):
+    def __init__(self, f, value=0):
         self.value = value
         self.f = f
 
@@ -97,9 +97,9 @@ class Vector:
        This module provides several callable classes that be used in place of an actual function.
        The vector contents can be accessed transparently from this class.
        """
-    def __init__(self, value, f):
+    def __init__(self, f, value=(0,0,0)):
         self.f = f
-        self.values = [Value(v, self.f) for v in value]
+        self.values = [Value(self.f, v) for v in value]
 
     def integrate(self, dt):
         for i in xrange(len(self.values)):

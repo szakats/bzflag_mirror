@@ -39,7 +39,7 @@ def attach(game, eventLoop):
     remaining = Layout.Rect(viewport).margin(padding)
 
     # HUD panel along the bottom of the screen, with animated resize
-    hudSize = Animated.Value(fullHudSize, Animated.SigmoidApproach(fullHudSize, 15, (0, fullHudSize)))
+    hudSize = Animated.Value(Animated.SigmoidApproach(fullHudSize, 15, (0, fullHudSize)), fullHudSize)
     def onSetupFrame():
         hudSize.integrate(time.step())
     def onKeyDown(event):
