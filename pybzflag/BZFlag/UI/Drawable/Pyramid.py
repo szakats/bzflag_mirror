@@ -217,6 +217,8 @@ def detectPyramidDrawables(pyramid):
     if not (pyramid.size[0] and pyramid.size[1] and pyramid.size[2]):
         return []
 
+    drawables = []
+    
     # Calculate the slope, we'll use this to help decide how to draw the pyramid
     try:
         slope = pyramid.size[2] / min(pyramid.size[0], pyramid.size[1])
@@ -225,19 +227,25 @@ def detectPyramidDrawables(pyramid):
 
     if slope > 10:
         # It's a very pointy pyramid
-        return [Pillar(pyramid)]
+        drawables.append(Pillar(pyramid))
 
     elif slope < 0.5 and pyramid.center[2] > 0:
         # It's very flat and not touching the ground. These are often used
         # to simulate water, so make them look that way too :)
-        return [Water(pyramid)]
-
-    elif GLExtension.multitexture and GLExtension.cubeMap:
-        # Draw the default pyramid, but with a shiny finish
-        return [Pyramid(pyramid), Reflection(pyramid)]
+        drawables.append(Water(pyramid))
 
     else:
-        # Just the default pyramid
-        return [Pyramid(pyramid)]
+        # Default pyramid, but with a shiny finish if we can support one
+        drawables.append(Pyramid(pyramid))
+        if GLExtension.multitexture and GLExtension.cubeMap:
+            drawables.append(Reflection(pyramid))
+
+    ## If it's on the ground and not too thin, add some grass poking up around it
+    ## Commented out because this looks silly on pyramids
+    #if pyramid.center[2] == 0 and pyramid.size[2] > 1:
+    #    from Box import GrassEdge
+    #    drawables.append(GrassEdge(pyramid))
+
+    return drawables
         
 ### The End ###
