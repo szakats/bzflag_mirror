@@ -99,6 +99,11 @@ def messageDump(msg, f, showContents=True, keyColumnWidth=25):
     f.write("%s %s\n" % (direction, name))
     if not showContents:
         return
+
+    # Attributes for us to ignore. These are generally things we annotate the message
+    # with later. Note that this isn't a list of all such annotations- most notably,
+    # 'protocol' is omitted since it's very useful to have in message dumps.
+    ignoreList = ('eventLoop', 'socket', 'header', 'fromModule', 'fromAddress', 'client')
     
     # Recursively build a list of (key,value) tuples that will be displayed
     # to represent a message. This handles traversing into substructures
@@ -108,7 +113,7 @@ def messageDump(msg, f, showContents=True, keyColumnWidth=25):
         keys.sort()
         lst = []
         for key in keys:
-            if key[0] != '_' and not key in ('eventLoop', 'socket', 'header', 'fromModule'):
+            if key[0] != '_' and not key in ignoreList:
                 value = object.__dict__[key]
                 if isinstance(value, Protocol.Struct):
                     lst.extend(buildKeys(value, prefix + key + "."))
