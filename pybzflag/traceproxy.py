@@ -45,10 +45,13 @@ def hexDump(value, bytesPerLine=16, wordSize=2):
         addr += len(srcLine)
 
         # Hex values
-        for byte in srcLine:
-            dest.write("%02X " % ord(byte))
-        for i in xrange(bytesPerLine - len(srcLine)):
-            dest.write("   ")
+        for i in xrange(bytesPerLine):
+            if i < len(srcLine):
+                dest.write("%02X" % ord(srcLine[i]))
+            else:
+                dest.write("  ")
+            if not (i+1) % wordSize:
+                dest.write(" ")
         dest.write(" ")
         
         # ASCII representation
@@ -67,7 +70,9 @@ def hexDump(value, bytesPerLine=16, wordSize=2):
 # mostly human readable, thanks to the Protocol module.
 def dumpMessage(msg, direction):
     print "%s %s" % (direction, msg.__class__.__name__)
-    for key in msg.__dict__:
+    keys = msg.__dict__.keys()
+    keys.sort()
+    for key in keys:
         if key[0] != '_' and not key in ('eventLoop', 'socket', 'header'):
             value = msg.__dict__[key]
             if key == 'data':
