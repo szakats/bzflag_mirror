@@ -159,6 +159,11 @@ class UselessFlag(FlagBase):
     type         = ['unstable', 'good']
     description  = "You have found the useless flag. Use it wisely."
 
+class MasqueradeFlag(FlagBase):
+    abbreviation = "MQ"
+    type         = ['unstable', 'good']
+    description  = "In opponent's hud, you appear as a teammate."
+
 ########################################### Bad flags
 
 class ColorblindnessFlag(FlagBase):
