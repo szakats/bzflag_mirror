@@ -39,6 +39,7 @@ class BaseServer(Network.Endpoint):
         Network.Endpoint.init(self)
         self.clients = {}
         self.nextClientID = 0
+        self.clientIDIncrement = 1
         self.options.update({
             'interface': None,
             })
@@ -58,7 +59,7 @@ class BaseServer(Network.Endpoint):
 
     def getNewClientID(self):
         id = self.nextClientID
-        self.nextClientID += 1
+        self.nextClientID += self.clientIDIncrement
         return id
 
     def handleConnection(self, socket, eventLoop):

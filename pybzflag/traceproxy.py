@@ -34,7 +34,8 @@ server.onDisconnect.trace(lambda socket: "*** Disconnected client %d, from %s:%s
 def onClientConnect():
     print "*** Connected to server %s" % client.options['server']
     print "--- Client ID is %d" % client.id
-    server.nextClientID = client.id   
+    server.nextClientID = client.id
+    server.clientIDIncrement = 0
 client.onConnect.observe(onClientConnect)
 
 
