@@ -7,7 +7,7 @@ loop = EventLoop()
 viewport = Viewport.OpenGLViewport(loop, (800,600))
 viewport.setCaption("OpenGL Noise Experiment")
 view = ThreeDRender.View(viewport)
-ThreeDControl.Viewing(view, viewport)
+control = ThreeDControl.Viewing(view, viewport)
 
 viewport.mode = Viewport.GL.ClearedMode((0.25, 0.25, 0.5, 1))
 view.camera.position = (0,0,0)

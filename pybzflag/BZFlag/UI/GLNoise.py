@@ -28,7 +28,7 @@ that creates its own viewport.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from __future__ import division
-from BZFlag.UI import Texture
+from BZFlag.UI import Texture, GLExtension
 from BZFlag import Noise, Animated
 from Numeric import *
 from OpenGL.GL import *
@@ -101,6 +101,7 @@ class NoiseTexture(Texture.DynamicTexture):
         # Prepare our texture
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_CULL_FACE)
+        GLExtension.disableMultitex()
         glEnable(GL_TEXTURE_2D)
         glDisable(GL_LIGHTING)
         glDisable(GL_BLEND)
@@ -150,13 +151,6 @@ class AnimatedNoise:
 
         self.reset()
 
-    def attachRenderState(self, rstate):
-        """Each of our frames is a DynamicTexture and requires a render state to be attached.
-           This will broadcast the given rstate to all of our frame textures.
-           """
-        for frame in self.frames:
-            frame.attachRenderState(rstate)
-
     def hasRenderState(self):
         return self.frames[0].hasRenderState()
 
@@ -173,6 +167,8 @@ class AnimatedNoise:
         if not size:
             size = self.frames[0].size
 
+        GLExtension.disableMultitex()
+        glDisable(GL_TEXTURE_2D)
         glDisable(GL_LIGHTING)
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_CULL_FACE)
@@ -190,7 +186,6 @@ class AnimatedNoise:
         # two frames, we need to do the blend operation in three passes.
 
         # 1. Multiply the color buffer by (1-alpha)
-        glDisable(GL_TEXTURE_2D)
         glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA)
         glColor4f(1,1,1,color[3])
         drawTexRect(size)
@@ -240,13 +235,6 @@ class AnimatedPerlinNoise:
         self.factory = factory
         self.createOctaves()
 
-    def attachRenderState(self, rstate):
-        """Each of our octaves is an AnimatedNoise with multiple DynamicTextures.
-           DynamicTextures require a RenderState to draw themselves.
-           """
-        for octave in self.octaves:
-            octave.attachRenderState(rstate)
-
     def hasRenderState(self):
         return self.octaves[0].hasRenderState()
 
@@ -286,9 +274,9 @@ class PerlinTexture(Texture.DynamicTexture):
                                         meanExpiration = frameDuration)
         self.format = GL_INTENSITY8
 
-    def attachRenderState(self, rstate):
-        Texture.DynamicTexture.attachRenderState(self, rstate)
-        self.noise.attachRenderState(rstate)
+        # Register all our texture dependencies
+        for octave in self.noise.octaves:
+            self.addDependencies(*octave.frames)
 
     def draw(self):
         self.noise.draw(self.viewport.size)

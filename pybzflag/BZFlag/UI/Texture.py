@@ -203,13 +203,28 @@ class DynamicTexture(Texture):
         self.expStdDeviation = expStdDeviation
         self.maxSize = maxSize
         self.viewport = None
-        self.dirty = True
+        self.setDirty()
         self.rendered = False
         self.rstate = None
         self.renderLifetime = 0
         self.time = Animated.Timekeeper()
         self.format = GL_RGB
+        self.dependencies = []
         self.newExpiration()
+
+    def addDependencies(self, *textures):
+        """Register the given texture as a dependency of this one. It will be
+           rendered before this one starts rendering if necessary.
+           """
+        self.dependencies.extend(textures)
+
+    def setDirty(self):
+        """Call this to set the dirty flag, and cause the texture to be
+           regenerated during the next frame.
+           """
+        self.dirty = True
+        if self.viewport:
+            self.viewport.show()
 
     def newExpiration(self):
         """Create a new random expiration duration"""
@@ -245,10 +260,15 @@ class DynamicTexture(Texture):
     def attachRenderState(self, rstate):
         """Attach this dynamic texture to a viewport and rendering state"""
         self.rstate = copy.copy(rstate)
-        self.viewport = self.rstate.viewport.region(
-            self.getTextureRect(self.rstate.viewport), renderLink='before')
+        rootView = rstate.viewport.rootView
+        self.viewport = rootView.region(self.getTextureRect(rootView),
+                                        renderLink = 'before')
         self.viewport.onDrawFrame.observe(self.drawFrame)
         self.setupViewport()
+        if self.dirty:
+            self.viewport.show()
+        else:
+            self.viewport.hide()
 
     def setupViewport(self):
         """A hook to let subclasses easily set up their viewport requirements.
@@ -264,22 +284,41 @@ class DynamicTexture(Texture):
         if self.expiration and self.renderLifetime > self.expiration:
             # This rendering expired, set the dirty flag and get a new expiration duration
             self.newExpiration()
-            self.dirty = True
+            self.setDirty()
 
     def drawFrame(self):
         """Draw function called by our viewport"""
         self.integrate(self.time.step())
         if not self.dirty:
+            self.viewport.hide()
             return
+
+        needReconfigure = False
+        for dependency in self.dependencies:
+            if not dependency.rendered:
+                needReconfigure = True
+                self.renderDependency(dependency)
+        if needReconfigure:
+            self.viewport.configureOpenGL()
+
         self.render()
+
         self.dirty = False
+        self.viewport.hide()
         self.rendered = True
         self.renderLifetime = 0
 
         ## Uncomment this to show the textures as they're stored
         #self.viewport.display.flip()
         #import time
-        #time.sleep(1)
+        #time.sleep(0.5)
+
+    def renderDependency(self, dep):
+        """Force a dependency texture to render immediately"""
+        if not dep.hasRenderState():
+            dep.attachRenderState(self.rstate)
+        dep.rstate.viewport.render()
+        assert(dep.rendered)
 
     def render(self):
         """Render the texture. By default this calls the draw() method to draw

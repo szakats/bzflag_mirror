@@ -68,10 +68,6 @@ class Viewport(object):
 
     def render(self):
         if self.visible and self.size[0] > 0 and self.size[1] > 0:
-            ## Show all the main viewport's render sequence items, for debug
-            #if not self.parent:
-            #    print self.renderSequence
-
             for f in self.renderSequence:
                 f()
 
@@ -183,7 +179,7 @@ class RegionMixin(Viewport):
         self.visible = False
 
         # Stop updating our parent rectangle
-        parent.onResize.unobserve(self.updateRect)
+        self.parent.onResize.unobserve(self.updateRect)
 
         # Try to remove our renderProxy from the renderSequence. If this fails, it could
         # just mean that renderProxy was None when we were last show()'ed, so ignore it.
