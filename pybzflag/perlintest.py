@@ -7,10 +7,10 @@ from BZFlag import Event, Util, Noise
 from Numeric import *
 import pygame
 
-n = Noise.PerlinNoise3()
+n = Noise.PerlinNoise(3)
 
 # Make sure the noise generator works on individual vectors
-n.smoothNoise((1,2,3))
+n.get((1,2,3))
 
 # Create a viewport for displaying animated perlin noise
 loop = Event.EventLoop()

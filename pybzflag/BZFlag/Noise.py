@@ -24,58 +24,40 @@ from Numeric import *
 from BZFlag import Geometry
 
 
-class PerlinNoise3:
-    """Generates Perlin noise in 3 dimensions. This consists of several layers
-       of noise interpolated from a deterministic random number generator.
-       This is Numeric-friendly, so anywhere you request a value for one input
-       coordinate you could also request a value for an n-dimensional array
-       of input coordinates.
-
-       Constructor parameters:
-
-          seed          - The seed is combined with the input vector such that the same seed
-                          and vector will produce the same output, but for any vector a different
-                          seed will produce different output.
-                          A seed of zero will use the current time to produce a random seed.
-
-          octaves       - Number of layers (sized at multiples of two) to render noise at. More
-                          octaves increase the detail in the noise, but also slow it down.
-
-          persistence   - The amount each successive octave's influence on the final noise is scaled by
-
-          logTableSize  - The base-2 logarithm of the random vector table size. A larger table will
-                          produce a noise pattern with more entropy, but will also use more memory.
-                          The default should be fine for most purposes.
+class SmoothNoise:
+    """Cubically interpolated noise, in any number of dimensions.
+       The parameters here are the same as described in VectorTable.
        """
-    def __init__(self, seed=0, octaves=3, persistence=0.5, logTableSize=10):
-        self.octaves = octaves
-        self.persistence = persistence
-
-        self.table = VectorTable(seed, logTableSize, 3)
+    def __init__(self, dimensions, seed=None, logTableSize=None):
+        self.dimensions = dimensions
+        self.seed = seed
+        self.table = VectorTable(dimensions, seed, logTableSize)
 
         self.two = array(2, Float32)
         self.three = array(3, Float32)
-        self.cube = array(((0,0,0),
-                           (0,0,1),
-                           (0,1,0),
-                           (0,1,1),
-                           (1,0,0),
-                           (1,0,1),
-                           (1,1,0),
-                           (1,1,1)))
 
-    def smoothNoise(self, v):
+        # Generate the vertices of an n-dimensional cube.
+        # These vertices are used as corners to sample the noise at.
+        # This happens to be exactly the same as the digits of all
+        # n-digit binary numbers.
+        self.cube = zeros((1 << self.dimensions, self.dimensions))
+        for point in xrange(1 << self.dimensions):
+            for axis in xrange(self.dimensions):
+                if point & (1<<axis):
+                    self.cube[point, -(1+axis)] = 1
+
+    def get(self, v):
         """Generate smoothed noise using the random gradient table and interpolation.
-           The input can be a single vector or an n-dimensional array of vectors. An array of
-           the same shape will be returned.
+           The input can be a single vector or an array of vectors. An array of the same
+           shape will be returned.
            """
         v = asarray(v).astype(Float32)
         intv = v.astype(Int)
 
-        # Define a sampling pattern of 8 vertices around intv
+        # Define a sampling pattern of vertices within 1 of intv in each dimension.
         # The last axis of this array will be the vertex, the next-to-last will be the
         # cube point, all other axes are as used by the caller.
-        cubev = repeat(intv[...,NewAxis,:], 8, -2)
+        cubev = repeat(intv[...,NewAxis,:], self.cube.shape[0], -2)
         cubev += self.cube
 
         # Get random gradient vectors for each sample point
@@ -83,14 +65,14 @@ class PerlinNoise3:
         cubev = cubev.astype(Float32)
 
         # Get the distance between our vector and each sample point
-        dist = repeat(v[...,NewAxis,:], 8, -2) - cubev
+        dist = repeat(v[...,NewAxis,:], self.cube.shape[0], -2) - cubev
 
         # Use dot products to calculate the influence of each sample point
         infl = sum(grad * dist, -1)
 
         # Determine the amount of interpolation in each axis.
         # This uses the curve y = 3x^2 - 2x^3 to give a much more visually
-        # pleasing result. Linearly interpolated perlin noise looks really bad.
+        # pleasing result. Linearly interpolated perlin noise generally looks bad.
         s = dist[...,0,:]
         s = s*s*self.three - s*s*s*self.two
 
@@ -132,13 +114,46 @@ class PerlinNoise3:
         a += s2
         return a
 
+
+class PerlinNoise(SmoothNoise):
+    """Generates Perlin noise in any number of dimensions. This consists of
+       several layers of noise interpolated from a deterministic random number
+       generator. This is Numeric-friendly, so anywhere you request a value
+       for one input coordinate you could also request a value for an
+       n-dimensional array of input coordinates.
+
+       Constructor parameters:
+
+          seed          - The seed is combined with the input vector such that the same seed
+                          and vector will produce the same output, but for any vector a different
+                          seed will produce different output.
+                          A seed of zero will use the current time to produce a random seed.
+
+          octaves       - Number of layers (sized at multiples of two) to render noise at. More
+                          octaves increase the detail in the noise, but also slow it down.
+
+          persistence   - The amount each successive octave's influence on the final noise is scaled by
+
+          logTableSize  - The base-2 logarithm of the random vector table size. A larger table will
+                          produce a noise pattern with more entropy, but will also use more memory.
+                          The default should be fine for most purposes.
+
+          dimensions    - Number of dimensions the noise is generated in, and the length of the
+                          expected input vectors for get()
+       """
+    def __init__(self, dimensions, octaves=3, persistence=0.5, seed=None, logTableSize=None):
+        SmoothNoise.__init__(self, dimensions, seed, logTableSize)
+        self.octaves = octaves
+        self.persistence = persistence
+
     def get(self, v):
         """Using multiple octaves of smoothed noise, generate perlin noise"""
+        v = asarray(v)
         result = zeros(v.shape[:-1], Float)
         fundamental = 1
         amplitude = 1
         for i in xrange(self.octaves):
-            result += self.smoothNoise(v * fundamental) * amplitude
+            result += SmoothNoise.get(self, v * fundamental) * amplitude
             fundamental *= 2
             amplitude *= self.persistence
         return result
@@ -153,7 +168,10 @@ class VectorTable:
        it must be a power of two. This is to avoid division in the get() function
        when it's necessary to constrain the input vector hash to the table size.
        """
-    def __init__(self, seed, logTableSize, dimensions):
+    def __init__(self, dimensions, seed=None, logTableSize=None):
+        if not logTableSize:
+            logTableSize = 10
+
         self.size = 1 << logTableSize
         self.dimensions = dimensions
 
