@@ -139,15 +139,20 @@ class LogApproach:
     """A class that can be used as an integration function for Value and Vector.
        Approaches a target, fast at first but exponentially slowing down to approach it.
        """
-    def __init__(self, target, speed):
+    def __init__(self, target, speed, epsilon=0.001):
         self.target = target
         self.speed  = speed
+        self.epsilon = epsilon
 
     def __call__(self, oldValue, dt, index=None):
         if index is None:
             t = self.target
         else:
             t = self.target[index]
-        return oldValue + (t - oldValue) * dt * self.speed
+        delta = t - oldValue
+        if delta > self.epsilon or delta < -self.epsilon:
+            return oldValue + delta * dt * self.speed
+        else:
+            return t
 
 ### The End ###
