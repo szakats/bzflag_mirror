@@ -92,7 +92,7 @@ class Clouds(SkyDrawable):
     def __init__(self, *args, **kw):
         SkyDrawable.__init__(self, *args, **kw)
         self.render.textures = (CloudTexture(),)
-        self.motion = Animated.Value(Animated.RampFunction(200))
+        self.motion = Animated.Value(Animated.RampFunction(1000))
         self.time = Animated.Timekeeper()
         self.scale = 0.2
 
