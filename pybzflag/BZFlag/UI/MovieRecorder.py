@@ -26,6 +26,45 @@ later ported to Crystal Space.
 from Numeric import *
 
 
+class Recorder:
+    """Movie Recorder that attaches to a Viewport and records frames to
+       a NuppelVideo file as they're rendered.
+       """
+    def __init__(self, viewport, fileTemplate="snapshot%02d.nuv"):
+        self.viewport = viewport
+        self.fileTemplate = fileTemplate
+        self.running = False
+
+    def start(self):
+        if self.running:
+            return
+        self.file = open(self.getFilename(), "wb")
+        self.recordHeader()
+
+        # Insert our recorder at the beginning of the render sequence.
+        # After the beginning the next frame will have started, but inserting
+        # at the end isn't friendly to the way Viewport manages subviewports.
+        self.viewport.renderSequence.insert(0, self.recordFrame)
+        self.running = True
+
+    def stop(self):
+        if not self.running:
+            return
+        self.viewport.renderSequence.remove(self.recordFrame)
+        self.running = False
+        self.file.close()
+        self.file = None
+
+    def getFilename(self):
+        return "boing"
+
+    def recordHeader(self):
+        print "squeegie"
+
+    def recordFrame(self):
+        print "poing"
+
+
 class RGBtoYUV420:
     """Encapsulation for the RGB to YUV420 colorspace converter.
        This must be a class because it requires lookup tables.

@@ -21,8 +21,7 @@ Controller classes for manipulating 3D views
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import math
-import pygame
+import math, sys, pygame
 from BZFlag import Animated, Event
 from BZFlag.UI import ThreeDRender
 
@@ -160,6 +159,8 @@ class Viewing:
     def __init__(self, view, viewport):
         self.view = view
         self.viewport = viewport
+        self.movieRecorder = None
+        
         self.view.camera = ThreeDRender.SmoothedCamera()
         view.camera.position = (0, 0, 20)
         view.camera.distance  = 900
@@ -169,6 +170,7 @@ class Viewing:
 
         self.bind(KeyPress, 'f').observe(self.toggleFullscreen)
         self.bind(KeyPress, 'w').observe(self.toggleWireframe)
+        self.bind(KeyPress, 'r').observe(self.toggleRecorder)
         self.bind(KeyPress, 'q').observe(self.quit)
         self.bind(KeyPress, pygame.K_ESCAPE).observe(self.quit)
         self.bind(MouseWheel, 0.1, 'any').observe(self.zoom)
@@ -230,6 +232,21 @@ class Viewing:
         if self.view.camera.distance > 1500:
             self.view.camera.distance = 1500
 
+    def toggleRecorder(self):
+        if self.movieRecorder:
+            self.movieRecorder.stop()
+            self.movieRecorder = None
+        else:
+            try:
+                from BZFlag.UI import MovieRecorder
+                self.movieRecorder = MovieRecorder.Recorder(self.viewport)
+                self.movieRecorder.start()
+            except:
+                exc_info = sys.exc_info()
+                print "*** An exception occurred while trying to start the movie recorder:"
+                print "    %s: %s" % (exc_info[0].__name__, exc_info[1])
+                self.movieRecorder = None
+               
 
 class Editing(Viewing):
     """Implement a superset of the Viewing controls, used for editing worlds"""
