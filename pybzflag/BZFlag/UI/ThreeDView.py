@@ -156,39 +156,56 @@ class ThreeDView:
 
 class ThreeDController:
   def __init__(self, view, viewport):
-    time = Animated.Timekeeper()
-    distance = Animated.Value(view.camera.distance,
-                              Animated.LogApproach(view.camera.distance, 4))
-
+    self.view = view
+    self.viewport = viewport
+    self.distance = Animated.Value(view.camera.distance,
+                                   Animated.LogApproach(view.camera.distance, 4))
+    self.mouseZoomScale = 1.08
+    self.keyZoomScale = 1.6
     view.camera.focus = (0, 0, -90)
 
+    time = Animated.Timekeeper()
     def onSetupFrame():
       dt = time.step()
-      distance.integrate(dt)
-      view.camera.distance = distance.value
+      self.distance.integrate(dt)
+      view.camera.distance = self.distance.value
       view.camera.rotation += 6 * dt
     viewport.onSetupFrame.observe(onSetupFrame)
 
     def onMouseButtonDown(event):
-      scale = 1.08
       if event.button == 4:
-        distance.f.target /= scale
-        if distance.f.target < 0.1:
-          distance.f.target = 0.1
+        self.zoom(1/self.mouseZoomScale)
       if event.button == 5:
-        distance.f.target *= scale
-        if distance.f.target > 1500:
-          distance.f.target = 1500
+        self.zoom(self.mouseZoomScale)
     viewport.onMouseButtonDown.observe(onMouseButtonDown)
 
     def onKeyDown(event):
-      # f - toggle fullscreen
       if event.unicode == "f":
-        viewport.display.toggle_fullscreen()
-      # q - quit
+        self.toggleFullscreen()
       if event.unicode == "q":
-        viewport.eventLoop.stop()
+        self.quit()
+      if event.unicode == "-":
+        self.zoom(self.keyZoomScale)
+      if event.unicode == "=":
+        self.zoom(1/self.keyZoomScale)
     viewport.onKeyDown.observe(onKeyDown)
+
+    def onMouseMotion(event):
+      print event
+    viewport.onMouseMotion.observe(onMouseMotion)
+
+  def toggleFullscreen(self):
+    self.viewport.display.toggle_fullscreen()
+
+  def quit(self):
+    self.viewport.eventLoop.stop()
+
+  def zoom(self, scale):
+    self.distance.f.target *= scale
+    if self.distance.f.target < 0.1:
+      self.distance.f.target = 0.1
+    if self.distance.f.target > 1500:
+      self.distance.f.target = 1500
 
 
 def attach(game, eventLoop):
