@@ -58,3 +58,6 @@ Todo list, in no particular order:
 
   - In OverheadView, update using dirty rectangles for lower CPU usage
 
+  - Use a uniform distribution rather than a normal distribution to decide cubemap
+    update times, make the times configurable.
+
