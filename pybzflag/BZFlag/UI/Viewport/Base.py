@@ -22,7 +22,7 @@ An abstract base class defining the Viewport interface
 #
 
 from BZFlag import Event
-import copy
+import copy, weakref
 
 __all__ = ('Viewport',)
 
@@ -51,6 +51,8 @@ class Viewport:
         self.setRect((0,0) + size)
 
     def render(self):
+#        if not self.parent:
+#            print self.renderSequence
         if self.visible and self.size[0] > 0 and self.size[1] > 0:
             for f in self.renderSequence:
                 f()
@@ -104,7 +106,7 @@ class Viewport:
         # Disconnect all events and the renderSequence from the parent
         for attribute, value in sub.__dict__.iteritems():
             if isinstance(value, Event.Event):
-                Event.attach(sub, attribute)
+                setattr(sub, attribute, Event.Event())
 
         sub.renderSequence = [sub.onSetupFrame,
                               sub.onDrawFrame,
@@ -117,9 +119,10 @@ class Viewport:
             # Stick it in our render sequence right before our onFinishFrame which flips the buffer
             # This should be safe for nesting viewport regions-  and the last entry will always be
             # the root viewport's onFinishFrame event.
-            self.rootView.renderSequence = self.rootView.renderSequence[:-1] + \
-                                           [sub.render] + \
-                                           self.rootView.renderSequence[-1:]
+            self.rootView.renderSequence = (self.rootView.renderSequence[:-1] +
+#                                           [RenderSequenceProxy(self, sub.render)] + \
+                                            [sub.render] +
+                                            self.rootView.renderSequence[-1:])
 
         if renderLink == 'before':
             self.rootView.renderSequence = [sub.render] + self.rootView.renderSequence
@@ -127,5 +130,21 @@ class Viewport:
         # Ignore the caption on sub-viewports
         sub.setCaption = lambda title: None
         return sub
+
+
+class RenderSequenceProxy:
+    """This is a class that is inserted into the Viewport's renderSequence as
+       a weak reference proxy. When the referenced object is garbage collected,
+       the viewport's renderSequence entry corresponding to this proxy is deleted.
+       """
+    def __init__(self, viewport, referent):
+        self.viewport = viewport
+        self.ref = weakref(referent, self.unref)
+
+    def __call__(self, *args, **kw):
+        self.ref()(*args, **kw)
+
+    def unref(self, ref):
+        self.viewport.renderSequence.remove(self)
 
 ### The End ###
