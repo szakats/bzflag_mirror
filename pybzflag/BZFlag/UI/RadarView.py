@@ -82,7 +82,7 @@ class RadarLayer(Drawable.DisplayList):
         self.z = z
         self.objects = objects
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         for object in self.objects:
             smoothedPoly(object.toPolygon())
 
@@ -95,7 +95,7 @@ class RegularPolygon(Drawable.DisplayList):
     def set(self, sides):
         self.sides = sides
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         points = []
         sideRadians = math.pi * 2 / self.sides
         for side in xrange(self.sides):
@@ -103,10 +103,10 @@ class RegularPolygon(Drawable.DisplayList):
             points.append((math.cos(theta), math.sin(theta)))
         smoothedPoly(points)
 
-    def drawAt(self, point, radius):
+    def drawAt(self, rstate, point, radius):
         glTranslatef(point[0], point[1], 0)
         glScalef(radius, radius, 1)
-        self.draw()
+        self.draw(rstate)
 
 
 class Scene:
@@ -162,11 +162,11 @@ class Scene:
             # New layer with remaining objects
             self.layers.append(RadarLayer(color, currentLayerZ, layerObjects))
 
-    def render(self, viewHeight=0):
+    def render(self, rstate, viewHeight=0):
         for layer in self.layers:
             color = layer.color
             glColor4f(color[0], color[1], color[2], colorScale(layer.z, viewHeight))
-            layer.draw()
+            layer.draw(rstate)
             
 
 class RadarView:
@@ -190,7 +190,7 @@ class RadarView:
             self.render()
         viewport.onDrawFrame.observe(onDrawFrame)
 
-    def renderPlayers(self):
+    def renderPlayers(self, rstate):
         # XXX - setting self.follow here is just for testing
         self.follow = None
         for player in self.game.players.values():
@@ -205,7 +205,7 @@ class RadarView:
                     color = colorScheme["player"]
                 pos = player.motion.position
                 glColor4f(color[0], color[1], color[2], colorScale(pos[2], self.center[2]))
-                self.dot.drawAt(pos, 5)
+                self.dot.drawAt(rstate, pos, 5)
 
     def updateFollowing(self):
         if self.follow:
@@ -215,6 +215,7 @@ class RadarView:
 
     def render(self):
         self.updateFollowing()
+        rstate = Drawable.RenderState(self)
 
         glEnable(GL_BLEND)
         glDisable(GL_LIGHTING)
@@ -233,8 +234,8 @@ class RadarView:
                  -float(self.zoom) / self.game.world.size[1], 1)
         glRotatef(self.angle, 0,0,1)
         glTranslatef(-self.center[0], -self.center[1], 0)
-        self.scene.render(self.center[2])
-        self.renderPlayers()
+        self.scene.render(rstate, self.center[2])
+        self.renderPlayers(rstate)
         glPopMatrix()
 
 

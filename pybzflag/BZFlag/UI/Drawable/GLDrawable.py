@@ -26,7 +26,7 @@ second rendering pass.
 #
 from BZFlag.UI import Texture, GLExtension
 
-__all__ = ['GLDrawable', 'RenderSettings']
+__all__ = ['GLDrawable', 'RenderSettings', 'RenderState']
 
 
 class RenderSettings:
@@ -43,7 +43,15 @@ class RenderSettings:
         settings = [key for key in self.__dict__.iterkeys() if key[0] != '_']
         pairs = ["%s=%s" % (key, self.__dict__[key]) for key in settings] 
         return "<%s %s>" % (self.__class__.__name__, ", ".join(pairs))
-        
+
+
+class RenderState:
+    """Holder for state information passed down to all objects being rendered"""
+    def __init__(self, view):
+        self.view = view
+        self.viewport = view.viewport
+        self.picking = None
+
 
 class GLDrawable:
     """Abstract base class for an object that can be drawn to an OpenGL context.

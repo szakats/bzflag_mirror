@@ -35,14 +35,6 @@ import sys, LinearAlgebra
 from Numeric import subtract
 
 
-class RenderState:
-    """Holder for state information passed down to all objects being rendered"""
-    def __init__(self, view):
-        self.view = view
-        self.viewport = view.viewport
-        self.picking = None
-
-
 class PickingState:
     """Holds render state information specific to picking. This is passed
        to render passes when doing a picking render, so the passes can tag
@@ -558,7 +550,7 @@ class View:
     def render(self):
         """The main entry point for rendering"""
         self.camera.load()
-        self.renderScene(RenderState(self))
+        self.renderScene(Drawable.RenderState(self))
 
     def renderScene(self, rstate):
         """Set up lighting and render the scene. This is called
