@@ -93,6 +93,8 @@ public:
 private:
 	int	iTexture;
 	int	iModel;
+	trVertex3D		m_rTempPosition;
+	trVertex3D		m_rTempScale;
 };
 
 class Teleporter : public CBaseObject

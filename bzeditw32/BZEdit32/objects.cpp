@@ -372,7 +372,19 @@ bool Pyramid::Init ( void )
 
 
 	pModel->SetTexuture(iTexture);
-	pModel->Init(m_rPosition,m_rScale,m_fAngle);
+
+	if (m_bFlipZ){
+		m_rTempScale.x = -m_rScale.x;
+		m_rTempScale.y = m_rScale.y;
+		m_rTempScale.z = -m_rScale.z;
+		m_rTempPosition.x = m_rPosition.x;
+		m_rTempPosition.y = m_rPosition.y;
+		m_rTempPosition.z = m_rPosition.z + m_rScale.z;
+		pModel->Init(m_rTempPosition,m_rTempScale,m_fAngle);
+
+	}
+	else
+		pModel->Init(m_rPosition,m_rScale,m_fAngle);
 
 	m_sTypeName = "Pyramid";
 
