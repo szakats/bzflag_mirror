@@ -20,6 +20,9 @@ Todo list, in no particular order:
 
       * Light the clouds using bump mapping, so we can get nice edge hilights
 
+      * optional: change all the clouds to use the technique that MS Flight Sim:
+        A Century of Flight uses, because it rawks
+
   - Figure out what should be at and below the horizon
 
   - Stars, sun and the moon
