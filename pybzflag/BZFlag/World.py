@@ -146,12 +146,12 @@ class World:
         self.erase()
         self.storeBlock(WorldObjects.Style())
         self.storeBlock(WorldObjects.Wall(
-            center = [0, 400, 0]
-            angle  = math.pi * 1.5
+            center = [0, 400, 0],
+            angle  = math.pi * 1.5,
             ))
         self.storeBlock(WorldObjects.Wall(
-            center = [400, 0, 0]
-            angle  = math.pi
+            center = [400, 0, 0],
+            angle  = math.pi,
             ))
 
         
