@@ -46,7 +46,7 @@ class ParticleTest(Drawable.SpriteArray):
             Tweak.Quantity(self.fader, 'sizeRange', range=(0,10)),
             Tweak.Color(self.fader, 'colorRange'),
             Tweak.Separator(),
-            Tweak.Quantity(self.constAccel, 'vector', range=(-100,10)),
+            Tweak.Quantity(self.constAccel, 'vector', range=(-100,100)),
             )
 
     def draw(self, rstate):
