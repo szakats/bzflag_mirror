@@ -26,7 +26,7 @@ from pygame.locals import *
 from BZFlag import Event
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from BZFlag.UI import Objects
+from BZFlag.UI.Objects import Ground
 
 class Camera:
     def __init__(self):
