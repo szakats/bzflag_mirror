@@ -408,9 +408,9 @@ class GrassEdge(Sides):
         self.size = (self.size[0],
                      self.size[1],
                      1.5)
-        self.texRepeats = (self.size[0] / 5,
-                           self.size[1] / 5,
-                           1)
+        self.texRepeats = (self.size[0] / 2,
+                           self.size[1] / 2,
+                           0.95)
         self.tex2Repeats = (self.size[0] / 400,
                            self.size[1] / 400,
                            1)
