@@ -1,15 +1,13 @@
 #!/usr/bin/env python
-from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, ParticleSystem
+from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, ParticleSystem, Environment
 from BZFlag import Event, Geometry, Noise, Animated
 from OpenGL.GL import *
 import math
 
 
-class SparkThingy(Drawable.SpriteArray):
-    """An example particle system that draws glowing balls positioned on the surface of a sphere"""
+class Sparks(Drawable.SpriteArray):
     textureName = 'spark.png'
-
-    def __init__(self, numParticles=200):
+    def __init__(self, position=(0,0,0), numParticles=200):
         self.model = ParticleSystem.SpriteFountain(numParticles)
         Drawable.SpriteArray.__init__(self, numParticles, allowPointSprite=False)
         self.model.attachDrawable(self)
@@ -23,7 +21,7 @@ class SparkThingy(Drawable.SpriteArray):
                        speedRange          = (4, 50),
                        direction           = (0, 0, 1),
                        directionRandomness = 0.2,
-                       position            = (0, 0, -2),
+                       position            = position,
                        )
         self.model.add(ParticleSystem.LifespanAffector, 1)
         self.model.add(ParticleSystem.LinearFadeAffector)
@@ -47,10 +45,12 @@ if __name__ == '__main__':
 
     viewport.mode = Viewport.GL.ClearedMode(clearColor=(0.2, 0.2, 0.2, 1))
 
-    view.camera.position = (0,0,0)
+    view.camera.position = (0,0,3)
     view.camera.distance = 20
     view.camera.jump()
 
-    view.scene.add(SparkThingy())
+    view.scene.add(Drawable.Ground(400))
+    view.scene.add(Environment.Sky())
+    view.scene.add(Sparks((5,0,3)))
 
     loop.run()
