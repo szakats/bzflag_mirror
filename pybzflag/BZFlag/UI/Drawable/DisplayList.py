@@ -23,6 +23,8 @@ A drawable that stores itself to a display list before rendering
 from BZFlag.UI.Drawable.GLDrawable import *
 from OpenGL.GL import *
 
+__all__ = ['DisplayList']
+
 class DisplayList(GLDrawable):
     """A drawable that stores itself to a display list before rendering"""
     def __init__(self, *args, **kw):
