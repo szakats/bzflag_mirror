@@ -263,6 +263,7 @@ class DynamicTexture(Texture):
         rootView = rstate.viewport.rootView
         self.viewport = rootView.region(self.getTextureRect(rootView),
                                         renderLink = 'before')
+        self.rstate.viewport = self.viewport
         self.viewport.onDrawFrame.observe(self.drawFrame)
         self.setupViewport()
         if self.dirty:
@@ -309,15 +310,16 @@ class DynamicTexture(Texture):
         self.renderLifetime = 0
 
         ## Uncomment this to show the textures as they're stored
-        #self.viewport.display.flip()
+        #self.viewport.rootView.display.flip()
         #import time
+        #print self
         #time.sleep(0.5)
 
     def renderDependency(self, dep):
         """Force a dependency texture to render immediately"""
         if not dep.hasRenderState():
             dep.attachRenderState(self.rstate)
-        dep.rstate.viewport.configureOpenGL()
+        dep.viewport.configureOpenGL()
         dep.drawFrame()
         assert(dep.rendered)
 
