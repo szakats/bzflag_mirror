@@ -130,9 +130,9 @@ class Clouds(SkyDrawable):
 
 class MountainTexture(Texture.DynamicTexture):
     """Perlin-noise-based mountain range silhouette"""
-    def __init__(self, size=(512,32), noise=None):
+    def __init__(self, size=(512,128), noise=None):
         if not noise:
-            noise = Noise.PerlinNoise(octaves=12, persistence=0.4, fundamental=10)
+            noise = Noise.PerlinNoise(octaves=1, fundamental=20)
         self.noise = noise
         Texture.DynamicTexture.__init__(self, size)
         self.setRepeat(GL_REPEAT, GL_CLAMP)
@@ -174,7 +174,7 @@ class MountainTexture(Texture.DynamicTexture):
 
         self.viewport.display.flip()
         import time
-        time.sleep(1)
+        time.sleep(10)
 
 
 class Horizon(SkyDrawable):
@@ -184,19 +184,23 @@ class Horizon(SkyDrawable):
         self.render.textures = (MountainTexture(),)
 
     def drawToList(self, rstate):
-        glEnable(GL_BLEND)
+        # FIXME: the color of the mountains
+        glColor3f(0,1,0)
 
-        # Set up texture coordinate generation. The plane equations
-        # are set up every frame in draw() to animate the clouds' motion
-        glTexGenfv(GL_S, GL_OBJECT_PLANE, (1, 0, 0, 0))
+        # Set up blending to use only the texture's alpha
+        # channel, disregarding its color channels
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA)
+
+        # Set up texture coordinates. We can't do cylindrical mapping with
+        # glTexGen, and we don't have texture coordinates in the VRML loader
+        # yet, so just fudge something reasonableish with linear mapping.
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (3, 0, 0, 0))
         glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 1, 0))
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
-
-        # FIXME: the color of the mountains
-        glColor3f(0,1,0)
 
         VRML.load('sky.wrl')['horizon'].drawToList(rstate)
 
@@ -205,5 +209,7 @@ class Horizon(SkyDrawable):
         glDisable(GL_TEXTURE_GEN_T)
         glDisable(GL_BLEND)
         glColor3f(1,1,1)
+        glDisable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 ### The End ###

@@ -7,7 +7,9 @@ loop = Event.EventLoop()
 viewport = Viewport.OpenGLViewport(loop, (800,600), 1000)
 view = ThreeDRender.View(viewport)
 control = ThreeDControl.Viewing(view, viewport)
+
 viewport.setCaption("Sky Test")
+viewport.mode = Viewport.GL.UnclearedMode()
 
 # Move the camera to the center of the universe
 view.camera.position = (0,0,0)
