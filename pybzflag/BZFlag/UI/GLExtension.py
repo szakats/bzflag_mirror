@@ -53,7 +53,14 @@ def test():
                 unit += 1
         except:
             pass
-        OpenGL.GL.ARB.multitexture.glActiveTextureARB(textureUnits[0])
+        try:
+            OpenGL.GL.ARB.multitexture.glActiveTextureARB(textureUnits[0])
+        except:
+            pass
+
+        # If we have less than 2 multitexture units, declare it broken
+        if len(textureUnits) < 2:
+            multitexture = False
 
     # Determine whether we have anisotropic filtering
     try:
