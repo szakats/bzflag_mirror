@@ -30,9 +30,9 @@ class OverheadView:
        client, so it should be usable on either client or server side.
        """
     colorScheme = {
-        'background': 'black',
-        'Box':        '#408080',
-        'Pyramid':    '#80FFFF',
+        'background': '#6c8b6c',
+        'Box':        '#bcbba7',
+        'Pyramid':    '#1b8de3',
         'Teleporter': '#FFFF80',
         'player':     'white',
       }
@@ -115,8 +115,9 @@ class OverheadView:
     def renderPlayers(self, surface):
         color = self.colorScheme['player']
         for player in self.game.players.values():
-            pos = self.worldToView(player.motion.position)
-            pygame.draw.circle(surface, color, pos, 2, 1)
+            if 'alive' in player.status:
+                pos = self.worldToView(player.motion.position)
+                pygame.draw.circle(surface, color, pos, 2, 1)
         pass
 
     def renderFlags(self, surface):
