@@ -1,5 +1,8 @@
 Todo list, in no particular order:
 
+  - Add some sort of color-selection mechanism (for showing selected objects, widget
+    highlighting, etc)
+
   - Port the jetstream particle engine (why not?)
 
   - Sky!
