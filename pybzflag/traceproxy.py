@@ -94,13 +94,13 @@ def dumpMessage(msg, direction):
 # Set up events to forward messages between
 # client and server, dumping them to stdout
 def onClientMessage(msg):
-    server.tcp.write(msg)
     dumpMessage(msg, '<--')
+    server.clients[client.id].write(msg)
     return 1
 client.onAnyMessage.observe(onClientMessage)
 def onServerMessage(msg):
-    client.tcp.write(msg)
     dumpMessage(msg, '-->')
+    client.tcp.write(msg)
     return 1
 server.onAnyMessage.observe(onServerMessage)
 

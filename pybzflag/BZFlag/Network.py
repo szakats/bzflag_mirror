@@ -60,8 +60,7 @@ class Socket:
         try:
             self.socket.send(str(data))
         except socket.error:
-            pass
-            #raise Errors.ConnectionLost()
+            raise Errors.ConnectionLost()
 
     def recv(self, size):
         """Low-level recv() wrapper that just provides a little error handling."""
