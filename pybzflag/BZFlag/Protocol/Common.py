@@ -25,6 +25,7 @@ specific to packets to and from the BZFlag server.
 
 from BZFlag.Protocol import *
 from BZFlag import Util
+import math
 
 
 # Default BZFlag port
@@ -45,6 +46,11 @@ VectorYZ = MappedEntry(Vector2,
 VectorXY = MappedEntry(Vector2,
                        lambda v2: (v2[0], v2[1], 0.0),
                        lambda v3: (v3[0], v3[1]))
+
+# The protocol stores values in radians, but we try to use degrees everywhere here
+Radians = MappedEntry(Float,
+                      lambda radians: radians * 180 / math.pi,
+                      lambda degrees: degrees * math.pi / 180)
 
 
 PlayerId = Enum(UInt8, {
@@ -223,8 +229,8 @@ class MsgPlayerUpdate(Message):
         StructEntry(PlayerStatus, 'status'),
         StructEntry(Vector3,      'position'),
         StructEntry(Vector3,      'velocity'),
-        StructEntry(Float,        'azimuth'),
-        StructEntry(Float,        'angularVelocity'),
+        StructEntry(Radians,      'azimuth'),
+        StructEntry(Radians,      'angularVelocity'),
         ]
 
 class MsgNegotiateFlags(DataMessage):

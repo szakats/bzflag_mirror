@@ -71,7 +71,7 @@ class WorldObject(Block):
             if keyword == 'position':
                 self.center = map(float, args[:3])
             elif keyword == 'rotation':
-                self.angle = float(args[0]) * math.pi / 180
+                self.angle = float(args[0])
             elif keyword == 'size':
                 self.size = map(float, args[:3])
             elif keyword == 'border':
@@ -105,7 +105,7 @@ class WorldObject(Block):
         if hasattr(self, 'border'):
             f.write("border %s\n" % self.border)
         if hasattr(self, 'angle'):
-            f.write("rotation %s\n" % (self.angle * 180 / math.pi))
+            f.write("rotation %s\n" % self.angle)
         if hasattr(self, 'fromSide'):
             f.write("from %s\n" % self.fromSide)
         if hasattr(self, 'toSide'):
@@ -130,8 +130,9 @@ class WorldObject(Block):
         poly = self.toUntransformedPolygon()
 
         # Rotate the polygon by our angle
-        cos = math.cos(-self.angle)
-        sin = math.sin(-self.angle)
+        radians = -self.angle * math.pi / 180
+        cos = math.cos(radians)
+        sin = math.sin(radians)
         def rotate(point):
             return ( cos*point[0] + sin*point[1],
                     -sin*point[0] + cos*point[1])
@@ -185,7 +186,7 @@ class TeamBase(WorldObject):
     entries = [
         StructEntry(Common.TeamColor, 'team'),
         StructEntry(Common.Vector3,   'center', [0,0,0]),
-        StructEntry(Float,            'angle',  0),
+        StructEntry(Common.Radians,   'angle',  0),
         StructEntry(Common.VectorXY,  'size',   [1,1,0]),
         StructEntry(Common.Vector3,   'safety', [0,0,0]),
         ]
@@ -205,7 +206,7 @@ class Wall(WorldObject):
     messageId = 0x776C
     entries = [
         StructEntry(Common.Vector3,   'center', [0,0,0]),
-        StructEntry(Float,            'angle',  0),
+        StructEntry(Common.Radians,   'angle',  0),
         StructEntry(Common.VectorYZ,  'size',   [0,1,1]),
         ]
 
@@ -219,7 +220,7 @@ class Box(WorldObject):
     messageId = 0x6278
     entries = [
         StructEntry(Common.Vector3,   'center',       [0,0,0]),
-        StructEntry(Float,            'angle',        0),
+        StructEntry(Common.Radians,   'angle',        0),
         StructEntry(Common.Vector3,   'size',         [1,1,1]),
         StructEntry(ObjectOptions,    'options',      []),
         ]
@@ -237,7 +238,7 @@ class Pyramid(WorldObject):
     messageId = 0x7079
     entries = [
         StructEntry(Common.Vector3,   'center',       [0,0,0]),
-        StructEntry(Float,            'angle',        0),
+        StructEntry(Common.Radians,   'angle',        0),
         StructEntry(Common.Vector3,   'size',         [1,1,1]),
         StructEntry(ObjectOptions,    'options',      []),
         ]
@@ -252,7 +253,7 @@ class Teleporter(WorldObject):
     messageId = 0x7465
     entries = [
         StructEntry(Common.Vector3,   'center',       [0,0,0]),
-        StructEntry(Float,            'angle',        0),
+        StructEntry(Common.Radians,   'angle',        0),
         StructEntry(Common.Vector3,   'size',         [1,1,1]),
         StructEntry(Float,            'border',       1.0),
         StructEntry(ObjectOptions,    'options',      []),
