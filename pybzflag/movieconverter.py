@@ -17,16 +17,19 @@ parser.add_option("-b", "--bitrate", metavar="KBPS", dest="bitrate",
                   help="Sets the mpeg4 encoder bit rate. Default is 900kbps.", default=900)
 (options, args) = parser.parse_args()
 
-try:
-    inFile = args[0]
-except IndexError:
-    parser.error("A recording filename must be specified on the command line.")
+if len(args) == 0:
+    parser.error("One or more recording filenames must be specified on the command line.")
 
-if not options.file:
-    options.file = re.sub("\..*", "", inFile) + ".avi"
 
-(width, height) = options.resolution.split("x")
 
-t = MovieRecorder.Transcoder(inFile)
-t.encode("-o %s -vop scale=%s:%s -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=%s" %
-         (options.file, width, height, options.bitrate))
+for inFile in args:
+    if options.file:
+        outFile = options.file
+    else:
+        outFile = re.sub("\..*", "", inFile) + ".avi"
+
+    (width, height) = options.resolution.split("x")
+
+    t = MovieRecorder.Transcoder(inFile)
+    t.encode("-o %s -vop scale=%s:%s -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=%s" %
+             (outFile, width, height, options.bitrate))
