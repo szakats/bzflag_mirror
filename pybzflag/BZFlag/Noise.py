@@ -164,6 +164,27 @@ class PerlinNoise(SmoothNoise):
         return result
 
 
+def randomArray(shape, seed=None, range=(0,1), type=Float):
+    """Utility to generate a Numeric array full of pseudorandom numbers in the given range.
+       This will attempt to use the RandomArray module, but fall back on using the standard
+       random module in a loop.
+       """
+    try:
+        import RandomArray
+        if seed is None:
+            RandomArray.seed()
+        else:
+            RandomArray.seed(seed+1)
+        return (RandomArray.random(shape) * (range[1]-range[0]) + range[0]).astype(type)
+    except ImportError:
+        import random
+        random.seed(seed)
+        a = zeros(multiply.reduce(shape), Float)
+        for i in xrange(a.shape[0]):
+            a[i] = random.random() * (range[1]-range[0]) + range[0]
+        return reshape(a, shape).astype(type)
+
+
 class VectorTable:
     """A table of random unit vectors generated from a seed.
 
@@ -180,23 +201,8 @@ class VectorTable:
         self.size = 1 << logTableSize
         self.dimensions = dimensions
 
-        # This generates a random array of numbers between -0.5 and 0.5, then normalizes the vectors.
-        # Use the RandomArray module if we can, if not we'll call 'random' repeatedly.
-        try:
-            import RandomArray
-            if seed is None:
-                RandomArray.seed()
-            else:
-                RandomArray.seed(seed+1)
-            self.table = (RandomArray.random((self.size, dimensions)) - 0.5).astype(Float32)
-        except ImportError:
-            import random
-            random.seed(seed)
-            self.table = zeros((self.size, dimensions), Float32)
-            for j in xrange(dimensions):
-                for i in xrange(self.size):
-                    self.table[i,j] = random.random() - 0.5
-
+        # This generates a random array of numbers between -1 and 1, then normalizes the vectors.
+        self.table = randomArray((self.size, dimensions), type=Float32, range=(-1,1), seed=seed)
         Geometry.normalize(self.table, self.table)
 
     def get(self, v):
