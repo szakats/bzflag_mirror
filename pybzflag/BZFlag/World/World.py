@@ -146,7 +146,7 @@ class World:
         self.teleporters = []
         self.teleporterLinks = []
         self.scene = self.sceneClass()
-        self.gameStyle = None
+        self.style = None
         self.lifetime = 'permanent'     # For client-side world caching
 
     def storeSkeletonHeader(self, size=Scale.WorldSize, wallHeight=Scale.WallHeight):
@@ -185,7 +185,7 @@ class World:
         # File this block in the appropriate lists
         self.blocks.append(block)
         if isinstance(block, WorldObjects.Style):
-            self.gameStyle = block
+            self.style = block
             # Use a 2D size to make it easy to support non-square worlds in the future
             self.size = (block.worldSize, block.worldSize)
         if hasattr(block, 'center'):

@@ -36,6 +36,7 @@ class BaseClient(Network.Endpoint):
     def init(self):
         Network.Endpoint.init(self)
         self.connected = 0
+        self.protocolVersion = BZFlag.protocolVersion
         self.options.update({
             'server': None,
             })
@@ -94,11 +95,11 @@ class BaseClient(Network.Endpoint):
         # We should have just received a Hello packet with
         # the server version and our client ID.
         hello = socket.readStruct(self.incoming.HelloPacket)
-        if hello.version != BZFlag.protocolVersion:
+        if hello.version != self.protocolVersion:
             raise Errors.ProtocolError(
                 "Protocol version mismatch: The server is version " +
                 "'%s', this client is version '%s'." % (
-                hello.version, BZFlag.protocolVersion))
+                hello.version, self.protocolVersion))
         self.id = hello.clientId
 
         # Now we're connected

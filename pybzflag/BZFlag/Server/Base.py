@@ -37,13 +37,14 @@ class BaseServer(Network.Endpoint):
     
     def init(self):
         Network.Endpoint.init(self)
+        self.protocolVersion = BZFlag.protocolVersion
         self.clients = {}
         self.nextClientID = 0
         self.clientIDIncrement = 1
         self.options.update({
             'interface': None,
             })
-        Event.attach(self, 'onConnect', 'onDisconnect')
+        Event.attach(self, 'onListen', 'onConnect', 'onDisconnect')
 
         def setOptions(**options):
             if 'interface' in options.keys():
@@ -55,6 +56,7 @@ class BaseServer(Network.Endpoint):
         self.tcp.listen(interface, Protocol.Common.defaultPort)
         self.tcp.handler = self.handleConnection
         self.eventLoop.add(self.tcp)
+        self.onListen()
 
     def getNewClientID(self):
         id = self.nextClientID
@@ -71,7 +73,7 @@ class BaseServer(Network.Endpoint):
         clientId = self.getNewClientID()
         clientSocket.id = clientId
         self.clients[clientId] = clientSocket
-        hello = self.outgoing.HelloPacket(version = BZFlag.protocolVersion,
+        hello = self.outgoing.HelloPacket(version = self.protocolVersion,
                                           clientId = clientId)
         self.eventLoop.add(clientSocket)
         clientSocket.handler = self.handleMessage

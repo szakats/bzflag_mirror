@@ -116,8 +116,8 @@ class GameInfo(Struct):
     """The game information contained within a PingPacket"""
     entries = [
         StructEntry(GameStyle, 'gameStyle'),
-        StructEntry(UInt16,    'maxPlayers'),
-        StructEntry(UInt16,    'maxShots'),
+        StructEntry(UInt16,    'players'),
+        StructEntry(UInt16,    'shots'),
         StructEntry(UInt16,    'rogueCount'),
         StructEntry(UInt16,    'redCount'),
         StructEntry(UInt16,    'greenCount'),
@@ -129,7 +129,7 @@ class GameInfo(Struct):
         StructEntry(UInt16,    'blueMax'),
         StructEntry(UInt16,    'purpleMax'),
         StructEntry(UInt16,    'shakeWins'),
-        StructEntry(UInt16,    'shakeTimeout'),   # 1/10ths of a second
+        StructEntry(UInt16,    'shakeTime'),      # 1/10ths of a second
         StructEntry(UInt16,    'maxPlayerScore'),
         StructEntry(UInt16,    'maxTeamScore'),
         StructEntry(UInt16,    'maxTime'),        # Seconds

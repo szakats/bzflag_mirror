@@ -25,6 +25,7 @@ over the network, frontends display and modify it.
 #
 
 from BZFlag import World, Event
+from BZFlag.Protocol import Common
 import time
 
 
@@ -86,5 +87,34 @@ class Game:
         self.world.loadText(f)
         f.close()
         self.onLoadWorld()
+
+    def getGameInfo(self):
+        """Return a GameInfo instance with information
+           about our game style and current status
+           """
+        info = Common.GameInfo()
+        info.gameStyle  = self.world.style.gameStyle
+        info.players    = self.world.style.players
+        info.shots      = self.world.style.shots
+        info.shakeWins  = self.world.style.shakeWins
+        info.shakeTime  = self.world.style.shakeWins
+
+        info.maxPlayerScore = -1
+        info.maxTeamScore   = -1
+        info.maxTime        = -1
+        
+        info.rogueCount  = 0
+        info.redCount    = 0
+        info.greenCount  = 0
+        info.blueCount   = 0
+        info.purpleCount = 0
+        info.rogueMax    = 5
+        info.redMax      = 5
+        info.greenMax    = 5
+        info.blueMax     = 5
+        info.purpleMax   = 5
+        return info
+
+    
 
 ### The End ###

@@ -23,7 +23,7 @@ support updating a game state and transmitting changes.
 #
 
 import BZFlag
-from BZFlag import Event, Game, Flag
+from BZFlag import Event, Game, Flag, Meta
 from StringIO import StringIO
 from BZFlag.Server.Base import BaseServer
 
@@ -37,11 +37,15 @@ class StatefulServer(BaseServer):
         BaseServer.init(self)
         self.game = Game.Game()
         self.binaryWorld = None
+        self.publicityTimer = None
         self.worldBlockSize = 1000
 
         self.options.update({
-            'world': None,
-            'welcomeMessage': BZFlag.serverWelcomeMessage,
+            'world':              None,
+            'welcomeMessage':     BZFlag.serverWelcomeMessage,
+            'public':             1,
+            'title':              'PyBZFlag Server',
+            'publicityInterval':  30 * 60,
             })
 
         Event.attach(self, 'onAttemptEnter', 'onEnter', 'onFinishEnter',
@@ -49,10 +53,52 @@ class StatefulServer(BaseServer):
 
         def setOptions(**options):
             if 'world' in options.keys():
+                # Load world
                 f = open(options['world'])
                 self.game.world.loadText(f)
                 f.close()
         self.onSetOptions.observe(setOptions)
+
+        def onListen():
+            if self.options['public']:
+                self.publicize()
+        self.onListen.observe(onListen)
+
+    def publicize(self, enable=1):
+        """Periodically post information about this server to the metaserver"""
+        if self.publicityTimer:
+            # Remove any old timers
+            self.eventLoop.remove(self.publicityTimer)
+            self.publicityTimer = None
+        if enable:
+            # Post our server info immediately, and set up a timer to repost
+            # it periodically, in case the server loses it for some reason.
+            def postInfo():
+                Meta.MetaClient(self.eventLoop).add(self.getServerInfo())
+            self.publicityTimer = Event.PeriodicTimer(
+                self.options['publicityInterval'], postInfo)
+            self.eventLoop.add(self.publicityTimer)
+            postInfo()
+        else:
+            # Remove our posting from the list
+            Meta.MetaClient(self.eventLoop).remove(self.getServerInfo().name)
+
+    def getServerInfo(self):
+        """Return a ServerInfo instance, used to advertise
+           ourselves to list servers.
+           """
+        info = Meta.ServerInfo()
+
+        # This should be our canonical hostname
+        import socket
+        info.name     = "%s:%s" % (
+            socket.gethostbyname_ex(socket.gethostname())[0], self.tcp.port)
+
+        info.version  = self.protocolVersion
+        info.gameinfo = self.game.getGameInfo()
+        info.title    = self.options['title']
+        print info.info()
+        return info
 
     def onMsgNegotiateFlags(self, msg):
         """Given a list of supported flags by the client and the
