@@ -32,11 +32,9 @@ def drawFrame():
     glEnd()
 
     glLoadIdentity()
-    glTranslatef(0,viewport.size[1],0)
+    glTranslatef(5,viewport.size[1]-5,0)
     glColor3f(1,1,1)
-    f.draw("Boing! This is the default size. Alignment test:\n")
-    f.draw("WWWWWWWWWWWWWWWWWWWWWWWWWWWW\n")
-    f.draw("W   iiiii\n\n")
+    f.draw("Boing! This is the default size\n\n")
     glColor3f(1,1,0.5)
     f.draw("50 pixels high", 50)
 
@@ -46,10 +44,14 @@ def drawFrame():
     spin.integrate(time.step())
     f.drawCentered("Spinny-widget")
 
+    glColor3f(0,0,0)
     glLoadIdentity()
     glTranslatef(viewport.size[0]/2, viewport.size[1]/4, 0)
-    glColor3f(0,0,0)
-    f.drawCentered("Not-so-spinny-widget",15)
+    f.drawCentered("Not-so-spinny-widget")
+
+    glLoadIdentity()
+    glTranslatef(viewport.size[0]/2, viewport.size[1]/8, 0)
+    f.drawCentered("(small print)", 10)
 
 Util.showFrameRate(viewport)
 viewport.onDrawFrame.observe(drawFrame)

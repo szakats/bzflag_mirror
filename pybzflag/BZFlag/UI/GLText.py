@@ -53,25 +53,21 @@ class Glyph:
                           rect[2] / self.page.size[0],
                           rect[3] / self.page.size[1])
             
-    def draw(self, size):
+    def draw(self, magnification):
         self.page.updateTexture()
         self.page.texture.bind()
 
-        # This offset ensures we draw to the center of pixels
-        # rather than having our texels split across two pixels.
-        offset = 0.25
-
-        v = (self.size[0] * size / self.size[1], size)
+        v = (self.size[0] * magnification, self.size[1] * magnification)
         t = self.texCoords
         glBegin(GL_QUADS)
         glTexCoordf(t[0],t[1])
-        glVertex2f(offset, offset - v[1])
+        glVertex2f(0, -v[1])
         glTexCoordf(t[0]+t[2],t[1])
-        glVertex2f(v[0] + offset, offset - v[1])
+        glVertex2f(v[0], -v[1])
         glTexCoordf(t[0]+t[2],t[1]+t[3])
-        glVertex2f(v[0] + offset, offset)
+        glVertex2f(v[0], 0)
         glTexCoordf(t[0],t[1]+t[3])
-        glVertex2f(offset, offset)
+        glVertex2f(0, 0)
         glEnd()
         glTranslatef(v[0], 0, 0)
 
@@ -93,10 +89,6 @@ class FontPage:
         if not self.textureDirty:
             return
         self.texture.loadSurface(self.surface, monochrome=True)
-#        self.texture.loadFile("test.png")
-#        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-#        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-
         self.textureDirty = False
 
     def allocRect(self, size):
@@ -170,7 +162,7 @@ class RenderedFont:
             return g
 
     def draw(self, char, size):
-        self.getGlyph(char).draw(size)
+        self.getGlyph(char).draw(size / self.size)
 
 
 class Font:
