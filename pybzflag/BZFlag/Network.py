@@ -134,6 +134,8 @@ class Socket:
             # "Operation now in progress" isn't an error
             if not sys.exc_info()[1][1].endswith('progress'):
                 raise
+        self.remoteHost = host
+        self.remotePort = port
 
     def listen(self, host, port=None):
         """The arguments for this are processed just like for connect(),
@@ -156,6 +158,19 @@ class Socket:
         except socket.error:
             # Can't listen on UDP sockets
             pass
+
+    def listenOnFirstAvailable(self, firstPort=17200):
+        """Listen on the first available port, starting at the given port"""
+        port = 1
+        while 1:
+            try:
+                self.listen('', port)
+                break
+            except:
+                if port < 0xFFFF:
+                    port += 1
+                else:
+                    raise
 
     def accept(self):
         """Accept an incoming connection on a socket that has been bind()'ed,

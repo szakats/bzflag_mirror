@@ -40,7 +40,7 @@ class BaseClient(Network.Endpoint):
         self.options.update({
             'server': None,
             })
-        Event.attach(self, 'onConnect', 'onDisconnect')
+        Event.attach(self, 'onConnect', 'onDisconnect', 'onConnectUDP')
 
         def setOptions(**options):
             if 'server' in options.keys():
@@ -109,5 +109,21 @@ class BaseClient(Network.Endpoint):
         self.connected = 1
         socket.handler = self.handleMessage
         self.onConnect()
+
+    def onConnect(self):
+        """We just established a TCP link. This handler tries to set up a UDP link too"""
+        # We don't use multicast, so notify the server that we need it to relay messages
+        self.tcp.write(self.outgoing.MsgNetworkRelay())
+
+        # Start trying to set up a UDP connection
+        self.udp = Network.Socket('udp')
+        self.udp.listenOnFirstAvailable()
+        self.tcp.write(self.outgoing.MsgUDPLinkRequest(port = self.udp.port))
+
+    def onMsgUDPLinkRequest(self, msg):
+        """The server got our UDP link request, and is responding with its UDP port"""
+        self.udp.connect(self.tcp.remoteHost, msg.port)
+        self.tcp.write(self.outgoing.MsgUDPLinkEstablished())
+        self.onConnectUDP()
 
 ### The End ###

@@ -38,6 +38,10 @@ class StatefulClient(BaseClient):
         Event.attach(self, 'onLoadWorld', 'onStartWorldDownload',
                      'onNegotiateFlags')
 
+        # Immediately after connecting, ask for a world hash so
+        # we can check our cache for a copy of that world
+        self.onConnect.observe(self.negotiateFlags)
+
     def onMsgSuperKill(self, msg):
         """The server wants us to die immediately"""
         self.disconnect()
@@ -45,12 +49,6 @@ class StatefulClient(BaseClient):
     def onMsgLagPing(self, msg):
         """The server is measuring our lag, reply with the same message."""
         msg.socket.write(msg)
-
-    def onConnect(self):
-        """Immediately after connecting, ask for a world hash so
-           we can check our cache for a copy of that world
-           """
-        self.negotiateFlags()
 
     def negotiateFlags(self):
         """Send a MsgNegotiateFlags to the server to indicate which

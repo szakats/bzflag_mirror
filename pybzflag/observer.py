@@ -6,6 +6,7 @@ client = CommandLine.client(callSign = "@PyObserver")
 
 # Stick some instrumentation in select events
 client.onConnect.trace("Connected.")
+client.onConnectUDP.trace("UDP link established.")
 client.onStartWorldDownload.trace("Downloading world...")
 client.onEnterGame.trace("Entered the game.")
 client.game.onLoadWorld.trace("World loaded.")

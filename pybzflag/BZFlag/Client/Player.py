@@ -45,14 +45,14 @@ class PlayerClient(StatefulClient):
         # back for ourselves and StatefulClient adds it to the Game.
         self.inGame = 0
         self.player = None
-        Event.attach(self, 'onEnterGame', 'onInitPlayer')
+        Event.attach(self, 'onEnterGame')
 
         # Set up an observer for the game's onAddPlayer that will set
         # up our player member whenever that MsgAddPlayer is received.
         def onAddPlayer(game, player):
             if player.identity.playerId == self.id:
                 self.player = player
-                self.onInitPlayer()
+                self.onEnterGame()
         self.game.onAddPlayer.observe(onAddPlayer)
 
     def onLoadWorld(self):
@@ -83,14 +83,11 @@ class PlayerClient(StatefulClient):
         self.tcp.write(self.outgoing.MsgExit())
 
     def onMsgAccept(self, msg):
-        """This is called after we try to enterGame, if it's successful."""
+        """This is called after we try to enterGame, if it's successful.
+           This probably shouldn't be used for anything important, since it
+           also might be used in other undocumented ways.
+           """
         pass
-
-    def onMsgAddPlayer(self, msg):
-        if msg.id == self.id:
-            # We just got a player add for ourselves, this means we're in the game.
-            self.inGame = 1
-            self.onEnterGame()
 
     def onMsgReject(self, msg):
         """This is called after we try to enterGame, if we failed."""
