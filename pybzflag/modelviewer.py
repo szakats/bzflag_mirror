@@ -20,8 +20,7 @@ parser.add_option("-s", "--stereo", action="store_true",
 try:
     fileName = args[0]
 except IndexError:
-    print "A model filename must be specified on the command line."
-    sys.exit(0)
+    parser.error("A model filename must be specified on the command line.")
 
 if options.anaglyph:
     viewClass = AnaglyphView.AnaglyphView
