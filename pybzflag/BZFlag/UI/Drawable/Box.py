@@ -24,6 +24,8 @@ from DisplayList import *
 from OpenGL.GL import *
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import GLExtension
+from BZFlag.World import Scale
+import random
 
 
 class BoxSides(DisplayList):
@@ -83,21 +85,46 @@ class BoxSides(DisplayList):
 
 
 class BoxTop(DisplayList):
-    textureNames = ('concrete_base.jpeg', 'concrete_overlay.png')
+    def __init__(self, box):
+        self.box = box
+        self.textureNames = ['concrete.jpeg']
+        self.tex2Coords = ( (0,0), (1,0), (1,1), (0,1) )
+
+        # If the box is fairly large and squareish, use a square oil-stain texture
+        if box.size[0] > 10 and box.size[1] > 10 and box.size[0] / box.size[1] < 2 and box.size[1] / box.size[0] < 2:
+            self.textureNames.append(random.choice(('oilstain_1.png',
+                                                    'oilstain_2.png',
+                                                    'oilstain_3.png')))
+
+        # If it's about the same width as a tank, assume it's a bridge and put some tread stains on it
+        if box.size[0] > Scale.TankWidth and box.size[0] < Scale.TankWidth * 4 and box.size[1] > Scale.TankLength * 2:
+            self.textureNames.append('treadstain_1.png')
+            self.tex2Coords = ( (0,0), (0,1), (1,1), (1,0) )
+        if box.size[1] > Scale.TankWidth and box.size[1] < Scale.TankWidth * 4 and box.size[0] > Scale.TankLength * 2:
+            self.textureNames.append('treadstain_1.png')
+            self.tex2Coords = ( (0,0), (1,0), (1,1), (0,1) )
+            
+        DisplayList.__init__(self, box)
     
-    def set(self, polygon, height):
-        self.polygon = polygon
-        self.height = height
-        self.render.textures[1].texEnv = GL_BLEND
+    def set(self, box):
+        self.polygon = self.box.toPolygon()
+        self.height = self.box.center[2] + self.box.size[2]
+
+        try:
+            self.render.textures[1].texEnv = GL_MODULATE
+        except IndexError:
+            pass
 
     def drawToList(self):
         glPushMatrix()
         glTranslatef(0, 0, self.height)
         glNormal3f(0, 0, 1)
         glBegin(GL_POLYGON)
-        for vertex in self.polygon:
-            glTexCoord2f(vertex[0] / 100, vertex[1] / 100)
-            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, vertex[0] / 20, vertex[1] / 20)
+        for i in xrange(4):
+            vertex = self.polygon[i]
+            tex2Coord = self.tex2Coords[i]
+            glTexCoord2f(vertex[0] / 30, vertex[1] / 30)
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, tex2Coord[0], tex2Coord[1])
             glVertex2f(*vertex)
         glEnd()
         glPopMatrix()
