@@ -259,12 +259,14 @@ class Font:
         self.draw(text, fontSize)
 
 
-def draw(text, fontSize=defaultSize, fontName=None):
+def draw(text, fontSize=None, fontName=None):
     """Draw a string with the given font size and name. The
        name may be a data file name or an alias as defined
        at the top of this module.
        """
     global fontAliases, loadedFonts
+    if fontSize is None:
+        fontSize = defaultSize
     try:
         fontName = fontAliases[fontName]
     except:

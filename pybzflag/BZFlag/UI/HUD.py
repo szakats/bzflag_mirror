@@ -65,28 +65,28 @@ class Panel:
 
 class Text:
     """A view that draws a block of text"""
-    def __init__(self, viewport, text=""):
-        self.text = text
+    def __init__(self, viewport, text="", color=(1,1,1), fontSize=None, fontName=None, shadow=None):
         viewport.fov = None
         self.viewport = viewport
+        self.text = text
+        self.color = color
+        self.fontSize = fontSize
+        self.fontName = fontName
+        self.shadow = shadow
         viewport.onDrawFrame.observe(self.render)
 
     def render(self):
-        glEnable(GL_BLEND)
-        glDisable(GL_LIGHTING)
-        glDisable(GL_CULL_FACE)
-        glDisable(GL_COLOR_MATERIAL)
-        glDisable(GL_DEPTH_TEST)
-        glDisable(GL_TEXTURE_2D)
-        glEnable(GL_LINE_SMOOTH)
-
         glLoadIdentity()
-        glTranslatef(10,10,0)
-        glColor3f(0,0,0)
-        GLText.draw("Hello World", fontName='bold')
-        glTranslatef(-2,-2,0)
-        glColor3f(1,1,0)
-        GLText.draw("Hello World", fontName='bold')
+
+        if self.shadow:
+            glPushMatrix()
+            glTranslatef(2,2,0)
+            glColor3f(0,0,0)
+            GLText.draw(self.text, self.fontSize, self.fontName)
+            glPopMatrix()
+            
+        glColor3f(*self.color)
+        GLText.draw(self.text, self.fontSize, self.fontName)
         
 
 ### The End ###

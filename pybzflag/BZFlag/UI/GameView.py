@@ -65,7 +65,7 @@ def attach(game, eventLoop):
     HUD.Panel(viewport.region(fooRect))
 
     # Some text in the remaining area
-    HUD.Text(viewport.region(remaining), BZFlag.name)
+    HUD.Text(viewport.region(remaining), BZFlag.name, color=(1,1,0), shadow=True)
 
     return viewport
 
