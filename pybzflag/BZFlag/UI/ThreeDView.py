@@ -231,12 +231,12 @@ class ThreeDController:
             if modifiers.shift:
 	      if event.buttons[1]:
 		(x, y, z) = view.camera.position
-		xscale = math.cos((view.camera.azimuth) * 3.1415926 / 180)
-		yscale = math.sin((view.camera.azimuth) * 3.1415926 / 180)
+		xscale = math.cos((view.camera.azimuth) * math.pi / 180)
+		yscale = math.sin((view.camera.azimuth) * math.pi / 180)
 		xmove = event.rel[0] * xscale
 		ymove = event.rel[1] * yscale
-		x = math.cos((view.camera.azimuth) * 3.1415926 / 180) / xmove
-		y = math.sin((view.camera.azimuth) * 3.1415926 / 180) / ymove
+		x = math.cos((view.camera.azimuth) * math.pi / 180) / xmove
+		y = math.sin((view.camera.azimuth) * math.pi / 180) / ymove
 		view.camera.position = (x, y, z)
 	      return
 	    if modifiers.alt:
