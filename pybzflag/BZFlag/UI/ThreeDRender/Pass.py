@@ -181,7 +181,7 @@ class BasicRenderPass(RenderPass):
                     t = textures[texIndex]
                     if t:
                         t.bind(rstate)
-                        glEnable(t.target)
+                        glEnable(t.glTarget)
                 texIndex += 1
 
             # Leave the first texture unit active
@@ -191,7 +191,7 @@ class BasicRenderPass(RenderPass):
             for target in GLExtension.textureTargets:
                 glDisable(target)
             if textures:
-                glEnable(textures[0].target)
+                glEnable(textures[0].glTarget)
                 textures[0].bind(rstate)
 
 

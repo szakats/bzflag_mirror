@@ -33,7 +33,7 @@ import copy, math, random
 
 class Texture:
     """Represents an OpenGL texture, optionally loaded from disk in any format supported by PIL"""
-    target = GL_TEXTURE_2D
+    glTarget = GL_TEXTURE_2D
 
     def __init__(self, name=None):
         self.texture = glGenTextures(1)
@@ -100,7 +100,7 @@ class Texture:
         (w,h) = size
         Texture.bind(self)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        gluBuild2DMipmaps(self.target, components, w, h, format, GL_UNSIGNED_BYTE, string)
+        gluBuild2DMipmaps(self.glTarget, components, w, h, format, GL_UNSIGNED_BYTE, string)
         self.loader = ('loadRaw', size, string, format, components)
 
     def loadBackbuffer(self, size, position=(0,0), format=GL_RGB):
@@ -113,7 +113,7 @@ class Texture:
         glReadBuffer(GL_BACK)
         Texture.bind(self)
         viewport = glGetIntegerv(GL_VIEWPORT)
-        glCopyTexImage2D(self.target, 0, format,
+        glCopyTexImage2D(self.glTarget, 0, format,
                          position[0], viewport[3] - position[1] - size[1],
                          size[0], size[1],
                          0)
@@ -128,17 +128,17 @@ class Texture:
         self.setFilter()
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
         if GLExtension.maxAnisotropy > 1:
-            glTexParameterf(self.target, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)
+            glTexParameterf(self.glTarget, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)
 
     def setRepeat(self, u=GL_REPEAT, v=GL_REPEAT):
         Texture.bind(self)
-        glTexParameteri(self.target, GL_TEXTURE_WRAP_S, u)
-        glTexParameteri(self.target, GL_TEXTURE_WRAP_T, v)
+        glTexParameteri(self.glTarget, GL_TEXTURE_WRAP_S, u)
+        glTexParameteri(self.glTarget, GL_TEXTURE_WRAP_T, v)
 
     def setFilter(self, min=GL_LINEAR_MIPMAP_LINEAR, mag=GL_LINEAR):
         Texture.bind(self)
-        glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, min)
-        glTexParameteri(self.target, GL_TEXTURE_MAG_FILTER, mag)
+        glTexParameteri(self.glTarget, GL_TEXTURE_MIN_FILTER, min)
+        glTexParameteri(self.glTarget, GL_TEXTURE_MAG_FILTER, mag)
 
     def __setstate__(self, state):
         """This method is called on unpickling a Texture. It performs the usual dictionary merge,
@@ -157,11 +157,11 @@ class Texture:
         except:
             pass
 
-    def bind(self, rstate=None, target=None):
-        """Bind this texture to self.target in the current OpenGL context"""
-        if not target:
-            target = self.target
-        glBindTexture(target, self.texture)
+    def bind(self, rstate=None, glTarget=None):
+        """Bind this texture to self.glTarget in the current OpenGL context"""
+        if not glTarget:
+            glTarget = self.glTarget
+        glBindTexture(glTarget, self.texture)
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, self.texEnv)
 
 
@@ -190,11 +190,66 @@ class AnimatedTexture:
         self.frameNumber = Animated.Value(Animated.RampFunction(
             1/framerate * len(self.frames), (0, len(self.frames))))
         self.time = Animated.Timekeeper()
-        self.target = GL_TEXTURE_2D
+        self.glTarget = GL_TEXTURE_2D
 
     def bind(self, rstate=None):
         self.frameNumber.integrate(self.time.step())
         self.frames[int(self.frameNumber.value)].bind(rstate)
+
+
+class ProxyTexture(object):
+    """A class that can be used as a texture, but simply references another
+       Texture object that can be switched at runtime. This his helpful because
+       a GLDrawable's textures are expected to stay static at runtime, since the
+       ThreeDRender caches them.
+
+       Textures are lazily loaded if necessary, so they can be set from other threads safely.
+
+       if errorStandin is provided, it may be a Texture or name to load when
+       the targetName doesn't load.
+       """
+    def __init__(self, target, errorStandin=None):
+        if type(target) == str or type(target) == unicode:
+            target = load(target)
+        self.toLoad = None
+        self.errorStandin = errorStandin
+        self.setTarget(target)
+
+    def bind(self, rstate=None):
+        """Bind the texture, lazily loading self.toLoad as necessary.
+           of there's a load error and an errorStandin is provided, it
+           will be used, lazily loading if necessary.
+           """
+        if self.toLoad:
+            try:
+                self.setTarget(load(self.toLoad))
+            except IOError:
+                if self.errorStandin:
+                    if type(self.errorStandin) == str or type(self.errorStandin) == unicode:
+                        self.errorStandin = load(self.errorStandin)
+                    self.setTarget(self.errorStandin)
+                else:
+                    raise
+            self.toLoad = None
+
+        self._target.bind(rstate)
+
+    def getTarget(self):
+        return self._target
+
+    def setTarget(self, target):
+        self._target = target
+        self.glTarget = target.glTarget
+
+    target = property(getTarget, setTarget)
+
+    def getTargetName(self):
+        return self._target.name
+
+    def setTargetName(self, name):
+        self.toLoad = name
+
+    targetName = property(getTargetName, setTargetName)
 
 
 class DynamicTextureException(Exception):

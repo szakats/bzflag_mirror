@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable
-from BZFlag.UI import ParticleSystem, Environment, Tweak
+from BZFlag.UI import ParticleSystem, Environment, Tweak, Texture
 from BZFlag import Event, Geometry, Noise, Animated
 from OpenGL.GL import *
 from Numeric import *
 
 
 class Sparks(Drawable.SpriteArray):
-    textureName = 'spark.png'
     def __init__(self, position=(0,0,0)):
         numParticles = 200
         self.model = ParticleSystem.SpriteFountain(numParticles)
         Drawable.SpriteArray.__init__(self, numParticles, allowPointSprite=False)
         self.model.attachDrawable(self)
+
+        texProxy = Texture.ProxyTexture('spark.png', errorStandin='caution.png')
+        self.render.textures = (texProxy,)
 
         self.time = Animated.Timekeeper()
         self.render.static = False
@@ -30,7 +32,7 @@ class Sparks(Drawable.SpriteArray):
         self.constAccel = self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,-50))
 
         Tweak.Window(
-#            Tweak.Text(self, 'loadedTextureNames'),
+            Tweak.Text(texProxy, 'targetName'),
             Tweak.Separator(),
             Tweak.Quantity(self.emitter, 'spawnRate', range=(0,400)),
             Tweak.Quantity(self.emitter, 'speedRange', range=(0,200)),
