@@ -55,6 +55,11 @@ def drawFrame():
     glTranslatef(viewport.size[0]/2, viewport.size[1] * 0.85, 0)
     GLText.drawCentered("(small print)", 10)
 
+    glLoadIdentity()
+    glTranslatef(viewport.size[0]/2, viewport.size[1] * 0.95, 0)
+    glColor3f(0,0,1)
+    GLText.drawCentered("bold", fontName="VeraBd.ttf")
+
 Util.showFrameRate(viewport)
 viewport.onDrawFrame.observe(drawFrame)
 loop.run()

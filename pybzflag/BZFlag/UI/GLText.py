@@ -225,8 +225,9 @@ class Font:
         glDisable(GL_LIGHTING)
         glDisable(GL_COLOR_MATERIAL)
         glDisable(GL_DEPTH_TEST)
-        glEnable(GL_BLEND)       
-
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA)
+        
         rendered = self.findRendered(size)
         magnification = size / rendered.size
 
@@ -244,7 +245,9 @@ class Font:
 
             else:
                 rendered.draw(char, size)
+
         glPopMatrix()
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def size(self, text, fontSize=defaultSize):
         """Measure the rendered size of the given text"""
