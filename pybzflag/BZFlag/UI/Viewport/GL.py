@@ -172,11 +172,11 @@ class ViewportMode:
        initialization and completion of an entire viewport.
        """
     clearBuffers = GL_DEPTH_BUFFER_BIT
-    
+
     def __init__(self):
         if self.__class__ == ViewportMode:
             raise Exception("ViewportMode is an abstract base class and cannot be instantiated")
-    
+
     def setupFrame(self):
         """Called during the viewport's onSetupFrame event"""
         if self.clearBuffers:
@@ -198,7 +198,7 @@ class UnclearedMode(ViewportMode):
 class ClearedMode(ViewportMode):
     """A viewport mode in which the color buffer is cleared each frame"""
     clearBuffers = ViewportMode.clearBuffers | GL_COLOR_BUFFER_BIT
-    
+
     def __init__(self, clearColor=(0,0,0,1)):
         self.clearColor = clearColor
 
@@ -229,7 +229,7 @@ class XRayMode(ClearedMode):
        from it's ability to see through objects, visually representing their density.
        """
     clearBuffers = ClearedMode.clearBuffers | GL_STENCIL_BUFFER_BIT
-    
+
     def __init__(self, clearColor=(0,0,0,1), xRayColor=(1, 0, 0, 0.8), depthRange=10):
         ClearedMode.__init__(self, clearColor)
         self.xRayColor = xRayColor
@@ -244,7 +244,7 @@ class XRayMode(ClearedMode):
         self.texSize = 16
         self.texRepeats = (glGetIntegerv(GL_VIEWPORT)[2] / self.texSize,
                            glGetIntegerv(GL_VIEWPORT)[3] / self.texSize)
-                           
+
         from BZFlag.UI import GLText
         self.depthTextures = {}
         font = GLText.Font(self.fontName, [self.fontSize]).findRendered(self.fontSize).font
@@ -289,7 +289,7 @@ class XRayMode(ClearedMode):
                 glStencilFunc(GL_EQUAL, value, 0xFF)
 
             # Color with alpha corresponding to depth
-            unitDepth = float(value) / self.depthRange[-1]            
+            unitDepth = float(value) / self.depthRange[-1]
             glColor4f(self.xRayColor[0],
                       self.xRayColor[1],
                       self.xRayColor[2],
@@ -297,7 +297,7 @@ class XRayMode(ClearedMode):
             glRectf(-1, -1, 1, 1)
 
             # Texture to numerically indicate depth
-            self.depthTextures[value].bind()            
+            self.depthTextures[value].bind()
             glEnable(GL_TEXTURE_2D)
             glColor4f(1,1,1,0.35)
             glBegin(GL_QUADS)
