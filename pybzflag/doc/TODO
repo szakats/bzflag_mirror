@@ -10,6 +10,7 @@ Todo list, in no particular order:
   - A system for generating dynamic impostors. All the existing dynamic texture infrastructure
     should make this relatively simple. These will be useful for clouds, smoke, and volumetric
     fog to dramatically reduce overdraw.
+       http://graphics.lcs.mit.edu/~gs/papers/05_imposter_95.pdf
 
   - Clouds:
       * Vary the cloud velocity according to the current global wind speed.
@@ -43,8 +44,6 @@ Todo list, in no particular order:
     be a Config.Loader module to manage it all, Config.Default to hold default settings,
     and a ~/.pybzflag for user customizations. The config files would be python code,
     executed in the Config module's namespace.
-
-  - Unify the world cache and VRML cache
 
   - Write more documentation :)
 
