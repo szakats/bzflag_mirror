@@ -54,7 +54,6 @@ class Parser(optik.OptionParser):
             self.instances.append(inst)
             availableOpts.extend(inst.options.keys())
 
-
         defaults = {
             'team':       'rogue',
             'email':      'PyBZFlag',
@@ -74,6 +73,14 @@ class Parser(optik.OptionParser):
         if 'server' in availableOpts:
             add("-s", "--server", dest="server", metavar="HOST",
                 help="Sets the BZFlag server to connect to.")
+
+        if 'publicTitle' in availableOpts:
+            add("-p", "--public", dest="publicTitle", metavar="TITLE",
+                help="Publicize the server under the given title.")
+
+        if 'gameStyle' in availableOpts:
+            add("-g", "--game", dest="gameStyle", metavar="STYLE", action="append",
+                help="Enable the given game style.")
 
         if 'world' in availableOpts:
             add("-w", "--world", dest="world", metavar="FILE",
@@ -103,7 +110,7 @@ class Parser(optik.OptionParser):
         except KeyError:
             pass
 
-        for key in ('interface', 'server', 'world'):
+        for key in ('interface', 'server', 'world', 'publicTitle', 'gameStyle'):
             try:
                 value = values[key]
                 if value is not None:

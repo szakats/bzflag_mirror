@@ -43,9 +43,9 @@ class StatefulServer(BaseServer):
         self.options.update({
             'world':              None,
             'welcomeMessage':     BZFlag.serverWelcomeMessage,
-            'public':             0,
-            'title':              'PyBZFlag Server',
+            'publicTitle':        None,
             'publicityInterval':  30 * 60,
+            'gameStyle':          [],
             })
 
         Event.attach(self, 'onAttemptEnter', 'onEnter', 'onFinishEnter',
@@ -57,10 +57,14 @@ class StatefulServer(BaseServer):
                 f = open(options['world'])
                 self.game.world.loadText(f)
                 f.close()
+
+            if 'gameStyle' in options.keys():
+                self.game.world.style.gameStyle = options['gameStyle']
+                
         self.onSetOptions.observe(setOptions)
 
         def onListen():
-            if self.options['public']:
+            if self.options['publicTitle']:
                 self.publicize()
         self.onListen.observe(onListen)
 
@@ -96,7 +100,8 @@ class StatefulServer(BaseServer):
 
         info.version  = self.protocolVersion
         info.gameinfo = self.game.getGameInfo()
-        info.title    = self.options['title']
+        info.title    = self.options['publicTitle']
+        print info.info()
         return info
 
     def onMsgNegotiateFlags(self, msg):
