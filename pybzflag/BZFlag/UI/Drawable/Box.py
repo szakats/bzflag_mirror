@@ -188,7 +188,6 @@ class BoxDecal(DisplayList):
         self.render.decal = True
 
     def drawToList(self):
-        return
         glPushMatrix()
         glTranslatef(0, 0, self.height)
         glNormal3f(0, 0, -1)
