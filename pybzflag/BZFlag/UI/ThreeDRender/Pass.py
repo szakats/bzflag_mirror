@@ -250,6 +250,11 @@ class BackgroundRenderPass(BasicRenderPass):
         return drawable.render.background
 
     def render(self, rstate):
+        # Since the background's depth values will not be consistent with
+        # the rest of the scene, it will disrupt picking.
+        if rstate.picking:
+            return
+        
         glPushMatrix()
         # Strip out all but the top 3x3 square of the modelview matrix.
         # This preserves the camera's location, but keeps it centered at 0,0,0
