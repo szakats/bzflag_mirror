@@ -3,7 +3,7 @@
 # Test the perlin noise generator
 #
 from BZFlag.UI import Viewport
-from BZFlag import Event, Util, Noise
+from BZFlag import Event, Noise
 from Numeric import *
 import pygame
 
@@ -37,5 +37,4 @@ def drawFrame():
     pygame.surfarray.blit_array(viewport.screen, img)
 
 viewport.onDrawFrame.observe(drawFrame)
-Util.showFrameRate(viewport)
 loop.run()

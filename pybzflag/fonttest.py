@@ -2,9 +2,9 @@
 #
 # Test rig for our GLText module
 #
-from BZFlag.UI import Viewport, GLText
+from BZFlag.UI import Viewport, GLText, Instrument
 from BZFlag.Event import EventLoop
-from BZFlag import Animated, Util
+from BZFlag import Animated
 from OpenGL.GL import *
 
 # Create a new orthogonal mode viewport
@@ -33,9 +33,9 @@ def drawFrame():
     glLoadIdentity()
     glTranslatef(5,5,0)
     glColor3f(1,1,1)
-    GLText.draw("Boing! This is the default size\n\n")
+    GLText.draw("\n\nBoing! This is the default size\n\n")
     glColor3f(1,1,0.5)
-    GLText.draw("50 pixels high", 50)
+    GLText.draw("A little larger", 50)
 
     glLoadIdentity()
     glTranslatef(viewport.size[0]/2, viewport.size[1]/2, 0)
@@ -60,8 +60,8 @@ def drawFrame():
     glColor3f(0,0,1)
     GLText.drawCentered("bold", fontName="VeraBd.ttf")
 
-Util.showFrameRate(viewport)
 viewport.onDrawFrame.observe(drawFrame)
+Instrument.FrameRate(viewport)
 loop.run()
 
 

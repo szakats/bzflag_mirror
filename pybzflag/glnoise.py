@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from BZFlag.Event import EventLoop
 from BZFlag.UI import Viewport, GLNoise, Texture, ThreeDRender, ThreeDControl, Drawable
-from BZFlag import Util, Animated
+from BZFlag import Animated
 
 loop = EventLoop()
 viewport = Viewport.OpenGLViewport(loop, (800,600), 1000)
@@ -26,5 +26,4 @@ class TestObject:
         return self.drawables
 
 view.scene.add(TestObject())
-Util.showFrameRate(viewport)
 loop.run()

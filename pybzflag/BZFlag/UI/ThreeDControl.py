@@ -23,7 +23,7 @@ Controller classes for manipulating 3D views
 
 import math, sys, pygame
 from BZFlag import Animated, Event
-from BZFlag.UI import ThreeDRender, Viewport
+from BZFlag.UI import ThreeDRender, Viewport, Instrument
 
 
 class Modifiers:
@@ -161,6 +161,9 @@ class Viewing:
         self.viewport = viewport
         self.movieRecorder = None
         self.savedMode = None
+
+        # Need to make this toggleable...
+        Instrument.FrameRate(viewport)
 
         self.view.camera = ThreeDRender.SmoothedCamera()
         view.camera.position = (0, 0, 20)

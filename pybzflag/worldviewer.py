@@ -3,7 +3,7 @@
 # Simple viewer for BZFlag world files. Give any valid world name on the
 # command line. A world name of 'help' prints information about the name format.
 #
-from BZFlag import World, Game, UI, CommandLine, Util
+from BZFlag import World, Game, UI, CommandLine
 from BZFlag.Event import EventLoop
 import sys
 
@@ -21,7 +21,6 @@ loop = EventLoop()
 game.world.clone(World.load(ui.cmdLineArgs[0]))
 
 viewport = ui.attach(game, loop)
-Util.showFrameRate(viewport)
 loop.run()
 
 

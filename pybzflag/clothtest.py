@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, SpringSystem, Texture
-from BZFlag import Event, Util, Animated
+from BZFlag import Event, Animated
 from Numeric import *
 from time import time
 from OpenGL.GL import *
@@ -124,5 +124,4 @@ if __name__ == '__main__':
         flag.integrate(dt)
     viewport.onSetupFrame.observe(update)
 
-    Util.showFrameRate(viewport)
     loop.run()
