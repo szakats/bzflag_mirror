@@ -32,7 +32,10 @@ else:
 
 # Set up a quick 3D renderer view with a controller attached so we can spin the model around
 loop = Event.EventLoop()
-viewport = Viewport.OpenGLViewport(loop, (800,600))
+if options.stereo:
+    viewport = Viewport.StereoGLViewport(loop, (800, 600))
+else:
+    viewport = Viewport.OpenGLViewport(loop, (800,600))
 viewport.setCaption("Model Viewer - %s" % fileName)
 view = viewClass(viewport)
 control = ThreeDControl.Viewing(view, viewport)
