@@ -34,6 +34,9 @@ class FlagMotion:
         self.flightEndTime = 0
         self.initialVelocity = 0
 
+    def integrate(self, dt):
+        pass
+
 
 class FlagBase:
     """Abstract base type for a flag. Subclasses should provide
