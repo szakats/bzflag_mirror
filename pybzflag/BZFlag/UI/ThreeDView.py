@@ -128,7 +128,7 @@ class ThreeDView:
 
     glEnable(GL_LIGHTING)
 
-    viewport.setCaption("%s Overhead View" % BZFlag.name)
+    viewport.setCaption("%s 3D View" % BZFlag.name)
     def onDrawFrame():
       game.update()
       self.render()
