@@ -46,7 +46,7 @@ class Event:
 
     def __call__(self, *args, **kw):
         if self.clients:
-            for client in self.clients:
+            for client in self.clients.keys():
                 r = client(*args, **kw)
                 # Allow the client to abort
                 if r:

@@ -118,13 +118,11 @@ class OverheadView:
         pass
 
 
-def simpleClient(client, size=(512,512), viewClass=OverheadView):
-    """Set up the supplied client to display a window
-       consisting only of an OverheadView.
-       """
-    import time
+def attach(game, eventLoop, size=(512,512), viewClass=OverheadView):
+    """Set up a window with only an overhead view, on the given game and event loop"""
 
     # Update the view regularly
+    import time
     global lastUpdate
     lastUpdate = None
     def updateView():
@@ -137,15 +135,15 @@ def simpleClient(client, size=(512,512), viewClass=OverheadView):
                 dt = now - lastUpdate
                 if dt < 0.02:
                     return
-                client.game.integrate(dt)
+                game.integrate(dt)
             lastUpdate = now
 
             view.render(screen)
             pygame.display.flip()
 
     # FIXME: We need a real timer system
-    client.eventLoop.pollTime = 0.02
-    client.eventLoop.onPoll.observe(updateView)
+    eventLoop.pollTime = 0.02
+    eventLoop.onPoll.observe(updateView)
 
     # Start up pygame when we first get world data
     global view, screen
@@ -156,8 +154,8 @@ def simpleClient(client, size=(512,512), viewClass=OverheadView):
             pygame.init()
             screen = pygame.display.set_mode(size)
             pygame.display.set_caption("BZFlag Overhead View")
-            view = OverheadView(client.game)
+            view = OverheadView(game)
             updateView()
-    client.onLoadWorld.observe(initPygame)
+    game.onLoadWorld.observe(initPygame)
 
 ### The End ###

@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 #
-# Simple viewer for BZFlag world files
+# Simple viewer for BZFlag world files. Give a .bzw file on the command line.
 #
-from BZFlag.World import World
 from BZFlag.Game import Game
-from BZFlag.UI.OverheadView import OverheadView
+from BZFlag.UI import OverheadView
+from BZFlag.Network import EventLoop
+import sys
 
 game = Game()
-game.world.loadText(open("/home/micah/bzflag/worlds/RunRabbitRun.bzw"))
-
+loop = EventLoop()
+OverheadView.attach(game, loop)
+game.loadWorld(sys.argv[1])
+loop.run()
 
 

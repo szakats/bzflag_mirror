@@ -70,4 +70,11 @@ class Game:
             self.onAddFlag(self, flag)
         return flag
 
+    def loadWorld(self, filename):
+        """Load a world from the given text file"""
+        f = open(filename)
+        self.world.loadText(f)
+        f.close()
+        self.onLoadWorld()
+
 ### The End ###

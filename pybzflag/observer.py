@@ -20,6 +20,6 @@ def message(msg):
 client.onMsgMessage.observe(message)
 
 # Show an overhead view of the world
-OverheadView.simpleClient(client)
+OverheadView.attach(client.game, client.eventLoop)
 
 client.run()
