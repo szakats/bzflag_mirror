@@ -118,7 +118,7 @@ const char*	CBaseObject::GetTypeName ( void )
 
 bool CBaseObject::StdDataField ( char *line )
 {
-	char	name[256],temp[256],*pNameEnd;
+	char    name[256],temp[256],*pNameEnd;
 
 	sscanf(line,"%s",name);
 	pNameEnd = line+strlen(name);
@@ -137,9 +137,9 @@ bool CBaseObject::StdDataField ( char *line )
 	}
 	else if (stricmp(name,"name") ==0)
 	{
-	//	sscanf(pNameEnd," %s",&temp);
+		//  sscanf(pNameEnd," %s",&temp);
 
-		char	szTempString[512];
+		char    szTempString[512];
 		strcpy(szTempString,pNameEnd);
 
 		char *pStringStart = szTempString;
@@ -174,12 +174,13 @@ bool CBaseObject::StdDataField ( char *line )
 		sscanf(pNameEnd," %d %s",&m_iGroupID,&temp);
 		m_sGroupName = temp;
 	}
-        else if (stricmp(name,"passable") ==0)
-            m_bDriveThru = m_bShootThru = true;
-        else if (stricmp(name,"drivethrough") ==0)
-            m_bDriveThru = true;
-        else if (stricmp(name,"shootthrough") ==0)
-            m_bShootThru = true;
+	else if (stricmp(name,"passable") ==0)
+		m_bDriveThru = m_bShootThru = true;
+	else if (stricmp(name,"drivethrough") ==0)
+		m_bDriveThru = true;
+	else if (stricmp(name,"shootthrough") ==0)
+		m_bShootThru = true;
+
 	else
 		return false;
 
@@ -290,6 +291,7 @@ void CBaseObject::UpdateEditInfo ( void )
 
         ((CStdObjectInfoPanel*)m_pInterface)->m_bShootThru = m_bShootThru;
         ((CStdObjectInfoPanel*)m_pInterface)->m_bDriveThru = m_bDriveThru;
+		((CStdObjectInfoPanel*)m_pInterface)->m_bFlipZ = m_bFlipZ;
 
 	((CStdObjectInfoPanel*)m_pInterface)->UpdateData(false);
 	((CStdObjectInfoPanel*)m_pInterface)->UpdateWindow();
@@ -312,6 +314,7 @@ void CBaseObject::ApplyEdit ( void )
 	m_fAngle = ((CStdObjectInfoPanel*)m_pInterface)->m_fZRot;
 	m_bShootThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bShootThru;
 	m_bDriveThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bDriveThru;
+	m_bFlipZ = ((CStdObjectInfoPanel*)m_pInterface)->m_bFlipZ;
 
 	Init();
 }

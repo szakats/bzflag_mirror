@@ -405,7 +405,10 @@ void Pyramid::Write(std::ostream &stream)
 		stream << "	drivethrough" << std::endl;
 	if (m_bShootThru)
 		stream << "	shootthrough" << std::endl;
-        }
+	if (m_bFlipZ)
+		stream << "	flipz" << std::endl;
+		}
+
 
 		stream << "end" << std::endl;
 		stream << std::endl;
@@ -427,6 +430,8 @@ void Pyramid::Write( char *data )
 		  sprintf(szTemp,"\tdrivethrough\n");
 	  if (m_bShootThru)
 		  sprintf(szTemp,"\tshootthrough\n");
+	  if (m_bFlipZ)
+		  sprintf(szTemp,"\tflipz\n");
         }
 	strcat(data,szTemp);
 	strcat(data,"end\n\n");
@@ -441,17 +446,19 @@ bool Pyramid::Read( char *data )
 	bool	bDone = false;
 	while (!bDone)
 	{
-	  bDone = !GetLine( &pPtr, line );
+		bDone = !GetLine( &pPtr, line );
 
-	  if (!StdDataField(line))
-	  {
-	    sscanf(line,"%s",name);
+		if (!StdDataField(line))
+		{
+			sscanf(line,"%s",name);
 
-	    if (stricmp(name,"end") ==0)
-		    bDone = true;
-            else if (stricmp(name,"end") ==0)
-              m_rScale.z *= -1;
-	  }
+			if (stricmp(name,"end") ==0)
+				bDone = true;
+			else if (stricmp(name,"end") ==0)
+				m_rScale.z *= -1;
+			else if (stricmp(name,"flipz") ==0)
+				m_bFlipZ = true;
+		}
 	}
 	return true;
 }
