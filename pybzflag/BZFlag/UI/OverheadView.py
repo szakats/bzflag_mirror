@@ -63,22 +63,28 @@ class OverheadView:
            So far this will only return quadrilaterals.
            """
         # Create four vertices from the object's extents
-        poly = ((object.center[0] - object.size[0],
-                 object.center[1] - object.size[1]),
-                (object.center[0] + object.size[0],
-                 object.center[1] - object.size[1]),
-                (object.center[0] + object.size[0],
-                 object.center[1] + object.size[1]),
-                (object.center[0] - object.size[0],
-                 object.center[1] + object.size[1]))
+        poly = ((-object.size[0],
+                 -object.size[1]),
+                ( object.size[0],
+                 -object.size[1]),
+                ( object.size[0],
+                  object.size[1]),
+                (-object.size[0],
+                  object.size[1]))
 
         # Rotate the polygon by the object's angle
-        cos = math.cos(object.angle)
-        sin = math.sin(object.angle)
+        cos = math.cos(-object.angle)
+        sin = math.sin(-object.angle)
         def rotate(point):
             return ( cos*point[0] + sin*point[1],
                     -sin*point[0] + cos*point[1])
-        return map(rotate, poly)
+        poly = map(rotate, poly)
+
+        # Translate it to the object's center location
+        def translate(point):
+            return (point[0] + object.center[0],
+                    point[1] + object.center[1])
+        return map(translate, poly)
 
     def renderWorld(self, surface):
         """Render the game world to the given surface."""
