@@ -67,7 +67,7 @@ def attach(game, eventLoop):
 
     # Logo-thingy!
     HUD.Text(viewport.region(remaining), BZFlag.name,
-             shadow=True, color=(1,1,0), fontSize=35)
+             shadow=True, color=(1,1,0,1), fontSize=35)
     return viewport
 
 ### The End ###
