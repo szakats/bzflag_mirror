@@ -3,7 +3,13 @@ Todo list, in no particular order:
   - Add some sort of color-selection mechanism (for showing selected objects, widget
     highlighting, etc)
 
-  - Port the jetstream particle engine (why not?)
+  - Put together a way to tweak particle system parameters in realtime to construct the best
+    possible systems. This could use an external GUI like gtk, or maybe we complete the 3D
+    widget idea.
+
+  - A system for generating dynamic impostors. All the existing dynamic texture infrastructure
+    should make this relatively simple. These will be useful for clouds, smoke, and volumetric
+    fog to dramatically reduce overdraw.
 
   - Clouds:
       * Vary the cloud velocity according to the current global wind speed.
