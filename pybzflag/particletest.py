@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable
-from BZFlag import Event, Animated, Geometry
+from BZFlag import Event, Geometry
 from OpenGL.GL import *
 import random
 import RandomArray
@@ -33,12 +33,9 @@ class GlowSphere(Drawable.ParticleArray):
 class WigglyGlowSphere(GlowSphere):
     def __init__(self):
         GlowSphere.__init__(self, numParticles=1000)
-        self.time  = Animated.Timekeeper()
-        self.wigglyness = 50
 
     def draw(self, rstate):
-        dt = self.time.step()
-        self.points += (RandomArray.random(self.points.shape)-0.5) * self.wigglyness * dt
+        self.points += (RandomArray.random(self.points.shape)-0.5) * 0.2
         GlowSphere.draw(self, rstate)
 
 
