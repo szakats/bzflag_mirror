@@ -4,6 +4,7 @@
 # messages in a human readable form.
 #
 from BZFlag import CommandLine, Server, Client, Event
+from StringIO import StringIO
 
 # Create a server and a client, sharing command line options and event loop
 eventLoop = Event.EventLoop()
@@ -11,28 +12,79 @@ eventLoop = Event.EventLoop()
                                       eventLoop = eventLoop
                                       ).parse()
 
+
 # Trace server connections and disconnections
-print "Server is listening on %s:%d" % (server.tcp.interface, server.tcp.port)
-server.onConnect.trace(lambda socket: "Connected client %d, from %s:%s" %
+print "--- Server is listening on %s:%d" % (server.tcp.interface, server.tcp.port)
+server.onConnect.trace(lambda socket: "*** Connected client %d, from %s:%s" %
                        (socket.id, socket.address[0], socket.address[1]))
-server.onDisconnect.trace(lambda socket: "Disconnected client %d, from %s:%s" %
+server.onDisconnect.trace(lambda socket: "*** Disconnected client %d, from %s:%s" %
                           (socket.id, socket.address[0], socket.address[1]))
+
 
 # Let the user know when our client connects, and force
 # our server to hand out the same client ID we were given.
 def onClientConnect():
-    print "Connected to server %s" % client.options['server']
-    print "Client ID is %d" % client.id
+    print "*** Connected to server %s" % client.options['server']
+    print "--- Client ID is %d" % client.id
     server.nextClientID = client.id   
 client.onConnect.observe(onClientConnect)
+
+
+# A hex dump utility used to format 'data' fields
+def hexDump(value, bytesPerLine=16, wordSize=2):
+    src = StringIO(value)
+    dest = StringIO()
+    addr = 0
+    while 1:
+        srcLine = src.read(bytesPerLine)
+        if not srcLine:
+            break
+        
+        # Address
+        dest.write("%04X: " % addr)
+        addr += len(srcLine)
+
+        # Hex values
+        for byte in srcLine:
+            dest.write("%02X " % ord(byte))
+        for i in xrange(bytesPerLine - len(srcLine)):
+            dest.write("   ")
+        dest.write(" ")
+        
+        # ASCII representation
+        for byte in srcLine:
+            if ord(byte) >= 32 and ord(byte) < 128:
+                dest.write(byte)
+            else:
+                dest.write(".")
+        for i in xrange(bytesPerLine - len(srcLine)):
+            dest.write(" ")
+        dest.write("\n")
+    return dest.getvalue()
+
 
 # Dump a message contents to stdout. It should already be
 # mostly human readable, thanks to the Protocol module.
 def dumpMessage(msg, direction):
-    print "\n%s %s" % (direction, msg.__class__.__name__)
+    print "%s %s" % (direction, msg.__class__.__name__)
     for key in msg.__dict__:
         if key[0] != '_' and not key in ('eventLoop', 'socket', 'header'):
-            print "%15s: %r" % (key, msg.__dict__[key])
+            value = msg.__dict__[key]
+            if key == 'data':
+                # Special decoding for 'data' members- do a hex dump
+                value = hexDump(value)
+            else:
+                # Let python decode everything else
+                value = repr(value)
+
+            # Handle printing multiline values properly
+            keyColumnWidth = 15
+            lines = value.split("\n")
+            print ("%%%ss: %%s" % keyColumnWidth) % (key, lines[0])
+            for line in lines[1:]:
+                if line:
+                    print " " * (keyColumnWidth + 2) + line
+
 
 # Set up events to forward messages between
 # client and server, dumping them to stdout
