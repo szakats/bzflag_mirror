@@ -262,7 +262,7 @@ class Scene:
     def add(self, object, drawables):
         """Add the given object and drawables to the scene."""
         for drawable in drawables:
-            drawable.parent = object
+            drawable.parent(object)
         self.objects.setdefault(object, []).extend(drawables)
 
     def preprocess(self):
