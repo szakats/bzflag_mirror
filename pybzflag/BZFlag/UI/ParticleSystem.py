@@ -242,8 +242,9 @@ class Emitter(Affector):
         self.spawnBudget += self.spawnRate * dt
         deadIndices = nonzero(less_equal(self.model.life, 0))
         spawnIndices = deadIndices[:int(self.spawnBudget)]
-        self.spawnBudget -= len(spawnIndices)
-        self.respawn(spawnIndices)
+        if spawnIndices:
+            self.spawnBudget -= len(spawnIndices)
+            self.respawn(spawnIndices)
 
     def respawn(self, indices):
         """Respawn particles at each model array index in the given list. By default this initializes
@@ -289,16 +290,19 @@ class RandomEmitter(Emitter):
 
     def setDirection(self, direction, directionRandomness=0):
         """Set a new direction, premultiplying it with directionRandomness"""
-        self.directionRandomness = directionRandomness
-        self.premultDirection = normalize(direction) * (1-directionRandomness)
+        self.directionRandomness = array(directionRandomness, Float32)
+        self.premultDirection = (normalize(direction) * (1-directionRandomness)).astype(Float32)
 
     def newVelocity(self, n):
         """Generate a new random velocity by blending the given direction with a random unit vector,
            normalizing it, then multiplying by a randomly generated speed.
            """
-        return (normalize(self.premultDirection +
-                         Noise.randomVectors((3,)) * self.directionRandomness) *
-                random.uniform(*self.speedRange))
+        randomDirections = Noise.randomVectors((n, 3), type=Float32)
+        randomDirections *= self.directionRandomness
+        randomDirections += self.premultDirection
+        normalize(randomDirections, randomDirections)
+        randomDirections *= repeat(Noise.randomArray((n, 1), type=Float32, range=self.speedRange), 3, -1)
+        return randomDirections
 
 
 class LinearFadeAffector(Affector):

@@ -30,7 +30,8 @@ The 3D modules require PyOpenGL (http://pyopengl.sourceforge.net).
 -- Optional Dependencies
 
 The Psyco specializing compiler and the RandomArray companion module to Numeric
-are not requried, but both can be utilized to provide a speed boost.
+are not requried, but both can be utilized to provide decreased load time and
+a higher frame rate in some circumstances.
 
 -- Contacts
 
