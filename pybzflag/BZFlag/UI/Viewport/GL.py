@@ -101,6 +101,8 @@ class OpenGLViewport(PygameViewport):
         pass
 
     def region(self, rect, renderLink='after'):
+        # Note that we use Viewport.region(), since PygameViewport.region()
+        # bothers with creating a subsurface, which we don't need.
         sub = Viewport.region(self, rect, renderLink)
 
         # Disable the root viewport's frame setup and finishing code,
