@@ -30,7 +30,7 @@ class OverheadView:
        client, so it should be usable on either client or server side.
        """
     colorScheme = {
-        'background': '#6c8b6c',
+        'background': '#587058',
         'Box':        '#bcbba7',
         'Pyramid':    '#1b8de3',
         'Teleporter': '#FFFF80',
@@ -50,7 +50,7 @@ class OverheadView:
         # translates everything into a proper pygame Color.
         convertedColors = {}
         for key in self.colorScheme:
-            convertedColors[key] = pygame.color.Color(self.colorScheme[key])
+            convertedColors[key] = Color(self.colorScheme[key])
         self.colorScheme = convertedColors
 
     def worldToView(self, point):
@@ -113,11 +113,20 @@ class OverheadView:
         self.renderShots(surface)
 
     def renderPlayers(self, surface):
+        bg = Color('black')
         color = self.colorScheme['player']
         for player in self.game.players.values():
             if 'alive' in player.status:
                 pos = self.worldToView(player.motion.position)
-                pygame.draw.circle(surface, color, pos, 2, 1)
+                height = player.motion.position[2]
+                if height < 0:
+                    height = 0
+                size = height/4 + 6
+                heading = (pos[0] + math.cos(-player.motion.azimuth)*size,
+                           pos[1] + math.sin(-player.motion.azimuth)*size)
+                pygame.draw.circle(surface, bg, pos, size-1)
+                pygame.draw.circle(surface, color, pos, size, 1)
+                pygame.draw.line(surface, color, pos, heading)
         pass
 
     def renderFlags(self, surface):
@@ -127,7 +136,7 @@ class OverheadView:
         pass
 
 
-def simpleClient(client, size=(600,600), viewClass=OverheadView):
+def simpleClient(client, size=(512,512), viewClass=OverheadView):
     """Set up the supplied client to display a window
        consisting only of an OverheadView.
        """
@@ -149,7 +158,7 @@ def simpleClient(client, size=(600,600), viewClass=OverheadView):
             pygame.display.flip()
 
     # FIXME: We need a real timer system
-    client.eventLoop.pollTime = 0.01
+    client.eventLoop.pollTime = 0.03
     client.eventLoop.onPoll.observe(updateView)
 
     # Start up pygame when we first get world data
