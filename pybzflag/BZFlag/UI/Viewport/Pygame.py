@@ -31,7 +31,7 @@ class PygameViewport(Viewport):
     """A basic viewport for 2D pygame rendering. This handles all pygame
        events, and is subclassed below for 3D rendering via pygame.
        """
-    def __init__(self, eventLoop, size=(640,480), targetFrameRate=60, resizable=True):
+    def __init__(self, eventLoop, size=(640,480), targetFrameRate=100, resizable=True):
         Viewport.__init__(self, eventLoop)
 
         # Add event handlers for all the pygame events we can find
