@@ -1,5 +1,12 @@
 Todo list, in no particular order:
 
+  - Clean up the Pyramid code- move cube map reflections into a new rendering pass so 
+    the modelview matrix only has to be inverted once, clean up binding of CubeMap
+    instance with a View to render.
+
+  - Convert observers and render sequence callbacks to use weak references so it's possible
+    to properly delete objects that register callbacks.
+
   - Enhance the ThreeDController binding system: move functionality to detect pressed
     buttons and modifiers to separate Criteria classes that can be listed when setting
     a binding. Add a Criteria for the mouse being over a named object. Move binding
