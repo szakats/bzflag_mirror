@@ -1,5 +1,12 @@
 Todo list, in no particular order:
 
+  - Enhance the ThreeDController binding system: move functionality to detect pressed
+    buttons and modifiers to separate Criteria classes that can be listed when setting
+    a binding. Add a Criteria for the mouse being over a named object. Move binding
+    setup to a data/config.py or something similar.
+
+  - Write more documentation :)
+
   - Add Animated functions for sawtooth, sine, square, and triangle waves. Use
     the sawtooth wave to replace the hardcoded goop in AnimatedTexture.
     Functions should take parameters specifying the range and the period of their output.

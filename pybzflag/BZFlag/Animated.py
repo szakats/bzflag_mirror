@@ -23,6 +23,7 @@ physical models or other formulas.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+from __future__ import division
 import time, math
 
 
@@ -230,5 +231,36 @@ class SigmoidApproach(LinearApproach):
 
     def f(self, value, target, dt):
         return self.unmap(LinearApproach.f(self, self.map(value), self.map(target), dt))
+
+
+class PeriodicFunction:
+    """Abstract base class for animation evaluators that evaluate a periodic
+       function over time, scaled to the given range.
+       """
+    def __init__(self, period=1, range=(0,1)):
+        self.period = period
+        self.range  = range
+        self.cycleTime = 0
+
+    def __call__(self, value, dt, index=None):
+        self.cycleTime = (self.cycleTime + dt) % self.period
+        return self.f(self.cycleTime / self.period) * \
+               (self.range[1] - self.range[0]) + self.range[0]
+    
+    def f(self, x):
+        """Implementation of the periodic function. Should have a domain
+           of [0,1] and a range of [0,1], which will be scaled to the values
+           our instantiator wants.
+           """
+        pass
+
+
+class SineFunction(PeriodicFunction):
+    def f(self, x):
+        return sin(x / (math.pi * 2)) * 0.5 + 0.5
+
+class RampFunction(PeriodicFunction):
+    def f(self, x):
+        return x
 
 ### The End ###

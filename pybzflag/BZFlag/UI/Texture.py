@@ -21,6 +21,7 @@ Texture loading utilities
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+from __future__ import division
 import Image, pygame
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -89,6 +90,7 @@ class Texture:
             glBindTexture(GL_TEXTURE_2D, self.texture)
             currentTexture = self
 
+
 class AnimatedTexture:
     """Load a sequence of still images for an animated texture.
        Animated textures have a printf-style format specifier to
@@ -97,14 +99,11 @@ class AnimatedTexture:
        """
     def __init__(self, name):
         (filename, framerate) = name.split(":")
-        self.frameDuration = 1 / float(framerate)
-        self.frames = []
-        self.frameScreenTime = 0
-        self.frameNumber = 0
-        self.time = Animated.Timekeeper()
-
+        framerate = float(framerate)
+        
         # Try to load texture frames. An error on the
         # first frame is fatal, but an error after that simply stops the loading.
+        self.frames = []
         try:
             frameNumber = 0
             while True:
@@ -114,12 +113,13 @@ class AnimatedTexture:
             if not self.frames:
                 raise
 
+        self.frameNumber = Animated.Value(0, Animated.RampFunction(
+            1/framerate * len(self.frames), (0, len(self.frames))))
+        self.time = Animated.Timekeeper()
+
     def bind(self):
-        self.frameScreenTime += self.time.step()
-        self.frameNumber += int(self.frameScreenTime / self.frameDuration)
-        self.frameScreenTime %= self.frameDuration
-        self.frameNumber %= len(self.frames)
-        self.frames[self.frameNumber].bind()
+        self.frameNumber.integrate(self.time.step())
+        self.frames[int(self.frameNumber.value)].bind()
         
 
 class Cache:
