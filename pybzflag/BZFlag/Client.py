@@ -366,6 +366,14 @@ class StatefulClient(BaseClient):
         # FIXME
         pass
 
+    def onMsgAlive(self, msg):
+        # FIXME
+        pass
+
+    def onMsgTeleport(self, msg):
+        # FIXME
+        pass
+
 
 class PlayerClient(StatefulClient):
     """Extends the StatefulClient with functionality for implementing
