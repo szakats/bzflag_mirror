@@ -23,7 +23,7 @@ physical models or other formulas.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import time
+import time, math
 
 
 class Timekeeper:
@@ -135,24 +135,96 @@ class Velocity:
         self.value[i] = v
 
 
-class LogApproach:
-    """A class that can be used as an integration function for Value and Vector.
-       Approaches a target, fast at first but exponentially slowing down to approach it.
+class Approach:
+    """Abstract base class for animation evaluators that approach a target.
+       Subclasses of this can be used as an integration function for Value and Vector.
        """
-    def __init__(self, target, speed, epsilon=0.001):
+    def __init__(self, target):
         self.target = target
-        self.speed  = speed
-        self.epsilon = epsilon
 
-    def __call__(self, oldValue, dt, index=None):
+    def __call__(self, value, dt, index=None):
         if index is None:
             t = self.target
         else:
             t = self.target[index]
-        delta = t - oldValue
+        return self.f(value, t, dt)
+
+    def f(self, value, target, dt):
+        """Approach function. Subclasses must override this."""
+        pass
+    
+
+class LogApproach(Approach):
+    """Approaches a target, fast at first but exponentially slowing down."""
+    def __init__(self, target, speed, epsilon=0.001):
+        Approach.__init__(self, target)
+        self.speed = speed
+        self.epsilon = epsilon
+
+    def f(self, value, target, dt):
+        delta = target - value
         if delta > self.epsilon or delta < -self.epsilon:
-            return oldValue + delta * dt * self.speed
+            return value + (target - value) * dt * self.speed
         else:
-            return t
+            return target
+
+
+class LinearApproach(Approach):
+    """Approaches a target at a constant speed"""
+    def __init__(self, target, speed):
+        Approach.__init__(self, target)
+        self.speed = speed
+
+    def f(self, value, target, dt):
+        if target > value:
+            nvalue = value + dt * self.speed
+            if nvalue > target:
+                # We just stepped over the target- stop now
+                return target
+            return nvalue
+        else:
+            nvalue = value - dt * self.speed
+            if nvalue < target:
+                # We just stepped over the target- stop now
+                return target
+            return nvalue
+
+
+def sigmoid(x):
+    """The sigmoid function. Approaches zero as x approaches -inf,
+       approaches 1 as x approaches +inf, 0.5 at x=0.
+       As x increases, y rises slowly at first, then fast,
+       then finally slow. This produces a very natural animation.
+       """
+    return 1 / (1 + math.exp(-x))
+
+
+def invSigmoid(y):
+    """Inverse of the sigmoid function"""
+    return -math.log(1/y - 1)
+
+
+class SigmoidApproach(LinearApproach):
+    """A linear approach transformed through the sigmoid function.
+       The supplied range will be mapped to a (0.02, 0.98) range
+       on the sigmoid function.
+       """
+    def __init__(self, target, speed, range):
+        self.range = range
+        LinearApproach.__init__(self, self.map(target), speed)
+        
+    def map(self, x):
+        normalized = (x - self.range[0]) / (self.range[1] - self.range[0])
+        if normalized > 1:
+            normalized = 1
+        if normalized < 0:
+            normalized = 0
+        return invSigmoid(normalized * 0.96 + 0.02)
+
+    def unmap(self, x):
+        return self.range[0] + (sigmoid(x) - 0.02)/0.96 * (self.range[1] - self.range[0])
+
+    def f(self, value, target, dt):
+        return self.unmap(LinearApproach.f(self, self.map(value), self.map(target), dt))
 
 ### The End ###
