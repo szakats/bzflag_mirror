@@ -40,12 +40,13 @@ from BZFlag.UI.Texture import Texture
 from OpenGL.GL import *
 
 # Default font height, in pixels
-defaultSize = 20
+defaultSize = 16
 
 # Names that can be used in place of actual filenames
 fontAliases = {
-    None:   'Vera.ttf',
-    'bold': 'VeraBd.ttf',
+    None:       'VeraBd.ttf',   # Bold is the default
+    'regular':  'Vera.ttf',
+    'bold':     'VeraBd.ttf',
     }
 
 # Default list of sizes to render fonts at
@@ -259,14 +260,11 @@ class Font:
         self.draw(text, fontSize)
 
 
-def draw(text, fontSize=None, fontName=None):
-    """Draw a string with the given font size and name. The
-       name may be a data file name or an alias as defined
-       at the top of this module.
+def findFont(fontName=None):
+    """Look up and/or load the given font. Font names can be a data file
+       name, or an alias as defined at the top of this module.
        """
     global fontAliases, loadedFonts
-    if fontSize is None:
-        fontSize = defaultSize
     try:
         fontName = fontAliases[fontName]
     except:
@@ -276,6 +274,24 @@ def draw(text, fontSize=None, fontName=None):
     except:
         font = Font(fontName)
         loadedFonts[fontName] = font
-    font.draw(text, fontSize)
-    
+    return font
+
+
+def draw(text, fontSize=None, fontName=None):
+    if fontSize is None:
+        fontSize = defaultSize
+    findFont(fontName).draw(text, fontSize)
+
+
+def size(text, fontSize=None, fontName=None):
+    if fontSize is None:
+        fontSize = defaultSize
+    return findFont(fontName).size(text, fontSize)
+
+
+def drawCentered(text, fontSize=None, fontName=None):
+    if fontSize is None:
+        fontSize = defaultSize
+    findFont(fontName).drawCentered(text, fontSize)
+
 ### The End ###

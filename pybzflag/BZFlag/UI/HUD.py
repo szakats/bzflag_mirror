@@ -21,8 +21,10 @@ Views and utilities for rendering the Heads Up Display
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+from __future__ import division
 from OpenGL.GL import *
 from BZFlag.UI import GLText
+from BZFlag import Animated
 
 
 class Panel:
@@ -65,28 +67,50 @@ class Panel:
 
 class Text:
     """A view that draws a block of text"""
-    def __init__(self, viewport, text="", color=(1,1,1), fontSize=None, fontName=None, shadow=None):
+    def __init__(self, viewport, text=None, color=(1,1,1), fontSize=None, fontName=None, shadow=None):
         viewport.fov = None
         self.viewport = viewport
-        self.text = text
+        self.text = ''
         self.color = color
         self.fontSize = fontSize
         self.fontName = fontName
         self.shadow = shadow
         viewport.onDrawFrame.observe(self.render)
+        self.init()
+        if text:
+            self.write(text)
+
+    def init(self):
+        """A hook for clients to do extra initialization before the first write() without
+           affecting the constructor's calling signature.
+           """
+        pass
+
+    def write(self, text):
+        self.text += text
 
     def render(self):
         glLoadIdentity()
-
         if self.shadow:
             glPushMatrix()
             glTranslatef(2,2,0)
             glColor3f(0,0,0)
             GLText.draw(self.text, self.fontSize, self.fontName)
             glPopMatrix()
-            
         glColor3f(*self.color)
         GLText.draw(self.text, self.fontSize, self.fontName)
+
         
+class ScrolledText(Text):
+    """A view that draws a block of vertically scrolled text"""
+    def init(self):
+        self.scroll = Animated.Value(Animated.LogApproach(0, 0.2))
+
+    def write(self, text):
+        Text.write(self, text)
+
+        lineHeight = GLText.size("", self.fontSize, self.fontName)[1]
+        viewableLines = int(self.viewport.size[1] / lineHeight)
+        self.text = "\n".join(self.text.split("\n")[-viewableLines:])
 
 ### The End ###

@@ -29,6 +29,9 @@ protocolVersion = "BZFS109a"
 name    = "PyBZFlag"
 version = "cvs-dev"
 
+about = "%s - code version %s, protocol version %s" % \
+        (name, version, protocolVersion)
+
 serverWelcomeMessage = "Welcome to the %s Server (code/%s protocol/%s)" % \
                        (name, version, protocolVersion)
 

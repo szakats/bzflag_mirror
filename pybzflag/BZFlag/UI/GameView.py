@@ -23,7 +23,7 @@ the full in-game experience.
 #
 
 from BZFlag.UI import Viewport, ThreeDView, ThreeDControl, RadarView, Layout, HUD
-import BZFlag
+import BZFlag, sys
 from BZFlag import Animated
 
 
@@ -52,20 +52,22 @@ def attach(game, eventLoop):
     viewport.onKeyDown.observe(onKeyDown)
     (remaining, hudRect) = remaining.hSplit(lambda r: (1-hudSize.value) * r[3])
 
-    hud = viewport.region(hudRect)
-    HUD.Panel(hud)
+    hudPanel = viewport.region(hudRect)
+    HUD.Panel(hudPanel)
 
     # Stick a radar in the left side of the HUD panel. The lambda expression
-    # lazily evaluates the HUD panel's height and uses it as a width for the left
-    # split, keeping the radar square.
-    RadarView.RadarView(game, hud.region(Layout.Rect(hud).left(lambda r: r[3]).margin(0.03)))
+    # lazily evaluates the panel's height and uses it as a width for the left
+    # split, keeping the radar square. The rest of the panel gets used for messages.
+    (radarRect, messageRect) = Layout.Rect(hudPanel).vSplit(lambda r: r[3])
+    RadarView.RadarView(game, hudPanel.region(radarRect))
+
+    # Redirect our stdout to this text panel
+    sys.stdout = HUD.ScrolledText(hudPanel.region(messageRect))
+    print BZFlag.about
 
     # Another HUD panel, just for illustrative purposes
-    (remaining, fooRect) = remaining.margin(0,0,padding,0).vSplit(0.9)
+    (remaining, fooRect) = remaining.margin(0,0,padding,0).vSplit(0.95)
     HUD.Panel(viewport.region(fooRect))
-
-    # Some text in the remaining area
-    HUD.Text(viewport.region(remaining), BZFlag.name, color=(1,1,0), shadow=True)
 
     return viewport
 
