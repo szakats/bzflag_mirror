@@ -55,15 +55,7 @@ def cross(u, v, result=None):
 def magnitude2(a):
     """Calculate the squared magnitude of a vector or each vector in an n-dimensional array"""
     a = asarray(a)
-    a = a*a
-    result = a[...,0]
-    if type(result) == ArrayType:
-        add(result, a[...,1], result)
-        add(result, a[...,2], result)
-        return result
-    else:
-        # It's a single vector rather than a vector array
-        return sum(a)
+    return sum(a*a, -1)
 
 
 def magnitude(a):
