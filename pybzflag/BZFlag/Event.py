@@ -173,7 +173,11 @@ class EventObserver:
         self.ref()(*args, **kw)
 
     def unref(self, ref):
-        del self.event.clients[self.callbackHash]
+        try:
+            del self.event.clients[self.callbackHash]
+        except KeyError:
+            # Hmm, something else already deleted it
+            pass
 
 
 class EventMethodObserver:
@@ -191,7 +195,11 @@ class EventMethodObserver:
         self.im_func(self.im_self_ref(), *args, **kw)
 
     def unref(self, ref):
-        del self.event.clients[self.callbackHash]
+        try:
+            del self.event.clients[self.callbackHash]
+        except KeyError:
+            # Hmm, something else already deleted it
+            pass
 
 
 class Timer:

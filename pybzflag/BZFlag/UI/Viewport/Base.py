@@ -68,6 +68,10 @@ class Viewport(object):
 
     def render(self):
         if self.visible and self.size[0] > 0 and self.size[1] > 0:
+            ## Show all the main viewport's render sequence items, for debug
+            #if not self.parent:
+            #    print self.renderSequence
+
             for f in self.renderSequence:
                 f()
 
