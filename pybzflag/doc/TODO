@@ -19,9 +19,9 @@ Todo list, in no particular order:
       * Light the clouds correctly. This probably entails pulling a color from the sky near
         the horizon as well.
 
-      * Curve the clouds more, so it doesn't look so flat.
-
       * Clouds near the horizon should be obscured by haze.
+
+      * Clouds should get a good deal smaller as they approach the horizon
 
   - Figure out what should be at and below the horizon
 
