@@ -95,14 +95,14 @@ class Scene:
             for drawable in drawables:
                 if drawable.blended:
                     if self.passes[1].has_key(drawable.texture):
-                        self.passes[1][drawable.texture].append(drawable)
+                        self.passes[1][drawable.texture].append(drawable.draw)
                     else:
-                        self.passes[1][drawable.texture] = [drawable]
+                        self.passes[1][drawable.texture] = [drawable.draw]
                 else:
                     if self.passes[0].has_key(drawable.texture):
-                        self.passes[0][drawable.texture].append(drawable)
+                        self.passes[0][drawable.texture].append(drawable.draw)
                     else:
-                        self.passes[0][drawable.texture] = [drawable]
+                        self.passes[0][drawable.texture] = [drawable.draw]
 
     def render(self):
         """Render the scene to the current OpenGL context"""
@@ -112,16 +112,16 @@ class Scene:
             if texture != None:
                 glEnable(GL_TEXTURE_2D)
                 texture.bind()
-            for drawable in self.passes[0][texture]:
-                drawable.draw()
+            for drawFunc in self.passes[0][texture]:
+                drawFunc()
         glEnable(GL_BLEND)
         for texture in self.passes[1].keys():
             glDisable(GL_TEXTURE_2D)
             if texture != None:
                 glEnable(GL_TEXTURE_2D)
                 texture.bind()
-            for drawable in self.passes[1][texture]:
-                drawable.draw()
+            for drawFunc in self.passes[1][texture]:
+                drawFunc()
 
 
 class ThreeDView:
