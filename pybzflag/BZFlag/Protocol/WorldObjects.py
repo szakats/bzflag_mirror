@@ -195,7 +195,7 @@ class TeamBase(WorldObject):
 	    self.size[2] = 1
 	    return [
 	        BZFlag.Drawable.BaseTops(self.team, self.center, self.angle, self.size),
-		BZFlag.Drawable.BoxSides(self.center, self.angle, self.size),
+#		BZFlag.Drawable.BoxSides(self.center, self.angle, self.size),
 	    ]
         return [BZFlag.Drawable.BaseTops(self.team, self.center, self.angle, self.size)]
 

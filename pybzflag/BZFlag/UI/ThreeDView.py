@@ -161,15 +161,15 @@ class ThreeDController:
     self.distance = Animated.Value(view.camera.distance,
                                    Animated.LogApproach(view.camera.distance, 4))
     self.mouseZoomScale = 1.08
+    self.mouseRotateScale = 5.0
     self.keyZoomScale = 1.6
-    view.camera.focus = (0, 0, -90)
+    view.camera.focus = (0, 0, -20)
 
     time = Animated.Timekeeper()
     def onSetupFrame():
       dt = time.step()
       self.distance.integrate(dt)
       view.camera.distance = self.distance.value
-      view.camera.rotation += 6 * dt
     viewport.onSetupFrame.observe(onSetupFrame)
 
     def onMouseButtonDown(event):
@@ -191,7 +191,13 @@ class ThreeDController:
     viewport.onKeyDown.observe(onKeyDown)
 
     def onMouseMotion(event):
-      print event
+      if event.buttons[2]:
+        view.camera.rotation += event.rel[0] / self.mouseRotateScale
+	view.camera.elevation += event.rel[1] / self.mouseRotateScale
+	if view.camera.elevation > 0:
+	  view.camera.elevation = 0
+	if view.camera.elevation < -90:
+	  view.camera.elevation = -90
     viewport.onMouseMotion.observe(onMouseMotion)
 
   def toggleFullscreen(self):
@@ -207,6 +213,8 @@ class ThreeDController:
     if self.distance.f.target > 1500:
       self.distance.f.target = 1500
 
+  def rotate(self, scale):
+    self.rotation.f.target *= scale
 
 def attach(game, eventLoop):
     from BZFlag.UI.Viewport import OpenGLViewport
@@ -215,5 +223,5 @@ def attach(game, eventLoop):
     ThreeDController(view, viewport)
 
     # Add a Frame Hertz indicator
-    Animated.FrequencyCounter(viewport.onFinishFrame,
-                              lambda hz: "FHz: %.3f (target %.3f)" % (hz, viewport.targetFrameRate))
+#    Animated.FrequencyCounter(viewport.onFinishFrame,
+#                              lambda hz: "FHz: %.3f (target %.3f)" % (hz, viewport.targetFrameRate))
