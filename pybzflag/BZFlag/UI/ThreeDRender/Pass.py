@@ -26,7 +26,7 @@ the available rendering passes with the proper priorities.
 from BZFlag.UI import Drawable, GLExtension
 from OpenGL.GL import *
 from OpenGL.GL.ARB.multitexture import *
-import LinearAlgebra
+import LinearAlgebra, Numeric
 from OpenGL.GL.EXT.texture_cube_map import *
 
 
