@@ -30,7 +30,7 @@ r = VRML.Reader(fileName)
 
 class ViewerModel:
     pass
-view.scene.objects[ViewerModel()] = [r.meshes[None]]
+view.scene.objects[ViewerModel()] = r.meshes.values()
 
 view.scene.preprocess()
 loop.run()
