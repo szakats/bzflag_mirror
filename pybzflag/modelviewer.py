@@ -40,6 +40,8 @@ viewport.setCaption("Model Viewer - %s" % fileName)
 view = viewClass(viewport)
 control = ThreeDControl.Viewing(view, viewport)
 
+# modify the clear color
+viewport.mode = Viewport.GL.ClearedMode(clearColor=(0.2, 0.2, 0.2, 1))
 
 # Move the camera a little closer in, and down to the origin
 view.camera.position = (0,0,0)
