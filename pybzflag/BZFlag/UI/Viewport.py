@@ -60,7 +60,8 @@ class Viewport:
         self.rootView = self
 
     def render(self):
-        if self.visible:
+        self.evalViewport()
+        if self.visible and self.size[0] > 0 and self.size[1] > 0:
             for f in self.renderSequence:
                 f()
 
@@ -201,10 +202,8 @@ class OpenGLViewport(PygameViewport):
 
         self.onSetupFrame.observe(self.configureOpenGL)
 
-    def configureOpenGL(self):
-        from OpenGL import GL, GLU
-
-        # Evaluate our viewport if necessary, and set it up
+    def evalViewport(self):
+        """Evaluate our viewport if necessary, and set up our 'size' and 'viewport' members"""
         if callable(self.viewportExp):
             v = self.viewportExp()
         else:
@@ -216,7 +215,9 @@ class OpenGLViewport(PygameViewport):
         self.viewport = v
         self.size = v[2:]
 
-        GL.glViewport(*v)
+    def configureOpenGL(self):
+        from OpenGL import GL, GLU
+        GL.glViewport(*self.viewport)
         GL.glMatrixMode(GL.GL_PROJECTION)
         GL.glLoadIdentity()
         if self.fov:

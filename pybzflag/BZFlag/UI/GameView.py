@@ -23,20 +23,34 @@ the full in-game experience.
 #
 
 from BZFlag.UI import Viewport, ThreeDView, RadarView, Layout, HUD
+from BZFlag import Animated
 
 
 def attach(game, eventLoop):
     viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
-
+    time = Animated.Timekeeper()
     padding = 10
+    fullHudSize = 0.3
 
     # 3D view in the root viewport
     view3d   = ThreeDView.ThreeDView(game, viewport)
     ThreeDView.ThreeDController(view3d, viewport)
     remaining = Layout.Rect(viewport).margin(padding)
 
-    # HUD panel along the bottom of the screen
-    (remaining, hudRect) = remaining.hSplit(0.7)
+    # HUD panel along the bottom of the screen, with animated resize
+    hudSize = Animated.Value(fullHudSize, Animated.LogApproach(fullHudSize, 5))
+    def onSetupFrame():
+        hudSize.integrate(time.step())
+    def onKeyDown(event):
+        if event.unicode == " ":
+            if hudSize.f.target == fullHudSize:
+                hudSize.f.target = 0
+            else:
+                hudSize.f.target = fullHudSize
+    viewport.onSetupFrame.observe(onSetupFrame)
+    viewport.onKeyDown.observe(onKeyDown)
+    (remaining, hudRect) = remaining.hSplit(lambda r: (1-hudSize.value) * r[3])
+    
     hud = viewport.region(hudRect)
     HUD.Panel(hud)
 
