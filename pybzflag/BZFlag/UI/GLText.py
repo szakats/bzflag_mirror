@@ -36,8 +36,9 @@ from __future__ import division
 import pygame, string, math
 from pygame.locals import *
 from BZFlag import Util
-from BZFlag.UI.Texture import Texture
+from BZFlag.UI.Texture import Texture, GLExtension
 from OpenGL.GL import *
+
 
 # Default font height, in pixels
 defaultSize = 14
@@ -216,13 +217,14 @@ class Font:
         """Draw the given text using the current OpenGL transform and color.
            All glyph escapements will cause the OpenGL modelview matrix to
            be translated.
-           """
+           """        
         # Prepare the OpenGL state
+        GLExtension.disableMultitex()
         glEnable(GL_TEXTURE_2D)
         glDisable(GL_LIGHTING)
         glDisable(GL_COLOR_MATERIAL)
         glDisable(GL_DEPTH_TEST)
-        glEnable(GL_BLEND)
+        glEnable(GL_BLEND)       
 
         rendered = self.findRendered(size)
         magnification = size / rendered.size

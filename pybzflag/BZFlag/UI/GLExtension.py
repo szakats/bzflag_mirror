@@ -52,4 +52,18 @@ def test():
     except:
         maxAnisotropy = 1.0
 
+
+def disableMultitex():
+    """Turn off all texture units except the first, and select the first.
+       If multitexture isn't supported, this has no effect.
+       """
+    from OpenGL.GL.ARB.multitexture import glActiveTextureARB
+    from OpenGL.GL import glDisable, GL_TEXTURE_2D
+    if not multitexture:
+        return
+    for unit in textureUnits[1:]:
+        glActiveTextureARB(unit)
+        glDisable(GL_TEXTURE_2D)
+    glActiveTextureARB(textureUnits[0])
+
 ### The End ###

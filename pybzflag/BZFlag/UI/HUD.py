@@ -23,7 +23,7 @@ Views and utilities for rendering the Heads Up Display
 
 from __future__ import division
 from OpenGL.GL import *
-from BZFlag.UI import GLText
+from BZFlag.UI import GLText, GLExtension
 from BZFlag import Animated
 
 
@@ -40,6 +40,7 @@ class Panel:
         glDisable(GL_CULL_FACE)
         glDisable(GL_COLOR_MATERIAL)
         glDisable(GL_DEPTH_TEST)
+        GLExtension.disableMultitex()
         glDisable(GL_TEXTURE_2D)
         glLoadIdentity()
         size = self.viewport.size

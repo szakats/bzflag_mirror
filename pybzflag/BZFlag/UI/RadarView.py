@@ -27,7 +27,7 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from BZFlag import Event
-from BZFlag.UI import Drawable
+from BZFlag.UI import Drawable, GLExtension
 
 # Maximum number of radar laysrs per color, trades off Z accuracy for speed
 numRadarLayers = 8
@@ -221,6 +221,7 @@ class RadarView:
         glDisable(GL_CULL_FACE)
         glDisable(GL_COLOR_MATERIAL)
         glDisable(GL_DEPTH_TEST)
+        GLExtension.disableMultitex()
         glDisable(GL_TEXTURE_2D)
         glEnable(GL_LINE_SMOOTH)
 
