@@ -43,7 +43,7 @@ class Sky:
     def update(self):
         # Calculate the time of day, scaled from 0 to 1.
         # For now this just loops the day fairly fast so it's easy to see what's happening.
-        # 'period' is the lenght of a day in seconds.
+        # 'period' is the length of a day in seconds.
         period = 10
         self.unitDayTime = (self.time.time() % period) / period
 
