@@ -4,24 +4,24 @@ Network transport layer for BZFlag clients and servers. This
 provides methods for transporting messges across TCP and UDP
 links.
 """
-# 
+#
 # Python BZFlag Protocol Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
-# 
+#
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2.1 of the License, or (at your option) any later version.
-#  
+#
 #  This library is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-# 
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
 
 from BZFlag.Protocol import Common
 from BZFlag import Protocol, Errors, Util
@@ -35,13 +35,13 @@ class Socket:
     def __init__(self, protocol='TCP'):
         self.readBuffer = ''
         self.socket = getattr(self, "new%sSocket" % protocol)()
-    
+
     def newTCPSocket(self):
         """Create a new TCP socket, setting the proper options"""
         tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # Disable the nagle algorithm. This is necessary to get
-        # anything near reasonable latency when sending small packets.        
+        # anything near reasonable latency when sending small packets.
         try:
             tcp.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         except:
@@ -57,7 +57,7 @@ class Socket:
 
     def setBlocking(self, flag):
         self.socket.setblocking(flag)
-    
+
     def write(self, data):
         self.socket.send(str(data))
 
@@ -71,7 +71,7 @@ class Socket:
         if not data:
             raise Errors.ConnectionLost()
         return data
-                
+
     def read(self, size=None, bufferSize=64*1024):
         """High level interface for reading from the socket,
            includes a buffering scheme that works well for
@@ -137,7 +137,7 @@ class Socket:
            to select()
            """
         return self.socket.fileno()
-        
+
     def readStruct(self, structClass):
         struct = structClass()
         packed = self.read(struct.getSize())
@@ -179,7 +179,7 @@ class EventLoop:
 
     def unregisterSocket(self, socket):
         self.sockets.remove(socket)
-    
+
     def run(self):
         self.running = 1
 
@@ -189,7 +189,7 @@ class EventLoop:
             selectable = socket.getSelectable()
             selectDict[selectable] = socket
         selectables = selectDict.keys()
-            
+
         while self.running:
             try:
                 (iwtd, owtd, ewtd) = select.select(selectables, [], [], self.pollTime)
@@ -206,8 +206,6 @@ class EventLoop:
             self.onPoll()
 
     def stop(self):
-        self.running = 0        
+        self.running = 0
 
 ### The End ###
-        
-    

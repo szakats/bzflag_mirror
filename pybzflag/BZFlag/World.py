@@ -3,24 +3,24 @@
 Implementation of BZFlag's world database. This includes loading
 and saving worlds in binary and text formats.
 """
-# 
+#
 # Python BZFlag Protocol Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
-# 
+#
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2.1 of the License, or (at your option) any later version.
-#  
+#
 #  This library is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-# 
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
 
 from BZFlag.Protocol import BinaryWorld, Common
 from BZFlag import Errors
@@ -53,7 +53,7 @@ class Scene:
     def __iter__(self):
         """Scene subclasses must support python's iterator protocol"""
         pass
-    
+
 
 class SceneList:
     """Implementation of Scene using a flat list"""
@@ -111,7 +111,7 @@ class World:
     def __init__(self, sceneClass=SceneList):
         self.sceneClass = sceneClass
         self.erase()
-    
+
     def loadBinary(self, bin):
         """Load a binary world from the supplied file-like object"""
         blockDict = Common.getMessageDict(BinaryWorld)
@@ -123,7 +123,7 @@ class World:
             if len(packedHeader) < header.getSize():
                 raise Errors.ProtocolError("Premature end of binary world data")
             header.unmarshall(packedHeader)
-            
+
             # Look up the block type and instantiate it
             try:
                 block = blockDict[header.id]()
@@ -179,7 +179,7 @@ class World:
             fromSide = TeleporterSide(self.teleporters[link.fromSide >> 1], link.fromSide & 1)
             toSide = TeleporterSide(self.teleporters[link.toSide >> 1], link.toSide & 1)
             fromSide.link(toSide)
-        
+
 
 class Cache:
     """Cache worlds on disk according to a server-generated hash,
@@ -222,5 +222,3 @@ class Cache:
         return open(self.getFilename(hash), "rb")
 
 ### The End ###
-        
-    

@@ -26,23 +26,23 @@ Conventions for the classes herein:
 
 This module is safe for use with 'from BZFlag.Protocol import *'
 """
-# 
+#
 # Python BZFlag Protocol Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
-# 
+#
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2.1 of the License, or (at your option) any later version.
-#  
+#
 #  This library is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
 import struct
@@ -86,7 +86,7 @@ class ScalarType(EntryType):
 
     def getSize(self, packed=None):
         return self.size
-    
+
 
 class VectorType(EntryType):
     """A vector EntryType, implemented using the standard 'struct' module.
@@ -125,12 +125,12 @@ class SubStruct(EntryType):
     def getSize(self, packed=None):
         return self.size
 
-    
+
 class StructEntry:
     """(Un)marshalls one structure entry, using an instance of EntryType."""
     def __init__(self, entryType, entryName):
         self.entryType = entryType
-        self.entryName = entryName 
+        self.entryName = entryName
 
     def unmarshall(self, struct, packed):
         """Given a string beginning with the packed representation
@@ -220,7 +220,7 @@ class Enum(EntryType):
         self.reverseDict = {}
         for key in self.dict:
             self.reverseDict[self.dict[key]] = key
- 
+
     def unmarshall(self, packed):
         object = self.baseType.unmarshall(packed)
         try:
@@ -255,7 +255,7 @@ class Bitfield(EntryType):
            """
         self.baseType = baseType
         self.bitMap = bitMap
- 
+
     def unmarshall(self, packed):
         bits = self.baseType.unmarshall(packed)
         matches = []
@@ -285,7 +285,7 @@ class StringField(EntryType):
        """
     def __init__(self, length):
         self.length = length
- 
+
     def unmarshall(self, packed):
         # Remove everything after and including the zero termination
         zeroPos = packed.find(chr(0))
@@ -314,12 +314,12 @@ class Struct:
        individual variables.
        """
     entries = []
-    
+
     def __init__(self, packed=None, **kw):
         if packed:
             self.unmarshall(packed)
         self.__dict__.update(kw)
-      
+
     def __str__(self):
         return self.marshall()
 
@@ -328,7 +328,7 @@ class Struct:
             packed = entry.unmarshall(self, packed)
         self.postUnmarshall()
         return packed
-        
+
     def marshall(self):
         self.preMarshall()
         packed = ''
@@ -372,5 +372,3 @@ Float   = ScalarType("!f")
 Double  = ScalarType("!d")
 
 ### The End ###
-        
-    

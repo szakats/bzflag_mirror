@@ -2,24 +2,24 @@
 
 Abstraction for the BZFlag server list server.
 """
-# 
+#
 # Python BZFlag Protocol Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
-# 
+#
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2.1 of the License, or (at your option) any later version.
-#  
+#
 #  This library is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-# 
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
 
 import BZFlag
 
@@ -67,7 +67,7 @@ class ServerInfo:
                 s += "              "
             s += "%s = %s\n" % (key, self.gameinfo.__dict__[key])
         return s
-    
+
 
 class ListServer:
     """List server abstract base class. This should be subclassed with either
@@ -94,7 +94,7 @@ class ListServer:
         """Returns a list of ServerInfo classes"""
         pass
 
-    
+
 class RemoteListServer(ListServer):
     """Implementation of a ListServer that connects to a remote bzfls process"""
     def __init__(self, url):
@@ -122,10 +122,10 @@ class RemoteListServer(ListServer):
 
     def setPlayerCounts(self, name, counts):
         self.command(("SETNUM",
-                      counts.get("rogue",0), 
-                      counts.get("red",0), 
-                      counts.get("green",0), 
-                      counts.get("blue",0), 
+                      counts.get("rogue",0),
+                      counts.get("red",0),
+                      counts.get("green",0),
+                      counts.get("blue",0),
                       counts.get("purple",0)))
 
     def list(self):
@@ -143,12 +143,10 @@ class RemoteListServer(ListServer):
         def versionFilter(server):
             return server.version == version
         return filter(versionFilter, self.list())
-    
+
 
 def getDefault():
     """Factory for a default list server object"""
     return RemoteListServer(getListServerURL())
 
 ### The End ###
-        
-    
