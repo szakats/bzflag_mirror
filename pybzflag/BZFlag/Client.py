@@ -142,27 +142,14 @@ class StatefulClient(BaseClient):
            MsgNegotiateFlags listing all the flags we need to participate
            in the game that we don't know about.
            """
-        # One character abbreviations must be null-padded to two characters
-        def padAbbreviation(str):
-            if len(str) < 2:
-                return str + chr(0)
-            return str
-        flagAbbreviations = map(padAbbreviation, Flag.getDict().keys())
         self.tcp.write(self.outgoing.MsgNegotiateFlags(
-            data = "".join(flagAbbreviations),
-            ))
+            data = Flag.joinAbbreviations(Flag.getDict().keys())))
 
     def onMsgNegotiateFlags(self, msg):
         """The server responded with a list of flags we need. If it's
            empty, we're good to go on with the rest of the connection.
            """
-        data = StringIO(msg.data)
-        unknownFlags = []
-        for i in xrange(len(msg.data)/2):
-            flag = data.read(2)
-            if flag[1] == chr(0):
-                flag = flag[0]
-            self.unknownFlags.append(flag)
+        unknownFlags = Flag.splitAbbreviations(msg.data)
         if unknownFlags:
             raise Errors.ProtocolError(
                 "Server knows about the following flags that we don't: %s" %
@@ -227,8 +214,7 @@ class StatefulClient(BaseClient):
             # If we're using a cache, save a copy of the map.
             if self.worldCache:
                 self.worldCache.storeWorld(self.worldHash, self.binaryWorld)
-            import StringIO
-            self.game.world.loadBinary(StringIO.StringIO(self.binaryWorld))
+            self.game.world.loadBinary(StringIO(self.binaryWorld))
             del self.binaryWorld
             self.worldDownloaded = 1
             self.onLoadWorld()

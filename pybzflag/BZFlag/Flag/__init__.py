@@ -24,6 +24,8 @@ Catalog of all supported flag types, and related utilities.
 from BZFlag import Event, Errors, Util
 from BZFlag.Protocol import FromServer
 import re
+from StringIO import StringIO
+
 
 class FlagMotion:
     def __init__(self, position=[0,0,0]):
@@ -122,5 +124,26 @@ def getDict():
     """Return a dictionary mapping flag abbreviations to flag classes"""
     import BZFlag.Flag.List
     return Util.getSubclassDict(BZFlag.Flag.List, FlagBase, 'abbreviation')
+
+def joinAbbreviations(flags):
+    """Given a list of flag classes or instances, return a list of 2-byte
+       abbreviations ready to use in flag negotiation.
+       """
+    def padAbbreviation(str):
+        if len(str) < 2:
+            return str + chr(0)
+        return str
+    return "".join(map(padAbbreviation, flags))
+
+def splitAbbreviations(str):
+    """Convert a list of packed abbreviations to a list of abbreviation strings"""
+    data = StringIO(str)
+    lst = []
+    for i in xrange(len(str)/2):
+        flag = data.read(2)
+        if flag[1] == chr(0):
+            flag = flag[0]
+        lst.append(flag)
+    return lst
 
 ### The End ###

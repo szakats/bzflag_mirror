@@ -36,7 +36,7 @@ class Game:
        """
     def __init__(self):
         self.players = {}    # Indexed by player Id
-        self.flags = {}      # Indexed by flag number (not Id)
+        self.flags = {}      # Indexed by flag number
         self.teams = {}      # Indexed by color, represented as a string
         self.world = World.World()
         self.lastUpdateTime = None
