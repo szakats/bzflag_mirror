@@ -60,6 +60,18 @@ def dot(a,b):
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 
 
+def mul3(a,b):
+    return (a[0] * b[0],
+            a[1] * b[1],
+            a[2] * b[2])
+
+
+def mul1(a,b):
+    return (a[0] * b,
+            a[1] * b,
+            a[2] * b)
+
+
 def angle(a,b):
     """Find the angle between two vectors, in degrees"""
     try:

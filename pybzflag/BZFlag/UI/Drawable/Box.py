@@ -27,6 +27,7 @@ from OpenGL.GL import *
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import GLExtension
 from BZFlag.World import Scale
+from BZFlag import Vector
 import random
 
 
@@ -222,6 +223,87 @@ class TreadStain(TopDecal):
         TopDecal.__init__(self, box)
 
 
+class FixedDecal(DisplayList):
+    """Abstract base class for a decal with a fixed size and aspect ratio,
+       positioned within a plane. origin, vx, and vy specify the plane's coordinate space.
+       position is in this space. width is in world coordinates. anchor is the position
+       in texture coordinates that should be anchored to the given position in plane coordinates.
+       """
+    def set(self, origin, vx, vy, width, position=(0.5, 0.5), anchor=(0.5, 0.5)):
+        """           """
+        self.render.decal = True
+
+        # Transform width from world coordinates to plane coordinates
+        width /= Vector.length(vx)
+        
+        # Calculate a height to keep the image aspect ratio correct
+        texSize = self.render.textures[0].size
+        height = width * texSize[1] / texSize[0] * Vector.length(vx) / Vector.length(vy)
+
+        # Compute the amount of the texture to each side of the given position
+        leftSize = anchor[0] * width
+        rightSize = (1 - anchor[0]) * width
+        topSize = anchor[1] * height
+        bottomSize = (1 - anchor[1]) * height
+
+        # Compute the vertices of a quadrilateral using the given vectors
+        self.quad = (Vector.add(origin, Vector.add(Vector.mul1(vx, position[0] - leftSize),
+                                                   Vector.mul1(vy, position[1] - topSize))),
+                     Vector.add(origin, Vector.add(Vector.mul1(vx, position[0] + rightSize),
+                                                   Vector.mul1(vy, position[1] - topSize))),
+                     Vector.add(origin, Vector.add(Vector.mul1(vx, position[0] + rightSize),
+                                                   Vector.mul1(vy, position[1] + bottomSize))),
+                     Vector.add(origin, Vector.add(Vector.mul1(vx, position[0] - leftSize),
+                                                   Vector.mul1(vy, position[1] + bottomSize))))
+
+        # Compute a normal to the given plane
+        self.normal = Vector.normalize(Vector.cross(vx, vy))
+        
+    def drawToList(self):
+        glNormal3f(*self.normal)
+        glBegin(GL_QUADS)
+        glTexCoord2f(0,0)
+        glVertex3f(*self.quad[0])
+        glTexCoord2f(1,0)
+        glVertex3f(*self.quad[1])
+        glTexCoord2f(1,1)
+        glVertex3f(*self.quad[2])
+        glTexCoord2f(0,1)
+        glVertex3f(*self.quad[3])
+        glEnd()
+
+
+class FixedWallDecal(FixedDecal):
+    """Abstract base class for a fixed-size decal applied to a box wall"""
+    def set(self, box, wallNumber, width, position=(0.5, 0.5), anchor=(0.5, 0.5)):
+        poly = box.toPolygon()
+        edge1 = poly[(wallNumber * 2) % len(poly)]
+        edge2 = poly[(wallNumber * 2 + 1) % len(poly)]
+
+        # Place the origin at the ground, with X pointing along the wall and Y pointing up
+        origin = (edge1[0], edge1[1], box.center[2])
+        vx = Vector.sub((edge2[0], edge2[1], box.center[2]), origin)
+        vy = (0, 0, box.size[2])
+
+        FixedDecal.set(self, origin, vx, vy, width, position, anchor)
+
+
+class LogoDecal(FixedWallDecal):
+    """A BZFlag logo applied to a random box wall"""
+    textureName = 'logo.png'
+    
+    def set(self, box):
+        FixedWallDecal.set(self, box, random.randint(0,3), 10, (0, 1), (-0.1, 1.1))
+
+
+class DustPuppyDecal(FixedWallDecal):
+    """It's Dust Puppy!"""
+    textureName = 'dust_puppy.png'
+    
+    def set(self, box):
+        FixedWallDecal.set(self, box, random.randint(0,3), 10, (0.5, 0), (0.5, 0))
+
+
 def detectBoxDrawables(box):
     """Given a box WorldObject, return a list of the drawables that should be used
        to represent it. This looks at the size and placement of the box to determine
@@ -237,7 +319,7 @@ def detectBoxDrawables(box):
     majorAxis = max(box.size[0], box.size[1])
     minorAxis = min(box.size[0], box.size[1])
     axisRatio = majorAxis / minorAxis
-
+    
     # If the box isn't on the ground and it's fairly flat, assume it's a platform
     if height < 8 and box.center[2] > 1:
         sides = PlatformSides(box)
@@ -250,6 +332,14 @@ def detectBoxDrawables(box):
     if minorAxis > Scale.TankWidth and minorAxis < Scale.TankWidth * 4 and majorAxis > Scale.TankWidth * 4:
         drawables.append(TreadStain(box))
 
+    # Randomly put BZFlag logos on properly sized boxes
+    if minorAxis > 10 and height > 4 and random.random() > 0.7:
+        drawables.append(LogoDecal(box))
+
+    # Randomly put a Dust Puppy on properly sized boxes, with a smaller probability
+    if minorAxis > 10 and height > 15 and random.random() > 0.98:
+        drawables.append(DustPuppyDecal(box))
+        
     # Pick defaults for any characteristics we haven't decided on already and return a list
     if sides:
         drawables.append(sides)
