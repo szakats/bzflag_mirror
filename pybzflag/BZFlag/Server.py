@@ -102,7 +102,12 @@ class StatefulServer(BaseServer):
        this implements a server that knows about a game state and can
        communicate this to clients.
        """
-    pass
+    def init(self):
+        BaseServer.init(self)
+        self.game = Game.Game()
+
+    def onMsgNegotiateFlags(self, msg):
+        pass
 
 
 class StandardServer(StatefulServer):
