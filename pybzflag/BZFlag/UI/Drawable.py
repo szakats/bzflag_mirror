@@ -61,6 +61,12 @@ class DisplayList(GLDrawable):
     def __init__(self, *args, **kw):
         GLDrawable.__init__(self)
         self.list = glGenLists(1)
+        self.init(*args, **kw)
+
+    def init(self, *args, **kw):
+        """Called on init after setting up the display list. By default this
+           builds the display lists, but this hook lets subclasses override that.
+           """
         self.buildList(*args, **kw)
 
     def __del__(self):
