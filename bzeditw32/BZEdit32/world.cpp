@@ -131,7 +131,7 @@ bool CBaseObject::StdDataField ( char *line )
 	{
 		sscanf(pNameEnd," %f %f %f",&m_rScale.x,&m_rScale.y,&m_rScale.z);
 	}
-	else if (stricmp(name,"#!name") ==0)
+	else if (stricmp(name,"name") ==0)
 	{
 	//	sscanf(pNameEnd," %s",&temp);
 
@@ -170,6 +170,12 @@ bool CBaseObject::StdDataField ( char *line )
 		sscanf(pNameEnd," %d %s",&m_iGroupID,&temp);
 		m_sGroupName = temp;
 	}
+        else if (stricmp(name,"passable") ==0)
+            m_bDriveThru = m_bShootThru = true;
+        else if (stricmp(name,"drivethrough") ==0)
+            m_bDriveThru = true;
+        else if (stricmp(name,"shoothrough") ==0)
+            m_bShootThru = true;
 	else
 		return false;
 
@@ -184,7 +190,7 @@ void CBaseObject::WriteStdData ( ostream &stream )
 	stream << szName << endl;
 
 	if (m_sItemName.size()>0)
-		stream << "#!name " << m_sItemName.c_str() << endl;
+		stream << "name " << m_sItemName.c_str() << endl;
 
 	if (m_iGroupID != -1)
 		stream << "#!group " <<  m_iGroupID << " " << m_sGroupName.c_str() << endl;
@@ -207,7 +213,7 @@ void CBaseObject::WriteStdData ( char *data )
 
 	if (m_sItemName.size()>0)
 	{
-		sprintf(szTemp,"#!name %s\n",m_sItemName.c_str());
+		sprintf(szTemp,"name %s\n",m_sItemName.c_str());
 		strcat(data,szTemp);
 	}
 

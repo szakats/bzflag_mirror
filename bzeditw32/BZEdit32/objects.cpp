@@ -198,10 +198,16 @@ void Box::Write(ostream &stream)
 {
 	WriteStdData(stream);
 	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
+
+        if (m_bDriveThru && m_bShootThru)
+          	stream << "	passable" << endl;
+        else
+        {
 	if (m_bDriveThru)
 		stream << "	drivethrough" << endl;
 	if (m_bShootThru)
 		stream << "	shootthrough" << endl;
+        }
 
 	stream << "end" << endl;
 	stream << endl;
@@ -214,10 +220,15 @@ void Box::Write( char *data )
 	WriteStdData(data);
 	sprintf(szTemp,"\tsize %f %f %f\n",m_rScale.x,m_rScale.y,m_rScale.z);
 
-	if (m_bDriveThru)
-		sprintf(szTemp,"\tdrivethrough\n");
-	if (m_bShootThru)
-		sprintf(szTemp,"\tshootthrough\n");
+	if (m_bDriveThru && m_bShootThru)
+		sprintf(szTemp,"\tpassable\n");
+        else
+        {
+	  if (m_bDriveThru)
+		  sprintf(szTemp,"\tdrivethrough\n");
+	  if (m_bShootThru)
+		  sprintf(szTemp,"\tshootthrough\n");
+        }
 		
 	sprintf(szTemp,"end\n\n");
 
@@ -323,12 +334,15 @@ void Pyramid::Write(ostream &stream)
 {
 	WriteStdData(stream);
 	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
+        if (m_bDriveThru && m_bShootThru)
+            stream << "	passable" << endl;
+        else
+        {
 	if (m_bDriveThru)
 		stream << "	drivethrough" << endl;
 	if (m_bShootThru)
 		stream << "	shootthrough" << endl;
-	if (m_bFlipZ)
-		stream << "	flipZ" << endl;
+        }
 
 	stream << "end" << endl;
 	stream << endl;
@@ -339,8 +353,20 @@ void Pyramid::Write( char *data )
 	char	szTemp[1024] = {0};
 
 	WriteStdData(data);
-	sprintf(szTemp,"\tsize %f %f %f\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z);
+	sprintf(szTemp,"\tsize %f %f %f\n",m_rScale.x,m_rScale.y,m_rScale.z);
 	strcat(data,szTemp);
+
+        if (m_bDriveThru && m_bShootThru)
+	    sprintf(szTemp,"\tpassable\n");
+        else
+        {
+	  if (m_bDriveThru)
+		  sprintf(szTemp,"\tdrivethrough\n");
+	  if (m_bShootThru)
+		  sprintf(szTemp,"\tshootthrough\n");
+        }
+	strcat(data,szTemp);
+	strcat(data,"end\n\n");
 }
 
 bool Pyramid::Read( char *data )
@@ -352,15 +378,17 @@ bool Pyramid::Read( char *data )
 	bool	bDone = false;
 	while (!bDone)
 	{
-		bDone = !GetLine( &pPtr, line );
+	  bDone = !GetLine( &pPtr, line );
 
-		if (!StdDataField(line))
-		{
-			sscanf(line,"%s",name);
+	  if (!StdDataField(line))
+	  {
+	    sscanf(line,"%s",name);
 
-			if (stricmp(name,"end") ==0)
-				bDone = true;
-		}
+	    if (stricmp(name,"end") ==0)
+		    bDone = true;
+            else if (stricmp(name,"end") ==0)
+              m_rScale.z *= -1;
+	  }
 	}
 	return true;
 }
@@ -465,6 +493,15 @@ void Teleporter::Write(ostream &stream)
 	WriteStdData(stream);
 	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
 	stream << "	border " << border << endl;
+        if (m_bDriveThru && m_bShootThru)
+            stream << "	passable" << endl;
+        else
+        {
+	if (m_bDriveThru)
+		stream << "	drivethrough" << endl;
+	if (m_bShootThru)
+		stream << "	shootthrough" << endl;
+        }
 	stream << "end" << endl;
 	stream << endl;
 }
@@ -474,8 +511,20 @@ void Teleporter::Write( char *data )
 	char	szTemp[1024] = {0};
 
 	WriteStdData(data);
-	sprintf(szTemp,"\tsize %f %f %f\n\tborder %f\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z,border);
+	sprintf(szTemp,"\tsize %f %f %f\n\tborder %f\n",m_rScale.x,m_rScale.y,m_rScale.z,border);
+        strcat(data,szTemp);
+
+        if (m_bDriveThru && m_bShootThru)
+	    sprintf(szTemp,"\tpassable\n");
+        else
+        {
+	  if (m_bDriveThru)
+		  sprintf(szTemp,"\tdrivethrough\n");
+	  if (m_bShootThru)
+		  sprintf(szTemp,"\tshootthrough\n");
+        }
 	strcat(data,szTemp);
+	strcat(data,"end\n\n");
 }
 
 bool Teleporter::Read( char *data )
@@ -734,6 +783,15 @@ void Base::Write(ostream &stream)
 	WriteStdData(stream);
 	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << endl;
 	stream << "	color " << color << endl;
+        if (m_bDriveThru && m_bShootThru)
+            stream << "	passable" << endl;
+        else
+        {
+	if (m_bDriveThru)
+		stream << "	drivethrough" << endl;
+	if (m_bShootThru)
+		stream << "	shootthrough" << endl;
+        }
 	stream << "end" << endl;
 	stream << endl;
 }
@@ -744,7 +802,19 @@ void Base::Write( char *data )
 
 	WriteStdData(data);
 	sprintf(szTemp,"\tsize %f %f %f\n\tcolor %d\nend\n\n",m_rScale.x,m_rScale.y,m_rScale.z,color);
+        strcat(data,szTemp);
+
+        if (m_bDriveThru && m_bShootThru)
+	    sprintf(szTemp,"\tpassable\n");
+        else
+        {
+	  if (m_bDriveThru)
+		  sprintf(szTemp,"\tdrivethrough\n");
+	  if (m_bShootThru)
+		  sprintf(szTemp,"\tshootthrough\n");
+        }
 	strcat(data,szTemp);
+	strcat(data,"end\n\n");
 }
 
 bool Base::Read( char *data )
