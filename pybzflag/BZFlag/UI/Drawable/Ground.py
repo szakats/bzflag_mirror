@@ -28,7 +28,7 @@ from BZFlag.UI import GLExtension
 class Ground(DisplayList):
     # Use two concrete textures if we have multitexturing, if not
     # fall back to the classic BZFlag texture.
-    textureNames = ('grass_base.png', 'grass_overlay.png')
+    textureNames = ('grass_base.png', 'grass_overlay.jpeg')
     textureName = 'ground.png'
 
     def set(self, size):

@@ -85,7 +85,7 @@ class BoxSides(DisplayList):
 class BoxTops(DisplayList):
     # Use two concrete textures if we have multitexturing, if not
     # fall back to the classic BZFlag texture.
-    textureNames = ('concrete_base.png', 'concrete_overlay.png')
+    textureNames = ('concrete_base.jpeg', 'concrete_overlay.png')
     textureName = 'boxtops.png'
     
     def set(self, polygon, base, height):
