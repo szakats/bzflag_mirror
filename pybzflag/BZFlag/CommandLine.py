@@ -34,11 +34,24 @@ optik.STD_VERSION_OPTION.help = "Shows the version number and exits."
 class Parser(optik.OptionParser):
     """OptionParser subclass to assist with creating Client or Server instances
        using a standard set of command line options.
+
+       cls should be the class to instantiate using command line options. It
+       may also be a list of classes- all of them will be used to construct
+       a list of command line options.
        """
     def __init__(self, cls, **extraDefaults):
         optik.OptionParser.__init__(self)
-        self.inst = cls()
-        availableOpts = self.inst.options.keys()
+
+        if type(cls) != type(()) and type(cls) != type([]):
+            classes = [cls]
+        else:
+            classes = cls
+        self.instances = []
+        availableOpts = []
+        for c in classes:
+            inst = c()
+            self.instances.append(inst)
+            availableOpts.extend(inst.options.keys())
 
         defaults = {
             'team':       'rogue',
@@ -94,10 +107,15 @@ class Parser(optik.OptionParser):
         except KeyError:
             pass
 
-        self.inst.cmdLineValues = values
-        self.inst.cmdLineArgs = args
-        self.inst.setOptions(**options)
-        return self.inst
+        for inst in self.instances:
+            inst.cmdLineValues = values
+            inst.cmdLineArgs = args
+            inst.setOptions(**options)
+
+        if len(self.instances) > 1:
+            return self.instances
+        else:
+            return self.instances[0]
 
 
 def client(clientClass=Client.PlayerClient, argv=sys.argv, **extraDefaults):
