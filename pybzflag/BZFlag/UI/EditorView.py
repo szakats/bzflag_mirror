@@ -43,13 +43,13 @@ def attach(game, eventLoop):
 
     view3d   = ThreeDView.ThreeDView(game, viewport)
     widget = Widgetness()
-    view3d.scene.objects[widget] = widget.getGLDrawables((5, -3.5, -10))
+    view3d.scene.objects[widget] = widget.getGLDrawables((4.5, -3.5, -10))
     widget = Widgetness()
-    view3d.scene.objects[widget] = widget.getGLDrawables((-5, -3.5, -10))
+    view3d.scene.objects[widget] = widget.getGLDrawables((-4.5, -3.5, -10))
     widget = Widgetness()
-    view3d.scene.objects[widget] = widget.getGLDrawables((5, -3.5, -10))
+    view3d.scene.objects[widget] = widget.getGLDrawables((4.5, 3.5, -10))
     widget = Widgetness()
-    view3d.scene.objects[widget] = widget.getGLDrawables((-5, 3.5, -10))
+    view3d.scene.objects[widget] = widget.getGLDrawables((-4.5, 3.5, -10))
     view3d.scene.preprocess()
     ThreeDControl.Editing(view3d, viewport)
 
