@@ -3,6 +3,11 @@
 Noise rendering algorithms, hardware accelerated by OpenGL.
 This module is only for algorithms that require OpenGL. General-purpose
 noise algorithms should go in BZFlag.Noise.
+
+The functions here require an ortho mode viewport to be active, and
+generally assume they have free reign over the OpenGL backbuffer.
+It is assumed that they will be invoked from a dynamic texture class
+that creates its own viewport.
 """
 #
 # Python BZFlag Package
@@ -22,10 +27,25 @@ noise algorithms should go in BZFlag.Noise.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+from __future__ import division
 from BZFlag.UI import Texture
 from BZFlag import Noise
 from Numeric import *
 from OpenGL.GL import *
+
+
+def drawTexRect(destSize, texSize=(1,1)):
+    """Draw a rectangle at the origin using the given sizes in texels and pixels"""
+    glBegin(GL_QUADS)
+    glTexCoord2f(0,0)
+    glVertex2f(0,0)
+    glTexCoord2f(texSize[0],0)
+    glVertex2f(destSize[0],0)
+    glTexCoord2f(*texSize)
+    glVertex2f(*destSize)
+    glTexCoord2f(0,texSize[1])
+    glVertex2f(0,destSize[1])
+    glEnd()
 
 
 class NoiseTexture(Texture.Texture):
@@ -80,18 +100,8 @@ class NoiseRenderer:
         glTranslatef(-self.rotationDistance, -self.rotationDistance, 0)
         glMatrixMode(GL_MODELVIEW)
 
-        # Draw a unit square
-        glBegin(GL_QUADS)
-        glTexCoord2f(0,0)
-        glVertex2f(0,0)
-        glTexCoord2f(self.scale,0)
-        glVertex2f(size[0],0)
-        glTexCoord2f(self.scale,self.scale)
-        glVertex2f(*size)
-        glTexCoord2f(0,self.scale)
-        glVertex2f(0,size[1])
-        glEnd()
-
+        drawTexRect(size, (self.scale, self.scale))
+        
         # Clean up
         glMatrixMode(GL_TEXTURE)
         glLoadIdentity()
@@ -101,5 +111,79 @@ class NoiseRenderer:
         # Capture our rendered image
         texture.loadBackbuffer(size)
 
+
+class AnimatedNoise:
+    """Creates multiple frames of noise at the same size, and smoothly blends between them.
+       Note that this isn't Perlin noise yet, just uncorrelated noise at a single resolution.
+       Multiple AnimatedNoise instances are used to animate Perlin noise.
+
+       This creates numFrames noise frames using the provided renderer at the given size.
+       They are animated over the given period, in seconds.
+       """
+    def __init__(self, renderer, size, numFrames, period=1):
+        self.period = period
+        self.size = size
+        self.frameDuration = period / numFrames
+        
+        # Render and store all the frames we'll need
+        self.frames = []
+        for i in xrange(numFrames):
+            frame = Texture.Texture()
+            renderer.render(frame, size)
+            self.frames.append(frame)
+
+        # To prevent special cases in looping below, refer back to the first frame after the last frame
+        self.frames.append(self.frames[0])
+
+        self.reset()
+
+    def reset(self):
+        self.time = 0
+
+    def integrate(self, dt):
+        """Advance the clock by the given number of seconds"""
+        self.time += dt
+        self.time %= self.period
+
+    def draw(self, size=None, color=(1,1,1,1)):
+        """Draw the noise, optionally scaled to the given size and modulated by the given color"""
+        if not size:
+            size = self.frames[0].size
+
+        glEnable(GL_BLEND)
+
+        # To smoothly blend between two frames, we will need to know which two frames
+        # we're blending between, and the amount of fading between them. The fade value
+        # will be 0 for 100% frame1, and 1 for 100% frame2.
+        frameNum = int(self.time / self.frameDuration)
+        frame1 = self.frames[frameNum]
+        frame2 = self.frames[frameNum+1]
+        fade = (self.time % self.frameDuration) / self.frameDuration
+
+        # To properly blend between the existing data in the color buffer and the
+        # two frames, we need to do the blend operation in three passes.
+
+        # 1. Multiply the color buffer by (1-alpha)
+        glDisable(GL_TEXTURE_2D)
+        glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA)
+        glColor4f(1,1,1,color[3])
+        drawTexRect(size)
+
+        # 2. Multiply the first frame by (alpha * (1-fade)) and add it to the color buffer
+        glEnable(GL_TEXTURE_2D)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE)
+        glColor4f(color[0], color[1], color[2], color[3] * (1-fade))
+        frame1.bind()
+        drawTexRect(size)
+
+        # 3. Multiply the second frame by (alpha * fade) and add it to the color buffer
+        glColor4f(color[0], color[1], color[2], color[3] * fade)
+        frame2.bind()
+        drawTexRect(size)
+
+        glDisable(GL_BLEND)
+        glDisable(GL_TEXTURE_2D)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    
 ### The End ###
 

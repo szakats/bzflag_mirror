@@ -89,6 +89,8 @@ class Texture:
            coordinates in PyBZFlag style rather than OpenGL style- the origin is at the top-left
            corner of the viewport.
            """
+        self.size = size
+        self.format = format
         glReadBuffer(GL_BACK)
         Texture.bind(self)
         viewport = glGetIntegerv(GL_VIEWPORT)
