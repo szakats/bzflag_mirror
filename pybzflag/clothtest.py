@@ -7,28 +7,26 @@ from time import time
 
 class AnchorAffector(SpringSystem.Affector):
     def integrate(self, dt):
-        # Pin the cloth up at its two top corners
-        #self.model.state[-1,-1] = self.model.initialState[-1,-1]
-        #self.model.state[-1,0] = self.model.initialState[-1,0]
-
-        # Anchor the cloth at the left side, like a flag
-        self.model.state[:,0] = self.model.initialState[:,0]
+        # Pin the cloth up at its two left corners
+        self.model.state[-1,0] = self.model.initialState[-1,0]
+        self.model.state[0,0] = self.model.initialState[0,0]
 
 
-class ClothObject:
+class Flag:
     def __init__(self):
+        self.pole = Drawable.VRML.load("flagpole.wrl")
         self.cloth = SpringSystem.Cloth(self.getInitialState())
 
         self.surf = Drawable.ArraySurface(self.cloth.state)
         self.surf.render.static = False
 
-        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.01))
-        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (-4, 1, 1))
+        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.004))
+        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (-1, 0.2, 0))
         self.cloth.add(AnchorAffector)
 
     def getInitialState(self):
-        xAxis = arange(-2, 2, 0.1)
-        yAxis = arange( 0, 3, 0.1)
+        xAxis = arange(0, 8, 0.5)
+        yAxis = arange(5, 11, 0.5)
         size = (len(yAxis), len(xAxis))
         a = zeros(size + (3,), Float)
         a[:,:,0] += 0 - xAxis
@@ -36,7 +34,7 @@ class ClothObject:
         return a
 
     def getDrawables(self):
-        return [self.surf]
+        return [self.surf] + self.pole.values()
 
     def update(self):
         # Use a fixed time step for now, since the model gets unstable
@@ -52,8 +50,8 @@ if __name__ == '__main__':
     viewport.setCaption("Cloth Simulation Test")
 
     # Enzoomify the camera toward our object
-    view.camera.position = (0,0,0)
-    view.camera.distance = 10
+    view.camera.position = (5,0,-5)
+    view.camera.distance = 20
     view.camera.jump()
 
     # Give us some spiffy blue and yellow highlights
@@ -64,10 +62,10 @@ if __name__ == '__main__':
     view.light1.diffuse  = (0.4,0.4,0.5,1)
     view.light1.position = (20,200,20,1)
 
-    obj = ClothObject()
+    obj = Flag()
     viewport.onSetupFrame.observe(obj.update)
     view.scene.add(obj)
-    
+
     view.scene.preprocess()
     Util.showFrameRate(viewport)
     loop.run()

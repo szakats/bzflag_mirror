@@ -162,6 +162,7 @@ class ClothWindAffector(Affector):
         self.windVector = windVector
 
     def integrate(self, dt):
+        # This just uses the dot product to calculate a normal force due to wind
         forceMagnitude = dot(self.crossProducts, self.windVector)
         force = self.gridNormals * reshape(repeat(forceMagnitude, 3, 1), self.gridNormals.shape)
         self.model.velocity[:-1,:-1] += force
