@@ -33,6 +33,8 @@ class PygameViewport(Viewport):
        """
     def __init__(self, eventLoop, size=(640,480), targetFrameRate=100, resizable=True):
         pygame.display.init()
+        pygame.key.set_repeat(500, 30)
+
         self.display = pygame.display
         self.resizable = resizable
         Viewport.__init__(self, eventLoop, size)

@@ -176,8 +176,8 @@ class Viewing:
         self.bind(KeyPress, 'q').observe(self.quit)
         self.bind(KeyPress, pygame.K_ESCAPE).observe(self.quit)
         self.bind(MouseWheel, 0.1, 'any').observe(self.zoom)
-        self.bind(KeyAxis, '=', '-', 0.3).observe(self.zoom)
-        self.bind(KeyAxis, '[', ']', 1).observe(self.fovZoom)
+        self.bind(KeyAxis, '=', '-', 0.1).observe(self.zoom)
+        self.bind(KeyAxis, '[', ']', 0.1).observe(self.fovZoom)
 
         dragButton = 3
         self.bind(MouseGrab, dragButton)
@@ -255,7 +255,7 @@ class Viewing:
 
     def fovZoom(self, amount):
         """Zoom the camera by changing the field of view"""
-        self.view.viewport.fov += amount
+        self.view.viewport.fov *= math.exp(amount)
         if self.view.viewport.fov > 175:
             self.view.viewport.fov = 175
         if self.view.viewport.fov < 0.1:
