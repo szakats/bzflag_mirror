@@ -188,7 +188,7 @@ class Scene:
 
         self.renderPass(self.passes[0])
         glEnable(GL_BLEND)
-        self.renderPass(self.passes[0])
+        self.renderPass(self.passes[1])
 
 
 class ThreeDView:
