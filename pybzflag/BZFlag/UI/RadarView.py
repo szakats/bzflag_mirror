@@ -48,7 +48,7 @@ class RadarView:
     def __init__(self, game, viewport):
         self.game = game
         self.viewport = viewport
-        self.zoom = 1
+        self.zoom = 0.95
         self.center = [0,0,0]
         self.angle = 0
         self.follow = None
@@ -142,9 +142,12 @@ class RadarView:
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_TEXTURE_2D)
 
+        size = self.viewport.size
         glPushMatrix()
-        glScalef(float(self.zoom) / self.game.world.size[0] * 1.9,
-                 float(self.zoom) / self.game.world.size[1] * 1.9, 1)
+        glScalef(size[0], size[1], 1)                 
+        glTranslatef(0.5, 0.5, 0)
+        glScalef(float(self.zoom) / self.game.world.size[0],
+                 float(self.zoom) / self.game.world.size[1], 1)
         glRotatef(self.angle, 0,0,1)
         glTranslatef(-self.center[0], -self.center[1], 0)
         self.renderWorld()

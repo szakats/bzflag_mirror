@@ -9,7 +9,7 @@ All layout operators' inputs can be static rectangles, viewports
 callable layout operators.
 
 All parameters can either be specified in pixels as integers,
-or in fractions of the input rectangle's minor axis, as floats,
+or in fractions of the input rectangle's relevant axis, as floats,
 or as a callable that takes the rectangle in question as a parameter.
 """
 #
@@ -35,22 +35,17 @@ from BZFlag.UI import Viewport
 from __future__ import nested_scopes
 
 
-def autoScale(rect, seq):
+def autoScale(rect, seq, axisIndex=2):
     """Performs the automatic conversion from scale factors
        to pixels mentioned in the module's documentation.
        Integer values pass straight through, floating point
        values are multiplied by the rectangle's minor axis.
        Callables are called with the rectangle in question.
        """
-    if rect[2] > rect[3]:
-        minor = rect[3]
-    else:
-        minor = rect[2]
-        
     result = []
     for item in seq:
         if type(item) == float:
-            result.append(item * minor)
+            result.append(item * rect[axisIndex])
         elif callable(item):
             result.append(item(rect))
         else:
@@ -71,7 +66,7 @@ class Rect:
         else:
             self.__call__ = lambda: value
 
-    def margin(self, margin):
+    def margin(self, *margin):
         """Remove the given margin from the edges of self.
            margin is specified CSS-style- it can be either
            a scalar for a margin to remove from all sides,
@@ -79,20 +74,19 @@ class Rect:
            respectively, or a 4-tuple for margin on the
            top, right, bottom, and left sides, respectively.
            """
-        if type(margin) == type(()) or type(margin) == type([]):
-            if len(margin) <= 2:
-                (vertical, horizontal) = margin
-                margin = (vertical, horizontal, vertical, horizontal)
-        else:
-            margin = (margin, margin, margin, margin)
+        if len(margin) == 2:
+            (vertical, horizontal) = margin
+            margin = (vertical, horizontal, vertical, horizontal)
+        elif len(margin) == 1:
+            margin *= 4
 
         def fMargin():
             r = self()
             (top, right, bottom, left) = autoScale(r, margin)
             return (r[0] + left,
-                    r[1] + top,
+                    r[1] + bottom,
                     r[2] - left - right,
-                    r[3] - top - bottom)
+                    r[3] - bottom - top)
         return Rect(fMargin)
     
     def bottom(self, height):
@@ -101,7 +95,7 @@ class Rect:
            """
         def fBottom():
             r = self()
-            h = autoScale(r, (height,))[0]
+            h = autoScale(r, (height,), 3)[0]
             if h > r[3]:
                 h = r[3]
             return (r[0],
@@ -116,7 +110,7 @@ class Rect:
            """
         def fTop():
             r = self()
-            h = autoScale(r, (height,))[0]
+            h = autoScale(r, (height,), 3)[0]
             if h > r[3]:
                 h = r[3]
             return (r[0],
@@ -154,5 +148,53 @@ class Rect:
                     w,
                     r[3])
         return Rect(fRight)
+
+    def hSplit(self, height):
+        """Given the height of the top section, split the rectangle horizontally
+           into top and bottom sections.
+           """
+        def fBottom():
+            r = self()
+            h = autoScale(r, (height,), 3)[0]
+            if h > r[3]:
+                h = r[3]
+            return (r[0],
+                    r[1],
+                    r[2],
+                    r[3] - h)
+        def fTop():
+            r = self()
+            h = autoScale(r, (height,), 3)[0]
+            if h > r[3]:
+                h = r[3]
+            return (r[0],
+                    r[1] + r[3] - h,
+                    r[2],
+                    h)
+        return (Rect(fTop), Rect(fBottom))
+
+    def vSplit(self, width):
+        """Given the width of the left section, split the rectangle vertically
+           into left and right sections.
+           """
+        def fLeft():
+            r = self()
+            w = autoScale(r, (width,))[0]
+            if w > r[2]:
+                w = r[2]
+            return (r[0],
+                    r[1],
+                    w,
+                    r[3])
+        def fRight():
+            r = self()
+            w = autoScale(r, (width,))[0]
+            if w > r[2]:
+                w = r[2]
+            return (r[0] + w,
+                    r[1],
+                    r[2] - w,
+                    r[3])
+        return (Rect(fLeft), Rect(fRight))
 
 ### The End ###

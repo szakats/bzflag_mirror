@@ -22,57 +22,32 @@ the full in-game experience.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag.UI import Viewport, ThreeDView, RadarView, Layout
-from OpenGL.GL import *
-
-
-class HUDBorderView:
-    """A view that draws a shaded background and thin border"""
-    def __init__(self, viewport):
-        viewport.fov = None
-        viewport.onDrawFrame.observe(self.render)
-
-    def render(self):
-        glEnable(GL_BLEND)
-        glDisable(GL_LIGHTING)
-        glDisable(GL_CULL_FACE)
-        glDisable(GL_COLOR_MATERIAL)
-        glDisable(GL_DEPTH_TEST)
-        glDisable(GL_TEXTURE_2D)
-        glLoadIdentity()
-
-        # Draw slightly inside the viewport, so our border doesn't get half-chopped-off
-        glScalef(0.995, 0.995, 0.995)
-
-        def square():
-            glVertex2f(-1,-1)
-            glVertex2f( 1,-1)
-            glVertex2f( 1, 1)
-            glVertex2f(-1, 1)
-
-        # Creamy translucent filling
-        glColor4f(0,0,0,0.3)
-        glBegin(GL_POLYGON)
-        square()
-        glEnd()
-
-        # Bright border
-        glColor4f(1,1,1,1)
-        glBegin(GL_LINE_LOOP)
-        square()
-        glEnd()
+from BZFlag.UI import Viewport, ThreeDView, RadarView, Layout, HUD
 
 
 def attach(game, eventLoop):
     viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
 
+    padding = 10
+
+    # 3D view in the root viewport
     view3d   = ThreeDView.ThreeDView(game, viewport)
     ThreeDView.ThreeDController(view3d, viewport)
+    remaining = Layout.Rect(viewport).margin(padding)
 
-    hud = viewport.region(Layout.Rect(viewport).margin(0.01).bottom(0.3))
-    HUDBorderView(hud)
+    # HUD panel along the bottom of the screen
+    (remaining, hudRect) = remaining.hSplit(0.7)
+    hud = viewport.region(hudRect)
+    HUD.Panel(hud)
 
+    # Stick a radar in the left side of the HUD panel. The lambda expression
+    # lazily evaluates the HUD panel's height and uses it as a width for the left
+    # split, keeping the radar square.
     RadarView.RadarView(game, hud.region(Layout.Rect(hud).left(lambda r: r[3]).margin(0.03)))
+
+    # Another HUD panel, just for illustrative purposes
+    (remaining, fooRect) = remaining.margin(0,0,padding,0).vSplit(0.9)
+    HUD.Panel(viewport.region(fooRect))
 
     return viewport
 

@@ -53,14 +53,16 @@ class Viewport:
             self.onDrawFrame,
             self.onFinishFrame,
             ]
+        self.visible = True
 
         # For subviews created with region()
         self.parent = None
         self.rootView = self
 
     def render(self):
-        for f in self.renderSequence:
-            f()
+        if self.visible:
+            for f in self.renderSequence:
+                f()
 
     def setCaption(self, title):
         """Set the window caption on the viewport, if applicable"""
@@ -220,7 +222,7 @@ class OpenGLViewport(PygameViewport):
         if self.fov:
             GLU.gluPerspective(self.fov, float(self.size[0]) / self.size[1], self.nearClip, self.farClip)
         else:
-            GL.glOrtho(-1,1,-1,1, -self.farClip, self.farClip)
+            GL.glOrtho(0,self.size[0],0,self.size[1], -self.farClip, self.farClip)
         GL.glMatrixMode(GL.GL_MODELVIEW)
         GL.glLoadIdentity()
 
@@ -244,16 +246,16 @@ class OpenGLViewport(PygameViewport):
         sub.onSetupFrame  = Event.Event(sub.configureOpenGL)
         sub.onDrawFrame   = Event.Event()
         sub.onFinishFrame = Event.Event()
+        sub.renderSequence = [sub.onSetupFrame,
+                              sub.onDrawFrame,
+                              sub.onFinishFrame]
 
         # Stick it in our render sequence right before our onFinishFrame which flips the buffer
         # This should be safe for nesting viewport regions-  and the last entry will always be
         # the root viewport's onFinishFrame event.
         self.rootView.renderSequence = self.rootView.renderSequence[:-1] + \
-                                       [sub.onSetupFrame, sub.onDrawFrame, sub.onFinishFrame] + \
+                                       [sub.render] + \
                                        self.rootView.renderSequence[-1:]
-
-        # A forceful reminder that we don't manage our own rendering any more
-        sub.renderSequence = None
 
         # Ignore the caption on sub-viewports
         sub.setCaption = lambda title: None        
