@@ -24,7 +24,7 @@ for inFile in args:
     if options.file:
         outFile = options.file
     else:
-        outFile = re.sub("\..*", "", inFile) + ".avi"
+        outFile = re.sub("\.[^\/\\\.]+$", "", inFile) + ".avi"
 
     (width, height) = options.resolution.split("x")
 

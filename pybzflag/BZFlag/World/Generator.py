@@ -169,7 +169,12 @@ def Text(name,
             elif not line.startswith("#!"):
                 # We're beginning a section
                 section = line.lower()
+                if section.find(" ") >= 0:
+                    raise Errors.ProtocolError("Unexpected whitespace within section name")
                 sectionLines = []
+
+    if section:
+        raise Errors.ProtocolError("World file has unterminated '%s' section" % section)
 
     # Now store all the blocks in our world
     w.storeSkeletonHeader(size, wallHeight)

@@ -41,7 +41,7 @@ class CubeMap(Texture):
        The actual height could be limited by viewport size.
        """
     def __init__(self, position=(0,0,0), maxSize=256):
-        Texture.__init__(self, 'data/water.jpeg')
+        Texture.__init__(self)
         
         self.position = position
         self.maxSize = maxSize
