@@ -214,6 +214,7 @@ class Color(AttributeControl):
         oldGdkColor = drawingArea.gdkColor
         oldAlpha = drawingArea.colorTuple[3]
 
+        colorsel.set_has_opacity_control(gtk.TRUE)
         colorsel.set_previous_color(drawingArea.gdkColor)
         colorsel.set_previous_alpha(int(drawingArea.colorTuple[3] * 65535))
         colorsel.set_current_color(drawingArea.gdkColor)
@@ -225,7 +226,7 @@ class Color(AttributeControl):
 
         if response != gtk.RESPONSE_OK:
             # Restore the original color
-            self.setColor(oldGdkColor, oldAlpha)
+            self.setColor(drawingArea, oldGdkColor, oldAlpha)
 
         drawingArea.colorDialog.hide()
         drawingArea.colorDialog = None
