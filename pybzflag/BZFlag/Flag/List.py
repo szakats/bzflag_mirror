@@ -154,6 +154,11 @@ class CloakingFlag(FlagBase):
     type         = ['unstable', 'good']
     description  = "Makes your tank invisible out-the-window.  Still visible on radar."
 
+class UselessFlag(FlagBase):
+    abbreviation = "US"
+    type         = ['unstable', 'good']
+    description  = "You have found the useless flag. Use it wisely."
+
 ########################################### Bad flags
 
 class ColorblindnessFlag(FlagBase):
