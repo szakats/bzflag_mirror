@@ -92,7 +92,13 @@ class MsgKilled(Common.Message):
 class MsgGrabFlag(Common.Message):
     messageId = 0x6766
     entries = [
-        StructEntry(UInt16,          'flagNum'),
+        StructEntry(UInt16, 'flagNum'),
+        ]
+
+class MsgDropFlag(Common.Message):
+    messageId = 0x6466
+    entries = [
+        StructEntry(Common.Vector3, 'position'),
         ]
 
 
