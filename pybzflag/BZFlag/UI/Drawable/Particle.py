@@ -104,8 +104,8 @@ class SoftwareParticleRenderer(VertexArray):
         # Billboard ourselves some quads from the point positions and sizes
         radius = self.pointDiameter/2
         modelview = glGetFloatv(GL_MODELVIEW_MATRIX).flat
-        up    = take(modelview, (1,5,9)) * radius
-        right = take(modelview, (0,4,8)) * radius
+        up    = (take(modelview, (1,5,9)) * radius).astype(Float32)
+        right = (take(modelview, (0,4,8)) * radius).astype(Float32)
         self.vertices[...,0,:] = self.points - right - up;
         self.vertices[...,1,:] = self.points + right - up;
         self.vertices[...,2,:] = self.points + right + up;

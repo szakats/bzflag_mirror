@@ -50,7 +50,7 @@ class Model:
            """
         try:
             for affector in self.affectors:
-                affector.integrate(self.stepSize)
+                affector.integrate(dt)
         except OverflowError:
             self.integrationError()
 

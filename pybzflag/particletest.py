@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable
-from BZFlag import Event, Geometry, Noise
+from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, ParticleSystem
+from BZFlag import Event, Geometry, Noise, Animated
 from OpenGL.GL import *
 
 
@@ -10,30 +10,22 @@ class GlowSphere(Drawable.ParticleArray):
 
     def __init__(self, numParticles=2500, particleDiameter=5, sphereDiameter=50):
         Drawable.ParticleArray.__init__(self, (numParticles,), particleDiameter)
+        self.time = Animated.Timekeeper()
 
         self.render.static = False
         self.render.blended = True
 
-        # Generate some points on a sphere
-        self.vertices[...] = Noise.randomVectors((numParticles, 3),
-                                                 magnitude = sphereDiameter,
-                                                 type      = 'f')
+        self.model = ParticleSystem.Newtonian(Noise.randomVectors((numParticles, 3),
+                                                                  magnitude = sphereDiameter))
+        self.model.attachState(self.vertices)
 
     def draw(self, rstate):
+        self.model.integrate(self.time.step())
         glDisable(GL_LIGHTING)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE)
         Drawable.ParticleArray.draw(self, rstate)
         glEnable(GL_LIGHTING)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-
-class WigglyGlowSphere(GlowSphere):
-    def __init__(self):
-        GlowSphere.__init__(self, numParticles=1000)
-
-    def draw(self, rstate):
-        self.vertices += Noise.randomVectors(self.vertices.shape, magnitude=0.2)
-        GlowSphere.draw(self, rstate)
 
 
 if __name__ == '__main__':
@@ -49,7 +41,6 @@ if __name__ == '__main__':
     view.camera.distance = 150
     view.camera.jump()
 
-#    view.scene.add(WigglyGlowSphere())
     view.scene.add(GlowSphere())
 
     loop.run()
