@@ -42,7 +42,7 @@ class Widgetness:
 
 class Setup:
     def __init__(self, game, eventLoop):
-        self.viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
+        self.viewport = Viewport.OpenGLViewport(eventLoop)
 
         self.view   = ThreeDView.ThreeDView(game, self.viewport)
         widget = Widgetness()

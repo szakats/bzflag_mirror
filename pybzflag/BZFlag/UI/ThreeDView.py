@@ -146,7 +146,7 @@ class ThreeDView(ThreeDRender.View):
 class Setup:
     def __init__(self, game, eventLoop):
         from BZFlag.UI import Viewport, ThreeDControl
-        self.viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
+        self.viewport = Viewport.OpenGLViewport(eventLoop)
         self.view = ThreeDView(game, self.viewport)
         self.control = ThreeDControl.Viewing(self.view, self.viewport)
 

@@ -29,7 +29,7 @@ from BZFlag import Animated
 
 class Setup:
     def __init__(self, game, eventLoop):
-        self.viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
+        self.viewport = Viewport.OpenGLViewport(eventLoop)
         self.time = Animated.Timekeeper()
         padding = 10
         fullHudSize = 0.3

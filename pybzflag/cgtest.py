@@ -86,7 +86,7 @@ def DrawCube():
     CheckCGError()
 
 loop = Event.EventLoop()
-viewport = Viewport.OpenGLViewport(loop, (800, 600))
+viewport = Viewport.OpenGLViewport(loop)
 
 context = cgCreateContext()
 CheckCGError()
