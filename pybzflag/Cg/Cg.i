@@ -61,7 +61,7 @@ const char *cgGetProfileString(int);
 int cgGetProfile(const char *);
 
 // error functions
-CGerror cgGetError(void);
-const char *cgGetErrorString(CGerror);
-void cgSetErrorCallback(CGerrorCallbackFunc);
-CGerrorCallbackFunc cgGetErrorCallback();
+int cgGetError(void);
+const char *cgGetErrorString(int);
+void cgSetErrorCallback(int);
+int cgGetErrorCallback();
