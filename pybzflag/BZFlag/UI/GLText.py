@@ -39,10 +39,20 @@ from BZFlag import Util
 from BZFlag.UI.Texture import Texture
 from OpenGL.GL import *
 
+# Default font height, in pixels
 defaultSize = 20
+
+# Names that can be used in place of actual filenames
+fontAliases = {
+    None:   'Vera.ttf',
+    'bold': 'VeraBd.ttf',
+    }
 
 # Default list of sizes to render fonts at
 defaultSizes = [defaultSize, 64]
+
+# Cache of font objects, by data file name
+loadedFonts = {}
 
 
 class Glyph:
@@ -248,4 +258,22 @@ class Font:
         glTranslatef(-size[0]/2, -size[1]/2, 0)
         self.draw(text, fontSize)
 
+
+def draw(text, fontSize=defaultSize, fontName=None):
+    """Draw a string with the given font size and name. The
+       name may be a data file name or an alias as defined
+       at the top of this module.
+       """
+    global fontAliases, loadedFonts
+    try:
+        fontName = fontAliases[fontName]
+    except:
+        pass
+    try:
+        font = loadedFonts[fontName]
+    except:
+        font = Font(fontName)
+        loadedFonts[fontName] = font
+    font.draw(text, fontSize)
+    
 ### The End ###
