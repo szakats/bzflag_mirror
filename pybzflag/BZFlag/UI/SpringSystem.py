@@ -153,4 +153,21 @@ class ConstantAccelAffector(Affector):
     def integrate(self, dt):
         add(self.model.velocity, self.vector, self.model.velocity)
 
+
+class ClothWindAffector(Affector):
+    """Affector for applying a wind force to cloth. This must be given a
+       reference to the ArraySurface that renders this cloth, since it uses
+       the cross products and normals that it has already calculated.
+       """
+    def __init__(self, model, surface, windVector):
+        Affector.__init__(self, model)
+        self.crossProducts = surface.crossProducts
+        self.gridNormals = surface.gridNormals
+        self.windVector = windVector
+
+    def integrate(self, dt):
+        forceMagnitude = dot(self.crossProducts, self.windVector)
+        force = self.gridNormals * reshape(repeat(forceMagnitude, 3, 1), self.gridNormals.shape)
+        self.model.velocity[:-1,:-1] += force
+        
 ### The End ###

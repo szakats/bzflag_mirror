@@ -59,6 +59,11 @@ class ArraySurface(GLDrawable):
                 row.append(x + y * width)
             self.indices.append(array(row))
 
+        # Set up empty arrays of the right size for intermediate results
+        self.crossProducts = zeros((height-1, width-1, 3), self.vertices.typecode())
+        self.gridNormals = zeros(self.crossProducts.shape, self.vertices.typecode())
+        self.normals = zeros(self.vertices.shape, self.vertices.typecode())
+
     def prepareNormals(self):
         """Prepare vertex normals for this surface, storing intermediate results
            that might be helpful for other calculations.
@@ -66,14 +71,13 @@ class ArraySurface(GLDrawable):
         # Calculate cross products for all grid squares
         vx = self.vertices[1:,:-1,:] - self.vertices[:-1,:-1,:]
         vy = self.vertices[:-1,1:,:] - self.vertices[:-1,:-1,:]
-        self.crossProducts = cross(vy, vx)
+        cross(vy, vx, self.crossProducts)
 
         # Normalize them to get normals for each grid square
-        self.gridNormals = normalize(self.crossProducts)
+        normalize(self.crossProducts, self.gridNormals)
 
         # Expand that to the size of the vertex array, repeating the
         # last row and column of normals.
-        self.normals = zeros(self.vertices.shape, self.gridNormals.typecode())
         self.normals[:-1, :-1, :]  = self.gridNormals
         self.normals[-1, :-1, :] = self.gridNormals[-1,:,:]
         self.normals[:-1, -1, :] = self.gridNormals[:,-1,:]

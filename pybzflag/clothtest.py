@@ -15,12 +15,14 @@ class AnchorAffector(SpringSystem.Affector):
 class ClothObject:
     def __init__(self):
         self.cloth = SpringSystem.Cloth(self.getInitialState())
-        self.cloth.add(SpringSystem.ConstantAccelAffector, (0.01, 0.001, -0.01))
-        self.cloth.add(AnchorAffector)
 
         self.time = Animated.Timekeeper()
-        self.drawables = [Drawable.ArraySurface(self.cloth.state)]
-        self.drawables[0].render.static = False
+        self.surf = Drawable.ArraySurface(self.cloth.state)
+        self.surf.render.static = False
+
+        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.01))
+        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (0, 3, 0))
+        self.cloth.add(AnchorAffector)
 
     def getInitialState(self):
         xAxis = arange(-2, 2, 0.1)
@@ -32,7 +34,7 @@ class ClothObject:
         return a
 
     def getDrawables(self):
-        return self.drawables
+        return [self.surf]
 
     def update(self):
         self.cloth.integrate(self.time.step())

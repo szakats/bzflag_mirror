@@ -30,11 +30,12 @@ __all__ = ['cross', 'magnitude2', 'magnitude', 'normalize', 'vectorAngle',
            'unitVectorAngle']
 
 
-def cross(u, v):
+def cross(u, v, result=None):
     """Perform a cross product of two vectors or n-dimensional arrays of vectors"""
     u = asarray(u)
     v = asarray(v)
-    result = zeros(u.shape, u.typecode())
+    if result is None:
+        result = zeros(u.shape, u.typecode())
     ux = u[...,0]
     uy = u[...,1]
     uz = u[...,2]
@@ -72,11 +73,14 @@ def magnitude(a):
         return sqrt(result)
 
 
-def normalize(a):
+def normalize(a, result=None):
     """Normalize a vector or each vector in an n-dimensional array of vectors"""
     a = asarray(a)
+    if result is None:
+        result = zeros(a.shape, a.typecode())
     if len(a.shape) > 1:
-        return a / magnitude(a)[..., NewAxis]
+        divide(a, magnitude(a)[..., NewAxis], result)
+        return result
     else:
         return a / magnitude(a)
     
