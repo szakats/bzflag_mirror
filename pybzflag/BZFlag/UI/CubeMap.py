@@ -27,9 +27,16 @@ but the CubeMap class should not be instantiated.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+from __future__ import division
 from OpenGL.GL.EXT.texture_cube_map import *
 from OpenGL.GL import *
 from BZFlag.UI.Texture import Texture
+import math
+
+
+# A global lock to keep us from rendering any cube maps while we're already rendering one.
+# Not that recursive cube mapping isn't neat, but we are trying to do this in real time.
+renderingCubeMap = False
 
 
 class CubeMap(Texture):
@@ -43,6 +50,7 @@ class CubeMap(Texture):
         self.maxSize = maxSize
         self.rendered = False
         self.target = GL_TEXTURE_CUBE_MAP_EXT
+        self.recursion = 0
     
     def render(self, view, position=None):
         """Renders a cube map at the given position in world
@@ -51,16 +59,35 @@ class CubeMap(Texture):
            else in the scene, as it uses the top-left corner of the
            backbuffer as temporary space.
            """
+        # Don't allow recursive rendering of cubemaps inside other cubemaps
+        global renderingCubeMap
+        if renderingCubeMap:
+            return
+        renderingCubeMap = True
+        
         if not position:
             position = self.defaultPosition
 
-        print "Render %r" % self
+        # Determine the actual size of our texture
+        viewMinorAxis = min(view.viewport.size[0], view.viewport.size[1])
+        largestPowerOfTwo = pow(2, int(math.log(viewMinorAxis) / math.log(2)))
+        size = self.maxSize
+        if size > largestPowerOfTwo:
+            size = largestPowerOfTwo
 
-        self.rendered = True
+        # Create a viewport we can render the texture into
+        texViewport = view.viewport.region((0, 0, size, size))
+        texViewport.configureOpenGL()
+
+        view.renderScene()
+        texViewport.display.flip()
+
+        #self.rendered = True
+        renderingCubeMap = False
 
     def bind(self, view):
-        if not self.rendered:
-            self.render(view)
+        #if not self.rendered:
+        #    self.render(view)
         Texture.bind(self, view)
 
 ### The End ###

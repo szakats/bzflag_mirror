@@ -187,6 +187,7 @@ class Font:
     """Represents all sizes of one scalable font."""
     def __init__(self, name, sizes=defaultSizes):
         filename = Util.dataFile(name)
+        pygame.font.init()
         self.sizes = {}
         self.sortedSizes = sizes
         self.sortedSizes.sort()

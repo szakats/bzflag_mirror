@@ -91,7 +91,7 @@ class PygameViewport(Viewport):
             if name != "Unknown":
                 Event.attach(self, 'on' + name)
 
-        pygame.init()
+        pygame.display.init()
         self.display = pygame.display
         self.resize(size)
         self.init()
