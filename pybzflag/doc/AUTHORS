@@ -3,9 +3,9 @@
   and human readability. The fields are: name (N), email address (E),
   web address (W), PGP key ID and fingerprint (P), description (D),
   snail-mail address (S), instant messaging address (I).
-  
+
   Feel free to add yourself to this, no matter how large or small your contribution.
-  
+
 -------------------------------------------------------------------------------------
 
 N: Micah Dowty
@@ -15,6 +15,8 @@ S: Colorado, USA
 I: scanline on irc.openprojects.net
 
 N: David Trowbridge
+E: davidtrowbridge@users.sourceforge.net
 D: Wrote the ThreeDView, miscellaneous enhancements
+S: Colorado, USA
 I: captain_proton on irc.openprojects.net
 
