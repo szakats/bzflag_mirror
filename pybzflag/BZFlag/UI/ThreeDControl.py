@@ -164,14 +164,12 @@ class Viewing:
        foundation for a world editor.
        """
     def __init__(self, view, viewport):
+        self.bindings = []
         self.view = view
         self.viewport = viewport
         self.movieRecorder = None
         self.savedMode = None
-        self.bindings = []
-
-        # Need to make this toggleable...
-        self.frameRateInstrument = Instrument.FrameRate(viewport)
+        self.frameRateInstrument = None
 
         self.view.camera = ThreeDRender.SmoothedCamera()
         view.camera.position = (0, 0, 20)
@@ -184,6 +182,7 @@ class Viewing:
         self.bind(KeyPress, 'w').observe(self.toggleWireframe)
         self.bind(KeyPress, 'x').observe(self.toggleXRay)
         self.bind(KeyPress, 'r').observe(self.toggleRecorder)
+        self.bind(KeyPress, 'h').observe(self.toggleFrameRate)
         self.bind(KeyPress, 'q').observe(self.quit)
         self.bind(KeyPress, pygame.K_ESCAPE).observe(self.quit)
         self.bind(MouseWheel, 0.1, 'any').observe(self.zoom)
@@ -253,6 +252,12 @@ class Viewing:
 
     def toggleXRay(self):
         self.toggleViewportMode(Viewport.GL.XRayMode)
+
+    def toggleFrameRate(self):
+        if self.frameRateInstrument:
+            self.frameRateInstrument = None
+        else:
+            self.frameRateInstrument = Instrument.FrameRate(self.viewport)
 
     def quit(self):
         self.viewport.eventLoop.stop()

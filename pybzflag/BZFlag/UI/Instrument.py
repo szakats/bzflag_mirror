@@ -134,5 +134,7 @@ class FrameRate(TextInstrument):
     def getText(self):
         if self.counter.value:
             return "FHz: %.01f" % self.counter.value
+        else:
+            return "Calculating frame rate..."
 
 ### The End ###
