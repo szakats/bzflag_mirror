@@ -51,6 +51,12 @@ class ParticleArray(GLDrawable):
     def __init__(self, shape, allowPointSprite=False):
         GLDrawable.__init__(self)
 
+        # Allow scalar sizes in addition to real shapes
+        try:
+            shape[0]
+        except TypeError:
+            shape = (shape,)
+
         if GLExtension.nvPointSprite and allowPointSprite:
             # Do hardware accelerated billboarding via NV_point_sprite
             # To get hardware acceleration on the GeForce 3, we have to
@@ -85,8 +91,8 @@ class SoftwareParticleRenderer(VertexArray):
 
         # Create point color and position arrays
         self.points      = zeros(shape + (3,), Float32, savespace=True)
+        self.pointSizes  = zeros(shape, Float32, savespace=True)
         self.pointColors = ones(shape + (4,), Float32, savespace=True)
-        self.pointSizes  = ones(shape, Float32, savespace=True)
 
     def draw(self, rstate):
         # Stretch our point colors over each whole quad

@@ -9,19 +9,16 @@ class GlowSphere(Drawable.ParticleArray):
     """An example particle system that draws glowing balls positioned on the surface of a sphere"""
     textureName = 'spark.png'
 
-    def __init__(self, numParticles=2500, particleDiameter=5, gridRadius=80):
-        resolution = int(math.sqrt(numParticles))
-        self.model = ParticleSystem.Newtonian(Geometry.pointGrid(
-            (-gridRadius, -gridRadius, 0), (gridRadius*2,0,0), (0,gridRadius*2,0), (resolution, resolution)))
-
-        Drawable.ParticleArray.__init__(self, self.model.state.shape[:-1])
+    def __init__(self, numParticles=100):
+        self.model = ParticleSystem.Fountain(numParticles)
+        Drawable.ParticleArray.__init__(self, numParticles)
         self.model.attachDrawable(self)
+
         self.time = Animated.Timekeeper()
-
-        self.sizes *= particleDiameter
-
         self.render.static = False
         self.render.blended = True
+
+        self.model.add(ParticleSystem.Emitter, 1, 1)
 
     def draw(self, rstate):
         self.model.integrate(self.time.step())
