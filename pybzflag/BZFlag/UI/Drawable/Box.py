@@ -144,6 +144,14 @@ class BrickSides(Sides):
         Sides.__init__(self, box)
 
 
+class MetalSides(Sides):
+    """Sides of a square metal box"""
+    textureName = "metal_box.jpeg"
+    def __init__(self, box):
+        self.texRepeats = (1,1,1)
+        Sides.__init__(self, box)
+
+
 class PlatformSides(Sides):
     """Sides of a thin platform box. This makes platforms look like two
        thin pieces of concrete sandwiching some lighter concrete, with
@@ -186,6 +194,37 @@ class Top(End):
     def set(self, box):
         self.polygon = box.toPolygon()
         self.height = box.center[2] + box.size[2]
+
+
+class MetalEnd(DisplayList):
+    """The top or bottom of a square metal box"""
+    textureName = 'metal_box.jpeg'
+    uvMap = ( (0,0), (1,0), (1,1), (0,1) )
+
+    def drawToList(self):
+        glPushMatrix()
+        glTranslatef(0, 0, self.height)
+        glNormal3f(0, 0, 1)
+        glBegin(GL_POLYGON)
+        for i in xrange(4):
+            vertex = self.polygon[i]
+            glTexCoord2f(*self.uvMap[i])
+            glVertex2f(*vertex)
+        glEnd()
+        glPopMatrix()
+
+
+class MetalTop(MetalEnd):
+    def set(self, box):
+        self.polygon = box.toPolygon()
+        self.height = box.center[2] + box.size[2]
+
+
+class MetalBottom(MetalEnd):
+    def set(self, box):
+        self.polygon = box.toPolygon()
+        self.polygon.reverse()
+        self.height = box.center[2]
 
 
 class MultitexTop(Top):
@@ -392,26 +431,30 @@ def detectBoxDrawables(box):
     majorAxis = max(box.size[0], box.size[1])
     minorAxis = min(box.size[0], box.size[1])
     axisRatio = majorAxis / minorAxis
-    
-    # If the box isn't on the ground and it's fairly flat, assume it's a platform
-    if height < 8 and box.center[2] > 1:
-        sides = PlatformSides(box)
+    heightRatio = height / minorAxis
 
     # If the box is on the ground and it's high enough, add some grass around the edges
     if box.center[2] == 0 and height > 1:
         drawables.append(GrassEdge(box))
 
-    # If the box is about the same width as a tank, put some tread marks on it...
-    if minorAxis > Scale.TankWidth and minorAxis < Scale.TankWidth * 4 and majorAxis > Scale.TankWidth * 4:
+    # If the box isn't on the ground and it's fairly flat, assume it's a platform
+    if height < 8 and box.center[2] > 1:
+        sides = PlatformSides(box)
+
+    if majorAxis < 8 and axisRatio < 1.1 and heightRatio < 2.2 and heightRatio > 1.8:
+        # If the box is a fairly small cube, make it metal
+        sides = MetalSides(box)
+        top = MetalTop(box)
+        bottom = MetalBottom(box)
+    elif minorAxis > Scale.TankWidth and minorAxis < Scale.TankWidth * 4 and majorAxis > Scale.TankWidth * 4:
+        # If the box is about the same width as a tank, put some tread marks on it...
         drawables.append(TreadStain(box))
-
-    # ...or, if the box is fairly large and squareish, use an oil-stain texture
     elif minorAxis > 10 and axisRatio < 2:
+        # ...or, if the box is fairly large and squareish, use an oil-stain texture
         drawables.append(OilStain(box))
-
-    # ...or if it's fairly large and we have nothing better to
-    #    do to the top, multitexture it so it isn't so boring
     elif minorAxis > 10:
+        # ...or if it's fairly large and we have nothing better to
+        #    do to the top, multitexture it so it isn't so boring
         top = MultitexTop(box)
     
     # Randomly put BZFlag logos on properly sized boxes
