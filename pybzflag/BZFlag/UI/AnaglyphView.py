@@ -70,10 +70,10 @@ class AnaglyphView(ThreeDView):
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)
 
 def attach(game, eventLoop):
-    from BZFlag.UI.Viewport import OpenGLViewport
-    viewport = OpenGLViewport(eventLoop, (800, 600))
+    from BZFlag.UI import Viewport, ThreeDControl
+    viewport = Viewport.OpenGLViewport(eventLoop, (800, 600))
     view = AnaglyphView(game, viewport)
-    ThreeDController(view, viewport)
+    ThreeDControl.Viewing(view, viewport)
     return viewport
 
 ### The End ###
