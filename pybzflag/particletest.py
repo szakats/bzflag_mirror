@@ -26,9 +26,7 @@ class Sparks(Drawable.SpriteArray):
                                       position            = position,
                                       )
         self.lifespan = self.model.add(ParticleSystem.LifespanAffector, 1)
-        self.fader = self.model.add(ParticleSystem.FountainFadeAffector,
-                                    sizeRange = (0, 1),
-                                    )
+        self.fader = self.model.add(ParticleSystem.FountainFadeAffector)
         self.constAccel = self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,-50))
 
         Tweak.Window(
@@ -37,8 +35,10 @@ class Sparks(Drawable.SpriteArray):
             Tweak.Attribute(self.emitter, 'direction', range=(-1,1)),
             Tweak.Attribute(self.emitter, 'directionRandomness'),
             Tweak.Attribute(self.emitter, 'position', range=(-10,10)),
-            Tweak.Attribute(self.constAccel, 'vector', range=(-100,100)),
+            Tweak.Attribute(self.lifespan, 'lifespan', range=(0,10)),
             Tweak.Attribute(self.fader, 'sizeRange', range=(0,10)),
+#            Tweak.Attribute(self.fader, 'colorRange', range=(0,1)),
+            Tweak.Attribute(self.constAccel, 'vector', range=(-100,100)),
             )
 
     def draw(self, rstate):

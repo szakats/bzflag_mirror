@@ -203,7 +203,16 @@ class LifespanAffector(Affector):
        """
     def __init__(self, model, lifespan):
         Affector.__init__(self, model)
+        self.lifespan = lifespan
+
+    def getLifespan(self):
+        return self._lifespan
+
+    def setLifespan(self, lifespan):
+        self._lifespan = lifespan
         self.ageRate = -1/lifespan
+
+    lifespan = property(getLifespan, setLifespan)
 
     def integrate(self, dt):
         add(self.model.life, dt * self.ageRate, self.model.life)
