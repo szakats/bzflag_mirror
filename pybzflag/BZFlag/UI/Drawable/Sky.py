@@ -47,33 +47,46 @@ class SkyDrawable(DisplayList):
         self.render.static = False
 
 
-class Colors(SkyDrawable):
-    """The sky itself, with colors changing over the course of the day"""
-    textureName = 'sky_colors.png'
+class ColoredSkyMesh(SkyDrawable):
+    """A SkyDrawable with colors animated using one track from the sky_colors texture.
+       The colorTrack values should be replaced by subclasses with the position of the
+       color track in texels. Fractional texels can and should be used to account for
+       the linear interpolation overshoot.
+       The X axis of the sky color is temporal, indicating the time of day.
+       The Y axis of the sky color maps from 0 to 1 on the model.
+       """
+    textureName      = 'sky_colors.png'
+    colorTrackOrigin = None
+    colorTrackHeight = None
+    meshName         = None
+
     def drawToList(self, rstate):
-        """Our display list only holds an inverted sphere and the static
-           texture coordinates. Texture coordinates must be adjusted for time
-           of day in draw().
+        """The display list should hold everything except the time-dependent
+           texGen plane equation.
            """
-        # Texture the sky dome vertically with the Y axis of our gradient.
-        # The sky dome gets the top half of our sky_colors texture
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 31/64, 32.5/64))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0,
+                                           self.colorTrackHeight / self.render.textures[0].size[1],
+                                           self.colorTrackOrigin / self.render.textures[0].size[1]))
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
-        VRML.load('sky.wrl')['dome'].drawToList(rstate)
+        VRML.load('sky.wrl')[self.meshName].drawToList(rstate)
 
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
 
     def draw(self, rstate):
-        # Use texture coordinate generation to set the time of day.
-        # The X axis of our texture is time, representing one day. The Y axis is spacial,
-        # stretching from the bottom of the sky sphere to the top.
         glTexGenfv(GL_S, GL_OBJECT_PLANE, (0, 0, 0, self.sky.unitDayTime))
         DisplayList.draw(self, rstate)
+
+
+class Colors(ColoredSkyMesh):
+    """The sky itself, with colors changing over the course of the day"""
+    colorTrackOrigin = 32.5
+    colorTrackHeight = 31
+    meshName         = 'dome'
 
 
 class CloudTexture(GLNoise.MappedPerlinTexture):
@@ -85,44 +98,50 @@ class CloudTexture(GLNoise.MappedPerlinTexture):
             return 0
 
 
-class Clouds(SkyDrawable):
+class Clouds(ColoredSkyMesh):
     """Dynamic perlin-noise-based clouds"""
+    colorTrackOrigin = 13
+    colorTrackHeight = 1
+    meshName         = 'dome'
+
     def __init__(self, *args, **kw):
-        SkyDrawable.__init__(self, *args, **kw)
-        self.render.textures = (CloudTexture(),)
+        ColoredSkyMesh.__init__(self, *args, **kw)
+        self.render.textures += (CloudTexture(),)
         self.motion = Animated.Value(Animated.RampFunction(1000))
         self.time = Animated.Timekeeper()
         self.scale = 0.2
 
     def drawToList(self, rstate):
-        """Do all the drawing we can in the display list"""
-
-        # Set up blending to use only the texture's alpha
-        # channel, disregarding its color channels
-        glColor3f(1,1,1)
         glEnable(GL_BLEND)
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA)
 
         # Set up texture coordinate generation. The plane equations
         # are set up every frame in draw() to animate the clouds' motion
+        glActiveTextureARB(GL_TEXTURE1_ARB)
         glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, self.scale, 0, 0))
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
+        glActiveTextureARB(GL_TEXTURE0_ARB)
 
-        VRML.load('sky.wrl')['dome'].drawToList(rstate)
+        # Do the usual ColoredSkyMesh rendering
+        ColoredSkyMesh.drawToList(self, rstate)
 
         # Cleanup!
+        glActiveTextureARB(GL_TEXTURE1_ARB)
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
+        glActiveTextureARB(GL_TEXTURE0_ARB)
         glDisable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def draw(self, rstate):
         """Animate the texture coordinates every frame"""
         self.motion.integrate(self.time.step())
+        glActiveTextureARB(GL_TEXTURE1_ARB)
         glTexGenfv(GL_S, GL_OBJECT_PLANE, (self.scale, 0, 0, self.motion.value))
+        glActiveTextureARB(GL_TEXTURE0_ARB)
         DisplayList.draw(self, rstate)
 
 
@@ -163,9 +182,12 @@ class MountainTexture(Texture.DynamicTexture):
         glDisable(GL_LINE_SMOOTH)
 
 
-class Mountains(SkyDrawable):
+class Mountains(ColoredSkyMesh):
     """Some mountains and a chasm to cover up the horizon"""
-    textureName = 'sky_colors.png'
+    colorTrackOrigin = 24.5
+    colorTrackHeight = 7
+    meshName         = 'horizon'
+
     def __init__(self, *args, **kw):
         SkyDrawable.__init__(self, *args, **kw)
         self.render.textures += (MountainTexture(),)
@@ -173,6 +195,7 @@ class Mountains(SkyDrawable):
     def drawToList(self, rstate):
         """Do everything except the frame-dependent texgen setup in the display list"""
         glEnable(GL_BLEND)
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA)
 
         # Set up texture coordinates for the mountain silhouette.
         # We can't do cylindrical mapping with glTexGen, and we don't have
@@ -187,35 +210,16 @@ class Mountains(SkyDrawable):
         glEnable(GL_TEXTURE_GEN_T)
         glActiveTextureARB(GL_TEXTURE0_ARB)
 
-        # Texture coordinate generation for the sky colors
-        # This is a band of 8 texels that sits right below
-        # the sky colors.
-        glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 7.5/64, 24/64))
-        glEnable(GL_TEXTURE_GEN_S)
-        glEnable(GL_TEXTURE_GEN_T)
-
-        VRML.load('sky.wrl')['horizon'].drawToList(rstate)
+        # Do the usual ColoredSkyMesh rendering
+        ColoredSkyMesh.drawToList(self, rstate)
 
         # Cleanup!
         glActiveTextureARB(GL_TEXTURE1_ARB)
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
         glActiveTextureARB(GL_TEXTURE0_ARB)
-        glDisable(GL_TEXTURE_GEN_S)
-        glDisable(GL_TEXTURE_GEN_T)
-        glDisable(GL_BLEND)
-        glColor3f(1,1,1)
         glDisable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-    def draw(self, rstate):
-        # Use texture coordinate generation to set the time of day.
-        # The X axis of our texture is time, representing one day. The Y axis is spacial,
-        # stretching from the bottom of the sky sphere to the top.
-        glTexGenfv(GL_S, GL_OBJECT_PLANE, (0, 0, 0, self.sky.unitDayTime))
-        DisplayList.draw(self, rstate)
 
 
 class Void(SkyDrawable):
