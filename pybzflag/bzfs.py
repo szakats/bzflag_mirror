@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from BZFlag import Server
+from BZFlag import CommandLine
 
-server = Server.BaseServer(interface = '')
+server = CommandLine.server()
 
 print "Server is listening on %s:%d" % (server.tcp.interface, server.tcp.port)
 

@@ -22,7 +22,7 @@ of BZFlag-related utilities.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag import optik, Client, Player
+from BZFlag import optik, Client, Player, Server, Protocol
 import sys
 
 
@@ -31,22 +31,20 @@ optik.STD_HELP_OPTION.help    = "Shows this help message and exits."
 optik.STD_VERSION_OPTION.help = "Shows the version number and exits."
 
 
-class ClientParser(optik.OptionParser):
-    """OptionParser subclass to assist with creating Client instances
+class Parser(optik.OptionParser):
+    """OptionParser subclass to assist with creating Client or Server instances
        using a standard set of command line options.
        """
-    def __init__(self, clientClass=Client.PlayerClient, **extraDefaults):
-        """Provide a command line interface for creating a Client instance,
-           given a Client subclass to use and a list of default option values.
-           """
+    def __init__(self, cls, **extraDefaults):
         optik.OptionParser.__init__(self)
-        self.clientInst = clientClass()
-        availableOpts = self.clientInst.options.keys()
+        self.inst = cls()
+        availableOpts = self.inst.options.keys()
 
         defaults = {
-            'team': 'rogue',
-            'email': 'PyBZFlag',
+            'team':       'rogue',
+            'email':      'PyBZFlag',
             'playerType': 'tank',
+            'interface':  ':%s' % Protocol.Common.defaultPort,
             }
         defaults.update(extraDefaults)
 
@@ -58,11 +56,13 @@ class ClientParser(optik.OptionParser):
                 kw['help'] += " [%s]" % default
             self.add_option(*names, **kw)
 
-        ### Add command line options for supported client options
-
         if 'server' in availableOpts:
             add("-s", "--server", dest="server", metavar="HOST",
                 help="Sets the BZFlag server to connect to on startup.")
+
+        if 'interface' in availableOpts:
+            add("-i", "--interface", dest="interface", metavar="HOST:PORT",
+                help="Sets the host and/or the port to listen on.")
 
         if 'identity' in availableOpts:
             add("-c", "--call-sign", dest="callSign", metavar="NAME",
@@ -78,8 +78,6 @@ class ClientParser(optik.OptionParser):
         values = values.__dict__
         options = {}
 
-        ### Convert command line options that we have into client options
-
         try:
             options['server'] = values['server']
         except KeyError:
@@ -91,10 +89,15 @@ class ClientParser(optik.OptionParser):
         except KeyError:
             pass
 
-        self.clientInst.cmdLineValues = values
-        self.clientInst.cmdLineArgs = args
-        self.clientInst.setOptions(**options)
-        return self.clientInst
+        try:
+            options['interface'] = values['interface']
+        except KeyError:
+            pass
+
+        self.inst.cmdLineValues = values
+        self.inst.cmdLineArgs = args
+        self.inst.setOptions(**options)
+        return self.inst
 
 
 def client(clientClass=Client.PlayerClient, argv=sys.argv, **extraDefaults):
@@ -102,7 +105,13 @@ def client(clientClass=Client.PlayerClient, argv=sys.argv, **extraDefaults):
        and immediately parsing args with it, for the case when you don't
        need to add any extra options.
        """
-    parser = ClientParser(clientClass, **extraDefaults)
+    parser = Parser(clientClass, **extraDefaults)
+    return parser.parse(argv)
+
+
+def server(serverClass=Server.StandardServer, argv=sys.argv, **extraDefaults):
+    """A similar convenience function for servers"""
+    parser = Parser(serverClass, **extraDefaults)
     return parser.parse(argv)
 
 ### The End ###

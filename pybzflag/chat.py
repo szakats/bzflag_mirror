@@ -5,12 +5,13 @@
 # Imagine cron jobs spitting uptimes and disk space stats into bzflag
 # so you don't miss out on such things while playing :)
 #
-from BZFlag import CommandLine
+from BZFlag import CommandLine, Client
 from threading import *
 import sys, time
 
-argParser = CommandLine.ClientParser(server   = "localhost",
-                                     callSign = "@PyChat")
+argParser = CommandLine.Parser(Client.PlayerClient,
+                               server   = "localhost",
+                               callSign = "@PyChat")
 argParser.add_option("-q", "--quiet", action="store_true", dest="quiet",
                      help="Disables the output of connection status messages and protocol warnings.")
 argParser.add_option("-i", "--silent", action="store_true", dest="silent",

@@ -96,4 +96,19 @@ class BaseServer(Network.Endpoint):
                 # Already disconnected
                 pass
 
+
+class StatefulServer(BaseServer):
+    """On top of the basic networking functionality given by BaseServer,
+       this implements a server that knows about a game state and can
+       communicate this to clients.
+       """
+    pass
+
+
+class StandardServer(StatefulServer):
+    """A server that implements standard game rules in the world supplied
+       by a StatefulServer
+       """
+    pass
+
 ### The End ###

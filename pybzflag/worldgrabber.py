@@ -2,11 +2,12 @@
 #
 # A simple utility to save a server's world file
 #
-from BZFlag import CommandLine
+from BZFlag import CommandLine, Client
 import sys
 
-argParser = CommandLine.ClientParser(server   = "localhost",
-                                     callSign = "@Worldgrabber")
+argParser = CommandLine.Parser(Client.PlayerClient,
+                               server   = "localhost",
+                               callSign = "@Worldgrabber")
 
 argParser.add_option("-o", "--output", dest="outputFile", metavar="FILE", default="-",
                      help="Sets the name of the file to save the downloaded world to.")
