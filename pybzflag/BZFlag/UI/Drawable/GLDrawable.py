@@ -65,10 +65,9 @@ class GLDrawable:
 
     def loadTextures(self):
         textures = []
-        if self.textureNames and GLExtension.multitexture:
-            for name in self.textureNames:
-                textures.append(Texture.load(name))
-        elif self.textureName:
+        for name in self.textureNames:
+            textures.append(Texture.load(name))
+        if self.textureName:
             textures.append(Texture.load(self.textureName))
         self.render.textures = tuple(textures)
 

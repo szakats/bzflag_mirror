@@ -25,16 +25,13 @@ from OpenGL.GL import *
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import GLExtension
 
+
 class Ground(DisplayList):
-    # Use two concrete textures if we have multitexturing, if not
-    # fall back to the classic BZFlag texture.
     textureNames = ('grass_base.png', 'grass_overlay.jpeg')
-    textureName = 'ground.png'
 
     def set(self, size):
         self.size = size / 2
-        if GLExtension.multitexture:
-            self.render.textures[1].texEnv = GL_MODULATE
+        self.render.textures[1].texEnv = GL_MODULATE
 
     def drawToList(self):
         glPushMatrix()
@@ -42,35 +39,23 @@ class Ground(DisplayList):
         glBegin(GL_QUADS)
         glNormal3f(0, 0, 1);
 
-        if GLExtension.multitexture:
-            baseTexRepeats = 30
-            overlayTexRepeats = 1
-            glMultiTexCoord2fARB(GL_TEXTURE0_ARB, baseTexRepeats, 0)
-            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, overlayTexRepeats, 0)
-            glVertex3f(self.size, -self.size, 0)
-            glMultiTexCoord2fARB(GL_TEXTURE0_ARB, 0,0)
-            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0,0)
-            glVertex3f(-self.size, -self.size, 0)
-            glMultiTexCoord2fARB(GL_TEXTURE0_ARB, 0, baseTexRepeats)
-            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, overlayTexRepeats)
-            glVertex3f(-self.size, self.size, 0)
-            glMultiTexCoord2fARB(GL_TEXTURE0_ARB, baseTexRepeats, baseTexRepeats)
-            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, overlayTexRepeats, overlayTexRepeats)
-            glVertex3f(self.size, self.size, 0)
-        else:
-            texRepeats = 30
-            glTexCoord2f(0.0, 0.0)
-            glVertex3f(self.size, -self.size, 0)
-            glTexCoord2f(texRepeats, 0.0)
-            glVertex3f(-self.size, -self.size, 0)
-            glTexCoord2f(texRepeats, texRepeats)
-            glVertex3f(-self.size, self.size, 0)
-            glTexCoord2f(0.0, texRepeats)
-            glVertex3f(self.size, self.size, 0)
+        baseTexRepeats = 30
+        overlayTexRepeats = 1
+        glTexCoord2f(baseTexRepeats, 0)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, overlayTexRepeats, 0)
+        glVertex3f(self.size, -self.size, 0)
+        glTexCoord2f(0,0)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0,0)
+        glVertex3f(-self.size, -self.size, 0)
+        glTexCoord2f(0, baseTexRepeats)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, overlayTexRepeats)
+        glVertex3f(-self.size, self.size, 0)
+        glTexCoord2f(baseTexRepeats, baseTexRepeats)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, overlayTexRepeats, overlayTexRepeats)
+        glVertex3f(self.size, self.size, 0)
 
         glEnd()
         glEnable(GL_CULL_FACE)
         glPopMatrix()
-
 
 ### The End ###

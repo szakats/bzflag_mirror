@@ -83,31 +83,22 @@ class BoxSides(DisplayList):
 
 
 class BoxTop(DisplayList):
-    # Use two concrete textures if we have multitexturing, if not
-    # fall back to the classic BZFlag texture.
     textureNames = ('concrete_base.jpeg', 'concrete_overlay.png')
-    textureName = 'boxtops.png'
     
     def set(self, polygon, height):
         self.polygon = polygon
         self.height = height
-        if GLExtension.multitexture:
-            self.render.textures[1].texEnv = GL_BLEND
+        self.render.textures[1].texEnv = GL_BLEND
 
     def drawToList(self):
         glPushMatrix()
         glTranslatef(0, 0, self.height)
         glNormal3f(0, 0, 1)
         glBegin(GL_POLYGON)
-        if GLExtension.multitexture:
-            for vertex in self.polygon:
-                glMultiTexCoord2fARB(GL_TEXTURE0_ARB, vertex[0] / 100, vertex[1] / 100)
-                glMultiTexCoord2fARB(GL_TEXTURE1_ARB, vertex[0] / 20, vertex[1] / 20)
-                glVertex2f(*vertex)
-        else:
-            for vertex in self.polygon:
-                glTexCoord2f(vertex[0] / 2, vertex[1] / 2)
-                glVertex2f(*vertex)
+        for vertex in self.polygon:
+            glTexCoord2f(vertex[0] / 100, vertex[1] / 100)
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, vertex[0] / 20, vertex[1] / 20)
+            glVertex2f(*vertex)
         glEnd()
         glPopMatrix()
 

@@ -178,7 +178,7 @@ class OpenGLViewport(PygameViewport):
 
         # Test for OpenGL extensions we can use
         from BZFlag.UI import GLExtension
-        GLExtension.init()
+        GLExtension.test()
 
         self.nearClip    = 0.1
         self.farClip     = 2500.0

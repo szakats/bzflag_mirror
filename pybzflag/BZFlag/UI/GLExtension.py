@@ -21,32 +21,28 @@ then containing those query results in an easy to find place.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-initialized = False
 multitexture = False
 textureUnits = []
 
 
-def init():
-    """Test for extension support"""
-    global initialized, multitexture, textureUnits
-    if initialized:
-        return
+def test():
+    """Test for extension support."""
+    global multitexture, textureUnits
+    import OpenGL.GL.ARB.multitexture
+    from OpenGL import GL
 
     # Determine whether we have multitexturing
-    from OpenGL.GL.ARB.multitexture import glInitMultitextureARB, GL_TEXTURE0_ARB, glActiveTextureARB
-    multitexture = glInitMultitextureARB()
+    multitexture = OpenGL.GL.ARB.multitexture.glInitMultitextureARB()
 
     # If we have multitexturing, make a list of supported texture units
     if multitexture:
         try:
-            unit = GL_TEXTURE0_ARB
+            unit = OpenGL.GL.ARB.multitexture.GL_TEXTURE0_ARB
             while True:
-                glActiveTextureARB(unit)
+                OpenGL.GL.ARB.multitexture.glActiveTextureARB(unit)
                 textureUnits.append(unit)
                 unit += 1
         except:
             pass
-
-    initialized = True
 
 ### The End ###
