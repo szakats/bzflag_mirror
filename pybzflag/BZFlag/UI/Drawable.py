@@ -22,7 +22,7 @@ OpenGL drawing definitions for various world objects
 #
 
 from OpenGL.GL import *
-from BZFlag.UI.Texture import Texture
+from BZFlag.UI import Texture
 from BZFlag import Util
 
 
@@ -42,7 +42,7 @@ class GLDrawable:
 
     def __init__(self):
         if self.textureName:
-            self.texture = Texture(Util.dataFile(self.textureName))
+            self.texture = Texture.load(self.textureName)
         else:
             self.texture = None
         self.blended = False

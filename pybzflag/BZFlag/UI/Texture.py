@@ -55,7 +55,8 @@ class Texture:
         """Bind this texture to GL_TEXTURE_2D in the current OpenGL context"""
         glBindTexture(GL_TEXTURE_2D, self.texture)
 
-class TCache:
+
+class Cache:
     """Keeps track of which textures are already loaded, so we never
        duplicate texture ids
        """
@@ -65,6 +66,11 @@ class TCache:
     def load(self, name):
         if not self.textures.has_key(name):
 	    self.textures[name] = Texture(Util.dataFile(name))
-	return self.texutres[name]
+	return self.textures[name]
+
+
+default_cache = Cache()
+def load(name):
+    return default_cache.load(name)
 
 ### The End ###
