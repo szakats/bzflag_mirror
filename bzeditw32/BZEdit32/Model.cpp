@@ -1208,10 +1208,10 @@ void CBaseTopsModel::Render ( bool bTrans, bool bSelected )
 		case 1:
 			afColor[0] = 1.0f;
 			break;
-		case 2:
+		case 3:
 			afColor[2] = 1.0f;
 			break;
-		case 3:
+		case 2:
 			afColor[1] = 1.0f;
 			break;
 		case 4:
