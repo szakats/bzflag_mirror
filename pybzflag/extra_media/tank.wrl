@@ -6,13 +6,6 @@
 
 Separator {
 Switch {
-	DEF Grey
-	Material {
-		diffuseColor 0.941176 0.941176 0.941176
-		specularColor 1.000000 1.000000 1.000000
-		shininess 0.500000 
-		transparency 0.000000 
-	}
 	DEF barrel
 	Separator {
 		Coordinate3 {
@@ -35,8 +28,6 @@ Switch {
 				 -1.685000 -0.128000 -0.130000,
 			]
 		}
-		USE Grey
-
 		IndexedFaceSet {
 			coordIndex [
 				 0, 1, 2, -1,
@@ -110,8 +101,6 @@ Switch {
 				 -2.960000 -0.877500 0.450000,
 			]
 		}
-		USE Grey
-
 		IndexedFaceSet {
 			coordIndex [
 				 0, 1, 2, -1,
@@ -195,8 +184,6 @@ Switch {
 				 2.845000 0.261500 0.034000,
 			]
 		}
-		USE Grey
-
 		IndexedFaceSet {
 			coordIndex [
 				 0, 1, 2, -1,
@@ -288,8 +275,6 @@ Switch {
 				 2.845000 0.262500 0.034000,
 			]
 		}
-		USE Grey
-
 		IndexedFaceSet {
 			coordIndex [
 				 0, 1, 2, -1,
@@ -417,8 +402,6 @@ Switch {
 				 -0.483000 0.704000 0.365000,
 			]
 		}
-		USE Grey
-
 		IndexedFaceSet {
 			coordIndex [
 				 0, 1, 2, -1,
