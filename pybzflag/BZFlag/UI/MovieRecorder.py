@@ -23,10 +23,12 @@ later ported to Crystal Space.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+from __future__ import division
 from Numeric import *
 from OpenGL.GL import *
 import os, Image
 from StringIO import StringIO
+from BZFlag import Animated
 
 
 class Recorder:
@@ -37,6 +39,8 @@ class Recorder:
         self.frameRate = frameRate
         self.viewport = viewport
         self.fileTemplate = fileTemplate
+        self.recordedFrames = 0
+        self.movieTime = 0
         self.running = False
         self.encoder = 'JPEG'
         self.options = {'quality': 98}
@@ -57,11 +61,13 @@ class Recorder:
         # at the end isn't friendly to the way Viewport manages subviewports.
         self.viewport.renderSequence.insert(0, self.recordFrame)
         self.running = True
+        Animated.currentTimeMaster = MovieTimeMaster(self)
         return self.fileName
 
     def stop(self):
         if not self.running:
             return
+        Animated.currentTimeMaster = Animated.defaultTimeMaster
         self.viewport.renderSequence.remove(self.recordFrame)
         self.running = False
         self.file.close()
@@ -86,6 +92,8 @@ class Recorder:
                                  GL_UNSIGNED_BYTE)
         self.image.fromstring(rgb)
         self.image.save(self, self.encoder, **self.options)
+        self.recordedFrames += 1
+        self.movieTime += 1/self.frameRate
 
     def writeHeader(self):
         self.file.write("bzmovie %s %s %s %s\n" % (self.image.size[0],
@@ -97,6 +105,24 @@ class Recorder:
         """Store raw frame data as compressed in recordFrame"""
         self.file.write("%s\n" % len(data))
         self.file.write(data)
+
+
+class MovieTimeMaster(Animated.TimeMaster):
+    """Replacement TimeMaster class that keeps the global timebase in
+       sync with a recording's constant frame rate.
+       """
+    def __init__(self, recorder):
+        self.recorder = recorder
+        Animated.TimeMaster.__init__(self)
+
+    def update(self):
+        # Keep updating the default TimeMaster, to avoid a very large
+        # timestep when disabling recording
+        Animated.defaultTimeMaster.update()
+
+        self.now = self.recorder.movieTime
+        self.stepTime = 1 / self.recorder.frameRate
+        self.stepNumber += 1
 
 
 class Transcoder:

@@ -34,20 +34,40 @@ class TimeMaster:
        to a movie file at a constant rate, or to synchronize with a server's time.
        """
     def __init__(self):
-        self.step()
+        self.then = None
+        self.now = None
+        self.stepNumber = 0
+        self.stepTime = 0
 
-    def step(self):
-        """Update the global timebase to the current time.
-           Generally this is stepped by the Viewport. If you are running a
-           simulation without a visual frontend, you will have to call this manually.
+    def update(self):
+        """Take a global time step. This is generally called by the viewport,
+           but if you are using it in a nonvisual environment, you will have to
+           call it yourself each time you want to take a separate timestep.
            """
         self.now = time.time()
+        if self.then:
+            self.stepTime = self.now - self.then
+        else:
+            self.stepTime = 0
+        self.then = self.now
+        self.stepNumber += 1
 
+    def step(self, lastStep=None):
+        """Return a (stepTime, stepNumber) tuple for the current time step.
+           Clients to this function should pass that step number back as
+           lastStep the next time this function is called.
+           """
+        if lastStep == self.stepNumber:
+            return (0, self.stepNumber)
+        else:
+            return (self.stepTime, self.stepNumber)
+    
     def time(self):
         """Return the current time, according to the master clock"""
         return self.now
 
 defaultTimeMaster = TimeMaster()
+currentTimeMaster = defaultTimeMaster
     
 
 class Timekeeper:
@@ -57,28 +77,20 @@ class Timekeeper:
        timestep. All timekeeper instances advance in sync when the TimeMaster takes
        a step.
        """
-    def __init__(self, timeMaster=None):
-        self.master = timeMaster
-        self.lastTime = None
+    def __init__(self):
+        self.lastStep = None
         
     def time(self):
         """Return the current time, according to the master clock"""
-        if self.master:
-            return self.master.time()
-        else:
-            global defaultTimeMaster
-            return defaultTimeMaster.time()
+        global currentTimeMaster
+        return currentTimeMaster.time()
 
     def step(self):
         """Take a step, return the number of seconds since the last step."""
-        now = self.time()
-        if self.lastTime:
-            step = now - self.lastTime
-        else:
-            step = 0
-        self.lastTime = now
+        global currentTimeMaster
+        (step, self.lastStep) = currentTimeMaster.step(self.lastStep)
         return step
-
+    
 
 class FrequencyCounter:
     """Measure the frequency at which a specified event occurs,

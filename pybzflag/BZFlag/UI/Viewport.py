@@ -142,7 +142,7 @@ class PygameViewport(Viewport):
             self.onEvent(event)
 
         # Update the global timestep for this frame
-        Animated.defaultTimeMaster.step()
+        Animated.currentTimeMaster.update()
 
         # Call all of our rendering callbacks. This includes subviewports.
         self.render()
