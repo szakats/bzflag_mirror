@@ -96,6 +96,7 @@ class PygameViewport(Viewport):
            try to call us for rendering, using a PeriodicTimer.
            A rate of 'None' will disable continuous rendering.
            """
+        self.targetFrameRate = rate
         if self.frameTimer:
             self.eventLoop.remove(self.frameTimer)
         if rate:
