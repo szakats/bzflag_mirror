@@ -42,7 +42,9 @@ cachePath = "~/.bzflag-cache"
 requiredPythonVersion = (2,2,1)
 import sys, string
 if sys.version_info < requiredPythonVersion:
-    raise Exception("%s requires at least Python %s" % (
-        name, string.join(map(str, requiredPythonVersion), ".")))
+    raise Exception("%s requires at least Python %s, found %s instead." % (
+        name,
+        string.join(map(str, requiredPythonVersion), "."),
+        string.join(map(str, sys.version_info), ".")))
 
 ### The End ###
