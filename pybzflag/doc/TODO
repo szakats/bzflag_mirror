@@ -6,12 +6,7 @@ Todo list, in no particular order:
   - Port the jetstream particle engine (why not?)
 
   - Clouds:
-      * Improve the noise - try replacing the prohibitively slow mapping tables with blending,
-        so we can animate the clouds in realtime.
-
       * Vary the cloud velocity according to the current global wind speed.
-
-      * Clouds near the horizon should be obscured by haze.
 
       * Think of more ways to make the conversion from Perlin Noise to clouds run fast
         enough to animate the clouds in realtime
