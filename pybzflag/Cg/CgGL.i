@@ -7,7 +7,7 @@
 int cgGLIsProfileSupported(int profile);
 void cgGLEnableProfile(int);
 void cgGLDisableProfile(int);
-int cgGLGetLatestProfile(CGGLenum);
+int cgGLGetLatestProfile(int);
 void cgGLSetOptimalOptions(int);
 
 // program management functions
@@ -74,7 +74,7 @@ void cgGLGetMatrixParameterfr(CGparameter, float *);
 void cgGLGetMatrixParameterdc(CGparameter, double *);
 void cgGLGetMatrixParameterfc(CGparameter, float *);
 
-void cgGLSetStateMatrixParameter(CGparameter, CGGLenum, CGGLenum);
+void cgGLSetStateMatrixParameter(CGparameter, int, int);
 void cgGLSetMatrixParameterArrayfc(CGparameter, long, long, const float *);
 void cgGLSetMatrixParameterArrayfr(CGparameter, long, long, const float *);
 void cgGLSetMatrixParameterArraydc(CGparameter, long, long, const double *);
