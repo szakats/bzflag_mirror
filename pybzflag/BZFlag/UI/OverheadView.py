@@ -151,17 +151,12 @@ def attach(game, eventLoop, size=(512,512), viewClass=OverheadView, targetFrameR
             pygame.display.flip()
     eventLoop.add(Event.PeriodicTimer(1.0 / targetFrameRate, updateView))
 
-    # Start up pygame when we first get world data
+    # Start up pygame and init the view
     global view, screen
-    view = screen = None
-    def initPygame():
-        global view, screen
-        if not view:
-            pygame.init()
-            screen = pygame.display.set_mode(size)
-            pygame.display.set_caption("BZFlag Overhead View")
-            view = OverheadView(game)
-            updateView()
-    game.onLoadWorld.observe(initPygame)
+    pygame.init()
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption("BZFlag Overhead View")
+    view = OverheadView(game)
+    updateView()
 
 ### The End ###

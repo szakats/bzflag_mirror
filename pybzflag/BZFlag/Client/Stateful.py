@@ -140,10 +140,7 @@ class StatefulClient(BaseClient):
         self.game.removePlayer(msg.id)
 
     def onMsgPlayerUpdate(self, msg):
-        try:
-            self.game.players[msg.id].updateFromMessage(msg)
-        except KeyError:
-            pass
+        self.game.updatePlayerFromMessage(msg)
 
     def updateFlag(self, msg):
         """Generic handler for all messages that update a flag"""

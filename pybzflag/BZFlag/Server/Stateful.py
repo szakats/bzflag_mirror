@@ -196,4 +196,7 @@ class StatefulServer(BaseServer):
             toId = msg.client.id,
             message = self.options['welcomeMessage']))
 
+    def onMsgPlayerUpdate(self, msg):
+        self.game.updatePlayerFromMessage(msg)
+
 ### The End ###

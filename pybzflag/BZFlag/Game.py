@@ -88,6 +88,13 @@ class Game:
         f.close()
         self.onLoadWorld()
 
+    def updatePlayerFromMessage(self, msg):
+        """Update the correct player from a MsgPlayerUpdate"""
+        try:
+            self.players[msg.id].updateFromMessage(msg)
+        except KeyError:
+            pass
+
     def getGameInfo(self):
         """Return a GameInfo instance with information
            about our game style and current status
