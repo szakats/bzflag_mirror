@@ -228,7 +228,7 @@ class AnimatedPerlinNoise:
                  persistence     = 0.5,
                  numOctaves      = 6,
                  fundamental     = 16,
-                 framesPerOctave = 16,
+                 framesPerOctave = 8,
                  factory         = None):
         if not factory:
             factory = NoiseFactory()
