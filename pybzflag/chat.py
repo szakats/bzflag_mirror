@@ -7,7 +7,7 @@
 #
 from BZFlag import CommandLine
 from threading import *
-import sys
+import sys, time
 
 argParser = CommandLine.ClientParser(server   = "localhost",
                                      callSign = "@PyChat")
@@ -15,6 +15,8 @@ argParser.add_option("-q", "--quiet", action="store_true", dest="quiet",
                      help="Disables the output of connection status messages and protocol warnings.")
 argParser.add_option("-i", "--silent", action="store_true", dest="silent",
                      help="Disables all output.")
+argParser.add_option("-w", "--wait", dest="wait", metavar="SECONDS", default=0,
+                     help="Waits the given number of seconds after an EOF before leaving the game.")
 client = argParser.parse()
 
 # Disable warnings by default, enable them below if we're not being quiet
@@ -45,6 +47,9 @@ if not client.cmdLineValues['silent']:
         print "%s %s" % (sender, msg.message)
     client.onMsgMessage.observe(message)
 
+# A hack to prevent waiting in the main loop too long after client.eventLoop.stop()
+client.eventLoop.pollTime = 0.5
+
 # Thread to read keyboard input and send messages.
 # It would generally be better to do this by making stdin nonblocking,
 # but there's no portable way to do this in pyhton. Threads are slightly
@@ -55,6 +60,7 @@ class ChatThread(Thread):
             line = sys.stdin.readline()
             if not line:
                 # End of file
+                time.sleep(float(client.cmdLineValues['wait']))
                 client.eventLoop.stop()
                 return
             # Strip off the newline and all other trailing space
