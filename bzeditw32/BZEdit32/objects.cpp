@@ -193,8 +193,25 @@ void Box::CopyFrom (CBaseObject *r)
 
 bool Box::Init ( void )
 {
-	iWallTexture = m_pTextureMan->GetID("boxwall");
-	iRoofTexture = m_pTextureMan->GetID("roof");
+	if (m_bDriveThru && m_bShootThru) {
+		iWallTexture = m_pTextureMan->GetID("wallpass");
+		iRoofTexture = m_pTextureMan->GetID("roofpass");
+	}
+	else if (m_bDriveThru) {
+		iWallTexture = m_pTextureMan->GetID("walldrv");
+		iRoofTexture = m_pTextureMan->GetID("roofdrv");
+	}
+	else if (m_bShootThru) {
+		iWallTexture = m_pTextureMan->GetID("wallsht");
+		iRoofTexture = m_pTextureMan->GetID("roofsht");
+	}
+	else {
+		iWallTexture = m_pTextureMan->GetID("boxwall");
+		iRoofTexture = m_pTextureMan->GetID("roof");
+		}
+
+	//iWallTexture = m_pTextureMan->GetID("boxwall");
+	//iRoofTexture = m_pTextureMan->GetID("roof");
 
 	if (!m_pModelMan)
 		return false;
@@ -242,13 +259,11 @@ void Box::Write(std::ostream &stream)
 
         if (m_bDriveThru && m_bShootThru)
 			stream << "	passable" << std::endl;
-        else
-        {
-	if (m_bDriveThru)
-		stream << "	drivethrough" << std::endl;
-	if (m_bShootThru)
-		stream << "	shootthrough" << std::endl;
-        }
+        else if (m_bDriveThru)
+			stream << "	drivethrough" << std::endl;
+		else if (m_bShootThru)
+			stream << "	shootthrough" << std::endl;
+        
 
 		stream << "end" << std::endl;
 		stream << std::endl;
@@ -341,7 +356,14 @@ bool Pyramid::Init ( void )
 	if (!m_pModelMan)
 		return false;
 
-	iTexture = m_pTextureMan->GetID("pyrwall");
+	if (m_bDriveThru && m_bShootThru)
+		iTexture = m_pTextureMan->GetID("pyrpasswall");
+	else if (m_bDriveThru)
+		iTexture = m_pTextureMan->GetID("pyrdrvwall");
+	else if (m_bShootThru)
+		iTexture = m_pTextureMan->GetID("pyrshtwall");
+	else
+		iTexture = m_pTextureMan->GetID("pyrwall");
 
 	if (iModel<0)
 		iModel = m_pModelMan->NewModel("Pyramid");
