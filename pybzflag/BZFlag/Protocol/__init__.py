@@ -302,7 +302,7 @@ class StringField(EntryType):
 
     def marshall(self, object):
         # Truncate to the field width and pad out with zeroes
-        object = object[:self.length-1]
+        object = object[:self.length]
         object += chr(0) * (self.length - len(object))
         return object
 

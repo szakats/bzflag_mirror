@@ -57,7 +57,10 @@ class Socket:
         self.socket.setblocking(flag)
 
     def write(self, data):
-        self.socket.send(str(data))
+        try:
+            self.socket.send(str(data))
+        except socket.error:
+            raise Errors.ConnectionLost()
 
     def recv(self, size):
         """Low-level recv() wrapper that just provides a little error handling."""

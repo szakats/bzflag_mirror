@@ -31,10 +31,7 @@ from StringIO import StringIO
 
 
 class BaseClient(Network.Endpoint):
-    """On top of the basic message processing provided by Network.Endpoint,
-       this class implements connecting to a server, and processing the
-       basic messages necessary to keep a client-server connection going.
-       """
+    """A basic client class that doesn't process any messages."""
 
     outgoing = Protocol.ToServer
     incoming = Protocol.FromServer
@@ -113,6 +110,18 @@ class BaseClient(Network.Endpoint):
         socket.handler = self.handleMessage
         self.onConnect()
 
+
+class StatefulClient(BaseClient):
+    """Extends the BaseClient to keep track of the state of the game
+       world, as reported by the server and the other clients.
+       """
+    def init(self):
+        BaseClient.init(self)
+        self.game = Game.Game()
+        self.worldCache = None
+        Event.attach(self, 'onLoadWorld', 'onStartWorldDownload',
+                     'onNegotiateFlags')
+
     def onMsgSuperKill(self, msg):
         """The server wants us to die immediately"""
         self.disconnect()
@@ -126,18 +135,6 @@ class BaseClient(Network.Endpoint):
            that we'd normally multicast.
            """
         self.multicast = self.tcp
-
-
-class StatefulClient(BaseClient):
-    """Extends the BaseClient to keep track of the state of the game
-       world, as reported by the server and the other clients.
-       """
-    def init(self):
-        BaseClient.init(self)
-        self.game = Game.Game()
-        self.worldCache = None
-        Event.attach(self, 'onLoadWorld', 'onStartWorldDownload',
-                     'onNegotiateFlags')
 
     def onConnect(self):
         """Immediately after connecting, ask for a world hash so
