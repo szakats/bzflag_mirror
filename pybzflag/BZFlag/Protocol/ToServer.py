@@ -81,6 +81,15 @@ class MsgMessage(Common.Message):
         StructEntry(StringField(128), 'message'),
         ]
 
+class MsgKilled(Common.Message):
+    messageId = 0x6b6c
+    entries = [
+        StructEntry(Common.PlayerId, 'killer'),
+        StructEntry(UInt16,          'reason'),
+        StructEntry(UInt16,          'shotId'),
+        ]
+
+
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgShotBegin = Common.MsgShotBegin
 MsgPlayerUpdate = Common.MsgPlayerUpdate

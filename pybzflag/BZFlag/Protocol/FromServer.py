@@ -160,14 +160,6 @@ class MsgTeleport(Common.Message):
         StructEntry(UInt16,          'toId'),
         ]
 
-class MsgShotEnd(Common.Message):
-    messageId = 0x7365
-    entries = [
-        StructEntry(Common.PlayerId, 'playerId'),
-        StructEntry(UInt16,          'shotId'),
-        StructEntry(UInt16,          'reason'),
-        ]
-
 class MsgKilled(Common.Message):
     messageId = 0x6b6c
     entries = [
@@ -195,6 +187,7 @@ class MsgSetTTL(Common.Message):
 
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgShotBegin = Common.MsgShotBegin
+MsgShotEnd = Common.MsgShotEnd
 MsgPlayerUpdate = Common.MsgPlayerUpdate
 
 ### The End ###

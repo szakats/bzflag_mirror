@@ -237,6 +237,14 @@ class MsgShotBegin(Message):
         StructEntry(Float,    'lifetime'),
         ]
 
+class MsgShotEnd(Message):
+    messageId = 0x7365
+    entries = [
+        StructEntry(layerId, 'playerId'),
+        StructEntry(UInt16,  'shotId'),
+        StructEntry(UInt16,  'reason'),
+        ]
+
 
 class FlagNegotiationID(Struct):
     entries = [
