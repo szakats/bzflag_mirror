@@ -44,7 +44,7 @@ def getMetaserverURL(eventLoop, callback):
     else:
         # Stick together an HTTP request, with responseHandler called when it comes back.
         def responseHandler(response):
-            metaURL = response.strip()
+            metaURL = response.strip().split("\n")[-1].strip()
             callback(metaURL)
         parsed = urlparse.urlparse(metaMetaURL)
         Network.asyncRequest(eventLoop, parsed[1], 80,
