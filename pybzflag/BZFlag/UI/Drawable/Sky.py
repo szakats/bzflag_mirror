@@ -81,7 +81,7 @@ class Clouds(SkyDrawable):
     def __init__(self, *args, **kw):
         SkyDrawable.__init__(self, *args, **kw)
         self.render.textures = (GLNoise.CloudTexture(),)
-        self.motion = Animated.Value(Animated.Velocity(0.01))
+        self.motion = Animated.Value(Animated.RampFunction(200))
         self.time = Animated.Timekeeper()
 
     def drawToList(self, rstate):
