@@ -22,13 +22,15 @@ A class to draw the walls in the world
 #
 from DisplayList import *
 from OpenGL.GL import *
+from OpenGL.GL.ARB.multitexture import *
 
 class Wall(DisplayList):
-    textureName = 'wall.png'
+    textureNames = ('outer_wall.jpeg', 'wall_grime.jpeg')
     def set(self, center, angle, size):
         self.center = center
         self.angle = angle
         self.size = size
+        self.render.textures[1].texEnv = GL_MODULATE
 
     def drawToList(self):
         glPushMatrix()
@@ -37,12 +39,16 @@ class Wall(DisplayList):
         glDisable(GL_CULL_FACE)
         glBegin(GL_TRIANGLE_STRIP)
         glTexCoord2f(0, 0)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 0)
         glVertex3f(0, -self.size[1], 0)
         glTexCoord2f(0, 1)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 1)
         glVertex3f(0, -self.size[1], self.size[2])
         glTexCoord2f((self.size[1] * 2) / self.size[2], 0)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 1, 0)
         glVertex3f(0, self.size[1], 0)
         glTexCoord2f((self.size[1] * 2) / self.size[2], 1)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 1, 1)
         glVertex3f(0, self.size[1], self.size[2])
         glEnd()
         glEnable(GL_CULL_FACE)
