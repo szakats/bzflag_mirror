@@ -890,7 +890,7 @@ Separator {
 	Separator {
 
 		Texture2 {
-			filename ".\red.bmp"
+			filename "tank_red.png"
 		}
 		Material {
 			ambientColor 1.00 1.00 1.00
@@ -1221,7 +1221,7 @@ Separator {
 	Separator {
 
 		Texture2 {
-			filename ".\red.bmp"
+			filename "tank_red.png"
 		}
 		Material {
 			ambientColor 1.00 1.00 1.00
@@ -1402,7 +1402,7 @@ Separator {
 	Separator {
 
 		Texture2 {
-			filename ".\red.bmp"
+			filename "tank_red.png"
 		}
 		Material {
 			ambientColor 1.00 1.00 1.00
@@ -1499,7 +1499,7 @@ Separator {
 	Separator {
 
 		Texture2 {
-			filename ".\red.bmp"
+			filename "tank_red.png"
 		}
 		Material {
 			ambientColor 1.00 1.00 1.00
@@ -1788,7 +1788,7 @@ Separator {
 	Separator {
 
 		Texture2 {
-			filename ".\red.bmp"
+			filename "tank_red.png"
 		}
 		Material {
 			ambientColor 1.00 1.00 1.00
@@ -1933,7 +1933,7 @@ Separator {
 	Separator {
 
 		Texture2 {
-			filename ".\red.bmp"
+			filename "tank_red.png"
 		}
 		Material {
 			ambientColor 1.00 1.00 1.00
@@ -2162,7 +2162,7 @@ Separator {
 	Separator {
 
 		Texture2 {
-			filename ".\red.bmp"
+			filename "tank_red.png"
 		}
 		Material {
 			ambientColor 1.00 1.00 1.00
@@ -2271,7 +2271,7 @@ Separator {
 	Separator {
 
 		Texture2 {
-			filename ".\red.bmp"
+			filename "tank_red.png"
 		}
 		Material {
 			ambientColor 1.00 1.00 1.00
