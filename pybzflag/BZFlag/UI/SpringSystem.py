@@ -38,7 +38,7 @@ class Cloth:
        which exerts spring forces. Extra affectors can be added for
        gravity, wind, and collisions.
        """
-    def __init__(self, initialState, friction=0.02, stiffness=800):
+    def __init__(self, initialState, friction=0.02, stiffness=200):
         self.friction = friction
         self.stiffness = stiffness
         self.initialState = array(initialState)
@@ -49,6 +49,10 @@ class Cloth:
                           VelocityAffector(self)]
 
     def integrate(self, dt):
+        # Use a fixed time step for now, since the model gets unstable
+        # far too easily wiht a variable time step.
+        dt = 0.02
+        
         for affector in self.affectors:
             affector.integrate(dt)
 
@@ -121,7 +125,11 @@ class ClothSpringAffector(Affector):
         self.integrateSprings(dt, (1,0))
         self.integrateSprings(dt, (0,1))
         self.integrateSprings(dt, (1,1))
-        #self.integrateSprings(dt, (2,2))
+        self.integrateSprings(dt, (2,0))
+        self.integrateSprings(dt, (2,1))
+        self.integrateSprings(dt, (2,2))
+        self.integrateSprings(dt, (0,2))
+        self.integrateSprings(dt, (1,2))
 
 
 class VelocityAffector(Affector):
