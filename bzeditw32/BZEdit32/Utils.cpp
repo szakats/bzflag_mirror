@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 //loger
 void LogLine ( char* szLine )
@@ -42,6 +43,17 @@ bool GetLine( char** data, char* line )
 
 	*data = pPtr;
 	*pOut = NULL;
+
+	// trim any trailing spaces
+
+	for ( int i = strlen(line)-1; i >= 0;i--)
+	{
+		if (isspace(line[i]))
+			line[i] = NULL;
+		else
+			i = -1;
+	}
+
 	return true;
 }
 

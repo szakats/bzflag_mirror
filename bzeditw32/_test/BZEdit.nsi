@@ -6,8 +6,8 @@
 ; It will install notepad.exe into a directory that the user selects,
 ;
 
-!define VER_MAJOR 1.5
-!define VER_MINOR .9f12
+!define VER_MAJOR 1.6
+!define VER_MINOR .0
 
 ; Main Installer Options
 Name "BZEdit"

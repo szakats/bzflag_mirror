@@ -231,7 +231,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About BZEdit32"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LTEXT           "BZEdit32 Version 1.5.9f12\nwww.artemisgames.com/code/bz/edit\nwww.bzflag.org\nbaflag.sourceforge.com",
+    LTEXT           "BZEdit32 Version 1.6\nwww.artemisgames.com/code/bz/edit\nwww.bzflag.org\nbaflag.sourceforge.com",
                     IDC_STATIC,180,8,126,53,SS_SUNKEN
     LTEXT           "Copyright (C) 2002 Jeff Myers",IDC_STATIC,208,66,98,8
     CONTROL         139,IDC_STATIC,"Static",SS_BITMAP,7,7,167,67
