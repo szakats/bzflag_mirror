@@ -1,0 +1,11 @@
+Basic Installation
+==================
+There shouldn't be too much involved in installing bzedit.
+These three lines should suffice:
+	# make
+	# make install
+
+If you need custom compiler/linker options, you can
+change these by editing the makefile.
+
+bzedit requires OpenGL, GLU, GTK+, GNOME, and gtkglarea
