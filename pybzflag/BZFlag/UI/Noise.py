@@ -58,7 +58,7 @@ class PerlinNoise3:
            The input can be a single vector or an n-dimensional array of vectors. An array of
            the same shape will be returned.
            """
-        v = asarray(v)
+        v = asarray(v).astype(Float32)
         intv = v.astype(Int)
         
         # Define a sampling pattern of 8 vertices around intv
@@ -88,15 +88,44 @@ class PerlinNoise3:
         # First calculate the normalized amount of interpolation in each axis
         s = dist[...,0,:]
         s = 3*s**2 - 2*s**3
+        
         # Now perform the interpolation one axis at a time
-        ax00 = infl[...,0] + s[...,0] * (infl[...,4] - infl[...,0])
-        ax01 = infl[...,1] + s[...,0] * (infl[...,5] - infl[...,1])
-        ax10 = infl[...,2] + s[...,0] * (infl[...,6] - infl[...,2])
-        ax11 = infl[...,3] + s[...,0] * (infl[...,7] - infl[...,3])
-        ay0  = ax00 + s[...,1] * (ax10-ax00)
-        ay1  = ax01 + s[...,1] * (ax11-ax01)
-        az   = ay0  + s[...,2] * (ay1-ay0)
-        return az
+        # This has been made fairly cryptic in the interest of reducing the
+        # number of copies performed- modifying an array in place is much faster
+        # than performing normal infix arithmetic because a temporary array does
+        # not need to be created.
+        # This first combines all points along the X axis, then the Y, then Z.
+        s0 = s[...,0]
+        s1 = s[...,1]
+        s2 = s[...,2]
+        a = infl[...,0]
+        b = infl[...,1]
+        c = infl[...,2]
+        d = infl[...,3]
+        i4 = infl[...,4]
+        i5 = infl[...,5]
+        i6 = infl[...,6]
+        i7 = infl[...,7]
+        i4 -= a
+        i5 -= b
+        i6 -= c
+        i7 -= d
+        i4 *= s0
+        i5 *= s0
+        i6 *= s0
+        i7 *= s0
+        a += i4
+        b += i5
+        c += i6
+        d += i7
+        c -= a
+        a += s1 * c
+        d -= b
+        b += s1 * d
+        b -= a
+        s2 *= b
+        a += s2
+        return a
 
     def get(self, v):
         """Using multiple octaves of smoothed noise, generate perlin noise"""
