@@ -358,6 +358,7 @@ static int broadcastRadio = InvalidPlayer;
 static int maxPlayerScore = 0;
 static int maxTeamScore = 0;
 static int debug = 0;
+static boolean hasBase[NumTeams] = { false };
 
 // True if only new clients allowed
 static boolean requireUDP;
@@ -561,8 +562,14 @@ CustomBase::CustomBase()
 }
 
 bool CustomBase::read(const char *cmd, istream& input) {
-  if (strcmp(cmd, "color") == 0)
+  if (strcmp(cmd, "color") == 0) {
     input >> color;
+    if ((color >= 0) && (color < NumTeams)) {
+	hasBase[color] = true;
+    }
+    else
+	return False;
+  }
   else {
     WorldFileObstacle::read(cmd, input);
     if(!flagsOnBuildings && (pos[2] != 0)) {
@@ -1321,7 +1328,6 @@ static void patchMessage(PlayerId fromId, PlayerId toId, const void *msg)
   switch (code) {
     case MsgAddPlayer:
     case MsgCaptureFlag:
-    case MsgEnter:
     case MsgPlayerUpdate:
     case MsgRemovePlayer:
     case MsgScoreOver:
@@ -1338,10 +1344,11 @@ static void patchMessage(PlayerId fromId, PlayerId toId, const void *msg)
       ;;
     case MsgDropFlag:
     case MsgGrabFlag:
-      if (len > 28)
+       if (len > 28) {
 	// server version
 	patchPlayerId(fromId, toId, msg, 4);
 	patchPlayerId(fromId, toId, msg, 20);
+       }
       break;
       ;;
     case MsgFlagUpdate:
@@ -1368,6 +1375,7 @@ static void patchMessage(PlayerId fromId, PlayerId toId, const void *msg)
       ;;
     case MsgAccept:
     case MsgClientVersion:
+    case MsgEnter:
     case MsgExit:
     case MsgGetWorld:
     case MsgNetworkRelay:
@@ -1395,7 +1403,8 @@ static void pwrite(int playerIndex, const void *b, int l)
   if (p.fd == NotConnected || l == 0)
     return;
 
-  patchMessage(player[playerIndex].id, player[playerIndex].oldId, b);
+  if (!player[playerIndex].knowId)
+     patchMessage(player[playerIndex].id, player[playerIndex].oldId, b);
   // Check if UDP Link is used instead of TCP, if so jump into puwrite
   if (p.ulinkup) {
     uint16_t len, code;
@@ -1474,18 +1483,23 @@ static void pwrite(int playerIndex, const void *b, int l)
   }
 }
 
+static char sMsgBuf[MaxPacketLen];
+static char *getDirectMessageBuffer()
+{
+  return &sMsgBuf[2*sizeof(short)];
+}
+
 static void directMessage(int playerIndex, uint16_t code, int len, const void *msg)
 {
   if (player[playerIndex].fd == NotConnected)
     return;
 
   // send message to one player
-  char msgbuf[MaxPacketLen];
-  void *buf = msgbuf;
+  void *bufStart = (char *)msg - 2*sizeof(short);;
+  void *buf = bufStart;
   buf = nboPackUShort(buf, uint16_t(len));
   buf = nboPackUShort(buf, code);
-  buf = nboPackString(buf, msg, len);
-  pwrite(playerIndex, msgbuf, len + 4);
+  pwrite(playerIndex, bufStart, len + 4);
 }
 
 static void broadcastMessage(uint16_t code, int len, const void *msg)
@@ -1498,22 +1512,20 @@ static void broadcastMessage(uint16_t code, int len, const void *msg)
 
 static void sendUDPupdate(int playerIndex)
 {
-  char  buffer[2];
-  void *buf = (void*)buffer;
-  buf = nboPackUShort(buf, wksPort);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = nboPackUShort(bufStart, wksPort);
   UMDEBUG("LOCAL Update to %d port %d\n",playerIndex,wksPort);
   // send it
-  directMessage(playerIndex, MsgUDPLinkRequest, sizeof(buffer), buffer);
+  directMessage(playerIndex, MsgUDPLinkRequest, (char*)buf - (char*)bufStart, bufStart);
 }
 
 //static void sendUDPseqno(int playerIndex)
 //{
-//  char  buffer[2];
 //  unsigned short seqno = player[playerIndex].lastRecvPacketNo;
-//  void *buf = (void*)buffer;
-//  buf = nboPackUShort(buf, seqno);
+//  void *buf, *bufStart = getDirectMessageBuffer();
+//  buf = nboPackUShort(bufStart, seqno);
 //  // send it
-//  directMessage(playerIndex, MsgUDPLinkUpdate, sizeof(buffer), buffer);
+//  directMessage(playerIndex, MsgUDPLinkUpdate, (char*)buf-(char*)bufStart, bufStart);
 //}
 
 static void createUDPcon(int t, int remote_port) {
@@ -1583,40 +1595,42 @@ static int uread(int *playerIndex, int *nopackets)
 
   *nopackets = 0;
 
+  PlayerInfo *pPlayerInfo;
   if ((n = recvfrom(udpSocket, (char *)ubuf, MaxPacketLen, MSG_PEEK, (struct sockaddr*)&uaddr, &recvlen)) != -1) {
     uint16_t len, lseqno;
     void *pmsg;
-    for (*playerIndex = 0; *playerIndex < MaxPlayers; (*playerIndex)++) {
-      if ((player[*playerIndex].ulinkup) &&
-	  (player[*playerIndex].uaddr.sin_port == uaddr.sin_port) &&
-	  (memcmp(&player[*playerIndex].uaddr.sin_addr, &uaddr.sin_addr, sizeof(uaddr.sin_addr)) == 0)) {
+    int pi;
+    for (pi = 0, pPlayerInfo = player; pi < MaxPlayers; pi++, pPlayerInfo++) {
+      if ((pPlayerInfo->ulinkup) &&
+	  (pPlayerInfo->uaddr.sin_port == uaddr.sin_port) &&
+	  (memcmp(&pPlayerInfo->uaddr.sin_addr, &uaddr.sin_addr, sizeof(uaddr.sin_addr)) == 0)) {
 	break;
       }
     }
-    if (*playerIndex == MaxPlayers) {
+    if (pi == MaxPlayers) {
       // didn't find player so test for exact match new player
-      for (*playerIndex = 0; *playerIndex < MaxPlayers; (*playerIndex)++) {
-	if (!player[*playerIndex].ulinkup &&
-	    (player[*playerIndex].uaddr.sin_port == uaddr.sin_port) &&
-	    (memcmp(&player[*playerIndex].uaddr.sin_addr, &uaddr.sin_addr, sizeof(uaddr.sin_addr)) == 0)) {
+      for (pi = 0, pPlayerInfo = player; pi < MaxPlayers; pi++, pPlayerInfo++) {
+	if (!pPlayerInfo->ulinkup &&
+	    (pPlayerInfo->uaddr.sin_port == uaddr.sin_port) &&
+	    (memcmp(&pPlayerInfo->uaddr.sin_addr, &uaddr.sin_addr, sizeof(uaddr.sin_addr)) == 0)) {
 	  UMDEBUG("uread() exact udp up for player %d %s:%d\n",
-	      *playerIndex, inet_ntoa(player[*playerIndex].uaddr.sin_addr),
-	      ntohs(player[*playerIndex].uaddr.sin_port));
-	  player[*playerIndex].ulinkup = true;
+	      pi, inet_ntoa(pPlayerInfo->uaddr.sin_addr),
+	      ntohs(pPlayerInfo->uaddr.sin_port));
+	  pPlayerInfo->ulinkup = true;
 	  break;
 	}
       }
     }
-    if (*playerIndex == MaxPlayers) {
+    if (pi == MaxPlayers) {
       // still didn't find player so test for just address not port (ipmasq fw etc.)
-      for (*playerIndex = 0; *playerIndex < MaxPlayers; (*playerIndex)++) {
-	if (!player[*playerIndex].ulinkup &&
-	    memcmp(&uaddr.sin_addr, &player[*playerIndex].uaddr.sin_addr, sizeof(uaddr.sin_addr)) == 0) {
+      for (pi = 0, pPlayerInfo = player; pi < MaxPlayers; pi++, pPlayerInfo++) {
+	if (!pPlayerInfo->ulinkup &&
+	    memcmp(&uaddr.sin_addr, &pPlayerInfo->uaddr.sin_addr, sizeof(uaddr.sin_addr)) == 0) {
 	  UMDEBUG("uread() fuzzy udp up for player %d %s:%d actual port %d\n",
-	      *playerIndex, inet_ntoa(player[*playerIndex].uaddr.sin_addr),
-	      ntohs(player[*playerIndex].uaddr.sin_port), ntohs(uaddr.sin_port));
-	  player[*playerIndex].uaddr.sin_port = uaddr.sin_port;
-	  player[*playerIndex].ulinkup = true;
+	      pi, inet_ntoa(pPlayerInfo->uaddr.sin_addr),
+	      ntohs(pPlayerInfo->uaddr.sin_port), ntohs(uaddr.sin_port));
+	  pPlayerInfo->uaddr.sin_port = uaddr.sin_port;
+	  pPlayerInfo->ulinkup = true;
 	  break;
 	}
       }
@@ -1624,15 +1638,15 @@ static int uread(int *playerIndex, int *nopackets)
 
     // get the packet
     n = recv(udpSocket, (char *)ubuf, MaxPacketLen, 0);
-    if (*playerIndex == MaxPlayers) {
+    if (pi == MaxPlayers) {
       // no match, discard packet
       UMDEBUG("uread() discard packet! %s:%d choices p(l) h:p", inet_ntoa(uaddr.sin_addr), ntohs(uaddr.sin_port));
-      for (*playerIndex = 0; *playerIndex < MaxPlayers; (*playerIndex)++) {
-	if (player[*playerIndex].fd != -1) {
+      for (pi = 0, pPlayerInfo = player; pi < MaxPlayers; pi++, pPlayerInfo++) {
+	if (pPlayerInfo->fd != -1) {
 	  UMDEBUG(" %d(%d) %s:%d",
-	      *playerIndex, player[*playerIndex].ulinkup,
-	      inet_ntoa(player[*playerIndex].uaddr.sin_addr),
-	      ntohs(player[*playerIndex].uaddr.sin_port));
+	      pi, pPlayerInfo->ulinkup,
+	      inet_ntoa(pPlayerInfo->uaddr.sin_addr),
+	      ntohs(pPlayerInfo->uaddr.sin_port));
 	}
       }
       UMDEBUG("\n");
@@ -1640,15 +1654,17 @@ static int uread(int *playerIndex, int *nopackets)
       return 0;
     }
 
+    *playerIndex = pi;
+    pPlayerInfo = &player[pi];
     UMDEBUG("uread() player %d %s:%d len %d from %s:%d on %i\n",
-	*playerIndex, inet_ntoa(player[*playerIndex].uaddr.sin_addr),
-	ntohs(player[*playerIndex].uaddr.sin_port), n, inet_ntoa(uaddr.sin_addr),
+	pi, inet_ntoa(pPlayerInfo->uaddr.sin_addr),
+	ntohs(pPlayerInfo->uaddr.sin_port), n, inet_ntoa(uaddr.sin_addr),
 	ntohs(uaddr.sin_port), udpSocket);
 
     if (n > 0) {
       // got something! now disassemble the package block into single BZPackets
       // filling up the dqueue with these packets
-      disassemblePacket(*playerIndex, ubuf, nopackets);
+      disassemblePacket(pi, ubuf, nopackets);
 
       // old code is obsolete
       // if (*nopackets > 6 )
@@ -1657,17 +1673,17 @@ static int uread(int *playerIndex, int *nopackets)
     // have something in the receive buffer? so get it
     // due to the organization sequence and reliability is always granted
     // even if some packets are lost during transfer
-    pmsg =  getPacketFromClient(*playerIndex, &len, &lseqno);
+    pmsg =  getPacketFromClient(pi, &len, &lseqno);
     if (pmsg != NULL) {
       int clen = len;
       if (clen < 1024) {
-	memcpy(player[*playerIndex].udpmsg,pmsg,clen);
-	player[*playerIndex].udplen = clen;
+	memcpy(pPlayerInfo->udpmsg,pmsg,clen);
+	pPlayerInfo->udplen = clen;
       }
       // be sure to free the packet again
       free(pmsg);
       UDEBUG("GOT UDP READ %d Bytes [%d]\n",len, lseqno);
-      return player[*playerIndex].udplen;
+      return pPlayerInfo->udplen;
     }
   }
   return 0;
@@ -1720,34 +1736,31 @@ static int pread(int playerIndex, int l)
 
 static void sendFlagUpdate(int flagIndex, int index = -1)
 {
-  char msg[2 + FlagPLen];
-  void *buf = msg;
-  buf = nboPackUShort(buf, flagIndex);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = nboPackUShort(bufStart, flagIndex);
   buf = flag[flagIndex].flag.pack(buf);
   if (index == -1)
-    broadcastMessage(MsgFlagUpdate, sizeof(msg), msg);
+    broadcastMessage(MsgFlagUpdate, (char*)buf - (char*)bufStart, bufStart);
   else
-    directMessage(index, MsgFlagUpdate, sizeof(msg), msg);
+    directMessage(index, MsgFlagUpdate, (char*)buf - (char*)bufStart, bufStart);
 }
 
 static void sendTeamUpdate(int teamIndex, int index = -1)
 {
-  char msg[TeamPLen];
-  void *buf = msg;
-  buf = nboPackUShort(buf, teamIndex);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = nboPackUShort(bufStart, teamIndex);
   buf = team[teamIndex].team.pack(buf);
   if (index == -1)
-    broadcastMessage(MsgTeamUpdate, sizeof(msg), msg);
+    broadcastMessage(MsgTeamUpdate, (char*)buf - (char*)bufStart, bufStart);
   else
-    directMessage(index, MsgTeamUpdate, sizeof(msg), msg);
+    directMessage(index, MsgTeamUpdate, (char*)buf - (char*)bufStart, bufStart);
 }
 
 static void sendPlayerUpdate(int playerIndex, int index)
 {
-  char msg[PlayerIdPLen + 8 + CallSignLen + EmailLen + PlayerIdPLen];
-  void *buf = msg;
+  void *buf, *bufStart = getDirectMessageBuffer();
   PlayerInfo *pPlayer = &player[playerIndex];
-  buf = pPlayer->id.pack(buf);
+  buf = pPlayer->id.pack(bufStart);
   buf = nboPackUShort(buf, uint16_t(pPlayer->type));
   buf = nboPackUShort(buf, uint16_t(pPlayer->team));
   buf = nboPackUShort(buf, uint16_t(pPlayer->wins));
@@ -1760,11 +1773,11 @@ static void sendPlayerUpdate(int playerIndex, int index)
     // send all players info about player[playerIndex]
     for (int i = 0; i < maxPlayers; i++)
       if (player[i].state > PlayerInLimbo && i != playerIndex)
-        directMessage(i, MsgAddPlayer, sizeof(msg) - PlayerIdPLen, msg);
+        directMessage(i, MsgAddPlayer, (char*)buf - (char*)bufStart - PlayerIdPLen, bufStart);
     // append playerid which will not be mangled so new clients can adapt
-    directMessage(index, MsgAddPlayer, sizeof(msg), msg);
+    directMessage(index, MsgAddPlayer, (char*)buf - (char*)bufStart, bufStart);
   } else
-    directMessage(index, MsgAddPlayer, sizeof(msg) - PlayerIdPLen, msg);
+    directMessage(index, MsgAddPlayer, (char*)buf - (char*)bufStart - PlayerIdPLen, bufStart);
 }
 
 static void closeListServer(int index)
@@ -2188,7 +2201,7 @@ static void serverStop()
   // tell players to quit
   int i;
   for (i = 0; i < MaxPlayers; i++)
-    directMessage(i, MsgSuperKill, 0, NULL);
+    directMessage(i, MsgSuperKill, 0, getDirectMessageBuffer());
 
   // close connections
   for (i = 0; i < MaxPlayers; i++)
@@ -2265,7 +2278,7 @@ static boolean startPlayerPacketRelay(int playerIndex)
     for (int i = 0; i < maxPlayers; i++)
       if (i != playerIndex &&
 	  player[i].state > PlayerInLimbo && !player[i].multicastRelay) {
-	directMessage(i, MsgNetworkRelay, 0, NULL);
+	directMessage(i, MsgNetworkRelay, 0, getDirectMessageBuffer());
 	player[i].multicastRelay = True;
       }
     noMulticastRelay = True;
@@ -2463,6 +2476,17 @@ static WorldInfo *defineWorldFromFile(const char *filename)
     delete world;
     return NULL;
   }
+
+  if (gameStyle & TeamFlagGameStyle) {
+    for (int i = RedTeam; i <= PurpleTeam; i++) {
+	    if ((maxTeam[i] > 0) && !hasBase[i]) {
+		    cerr << "base was not defined for team " << i << " capture the flag game style removed." << endl;
+		    gameStyle &= (~TeamFlagGameStyle);
+		    break;
+	    }
+    }
+  }
+
 
   // make walls
   world->addWall(0.0f, 0.5f * WorldSize, 0.0f, 1.5f * M_PI, 0.5f * WorldSize, WallHeight);
@@ -2985,6 +3009,7 @@ static void acceptClient()
   player[playerIndex].time = TimeKeeper::getCurrent();
   player[playerIndex].fd = fd;
   player[playerIndex].state = PlayerAccept;
+  player[playerIndex].knowId = false;
 
   // send server version and which port to reconnect to
   char buffer[8 + sizeof(serverAddr.sin_port)];
@@ -3043,7 +3068,7 @@ static void addClient(int acceptSocket)
   if (gameOver) {
     int count = 0;
     for (int i = 0; i < maxPlayers; i++)
-      if (player[i].state > PlayerInLimbo)
+      if (player[i].state >= PlayerInLimbo)
 	count++;
     if (count == 1) {
       gameOver = False;
@@ -3116,13 +3141,12 @@ static void sendMessage(int playerIndex, const PlayerId& targetPlayer, TeamColor
 {
   // player is sending a message to a particular player, a team, or all.
   // send MsgMessage
-  char msg[PlayerIdPLen + PlayerIdPLen + 2 + MessageLen];
-  void *buf = msg;
-  buf = player[playerIndex].id.pack(buf);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = player[playerIndex].id.pack(bufStart);
   buf = targetPlayer.pack(buf);
   buf = nboPackUShort(buf, uint16_t(targetTeam));
   buf = nboPackString(buf, message, MessageLen);
-  broadcastMessage(MsgMessage, sizeof(msg), msg);
+  broadcastMessage(MsgMessage, (char*)buf-(char*)bufStart, bufStart);
 }
 
 static void addPlayer(int playerIndex)
@@ -3168,9 +3192,9 @@ static void addPlayer(int playerIndex)
 	}
     }
 
-    char msg[2];
-    nboPackUShort(msg, code);
-    directMessage(playerIndex, MsgReject, sizeof(msg), &msg);
+    void *buf, *bufStart = getDirectMessageBuffer();
+    buf = nboPackUShort(bufStart, code);
+    directMessage(playerIndex, MsgReject, (char*)buf-(char*)bufStart, bufStart);
     return;
   }
 
@@ -3193,7 +3217,7 @@ static void addPlayer(int playerIndex)
 
 
   // accept player
-  directMessage(playerIndex, MsgAccept, 0, NULL);
+  directMessage(playerIndex, MsgAccept, 0, getDirectMessageBuffer());
 
   // abort if we hung up on the client
   if (player[playerIndex].fd == NotConnected)
@@ -3240,7 +3264,7 @@ static void addPlayer(int playerIndex)
 
   // if necessary force multicast relaying
   if (noMulticastRelay) {
-    directMessage(playerIndex, MsgNetworkRelay, 0, NULL);
+    directMessage(playerIndex, MsgNetworkRelay, 0, getDirectMessageBuffer());
     player[playerIndex].multicastRelay = True;
   }
 
@@ -3262,10 +3286,10 @@ static void addPlayer(int playerIndex)
       // oops
       timeLeft = 0.0f;
     }
-    char msg[2];
-    void *buf = msg;
-    buf = nboPackUShort(buf, (uint16_t)(int)timeLeft);
-    directMessage(playerIndex, MsgTimeUpdate, sizeof(msg), msg);
+
+    void *buf, *bufStart = getDirectMessageBuffer();
+    buf = nboPackUShort(bufStart, (uint16_t)(int)timeLeft);
+    directMessage(playerIndex, MsgTimeUpdate, (char*)buf-(char*)bufStart, bufStart);
   }
 
   // again check if player was disconnected
@@ -3407,12 +3431,11 @@ static void zapFlag(int flagIndex)
     flag[flagIndex].flag.status = FlagNoExist;
     player[playerIndex].flag = -1;
 
-    char msg[PlayerIdPLen + 2 + FlagPLen];
-    void *buf = msg;
-    buf = player[playerIndex].id.pack(buf);
+    void *buf, *bufStart = getDirectMessageBuffer();
+    buf = player[playerIndex].id.pack(bufStart);
     buf = nboPackUShort(buf, uint16_t(flagIndex));
     buf = flag[flagIndex].flag.pack(buf);
-    broadcastMessage(MsgDropFlag, sizeof(msg), msg);
+    broadcastMessage(MsgDropFlag, (char*)buf-(char*)bufStart, bufStart);
   }
 
   // if flag was flying then it flies no more
@@ -3504,9 +3527,9 @@ static void removePlayer(int playerIndex)
       releaseRadio(playerIndex);
 
     // tell everyone player has left
-    char msg[PlayerIdPLen];
-    player[playerIndex].id.pack(msg);
-    broadcastMessage(MsgRemovePlayer, sizeof(msg), msg);
+    void *buf, *bufStart = getDirectMessageBuffer();
+    buf = player[playerIndex].id.pack(bufStart);
+    broadcastMessage(MsgRemovePlayer, (char*)buf-(char*)bufStart, bufStart);
 
     // decrease team size
     int teamNum = int(player[playerIndex].team);
@@ -3559,8 +3582,7 @@ static void sendWorld(int playerIndex, int ptr)
 {
   // send another small chunk of the world database
   assert(world != NULL && worldDatabase != NULL);
-  char buffer[258];
-  void *buf = buffer;
+  void *buf, *bufStart = getDirectMessageBuffer();
   int size = 256, left = worldDatabaseSize - ptr;
   if (ptr >= worldDatabaseSize) {
     size = 0;
@@ -3568,9 +3590,9 @@ static void sendWorld(int playerIndex, int ptr)
   } else
     if (ptr + size >= worldDatabaseSize)
       size = worldDatabaseSize - ptr;
-  buf = nboPackUShort(buf, uint16_t(left));
+  buf = nboPackUShort(bufStart, uint16_t(left));
   buf = nboPackString(buf, (char*)worldDatabase + ptr, size);
-  directMessage(playerIndex, MsgGetWorld, size + 2, buffer);
+  directMessage(playerIndex, MsgGetWorld, (char*)buf-(char*)bufStart, bufStart);
 }
 
 static void sendQueryGame(int playerIndex)
@@ -3578,9 +3600,8 @@ static void sendQueryGame(int playerIndex)
   // much like a ping packet but leave out useless stuff (like
   // the server address, which must already be known, and the
   // server version, which was already sent).
-  char  buffer[36];
-  void *buf = (void*)buffer;
-  buf = nboPackUShort(buf, pingReply.gameStyle);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = nboPackUShort(bufStart, pingReply.gameStyle);
   buf = nboPackUShort(buf, pingReply.maxPlayers);
   buf = nboPackUShort(buf, pingReply.maxShots);
   buf = nboPackUShort(buf, team[0].team.activeSize);
@@ -3601,7 +3622,7 @@ static void sendQueryGame(int playerIndex)
   buf = nboPackUShort(buf, pingReply.maxTime);
 
   // send it
-  directMessage(playerIndex, MsgQueryGame, sizeof(buffer), buffer);
+  directMessage(playerIndex, MsgQueryGame, (char*)buf-(char*)bufStart, bufStart);
 }
 
 static void sendQueryPlayers(int playerIndex)
@@ -3614,11 +3635,10 @@ static void sendQueryPlayers(int playerIndex)
       numPlayers++;
 
   // first send number of teams and players being sent
-  char buffer[4];
-  void *buf = (void*)buffer;
-  buf = nboPackUShort(buf, NumTeams);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = nboPackUShort(bufStart, NumTeams);
   buf = nboPackUShort(buf, numPlayers);
-  directMessage(playerIndex, MsgQueryPlayers, sizeof(buffer), buffer);
+  directMessage(playerIndex, MsgQueryPlayers, (char*)buf-(char*)bufStart, bufStart);
 
   // now send the teams and players
   for (i = 0; i < NumTeams && player[playerIndex].fd != NotConnected; i++)
@@ -3638,23 +3658,21 @@ static void playerAlive(int playerIndex, const float *pos, const float *fwd)
   player[playerIndex].flag = -1;
 
   // send MsgAlive
-  char msg[PlayerIdPLen + 24];
-  void *buf = msg;
-  buf = player[playerIndex].id.pack(buf);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = player[playerIndex].id.pack(bufStart);
   buf = nboPackVector(buf,pos);
   buf = nboPackVector(buf,fwd);
-  broadcastMessage(MsgAlive, sizeof(msg), msg);
+  broadcastMessage(MsgAlive, (char*)buf-(char*)bufStart, bufStart);
 }
 
 static void checkTeamScore(int playerIndex, int teamIndex)
 {
   if (maxTeamScore == 0 || teamIndex == (int)RogueTeam) return;
   if (team[teamIndex].team.won - team[teamIndex].team.lost >= maxTeamScore) {
-    char msg[PlayerIdPLen + 2];
-    void *buf = msg;
-    buf = player[playerIndex].id.pack(buf);
+    void *buf, *bufStart = getDirectMessageBuffer();
+    buf = player[playerIndex].id.pack(bufStart);
     buf = nboPackUShort(buf, uint16_t(teamIndex));
-    broadcastMessage(MsgScoreOver, sizeof(msg), msg);
+    broadcastMessage(MsgScoreOver, (char*)buf-(char*)bufStart, bufStart);
     gameOver = True;
   }
 }
@@ -3670,12 +3688,11 @@ static void playerKilled(int victimIndex, int killerIndex,
   player[victimIndex].state = PlayerDead;
 
   // send MsgKilled
-  char msg[PlayerIdPLen + PlayerIdPLen + 2];
-  void *buf = msg;
-  buf = player[victimIndex].id.pack(buf);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = player[victimIndex].id.pack(bufStart);
   buf = player[killerIndex].id.pack(buf);
   buf = nboPackShort(buf, shotIndex);
-  broadcastMessage(MsgKilled, sizeof(msg), msg);
+  broadcastMessage(MsgKilled, (char*)buf-(char*)bufStart, bufStart);
 
   // we try to estimate lag by measuring time between broadcast of MsgKilled
   // and MsgScore reply of the killer; should give us a good approximation
@@ -3734,12 +3751,11 @@ static void grabFlag(int playerIndex, int flagIndex)
   player[playerIndex].flag = flagIndex;
 
   // send MsgGrabFlag
-  char msg[PlayerIdPLen + 2 + FlagPLen];
-  void *buf = msg;
-  buf = player[playerIndex].id.pack(buf);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = player[playerIndex].id.pack(bufStart);
   buf = nboPackUShort(buf, uint16_t(flagIndex));
   buf = flag[flagIndex].flag.pack(buf);
-  broadcastMessage(MsgGrabFlag, sizeof(msg), msg);
+  broadcastMessage(MsgGrabFlag, (char*)buf-(char*)bufStart, bufStart);
 }
 
 static void dropFlag(int playerIndex, float pos[3])
@@ -3846,12 +3862,11 @@ static void dropFlag(int playerIndex, float pos[3])
 
   // player no longer has flag -- send MsgDropFlag
   player[playerIndex].flag = -1;
-  char msg[PlayerIdPLen + 2 + FlagPLen];
-  void *buf = msg;
-  buf = player[playerIndex].id.pack(buf);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = player[playerIndex].id.pack(bufStart);
   buf = nboPackUShort(buf, uint16_t(flagIndex));
   buf = flag[flagIndex].flag.pack(buf);
-  broadcastMessage(MsgDropFlag, sizeof(msg), msg);
+  broadcastMessage(MsgDropFlag, (char*)buf-(char*)bufStart, bufStart);
 
   // notify of new flag state
   sendFlagUpdate(flagIndex);
@@ -3872,12 +3887,11 @@ static void captureFlag(int playerIndex, TeamColor teamCaptured)
   resetFlag(flagIndex);
 
   // send MsgCaptureFlag
-  char msg[PlayerIdPLen + 4];
-  void *buf = msg;
-  buf = player[playerIndex].id.pack(buf);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = player[playerIndex].id.pack(bufStart);
   buf = nboPackUShort(buf, uint16_t(flagIndex));
   buf = nboPackUShort(buf, uint16_t(teamCaptured));
-  broadcastMessage(MsgCaptureFlag, sizeof(msg), msg);
+  broadcastMessage(MsgCaptureFlag, (char*)buf-(char*)bufStart, bufStart);
 
   // everyone on losing team is dead
   for (int i = 0; i < maxPlayers; i++)
@@ -3915,12 +3929,11 @@ static void shotFired(int /*playerIndex*/, const void *buf, int len)
 static void shotEnded(const PlayerId& id, int16_t shotIndex, uint16_t reason)
 {
   // shot has ended prematurely -- send MsgShotEnd
-  char msg[PlayerIdPLen + 4];
-  void *buf = msg;
-  buf = id.pack(buf);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = id.pack(bufStart);
   buf = nboPackShort(buf, shotIndex);
   buf = nboPackUShort(buf, reason);
-  broadcastMessage(MsgShotEnd, sizeof(msg), msg);
+  broadcastMessage(MsgShotEnd, (char*)buf-(char*)bufStart, bufStart);
 }
 
 static void scoreChanged(int playerIndex, uint16_t wins, uint16_t losses)
@@ -3959,12 +3972,11 @@ static void scoreChanged(int playerIndex, uint16_t wins, uint16_t losses)
     }
   }
 
-  char msg[PlayerIdPLen + 4];
-  void *buf = msg;
-  buf = player[playerIndex].id.pack(buf);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = player[playerIndex].id.pack(bufStart);
   buf = nboPackUShort(buf, wins);
   buf = nboPackUShort(buf, losses);
-  broadcastMessage(MsgScore, sizeof(msg), msg);
+  broadcastMessage(MsgScore, (char*)buf-(char*)bufStart, bufStart);
   player[playerIndex].wins = wins;
   player[playerIndex].losses = losses;
 #ifdef PRINTSCORE
@@ -3974,23 +3986,21 @@ static void scoreChanged(int playerIndex, uint16_t wins, uint16_t losses)
   // see if the player reached the score limit
   if (maxPlayerScore != 0 &&
       player[playerIndex].wins - player[playerIndex].losses >= maxPlayerScore) {
-    char msg[PlayerIdPLen + 2];
-    void *buf = msg;
-    buf = player[playerIndex].id.pack(buf);
+    void *buf, *bufStart = getDirectMessageBuffer();
+    buf = player[playerIndex].id.pack(bufStart);
     buf = nboPackUShort(buf, uint16_t(NoTeam));
-    broadcastMessage(MsgScoreOver, sizeof(msg), msg);
+    broadcastMessage(MsgScoreOver, (char*)buf-(char*)bufStart, bufStart);
     gameOver = True;
   }
 }
 
 static void sendTeleport(int playerIndex, uint16_t from, uint16_t to)
 {
-  char msg[PlayerIdPLen + 4];
-  void *buf = msg;
-  buf = player[playerIndex].id.pack(buf);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = player[playerIndex].id.pack(bufStart);
   buf = nboPackUShort(buf, from);
   buf = nboPackUShort(buf, to);
-  broadcastMessage(MsgTeleport, sizeof(msg), msg);
+  broadcastMessage(MsgTeleport, (char*)buf-(char*)bufStart, bufStart);
 }
 
 static void acquireRadio(int playerIndex, uint16_t flags)
@@ -4008,11 +4018,10 @@ static void acquireRadio(int playerIndex, uint16_t flags)
   team[int(player[playerIndex].team)].radio = playerIndex;
 
   // send MsgAcquireRadio
-  char msg[PlayerIdPLen + 2];
-  void *buf = msg;
-  buf = player[playerIndex].id.pack(buf);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = player[playerIndex].id.pack(bufStart);
   buf = nboPackUShort(buf, flags);
-  broadcastMessage(MsgAcquireRadio, sizeof(msg), msg);
+  broadcastMessage(MsgAcquireRadio, (char*)buf-(char*)bufStart, bufStart);
 }
 
 static void releaseRadio(int playerIndex)
@@ -4025,9 +4034,9 @@ static void releaseRadio(int playerIndex)
   team[int(player[playerIndex].team)].radio = InvalidPlayer;
 
   // send MsgReleaseRadio
-  char msg[PlayerIdPLen];
-  player[playerIndex].id.pack(msg);
-  broadcastMessage(MsgReleaseRadio, sizeof(msg), msg);
+  void *buf, *bufStart = getDirectMessageBuffer();
+  buf = player[playerIndex].id.pack(bufStart);
+  broadcastMessage(MsgReleaseRadio, (char*)buf-(char*)bufStart, bufStart);
 }
 
 // parse player comands (messages with leading /)
@@ -4047,15 +4056,14 @@ static void parseCommand(const char *message, int t)
   // /superkill closes all player connections
   } else if (player[t].Admin && strncmp(message + 1, "superkill", 8) == 0) {
     for (int i = 0; i < MaxPlayers; i++)
-      directMessage(i, MsgSuperKill, 0, NULL);
+      directMessage(i, MsgSuperKill, 0, getDirectMessageBuffer());
     gameOver = True;
   // /gameover command allows operator to end the game
   } else if (player[t].Admin && strncmp(message + 1, "gameover", 8) == 0) {
-    char msg[PlayerIdPLen + 2];
-    void *buf = msg;
-    buf = player[t].id.pack(buf);
+    void *buf, *bufStart = getDirectMessageBuffer();
+    buf = player[t].id.pack(bufStart);
     buf = nboPackUShort(buf, uint16_t(NoTeam));
-    broadcastMessage(MsgScoreOver, sizeof(msg), msg);
+    broadcastMessage(MsgScoreOver, (char*)buf-(char*)bufStart, bufStart);
     gameOver = True;
   // /flag command allows operator to control flags
   } else if (player[t].Admin && strncmp(message + 1, "flag ", 5) == 0) {
@@ -4068,12 +4076,11 @@ static void parseCommand(const char *message, int t)
 	  flag[i].flag.status = FlagNoExist;
 	  player[playerIndex].flag = -1;
 
-	  char msg[PlayerIdPLen + 2 + FlagPLen];
-	  void *buf = msg;
-	  buf = player[playerIndex].id.pack(buf);
+	  void *buf, *bufStart = getDirectMessageBuffer();
+	  buf = player[playerIndex].id.pack(bufStart);
 	  buf = nboPackUShort(buf, uint16_t(i));
 	  buf = flag[i].flag.pack(buf);
-	  broadcastMessage(MsgDropFlag, sizeof(msg), msg);
+	  broadcastMessage(MsgDropFlag, (char*)buf-(char*)bufStart, bufStart);
 	}
 	resetFlag(i);
       }
@@ -4088,12 +4095,11 @@ static void parseCommand(const char *message, int t)
 	    flag[i].flag.status = FlagNoExist;
 	    player[playerIndex].flag = -1;
 
-	    char msg[PlayerIdPLen + 2 + FlagPLen];
-	    void *buf = msg;
-	    buf = player[playerIndex].id.pack(buf);
+	    void *buf, *bufStart = getDirectMessageBuffer();
+	    buf = player[playerIndex].id.pack(bufStart);
 	    buf = nboPackUShort(buf, uint16_t(i));
 	    buf = flag[i].flag.pack(buf);
-	    broadcastMessage(MsgDropFlag, sizeof(msg), msg);
+	    broadcastMessage(MsgDropFlag, (char*)buf-(char*)bufStart, bufStart);
 	  }
 	  flag[i].flag.status = FlagGoing;
 	  if (!flag[i].required)
@@ -4150,7 +4156,8 @@ static void parseCommand(const char *message, int t)
 static void handleCommand(int t, uint16_t code, uint16_t len, void *rawbuf)
 {
   void *buf = (void*)((char*)rawbuf + 4);
-  patchMessage(player[t].oldId, player[t].id, rawbuf);
+  if (!player[t].knowId)
+    patchMessage(player[t].oldId, player[t].id, rawbuf);
   switch (code) {
     // player joining
     case MsgEnter: {
@@ -4176,6 +4183,7 @@ static void handleCommand(int t, uint16_t code, uint16_t len, void *rawbuf)
       player[t].oldId.serverHost = player[t].id.serverHost;
       player[t].oldId.port = player[t].id.port;
       player[t].oldId.number = player[t].id.number;
+      player[t].knowId = true;
       break;
 
     // player closing connection
@@ -4193,9 +4201,9 @@ static void handleCommand(int t, uint16_t code, uint16_t len, void *rawbuf)
       nboUnpackUShort(buf, ttl);
       if (ttl > (uint16_t)MaximumTTL) ttl = (uint16_t)MaximumTTL;
       if ((int)ttl > playerTTL) {
-	char msg[2];
-	nboPackUShort(msg, ttl);
-	broadcastMessage(MsgSetTTL, sizeof(msg), msg);
+	void *buf, *bufStart = getDirectMessageBuffer();
+	buf = nboPackUShort(bufStart, ttl);
+	broadcastMessage(MsgSetTTL, (char*)buf-(char*)bufStart, bufStart);
 	playerTTL = (int)ttl;
       }
       break;
@@ -4205,10 +4213,10 @@ static void handleCommand(int t, uint16_t code, uint16_t len, void *rawbuf)
     case MsgNetworkRelay:
       if (startPlayerPacketRelay(t)) {
 	player[t].multicastRelay = True;
-	directMessage(t, MsgAccept, 0, NULL);
+	directMessage(t, MsgAccept, 0, getDirectMessageBuffer());
       }
       else {
-	directMessage(t, MsgReject, 0, NULL);
+	directMessage(t, MsgReject, 0, getDirectMessageBuffer());
       }
       break;
 
@@ -5423,10 +5431,9 @@ int main(int argc, char **argv)
 	gameOver = True;
       }
       if (timeLeft == 0.0f || newTimeElapsed - timeElapsed >= 30.0f) {
-	char msg[2];
-	void *buf = msg;
-	buf = nboPackUShort(buf, (uint16_t)(int)timeLeft);
-	broadcastMessage(MsgTimeUpdate, sizeof(msg), msg);
+	void *buf, *bufStart = getDirectMessageBuffer();
+	buf = nboPackUShort(bufStart, (uint16_t)(int)timeLeft);
+	broadcastMessage(MsgTimeUpdate, (char*)buf-(char*)bufStart, bufStart);
 	timeElapsed = newTimeElapsed;
       }
     }
