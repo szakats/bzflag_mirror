@@ -125,19 +125,19 @@ void CBZEdit32View::DrawNiceGrid ( void )
 	glBegin(GL_LINES);
 	glColor4f(0.65f,0.65f,0.65f,1);
 	// make the grid
-	for (float f = 0; f <= 400.0f;f+=fGridSpacing)
+	for (float f = 0; f <= M_WORLDSIZE ;f+=fGridSpacing)
 	{
-		glVertex3f(-400,f,0.1f);
-		glVertex3f(400,f,0.1f);
+		glVertex3f(-M_WORLDSIZE,f,0.1f);
+		glVertex3f(M_WORLDSIZE,f,0.1f);
 
-		glVertex3f(-400,-f,0.1f);
-		glVertex3f(400,-f,0.1f);
+		glVertex3f(-M_WORLDSIZE,-f,0.1f);
+		glVertex3f(M_WORLDSIZE,-f,0.1f);
 
-		glVertex3f(f,400,0.1f);
-		glVertex3f(f,-400,0.1f);
+		glVertex3f(f,M_WORLDSIZE,0.1f);
+		glVertex3f(f,-M_WORLDSIZE,0.1f);
 
-		glVertex3f(-f,400,0.1f);
-		glVertex3f(-f,-400,0.1f);
+		glVertex3f(-f,M_WORLDSIZE,0.1f);
+		glVertex3f(-f,-M_WORLDSIZE,0.1f);
 	}
 	glEnd();
 
@@ -162,30 +162,30 @@ void CBZEdit32View::DrawNiceGrid ( void )
 	// X +
 	glBegin(GL_LINES);
 	glColor4f(1,1,1,1.0f);
-		glVertex3f(400,-10,30);
-		glVertex3f(400,10,60);
+		glVertex3f(M_WORLDSIZE,-10,30);
+		glVertex3f(M_WORLDSIZE,10,60);
 
-		glVertex3f(400,10,30);
-		glVertex3f(400,-10,60);
+		glVertex3f(M_WORLDSIZE,10,30);
+		glVertex3f(M_WORLDSIZE,-10,60);
 
-		glVertex3f(400,-12,45);
-		glVertex3f(400,-22,45);
+		glVertex3f(M_WORLDSIZE,-12,45);
+		glVertex3f(M_WORLDSIZE,-22,45);
 
-		glVertex3f(400,-17,40);
-		glVertex3f(400,-17,50);
+		glVertex3f(M_WORLDSIZE,-17,40);
+		glVertex3f(M_WORLDSIZE,-17,50);
 	glEnd();
 
 	// x-
 	glBegin(GL_LINES);
 	glColor4f(1,1,1,1.0f);
-		glVertex3f(-400,-10,30);
-		glVertex3f(-400,10,60);
+		glVertex3f(-M_WORLDSIZE,-10,30);
+		glVertex3f(-M_WORLDSIZE,10,60);
 
-		glVertex3f(-400,10,30);
-		glVertex3f(-400,-10,60);
+		glVertex3f(-M_WORLDSIZE,10,30);
+		glVertex3f(-M_WORLDSIZE,-10,60);
 
-		glVertex3f(-400,12,45);
-		glVertex3f(-400,22,45);
+		glVertex3f(-M_WORLDSIZE,12,45);
+		glVertex3f(-M_WORLDSIZE,22,45);
 	glEnd();
 
 
@@ -193,37 +193,37 @@ void CBZEdit32View::DrawNiceGrid ( void )
 	glBegin(GL_LINES);
 	glColor4f(1,1,1,1.0f);
 
-		glVertex3f(0,400,30);
-		glVertex3f(0,400,45);
+		glVertex3f(0,M_WORLDSIZE,30);
+		glVertex3f(0,M_WORLDSIZE,45);
 
-		glVertex3f(0,400,45);
-		glVertex3f(-10,400,60);
+		glVertex3f(0,M_WORLDSIZE,45);
+		glVertex3f(-10,M_WORLDSIZE,60);
 
-		glVertex3f(0,400,45);
-		glVertex3f(10,400,60);
+		glVertex3f(0,M_WORLDSIZE,45);
+		glVertex3f(10,M_WORLDSIZE,60);
 
-		glVertex3f(12,400,45);
-		glVertex3f(22,400,45);
+		glVertex3f(12,M_WORLDSIZE,45);
+		glVertex3f(22,M_WORLDSIZE,45);
 
-		glVertex3f(17,400,40);
-		glVertex3f(17,400,50);
+		glVertex3f(17,M_WORLDSIZE,40);
+		glVertex3f(17,M_WORLDSIZE,50);
 	glEnd();
 
 		// y+
 	glBegin(GL_LINES);
 	glColor4f(1,1,1,1.0f);
 
-		glVertex3f(0,-400,30);
-		glVertex3f(0,-400,45);
+		glVertex3f(0,-M_WORLDSIZE,30);
+		glVertex3f(0,-M_WORLDSIZE,45);
 
-		glVertex3f(0,-400,45);
-		glVertex3f(-10,-400,60);
+		glVertex3f(0,-M_WORLDSIZE,45);
+		glVertex3f(-10,-M_WORLDSIZE,60);
 
-		glVertex3f(0,-400,45);
-		glVertex3f(10,-400,60);
+		glVertex3f(0,-M_WORLDSIZE,45);
+		glVertex3f(10,-M_WORLDSIZE,60);
 
-		glVertex3f(-12,-400,45);
-		glVertex3f(-22,-400,45);
+		glVertex3f(-12,-M_WORLDSIZE,45);
+		glVertex3f(-22,-M_WORLDSIZE,45);
 
 	glEnd();
 

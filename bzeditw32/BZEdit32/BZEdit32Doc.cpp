@@ -371,7 +371,7 @@ void CBZEdit32Doc::OnUtiltyDumpmap()
 			return;
 
 		fprintf (fp,"WLDF\n\n");
-		fprintf (fp,"World: :\nXDim: 400\nYDim: 400\nWallHeigh: 5\nGroundTex:	data/Textures/World/ground\nWallTex:	data/Textures/World/wall\n#End\n\n");
+		fprintf (fp,"World: :\nXDim: *M_WorldSize\nYDim: *M_WorldSize\nWallHeigh: 5\nGroundTex:	data/Textures/World/ground\nWallTex:	data/Textures/World/wall\n#End\n\n");
 		
 		int iSize = m_oWorld.Size();
 		CBaseObject *pObject;

@@ -235,7 +235,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About BZEdit32"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LTEXT           "BZEdit32 Version 1.6.2\nwww.artemisgames.com/code/bz/edit\nwww.bzflag.org\nbaflag.sourceforge.com",
+    LTEXT           "BZEdit32 Version 1.6.3\nwww.sourceforge.net/bzflag/bzeditw32\nwww.bzflag.org\nbaflag.sourceforge.com",
                     IDC_STATIC,180,8,126,53,SS_SUNKEN
     LTEXT           "Copyright (C) 2002 Jeff Myers",IDC_STATIC,208,66,98,8
     CONTROL         139,IDC_STATIC,"Static",SS_BITMAP,7,7,167,67
@@ -265,9 +265,9 @@ BEGIN
     PUSHBUTTON      "Add",IDC_ADD,91,15,27,14
 END
 
-IDD_ELEMENT_INSP DIALOG  0, 0, 436, 107
+IDD_ELEMENT_INSP DIALOGEX 0, 0, 532, 119
 STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_BORDER
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     PUSHBUTTON      "Remove",IDC_REMOVE_ITEM,280,11,50,14
     LTEXT           "Name",IDC_STATIC,11,12,20,8
@@ -277,12 +277,12 @@ BEGIN
                     ES_READONLY
     PUSHBUTTON      "Duplicate",IDC_DUPLICATE,222,11,50,14
     DEFPUSHBUTTON   "Apply",IDC_APPLY,341,11,50,14
-    LTEXT           "",IDC_CHILD_DLOG_FRAME,13,30,416,72,NOT WS_GROUP
+    LTEXT           "",IDC_CHILD_DLOG_FRAME,7,30,506,72,NOT WS_GROUP
 END
 
-IDD_STD_INFO_DLOG DIALOG  0, 0, 434, 83
+IDD_STD_INFO_DLOG DIALOGEX 0, 0, 523, 83
 STYLE DS_SETFONT | WS_CHILD
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Position",IDC_STATIC,1,0,116,65
     LTEXT           "X",IDC_STATIC,8,13,8,8
@@ -301,17 +301,17 @@ BEGIN
     GROUPBOX        "Rotation",IDC_STATIC,248,0,113,30
     LTEXT           "Z",IDC_STATIC,253,13,8,8
     EDITTEXT        IDC_ZROT,267,11,86,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_BORDER,269,46,86,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
-    LTEXT           "Border",IDC_BORDER_LABEL,250,49,22,8,NOT WS_VISIBLE
-    LTEXT           "Team",IDC_TEAM_LABEL,249,49,19,8,NOT WS_VISIBLE
-    COMBOBOX        IDC_TEAM_LIST,271,46,86,30,CBS_DROPDOWNLIST | NOT 
+    EDITTEXT        IDC_BORDER,273,34,86,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+    LTEXT           "Border",IDC_BORDER_LABEL,248,40,22,8,NOT WS_VISIBLE
+    LTEXT           "Team",IDC_TEAM_LABEL,249,40,19,8,NOT WS_VISIBLE
+    COMBOBOX        IDC_TEAM_LIST,275,36,86,30,CBS_DROPDOWNLIST | NOT 
                     WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Drive Through",IDC_DRIVE_THRU,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,247,33,61,10
+                    WS_TABSTOP,393,42,61,10
     CONTROL         "Shoot Through",IDC_SHOOT_THRU,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,312,33,63,10
-    CONTROL         "Rotate Upside down",IDC_FLIPZ,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_VISIBLE | WS_TABSTOP,251,49,81,10
+                    WS_TABSTOP,393,28,63,10
+    CONTROL         "FlipZ",IDC_FLIPZ,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    393,15,31,10
 END
 
 IDD_LINK_INTERFACE DIALOG  0, 0, 347, 62
@@ -432,15 +432,15 @@ BEGIN
     IDD_ELEMENT_INSP, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 429
+        RIGHTMARGIN, 522
         TOPMARGIN, 7
-        BOTTOMMARGIN, 100
+        BOTTOMMARGIN, 112
     END
 
     IDD_STD_INFO_DLOG, DIALOG
     BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 427
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 516
         TOPMARGIN, 7
         BOTTOMMARGIN, 76
     END

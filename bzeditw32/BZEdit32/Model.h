@@ -8,6 +8,10 @@
 
 #include "3dtypes.h"
 
+
+// place holder for modifying world size
+#define M_WORLDSIZE 400.0f
+
 typedef enum
 {
 	eFirst = 0,

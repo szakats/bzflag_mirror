@@ -571,5 +571,8 @@ copy debug\*.exe ..\_test\*.exe
 		</File>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="BZEdit32.rc"/>
 	</Globals>
 </VisualStudioProject>

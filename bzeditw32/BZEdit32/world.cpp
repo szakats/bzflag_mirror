@@ -64,7 +64,7 @@ void CBaseObject::SetDefalutData ( void )
 	m_pTextureMan = NULL;
 	m_pModelMan = NULL;
 
-	m_rPosition.x = m_rPosition.y = m_rPosition.z = 0;
+	m_rPosition.x = m_rPosition.y = m_rPosition.z = 50;
 	m_rScale.x = m_rScale.y = m_rScale.z = 10;
 	m_fAngle = 0;
 

@@ -342,7 +342,7 @@ void CGroundPlaneModel::Init ( trVertex3D rPos, trVertex3D rScale, float fRot )
 
 		float		TextureScale = 50.0f;
 
-		float		WallSize = 400.0f;
+		float		WallSize = M_WORLDSIZE;
 
 	//	glDisable(GL_CULL_FACE);
 
@@ -380,7 +380,7 @@ void CWallsModel::Init ( trVertex3D rPos, trVertex3D rScale, float fRot )
 
 		glDisable(GL_CULL_FACE);
 
-		float		WallSize = 400.0f;
+		float		WallSize = M_WORLDSIZE;
 		float		fWallZ = 20.0f;
 
 		glBegin(GL_TRIANGLE_STRIP);
