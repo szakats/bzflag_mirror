@@ -10,7 +10,7 @@ client.onConnect.trace("Connected.")
 client.onConnectUDP.trace(lambda: "UDP link established, local port %s" % client.udp.port)
 client.onStartWorldDownload.trace("Downloading world...")
 client.onEnterGame.trace("Entered the game.")
-client.game.onLoadWorld.trace("World loaded.")
+client.game.world.onLoad.trace("World loaded.")
 client.game.onAddPlayer.trace("Added player %(2)s")
 client.game.onRemovePlayer.trace("Removed player %(2)s")
 

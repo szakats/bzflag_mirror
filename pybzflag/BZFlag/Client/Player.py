@@ -55,9 +55,9 @@ class PlayerClient(StatefulClient):
                 self.onEnterGame()
         self.game.onAddPlayer.observe(onAddPlayer)
 
-    def onLoadWorld(self):
-        self.game.onLoadWorld()
-        self.enterGame()
+        def onLoadWorld():
+            self.enterGame()
+        self.game.world.onLoad.observe(onLoadWorld)
 
     def enterGame(self):
         msg = self.outgoing.MsgEnter()

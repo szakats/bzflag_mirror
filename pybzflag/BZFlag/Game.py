@@ -42,7 +42,7 @@ class Game:
         self.world = World.Empty()
         self.lastUpdateTime = None
         Event.attach(self, 'onChangePlayerList', 'onAddPlayer', 'onRemovePlayer',
-                     'onLoadWorld', 'onAddFlag')
+                     'onAddFlag')
 
     def update(self):
         """Update all time-dependant game state"""
@@ -80,13 +80,6 @@ class Game:
             self.flags[number] = flag
             self.onAddFlag(self, flag)
         return flag
-
-    def loadWorld(self, filename):
-        """Load a world from the given text file"""
-        f = open(filename)
-        self.world.loadText(f)
-        f.close()
-        self.onLoadWorld()
 
     def updatePlayerFromMessage(self, msg):
         """Update the correct player from a MsgPlayerUpdate"""

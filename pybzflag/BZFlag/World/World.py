@@ -54,6 +54,7 @@ class World:
        """
     def __init__(self):
         Event.attach(self, 'onLoad', 'onAddObject', 'onRemoveObject', 'onChangeObject')
+        self.erase()
 
     def saveBinary(self, f):
         """Save a binary world to the supplied file-like object"""
@@ -73,6 +74,17 @@ class World:
         self.teleporterLinks = []
         self.style = None
         self.lifetime = 'permanent'     # For client-side world caching
+
+    def clone(self, src):
+        """Shallow-copy the contents from another Scene, leaving event handlers and such alone.
+           Triggers the onLoad event.
+           """
+        self.blocks = src.blocks
+        self.teleporters = src.teleporters
+        self.teleporterLinks = src.teleporterLinks
+        self.style = src.style
+        self.lifetime = src.lifetime
+        self.onLoad()
 
     def storeSkeletonHeader(self, size=Scale.WorldSize, wallHeight=Scale.WallHeight):
         """Adds required objects to the world that are only present in the binary format"""

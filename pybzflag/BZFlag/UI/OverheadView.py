@@ -59,7 +59,7 @@ class OverheadView:
         # When the world is reloaded, invalidate our cached rendering of it
         def onLoadWorld():
             self.cachedWorld = None
-        game.onLoadWorld.observe(onLoadWorld)
+        game.world.onLoad.observe(onLoadWorld)
 
     def worldToView(self, point):
         """Convert world coordinates to view coordinates in pixels"""

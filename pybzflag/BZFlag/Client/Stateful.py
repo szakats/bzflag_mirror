@@ -35,8 +35,7 @@ class StatefulClient(BaseClient):
         BaseClient.init(self)
         self.game = Game.Game()
         self.worldCache = None
-        Event.attach(self, 'onLoadWorld', 'onStartWorldDownload',
-                     'onNegotiateFlags')
+        Event.attach(self, 'onStartWorldDownload', 'onNegotiateFlags')
 
         # Immediately after connecting, ask for a world hash so
         # we can check our cache for a copy of that world
@@ -97,9 +96,8 @@ class StatefulClient(BaseClient):
         if self.worldCache and self.worldCache.hasWorld(self.worldHash):
             # Yay, the world is in our cache
             f = self.worldCache.openWorld(self.worldHash)
-            self.game.world = World.Binary(f)
+            self.game.world.clone(World.Binary(f))
             f.close()
-            self.onLoadWorld()
         else:
             # We're not using the cache or it didn't have our world.
             # Start a download.
@@ -128,10 +126,9 @@ class StatefulClient(BaseClient):
             # If we're using a cache, save a copy of the map.
             if self.worldCache:
                 self.worldCache.storeWorld(self.worldHash, self.binaryWorld)
-            self.game.world = World.Binary(StringIO(self.binaryWorld))
+            self.game.world.clone(World.Binary(StringIO(self.binaryWorld)))
             del self.binaryWorld
             self.worldDownloaded = 1
-            self.onLoadWorld()
 
     def onMsgAddPlayer(self, msg):
         self.game.addPlayer(Player.fromMessage(msg))
