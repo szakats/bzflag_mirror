@@ -138,8 +138,8 @@ class OverheadView:
            game world, with transient objects such as players and flags overlaid on top.
            """
         import pygame
-        self.size = surface.get_size()
         surface = self.viewport.screen
+        self.size = surface.get_size()
 
         # Since the game world doesn't usually change, we cache a rendered version of it.
         if (not self.cachedWorld) or self.cachedWorld.get_size() != surface.get_size():
@@ -195,7 +195,7 @@ class OverheadView:
 class Setup:
     def __init__(self, game, eventLoop):
         from BZFlag.UI.Viewport import PygameViewport
-        self.viewport = PygameViewport(self.eventLoop, (512,512))
+        self.viewport = PygameViewport(eventLoop, (512,512))
         self.view = OverheadView(game, self.viewport)
 
 ### The End ###
