@@ -62,10 +62,6 @@ Todo list, in no particular order:
 
   - Write a playable client
 
-  - fix resizing: what might be an SDL bug is causing the window to get stuck
-    resizing to its original size when using a WM or equivalent that does
-    opaque resizing. Known to break under sawfish, win32, and OS X.
-
   - In OverheadView, update using dirty rectangles for lower CPU usage
 
   - Use a uniform distribution rather than a normal distribution to decide cubemap
