@@ -176,6 +176,10 @@ class OpenGLViewport(PygameViewport):
     def init(self):
         from OpenGL import GL
 
+        # Test for OpenGL extensions we can use
+        from BZFlag.UI import GLExtension
+        GLExtension.init()
+
         self.nearClip    = 0.1
         self.farClip     = 2500.0
         self.fov         = 45.0

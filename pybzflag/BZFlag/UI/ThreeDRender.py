@@ -25,10 +25,11 @@ to implement views that need moderately complex 3D engine behaviour.
 
 import pygame
 from pygame.locals import *
-from BZFlag.UI import Texture, Drawable
+from BZFlag.UI import Texture, Drawable, GLExtension
 from BZFlag import Event, Animated
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from OpenGL.GL.ARB.multitexture import *
 import sys
 
 
@@ -231,10 +232,10 @@ class BasicRenderPass(RenderPass):
     def add(self, drawable):
         """Files the given drawable according to texture group"""
         groups = self.textureGroups
-        if groups.has_key(drawable.render.texture):
-            groups[drawable.render.texture].add(drawable)
+        if groups.has_key(drawable.render.textures):
+            groups[drawable.render.textures].add(drawable)
         else:
-            groups[drawable.render.texture] = TextureGroup([drawable])
+            groups[drawable.render.textures] = TextureGroup([drawable])
 
     def preprocess(self):
         """This builds display lists for all our texture groups"""
@@ -249,14 +250,28 @@ class BasicRenderPass(RenderPass):
             for group in self.textureGroups.itervalues():
                 group.pickingDraw(picking)
         else:
-            for (texture, group) in self.textureGroups.iteritems():
+            for (textures, group) in self.textureGroups.iteritems():
                 if not picking:
-                    if texture is None:
-                        glDisable(GL_TEXTURE_2D)
-                    else:
-                        glEnable(GL_TEXTURE_2D)
-                        texture.bind()
+                    self.bindTextures(textures)
                 group.draw()
+
+    def bindTextures(self, textures):
+        """Bind the given list of 2D textures in the current OpenGL context.
+           If multitexturing is not supported, all but the first texture will
+           be ignored.
+           """
+        if textures:
+            glEnable(GL_TEXTURE_2D)
+            if GLExtension.multitexture:
+                textureUnit = GL_TEXTURE1_ARB
+                for texture in textures:
+                    glActiveTextureARB(textureUnit)
+                    textureUnit += 1
+                    texture.bind()
+            else:
+                textures[0].bind()
+        else:
+            glDisable(GL_TEXTURE_2D)
 
 
 class BlendedRenderPass(BasicRenderPass):

@@ -33,7 +33,7 @@ __all__ = ['GLDrawable', 'RenderSettings']
 class RenderSettings:
     """Settings that affect how ThreeDRender processes a a drawable"""
     def __init__(self):
-        self.texture = None
+        self.textures = []
         self.blended = False
         self.overlay = False
         self.static = True
@@ -51,13 +51,25 @@ class GLDrawable:
        The blended flag is used to put objects that need blending into a
        second rendering pass.
        """
+
+    # The majority of object will only need one texture, so give them a simpler
+    # syntax. Note that textureNames is for multitexturing. Textures are never
+    # bound during the rendering of a drawable.
     textureName = None
+    textureNames = []
 
     def __init__(self):
         self.render = RenderSettings()
-        if self.textureName:
-            self.render.texture = Texture.load(self.textureName)
 	self.object = None
+        self.loadTextures()
+
+    def loadTextures(self):
+        textures = []
+        if self.textureName:
+            textures.append(Texture.load(self.textureName))
+        for name in self.textureNames:
+            textures.append(Texture.load(name))
+        self.render.textures = tuple(textures)
 
     def parent(self, parent):
         self.object = parent
