@@ -16,7 +16,7 @@ except IndexError:
 
 # Set up a quick 3D renderer view with a controller attached so we can spin the model around
 loop = EventLoop()
-viewport = Viewport.OpenGLViewport(loop, (1600,600))
+viewport = Viewport.OpenGLViewport(loop, (2560,1024))
 viewport.setCaption("Model Viewer - %s" % fileName)
 view = StereoView.StereoView(viewport)
 control = ThreeDControl.Viewing(view, viewport)
