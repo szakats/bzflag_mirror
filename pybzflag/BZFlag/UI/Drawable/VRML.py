@@ -339,7 +339,6 @@ class Mesh(DisplayList):
     def drawToList(self):
         polygon = []
         glPushMatrix()
-        glScalef(40,40,40)
 
         if self.color:
             glColor4f(*self.color)
