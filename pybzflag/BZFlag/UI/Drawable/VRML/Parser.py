@@ -34,6 +34,14 @@ from BZFlag.Geometry import *
 from Mesh import Mesh
 import re
 
+try:
+    # Use psyco to speed up this module if it's installed
+    from psyco.classes import __metaclass__
+    import psyco
+    psyco.bind(autoVertexNormals)
+except ImportError:
+    pass
+
 __all__ = ('Reader', 'VRMLParseError', 'Node', 'AnonymousMeshName')
 
 
@@ -311,4 +319,4 @@ class Reader:
         for child in node.children:
             self.extractMeshes(child, newParents)
 
-### The End ###
+# The End ###
