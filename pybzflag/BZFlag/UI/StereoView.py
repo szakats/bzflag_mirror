@@ -24,7 +24,6 @@ visualization hardware)
 
 from BZFlag.UI import Viewport, ThreeDView, ThreeDControl, ThreeDRender, Layout, HUD
 import BZFlag, math
-from OpenGL.GL import *
 
 
 class RightCamera(ThreeDRender.Camera):
@@ -38,20 +37,20 @@ class RightCamera(ThreeDRender.Camera):
 
     def load(self):
         angle = math.atan(self.eyesep / self.left.distance)
-        self.left.azimuthOffset = angle
-        self.left.load()
         self.left.azimuthOffset = -angle
+        self.left.load()
+        self.left.azimuthOffset = angle
 
 
 class StereoView:
-    """Shows a side-by-side stereo view of the BZFlag game, renderable
-       to an OpenGLViewport.
-       """
-    def __init__(self, game, viewport):
-        self.lefteye  = ThreeDView.ThreeDView(game, viewport.region(Layout.Rect(viewport).left(0.5)))
-        self.righteye = ThreeDView.ThreeDView(game, viewport.region(Layout.Rect(viewport).right(0.5)))
+    def __init__(self, viewport, scene=None):
+        if not scene:
+            scene = ThreeDRender.Scene()
+        self.scene = scene
+        self.lefteye  = ThreeDRender.View(viewport.region(Layout.Rect(viewport).left(0.5)), self.scene)
+        self.righteye = ThreeDRender.View(viewport.region(Layout.Rect(viewport).right(0.5)), self.scene)
         ThreeDControl.Viewing(self.lefteye, viewport)
-        self.righteye.camera = RightCamera(self.lefteye.camera, 30)
+        self.righteye.camera = RightCamera(self.lefteye.camera, 100)
 
 
 def attach(game, eventLoop):

@@ -31,7 +31,7 @@ nameMap = {
     'anaglyph':	'AnaglyphGame',
     'game':     'GameView',
     'editor':   'EditorView',
-    'stereo':	'StereoView',
+    'stereo':	'StereoGame',
     }
 
 
