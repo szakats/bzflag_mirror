@@ -167,7 +167,7 @@ class EventObserver:
         self.ref = weakref.ref(callback, self.unref)
 
     def __call__(self, *args, **kw):
-        self.ref(*args, **kw)
+        self.ref()(*args, **kw)
 
     def unref(self, ref):
         del self.event.clients[self.callbackHash]
