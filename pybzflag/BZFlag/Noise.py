@@ -40,6 +40,9 @@ class SmoothNoise:
         # These vertices are used as corners to sample the noise at.
         # This happens to be exactly the same as the digits of all
         # n-digit binary numbers.
+        # It is important how the indices in this cube array correlate
+        # binary digits to axes. See the description of the interpolation
+        # algorithm below for more information.
         self.cube = zeros((1 << self.dimensions, self.dimensions))
         for point in xrange(1 << self.dimensions):
             for axis in xrange(self.dimensions):
@@ -76,43 +79,45 @@ class SmoothNoise:
         s = dist[...,0,:]
         s = s*s*self.three - s*s*s*self.two
 
-        # Now perform the interpolation one axis at a time
-        # This has been made fairly cryptic in the interest of reducing the
-        # number of copies performed- modifying an array in place is much faster
-        # than performing normal infix arithmetic because a temporary array does
-        # not need to be created.
-        # This first combines all points along the X axis, then the Y, then Z.
-        s0 = s[...,0]
-        s1 = s[...,1]
-        s2 = s[...,2]
-        a = infl[...,0]
-        b = infl[...,1]
-        c = infl[...,2]
-        d = infl[...,3]
-        i4 = infl[...,4]
-        i5 = infl[...,5]
-        i6 = infl[...,6]
-        i7 = infl[...,7]
-        i4 -= a
-        i5 -= b
-        i6 -= c
-        i7 -= d
-        i4 *= s0
-        i5 *= s0
-        i6 *= s0
-        i7 *= s0
-        a += i4
-        b += i5
-        c += i6
-        d += i7
-        c -= a
-        a += s1 * c
-        d -= b
-        b += s1 * d
-        b -= a
-        s2 *= b
-        a += s2
-        return a
+        # This interpolation is easier to visulaize if you think of each axis
+        # as a bit, and each sampling point as a binary number.
+        # The process of interpolating over n dimensions and returning a
+        # scalar result requires that we 'fold' our sample influences.
+        #
+        # First we fold across axis 0: This means that all samples with axis
+        # zero at 0 will be matched with all samples where axis 0 is 1, and they
+        # will be interpolated according to the amount in s. The result will be
+        # stored in the influence array, where axis 0 is 0. The locations where
+        # axis 0 is 1 will no longer be used.
+        #
+        # Next it folds across axis 1. Axis 0 is now 'locked', so we only have
+        # half as many axes to  match up and interpolate across. The process
+        # continues across all axes.
+        #
+        # The connection with binary digits involves how the axes are mapped
+        # to locations in our cube and infl arrays. The least significant bit
+        # in the cube index is the last axis, the most significant bit is the
+        # first axis. Thus, reading the cube index in binary from left to right,
+        # the axes are in increasing order.
+        #
+        # The first axis we process will then be the high bit. We fold all infl
+        # samples by listing all binary numbers with this bit set to 0 and then
+        # 1, and interpolate. To 'lock' this bit then is just a matter of decreasing
+        # the number of axes we loop over.
+        #
+        # To keep track of all this bit-banging fun, we have a bit mask indicating
+        # the current fold axis. The number of interpolations necessary for that fold
+        # will always be equal to this mask. Every time we lock an axis, we just
+        # bit-shift this mask right by one. We're done when the mask is zero.
+        #
+        axisNumber = 0
+        axisMask = 1 << (self.dimensions - 1)
+        while axisMask:
+            for i in xrange(axisMask):
+                infl[...,i] += s[...,axisNumber] * (infl[...,axisMask + i] - infl[...,i])
+            axisMask >>= 1
+            axisNumber += 1
+        return infl[...,0]
 
 
 class PerlinNoise(SmoothNoise):

@@ -7,7 +7,7 @@ from BZFlag import Event, Util, Noise
 from Numeric import *
 import pygame
 
-n = Noise.PerlinNoise(3)
+n = Noise.PerlinNoise(3, octaves=1)
 
 # Make sure the noise generator works on individual vectors
 n.get((1,2,3))
