@@ -3,8 +3,7 @@ from BZFlag import CommandLine
 from BZFlag.UI import OverheadView
 
 client = CommandLine.client(server     = "localhost",
-                            callSign   = "@Super Observer Duckie",
-                            playerType = "observer")
+                            callSign   = "@PyObserver")
 
 # Stick some instrumentation in select events
 client.onConnect.trace("Connected.")

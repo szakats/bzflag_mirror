@@ -171,8 +171,9 @@ class EventLoop:
         # No polling by default. This can be changed to a duration
         # between polls, or to zero to poll continuously.
         self.pollTime = None
-        Util.initEvents(self, 'onPoll')
+        Util.initEvents(self, 'onPoll', 'onNonfatalException')
         self.sockets = []
+        self.showNonfatalExceptions = 1
 
     def registerSocket(self, socket):
         self.sockets.append(socket)
@@ -200,14 +201,17 @@ class EventLoop:
                     try:
                         selectDict[ready].poll(self)
                     except Errors.NonfatalException:
-                        # Catch nonfatal exceptions
-                        import sys
-                        print "*** %s : %s" % (sys.exc_info()[1].__class__.__name__, sys.exc_info()[1])
+                        self.onNonfatalException(sys.exc_info())
                 self.onPoll()
         finally:
             self.running = 0
 
     def stop(self):
         self.running = 0
+
+    def onNonfatalException(info):
+        if self.showNonfatalExceptions:
+            print "*** %s : %s" % (info[1].__class__.__name__, info[1])
+
 
 ### The End ###

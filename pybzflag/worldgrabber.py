@@ -5,9 +5,8 @@
 from BZFlag import CommandLine
 import sys
 
-argParser = CommandLine.ClientParser(server     = "localhost",
-                                     callSign   = "Worldgrabber",
-                                     playerType = "observer")
+argParser = CommandLine.ClientParser(server   = "localhost",
+                                     callSign = "@Worldgrabber")
 
 argParser.add_option("-o", "--output", dest="outputFile", metavar="FILE", default="-",
                      help="Sets the name of the file to save the downloaded world to.")
