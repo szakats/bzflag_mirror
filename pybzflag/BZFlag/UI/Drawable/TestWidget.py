@@ -26,7 +26,7 @@ from OpenGL.GL import *
 class TestWidget(DisplayList):
     def set(self, center):
         self.center = center
-        self.overlay = True
+        self.render.overlay = True
 
     def drawToList(self, rstate):
         size = 0.2
