@@ -28,7 +28,7 @@ class TestWidget(DisplayList):
         self.center = center
         self.overlay = True
 
-    def drawToList(self):
+    def drawToList(self, rstate):
         size = 0.2
         glPushMatrix()
 	glLoadIdentity()

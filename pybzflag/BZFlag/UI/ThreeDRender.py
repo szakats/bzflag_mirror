@@ -467,8 +467,8 @@ class View:
     def initLighting(self):
         self.light0 = Light(GL_LIGHT0)
         self.light1 = Light(GL_LIGHT1)
-        self.light0.ambient  = (0.05, 0.05, 0.05, 1.0)
-        self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
+        self.light0.ambient  = (0.25, 0.25, 0.25, 1.0)
+        self.light0.diffuse  = (0.65, 0.65, 0.65, 1.0)
         self.light0.position = (400, 400, 400, 1.0)
         self.light1.ambient  = (0.05, 0.05, 0.05, 1.0)
         self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)

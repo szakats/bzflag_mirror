@@ -38,7 +38,7 @@ class Texture:
     """Represents an OpenGL texture, optionally loaded from disk in any format supported by PIL"""
     def __init__(self, name=None):
         self.texture = glGenTextures(1)
-        self.texEnv = GL_REPLACE
+        self.texEnv = GL_MODULATE
         self.target = GL_TEXTURE_2D
         if name:
             self.loadFile(name)

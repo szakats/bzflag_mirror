@@ -197,6 +197,7 @@ class Pyramid(DisplayList):
             for mesh in VRML.load("../extra_media/sphere.wrl").values():
                 mesh.drawToList(rstate)
             glPopMatrix()
+            glColor3f(1,1,1)
             
         glBegin(GL_QUADS)
         # Z- side
