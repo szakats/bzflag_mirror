@@ -66,6 +66,9 @@ class Texture:
            GL_RGB or GL_RGBA that can be passed to gluBuild2DMipmaps.
            """
         self.size = size
+        self.string = string
+        self.format = format
+        self.components = components
         (w,h) = size
         self.bind()
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
@@ -76,6 +79,20 @@ class Texture:
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
         gluBuild2DMipmaps(GL_TEXTURE_2D, components, w, h, format, GL_UNSIGNED_BYTE, string)
+
+    def __getstate__(self):
+        """This method is called when pickling a Texture, to return an object which is
+           stored then passed to __setstate__ on unpickling.
+           """
+        return (self.size, self.string, self.format, self.components)
+
+    def __setstate__(self, state):
+        """This method is called on unpickling a Texture"""
+        self.loadRaw(*state)
+
+    def __getinitargs__(self):
+        """This is here to force __init__ to be called on unpickling, to get us a new texture ID"""
+        return ()
 
     def __del__(self):
         try:
