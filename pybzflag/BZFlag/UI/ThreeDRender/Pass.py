@@ -179,8 +179,9 @@ class BasicRenderPass(RenderPass):
                     glDisable(target)
                 if texIndex < len(textures):
                     t = textures[texIndex]
-                    t.bind(rstate)
-                    glEnable(t.target)
+                    if t:
+                        t.bind(rstate)
+                        glEnable(t.target)
                 texIndex += 1
 
             # Leave the first texture unit active

@@ -49,6 +49,7 @@ if __name__ == '__main__':
     view.camera.distance = 150
     view.camera.jump()
 
-    view.scene.add(WigglyGlowSphere())
+#    view.scene.add(WigglyGlowSphere())
+    view.scene.add(GlowSphere())
 
     loop.run()

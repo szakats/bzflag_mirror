@@ -25,9 +25,17 @@ acceleration via OpenGL extensions like NV_point_sprite.
 from Array import *
 from GLDrawable import *
 from OpenGL.GL import *
+from OpenGL.GL.EXT.point_parameters import *
+from OpenGL.GL.ARB.multitexture import *
 from BZFlag.Geometry import *
 from Numeric import *
 from BZFlag.UI import GLExtension
+
+# PyOpenGL doesn't yet have a module for NV_point_sprite
+GL_POINT_SPRITE_NV        = 0x8861
+GL_COORD_REPLACE_NV       = 0x8862
+GL_POINT_SPRITE_R_MODE_NV = 0x8863
+
 
 __all__ = ('ParticleArray',)
 
@@ -37,8 +45,14 @@ class ParticleArray(GLDrawable):
     def __init__(self, shape, pointDiameter):
         GLDrawable.__init__(self)
 
-        # Fall back to doing everything ourselves
-        self.renderer = SoftwareParticleRenderer(shape, pointDiameter)
+        if GLExtension.nvPointSprite:
+            # Do hardware accelerated billboarding via NV_point_sprite
+            # To get hardware acceleration on the GeForce 3, we have to
+            # use texture unit 3 rather than 0... odd, eh?
+            self.render.textures = (None,None,None) + self.render.textures
+            self.renderer = PointSpriteRenderer(shape, pointDiameter)
+        else:
+            self.renderer = SoftwareParticleRenderer(shape, pointDiameter)
 
         # Reference public render state
         self.points = self.renderer.points
@@ -64,10 +78,10 @@ class SoftwareParticleRenderer(VertexArray):
         self.numVertices = multiply.reduce(self.shape)
 
         # Initialize texture coordinates. These are static
-        self.texcoords[...,0,:] = (0,0)
-        self.texcoords[...,1,:] = (1,0)
-        self.texcoords[...,2,:] = (1,1)
-        self.texcoords[...,3,:] = (0,1)
+        self.texcoords[...,0,:] = (0,1)
+        self.texcoords[...,1,:] = (1,1)
+        self.texcoords[...,2,:] = (1,0)
+        self.texcoords[...,3,:] = (0,0)
 
         # Create point color and position arrays
         self.points      = zeros(shape + (3,), Float32, savespace=True)
@@ -92,5 +106,41 @@ class SoftwareParticleRenderer(VertexArray):
 
         self.bind()
         glDrawArrays(GL_QUADS, 0, self.numVertices)
+
+
+class PointSpriteRenderer(VertexArray):
+    """A ParticleRenderer that uses the NV_point_sprite extension to accelerate billboarding"""
+    def __init__(self, shape, pointDiameter):
+        self.pointDiameter = pointDiameter
+
+        VertexArray.__init__(self, shape, GL_C4F_N3F_V3F)
+        self.numVertices = multiply.reduce(self.shape)
+
+        # Our point and pointcolors arrays are just references into the VertexArray
+        self.points      = self.vertices
+        self.pointColors = self.colors
+
+        # Initialize all our colors to one
+        self.colors[...] = ones(self.colors.shape, Float32)
+
+    def draw(self, rstate):
+        glEnable(GL_POINT_SPRITE_NV)
+        glPointSize(self.pointDiameter)
+
+#        glPointParameterfvEXT(GL_POINT_DISTANCE_ATTENUATION_EXT, (0, 0, 0))
+
+        # Activate GL_COORD_REPLACE_NV only on texture unit 3. According to the
+        # implementation notes, this is the only way it will actually be hardware
+        # accelerated on the GeForce 3. ParticleArray helps us out by sticking
+        # None in texture units 0 through 2.
+        glActiveTextureARB(GL_TEXTURE3_ARB)
+        glTexEnvi(GL_POINT_SPRITE_NV, GL_COORD_REPLACE_NV, GL_TRUE)
+
+        self.bind()
+        glDrawArrays(GL_POINTS, 0, self.numVertices)
+
+        glTexEnvi(GL_POINT_SPRITE_NV, GL_COORD_REPLACE_NV, GL_FALSE)
+        glActiveTextureARB(GL_TEXTURE0_ARB)
+        glDisable(GL_POINT_SPRITE_NV)
 
 ### The End ###

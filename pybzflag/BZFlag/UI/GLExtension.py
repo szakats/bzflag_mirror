@@ -28,21 +28,22 @@ textureUnits = None
 maxAnisotropy = None
 cubeMap = None
 textureTargets = None
+nvPointSprite = None
 
 
 def test():
     """Test for extension support."""
-    global multitexture, textureUnits, maxAnisotropy, cubeMap
-    global textureTargets
     import OpenGL.GL.ARB.multitexture
     from OpenGL.GL.EXT import texture_filter_anisotropic
     from OpenGL.GL.EXT import texture_cube_map
     from OpenGL import GL
 
     # Determine whether we have multitexturing
+    global multitexture
     multitexture = OpenGL.GL.ARB.multitexture.glInitMultitextureARB()
 
     # If we have multitexturing, make a list of supported texture units
+    global textureUnits
     if multitexture:
         try:
             textureUnits = []
@@ -63,19 +64,26 @@ def test():
             multitexture = False
 
     # Determine whether we have anisotropic filtering
+    global maxAnisotropy
     try:
         maxAnisotropy = GL.glGetFloatv(texture_filter_anisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT)
     except:
         maxAnisotropy = 1.0
 
     # Start a list of supported texture targets, we'll add to it later
+    global textureTargets
     textureTargets = [GL.GL_TEXTURE_1D, GL.GL_TEXTURE_2D]
 
     # Test for the cube map extension
+    global cubeMap
     texture_cube_map.glInitTextureCubeMapEXT()
     cubeMap = GL.glGetString(GL.GL_EXTENSIONS).find("GL_EXT_texture_cube_map") >= 0
     if cubeMap:
         textureTargets.append(texture_cube_map.GL_TEXTURE_CUBE_MAP_EXT)
+
+    # Test for the NVidia point sprite extension
+    global nvPointSprite
+    nvPointSprite = GL.glGetString(GL.GL_EXTENSIONS).find("GL_NV_point_sprite") >= 0
 
 
 def disableMultitex():
