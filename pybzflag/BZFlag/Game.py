@@ -51,7 +51,7 @@ class Game:
     def integrate(self, dt):
         """Integrate velocity with respect to time everywhere it's needed"""
         for player in self.players.values():
-            player.motion.integrate(dt)
+            player.integrate(dt)
         for flag in self.flags.values():
             flag.motion.integrate(dt)
 

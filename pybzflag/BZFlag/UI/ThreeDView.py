@@ -24,11 +24,25 @@ A 3d scene renderer similar to BZFlag proper
 import BZFlag
 from BZFlag.UI import ThreeDRender, Drawable
 from BZFlag.Protocol import WorldObjects
+from OpenGL.GL import *
 
+
+class PlayerTransform(Drawable.Transform):
+    """A drawable transform to set the tank's position, orientation, and color
+       according to its attached player.
+       """
+    def __init__(self, player):
+        self.player = player
+
+    def apply(self):
+        m = self.player.motion
+        glTranslatef(*m.position)
+        glRotatef(m.azimuth, 0,0,1)
+    
 
 class Tank:
     """A Scene object representing a player's tank"""
-    def __init__(self):
+    def __init__(self, player): 
         # Load the tank from disk. The tank is divided into separate meshes
         # for the barrel, turret, body, and each tread.
         meshes = Drawable.VRML.load("tank.wrl")
@@ -37,15 +51,11 @@ class Tank:
         # display list, since we generally move them together.
         meshGroup = Drawable.Group(meshes.values())
 
-        # Set up a set of transforms we can apply to the tank dynamically
-        self.position = Drawable.Position()
-        self.rotation = Drawable.Rotate()
-        self.color    = Drawable.Colorize()
-        self.transforms = [self.position, self.rotation, self.color]
-
         # Our final drawable is just a transformer wrapped around our mesh group
+        self.player = player
+        self.transforms = [PlayerTransform(player)]
         self.drawables = [Drawable.Transformer(meshGroup, self.transforms)]
-        
+
     def getDrawables(self):
         return self.drawables
 
@@ -78,7 +88,7 @@ class Scene(ThreeDRender.Scene):
         self.preprocess()
 
     def addPlayer(self, game, player):
-        tank = Tank()
+        tank = Tank(player)
         self.playerTanks[player] = tank
         self.add(tank)
 

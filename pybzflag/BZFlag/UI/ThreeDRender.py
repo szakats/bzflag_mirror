@@ -118,20 +118,35 @@ class Light:
 
 
 class TextureGroup(Drawable.DisplayList):
-    """A container for all the objects drawn in the same texture, compiled
-       into a display list for speedy rendering of static worlds.
+    """A container for all the objects drawn in the same texture. Objects
+       with the 'static' flag are compiled into a display list for
+       speedy rendering of static worlds.
        """
     def __init__(self, drawables=[]):
-        self.drawables = drawables
+        self.dynamic = []
+        self.static = []
+        for drawable in drawables:
+            self.add(drawable)
         Drawable.DisplayList.__init__(self)
+
+    def add(self, drawable):
+        if drawable.render.static:
+            self.static.append(drawable)
+        else:
+            self.dynamic.append(drawable)
 
     def init(self):
         """Don't rebuild the list on init"""
         pass
 
     def drawToList(self):
-        for drawable in self.drawables:
+        for drawable in self.static:
             drawable.drawToList()
+
+    def draw(self):
+        Drawable.DisplayList.draw(self)
+        for drawable in self.dynamic:
+            drawable.draw()
 
 
 class PickingState:
@@ -208,7 +223,7 @@ class BasicRenderPass(RenderPass):
         """Files the given drawable according to texture group"""
         groups = self.textureGroups
         if groups.has_key(drawable.render.texture):
-            groups[drawable.render.texture].drawables.append(drawable)
+            groups[drawable.render.texture].add(drawable)
         else:
             groups[drawable.render.texture] = TextureGroup([drawable])
 

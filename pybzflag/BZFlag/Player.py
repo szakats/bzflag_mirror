@@ -73,19 +73,26 @@ class Player:
         self.identity = Identity()
         self.motion = Motion()
         self.score = Score()
-        Event.attach(self, 'onUpdate')
+        Event.attach(self, 'onChangeStatus', 'onMove')
 
     def __str__(self):
         return "%s : %s" % (self.score, self.identity)
 
     def updateFromMessage(self, msg):
         """Update the player from a MsgPlayerUpdate"""
-        self.status = msg.status
+        if msg.status != self.status:
+            self.status = msg.status
+            self.onChangeStatus(self)
+
         self.motion.position.set(msg.position)
         self.motion.velocity[:] = list(msg.velocity)
         self.motion.azimuth = msg.azimuth
         self.motion.angularVelocity = msg.angularVelocity
-        self.onUpdate()
+        self.onMove(self)
+
+    def integrate(self, dt):
+        self.motion.integrate(dt)
+        self.onMove(self)
 
 
 def fromMessage(msg):

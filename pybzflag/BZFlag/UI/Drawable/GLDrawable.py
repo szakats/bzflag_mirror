@@ -36,6 +36,7 @@ class RenderSettings:
         self.texture = None
         self.blended = False
         self.overlay = False
+        self.static = True
 
     def __repr__(self):
         settings = [key for key in self.__dict__.iterkeys() if key[0] != '_']

@@ -40,3 +40,5 @@ Todo list, in no particular order:
   - Better textures/lighting possibly, maybe multitexturing so long range
     views don't look so boring and the 'grass' isn't so bad. This is supposed
     to be protocol-compatible with BZFlag, but doesn't have to look just like it :)
+
+  - In OverheadView, update using dirty rectangles for lower CPU usage

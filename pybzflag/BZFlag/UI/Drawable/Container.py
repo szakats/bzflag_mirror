@@ -25,8 +25,9 @@ into one, and to perform transformations on other drawables.
 from BZFlag.UI.Drawable.GLDrawable import *
 from BZFlag.UI.Drawable.DisplayList import *
 from OpenGL.GL import *
+import copy
 
-__all__ = ['Group', 'Transformer', 'Transform', 'Colorize', 'Position', 'Rotate']
+__all__ = ['Group', 'Transformer', 'Transform']
 
 
 class Group(DisplayList):
@@ -53,8 +54,9 @@ class Transformer(GLDrawable):
     def __init__(self, child, transforms):
         GLDrawable.__init__(self)
         self.child = child
-        self.render = child.render
         self.transforms = transforms
+        self.render = copy.copy(child.render)
+        self.render.static = False
 
     def draw(self):
         glPushMatrix()
@@ -70,35 +72,5 @@ class Transform:
     def apply(self):
         """Apply this transform to the current OpenGL state"""
         pass
-
-
-class Colorize(Transform):
-    """Changes the current color"""
-    def __init__(self, rgb=[1,1,1]):
-        self.rgb = rgb
-
-    def apply(self):
-        glColor3f(*self.rgb)
-
-
-class Position(Transform):
-    """Move the drawable's origin"""
-    def __init__(self, vector=[0,0,0]):
-        self.vector = vector
-
-    def apply(self):
-        glTranslatef(*self.vector)
-
-
-class Rotate(Transform):
-    """Rotate the drawable using Euler angles"""
-    def __init__(self, angle=[0,0,0]):
-        self.angle = angle
-
-    def apply(self):
-        glRotatef(self.angle[2], 0,0,1)
-        glRotatef(self.angle[0], 1,0,0)
-        glRotatef(self.angle[1], 0,1,0)
-
 
 ### The End ###
