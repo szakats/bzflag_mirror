@@ -53,9 +53,7 @@ class RadarView:
         self.angle = 0
         self.follow = None
 
-        glClearColor(0.0, 0.0, 0.0, 0.0)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_BLEND)
         glEnable(GL_LINE_SMOOTH)
 
         viewport.setCaption("%s Radar View" % BZFlag.name)
@@ -137,6 +135,12 @@ class RadarView:
             self.zoom   = 2
 
     def render(self):
+        glEnable(GL_BLEND)
+        glDisable(GL_LIGHTING)
+        glDisable(GL_CULL_FACE)
+        glDisable(GL_COLOR_MATERIAL)
+        glDisable(GL_DEPTH_TEST)
+        
         glPushMatrix()
         glTranslatef(0,0,-10)
         self.updateFollowing()

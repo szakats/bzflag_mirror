@@ -108,6 +108,12 @@ class Scene:
     def render(self):
         """Render the scene to the current OpenGL context"""
         glDisable(GL_BLEND)
+        glEnable(GL_DEPTH_TEST)
+        glEnable(GL_NORMALIZE)
+        glEnable(GL_CULL_FACE)
+        glEnable(GL_COLOR_MATERIAL)
+        glColor4f(1,1,1,1)
+
         for texture in self.passes[0].keys():
             glDisable(GL_TEXTURE_2D)
             if texture != None:
@@ -146,18 +152,6 @@ class ThreeDView:
         self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
         self.light1.position = (0, 0, 400, 1.0)
         self.light1.set()
-
-        glEnable(GL_DEPTH_TEST)
-        glEnable(GL_NORMALIZE)
-        glEnable(GL_CULL_FACE)
-        glEnable(GL_COLOR_MATERIAL)
-
-        glClearColor(0.0, 0.0, 0.0, 0.0)
-        glClearDepth(1.0)
-        glDepthFunc(GL_LESS)
-        glShadeModel(GL_SMOOTH)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
 
         viewport.setCaption("%s 3D View" % BZFlag.name)
         def onDrawFrame():

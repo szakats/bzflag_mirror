@@ -157,9 +157,17 @@ class OpenGLViewport(PygameViewport):
         self.farClip    = 2500.0
         self.fov        = 45.0
 
+        # Set up some common OpenGL defaults
+        GL.glClearColor(0.0, 0.0, 0.0, 0.0)
+        GL.glClearDepth(1.0)
+        GL.glDepthFunc(GL.GL_LESS)
+        GL.glShadeModel(GL.GL_SMOOTH)
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+        GL.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST)
         def onSetupFrame():
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         self.onSetupFrame.observe(onSetupFrame)
+
         self.onSetupFrame.observe(self.configureOpenGL)
 
     def configureOpenGL(self):
@@ -195,7 +203,6 @@ class OpenGLViewport(PygameViewport):
         self.renderSequence = self.renderSequence[:-1] + \
                               [sub.onSetupFrame, sub.onDrawFrame, sub.onFinishFrame] + \
                               self.renderSequence[-1:]
-        print self.renderSequence
         return sub
 
 ### The End ###
