@@ -23,7 +23,7 @@ support updating a game state and transmitting changes.
 #
 
 import BZFlag
-from BZFlag import Event, Game, Flag, Meta
+from BZFlag import Event, Game, Flag, Meta, World
 from StringIO import StringIO
 from BZFlag.Server.Base import BaseServer
 
@@ -54,10 +54,15 @@ class StatefulServer(BaseServer):
 
         def setOptions(**options):
             if 'world' in options.keys() and options['world']:
-                # Load world
-                f = open(options['world'])
-                self.game.world.loadText(f)
-                f.close()
+                world = options['world']
+                if hasattr(World.Generator, world):
+                    # Automatically generated world
+                    self.game.world = getattr(World.Generator, world)()
+                else:
+                    # Load world
+                    f = open(options['world'])
+                    self.game.world.loadText(f)
+                    f.close()
 
             if 'gameStyle' in options.keys():
                 self.game.world.style.gameStyle = options['gameStyle']
