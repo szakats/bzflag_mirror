@@ -5,7 +5,7 @@ from OpenGL.GL import *
 import math
 
 
-class GlowSphere(Drawable.SpriteArray):
+class SparkThingy(Drawable.SpriteArray):
     """An example particle system that draws glowing balls positioned on the surface of a sphere"""
     textureName = 'spark.png'
 
@@ -48,9 +48,9 @@ if __name__ == '__main__':
     viewport.mode = Viewport.GL.ClearedMode(clearColor=(0.2, 0.2, 0.2, 1))
 
     view.camera.position = (0,0,0)
-    view.camera.distance = 150
+    view.camera.distance = 20
     view.camera.jump()
 
-    view.scene.add(GlowSphere())
+    view.scene.add(SparkThingy())
 
     loop.run()
