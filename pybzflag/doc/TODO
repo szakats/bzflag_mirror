@@ -47,6 +47,8 @@ Todo list, in no particular order:
 
   - Write more documentation :)
 
+  - Unify the world and VRML caches
+
   - Complete the Unicode support in GLText. This means deleting rarely used texture pages
     to prevent uncontrolled memory usage, and automatically loading auxiliary fonts
     when a character can't be located.
