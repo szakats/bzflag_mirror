@@ -26,20 +26,19 @@ from BZFlag.UI import Viewport, ThreeDView, ThreeDControl, ThreeDRender, Layout,
 import BZFlag, math
 
 
-class RightCamera(ThreeDRender.Camera):
-    """The left eye has our 'master camera' that is operated by the ThreeDControl.Viewing
-       instance. This class replaces the camera for the right eye, and manages setting the
-       azimuthOffset correctly when switching between views.
+class EyeCamera(ThreeDRender.Camera):
+    """A camera that will track the location of a master camera, offsetting its azimuth
+       to simulate an eye separation of the given amount.
        """
-    def __init__(self, left, eyesep=12.5):
-        self.left = left
+    def __init__(self, masterView, eyesep):
+        self.masterView = masterView
         self.eyesep = eyesep
 
     def load(self):
-        angle = math.atan(self.eyesep / self.left.distance)
-        self.left.azimuthOffset = -angle
-        self.left.load()
-        self.left.azimuthOffset = angle
+        master = getattr(self.masterView, 'camera')
+        angle = math.atan(self.eyesep / master.distance)
+        master.azimuthOffset = angle
+        master.load()
 
 
 class StereoView:
@@ -47,8 +46,13 @@ class StereoView:
         if not scene:
             scene = ThreeDRender.Scene()
         self.scene = scene
+        self.viewport = viewport
+        self.camera = ThreeDRender.Camera()
+
         self.lefteye  = ThreeDRender.View(viewport.region(Layout.Rect(viewport).left(0.5)), self.scene)
         self.righteye = ThreeDRender.View(viewport.region(Layout.Rect(viewport).right(0.5)), self.scene)
-        ThreeDControl.Viewing(self.lefteye, viewport)
-        self.righteye.camera = RightCamera(self.lefteye.camera, 30)
+        self.lefteye.camera  = EyeCamera(self, -30)
+        self.righteye.camera = EyeCamera(self,  30)
+
+### The End ###
 
