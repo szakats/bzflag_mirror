@@ -24,8 +24,8 @@ A 3d scene renderer similar to BZFlag proper
 import pygame, BZFlag
 from pygame.locals import *
 from BZFlag.World import WorldObjects
-from BZFlag.UI import Texture, Animated
-from BZFlag import Event
+from BZFlag.UI import Texture
+from BZFlag import Event, Animated
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import sys
