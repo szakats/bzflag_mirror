@@ -367,7 +367,7 @@ class OverlayRenderPass(BasicRenderPass):
 
 class BackgroundRenderPass(BasicRenderPass):
     """A rendering pass that draws objects behind the scene, with the camera's
-       translation removed and the Z-buffer cleared afterwards.
+       translation removed and Z-buffer writes disabled.
        """
     filterPriority = 20
     renderPriority = 110
@@ -384,8 +384,9 @@ class BackgroundRenderPass(BasicRenderPass):
         rotation[3,3] = 1
         glLoadMatrixf(rotation)
 
+        glDepthMask(0)
         BasicRenderPass.render(self, rstate)
-        glClear(GL_DEPTH_BUFFER_BIT)
+        glDepthMask(1)
         glPopMatrix()
 
 
