@@ -27,6 +27,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from BZFlag import Animated
 from BZFlag.UI import GLNoise
+import VRML
 
 
 class SkyDrawable(DisplayList):
@@ -51,19 +52,19 @@ class Colors(SkyDrawable):
            texture coordinates. Texture coordinates must be adjusted for time
            of day in draw().
            """
-        # Texture the top half of the sky sphere with our changing gradient,
-        # leaving the bottom half clamped to the horizon.
+        # Texture the sky dome vertically with the Y axis of our gradient.
+        # The bottom of the texture is at the horizon, the top of the texture is
+        # a little below the top of the dome, to increase the amount of texture
+        # resolution near the horizon.
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
         glDisable(GL_LIGHTING)
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 0.1, 0))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 0.8, 0))
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
-        quad = gluNewQuadric()
-        gluQuadricOrientation(quad, GLU_INSIDE)
-        gluSphere(quad, 10, 8, 8)
+        VRML.load('sky.wrl')['colors'].drawToList(rstate)
 
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
@@ -102,28 +103,22 @@ class Clouds(SkyDrawable):
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
-        # Create a very large sphere with the camera near the top
-        glPushMatrix()
-        glTranslatef(0, 0, -990)
-        quad = gluNewQuadric()
-        gluQuadricOrientation(quad, GLU_INSIDE)
-        gluSphere(quad, 1000, 80, 80)
+        VRML.load('sky.wrl')['clouds'].drawToList(rstate)
 
         # Cleanup!
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
         glEnable(GL_LIGHTING)
         glDisable(GL_BLEND)
-        glPopMatrix()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glDisable(GL_TEXTURE_2D)
 
     def draw(self, rstate):
         """Animate the texture coordinates every frame"""
-        scale = 0.01
+        scale = 1
         self.motion.integrate(self.time.step())
         glTexGenfv(GL_S, GL_OBJECT_PLANE, (scale, 0, 0, self.motion.value))
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, scale, 0, 0))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, scale, 0))
         DisplayList.draw(self, rstate)
 
 ### The End ###
