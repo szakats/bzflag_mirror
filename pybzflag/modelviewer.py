@@ -33,7 +33,7 @@ class MeshObject:
         self.name = name
     def __repr__(self):
         return "<%s %r>" % (self.__class__.__name__, self.name)
-for (name, drawable) in r.meshes.items():
+for name, drawable in r.meshes.items():
     view.scene.add(MeshObject(name), [drawable])
 
 # Let the user pick objects with the left mouse button, printing the mesh name
