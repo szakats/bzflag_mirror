@@ -6,9 +6,6 @@
 from BZFlag import World, Game, UI, CommandLine, Animated
 from BZFlag.Event import EventLoop
 import sys
-import psyco
-
-psyco.full()
 
 ui = CommandLine.Parser(UI.Any, ui = 'overhead').parse()
 
