@@ -25,27 +25,29 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 class Texture:
-  def __init__(self, name):
-    self.image = Image.open(name)
-    self.w = self.image.size[0]
-    self.h = self.image.size[1]
-    self.image = self.image.convert('RGBA')
-    self.image = self.image.tostring('raw', 'RGBA', 0, -1)
+    def __init__(self, name):
+        self.image = Image.open(name)
+        self.w = self.image.size[0]
+        self.h = self.image.size[1]
+        self.image = self.image.convert('RGBA')
+        self.image = self.image.tostring('raw', 'RGBA', 0, -1)
 
-    self.texture = glGenTextures(1)
-    glBindTexture(GL_TEXTURE_2D, self.texture)
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, self.w, self.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, self.image)
-    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, self.w, self.h, GL_RGBA, GL_UNSIGNED_BYTE, self.image)
+        self.texture = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, self.texture)
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
+        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, self.w, self.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, self.image)
+        gluBuild2DMipmaps(GL_TEXTURE_2D, 3, self.w, self.h, GL_RGBA, GL_UNSIGNED_BYTE, self.image)
 
-  def __del__(self):
-    glDeleteTextures(self.texture)
+    def __del__(self):
+        glDeleteTextures(self.texture)
 
-  def bind(self):
-    glBindTexture(GL_TEXTURE_2D, self.texture)
+    def bind(self):
+        glBindTexture(GL_TEXTURE_2D, self.texture)
+
+### The End ###

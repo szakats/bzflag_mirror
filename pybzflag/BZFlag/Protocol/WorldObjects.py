@@ -30,6 +30,7 @@ from BZFlag.Protocol import Common
 from BZFlag import Errors
 import re, math
 
+
 class BlockHeader(Struct):
     entries = [
         StructEntry(UInt16, 'id'),
