@@ -31,7 +31,7 @@ from OpenGL.GLU import *
 class Camera:
   def __init__(self):
     self.focus = (0, 0, 4.0)
-    self.distance = 1500
+    self.distance = 900
     self.rotation = 45
     self.elevation = -75
     self.isFocused = True
