@@ -125,7 +125,7 @@ class MsgShotBegin(Common.Message):
         StructEntry(Common.Vector3,  'position'),
         StructEntry(Common.Vector3,  'velocity'),
         StructEntry(Float,           'time'),
-        StructEntry(Common.FlagType, 'flagType'),
+        StructEntry(Common.FlagId,   'flagId'),
         StructEntry(Float,           'lifetime'),
         ]
 

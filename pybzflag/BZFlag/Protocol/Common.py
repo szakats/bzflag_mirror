@@ -84,18 +84,11 @@ GameStyle = Bitfield(UInt16, {
     'rabbitChase': 0x0200,
     })
 
-FlagId = Enum(UInt16, [
-    # Team flags
-    None, 'rogue', 'red', 'green', 'blue', 'purple',
-    # Good flags
-    'velocity', 'quickTurn', 'oscOverthruster', 'rapidFire', 'machineGun',
-    'guidedMissle', 'laser', 'ricochet', 'superBullet', 'invisibleBullet',
-    'stealth', 'tiny', 'narrow', 'shield', 'steamroller', 'shockWave',
-    'phantomZone', 'genocide', 'jumping', 'identify', 'cloaking',
-    # Bad flags
-    'colorBlindness', 'obesity', 'leftTurnOnly', 'rightTurnOnly',
-    'momentum', 'blindness', 'jamming', 'wideAngle',
-    ])
+# This is in fact an enum, but rather than being constant it's
+# decided upon during flag negotiation. StatefulClient will
+# create dictionaries to map FlagIds to flag classes with further
+# information and code for each flag.
+FlagId = UInt16
 
 FlagStatus = Enum(UInt16, [
     'noExist', 'onGround', 'onTank', 'inAir', 'coming', 'going',
@@ -234,7 +227,7 @@ class MsgNegotiateFlags(DataMessage):
 
 class FlagNegotiationID(Struct):
     entries = [
-        StructEntry(UInt16,         'id'),
+        StructEntry(FlagId,         'id'),
         StructEntry(StringField(2), 'abbreviation'),
         ]
     

@@ -230,15 +230,19 @@ class StatefulClient(BaseClient):
     def onMsgNegotiateFlags(self, msg):
         """Flag negotiation succeeded. This message tells us what IDs we should
            use to represent each flag over the wire.
+
+           The message's data is a variable length list of FlagNegotiationID
+           structures that map an ID and abbreviation. This looks up those
+           abbreviations in the Flag module and creates dictionaries mapping
+           those classes to IDs and vice versa.
            """
         data = StringIO(msg.data)
         self.flagIdToClass = {}
         self.flagClassToId = {}
         flagDict = Flag.getDict()
-        while 1:
+        for i in xrange(msg.numFlags):
             flag = Common.FlagNegotiationID()
-            if not flag.read(data):
-                break
+            flag.read(data)
             try:
                 cls = flagDict[flag.abbreviation]
             except KeyError:
@@ -310,7 +314,6 @@ class StatefulClient(BaseClient):
             del self.binaryWorld
             self.worldDownloaded = 1
             self.onLoadWorld()
-
 
     def onMsgAddPlayer(self, msg):
         self.game.addPlayer(Player.fromMessage(msg))
