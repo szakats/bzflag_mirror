@@ -7,16 +7,9 @@ Todo list, in no particular order:
 
   - Write more documentation :)
 
-  - Add Animated functions for sawtooth, sine, square, and triangle waves. Use
-    the sawtooth wave to replace the hardcoded goop in AnimatedTexture.
-    Functions should take parameters specifying the range and the period of their output.
-
   - Complete the Unicode support in GLText. This means deleting rarely used texture pages
     to prevent uncontrolled memory usage, and automatically loading auxiliary fonts
     when a character can't be located.
-
-  - Standardize the viewport coordinates, top-left should be the origin. This will affect
-    layout and font rendering.
 
   - Finish the server
 
