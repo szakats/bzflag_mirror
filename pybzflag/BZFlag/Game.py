@@ -24,7 +24,7 @@ over the network, frontends display and modify it.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag import World, Event, Util
+from BZFlag import World, Event, Animated
 from BZFlag.Protocol import Common
 import time
 
@@ -40,7 +40,7 @@ class Game:
         self.flags = {}      # Indexed by flag number
         self.teams = {}      # Indexed by color, represented as a string
         self.world = World.Empty()
-        self.time  = Util.Timekeeper()
+        self.time  = Animated.Timekeeper()
         Event.attach(self, 'onChangePlayerList', 'onAddPlayer', 'onRemovePlayer',
                      'onAddFlag')
 

@@ -23,7 +23,7 @@ A 3d scene renderer similar to BZFlag proper
 
 import pygame, math, BZFlag
 from pygame.locals import *
-from BZFlag import Event, Util
+from BZFlag import Event, Animated
 from BZFlag.World import Scene, WorldObjects
 from BZFlag.UI import Texture
 from OpenGL.GL import *
@@ -143,7 +143,7 @@ class ThreeDController:
   def __init__(self, view, viewport):
     self.view = view
     self.viewport = viewport
-    self.time = Util.Timekeeper()
+    self.time = Animated.Timekeeper()
 
     view.camera.focus = (0, 0, -90)
 
