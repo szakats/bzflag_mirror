@@ -22,6 +22,7 @@ Catalog of all supported flag types, and related utilities.
 # 
 
 from BZFlag import Util
+from BZFlag.Protocol import FromServer
 import re
 
 class FlagMotion:
@@ -49,7 +50,7 @@ class FlagBase:
         self.status = None
         self.owner = None
         self.motion = FlagMotion()
-        Util.initEvents(self, 'onGrab', 'onRelease', 'onUpdate')
+        Util.initEvents(self, 'onGrab', 'onDrop', 'onUpdate')
 
     def getName(self):
         """Infer a flag's name from the class name"""
@@ -105,7 +106,12 @@ class FlagBase:
         self.motion.flightTime = msg.update.flightTime
         self.motion.flightEndTime = msg.update.flightEndTime
         self.motion.initialVelocity = msg.update.initialVelocity
+
         self.onUpdate()
+        if msg.__class__ == FromServer.MsgDropFlag:
+            self.onDrop(msg.playerId)
+        elif msg.__class__ == FromServer.MsgGrabFlag:
+            self.onGrab(msg.playerId)
 
         if not msg.update.type in self.type:
             raise Errors.ProtocolWarning("Flag type in update doesn't match local flag type")

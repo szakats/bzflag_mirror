@@ -324,27 +324,19 @@ class StatefulClient(BaseClient):
     def onMsgPlayerUpdate(self, msg):
         self.game.players[msg.id].updateFromMessage(msg)
 
-    def onMsgFlagUpdate(self, msg):
+    def updateFlag(self, msg):
+        """Generic handler for all messages that update a flag"""
         flag = self.game.getFlag(msg.flagNum, self.flagIdToClass[msg.update.id])
         flag.updateFromMessage(msg)
 
-    def onMsgTeamUpdate(self, msg):
-        pass
-
-    def onMsgNewRabbit(self, msg):
-        pass
-
-    def onMsgAlive(self, msg):
-        pass
-
-    def onMsgShotBegin(self, msg):
-        pass
-
+    def onMsgFlagUpdate(self, msg):
+        self.updateFlag(msg)
+        
     def onMsgGrabFlag(self, msg):
-        pass
+        self.updateFlag(msg)
 
     def onMsgDropFlag(self, msg):
-        pass
+        self.updateFlag(msg)
 
 
 class PlayerClient(StatefulClient):

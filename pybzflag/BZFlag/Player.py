@@ -77,6 +77,7 @@ class Player:
         self.identity = Identity()
         self.motion = Motion()
         self.score = Score()
+        Util.initEvents(self, 'onUpdate')
 
     def __str__(self):
         return "%s : %s" % (self.score, self.identity)
@@ -88,7 +89,8 @@ class Player:
         self.motion.velocity = msg.velocity
         self.motion.azimuth = msg.azimuth
         self.motion.angularVelocity = msg.angularVelocity
-
+        self.onUpdate()
+        
 
 def fromMessage(msg):
     """Create a new Player class with the information from
