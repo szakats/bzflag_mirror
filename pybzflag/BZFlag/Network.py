@@ -34,7 +34,8 @@ class Socket:
        """
     def __init__(self, protocol='TCP'):
         self.readBuffer = ''
-        self.socket = getattr(self, "new%sSocket" % protocol)()
+        if protocol:
+            self.socket = getattr(self, "new%sSocket" % protocol)()
 
     def newTCPSocket(self):
         """Create a new TCP socket, setting the proper options"""
@@ -121,6 +122,23 @@ class Socket:
             port = int(port)
         self.socket.connect((host, port))
 
+    def bind(self, port, interface=None):
+        """Bind this socket to the given port and optional interface,
+           and start listening for connections.
+           """
+        if interface is None:
+            interface = socket.gethostname()
+        self.socket.bind(interface, port)
+        self.socket.listen(5)
+
+    def accept(self):
+        """Accept an incoming connection on a socket that has been bind()'ed,
+           returning a Socket class for the new connection.
+           """
+        s = Socket(None)
+        (s.socket, s.address) = self.socket.accept()
+        return s
+
     def poll(self, eventLoop):
         """This is designed for event driven programming with
            one or more sockets. The event loop should call this
@@ -164,5 +182,95 @@ class Socket:
         except KeyError:
             raise Errors.ProtocolWarning("Received unknown message type 0x%04X" % header.id)
         return msgClass(str(header) + body)
+
+
+class Endpoint:
+    """Abstract base class for an endpoint in the BZFlag client-server connection.
+       This is a base class for both BaseClient and BaseServer.
+
+       This class provides a system for asynchronously processing messages
+       and dispatching them to event handler functions.
+
+       The methods of this class and its subclasses use the following
+       naming conventions:
+
+         - Low-level socket handlers should be of the form handleFoo()
+         - Event handlers for messages should be of the form onMsgFoo()
+         - Event handlers for other events should be of the form onFoo()
+
+       All onFoo() and onMsgFoo() events are observable and traceable,
+       See the Event class for more information about this feature.      
+       """
+    
+    # Protocol modules for the messages sent in and out of this endpoint
+    outgoing = None
+    incoming = None
+    
+    def __init__(self, **options):
+        """Any options passed to the constructor will be sent to setOptions"""
+        self.tcp = None
+        self.udp = None
+        self.options = {}
+        
+        from BZFlag import Event
+        Event.attach(self, 'onAnyMessage', 'onUnhandledMessage', 'onSetOptions')
+
+        # Add events for all messages, with onUnhandledMessage as an
+        # unhandled event handler.
+        for message in Common.getMessageDict(self.incoming).values():
+            eventName = self.getMsgHandlerName(message)
+            if hasattr(self, eventName):
+                event = Event.Event(getattr(self, eventName))
+            else:
+                event = Event.Event()
+            event.unhandledCallback = self.onUnhandledMessage
+            setattr(self, eventName, event)
+
+        self.init()
+        self.onSetOptions(**options)
+
+    def setOptions(self, **options):
+        self.onSetOptions(**options)
+
+    def init(self):
+        """A hook for subclasses to add initialization in the proper sequence"""
+        pass
+
+    def getMsgHandlerName(self, messageClass):
+        return "on%s" % messageClass.__name__
+
+    def onSetOptions(self, **options):
+        self.options.update(options)
+
+        if 'eventLoop' in options.keys():
+            self.eventLoop = options['eventLoop']
+        else:
+            from BZFlag import Event
+            self.eventLoop = Event.EventLoop()
+
+    def getSupportedOptions(self):
+        return self.options.keys()
+
+    def run(self):
+        self.eventLoop.run()
+
+    def handleMessage(self, socket, eventLoop):
+        """This is a callback used to handle incoming socket
+           data when we're expecting a message.
+           """
+        # This can return None if part of the mesasge but not the whole
+        # thing is available. The rest of the message will be rebuffered,
+        # so we'll read the whole thing next time this is called.
+        msg = socket.readMessage(self.incoming)
+        if msg:
+            msg.socket = socket
+            msg.eventLoop = eventLoop
+            handler = getattr(self, self.getMsgHandlerName(msg.__class__))
+            if self.onAnyMessage(msg):
+                return
+            handler(msg)
+
+    def onUnhandledMessage(self, msg):
+        raise Errors.ProtocolWarning("Unhandled message %s" % msg.__class__.__name__)
 
 ### The End ###

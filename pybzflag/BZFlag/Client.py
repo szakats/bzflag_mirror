@@ -3,6 +3,9 @@
 Provides the BaseClient class, which implements basic communication
 with the server and provides hooks for adding more functionality
 in subclasses.
+
+Provides subclasses providing logic to update the game state,
+and providing player functionality.
 """
 #
 # Python BZFlag Protocol Package
@@ -28,70 +31,26 @@ from BZFlag.Protocol import FromServer, ToServer, Common
 from StringIO import StringIO
 
 
-class BaseClient:
-    """Implements a very simple but extensible BZFlag client.
-       This client can connect and disconnect, and it has a system
-       for asynchronously processing messages. This class only processes
-       messages related to upkeep on the server-client link, such as
-       lag ping, disconnection, and UDP-related messages.
-
-       The methods of this class and its subclasses use the following
-       naming conventions:
-
-         - Low-level socket handlers should be of the form handleFoo()
-         - Event handlers for messages should be of the form onMsgFoo()
-         - Event handlers for other events should be of the form onFoo()
-
-       All onFoo() and onMsgFoo() events are observable and traceable,
-       See the Event class for more information about this feature.
+class BaseClient(Network.Endpoint):
+    """On top of the basic message processing provided by Network.Endpoint,
+       this class implements connecting to a server, and processing the
+       basic messages necessary to keep a client-server connection going.
        """
 
-    def __init__(self, **options):
-        """Any options passed to the constructor will be sent to setOptions"""
-        self.tcp = None
-        self.udp = None
-        self.connected = 0
-        self.options = {
-            'server': None,
-            }
-
-        Event.attach(self, 'onConnect', 'onAnyMessage', 'onUnhandledMessage',
-                     'onDisconnect')
-
-        # Add events for all messages, with onUnhandledMessage as an
-        # unhandled event handler.
-        for message in Common.getMessageDict(FromServer).values():
-            eventName = self.getMsgHandlerName(message)
-            if hasattr(self, eventName):
-                event = Event.Event(getattr(self, eventName))
-            else:
-                event = Event.Event()
-            event.unhandledCallback = self.onUnhandledMessage
-            setattr(self, eventName, event)
-
-        self.init()
-        self.setOptions(**options)
-
-    def getMsgHandlerName(self, messageClass):
-        return "on%s" % messageClass.__name__
-
+    outgoing = ToServer
+    incoming = FromServer
+    
     def init(self):
-        """A hook for subclasses to add initialization in the proper sequence"""
-        pass
+        self.connected = 0
+        self.options.update({
+            'server': None,
+            })
+        Event.attach(self, 'onConnect', 'onDisconnect')
 
-    def setOptions(self, **options):
-        self.options.update(options)
-
-        if 'eventLoop' in options.keys():
-            self.eventLoop = options['eventLoop']
-        else:
-            self.eventLoop = Event.EventLoop()
-
-        if 'server' in options.keys():
-            self.connect(options['server'])
-
-    def getSupportedOptions(self):
-        return self.options.keys()
+        def setOptions(**options):
+            if 'server' in options.keys():
+                self.connect(options['server'])
+        self.onSetOptions.observe(setOptions)
 
     def connect(self, server):
         """This does the bare minimum necessary to connect to the
@@ -129,9 +88,6 @@ class BaseClient:
         self.connected = 0
         self.onDisconnect()
 
-    def run(self):
-        self.eventLoop.run()
-
     def onDisconnect(self):
         self.eventLoop.stop()
 
@@ -153,25 +109,6 @@ class BaseClient:
         self.connected = 1
         socket.handler = self.handleMessage
         self.onConnect()
-
-    def handleMessage(self, socket, eventLoop):
-        """This is a callback used to handle incoming socket
-           data when we're expecting a message.
-           """
-        # This can return None if part of the mesasge but not the whole
-        # thing is available. The rest of the message will be rebuffered,
-        # so we'll read the whole thing next time this is called.
-        msg = socket.readMessage(FromServer)
-        if msg:
-            msg.socket = socket
-            msg.eventLoop = eventLoop
-            handler = getattr(self, self.getMsgHandlerName(msg.__class__))
-            if self.onAnyMessage(msg):
-                return
-            handler(msg)
-
-    def onUnhandledMessage(self, msg):
-        raise Errors.ProtocolWarning("Unhandled message %s" % msg.__class__.__name__)
 
     def onMsgSuperKill(self, msg):
         """The server wants us to die immediately"""
