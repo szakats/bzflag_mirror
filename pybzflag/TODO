@@ -1,11 +1,11 @@
 Todo list, in no particular order:
 
-  - Implement a Server module
+  - Finish the server
+
+  - Bots!
+
+  - A 3D client!
 
   - Write a module for generating thumbnails of world files, for sites that index bzflag worlds
 
   - Complete the MVC paradigm by implementing controller classes for the player
-
-  - Implement UDP communication
-
-  - Improve event handling and cpu utilization so Mac OS X client behaves   
