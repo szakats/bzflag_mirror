@@ -323,7 +323,6 @@ class Reader:
                 material           = self.searchUp('Material', parents),
                 textureCoordinate2 = self.searchUp('TextureCoordinate2', parents),
                 texture2           = self.searchUp('Texture2', parents),
-                shapeHints         = self.searchUp('ShapeHints', parents),
                 )
 
         for child in node.children:
@@ -404,15 +403,9 @@ class Mesh(DisplayList):
         vertices = nodes['coordinate3'].value['point']
         for face in nodes['indexedFaceSet'].value['coordIndex']:
             if face == -1:
-                # -1 is the end-of-polygon marker
-                if len(polygon) == 3:
-                    self.storeTriangle(polygon)
-                elif len(polygon) == 4:
-                    self.storeTriangle((polygon[0], polygon[1], polygon[2]))
-                    self.storeTriangle((polygon[0], polygon[2], polygon[3]))
-                else:
-                    raise VRMLParseError("Only triangles and quads are supported. " +
-                                         "Found a polygon with %s sides" % len(polygon))
+                # -1 is the end-of-polygon marker. Tesselate any convex polygon into triangles
+                for i in xrange(1, len(polygon)-1):
+                    self.storeTriangle((polygon[0], polygon[i], polygon[i+1]))
                 polygon = []
             else:
                 # Toss another vertex on the buffer
