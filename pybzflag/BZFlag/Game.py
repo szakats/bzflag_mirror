@@ -37,7 +37,8 @@ class Game:
         self.flags = {}
         self.teams = {}
         self.world = World.World()
-        Util.initEvents(self, 'onChangePlayerList', 'onAddPlayer', 'onRemovePlayer')
+        Util.initEvents(self, 'onChangePlayerList', 'onAddPlayer', 'onRemovePlayer',
+                        'onLoadWorld')
 
     def integrate(dt):
         """Integrate velocity with respect to time everywhere it's needed"""
