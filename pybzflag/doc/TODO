@@ -5,6 +5,19 @@ Todo list, in no particular order:
     a binding. Add a Criteria for the mouse being over a named object. Move binding
     setup to a data/config.py or something similar.
 
+  - Better options/configuration system. For example, it should be possible to switch
+    between mono, stereo, and anaglyph mode transparently in any part of pybzflag.
+    It should be possible to pass view-dependent options to commands for window geometry,
+    fullscreen, disabling window borders, etc.
+
+  - Unify the world cache and VRML cache
+
+  - Add a way to remove observer clients easily. Perhaps it could be required that observer
+    clients are bound methods, then there could be a way to remove all observer clients
+    bound to a specific class instance.
+
+  - Draw players in the ThreeDView
+
   - Write more documentation :)
 
   - Complete the Unicode support in GLText. This means deleting rarely used texture pages
