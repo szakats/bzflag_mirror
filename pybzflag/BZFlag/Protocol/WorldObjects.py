@@ -76,7 +76,7 @@ class WorldObject(Block):
             elif keyword == 'size':
                 self.size = map(float, args)
             elif keyword == 'border':
-                self.size = float(args[0])
+                self.border = float(args[0])
             elif keyword == 'name':
                 self.name = " ".join(args)
             elif keyword == 'from':
@@ -144,69 +144,69 @@ class Style(Block):
         # This first field is the size, but since this is the only
         # block that has it, we'll just treat it as a magical constant.
         ConstStructEntry(UInt16, 28,  Errors.ProtocolError("Bad size in world style block")),
-        StructEntry(Float,            'worldSize'),
-        StructEntry(Common.GameStyle, 'gameStyle'),
-        StructEntry(UInt16,           'players'),
-        StructEntry(UInt16,           'shots'),
-        StructEntry(UInt16,           'flags'),
-        StructEntry(Float,            'linearAcceleration'),
-        StructEntry(Float,            'angularAcceleration'),
-        StructEntry(UInt16,           'shakeTime'),
-        StructEntry(UInt16,           'shakeWins'),
-        StructEntry(UInt32,           'serverTime'),
+        StructEntry(Float,            'worldSize',            800.0),
+        StructEntry(Common.GameStyle, 'gameStyle',            []),
+        StructEntry(UInt16,           'players',              20),
+        StructEntry(UInt16,           'shots',                1),
+        StructEntry(UInt16,           'flags',                0),
+        StructEntry(Float,            'linearAcceleration',   0.0),
+        StructEntry(Float,            'angularAcceleration',  0.0),
+        StructEntry(UInt16,           'shakeTime',            16138),
+        StructEntry(UInt16,           'shakeWins',            22155),
+        StructEntry(UInt32,           'serverTime',           0),
         ]
 
 class TeamBase(WorldObject):
     messageId = 0x6261
     entries = [
         StructEntry(Common.TeamColor, 'team'),
-        StructEntry(Common.Vector3,   'center'),
-        StructEntry(Float,            'angle'),
-        StructEntry(Common.Vector2,   'size'),
+        StructEntry(Common.Vector3,   'center', [0,0,0]),
+        StructEntry(Float,            'angle',  0),
+        StructEntry(Common.Vector2,   'size',   [1,1,1]),
         StructEntry(Common.Vector3,   'safety'),
         ]
 
 class Wall(WorldObject):
     messageId = 0x776C
     entries = [
-        StructEntry(Common.Vector3,   'center'),
-        StructEntry(Float,            'angle'),
-        StructEntry(Common.Vector2,   'size'),
+        StructEntry(Common.Vector3,   'center', [0,0,0]),
+        StructEntry(Float,            'angle',  0),
+        StructEntry(Common.Vector2,   'size',   [1,1]),
         ]
 
 class Box(WorldObject):
     textName = 'box'
     messageId = 0x6278
     entries = [
-        StructEntry(Common.Vector3,   'center'),
-        StructEntry(Float,            'angle'),
-        StructEntry(Common.Vector3,   'size'),
-        StructEntry(UInt8,            'driveThrough'),
-        StructEntry(UInt8,            'shootThrough'),
+        StructEntry(Common.Vector3,   'center',       [0,0,0]),
+        StructEntry(Float,            'angle',        0),
+        StructEntry(Common.Vector3,   'size',         [1,1,1]),
+        StructEntry(UInt8,            'driveThrough', 0),
+        StructEntry(UInt8,            'shootThrough', 0),
         ]
 
 class Pyramid(WorldObject):
     textName = 'pyramid'
     messageId = 0x7079
     entries = [
-        StructEntry(Common.Vector3,   'center'),
-        StructEntry(Float,            'angle'),
-        StructEntry(Common.Vector3,   'size'),
-        StructEntry(UInt8,            'driveThrough'),
-        StructEntry(UInt8,            'shootThrough'),
-        StructEntry(UInt8,            'flipZ'),
+        StructEntry(Common.Vector3,   'center',       [0,0,0]),
+        StructEntry(Float,            'angle',        0),
+        StructEntry(Common.Vector3,   'size',         [1,1,1]),
+        StructEntry(UInt8,            'driveThrough', 0),
+        StructEntry(UInt8,            'shootThrough', 0),
+        StructEntry(UInt8,            'flipZ',        0),
         ]
 
 class Teleporter(WorldObject):
     textName = 'teleporter'
     messageId = 0x7465
     entries = [
-        StructEntry(Common.Vector3,   'center'),
-        StructEntry(Float,            'angle'),
-        StructEntry(Common.Vector3,   'size'),
-        StructEntry(UInt8,            'driveThrough'),
-        StructEntry(UInt8,            'shootThrough'),
-        StructEntry(Float,            'border'),
+        StructEntry(Common.Vector3,   'center',       [0,0,0]),
+        StructEntry(Float,            'angle',        0),
+        StructEntry(Common.Vector3,   'size',         [1,1,1]),
+        StructEntry(UInt8,            'driveThrough', 0),
+        StructEntry(UInt8,            'shootThrough', 0),
+        StructEntry(Float,            'border',       1.0),
         ]
 
 class TeleporterLink(WorldObject):

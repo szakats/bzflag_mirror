@@ -128,9 +128,10 @@ class SubStruct(EntryType):
 
 class StructEntry:
     """(Un)marshalls one structure entry, using an instance of EntryType."""
-    def __init__(self, entryType, entryName):
+    def __init__(self, entryType, entryName, defaultValue=None):
         self.entryType = entryType
         self.entryName = entryName
+        self.defaultValue = defaultValue
 
     def unmarshall(self, struct, packed):
         """Given a string beginning with the packed representation
@@ -150,6 +151,10 @@ class StructEntry:
 
     def getSize(self, packed=None):
         return self.entryType.getSize(packed)
+
+    def setDefault(self, struct):
+        if self.defaultValue is not None:
+            setattr(struct, self.entryName, self.defaultValue)
 
 
 class ConstStructEntry:
@@ -316,6 +321,13 @@ class Struct:
     entries = []
 
     def __init__(self, packed=None, **kw):
+        # Extract defaults from entries if we have them
+        for entry in self.entries:
+            try:
+                entry.setDefault(self)
+            except AttributeError:
+                pass
+        
         if packed:
             self.unmarshall(packed)
         self.__dict__.update(kw)

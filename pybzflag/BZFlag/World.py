@@ -23,35 +23,28 @@ and saving worlds in binary and text formats.
 #
 
 from BZFlag.Protocol import WorldObjects, Common
-from BZFlag import Errors
-import os
+from BZFlag import Errors, Util
+import os, re
+from xreadlines import xreadlines
 
 
 class Scene:
     """Abstract base class for a scene manager. This class provides
-       a way to store scene objects and later select objects based
-       on geometric criteria, for example frustum culling.
+       a way to store scene objects and later provide iterators for
+       sorting or selecting geometry based on different criteria
+
+       Right now this only supports iterating through all available
+       objects. New iterators will be added as needed, but it is
+       expected that we will need iterators for finding objects that
+       intersect with geometry, and for sorting objects by Z order.
        """
     def add(self, block):
         pass
 
-    def clip(self, filter, action):
-        """Filter blocks through the provided filter function, passing
-           them to the provided action function if they pass. The
-           implementation is free to assume that if the filter fails
-           for any particular volume, it will also fail for any objects
-           contained completely within that volume.
-           """
-        pass
-
-    def filter(self, filter, action):
-        """Like clip, but doesn't assume the filter is geometric in
-           nature so it is forced to test all scene nodes.
-           """
-        pass
-
     def __iter__(self):
-        """Scene subclasses must support python's iterator protocol"""
+        """Scene subclasses must support python's iterator protocol
+           for iterating through all available objects.
+           """
         pass
 
 
@@ -59,15 +52,9 @@ class SceneList:
     """Implementation of Scene using a flat list"""
     def __init__(self):
         self.list = []
-        self.clip = self.filter
 
     def add(self, block):
         self.list.append(block)
-
-    def filter(self, filter, action):
-        for item in self.list:
-            if filter(item):
-                action(item)
 
     def __iter__(self):
         scene = self
@@ -147,6 +134,43 @@ class World:
         """Save a binary world to the supplied file-like object"""
         for block in self.blocks:
             f.write(str(block))
+
+    def loadText(self, f):
+        """Load a text world from the supplied file-like object"""
+        section = None
+        sectionDict = Util.getSubclassDict(WorldObjects, WorldObjects.WorldObject,
+                                           'textName', 'textSectionDict')
+        self.erase()
+        self.storeBlock(WorldObjects.Style())
+        
+        for line in xreadlines(f):
+            # If this is a kludge used by map editors to store extra
+            # attributes. Don't process any comments on the line.
+            if not line.startswith("#!"):
+                line = re.sub("#.*", "", line)
+            line = line.strip()
+            if line:
+                if section:
+                    # We're inside a section. Accumulate lines until 'end'
+                    sectionLines.append(line)
+                    if line == 'end':
+                        # Done with this section, process it.
+                        try:
+                            cls = sectionDict[section]
+                        except KeyError:
+                            raise Errors.ProtocolError(
+                                "World file contains unknown section type '%s'" % section)
+                        inst = cls()
+                        inst.textRead(sectionLines)
+                        self.storeBlock(inst)
+                        section = None
+                else:
+                    # We're beginning a section
+                    section = line
+                    sectionLines = []
+
+        self.storeBlock(WorldObjects.EndOfData())
+        self.postprocess()
 
     def saveText(self, f):
         """Save a text world to the supplied file-like object"""
