@@ -17,7 +17,7 @@ WindowIcon On
 Caption "BZEdit ${VER_MAJOR}${VER_MINOR} for Windows - Setup"
 
 ; The file to write
-OutFile "BZE_${VER_MAJOR}${VER_MINOR}_Installer.exe"
+OutFile "BZEditW32_${VER_MAJOR}${VER_MINOR}_Installer.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\BZEdit${VER_MAJOR}${VER_MINOR}
