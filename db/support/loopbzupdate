@@ -1,5 +1,0 @@
-#!/bin/sh
-while sleep 10 ; do
- date >> bzupdate.log
- ./bzupdate.pl -d
-done
