@@ -140,7 +140,7 @@ class GenocideFlag(FlagBase):
     description  = "Killing one tank kills that tank's whole team."
 
 class JumpingFlag(FlagBase):
-    abbreviation = "J"
+    abbreviation = "JP"
     type         = ['unstable', 'good']
     description  = "Tank can jump.  Use Tab key.  Can't steer in the air."
 
@@ -182,12 +182,12 @@ class ObesityFlag(FlagBase):
     description  = "Tank becomes very large.  Can't fit through teleporters."
 
 class LeftTurnOnlyFlag(FlagBase):
-    abbreviation = "<-"
+    abbreviation = "LT"
     type         = ['unstable', 'bad']
     description  = "Can't turn right."
 
 class RightTurnOnlyFlag(FlagBase):
-    abbreviation = "->"
+    abbreviation = "RT"
     type         = ['unstable', 'bad']
     description  = "Can't turn left."
 
