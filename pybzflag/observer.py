@@ -3,7 +3,7 @@ from BZFlag import CommandLine
 from BZFlag.UI import OverheadView
 
 client = CommandLine.client(server     = "localhost",
-                            callSign   = "Super Observer Duckie",
+                            callSign   = "@Super Observer Duckie",
                             playerType = "observer")
 
 # Stick some instrumentation in select events
