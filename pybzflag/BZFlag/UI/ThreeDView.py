@@ -40,7 +40,7 @@ class Camera:
     def __init__(self):
         self.position  = (0, 0, 4.0)
         self.distance  = 900
-        self.azimuth   = 45
+        self.azimuth   = 0
         self.elevation = -75
 
     def load(self):
@@ -62,6 +62,7 @@ class Light:
 
     def set(self):
         """Set up and enable the light in the current OpenGL context"""
+	glEnable(GL_LIGHTING)
         glLightfv(self.lightnum, GL_AMBIENT, self.ambient)
         glLightfv(self.lightnum, GL_DIFFUSE, self.diffuse)
         glLightfv(self.lightnum, GL_POSITION, self.position)
@@ -133,7 +134,7 @@ class ThreeDView:
         self.viewport = viewport
         self.camera = Camera()
         self.light0 = Light(GL_LIGHT0)
-        self.light1 = Light(GL_LIGHT1)
+#        self.light1 = Light(GL_LIGHT1)
         self.scene = Scene(game)
 
         # Initialize the opengl view
@@ -141,10 +142,10 @@ class ThreeDView:
         self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
         self.light0.position = (400, 400, 400, 1.0)
         self.light0.set()
-        self.light1.ambient  = (0.85, 0.85, 0.85, 1.0)
-        self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
-        self.light1.position = (0, 0, 400, 1.0)
-        self.light1.set()
+#        self.light1.ambient  = (0.85, 0.85, 0.85, 1.0)
+#        self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
+#        self.light1.position = (0, 0, 400, 1.0)
+#        self.light1.set()
 
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_NORMALIZE)
@@ -231,12 +232,12 @@ class ThreeDController:
             if modifiers.shift:
 	      if event.buttons[1]:
 		(x, y, z) = view.camera.position
-		xscale = math.cos((view.camera.azimuth) * math.pi / 180)
-		yscale = math.sin((view.camera.azimuth) * math.pi / 180)
-		xmove = event.rel[0] * xscale
-		ymove = event.rel[1] * yscale
-		x = math.cos((view.camera.azimuth) * math.pi / 180) / xmove
-		y = math.sin((view.camera.azimuth) * math.pi / 180) / ymove
+		xscale = math.cos((view.camera.azimuth) * 3.1415926 / 180)
+		yscale = math.sin((view.camera.azimuth) * 3.1415926 / 180)
+		print 'xscale =',xscale
+		print 'yscale =',yscale
+		y += event.rel[0] * xscale
+		x += event.rel[1] * yscale
 		view.camera.position = (x, y, z)
 	      return
 	    if modifiers.alt:
