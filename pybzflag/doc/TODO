@@ -6,6 +6,10 @@ Todo list, in no particular order:
 
   - Port the jetstream particle engine (why not?)
 
+  - Try replacing the exp() function in CloudTexture with a bias+scale that can be implemented
+    using two blending passes. This should make cloud rendering fast enough that the clouds
+    can be slowly animated over time.
+
   - Clouds:
       * Improve the noise - try replacing the prohibitively slow mapping tables with blending,
         so we can animate the clouds in realtime.
