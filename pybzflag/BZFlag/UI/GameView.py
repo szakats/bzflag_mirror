@@ -29,7 +29,7 @@ from OpenGL.GL import *
 class HUDBorderView:
     """A view that draws a darkened background and thin border"""
     def __init__(self, viewport):
-        self.fov = None
+        viewport.fov = None
         viewport.onDrawFrame.observe(self.render)
 
     def render(self):
@@ -38,13 +38,23 @@ class HUDBorderView:
         glDisable(GL_CULL_FACE)
         glDisable(GL_COLOR_MATERIAL)
         glDisable(GL_DEPTH_TEST)
+        glLoadIdentity()
 
+        glColor4f(1,1,1,1)
         glBegin(GL_LINE_LOOP)
         glVertex2f(0,0)
         glVertex2f(1,0)
         glVertex2f(1,1)
         glVertex2f(0,1)
-        glEnd(GL_LINE_LOOP)
+        glEnd()
+
+        glColor4f(1,1,1,0.2)
+        glBegin(GL_POLYGON)
+        glVertex2f(0,0)
+        glVertex2f(1,0)
+        glVertex2f(1,1)
+        glVertex2f(0,1)
+        glEnd()
 
 
 def attach(game, eventLoop):

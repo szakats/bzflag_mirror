@@ -62,7 +62,6 @@ class Light:
 
     def set(self):
         """Set up and enable the light in the current OpenGL context"""
-	glEnable(GL_LIGHTING)
         glLightfv(self.lightnum, GL_AMBIENT, self.ambient)
         glLightfv(self.lightnum, GL_DIFFUSE, self.diffuse)
         glLightfv(self.lightnum, GL_POSITION, self.position)
@@ -112,6 +111,7 @@ class Scene:
         glEnable(GL_NORMALIZE)
         glEnable(GL_CULL_FACE)
         glEnable(GL_COLOR_MATERIAL)
+	glEnable(GL_LIGHTING)
         glColor4f(1,1,1,1)
 
         for texture in self.passes[0].keys():

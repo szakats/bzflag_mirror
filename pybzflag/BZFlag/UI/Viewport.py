@@ -179,6 +179,8 @@ class OpenGLViewport(PygameViewport):
         GL.glLoadIdentity()
         if self.fov:
             GLU.gluPerspective(self.fov, float(self.size[0]) / self.size[1], self.nearClip, self.farClip)
+        else:
+            GL.glOrtho(0,1,0,1, -self.farClip, self.farClip)
         GL.glMatrixMode(GL.GL_MODELVIEW)
         GL.glLoadIdentity()
 
