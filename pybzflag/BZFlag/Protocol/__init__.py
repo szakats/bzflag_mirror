@@ -154,7 +154,8 @@ class StructEntry:
 
     def setDefault(self, struct):
         if self.defaultValue is not None:
-            setattr(struct, self.entryName, self.defaultValue)
+            from copy import copy
+            setattr(struct, self.entryName, copy(self.defaultValue))
 
 
 class ConstStructEntry:

@@ -80,7 +80,7 @@ class Pyramid(DisplayList):
 
         flip = 'flipZ' in self.pyramid.options
         if flip:
-            glFrontFace(GL_CW)
+            poly.reverse()
             z = self.pyramid.center[2]
             z2 = self.pyramid.center[2] - self.pyramid.size[2]
         else:
@@ -89,7 +89,10 @@ class Pyramid(DisplayList):
 
         # Base
         glBegin(GL_QUADS)
-        glNormal3f(0, 0, -1)
+        if flip:
+            glNormal3f(0, 0, 1)
+        else:
+            glNormal3f(0, 0, -1)            
         rpoly = poly[:]
         rpoly.reverse()
         for vertex in rpoly:
@@ -119,7 +122,6 @@ class Pyramid(DisplayList):
             glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *uvstack2.pop())
             glVertex3f(*v3)
         glEnd()
-        glFrontFace(GL_CCW)
 
 
 class Pillar(Pyramid):
@@ -195,15 +197,19 @@ class Water(Pyramid):
 class Reflection(Pyramid):
     """A reflective surface applied on top of a normal pyramid"""
     def __init__(self, pyramid):
-        mapCenter = (pyramid.center[0],
-                     pyramid.center[1],
-                     pyramid.center[2] + pyramid.size[2]/2)        
+        if 'flipZ' in pyramid.options:
+            sizeScale = (0, 0, -0.5)
+        else:
+            sizeScale = (0, 0, 1)
+
+        mapCenter = add(pyramid.center, multiply(sizeScale, pyramid.size))
+
         self.textureName = CubeMap.CubeMap(mapCenter)
         Pyramid.__init__(self, pyramid)
         self.render.reflection = True
 
     def drawToList(self, rstate):
-        glColor4f(1,1,1, 0.3)
+        glColor4f(1,1,1, 0.4)
         Pyramid.drawToList(self, rstate)
         glColor4f(1,1,1,1)
 

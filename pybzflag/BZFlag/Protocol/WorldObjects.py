@@ -44,6 +44,7 @@ class Block(Common.Message):
     headerClass = BlockHeader
     messageId = None
 
+
 class WorldObject(Block):
     """Building on the Struct and Message functionality, this base
        class adds methods for serializing to text.
