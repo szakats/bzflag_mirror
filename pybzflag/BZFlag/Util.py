@@ -166,7 +166,7 @@ def proxy(server, client):
     server.onUnhandledMessage.replace(onServerMessage)
 
 
-def autoFile(name):
+def autoFile(name, mode="r"):
     """Given a name which could be a local file, URI, or
        a file-like object, return a file-like object.
        """
@@ -174,7 +174,7 @@ def autoFile(name):
         # If it doesn't look like a URL, don't bother loading urllib2
         if name.find("://") < 0:
             import os
-            return open(os.path.expanduser(name))
+            return open(os.path.expanduser(name), mode)
         else:
             import urllib2
             return urllib2.urlopen(name)

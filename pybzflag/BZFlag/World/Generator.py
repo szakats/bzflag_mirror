@@ -26,7 +26,7 @@ from BZFlag.World import Scale
 from BZFlag.Protocol import WorldObjects
 from BZFlag import Util, Errors
 
-__all__ = ['Empty', 'Random', 'Text', 'Binary']
+__all__ = ['Empty', 'Random', 'Text', 'Binary', 'Heightmap']
 
 
 def Empty(size=Scale.WorldSize,
@@ -170,5 +170,46 @@ def Binary(name):
             break
     w.postprocess()
     return w
+
+
+def Heightmap(name,
+              size          = Scale.WorldSize,
+              wallHeight    = Scale.WallHeight,
+              boxHeight     = 6.0 * Scale.MuzzleHeight,
+              ):
+    """Uses the given image file to make a heightmapped world.
+       This is very silly and nobody should use this except
+       as an example and a proof-of-concept.
+       Requires PIL.
+       """
+    import Image
+    f = Util.autoFile(name, "rb")
+    img = Image.open(f).convert("L")   # Convert to grayscale
+    w = World()
+    w.erase()
+    w.storeSkeletonHeader(size=size, wallHeight=wallHeight)
+
+    # For now just output a box per nonzero pixel. If I expected
+    # anyone to actually use this I'd make it combine rectangular
+    # regions of the same pixel value into larger boxes.
+    for y in xrange(img.size[1]):
+        for x in xrange(img.size[0]):
+            p = img.getpixel((x,y))
+            if p:
+                w.storeBlock(WorldObjects.Box(
+                    center = ((float(x) / img.size[0] - 0.5) * size,
+                              (float(y) / img.size[1] - 0.5) * size,
+                              0),
+                    size   = (size / img.size[0],
+                              size / img.size[1],
+                              p / 255.0 * boxHeight),
+                    angle  = 0))
+    
+    w.storeSkeletonFooter()    
+    w.postprocess()
+    f.close()
+    return w
+
+
 
 ### The End ###
