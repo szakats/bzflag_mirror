@@ -21,7 +21,7 @@
 			var flags = new Array(	"V", "A", "OO", "F", "MG", "GM", "L", "R", "SB",
 						"IB", "ST", "T", "N", "SH", "SR", "SW", "PZ", "G",
 						"JP", "ID", "CL", "US", "MQ", "SE", "TH", "BU",
-                                                "CB", "LT", "GT", "M", "B", "JM", "WA" );
+                                                "CB", "LT", "RT", "M", "B", "JM", "WA" );
 
 			function ableControls()
 			{
@@ -159,6 +159,11 @@
 					if (mainform.print_score.checked) {
 						d.writeln("#Write score to stdout whenever it changes<br/>");
 						d.writeln("-printscore<br/><br/>");
+					}
+
+					if (mainform.prohibit_bots.checked) {
+						d.writeln("#Disable robots and the ROGER autopilot<br/>");
+						d.writeln("-prohibitBots<br/><br/>");
 					}
 
 					if (mainform.help_msgs.value.length > 0) {
@@ -699,6 +704,8 @@
 						<tr>
 							<td>Filter Simple</td>
 							<td><input type="checkbox" name="filtersimple" title="Perform simple exact matches with the bad word list"/></td>
+							<td>Disable bots and autopilot</td>
+							<td><input type="checkbox" name="prohibit_bots" title="Prohibit robots and ROGER autopilot"/></td>
 						</tr>
 						<tr>
 							<td>Vote Percent</td>

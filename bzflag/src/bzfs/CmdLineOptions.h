@@ -13,13 +13,14 @@
 #ifndef __CMDLINEOPTIONS_H__
 #define __CMDLINEOPTIONS_H__
 
+/* bzflag special common - 1st one */
+#include "common.h"
+
 /* system headers */
 #include <string>
 #include <map>
 
 /* bzflag common headers */
-#include "config.h"
-#include "common.h"
 #include "Protocol.h"
 #include "Flag.h"
 #include "WordFilter.h"
@@ -69,9 +70,9 @@ struct CmdLineOptions
     randomCTF(false), flagsOnBuildings(false), respawnOnBuildings(false),
     oneGameOnly(false), timeManualStart(false), randomHeights(false),
     useTeleporters(false), teamKillerDies(true), printScore(false),
-    publicizeServer(false), filterFilename(""),
+    publicizeServer(false), prohibitBots(false), filterFilename(""),
     filterCallsigns(false), filterChat(false), filterSimple(false), voteTime(60),
-    vetoTime(20), votesRequired(3), votePercentage(50.1f),
+    vetoTime(10), votesRequired(3), votePercentage(50.1f),
     voteRepeatTime(300), autoTeam(false), citySize(5)
   {
     int i;
@@ -134,6 +135,7 @@ struct CmdLineOptions
   bool			teamKillerDies;
   bool			printScore;
   bool			publicizeServer;
+  bool			prohibitBots;
 
   uint16_t		maxTeam[NumTeams];
   FlagNumberMap		flagCount;

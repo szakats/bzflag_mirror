@@ -10,8 +10,11 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/* no header other than VotingArbiter.h should be included here */
+/* interface header */
 #include "VotingArbiter.h"
+
+/* common implementation headers */
+#include "TextUtils.h"
 
 
 /* private */
@@ -35,7 +38,7 @@ void VotingArbiter::updatePollers(void)
 bool VotingArbiter::isPollerWaiting(std::string name) const
 {
   for (unsigned int i = 0; i < _pollers.size(); i++) {
-    if (_pollers[i].name == name) {
+    if (compare_nocase(_pollers[i].name, name) == 0) {
       return true;
     }
   }
@@ -116,6 +119,11 @@ bool VotingArbiter::pollToBan(std::string player, std::string playerRequesting, 
   return (this->poll(player, playerRequesting, "ban", playerIP));
 }
 
+bool VotingArbiter::pollToSet(std::string setting, std::string playerRequesting)
+{
+  return (this->poll(setting, playerRequesting, "set"));
+}
+
 bool VotingArbiter::closePoll(void)
 {
   if (this->isPollClosed()) {
@@ -137,7 +145,7 @@ bool VotingArbiter::setAvailableVoters(unsigned short int count)
 bool VotingArbiter::grantSuffrage(std::string player)
 {
   for (unsigned int i = 0; i < _suffraged.size(); i++) {
-    if (_suffraged[i] == player) {
+    if (compare_nocase(_suffraged[i], player) == 0) {
       return true;
     }
   }
@@ -155,7 +163,7 @@ bool VotingArbiter::hasSuffrage(std::string player) const
   // was this player granted the right to vote?
   bool foundPlayer = false;
   for (unsigned int i = 0; i < _suffraged.size(); i++) {
-    if (_suffraged[i] == player) {
+    if (compare_nocase(_suffraged[i], player) == 0) {
       foundPlayer = true;
       break;
     }
@@ -165,7 +173,7 @@ bool VotingArbiter::hasSuffrage(std::string player) const
   }
 
   // has this player already voted?
-  if (_votingBooth->hasVoted(player)) {
+  if (_votingBooth->hasVoted(string_util::tolower(player))) {
     return false;
   }
 
@@ -188,7 +196,7 @@ bool VotingArbiter::voteYes(std::string player)
     return false;
   }
 
-  return (_votingBooth->vote(player, "yes"));
+  return (_votingBooth->vote(string_util::tolower(player), "yes"));
 }
 
 bool VotingArbiter::voteNo(std::string player)
@@ -202,7 +210,7 @@ bool VotingArbiter::voteNo(std::string player)
     return false;
   }
 
-  return (_votingBooth->vote(player, "no"));
+  return (_votingBooth->vote(string_util::tolower(player), "no"));
 }
 
 unsigned long int VotingArbiter::getYesCount(void) const
@@ -227,7 +235,7 @@ unsigned long int VotingArbiter::getAbstentionCount(void) const
   if (!this->knowsPoll()) {
     return 0;
   }
-  int count = _suffraged.size() - this->getYesCount() - this->getNoCount();
+  int count = int(_suffraged.size() - this->getYesCount() - this->getNoCount());
   if (count <= 0) {
     return 0;
   }
@@ -306,7 +314,7 @@ bool VotingArbiter::retractVote(std::string player)
   if (_votingBooth == NULL) {
     return false;
   }
-  return _votingBooth->retractVote(player);
+  return _votingBooth->retractVote(string_util::tolower(player));
 }
 
 

@@ -49,7 +49,18 @@ const char*		KeyManager::buttonNames[] = {
   "F12",
   "Left Mouse",
   "Middle Mouse",
-  "Right Mouse"
+  "Right Mouse",
+  "Joystick Button 1",
+  "Joystick Button 2",
+  "Joystick Button 3",
+  "Joystick Button 4",
+  "Joystick Button 5",
+  "Joystick Button 6",
+  "Joystick Button 7",
+  "Joystick Button 8",
+  "Joystick Button 9",
+  "Joystick Button 10",
+  "LastButton"
 };
 const char*		KeyManager::asciiNames[][2] = {
   { "Tab",		"\t" },
@@ -66,7 +77,7 @@ KeyManager::KeyManager()
   BzfKeyEvent key;
   key.ascii  = 0;
   key.shift  = 0;
-  for (i = BzfKeyEvent::Pause; i <= BzfKeyEvent::RightMouse; ++i) {
+  for (i = BzfKeyEvent::Pause; i < BzfKeyEvent::LastButton; ++i) {
     key.button = static_cast<BzfKeyEvent::Button>(i);
     stringToEvent.insert(std::make_pair(std::string(buttonNames[i]), key));
   }

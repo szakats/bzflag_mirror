@@ -71,6 +71,11 @@ else
 RESOURCE =
 endif
 
+if BUILD_REGEX
+REGEX = \
+        ../regex/libregex.a
+endif
+
 if MACOS
 LDADD =	\
 	../net/libNet.a			\
@@ -83,6 +88,7 @@ LDADD =	\
 	../geometry/libGeometry.a	\
 	../mediafile/libMediaFile.a	\
 	../zlib/libz.a			\
+	$(REGEX)			\
 	$(RESOURCE)			\
 	$(GLIBS)
 # This is required to hook in ogg/vorbis libraries
@@ -98,6 +104,7 @@ LDADD =	\
 	../geometry/libGeometry.a	\
 	../mediafile/libMediaFile.a	\
 	../zlib/libz.a			\
+	$(REGEX)			\
 	$(RESOURCE)			\
 	$(GLIBS)
 # This is required to hook in ogg/vorbis libraries
@@ -108,6 +115,6 @@ AM_CPPFLAGS = $(X_CFLAGS)
 
 bzflag_LDFLAGS = ../date/buildDate.o
 
-bzflag.res: $(srcdir)/bzflag.rc $(srcdir)/bzflag.ico
-	windres -include-dir=$(srcdir) -i $(srcdir)/bzflag.rc -o bzflag.res \
+bzflag.res: $(top_srcdir)/win32/bzflag.rc $(top_srcdir)/win32/bzflag.ico
+	windres --include-dir=$(top_srcdir)/win32/ -i $(top_srcdir)/win32/bzflag.rc -o bzflag.res \
 	-O coff

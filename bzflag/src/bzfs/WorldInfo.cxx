@@ -220,6 +220,10 @@ InBuildingType WorldInfo::inBuilding(WorldInfo::ObstacleLocation **location,
 				     float x, float y, float z, float r,
 				     float height) const
 {
+
+  if (height < Epsilon)
+    height = Epsilon;
+
   int i;
   for (i = 0; i < numBases; i++) {
     if ((bases[i].pos[2] < (z + height))
@@ -236,7 +240,8 @@ InBuildingType WorldInfo::inBuilding(WorldInfo::ObstacleLocation **location,
 	&&	(inRect(boxes[i].pos, boxes[i].rotation, boxes[i].size, x, y, r))) {
       if (location != NULL)
 	*location = &boxes[i];
-      return IN_BOX;
+      if (boxes[i].driveThrough) return IN_BOX_DRIVETHROUGH;
+      else return IN_BOX_NOTDRIVETHROUGH;
     }
   for (i = 0; i < numPyramids; i++) {
     if ((pyramids[i].pos[2] < (z + height))

@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include "Permissions.h"
 #include "md5.h"
+#include "TextUtils.h"
 
 PlayerAccessMap	groupAccess;
 PlayerAccessMap	userDatabase;
@@ -164,6 +165,7 @@ std::string nameFromPerm(PlayerAccessInfo::AccessPerm perm)
     case PlayerAccessInfo::poll: return "poll";
     case PlayerAccessInfo::vote: return "vote";
     case PlayerAccessInfo::veto: return "veto";
+		case PlayerAccessInfo::adminMessages: return "adminMessages";
     case PlayerAccessInfo::requireIdentify: return "requireIdentify";
   default: return "";
   };
@@ -197,6 +199,7 @@ PlayerAccessInfo::AccessPerm permFromName(const std::string &name)
   if (name == "VOTE") return PlayerAccessInfo::vote;
   if (name == "VETO") return PlayerAccessInfo::veto;
   if (name == "REQUIREIDENTIFY") return PlayerAccessInfo::requireIdentify;
+	if (name == "ADMINMESSAGES") return PlayerAccessInfo::adminMessages;
   return PlayerAccessInfo::lastPerm;
 }
 
@@ -225,13 +228,14 @@ bool readPassFile(const std::string &filename)
 
   std::string line;
   while (std::getline(in, line)) {
-    std::string::size_type colonpos = line.find(':');
-    if (colonpos != std::string::npos) {
-      std::string name = line.substr(0, colonpos);
-      std::string pass = line.substr(colonpos + 1);
-      makeupper(name);
-      setUserPassword(name.c_str(), pass.c_str());
-    }
+    // Should look at an unescaped ':'
+    int colonpos = unescape_lookup(line, '\\', ':');
+    if (colonpos == -1)
+      continue;
+    std::string name = unescape(line.substr(0, colonpos), '\\');
+    std::string pass = line.substr(colonpos + 1);
+    makeupper(name);
+    setUserPassword(name.c_str(), pass.c_str());
   }
 
   return (passwordDatabase.size() > 0);
@@ -244,7 +248,7 @@ bool writePassFile(const std::string &filename)
     return false;
   PasswordMap::iterator itr = passwordDatabase.begin();
   while (itr != passwordDatabase.end()) {
-    out << itr->first << ':' << itr->second << std::endl;
+    out << escape(itr->first, '\\') << ':' << itr->second << std::endl;
     itr++;
   }
   out.close();

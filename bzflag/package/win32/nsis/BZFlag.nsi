@@ -7,7 +7,7 @@
 ;
 
 !define VER_MAJOR 1.10
-!define VER_MINOR .4
+!define VER_MINOR .6
 
 ; Main Installer Options
 Name "BZFlag"
@@ -107,7 +107,7 @@ SectionEnd
 Function .onInstSuccess
 	MessageBox MB_YESNO|MB_ICONQUESTION \
 		"Setup has completed. Would you like to view readme file now?" \
-		IDNO NoReadme
+		/SD IDNO IDNO NoReadme
 			ExecShell open '$INSTDIR\doc\ReadMe.win32.html'
 		NoReadme:
 FunctionEnd
