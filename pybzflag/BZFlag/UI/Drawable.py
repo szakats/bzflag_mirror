@@ -259,61 +259,71 @@ class Pyramid(DisplayList):
         # FIXME - respect flipz
         self.center = center
         self.angle = angle
-        self.size = size;
-        self.flip = flip;
+        self.size = size
+        self.flip = flip
+        z = 0
+        z2 = self.size[2]
+        if flip:
+            z = self.size[2]
+            z2 = 0
         glPushMatrix()
         glTranslatef(*self.center)
+        if flip:
+            glFrontFace(GL_CW)
+            glTranslatef(0, 0, -self.size[2])
         glRotatef(self.angle, 0.0, 0.0, 1.0)
         glBegin(GL_QUADS)
         # Z- side
         glNormal3f(0, 0, -1)
         glTexCoord2f(0, 0)
-        glVertex3f(-self.size[0], -self.size[1], 0)
+        glVertex3f(-self.size[0], -self.size[1], z)
         glTexCoord2f(0, self.size[1] / 2)
-        glVertex3f(-self.size[0], self.size[1], 0)
+        glVertex3f(-self.size[0], self.size[1], z)
         glTexCoord2f(self.size[0] / 2, self.size[1] / 2)
-        glVertex3f(self.size[0], self.size[1], 0)
+        glVertex3f(self.size[0], self.size[1], z)
         glTexCoord2f(self.size[0] / 2, 0)
-        glVertex3f(self.size[0], -self.size[1], 0)
+        glVertex3f(self.size[0], -self.size[1], z)
         glEnd()
         glBegin(GL_TRIANGLES)
         # X+ side
         norm = cross((self.size[0], -self.size[1], self.size[2]), (self.size[0] * 2, 0, 0))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
-        glVertex3f(-self.size[0], self.size[1], 0)
+        glVertex3f(-self.size[0], self.size[1], z)
         glTexCoord2f(self.size[0] / 4, self.size[2] / 4)
-        glVertex3f(0, 0, self.size[2])
+        glVertex3f(0, 0, z2)
         glTexCoord2f(self.size[0] / 2, 0)
-        glVertex3f(self.size[0], self.size[1], 0)
+        glVertex3f(self.size[0], self.size[1], z)
         # Y+ side
         norm = cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
-        glVertex3f(self.size[0], self.size[1], 0)
+        glVertex3f(self.size[0], self.size[1], z)
         glTexCoord2f(self.size[1] / 4, self.size[2] / 4)
-        glVertex3f(0, 0, self.size[2])
+        glVertex3f(0, 0, z2)
         glTexCoord2f(self.size[1] / 2, 0)
-        glVertex3f(self.size[0], -self.size[1], 0)
+        glVertex3f(self.size[0], -self.size[1], z)
         # X- side
         norm = cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
-        glVertex3f(self.size[0], -self.size[1], 0)
+        glVertex3f(self.size[0], -self.size[1], z)
         glTexCoord2f(self.size[0] / 4, self.size[2] / 4)
-        glVertex3f(0, 0, self.size[2])
+        glVertex3f(0, 0, z2)
         glTexCoord2f(self.size[0] / 2, 0)
-        glVertex3f(-self.size[0], -self.size[1], 0)
+        glVertex3f(-self.size[0], -self.size[1], z)
         # Y- side
         norm = cross((-self.size[0], self.size[1], self.size[2]), (0, -self.size[1] * 2, 0))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
-        glVertex3f(-self.size[0], -self.size[1], 0)
+        glVertex3f(-self.size[0], -self.size[1], z)
         glTexCoord2f(self.size[1] / 4, self.size[2] / 4)
-        glVertex3f(0, 0, self.size[2])
+        glVertex3f(0, 0, z2)
         glTexCoord2f(self.size[1] / 2, 0)
-        glVertex3f(-self.size[0], self.size[1], 0)
+        glVertex3f(-self.size[0], self.size[1], z)
         glEnd()
+        if flip:
+            glFrontFace(GL_CCW)
         glPopMatrix()
 
 
