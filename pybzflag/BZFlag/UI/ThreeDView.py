@@ -43,7 +43,7 @@ class Scene(ThreeDRender.Scene):
         self.erase()
         for block in self.game.world.blocks:
             if isinstance(block, WorldObjects.WorldObject):
-                self.objects[block] = block.getGLDrawables()
+                self.add(block, block.getGLDrawables())
         self.preprocess()
 
 

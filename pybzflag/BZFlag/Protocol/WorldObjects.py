@@ -146,12 +146,10 @@ class WorldObject(Block):
         return map(translate, poly)
 
     def getGLDrawables(self):
-        from BZFlag.UI import Drawable
-        if self.drawables == None:
-            self.drawables = [Drawable.GLDrawable()]
-            for drawable in self.drawables:
-                drawable.parent(self)
-        return self.drawables
+        if self.drawables is None:
+            return []
+        else:
+            return self.drawables
 
 
 class Style(WorldObject):

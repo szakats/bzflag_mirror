@@ -259,6 +259,12 @@ class Scene:
     def erase(self):
         self.objects = {}
 
+    def add(self, object, drawables):
+        """Add the given object and drawables to the scene."""
+        for drawable in drawables:
+            drawable.parent = object
+        self.objects.setdefault(object, []).extend(drawables)
+
     def preprocess(self):
         """Rebuilds rendering passes. Currently this is necessary when the world changes."""
         # Sort the rendering passes by decreasing render priority
