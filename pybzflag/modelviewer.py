@@ -44,7 +44,9 @@ view.camera.distance = 60
 view.camera.jump()
 
 
-# Read in the VRML file, putting each mesh in a separate object
+# Read in the VRML file, putting each mesh in a separate object.
+# Note the abspath()- model and texture names are relative to our data directory
+# by default, this makes them relative to our caller's current directory.
 meshes = VRML.load(os.path.abspath(fileName))
 class MeshObject:
     def __init__(self, name):
