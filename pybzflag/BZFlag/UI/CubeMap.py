@@ -29,17 +29,20 @@ but the CubeMap class should not be instantiated.
 
 from OpenGL.GL.EXT.texture_cube_map import *
 from OpenGL.GL import *
-from BZFlag.UI import Texture
+from BZFlag.UI.Texture import Texture
 
 
-class CubeMap(Texture.Texture):
+class CubeMap(Texture):
     """Abstraction for creating and using cube environment maps
        maxSize is the maximum height of the cube in texels.
        The actual height could be limited by viewport size.
        """
     def __init__(self, defaultPosition=(0,0,0), maxSize=256):
         self.defaultPosition = defaultPosition
+        Texture.__init__(self)
         self.maxSize = maxSize
+        self.rendered = False
+        self.target = GL_TEXTURE_CUBE_MAP_EXT
     
     def render(self, view, position=None):
         """Renders a cube map at the given position in world
@@ -51,8 +54,13 @@ class CubeMap(Texture.Texture):
         if not position:
             position = self.defaultPosition
 
-    def bind(self, view):
-        pass
+        print "Render %r" % self
 
+        self.rendered = True
+
+    def bind(self, view):
+        if not self.rendered:
+            self.render(view)
+        Texture.bind(self, view)
 
 ### The End ###

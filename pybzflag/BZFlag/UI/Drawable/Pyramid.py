@@ -36,6 +36,7 @@ class Pyramid(DisplayList):
         flip   = 'flipZ' in pyramid.options
         self.uvMap = None
         self.uvMap2 = None
+        self.water = False
 
         # Change the pyramid's texture and mapping depending on its slope
         try:
@@ -78,6 +79,7 @@ class Pyramid(DisplayList):
             # Texture this in world coordinates so all the water lines up.
             self.textureNames = ('caustic%02d.jpeg:50.0', 'water.jpeg')
             poly = pyramid.toPolygon()
+            self.water = True
 
             def worldMap(scale):
                 texCenter = ((poly[0][0] + poly[2][0]) / 2 / scale,
@@ -148,9 +150,10 @@ class Pyramid(DisplayList):
         self.flip = flip
         try:
             self.render.textures[1].texEnv = GL_MODULATE
-            self.render.blended = True
         except IndexError:
             pass
+        if self.water:
+            self.render.blended = True
 
     def drawToList(self):
         if self.render.blended:
