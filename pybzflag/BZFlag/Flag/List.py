@@ -169,6 +169,11 @@ class SeerFlag(FlagBase):
     type         = ['unstable', 'good']
     description  = "See stealthed, cloaked and masquerading tanks as normal."
 
+class ThiefFlag(FlagBase):
+    abbreviation = "TH"
+    type         = ['unstable', 'good']
+    description  = "Steal flags.  Small and fast but can't kill."
+
 ########################################### Bad flags
 
 class ColorblindnessFlag(FlagBase):
