@@ -250,13 +250,13 @@ class Wall(WorldObject):
 	    import BZFlag.UI.Texture
 	    GLDrawable.__init__(self)
 	    self.center = center
-	    self.angle = angle
+	    self.angle = angle * 180 / 3.1415926
 	    self.size = size
 	    self.texture = BZFlag.UI.Texture.Texture('data/wall.png')
 	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
 	    OpenGL.GL.glPushMatrix()
 	    OpenGL.GL.glTranslatef(*self.center)
-	    OpenGL.GL.glRotatef(self.angle / 3.1415924 * 180, 0.0, 0.0, 1.0)
+	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
 	    OpenGL.GL.glDisable(OpenGL.GL.GL_CULL_FACE)
 	    OpenGL.GL.glColor3f(1.0, 1.0, 1.0)
 	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLE_STRIP)
@@ -297,13 +297,13 @@ class Box(WorldObject):
 	    import BZFlag.UI.Texture
 	    GLDrawable.__init__(self)
 	    self.center = center
-	    self.angle = angle
+	    self.angle = angle * 180 / 3.1415926
 	    self.size = size
 	    self.texture = BZFlag.UI.Texture.Texture('data/boxwall.png')
 	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
 	    OpenGL.GL.glPushMatrix()
 	    OpenGL.GL.glTranslatef(*self.center)
-	    OpenGL.GL.glRotatef(self.angle / 3.1415926 * 180, 0.0, 0.0, 1.0)
+	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
 	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
 	    # Y+ side
 	    OpenGL.GL.glNormal3f(0, 1, 0)
@@ -358,9 +358,42 @@ class Box(WorldObject):
 	    import OpenGL.GL
 	    import BZFlag.UI.Texture
 	    GLDrawable.__init__(self)
+	    self.center = center
+	    self.angle = angle * 180 / 3.1415926
+	    self.size = size
+	    self.texture = BZFlag.UI.Texture.Texture('data/boxtops.png')
+	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
+	    OpenGL.GL.glPushMatrix()
+	    OpenGL.GL.glTranslatef(*self.center)
+	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
+	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
+	    # Z+ side
+	    OpenGL.GL.glNormal3f(0, 0, 1)
+	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
+	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], self.size[2])
+	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, self.size[1] / 2)
+	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], self.size[2])
+	    OpenGL.GL.glTexCoord2f(0, self.size[1] / 2)
+	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], self.size[2])
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], self.size[2])
+	    # Z- side
+	    OpenGL.GL.glNormal3f(0, 0, -1)
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(0, self.size[1] / 2)
+	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, self.size[1] / 2)
+	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
+	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], 0)
+	    OpenGL.GL.glEnd()
+	    OpenGL.GL.glPopMatrix()
+	    OpenGL.GL.glEndList()
 
 	def draw(self):
-	    pass
+	    import OpenGL.GL
+	    OpenGL.GL.glCallList(self.list)
 
     def getGLDrawables(self):
         return [
@@ -379,6 +412,49 @@ class Pyramid(WorldObject):
         StructEntry(ObjectOptions,    'options',      []),
         ]
 
+    class PyramidDrawable(GLDrawable):
+        def __init__(self, center, angle, size, flip):
+	    # FIXME - respect flipz
+	    import OpenGL.GL
+	    import BZFlag.UI.Texture
+	    GLDrawable.__init__(self)
+	    self.center = center
+	    self.angle = angle * 180 / 3.1415926
+	    self.size = size;
+	    self.flip = flip;
+	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
+	    OpenGL.GL.glPushMatrix()
+	    OpenGL.GL.glTranslatef(*self.center)
+	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
+	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
+	    # Z- side
+	    OpenGL.GL.glNormal3f(0, 0, -1)
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(0, self.size[1] / 2)
+	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, self.size[1] / 2)
+	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
+	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], 0)
+	    OpenGL.GL.glEnd()
+	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLES)
+	    # FIXME - implement vector cross product to do this correctly
+	    # X+ side
+	    # X- side
+	    # Y+ side
+	    # Y- side
+	    OpenGL.GL.glEnd()
+	    OpenGL.GL.glPopMatrix()
+	    OpenGL.GL.glEndList()
+
+	def draw(self):
+	    import OpenGL.GL
+	    OpenGL.GL.glCallList(self.list)
+
+    def getGLDrawables(self):
+        return [self.PyramidDrawable(self.center, self.angle, self.size, False)]
+
 
 class Teleporter(WorldObject):
     textName = 'teleporter'
@@ -390,6 +466,43 @@ class Teleporter(WorldObject):
         StructEntry(ObjectOptions,    'options',      []),
         StructEntry(Float,            'border',       1.0),
         ]
+
+    class FieldDrawable(GLDrawable):
+        def __init__(self, center, angle, size):
+	    import OpenGL.GL
+	    GLDrawable.__init__(self)
+	    self.center = center
+	    self.angle = angle * 180 / 3.1415926
+	    self.size = size
+	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
+	    OpenGL.GL.glPushMatrix()
+	    OpenGL.GL.glTranslatef(*self.center)
+	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
+	    OpenGL.GL.glColor3f(0.1, 0.1, 0.1)
+	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
+	    # X+ side
+	    OpenGL.GL.glNormal3f(1, 0, 0)
+	    OpenGL.GL.glVertex3f(self.size[0] / 2, self.size[1], 0)
+	    OpenGL.GL.glVertex3f(self.size[0] / 2, self.size[1], self.size[2])
+	    OpenGL.GL.glVertex3f(self.size[0] / 2, -self.size[1], self.size[2])
+	    OpenGL.GL.glVertex3f(self.size[0] / 2, -self.size[1], 0)
+	    # X- side
+	    OpenGL.GL.glNormal3f(-1, 0, 0)
+	    OpenGL.GL.glVertex3f(-self.size[0] / 2, -self.size[1], 0)
+	    OpenGL.GL.glVertex3f(-self.size[0] / 2, -self.size[1], self.size[2])
+	    OpenGL.GL.glVertex3f(-self.size[0] / 2, self.size[1], self.size[2])
+	    OpenGL.GL.glVertex3f(-self.size[0] / 2, self.size[1], 0)
+	    OpenGL.GL.glEnd()
+	    OpenGL.GL.glColor3f(1.0, 1.0, 1.0)
+	    OpenGL.GL.glPopMatrix()
+	    OpenGL.GL.glEndList()
+
+	def draw(self):
+	    import OpenGL.GL
+	    OpenGL.GL.glCallList(self.list)
+
+    def getGLDrawables(self):
+        return [self.FieldDrawable(self.center, self.angle, self.size)]
 
 
 class TeleporterLink(WorldObject):

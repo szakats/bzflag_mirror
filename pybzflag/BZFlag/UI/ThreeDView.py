@@ -71,7 +71,7 @@ class Scene:
   def onLoadWorld(self):
     print "loading world..."
     for block in self.game.world.blocks:
-      print 'block',id(block),'is a',block.__class__
+#      print 'block',id(block),'is a',block.__class__
       if isinstance(block, WorldObjects.WorldObject):
         self.objects[block] = block.getGLDrawables()
     self.rebuildTexmap()
@@ -83,11 +83,13 @@ class Scene:
 	    self.passes[drawable.texture].append(drawable)
 	else:
 	    self.passes[drawable.texture] = [drawable]
-	print 'drawable',drawable,'uses texture',drawable.texture
+#	print 'drawable',drawable,'uses texture',drawable.texture
 
   def render(self):
     for texture in self.passes.keys():
+      glDisable(GL_TEXTURE_2D)
       if texture != None:
+	glEnable(GL_TEXTURE_2D)
         texture.bind()
       for drawable in self.passes[texture]:
 	drawable.draw()
@@ -102,6 +104,7 @@ class ThreeDView:
     self.scene = Scene(game)
 
   def configureOpenGL(self, size):
+    self.size = size
     glViewport(0, 0, size[0], size[1])
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
@@ -122,10 +125,10 @@ class ThreeDView:
     self.light1.position = (0, 0, 400, 1.0)
     self.light1.set()
 
-    glEnable(GL_TEXTURE_2D)
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_NORMALIZE)
     glEnable(GL_CULL_FACE)
+    glEnable(GL_COLOR_MATERIAL)
     glEnable(GL_LIGHTING)
 
     glClearColor(0.0, 0.0, 0.0, 0.0)
@@ -151,6 +154,11 @@ def attach(game, eventLoop, size=(800,600), targetFrameRate=60):
   def updateView():
     global view, screen
     if view:
+      for event in pygame.event.get():
+	if event.type == pygame.QUIT:
+	  sys.exit()
+	if event.type == pygame.VIDEORESIZE:
+	  view.configureOpenGL(event.size)
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
       game.update()
       view.render()
@@ -159,7 +167,7 @@ def attach(game, eventLoop, size=(800,600), targetFrameRate=60):
 
   global view, screen
   pygame.init()
-  screen = pygame.display.set_mode(size, pygame.OPENGL | pygame.DOUBLEBUF)
+  screen = pygame.display.set_mode(size, pygame.OPENGL | pygame.DOUBLEBUF | pygame.RESIZABLE)
   pygame.display.set_caption("BZFlag 3D View")
   view = ThreeDView(game)
   view.initializeOpenGL(screen)
