@@ -142,9 +142,9 @@ class Mesh(TriangleArray, DisplayList):
         if self.matrix:
             glMultMatrixf(self.matrix)
 
-        # Our normals are normalized at this point, but they might be scaled
-        # by the transforms applied to each VRML mesh
-        glEnable(GL_NORMALIZE)
+            # Our normals are normalized at this point, but they might be scaled
+            # by the transforms applied to each VRML mesh
+            glEnable(GL_NORMALIZE)
 
         TriangleArray.draw(self, rstate)
 

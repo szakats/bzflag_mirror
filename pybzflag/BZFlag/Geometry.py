@@ -146,4 +146,24 @@ def autoVertexNormals(triangles, creaseAngle=60):
     normalize(normals, normals)
     return normals
 
+
+def pointGrid(origin, vx, vy, resolution):
+    """Create an array with the shape (resolution[0], resolution[1], len(origin)),
+       of points filling the given cartesian space specified as an origin and two
+       axes.
+
+       For example, the pointGrid((-5,-5,0), (10,0,0), (0,0,10), (100,100)) would produce
+       a 100x100 grid of points inside a 10x10 square centered on the origin in the XZ plane.
+
+       Note that unlike the semantics of range() and arange(), all endpoints are included
+       in the resulting array, rather than including all but the final value.
+       """
+    origin = asarray(origin)
+    vx = asarray(vx)
+    vy = asarray(vy)
+    resolution = asarray(resolution)
+    
+    def f(x,y):
+        return origin + vx
+
 ### The End ###
