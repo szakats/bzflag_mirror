@@ -26,14 +26,11 @@ view.camera.position = (0,0,0)
 view.camera.distance = 60
 view.camera.jump()
 
-# Debugging the model loader...
 r = VRML.Reader(fileName)
 
-# Just draw a box until the model loader works, to make this file less than completely useless
 class ViewerModel:
     pass
-view.scene.objects[ViewerModel()] = [Box.BoxSides( (0,0,-10), 0, (10,10,20) ),
-                                     Box.BoxTops( (0,0,-10), 0, (10,10,20) )]
+view.scene.objects[ViewerModel()] = [r.meshes[None]]
 
 view.scene.preprocess()
 loop.run()

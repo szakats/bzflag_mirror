@@ -117,9 +117,13 @@ class Node:
 class Reader:
     """Scans a VRML file, instantiating drawables for all readable meshes.
        The file can be specified as a file object, file name, or URI.
+       After initialization, all the meshes found in the file are available
+       keyed by name in the 'meshes' dictionary.
        """
     def __init__(self, name):
         self.encoding = 'utf8'
+        self.meshes = {}
+
         self.parseStack = []
         self.namespace = {}
         f = Util.autoFile(name)
@@ -127,6 +131,8 @@ class Reader:
         f.close()
         for node in self.parseStack:
             self.extractMeshes(node)
+        del self.parseStack
+        del self.namespace
         
     def parse(self, f):
         """Parse the given file object as VRML. Upon returning, there will
@@ -300,13 +306,47 @@ class Reader:
             coords = self.searchUp('Coordinate3', parents)
             material = self.searchUp('Material', parents)
             matrix = self.searchUp('MatrixTransform', parents)
+            if not coords:
+                raise VRMLParseError("Could not find required Coordinate3 section")
 
-            print "\nName: %s" % name
-            print "Coords: %s" % coords
-            print "Material: %s" % material
-            print "Matrix: %s" % matrix
+            self.meshes[name] = Mesh(faces = node,
+                                     coords = coords,
+                                     name = name,
+                                     material = material,
+                                     matrix = matrix)
 
         for child in node.children:
             self.extractMeshes(child, newParents)
-            
+
+
+class Mesh(DisplayList):
+    """A drawable mesh model as extracted from the VRML file.
+       All parameters to set() are VRML nodes.
+       """
+    def set(self, faces, coords, name=None, material=None, matrix=None):
+        self.faces = faces
+        self.coords = coords
+        self.name = name
+        self.material = material
+        self.matrix = matrix
+
+    def drawToList(self):
+        vertices = self.coords.value['point']
+        faces = self.faces.value['coordIndex']
+        polygon = []
+        glPushMatrix()
+        glScalef(100,100,100)
+        glBegin(GL_TRIANGLES)
+        for face in faces:
+            if face == -1:
+                # Output the buffered polygon
+                for vertex in polygon:
+                    glVertex3f(*vertex)
+                polygon = []
+            else:
+                # Toss another vertex on the buffer
+                polygon.append(vertices[face])
+        glEnd()
+        glPopMatrix()
+
 ### The End ###
