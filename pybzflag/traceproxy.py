@@ -109,7 +109,7 @@ def dumpMessage(msg, direction):
         for (key, value) in buildKeys(msg):
             if key == 'data':
                 # Special decoding for 'data' members- do a hex dump
-                value = hexDump(value)
+                value = ("%d bytes\n" % len(value)) + hexDump(value)
             else:
                 # Let python decode everything else
                 value = repr(value)
