@@ -184,6 +184,7 @@ class OpenGLViewport(PygameViewport):
         sub.setCaption = lambda title: None
         return sub
 
+
 class StereoGLViewport(OpenGLViewport):
     def getModeFlags(self):
         # use this as a convenient way to set the GL options
