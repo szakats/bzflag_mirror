@@ -33,7 +33,7 @@ class Flag:
         self.cloth.add(SpringSystem.ConstantAccelAffector, (0.001, 0.001, -0.04))
 
         # Wind!
-        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (1,0,0.2), 0.15)
+        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (1,0,0.2), 0.15, 0.15)
 
         # Pin the cloth to the flagpole
         self.cloth.add(SpringSystem.ClothAnchorAffector, (-1,0), (0,0))

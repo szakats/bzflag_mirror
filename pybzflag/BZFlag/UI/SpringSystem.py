@@ -23,6 +23,7 @@ Spring system based simulation models and affectors
 from Numeric import *
 from BZFlag.Geometry import *
 from BZFlag.World import Scale
+import random
 
 
 class Cloth:
@@ -156,16 +157,29 @@ class ClothWindAffector(Affector):
        reference to the ArraySurface that renders this cloth, since it uses
        the cross products and normals that it has already calculated.
        """
-    def __init__(self, model, surface, windDirection, windMagnitude):
+    def __init__(self, model, surface, windDirection, windMagnitude, stdDeviation=0):
+        """Set up a wind affector with the given direction, magnitude, and standard deviation.
+           The direction doesn't have to be a unit vector, as it will be normalized later.
+           All parameters can be set after the affector has been created.
+           The standard deviation affects the wind magnitude and direction per-frame.
+           """
         Affector.__init__(self, model)
         self.crossProducts = surface.crossProducts
         self.gridNormals = surface.gridNormals
         self.windDirection = windDirection
         self.windMagnitude = windMagnitude
+        self.stdDeviation = stdDeviation
 
     def integrate(self, dt):
-        # This just uses the dot product to calculate a normal force due to wind
-        forceMagnitude = dot(self.gridNormals, normalize(self.windDirection) * self.windMagnitude)
+        """Uses the dot product to calculate a normal force due to wind,
+           applied to all masses in the spring system.
+           """
+        wind = normalize(self.windDirection) * self.windMagnitude
+        wind = (random.normalvariate(wind[0], self.stdDeviation),
+                random.normalvariate(wind[1], self.stdDeviation),
+                random.normalvariate(wind[2], self.stdDeviation))
+                
+        forceMagnitude = dot(self.gridNormals, wind)
         force = self.gridNormals * reshape(repeat(forceMagnitude, 3, 1), self.gridNormals.shape)
         self.model.velocity[:-1,:-1] += force
 
