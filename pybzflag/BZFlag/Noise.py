@@ -177,12 +177,20 @@ class VectorTable:
         Geometry.normalize(self.table, self.table)
 
     def get(self, v):
-        """Retrieve a random 3-vector given an integer 3-vector.
-           An n-dimensional array of vectors can also be given,
-           and an array of the same shape will be returned.
+        """Retrieve a random n-vector given an integer m-vector.
+           An array of vectors can also be given, and an array
+           of the same shape will be returned.
            """
         v = asarray(v)
-        src = (v[...,0] + v[...,1]*95 + v[...,2]*127) % (self.size - 1)
+
+        # Create a randomish hash value for the given vector
+        hash = zeros(v.shape[:-1], v.typecode())
+        m = 1
+        for i in xrange(0, v.shape[-1]):
+            hash += v[...,i] * m
+            m += 13
+
+        src = hash % (self.size - 1)
         if type(src) == ArrayType:
             return take(self.table, src)
         else:
