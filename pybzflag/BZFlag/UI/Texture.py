@@ -231,6 +231,13 @@ class DynamicTexture(Texture):
         self.viewport = self.rstate.viewport.region(
             self.getTextureRect(self.rstate.viewport), renderLink='before')
         self.viewport.onDrawFrame.observe(self.drawFrame)
+        self.setupViewport()
+
+    def setupViewport(self):
+        """A hook to let subclasses easily set up their viewport requirements.
+           Defaults to ortho mode.
+           """
+        self.viewport.fov = None
         
     def drawFrame(self):
         """Draw function called by our viewport"""

@@ -45,8 +45,7 @@ class CubeMap(Texture.DynamicTexture):
         self.target = GL_TEXTURE_CUBE_MAP_EXT
         self.texEnv = GL_REPLACE
 
-    def setupViewport(self, rstate):
-        Texture.DynamicTexture.setupViewport(self, rstate)
+    def setupViewport(self):
         # Make a note in our render state that we're rendering to a cube map.
         # Some objects will want to hide themselves during this process, for example
         # camera-induced effects and overlay objects.

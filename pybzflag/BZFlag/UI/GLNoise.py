@@ -96,7 +96,7 @@ class NoiseTexture(Texture.DynamicTexture):
         self.angle = factory.angle
         factory.angle += factory.rotationSpeed
 
-    def render(self):
+    def draw(self):
         # Prepare our texture
         glEnable(GL_TEXTURE_2D)
         glDisable(GL_LIGHTING)
@@ -112,7 +112,7 @@ class NoiseTexture(Texture.DynamicTexture):
                      -self.factory.rotationDistance, 0)
         glMatrixMode(GL_MODELVIEW)
 
-        drawTexRect(self.viewport.size, (self.scale, self.scale))
+        drawTexRect(self.viewport.size, (self.factory.scale, self.factory.scale))
         
         # Clean up
         glMatrixMode(GL_TEXTURE)
@@ -146,6 +146,16 @@ class AnimatedNoise:
         self.frames.append(self.frames[0])
 
         self.reset()
+
+    def attachRenderState(self, rstate):
+        """Each of our frames is a DynamicTexture and requires a render state to be attached.
+           This will broadcast the given rstate to all of our frame textures.
+           """
+        for frame in self.frames:
+            frame.attachRenderState(rstate)
+
+    def hasRenderState(self):
+        return self.frames[0].hasRenderState()
 
     def reset(self):
         self.time = 0
@@ -218,19 +228,27 @@ class AnimatedPerlinNoise:
             factory = NoiseFactory()
         self.period = period
         self.persistence = persistence
-        self.octaves = []
         self.numOctaves = numOctaves
         self.fundamental = fundamental
         self.framesPerOctave = framesPerOctave
         self.factory = factory
+        self.createOctaves()
 
+    def attachRenderState(self, rstate):
+        """Each of our octaves is an AnimatedNoise with multiple DynamicTextures.
+           DynamicTextures require a RenderState to draw themselves.
+           """
+        for octave in self.octaves:
+            octave.attachRenderState(rstate)
+
+    def hasRenderState(self):
+        return self.octaves[0].hasRenderState()
+    
     def draw(self, size):
         """Draw the octaves, largest first, with alpha blending.
            This will correctly make the most prominent octaves the
            ones with the least detail.
            """
-        if not self.octaves:
-            self.createOctaves()
         color = (1,1,1,1)
         for octave in self.octaves:
             octave.draw(size, color)
@@ -245,19 +263,27 @@ class AnimatedPerlinNoise:
         """Generate all octave textures"""
         self.octaves = []
         period = self.period
-        size = self.fundamental
-        viewport = glGetIntegerv(GL_VIEWPORT)
-        
+        size = self.fundamental        
         for i in xrange(self.numOctaves):
-            # Stop adding octaves if they've become too large to render
-            if size > viewport[2] or size > viewport[3]:
-                break
-            
             self.octaves.insert(0, AnimatedNoise((size,size), self.framesPerOctave, period, self.factory))
             period /= 2
             size   *= 2
 
-
     
+class PerlinTexture(Texture.DynamicTexture):
+    """Perlin noise, rendered to a texture"""
+    def __init__(self, size=(512,512), noise=None):
+        if not noise:
+            noise = AnimatedPerlinNoise()
+        self.noise = noise
+        Texture.DynamicTexture.__init__(self, size)
+
+    def attachRenderState(self, rstate):
+        Texture.DynamicTexture.attachRenderState(self, rstate)
+        self.noise.attachRenderState(rstate)
+
+    def draw(self):
+        self.noise.draw(self.viewport.size)
+
 ### The End ###
 

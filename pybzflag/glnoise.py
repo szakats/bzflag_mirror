@@ -1,22 +1,29 @@
 #!/usr/bin/env python
-from __future__ import division
 from BZFlag.Event import EventLoop
-from BZFlag.UI import Viewport, GLNoise, Texture
+from BZFlag.UI import Viewport, GLNoise, Texture, ThreeDRender, ThreeDControl, Drawable
 from BZFlag import Util, Animated
-from OpenGL.GL import *
 
 loop = EventLoop()
 viewport = Viewport.OpenGLViewport(loop, (800,600), 1000)
 viewport.setCaption("OpenGL Noise Experiment")
-viewport.fov = None   
+view = ThreeDRender.View(viewport)
+ThreeDControl.Viewing(view, viewport)
 
-time = Animated.Timekeeper()
-n = GLNoise.AnimatedPerlinNoise()
+viewport.mode = Viewport.GL.ClearedMode((0.25, 0.25, 0.5, 1))
+view.camera.position = (0,0,0)
+view.camera.distance = 6
+view.camera.jump()
 
-def drawFrame():
-    n.integrate(time.step())
-    n.draw(viewport.size)
+class TestObject:
+    def __init__(self):
+        ground = Drawable.Ground(10)
+        ground.render.textures = (GLNoise.PerlinTexture(),)
+        self.drawables = [ground]
+    
+    def getDrawables(self):
+        return self.drawables
 
+view.scene.add(TestObject())
+view.scene.preprocess()
 Util.showFrameRate(viewport)
-viewport.onDrawFrame.observe(drawFrame)
 loop.run()
