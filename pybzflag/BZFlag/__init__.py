@@ -22,6 +22,7 @@ protocols used by BZFlag.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+
 # The version of the BZFlag protocol this should be compatible with
 protocolVersion = "BZFS109a"
 
@@ -37,5 +38,15 @@ serverWelcomeMessage = "Welcome to the %s Server (code/%s protocol/%s)" % \
 
 # Default pathnames
 cachePath = "~/.bzflag-cache"
+
+
+# Start up psyco to accelerate PyBZFlag if it's available
+# This uses psyco's profiler, which means that generally it will take
+# several seconds for the performance to ramp up to its maximum value.
+try:
+    import psyco
+    psyco.profile()
+except ImportError:
+    pass
 
 ### The End ###
