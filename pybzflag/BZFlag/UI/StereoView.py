@@ -51,7 +51,7 @@ class StereoView:
         self.lefteye  = ThreeDView.ThreeDView(game, viewport.region(Layout.Rect(viewport).left(0.5)))
         self.righteye = ThreeDView.ThreeDView(game, viewport.region(Layout.Rect(viewport).right(0.5)))
         ThreeDControl.Viewing(self.lefteye, viewport)
-        self.righteye.camera = RightCamera(self.lefteye.camera)
+        self.righteye.camera = RightCamera(self.lefteye.camera, 30)
 
 
 def attach(game, eventLoop):

@@ -38,12 +38,12 @@ class TeleporterField(DisplayList):
                            self.size[1] / texScale)
 
     def drawToList(self):
-        glBlendFunc(GL_SRC_COLOR, GL_ONE)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE)
         glDisable(GL_LIGHTING)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
-        glColor4f(0.89, 0.90, 0.99, 1.0)
+        glColor4f(0.89, 0.90, 0.99, 0.3)
         glDepthMask(0)
         glBegin(GL_QUADS)
         # X+ side

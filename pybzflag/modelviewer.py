@@ -44,5 +44,3 @@ viewport.onMouseButtonDown.observe(onMouseButtonDown)
 
 view.scene.preprocess()
 loop.run()
-
-
