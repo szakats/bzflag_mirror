@@ -53,13 +53,17 @@ class BaseServer(Network.Endpoint):
 
     def listen(self, interface):
         """Listen for multiple protocols on the same interface and port"""
-        for protocol in ('tcp', 'udp'):
-            s = Network.Socket(protocol)
-            s.listen(interface, Protocol.Common.defaultPort)
-            self.eventLoop.add(s)
-            setattr(self, protocol, s)
+
+        self.tcp = Network.TCPSocket(protocol)
+        self.tcp.listen(interface, Protocol.Common.defaultPort)
         self.tcp.handler = self.handleConnection
+        self.eventLoop.add(self.tcp)
+
+        self.udp = Network.UDPSocket(protocol)
+        self.udp.listen(interface, Protocol.Common.defaultPort)
         self.udp.handler = self.handleMessage
+        self.eventLoop.add(self.udp)
+
         self.onListen()
 
     def getNewClientID(self):

@@ -140,6 +140,8 @@ class StatefulClient(BaseClient):
         self.game.removePlayer(msg.id)
 
     def onMsgPlayerUpdate(self, msg):
+        print msg.position
+        return
         try:
             self.game.players[msg.id].updateFromMessage(msg)
         except KeyError:

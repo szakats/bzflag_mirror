@@ -28,32 +28,19 @@ from BZFlag import Protocol, Errors
 import socket, sys
 
 
-class Socket:
+class BaseSocket:
     """This is a socket wrapper that can be used for normal socket
        operations, but also supports sending BZFlag messages.
+       It is an abstract base class. Use a subclass that defines methods
+       specific to UDP or TCP.
        """
-    def __init__(self, protocol='tcp'):
-        self.readBuffer = ''
-        self.writeBuffer = ''
-        if protocol:
-            self.socket = getattr(self, "new%sSocket" % protocol.upper())()
-
-    def newTCPSocket(self):
-        tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.setNodelay(tcp)
-        self.setBlocking(tcp)
-        return tcp
-        
-    def newUDPSocket(self):
-        return socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    def setNodelay(self, s, flag=1):
+    def setNodelay(self, flag=1):
         # Disable the Nagle algorithm. This is necessary to get
         # anything near reasonable latency when sending small packets.
-        s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
-    def setBlocking(self, s, flag=0):
-        s.setblocking(flag)
+    def setBlocking(self, flag=0):
+        self.socket.setblocking(flag)
 
     def close(self):
         self.socket.close()
@@ -62,8 +49,6 @@ class Socket:
     def write(self, data):
         # Queue it, plus try to send it. If we can't send
         # it yet, it will stay in the queue until it can be sent.
-        # The call to pollWrite() is a good idea in any case,
-        # and required for UDP since select() will never poke us.
         self.writeBuffer += str(data)
         self.pollWrite()
 
@@ -77,52 +62,6 @@ class Socket:
         if not data:
             raise Errors.ConnectionLost()
         return data
-
-    def read(self, size=None, bufferSize=64*1024):
-        """High level interface for reading from the socket,
-           includes a buffering scheme that works well for
-           receiving fixed size messages.
-           """
-        if size is None:
-            # Keep reading until there's no more to read.
-            # Only return data if we've read everything and
-            # the connection's closed. If we're waiting for
-            # more data, keep it buffered until the last chunk.
-            try:
-                while 1:
-                    chunk = self.recv(bufferSize)
-                    if not chunk:
-                        return None
-                    self.readBuffer += chunk
-            except Errors.ConnectionLost:
-                pass
-            received = self.readBuffer
-            self.readBuffer = ''
-            return received
-
-        elif size != 0:
-            # Read the amount specified, first from our
-            # local read buffer then from the socket itself.
-            # If we can't read the complete packet, return
-            # None and keep the partial packet buffered.
-            while len(self.readBuffer) < size:
-                chunk = self.recv(size - len(self.readBuffer))
-                if not chunk:
-                    return None
-                self.readBuffer += chunk
-            received = self.readBuffer[:size]
-            self.readBuffer = self.readBuffer[size:]
-            return received
-        
-        else:
-            # Zero size
-            return ''
-
-    def unread(self, data):
-        """Push the supplied data back into the read buffer,
-           so that it will be the next thing read.
-           """
-        self.readBuffer = str(data) + self.readBuffer
 
     def connect(self, host, port=None):
         """The port can be specified either as part of the host using
@@ -180,7 +119,7 @@ class Socket:
         """Accept an incoming connection on a socket that has been bind()'ed,
            returning a Socket class for the new connection.
            """
-        s = Socket(None)
+        s = TCPSocket(None)
         (s.socket, s.address) = self.socket.accept()
         self.setNodelay(s.socket)
         self.setBlocking(s.socket)
@@ -197,32 +136,17 @@ class Socket:
            """
         self.handler(self, eventLoop)
 
-    def pollWrite(self, eventLoop=None):
-        """As with pollWrite, this is called if needsWrite() returns true
-           and we can write to the socket without blocking.
-           """
-        if len(self.writeBuffer) == 0:
-            return
-        try:
-            bytes = self.socket.send(self.writeBuffer)
-            if not bytes:
-                raise Errors.ConnectionLost()
-            self.writeBuffer = self.writeBuffer[bytes:]
-        except socket.error:
-            # Not available for sending yet
-            pass
+    def needsWrite(self):
+        return 0
+
+    def pollWrite(self, eventLoop):
+        pass
 
     def getSelectable(self):
         """Return an object for this socket that can be passed
            to select()
            """
         return self.socket.fileno()
-
-    def needsWrite(self):
-        """Return true if the socket needs to write data. It will
-           be placed in the select queue for writing.
-           """
-        return len(self.writeBuffer) > 0
 
     def readStruct(self, structClass):
         struct = structClass()
@@ -251,6 +175,101 @@ class Socket:
             raise Errors.ProtocolWarning("Received %s byte message with unknown type 0x%04X in %s" %
                                          (header.length, header.id, msgModule.__name__))
         return msgClass(str(header) + body)
+
+
+class TCPSocket(BaseSocket):
+    """Concrete TCP socket that includes buffered send and receive"""
+    def __init__(self):
+        self.readBuffer = ''
+        self.writeBuffer = ''
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.setNodelay()
+        self.setBlocking()
+    
+    def read(self, size=None, bufferSize=64*1024):
+        """High level interface for reading from the socket,
+           includes a buffering scheme that works well for
+           receiving fixed size messages.
+           """
+        if size is None:
+            # Keep reading until there's no more to read.
+            # Only return data if we've read everything and
+            # the connection's closed. If we're waiting for
+            # more data, keep it buffered until the last chunk.
+            try:
+                while 1:
+                    chunk = self.recv(bufferSize)
+                    if not chunk:
+                        return None
+                    self.readBuffer += chunk
+            except Errors.ConnectionLost:
+                pass
+            received = self.readBuffer
+            self.readBuffer = ''
+            return received
+
+        elif size != 0:
+            # Read the amount specified, first from our
+            # local read buffer then from the socket itself.
+            # If we can't read the complete packet, return
+            # None and keep the partial packet buffered.
+            while len(self.readBuffer) < size:
+                chunk = self.recv(size - len(self.readBuffer))
+                if not chunk:
+                    return None
+                self.readBuffer += chunk
+            received = self.readBuffer[:size]
+            self.readBuffer = self.readBuffer[size:]
+            return received
+        
+        else:
+            # Zero size
+            return ''
+
+    def unread(self, data):
+        """Push the supplied data back into the read buffer,
+           so that it will be the next thing read.
+           """
+        self.readBuffer = str(data) + self.readBuffer
+
+    def needsWrite(self):
+        """Return true if the socket needs to write data. It will
+           be placed in the select queue for writing.
+           """
+        return len(self.writeBuffer) > 0
+
+    def pollWrite(self, eventLoop=None):
+        """As with pollWrite, this is called if needsWrite() returns true
+           and we can write to the socket without blocking.
+           """
+        if len(self.writeBuffer) == 0:
+            return
+        try:
+            bytes = self.socket.send(self.writeBuffer)
+            if not bytes:
+                raise Errors.ConnectionLost()
+            self.writeBuffer = self.writeBuffer[bytes:]
+        except socket.error:
+            # Not available for sending yet
+            pass
+
+
+class UDPSocket(BaseSocket):
+    """Concrete UDP socket that includes unbuffered send and receive.
+       Here we assume we can send/receive the whole message, or nothing at all.
+       """
+    def __init__(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.setBlocking()
+
+    def read(self, size=64*1024):
+        return self.recv(size)
+
+    def write(self, data):
+        self.socket.send(str(data))
+
+    def unread(self, data):
+        pass
 
 
 class Endpoint:
@@ -350,7 +369,7 @@ def asyncRequest(eventLoop, host, port, request, callback):
        'host' may contain a port number using host:port notation, in which case it will
        override 'port'.
        """
-    sock = Socket()
+    sock = TCPSocket()
     sock.connect(host, port)
     sock.write(request)
     def handler(sock, eventLoop):

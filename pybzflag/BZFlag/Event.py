@@ -175,7 +175,7 @@ class EventLoop:
             self.selectDict[selectable] = socket
 
     def add(self, item):
-        if isinstance(item, Network.Socket):
+        if isinstance(item, Network.BaseSocket):
             self.sockets.append(item)
             self.updateSelectDict()
 

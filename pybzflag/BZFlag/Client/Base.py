@@ -60,7 +60,7 @@ class BaseClient(Network.Endpoint):
         # Establish the TCP socket
         if self.tcp:
             self.disconnect()
-        self.tcp = Network.Socket()
+        self.tcp = Network.TCPSocket()
         self.tcp.connect(server, Protocol.Common.defaultPort)
         self.eventLoop.add(self.tcp)
 
@@ -116,8 +116,10 @@ class BaseClient(Network.Endpoint):
         self.tcp.write(self.outgoing.MsgNetworkRelay())
 
         # Start trying to set up a UDP connection
-        self.udp = Network.Socket('udp')
+        self.udp = Network.UDPSocket()
         self.udp.listenOnFirstAvailable()
+        self.udp.handler = self.handleMessage
+        self.eventLoop.add(self.udp)
         self.tcp.write(self.outgoing.MsgUDPLinkRequest(port = self.udp.port))
 
     def onMsgUDPLinkRequest(self, msg):
