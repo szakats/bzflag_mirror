@@ -266,7 +266,7 @@ class AnimatedPerlinNoise:
 
 class PerlinTexture(Texture.DynamicTexture):
     """Perlin noise, rendered to a dynamic texture"""
-    def __init__(self, size=(512,512), noise=None, frameDuration=None):
+    def __init__(self, size=(512,512), frameDuration=None, noise=None):
         if not noise:
             noise = AnimatedPerlinNoise()
         self.noise = noise

@@ -19,7 +19,7 @@ class TestObject:
     def __init__(self):
         ground = Drawable.Ground(400)
         ground.baseTexRepeats = 4
-        ground.render.textures = (GLNoise.PerlinTexture(frameDuration=1/60.0),)
+        ground.render.textures = (GLNoise.PerlinTexture(frameDuration=0),)
         self.drawables = [ground]
 
     def getDrawables(self):
