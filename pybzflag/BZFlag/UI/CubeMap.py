@@ -40,7 +40,7 @@ class CubeMap(Texture):
        maxSize is the maximum height of the cube in texels.
        The actual height could be limited by viewport size.
        """
-    def __init__(self, position=(0,0,0), maxSize=256):
+    def __init__(self, position=(0,0,0), maxSize=128):
         Texture.__init__(self)
         
         self.position = position
