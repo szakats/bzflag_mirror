@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, SpringSystem, Texture
-from BZFlag import Event, Util
+from BZFlag import Event, Util, Animated
 from Numeric import *
 from time import time
 from OpenGL.GL import *
@@ -16,6 +16,7 @@ class Flag:
         self.size = (8,6)
         self.origin = (0,4.5)
         self.resolution = (20,20)
+        self.time = Animated.Timekeeper()
         
         self.pole = Drawable.VRML.load("flagpole.wrl")
         self.cloth = SpringSystem.Cloth(self.getInitialState())
@@ -62,10 +63,7 @@ class Flag:
         return [self.surf] + self.pole.values()
 
     def update(self):
-        # Use a fixed time step for now, since the model gets unstable
-        # far too easily with a variable time step.
-        self.cloth.integrate(0.03)
-        
+        self.cloth.integrate(self.time.step())
 
 if __name__ == '__main__':
     loop = Event.EventLoop()

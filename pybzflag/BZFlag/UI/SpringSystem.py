@@ -38,20 +38,48 @@ class Cloth:
        attached to the system. By default the system has an affector
        which exerts spring forces. Extra affectors can be added for
        gravity, wind, and collisions.
+
+       friction  - Damping for each point mass
+       stiffness - Relative amount of force exerted by springs
+       stepSize  - Size of integration steps taken
+       stepTime  - Wallclock time each integration step corresponds to
        """
-    def __init__(self, initialState, friction=0.02, stiffness=200):
+    def __init__(self, initialState,
+                 friction  = 0.02,
+                 stiffness = 200,
+                 stepSize  = 0.04,
+                 stepTime  = 0.01,
+                 ):
+        self.stepSize = stepSize
+        self.stepTime = stepTime
         self.friction = friction
         self.stiffness = stiffness
+
+        # Time accumulator for keeping track of the temporal error
+        # after taking zero or more integration steps in integrate()
+        self.dt = 0
+
+        # Initialize arrays for the simulation state
         self.initialState = array(initialState, Float32, savespace=True)
         self.state = array(initialState, Float32, savespace=True)
         self.velocity = zeros(initialState.shape, Float32, savespace=True)
+
+        # Initial affectors to cover the spring forces,
+        # friction, and velocity integration
         self.affectors = [ClothSpringAffector(self),
                           FrictionAffector(self),
                           VelocityAffector(self)]
 
     def integrate(self, dt):
-        for affector in self.affectors:
-            affector.integrate(dt)
+        """Integrate the spring system. Our simple method of simulation
+           will quickly get unstable if our timestep is too large, so
+           we limit the maximum step size here.
+           """
+        self.dt += dt
+        while self.dt > 0:
+            for affector in self.affectors:
+                affector.integrate(self.stepSize)
+            self.dt -= self.stepTime
 
     def add(self, cls, *args, **kw):
         """Add an affector to the cloth with the given class and extra
