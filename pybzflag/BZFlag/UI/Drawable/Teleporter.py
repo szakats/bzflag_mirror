@@ -25,7 +25,7 @@ from OpenGL.GL import *
 
 
 class TeleporterField(DisplayList):
-    textureName = 'caust%02d.bw.jpeg:50.0'
+    textureName = 'caustic%02d.jpeg:50.0'
     def set(self, center, angle, size):
         self.center = center
         self.angle = angle
