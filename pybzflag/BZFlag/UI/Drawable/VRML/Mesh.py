@@ -100,20 +100,26 @@ class Mesh(TriangleArrayDisplayList):
         if nodes.get('texture2', None):
             children = nodes['texture2'].children
             assert(children[-1].value == 'filename')
-            self.textureName = children[-2].value
+
             # Try to sanitize the texture name a bit. This removes surrounding quotes and
             # converts either DOS-style or UNIX-style slashes to the current OS's separator.
-            if self.textureName[0] == '"' and self.textureName[-1] == '"':
-                self.textureName = self.textureName[1:-1]
-            self.textureName = self.textureName.replace("/", os.sep)
-            self.textureName = self.textureName.replace("\\", os.sep)
+            # We also ignore the path, just using the texture's basename(). This makes it easy
+            # to author models in packages that tend to like absolute paths, but force them to
+            # all load from the data directory.
+            textureName = children[-2].value
+            if textureName[0] == '"' and textureName[-1] == '"':
+                textureName = textureName[1:-1]
+            textureName = textureName.replace("/", os.sep)
+            textureName = textureName.replace("\\", os.sep)
+            self.textureName = os.path.basename(textureName)
             self.loadTextures()
 
         # Store material color if we have it
         if nodes.get('material', None):
             self.color = [1,1,1,1]
             if nodes['material'].value.has_key('diffuseColor'):
-                if type(nodes['material'].value['diffuseColor'][0]) is float:
+                diffuse = nodes['material'].value['diffuseColor']
+                if len(diffuse) >= 3 and type(diffuse[0]) is float:
                     # Mesh has a single color value
                     self.color[:3] = nodes['material'].value['diffuseColor'][:3]
                 else:
