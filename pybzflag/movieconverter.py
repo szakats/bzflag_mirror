@@ -14,7 +14,7 @@ parser.add_option("-o", "--output", metavar="FILE", dest="file",
 parser.add_option("-r", "--resolution", metavar="WIDTHxHEIGHT", dest="resolution",
                   help="Sets the output resolution. Default is 512x384.", default="512x384")
 parser.add_option("-b", "--bitrate", metavar="KBPS", dest="bitrate",
-                  help="Sets the mpeg4 encoder bit rate. Default is 400kbps.", default=400)
+                  help="Sets the mpeg4 encoder bit rate. Default is 900kbps.", default=900)
 (options, args) = parser.parse_args()
 
 try:

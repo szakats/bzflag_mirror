@@ -81,9 +81,7 @@ class Recorder:
         return self.fileTemplate % fileNum
 
     def recordFrame(self):
-        """Read a raw frame from OpenGL, and use PIL to compress it.
-           PIL will call our write() method for each frame.
-           """
+        """Read a raw frame from OpenGL, and use PIL to compress it."""
         rgb = glReadPixels(self.viewport.rect[0],
                                  self.viewport.rect[1],
                                  self.image.size[0],
@@ -91,7 +89,16 @@ class Recorder:
                                  GL_RGB,
                                  GL_UNSIGNED_BYTE)
         self.image.fromstring(rgb)
-        self.image.save(self, self.encoder, **self.options)
+
+        # Encode the frame into a StringIO then stick that in the file,
+        # so that we can save a one-line header for each frame with its size.
+        frame = StringIO()
+        self.image.save(frame, self.encoder, **self.options)
+        frameString = frame.getvalue()
+        self.file.write("%s\n" % len(frameString))
+        self.file.write(frameString)
+
+        # Advance the recording clock
         self.recordedFrames += 1
         self.movieTime += 1/self.frameRate
 
@@ -100,13 +107,8 @@ class Recorder:
                                                    self.image.size[1],
                                                    self.encoder,
                                                    self.frameRate))
+
         
-    def write(self, data):
-        """Store raw frame data as compressed in recordFrame"""
-        self.file.write("%s\n" % len(data))
-        self.file.write(data)
-
-
 class MovieTimeMaster(Animated.TimeMaster):
     """Replacement TimeMaster class that keeps the global timebase in
        sync with a recording's constant frame rate.
@@ -143,12 +145,18 @@ class Transcoder:
 
     def readFrame(self):
         """Read and decompress a frame"""
-        size = int(self.file.readline().strip())
+        # Our frame consists of a line of text with the frame's size in bytes, then the encoded frame
+        # At both stages we need to check for end-of-file, which will be a read returning an empty string.
+        line = self.file.readline()
+        if not line:
+            return None
+        size = int(line.strip())
         data = self.file.read(size)
         if not data:
             return None
-        img = Image.open(StringIO(data))
 
+        img = Image.open(StringIO(data))
+            
         # Flip the image vertically as we output it, since it was stored
         # in OpenGL's bottom-up orientation.
         return img.tostring('raw', 'RGB', 0, -1)
@@ -174,8 +182,6 @@ class Transcoder:
                 break
             frameCount += 1
             encoder.write(frame)
-
-        stdout.close()
-        stdin.close()
+        encoder.close()
 
 ### The End ###
