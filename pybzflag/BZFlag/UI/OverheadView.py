@@ -30,12 +30,18 @@ class OverheadView:
        client, so it should be usable on either client or server side.
        """
     colorScheme = {
-        'background': '#587058',
-        'Box':        '#bcbba7',
-        'Pyramid':    '#1b8de3',
-        'Teleporter': '#FFFF80',
-        'player':     'white',
-        'flag':       'white',
+        'background':    '#587058',
+        'Box':           '#bcbba7',
+        'Pyramid':       '#1b8de3',
+        'Teleporter':    '#FFFF80',
+        'playerOutline': 'white',
+        'flag':          'white',
+        'roguePlayer':   'black',
+        'redPlayer':     '#800000',
+        'greenPlayer':   '#008000',
+        'bluePlayer':    '#000080',
+        'purplePlayer':  '#600090',
+        'rabbitPlayer':  '#808080',
       }
 
     def __init__(self, game):
@@ -114,10 +120,12 @@ class OverheadView:
         self.renderShots(surface)
 
     def renderPlayers(self, surface):
-        bg = Color('black')
-        color = self.colorScheme['player']
+        color = self.colorScheme['playerOutline']
         for player in self.game.players.values():
             if 'alive' in player.status:
+                # Pick player color based on team
+                bg = self.colorScheme[player.identity.team + "Player"]
+
                 # Draw a circle with black background and colored outline,
                 # with a line indicating the tank's current heading.
                 pos = self.worldToView(player.motion.position)
