@@ -477,7 +477,7 @@ bool CWorld::Append ( const char *szFileName )
 	if (!pData)
 	{
 		fclose(fp);
-		return FALSE;
+		return false;
 	}
 
 	fread(pData,iCount,1,fp);
@@ -501,7 +501,7 @@ bool CWorld::Append ( const char *szFileName )
 		{
 			sscanf(element,"%s",name);
 
-			for ( int i = strlen(name)-1; i >= 0;i--)
+			for (int i = strlen(name)-1; i >= 0; i--)
 			{
 				if (isspace(name[i]))
 					name[i] = NULL;
@@ -511,11 +511,19 @@ bool CWorld::Append ( const char *szFileName )
 
 			iNewItem = AddObject(name);
 
+			if (iNewItem < 0) {
+				char msg[511];
+				sprintf(msg, "This world contains unknown objects, and cannot be loaded.  Unknown object type: %s", name);
+				MessageBox(NULL, msg, "Unknown object", MB_ICONERROR | MB_TASKMODAL);
+				return false;
+			}
+
 			Item = GetObject(iNewItem);
 
 			if (Item)
 			{
-				Item->Read(element);
+				if (!Item->Read(element))
+					return false;
 				Item->Init();
 				Item = NULL;
 			}
