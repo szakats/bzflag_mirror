@@ -82,6 +82,7 @@ class MsgMessage(Common.Message):
         ]
 
 MsgNegotiateFlags = Common.MsgNegotiateFlags
+MsgShotBegin = Common.MsgShotBegin
 MsgPlayerUpdate = Common.MsgPlayerUpdate
 
 ### The End ###

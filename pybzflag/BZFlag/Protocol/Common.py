@@ -225,6 +225,19 @@ class MsgNegotiateFlags(DataMessage):
         StructEntry(UInt16, 'numFlags'),
         ]
 
+class MsgShotBegin(Message):
+    messageId = 0x7362
+    entries = [
+        StructEntry(PlayerId, 'playerId'),
+        StructEntry(UInt16,   'shotId'),
+        StructEntry(Vector3,  'position'),
+        StructEntry(Vector3,  'velocity'),
+        StructEntry(Float,    'time'),
+        StructEntry(FlagId,   'flagId'),
+        StructEntry(Float,    'lifetime'),
+        ]
+
+
 class FlagNegotiationID(Struct):
     entries = [
         StructEntry(FlagId,         'id'),

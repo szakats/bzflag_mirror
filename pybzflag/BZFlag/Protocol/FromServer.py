@@ -117,18 +117,6 @@ class MsgAlive(Common.Message):
 class MsgNetworkRelay(Common.Message):
     messageId = 0x6e72
 
-class MsgShotBegin(Common.Message):
-    messageId = 0x7362
-    entries = [
-        StructEntry(Common.PlayerId, 'playerId'),
-        StructEntry(UInt16,          'shotId'),
-        StructEntry(Common.Vector3,  'position'),
-        StructEntry(Common.Vector3,  'velocity'),
-        StructEntry(Float,           'time'),
-        StructEntry(Common.FlagId,   'flagId'),
-        StructEntry(Float,           'lifetime'),
-        ]
-
 class MsgDropFlag(Common.Message):
     messageId = 0x6466
     entries = [
@@ -198,8 +186,15 @@ class MsgScore(Common.Message):
         StructEntry(UInt16,          'teamKills'),
         ]
 
+class MsgSetTTL(Common.Message):
+    messageId = 0x7474
+    entries = [
+        StructEntry(UInt16, 'ttl'),
+        ]
+
 
 MsgNegotiateFlags = Common.MsgNegotiateFlags
+MsgShotBegin = Common.MsgShotBegin
 MsgPlayerUpdate = Common.MsgPlayerUpdate
 
 ### The End ###
