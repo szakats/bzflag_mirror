@@ -34,5 +34,6 @@ from Vector import *
 from Box import detectBoxDrawables
 from Pyramid import detectPyramidDrawables
 import VRML
+import Sky
 
 ### The End

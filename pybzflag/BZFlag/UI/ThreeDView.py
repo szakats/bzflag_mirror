@@ -22,7 +22,7 @@ A 3d scene renderer similar to BZFlag proper
 #
 
 import BZFlag
-from BZFlag.UI import ThreeDRender, Drawable
+from BZFlag.UI import ThreeDRender, Drawable, Environment
 from BZFlag.Protocol import WorldObjects
 from OpenGL.GL import *
 
@@ -81,16 +81,6 @@ class Tank:
         return self.drawables
 
 
-class Sky:
-    """A scene object representing the sky"""
-    def __init__(self):
-        from BZFlag.UI.Drawable import Sky
-        self.drawables = [Sky.Colors()]
-
-    def getDrawables(self):
-        return self.drawables
-
-
 class Scene(ThreeDRender.Scene):
     """A Scene class that builds on the functionality provided by ThreeDRender
        to provide a view of the current game world and other contents.
@@ -111,7 +101,8 @@ class Scene(ThreeDRender.Scene):
     def initialize(self):
         """Erase the scene, and add default scene objects that aren't part of the world"""
         self.erase()
-        self.add(Sky())
+        self.sky = Environment.Sky()
+        self.add(self.sky)
 
     def reloadWorld(self):
         """Rebuild the internal scene structures from the game's world"""
@@ -134,6 +125,9 @@ class Scene(ThreeDRender.Scene):
     def changePlayerList(self, game, players):
         self.preprocess()
 
+    def update(self):
+        self.sky.update()
+        
 
 class ThreeDView(ThreeDRender.View):
     """Shows a 3D view of the BZFlag game, renderable to an OpenGLViewport.
@@ -148,6 +142,7 @@ class ThreeDView(ThreeDRender.View):
 
         def onDrawFrame():
             game.update()
+            self.scene.update()
         viewport.onDrawFrame.observe(onDrawFrame)
 
 

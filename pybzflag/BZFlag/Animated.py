@@ -36,7 +36,7 @@ class TimeMaster:
        """
     def __init__(self):
         self.then = None
-        self.now = None
+        self.now = time.time()
         self.stepNumber = 0
         self.stepTime = 0
 

@@ -20,16 +20,17 @@ A class to draw a sky cube at various times of day
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-from GLDrawable import GLDrawable
+from DisplayList import DisplayList
 from OpenGL.GL import *
+from OpenGL.GLU import *
 import VRML
 from BZFlag import Animated
 
-class Colors(GLDrawable):
+class Colors(DisplayList):
     """The sky itself, with colors changing over the course of the day"""
     textureName = 'sky_colors.png'
-    def __init__(self):
-        GLDrawable.__init__(self)
+    def set(self, sky):
+        self.sky = sky
         
         # We render in a z-buffer-isolated pass before all other geometry.
         # This means that we can work with the sky on a scale independent of the rest of the world.
@@ -39,30 +40,31 @@ class Colors(GLDrawable):
         # coordinates each frame, so don't cache this drawable in the big render pass display lists
         self.render.static = False
 
-        # The period of a day, in seconds
-        self.period = 5
-
-        self.time = Animated.Timekeeper()
-        self.mesh = VRML.load("sky.wrl")['sky']
-
-    def draw(self, rstate):
+    def drawToList(self, rstate):
+        """Our display list only holds an inverted sphere and the static
+           texture coordinates. Texture coordinates must be adjusted for time
+           of day in draw().
+           """
         glDisable(GL_LIGHTING)
-
-        # Use texture coordinate generation to set the time of day.
-        # The X axis of our texture is time, representing one day. The Y axis is spacial,
-        # stretching from the bottom of the sky sphere to the top.
-        timeOfDay = (self.time.time() % self.period) / self.period
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        glTexGenfv(GL_S, GL_OBJECT_PLANE, (0, 0, 0, timeOfDay))
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0.5, 0, 0.5))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 0.05, 0.5))
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
-        self.mesh.draw(rstate)
+        quad = gluNewQuadric()
+        gluQuadricOrientation(quad, GLU_INSIDE)
+        gluSphere(quad, 10, 8, 8)
 
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
         glEnable(GL_LIGHTING)
+
+    def draw(self, rstate):
+        # Use texture coordinate generation to set the time of day.
+        # The X axis of our texture is time, representing one day. The Y axis is spacial,
+        # stretching from the bottom of the sky sphere to the top.
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (0, 0, 0, self.sky.unitDayTime))
+        DisplayList.draw(self, rstate)
 
 ### The End ###
