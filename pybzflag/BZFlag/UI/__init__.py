@@ -47,14 +47,7 @@ def attach(name, *args, **kw):
 
 def list():
     """List the available UIs"""
-    available = []
-    for name in nameMap:
-        try:
-            find(name)
-            available.append(name)
-        except ImportError:
-            pass
-    return available
+    return nameMap.keys()
 
 
 class Any:
