@@ -31,7 +31,7 @@ coordinates are assumed, where 0,0 is at the bottom-left.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from __future__ import division
-import pygame, string
+import pygame, string, math
 from pygame.locals import *
 from BZFlag import Util
 from BZFlag.UI.Texture import Texture
@@ -84,6 +84,11 @@ class FontPage:
         self.texture = Texture()
         self.textureDirty = True
 
+        # To avoid mipmaps blending glyhps together, we have to
+        # leave a gap between glyphs equal to the number of mipmap levels we have.
+        self.gap = (int(math.log(size[0]) / math.log(2)),
+                    int(math.log(size[1]) / math.log(2)))
+
     def updateTexture(self):
         """If necessary, update the texture from the surface"""
         if not self.textureDirty:
@@ -100,7 +105,7 @@ class FontPage:
         if size[0] > self.size[0]:
             return None
         
-        if self.packingX + size[0] > self.size[0]:
+        if self.packingX + size[0] + self.gap[0] > self.size[0]:
             # Next line
             self.packingX = 0
             self.packingY += self.lineHeight
@@ -108,11 +113,11 @@ class FontPage:
             
         if self.packingY + size[1] > self.size[1]:
             return None
-        if size[1] > self.lineHeight:
-            self.lineHeight = size[1]
+        if size[1] + self.gap[1] > self.lineHeight:
+            self.lineHeight = size[1] + self.gap[1]
 
         allocated = (self.packingX, self.packingY)
-        self.packingX += size[0]
+        self.packingX += size[0] + self.gap[0]
         return allocated
         
     def pack(self, char):
