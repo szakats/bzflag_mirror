@@ -25,10 +25,10 @@ except IndexError:
 if options.anaglyph:
     viewClass = AnaglyphView.AnaglyphView
 elif options.stereo:
-    viewClass = StereoView.StereoView    
+    viewClass = StereoView.StereoView
 else:
     viewClass = ThreeDRender.View
-    
+
 
 # Set up a quick 3D renderer view with a controller attached so we can spin the model around
 loop = Event.EventLoop()
