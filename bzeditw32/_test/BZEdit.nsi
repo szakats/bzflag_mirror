@@ -7,13 +7,13 @@
 ;
 
 !define VER_MAJOR 1.6
-!define VER_MINOR .3
+!define VER_MINOR .4
 
 ; Main Installer Options
 Name "BZEdit"
 WindowIcon On
-EnabledBitmap "EnableCheck.bmp"
-DisabledBitmap "DisableCheck.bmp"
+; EnabledBitmap "EnableCheck.bmp"
+; DisabledBitmap "DisableCheck.bmp"
 Caption "BZEdit ${VER_MAJOR}${VER_MINOR} for Windows - Setup"
 
 ; The file to write
@@ -43,6 +43,8 @@ Section "BZEdit (required)"
 	File BZEdit32.exe.manifest
 	File PocketEngine.dll
 	File TextureMngr.dll
+	File msvcr71.dll
+	File mfc71.dll
 
 	; make the data dir
 	SetOutPath $INSTDIR\data
@@ -87,6 +89,8 @@ Section "Uninstall"
 	Delete $INSTDIR\BZEdit32.exe.manifest
 	Delete $INSTDIR\PocketEngine.dll
 	Delete $INSTDIR\TextureMngr.dll
+	Delete $INSTDIR\msvcr71.dll
+	Delete $INSTDIR\mfc71.dll
 
 	Delete $INSTDIR\data\*.*
 
