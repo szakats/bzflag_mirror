@@ -54,6 +54,16 @@ class CubeMap(Texture.DynamicTexture):
 
         # We must have a 90-degree FOV to render cube maps
         self.viewport.fov = 90
+
+    def bind(self, rstate=None):
+        """Normally DynamicTexture throws an exception if it's bound before it's
+           been rendered. This is inevitable when rendering reflections, since we
+           don't process the reflections recursively. Just ignore the error.
+           """
+        try:
+            Texture.DynamicTexture.bind(self, rstate)
+        except Texture.DynamicTextureException:
+            pass
         
     def render(self):
         self.renderSides()
@@ -122,7 +132,7 @@ class CubeMap(Texture.DynamicTexture):
         self.rstate.view.renderScene(self.rstate)
 
         glReadBuffer(GL_BACK)
-        self.bind()
+        Texture.Texture.bind(self)
 
         glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_CLAMP)

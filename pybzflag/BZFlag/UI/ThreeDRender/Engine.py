@@ -157,8 +157,28 @@ class Scene:
        """
     def __init__(self):
         self.erase()
+        self.mainView = None
+        self.dynTexRenderState = None
         self.passes = Pass.getRenderPasses()
 
+    def hasMainView(self):
+        return self.mainView is not None
+
+    def setMainView(self, view):
+        """The scene can be used with any number of views, but one 'main' view is
+           required for rendering dynamic textures.
+           """
+        self.mainView = view
+        self.dynTexRenderState = Drawable.RenderState(view)
+
+        # Go through existing textures and set up any that haven't been already
+        for p in self.passes:
+            for textures in p.textureGroups.keys():
+                for texture in textures:
+                    if hasattr(texture, 'hasRenderState'):
+                        if not texture.hasRenderState():
+                            texture.attachRenderState(self.dynTexRenderState)
+                    
     def erase(self):
         self.objects = {}
 
@@ -168,6 +188,12 @@ class Scene:
            """
         drawables = object.getDrawables()
         for drawable in drawables:
+            for texture in drawable.render.textures:
+                # If this is a dynamic texture and we have a renderstate to hand it, do so
+                if self.dynTexRenderState and hasattr(texture, 'hasRenderState'):
+                    if not texture.hasRenderState():
+                        texture.attachRenderState(self.dynTexRenderState)
+
             drawable.parent(object)
         self.objects.setdefault(object, []).extend(drawables)
 
@@ -261,6 +287,8 @@ class View:
         self.scene = scene
         viewport.onDrawFrame.observe(self.render)
         self.initLighting()
+        if not scene.hasMainView():
+            scene.setMainView(self)
 
     def initLighting(self):
         self.lights = []
