@@ -50,7 +50,7 @@ fontAliases = {
     }
 
 # Default list of sizes to render fonts at
-defaultSizes = [defaultSize, 64]
+defaultSizes = [10, defaultSize, 64]
 
 # Cache of font objects, by data file name
 loadedFonts = {}
