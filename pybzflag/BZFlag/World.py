@@ -279,7 +279,7 @@ class Cache:
             pass
 
     def getFilename(self, hash):
-        return os.path.join(self.path, hash) + ".bwc"
+        return os.path.join(self.path, "p" + hash + ".bwc")
 
     def hasWorld(self, hash):
         try:
