@@ -255,7 +255,7 @@ class Pyramid(WorldObject):
     def getDrawables(self):
         from BZFlag.UI import Drawable
         if self.drawables == None:
-            self.drawables = [Drawable.Pyramid(self.center, self.angle, self.size, 'flipZ' in self.options)]
+            self.drawables = [Drawable.Pyramid(self)]
         return self.drawables
 
 

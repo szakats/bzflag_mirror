@@ -397,8 +397,8 @@ def detectBoxDrawables(box):
     if height < 8 and box.center[2] > 1:
         sides = PlatformSides(box)
 
-    # If the box is on the ground, add some grass around the edges
-    if box.center[2] == 0:
+    # If the box is on the ground and it's high enough, add some grass around the edges
+    if box.center[2] == 0 and height > 1:
         drawables.append(GrassEdge(box))
 
     # If the box is about the same width as a tank, put some tread marks on it...

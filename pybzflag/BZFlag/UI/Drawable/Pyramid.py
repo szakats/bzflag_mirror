@@ -24,14 +24,23 @@ from __future__ import division
 from DisplayList import *
 from OpenGL.GL import *
 from BZFlag.Vector import cross, normalize
+from OpenGL.GL.ARB.multitexture import *
 
 
 class Pyramid(DisplayList):
-    def __init__(self, center, angle, size, flip):
+    def __init__(self, pyramid):
+        center = pyramid.center
+        angle  = pyramid.angle
+        size   = pyramid.size
+        flip   = 'flipZ' in pyramid.options
         self.uvMap = None
+        self.uvMap2 = None
 
         # Change the pyramid's texture and mapping depending on its slope
-        slope = size[2] / min(size[0], size[1])
+        try:
+            slope = size[2] / min(size[0], size[1])
+        except ZeroDivisionError:
+            slope = 1e100
 
         if slope > 10:
             # It's a very pointy pyramid - XZ and YZ planar texture mapping
@@ -60,6 +69,40 @@ class Pyramid(DisplayList):
                           (0.5, 1),
                           (1, 0))
 
+        elif slope < 0.5 and center[2] > 0:
+            # It's a very flat pyramid. Due to their blue color these are often
+            # used to simulate water- so, let's make it actually look like water.
+            # Texture this in world coordinates so all the water lines up.
+            self.textureNames = ('caustic%02d.jpeg:50.0', 'water.jpeg')
+            poly = pyramid.toPolygon()
+
+            def worldMap(scale):
+                texCenter = ((poly[0][0] + poly[2][0]) / 2 / scale,
+                             (poly[0][1] + poly[2][1]) / 2 / scale)
+                return ((poly[0][0]/scale, poly[0][1]/scale),
+                        (poly[1][0]/scale, poly[1][1]/scale),
+                        (poly[2][0]/scale, poly[2][1]/scale),
+                        (poly[3][0]/scale, poly[3][1]/scale),
+                        
+                        (poly[1][0]/scale, poly[1][1]/scale),
+                        texCenter,
+                        (poly[2][0]/scale, poly[2][1]/scale),
+                        
+                        (poly[2][0]/scale, poly[2][1]/scale),
+                        texCenter,
+                        (poly[3][0]/scale, poly[3][1]/scale),
+                        
+                        (poly[3][0]/scale, poly[3][1]/scale),
+                        texCenter,
+                        (poly[0][0]/scale, poly[0][1]/scale),
+                        
+                        (poly[0][0]/scale, poly[0][1]/scale),
+                        texCenter,
+                        (poly[1][0]/scale, poly[1][1]/scale))
+
+            self.uvMap  = worldMap(20)
+            self.uvMap2 = worldMap(200)
+            
         else:
             # Default pyramid
             self.textureName = 'black_marble.jpeg'
@@ -87,6 +130,9 @@ class Pyramid(DisplayList):
                           (0, 0),
                           (repeats[0]/2, repeats[1]/2),
                           (0, repeats[1]))
+
+        if not self.uvMap2:
+            self.uvMap2 = self.uvMap
                        
         DisplayList.__init__(self, center, angle, size, flip)
 
@@ -95,8 +141,16 @@ class Pyramid(DisplayList):
         self.angle = angle
         self.size = size
         self.flip = flip
+        try:
+            self.render.textures[1].texEnv = GL_MODULATE
+            self.render.blended = True
+        except IndexError:
+            pass
 
     def drawToList(self):
+        if self.render.blended:
+            glColor4f(1, 1, 1, 0.6)
+            glDisable(GL_LIGHTING)
         z = 0
         z2 = self.size[2]
         if self.flip:
@@ -112,12 +166,16 @@ class Pyramid(DisplayList):
         # Z- side
         glNormal3f(0, 0, -1)
         glTexCoord2f(*self.uvMap[0])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[0])
         glVertex3f(-self.size[0], -self.size[1], z)
         glTexCoord2f(*self.uvMap[1])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[1])
         glVertex3f(-self.size[0], self.size[1], z)
         glTexCoord2f(*self.uvMap[2])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[2])
         glVertex3f(self.size[0], self.size[1], z)
         glTexCoord2f(*self.uvMap[3])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[3])
         glVertex3f(self.size[0], -self.size[1], z)
         glEnd()
         glBegin(GL_TRIANGLES)
@@ -125,42 +183,56 @@ class Pyramid(DisplayList):
         norm = normalize(cross((self.size[0], -self.size[1], self.size[2]), (self.size[0] * 2, 0, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[4])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[4])
         glVertex3f(-self.size[0], self.size[1], z)
         glTexCoord2f(*self.uvMap[5])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[5])
         glVertex3f(0, 0, z2)
         glTexCoord2f(*self.uvMap[6])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[6])
         glVertex3f(self.size[0], self.size[1], z)
         # Y+ side
         norm = normalize(cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[7])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[7])    
         glVertex3f(self.size[0], self.size[1], z)
         glTexCoord2f(*self.uvMap[8])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[8])
         glVertex3f(0, 0, z2)
         glTexCoord2f(*self.uvMap[9])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[9])
         glVertex3f(self.size[0], -self.size[1], z)
         # X- side
         norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[10])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[10])
         glVertex3f(self.size[0], -self.size[1], z)
         glTexCoord2f(*self.uvMap[11])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[11])
         glVertex3f(0, 0, z2)
         glTexCoord2f(*self.uvMap[12])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[12])
         glVertex3f(-self.size[0], -self.size[1], z)
         # Y- side
         norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (0, -self.size[1] * 2, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[13])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[13])
         glVertex3f(-self.size[0], -self.size[1], z)
         glTexCoord2f(*self.uvMap[14])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[14])
         glVertex3f(0, 0, z2)
         glTexCoord2f(*self.uvMap[15])
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[15])
         glVertex3f(-self.size[0], self.size[1], z)
         glEnd()
         if self.flip:
             glFrontFace(GL_CCW)
         glPopMatrix()
-
+        if self.render.blended:
+            glEnable(GL_LIGHTING)
+            glColor3f(1,1,1)
 
 ### The End ###
