@@ -116,7 +116,6 @@ class TextureGroup(Drawable.DisplayList):
     
     def drawToList(self):
         for drawable in self.drawables:
-            print drawable
             if hasattr(drawable, 'drawToList'):
                 drawable.drawToList()
             else:
