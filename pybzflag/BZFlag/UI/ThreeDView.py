@@ -284,7 +284,7 @@ def attach(game, eventLoop):
     ThreeDController(view, viewport)
 
     # Add a Frame Hertz indicator
-    #Animated.FrequencyCounter(viewport.onFinishFrame,
-    #                          lambda hz: "FHz: %.3f (target %.3f)" % (hz, viewport.targetFrameRate))
+    Animated.FrequencyCounter(viewport.onFinishFrame,
+                              lambda hz: "FHz: %.3f (target %.3f)" % (hz, viewport.targetFrameRate))
 
 ### The End ###
