@@ -16,6 +16,9 @@
 #ifndef _VC5_6_CONFIG
 #define _VC5_6_CONFIG
 
+/* Building regex */
+#define BUILD_REGEX 1
+
 /* Time Bomb expiration */
 /* #undef TIME_BOMB */
 
@@ -30,6 +33,9 @@
 
 /* On windows, strcasecmp is really stricmp */
 #define HAVE_STRICMP 1
+
+/* Define to 1 if you have regex stuff available */
+/* undef HAVE_REGEX_H */
 
 // define our OS
 #ifndef BZ_BUILD_OS
@@ -57,16 +63,15 @@
   #endif
 #endif
 
+#ifndef WINVER
 #define WINVER 0x0400
+#endif
 #define _WIN32_WINNT 0x0400
+#include "Windows.h"
 
 #if(1)
   #include "ATLbase.h"
-  #if defined(_MSC_VER) && (_MSC_VER == 1200)
-    inline void W32_DEBUG_TRACE (const char* buffer ) {ATLTRACE(buffer);}
-  #else ifdef(_MSC_VER) && (_MSC_VER == 1100)
-    inline void W32_DEBUG_TRACE (const char* buffer ) {ATLTRACE(buffer);}
-  #endif
+  inline void W32_DEBUG_TRACE (const char* buffer ) {ATLTRACE(buffer);}
 #else
   inline void W32_DEBUG_TRACE (const char* buffer){return;}
 #endif
