@@ -24,7 +24,7 @@ into observable and traceable events.
 #
 
 from BZFlag import Network, Errors
-import select, time
+import select, time, sys
 
 
 class Event:

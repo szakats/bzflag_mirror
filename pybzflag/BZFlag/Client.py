@@ -40,6 +40,7 @@ class BaseClient(Network.Endpoint):
     incoming = Protocol.FromServer
     
     def init(self):
+        Network.Endpoint.init(self)
         self.connected = 0
         self.options.update({
             'server': None,
