@@ -24,7 +24,7 @@ in subclasses.
 #
 
 import BZFlag
-from BZFlag import Network, Protocol, Event, Errors
+from BZFlag import Network, Protocol, Event, Errors, Game
 
 
 class BaseServer(Network.Endpoint):
@@ -107,7 +107,7 @@ class StatefulServer(BaseServer):
         self.game = Game.Game()
 
     def onMsgNegotiateFlags(self, msg):
-        pass
+        msg.socket.write(self.outgoing.MsgNegotiateFlags(data="Q\0BCD#F"))
 
 
 class StandardServer(StatefulServer):

@@ -218,9 +218,6 @@ class MsgPlayerUpdate(Message):
 
 class MsgNegotiateFlags(DataMessage):
     messageId = 0x6e66
-    entries = [
-        StructEntry(UInt16, 'numFlags'),
-        ]
 
 class MsgShotBegin(Message):
     messageId = 0x7362
