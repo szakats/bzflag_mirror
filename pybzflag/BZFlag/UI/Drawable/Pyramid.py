@@ -23,8 +23,9 @@ A class for drawing the pyramids in the world
 from __future__ import division
 from DisplayList import *
 from OpenGL.GL import *
-from BZFlag.Vector import cross, normalize
+from BZFlag import Vector
 from OpenGL.GL.ARB.multitexture import *
+from BZFlag.UI import CubeMap, GLExtension
 
 
 class Pyramid(DisplayList):
@@ -47,7 +48,10 @@ class Pyramid(DisplayList):
             # This maps each side of the pyramid to a triangle based at the bottom
             # of the texture with its tip at the top-center. The bottom of the pyramid
             # is mapped to a the top-left 1/4 of the texture.
-            self.textureName = 'pillar.jpeg'
+            self.textureNames = ['pillar.jpeg']
+            print GLExtension.cubeMap
+            if GLExtension.cubeMap:
+                self.textureNames.append(CubeMap.CubeMap(Vector.add(center, (0,0,size[2]/2))))
             self.uvMap = ((0,   3/4),
                           (1/4, 3/4),
                           (1/4, 1),
@@ -105,7 +109,9 @@ class Pyramid(DisplayList):
             
         else:
             # Default pyramid
-            self.textureName = 'black_marble.jpeg'
+            self.textureNames = ['black_marble.jpeg']
+            if GLExtension.cubeMap:
+                self.textureNames.append(CubeMap.CubeMap(Vector.add(center, (0,0,size[2]/2))))
             repeats = (size[0] / 4, size[1] / 4)
 
         if not self.uvMap:
@@ -180,7 +186,7 @@ class Pyramid(DisplayList):
         glEnd()
         glBegin(GL_TRIANGLES)
         # X+ side
-        norm = normalize(cross((self.size[0], -self.size[1], self.size[2]), (self.size[0] * 2, 0, 0)))
+        norm = Vector.normalize(Vector.cross((self.size[0], -self.size[1], self.size[2]), (self.size[0] * 2, 0, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[4])
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[4])
@@ -192,7 +198,7 @@ class Pyramid(DisplayList):
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[6])
         glVertex3f(self.size[0], self.size[1], z)
         # Y+ side
-        norm = normalize(cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0)))
+        norm = Vector.normalize(Vector.cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[7])
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[7])    
@@ -204,7 +210,7 @@ class Pyramid(DisplayList):
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[9])
         glVertex3f(self.size[0], -self.size[1], z)
         # X- side
-        norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0)))
+        norm = Vector.normalize(Vector.cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[10])
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[10])
@@ -216,7 +222,7 @@ class Pyramid(DisplayList):
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[12])
         glVertex3f(-self.size[0], -self.size[1], z)
         # Y- side
-        norm = normalize(cross((-self.size[0], self.size[1], self.size[2]), (0, -self.size[1] * 2, 0)))
+        norm = Vector.normalize(Vector.cross((-self.size[0], self.size[1], self.size[2]), (0, -self.size[1] * 2, 0)))
         glNormal3f(*norm)
         glTexCoord2f(*self.uvMap[13])
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *self.uvMap2[13])

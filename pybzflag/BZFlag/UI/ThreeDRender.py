@@ -186,7 +186,8 @@ class RenderPass:
     # Rendering passes with a higher priority get a chance to filter drawables first
     priority = None
 
-    def __init__(self):
+    def __init__(self, view):
+        self.view = view
         self.erase()
 
     def render(self, picking=None):
@@ -271,7 +272,7 @@ class BasicRenderPass(RenderPass):
                 for unit in GLExtension.textureUnits:
                     glActiveTextureARB(unit)
                     if texIndex < len(textures):
-                        textures[texIndex].bind()
+                        textures[texIndex].bind(self.view)
                         glEnable(GL_TEXTURE_2D)
                     else:
                         glDisable(GL_TEXTURE_2D)
@@ -279,7 +280,7 @@ class BasicRenderPass(RenderPass):
             else:
                 # No multitexturing, only enable the current texture unit
                 glEnable(GL_TEXTURE_2D)
-                textures[0].bind()
+                textures[0].bind(self.view)
         else:
             if GLExtension.multitexture:
                 # We have multitexturing, make sure all the texture units are disabled
@@ -344,10 +345,13 @@ class Scene:
        and sorted by texture. Multiple rendering passes are necessary to deal
        with blended objects, and texture sorting is an important OpenGL optimization.
        """
-    def __init__(self):
+    def __init__(self, view):
+        self.view = view
         self.erase()
-        self.passes = [BasicRenderPass(), BlendedRenderPass(), OverlayRenderPass(),
-                       DecalRenderPass()]
+        self.passes = [BasicRenderPass(view),
+                       BlendedRenderPass(view),
+                       OverlayRenderPass(view),
+                       DecalRenderPass(view)]
 
     def erase(self):
         self.objects = {}
@@ -442,7 +446,7 @@ class View:
     """A generic 3D view with multiple rendering passes, usable with OpenGLViewport."""
     def __init__(self, viewport, scene=None):
         if not scene:
-            scene = Scene()
+            scene = Scene(self)
         self.viewport = viewport
         self.camera = Camera()
         self.scene = scene
@@ -461,7 +465,14 @@ class View:
         self.lights = [self.light0, self.light1]
 
     def render(self):
+        """The main entry point for rendering"""
         self.camera.load()
+        self.renderScene()
+
+    def renderScene(self):
+        """Set up lighting and render the scene. This is called
+           when the camera has already been set up elsewhere.
+           """
         # Set up the light so it is in world space not cam space
         for light in self.lights:
             light.set()

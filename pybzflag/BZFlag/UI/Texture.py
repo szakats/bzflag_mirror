@@ -30,8 +30,8 @@ from BZFlag.UI import GLExtension
 from OpenGL.GL.EXT.texture_filter_anisotropic import *
 
 
-# Keep track of the current OpenGL texture, to reduce the number of binds we do
-currentTexture = None
+# Keep track of the current OpenGL texture in each target, to reduce the number of binds we do
+currentTexture = {}
 
 
 class Texture:
@@ -39,6 +39,7 @@ class Texture:
     def __init__(self, name=None):
         self.texture = glGenTextures(1)
         self.texEnv = GL_REPLACE
+        self.target = GL_TEXTURE_2D
         if name:
             self.loadFile(name)
 
@@ -84,15 +85,15 @@ class Texture:
         (w,h) = size
         self.bind()
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_REPEAT)
+        glTexParameteri(self.target, GL_TEXTURE_WRAP_T, GL_REPEAT)
+        glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+        glTexParameteri(self.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
         if GLExtension.maxAnisotropy > 1:
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)
-        gluBuild2DMipmaps(GL_TEXTURE_2D, components, w, h, format, GL_UNSIGNED_BYTE, string)
+            glTexParameterf(self.target, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)
+        gluBuild2DMipmaps(self.target, components, w, h, format, GL_UNSIGNED_BYTE, string)
 
     def __getstate__(self):
         """This method is called when pickling a Texture, to return an object which is
@@ -114,13 +115,13 @@ class Texture:
         except:
             pass
 
-    def bind(self):
-        """Bind this texture to GL_TEXTURE_2D in the current OpenGL context"""
+    def bind(self, view=None):
+        """Bind this texture to self.target in the current OpenGL context"""
         global currentTexture
-        if self != currentTexture:
-            glBindTexture(GL_TEXTURE_2D, self.texture)
+        if self != currentTexture.setdefault(self.target, None):
+            glBindTexture(self.target, self.texture)
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, self.texEnv)
-            currentTexture = self
+            currentTexture[self.target] = self
 
 
 class AnimatedTexture:
@@ -149,7 +150,7 @@ class AnimatedTexture:
             1/framerate * len(self.frames), (0, len(self.frames))))
         self.time = Animated.Timekeeper()
 
-    def bind(self):
+    def bind(self, view=None):
         self.frameNumber.integrate(self.time.step())
         self.frames[int(self.frameNumber.value)].bind()
         

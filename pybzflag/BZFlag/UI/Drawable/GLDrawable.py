@@ -66,10 +66,20 @@ class GLDrawable:
 
     def loadTextures(self):
         textures = []
-        for name in self.textureNames:
-            textures.append(Texture.load(name))
-        if self.textureName:
-            textures.append(Texture.load(self.textureName))
+        # textureNames overrides textureName
+        if self.textureNames:
+            names = self.textureNames
+        else:
+            names = (self.textureName,)
+
+        # Each texture can be a string to indicate a name to load,
+        # or a texture instance that is stored as-is.
+        for name in names:
+            if type(name) == str or type(name) == unicode:
+                textures.append(Texture.load(name))
+            elif name:
+                textures.append(name)
+                
         self.render.textures = tuple(textures)
 
     def parent(self, parent):
