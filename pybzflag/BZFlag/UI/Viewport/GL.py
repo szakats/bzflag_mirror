@@ -140,6 +140,15 @@ class OpenGLViewport(PygameViewport):
     def getModeFlags(self):
         return PygameViewport.getModeFlags(self) | pygame.OPENGL
 
+    def resize(self, size):
+        """Before setting our display mode, set up any OpenGL attributes we need"""
+        self.setGLAttributes()
+        PygameViewport.resize(self, size)
+
+    def setGLAttributes(self):
+        """A hook allowing subclasses the ability to set OpenGL attributes before initializing the context"""
+        pass
+
     def render(self):
         """Reevaluate our viewport, then do the usual rendering sequence"""
         self.evalViewport()
@@ -186,9 +195,10 @@ class OpenGLViewport(PygameViewport):
 
 
 class StereoGLViewport(OpenGLViewport):
-    def getModeFlags(self):
-        # use this as a convenient way to set the GL options
+    """An OpenGLViewport subclass that uses a stereo OpenGL context, for
+       big expensive hardware designed for stereo rendering :)
+       """
+    def setGLAttributes(self):
 	pygame.display.gl_set_attribute(pygame.GL_STEREO, 1)
-	return OpenGLViewport.getModeFlags(self)
 
 ### The End ###
