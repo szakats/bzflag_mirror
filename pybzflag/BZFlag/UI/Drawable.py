@@ -56,7 +56,7 @@ class GLDrawable:
 
 
 class DisplayList(GLDrawable):
-    """A drawable that stores itself to a display list before rendering"""    
+    """A drawable that stores itself to a display list before rendering"""
     def __init__(self, *args, **kw):
         GLDrawable.__init__(self)
         self.list = glGenLists(1)
@@ -77,7 +77,7 @@ class DisplayList(GLDrawable):
            """
         glNewList(self.list, GL_COMPILE)
         self.drawToList(*args, **kw)
-        glEndList()        
+        glEndList()
 
     def drawToList(self):
         """Stub where subclasses will do their drawing"""

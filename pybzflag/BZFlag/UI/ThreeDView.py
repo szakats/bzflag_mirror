@@ -215,8 +215,8 @@ class ThreeDController:
 	    if pygame.key.get_mods() & (pygame.KMOD_RSHIFT | pygame.KMOD_LSHIFT):
 	        if event.buttons[1]:
 		    (x, y, z) = view.camera.position
-	 	    xscale = math.cos((view.camera.azimuth) * math.pi / 180)
-		    yscale = math.sin((view.camera.azimuth) * math.pi / 180)
+	 	    xscale = math.cos((-view.camera.azimuth) * math.pi / 180)
+		    yscale = math.sin((-view.camera.azimuth) * math.pi / 180)
 		    x += event.rel[0] * xscale - event.rel[1] * yscale
 		    y += event.rel[0] * yscale - event.rel[1] * xscale
 		    view.camera.position = (x, y, z)

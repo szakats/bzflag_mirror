@@ -24,6 +24,7 @@ Texture loading utilities
 import Image
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from BZFlag import Util
 
 
 class Texture:
@@ -53,5 +54,17 @@ class Texture:
     def bind(self):
         """Bind this texture to GL_TEXTURE_2D in the current OpenGL context"""
         glBindTexture(GL_TEXTURE_2D, self.texture)
+
+class TCache:
+    """Keeps track of which textures are already loaded, so we never
+       duplicate texture ids
+       """
+    def __init__(self):
+        self.textures = {}
+
+    def load(self, name):
+        if not self.textures.has_key(name):
+	    self.textures[name] = Texture(Util.dataFile(name))
+	return self.texutres[name]
 
 ### The End ###
