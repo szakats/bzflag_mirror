@@ -11,3 +11,8 @@ Todo list, in no particular order:
   - fix panning in 3d view
 
   - fix lighting in 3d view
+
+  - fix resizing: what might be an SDL bug is causing the window to get stuck
+    resizing to its original size when using a WM or equivalent that does
+    opaque resizing. Known to break under sawfish, win32, and OS X.
+
