@@ -38,7 +38,10 @@ def length(v):
 
 def normalize(v):
     l = length(v)
-    return (v[0]/l, v[1]/l, v[2]/l)
+    try:
+        return (v[0]/l, v[1]/l, v[2]/l)
+    except ZeroDivisionError:
+        return (0,0,0)
 
 
 def sub(a,b):
