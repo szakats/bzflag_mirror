@@ -28,7 +28,7 @@ from OpenGL.GLU import *
 from BZFlag import Util, Animated
 from BZFlag.UI import GLExtension
 from OpenGL.GL.EXT.texture_filter_anisotropic import *
-import copy, math
+import copy, math, random
 
 
 class Texture:
@@ -195,14 +195,35 @@ class DynamicTexture(Texture):
     """Abstract base class for a texture which is captured from an OpenGL rendering.
        The size given is treated as a preferred size- the actual texture size may
        be smaller due to viewport size limitations in the current video mode.
+
+       By default the generated texture does not expire unless the 'dirty' flag
+       is explicitly set. This can be changed by providing a meanExpiration time
+       in seconds. To randomly vary the expiration time, expStdDeviation can be
+       set to a nonzero value. Expiration times are generated according to a normal
+       distribution.
        """
-    def __init__(self, maxSize):
+    def __init__(self, maxSize, meanExpiration=None, expStdDeviation=0):
         Texture.__init__(self)
+        self.meanExpiration = meanExpiration
+        self.expStdDeviation = expStdDeviation
         self.maxSize = maxSize
         self.viewport = None
         self.dirty = True
         self.rendered = False
         self.rstate = None
+        self.renderLifetime = 0
+        self.time = Animated.Timekeeper()
+        self.newExpiration()
+
+    def newExpiration(self):
+        """Create a new random expiration duration"""
+        if self.meanExpiration:
+            if self.expStdDeviation:
+                self.expiration = random.normalvariate(self.meanExpiration, self.expStdDeviation)
+            else:
+                self.expiration = self.meanExpiration
+        else:
+            self.expiration = None
 
     def bind(self, rstate=None):
         """The first time we're bound we add a new viewport that renders our texture"""
@@ -238,14 +259,26 @@ class DynamicTexture(Texture):
            Defaults to ortho mode.
            """
         self.viewport.fov = None
+
+    def integrate(self, dt):
+        """Animation function called every time step. The default implementation
+           only manages the render expiration timer.
+           """
+        self.renderLifetime += dt
+        if self.expiration and self.renderLifetime > self.expiration:
+            # This rendering expired, set the dirty flag and get a new expiration duration
+            self.newExpiration()
+            self.dirty = True
         
     def drawFrame(self):
         """Draw function called by our viewport"""
+        self.integrate(self.time.step())
         if not self.dirty:
             return
         self.render()
         self.dirty = False
         self.rendered = True
+        self.renderLifetime = 0
 
     def render(self):
         """Render the texture. By default this calls the draw() method to draw

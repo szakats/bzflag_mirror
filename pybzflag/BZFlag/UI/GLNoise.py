@@ -279,8 +279,8 @@ class PerlinTexture(Texture.DynamicTexture):
         if not noise:
             noise = AnimatedPerlinNoise()
         self.noise = noise
-        self.time = Animated.Timekeeper()
-        Texture.DynamicTexture.__init__(self, size)
+        Texture.DynamicTexture.__init__(self, size,
+                                        meanExpiration = 1/60)
 
     def attachRenderState(self, rstate):
         Texture.DynamicTexture.attachRenderState(self, rstate)
@@ -288,11 +288,10 @@ class PerlinTexture(Texture.DynamicTexture):
 
     def draw(self):
         self.noise.draw(self.viewport.size)
-        self.noise.integrate(self.time.step())
 
-    def drawFrame(self):
-        Texture.DynamicTexture.drawFrame(self)
-        self.dirty = True
+    def integrate(self, dt):
+        self.noise.integrate(dt)
+        Texture.DynamicTexture.integrate(self, dt)
 
 ### The End ###
 
