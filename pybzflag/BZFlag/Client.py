@@ -245,7 +245,8 @@ class StatefulClient(BaseClient):
     def updateFlag(self, msg):
         """Generic handler for all messages that update a flag"""
         try:
-            flag = self.game.getFlag(msg.flagNum, self.flagIdToClass[msg.update.id])
+            flag = self.game.getFlag(msg.flagNum, Flag.getDict()[msg.update.id])
+            print flag
             flag.updateFromMessage(msg)
         except KeyError:
             raise Errors.ProtocolWarning("Can't update flag number %d with unknown ID %d" %
