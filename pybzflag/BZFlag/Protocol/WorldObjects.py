@@ -194,7 +194,10 @@ class TeamBase(WorldObject):
         from BZFlag.UI import Drawable
         if self.center[2] != 0:
 	    self.size[2] = 1
-	    return [Drawable.BaseTops(self.team, self.center, self.angle, self.size)]
+	    return [
+	        Drawable.BaseTops(self.team, self.center, self.angle, self.size),
+		Drawable.BoxSides(self.center, self.angle, self.size),
+		]
         return [Drawable.BaseTops(self.team, self.center, self.angle, self.size)]
 
 
