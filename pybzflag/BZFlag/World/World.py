@@ -23,10 +23,9 @@ save worlds to text and binary formats, storing them in a Scene class.
 #
 
 from BZFlag.Protocol import WorldObjects
-from BZFlag import Errors, Util
+from BZFlag import Event
 import os, math, md5
 from StringIO import StringIO
-from BZFlag.World.Scene import SceneList
 from BZFlag.World import Scale
 
 
@@ -53,8 +52,8 @@ class World:
        a flat list, but if this is being used for a 3D client it might be better
        to implement an Octree.
        """
-    def __init__(self, sceneClass=SceneList):
-        self.sceneClass = sceneClass
+    def __init__(self):
+        Event.attach(self, 'onLoad', 'onAddObject', 'onRemoveObject', 'onChangeObject')
 
     def saveBinary(self, f):
         """Save a binary world to the supplied file-like object"""
@@ -72,7 +71,6 @@ class World:
         self.blocks = []
         self.teleporters = []
         self.teleporterLinks = []
-        self.scene = self.sceneClass()
         self.style = None
         self.lifetime = 'permanent'     # For client-side world caching
 
@@ -115,8 +113,6 @@ class World:
             self.style = block
             # Use a 2D size to make it easy to support non-square worlds in the future
             self.size = (block.worldSize, block.worldSize)
-        if hasattr(block, 'center'):
-            self.scene.add(block)
         if isinstance(block, WorldObjects.TeleporterLink):
             self.teleporterLinks.append(block)
         if isinstance(block, WorldObjects.Teleporter):
@@ -125,6 +121,7 @@ class World:
     def postprocess(self):
         """Performs any checks or calculations necessary
            after a world has completed loading.
+           Triggers the onLoad event.
            """
         # Link teleporters to each other.
         # Note that this creates circular links, so the world will not
@@ -134,6 +131,7 @@ class World:
             fromSide = TeleporterSide(self.teleporters[link.fromSide >> 1], link.fromSide & 1)
             toSide = TeleporterSide(self.teleporters[link.toSide >> 1], link.toSide & 1)
             fromSide.link(toSide)
+        self.onLoad()
 
     def getHash(self):
         """Return an MD5 hash of the binary world"""

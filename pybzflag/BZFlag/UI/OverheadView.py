@@ -69,7 +69,7 @@ class OverheadView:
     def renderWorld(self, surface):
         """Render the game world to the given surface."""
         surface.fill(self.colorScheme['background'])
-        for object in self.game.world.scene:
+        for object in self.game.world.blocks:
             objClassName = object.__class__.__name__
             if objClassName == 'TeamBase':
                 # Color the bases by team
