@@ -95,7 +95,7 @@ class BoxTops(DisplayList):
         if GLExtension.multitexture:
             for vertex in self.polygon:
                 glMultiTexCoord2fARB(GL_TEXTURE0_ARB, vertex[0] / 62, vertex[1] / 62)
-                glMultiTexCoord2fARB(GL_TEXTURE1_ARB, vertex[0] / 10,  vertex[1] / 10)
+                glMultiTexCoord2fARB(GL_TEXTURE1_ARB, vertex[0] / 30,  vertex[1] / 30)
                 glVertex2f(*vertex)
         else:
             for vertex in self.polygon:
