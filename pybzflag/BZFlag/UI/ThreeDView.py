@@ -56,12 +56,33 @@ class SmoothedCamera(Camera):
     """Replacement Camera class that smooths all axes with the Animated module"""
     def __init__(self):
         Camera.__init__(self)
-        
+        self.time = Animated.Timekeeper()
+        self.animatedDistance  = Animated.Value (self.distance,
+                                                 Animated.LogApproach(self.distance, 4))
+        self.animatedPosition  = Animated.Vector(self.position,
+                                                 Animated.LogApproach(self.position, 10))
+        self.animatedAzimuth   = Animated.Value (self.azimuth,
+                                                 Animated.LogApproach(self.azimuth, 10))
+        self.animatedElevation = Animated.Value (self.elevation,
+                                                 Animated.LogApproach(self.elevation, 10))
+        self.animated = [self.animatedDistance,
+                         self.animatedPosition,
+                         self.animatedAzimuth,
+                         self.animatedElevation]
 
     def load(self):
-
-        Camera.load(self)
-
+        self.animatedDistance.f.target  = self.distance
+        self.animatedPosition.f.target  = self.position
+        self.animatedAzimuth.f.target   = self.azimuth
+        self.animatedElevation.f.target = self.elevation
+        dt = self.time.step()
+        for item in self.animated:
+            item.integrate(dt)
+        glLoadIdentity()
+        glTranslatef(0, 0, -self.animatedDistance.value)
+        glRotatef(self.animatedElevation.value, 1.0, 0.0, 0.0)
+        glRotatef(self.animatedAzimuth.value, 0.0, 0.0, 1.0)
+        glTranslatef(*self.animatedPosition.get())
 
 
 class Light:

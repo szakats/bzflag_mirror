@@ -24,6 +24,7 @@ Controller classes for manipulating 3D views
 import math
 import pygame
 from BZFlag import Animated
+from BZFlag.UI import ThreeDView
 
 
 class Viewing:
@@ -36,30 +37,12 @@ class Viewing:
         self.viewport = viewport
 
         # Use Animated to smooth out our camera
-        self.distance = Animated.Value(view.camera.distance,
-                                       Animated.LogApproach(view.camera.distance, 4))
-        self.focus = Animated.Vector(view.camera.position,
-                                     Animated.LogApproach(view.camera.position, 10))
-        self.azimuth = Animated.Value(view.camera.azimuth,
-                                      Animated.LogApproach(view.camera.azimuth, 10))
-        self.elevation = Animated.Value(view.camera.elevation,
-                                        Animated.LogApproach(view.camera.elevation, 10))
-        self.animated = [self.distance, self.focus, self.azimuth, self.elevation]
+        self.view.camera = ThreeDView.SmoothedCamera()
 
         self.mouseZoomScale = 1.08
         self.keyZoomScale = 1.6
         self.mouseRotateScale = 5.0
         view.camera.position = (0, 0, -20)
-
-        # Update camera animation before each frame
-        time = Animated.Timekeeper()
-        def onSetupFrame():
-            dt = time.step()
-            for item in self.animated:
-                item.integrate(dt)
-            view.camera.distance = self.distance.value
-            view.camera.position = self.focus.get()
-        viewport.onSetupFrame.observe(onSetupFrame)
 
         def onMouseButtonDown(event):
             if event.button == 4:
@@ -87,25 +70,25 @@ class Viewing:
             # Panning - shift-right mouse button
 	    if pygame.key.get_mods() & pygame.KMOD_SHIFT:
 	        if event.buttons[2]:
-		    (x, y, z) = self.focus.f.target
+		    (x, y, z) = self.view.camera.position
                     radians = view.camera.azimuth * math.pi / 180
 	 	    cos = math.cos(radians)
 		    sin = math.sin(radians)
 		    x +=  cos*event.rel[0] - sin*event.rel[1]
 		    y += -sin*event.rel[0] - cos*event.rel[1]
-		    self.focus.f.target = (x, y, z)
+		    self.view.camera.position = (x, y, z)
 	            return
 
             # Elevation - ctrl-right mouse button
 	    if pygame.key.get_mods() & pygame.KMOD_CTRL:
 	        if event.buttons[2]:
-		    (x, y, z) = self.focus.f.target
+		    (x, y, z) = self.view.camera.position
 		    z -= event.rel[1]
 		    if z > 0:
 		         z = 0
 		    if z < -1000:
 		         z = -1000
-		    self.focus.f.target = (x, y, z)
+		    self.view.camera.position = (x, y, z)
 	            return
 
             # Rotation - right mouse button
@@ -131,13 +114,10 @@ class Viewing:
         """Sets the camera zoom target to a multiple of its current
            value. The camera will smoothly track to this distance.
            """
-        self.distance.f.target *= scale
-        if self.distance.f.target < 0.1:
-            self.distance.f.target = 0.1
-        if self.distance.f.target > 1500:
-            self.distance.f.target = 1500
-
-    def rotate(self, scale):
-        self.rotation.f.target *= scale
+        self.view.camera.distance *= scale
+        if self.view.camera.distance < 0.1:
+            self.view.camera.distance = 0.1
+        if self.view.camera.distance > 1500:
+            self.view.camera.distance = 1500
 
 ### The End ###
