@@ -427,6 +427,10 @@ def detectBoxDrawables(box):
     bottom = None
     drawables = []
 
+    # Don't try to draw boxes with a zero size, they will give is a divide by zero later
+    if not (box.size[0] and box.size[1] and box.size[2]):
+        return []
+
     # Calculate a few values based on the box proportions to make the below decisions clearer
     height = box.size[2]
     majorAxis = max(box.size[0], box.size[1])
