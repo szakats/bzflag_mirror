@@ -162,8 +162,12 @@ def attach(game, eventLoop, size=(800,600), targetFrameRate=60):
 	if event.type == pygame.MOUSEBUTTONDOWN:
 	  if event.button == 4:
 	    view.camera.distance -= 50
+	    if view.camera.distance < 0:
+	      view.camera.distance = 0
 	  if event.button == 5:
 	    view.camera.distance += 50
+	    if view.camera.distance > 1500:
+	      view.camera.distance = 1500
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
       game.update()
       view.render()

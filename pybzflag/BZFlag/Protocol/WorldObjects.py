@@ -30,9 +30,6 @@ from BZFlag.Protocol import Common
 from BZFlag import Errors
 import re, math
 
-def cross(a, b):
-    return (a[2] * b[1] - a[1] * b[2], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
-
 class BlockHeader(Struct):
     entries = [
         StructEntry(UInt16, 'id'),
@@ -45,24 +42,6 @@ class Block(Common.Message):
        """
     headerClass = BlockHeader
     messageId = None
-
-
-class GLDrawable:
-    def __init__(self):
-    	import OpenGL.GL
-        self.list = OpenGL.GL.glGenLists(1)
-	self.texture = None
-
-    def __del__(self):
-        import OpenGL.GL
-	OpenGL.GL.glDeleteLists(self.list, 1)
-
-    def draw(self):
-        pass
-
-    def drawWithName(self, name):
-        pass
-
 
 class WorldObject(Block):
     """Building on the Struct and Message functionality, this base
@@ -186,37 +165,9 @@ class Style(WorldObject):
         StructEntry(UInt32,           'serverTime',           0),
         ]
 
-    class GroundDrawable(GLDrawable):
-        def __init__(self, size):
-	    import OpenGL.GL
-	    import BZFlag.UI.Texture
-	    GLDrawable.__init__(self)
-	    self.size = size / 2
-	    self.texture = BZFlag.UI.Texture.Texture('data/ground.png')
-	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
-	    OpenGL.GL.glPushMatrix()
-	    OpenGL.GL.glDisable(OpenGL.GL.GL_CULL_FACE)
-	    OpenGL.GL.glColor3f(1.0, 1.0, 1.0)
-	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
-	    OpenGL.GL.glTexCoord2f(0.0, 0.0)
-	    OpenGL.GL.glVertex3f(self.size, -self.size, 0)
-	    OpenGL.GL.glTexCoord2f(1.0, 0.0)
-	    OpenGL.GL.glVertex3f(-self.size, -self.size, 0)
-	    OpenGL.GL.glTexCoord2f(1.0, 1.0)
-	    OpenGL.GL.glVertex3f(-self.size, self.size, 0)
-	    OpenGL.GL.glTexCoord2f(0.0, 1.0)
-	    OpenGL.GL.glVertex3f(self.size, self.size, 0)
-	    OpenGL.GL.glEnd()
-	    OpenGL.GL.glEnable(OpenGL.GL.GL_CULL_FACE)
-	    OpenGL.GL.glPopMatrix()
-	    OpenGL.GL.glEndList()
-
-	def draw(self):
-	    import OpenGL.GL
-	    OpenGL.GL.glCallList(self.list)
-
     def getGLDrawables(self):
-        return [self.GroundDrawable(self.worldSize)]
+        import BZFlag.Drawable
+        return [BZFlag.Drawable.GroundDrawable(self.worldSize)]
 
 
 ObjectOptions = Bitfield(UInt8, {
@@ -237,6 +188,15 @@ class TeamBase(WorldObject):
         StructEntry(Common.Vector3,   'safety', [0,0,0]),
         ]
 
+    def getGLDrawables(self):
+        import BZFlag.Drawable
+        if self.center[2] != 0:
+	    self.size[2] = 1
+        return [
+	    BZFlag.Drawable.BaseTopsDrawable(self.team, self.center, self.angle, self.size),
+	    BZFlag.Drawable.BoxSidesDrawable(self.center, self.angle, self.size),
+	    ]
+
 
 class Wall(WorldObject):
     messageId = 0x776C
@@ -246,41 +206,9 @@ class Wall(WorldObject):
         StructEntry(Common.VectorYZ,  'size',   [0,1,1]),
         ]
 
-    class WallDrawable(GLDrawable):
-        def __init__(self, center, angle, size):
-	    import OpenGL.GL
-	    import BZFlag.UI.Texture
-	    GLDrawable.__init__(self)
-	    self.center = center
-	    self.angle = angle * 180 / 3.1415926
-	    self.size = size
-	    self.texture = BZFlag.UI.Texture.Texture('data/wall.png')
-	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
-	    OpenGL.GL.glPushMatrix()
-	    OpenGL.GL.glTranslatef(*self.center)
-	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
-	    OpenGL.GL.glDisable(OpenGL.GL.GL_CULL_FACE)
-	    OpenGL.GL.glColor3f(1.0, 1.0, 1.0)
-	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLE_STRIP)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(0, -self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(0, 1)
-	    OpenGL.GL.glVertex3f(0, -self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f((self.size[1] * 2) / self.size[2], 0)
-	    OpenGL.GL.glVertex3f(0, self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f((self.size[1] * 2) / self.size[2], 1)
-	    OpenGL.GL.glVertex3f(0, self.size[1], self.size[2])
-	    OpenGL.GL.glEnd()
-	    OpenGL.GL.glEnable(OpenGL.GL.GL_CULL_FACE)
-	    OpenGL.GL.glPopMatrix()
-	    OpenGL.GL.glEndList()
-
-	def draw(self):
-	    import OpenGL.GL
-	    OpenGL.GL.glCallList(self.list)
-
     def getGLDrawables(self):
-        return [self.WallDrawable(self.center, self.angle, self.size)]
+        import BZFlag.Drawable
+        return [BZFlag.Drawable.WallDrawable(self.center, self.angle, self.size)]
 
 
 class Box(WorldObject):
@@ -293,114 +221,11 @@ class Box(WorldObject):
         StructEntry(ObjectOptions,    'options',      []),
         ]
 
-    class SidesDrawable(GLDrawable):
-        def __init__(self, center, angle, size):
-	    import OpenGL.GL
-	    import BZFlag.UI.Texture
-	    GLDrawable.__init__(self)
-	    self.center = center
-	    self.angle = angle * 180 / 3.1415926
-	    self.size = size
-	    self.texture = BZFlag.UI.Texture.Texture('data/boxwall.png')
-	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
-	    OpenGL.GL.glPushMatrix()
-	    OpenGL.GL.glTranslatef(*self.center)
-	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
-	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
-	    # Y+ side
-	    OpenGL.GL.glNormal3f(0, 1, 0)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(0, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
-	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], 0)
-	    # Y- side
-	    OpenGL.GL.glNormal3f(0, -1, 0)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(0, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], 0)
-	    # X+ side
-	    OpenGL.GL.glNormal3f(1, 0, 0)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(0, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[1] / 2, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[1] / 2, 0)
-	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], 0)
-	    # X- side
-	    OpenGL.GL.glNormal3f(-1, 0, 0)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(0, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[1] / 2, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[1] / 2, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], 0)
-	    OpenGL.GL.glEnd()
-	    OpenGL.GL.glPopMatrix()
-	    OpenGL.GL.glEndList()
-
-	def draw(self):
-	    import OpenGL.GL
-	    OpenGL.GL.glCallList(self.list)
-
-    class TopsDrawable(GLDrawable):
-        def __init__(self, center, angle, size):
-	    import OpenGL.GL
-	    import BZFlag.UI.Texture
-	    GLDrawable.__init__(self)
-	    self.center = center
-	    self.angle = angle * 180 / 3.1415926
-	    self.size = size
-	    self.texture = BZFlag.UI.Texture.Texture('data/boxtops.png')
-	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
-	    OpenGL.GL.glPushMatrix()
-	    OpenGL.GL.glTranslatef(*self.center)
-	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
-	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
-	    # Z+ side
-	    OpenGL.GL.glNormal3f(0, 0, 1)
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
-	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, self.size[1] / 2)
-	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(0, self.size[1] / 2)
-	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], self.size[2])
-	    # Z- side
-	    OpenGL.GL.glNormal3f(0, 0, -1)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(0, self.size[1] / 2)
-	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, self.size[1] / 2)
-	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
-	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], 0)
-	    OpenGL.GL.glEnd()
-	    OpenGL.GL.glPopMatrix()
-	    OpenGL.GL.glEndList()
-
-	def draw(self):
-	    import OpenGL.GL
-	    OpenGL.GL.glCallList(self.list)
-
     def getGLDrawables(self):
+        import BZFlag.Drawable
         return [
-	    self.SidesDrawable(self.center, self.angle, self.size),
-	    self.TopsDrawable(self.center, self.angle, self.size),
+	    BZFlag.Drawable.BoxSidesDrawable(self.center, self.angle, self.size),
+	    BZFlag.Drawable.BoxTopsDrawable(self.center, self.angle, self.size),
 	    ]
 
 
@@ -414,80 +239,9 @@ class Pyramid(WorldObject):
         StructEntry(ObjectOptions,    'options',      []),
         ]
 
-    class PyramidDrawable(GLDrawable):
-        def __init__(self, center, angle, size, flip):
-	    # FIXME - respect flipz
-	    import OpenGL.GL
-	    import BZFlag.UI.Texture
-	    GLDrawable.__init__(self)
-	    self.center = center
-	    self.angle = angle * 180 / 3.1415926
-	    self.size = size;
-	    self.flip = flip;
-	    self.texture = BZFlag.UI.Texture.Texture('data/pyrwall.png')
-	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
-	    OpenGL.GL.glPushMatrix()
-	    OpenGL.GL.glTranslatef(*self.center)
-	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
-	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
-	    # Z- side
-	    OpenGL.GL.glNormal3f(0, 0, -1)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(0, self.size[1] / 2)
-	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, self.size[1] / 2)
-	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
-	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], 0)
-	    OpenGL.GL.glEnd()
-	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLES)
-	    # X+ side
-	    norm = cross((self.size[0], -self.size[1], self.size[2]), (self.size[0] * 2, 0, 0))
-	    OpenGL.GL.glNormal3f(*norm)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 4, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(0, 0, self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
-	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], 0)
-	    # Y+ side
-	    norm = cross((self.size[0], -self.size[1], self.size[2]), (0, self.size[1] * 2, 0))
-	    OpenGL.GL.glNormal3f(*norm)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(self.size[0], self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(self.size[1] / 4, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(0, 0, self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[1] / 2, 0)
-	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], 0)
-	    # X- side
-	    norm = cross((-self.size[0], self.size[1], self.size[2]), (-self.size[0] * 2, 0, 0))
-	    OpenGL.GL.glNormal3f(*norm)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(self.size[0], -self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 4, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(0, 0, self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[0] / 2, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], 0)
-	    # Y- side
-	    norm = cross((-self.size[0], self.size[1], self.size[2]), (0, self.size[1] * 2, 0))
-	    OpenGL.GL.glNormal3f(*norm)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], -self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(self.size[1] / 4, self.size[2] / 4)
-	    OpenGL.GL.glVertex3f(0, 0, self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.size[1] / 2, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], self.size[1], 0)
-	    OpenGL.GL.glEnd()
-	    OpenGL.GL.glPopMatrix()
-	    OpenGL.GL.glEndList()
-
-	def draw(self):
-	    import OpenGL.GL
-	    OpenGL.GL.glCallList(self.list)
-
     def getGLDrawables(self):
-        return [self.PyramidDrawable(self.center, self.angle, self.size, False)]
+        import BZFlag.Drawable
+        return [BZFlag.Drawable.PyramidDrawable(self.center, self.angle, self.size, 'flipZ' in self.options)]
 
 
 class Teleporter(WorldObject):
@@ -501,187 +255,11 @@ class Teleporter(WorldObject):
         StructEntry(Float,            'border',       1.0),
         ]
 
-    class FieldDrawable(GLDrawable):
-        def __init__(self, center, angle, size):
-	    import OpenGL.GL
-	    GLDrawable.__init__(self)
-	    self.center = center
-	    self.angle = angle * 180 / 3.1415926
-	    self.size = size
-	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
-	    OpenGL.GL.glPushMatrix()
-	    OpenGL.GL.glTranslatef(*self.center)
-	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
-	    OpenGL.GL.glColor3f(0.1, 0.1, 0.1)
-	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
-	    # X+ side
-	    OpenGL.GL.glNormal3f(1, 0, 0)
-	    OpenGL.GL.glVertex3f(self.size[0] / 2, self.size[1], 0)
-	    OpenGL.GL.glVertex3f(self.size[0] / 2, self.size[1], self.size[2])
-	    OpenGL.GL.glVertex3f(self.size[0] / 2, -self.size[1], self.size[2])
-	    OpenGL.GL.glVertex3f(self.size[0] / 2, -self.size[1], 0)
-	    # X- side
-	    OpenGL.GL.glNormal3f(-1, 0, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0] / 2, -self.size[1], 0)
-	    OpenGL.GL.glVertex3f(-self.size[0] / 2, -self.size[1], self.size[2])
-	    OpenGL.GL.glVertex3f(-self.size[0] / 2, self.size[1], self.size[2])
-	    OpenGL.GL.glVertex3f(-self.size[0] / 2, self.size[1], 0)
-	    OpenGL.GL.glEnd()
-	    OpenGL.GL.glColor3f(1.0, 1.0, 1.0)
-	    OpenGL.GL.glPopMatrix()
-	    OpenGL.GL.glEndList()
-
-	def draw(self):
-	    import OpenGL.GL
-	    OpenGL.GL.glCallList(self.list)
-
-    class BorderDrawable(GLDrawable):
-        def __init__(self, center, angle, size, border):
-	    import OpenGL.GL
-	    import BZFlag.UI.Texture
-	    GLDrawable.__init__(self)
-	    self.center = center
-	    self.angle = angle * 180 / 3.1415926
-	    self.size = size
-	    self.border = border
-	    self.texture = BZFlag.UI.Texture.Texture('data/caution.png')
-	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
-	    OpenGL.GL.glPushMatrix()
-	    OpenGL.GL.glTranslatef(*self.center)
-	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
-	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLE_STRIP)
-	    OpenGL.GL.glNormal3f(-1, 0, 0)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + self.border, 0)
-	    OpenGL.GL.glTexCoord2f(self.border, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(0, self.size[2] + self.border)
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
-	    OpenGL.GL.glTexCoord2f(self.border, self.size[2])
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1], self.size[2] + self.border)
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
-	    OpenGL.GL.glTexCoord2f(self.border + 2 * self.size[1], self.size[2])
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1], 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, 0)
-	    OpenGL.GL.glTexCoord2f(self.border + 2 * self.size[1], 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1], 0)
-	    OpenGL.GL.glEnd()
-	    OpenGL.GL.glFrontFace(OpenGL.GL.GL_CW)
-	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLE_STRIP)
-	    OpenGL.GL.glNormal3f(1, 0, 0)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, 0)
-	    OpenGL.GL.glTexCoord2f(self.border, 0)
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(0, self.size[2] + border)
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
-	    OpenGL.GL.glTexCoord2f(self.border, self.size[2])
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1], self.size[2] + self.border)
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
-	    OpenGL.GL.glTexCoord2f(self.border + 2 * self.size[1], self.size[2])
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1], 0)
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, 0)
-	    OpenGL.GL.glTexCoord2f(self.border + 2 * self.size[1], 0)
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1], 0)
-	    OpenGL.GL.glEnd()
-	    OpenGL.GL.glFrontFace(OpenGL.GL.GL_CCW)
-	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
-	    # top
-	    OpenGL.GL.glNormal3f(0.4, 0, 1)
-	    OpenGL.GL.glTexCoord2f(0.4, 0.0001)
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
-	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1] + 0.4, 0.0001)
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
-	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1] + 0.4, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
-	    OpenGL.GL.glTexCoord2f(0.4, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
-	    # underside of top
-	    OpenGL.GL.glNormal3f(0, 0, -1)
-	    OpenGL.GL.glTexCoord2f(0.4, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, self.size[2])
-	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1] + 0.4, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + self.border, self.size[2])
-	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1] + 0.4, 0.0001)
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, self.size[2])
-	    OpenGL.GL.glTexCoord2f(0.4, 0.0001)
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, self.size[2])
-	    # Y+ outside
-	    OpenGL.GL.glNormal3f(0, 1, 0)
-	    OpenGL.GL.glTexCoord2f(self.border, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + border, 0)
-	    OpenGL.GL.glTexCoord2f(self.border, self.size[2] + border)
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
-	    OpenGL.GL.glTexCoord2f(0, self.size[2] + self.border)
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, 0)
-	    # Y+ inside
-	    OpenGL.GL.glNormal3f(0, -1, 0)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(0, self.size[2])
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.border, self.size[2])
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(self.border, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1], 0);
-	    # Y- outside
-	    OpenGL.GL.glNormal3f(0, 1, 0)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, 0)
-	    OpenGL.GL.glTexCoord2f(0, self.size[2] + self.border)
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
-	    OpenGL.GL.glTexCoord2f(self.border, self.size[2] + self.border)
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
-	    OpenGL.GL.glTexCoord2f(self.border, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, 0)
-	    # Y- inside
-	    OpenGL.GL.glNormal3f(0, -1, 0)
-	    OpenGL.GL.glTexCoord2f(self.border, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(self.border, self.size[2])
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(0, self.size[2])
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1], self.size[2])
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1], 0)
-	    # Y+ leg bottom
-	    OpenGL.GL.glNormal3f(0, 0, -1)
-	    OpenGL.GL.glTexCoord2f(self.border, self.border)
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, 0)
-	    OpenGL.GL.glTexCoord2f(0, self.border)
-	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1], 0)
-	    OpenGL.GL.glTexCoord2f(self.border, 0)
-	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + self.border, 0)
-	    # Y- leg bottom
-	    OpenGL.GL.glNormal3f(0, 0, -1);
-	    OpenGL.GL.glTexCoord2f(self.border, self.border);
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, 0);
-	    OpenGL.GL.glTexCoord2f(self.border, 0);
-	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1], 0);
-	    OpenGL.GL.glTexCoord2f(0, 0);
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1], 0);
-	    OpenGL.GL.glTexCoord2f(0, self.border);
-	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, 0);
-	    OpenGL.GL.glEnd()
-	    OpenGL.GL.glPopMatrix()
-	    OpenGL.GL.glEndList()
-
-	def draw(self):
-	    import OpenGL.GL
-	    OpenGL.GL.glCallList(self.list)
-
     def getGLDrawables(self):
+        import BZFlag.Drawable
         return [
-	    self.FieldDrawable(self.center, self.angle, self.size),
-	    self.BorderDrawable(self.center, self.angle, self.size, self.border),
+	    self.TeleporterFieldDrawable(self.center, self.angle, self.size),
+	    self.TeleporterBorderDrawable(self.center, self.angle, self.size, self.border),
 	    ]
 
 
