@@ -24,5 +24,5 @@ def grabWorld():
     client.game.world.saveText(f)
     client.eventLoop.stop()
 
-client.game.onLoadWorld.observe(grabWorld)
+client.game.world.onLoad.observe(grabWorld)
 client.run()
