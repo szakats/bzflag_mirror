@@ -220,12 +220,8 @@ class OverlayRenderPass(BasicRenderPass):
         return drawable.overlay
 
     def render(self):
-        glPushMatrix()
-	glLoadIdentity()
-	glTranslatef(0, 0, -10)
 	glClear(GL_DEPTH_BUFFER_BIT)
 	BasicRenderPass.render(self)
-	glPopMatrix()
 
 
 class Scene:

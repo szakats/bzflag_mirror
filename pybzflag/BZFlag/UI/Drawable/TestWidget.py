@@ -31,6 +31,7 @@ class TestWidget(DisplayList):
     def drawToList(self):
         size = 0.2
         glPushMatrix()
+	glLoadIdentity()
         glColor3f(1.0, 0.0, 0.0)
         # lower left corner
         glTranslatef(*self.center)
