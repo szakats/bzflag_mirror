@@ -124,6 +124,5 @@ if __name__ == '__main__':
         flag.integrate(dt)
     viewport.onSetupFrame.observe(update)
 
-    view.scene.preprocess()
     Util.showFrameRate(viewport)
     loop.run()

@@ -258,7 +258,9 @@ class BackgroundRenderPass(BasicRenderPass):
         glLoadMatrixf(rotation)
 
         glDepthMask(0)
+        glDisable(GL_LIGHTING)
         BasicRenderPass.render(self, rstate)
+        glEnable(GL_LIGHTING)
         glDepthMask(1)
         glPopMatrix()
 

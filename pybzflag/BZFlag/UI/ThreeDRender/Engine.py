@@ -178,9 +178,10 @@ class Scene:
                     if hasattr(texture, 'hasRenderState'):
                         if not texture.hasRenderState():
                             texture.attachRenderState(self.dynTexRenderState)
-                    
+
     def erase(self):
         self.objects = {}
+        self.dirty = True
 
     def add(self, object):
         """Add the given object to the scene. The only requirement for the
@@ -196,9 +197,12 @@ class Scene:
 
             drawable.parent(object)
         self.objects.setdefault(object, []).extend(drawables)
+        self.dirty = True
 
     def preprocess(self):
-        """Rebuilds rendering passes. Currently this is necessary when the world changes."""
+        """Rebuilds rendering passes. This operation clears the 'dirty' flag, and
+           is called automatically when a dirty scene needs rendering.
+           """
         # Sort the rendering passes by decreasing render priority
         self.passes.sort(lambda a,b: cmp(b.renderPriority, a.renderPriority))
 
@@ -222,8 +226,13 @@ class Scene:
         for rpass in self.passes:
             rpass.preprocess()
 
+        self.dirty = False
+
     def render(self, rstate):
         """Render the scene to the current OpenGL context"""
+        if self.dirty:
+            self.preprocess()
+
         glDisable(GL_BLEND)
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_CULL_FACE)

@@ -28,6 +28,5 @@ class Axes:
         return self.drawables
 view.scene.add(Axes())
 
-view.scene.preprocess()
 Util.showFrameRate(viewport)
 loop.run()

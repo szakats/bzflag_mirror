@@ -95,7 +95,6 @@ class Scene(ThreeDRender.Scene):
         game.world.onLoad.observe(self.reloadWorld)
         game.onAddPlayer.observe(self.addPlayer)
         game.onRemovePlayer.observe(self.removePlayer)
-        game.onChangePlayerList.observe(self.changePlayerList)
         self.reloadWorld()
 
     def initialize(self):
@@ -112,7 +111,6 @@ class Scene(ThreeDRender.Scene):
                 self.add(block)
         for player in self.game.players.itervalues():
             self.addPlayer(self.game, player)
-        self.preprocess()
 
     def addPlayer(self, game, player):
         tank = Tank(player)
@@ -121,9 +119,6 @@ class Scene(ThreeDRender.Scene):
 
     def removePlayer(self, game, player):
         pass
-
-    def changePlayerList(self, game, players):
-        self.preprocess()
 
     def update(self):
         self.sky.update()

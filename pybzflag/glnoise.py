@@ -26,6 +26,5 @@ class TestObject:
         return self.drawables
 
 view.scene.add(TestObject())
-view.scene.preprocess()
 Util.showFrameRate(viewport)
 loop.run()

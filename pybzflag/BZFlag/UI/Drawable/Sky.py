@@ -57,7 +57,6 @@ class Colors(SkyDrawable):
         # a little below the top of the dome, to increase the amount of texture
         # resolution near the horizon.
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
-        glDisable(GL_LIGHTING)
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 0.8, 0))
@@ -68,7 +67,6 @@ class Colors(SkyDrawable):
 
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
-        glEnable(GL_LIGHTING)
 
     def draw(self, rstate):
         # Use texture coordinate generation to set the time of day.
@@ -91,7 +89,6 @@ class Clouds(SkyDrawable):
 
         # Disable lighting, set up blending to use only the texture's alpha
         # channel, disregarding its color channels
-        glDisable(GL_LIGHTING)
         glColor3f(1,1,1)
         glEnable(GL_BLEND)
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA)
@@ -108,7 +105,6 @@ class Clouds(SkyDrawable):
         # Cleanup!
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
-        glEnable(GL_LIGHTING)
         glDisable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glDisable(GL_TEXTURE_2D)
@@ -120,5 +116,11 @@ class Clouds(SkyDrawable):
         glTexGenfv(GL_S, GL_OBJECT_PLANE, (scale, 0, 0, self.motion.value))
         glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, scale, 0))
         DisplayList.draw(self, rstate)
+
+
+class Horizon(SkyDrawable):
+    """Some mountains and a chasm to cover up the horizon"""
+    def drawToList(self, rstate):
+        VRML.load('sky.wrl')['horizon'].drawToList(rstate)
 
 ### The End ###

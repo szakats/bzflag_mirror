@@ -33,10 +33,12 @@ class Sky:
        """
     def __init__(self):
         self.time = Animated.Timekeeper()
+        self.drawables = [
+            Drawable.Sky.Colors(self),
+            Drawable.Sky.Clouds(self),
+            Drawable.Sky.Horizon(self),
+            ]
         self.update()
-
-        self.drawables = [Drawable.Sky.Colors(self),
-                          Drawable.Sky.Clouds(self)]
 
     def getDrawables(self):
         return self.drawables

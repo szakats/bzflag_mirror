@@ -67,6 +67,4 @@ def onMouseButtonDown(event):
         print 'picked: %r' % view.pick(event.pos)
 viewport.onMouseButtonDown.observe(onMouseButtonDown)
 
-
-view.scene.preprocess()
 loop.run()
