@@ -33,7 +33,7 @@ import re, math
 
 class BlockHeader(Struct):
     entries = [
-        StructEntry(UInt16,   'id'),
+        StructEntry(UInt16, 'id'),
         ]
 
 
