@@ -130,7 +130,6 @@ class ThreeDView:
     def onDrawFrame():
       game.update()
       self.render()
-      self.camera.rotation += 0.1;
     viewport.onDrawFrame.observe(onDrawFrame)
 
   def render(self):
@@ -146,6 +145,10 @@ class ThreeDController:
     self.viewport = viewport
 
     view.camera.focus = (0, 0, -90)
+
+    def onSetupFrame():
+      view.camera.rotation += 0.1;
+    viewport.onSetupFrame.observe(onSetupFrame)
 
     def onMouseButtonDown(event):
       scale = 1.08
