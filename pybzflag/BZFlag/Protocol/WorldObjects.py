@@ -234,6 +234,7 @@ class Wall(WorldObject):
 	    OpenGL.GL.glVertex3f(0, self.size[1], self.size[2])
 #	    OpenGL.GL.glEnd()
 	    OpenGL.GL.glEnable(OpenGL.GL.GL_CULL_FACE)
+	    OpenGL.GL.glPopMatrix()
 	    OpenGL.GL.glEndList()
 
 	def draw(self):
