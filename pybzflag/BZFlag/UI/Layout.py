@@ -88,7 +88,7 @@ class Rect:
                     r[2] - left - right,
                     r[3] - bottom - top)
         return Rect(fMargin)
-    
+
     def bottom(self, height):
         """Split the rectangle horizontally at the given height from the bottom,
            in pixels or as a scale factor, returning the bottom rectangle.
@@ -103,7 +103,7 @@ class Rect:
                     r[2],
                     h)
         return Rect(fBottom)
-    
+
     def top(self, height):
         """Split the rectangle horizontally at the given height from the top,
            in pixels or as a scale factor, returning the top rectangle.
@@ -133,7 +133,7 @@ class Rect:
                     w,
                     r[3])
         return Rect(fLeft)
-    
+
     def right(self, width):
         """Split the rectangle vertically at the given width from the right side,
            in pixels or as a scale factor, returning the right rectangle.

@@ -277,7 +277,7 @@ class OpenGLViewport(PygameViewport):
                                        self.rootView.renderSequence[-1:]
 
         # Ignore the caption on sub-viewports
-        sub.setCaption = lambda title: None        
+        sub.setCaption = lambda title: None
         return sub
 
 ### The End ###
