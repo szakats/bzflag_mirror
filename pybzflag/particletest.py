@@ -99,30 +99,10 @@ if __name__ == '__main__':
     sparks = Sparks((0,0,3))
     view.scene.add(sparks)
 
-    Tweak.Window(Tweak.Scalar('Camera distance',
-                              set     = lambda x: setattr(view.camera, 'distance', x),
-                              get     = lambda: view.camera.distance,
-                              maximum = 100),
-                 Tweak.Scalar('Spawn rate',
-                              set     = lambda x: setattr(sparks.emitter, 'spawnRate', x),
-                              get     = lambda: sparks.emitter.spawnRate,
-                              maximum=500),
-                 Tweak.Scalar('Direction randomness',
-                              set     = lambda x: sparks.emitter.setDirection(sparks.emitter.direction, x),
-                              get     = lambda: sparks.emitter.directionRandomness),
-                 Tweak.Scalar('Minimum speed',
-                              set     = lambda x: setattr(sparks.emitter, 'speedRange', (x, sparks.emitter.speedRange[1])),
-                              get     = lambda: sparks.emitter.speedRange[0],
-                              maximum = 100),
-                 Tweak.Scalar('Maximum speed',
-                              set     = lambda x: setattr(sparks.emitter, 'speedRange', (sparks.emitter.speedRange[0], x)),
-                              get     = lambda: sparks.emitter.speedRange[1],
-                              maximum = 100),
-                 Tweak.Scalar('Gravity',
-                              set     = lambda x: put(sparks.constAccel.vector, (2,), x),
-                              get     = lambda: sparks.constAccel.vector[2],
-                              minimum = -100,
-                              maximum = 100),
-                 )
+    Tweak.Window(
+        Tweak.Attribute(sparks.emitter, 'spawnRate', range=(0,400)),
+        Tweak.Attribute(sparks.emitter, 'speedRange', range=(0,200)),
+        Tweak.Attribute(sparks.emitter, 'position', range=(-10,10)),
+        )
 
     Tweak.run(loop)
