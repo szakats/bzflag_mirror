@@ -141,10 +141,6 @@ class Pyramid(DisplayList):
             self.uvMap2 = self.uvMap
         DisplayList.__init__(self, center, angle, size, flip)
 
-        # XXXXX
-        from BZFlag.UI.Drawable import VRML
-        self.mesh = VRML.load("../extra_media/sphere.wrl").values()[0]
-
     def addCubeMap(self, center, size):
         """Add a cube environment map to make this pyramid shiny"""
         if not (GLExtension.cubeMap and GLExtension.multitexture):
@@ -163,7 +159,7 @@ class Pyramid(DisplayList):
         if self.water:
             self.render.textures[1].texEnv = GL_MODULATE
             self.render.blended = True
-        else:
+        elif len(self.render.textures) > 1:
             self.render.textures[1].texEnv = GL_REPLACE
 
     def drawToList(self, rstate):
@@ -194,10 +190,12 @@ class Pyramid(DisplayList):
             glActiveTextureARB(GL_TEXTURE0_ARB)
 
             # XXXXXXX
+            from BZFlag.UI.Drawable import VRML
             glPushMatrix()
             glTranslatef(0,0,20)
             glScalef(4,4,4)
-            self.mesh.drawToList(rstate)
+            for mesh in VRML.load("../extra_media/sphere.wrl").values():
+                mesh.drawToList(rstate)
             glPopMatrix()
             
         glBegin(GL_QUADS)
