@@ -38,22 +38,28 @@ class HUDBorderView:
         glDisable(GL_CULL_FACE)
         glDisable(GL_COLOR_MATERIAL)
         glDisable(GL_DEPTH_TEST)
+        glDisable(GL_TEXTURE_2D)
         glLoadIdentity()
 
-        glColor4f(1,1,1,1)
-        glBegin(GL_LINE_LOOP)
-        glVertex2f(0,0)
-        glVertex2f(1,0)
-        glVertex2f(1,1)
-        glVertex2f(0,1)
+        # Draw slightly inside the viewport, so our border doesn't get half-chopped-off
+        glScalef(0.995, 0.995, 0.995)
+
+        def square():
+            glVertex2f(-1,-1)
+            glVertex2f( 1,-1)
+            glVertex2f( 1, 1)
+            glVertex2f(-1, 1)
+
+        # Creamy translucent filling
+        glColor4f(0,0,0,0.3)
+        glBegin(GL_POLYGON)
+        square()
         glEnd()
 
-        glColor4f(0,0,0,0.2)
-        glBegin(GL_POLYGON)
-        glVertex2f(0,0)
-        glVertex2f(1,0)
-        glVertex2f(1,1)
-        glVertex2f(0,1)
+        # Bright border
+        glColor4f(1,1,1,1)
+        glBegin(GL_LINE_LOOP)
+        square()
         glEnd()
 
 
