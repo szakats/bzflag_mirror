@@ -30,18 +30,18 @@ class OverheadView:
        client, so it should be usable on either client or server side.
        """
     colorScheme = {
-        'background':    '#587058',
-        'Box':           '#bcbba7',
-        'Pyramid':       '#1b8de3',
-        'Teleporter':    '#FFFF80',
-        'playerOutline': 'white',
-        'flag':          'white',
-        'roguePlayer':   'black',
-        'redPlayer':     '#800000',
-        'greenPlayer':   '#008000',
-        'bluePlayer':    '#000080',
-        'purplePlayer':  '#600090',
-        'rabbitPlayer':  '#808080',
+        'background':    (88,  112, 88 ),
+        'Box':           (188, 187, 167),
+        'Pyramid':       (27,  141, 227),
+        'Teleporter':    (255, 255, 128),
+        'playerOutline': (255, 255, 255),
+        'flag':          (255, 255, 255),
+        'roguePlayer':   (0,   0,   0  ),
+        'redPlayer':     (128, 0,   0  ),
+        'greenPlayer':   (0,   128, 0  ),
+        'bluePlayer':    (0,   0,   128),
+        'purplePlayer':  (96,  0,   144),
+        'rabbitPlayer':  (128, 128, 128),
       }
 
     def __init__(self, game):
@@ -52,13 +52,6 @@ class OverheadView:
         def onLoadWorld():
             self.cachedWorld = None
         game.onLoadWorld.observe(onLoadWorld)
-
-        # Replace the class colorScheme with an instance version that
-        # translates everything into a proper pygame Color.
-        convertedColors = {}
-        for key in self.colorScheme:
-            convertedColors[key] = Color(self.colorScheme[key])
-        self.colorScheme = convertedColors
 
     def worldToView(self, point):
         """Convert world coordinates to view coordinates in pixels"""
