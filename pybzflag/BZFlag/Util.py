@@ -184,10 +184,15 @@ def autoFile(name, mode="r"):
 
 def dataFile(name):
     """Given the name of a data file, return its full path.
-       Currently this has a hardcoded data path, it will later be configurable.
+       Currently this is hardcoded relative to our binary's path.
        """
     import os, sys
-    return os.path.join(os.path.dirname(sys.argv[0]), 'data', name)
+    argv0 = sys.argv[0]
+    try:
+        argv0 = os.path.realpath(argv0)
+    except:
+        pass
+    return os.path.join(os.path.dirname(argv0), 'data', name)
 
 
 def showFrameRate(viewport):
