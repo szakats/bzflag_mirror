@@ -607,6 +607,15 @@ class Teleporter(WorldObject):
 	    OpenGL.GL.glTexCoord2f(self.border, 0)
 	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, 0)
 	    # Y- inside
+	    OpenGL.GL.glNormal3f(0, -1, 0)
+	    OpenGL.GL.glTexCoord2f(self.border, 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(self.border, self.size[2])
+	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1], self.size[2])
+	    OpenGL.GL.glTexCoord2f(0, self.size[2])
+	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1], self.size[2])
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1], 0)
 	    # Y+ leg bottom
 	    # Y- leg bottom
 	    OpenGL.GL.glEnd()
