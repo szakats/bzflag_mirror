@@ -54,6 +54,7 @@ class WorldObject(Block):
 
     def __init__(self, packed=None, **kw):
         self.unknownMapKeywords = {}
+        self.options = []
         Block.__init__(self, packed, **kw)
         self.drawables = None
 
@@ -85,6 +86,12 @@ class WorldObject(Block):
                 self.toSide = int(args[0])
             elif keyword == 'color':
                 self.team = Common.TeamColor.dict[int(args[0])]
+            elif keyword == 'drivethrough':
+                self.options.append('driveThrough')
+            elif keyword == 'shootthrough':
+                self.options.append('shootThrough')
+            elif keyword == 'flipz':
+                self.options.append('flipZ')
             elif keyword == 'end':
                 break
             else:
@@ -113,6 +120,12 @@ class WorldObject(Block):
             f.write("to %s\n" % self.toSide)
         if hasattr(self, 'team'):
             f.write("color %s\n" % Common.TeamColor.reverseDict(self.team))
+        if 'driveThrough' in self.options:
+            f.write("drivethrough\n")
+        if 'shootThrough' in self.options:
+            f.write("shootthrough\n")
+        if 'flipZ' in self.options:
+            f.write("flipz\n")
         f.write("end\n\n")
 
     def toUntransformedPolygon(self):

@@ -126,8 +126,6 @@ class World:
         self.blocks.append(block)
         if isinstance(block, WorldObjects.Style):
             self.style = block
-            # Use a 2D size to make it easy to support non-square worlds in the future
-            self.size = (block.worldSize, block.worldSize)
         if isinstance(block, WorldObjects.TeleporterLink):
             self.teleporterLinks.append(block)
         if isinstance(block, WorldObjects.Teleporter):

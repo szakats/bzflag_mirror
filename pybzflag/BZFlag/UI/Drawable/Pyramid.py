@@ -77,7 +77,7 @@ class Pyramid(DisplayList):
         uvstack.reverse()
         uvstack2 = list(self.uvMap2)
         uvstack2.reverse()
-        
+
         flip = 'flipZ' in self.pyramid.options
         if flip:
             glFrontFace(GL_CW)

@@ -113,7 +113,7 @@ def Text(name,
         name : File or URI containing the world
 
     Keyword arguments:
-        size       : Distance along each side of the generated square world
+        size       : Default distance along each side of the generated square world
         wallHeight : Height of the world's walls
     """
     from xreadlines import xreadlines
@@ -124,11 +124,13 @@ def Text(name,
     section = None
     sectionDict = Util.getSubclassDict(WorldObjects, WorldObjects.WorldObject,
                                        'textName', 'textSectionDict')
-        
-    # Start with a fresh map, and add objects that
-    # are implied but not specified in the text map format.
+
+    # We won't actually add the objects to the world until later,
+    # since we need to start the world out with walls and a game style
+    # block, but we might get the information needed for those at any
+    # point in the file.
     w.erase()
-    w.storeSkeletonHeader(size, wallHeight)
+    blocks = []
         
     for line in xreadlines(f):
         # If this is a kludge used by map editors to store extra
@@ -142,20 +144,37 @@ def Text(name,
                 sectionLines.append(line)
                 if line == 'end':
                     # Done with this section, process it.
-                    try:
-                        cls = sectionDict[section]
-                    except KeyError:
-                        raise Errors.ProtocolError(
-                            "World file contains unknown section type '%s'" % section)
-                    inst = cls()
-                    inst.textRead(sectionLines)
-                    w.storeBlock(inst)
+
+                    if section == 'world':
+                        # World information
+                        for line in sectionLines:
+                            tokens = re.split("\s+", line)
+                            keyword = tokens[0].lower()
+                            args = tokens[1:]
+                            if keyword == 'size':
+                                size = int(args[0])
+
+                    else:
+                        # Assume all other sections are world objects
+                        try:
+                            cls = sectionDict[section]
+                        except KeyError:
+                            raise Errors.ProtocolError(
+                                "World file contains unknown section type '%s'" % section)
+                        inst = cls()
+                        inst.textRead(sectionLines)
+                        blocks.append(inst)
+                        
                     section = None
             elif not line.startswith("#!"):
                 # We're beginning a section
-                section = line
+                section = line.lower()
                 sectionLines = []
 
+    # Now store all the blocks in our world
+    w.storeSkeletonHeader(size, wallHeight)
+    for block in blocks:
+        w.storeBlock(block)
     w.storeSkeletonFooter()
     w.postprocess()
     return w

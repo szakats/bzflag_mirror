@@ -167,4 +167,9 @@ class CubeMap(Texture):
         glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_CLAMP)
         glTexParameteri(self.target, GL_TEXTURE_WRAP_T, GL_CLAMP)
 
+        ## Uncomment this to show the cube map textures as they're stored
+        #self.viewport.display.flip()
+        #import time
+        #time.sleep(2)
+
 ### The End ###
