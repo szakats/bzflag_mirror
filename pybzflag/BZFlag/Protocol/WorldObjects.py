@@ -175,8 +175,6 @@ class Style(WorldObject):
         from BZFlag.UI import Drawable
         if self.drawables == None:
             self.drawables = [Drawable.Ground(self.worldSize)]
-            for drawable in self.drawables:
-                drawable.parent(self)
         return self.drawables
 
 
@@ -208,8 +206,6 @@ class TeamBase(WorldObject):
                     ]
             else:
                 self.drawables = [Drawable.BaseTops(self.team, self.center, self.angle, self.size)]
-            for drawable in self.drawables:
-                drawable.parent(self)
         return self.drawables
 
 
@@ -225,8 +221,6 @@ class Wall(WorldObject):
         from BZFlag.UI import Drawable
 	if self.drawables == None:
 	    self.drawables = [Drawable.Wall(self.center, self.angle, self.size)]
-	    for drawable in self.drawables:
-                drawable.parent(self)
         return self.drawables
 
 
@@ -247,9 +241,8 @@ class Box(WorldObject):
                 Drawable.BoxSides(self),
                 Drawable.BoxTop(self),
                 Drawable.BoxBottom(self),
+                Drawable.BoxDecal(self),
                 ]
-            for drawable in self.drawables:
-                drawable.parent(self)
         return self.drawables
 
 
@@ -267,8 +260,6 @@ class Pyramid(WorldObject):
         from BZFlag.UI import Drawable
         if self.drawables == None:
             self.drawables = [Drawable.Pyramid(self.center, self.angle, self.size, 'flipZ' in self.options)]
-            for drawable in self.drawables:
-                drawable.parent(self)
         return self.drawables
 
 
@@ -290,8 +281,6 @@ class Teleporter(WorldObject):
                 Drawable.TeleporterField(self.center, self.angle, self.size),
                 Drawable.TeleporterBorder(self.center, self.angle, self.size, self.border),
                 ]
-            for drawable in self.drawables:
-                drawable.parent(self)
         return self.drawables
 
 

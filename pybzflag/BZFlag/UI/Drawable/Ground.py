@@ -39,7 +39,7 @@ class Ground(DisplayList):
         glBegin(GL_QUADS)
         glNormal3f(0, 0, 1);
 
-        baseTexRepeats = 30
+        baseTexRepeats = 90
         overlayTexRepeats = 1
         glTexCoord2f(baseTexRepeats, 0)
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, overlayTexRepeats, 0)

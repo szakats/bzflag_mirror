@@ -135,30 +135,11 @@ class BoxSides(DisplayList):
 
 
 class BoxTop(DisplayList):
-    def __init__(self, box):
-        self.box = box
-        self.textureNames = ['concrete.jpeg']
-        self.tex2Coords = ( (0,0), (1,0), (1,1), (0,1) )
+    textureNames = ['concrete.jpeg']
 
-        # If the box is fairly large and squareish, use a square oil-stain texture
-        if box.size[0] > 10 and box.size[1] > 10 and box.size[0] / box.size[1] < 2 and box.size[1] / box.size[0] < 2:
-            self.textureNames.append(random.choice(('oilstain_1.png',
-                                                    'oilstain_2.png',
-                                                    'oilstain_3.png')))
-
-        # If it's about the same width as a tank, assume it's a bridge and put some tread stains on it
-        if box.size[0] > Scale.TankWidth and box.size[0] < Scale.TankWidth * 4 and box.size[1] > Scale.TankLength * 2:
-            self.textureNames.append('treadstain_1.png')
-            self.tex2Coords = ( (0,0), (0,1), (1,1), (1,0) )
-        if box.size[1] > Scale.TankWidth and box.size[1] < Scale.TankWidth * 4 and box.size[0] > Scale.TankLength * 2:
-            self.textureNames.append('treadstain_1.png')
-            self.tex2Coords = ( (0,0), (1,0), (1,1), (0,1) )
-            
-        DisplayList.__init__(self, box)
-    
     def set(self, box):
-        self.polygon = self.box.toPolygon()
-        self.height = self.box.center[2] + self.box.size[2]
+        self.polygon = box.toPolygon()
+        self.height = box.center[2] + box.size[2]
 
         try:
             self.render.textures[1].texEnv = GL_MODULATE
@@ -173,17 +154,13 @@ class BoxTop(DisplayList):
         for i in xrange(4):
             vertex = self.polygon[i]
             glTexCoord2f(vertex[0] / 20, vertex[1] / 20)
-            tex2Coord = self.tex2Coords[i]
-            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, tex2Coord[0], tex2Coord[1])
             glVertex2f(*vertex)
         glEnd()
         glPopMatrix()
 
 
 class BoxBottom(DisplayList):
-    def __init__(self, box):
-        self.textureNames = ['concrete.jpeg']
-        DisplayList.__init__(self, box)
+    textureName = 'concrete.jpeg'
                
     def set(self, box):
         self.polygon = box.toPolygon()
@@ -200,5 +177,72 @@ class BoxBottom(DisplayList):
             glVertex2f(*vertex)
         glEnd()
         glPopMatrix()
+
+
+class BoxDecal(DisplayList):
+    textureName = 'oilstain_1.png'
+               
+    def set(self, box):
+        self.polygon = box.toPolygon()
+        self.height = box.center[2] + box.size[2]
+        self.render.decal = True
+
+    def drawToList(self):
+        return
+        glPushMatrix()
+        glTranslatef(0, 0, self.height)
+        glNormal3f(0, 0, -1)
+        glBegin(GL_POLYGON)
+        for vertex in self.polygon:
+            glTexCoord2f(vertex[0] / 30, vertex[1] / 30)
+            glVertex2f(*vertex)
+        glEnd()
+        glPopMatrix()
+
+
+## class BoxDecal(DisplayList):
+##     def __init__(self, box):
+##         self.box = box
+##         self.textureNames = ['concrete.jpeg']
+##         self.tex2Coords = ( (0,0), (1,0), (1,1), (0,1) )
+
+##         # If the box is fairly large and squareish, use a square oil-stain texture
+##         if box.size[0] > 10 and box.size[1] > 10 and box.size[0] / box.size[1] < 2 and box.size[1] / box.size[0] < 2:
+##             self.textureNames.append(random.choice(('oilstain_1.png',
+##                                                     'oilstain_2.png',
+##                                                     'oilstain_3.png')))
+
+##         # If it's about the same width as a tank, assume it's a bridge and put some tread stains on it
+##         if box.size[0] > Scale.TankWidth and box.size[0] < Scale.TankWidth * 4 and box.size[1] > Scale.TankLength * 2:
+##             self.textureNames.append('treadstain_1.png')
+##             self.tex2Coords = ( (0,0), (0,1), (1,1), (1,0) )
+##         if box.size[1] > Scale.TankWidth and box.size[1] < Scale.TankWidth * 4 and box.size[0] > Scale.TankLength * 2:
+##             self.textureNames.append('treadstain_1.png')
+##             self.tex2Coords = ( (0,0), (1,0), (1,1), (0,1) )
+            
+##         DisplayList.__init__(self, box)
+    
+##     def set(self, box):
+##         self.polygon = self.box.toPolygon()
+##         self.height = self.box.center[2] + self.box.size[2]
+
+##         try:
+##             self.render.textures[1].texEnv = GL_MODULATE
+##         except IndexError:
+##             pass
+
+##     def drawToList(self):
+##         glPushMatrix()
+##         glTranslatef(0, 0, self.height)
+##         glNormal3f(0, 0, 1)
+##         glBegin(GL_POLYGON)
+##         for i in xrange(4):
+##             vertex = self.polygon[i]
+##             glTexCoord2f(vertex[0] / 20, vertex[1] / 20)
+##             tex2Coord = self.tex2Coords[i]
+##             glMultiTexCoord2fARB(GL_TEXTURE1_ARB, tex2Coord[0], tex2Coord[1])
+##             glVertex2f(*vertex)
+##         glEnd()
+##         glPopMatrix()
 
 ### The End ###

@@ -45,9 +45,17 @@ class Texture:
 
     def loadImage(self, image):
         """Load the texture from a PIL image"""
-        image = image.convert('RGBA')
-        string = image.tostring('raw', 'RGBA', 0, -1)
-        self.loadRaw(image.size, string, GL_RGBA)
+        if image.mode == "RGBA":
+            string = image.tostring('raw', 'RGBA', 0, -1)
+            self.loadRaw(image.size, string, GL_RGBA, 4)
+        elif image.mode == "RGB":
+            string = image.tostring('raw', 'RGB', 0, -1)
+            self.loadRaw(image.size, string, GL_RGB, 3)
+        elif image.mode == "L":
+            string = image.tostring('raw', 'L', 0, -1)
+            self.loadRaw(image.size, string, GL_LUMINANCE, 1)
+        else:
+            raise Exception("Unsupported image mode '%s'" % image.mode)
 
     def loadSurface(self, surface, monochrome=False):
         """Load the texture from a pygame surface"""
@@ -60,9 +68,9 @@ class Texture:
             self.loadRaw(surface.get_size(), string, GL_LUMINANCE, GL_INTENSITY8)
         else:
             string = pygame.image.tostring(surface, "RGB", True)
-            self.loadRaw(surface.get_size(), string, GL_RGB)
+            self.loadRaw(surface.get_size(), string, GL_RGB, 3)
 
-    def loadRaw(self, size, string, format, components=3):
+    def loadRaw(self, size, string, format, components):
         """Load a raw image from the given string. 'format' is a constant such as
            GL_RGB or GL_RGBA that can be passed to gluBuild2DMipmaps.
            """

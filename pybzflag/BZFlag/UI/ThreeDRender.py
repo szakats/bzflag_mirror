@@ -291,7 +291,7 @@ class BasicRenderPass(RenderPass):
 class BlendedRenderPass(BasicRenderPass):
     """A rendering pass that collects blended objects and renders them after most other objects."""
     filterPriority = 10
-    renderPriority = 90
+    renderPriority = 80
 
     def filter(self, drawable):
         return drawable.render.blended
@@ -304,10 +304,29 @@ class BlendedRenderPass(BasicRenderPass):
         glDepthMask(1)
 
 
+class DecalRenderPass(BasicRenderPass):
+    """A rendering pass that collects decal objects and renders them after solid objects."""
+    filterPriority = 10
+    renderPriority = 90
+
+    def filter(self, drawable):
+        return drawable.render.decal
+
+    def render(self, picking=None):
+        glDepthMask(0)
+        glEnable(GL_POLYGON_OFFSET_FILL)
+        glEnable(GL_BLEND)
+        glPolygonOffset(-1, -1)
+        BasicRenderPass.render(self, picking)
+        glDisable(GL_BLEND)
+        glDisable(GL_POLYGON_OFFSET_FILL)
+        glDepthMask(1)
+
+
 class OverlayRenderPass(BasicRenderPass):
     """A rendering pass that draws objects overlaid on the current scene."""
     filterPriority = 20
-    renderPriority = 80
+    renderPriority = 10
 
     def filter(self, drawable):
         return drawable.render.overlay
@@ -324,7 +343,8 @@ class Scene:
        """
     def __init__(self):
         self.erase()
-        self.passes = [BasicRenderPass(), BlendedRenderPass(), OverlayRenderPass()]
+        self.passes = [BasicRenderPass(), BlendedRenderPass(), OverlayRenderPass(),
+                       DecalRenderPass()]
 
     def erase(self):
         self.objects = {}
