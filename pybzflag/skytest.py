@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Environment, Drawable
-from BZFlag import Event, Util
+from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Environment, Drawable, Instrument
+from BZFlag import Event
 
 # Viewport, view, and event loop setup
 loop = Event.EventLoop()
@@ -25,5 +25,5 @@ sky = Environment.Sky()
 view.scene.add(sky)
 viewport.onSetupFrame.observe(sky.update)
 
-Util.showFrameRate(viewport)
+Instrument.FrameRate(viewport)
 loop.run()

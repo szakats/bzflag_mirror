@@ -93,36 +93,6 @@ class Timekeeper:
         return step
 
 
-class FrequencyCounter:
-    """Measure the frequency at which a specified event occurs,
-       reporting it periodically to stdout with the given format string.
-       Reporting period is in seconds.
-       The format can either be a printf-style format string, or a function
-       that accepts the measured frequency as an argument. If the function
-       returns a non-None value, it will be printed.
-       """
-    def __init__(self, event, fmt, reportingPeriod=2):
-        self.fmt = fmt
-        self.reportingPeriod = reportingPeriod
-        self.numEvents = 0
-        self.lastReport = time.time()
-        event.observe(self.trigger)
-
-    def trigger(self, *args, **kw):
-        self.numEvents += 1
-        now = time.time()
-        if now > self.lastReport + self.reportingPeriod:
-            hz =  self.numEvents / (now - self.lastReport)
-            self.lastReport = now
-            self.numEvents = 0
-            if type(self.fmt) == str:
-                print self.fmt % hz
-            else:
-                result = self.fmt(hz)
-                if result is not None:
-                    print result
-
-
 class Value:
     """A value that changes over time according to a function.
        The given function should take the old value, the time step, and the vector index as parameters.

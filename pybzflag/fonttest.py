@@ -11,7 +11,7 @@ from OpenGL.GL import *
 loop = EventLoop()
 viewport = Viewport.OpenGLViewport(loop, (640,480), 1000)
 viewport.setCaption("Font Test")
-viewport.fov = None   
+viewport.fov = None
 
 time = Animated.Timekeeper()
 spin = Animated.Value(Animated.Velocity(80))

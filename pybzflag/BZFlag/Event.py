@@ -128,7 +128,7 @@ class Timer:
     def activate(self):
         """The timer should call this function when it goes off"""
         self.handler()
-        
+
 
 class OneshotTimer(Timer):
     """A timer that goes off only once"""
@@ -150,7 +150,7 @@ class PeriodicTimer(Timer):
         self.handler = handler
         self.period = period
         self.activationTime = time.time() + period
-        
+
     def poll(self, now):
         if now > self.activationTime:
             self.activate()
@@ -227,7 +227,7 @@ class EventLoop:
                     else:
                         if untilNextTimer < pollTime:
                             pollTime = untilNextTimer
-                            
+
                 if self.selectDict:
                     # This waits until either a socket has activity, or
                     # our pollTime has expired and we need to check timers
@@ -259,7 +259,7 @@ class EventLoop:
                     # empty lists on win32, so this has to be a special case.
                     if pollTime > 0:
                         time.sleep(pollTime)
-  
+
                 # Poll timers, updating the time of next activation if necessary
                 now = time.time()
                 timesChanged = 0

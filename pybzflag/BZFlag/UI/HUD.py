@@ -67,19 +67,17 @@ class Panel:
 
 
 class Text:
-    """A view that draws a block of text"""
-    def __init__(self, viewport, text=None, color=(1,1,1), fontSize=None, fontName=None, shadow=None):
+    """A view that draws a block of text."""
+    def __init__(self, viewport, text='', color=(1,1,1), fontSize=None, fontName=None, shadow=None):
         viewport.fov = None
         self.viewport = viewport
-        self.text = ''
+        self.text = text
         self.color = color
         self.fontSize = fontSize
         self.fontName = fontName
         self.shadow = shadow
         viewport.onDrawFrame.observe(self.render)
         self.init()
-        if text:
-            self.write(text)
 
     def init(self):
         """A hook for clients to do extra initialization before the first write() without
@@ -90,16 +88,21 @@ class Text:
     def write(self, text):
         self.text += text
 
+    def getText(self):
+        return self.text
+
     def render(self):
-        glLoadIdentity()
-        if self.shadow:
-            glPushMatrix()
-            glTranslatef(2,2,0)
-            glColor3f(0,0,0)
-            GLText.draw(self.text, self.fontSize, self.fontName)
-            glPopMatrix()
-        glColor3f(*self.color)
-        GLText.draw(self.text, self.fontSize, self.fontName)
+        text = self.getText()
+        if text:
+            glLoadIdentity()
+            if self.shadow:
+                glPushMatrix()
+                glTranslatef(2,2,0)
+                glColor3f(0,0,0)
+                GLText.draw(text, self.fontSize, self.fontName)
+                glPopMatrix()
+            glColor3f(*self.color)
+            GLText.draw(text, self.fontSize, self.fontName)
 
 
 class ScrolledText(Text):
