@@ -65,10 +65,9 @@ def attach(game, eventLoop):
     sys.stdout = HUD.ScrolledText(hudPanel.region(messageRect))
     print BZFlag.about
 
-    # Another HUD panel, just for illustrative purposes
-    (remaining, fooRect) = remaining.margin(0,0,padding,0).vSplit(0.95)
-    HUD.Panel(viewport.region(fooRect))
-
+    # Logo-thingy!
+    HUD.Text(viewport.region(remaining), BZFlag.name,
+             shadow=True, color=(1,1,0), fontSize=35)
     return viewport
 
 ### The End ###

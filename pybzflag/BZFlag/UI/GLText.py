@@ -40,12 +40,11 @@ from BZFlag.UI.Texture import Texture
 from OpenGL.GL import *
 
 # Default font height, in pixels
-defaultSize = 16
+defaultSize = 12
 
 # Names that can be used in place of actual filenames
 fontAliases = {
-    None:       'VeraBd.ttf',   # Bold is the default
-    'regular':  'Vera.ttf',
+    None:       'Vera.ttf',
     'bold':     'VeraBd.ttf',
     }
 
