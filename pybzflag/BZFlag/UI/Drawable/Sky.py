@@ -53,17 +53,14 @@ class Colors(SkyDrawable):
            of day in draw().
            """
         # Texture the sky dome vertically with the Y axis of our gradient.
-        # The bottom of the texture is at the horizon, the top of the texture is
-        # a little below the top of the dome, to increase the amount of texture
-        # resolution near the horizon.
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 0.8, 0))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 1, 0))
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
-        VRML.load('sky.wrl')['colors'].drawToList(rstate)
+        VRML.load('sky.wrl')['dome'].drawToList(rstate)
 
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
@@ -100,7 +97,7 @@ class Clouds(SkyDrawable):
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
-        VRML.load('sky.wrl')['clouds'].drawToList(rstate)
+        VRML.load('sky.wrl')['dome'].drawToList(rstate)
 
         # Cleanup!
         glDisable(GL_TEXTURE_GEN_S)
@@ -113,7 +110,7 @@ class Clouds(SkyDrawable):
         scale = 1
         self.motion.integrate(self.time.step())
         glTexGenfv(GL_S, GL_OBJECT_PLANE, (scale, 0, 0, self.motion.value))
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, scale, 0))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, scale, 0, 0))
         DisplayList.draw(self, rstate)
 
 
@@ -137,7 +134,7 @@ class Horizon(SkyDrawable):
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
-        VRML.load('sky.wrl')['horizon'].drawToList(rstate)
+        #VRML.load('sky.wrl')['horizon'].drawToList(rstate)
 
         # Cleanup!
         glDisable(GL_TEXTURE_GEN_S)
