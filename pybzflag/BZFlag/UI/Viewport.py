@@ -109,6 +109,7 @@ class PygameViewport(Viewport):
            render a frame. The task is divided into events for setting up the
            rendering, actually performing the rendering, and finishing the frame.
            """
+        import pygame
         for event in pygame.event.get():
             self.onEvent(event)
 
