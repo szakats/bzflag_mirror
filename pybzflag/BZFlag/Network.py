@@ -156,7 +156,7 @@ class BaseSocket:
         struct.unmarshall(packed)
         return struct
 
-    def lookupMessage(self, msgModule, id):
+    def lookupMessage(self, msgModule, header):
         try:
             return Common.getMessageDict(msgModule)[id]
         except KeyError:
@@ -255,7 +255,7 @@ class TCPSocket(BaseSocket):
                 return None
         else:
             body = ''
-        cls = self.lookupMessage(msgModule, header.id)
+        cls = self.lookupMessage(msgModule, header)
         msg = cls(str(header) + body)
         msg.fromModule = msgModule
         return msg
@@ -291,7 +291,7 @@ class UDPSocket(BaseSocket):
         """Read a message, using the supplied module full of Message subclasses."""
         (packet, address) = self.socket.recvfrom(self.maxPacketSize)
         header = Common.MessageHeader(packet)
-        msg = self.lookupMessage(msgModule, header.id)(packet)
+        msg = self.lookupMessage(msgModule, header)(packet)
         if msg:
             msg.fromAddress = address
         msg.fromModule = msgModule
