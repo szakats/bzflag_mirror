@@ -179,8 +179,8 @@ int	CTextureManager::LoadBMP ( const char* szPath,trTextureInfo	*pTexInfo, bool	
 
 	free(pData);
 
-	pTexInfo->x = iImageW;
-	pTexInfo->y = iImageH;
+	pTexInfo->x = (unsigned short)iImageW;
+	pTexInfo->y = (unsigned short)iImageH;
 	pTexInfo->alpha = false;
 
 	return (int)iglID;
@@ -450,6 +450,9 @@ int CTextureManager::LoadAll ( const char * szPath, bool bSkin )
 
 int CTextureManager::GetID ( char * szName )
 {
+	if (!szName)
+		return -1;
+
 	std::string	str = szName;
 
 	tmTextureNameMap::iterator	itr = m_TextureMap.find(str);
@@ -463,7 +466,7 @@ int CTextureManager::GetID ( char * szName )
 
 bool CTextureManager::GetInfo ( int iID, trTextureInfo* pInfo )
 {
-	if ( (iID<0) || (iID>=_m_pTextureList->size()) || !pInfo)
+	if ( (iID < 0) || (iID >= (int)_m_pTextureList->size()) || !pInfo)
 		return false;
 
 	pInfo = m_TextureList[iID];
@@ -472,7 +475,7 @@ bool CTextureManager::GetInfo ( int iID, trTextureInfo* pInfo )
 
 bool CTextureManager::Bind ( int iID )
 {
-	if ( (iID<0) || (iID>=_m_pTextureList->size()) )
+	if ( (iID < 0) || (iID >= (int)_m_pTextureList->size()) )
 		return false;
 
 	glBindTexture(GL_TEXTURE_2D,m_TextureList[iID]->glID);

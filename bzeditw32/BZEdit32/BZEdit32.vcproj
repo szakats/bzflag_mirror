@@ -110,7 +110,7 @@ copy release\*.exe ..\_test\*.exe
 				Name="VCLinkerTool"
 				AdditionalDependencies="TextureMngr.lib glu32.lib opengl32.lib PocketEngine.lib"
 				OutputFile=".\Debug/BZEdit32.exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\libs\debug\"
 				GenerateDebugInformation="TRUE"

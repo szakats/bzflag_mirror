@@ -794,7 +794,7 @@ bool Base::Init( void )
 		
 	pModel->SetTexuture(-1);
 
-	float	fTemp = color;
+	float	fTemp = (float)color;
 	pModel->SetItemInfo("Color",&fTemp);
 
 	pModel->Init(m_rPosition,m_rScale,m_fAngle);

@@ -312,9 +312,9 @@ void CBaseObject::ApplyEdit ( void )
 	m_rScale.z = ((CStdObjectInfoPanel*)m_pInterface)->m_fZScale;
 
 	m_fAngle = ((CStdObjectInfoPanel*)m_pInterface)->m_fZRot;
-	m_bShootThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bShootThru;
-	m_bDriveThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bDriveThru;
-	m_bFlipZ = ((CStdObjectInfoPanel*)m_pInterface)->m_bFlipZ;
+	m_bShootThru = (((CStdObjectInfoPanel*)m_pInterface)->m_bShootThru == TRUE);
+	m_bDriveThru = (((CStdObjectInfoPanel*)m_pInterface)->m_bDriveThru == TRUE);
+	m_bFlipZ = (((CStdObjectInfoPanel*)m_pInterface)->m_bFlipZ == TRUE);
 
 	Init();
 }

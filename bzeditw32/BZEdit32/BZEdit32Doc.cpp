@@ -187,7 +187,7 @@ void CBZEdit32Doc::OnFileOpen()
 {
 	char szFilter[] = "BZFlag Map Files (*.bzw;*.map)|*.bzw;*.map|All Files (*.*)|*.*||";
 		
-	CFileDialog  oFD(true,".map;.bzw","*.map;*.bzw",OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
+	CFileDialog  oFD(true,".bzw;.map","*.bzw;*.map",OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 
 	if (oFD.DoModal() == IDOK)
 	{

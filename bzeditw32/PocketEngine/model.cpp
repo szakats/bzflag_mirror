@@ -165,7 +165,7 @@ void CModel::LoadFB ( FILE *fp )
 	m_bLit = true;
 
 	// make the face normals
-	for ( i = 0; i < m_iTris; i++)
+	for ( i = 0; i < (int)m_iTris; i++)
 	{
 		trVertex3D	p1,p2;
 
@@ -408,7 +408,7 @@ void CModel::LoadOBJ ( FILE *fp  )
 		m_bTextured = false;
 
 	// make the face normals
-	for ( i = 0; i < m_iTris; i++)
+	for ( i = 0; i < (int)m_iTris; i++)
 	{
 		trVertex3D	p1,p2;
 

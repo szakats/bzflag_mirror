@@ -254,7 +254,7 @@ BOOL CMainFrame::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		if (HIWORD(wParam) ==0)
 		{
-			int iItem = LOWORD(wParam);
+			unsigned int iItem = LOWORD(wParam);
 
 			if (iItem < m_vPluginHandles.size())
 			{

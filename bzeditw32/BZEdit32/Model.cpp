@@ -178,7 +178,7 @@ void CModelManager::KillModel ( int iItem )
 
 CBaseModel	*CModelManager::GetModel ( int iItem )
 {
-	if ( (iItem < 0) && (iItem >= aModelList.size()) )
+	if ( (iItem < 0) && (iItem >= (int)aModelList.size()) )
 		return NULL;
 
 	return aModelList[iItem];
@@ -186,7 +186,7 @@ CBaseModel	*CModelManager::GetModel ( int iItem )
 
 void CModelManager::AddDrawItem ( int iItem, bool bTransparent, bool bSelected, int iName, teDrawPriority ePriority )
 {
-	if ( (iItem < 0) && (iItem >= aModelList.size()) )
+	if ( (iItem < 0) && (iItem >= (int) aModelList.size()) )
 		return;
 
 	trDrawItem	rDrawItem;
