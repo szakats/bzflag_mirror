@@ -97,3 +97,36 @@ void cgGLSetParameter1dv(CGparameter, const double *);
 void cgGLSetParameter2dv(CGparameter, const double *);
 void cgGLSetParameter3dv(CGparameter, const double *);
 void cgGLSetParameter4dv(CGparameter, const double *);
+
+void cgGLGetParameter1f(CGparameter param, float *v);
+void cgGLGetParameter2f(CGparameter param, float *v);
+void cgGLGetParameter3f(CGparameter param, float *v);
+void cgGLGetParameter4f(CGparameter param, float *v);
+void cgGLGetParameter1d(CGparameter param, double *v);
+void cgGLGetParameter2d(CGparameter param, double *v);
+void cgGLGetParameter3d(CGparameter param, double *v);
+void cgGLGetParameter4d(CGparameter param, double *v);
+
+void cgGLSetParameterArray1f(CGparameter, long, long, const float *);
+void cgGLSetParameterArray2f(CGparameter, long, long, const float *);
+void cgGLSetParameterArray3f(CGparameter, long, long, const float *);
+void cgGLSetParameterArray4f(CGparameter, long, long, const float *);
+void cgGLSetParameterArray1d(CGparameter, long, long, const double *);
+void cgGLSetParameterArray2d(CGparameter, long, long, const double *);
+void cgGLSetParameterArray3d(CGparameter, long, long, const double *);
+void cgGLSetParameterArray4d(CGparameter, long, long, const double *);
+
+void cgGLGetParameterArray1f(CGparameter, long, long, float *);
+void cgGLGetParameterArray2f(CGparameter, long, long, float *);
+void cgGLGetParameterArray3f(CGparameter, long, long, float *);
+void cgGLGetParameterArray4f(CGparameter, long, long, float *);
+void cgGLGetParameterArray1d(CGparameter, long, long, double *);
+void cgGLGetParameterArray2d(CGparameter, long, long, double *);
+void cgGLGetParameterArray3d(CGparameter, long, long, double *);
+void cgGLGetParameterArray4d(CGparameter, long, long, double *);
+void cgGLSetParameterPointer(CGparameter, GLint, GLenum, GLsizei, GLvoid *);
+
+void cgGLEnableClientState(CGparameter);
+void cgGLDisableClientState(CGparameter);
+
+// matrix parameter management functions
