@@ -138,11 +138,11 @@ class ThreeDView:
         self.scene = Scene(game)
 
         # Initialize the opengl view
-        self.light0.ambient  = (0.85, 0.85, 0.85, 1.0)
+        self.light0.ambient  = (0.05, 0.05, 0.05, 1.0)
         self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
         self.light0.position = (400, 400, 400, 1.0)
         self.light0.set()
-        self.light1.ambient  = (0.85, 0.85, 0.85, 1.0)
+        self.light1.ambient  = (0.05, 0.05, 0.05, 1.0)
         self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
         self.light1.position = (0, 0, 400, 1.0)
         self.light1.set()
@@ -151,7 +151,6 @@ class ThreeDView:
         glEnable(GL_NORMALIZE)
         glEnable(GL_CULL_FACE)
         glEnable(GL_COLOR_MATERIAL)
-        glEnable(GL_LIGHTING)
 
         glClearColor(0.0, 0.0, 0.0, 0.0)
         glClearDepth(1.0)
