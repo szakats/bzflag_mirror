@@ -248,10 +248,16 @@ class Emitter(Affector):
            position, velocity, acceleration, and life according to the emitter. More particle
            qualities for this to set can be added by subclasses.
            """
-        put(self.model.state, indices, self.newState(len(indices)))
-        put(self.model.velocity, indices, self.newVelocity(len(indices)))
-        put(self.model.acceleration, indices, self.newAcceleration(len(indices)))
-        put(self.model.life, indices, self.newLife(len(indices)))
+        numIndices = len(indices)
+
+        # put() requires flattened indexes, so expand our index list for 3-vectors
+        v3indices = (reshape(repeat(indices, 3), (-1,3)) * 3 + (0,1,2)).flat
+
+        put(self.model.state, v3indices, self.newState(numIndices))
+        put(self.model.velocity, v3indices, self.newVelocity(numIndices))
+        put(self.model.acceleration, v3indices, self.newAcceleration(numIndices))
+
+        put(self.model.life, indices, self.newLife(numIndices))
 
     def newState(self, n):
         """Returns state vectors for n new particles. This may return less than n values, and they
@@ -261,7 +267,7 @@ class Emitter(Affector):
         return (0,0,0)
 
     def newVelocity(self, n):
-        return (0,0,0)
+        return (0,0,1000)
 
     def newAcceleration(self, n):
         return (0,0,0)
