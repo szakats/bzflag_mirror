@@ -8,4 +8,4 @@ Todo list, in no particular order:
 
   - Implement UDP communication
 
-    
+  - Improve event handling and cpu utilization so Mac OS X client behaves   
