@@ -451,6 +451,7 @@ class Mesh(DisplayList):
             glVertex3f(*tri.vertices[2])
         glEnd()
         glPopMatrix()
+        glColor4f(1,1,1,1)
 
 
 class Cache:

@@ -13,45 +13,49 @@ class AnchorAffector(SpringSystem.Affector):
         self.model.state[0,0] = self.model.initialState[0,0]
 
 
-class FlagColorizer(Drawable.Transform):
-    def apply(self):
-        glColor3f(0.5,1,0.5)
-
-
 class Flag:
     def __init__(self):
+        # Note that the size and origin are in world coordinates along the XZ
+        # plane, and that resolution is in the cloth array. The origin of the
+        # cloth array is at the base of the flag on the pole, with the top
+        # of the array running up the pole.
+        self.size = (8,6)
+        self.origin = (0,4.5)
+        self.resolution = (12,16)
+        
         self.pole = Drawable.VRML.load("flagpole.wrl")
         self.cloth = SpringSystem.Cloth(self.getInitialState())
 
-        surf = Drawable.ArraySurface(self.cloth.state, self.getTexCoords())
-        surf.render.static = False
-        surf.render.texture = Texture.load("flag.png")
-        self.transformer = Drawable.Transformer(surf, [FlagColorizer()])
+        self.surf = Drawable.ArraySurface(self.cloth.state, self.getTexCoords())
+        self.surf.render.static = False
+        self.surf.render.textures = (Texture.load("water.jpeg"),)
 
-        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.04))
-        self.cloth.add(SpringSystem.ClothWindAffector, surf, (-1, 0.001, 0.8))
-        self.cloth.add(AnchorAffector)
+#        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.04))
+#        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (1, 0.001, 0.3))
+#        self.cloth.add(AnchorAffector)
 
     def getInitialState(self):
-        xAxis = arange(0, 8, 0.5)
-        yAxis = arange(5, 11, 0.5)
-        size = (len(yAxis), len(xAxis))
-        a = zeros(size + (3,), Float32, savespace=True)
-        a[:,:,0] += 0 - xAxis
-        a[:,:,2] += yAxis[:, NewAxis]
+        def xcoord(x,y):
+            return self.origin[0] + self.size[0] * y / float(self.resolution[1]-1)
+        def zcoord(x,y):
+            return self.origin[1] + self.size[1] * x / float(self.resolution[0]-1)
+        a = zeros(self.resolution + (3,), Float)
+        a[:,:,0] = fromfunction(xcoord, self.resolution)
+        a[:,:,2] = fromfunction(zcoord, self.resolution)
         return a
 
     def getTexCoords(self):
-        xAxis = arange(0, 8, 0.5)
-        yAxis = arange(5, 11, 0.5)
-        size = (len(yAxis), len(xAxis))
-        a = zeros(size + (2,), Float32, savespace=True)
-        a[:,:,0] += xAxis
-        a[:,:,1] += yAxis[:, NewAxis]
-        return a
+        def xf(x,y):
+            return x / float(self.resolution[0]-1)
+        def yf(x,y):
+            return y / float(self.resolution[1]-1)
+        a = zeros(self.resolution + (2,), Float)
+        a[:,:,0] = fromfunction(xf, self.resolution)
+        a[:,:,1] = fromfunction(yf, self.resolution)
+        return a.astype(Float32)
 
     def getDrawables(self):
-        return [self.transformer] + self.pole.values()
+        return [self.surf] + self.pole.values()
 
     def update(self):
         # Use a fixed time step for now, since the model gets unstable
@@ -67,18 +71,19 @@ if __name__ == '__main__':
     viewport.setCaption("Cloth Simulation Test")
 
     # Enzoomify the camera toward our object
-    view.camera.position = (5,0,-5)
+    view.camera.position = (-5,0,-5)
     view.camera.distance = 20
+    view.camera.azimuth = 0
     view.camera.jump()
 
     # Give us some spiffy blue and yellow highlights
     glClearColor(0.3, 0.3, 0.3, 1)
     view.light0.ambient  = (0,0,0,1)
     view.light0.diffuse  = (0.5,0.5,0.4,1)
-    view.light0.position = (0,200,200,1)
+    view.light0.position = (0,-200,200,1)
     view.light1.ambient  = (0,0,0,1)
     view.light1.diffuse  = (0.4,0.4,0.5,1)
-    view.light1.position = (0,200,200,1)
+    view.light1.position = (0,-200,200,1)
 
     obj = Flag()
     viewport.onSetupFrame.observe(obj.update)

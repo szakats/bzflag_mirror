@@ -96,18 +96,12 @@ class ArraySurface(GLDrawable):
     def draw(self, rstate):
         """Calculate normals and blast our triangle strips out to OpenGL"""
         self.prepareNormals()
-        #if self.texcoords:
-        #    texcoord = reshape(self.texcoords, (-1, 2))
-            #glTexCoordPointer(2, GL_DOUBLE, 0, texcoord)
-            #glEnable(GL_TEXTURE_COORD_ARRAY)
-        #glVertexPointerd(reshape(self.vertices, (-1, 3)))
-        #glNormalPointerd(reshape(self.normals, (-1, 3)))
 
-        interleaved = zeros(self.vertices.shape[:-1] + (2, 3), Float32)
-        interleaved[:,:,0,:]  = self.normals
-        interleaved[:,:,1,:]  = self.vertices
-
-        glInterleavedArrays(GL_N3F_V3F, 0, interleaved.tostring())
+        interleaved = zeros(self.vertices.shape[:-1] + (8,), Float32)
+        interleaved[:,:,:2]  = self.texcoords
+        interleaved[:,:,2:5] = self.normals
+        interleaved[:,:,5:]  = self.vertices
+        glInterleavedArrays(GL_T2F_N3F_V3F, 0, interleaved.tostring())
 
         # We want to draw both sides of the surface. This will have OpenGL
         # automatically flip the surface normals when drawing the back side
