@@ -146,8 +146,9 @@ class PlatformSides(Sides):
 
 class End(DisplayList):
     """Abstract base class for the top and bottom sides of a box"""
-    textureName = 'concrete.jpeg'
+    textureNames = ('concrete.jpeg',)
     texScale = 20
+    tex2Scale = 300
 
     def drawToList(self):
         glPushMatrix()
@@ -157,6 +158,7 @@ class End(DisplayList):
         for i in xrange(4):
             vertex = self.polygon[i]
             glTexCoord2f(vertex[0] / self.texScale, vertex[1] / self.texScale)
+            glMultiTexCoord2fARB(GL_TEXTURE1_ARB, vertex[0] / self.tex2Scale, vertex[1] / self.tex2Scale)
             glVertex2f(*vertex)
         glEnd()
         glPopMatrix()
@@ -166,6 +168,13 @@ class Top(End):
     def set(self, box):
         self.polygon = box.toPolygon()
         self.height = box.center[2] + box.size[2]
+
+
+class MultitexTop(Top):
+    textureNames = ('concrete.jpeg', 'lightmap.jpeg')
+    def set(self, box):
+        Top.set(self, box)
+        self.render.textures[1].texEnv = GL_MODULATE
 
 
 class Bottom(End):
@@ -230,12 +239,6 @@ class OilStain(TopDecal):
                                           'oilstain_3.png',
                                           'swerve_1.png'))
         TopDecal.__init__(self, box)
-
-
-class TiledOilStain(TiledTopDecal):
-    """An oil stain for large boxes, tiled in world coordinates"""
-    textureName = "tiled_oilstain_1.png"
-    texScale = 100
 
 
 class TreadStain(AlignedTopDecal):
@@ -355,18 +358,18 @@ def detectBoxDrawables(box):
     if height < 8 and box.center[2] > 1:
         sides = PlatformSides(box)
 
-    # If the box is fairly large and squareish, use a square oil-stain texture...
-    if minorAxis > 10 and axisRatio < 2:
-        drawables.append(OilStain(box))
-
-    # ...or, if the box is about the same width as a tank, put some tread marks on it...
-    elif minorAxis > Scale.TankWidth and minorAxis < Scale.TankWidth * 4 and majorAxis > Scale.TankWidth * 4:
+    # If the box is about the same width as a tank, put some tread marks on it...
+    if minorAxis > Scale.TankWidth and minorAxis < Scale.TankWidth * 4 and majorAxis > Scale.TankWidth * 4:
         drawables.append(TreadStain(box))
 
-    # ...or if the box is fairly large and we don't have anything better to
-    #    put on it, give it some tileable oil stains.
+    # ...or, if the box is fairly large and squareish, use an oil-stain texture
+    elif minorAxis > 10 and axisRatio < 2:
+        drawables.append(OilStain(box))
+
+    # ...or if it's fairly large and we have nothing better to
+    #    do to the top, multitexture it so it isn't so boring
     elif minorAxis > 10:
-        drawables.append(TiledOilStain(box))
+        top = MultitexTop(box)
     
     # Randomly put BZFlag logos on properly sized boxes
     if minorAxis > 10 and height > 4 and random.random() > 0.7:
