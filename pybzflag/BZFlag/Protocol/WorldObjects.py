@@ -145,7 +145,7 @@ class WorldObject(Block):
                     point[1] + self.center[1])
         return map(translate, poly)
 
-    def getGLDrawables(self):
+    def getDrawables(self):
         if self.drawables is None:
             return []
         else:
@@ -171,7 +171,7 @@ class Style(WorldObject):
         StructEntry(UInt32,           'serverTime',           0),
         ]
 
-    def getGLDrawables(self):
+    def getDrawables(self):
         from BZFlag.UI import Drawable
         if self.drawables == None:
             self.drawables = [Drawable.Ground(self.worldSize)]
@@ -198,7 +198,7 @@ class TeamBase(WorldObject):
         StructEntry(Common.Vector3,   'safety', [0,0,0]),
         ]
 
-    def getGLDrawables(self):
+    def getDrawables(self):
         from BZFlag.UI import Drawable
         if self.drawables == None:
             if self.center[2] != 0:
@@ -221,7 +221,7 @@ class Wall(WorldObject):
         StructEntry(Common.VectorYZ,  'size',   [0,1,1]),
         ]
 
-    def getGLDrawables(self):
+    def getDrawables(self):
         from BZFlag.UI import Drawable
 	if self.drawables == None:
 	    self.drawables = [Drawable.Wall(self.center, self.angle, self.size)]
@@ -240,7 +240,7 @@ class Box(WorldObject):
         StructEntry(ObjectOptions,    'options',      []),
         ]
 
-    def getGLDrawables(self):
+    def getDrawables(self):
         from BZFlag.UI import Drawable
         if self.drawables == None:
             self.drawables = [
@@ -262,7 +262,7 @@ class Pyramid(WorldObject):
         StructEntry(ObjectOptions,    'options',      []),
         ]
 
-    def getGLDrawables(self):
+    def getDrawables(self):
         from BZFlag.UI import Drawable
         if self.drawables == None:
             self.drawables = [Drawable.Pyramid(self.center, self.angle, self.size, 'flipZ' in self.options)]
@@ -282,7 +282,7 @@ class Teleporter(WorldObject):
         StructEntry(ObjectOptions,    'options',      []),
         ]
 
-    def getGLDrawables(self):
+    def getDrawables(self):
         from BZFlag.UI import Drawable
         if self.drawables == None:
             self.drawables = [

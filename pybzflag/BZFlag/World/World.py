@@ -24,7 +24,7 @@ save worlds to text and binary formats, storing them in a Scene class.
 
 from BZFlag.Protocol import WorldObjects
 from BZFlag import Event, Errors
-import os, math, md5, sys
+import os, math, md5, sys, BZFlag
 from StringIO import StringIO
 from BZFlag.World import Scale
 

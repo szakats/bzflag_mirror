@@ -280,8 +280,11 @@ class Scene:
     def erase(self):
         self.objects = {}
 
-    def add(self, object, drawables):
-        """Add the given object and drawables to the scene."""
+    def add(self, object):
+        """Add the given object to the scene. The only requirement for the
+           object is that it support the getDrawables() method.
+           """
+        drawables = object.getDrawables()
         for drawable in drawables:
             drawable.parent(object)
         self.objects.setdefault(object, []).extend(drawables)

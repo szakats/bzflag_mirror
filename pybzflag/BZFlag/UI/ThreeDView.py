@@ -24,6 +24,17 @@ A 3d scene renderer similar to BZFlag proper
 import BZFlag
 from BZFlag.UI import ThreeDRender
 from BZFlag.Protocol import WorldObjects
+from BZFlag.UI.Drawable import VRML
+
+
+class Tank:
+    """A Scene object representing a player's tank"""
+    def __init__(self):
+        meshes = VRML.load("tank.wrl")
+        self.drawables = meshes.values()
+        
+    def getDrawables(self):
+        return self.drawables
 
 
 class Scene(ThreeDRender.Scene):
@@ -35,7 +46,12 @@ class Scene(ThreeDRender.Scene):
     def __init__(self, game):
         ThreeDRender.Scene.__init__(self)
         self.game = game
+        self.playerTanks = {}
+
         game.world.onLoad.observe(self.reloadWorld)
+        game.onAddPlayer.observe(self.addPlayer)
+        game.onRemovePlayer.observe(self.removePlayer)
+        game.onChangePlayerList.observe(self.changePlayerList)
         self.reloadWorld()
 
     def reloadWorld(self):
@@ -43,7 +59,20 @@ class Scene(ThreeDRender.Scene):
         self.erase()
         for block in self.game.world.blocks:
             if isinstance(block, WorldObjects.WorldObject):
-                self.add(block, block.getGLDrawables())
+                self.add(block)
+        for player in self.game.players.itervalues():
+            self.addPlayer(self.game, player)
+        self.preprocess()
+
+    def addPlayer(self, game, player):
+        tank = Tank()
+        self.playerTanks[player] = tank
+        self.add(tank)
+
+    def removePlayer(self, game, player):
+        pass
+
+    def changePlayerList(self, game, players):
         self.preprocess()
 
 
