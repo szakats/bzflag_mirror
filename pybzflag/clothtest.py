@@ -4,13 +4,7 @@ from BZFlag import Event, Util
 from Numeric import *
 from time import time
 from OpenGL.GL import *
-
-
-class AnchorAffector(SpringSystem.Affector):
-    def integrate(self, dt):
-        # Pin the cloth up at its two left corners
-        self.model.state[-1,0] = self.model.initialState[-1,0]
-        self.model.state[0,0] = self.model.initialState[0,0]
+from BZFlag.Geometry import *
 
 
 class Flag:
@@ -21,7 +15,7 @@ class Flag:
         # of the array running up the pole.
         self.size = (8,6)
         self.origin = (0,4.5)
-        self.resolution = (12,16)
+        self.resolution = (20,20)
         
         self.pole = Drawable.VRML.load("flagpole.wrl")
         self.cloth = SpringSystem.Cloth(self.getInitialState())
@@ -34,9 +28,15 @@ class Flag:
         # do z-sorting, which would be a gigantic pain.
         self.surf.render.textures = (Texture.load("flag.png"),)
 
-        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.04))
-        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (1, 0.001, 0.3))
-        self.cloth.add(AnchorAffector)
+        # Gravity, plus a small force in the other two axes to keep the springs from
+        # lining up perfectly and standing end-on-end.
+        self.cloth.add(SpringSystem.ConstantAccelAffector, (0.001, 0.001, -0.04))
+
+        # Wind!
+        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (1,0,0.2), 0.15)
+
+        # Pin the cloth to the flagpole
+        self.cloth.add(SpringSystem.ClothAnchorAffector, (-1,0), (0,0))
 
     def getInitialState(self):
         def xcoord(x,y):

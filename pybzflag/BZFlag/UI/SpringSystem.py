@@ -156,16 +156,28 @@ class ClothWindAffector(Affector):
        reference to the ArraySurface that renders this cloth, since it uses
        the cross products and normals that it has already calculated.
        """
-    def __init__(self, model, surface, windVector):
+    def __init__(self, model, surface, windDirection, windMagnitude):
         Affector.__init__(self, model)
         self.crossProducts = surface.crossProducts
         self.gridNormals = surface.gridNormals
-        self.windVector = windVector
+        self.windDirection = windDirection
+        self.windMagnitude = windMagnitude
 
     def integrate(self, dt):
         # This just uses the dot product to calculate a normal force due to wind
-        forceMagnitude = dot(self.crossProducts, self.windVector)
+        forceMagnitude = dot(self.gridNormals, normalize(self.windDirection) * self.windMagnitude)
         force = self.gridNormals * reshape(repeat(forceMagnitude, 3, 1), self.gridNormals.shape)
         self.model.velocity[:-1,:-1] += force
-        
+
+
+class ClothAnchorAffector(Affector):
+    """Affector that forces the given array positions to remain at their initial values"""
+    def __init__(self, model, *positions):
+        Affector.__init__(self, model)
+        self.positions = positions
+
+    def integrate(self, dt):
+        for x,y in self.positions:
+            self.model.state[x,y] = self.model.initialState[x,y]
+
 ### The End ###
