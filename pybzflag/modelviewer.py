@@ -46,9 +46,6 @@ view.camera.position = (0,0,0)
 view.camera.distance = 60
 view.camera.jump()
 
-# Change the background color
-viewport.mode = Viewport.GL.ClearedMode(clearColor=(0.3, 0.3, 0.3, 1))
-
 # Read in the VRML file, putting each mesh in a separate object.
 # Note the abspath()- model and texture names are relative to our data directory
 # by default, this makes them relative to our caller's current directory.

@@ -183,7 +183,8 @@ class VectorTable:
            """
         v = asarray(v)
 
-        # Create a randomish hash value for the given vector
+        # Create a quick hash of the given vector array, to give
+        # it fairly uniform coverage of our random vector array.
         hash = zeros(v.shape[:-1], v.typecode())
         m = 1
         for i in xrange(0, v.shape[-1]):
