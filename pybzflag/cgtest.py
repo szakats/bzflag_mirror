@@ -43,33 +43,31 @@ def CheckCGError():
     if error != CG_NO_ERROR:
         sys.exit('Cg error: %s' % Cg.cgGetErrorString(error))
 
-def InitGL():
-    glViewport(0, 0, 800, 600)
-
-    glDisable(GL_LIGHTING)
-
-    glEnable(GL_DEPTH_TEST)
-    glMatrixMode(GL_PROJECTION)
-    gluPerspective(40, 1, 1, 10)
-    glMatrixMode(GL_MODELVIEW)
-    gluLookAt(0, 0, 5, 0, 0, 0, 0, 1, 0)
-    glTranslatef(0, 0, -1)
-    glRotatef(60, 1, 0, 0)
-    glRotatef(-20, 0, 0, 1)
-
 def DrawCube():
-#    cgGLBindProgram(program)
+    cgGLBindProgram(program)
     CheckCGError()
 
     if Kd != None:
         cgGLSetParameter4f(Kd, 1.0, 1.0, 0.0, 1.0)
 
+    cgGLEnableProfile(CG_PROFILE_VP20)
+    CheckCGError()
+
+    glDisable(GL_LIGHTING)
+    glEnable(GL_DEPTH_TEST)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluPerspective(40, 1, 1, 10)
+    glMatrixMode(GL_MODELVIEW)
+    gluLookAt(0, 0, 5, 0, 0, 0, 0, 1, 0)
+    glLoadIdentity()
+    glColor3f(1, 1, 1)
+    glTranslatef(0, 0, -6)
+    glRotatef(60, 1, 0, 0)
+    glRotatef(-20, 0, 0, 1)
+
     if modelViewProj != None:
         cgGLSetStateMatrixParameter(modelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY)
-
-#    cgGLEnableProfile(CG_PROFILE_VP20)
-    CheckCGError()
-    glColor3f(1, 1, 1)
 
     for i in range(5):
         glBegin(GL_QUADS)
@@ -114,9 +112,7 @@ CheckCGError()
 testColor = cgGetNamedParameter(program, 'IN.TestColor')
 CheckCGError()
 
-InitGL()
-HUD.Text(viewport.region(Layout.Rect(viewport).margin(10)), programString, fontSize=10)
-DrawCube()
+viewport.onDrawFrame.observe(DrawCube)
 
 loop.run()
 
