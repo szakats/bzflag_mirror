@@ -65,7 +65,7 @@ class Glyph:
                           (self.page.size[1]-rect[1]-rect[3]) / self.page.size[1],
                           rect[2] / self.page.size[0],
                           rect[3] / self.page.size[1])
-            
+
     def draw(self, magnification):
         self.page.updateTexture()
         self.page.texture.bind()
@@ -117,13 +117,13 @@ class FontPage:
            """
         if size[0] > self.size[0]:
             return None
-        
+
         if self.packingX + size[0] + self.gap[0] > self.size[0]:
             # Next line
             self.packingX = 0
             self.packingY += self.lineHeight
             self.lineHeight = 0
-            
+
         if self.packingY + size[1] > self.size[1]:
             return None
         if size[1] + self.gap[1] > self.lineHeight:
@@ -132,7 +132,7 @@ class FontPage:
         allocated = (self.packingX, self.packingY)
         self.packingX += size[0] + self.gap[0]
         return allocated
-        
+
     def pack(self, char):
         """Pack the glyph for the given character into our texture, return a Glyph.
            If there isn't enough room, return None.
@@ -147,7 +147,7 @@ class FontPage:
         self.surface.blit(self.font.render(char, True, (255,255,255), (0,0,0)), allocated)
         self.textureDirty = True
         return Glyph((allocated[0], allocated[1], glyphSize[0], glyphSize[1]), self)
-        
+
 
 class RenderedFont:
     """Represents one font size, rendered to zero or more texture 'pages'"""
@@ -218,7 +218,7 @@ class Font:
         """Draw the given text using the current OpenGL transform and color.
            All glyph escapements will cause the OpenGL modelview matrix to
            be translated.
-           """        
+           """
         # Prepare the OpenGL state
         GLExtension.disableMultitex()
         glEnable(GL_TEXTURE_2D)
@@ -227,7 +227,7 @@ class Font:
         glDisable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA)
-        
+
         rendered = self.findRendered(size)
         magnification = size / rendered.size
 

@@ -56,7 +56,7 @@ class PygameViewport(Viewport):
         """A hook for subclasses to override the mode flags used to initialize pygame"""
         flags = pygame.DOUBLEBUF
         if self.resizable:
-            flags |= pygame.RESIZABLE 
+            flags |= pygame.RESIZABLE
         return flags
 
     def resize(self, size):

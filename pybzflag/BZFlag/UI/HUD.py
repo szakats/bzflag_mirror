@@ -101,7 +101,7 @@ class Text:
         glColor3f(*self.color)
         GLText.draw(self.text, self.fontSize, self.fontName)
 
-        
+
 class ScrolledText(Text):
     """A view that draws a block of vertically scrolled text"""
     def init(self):
