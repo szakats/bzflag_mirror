@@ -24,8 +24,8 @@ links.
 #
 
 from BZFlag.Protocol import Common
-from BZFlag import Protocol, Errors, Util
-import socket, select, sys
+from BZFlag import Protocol, Errors
+import socket, sys
 
 
 class Socket:
@@ -164,54 +164,5 @@ class Socket:
         except KeyError:
             raise Errors.ProtocolWarning("Received unknown message type 0x%04X" % header.id)
         return msgClass(str(header) + body)
-
-
-class EventLoop:
-    def __init__(self):
-        # No polling by default. This can be changed to a duration
-        # between polls, or to zero to poll continuously.
-        self.pollTime = None
-        Util.initEvents(self, 'onPoll', 'onNonfatalException')
-        self.sockets = []
-        self.showNonfatalExceptions = 1
-
-    def registerSocket(self, socket):
-        self.sockets.append(socket)
-
-    def unregisterSocket(self, socket):
-        self.sockets.remove(socket)
-
-    def run(self):
-        self.running = 1
-        try:
-            # Make a dictionary for quickly detecting which socket has activity
-            selectDict = {}
-            for socket in self.sockets:
-                selectable = socket.getSelectable()
-                selectDict[selectable] = socket
-            selectables = selectDict.keys()
-
-            while self.running:
-                try:
-                    (iwtd, owtd, ewtd) = select.select(selectables, [], [], self.pollTime)
-                except select.error:
-                    raise Errors.ConnectionLost()
-                readyList = iwtd + owtd + ewtd
-                for ready in readyList:
-                    try:
-                        selectDict[ready].poll(self)
-                    except Errors.NonfatalException:
-                        self.onNonfatalException(sys.exc_info())
-                self.onPoll()
-        finally:
-            self.running = 0
-
-    def stop(self):
-        self.running = 0
-
-    def onNonfatalException(self, info):
-        if self.showNonfatalExceptions:
-            print "*** %s : %s" % (info[1].__class__.__name__, info[1])
-
 
 ### The End ###

@@ -21,7 +21,7 @@ Catalog of all supported flag types, and related utilities.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag import Util, Errors
+from BZFlag import Event, Errors, Util
 from BZFlag.Protocol import FromServer
 import re
 
@@ -53,7 +53,7 @@ class FlagBase:
         self.status = None
         self.owner = None
         self.motion = FlagMotion()
-        Util.initEvents(self, 'onGrab', 'onDrop', 'onUpdate')
+        Event.attach(self, 'onGrab', 'onDrop', 'onUpdate')
 
     def getName(self):
         """Infer a flag's name from the class name"""

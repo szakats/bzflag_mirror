@@ -24,7 +24,7 @@ over the network, frontends display and modify it.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag import World, Util
+from BZFlag import World, Event
 
 class Game:
     """Container for all game state information.
@@ -37,8 +37,8 @@ class Game:
         self.flags = {}      # Indexed by flag number (not Id)
         self.teams = {}      # Indexed by color, represented as a string
         self.world = World.World()
-        Util.initEvents(self, 'onChangePlayerList', 'onAddPlayer', 'onRemovePlayer',
-                        'onLoadWorld', 'onAddFlag')
+        Event.attach(self, 'onChangePlayerList', 'onAddPlayer', 'onRemovePlayer',
+                     'onLoadWorld', 'onAddFlag')
 
     def integrate(self, dt):
         """Integrate velocity with respect to time everywhere it's needed"""

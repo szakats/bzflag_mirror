@@ -23,7 +23,7 @@ in subclasses.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 import BZFlag
-from BZFlag import Network, Protocol, Errors, Player, Game, World, Util, Flag
+from BZFlag import Network, Protocol, Errors, Player, Game, World, Event, Flag
 from BZFlag.Protocol import FromServer, ToServer, Common
 from StringIO import StringIO
 
@@ -43,7 +43,7 @@ class BaseClient:
          - Event handlers for other events should be of the form onFoo()
 
        All onFoo() and onMsgFoo() events are observable and traceable,
-       See the Util.Event class for more information about this feature.
+       See the Event class for more information about this feature.
        """
 
     def __init__(self, **options):
@@ -55,17 +55,17 @@ class BaseClient:
             'server': None,
             }
 
-        Util.initEvents(self, 'onConnect', 'onAnyMessage', 'onUnhandledMessage',
-                        'onDisconnect')
+        Event.attach(self, 'onConnect', 'onAnyMessage', 'onUnhandledMessage',
+                     'onDisconnect')
 
         # Add events for all messages, with onUnhandledMessage as an
         # unhandled event handler.
         for message in Common.getMessageDict(FromServer).values():
             eventName = self.getMsgHandlerName(message)
             if hasattr(self, eventName):
-                event = Util.Event(getattr(self, eventName))
+                event = Event.Event(getattr(self, eventName))
             else:
-                event = Util.Event()
+                event = Event.Event()
             event.unhandledCallback = self.onUnhandledMessage
             setattr(self, eventName, event)
 
@@ -85,7 +85,7 @@ class BaseClient:
         if 'eventLoop' in options.keys():
             self.eventLoop = options['eventLoop']
         else:
-            self.eventLoop = Network.EventLoop()
+            self.eventLoop = Event.EventLoop()
 
         if 'server' in options.keys():
             self.connect(options['server'])
@@ -195,8 +195,8 @@ class StatefulClient(BaseClient):
         BaseClient.init(self)
         self.game = Game.Game()
         self.worldCache = None
-        Util.initEvents(self, 'onLoadWorld', 'onStartWorldDownload',
-                        'onNegotiateFlags')
+        Event.attach(self, 'onLoadWorld', 'onStartWorldDownload',
+                     'onNegotiateFlags')
 
     def onConnect(self):
         """Immediately after connecting, ask for a world hash so
@@ -393,7 +393,7 @@ class PlayerClient(StatefulClient):
         # of course.
         self.inGame = 0
         self.player = None
-        Util.initEvents(self, 'onEnterGame', 'onInitPlayer')
+        Event.attach(self, 'onEnterGame', 'onInitPlayer')
 
         # Set up an observer for the game's onAddPlayer that will set
         # up our player member whenever that MsgAddPlayer is received.
