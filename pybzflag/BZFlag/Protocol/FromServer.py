@@ -172,6 +172,32 @@ class MsgTeleport(Common.Message):
         StructEntry(UInt16,          'toId'),
         ]
 
+class MsgShotEnd(Common.Message):
+    messageId = 0x7365
+    entries = [
+        StructEntry(Common.PlayerId, 'playerId'),
+        StructEntry(UInt16,          'shotId'),
+        StructEntry(UInt16,          'reason'),
+        ]
+
+class MsgKilled(Common.Message):
+    messageId = 0x6b6c
+    entries = [
+        StructEntry(Common.PlayerId, 'victim'),
+        StructEntry(Common.PlayerId, 'killer'),
+        StructEntry(UInt16,          'reason'),
+        StructEntry(UInt16,          'shotId'),
+        ]
+
+class MsgScore(Common.Message):
+    messageId = 0x7363
+    entries = [
+        StructEntry(Common.PlayerId, 'playerId'),
+        StructEntry(UInt16,          'wins'),
+        StructEntry(UInt16,          'losses'),
+        StructEntry(UInt16,          'teamKills'),
+        ]
+
 
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgPlayerUpdate = Common.MsgPlayerUpdate

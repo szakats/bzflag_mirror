@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from BZFlag import CommandLine
 from BZFlag.UI import OverheadView
+import readline
 
 client = CommandLine.client(server     = "localhost",
                             callSign   = "@Super Observer Duckie",
