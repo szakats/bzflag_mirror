@@ -164,6 +164,11 @@ class MasqueradeFlag(FlagBase):
     type         = ['unstable', 'good']
     description  = "In opponent's hud, you appear as a teammate."
 
+class SeerFlag(FlagBase):
+    abbreviation = "SE"
+    type         = ['unstable', 'good']
+    description  = "See stealthed, cloaked and masquerading tanks as normal."
+
 ########################################### Bad flags
 
 class ColorblindnessFlag(FlagBase):
