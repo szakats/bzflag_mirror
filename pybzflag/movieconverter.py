@@ -20,8 +20,6 @@ parser.add_option("-b", "--bitrate", metavar="KBPS", dest="bitrate",
 if len(args) == 0:
     parser.error("One or more recording filenames must be specified on the command line.")
 
-
-
 for inFile in args:
     if options.file:
         outFile = options.file
