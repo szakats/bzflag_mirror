@@ -35,6 +35,7 @@ class OverheadView:
         'Pyramid':    '#1b8de3',
         'Teleporter': '#FFFF80',
         'player':     'white',
+        'flag':       'green',
       }
 
     def __init__(self, game):
@@ -127,10 +128,13 @@ class OverheadView:
                 pygame.draw.circle(surface, bg, pos, size-1)
                 pygame.draw.circle(surface, color, pos, size, 1)
                 pygame.draw.line(surface, color, pos, heading)
-        pass
 
     def renderFlags(self, surface):
-        pass
+        color = self.colorScheme['flag']
+        for flag in self.game.flags.values():
+            if 'onGround' == flag.status:
+                pos = self.worldToView(flag.motion.position)
+                pygame.draw.circle(surface, color, pos, 3, 1)
 
     def renderShots(self, surface):
         pass
