@@ -35,6 +35,7 @@ class OverheadView:
         'background':    (88,  112, 88 ),
         'Box':           (188, 187, 167),
         'Pyramid':       (27,  141, 227),
+        'Wall':          (255, 255, 0  ),
         'Teleporter':    (255, 255, 128),
         'playerOutline': (255, 255, 255),
         'flag':          (255, 255, 255),
@@ -62,8 +63,8 @@ class OverheadView:
 
     def worldToView(self, point):
         """Convert world coordinates to view coordinates in pixels"""
-        return (( point[0] / self.game.world.size[0] + 0.5) * self.size[0],
-                (-point[1] / self.game.world.size[1] + 0.5) * self.size[1])
+        return (( point[0] * 0.98 / self.game.world.size[0] + 0.5) * self.size[0],
+                (-point[1] * 0.98 / self.game.world.size[1] + 0.5) * self.size[1])
 
     def renderWorld(self, surface):
         """Render the game world to the given surface."""
@@ -82,7 +83,10 @@ class OverheadView:
                 color = self.colorScheme.get(objClassName, None)
                 if color:
                     poly = map(self.worldToView, object.toPolygon())
-                    pygame.draw.polygon(surface, color, poly)
+                    if len(poly) > 2:
+                        pygame.draw.polygon(surface, color, poly)
+                    else:
+                        pygame.draw.line(surface, color, poly[0], poly[1])
 
     def render(self, surface):
         """Render the overhead view to the given surface. This includes the

@@ -114,19 +114,22 @@ class WorldObject(Block):
         if hasattr(self, 'team'):
             f.write("color %s\n" % Common.TeamColor.reverseDict(self.team))
         f.write("end\n\n")
-        
-    def toPolygon(self):
-        """Return a 2D polygon representation of this object, as a tuple of tuples."""
+ 
+    def toUntransformedPolygon(self):
         # Create four vertices from our extents
-        poly = ((-self.size[0],
+        return ((-self.size[0],
                  -self.size[1]),
                 ( self.size[0],
-                 -self.size[1]),
+                  -self.size[1]),
                 ( self.size[0],
                   self.size[1]),
                 (-self.size[0],
                   self.size[1]))
-
+    
+    def toPolygon(self):
+        """Return a 2D polygon representation of this object, as a tuple of tuples."""
+        poly = self.toUntransformedPolygon()
+        
         # Rotate the polygon by our angle
         cos = math.cos(-self.angle)
         sin = math.sin(-self.angle)
@@ -178,6 +181,9 @@ class Wall(WorldObject):
         StructEntry(Float,            'angle',  0),
         StructEntry(Common.Vector2,   'size',   [1,1]),
         ]
+    
+    def toUntransformedPolygon(self):
+        return ((0, -self.size[0]), (0, self.size[0]))
 
 class Box(WorldObject):
     textName = 'box'
