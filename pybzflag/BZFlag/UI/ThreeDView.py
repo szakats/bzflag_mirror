@@ -62,7 +62,7 @@ class Scene:
     self.game = game
     game.world.onLoad.observe(self.onLoadWorld)
     self.objects = {}
-    self.passess = {}
+    self.passes = {}
 
   def onLoadWorld(self):
     print "loading world..."
@@ -74,7 +74,11 @@ class Scene:
   def rebuildTexmap(self):
     for object, drawables in self.objects.items():
       for drawable in drawables:
-	print "drawable",id(drawable),"is a",drawable.__class__
+	if self.passes.has_key(drawable.texid):
+	    self.passes[drawable.texid].append(drawable)
+	else:
+	    self.passes[drawable.texid] = [drawable]
+	print 'drawable',drawable,'uses texture',drawable.texid
 
 class ThreeDView:
   def __init__(self, game):

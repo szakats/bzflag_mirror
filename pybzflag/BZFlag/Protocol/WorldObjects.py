@@ -49,6 +49,7 @@ class GLDrawable:
     def __init__(self):
     	import OpenGL.GL
         self.list = OpenGL.GL.glGenLists(1)
+	self.texid = None
 
     def __del__(self):
         import OpenGL.GL
@@ -216,6 +217,7 @@ class Wall(WorldObject):
 	    self.center = center
 	    self.angle = angle
 	    self.size = size
+	    self.texid = 'wall'
 
         def createList(self):
 	    import OpenGL.GL
