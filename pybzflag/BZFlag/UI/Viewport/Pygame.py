@@ -107,7 +107,6 @@ class PygameViewport(Viewport):
 
     def onFinishFrame(self):
         """Default onFinishFrame handler that flips the pygame buffers"""
-        print "Flipski"
         self.display.flip()
 
     def onEvent(self, event):
