@@ -24,7 +24,7 @@ over the network, frontends display and modify it.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag import World, Event
+from BZFlag import World, Event, Util
 from BZFlag.Protocol import Common
 import time
 
@@ -40,16 +40,13 @@ class Game:
         self.flags = {}      # Indexed by flag number
         self.teams = {}      # Indexed by color, represented as a string
         self.world = World.Empty()
-        self.lastUpdateTime = None
+        self.time  = Util.Timekeeper()
         Event.attach(self, 'onChangePlayerList', 'onAddPlayer', 'onRemovePlayer',
                      'onAddFlag')
 
     def update(self):
         """Update all time-dependant game state"""
-        now = time.time()
-        if self.lastUpdateTime is not None:
-            self.integrate(now - self.lastUpdateTime)
-        self.lastUpdateTime = now
+        self.integrate(self.time.step())
 
     def integrate(self, dt):
         """Integrate velocity with respect to time everywhere it's needed"""

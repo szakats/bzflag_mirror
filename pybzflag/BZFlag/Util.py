@@ -182,4 +182,25 @@ def autoFile(name, mode="r"):
         return name
 
 
+class Timekeeper:
+    """A class that keeps track of the amount of time elapsed between steps"""
+    def __init__(self):
+        self.lastTime = None
+
+    def time(self):
+        """Return the current time"""
+        import time
+        return time.time()
+
+    def step(self):
+        """Take a step, return the number of seconds since the last step."""
+        now = self.time()
+        if self.lastTime:
+            step = now - self.lastTime
+        else:
+            step = 0
+        self.lastTime = now
+        return step
+
+
 ### The End ###
