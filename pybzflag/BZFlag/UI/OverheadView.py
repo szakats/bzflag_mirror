@@ -120,6 +120,9 @@ class OverheadView:
             self.cachedWorld = None
         game.world.onLoad.observe(onLoadWorld)
 
+    def worldToView(self, point):
+        return coordWorldToView(self.size, self.game.world, point)
+
     def renderWorld(self, surface):
         """Render the normally-static world to the given surface. This uses worldToImage
            to draw a fairly high quality image using PIL, then converts it to a
