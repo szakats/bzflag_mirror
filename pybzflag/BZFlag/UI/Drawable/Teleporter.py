@@ -25,45 +25,52 @@ from OpenGL.GL import *
 
 
 class TeleporterField(DisplayList):
-    textureName = 'caust%02d.bw.jpeg:30.0'
+    textureName = 'caust%02d.bw.jpeg:50.0'
     def set(self, center, angle, size):
         self.center = center
         self.angle = angle
         self.size = size
         self.blended = True
 
+        texScale  = 8
+        texAspect = 1.3
+        self.texRepeats = (self.size[2] / (texScale * texAspect),
+                           self.size[1] / texScale)
+
     def drawToList(self):
-        glBlendFunc(GL_ONE, GL_ONE)
+        glBlendFunc(GL_SRC_COLOR, GL_ONE)
+        glDisable(GL_LIGHTING)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
-        glColor4f(1.0, 1.0, 1.0, 0.3)
+        glColor4f(0.89, 0.90, 0.99, 1.0)
         glDepthMask(0)
         glBegin(GL_QUADS)
         # X+ side
         glNormal3f(1, 0, 0)
         glTexCoord2f(0,0)
         glVertex3f(self.size[0] / 2, self.size[1], 0)
-        glTexCoord2f(1,0)
+        glTexCoord2f(self.texRepeats[0],0)
         glVertex3f(self.size[0] / 2, self.size[1], self.size[2])
-        glTexCoord2f(1,1)
+        glTexCoord2f(self.texRepeats[0],self.texRepeats[1])
         glVertex3f(self.size[0] / 2, -self.size[1], self.size[2])
-        glTexCoord2f(0,1)
+        glTexCoord2f(0,self.texRepeats[1])
         glVertex3f(self.size[0] / 2, -self.size[1], 0)
         # X- side
         glNormal3f(-1, 0, 0)
         glTexCoord2f(0,0)
         glVertex3f(-self.size[0] / 2, -self.size[1], 0)
-        glTexCoord2f(1,0)
+        glTexCoord2f(self.texRepeats[0],0)
         glVertex3f(-self.size[0] / 2, -self.size[1], self.size[2])
-        glTexCoord2f(1,1)
+        glTexCoord2f(self.texRepeats[0],self.texRepeats[1])
         glVertex3f(-self.size[0] / 2, self.size[1], self.size[2])
-        glTexCoord2f(0,1)
+        glTexCoord2f(0,self.texRepeats[1])
         glVertex3f(-self.size[0] / 2, self.size[1], 0)
         glEnd()
         glDepthMask(1)
         glColor3f(1.0, 1.0, 1.0)
         glPopMatrix()
+        glEnable(GL_LIGHTING)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 	
 
