@@ -23,6 +23,7 @@ A 3d scene renderer that does anaglyph stereo
 
 import math
 from BZFlag.UI.ThreeDRender import View
+from BZFlag.UI import Drawable
 from OpenGL.GL import *
 
 class AnaglyphView(View):
@@ -34,24 +35,25 @@ class AnaglyphView(View):
         """Render the view to the given surface. This includes the game
            world, with transient objects such as players and flags
            """
+	rstate = Drawable.RenderState(self)
         eyesep = 12.5
         angle = math.atan(eyesep / self.camera.distance)
         # draw left eye (blue-green)
         self.camera.azimuthOffset = -angle
         glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE)
         self.camera.load()
-        self.light0.set()
-        self.light1.set()
-        self.scene.render()
+        for light in self.lights:
+            light.set()
+        self.scene.render(rstate)
         glClear(GL_DEPTH_BUFFER_BIT)
         # draw right eye (red)
         self.camera = self.camera
         self.camera.azimuthOffset = angle
         glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_FALSE)
         self.camera.load()
-        self.light0.set()
-        self.light1.set()
-        self.scene.render()
+        for light in self.lights:
+            light.set()
+        self.scene.render(rstate)
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)
 
 ### The End ###
