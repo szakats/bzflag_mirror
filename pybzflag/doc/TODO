@@ -12,6 +12,9 @@ Todo list, in no particular order:
 
   - Unify the world cache and VRML cache
 
+  - Add gamma correction to GLText so that the alpha blending doesn't look hideous
+    when drawing light text on a dark background.
+
   - Add a way to remove observer clients easily. Perhaps it could be required that observer
     clients are bound methods, then there could be a way to remove all observer clients
     bound to a specific class instance.
