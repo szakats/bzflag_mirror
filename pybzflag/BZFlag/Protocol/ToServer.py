@@ -115,6 +115,7 @@ class MsgTeleport(Common.Message):
 MsgUDPLinkRequest = Common.MsgUDPLinkRequest
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgShotBegin = Common.MsgShotBegin
+MsgShotEnd = Common.MsgShotEnd
 MsgPlayerUpdate = Common.MsgPlayerUpdate
 MsgSetTTL = Common.MsgSetTTL
 MsgNull = Common.MsgNull
