@@ -59,6 +59,12 @@ class OpenGLViewport(PygameViewport):
         # By default we use ClearedMode.
         self.mode = ClearedMode()
 
+    def initRegion(self):
+        """Inherit a few defaults from the parent"""
+        self.nearClip = self.parent.nearClip
+        self.farClip  = self.parent.farClip
+        self.fov      = self.parent.fov
+
     def onSetupFrame(self):
         self.configureOpenGL()
         self.mode.setupFrame()

@@ -106,7 +106,7 @@ class Event:
            be broadcast to all of its observers.
            """
         if self.clients:
-            for client in self.clients.itervalues():
+            for client in self.clients.values():
                 r = client(*args, **kw)
                 # Allow the client to abort
                 if r:

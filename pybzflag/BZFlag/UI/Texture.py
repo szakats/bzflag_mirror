@@ -317,7 +317,8 @@ class DynamicTexture(Texture):
         """Force a dependency texture to render immediately"""
         if not dep.hasRenderState():
             dep.attachRenderState(self.rstate)
-        dep.rstate.viewport.render()
+        dep.rstate.viewport.configureOpenGL()
+        dep.drawFrame()
         assert(dep.rendered)
 
     def render(self):
