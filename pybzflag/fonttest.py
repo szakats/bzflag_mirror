@@ -14,8 +14,8 @@ viewport.setCaption("Font Test")
 viewport.fov = None   
 
 time = Animated.Timekeeper()
-spin = Animated.Value(Animated.Velocity(-80))
-zoom = Animated.Value(Animated.SineFunction(0.5, (1,1.4)))
+spin = Animated.Value(Animated.Velocity(80))
+zoom = Animated.Value(Animated.SineFunction(0.5, (0.8,1)))
 
 def drawFrame():
     # Gradient
@@ -44,7 +44,7 @@ def drawFrame():
     dt = time.step()
     spin.integrate(dt)
     zoom.integrate(dt)
-    GLText.drawCentered("Spinny-widget")
+    GLText.drawCentered("Spinny-widget", 30)
 
     glColor3f(0,0,0)
     glLoadIdentity()
