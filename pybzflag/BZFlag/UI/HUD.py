@@ -68,7 +68,14 @@ class Panel:
 
 class Text:
     """A view that draws a block of text."""
-    def __init__(self, viewport, text='', color=(1,1,1), fontSize=None, fontName=None, shadow=None):
+    def __init__(self, viewport,
+                 text         = '',
+                 color        = (1,1,1,1),
+                 fontSize     = None,
+                 fontName     = None,
+                 shadow       = False,
+                 shadowColor  = (0,0,0,0.6),
+                 shadowOffset = 2):
         viewport.fov = None
         self.viewport = viewport
         self.text = text
@@ -76,6 +83,8 @@ class Text:
         self.fontSize = fontSize
         self.fontName = fontName
         self.shadow = shadow
+        self.shadowColor = shadowColor
+        self.shadowOffset = shadowOffset
         viewport.onDrawFrame.observe(self.render)
         self.init()
 
@@ -97,11 +106,11 @@ class Text:
             glLoadIdentity()
             if self.shadow:
                 glPushMatrix()
-                glTranslatef(2,2,0)
-                glColor3f(0,0,0)
+                glTranslatef(self.shadowOffset, self.shadowOffset, 0)
+                glColor4f(*self.shadowColor)
                 GLText.draw(text, self.fontSize, self.fontName)
                 glPopMatrix()
-            glColor3f(*self.color)
+            glColor4f(*self.color)
             GLText.draw(text, self.fontSize, self.fontName)
 
 

@@ -117,10 +117,12 @@ class FrequencyCounter:
 
 class TextInstrument(HUD.Text):
     """Abstract base class that attaches to a viewport and overlays a text readout on it"""
-    def __init__(self, viewport, **kw):
+    def __init__(self, viewport):
         self.mainViewport = viewport
         margin = GLText.defaultSize / 2
-        HUD.Text.__init__(self, viewport.region(Layout.Rect(viewport).margin(margin), **kw))
+        HUD.Text.__init__(self, viewport.region(Layout.Rect(viewport).margin(margin)),
+                          shadow       = True,
+                          shadowOffset = 1)
 
 
 class FrameRate(TextInstrument):
