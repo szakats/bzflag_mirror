@@ -37,7 +37,7 @@ int cgGetArraySize(CGparameter, int);
 CGprogram cgGetParameterProgram(CGparameter prog);
 int cgIsParameter(CGparameter);
 const char *cgGetParameterName(CGparameter);
-CGtype cgGetParameterType(CGparameter);
+int cgGetParameterType(CGparameter);
 const char *cgGetParameterSemantic(CGparameter);
 CGresource cgGetParameterResource(CGparameter);
 CGresource cgGetParameterBaseResource(CGparameter);
@@ -49,8 +49,8 @@ const double *cgGetParameterValues(CGparameter, int, int *);
 int cgGetParameterOrdinalNumber(CGparameter);
 
 // type functions
-const char *cgGetTypeString(CGtype);
-CGtype cgGetType(const char *);
+const char *cgGetTypeString(int);
+int cgGetType(const char *);
 
 // resource functions
 const char *cgGetResourceString(CGresource);
