@@ -230,7 +230,7 @@ class StatefulClient(BaseClient):
         """Flag negotiation succeeded. This message tells us what IDs we should
            use to represent each flag over the wire.
            """
-        #self.onNegotiateFlags()
+        self.onNegotiateFlags()
 
     def onNegotiateFlags(self):
         """Immediately after flag negotiation we usually want to start downloading
