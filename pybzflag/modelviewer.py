@@ -39,6 +39,7 @@ for (name, drawable) in r.meshes.items():
 # Let the user pick objects with the left mouse button, printing the mesh name
 def onMouseButtonDown(event):
     if event.button == 1:
+        view.camera.load()
         print 'picked: %r' % view.pick(event.pos)
 viewport.onMouseButtonDown.observe(onMouseButtonDown)
 
