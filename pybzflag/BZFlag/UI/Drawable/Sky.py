@@ -20,59 +20,49 @@ A class to draw a sky cube at various times of day
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-from DisplayList import *
+from GLDrawable import GLDrawable
 from OpenGL.GL import *
+import VRML
+from BZFlag import Animated
 
-
-colorScheme = {
-    'sunrise': ( (0.04, 0.04, 0.08, 1),
-                 (0.04, 0.04, 0.08, 1),
-                 (0.04, 0.04, 0.08, 1),
-                 (0.04, 0.04, 0.08, 1),
-                 (0.47, 0.12, 0.08, 1),
-                 (0.04, 0.04, 0.08, 1) ),
-
-    'sunset': ( (0.04, 0.04, 0.08, 1),
-                (0.04, 0.04, 0.08, 1),
-                (0.04, 0.04, 0.08, 1),
-                (0.04, 0.04, 0.08, 1),
-                (0.47, 0.12, 0.08, 1),
-                (0.04, 0.04, 0.08, 1) ),
-
-    'night': ( (0.04, 0.04, 0.08, 1),
-               (0.04, 0.04, 0.08, 1),
-               (0.04, 0.04, 0.08, 1),
-               (0.04, 0.04, 0.08, 1),
-               (0.04, 0.04, 0.08, 1),
-               (0.04, 0.04, 0.08, 1) ),
-
-    'twilight': ( (0.04, 0.04, 0.08, 1),
-                  (0.04, 0.04, 0.08, 1),
-                  (0.04, 0.04, 0.08, 1),
-                  (0.04, 0.04, 0.08, 1),
-                  (0.30, 0.12, 0.08, 1),
-                  (0.04, 0.04, 0.08, 1) ),
-
-    'morning': ( (0.25, 0.55, 0.86, 1),
-                 (0.43, 0.75, 0.95, 1),
-                 (0.43, 0.75, 0.95, 1),
-                 (0.43, 0.75, 0.95, 1),
-                 (0.43, 0.75, 0.95, 1),
-                 (0.25, 0.55, 0.86, 1), ),
-
-    'evening': ( (0.25, 0.55, 0.86, 1),
-                 (0.43, 0.75, 0.95, 1),
-                 (0.43, 0.75, 0.95, 1),
-                 (0.43, 0.75, 0.95, 1),
-                 (0.43, 0.75, 0.95, 1),
-                 (0.25, 0.55, 0.86, 1), ),
-    }
-        
-        
-class Sky(DisplayList):
+class Colors(GLDrawable):
+    """The sky itself, with colors changing over the course of the day"""
+    textureName = 'sky_colors.png'
     def __init__(self):
-        DisplayList.__init__(self)
-        self.time = 'sunrise'
+        GLDrawable.__init__(self)
+        
+        # We render in a z-buffer-isolated pass before all other geometry.
+        # This means that we can work with the sky on a scale independent of the rest of the world.
+        self.render.background = True
 
-    def drawToList(self, rstate):
-        pass
+        # The mesh itself is in a display list, but this drawable needs to update the texture
+        # coordinates each frame, so don't cache this drawable in the big render pass display lists
+        self.render.static = False
+
+        # The period of a day, in seconds
+        self.period = 5
+
+        self.time = Animated.Timekeeper()
+        self.mesh = VRML.load("sky.wrl")['sky']
+
+    def draw(self, rstate):
+        glDisable(GL_LIGHTING)
+
+        # Use texture coordinate generation to set the time of day.
+        # The X axis of our texture is time, representing one day. The Y axis is spacial,
+        # stretching from the bottom of the sky sphere to the top.
+        timeOfDay = (self.time.time() % self.period) / self.period
+        glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (0, 0, 0, timeOfDay))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0.5, 0, 0.5))
+        glEnable(GL_TEXTURE_GEN_S)
+        glEnable(GL_TEXTURE_GEN_T)
+
+        self.mesh.draw(rstate)
+
+        glDisable(GL_TEXTURE_GEN_S)
+        glDisable(GL_TEXTURE_GEN_T)
+        glEnable(GL_LIGHTING)
+
+### The End ###

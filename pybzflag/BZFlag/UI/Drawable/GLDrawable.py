@@ -38,6 +38,7 @@ class RenderSettings:
         self.static = True
         self.decal = False
         self.reflection = False
+        self.background = False
 
     def __repr__(self):
         settings = [key for key in self.__dict__.iterkeys() if key[0] != '_']

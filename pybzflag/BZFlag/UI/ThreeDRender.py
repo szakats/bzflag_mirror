@@ -365,6 +365,30 @@ class OverlayRenderPass(BasicRenderPass):
         BasicRenderPass.render(self, rstate)
 
 
+class BackgroundRenderPass(BasicRenderPass):
+    """A rendering pass that draws objects behind the scene, with the camera's
+       translation removed and the Z-buffer cleared afterwards.
+       """
+    filterPriority = 20
+    renderPriority = 110
+
+    def filter(self, drawable):
+        return drawable.render.background
+
+    def render(self, rstate):
+        glPushMatrix()
+        # Strip out all but the top 3x3 square of the modelview matrix.
+        # This preserves the camera's location, but keeps it centered at 0,0,0
+        rotation = Numeric.identity(4, Numeric.Float32)
+        rotation[:3,:3] = glGetFloatv(GL_MODELVIEW_MATRIX)[:3,:3]
+        rotation[3,3] = 1
+        glLoadMatrixf(rotation)
+
+        BasicRenderPass.render(self, rstate)
+        glClear(GL_DEPTH_BUFFER_BIT)
+        glPopMatrix()
+
+
 class ReflectionRenderPass(DecalRenderPass):
     """A rendering pass for reflections. Reflections are blended onto reflective
        objects in a separate pass, and require the texture matrix to be set up as
@@ -419,7 +443,8 @@ class Scene:
                        BlendedRenderPass(),
                        OverlayRenderPass(),
                        DecalRenderPass(),
-                       ReflectionRenderPass()]
+                       ReflectionRenderPass(),
+                       BackgroundRenderPass()]
 
     def erase(self):
         self.objects = {}

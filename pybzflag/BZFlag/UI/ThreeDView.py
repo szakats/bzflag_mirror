@@ -81,6 +81,16 @@ class Tank:
         return self.drawables
 
 
+class Sky:
+    """A scene object representing the sky"""
+    def __init__(self):
+        from BZFlag.UI.Drawable import Sky
+        self.drawables = [Sky.Colors()]
+
+    def getDrawables(self):
+        return self.drawables
+
+
 class Scene(ThreeDRender.Scene):
     """A Scene class that builds on the functionality provided by ThreeDRender
        to provide a view of the current game world and other contents.
@@ -98,9 +108,14 @@ class Scene(ThreeDRender.Scene):
         game.onChangePlayerList.observe(self.changePlayerList)
         self.reloadWorld()
 
+    def initialize(self):
+        """Erase the scene, and add default scene objects that aren't part of the world"""
+        self.erase()
+        self.add(Sky())
+
     def reloadWorld(self):
         """Rebuild the internal scene structures from the game's world"""
-        self.erase()
+        self.initialize()
         for block in self.game.world.blocks:
             if isinstance(block, WorldObjects.WorldObject):
                 self.add(block)
@@ -127,6 +142,9 @@ class ThreeDView(ThreeDRender.View):
     def __init__(self, game, viewport):
         ThreeDRender.View.__init__(self, viewport, Scene(game))
         viewport.setCaption("%s 3D View" % BZFlag.name)
+
+        # We don't need the viewport to clear the color buffer for us, since we have the sky
+        viewport.clearColor = None
 
         def onDrawFrame():
             game.update()

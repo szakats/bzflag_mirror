@@ -211,8 +211,8 @@ class Viewing:
     def rotate(self, azimuth, elevation):
         self.view.camera.azimuth -= azimuth
         self.view.camera.elevation += elevation
-        if self.view.camera.elevation < 0:
-            self.view.camera.elevation = 0
+        if self.view.camera.elevation < -90:
+            self.view.camera.elevation = -90
         if self.view.camera.elevation > 90:
             self.view.camera.elevation = 90
 
