@@ -27,18 +27,39 @@ import BZFlag
 from BZFlag import Network, Protocol, Event, Errors
 
 
+class ClientInfo:
+    """A container for the sockets and IDs related to one client"""
+    def __init__(self, server, id, socket):
+        self.id  = id
+        self.server = server
+        self.socket = socket
+        self.address = socket.address
+        self.udpPort = None
+
+    def __str__(self):
+        return "<Client #%d at %s:%s>" % (self.id, self.address[0], self.address[1])
+
+    def write(self, data, protocol='tcp'):
+        if protocol == 'udp' and self.udpPort:
+            self.server.udp.writeTo(data, (self.address[0], self.udpPort))
+        else:
+            self.socket.write(data)
+
+
 class BaseServer(Network.Endpoint):
     """On top of the basic message processing provided by Network.Endpoint,
        this class manages connections from clients.
        """
-
     outgoing = Protocol.FromServer
     incoming = Protocol.ToServer
+    clientInfoClass = ClientInfo
     
     def init(self):
         Network.Endpoint.init(self)
         self.protocolVersion = BZFlag.protocolVersion
-        self.clients = {}
+        self.clientsByID = {}
+        self.clientsBySocket = {}
+        self.clientsByIP = {}
         self.nextClientID = 0
         self.clientIDIncrement = 1
         self.options.update({
@@ -75,18 +96,30 @@ class BaseServer(Network.Endpoint):
         """This is called when a new connection to the server is made.
            It sends the hello packet, and sets up a new client socket.
            """
-        # On a new client connection, send them the
-        # hello packet and add to our dict of clients.
+        # Open a new client connection, add to our event loop
         clientSocket = socket.accept()
+        clientSocket.handler = self.handleMessage
+        self.eventLoop.add(clientSocket)
+
+        # Generate a new client ID, and tell the client in a hello packet
         clientId = self.getNewClientID()
-        clientSocket.id = clientId
-        self.clients[clientId] = clientSocket
         hello = self.outgoing.HelloPacket(version = self.protocolVersion,
                                           clientId = clientId)
-        self.eventLoop.add(clientSocket)
-        clientSocket.handler = self.handleMessage
         clientSocket.write(hello)
-        self.onConnect(clientSocket)
+
+        # Create a class to contain our client info, and file
+        # it by ID, TCP socket, and by address.
+        info = self.clientInfoClass(server, clientId, clientSocket)
+        self.clientsByID[info.id] = info
+        self.clientsBySocket[info.socket] = info
+
+        # Keep a list of all clients at any particular IP address
+        ip = info.address[0]
+        if not self.clientsByIP.has_key(ip):
+            self.clientsByIP[ip] = []
+        self.clientsByIP[ip].append(info)
+
+        self.onConnect(info)
 
     def handleMessage(self, socket, eventLoop):
         """This is called when new data is received from the client.
@@ -95,21 +128,57 @@ class BaseServer(Network.Endpoint):
            safely.
            """
         try:
-            if socket == self.udp:
-                print "UDP:"
-                from BZFlag import Util
-                print Util.hexDump(socket.recv(1024))
-            else:
-                Network.Endpoint.handleMessage(self, socket, eventLoop)
+            Network.Endpoint.handleMessage(self, socket, eventLoop)
         except Errors.ConnectionLost:
             try:
-                del self.clients[socket.id]
+                info = self.clientsBySocket[socket]
+                del self.clientsByID[info.id]
+                del self.clientsBySocket[info.socket]
+
+                # clientsByID might still contain other clients at the same IP
+                ip = info.address[0]
+                l = self.clientsByIP[ip]
+                l.remove(info)
+                if not l:
+                    del self.clientsByIP[ip]
+
                 self.eventLoop.remove(socket)
-                self.onDisconnect(socket)
+                self.onDisconnect(info)
             except KeyError:
                 # Already disconnected
                 pass
 
+    def getClientByUDPAddress(self, udpAddress):
+        """Given the from address of a UDP message try to determine
+           what client it came from.
+           """
+        # We can narrow it down to all the clients at one IP easily
+        try:
+            clients = self.clientsByIP[udpAddress[0]]
+        except KeyError:
+            return None
+
+        # If there's only one, we're done. This is helpful for NAT-tolerance
+        if len(clients) == 1:
+            return clients[0]
+
+        # Now find the one that has the correct UDP port
+        for client in clients:
+            if client.udpPort == udpAddress[1]:
+                return client
+        return None
+
+    def dispatchMessage(self, msg):
+        """Before sending off our message, look up what client it came from"""
+        if msg.socket == self.udp:
+            # Figure out where this message came from by its address.
+            # If we can't, assume it's just UDP spam and ignore it.
+            msg.client = self.getClientByUDPAddress(msg.fromAddress)
+            if not msg.client:
+                return
+        else:
+            msg.client = self.clientsBySocket[msg.socket]
+        Network.Endpoint.dispatchMessage(self, msg)
 
     def onMsgNetworkRelay(self, msg):
         """This is sent by the client when it can't do multicast.
@@ -123,11 +192,11 @@ class BaseServer(Network.Endpoint):
 
     def onMsgUDPLinkRequest(self, msg):
         """Client just sent us its UDP port, and wants to know ours"""
-        msg.socket.udpPort = msg.port
+        msg.client.udpPort = msg.port
         msg.socket.write(self.outgoing.MsgUDPLinkRequest(port = self.udp.port))
 
     def onMsgUDPLinkEstablished(self, msg):
-        if not hasattr(msg.socket, 'udpPort'):
+        if not msg.client.udpPort:
             raise Errors.ProtocolWarning(
                 "Client sent a MsgUDPLinkEstablished without sending MsgUDPLinkRequest")
 

@@ -266,22 +266,32 @@ class UDPSocket(BaseSocket):
 
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.maxPacketSize = 64*1024
         self.setBlocking()
 
-    def read(self, size=64*1024):
+    def read(self, size=None):
+        if not size:
+            size = self.maxPacketSize
         return self.recv(size)
 
     def write(self, data):
+        """This will send data to the default destination set with connect()"""
         self.socket.send(str(data))
+
+    def writeTo(self, data, address):
+        self.socket.sendto(str(data), address)
 
     def unread(self, data):
         pass
 
     def readMessage(self, msgModule):
         """Read a message, using the supplied module full of Message subclasses."""
-        packet = self.read()
+        (packet, address) = self.socket.recvfrom(self.maxPacketSize)
         header = Common.MessageHeader(packet)
-        return self.lookupMessage(msgModule, header.id)(packet)
+        msg = self.lookupMessage(msgModule, header.id)(packet)
+        if msg:
+            msg.fromAddress = address
+        return msg
 
 
 class Endpoint:
@@ -365,10 +375,14 @@ class Endpoint:
         if msg:
             msg.socket = socket
             msg.eventLoop = eventLoop
-            handler = getattr(self, self.getMsgHandlerName(msg.__class__))
-            if self.onAnyMessage(msg):
-                return
-            handler(msg)
+            self.dispatchMessage(msg)
+
+    def dispatchMessage(self, msg):
+        """After a complete message has been received, figure out where to send it"""
+        handler = getattr(self, self.getMsgHandlerName(msg.__class__))
+        if self.onAnyMessage(msg):
+            return
+        handler(msg)
 
     def onUnhandledMessage(self, msg):
         raise Errors.ProtocolWarning("Unhandled message %s" % msg.__class__.__name__)

@@ -118,12 +118,12 @@ class StatefulServer(BaseServer):
         for flag in self.game.flags.values():
             if not flag.abbreviation in supportedFlags:
                 missingFlags.append(flags)
-        msg.socket.write(self.outgoing.MsgNegotiateFlags(
+        msg.client.write(self.outgoing.MsgNegotiateFlags(
             data = Flag.joinAbbreviations(missingFlags)))
 
     def onMsgWantWHash(self, msg):
         """Send the client an MD5 hash of the current world"""
-        msg.socket.write(self.outgoing.MsgWantWHash(
+        msg.client.write(self.outgoing.MsgWantWHash(
             lifetime = self.game.world.lifetime,
             hash = self.game.world.getHash()))
 
@@ -136,7 +136,7 @@ class StatefulServer(BaseServer):
             self.binaryWorld = f.getvalue()
 
         block = self.binaryWorld[msg.offset:msg.offset + self.worldBlockSize]
-        msg.socket.write(self.outgoing.MsgGetWorld(
+        msg.client.write(self.outgoing.MsgGetWorld(
             remaining = len(self.binaryWorld) - msg.offset - len(block),
             data = block))
 
@@ -165,10 +165,10 @@ class StatefulServer(BaseServer):
         if reason:
             # An observer vetoed the request, deny it
             # using the given reason
-            msg.socket.write(self.outgoing.MsgReject(reason=reason))
+            msg.client.write(self.outgoing.MsgReject(reason=reason))
         else:
             # Accept it. The player is now in the game.
-            msg.socket.write(self.outgoing.MsgAccept())
+            msg.client.write(self.outgoing.MsgAccept())
             self.onEnter(msg)
             self.onFinishEnter(msg)
             self.onWelcome(msg)
@@ -177,8 +177,8 @@ class StatefulServer(BaseServer):
         """Finish the process of entering a client into the game by
            sending it a MsgAddPlayer for itself.
            """
-        msg.socket.write(self.outgoing.MsgAddPlayer(
-            id           = msg.socket.id,
+        msg.client.write(self.outgoing.MsgAddPlayer(
+            id           = msg.client.id,
             type         = msg.playerType,
             team         = msg.team,
             wins         = 0,
@@ -191,10 +191,9 @@ class StatefulServer(BaseServer):
         """Event triggered after a player has completely entered the
            game, to welcome them in with a message.
            """
-        print "Hiya"
-        msg.socket.write(self.outgoing.MsgMessage(
+        msg.client.write(self.outgoing.MsgMessage(
             fromId = 'server',
-            toId = msg.socket.id,
+            toId = msg.client.id,
             message = self.options['welcomeMessage']))
 
 ### The End ###
