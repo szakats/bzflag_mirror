@@ -315,25 +315,55 @@ class RandomEmitter(Emitter):
         return randomDirections
 
 
-class LinearFadeAffector(Affector):
-    """Causes particles to shrink and/or change color linearly over the course of their life.
-       Must be used with a Fountain instance as the model, and the model must have an Emitter attached.
+class FountainFadeAffector(Affector):
+    """Causes particles in a Fountain to shrink and/or change color over the course of their life.
+
+       Functions can be supplied to map the particle's lifetimes to interpolants. The 'lifeFunction'
+       is evaluated first, if present, then its output is passed to 'sizeFunction' and 'colorFunction'.
+       All functions default to an identity.
+       The functions will be processing all life values at once, so they should be written to accept
+       and return Numeric arrays.
        """
-    def __init__(self, model, sizeRange=(0,1), colorRange=((0,0,0,0), (1,1,1,1))):
+    def __init__(self, model,
+                 sizeRange     = (0,1),
+                 colorRange    = ((0,0,0,0), (1,1,1,1)),
+                 lifeFunction  = None,
+                 sizeFunction  = None,
+                 colorFunction = None,
+                 ):
         Affector.__init__(self, model)
         self.sizeConst = sizeRange[0]
         self.sizeCoeff = sizeRange[1] - sizeRange[0]
         colorRange = asarray(colorRange)
         self.colorConst = colorRange[0]
         self.colorCoeff = colorRange[1] - colorRange[0]
+        self.sizeFunction = sizeFunction
+        self.colorFunction = colorFunction
+        self.lifeFunction = lifeFunction
 
     def integrate(self, dt):
-        self.model.sizes[...] = self.model.life * self.sizeCoeff + self.sizeConst
+        if self.lifeFunction:
+            life = self.lifeFunction(self.model.life)
+        else:
+            life = self.model.life
+
+        if self.sizeFunction:
+            sizeLife = self.sizeFunction(life)
+        else:
+            sizeLife = life
+
+        if self.colorFunction:
+            colorLife = self.colorFunction(life)
+        else:
+            colorLife = life
+
+        self.model.sizes[...] = sizeLife * self.sizeCoeff + self.sizeConst
         put(self.model.sizes, self.model.hiddenIndices, 0)
-        self.model.colors[...,0] = self.model.life * self.colorCoeff[...,0] + self.colorConst[...,0]
-        self.model.colors[...,1] = self.model.life * self.colorCoeff[...,1] + self.colorConst[...,1]
-        self.model.colors[...,2] = self.model.life * self.colorCoeff[...,2] + self.colorConst[...,2]
-        self.model.colors[...,3] = self.model.life * self.colorCoeff[...,3] + self.colorConst[...,3]
+
+        self.model.colors[...,0] = colorLife * self.colorCoeff[...,0] + self.colorConst[...,0]
+        self.model.colors[...,1] = colorLife * self.colorCoeff[...,1] + self.colorConst[...,1]
+        self.model.colors[...,2] = colorLife * self.colorCoeff[...,2] + self.colorConst[...,2]
+        self.model.colors[...,3] = colorLife * self.colorCoeff[...,3] + self.colorConst[...,3]
 
 
 class ClothSpringAffector(Affector):
