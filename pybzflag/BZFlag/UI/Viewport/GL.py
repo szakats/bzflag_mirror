@@ -210,6 +210,7 @@ class ClearedMode(ViewportMode):
         glClearColor(*self.clearColor)
         ViewportMode.setupFrame(self)
 
+
 class WireframeMode(ClearedMode):
     """A viewport mode that draws all polygons in wireframe, with
        a different clear color that makes them stand out better.
@@ -219,5 +220,57 @@ class WireframeMode(ClearedMode):
 
     def setPolygonMode(self):
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+
+class XRayMode(ClearedMode):
+    """A viewport mode that shades the scene afterward according to depth complexity.
+       More opaque shading indicates more pixels have been rendered at that location.
+       The name 'X-Ray Mode' comes from it's ability to see through objects, visually
+       representing their density.
+       """
+    clearBuffers = ClearedMode.clearBuffers | GL_STENCIL_BUFFER_BIT
+    
+    def __init__(self, clearColor=(0,0,0,1), xRayColor=(1,0,0,1), depthRange=8):
+        ClearedMode.__init__(self, clearColor)
+        self.xRayColor = xRayColor
+        self.depthRange = range(depthRange)
+
+    def setupFrame(self):
+        """Every time a pixel is drawn, increment the stencil buffer"""
+        glEnable(GL_STENCIL_TEST)
+        glClearStencil(0)
+        ClearedMode.setupFrame(self)
+        glStencilFunc(GL_ALWAYS, 0, 0xFF)
+        glStencilOp(GL_KEEP, GL_INCR, GL_INCR)
+
+    def finishFrame(self):
+        """Render several rectangles over the scene, each testing against
+           a different value of the stencil buffer and drawn using a
+           corresponding alpha component in its color.
+           """
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP)
+        glDisable(GL_TEXTURE_2D)
+        glDisable(GL_LIGHTING)
+        glEnable(GL_BLEND)
+
+        for value in self.depthRange:
+            if value == self.depthRange[-1]:
+                glStencilFunc(GL_LEQUAL, value, 0xFF)
+            else:
+                glStencilFunc(GL_EQUAL, value, 0xFF)
+
+            unitDepth = float(value) / self.depthRange[-1]
+
+            glColor4f(self.xRayColor[0],
+                      self.xRayColor[1],
+                      self.xRayColor[2],
+                      self.xRayColor[3] * unitDepth)
+            glRectf(-1, -1, 1, 1)
+        glDisable(GL_STENCIL_TEST)
 
 ### The End ###
