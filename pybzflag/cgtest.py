@@ -41,7 +41,7 @@ testColor = cgGetNamedParameter(program, 'IN.TestColor')
 CheckCGError()
 
 
-HUD.Text(viewport.region(Layout.Rect(viewport).margin(10)), programString)
+HUD.Text(viewport.region(Layout.Rect(viewport).margin(10)), programString, fontSize=12)
 
 loop.run()
 

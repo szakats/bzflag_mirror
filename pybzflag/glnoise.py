@@ -19,7 +19,8 @@ class TestObject:
     def __init__(self):
         ground = Drawable.Ground(400)
         ground.baseTexRepeats = 4
-        ground.render.textures = (GLNoise.MappedPerlinTexture(),)
+        ground.render.blended = True
+        ground.render.textures = (GLNoise.CloudTexture(),)
         self.drawables = [ground]
     
     def getDrawables(self):

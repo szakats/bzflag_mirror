@@ -317,11 +317,18 @@ class MappedPerlinTexture(PerlinTexture):
         for i in xrange(mapSize):
             self.table[i] = self.map(i / (mapSize-1))
               
-    def map(self, v):
-        """Mapping function. Input and output are grayscale values from 0 to 1.
+    def map(self, y):
+        """Mapping function. Input and output are luminance values from 0 to 1.
            Default is an identity mapping.
            """
-        return v
+        return y
+
+
+class CloudTexture(MappedPerlinTexture):
+    """Perlin noise with mapping applied to create a cloud-like texture"""
+    def map(self, y):
+        return exp(y-1.0)
+
 
 ### The End ###
 
