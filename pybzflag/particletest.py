@@ -20,18 +20,14 @@ class GlowSphere(Drawable.SpriteArray):
 
         self.model.add(ParticleSystem.RandomEmitter,
                        spawnRate           = 95,
-                       speedRange          = (4, 10),
+                       speedRange          = (4, 50),
                        direction           = (0, 0, 1),
                        directionRandomness = 0.2,
                        position            = (0, 0, -2),
                        )
-        self.model.add(ParticleSystem.LifespanAffector,
-                       lifespan            = 1,
-                       )
-        self.model.add(ParticleSystem.LinearFadeAffector,
-                       sizeRange           = (0, 1),
-                       colorRange          = ( (0,0,0,0), (1,1,1,1) ),
-                       )
+        self.model.add(ParticleSystem.LifespanAffector, 1)
+        self.model.add(ParticleSystem.LinearFadeAffector)
+        self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,-0.4))
 
     def draw(self, rstate):
         self.model.integrate(self.time.step())
