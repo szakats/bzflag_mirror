@@ -41,14 +41,14 @@ class AnaglyphView(ThreeDView):
         """Render the view to the given surface. This includes the game
            world, with transient objects such as players and flags
            """
-        # draw left eye (red)
+        # draw left eye (blue-green)
 	self.camera1 = self.camera
 	self.camera1.azimuth -= 1
         glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_FALSE)
         self.camera1.load()
         self.scene.render()
 	glClear(GL_DEPTH_BUFFER_BIT)
-        # draw right eye (blue-green)
+        # draw right eye (red)
 	self.camera2 = self.camera
 	self.camera2.azimuth += 1
         glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE)
