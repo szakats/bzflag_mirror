@@ -132,7 +132,11 @@ class Scene:
     def __init__(self, game):
         self.game = game
         self.objects = {}
-        self.passes = [{}, {}]
+
+        self.defaultPass = {}
+        self.blendedPass = {}
+        self.passes = [self.defaultPass, self.blendedPass]
+
         game.world.onLoad.observe(self.reloadWorld)
         self.reloadWorld()
 
@@ -149,16 +153,15 @@ class Scene:
            """
         for object, drawables in self.objects.items():
             for drawable in drawables:
+                rpass = self.defaultPass
                 if drawable.blended:
-                    if self.passes[1].has_key(drawable.texture):
-                        self.passes[1][drawable.texture].drawables.append(drawable)
-                    else:
-                        self.passes[1][drawable.texture] = TextureGroup([drawable])
+                    rpass = self.blendedPass
+                    
+                if rpass.has_key(drawable.texture):
+                    rpass[drawable.texture].drawables.append(drawable)
                 else:
-                    if self.passes[0].has_key(drawable.texture):
-                        self.passes[0][drawable.texture].drawables.append(drawable)
-                    else:
-                        self.passes[0][drawable.texture] = TextureGroup([drawable])
+                    rpass[drawable.texture] = TextureGroup([drawable])
+
         for p in self.passes:
             for texgroup in p.values():
                 texgroup.buildList()
@@ -186,9 +189,9 @@ class Scene:
         glDisable(GL_LINE_SMOOTH)
         glColor4f(1,1,1,1)
 
-        self.renderPass(self.passes[0])
+        self.renderPass(self.defaultPass)
         glEnable(GL_BLEND)
-        self.renderPass(self.passes[1])
+        self.renderPass(self.blendedPass)
 
 
 class ThreeDView:
