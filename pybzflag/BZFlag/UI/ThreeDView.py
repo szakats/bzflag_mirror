@@ -59,14 +59,14 @@ class Light:
         self.diffuse  = (0, 0, 0, 1.0)
         self.position = (0, 0, 0, 1.0)
         self.lightnum = lightnum
-        
+
     def set(self):
         """Set up and enable the light in the current OpenGL context"""
         glLightfv(self.lightnum, GL_AMBIENT, self.ambient)
         glLightfv(self.lightnum, GL_DIFFUSE, self.diffuse)
         glLightfv(self.lightnum, GL_POSITION, self.position)
         glEnable(self.lightnum)
-        
+
 
 class Scene:
     """Set of all the objects this view sees, organized into rendering passes
@@ -187,6 +187,12 @@ class ThreeDController:
         self.mouseRotateScale = 5.0
         view.camera.position = (0, 0, -20)
 
+	class modifiers:
+	    pass
+	modifiers.shift = False
+	modifiers.alt = False
+	modifiers.control = False
+
         time = Animated.Timekeeper()
         def onSetupFrame():
             dt = time.step()
@@ -210,10 +216,42 @@ class ThreeDController:
                 self.zoom(self.keyZoomScale)
             if event.unicode == "=":
                 self.zoom(1/self.keyZoomScale)
+            if event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
+                modifiers.shift = True
+            if event.key == pygame.K_RALT or event.key == pygame.K_LALT:
+                modifiers.alt = True
         viewport.onKeyDown.observe(onKeyDown)
 
+        def onKeyUp(event):
+            if event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
+                modifiers.shift = False
+            if event.key == pygame.K_RALT or event.key == pygame.K_LALT:
+                modifiers.alt = False
+        viewport.onKeyUp.observe(onKeyUp)
+
         def onMouseMotion(event):
-            if event.buttons[2]:
+            if modifiers.shift:
+	      if event.buttons[1]:
+		(x, y, z) = view.camera.position
+		xscale = math.cos((view.camera.azimuth) * 3.1415926 / 180)
+		yscale = math.sin((view.camera.azimuth) * 3.1415926 / 180)
+		xmove = event.rel[0] * xscale
+		ymove = event.rel[1] * yscale
+		x = math.cos((view.camera.azimuth) * 3.1415926 / 180) / xmove
+		y = math.sin((view.camera.azimuth) * 3.1415926 / 180) / ymove
+		view.camera.position = (x, y, z)
+	      return
+	    if modifiers.alt:
+	      if event.buttons[1]:
+		(x, y, z) = view.camera.position
+		z -= event.rel[1]
+		if z > 0:
+		  z = 0
+		if z < -1000:
+		  z = -1000
+		view.camera.position = (x, y, z)
+	      return
+            if event.buttons[1]:
                 view.camera.azimuth += event.rel[0] / self.mouseRotateScale
                 view.camera.elevation += event.rel[1] / self.mouseRotateScale
                 if view.camera.elevation > 0:
@@ -240,7 +278,6 @@ class ThreeDController:
 
     def rotate(self, scale):
         self.rotation.f.target *= scale
-
 
 def attach(game, eventLoop):
     from BZFlag.UI.Viewport import OpenGLViewport
