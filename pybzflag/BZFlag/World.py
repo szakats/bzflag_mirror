@@ -130,8 +130,6 @@ class World:
             except KeyError:
                 raise Errors.ProtocolError(
                     "Unknown block type 0x%04X in binary world data" % header.id)
-            if isinstance(block, WorldObjects.EndOfData):
-                break
 
             # Read the block body
             packedBody = f.read(block.getSize() - len(packedHeader))
@@ -139,7 +137,16 @@ class World:
                 raise Errors.ProtocolError("Incomplete block in binary world data")
             block.unmarshall(packedHeader + packedBody)
             self.storeBlock(block)
+
+            # We're done if this was the EndOfData block
+            if isinstance(block, WorldObjects.EndOfData):
+                break
         self.postprocess()
+
+    def saveBinary(self, f):
+        """Save a binary world to the supplied file-like object"""
+        for block in self.blocks:
+            f.write(str(block))
 
     def saveText(self, f):
         """Save a text world to the supplied file-like object"""
