@@ -39,8 +39,8 @@ CheckCGError()
 testColor = cgGetNamedParameter(program, 'IN.TestColor')
 CheckCGError()
 
-
 # do drawing loop
+loop.run()
 
 cgDestroyProgram(program)
 cgDestroyContext(context)
