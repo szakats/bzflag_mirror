@@ -186,8 +186,6 @@ ostream & operator << (ostream & dest, Element &src) {
     dest << (*src.p);
   } else if(src.type == Element::TELEPORTER) {
     dest << (*src.t);
-  } else if(src.type == Element::LINK) {
-    dest << (*src.l);
   }
   return dest;
 }

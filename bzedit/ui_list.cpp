@@ -57,6 +57,8 @@ gint select_row(GtkCList *clist, gint row, gint column, GdkEventButton *event, g
   World *world = (World *) gtk_object_get_data(GTK_OBJECT(clist), "world");
   MainWindow *mainw = (MainWindow *) gtk_object_get_data(GTK_OBJECT(clist), "mainw");
   (*world)[row].selected = true;
+  if((*world)[row].type == Element::LINK)
+    mainw->showLinkWin(&((*world)[row]));
   mainw->update(MW::EDITWINS | MW::SPINVALUES);
   mainw->update(MW::SPINS);
   return TRUE;
@@ -66,6 +68,8 @@ gint unselect_row(GtkCList *clist, gint row, gint column, GdkEventButton *event,
   World *world = (World *) gtk_object_get_data(GTK_OBJECT(clist), "world");
   MainWindow *mainw = (MainWindow *) gtk_object_get_data(GTK_OBJECT(clist), "mainw");
   (*world)[row].selected = false;
+  if((*world)[row].type == Element::LINK)
+    mainw->destroyLinkWin();
   mainw->update(MW::EDITWINS | MW::SPINVALUES);
   mainw->update(MW::SPINS);
   return TRUE;

@@ -3,6 +3,7 @@
 
 #include <gnome.h>
 #include <vector>
+#include <string>
 #include "camera.h"
 #include "element.h"
 
@@ -20,6 +21,8 @@ class World : public vector<Element> {
     bool append(char *filename);
     bool write(char *filename);
     Element getElementByName(string name);
+    Element getElementByTypeNumber(int type, int number);
+    int getElementTypeNumberByName(string name);
     World operator = (World &w);
   private:
     void sort();

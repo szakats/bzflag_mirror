@@ -382,6 +382,7 @@ void MainWindow::showLinkWin(Element *link) {
   gtk_object_set_data(GTK_OBJECT(ok), "clist1", clist1);
   gtk_object_set_data(GTK_OBJECT(ok), "clist2", clist2);
   gtk_object_set_data(GTK_OBJECT(ok), "dialog", dialog);
+  gtk_object_set_data(GTK_OBJECT(ok), "mainw", this);
   gtk_widget_show(ok);
   gtk_signal_connect(GTK_OBJECT(ok), "clicked", GTK_SIGNAL_FUNC(MW::linkok), link);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), ok, TRUE, TRUE, 0);
@@ -391,6 +392,12 @@ void MainWindow::showLinkWin(Element *link) {
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), cancel, TRUE, TRUE, 0);
   gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
   gtk_widget_show(dialog);
+
+  linkwin = dialog;
+}
+
+void MainWindow::destroyLinkWin() {
+  gtk_widget_destroy(linkwin);
 }
 
 namespace MW {
@@ -773,6 +780,7 @@ gint linkok(GtkWidget *button, Element *link) {
   GtkWidget *clist1 = GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(button), "clist1"));
   GtkWidget *clist2 = GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(button), "clist2"));
   GtkWidget *dialog = GTK_WIDGET(gtk_object_get_data(GTK_OBJECT(button), "dialog"));
+  MainWindow *mainw = (MainWindow *) gtk_object_get_data(GTK_OBJECT(button), "mainw");
   char **text;
   int selection1 = (int) gtk_object_get_data(GTK_OBJECT(clist1), "selection") - 1;
   int selection2 = (int) gtk_object_get_data(GTK_OBJECT(clist2), "selection") - 1;
@@ -799,7 +807,7 @@ gint linkok(GtkWidget *button, Element *link) {
   link->l->set_from_side(side1);
   link->l->set_to(name2);
   link->l->set_to_side(side2);
-  gtk_widget_destroy(dialog);
+  mainw->destroyLinkWin();
   return TRUE;
 }
 

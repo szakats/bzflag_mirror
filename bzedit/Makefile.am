@@ -36,6 +36,7 @@ bzedit_LDADD = \
 	@GL_LIBS@
 
 EXTRA_DIST = \
+	data/basicon.png \
 	data/boxicon.png \
 	data/boxwall.tga \
 	data/caution.tga \

@@ -439,6 +439,83 @@ ostream & operator << (ostream &dest, Teleporter &src) {
   return dest;
 }
 
+Base::Base() : Object() {
+  color = 1;
+}
+
+Base::Base(const Base &b) {
+  this->px = b.px;
+  this->py = b.py;
+  this->pz = b.pz;
+  this->color = b.color;
+  this->sx = b.sx;
+  this->sy = b.sy;
+  this->sz = b.sz;
+  this->color = b.color;
+}
+
+Base Base::operator = (const Base &b) {
+  this->px = b.px;
+  this->py = b.py;
+  this->pz = b.pz;
+  this->color = b.color;
+  this->sx = b.sx;
+  this->sy = b.sy;
+  this->sz = b.sz;
+  this->color = b.color;
+  return *this;
+}
+
+void Base::render(Camera &c, bool transparent) {
+  glLoadIdentity();
+  c.setup();
+  glDisable(GL_TEXTURE_2D);
+  glEnable(GL_COLOR_MATERIAL);
+  switch(color) {
+    case 1:
+      glColor3f(1.0, 0.0, 0.0);
+      break;
+    case 2:
+      glColor3f(0.0, 1.0, 0.0);
+      break;
+    case 3:
+      glColor3f(0.0, 0.0, 1.0);
+      break;
+    case 4:
+      glColor3f(1.0, 0.0, 1.0);
+      break;
+  }
+  glColor3f(1.0, 1.0, 1.0);
+  glTranslatef(px, py, pz);
+  glRotatef(angle, 0, 0, 1);
+  glBegin(GL_QUADS); {
+    glVertex3f(-sx, -sy, 0);
+    glVertex3f(-sx, sy, 0);
+    glVertex3f(sx, sy, 0);
+    glVertex3f(sx, -sy, 0);
+  } glEnd();
+  glDisable(GL_COLOR_MATERIAL);
+  glEnable(GL_TEXTURE_2D);
+}
+
+void Base::set_color(int color) {
+  this->color = color;
+}
+
+int Base::get_color() {
+  return color;
+}
+
+ostream & operator << (ostream &dest, Base &src) {
+  dest << "base\n";
+  dest << "position " << src.get_px() << ' ' << src.get_py() << ' ' << src.get_pz() << endl;
+  dest << "rotation " << src.get_angle() << endl;
+  dest << "size " << src.get_sx() << ' ' << src.get_sy() << ' ' << src.get_sz() << endl;
+  dest << "color " << src.get_color() << endl;
+  dest << "end\n\n";
+  return dest;
+}
+
 Link::Link() {
   from = "";
   from_side = 0;
@@ -547,12 +624,4 @@ string Link::get_to() {
 
 int Link::get_to_side() {
   return to_side;
-}
-
-ostream & operator << (ostream &dest, Link &src) {
-  dest << "link" << endl;
-  dest << "from " << src.from << endl;
-  dest << "to " << src.to << endl;
-  dest << "end" << endl;
-  return dest;
 }

@@ -155,7 +155,7 @@ need_gnome_support = @need_gnome_support@
 smbfs = @smbfs@
 
 data1dir = /usr/local/share/bzedit/data
-data1_DATA = boxwall.tga             caution.tga 	    ground.tga 	    pyrwall.tga 	    roof.tga 	    wall.tga 	    boxicon.png 	    pyricon.png 	    telicon.png 	    lnkicon.png
+data1_DATA = boxwall.tga             caution.tga 	    ground.tga 	    pyrwall.tga 	    roof.tga 	    wall.tga 	    boxicon.png 	    pyricon.png 	    telicon.png 	    lnkicon.png 	    basicon.png
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h

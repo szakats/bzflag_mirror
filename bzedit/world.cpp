@@ -304,6 +304,28 @@ bool World::load(char *filename) {
       delete el;
       continue;
     } else if(x == "link") {
+      el = new Element;
+      el->makeLink();
+      while(x != "end") {
+	if(x == "to") {
+	  file >> x;
+	  el->l->set_to_side((atoi(x.c_str()) % 2));
+	  el->l->set_to(getElementByTypeNumber(Element::TELEPORTER, (int) (atoi(x.c_str()) / 2)).name);
+	}
+	if(x == "from") {
+	  file >> x;
+	  el->l->set_from_side((atoi(x.c_str()) % 2));
+	  el->l->set_from(getElementByTypeNumber(Element::TELEPORTER, (int) (atoi(x.c_str()) / 2)).name);
+	}
+	file >> x;
+      }
+      if(nextname != "") {
+	el->name = nextname;
+	nextname = "";
+      }
+      uniqueName(*el);
+      push_back(*el);
+      delete el;
     } else if(x.c_str()[0] == '#') {
       file.get(temp2, 82);
       file.ignore(82, '\n');
@@ -430,6 +452,28 @@ bool World::append(char *filename) {
       push_back(*el);
       delete el;
     } else if(x == "link") {
+      el = new Element;
+      el->makeLink();
+      while(x != "end") {
+	if(x == "to") {
+	  file >> x;
+	  el->l->set_to_side((atoi(x.c_str()) % 2));
+	  el->l->set_to(getElementByTypeNumber(Element::TELEPORTER, (int) (atoi(x.c_str()) / 2)).name);
+	}
+	if(x == "from") {
+	  file >> x;
+	  el->l->set_from_side((atoi(x.c_str()) % 2));
+	  el->l->set_from(getElementByTypeNumber(Element::TELEPORTER, (int) (atoi(x.c_str()) / 2)).name);
+	}
+	file >> x;
+      }
+      if(nextname != "") {
+	el->name = nextname;
+	nextname = "";
+      }
+      uniqueName(*el);
+      push_back(*el);
+      delete el;
     } else if(x.c_str()[0] == '#') {
       file.get(temp2, 82);
       file.ignore(82, '\n');
@@ -451,7 +495,18 @@ bool World::write(char *filename) {
   file << "# http://jupiter.babylonia.flatirons.org/\n\n";
   for(unsigned int i = 0; i < size(); i++) {
     file << "#!name " << (*this)[i].name << endl;
-    file << (*this)[i];
+    if((*this)[i].type != Element::LINK) {
+      file << (*this)[i];
+    } else {
+      int from = getElementTypeNumberByName((*this)[i].l->get_from()) * 2;
+      from += ((*this)[i].l->get_from_side());
+      int to = getElementTypeNumberByName((*this)[i].l->get_to()) * 2;
+      to += ((*this)[i].l->get_to_side());
+      file << "link\n";
+      file << "from " << from << endl;
+      file << "to " << to << endl;
+      file << "end\n\n";
+    }
   }
   return true;
 }
@@ -484,6 +539,7 @@ void World::sort() {
   }
   for(int i = 0; i < size(); i++) {
     if((*this)[i].type == Element::LINK) {
+      neww.push_back((*this)[i]);
     }
   }
   neww.boxicon = boxicon;
@@ -500,4 +556,32 @@ World World::operator = (World &w) {
   lnkicon = w.lnkicon;
   (vector<Element>) (*this) = (vector<Element>) w;
   return *this;
+}
+
+Element World::getElementByTypeNumber(int type, int number) {
+  int num = 0;
+  for(int i = 0; i < size(); i++) {
+    if((*this)[i].type == type) {
+      if(num == number) {
+	return (*this)[i];
+      } else {
+        num++;
+      }
+    }
+  }
+  return Element();
+}
+
+int World::getElementTypeNumberByName(string name) {
+  Element el = getElementByName(name);
+  int num = 0;
+  for(int i = 0; i < size(); i++) {
+    if((*this)[i].type == el.type) {
+      if((*this)[i].name == name) {
+	return num;
+      } else {
+	num++;
+      }
+    }
+  }
 }

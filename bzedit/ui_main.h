@@ -134,6 +134,7 @@ class MainWindow {
     void showList();
     void setWorld(World *world);
     void showLinkWin(Element *link);
+    void destroyLinkWin();
     World *getWorld();
     GtkWidget *getWindow();
     ListWindow &getListWindow();
@@ -148,6 +149,7 @@ class MainWindow {
     GtkWidget *sbborder;
     GtkWidget *enname;
     GtkWidget *testworld;
+    GtkWidget *linkwin;
     GtkAdjustment *sa;
     vector<EditWindow *> edits;
     ListWindow lw;

@@ -71,6 +71,19 @@ class Teleporter : public Object {
     float border;
 };
 
+class Base : public Object {
+  public:
+    Base();
+    Base(const Base &b);
+    Base operator = (const Base &b);
+    void render(Camera &c, bool transparent);
+    void set_color(int color);
+    int get_color();
+    friend ostream & operator << (ostream &dest, Base &src);
+  protected:
+    int color;
+};
+
 class Link {
   public:
     Link();
@@ -85,7 +98,6 @@ class Link {
     int get_from_side();
     string get_to();
     int get_to_side();
-    friend ostream & operator << (ostream &dest, Link &src);
   protected:
     string from;
     int from_side;

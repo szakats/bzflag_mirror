@@ -8,4 +8,5 @@ data1_DATA = boxwall.tga \
 	    boxicon.png \
 	    pyricon.png \
 	    telicon.png \
-	    lnkicon.png
+	    lnkicon.png \
+	    basicon.png
