@@ -14,9 +14,9 @@ this using pydoc.
 
 -- Requirements
 
-Python 2.2 or later is required. There are several recent python features used
-by PyBZFlag, but the most notable is that nested scopes are used extensively
-in its event handling system and HUD layout.
+Python 2.2.1 or later is required.
+PyBZFlag uses many recent python features, including iterators,
+lexical scoping, and the True and False constants.
 
 PyBZFlag uses the Numeric module extensively to perform the fast calculations
 necessary for real-time 3D graphics and game state updates, and is required for
