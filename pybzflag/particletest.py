@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, ParticleSystem, Environment
+from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable
+from BZFlag.UI import ParticleSystem, Environment, Tweak
 from BZFlag import Event, Geometry, Noise, Animated
 from OpenGL.GL import *
 from Numeric import *
@@ -17,13 +18,13 @@ class Sparks(Drawable.SpriteArray):
         self.render.static = False
         self.render.blended = True
 
-        self.model.add(ParticleSystem.RandomEmitter,
-                       spawnRate           = 95,
-                       speedRange          = (4, 30),
-                       direction           = (0, 0, 1),
-                       directionRandomness = 0.2,
-                       position            = position,
-                       )
+        self.emitter = self.model.add(ParticleSystem.RandomEmitter,
+                                      spawnRate           = 95,
+                                      speedRange          = (4, 30),
+                                      direction           = (0, 0, 1),
+                                      directionRandomness = 0.2,
+                                      position            = position,
+                                      )
         self.model.add(ParticleSystem.LifespanAffector, 1)
         self.model.add(ParticleSystem.FountainFadeAffector,
                        sizeRange = (0, 1),
@@ -51,13 +52,13 @@ class Smoke(Drawable.SpriteArray):
         self.render.static = False
         self.render.blended = True
 
-        self.model.add(ParticleSystem.RandomEmitter,
-                       spawnRate           = 75,
-                       speedRange          = (0, 2),
-                       direction           = (0, 0, 1),
-                       directionRandomness = 1,
-                       position            = position,
-                       )
+        self.emitter = self.model.add(ParticleSystem.RandomEmitter,
+                                      spawnRate           = 75,
+                                      speedRange          = (0, 2),
+                                      direction           = (0, 0, 1),
+                                      directionRandomness = 1,
+                                      position            = position,
+                                      )
         self.model.add(ParticleSystem.LifespanAffector, 3)
         self.model.add(ParticleSystem.FountainFadeAffector,
                        sizeRange           = (6, 1),
@@ -92,7 +93,14 @@ if __name__ == '__main__':
     viewport.onSetupFrame.observe(sky.update)
     view.scene.add(Drawable.Ground(400))
 
-    view.scene.add(Sparks((5,0,3)))
-    view.scene.add(Smoke((-5,0,3)))
+    #smoke = Smoke((-5,0,3))
+    #view.scene.add(smoke)
 
-    loop.run()
+    sparks = Sparks((0,0,3))
+    view.scene.add(sparks)
+
+    Tweak.Window(Tweak.Scalar(view.camera, 'distance', maximum=100),
+                 Tweak.Scalar(sparks.emitter, 'spawnRate', maximum=500),
+                 )
+
+    Tweak.run(loop)
