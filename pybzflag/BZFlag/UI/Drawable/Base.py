@@ -34,7 +34,7 @@ colorScheme = {
     }
 
 
-class BaseSquareDecal(Box.TopDecal):
+class BaseDecal(Box.TopDecal):
     """This is the fixed portion of the base graphics, sort of a futuristic metal frame.
        It is colored to indicate the base's team, but has no animation.
        """
@@ -58,9 +58,8 @@ class BaseSquareDecal(Box.TopDecal):
         glColor3f(1,1,1)
 
         
-class BaseSquareRotorDecal(Box.FixedTopDecal):
-    """This is the center of the base decal, with animated rotation and lighting"""
-    
+class BaseRotorDecal(Box.FixedTopDecal):
+    """This is the center of the base decal, with animated rotation and lighting"""    
     textureName = 'base_rotor.png'
 
     def __init__(self, base):
@@ -106,10 +105,15 @@ def detectBaseDrawables(base):
     """Given a base WorldObject, return a list of the drawables that should be used
        to represent it. This starts with a box, then adds some decorations to make it a base.
        """
+    # This is a hack bzflag uses since the Z component of base size isn't sent over the wire.
+    # if a base is not on the ground and it's height is zero, set the height to 1.
+    if base.center[2] > 0 and base.size[2] == 0:
+        base.size[2] = 1
+    
     drawables = Box.detectBoxDrawables(base)
     
-    drawables.append(BaseSquareDecal(base))
-    drawables.append(BaseSquareRotorDecal(base))
+    drawables.append(BaseDecal(base))
+    drawables.append(BaseRotorDecal(base))
         
     return drawables
 
