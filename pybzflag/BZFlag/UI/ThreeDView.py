@@ -139,23 +139,15 @@ class Scene:
                     else:
                         self.passes[0][drawable.texture] = [drawable.draw]
 
-    def pick(self, pos):
-        """Returns the closest scene object that was rendered at the given screen
-           coordinates. For normal BZFlag world objects, this will be an instance
-           of one of the classes defined in BZFlag.Protocol.WorldObjects. If no
-           object was rendered at this postion, returns None.
-           """
-        viewport = glGetIntegerv(GL_VIEWPORT)
+    def pick(self, pos, viewport):
+        """Implementation of View.pick, see that function for details"""
         glSelectBuffer(len(self.objects) * 4)
         glRenderMode(GL_SELECT)
         glInitNames()
         glPushName(0)
         glMatrixMode(GL_PROJECTION)
-        glPushMatrix()
-        glLoadIdentity();
-        gluPickMatrix(pos[0], viewport[3] - pos[1], 1.0, 1.0, viewport)
-        gluPerspective(45.0, (viewport[2] - viewport[0]) / (viewport[3] - viewport[1]), 3.0, 2500.0)
-	glMatrixMode(GL_MODELVIEW)
+	glPushMatrix()
+        viewport.configureOpenGL()
 	names = {}
 	curname = 1
         for object, drawables in self.objects.items():
@@ -240,6 +232,13 @@ class ThreeDView:
         self.light1.set()
         self.scene.render()
 
+    def pick(self, pos):
+        """Returns the closest scene object that was rendered at the given screen
+           coordinates. For normal BZFlag world objects, this will be an instance
+           of one of the classes defined in BZFlag.Protocol.WorldObjects. If no
+           object was rendered at this postion, returns None.
+           """
+        return self.scene.pick(pos, self.viewport)
 
 def attach(game, eventLoop):
     from BZFlag.UI import Viewport, ThreeDControl
