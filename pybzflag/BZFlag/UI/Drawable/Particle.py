@@ -23,35 +23,64 @@ acceleration via OpenGL extensions like NV_point_sprite.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 from Array import *
+from GLDrawable import *
 from OpenGL.GL import *
 from BZFlag.Geometry import *
 from Numeric import *
 from BZFlag.UI import GLExtension
 
-__all__ = ('ParticleArray', )
+__all__ = ('ParticleArray',)
 
 
-class AbstractParticleArray(GLDrawable):
-    """Abstract base class for a particle drawable implementation.
-       The particle array's shape is always held in the 'vertices' attribute.
-       Its shape is the caller-specified shape with (3,) appended.
-       This is consistent with the use of 'vertices
+class ParticleArray(GLDrawable):
+    """A drawable that picks a ParticleRenderer implementation at runtime."""
+    def __init__(self, shape, pointDiameter):
+        GLDrawable.__init__(self)
 
-    def  __init__(self, shape):
+        # Fall back to doing everything ourselves
+        self.renderer = SoftwareParticleRenderer(shape, pointDiameter)
 
+        # Reference public render state
+        self.points = self.renderer.points
+        self.pointColors = self.renderer.pointColors
+        self.pointDiameter = self.renderer.pointDiameter
 
-
-
-class TriangleArray(VertexArray, GLDrawable):
-    """A drawable which structures its arrays in groups of three, and draws them as
-       unconnected triangles. This is best for meshes that can't be easily decomposed
-       into triangle strips or other larger primitives.
-       """
-    def __init__(self, size, format):
-        super(TriangleArray, self).__init__((size, 3), format)
+    def setPointDiameter(self, d):
+        self.renderer.pointDiameter = d
+        self.pointDiameter = d
 
     def draw(self, rstate):
+        self.renderer.draw(rstate)
+
+
+class SoftwareParticleRenderer(VertexArray):
+    """A ParticleRenderer that does all billboarding in software"""
+    def __init__(self, shape, pointDiameter):
+        self.pointDiameter = pointDiameter
+
+        # This array format is somewhat wasteful, but we need at least T2F, C4F, and V3F :(
+        # We need room for one quad per particle.
+        VertexArray.__init__(self, shape + (4,), GL_T2F_C4F_N3F_V3F)
+        self.numVertices = multiply.reduce(self.shape)
+
+        # Initialize texture coordinates. These are static
+        self.texcoords[...,0,:] = (0,0)
+        self.texcoords[...,1,:] = (1,0)
+        self.texcoords[...,2,:] = (1,1)
+        self.texcoords[...,3,:] = (0,1)
+
+        # Create point color and position arrays
+        self.points      = zeros(shape + (3,), Float32)
+        self.pointColors = ones(shape + (4,), Float32)
+
+    def draw(self, rstate):
+        # Stretch our point colors over each whole quad
+        self.colors[...,0,:] = self.pointColors
+        self.colors[...,1,:] = self.pointColors
+        self.colors[...,2,:] = self.pointColors
+        self.colors[...,3,:] = self.pointColors
+
         self.bind()
-        glDrawArrays(GL_TRIANGLES, 0, self.shape[0] * 3)
+        glDrawArrays(GL_QUADS, 0, self.numVertices)
 
 ### The End ###

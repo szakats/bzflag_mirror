@@ -184,10 +184,21 @@ class Scene:
         self.dirty = True
 
     def add(self, object):
-        """Add the given object to the scene. The only requirement for the
-           object is that it support the getDrawables() method.
+        """Add the given object to the scene.
+           The object may be:
+              - Any object that supports the getDrawables() method
+              - A list of drawables
+              - A drawable
            """
-        drawables = object.getDrawables()
+        if hasattr(object, 'getDrawables'):
+            drawables = object.getDrawables()
+        elif type(object) == type(()) or type(object) == type([]):
+            drawables = object
+        elif isinstance(object, Drawable.GLDrawable):
+            drawables = (object,)
+        else:
+            raise TypeError("Scene.add() expects an object with getDrawables(), a drawable list, or a drawable")
+
         for drawable in drawables:
             for texture in drawable.render.textures:
                 # If this is a dynamic texture and we have a renderstate to hand it, do so
