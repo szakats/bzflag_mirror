@@ -465,6 +465,13 @@ def detectBoxDrawables(box):
     if minorAxis > 10 and height > 15 and random.random() > 0.98:
         drawables.append(DustPuppyDecal(box))
         
+    # Only draw the bottom if we're not on the ground
+    if box.center[2] > 0:
+        if bottom:
+            drawables.append(bottom)
+        else:
+            drawables.append(Bottom(box))
+
     # Pick defaults for any characteristics we haven't decided on already and return a list
     if sides:
         drawables.append(sides)
@@ -474,10 +481,6 @@ def detectBoxDrawables(box):
         drawables.append(top)
     else:
         drawables.append(Top(box))
-    if bottom:
-        drawables.append(bottom)
-    else:
-        drawables.append(Bottom(box))
     return drawables
 
 ### The End ###

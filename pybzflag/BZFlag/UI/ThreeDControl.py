@@ -211,8 +211,8 @@ class Viewing:
         self.view.camera.elevation += elevation
         if self.view.camera.elevation > 0:
             self.view.camera.elevation = 0
-        if self.view.camera.elevation < -90:
-            self.view.camera.elevation = -90
+        if self.view.camera.elevation < -135:
+            self.view.camera.elevation = -135
 
     def toggleFullscreen(self):
         self.viewport.display.toggle_fullscreen()

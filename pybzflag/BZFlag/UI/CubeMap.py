@@ -30,6 +30,7 @@ but the CubeMap class should not be instantiated.
 from __future__ import division
 from OpenGL.GL.EXT.texture_cube_map import *
 from OpenGL.GL import *
+from OpenGL.GLU import *
 from BZFlag.UI.Texture import Texture
 import math
 
@@ -92,7 +93,7 @@ class CubeMap(Texture):
         #Texture.bind(self)
         glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
-        self.renderColors()
+        self.renderSides()
         self.dirty = False
 
 
@@ -123,34 +124,32 @@ class CubeMap(Texture):
                      -self.position[2])
 
         glLoadIdentity()
-        glRotatef(-180, 1,0,0)
-        glTranslatef(*cameraPos)
-        self.renderSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT)
-
-        glLoadIdentity()
-        glTranslatef(*cameraPos)
-        self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT)
-
-        glLoadIdentity()
-        glRotatef(-90, 1,0,0)
+        gluLookAt(0,0,0, 0,0,1,  0,-1,0)
         glTranslatef(*cameraPos)
         self.renderSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT)
 
         glLoadIdentity()
-        glRotatef(-90, 1,0,0)
-        glRotatef(180, 0,0,1)
+        gluLookAt(0,0,0, 0,0,-1, 1,1,0)
         glTranslatef(*cameraPos)
         self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT)
 
         glLoadIdentity()
-        glRotatef(-90, 1,0,0)
-        glRotatef(90, 0,0,1)
+        gluLookAt(0,0,0, 0,-1,0, 0,0,-1)
+        glTranslatef(*cameraPos)
+        self.renderSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT)
+
+        glLoadIdentity()
+        gluLookAt(0,0,0, 0,1,0, 0,0,-1)
+        glTranslatef(*cameraPos)
+        self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT)
+
+        glLoadIdentity()
+        gluLookAt(0,0,0, 1,0,0, 0,0,-1)
         glTranslatef(*cameraPos)
         self.renderSide(GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT)
 
         glLoadIdentity()
-        glRotatef(-90, 1,0,0)
-        glRotatef(270, 0,0,1)
+        gluLookAt(0,0,0, -1,0,0, 0,0,-1)
         glTranslatef(*cameraPos)
         self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT)
 
