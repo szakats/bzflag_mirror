@@ -29,5 +29,6 @@ from Box import *
 from Pyramid import *
 from Teleporter import *
 from Base import *
+from TestWidget import *
 
 ### The End

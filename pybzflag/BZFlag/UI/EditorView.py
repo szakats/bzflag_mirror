@@ -23,12 +23,20 @@ and ThreeDControl.Editing.
 #
 
 from BZFlag.UI import Viewport, ThreeDView, ThreeDControl
+from BZFlag.UI.Drawable import TestWidget
 
+class Widgetness:
+    pass
 
 def attach(game, eventLoop):
     viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
 
     view3d   = ThreeDView.ThreeDView(game, viewport)
+    view3d.scene.objects[Widgetness()] = [TestWidget((3.9, -2.8, -8))]
+    view3d.scene.objects[Widgetness()] = [TestWidget((-3.9, -2.8, -8))]
+    view3d.scene.objects[Widgetness()] = [TestWidget((3.9, 2.8, -8))]
+    view3d.scene.objects[Widgetness()] = [TestWidget((-3.9, 2.8, -8))]
+    view3d.scene.rebuildTexmap()
     ThreeDControl.Editing(view3d, viewport)
 
     return viewport
