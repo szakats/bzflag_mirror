@@ -13,8 +13,8 @@ class ParticleTest(Drawable.SpriteArray):
         Drawable.SpriteArray.__init__(self, numParticles, allowPointSprite=False)
         self.model.attachDrawable(self)
 
-        texProxy = Texture.ProxyTexture('spark.png', errorStandin='caution.png')
-        self.render.textures = (texProxy,)
+        self.texProxy = Texture.ProxyTexture('spark.png', errorStandin='caution.png')
+        self.render.textures = (self.texProxy,)
 
         self.time = Animated.Timekeeper()
         self.render.static = False
@@ -32,8 +32,10 @@ class ParticleTest(Drawable.SpriteArray):
         self.fader = self.model.add(ParticleSystem.FountainFadeAffector)
         self.constAccel = self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,0))
 
-        Tweak.Window(
-            Tweak.Text(texProxy, 'targetName'),
+    def getTweakControls(self):
+        from BZFlag.UI import Tweak
+        return (
+            Tweak.Text(self.texProxy, 'targetName'),
             Tweak.Boolean(self, 'glowing'),
             Tweak.Boolean(self.renderer, 'zSort'),
             Tweak.Separator(),
@@ -75,8 +77,13 @@ if __name__ == '__main__':
 
     sky = Environment.Sky()
     view.scene.add(sky)
-    viewport.onSetupFrame.observe(sky.update)
     view.scene.add(Drawable.Ground(400))
 
-    view.scene.add(ParticleTest((0,0,3)))
+    particleTest = ParticleTest((0,0,3))
+    view.scene.add(particleTest)
+
+    Tweak.Window(particleTest.getTweakControls(),
+                 Tweak.Separator(),
+                 sky.getTweakControls())
+
     Tweak.run(loop)

@@ -45,20 +45,30 @@ class Thread(threading.Thread):
 
 
 class Window:
-    """A window that holds a list of named tweaking controls"""
-    def __init__(self, *controls):
-        self.controls = controls
+    """A window that holds a list of named tweaking controls.
+       For convenience, the constructor's argument list can be one
+       or more tweak controls or lists of tweak controls.
+       """
+    def __init__(self, *controlLists):
+        # Expand controlLists
+        self.controls = []
+        for controlList in controlLists:
+            try:
+                for control in controlList:
+                    self.controls.append(control)
+            except TypeError:
+                self.controls.append(controlList)
 
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_border_width(8)
         self.window.set_default_size(600,0)
 
-        self.table = gtk.Table(len(controls), 2)
+        self.table = gtk.Table(len(self.controls), 2)
         self.window.add(self.table)
         self.table.show()
 
         row = 0
-        for control in controls:
+        for control in self.controls:
             if control.name is not None:
                 # Pack the widget in the right side, with a name label in the left
                 l = gtk.Label(control.name + ": ")
