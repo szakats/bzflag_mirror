@@ -43,6 +43,10 @@ from OpenGL.GL import *
 # Default font height, in pixels
 defaultSize = 14
 
+# Some other helpful sizes
+smallSize = 10
+maxRenderSize = 64
+
 # Names that can be used in place of actual filenames
 fontAliases = {
     None:       'Vera.ttf',
@@ -50,7 +54,7 @@ fontAliases = {
     }
 
 # Default list of sizes to render fonts at
-defaultSizes = [10, defaultSize, 64]
+defaultSizes = [smallSize, defaultSize, maxRenderSize]
 
 # Cache of font objects, by data file name
 loadedFonts = {}

@@ -53,7 +53,7 @@ def drawFrame():
 
     glLoadIdentity()
     glTranslatef(viewport.size[0]/2, viewport.size[1] * 0.85, 0)
-    GLText.drawCentered("(small print)", 10)
+    GLText.drawCentered("(small print)", GLText.smallSize)
 
     glLoadIdentity()
     glTranslatef(viewport.size[0]/2, viewport.size[1] * 0.95, 0)
