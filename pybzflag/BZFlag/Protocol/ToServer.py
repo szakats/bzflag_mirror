@@ -117,5 +117,6 @@ MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgShotBegin = Common.MsgShotBegin
 MsgPlayerUpdate = Common.MsgPlayerUpdate
 MsgSetTTL = Common.MsgSetTTL
+MsgNull = Common.MsgNull
 
 ### The End ###

@@ -124,6 +124,11 @@ class BaseClient(Network.Endpoint):
         """The server got our UDP link request, and is responding with its UDP port"""
         self.udp.connect(self.tcp.remoteHost, msg.port)
         self.tcp.write(self.outgoing.MsgUDPLinkEstablished())
+
+        # The server won't actually turn on UDP until
+        # it gets at least one UDP packet.. so send some
+        self.udp.write(self.outgoing.MsgNull())
+        
         self.onConnectUDP()
 
     def onMsgNetworkRelay(self, msg):

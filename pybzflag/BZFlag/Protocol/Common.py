@@ -258,6 +258,9 @@ class FlagNegotiationID(Struct):
         StructEntry(StringField(2), 'abbreviation'),
         ]
 
+class MsgNull(Message):
+    messageId = 0x0000
+
 
 def getMessageDict(module):
     """Return a dictionary mapping message IDs to message classes,

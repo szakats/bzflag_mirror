@@ -53,18 +53,6 @@ class SceneList:
         self.list.append(block)
 
     def __iter__(self):
-        scene = self
-        class Iterator:
-            def __init__(self):
-                self.index = 0
-            def __iter__(self):
-                return self
-            def next(self):
-                if self.index >= len(scene.list):
-                    raise StopIteration
-                item = scene.list[self.index]
-                self.index += 1
-                return item
-        return Iterator()
+        return iter(self.list)
 
 ### The End ###

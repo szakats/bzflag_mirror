@@ -35,9 +35,6 @@ class HelloPacket(Struct):
         StructEntry(Common.PlayerId, 'clientId'),
         ]
 
-class MsgNull(Common.Message):
-    messageId = 0x0000
-
 class MsgAccept(Common.Message):
     messageId = 0x6163
 
@@ -185,5 +182,6 @@ MsgShotBegin = Common.MsgShotBegin
 MsgShotEnd = Common.MsgShotEnd
 MsgPlayerUpdate = Common.MsgPlayerUpdate
 MsgSetTTL = Common.MsgSetTTL
+MsgNull = Common.MsgNull
 
 ### The End ###
