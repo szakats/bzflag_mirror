@@ -54,8 +54,38 @@ import re
 
 
 lexicalScanner = re.compile(r"""
-    ((?P<boing>  [0-9])
-    |(?P<dot>    \.)
+
+    # Keywords
+    ((?P<DEF>          DEF)
+    |(?P<EXTERNPROTO>  EXTERNPROTO)
+    |(?P<FALSE>        FALSE)
+    |(?P<IS>           IS)
+    |(?P<NULL>         NULL)
+    |(?P<PROTO>        PROTO)
+    |(?P<ROUTE>        ROUTE)
+    |(?P<TO>           TO)
+    |(?P<TRUE>         TRUE)
+    |(?P<USE>          USE)
+    |(?P<eventIn>      eventIn)
+    |(?P<eventOut>     eventOut)
+    |(?P<exposedField> exposedField)
+    |(?P<field>        field)
+
+    # Data types
+    |(?P<float>        ([+/-]?( ([0-9]*\.[0-9]+) ([eE][+\-]?[0-9]+)? )))
+    |(?P<int>          ([+\-]?(([0-9]+)|(0[xX][0-9a-fA-F]+))))
+   
+    # Terminal symbols
+    |(?P<period>       \.)
+    |(?P<comma>        \,)
+    |(?P<openBrace>    \{)
+    |(?P<closeBrace>   \})
+    |(?P<openBracket>  \[)
+    |(?P<closeBracket> \])
+
+    # Identifiers
+    |(?P<id>           [^\s]+)    
+    
     )""", re.VERBOSE | re.UNICODE)
 
 
