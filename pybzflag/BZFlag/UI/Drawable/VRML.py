@@ -104,6 +104,16 @@ class VRMLParseError(Exception):
     pass
 
 
+class Node:
+    """A node in the VRML parser's stack"""
+    def __init__(self, type, value=None, id=None, name=None, children=[]):
+        self.type     = type      # Token type
+        self.value    = value     # Token value
+        self.id       = id        # Node id
+        self.name     = name      # DEF'ed name
+        self.children = children  # Nested nodes
+
+
 class Reader:
     """Scans a VRML file, instantiating drawables for all readable meshes.
        The file can be specified as a file object, file name, or URI.
@@ -115,7 +125,8 @@ class Reader:
         f = Util.autoFile(name)
         self.parse(f)
         f.close()
-        self.extractMeshes()
+        for node in self.parseStack:
+            self.extractMeshes(node)
         
     def parse(self, f):
         """Parse the given file object as VRML. Upon returning, there will
@@ -165,33 +176,33 @@ class Reader:
 
         # Toss it onto the stack
         stack = self.parseStack
-        stack.append((type, value))
+        stack.append(Node(type, value))
 
         try:
             # Combine consecutive numbers into vectors
-            if stack[-1][0] == 'number' and stack[-2][0] == 'number':
+            if stack[-1].type == 'number' and stack[-2].type == 'number':
                 n = stack.pop()
-                stack[-1] = ('vector', [stack[-1][1], n[1]])
-            if stack[-1][0] == 'number' and stack[-2][0] == 'vector':
+                stack[-1] = Node('vector', [stack[-1].value, n.value])
+            if stack[-1].type == 'number' and stack[-2].type == 'vector':
                 n = stack.pop()
-                stack[-1][1].append(n[1])
+                stack[-1].value.append(n.value)
         except IndexError:
             pass
 
         try:
             # If we have a closeBracket on the top of the stack,
             # condense everything back until the last openBracket into a list.
-            if stack[-1][0] == 'closeBracket':
+            if stack[-1].type == 'closeBracket':
                 lst = []
                 # Pop values until we hit the openBracket, stuffing a list full
                 # of all the numbers and vectors we find
                 while True:
-                    (type, value) = stack.pop()
-                    if type == 'number' or type == 'vector':
-                        lst.insert(0, value)
-                    elif type == 'openBracket':
+                    n = stack.pop()
+                    if n.type == 'number' or n.type == 'vector':
+                        lst.insert(0, n.value)
+                    elif n.type == 'openBracket':
                         break
-                stack.append(('list', lst))
+                stack.append(Node('list', lst))
         except IndexError:
             pass
 
@@ -200,72 +211,75 @@ class Reader:
             # what ended up getting reduced. We try to figure out attributes by
             # matching name-value pairs.
             valueTypes = ('list', 'vector', 'number')
-            if stack[-1][0] == 'closeBrace' and stack[-2][0] in valueTypes:
+            if stack[-1].type == 'closeBrace' and stack[-2].type in valueTypes:
                 attrs = {}
                 while True:
-                    if stack.pop()[0] == 'openBrace':
+                    if stack.pop().type == 'openBrace':
                         break
-                    if stack[-1][0] in valueTypes and stack[-2][0] == 'id':
-                        (type, value) = stack.pop()
-                        attrs[stack[-1][1]] = value
-                (type, value) = stack.pop()
-                if type != 'id':
-                    raise VRMLParseError("id token expected before attribute list section, found %s instead" % type)
-                stack.append(('section', (value, attrs)))
+                    if stack[-1].type in valueTypes and stack[-2].type == 'id':
+                        n = stack.pop()
+                        attrs[stack[-1].value] = n.value
+                n = stack.pop()
+                if n.type != 'id':
+                    raise VRMLParseError("id token expected before attribute list section, found %s instead" % n.type)
+                stack.append(Node('section', attrs, n.value))
         except IndexError:
             pass
 
         try:
             # Reduce sections ending in non-value types. Usually these are composed
             # of other sections. We'll just stick the contents into a list.
-            if stack[-1][0] == 'closeBrace':
+            if stack[-1].type == 'closeBrace':
                 contents = []
                 stack.pop()   # closeBrace
                 while True:
-                    (type, value) = stack.pop()
-                    if type == 'openBrace':
+                    n = stack.pop()
+                    if n.type == 'openBrace':
                         break
-                    contents.append((type, value))
-                (type, value) = stack.pop()
-                if type != 'id':
+                    contents.append(n)
+                n = stack.pop()
+                if n.type != 'id':
                     raise VRMLParseError("id token expected before section, found %s instead" % type)
-                stack.append(('section', (value, contents)))
+                stack.append(Node('section', id=n.value, children=contents))
         except IndexError:
             pass
-
 
         try:
             # If we have (DEF id section) on the stack now, yank it all off and stow
             # the section in the VRML namespace. If we have a DEF without an id afterwards,
             # that's a parse error.
-            if stack[-1][0] == 'section' and stack[-3][0] == 'DEF':
-                section = stack.pop()[1]      # Section contents
-                (type, value) = stack.pop()   # id
-                stack.pop()                   # DEF
-                if type != 'id':
-                    raise VRMLParseError("id token expected after DEF, found %s instead" % type)
-                self.namespace[value] = section
+            if stack[-1].type == 'section' and stack[-3].type == 'DEF':
+                section = stack.pop()   # Section contents
+                n = stack.pop()         # id
+                stack.pop()             # DEF
+                if n.type != 'id':
+                    raise VRMLParseError("id token expected after DEF, found %s instead" % n.type)
+                section.name = n.value
+                self.namespace[n.value] = section
         except IndexError:
             pass
 
         try:
             # Replace (USE id) with the object from our namespace
-            if stack[-1][0] == 'id' and stack[-2][0] == 'USE':
-                (type, value) = stack.pop()
+            if stack[-1].type == 'id' and stack[-2].type == 'USE':
+                n = stack.pop()
                 stack.pop()
                 try:
                     pass
-                    stack.append(self.namespace[value])
+                    stack.append(self.namespace[n.value])
                 except KeyError:
-                    raise VRMLParseError("USE of name not previously DEF'ed: %s" % value)
+                    raise VRMLParseError("USE of name not previously DEF'ed: %s" % n.value)
         except IndexError:
             pass
 
-    def extractMeshes(self):
-        """After parsing, this rummages through the parse stack looking for IndexedFaceSet
-           sections, and grouping the associated sections into a mesh. These meshes
-           are then instantiated as drawables.
-           """
-        print self.parseStack
+    def extractMeshes(self, node, parents=()):
+        """Recursively traverse a tree of parsed nodes, extracting meshes into Drawables"""
+        if node.id == 'IndexedFaceSet':
+            # We just found some data we can turn into a drawable. Now we just
+            # need to search for the matching coordinates, material, name, and matrix.
+            print parents[-1].name
+
+        for child in node.children:
+            self.extractMeshes(child, parents + (node,))
             
 ### The End ###
