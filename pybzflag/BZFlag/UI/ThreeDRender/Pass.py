@@ -120,14 +120,21 @@ class BasicRenderPass(RenderPass):
 
     def erase(self):
         self.textureGroups = {}
+        self.texGroupItems = []
 
     def add(self, drawable):
-        """Files the given drawable according to texture group"""
+        """Files the given drawable according to texture group.
+           We keep a separate texGroupItems list so that we can maintain
+           the order of items added to this pass. It also seems to be
+           a little faster.
+           """
         groups = self.textureGroups
         if groups.has_key(drawable.render.textures):
             groups[drawable.render.textures].add(drawable)
         else:
-            groups[drawable.render.textures] = TextureGroup([drawable])
+            newGroup = TextureGroup([drawable])
+            groups[drawable.render.textures] = newGroup
+            self.texGroupItems.append((drawable.render.textures, newGroup))
 
     def preprocess(self):
         """This builds display lists for all our texture groups"""
@@ -142,10 +149,10 @@ class BasicRenderPass(RenderPass):
            binding the pass' texture and drawing the texture group.
            """
         if rstate.picking:
-            for group in self.textureGroups.itervalues():
+            for textures, group in self.texGroupItems:
                 group.pickingDraw(rstate)
         else:
-            for (textures, group) in self.textureGroups.iteritems():
+            for textures, group in self.texGroupItems:
                 if not rstate.picking:
                     try:
                         self.bindTextures(textures, rstate)
