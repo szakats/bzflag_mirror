@@ -5,11 +5,9 @@ Todo list, in no particular order:
 
   - Port the jetstream particle engine (why not?)
 
-  - Stars, sun and the moon
+  - Clouds
 
-  - Fix texture binding for cube maps. It causes an OpenGL invalid operation error, I'm not sure
-    why. Currently these exceptions are being ignored in CubeMap.py, and all pyramids end up
-    sharing one cube map.
+  - Stars, sun and the moon
 
   - Convert observers and render sequence callbacks to use weak references so it's possible
     to properly delete objects that register callbacks.

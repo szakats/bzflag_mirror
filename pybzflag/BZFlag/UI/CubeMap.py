@@ -58,10 +58,7 @@ class CubeMap(Texture):
         if not self.viewport:
             self.rstate = rstate
             self.viewport = self.setupViewport()
-        try:
-            Texture.bind(self, rstate, self.bindTarget)
-        except:
-            pass
+        Texture.bind(self, rstate, self.bindTarget)
 
     def getTextureRect(self, viewport):
         """Return a function that calculates the texture size taking into account
@@ -160,10 +157,7 @@ class CubeMap(Texture):
         self.rstate.view.renderScene(self.rstate)
 
         glReadBuffer(GL_BACK)
-        try:
-            Texture.bind(self, None, self.bindTarget)
-        except:
-            pass
+        Texture.bind(self, None, self.bindTarget)
 
         # Disable mipmapping
         glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
