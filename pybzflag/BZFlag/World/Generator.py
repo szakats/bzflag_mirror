@@ -100,7 +100,6 @@ def Text(name,
     # Start with a fresh map, and add objects that
     # are implied but not specified in the text map format.
     w.erase()
-    print size, wallHeight
     w.storeSkeletonHeader(size, wallHeight)
         
     for line in xreadlines(f):

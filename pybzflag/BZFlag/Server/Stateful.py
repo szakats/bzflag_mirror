@@ -23,7 +23,7 @@ support updating a game state and transmitting changes.
 #
 
 import BZFlag
-from BZFlag import Event, Game, Flag, Meta, World
+from BZFlag import Event, Game, Flag, Meta, World, Player
 from StringIO import StringIO
 from BZFlag.Server.Base import BaseServer
 
@@ -174,7 +174,7 @@ class StatefulServer(BaseServer):
         """Finish the process of entering a client into the game by
            sending it a MsgAddPlayer for itself.
            """
-        msg.client.write(self.outgoing.MsgAddPlayer(
+        addmsg = self.outgoing.MsgAddPlayer(
             id           = msg.client.id,
             type         = msg.playerType,
             team         = msg.team,
@@ -182,7 +182,11 @@ class StatefulServer(BaseServer):
             losses       = 0,
             teamKills    = 0,
             callSign     = msg.callSign,
-            emailAddress = msg.emailAddress))
+            emailAddress = msg.emailAddress)
+
+        # Send it to the client and use it to update our game state
+        msg.client.write(addmsg)
+        self.game.addPlayer(Player.fromMessage(addmsg))
 
     def onWelcome(self, msg):
         """Event triggered after a player has completely entered the
