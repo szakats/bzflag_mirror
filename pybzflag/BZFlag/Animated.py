@@ -211,7 +211,7 @@ class SigmoidApproach(LinearApproach):
        """
     def __init__(self, target, speed, range):
         self.range = range
-        LinearApproach.__init__(self, self.map(target), speed)
+        LinearApproach.__init__(self, target, speed)
         
     def map(self, x):
         normalized = (x - self.range[0]) / (self.range[1] - self.range[0])
