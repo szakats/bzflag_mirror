@@ -54,15 +54,7 @@ class StatefulServer(BaseServer):
 
         def setOptions(**options):
             if 'world' in options.keys() and options['world']:
-                world = options['world']
-                if hasattr(World.Generator, world):
-                    # Automatically generated world
-                    self.game.world = getattr(World.Generator, world)()
-                else:
-                    # Load world
-                    f = open(options['world'])
-                    self.game.world.loadText(f)
-                    f.close()
+                self.game.world = World.load(options['world'])
 
             if 'gameStyle' in options.keys():
                 self.game.world.style.gameStyle = options['gameStyle']

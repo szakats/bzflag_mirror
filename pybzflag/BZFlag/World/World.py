@@ -257,4 +257,48 @@ class Cache:
         # At this point, we're committed to using the cache.
         return open(self.getFilename(hash), "rb")
 
+
+def load(name):
+    """Load a world 'ingelligently' from the given name.
+       The name can be:
+       
+          - A generator name from the World.Generator module,
+            with optional parameters. Note that this is
+            evaluated as a python expression, so world names
+            should not be sent here from an untrusted source.
+            
+            Examples:
+               Random(randomHeights=1)
+               random
+               Empty
+
+          - A local file name specifying a text world file
+          - A URL specifying a text world file
+            
+       """
+    from BZFlag.World import Generator
+
+    # See if it's a generator
+    nameLower = name.lower()
+    for gen in Generator.__all__:
+        if nameLower.startswith(gen.lower()):
+            # Found a generator. If it's an exact (case insensitive) match,
+            # run the generator with defaults and return that.
+            if nameLower == gen.lower():
+                return getattr(Generator, gen)()
+            # Nope, we'll need to evaluate this as a python expression
+            return eval(name, Generator.__dict__)
+
+    # If it doesn't look like a URL, don't bother loading urllib2
+    if name.find("://") < 0:
+        f = open(name)
+    else:
+        import urllib2
+        f = urllib2.urlopen(name)
+
+    w = World()
+    w.loadText(f)
+    f.close()
+    return w
+
 ### The End ###

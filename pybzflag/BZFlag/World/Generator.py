@@ -27,6 +27,8 @@ from BZFlag.Protocol import WorldObjects
 from random import random
 import math
 
+__all__ = ['Empty', 'Random']
+
 
 def Empty():
     w = World()
