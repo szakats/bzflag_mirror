@@ -207,12 +207,12 @@ class Color(AttributeControl):
         return handled
 
     def openColorDialog(self, drawingArea):
-        drawingArea.colorDialog = gtk.ColorSelectionDialog(self.name)
-        colorsel = drawingArea.colorDialog.colorsel
+        drawingArea.colorDialog = gtk.Window()
+        drawingArea.colorDialog.set_border_width(8)
+        colorsel = gtk.ColorSelection()
+        drawingArea.colorDialog.add(colorsel)
+        colorsel.show()
         colorsel.drawingArea = drawingArea
-
-        oldGdkColor = drawingArea.gdkColor
-        oldAlpha = drawingArea.colorTuple[3]
 
         colorsel.set_has_opacity_control(gtk.TRUE)
         colorsel.set_previous_color(drawingArea.gdkColor)
@@ -220,16 +220,15 @@ class Color(AttributeControl):
         colorsel.set_current_color(drawingArea.gdkColor)
         colorsel.set_current_alpha(int(drawingArea.colorTuple[3] * 65535))
         colorsel.set_has_palette(gtk.TRUE)
-
         colorsel.connect("color_changed", self.colorChanged)
-        response = drawingArea.colorDialog.run()
 
-        if response != gtk.RESPONSE_OK:
-            # Restore the original color
-            self.setColor(drawingArea, oldGdkColor, oldAlpha)
+        drawingArea.colorDialog.connect("delete_event", self.closeColorDialog)
+        drawingArea.colorDialog.drawingArea = drawingArea
+        drawingArea.colorDialog.show()
 
-        drawingArea.colorDialog.hide()
-        drawingArea.colorDialog = None
+    def closeColorDialog(self, widget, event):
+        widget.hide()
+        widget.drawingArea.colorDialog = None
 
     def colorChanged(self, widget):
         self.setColor(widget.drawingArea,
