@@ -27,19 +27,51 @@ import math
 def cross(a, b):
     return (a[2] * b[1] - a[1] * b[2], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
 
+
 def length2(v):
     return v[0]*v[0] + v[1]*v[1] + v[2]*v[2]
 
+
 def length(v):
     return math.sqrt(length2(v))
+
 
 def normalize(v):
     l = length(v)
     return (v[0]/l, v[1]/l, v[2]/l)
 
+
 def sub(a,b):
     return (a[0] - b[0],
             a[1] - b[1],
             a[2] - b[2])
+
+
+def add(a,b):
+    return (a[0] + b[0],
+            a[1] + b[1],
+            a[2] + b[2])
+
+
+def dot(a,b):
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+
+def angle(a,b):
+    """Find the angle between two vectors, in degrees"""
+    try:
+        return math.acos(dot(a,b) / (length(a) * length(b))) * 180 / math.pi
+    except ValueError:
+        # acos of equal vectors explodes
+        return 0
+
+
+def unitAngle(a,b):
+    """Same as angle, but assumes that a and b are unit vectors"""
+    try:
+        return math.acos(dot(a,b)) * 180 / math.pi
+    except ValueError:
+        # acos of equal vectors explodes
+        return 0
 
 ### The End ###
