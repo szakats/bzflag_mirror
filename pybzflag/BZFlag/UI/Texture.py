@@ -33,10 +33,12 @@ import copy, math, random
 
 class Texture:
     """Represents an OpenGL texture, optionally loaded from disk in any format supported by PIL"""
+    target = GL_TEXTURE_2D
+
     def __init__(self, name=None):
         self.texture = glGenTextures(1)
         self.texEnv = GL_MODULATE
-        self.target = GL_TEXTURE_2D
+        self.setDefaults()
         if name:
             self.loadFile(name)
 
@@ -83,7 +85,6 @@ class Texture:
         Texture.bind(self)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
         gluBuild2DMipmaps(self.target, components, w, h, format, GL_UNSIGNED_BYTE, string)
-        self.setDefaults()
 
     def loadBackbuffer(self, size, position=(0,0), format=GL_RGB):
         """Load this texture from the given location on the backbuffer. This accepts
@@ -99,7 +100,6 @@ class Texture:
                          position[0], viewport[3] - position[1] - size[1],
                          size[0], size[1],
                          0)
-        self.setDefaults()
 
         # Disable mipmapping, since we're not generating any mipmap levels
         self.setFilter(GL_LINEAR, GL_LINEAR)
@@ -113,14 +113,10 @@ class Texture:
         if GLExtension.maxAnisotropy > 1:
             glTexParameterf(self.target, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)
 
-    def setRepeat(self, repeat=True):
+    def setRepeat(self, u=GL_REPEAT, v=GL_REPEAT):
         Texture.bind(self)
-        if repeat:
-            glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_REPEAT)
-            glTexParameteri(self.target, GL_TEXTURE_WRAP_T, GL_REPEAT)
-        else:
-            glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_CLAMP)
-            glTexParameteri(self.target, GL_TEXTURE_WRAP_T, GL_CLAMP)
+        glTexParameteri(self.target, GL_TEXTURE_WRAP_S, u)
+        glTexParameteri(self.target, GL_TEXTURE_WRAP_T, v)
 
     def setFilter(self, min=GL_LINEAR_MIPMAP_LINEAR, mag=GL_LINEAR):
         Texture.bind(self)

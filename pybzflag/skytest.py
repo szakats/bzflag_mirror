@@ -9,24 +9,19 @@ view = ThreeDRender.View(viewport)
 control = ThreeDControl.Viewing(view, viewport)
 viewport.setCaption("Sky Test")
 
-# Move the camera
+# Move the camera to the center of the universe
 view.camera.position = (0,0,0)
-view.camera.distance = 400
+view.camera.distance = 0
 view.camera.elevation = 0
 view.camera.jump()
+
+# Remap the mouse wheel to FOV zoom
+control.bind(ThreeDControl.MouseWheel, -0.05, 'any').observe(control.fovZoom)
 
 # Add the sky
 sky = Environment.Sky()
 view.scene.add(sky)
 viewport.onSetupFrame.observe(sky.update)
-
-# Add a navigation widget so we don't get too disoriented
-class Axes:
-    def __init__(self):
-        self.drawables = Drawable.VRML.load("nav_widget.wrl").values()
-    def getDrawables(self):
-        return self.drawables
-view.scene.add(Axes())
 
 Util.showFrameRate(viewport)
 loop.run()

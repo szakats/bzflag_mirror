@@ -39,13 +39,14 @@ class CubeMap(Texture.DynamicTexture):
        maxSize is the maximum height of the cube in texels.
        The actual height could be limited by viewport size.
        """
+    target = GL_TEXTURE_CUBE_MAP_EXT
+
     def __init__(self, position=(0,0,0), maxSize=(128,128)):
         Texture.DynamicTexture.__init__(self, maxSize,
                                         meanExpiration  = 60,
                                         expStdDeviation = 5)
 
         self.position = position
-        self.target = GL_TEXTURE_CUBE_MAP_EXT
         self.texEnv = GL_REPLACE
 
     def setupViewport(self):

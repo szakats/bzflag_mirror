@@ -57,16 +57,16 @@ class BaseDecal(Box.TopDecal):
         glEnable(GL_LIGHTING)
         glColor3f(1,1,1)
 
-        
+
 class BaseRotorDecal(Box.FixedTopDecal):
-    """This is the center of the base decal, with animated rotation and lighting"""    
+    """This is the center of the base decal, with animated rotation and lighting"""
     textureName = 'base_rotor.png'
 
     def __init__(self, base):
         Box.FixedTopDecal.__init__(self, base, min(base.size[0], base.size[1]) * 1.3)
         self.time = Animated.Timekeeper()
         self.color = Numeric.array(colorScheme[base.team])
-        self.render.textures[0].setRepeat(False)
+        self.render.textures[0].setRepeat(GL_CLAMP, GL_CLAMP)
 
         # We still use display lists, but can't be cached in one because we do per-frame animation
         self.render.static = False
