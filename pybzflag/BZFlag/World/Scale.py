@@ -41,12 +41,6 @@ ShotTailLength = 4.0		       # meters
 
 WallHeight     = 3.0 * TankHeight      # meters
 
-PyrBase        = 4.0 * TankHeight      # meters
-PyrHeight      = 5.0 * TankHeight      # meters
-
-BoxBase        = 5.0 * TankLength      # meters
-BoxHeight      = 6.0 * MuzzleHeight    # meters
-
 TeleUnit       = 0.4 * TankWidth       # meters
 TeleWidth      = 1.0 * TeleUnit        # meters
 TeleBreadth    = 4.0 * TeleUnit        # meters
@@ -57,9 +51,6 @@ TankAngVel     = math.pi / 4.0         # radians/sec
 ShotSpeed      = 100.0                 # meters/sec
 ShotRange      = 350.0                 # meters
 ReloadTime     = ShotRange / ShotSpeed # seconds
-
-CitySize       = 5
-AvenueSize     = 2.0 * BoxBase         # meters
 
 ExplodeTime    = 5.0                   # seconds
 TeleportTime   = 1.0	               # seconds

@@ -22,10 +22,9 @@ save worlds to text and binary formats, storing them in a Scene class.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag.Protocol import WorldObjects, Common
+from BZFlag.Protocol import WorldObjects
 from BZFlag import Errors, Util
-import os, re, math, md5
-from xreadlines import xreadlines
+import os, math, md5
 from StringIO import StringIO
 from BZFlag.World.Scene import SceneList
 from BZFlag.World import Scale
@@ -56,83 +55,11 @@ class World:
        """
     def __init__(self, sceneClass=SceneList):
         self.sceneClass = sceneClass
-        self.erase()
-
-    def loadBinary(self, f):
-        """Load a binary world from the supplied file-like object"""
-        blockDict = Common.getMessageDict(WorldObjects)
-        self.erase()
-        while 1:
-            # Read the block header
-            header = WorldObjects.BlockHeader()
-            packedHeader = f.read(header.getSize())
-            if len(packedHeader) < header.getSize():
-                raise Errors.ProtocolError("Premature end of binary world data")
-            header.unmarshall(packedHeader)
-
-            # Look up the block type and instantiate it
-            try:
-                block = blockDict[header.id]()
-            except KeyError:
-                raise Errors.ProtocolError(
-                    "Unknown block type 0x%04X in binary world data" % header.id)
-
-            # Read the block body
-            packedBody = f.read(block.getSize() - len(packedHeader))
-            if len(packedBody) < (block.getSize() - len(packedHeader)):
-                raise Errors.ProtocolError("Incomplete block in binary world data")
-            block.unmarshall(packedHeader + packedBody)
-            self.storeBlock(block)
-
-            # We're done if this was the EndOfData block
-            if isinstance(block, WorldObjects.EndOfData):
-                break
-        self.postprocess()
 
     def saveBinary(self, f):
         """Save a binary world to the supplied file-like object"""
         for block in self.blocks:
             f.write(str(block))
-
-    def loadText(self, f):
-        """Load a text world from the supplied file-like object"""
-        section = None
-        sectionDict = Util.getSubclassDict(WorldObjects, WorldObjects.WorldObject,
-                                           'textName', 'textSectionDict')
-        
-        # Start with a fresh map, and add objects that
-        # are implied but not specified in the text map format.
-        self.erase()
-        self.storeSkeletonHeader()
-        
-        for line in xreadlines(f):
-            # If this is a kludge used by map editors to store extra
-            # attributes. Don't process any comments on the line.
-            if not line.startswith("#!"):
-                line = re.sub("#.*", "", line)
-            line = line.strip()
-            if line:
-                if section:
-                    # We're inside a section. Accumulate lines until 'end'
-                    sectionLines.append(line)
-                    if line == 'end':
-                        # Done with this section, process it.
-                        try:
-                            cls = sectionDict[section]
-                        except KeyError:
-                            raise Errors.ProtocolError(
-                                "World file contains unknown section type '%s'" % section)
-                        inst = cls()
-                        inst.textRead(sectionLines)
-                        self.storeBlock(inst)
-                        section = None
-                else:
-                    # We're beginning a section
-                    section = line
-                    sectionLines = []
-
-        self.storeSkeletonFooter()
-        self.postprocess()
 
     def saveText(self, f):
         """Save a text world to the supplied file-like object"""
@@ -268,20 +195,26 @@ def load(name):
             should not be sent here from an untrusted source.
             
             Examples:
-               Random(randomHeights=1)
+               Random(randomHeights=True)
                random
-               Empty
+               empty
 
-          - A local file name specifying a text world file
-          - A URL specifying a text world file
-            
+          - A local file name, URL name, or file-like object
+            to be passed to the Text world generator.
        """
     from BZFlag.World import Generator
+    import re
 
+    # If it's not a string, we can't handle it here- assume it's a
+    # file-like object or something else that Text() can handle.
+    if type(name) != str:
+        return Generator.Text(name)
+    
     # See if it's a generator
-    nameLower = name.lower()
+    nameLower = name.strip().lower()
+    nameBase = re.sub(r"\(.*", "", name).strip().lower()
     for gen in Generator.__all__:
-        if nameLower.startswith(gen.lower()):
+        if nameBase == gen.lower():
             # Found a generator. If it's an exact (case insensitive) match,
             # run the generator with defaults and return that.
             if nameLower == gen.lower():
@@ -289,16 +222,7 @@ def load(name):
             # Nope, we'll need to evaluate this as a python expression
             return eval(name, Generator.__dict__)
 
-    # If it doesn't look like a URL, don't bother loading urllib2
-    if name.find("://") < 0:
-        f = open(name)
-    else:
-        import urllib2
-        f = urllib2.urlopen(name)
-
-    w = World()
-    w.loadText(f)
-    f.close()
-    return w
+    # No? Try loading it as a text file
+    return Generator.Text(name)
 
 ### The End ###

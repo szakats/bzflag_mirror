@@ -165,4 +165,20 @@ def proxy(server, client):
         getattr(client, msg.protocol).write(msg)
     server.onUnhandledMessage.replace(onServerMessage)
 
+
+def autoFile(name):
+    """Given a name which could be a local file, URI, or
+       a file-like object, return a file-like object.
+       """
+    if type(name) == str:
+        # If it doesn't look like a URL, don't bother loading urllib2
+        if name.find("://") < 0:
+            return open(name)
+        else:
+            import urllib2
+            return urllib2.urlopen(name)
+    else:
+        return name
+
+
 ### The End ###

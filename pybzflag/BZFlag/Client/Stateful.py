@@ -97,7 +97,7 @@ class StatefulClient(BaseClient):
         if self.worldCache and self.worldCache.hasWorld(self.worldHash):
             # Yay, the world is in our cache
             f = self.worldCache.openWorld(self.worldHash)
-            self.game.world.loadBinary(f)
+            self.game.world = World.Binary(f)
             f.close()
             self.onLoadWorld()
         else:
@@ -128,7 +128,7 @@ class StatefulClient(BaseClient):
             # If we're using a cache, save a copy of the map.
             if self.worldCache:
                 self.worldCache.storeWorld(self.worldHash, self.binaryWorld)
-            self.game.world.loadBinary(StringIO(self.binaryWorld))
+            self.game.world = World.Binary(self.binaryWorld)
             del self.binaryWorld
             self.worldDownloaded = 1
             self.onLoadWorld()
