@@ -27,7 +27,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from BZFlag import Animated
 from BZFlag.UI import GLNoise
-import VRML
+import VRML, math
 
 
 class SkyDrawable(DisplayList):
@@ -73,11 +73,20 @@ class Colors(SkyDrawable):
         DisplayList.draw(self, rstate)
 
 
+class CloudTexture(GLNoise.MappedPerlinTexture):
+    """Perlin noise with mapping applied to create a cloud-like texture"""
+    def map(self, y):
+        try:
+            return math.log((y-0.35) * 40 + 1) * 0.27
+        except ValueError:
+            return 0
+
+
 class Clouds(SkyDrawable):
     """Dynamic perlin-noise-based clouds"""
     def __init__(self, *args, **kw):
         SkyDrawable.__init__(self, *args, **kw)
-        self.render.textures = (GLNoise.CloudTexture(),)
+        self.render.textures = (CloudTexture(),)
         self.motion = Animated.Value(Animated.RampFunction(200))
         self.time = Animated.Timekeeper()
         self.scale = 0.2

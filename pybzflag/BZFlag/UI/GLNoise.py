@@ -325,17 +325,5 @@ class MappedPerlinTexture(PerlinTexture):
            """
         return y
 
-
-class CloudTexture(MappedPerlinTexture):
-    """Perlin noise with mapping applied to create a cloud-like texture"""
-    def map(self, y):
-        try:
-            return log((y-0.35) * 40 + 1) * 0.27
-        except ValueError:
-            return 0
-
-    def bind(self, rstate):
-        MappedPerlinTexture.bind(self,rstate)
-
 ### The End ###
 
