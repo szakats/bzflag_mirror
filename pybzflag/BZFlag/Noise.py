@@ -21,7 +21,6 @@ Various methods of generating noise quickly using Numeric
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from Numeric import *
-import RandomArray
 from BZFlag import Geometry
 
 
@@ -52,7 +51,7 @@ class PerlinNoise3:
         self.octaves = octaves
         self.persistence = persistence
 
-        self.table = Vector3Table(seed, logTableSize)
+        self.table = VectorTable(seed, logTableSize, 3)
 
         self.two = array(2, Float32)
         self.three = array(3, Float32)
@@ -145,18 +144,36 @@ class PerlinNoise3:
         return result
 
 
-class Vector3Table:
-    """A table of random 3D unit vectors generated from a seed.
+class VectorTable:
+    """A table of random unit vectors generated from a seed.
+
+       A seed of None uses the current system time.
+    
        The size is specified as the base 2 logarithm of the actual size, since
        it must be a power of two. This is to avoid division in the get() function
        when it's necessary to constrain the input vector hash to the table size.
        """
-    def __init__(self, seed, logTableSize):
+    def __init__(self, seed, logTableSize, dimensions):
         self.size = 1 << logTableSize
+        self.dimensions = dimensions
 
-        # This generates a random array of numbers between -0.5 and 0.5, then normalizes the vectors
-        RandomArray.seed(seed)
-        self.table = (RandomArray.random((self.size, 3)) - 0.5).astype(Float32)
+        # This generates a random array of numbers between -0.5 and 0.5, then normalizes the vectors.
+        # Use the RandomArray module if we can, if not we'll call 'random' repeatedly.
+        try:
+            import RandomArray
+            if seed is None:
+                RandomArray.seed()
+            else:
+                RandomArray.seed(seed+1)
+            self.table = (RandomArray.random((self.size, dimensions)) - 0.5).astype(Float32)
+        except ImportError:
+            import random
+            random.seed(seed)
+            self.table = zeros((self.size, dimensions), Float32)
+            for j in xrange(dimensions):
+                for i in xrange(self.size):
+                    self.table[i,j] = random.random() - 0.5
+
         Geometry.normalize(self.table, self.table)
 
     def get(self, v):

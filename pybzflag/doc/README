@@ -25,8 +25,12 @@ nearly all applications of PyBZFlag.
 The graphical PyBZFlag modules all require pygame (http://pygame.org) and the
 Python Imaging Library (http://pythonware.com/products/pil/)
 
-The 3D modules require PyOpenGL (http://pyopengl.sourceforge.net) and the
-RandomArray companion module to Numeric.
+The 3D modules require PyOpenGL (http://pyopengl.sourceforge.net).
+
+-- Optional Dependencies
+
+The Psyco specializing compiler and the RandomArray companion module to Numeric
+are not requried, but both can be utilized to provide a speed boost.
 
 -- Contacts
 
