@@ -207,6 +207,10 @@ class ThreeDView:
            of one of the classes defined in BZFlag.Protocol.WorldObjects. If no
            object was rendered at this postion, returns None.
            """
+        # Flip the Y axis to convert from the traditional top-left-based coordinate
+        # system to OpenGL's bottom-left-based coordinate system.
+        pos = (pos[0], self.viewport.size[1] - pos[1])
+
         glSelectBuffer(len(self.scene.objects) * 4)
         glRenderMode(GL_SELECT)
         glInitNames()
@@ -218,7 +222,6 @@ class ThreeDView:
         gluPickMatrix(pos[0], pos[1], 5, 5, self.viewport.rect)
         self.viewport.setProjectionMatrix()
         glMatrixMode(GL_MODELVIEW)
-        
         self.camera.load()
 
 	names = {}
