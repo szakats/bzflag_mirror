@@ -144,8 +144,8 @@ class WorldObject(Block):
         return map(translate, poly)
 
     def getGLDrawables(self):
-        import BZFlag.Drawable
-        return [BZFlag.Drawable.GLDrawable()]
+        from BZFlag.UI import Drawable
+        return [Drawable.GLDrawable()]
 
 
 class Style(WorldObject):
@@ -168,8 +168,8 @@ class Style(WorldObject):
         ]
 
     def getGLDrawables(self):
-        import BZFlag.Drawable
-        return [BZFlag.Drawable.Ground(self.worldSize)]
+        from BZFlag.UI import Drawable
+        return [Drawable.Ground(self.worldSize)]
 
 
 ObjectOptions = Bitfield(UInt8, {
@@ -191,14 +191,11 @@ class TeamBase(WorldObject):
         ]
 
     def getGLDrawables(self):
-        import BZFlag.Drawable
+        from BZFlag.UI import Drawable
         if self.center[2] != 0:
 	    self.size[2] = 1
-	    return [
-	        BZFlag.Drawable.BaseTops(self.team, self.center, self.angle, self.size),
-#		BZFlag.Drawable.BoxSides(self.center, self.angle, self.size),
-	    ]
-        return [BZFlag.Drawable.BaseTops(self.team, self.center, self.angle, self.size)]
+	    return [Drawable.BaseTops(self.team, self.center, self.angle, self.size)]
+        return [Drawable.BaseTops(self.team, self.center, self.angle, self.size)]
 
 
 class Wall(WorldObject):
@@ -210,8 +207,8 @@ class Wall(WorldObject):
         ]
 
     def getGLDrawables(self):
-        import BZFlag.Drawable
-        return [BZFlag.Drawable.Wall(self.center, self.angle, self.size)]
+        from BZFlag.UI import Drawable
+        return [Drawable.Wall(self.center, self.angle, self.size)]
 
 
 class Box(WorldObject):
@@ -225,10 +222,10 @@ class Box(WorldObject):
         ]
 
     def getGLDrawables(self):
-        import BZFlag.Drawable
+        from BZFlag.UI import Drawable
         return [
-	    BZFlag.Drawable.BoxSides(self.center, self.angle, self.size),
-	    BZFlag.Drawable.BoxTops(self.center, self.angle, self.size),
+	    Drawable.BoxSides(self.center, self.angle, self.size),
+	    Drawable.BoxTops(self.center, self.angle, self.size),
 	    ]
 
 
@@ -243,8 +240,8 @@ class Pyramid(WorldObject):
         ]
 
     def getGLDrawables(self):
-        import BZFlag.Drawable
-        return [BZFlag.Drawable.Pyramid(self.center, self.angle, self.size, 'flipZ' in self.options)]
+        from BZFlag.UI import Drawable
+        return [Drawable.Pyramid(self.center, self.angle, self.size, 'flipZ' in self.options)]
 
 
 class Teleporter(WorldObject):
@@ -259,10 +256,10 @@ class Teleporter(WorldObject):
         ]
 
     def getGLDrawables(self):
-        import BZFlag.Drawable
+        from BZFlag.UI import Drawable
         return [
-	    BZFlag.Drawable.TeleporterField(self.center, self.angle, self.size),
-	    BZFlag.Drawable.TeleporterBorder(self.center, self.angle, self.size, self.border),
+	    Drawable.TeleporterField(self.center, self.angle, self.size),
+	    Drawable.TeleporterBorder(self.center, self.angle, self.size, self.border),
 	    ]
 
 
