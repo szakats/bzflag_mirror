@@ -153,7 +153,6 @@ class World:
             center = [400, 0, 0],
             angle  = math.pi,
             ))
-
         
         for line in xreadlines(f):
             # If this is a kludge used by map editors to store extra
