@@ -20,6 +20,21 @@ This is a python package providing a wrapper to nVidia's Cg runtime
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
+from Cg import *
+from CgGL import *
+
+# overwrite some functions, due to arrays and such
+def cgCreateProgramFromFile(context, type, file, profile, entry, args):
+    import Cg
+    if args is None:
+        Cg.cgCreateProgramFromFile(context, type, file, profile, entry, args)
+    else:
+        pargs = Cg.new_stringArray(len(args))
+        if len(args) > 0:
+            for index,arg in args,range(len(args)):
+                Cg.stringArray_setitem(pargs, index, arg)
+        Cg.cgCreateProgramFromFile(context, type, file, profile, entry, pargs)
+        Cg.delete_stringArray(pargs)
 
 # yay for constants
 CG_UNKNOWN_TYPE                   = 0

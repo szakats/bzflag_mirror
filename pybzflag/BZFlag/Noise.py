@@ -189,7 +189,7 @@ class VectorTable:
     """A table of random unit vectors generated from a seed.
 
        A seed of None uses the current system time.
-    
+
        The size is specified as the base 2 logarithm of the actual size, since
        it must be a power of two. This is to avoid division in the get() function
        when it's necessary to constrain the input vector hash to the table size.

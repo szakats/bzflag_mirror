@@ -2,6 +2,9 @@
 %{
 #include <cg.h>
 %}
+%include carrays.i
+
+%array_functions(char*, stringArray)
 
 // context functions
 CGcontext cgCreateContext(void);
@@ -63,5 +66,5 @@ int cgGetProfile(const char *);
 // error functions
 int cgGetError(void);
 const char *cgGetErrorString(int);
-void cgSetErrorCallback(int);
+void cgSetErrorCallback(CGerrorCallbackFunc);
 int cgGetErrorCallback();
