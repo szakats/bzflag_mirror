@@ -40,9 +40,9 @@ class Game:
         Util.initEvents(self, 'onChangePlayerList', 'onAddPlayer', 'onRemovePlayer',
                         'onLoadWorld')
 
-    def integrate(dt):
+    def integrate(self, dt):
         """Integrate velocity with respect to time everywhere it's needed"""
-        for player in self.players:
+        for player in self.players.values():
             player.motion.integrate(dt)
 
     def addPlayer(self, player):

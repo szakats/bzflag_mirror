@@ -124,10 +124,20 @@ def simpleClient(client, size=(600,600), viewClass=OverheadView):
     """Set up the supplied client to display a window
        consisting only of an OverheadView.
        """
+    import time
+    
     # Update the view regularly
+    global lastUpdate
+    lastUpdate = None
     def updateView():
-        global view, screen
+        global view, screen, lastUpdate
         if view:
+            # FIXME: this isn't the right place to handle updating the game state!
+            now = time.time()
+            if lastUpdate:
+                client.game.integrate(time.time() - lastUpdate)
+            lastUpdate = now
+            
             view.render(screen)
             pygame.display.flip()
 

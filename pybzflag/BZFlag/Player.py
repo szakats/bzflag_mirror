@@ -47,11 +47,11 @@ class Motion:
         self.angularVelocity = angularVelocity
 
     def integrate(self, dt):
-        self.velocity += dt * self.angularVelocity
+        self.azimuth += dt * self.angularVelocity
         self.position = [
-            self.velocity[0] * dt,
-            self.velocity[1] * dt,
-            self.velocity[2] * dt,
+            self.position[0] + self.velocity[0] * dt,
+            self.position[1] + self.velocity[1] * dt,
+            self.position[2] + self.velocity[2] * dt,
             ]
 
 
