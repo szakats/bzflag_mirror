@@ -64,7 +64,7 @@ class MsgFlagUpdate(Common.Message):
     messageId = 0x6675
     entries = [
         StructEntry(UInt16,                       'flagNum'),
-        StructEntry(SubStruct(Common.FlagStatus), 'status'),
+        StructEntry(SubStruct(Common.FlagUpdate), 'update'),
         ]
 
 class MsgAddPlayer(Common.Message):
@@ -134,7 +134,7 @@ class MsgDropFlag(Common.Message):
     entries = [
         StructEntry(Common.PlayerId,              'playerId'),
         StructEntry(UInt16,                       'flagNum'),
-        StructEntry(SubStruct(Common.FlagStatus), 'status'),
+        StructEntry(SubStruct(Common.FlagUpdate), 'update'),
         ]
 
 class MsgGrabFlag(Common.Message):
@@ -142,7 +142,7 @@ class MsgGrabFlag(Common.Message):
     entries = [
         StructEntry(Common.PlayerId,              'playerId'),
         StructEntry(UInt16,                       'flagNum'),
-        StructEntry(SubStruct(Common.FlagStatus), 'status'),
+        StructEntry(SubStruct(Common.FlagUpdate), 'update'),
         ]
 
 class MsgGetWorld(Common.DataMessage):

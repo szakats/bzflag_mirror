@@ -148,7 +148,7 @@ class PingPacket(Struct):
         ]
 
 
-class FlagStatus(Struct):
+class FlagUpdate(Struct):
     entries = [
         StructEntry(FlagId,     'id'),
         StructEntry(FlagStatus, 'status'),

@@ -325,7 +325,8 @@ class StatefulClient(BaseClient):
         self.game.players[msg.id].updateFromMessage(msg)
 
     def onMsgFlagUpdate(self, msg):
-        pass
+        flag = self.game.getFlag(msg.flagNum, self.flagIdToClass[msg.update.id])
+        flag.updateFromMessage(msg)
 
     def onMsgTeamUpdate(self, msg):
         pass

@@ -33,12 +33,12 @@ class Game:
        are stored in that object's class.
        """
     def __init__(self):
-        self.players = {}
-        self.flags = {}
-        self.teams = {}
+        self.players = {}    # Indexed by player Id
+        self.flags = {}      # Indexed by flag number (not Id)
+        self.teams = {}      # Indexed by color, represented as a string
         self.world = World.World()
         Util.initEvents(self, 'onChangePlayerList', 'onAddPlayer', 'onRemovePlayer',
-                        'onLoadWorld')
+                        'onLoadWorld', 'onAddFlag')
 
     def integrate(self, dt):
         """Integrate velocity with respect to time everywhere it's needed"""
@@ -54,7 +54,19 @@ class Game:
         player = self.players[playerId]
         del self.players[playerId]
         self.onRemovePlayer(self, player)
-        self.onChangePlayerList(self, self.players)    
+        self.onChangePlayerList(self, self.players)
+
+    def getFlag(self, number, cls=None):
+        """Get a flag, creating it with the given class if necessary.
+           There are no explicit messages for creating and destroying
+           flags, they are implicitly created when the first flag update is sent.
+           """
+        flag = self.flags.get(number, None)
+        if cls and not flag:
+            flag = cls(number)
+            self.flags[number] = flag
+            self.onAddFlag(self, flag)
+        return flag
 
 ### The End ###
         

@@ -24,6 +24,15 @@ Catalog of all supported flag types, and related utilities.
 from BZFlag import Util
 import re
 
+class FlagMotion:
+    def __init__(self, position=[0,0,0]):
+        self.position = position
+        self.launch = [0,0,0]
+        self.landing = [0,0,0]
+        self.flightTime = 0
+        self.flightEndTime = 0
+        self.initialVelocity = 0
+
 
 class FlagBase:
     """Abstract base type for a flag. Subclasses should provide
@@ -35,8 +44,12 @@ class FlagBase:
     type = []
     description = None
 
-    def __init__(self):
-        Util.initEvents(self, 'onGrab', 'onRelease')
+    def __init__(self, number):
+        self.number = number
+        self.status = None
+        self.owner = None
+        self.motion = FlagMotion()
+        Util.initEvents(self, 'onGrab', 'onRelease', 'onUpdate')
 
     def getName(self):
         """Infer a flag's name from the class name"""
@@ -79,6 +92,23 @@ class FlagBase:
         
         return "%s (%s%s):  %s" % (self.getMnemonic(), self.getAlignment(),
                                    abbreviation, self.description)
+
+    def updateFromMessage(self, msg):
+        """Update this flag from any message with an 'update' attribute
+           holding a FlagUpdate structure.
+           """
+        self.status = msg.update.status
+        self.owner = msg.update.owner
+        self.motion.position = msg.update.position
+        self.motion.launch = msg.update.launch
+        self.motion.landing = msg.update.landing
+        self.motion.flightTime = msg.update.flightTime
+        self.motion.flightEndTime = msg.update.flightEndTime
+        self.motion.initialVelocity = msg.update.initialVelocity
+        self.onUpdate()
+
+        if not msg.update.type in self.type:
+            raise Errors.ProtocolWarning("Flag type in update doesn't match local flag type")
 
 
 def getDict():
