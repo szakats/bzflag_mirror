@@ -25,6 +25,7 @@ in subclasses.
 
 import BZFlag
 from BZFlag import Network, Protocol, Event, Errors, Game, Flag
+from StringIO import StringIO
 
 
 class BaseServer(Network.Endpoint):
@@ -106,8 +107,24 @@ class StatefulServer(BaseServer):
     def init(self):
         BaseServer.init(self)
         self.game = Game.Game()
+        self.binaryWorld = None
+        self.worldBlockSize = 1000
+        self.options.update({
+            'world': None,
+            })
+
+        def setOptions(**options):
+            if 'world' in options.keys():
+                f = open(options['world'])
+                self.game.world.loadText(f)
+                f.close()
+        self.onSetOptions.observe(setOptions)
 
     def onMsgNegotiateFlags(self, msg):
+        """Given a list of supported flags by the client and the
+           flags in the game world, send back a list of flags the
+           client is missing.
+           """
         supportedFlags = Flag.splitAbbreviations(msg.data)
         missingFlags = []
         for flag in self.game.flags.values():
@@ -115,6 +132,25 @@ class StatefulServer(BaseServer):
                 missingFlags.append(flags)
         msg.socket.write(self.outgoing.MsgNegotiateFlags(
             data = Flag.joinAbbreviations(missingFlags)))
+
+    def onMsgWantWHash(self, msg):
+        """Send the client an MD5 hash of the current world"""
+        msg.socket.write(self.outgoing.MsgWantWHash(
+            lifetime = self.game.world.lifetime,
+            hash = self.game.world.getHash()))
+
+    def onMsgGetWorld(self, msg):
+        """Send the client a section of our world"""
+        # Convert the world to binary only on the first chunk we send
+        if msg.offset == 0 or not self.binaryWorld:
+            f = StringIO()
+            self.game.world.saveBinary(f)
+            self.binaryWorld = f.getvalue()
+
+        block = self.binaryWorld[msg.offset:msg.offset + self.worldBlockSize]
+        msg.socket.write(self.outgoing.MsgGetWorld(
+            remaining = len(self.binaryWorld) - msg.offset - len(block),
+            data = block))
 
 
 class StandardServer(StatefulServer):

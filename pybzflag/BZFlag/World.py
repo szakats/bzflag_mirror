@@ -24,8 +24,9 @@ and saving worlds in binary and text formats.
 
 from BZFlag.Protocol import WorldObjects, Common
 from BZFlag import Errors, Util
-import os, re, math
+import os, re, math, md5
 from xreadlines import xreadlines
+from StringIO import StringIO
 
 
 class Scene:
@@ -97,7 +98,13 @@ class World:
        """
     def __init__(self, sceneClass=SceneList):
         self.sceneClass = sceneClass
+        self.generateEmpty()
+
+    def generateEmpty(self):
+        """Generate an empty world"""
         self.erase()
+        self.storeSkeleton()
+        self.postprocess()
 
     def loadBinary(self, f):
         """Load a binary world from the supplied file-like object"""
@@ -144,15 +151,7 @@ class World:
         # Start with a fresh map, and add objects that
         # are implied but not specified in the text map format.
         self.erase()
-        self.storeBlock(WorldObjects.Style())
-        self.storeBlock(WorldObjects.Wall(
-            center = [0, 400, 0],
-            angle  = math.pi * 1.5,
-            ))
-        self.storeBlock(WorldObjects.Wall(
-            center = [400, 0, 0],
-            angle  = math.pi,
-            ))
+        self.storeSkeleton()
         
         for line in xreadlines(f):
             # If this is a kludge used by map editors to store extra
@@ -196,6 +195,19 @@ class World:
         self.teleporterLinks = []
         self.scene = self.sceneClass()
         self.gameStyle = None
+        self.lifetime = 'permanent'     # For client-side world caching
+
+    def storeSkeleton(self):
+        """Adds required objects to the world that are only present in the binary format"""
+        self.storeBlock(WorldObjects.Style())
+        self.storeBlock(WorldObjects.Wall(
+            center = [0, 400, 0],
+            angle  = math.pi * 1.5,
+            ))
+        self.storeBlock(WorldObjects.Wall(
+            center = [400, 0, 0],
+            angle  = math.pi,
+            ))
 
     def storeBlock(self, block):
         """Store one block class. This will be called while loading a world,
@@ -226,6 +238,14 @@ class World:
             fromSide = TeleporterSide(self.teleporters[link.fromSide >> 1], link.fromSide & 1)
             toSide = TeleporterSide(self.teleporters[link.toSide >> 1], link.toSide & 1)
             fromSide.link(toSide)
+
+    def getHash(self):
+        """Return an MD5 hash of the binary world"""
+        f = StringIO()
+        self.saveBinary(f)
+        m = md5.new()
+        m.update(f.getvalue())
+        return m.hexdigest()
 
 
 class Cache:

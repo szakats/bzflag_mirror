@@ -83,6 +83,10 @@ class Parser(optik.OptionParser):
             add("-s", "--server", dest="server", metavar="HOST",
                 help="Sets the BZFlag server to connect to.")
 
+        if 'world' in availableOpts:
+            add("-w", "--world", dest="world", metavar="FILE",
+                help="Loads a BZFlag world file.")
+
         if 'interface' in availableOpts:
             add("-i", "--interface", dest="interface", metavar="HOST:PORT",
                 help="Sets the host and/or the port to listen for clients on.")
@@ -102,20 +106,16 @@ class Parser(optik.OptionParser):
         options = {}
 
         try:
-            options['server'] = values['server']
-        except KeyError:
-            pass
-
-        try:
             options['identity'] = Player.Identity(
                 values['callSign'], values['team'], values['email'], values['playerType'])
         except KeyError:
             pass
 
-        try:
-            options['interface'] = values['interface']
-        except KeyError:
-            pass
+        for key in ('interface', 'server', 'world'):
+            try:
+                options[key] = values[key]
+            except KeyError:
+                pass
 
         options.update(self.extraOptions)
 
