@@ -97,8 +97,10 @@ class BoxTops(DisplayList):
         glPushMatrix()
         glTranslatef(0, 0, self.base)
         glNormal3f(0, 0, -1)
+        glFrontFace(GL_CW)
         if self.base:
             self.drawSide()
+        glFrontFace(GL_CCW)
         glTranslatef(0, 0, self.height)
         glNormal3f(0, 0, 1)
         self.drawSide()
