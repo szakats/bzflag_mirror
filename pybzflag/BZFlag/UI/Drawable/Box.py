@@ -35,7 +35,7 @@ import random
 class Sides(DisplayList):
     """Abstract base class for box sides"""
     tex2Repeats = None
-    
+
     def set(self, box):
         self.center = box.center
         self.angle = box.angle
