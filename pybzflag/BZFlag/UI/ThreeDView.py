@@ -28,6 +28,7 @@ from BZFlag.World import Scene, WorldObjects
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+
 class Camera:
   def __init__(self):
     self.focus = (0, 0, 4.0)
@@ -44,6 +45,7 @@ class Camera:
     if self.isFocused:
       glTranslatef(self.focus[0], self.focus[1], self.focus[2])
 
+
 class Light:
   def __init__(self, lightnum):
     self.ambient  = (0, 0, 0, 1.0)
@@ -56,6 +58,7 @@ class Light:
     glLightfv(self.lightnum, GL_DIFFUSE, self.diffuse)
     glLightfv(self.lightnum, GL_POSITION, self.position)
     glEnable(GL_LIGHT0)
+
 
 class Scene:
   def __init__(self, game):
@@ -86,6 +89,7 @@ class Scene:
       for drawable in self.passes[texture]:
 	drawable.draw()
 
+
 class ThreeDView:
   def __init__(self, game):
     self.game = game
@@ -94,12 +98,12 @@ class ThreeDView:
     self.scene = Scene(game)
 
   def configureOpenGL(self, size):
-    glViewport(0, 0, size[0], size[1]);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45.0, size[0] / size[1], 3.0, 2500.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    glViewport(0, 0, size[0], size[1])
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluPerspective(45.0, size[0] / size[1], 3.0, 2500.0)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
 
   def initializeOpenGL(self, surface):
     """Initialize the opengl view"""
@@ -116,12 +120,12 @@ class ThreeDView:
     glEnable(GL_CULL_FACE)
 
     glClearColor(0.0, 0.0, 0.0, 0.0)
-    glClearDepth(1.0);
-    glDepthFunc(GL_LESS);
-    glShadeModel(GL_SMOOTH);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    glClearDepth(1.0)
+    glDepthFunc(GL_LESS)
+    glShadeModel(GL_SMOOTH)
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
 
     glEnable(GL_LIGHTING)
     self.configureOpenGL(self.size)
@@ -129,9 +133,9 @@ class ThreeDView:
   def render(self):
     """Render the view to the given surface. This includes the game
        world, with transient objects such as players and flags"""
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     self.camera.load()
     self.scene.render()
+
 
 def attach(game, eventLoop, size=(800,600), targetFrameRate=60):
   """Set up a window and opengl context on the given game and event loop"""
@@ -139,6 +143,7 @@ def attach(game, eventLoop, size=(800,600), targetFrameRate=60):
   def updateView():
     global view, screen
     if view:
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
       game.update()
       view.render()
       pygame.display.flip()
@@ -147,6 +152,7 @@ def attach(game, eventLoop, size=(800,600), targetFrameRate=60):
   global view, screen
   pygame.init()
   screen = pygame.display.set_mode(size, pygame.OPENGL | pygame.DOUBLEBUF)
+  pygame.display.set_caption("BZFlag 3D View")
   view = ThreeDView(game)
   view.initializeOpenGL(screen)
   updateView()

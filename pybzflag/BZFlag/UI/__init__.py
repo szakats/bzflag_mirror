@@ -27,6 +27,7 @@ for setting up a UI by name.
 nameMap = {
     'overhead': 'OverheadView',
     '3D':       'ThreeDView',
+    'radar':    'RadarView',
     }
 
 

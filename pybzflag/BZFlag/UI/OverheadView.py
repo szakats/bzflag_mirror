@@ -182,7 +182,7 @@ class OverheadView:
         pass
 
 
-def attach(game, eventLoop, size=(512,512), viewClass=OverheadView, targetFrameRate=30):
+def attach(game, eventLoop, size=(512,512), targetFrameRate=30):
     """Set up a window with only an overhead view, on the given game and event loop"""
     import pygame
 
