@@ -38,16 +38,17 @@ class Socket:
             self.socket = getattr(self, "new%sSocket" % protocol)()
 
     def newTCPSocket(self):
-        """Create a new TCP socket, setting the proper options"""
         tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        # Disable the nagle algorithm. This is necessary to get
-        # anything near reasonable latency when sending small packets.
-        tcp.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.setNodelay(tcp)
         return tcp
-
+        
     def newUDPSocket(self):
         return socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    def setNodelay(self, s):
+        # Disable the Nagle algorithm. This is necessary to get
+        # anything near reasonable latency when sending small packets.
+        s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
     def close(self):
         self.socket.close()
@@ -148,6 +149,7 @@ class Socket:
            """
         s = Socket(None)
         (s.socket, s.address) = self.socket.accept()
+        self.setNodelay(s.socket)
         return s
 
     def poll(self, eventLoop):
