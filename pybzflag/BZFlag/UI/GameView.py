@@ -59,10 +59,10 @@ def attach(game, eventLoop):
     # lazily evaluates the panel's height and uses it as a width for the left
     # split, keeping the radar square. The rest of the panel gets used for messages.
     (radarRect, messageRect) = Layout.Rect(hudPanel).vSplit(lambda r: r[3])
-    RadarView.RadarView(game, hudPanel.region(radarRect))
+    RadarView.RadarView(game, hudPanel.region(radarRect.margin(2)))
 
     # Redirect our stdout to this text panel
-    sys.stdout = HUD.ScrolledText(hudPanel.region(messageRect))
+    sys.stdout = HUD.ScrolledText(hudPanel.region(messageRect.margin(2)))
     print BZFlag.about
 
     # Logo-thingy!
