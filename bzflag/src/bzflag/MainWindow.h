@@ -66,6 +66,8 @@ class MainWindow {
     void		grabMouse();
     void		ungrabMouse();
 
+    void		resize();
+
     // FIXME -- try to get rid of this
     void		getMousePosition(int& mx, int& my) const;
 
@@ -74,8 +76,7 @@ class MainWindow {
 			MainWindow(const MainWindow&);
     MainWindow&		operator=(const MainWindow&);
 
-    void		resize();
-    static void		resize(void*);
+    static void		resizeCB(void*);
 
   private:
     BzfWindow*		window;
