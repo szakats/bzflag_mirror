@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, SpringSystem
-from BZFlag import Event, Util, Animated
+from BZFlag import Event, Util
 from Numeric import *
 from time import time
 
@@ -8,25 +8,27 @@ from time import time
 class AnchorAffector(SpringSystem.Affector):
     def integrate(self, dt):
         # Pin the cloth up at its two top corners
-        self.model.state[-1,-1] = self.model.initialState[-1,-1]
-        self.model.state[-1,0] = self.model.initialState[-1,0]
+        #self.model.state[-1,-1] = self.model.initialState[-1,-1]
+        #self.model.state[-1,0] = self.model.initialState[-1,0]
+
+        # Anchor the cloth at the left side, like a flag
+        self.model.state[:,0] = self.model.initialState[:,0]
 
 
 class ClothObject:
     def __init__(self):
         self.cloth = SpringSystem.Cloth(self.getInitialState())
 
-        self.time = Animated.Timekeeper()
         self.surf = Drawable.ArraySurface(self.cloth.state)
         self.surf.render.static = False
 
         self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.01))
-        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (0, 3, 0))
+        self.cloth.add(SpringSystem.ClothWindAffector, self.surf, (-4, 1, 1))
         self.cloth.add(AnchorAffector)
 
     def getInitialState(self):
         xAxis = arange(-2, 2, 0.1)
-        yAxis = arange( 0, 2, 0.1)
+        yAxis = arange( 0, 3, 0.1)
         size = (len(yAxis), len(xAxis))
         a = zeros(size + (3,), Float)
         a[:,:,0] += 0 - xAxis
@@ -37,7 +39,9 @@ class ClothObject:
         return [self.surf]
 
     def update(self):
-        self.cloth.integrate(self.time.step())
+        # Use a fixed time step for now, since the model gets unstable
+        # far too easily with a variable time step.
+        self.cloth.integrate(0.03)
         
 
 if __name__ == '__main__':

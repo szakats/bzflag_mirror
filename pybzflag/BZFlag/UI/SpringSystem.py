@@ -49,10 +49,6 @@ class Cloth:
                           VelocityAffector(self)]
 
     def integrate(self, dt):
-        # Use a fixed time step for now, since the model gets unstable
-        # far too easily wiht a variable time step.
-        dt = 0.02
-        
         for affector in self.affectors:
             affector.integrate(dt)
 
