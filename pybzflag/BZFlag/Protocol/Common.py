@@ -240,9 +240,9 @@ class MsgShotBegin(Message):
 class MsgShotEnd(Message):
     messageId = 0x7365
     entries = [
-        StructEntry(layerId, 'playerId'),
-        StructEntry(UInt16,  'shotId'),
-        StructEntry(UInt16,  'reason'),
+        StructEntry(PlayerId, 'playerId'),
+        StructEntry(UInt16,   'shotId'),
+        StructEntry(UInt16,   'reason'),
         ]
 
 
