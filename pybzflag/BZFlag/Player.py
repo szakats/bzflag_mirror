@@ -23,6 +23,7 @@ areas like identity and motion that may be managed individually.
 #
 
 from BZFlag import Event, Animated
+from BZFlag.World import Scale
 
 
 class Identity:
@@ -91,7 +92,10 @@ class Player:
         self.onMove(self)
 
     def integrate(self, dt):
-        self.motion.integrate(dt)
+        if not 'paused' in self.status:
+            if 'falling' in self.status:
+                self.motion.velocity[2] += Scale.Gravity * dt
+            self.motion.integrate(dt)
         self.onMove(self)
 
 
