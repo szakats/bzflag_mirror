@@ -29,6 +29,7 @@ nameMap = {
     '3D':       'ThreeDView',
     'radar':    'RadarView',
     'anaglyph':	'AnaglyphView',
+    'game':     'GameView',
     }
 
 
