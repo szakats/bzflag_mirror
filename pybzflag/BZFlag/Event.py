@@ -178,6 +178,7 @@ class EventLoop:
         if isinstance(item, Network.Socket):
             self.sockets.append(item)
             self.updateSelectDict()
+
         elif isinstance(item, Timer):
             self.timers.append(item)
             item.setEventLoop(self)
@@ -190,9 +191,11 @@ class EventLoop:
         if isinstance(item, Network.Socket):
             self.sockets.remove(item)
             self.updateSelectDict()
+
         elif isinstance(item, Timer):
             self.timers.remove(item)
             self.updateNextTimerActivation()
+
         else:
             raise TypeError("Only Sockets and Timers are supported by this event loop")
 

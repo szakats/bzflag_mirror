@@ -6,7 +6,6 @@ from BZFlag import CommandLine, Client
 import sys
 
 argParser = CommandLine.Parser(Client.PlayerClient,
-                               server   = "localhost",
                                callSign = "@Worldgrabber")
 
 argParser.add_option("-o", "--output", dest="outputFile", metavar="FILE", default="-",

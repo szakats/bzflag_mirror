@@ -39,7 +39,7 @@ class Parser(optik.OptionParser):
        may also be a list of classes- all of them will be used to construct
        a list of command line options.
        """
-    def __init__(self, cls, **extraDefaults):
+    def __init__(self, cls, **kw):
         optik.OptionParser.__init__(self)
 
         if type(cls) != type(()) and type(cls) != type([]):
@@ -52,6 +52,16 @@ class Parser(optik.OptionParser):
             inst = c()
             self.instances.append(inst)
             availableOpts.extend(inst.options.keys())
+
+        # Separate our keyword args into extra defaults and options
+        # to pass directly to the classes.
+        extraDefaults = {}
+        self.extraOptions = {}
+        for key in kw:
+            if key in availableOpts:
+                extraDefaults[key] = kw[key]
+            else:
+                self.extraOptions[key] = kw[key]
 
         defaults = {
             'team':       'rogue',
@@ -106,6 +116,8 @@ class Parser(optik.OptionParser):
             options['interface'] = values['interface']
         except KeyError:
             pass
+
+        options.update(self.extraOptions)
 
         for inst in self.instances:
             inst.cmdLineValues = values

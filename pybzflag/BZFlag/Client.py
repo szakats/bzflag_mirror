@@ -59,6 +59,9 @@ class BaseClient(Network.Endpoint):
            returns, the client is connected to the server and can
            receive and transmit messages.
            """
+        if not server:
+            raise Errors.NetworkException("A server must be specified")
+
         # Establish the TCP socket
         if self.tcp:
             self.disconnect()

@@ -9,9 +9,7 @@ from BZFlag import CommandLine, Client
 from threading import *
 import sys, time
 
-argParser = CommandLine.Parser(Client.PlayerClient,
-                               server   = "localhost",
-                               callSign = "@PyChat")
+argParser = CommandLine.Parser(callSign = "@PyChat")
 argParser.add_option("-q", "--quiet", action="store_true", dest="quiet",
                      help="Disables the output of connection status messages and protocol warnings.")
 argParser.add_option("-i", "--silent", action="store_true", dest="silent",

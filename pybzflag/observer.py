@@ -2,8 +2,7 @@
 from BZFlag import CommandLine
 from BZFlag.UI import OverheadView
 
-client = CommandLine.client(server     = "localhost",
-                            callSign   = "@PyObserver")
+client = CommandLine.client(callSign = "@PyObserver")
 
 # Stick some instrumentation in select events
 client.onConnect.trace("Connected.")
