@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+#
+# A simple chat client.
+# This is suitable for interactive use, or for piping commands into.
+# Imagine cron jobs spitting uptimes and disk space stats into bzflag
+# so you don't miss out on such things while playing :)
+#
 from BZFlag import CommandLine
 from threading import *
 import sys
@@ -23,6 +29,8 @@ if not client.cmdLineValues['silent']:
         client.game.onLoadWorld.trace("--- World loaded.")
         client.game.onAddPlayer.trace("--> Joined : %(2)s")
         client.game.onRemovePlayer.trace("<-- Parted : %(2)s")
+
+        # Re-enable nonfatal exceptions
         client.eventLoop.showNonfatalExceptions = 1
 
     # Show incoming messages
@@ -45,13 +53,12 @@ class ChatThread(Thread):
     def run(self):
         while client.eventLoop.running:
             line = sys.stdin.readline()
-            # If this is end of file, exit or we'll spin in an infinite loop
             if not line:
+                # End of file
                 client.eventLoop.stop()
-            # Only send non-blank lines
-            line = line.strip()
-            if line:
-                client.sendMessage(line)
+                return
+            # Strip off the newline and all other trailing space
+            client.sendMessage(line.rstrip())
 client.onEnterGame.observe(ChatThread().start)
 
 client.run()
