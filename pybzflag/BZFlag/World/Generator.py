@@ -175,7 +175,7 @@ def Binary(name):
 def Heightmap(name,
               size          = Scale.WorldSize,
               wallHeight    = Scale.WallHeight,
-              boxHeight     = 6.0 * Scale.MuzzleHeight,
+              boxHeight     = 20.0 * Scale.MuzzleHeight,
               ):
     """Uses the given image file to make a heightmapped world.
        This is very silly and nobody should use this except
