@@ -95,8 +95,8 @@ class SoftwareSpriteRenderer(VertexArray):
         self.pointSizes  = zeros(shape, Float32, savespace=True)
         self.pointColors = ones(shape + (4,), Float32, savespace=True)
 
-        # Z-sorting is on by default
-        self.zSort = True
+        # Z-sorting is off by default
+        self.zSort = False
 
     def draw(self, rstate):
         # Stretch our point colors over each whole quad
