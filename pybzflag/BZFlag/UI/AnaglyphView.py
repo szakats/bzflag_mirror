@@ -33,8 +33,6 @@ class AnaglyphView(ThreeDView):
        """
     def __init__(self, game, viewport):
         ThreeDView.__init__(self, game, viewport)
-	self.camera1 = Camera()
-	self.camera2 = Camera()
         self.light0 = Light(GL_LIGHT0)
         self.light1 = Light(GL_LIGHT1)
         self.light0.ambient  = (0.05, 0.05, 0.05, 1.0)
@@ -51,19 +49,18 @@ class AnaglyphView(ThreeDView):
 	eyesep = 100
 	angle = math.atan(eyesep / self.camera.distance)
         # draw left eye (blue-green)
-	self.camera1 = self.camera
-	self.camera1.azimuth -= angle
+	self.camera.azimuthOffset = -angle
         glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_FALSE)
-        self.camera1.load()
+        self.camera.load()
         self.light0.set()
         self.light1.set()
         self.scene.render()
 	glClear(GL_DEPTH_BUFFER_BIT)
         # draw right eye (red)
-	self.camera2 = self.camera
-	self.camera2.azimuth += angle
+	self.camera = self.camera
+	self.camera.azimuthOffset = angle
         glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE)
-        self.camera2.load()
+        self.camera.load()
 	self.light0.set()
 	self.light1.set()
         self.scene.render()

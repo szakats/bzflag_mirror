@@ -42,13 +42,14 @@ class Camera:
         self.distance  = 900
         self.azimuth   = 180
         self.elevation = -75
+	self.azimuthOffset = 0
 
     def load(self):
         """Set the current OpenGL matrix according to the camera's location and orientation"""
         glLoadIdentity()
         glTranslatef(0, 0, -self.distance)
         glRotatef(self.elevation, 1.0, 0.0, 0.0)
-        glRotatef(self.azimuth, 0.0, 0.0, 1.0)
+        glRotatef(self.azimuth + self.azimuthOffset, 0.0, 0.0, 1.0)
         glTranslatef(*self.position)
 
 
@@ -81,7 +82,7 @@ class SmoothedCamera(Camera):
         glLoadIdentity()
         glTranslatef(0, 0, -self.animatedDistance.value)
         glRotatef(self.animatedElevation.value, 1.0, 0.0, 0.0)
-        glRotatef(self.animatedAzimuth.value, 0.0, 0.0, 1.0)
+        glRotatef(self.animatedAzimuth.value + self.azimuthOffset, 0.0, 0.0, 1.0)
         glTranslatef(*self.animatedPosition.get())
 
 
