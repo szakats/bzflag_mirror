@@ -29,33 +29,6 @@ from Numeric import *
 __all__ = ['ArraySurface']
 
  
-def calcGridNormals(vertices):
-    """Calculate a face normal for each grid square in the vertex array. Returns
-       an array smaller than the given array by 1 in each dimension, since the
-       result corresponds to grid squares rather than grid corners.
-       """
-    vx = vertices[1:,:-1,:] - vertices[:-1,:-1,:]
-    vy = vertices[:-1,1:,:] - vertices[:-1,:-1,:]
-    return normalize(cross(vy, vx))
-        
-    
-def calcVertexNormals(vertices):
-    """Calculate vertex normals.
-       The proper way to do this would be to average the face normal from each
-       neighboring vertex, but just using the face normals directly looks almost
-       the same and is a lot cheaper.
-       """
-    grid = calcGridNormals(vertices)
-    result = zeros(vertices.shape, grid.typecode())
-    result[:-1, :-1, :]  = grid
-
-    # Repeat the last row and column
-    result[-1, :-1, :] = grid[-1,:,:]
-    result[:-1, -1, :] = grid[:,-1,:]
-    result[-1,  -1, :] = grid[-1,-1,:]
-    return result
-
-
 class ArraySurface(GLDrawable):
     """Drawable representing a smooth surface composed of a grid of vertices,
        contained in a Numeric array. The array may change between renderings,
@@ -86,10 +59,31 @@ class ArraySurface(GLDrawable):
                 row.append(x + y * width)
             self.indices.append(array(row))
 
+    def prepareNormals(self):
+        """Prepare vertex normals for this surface, storing intermediate results
+           that might be helpful for other calculations.
+           """
+        # Calculate cross products for all grid squares
+        vx = self.vertices[1:,:-1,:] - self.vertices[:-1,:-1,:]
+        vy = self.vertices[:-1,1:,:] - self.vertices[:-1,:-1,:]
+        self.crossProducts = cross(vy, vx)
+
+        # Normalize them to get normals for each grid square
+        self.gridNormals = normalize(self.crossProducts)
+
+        # Expand that to the size of the vertex array, repeating the
+        # last row and column of normals.
+        self.normals = zeros(self.vertices.shape, self.gridNormals.typecode())
+        self.normals[:-1, :-1, :]  = self.gridNormals
+        self.normals[-1, :-1, :] = self.gridNormals[-1,:,:]
+        self.normals[:-1, -1, :] = self.gridNormals[:,-1,:]
+        self.normals[-1,  -1, :] = self.gridNormals[-1,-1,:]
+
     def draw(self, rstate):
-        """Calculate normals and blast our vertex array out to OpenGL"""
+        """Calculate normals and blast our triangle strips out to OpenGL"""
+        self.prepareNormals()
         glVertexPointerd(reshape(self.vertices, (-1, 3)))
-        glNormalPointerd(reshape(calcVertexNormals(self.vertices), (-1, 3)))
+        glNormalPointerd(reshape(self.normals, (-1, 3)))
         glEnable(GL_VERTEX_ARRAY)
         glEnable(GL_NORMAL_ARRAY)
         for row in self.indices:
