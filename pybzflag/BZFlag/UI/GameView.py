@@ -72,7 +72,7 @@ def attach(game, eventLoop):
     hud = viewport.region(Layout.Rect(viewport).margin(0.01).bottom(0.3))
     HUDBorderView(hud)
 
-    RadarView.RadarView(game, hud.region(Layout.Rect(hud).left(100)))
+    RadarView.RadarView(game, hud.region(Layout.Rect(hud).left(lambda r: r[3]).margin(0.03)))
 
     return viewport
 

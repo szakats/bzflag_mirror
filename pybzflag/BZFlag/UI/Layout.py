@@ -9,7 +9,8 @@ All layout operators' inputs can be static rectangles, viewports
 callable layout operators.
 
 All parameters can either be specified in pixels as integers,
-or in fractions of the input rectangle's minor axis, as floats.
+or in fractions of the input rectangle's minor axis, as floats,
+or as a callable that takes the rectangle in question as a parameter.
 """
 #
 # Python BZFlag Protocol Package
@@ -39,6 +40,7 @@ def autoScale(rect, seq):
        to pixels mentioned in the module's documentation.
        Integer values pass straight through, floating point
        values are multiplied by the rectangle's minor axis.
+       Callables are called with the rectangle in question.
        """
     if rect[2] > rect[3]:
         minor = rect[3]
@@ -49,9 +51,11 @@ def autoScale(rect, seq):
     for item in seq:
         if type(item) == float:
             result.append(item * minor)
+        elif callable(item):
+            result.append(item(rect))
         else:
             result.append(item)
-    return result    
+    return result
 
 
 class Rect:
