@@ -178,17 +178,12 @@ class ViewportMode:
     
     def setupFrame(self):
         """Called during the viewport's onSetupFrame event"""
-        self.setPolygonMode()
         if self.clearBuffers:
             glClear(self.clearBuffers)
 
     def finishFrame(self):
         """Called during the viewport's onFinishFrame event, before the page flip"""
         pass
-
-    def setPolygonMode(self):
-        """A hook for setting the polygon mode. Default is GL_FILL"""
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
 class UnclearedMode(ViewportMode):
@@ -218,8 +213,12 @@ class WireframeMode(ClearedMode):
     def __init__(self, clearColor=(0.5, 0.5, 0.5, 1)):
         ClearedMode.__init__(self, clearColor)
 
-    def setPolygonMode(self):
+    def setupFrame(self):
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        ClearedMode.setupFrame(self)
+
+    def finishFrame(self):
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
 class XRayMode(ClearedMode):
