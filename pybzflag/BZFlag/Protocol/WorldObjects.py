@@ -501,8 +501,127 @@ class Teleporter(WorldObject):
 	    import OpenGL.GL
 	    OpenGL.GL.glCallList(self.list)
 
+    class BorderDrawable(GLDrawable):
+        def __init__(self, center, angle, size, border):
+	    import OpenGL.GL
+	    import BZFlag.UI.Texture
+	    GLDrawable.__init__(self)
+	    self.center = center
+	    self.angle = angle * 180 / 3.1415926
+	    self.size = size
+	    self.border = border
+	    self.texture = BZFlag.UI.Texture.Texture('data/caution.png')
+	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
+	    OpenGL.GL.glPushMatrix()
+	    OpenGL.GL.glTranslatef(*self.center)
+	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
+	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLE_STRIP)
+	    OpenGL.GL.glNormal3f(-1, 0, 0)
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + self.border, 0)
+	    OpenGL.GL.glTexCoord2f(self.border, 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(0, self.size[2] + self.border)
+	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
+	    OpenGL.GL.glTexCoord2f(self.border, self.size[2])
+	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1], self.size[2])
+	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1], self.size[2] + self.border)
+	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
+	    OpenGL.GL.glTexCoord2f(self.border + 2 * self.size[1], self.size[2])
+	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1], self.size[2])
+	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1], 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, 0)
+	    OpenGL.GL.glTexCoord2f(self.border + 2 * self.size[1], 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1], 0)
+	    OpenGL.GL.glEnd()
+	    OpenGL.GL.glFrontFace(OpenGL.GL.GL_CW)
+	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLE_STRIP)
+	    OpenGL.GL.glNormal3f(1, 0, 0)
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, 0)
+	    OpenGL.GL.glTexCoord2f(self.border, 0)
+	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(0, self.size[2] + border)
+	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
+	    OpenGL.GL.glTexCoord2f(self.border, self.size[2])
+	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1], self.size[2])
+	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1], self.size[2] + self.border)
+	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
+	    OpenGL.GL.glTexCoord2f(self.border + 2 * self.size[1], self.size[2])
+	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1], self.size[2])
+	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1], 0)
+	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, 0)
+	    OpenGL.GL.glTexCoord2f(self.border + 2 * self.size[1], 0)
+	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1], 0)
+	    OpenGL.GL.glEnd()
+	    OpenGL.GL.glFrontFace(OpenGL.GL.GL_CCW)
+	    OpenGL.GL.glBegin(OpenGL.GL.GL_QUADS)
+	    # top
+	    OpenGL.GL.glNormal3f(0.4, 0, 1)
+	    OpenGL.GL.glTexCoord2f(0.4, 0.0001)
+	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
+	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1] + 0.4, 0.0001)
+	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
+	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1] + 0.4, 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
+	    OpenGL.GL.glTexCoord2f(0.4, 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
+	    # underside of top
+	    OpenGL.GL.glNormal3f(0, 0, -1)
+	    OpenGL.GL.glTexCoord2f(0.4, 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, self.size[2])
+	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1] + 0.4, 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + self.border, self.size[2])
+	    OpenGL.GL.glTexCoord2f(2 * self.border + 2 * self.size[1] + 0.4, 0.0001)
+	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, self.size[2])
+	    OpenGL.GL.glTexCoord2f(0.4, 0.0001)
+	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, self.size[2])
+	    # Y+ outside
+	    OpenGL.GL.glNormal3f(0, 1, 0)
+	    OpenGL.GL.glTexCoord2f(self.border, 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + border, 0)
+	    OpenGL.GL.glTexCoord2f(self.border, self.size[2] + border)
+	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
+	    OpenGL.GL.glTexCoord2f(0, self.size[2] + self.border)
+	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1] + self.border, 0)
+	    # Y+ inside
+	    OpenGL.GL.glNormal3f(0, -1, 0)
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1], 0)
+	    OpenGL.GL.glTexCoord2f(0, self.size[2])
+	    OpenGL.GL.glVertex3f(self.border / 2, self.size[1], self.size[2])
+	    OpenGL.GL.glTexCoord2f(self.border, self.size[2])
+	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1], self.size[2])
+	    OpenGL.GL.glTexCoord2f(self.border, 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, self.size[1], 0);
+	    # Y- outside
+	    OpenGL.GL.glNormal3f(0, 1, 0)
+	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, 0)
+	    OpenGL.GL.glTexCoord2f(0, self.size[2] + self.border)
+	    OpenGL.GL.glVertex3f(self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
+	    OpenGL.GL.glTexCoord2f(self.border, self.size[2] + self.border)
+	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, self.size[2] + self.border)
+	    OpenGL.GL.glTexCoord2f(self.border, 0)
+	    OpenGL.GL.glVertex3f(-self.border / 2, -self.size[1] - self.border, 0)
+	    # Y- inside
+	    # Y+ leg bottom
+	    # Y- leg bottom
+	    OpenGL.GL.glEnd()
+	    OpenGL.GL.glPopMatrix()
+	    OpenGL.GL.glEndList()
+
+	def draw(self):
+	    import OpenGL.GL
+	    OpenGL.GL.glCallList(self.list)
+
     def getGLDrawables(self):
-        return [self.FieldDrawable(self.center, self.angle, self.size)]
+        return [
+	    self.FieldDrawable(self.center, self.angle, self.size),
+	    self.BorderDrawable(self.center, self.angle, self.size, self.border),
+	    ]
 
 
 class TeleporterLink(WorldObject):
