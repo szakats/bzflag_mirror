@@ -38,7 +38,7 @@ class Sparks(Drawable.SpriteArray):
 
 class Smoke(Drawable.SpriteArray):
     textureName = 'cloud.png'
-    def __init__(self, position=(0,0,0), numParticles=100):
+    def __init__(self, position=(0,0,0), numParticles=450):
         self.model = ParticleSystem.SpriteFountain(numParticles)
         Drawable.SpriteArray.__init__(self, numParticles, allowPointSprite=False)
         self.model.attachDrawable(self)
@@ -49,15 +49,16 @@ class Smoke(Drawable.SpriteArray):
 
         self.model.add(ParticleSystem.RandomEmitter,
                        spawnRate           = 100,
-                       speedRange          = (4, 5),
+                       speedRange          = (3, 4),
                        direction           = (0, 0, 1),
                        directionRandomness = 0.2,
                        position            = position,
                        )
-        self.model.add(ParticleSystem.LifespanAffector, 1)
+        self.model.add(ParticleSystem.LifespanAffector, 4)
         self.model.add(ParticleSystem.LinearFadeAffector,
-                       sizeRange           = (3, 1),
-                       colorRange          = ((0,0,0,0), (1,1,1,0.5))
+                       sizeRange           = (6, 1),
+                       colorRange          = ((0.5, 0.5, 0.5, 0  ),
+                                              (1  , 1  , 1  , 0.1))
                        )
 
     def draw(self, rstate):
