@@ -261,17 +261,31 @@ class BasicRenderPass(RenderPass):
            be ignored.
            """
         if textures:
-            glEnable(GL_TEXTURE_2D)
             if GLExtension.multitexture:
-                textureUnit = GL_TEXTURE1_ARB
-                for texture in textures:
-                    glActiveTextureARB(textureUnit)
-                    textureUnit += 1
-                    texture.bind()
+                # We have multitexturing. Enable and bind the texture units we'll be using,
+                # make sure the rest are disabled.
+                texIndex = 0
+                for unit in GLExtension.textureUnits:
+                    glActiveTextureARB(unit)
+                    if texIndex < len(textures):
+                        textures[texIndex].bind()
+                        glEnable(GL_TEXTURE_2D)
+                    else:
+                        glDisable(GL_TEXTURE_2D)
+                    texIndex += 1
             else:
+                # No multitexturing, only enable the current texture unit
+                glEnable(GL_TEXTURE_2D)
                 textures[0].bind()
         else:
-            glDisable(GL_TEXTURE_2D)
+            if GLExtension.multitexture:
+                # We have multitexturing, make sure all the texture units are disabled
+                for unit in GLExtension.textureUnits:
+                    glActiveTextureARB(unit)
+                    glDisable(GL_TEXTURE_2D)
+            else:
+                # No multitexturing, only disable the current texture unit
+                glDisable(GL_TEXTURE_2D)
 
 
 class BlendedRenderPass(BasicRenderPass):

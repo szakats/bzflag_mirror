@@ -23,16 +23,29 @@ then containing those query results in an easy to find place.
 
 initialized = False
 multitexture = False
+textureUnits = []
 
 
 def init():
     """Test for extension support"""
-    global initialized, multitexture
+    global initialized, multitexture, textureUnits
     if initialized:
         return
 
-    from OpenGL.GL.ARB.multitexture import glInitMultitextureARB
+    # Determine whether we have multitexturing
+    from OpenGL.GL.ARB.multitexture import glInitMultitextureARB, GL_TEXTURE0_ARB, glActiveTextureARB
     multitexture = glInitMultitextureARB()
+
+    # If we have multitexturing, make a list of supported texture units
+    if multitexture:
+        try:
+            unit = GL_TEXTURE0_ARB
+            while True:
+                glActiveTextureARB(unit)
+                textureUnits.append(unit)
+                unit += 1
+        except:
+            pass
 
     initialized = True
 
