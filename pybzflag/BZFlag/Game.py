@@ -45,7 +45,7 @@ class Game:
         for player in self.players.values():
             player.motion.integrate(dt)
         for flag in self.flags.values():
-            flags.motion.integrate(dt)
+            flag.motion.integrate(dt)
 
     def addPlayer(self, player):
         self.players[player.identity.playerId] = player
