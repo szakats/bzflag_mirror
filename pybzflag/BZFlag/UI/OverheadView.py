@@ -93,7 +93,8 @@ def worldToImage(world, size, oversample=2, colors=colorScheme):
                     hsv = list(colorsys.rgb_to_hsv(color[0]/255.0,
                                                    color[1]/255.0,
                                                    color[2]/255.0))
-                    hsv[2] += object.center[2] / heightRef * 0.1
+                    if heightRef:
+                        hsv[2] += object.center[2] / heightRef * 0.1
                     color = colorsys.hsv_to_rgb(*hsv)
                     color = (color[0]*255, color[1]*255, color[2]*255)
                     draw.polygon(poly, fill=color, outline=colors['outline'])
@@ -118,6 +119,15 @@ class OverheadView:
         def onLoadWorld():
             self.cachedWorld = None
         game.world.onLoad.observe(onLoadWorld)
+
+    def renderWorld(self, surface):
+        """Render the normally-static world to the given surface. This uses worldToImage
+           to draw a fairly high quality image using PIL, then converts it to a
+           pygame surface.
+           """
+        import pygame
+        img = worldToImage(self.game.world, self.size)
+        surface.blit(pygame.image.fromstring(img.tostring(), img.size, "RGB"), (0,0))
 
     def render(self, surface):
         """Render the overhead view to the given surface. This includes the
