@@ -121,6 +121,7 @@ class OverheadView:
         # Set ourselves up to render to the given viewport
         viewport.setCaption("%s Overhead View" % BZFlag.name)
         def onDrawFrame():
+            game.update()
             self.render(viewport.screen)
         viewport.onDrawFrame.observe(onDrawFrame)
 

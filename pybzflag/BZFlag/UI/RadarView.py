@@ -22,7 +22,7 @@ the position and orientation of one player.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import pygame, math
+import pygame, math, BZFlag
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -58,7 +58,11 @@ class RadarView:
         glEnable(GL_BLEND)
         glEnable(GL_LINE_SMOOTH)
 
-        viewport.onDrawFrame.observe(self.render)
+        viewport.setCaption("%s Radar View" % BZFlag.name)
+        def onDrawFrame():
+            game.update()
+            self.render()
+        viewport.onDrawFrame.observe(onDrawFrame)
 
     def colorScale(self, z, h, viewHeight):
         """This is the Enhanced Radar (tm) color scaling algorithm from bzflag proper"""

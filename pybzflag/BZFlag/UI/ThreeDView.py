@@ -21,7 +21,7 @@ A 3d scene renderer similar to BZFlag proper
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import pygame, math
+import pygame, math, BZFlag
 from pygame.locals import *
 from BZFlag import Event
 from BZFlag.World import Scene, WorldObjects
@@ -96,26 +96,17 @@ class Scene:
 
 
 class ThreeDView:
-  def __init__(self, game):
+  def __init__(self, game, viewport):
     self.game = game
+    self.viewport = viewport
     self.camera = Camera()
     self.light0 = Light(GL_LIGHT0)
     self.light1 = Light(GL_LIGHT1)
     self.scene = Scene(game)
 
-  def configureOpenGL(self, size):
-    self.size = size
-    glViewport(0, 0, size[0], size[1])
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    gluPerspective(45.0, size[0] / size[1], 3.0, 2500.0)
-    glMatrixMode(GL_MODELVIEW)
-    glLoadIdentity()
-
-  def initializeOpenGL(self, surface):
-    """Initialize the opengl view"""
-    self.size = surface.get_size()
-
+    self.camera.focus = (0, 0, -90)    
+    
+    # Initialize the opengl view
     self.light0.ambient  = (0.85, 0.85, 0.85, 1.0)
     self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
     self.light0.position = (400, 400, 400, 1.0)
@@ -139,7 +130,24 @@ class ThreeDView:
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
 
     glEnable(GL_LIGHTING)
-    self.configureOpenGL(self.size)
+
+    viewport.setCaption("%s Overhead View" % BZFlag.name)
+    def onDrawFrame():
+      game.update()
+      self.render()
+      self.camera.rotation += 0.1;
+    viewport.onDrawFrame.observe(onDrawFrame)
+
+    def onMouseButtonDown(event):
+      if event.button == 4:
+        self.camera.distance -= 50
+        if self.camera.distance < 0:
+          self.camera.distance = 0
+      if event.button == 5:
+        self.camera.distance += 50
+        if self.camera.distance > 1500:
+          self.camera.distance = 1500
+    viewport.onMouseButtonDown.observe(onMouseButtonDown)
 
   def render(self):
     """Render the view to the given surface. This includes the game
@@ -148,38 +156,6 @@ class ThreeDView:
     self.scene.render()
 
 
-def attach(game, eventLoop, size=(800,600), targetFrameRate=60):
-  """Set up a window and opengl context on the given game and event loop"""
-
-  def updateView():
-    global view, screen
-    if view:
-      for event in pygame.event.get():
-	if event.type == pygame.QUIT:
-	  sys.exit()
-	if event.type == pygame.VIDEORESIZE:
-	  view.configureOpenGL(event.size)
-	if event.type == pygame.MOUSEBUTTONDOWN:
-	  if event.button == 4:
-	    view.camera.distance -= 50
-	    if view.camera.distance < 0:
-	      view.camera.distance = 0
-	  if event.button == 5:
-	    view.camera.distance += 50
-	    if view.camera.distance > 1500:
-	      view.camera.distance = 1500
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-      game.update()
-      view.render()
-      view.camera.rotation += 0.1;
-      pygame.display.flip()
-  eventLoop.add(Event.PeriodicTimer(1.0 / targetFrameRate, updateView))
-
-  global view, screen
-  pygame.init()
-  screen = pygame.display.set_mode(size, pygame.OPENGL | pygame.DOUBLEBUF | pygame.RESIZABLE)
-  pygame.display.set_caption("BZFlag 3D View")
-  view = ThreeDView(game)
-  view.initializeOpenGL(screen)
-  view.camera.focus = (0, 0, -90)
-  updateView()
+def attach(game, eventLoop):
+    from BZFlag.UI.Viewport import OpenGLViewport
+    ThreeDView(game, OpenGLViewport(eventLoop, (800,600)))
