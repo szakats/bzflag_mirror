@@ -7,7 +7,7 @@ from BZFlag import World, Game, UI, CommandLine, Util
 from BZFlag.Event import EventLoop
 import sys
 
-ui = CommandLine.Parser(UI.Any, ui = 'overhead').parse()
+ui = CommandLine.Parser(UI.Any, ui = '3D').parse()
 
 try:
     fileName = ui.cmdLineArgs[0]
