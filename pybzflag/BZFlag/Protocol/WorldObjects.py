@@ -50,6 +50,10 @@ class GLDrawable:
     	import OpenGL.GL
         self.list = OpenGL.GL.glGenLists(1)
 
+    def __del__(self):
+        import OpenGL.GL
+	OpenGL.GL.glDeleteLists(self.list, 1)
+
     def createList(self):
         pass
 
@@ -160,7 +164,7 @@ class WorldObject(Block):
         return map(translate, poly)
 
     def getGLDrawables(self):
-        return GLDrawable()
+        return [GLDrawable()]
 
 
 class Style(Block):
@@ -207,8 +211,41 @@ class Wall(WorldObject):
         StructEntry(Common.Vector2,   'size',   [1,1]),
         ]
 
+    class WallDrawable(GLDrawable):
+        def __init__(self, center, angle, size):
+	    self.center = center
+	    self.angle = angle
+	    self.size = size
+
+        def createList(self):
+	    import OpenGL.GL
+	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
+	    OpenGL.GL.glPushMatrix()
+	    OpenGL.GL.glTranslatefv(self.center)
+	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
+	    OpenGL.GL.glDisable(OpenGL.GL.GL_CULL_FACE)
+	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLE_STRIP)
+#	    OpenGL.GL.glTexCoord2f(0, 0)
+	    OpenGL.GL.glVertex3f(-self.size[0], self.size[0], 0)
+#	    OpenGL.GL.glTexCoord2f(0, 1)
+	    OpenGL.GL.glVertex3f(-self.size[0], self.size[0], self.size[1])
+#	    OpenGL.GL.glTexCoord2f()
+	    OpenGL.GL.glVertex3f(self.size[0], self.size[0], 0)
+#	    OpenGL.GL.glTexCoord2f()
+	    OpenGL.GL.glVertex3f(self.size[0], self.size[0], self.size[1])
+	    OpenGL.GL.glEnd()
+	    OpenGL.GL.glEnable(OpenGL.GL.GL_CULL_FACE)
+	    OpenGL.GL.glEndList()
+	
+	def draw(self):
+	    import OpenGL.GL
+	    OpenGL.GL.glCallList(self.list)
+
     def toUntransformedPolygon(self):
         return ((0, -self.size[0]), (0, self.size[0]))
+
+    def getGLDrawables(self):
+        return [self.WallDrawable(self.center, self.angle, self.size)]
 
 class Box(WorldObject):
     textName = 'box'

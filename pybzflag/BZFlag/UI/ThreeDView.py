@@ -69,13 +69,12 @@ class Scene:
     for block in self.game.world.blocks:
       if isinstance(block, WorldObjects.WorldObject):
         self.objects[block] = block.getGLDrawables()
-      print "block",id(block),"is a",block.__class__
-#    self.rebuildTexmap()
+    self.rebuildTexmap()
 
   def rebuildTexmap(self):
     for object, drawables in self.objects.items():
       for drawable in drawables:
-        pass
+	print "drawable",id(drawable),"is a",drawable.__class__
 
 class ThreeDView:
   def __init__(self, game):
