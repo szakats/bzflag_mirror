@@ -44,6 +44,7 @@ Section "BZEdit (required)"
 	File PocketEngine.dll
 	File TextureMngr.dll
 	File msvcr71.dll
+	File msvcp71.dll
 	File mfc71.dll
 
 	; make the data dir
@@ -90,6 +91,7 @@ Section "Uninstall"
 	Delete $INSTDIR\PocketEngine.dll
 	Delete $INSTDIR\TextureMngr.dll
 	Delete $INSTDIR\msvcr71.dll
+	Delete $INSTDIR\msvcp71.dll
 	Delete $INSTDIR\mfc71.dll
 
 	Delete $INSTDIR\data\*.*
