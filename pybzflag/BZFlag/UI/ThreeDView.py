@@ -27,17 +27,32 @@ from BZFlag.Protocol import WorldObjects
 from OpenGL.GL import *
 
 
+colorScheme = {
+    'player':        (0,   0,   0  ),
+    'redPlayer':     (1,   0,   0  ),
+    'greenPlayer':   (0,   1,   0  ),
+    'bluePlayer':    (0.2, 0.2, 1  ),
+    'purplePlayer':  (1,   0,   1  ),
+    'rabbitPlayer':  (1,   1,   1  ),
+    }
+
+
 class PlayerTransform(Drawable.Transform):
     """A drawable transform to set the tank's position, orientation, and color
        according to its attached player.
        """
     def __init__(self, player):
         self.player = player
+        try:
+            self.color = colorScheme[player.identity.team + "Player"]
+        except KeyError:
+            self.color = colorScheme['player']
 
     def apply(self):
         m = self.player.motion
         glTranslatef(*m.position)
         glRotatef(m.azimuth, 0,0,1)
+        glColor3f(*self.color)
     
 
 class Tank:
