@@ -4,7 +4,7 @@ Class representing a BZFlag player, divided up into subclasses for
 areas like identity and motion that may be managed individually.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

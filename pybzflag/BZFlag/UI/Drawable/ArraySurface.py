@@ -4,7 +4,7 @@ A Drawable for surfaces generated dynamically from a 2D Numeric
 array of vertex coordinates. Vertex normals are generated automatically.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

@@ -13,7 +13,7 @@ or in fractions of the input rectangle's relevant axis, as floats,
 or as a callable that takes the rectangle in question as a parameter.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

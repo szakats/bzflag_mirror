@@ -3,7 +3,7 @@
 A 3d scene renderer that does anaglyph stereo
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

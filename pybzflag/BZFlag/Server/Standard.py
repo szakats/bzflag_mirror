@@ -4,7 +4,7 @@ Provides the StandardServer class, extending StatefulServer with
 the default game rules enforced by the server.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

@@ -5,7 +5,7 @@ for finding information about BZFlag servers. This client can retrieve
 server lists and update the central server list.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

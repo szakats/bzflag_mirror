@@ -4,7 +4,7 @@ A 3d scene renderer that does side-by-side 2-channel stereo (usually for SGI
 visualization hardware)
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

@@ -29,7 +29,7 @@ This has been tested the most with VRML files produced by blender,
 but it has successfully loaded files exported by other software.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

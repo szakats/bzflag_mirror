@@ -4,7 +4,7 @@ An overhead view implemented using OpenGL, optionally tracking
 the position and orientation of one player.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

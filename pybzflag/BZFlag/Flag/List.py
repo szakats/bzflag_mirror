@@ -4,7 +4,7 @@ Collection of BZFlag.Flag.FlagBase subclasses that define the
 name, type, description, and behavior of all flags in the game.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

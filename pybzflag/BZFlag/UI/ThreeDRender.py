@@ -5,7 +5,7 @@ viewports, cameras, lighting, and picking. This should be subclassed
 to implement views that need moderately complex 3D engine behaviour.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

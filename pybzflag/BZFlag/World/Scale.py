@@ -4,7 +4,7 @@ Define constants that give the absolute and relative scale of objects
 in the BZFlag universe. These correspond to global.h.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

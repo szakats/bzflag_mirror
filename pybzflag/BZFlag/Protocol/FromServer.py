@@ -4,7 +4,7 @@ Low-level python abstractions for the BZFlag protocol messages
 sent from the game server to the clients.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

@@ -6,7 +6,7 @@ package operates- clients and servers transmit and receive game state
 over the network, frontends display and modify it.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

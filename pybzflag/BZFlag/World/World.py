@@ -4,7 +4,7 @@ Abstraction for BZFlag's world format. This class can load and
 save worlds to text and binary formats, storing them in a Scene class.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

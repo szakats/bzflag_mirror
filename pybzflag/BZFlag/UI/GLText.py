@@ -15,7 +15,7 @@ glyph images, it works instead with glyphs padded to include the font
 height and escapement.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

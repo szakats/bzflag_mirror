@@ -5,7 +5,7 @@ All generator objects in this model should be in __all__, and have help
 strings properly formatted for the Help() generator.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or

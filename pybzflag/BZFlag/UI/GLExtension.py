@@ -4,7 +4,7 @@ This module supports querying OpenGL for support of various extensions,
 then containing those query results in an easy to find place.
 """
 #
-# Python BZFlag Protocol Package
+# Python BZFlag Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
 #
 #  This library is free software; you can redistribute it and/or
