@@ -46,7 +46,6 @@ class CubeMap(Texture):
         self.position = position
         self.maxSize = maxSize
         self.target = GL_TEXTURE_CUBE_MAP_EXT
-        self.bindTarget = GL_TEXTURE_CUBE_MAP_EXT
         self.texEnv = GL_REPLACE
         self.recursion = 0
         self.rendered = False
@@ -58,7 +57,7 @@ class CubeMap(Texture):
         if not self.viewport:
             self.rstate = rstate
             self.viewport = self.setupViewport()
-        Texture.bind(self, rstate, self.bindTarget)
+        Texture.bind(self, rstate)
 
     def getTextureRect(self, viewport):
         """Return a function that calculates the texture size taking into account
@@ -157,23 +156,38 @@ class CubeMap(Texture):
         self.rstate.view.renderScene(self.rstate)
 
         glReadBuffer(GL_BACK)
-        Texture.bind(self, None, self.bindTarget)
+        Texture.bind(self)
 
-        # Disable mipmapping
         glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-
-        glCopyTexImage2D(target, 0, GL_RGB,
-                         self.viewport.rect[0],
-                         self.viewport.rect[1],
-                         self.viewport.rect[2],
-                         self.viewport.rect[3],
-                         0)
         glTexParameteri(self.target, GL_TEXTURE_WRAP_S, GL_CLAMP)
         glTexParameteri(self.target, GL_TEXTURE_WRAP_T, GL_CLAMP)
+
+        # Use glReadPixels and glTexImage2D here instead of glCopyTexImage2D
+        # because glCopyTexImage2D would seemingly-randomly leave the destination
+        # texture as uninitialized texture memory rather than copying.
+        # If you'd like to try glCopyTexImage2D on your system, comment ouy
+        # these two calls and uncomment the glCopyTexImage2D call below
+
+        pixels = glReadPixels(self.viewport.rect[0],
+                              self.viewport.rect[1],
+                              self.viewport.rect[2],
+                              self.viewport.rect[3],
+                              GL_RGB, GL_UNSIGNED_BYTE)
+        glTexImage2D(target, 0, GL_RGB,
+                     self.viewport.rect[2],
+                     self.viewport.rect[3],
+                     0, GL_RGB, GL_UNSIGNED_BYTE, pixels)
+
+        #glCopyTexImage2D(target, 0, GL_RGB,
+        #                 self.viewport.rect[0],
+        #                 self.viewport.rect[1],
+        #                 self.viewport.rect[2],
+        #                 self.viewport.rect[3],
+        #                 0)
 
         ## Uncomment this to show the cube map textures as they're stored
         #self.viewport.display.flip()
         #import time
-        #time.sleep(2)
+        #time.sleep(1)
 
 ### The End ###
