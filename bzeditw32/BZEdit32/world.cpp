@@ -476,6 +476,14 @@ bool CWorld::Append ( const char *szFileName )
 		{
 			sscanf(element,"%s",name);
 
+			for ( int i = strlen(name)-1; i >= 0;i--)
+			{
+				if (isspace(name[i]))
+					name[i] = NULL;
+				else
+					i = -1;
+			}
+
 			iNewItem = AddObject(name);
 
 			Item = GetObject(iNewItem);
