@@ -23,7 +23,7 @@ visualization hardware)
 #
 
 from BZFlag.UI import Viewport, ThreeDView, ThreeDControl, ThreeDRender, Layout, HUD
-import BZFlag
+import BZFlag, math
 from OpenGL.GL import *
 
 class StereoView:
@@ -31,20 +31,22 @@ class StereoView:
        to an OpenGLViewport.
        """
     def __init__(self, game, viewport):
-        lefteye  = ThreeDView.ThreeDView(game, viewport.region(Layout.Rect(viewport).left(0.5)))
-        righteye = ThreeDView.ThreeDView(game, viewport.region(Layout.Rect(viewport).right(0.5)))
-        ThreeDControl.Viewing(lefteye, viewport)
-        righteye.camera = lefteye.camera
+        self.lefteye  = ThreeDView.ThreeDView(game, viewport.region(Layout.Rect(viewport).left(0.5)))
+        self.righteye = ThreeDView.ThreeDView(game, viewport.region(Layout.Rect(viewport).right(0.5)))
+        ThreeDControl.Viewing(self.lefteye, viewport)
+        self.righteye.camera = self.lefteye.camera
+        viewport.onDrawFrame.observe(self.render)
 
     def render(self):
-        eyesep = 12.5
-        angle = math.atan(eyesep / self.camera.distance)
+#        eyesep = 12.5
+        eyesep = 300
+        angle = math.atan(eyesep / self.lefteye.camera.distance)
         # draw left eye
-        lefteye.camera.azimuthOffset = -angle
-        lefteye.render()
+        self.lefteye.camera.azimuthOffset = -angle
+        self.lefteye.render()
         # draw right eye
-        righteye.camera.azimuthOffset = angle
-        righteye.render()
+        self.righteye.camera.azimuthOffset = angle
+        self.righteye.render()
 
 def attach(game, eventLoop):
     viewport = Viewport.OpenGLViewport(eventLoop, (1600, 600))
