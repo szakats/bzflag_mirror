@@ -84,8 +84,13 @@ class PlayerClient(StatefulClient):
 
     def onMsgAccept(self, msg):
         """This is called after we try to enterGame, if it's successful."""
-        self.inGame = 1
-        self.onEnterGame()
+        pass
+
+    def onMsgAddPlayer(self, msg):
+        if msg.id == self.id:
+            # We just got a player add for ourselves, this means we're in the game.
+            self.inGame = 1
+            self.onEnterGame()
 
     def onMsgReject(self, msg):
         """This is called after we try to enterGame, if we failed."""

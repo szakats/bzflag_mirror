@@ -95,6 +95,9 @@ class BaseClient(Network.Endpoint):
         # We should have just received a Hello packet with
         # the server version and our client ID.
         hello = socket.readStruct(self.incoming.HelloPacket)
+        if not hello:
+            # The whole thing isn't here yet, wait until the next bit of data
+            return
         if hello.version != self.protocolVersion:
             raise Errors.ProtocolError(
                 "Protocol version mismatch: The server is version " +

@@ -191,6 +191,7 @@ class StatefulServer(BaseServer):
         """Event triggered after a player has completely entered the
            game, to welcome them in with a message.
            """
+        print "Hiya"
         msg.socket.write(self.outgoing.MsgMessage(
             fromId = 'server',
             toId = msg.socket.id,
