@@ -36,6 +36,14 @@ class AnaglyphView(ThreeDView):
         ThreeDView.__init__(self, game, viewport)
 	self.camera1 = Camera()
 	self.camera2 = Camera()
+        self.light0 = Light(GL_LIGHT0)
+        self.light1 = Light(GL_LIGHT1)
+        self.light0.ambient  = (0.05, 0.05, 0.05, 1.0)
+        self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
+        self.light0.position = (400, 400, 400, 1.0)
+        self.light1.ambient  = (0.05, 0.05, 0.05, 1.0)
+        self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
+        self.light1.position = (0, 0, 400, 1.0)
 
     def render(self):
         """Render the view to the given surface. This includes the game
@@ -46,6 +54,8 @@ class AnaglyphView(ThreeDView):
 	self.camera1.azimuth -= 1
         glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_FALSE)
         self.camera1.load()
+        self.light0.set()
+        self.light1.set()
         self.scene.render()
 	glClear(GL_DEPTH_BUFFER_BIT)
         # draw right eye (red)
@@ -53,6 +63,8 @@ class AnaglyphView(ThreeDView):
 	self.camera2.azimuth += 1
         glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE)
         self.camera2.load()
+	self.light0.set()
+	self.light1.set()
         self.scene.render()
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)
 

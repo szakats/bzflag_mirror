@@ -148,6 +148,14 @@ class ThreeDView:
             game.update()
             self.render()
         viewport.onDrawFrame.observe(onDrawFrame)
+        self.light0 = Light(GL_LIGHT0)
+        self.light1 = Light(GL_LIGHT1)
+        self.light0.ambient  = (0.05, 0.05, 0.05, 1.0)
+        self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
+        self.light0.position = (400, 400, 400, 1.0)
+        self.light1.ambient  = (0.05, 0.05, 0.05, 1.0)
+        self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
+        self.light1.position = (0, 0, 400, 1.0)
 
     def render(self):
         """Render the view to the given surface. This includes the game
@@ -155,15 +163,7 @@ class ThreeDView:
            """
         self.camera.load()
         # Set up the light so it is in world space not cam space
-        self.light0 = Light(GL_LIGHT0)
-        self.light1 = Light(GL_LIGHT1)
-        self.light0.ambient  = (0.05, 0.05, 0.05, 1.0)
-        self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
-        self.light0.position = (400, 400, 400, 1.0)
         self.light0.set()
-        self.light1.ambient  = (0.05, 0.05, 0.05, 1.0)
-        self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
-        self.light1.position = (0, 0, 400, 1.0)
         self.light1.set()
 
         self.scene.render()
