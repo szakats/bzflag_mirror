@@ -139,6 +139,40 @@ class Scene:
                     else:
                         self.passes[0][drawable.texture] = [drawable.draw]
 
+    def pick(self, pos):
+        viewport = glGetIntegerv(GL_VIEWPORT)
+        glSelectBuffer(len(self.objects) * 4)
+        glRenderMode(GL_SELECT)
+        glInitNames()
+        glPushName(0)
+        glMatrixMode(GL_PROJECTION)
+        glPushMatrix()
+        glLoadIdentity();
+        gluPickMatrix(pos[0], viewport[3] - pos[1], 1.0, 1.0, viewport)
+        gluPerspective(45.0, (viewport[2] - viewport[0]) / (viewport[3] - viewport[1]), 3.0, 2500.0)
+	glMatrixMode(GL_MODELVIEW)
+	names = {}
+	curname = 1
+        for object, drawables in self.objects.items():
+	    names[curname] = object
+            glLoadName(curname)
+            curname += 1
+            for drawable in drawables:
+                drawable.draw()
+        glMatrixMode(GL_PROJECTION)
+	glPopMatrix()
+	glMatrixMode(GL_MODELVIEW)
+	hits = glRenderMode(GL_RENDER)
+	if len(hits) > 0:
+	    depth = hits[0][1]
+	    choose = hits[0][2]
+	    for hit in hits:
+	        if hit[1] < depth:
+		    depth = hit[1]
+		    choose = hit[2]
+            return names[choose[0]]
+	return None
+
     def render(self):
         """Render the scene to the current OpenGL context"""
         glDisable(GL_BLEND)
@@ -199,7 +233,6 @@ class ThreeDView:
         # Set up the light so it is in world space not cam space
         self.light0.set()
         self.light1.set()
-
         self.scene.render()
 
 

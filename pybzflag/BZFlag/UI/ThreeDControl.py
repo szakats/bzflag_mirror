@@ -45,6 +45,9 @@ class Viewing:
         view.camera.position = (0, 0, -20)
 
         def onMouseButtonDown(event):
+	    if event.button == 1:
+	        view.camera.load()
+		print 'picked a',view.scene.pick(event.pos).__class__
             if event.button == 4:
                 self.zoom(1/self.mouseZoomScale)
             if event.button == 5:
