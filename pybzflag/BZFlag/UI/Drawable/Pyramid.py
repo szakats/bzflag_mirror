@@ -171,33 +171,35 @@ class Pyramid(DisplayList):
         if self.flip:
             z = self.size[2]
             z2 = 0
+
         glPushMatrix()
         glTranslatef(*self.center)
         if self.flip:
             glFrontFace(GL_CW)
             glTranslatef(0, 0, -self.size[2])
         glRotatef(self.angle, 0.0, 0.0, 1.0)
+
         if self.envMap:
             glActiveTextureARB(GL_TEXTURE1_ARB)
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)  # XXXXXX
             
-            glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
-            glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
-            glTexGenfv(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
+            glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP_EXT)
+            glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP_EXT)
+            glTexGenfv(GL_R, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP_EXT)
             glEnable(GL_TEXTURE_GEN_S)
             glEnable(GL_TEXTURE_GEN_T)
             glEnable(GL_TEXTURE_GEN_R)
             glActiveTextureARB(GL_TEXTURE0_ARB)
 
-            # XXXXXXX
-            from BZFlag.UI.Drawable import VRML
-            glPushMatrix()
-            glTranslatef(0,0,20)
-            glScalef(4,4,4)
-            for mesh in VRML.load("../extra_media/sphere.wrl").values():
-                mesh.drawToList(rstate)
-            glPopMatrix()
-            glColor3f(1,1,1)
+        # XXXXXXX
+        from BZFlag.UI.Drawable import VRML
+        glPushMatrix()
+        glTranslatef(0,0,20)
+        glScalef(4,4,4)
+        for mesh in VRML.load("../extra_media/sphere.wrl").values():
+            mesh.drawToList(rstate)
+        glPopMatrix()
+        glColor3f(1,1,1)
             
         glBegin(GL_QUADS)
         # Z- side

@@ -88,10 +88,39 @@ class CubeMap(Texture):
         if not self.dirty:
             return
         
+        glReadBuffer(GL_BACK)
+        #Texture.bind(self)
+        glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
+        self.renderColors()
+        self.dirty = False
+
+
+    def renderColors(self):
+        """For debugging, render solid color to each side of the cube map"""
+        for target, color in (
+            (GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT, (1,0,0,1)),
+            (GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT, (0,1,1,1)),
+            (GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT, (0,1,0,1)),
+            (GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT, (1,0,1,1)),
+            (GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT, (0,0,1,1)),
+            (GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT, (1,1,0,1)),
+            ):
+            glClearColor(*color)
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)       
+            glCopyTexImage2D(target, 0, GL_RGB,
+                             self.viewport.rect[0],
+                             self.viewport.rect[1],
+                             self.viewport.rect[2],
+                             self.viewport.rect[3],
+                             0)
+        glClearColor(0,0,0,1)
+
+    def renderSides(self):
+        """Render all six sides of the cube map"""
         cameraPos = (-self.position[0],
                      -self.position[1],
                      -self.position[2])
-        glReadBuffer(GL_BACK)
 
         glLoadIdentity()
         glRotatef(-180, 1,0,0)
@@ -125,16 +154,12 @@ class CubeMap(Texture):
         glTranslatef(*cameraPos)
         self.renderSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT)
 
-        self.dirty = False
-
     def renderSide(self, target):
         """Render one side of the cube map, storing it in the given texture target.
            The caller is responsible for positioning the camera correctly.
            """
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         self.rstate.view.renderScene(self.rstate)
-        #Texture.bind(self)
-        glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glCopyTexImage2D(target, 0, GL_RGB,
                          self.viewport.rect[0],
                          self.viewport.rect[1],
