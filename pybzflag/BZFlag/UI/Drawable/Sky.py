@@ -81,7 +81,7 @@ class Clouds(SkyDrawable):
     """Dynamic perlin-noise-based clouds"""
     def __init__(self, *args, **kw):
         SkyDrawable.__init__(self, *args, **kw)
-        self.render.textures = (GLNoise.CloudTexture(renderRate=0.001),)
+        self.render.textures = (GLNoise.CloudTexture(),)
 
     def drawToList(self, rstate):
         """Our display list only holds an inverted sphere and the static
@@ -89,16 +89,30 @@ class Clouds(SkyDrawable):
            of day in draw().
            """
         glDisable(GL_LIGHTING)
+        glColor3f(1,1,1)
         glEnable(GL_BLEND)
+
+        scale = 0.01
+
+        glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (scale, 0, 0, 0))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, scale, 0, 0))
+        glEnable(GL_TEXTURE_GEN_S)
+        glEnable(GL_TEXTURE_GEN_T)
+
+        glPushMatrix()
+        glTranslatef(0, 0, -990)
 
         quad = gluNewQuadric()
         gluQuadricOrientation(quad, GLU_INSIDE)
-        gluSphere(quad, 10, 8, 8)
+        gluSphere(quad, 1000, 80, 80)
 
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
         glEnable(GL_LIGHTING)
         glDisable(GL_BLEND)
+        glPopMatrix()
 
     def draw(self, rstate):
         DisplayList.draw(self, rstate)

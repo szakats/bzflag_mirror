@@ -99,6 +99,8 @@ class NoiseTexture(Texture.DynamicTexture):
 
     def draw(self):
         # Prepare our texture
+        glDisable(GL_DEPTH_TEST)
+        glDisable(GL_CULL_FACE)
         glEnable(GL_TEXTURE_2D)
         glDisable(GL_LIGHTING)
         glDisable(GL_BLEND)
@@ -276,12 +278,12 @@ class AnimatedPerlinNoise:
 
 class PerlinTexture(Texture.DynamicTexture):
     """Perlin noise, rendered to a dynamic texture"""
-    def __init__(self, size=(256,256), noise=None, renderRate=60):
+    def __init__(self, size=(256,256), noise=None, frameDuration=None):
         if not noise:
             noise = AnimatedPerlinNoise()
         self.noise = noise
         Texture.DynamicTexture.__init__(self, size,
-                                        meanExpiration = 1/renderRate)
+                                        meanExpiration = frameDuration)
         self.format = GL_INTENSITY8
 
     def attachRenderState(self, rstate):
