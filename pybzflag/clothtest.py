@@ -18,7 +18,7 @@ class Wind:
         self.vector = Animated.Vector(Animated.PerlinNoise(persistence = 0.8,
                                                            octaves     = 7,
                                                            amplitude   = 0.8,
-                                                           frequency   = 0.01,
+                                                           frequency   = 0.001,
                                                            ))
 
     def integrate(self, dt):
@@ -46,11 +46,7 @@ class Flag:
 
         self.surf = Drawable.ArraySurface(self.cloth.state, self.getTexCoords())
         self.surf.render.static = False
-
-        # The texture has little cutouts on the edge to make the flag look a little
-        # less new, but the flag won't render with blending properly unless we
-        # do z-sorting, which would be a gigantic pain.
-        self.surf.render.textures = (Texture.load("flag.png"),)
+        self.surf.render.textures = (Texture.load("superflag.png"),)
 
         # Gravity, plus a small force in the other two axes to keep the springs from
         # lining up perfectly and standing end-on-end.
@@ -74,9 +70,9 @@ class Flag:
 
     def getTexCoords(self):
         def xf(x,y):
-            return x / float(self.resolution[0]-1)
+            return y / float(self.resolution[0]-1)
         def yf(x,y):
-            return y / float(self.resolution[1]-1)
+            return x / float(self.resolution[1]-1)
         a = zeros(self.resolution + (2,), Float)
         a[:,:,0] = fromfunction(xf, self.resolution)
         a[:,:,1] = fromfunction(yf, self.resolution)
@@ -107,8 +103,12 @@ if __name__ == '__main__':
     # Set up some lighting more appropriate for this test
     view.resetLighting()
     view.lights[0].enabled  = True
-    view.lights[0].diffuse  = (1, 1, 0.98, 1)
-    view.lights[0].position = (0,-200,200,1)
+    view.lights[0].diffuse  = (1, 1, 0.9, 1)
+    view.lights[0].position = (0,-100,100,1)
+    view.lights[0].ambient  = (0.2, 0.2, 0.2, 1)
+    view.lights[1].enabled  = True
+    view.lights[1].diffuse  = (0.9, 0.9, 1, 1)
+    view.lights[1].position = (0,100,-100,1)
 
     # Create our simulation objects
     time = Animated.Timekeeper()
