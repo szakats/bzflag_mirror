@@ -9,17 +9,22 @@ class GlowSphere(Drawable.ParticleArray):
     """An example particle system that draws glowing balls positioned on the surface of a sphere"""
     textureName = 'spark.png'
 
-    def __init__(self, numParticles=200, particleDiameter=5, sphereDiameter=50):
+    def __init__(self, numParticles=500, particleDiameter=5, sphereDiameter=50):
         Drawable.ParticleArray.__init__(self, (numParticles,), particleDiameter)
 
-        # Disable the display list cache
         self.render.static = False
+        self.render.blended = True
 
         # Generate some points on a sphere
         for i in xrange(numParticles):
             self.points[i] = [random.random() - 0.5 for j in xrange(3)]
         Geometry.normalize(self.points, self.points)
         self.points *= sphereDiameter
+
+    def draw(self, rstate):
+        glDisable(GL_LIGHTING)
+        Drawable.ParticleArray.draw(self, rstate)
+        glEnable(GL_LIGHTING)
 
 
 if __name__ == '__main__':
