@@ -227,21 +227,27 @@ class EventLoop:
                     else:
                         if untilNextTimer < pollTime:
                             pollTime = untilNextTimer
-
-                # This waits until either a socket has activity, or
-                # our pollTime has expired and we need to check timers
-                try:
-                    # Interrupt if we can read from any socket
-                    iwtd = self.selectDict.keys()
-                    # Only interrupt if we can write on sockets that need to write
-                    owtd = []
-                    for s in iwtd:
-                        if self.selectDict[s].needsWrite():
-                            owtd.append(s)
-                    (iwtd, owtd, ewtd) = self.select(iwtd, owtd, [], pollTime)
-                except select.error:
-                    raise Errors.ConnectionLost()
-
+                            
+                if self.selectDict:
+                    # This waits until either a socket has activity, or
+                    # our pollTime has expired and we need to check timers
+                    try:
+                        # Interrupt if we can read from any socket
+                        iwtd = self.selectDict.keys()
+                        # Only interrupt if we can write on sockets that need to write
+                        owtd = []
+                        for s in iwtd:
+                            if self.selectDict[s].needsWrite():
+                                owtd.append(s)
+                        (iwtd, owtd, ewtd) = self.select(iwtd, owtd, [], pollTime)
+                    except select.error:
+                        raise Errors.ConnectionLost()
+                else:
+                    # No sockets to wait on. We can't call select with three
+                    # empty lists on win32, so this has to be a special case.
+                    if pollTime > 0:
+                        time.sleep(pollTime)
+  
                 # Poll available sockets, for reading and for writing
                 for ready in iwtd:
                     try:
