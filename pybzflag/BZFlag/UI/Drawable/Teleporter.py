@@ -31,7 +31,7 @@ class TeleporterField(DisplayList):
         self.size = size
         self.blended = True
 
-    def drawToList(self, center, angle, size):
+    def drawToList(self):
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
@@ -94,7 +94,7 @@ class TeleporterBorder(DisplayList):
         glVertex3f(self.border / 2, self.size[1] + self.border, 0)
         glTexCoord2f(self.border, 0)
         glVertex3f(self.border / 2, self.size[1], 0)
-        glTexCoord2f(0, self.size[2] + border)
+        glTexCoord2f(0, self.size[2] + self.border)
         glVertex3f(self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
         glTexCoord2f(self.border, self.size[2])
         glVertex3f(self.border / 2, self.size[1], self.size[2])
@@ -132,8 +132,8 @@ class TeleporterBorder(DisplayList):
         # Y+ outside
         glNormal3f(0, 1, 0)
         glTexCoord2f(self.border, 0)
-        glVertex3f(-self.border / 2, self.size[1] + border, 0)
-        glTexCoord2f(self.border, self.size[2] + border)
+        glVertex3f(-self.border / 2, self.size[1] + self.border, 0)
+        glTexCoord2f(self.border, self.size[2] + self.border)
         glVertex3f(-self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
         glTexCoord2f(0, self.size[2] + self.border)
         glVertex3f(self.border / 2, self.size[1] + self.border, self.size[2] + self.border)
