@@ -5,9 +5,18 @@ Todo list, in no particular order:
 
   - Port the jetstream particle engine (why not?)
 
-  - Improve the clouds- try replacing the provivitively slow mapping tables with blending,
-    so we can animate the clouds in realtime. Vary the cloud velocity according to the
-    current global wind speed. Light the clouds correctly.
+  - Clouds:
+      * Improve the noise - try replacing the prohibitively slow mapping tables with blending,
+        so we can animate the clouds in realtime.
+
+      * Vary the cloud velocity according to the current global wind speed.
+
+      * Light the clouds correctly. This probably entails pulling a color from the sky near
+        the horizon as well.
+
+      * Curve the clouds more, so it doesn't look so flat.
+
+      * Clouds near the horizon should be obscured by haze.
 
   - Figure out what should be at and below the horizon
 
