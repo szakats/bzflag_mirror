@@ -95,7 +95,7 @@ class RGBtoYUV420:
             vg[i]   = 93.786  * isl8 + 8388608
             vb[i]   = 18.214  * isl8
             ubvr[i] = 112     * isl8
-            
+
     def convert(self, r, g, b):
         """Accepts three Numeric arrays for the red, green, and blue planes.
            Returns a tuple of 2-D nuemric arrays, for the Y, U, and V plane
@@ -120,9 +120,9 @@ class RGBtoYUV420:
               +take(self.ubvr, r[1::2, ::2]) -take(self.vg, g[1::2, ::2]) -take(self.vb, b[1::2, ::2])
               +take(self.ubvr, r[1::2,1::2]) -take(self.vg, g[1::2,1::2]) -take(self.vb, b[1::2,1::2])
               +take(self.ubvr, r[ ::2,1::2]) -take(self.vg, g[ ::2,1::2]) -take(self.vb, b[ ::2,1::2]) ) >> 18
-        
+
         # Cast everything back to 8 bits
         return (y.astype(UInt8), u.astype(UInt8), v.astype(UInt8))
-            
+
 
 ### The End ###
