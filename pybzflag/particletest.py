@@ -3,6 +3,7 @@ from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable
 from BZFlag import Event, Animated, Geometry
 from OpenGL.GL import *
 import random
+import RandomArray
 
 
 class GlowSphere(Drawable.ParticleArray):
@@ -29,6 +30,18 @@ class GlowSphere(Drawable.ParticleArray):
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 
+class WigglyGlowSphere(GlowSphere):
+    def __init__(self):
+        GlowSphere.__init__(self, numParticles=1000)
+        self.time  = Animated.Timekeeper()
+        self.wigglyness = 50
+
+    def draw(self, rstate):
+        dt = self.time.step()
+        self.points += (RandomArray.random(self.points.shape)-0.5) * self.wigglyness * dt
+        GlowSphere.draw(self, rstate)
+
+
 if __name__ == '__main__':
     loop = Event.EventLoop()
     viewport = Viewport.OpenGLViewport(loop)
@@ -42,6 +55,6 @@ if __name__ == '__main__':
     view.camera.distance = 150
     view.camera.jump()
 
-    view.scene.add(GlowSphere())
+    view.scene.add(WigglyGlowSphere())
 
     loop.run()
