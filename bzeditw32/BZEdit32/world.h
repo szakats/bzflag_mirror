@@ -19,6 +19,10 @@
 #define		M_RAD2DEG	57.29577951308232087678f
 #define		M_DEG2RAD	0.01745329251994329577f
 
+#define ERR_UNKNOWNOBJECT	-1
+#define ERR_FAKEOBJECT		-2
+#define ERR_COULDNTCREATE	-3
+
 inline  bool operator < (const std::string &s1,const std::string &s2) { return (s1.compare(s2)<0);}
 
 class CWorld;

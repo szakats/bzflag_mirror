@@ -16,6 +16,7 @@
 
 #include "Utils.h"
 
+InvalidFactory		InvalidFac;
 GroundFactory		GroundFac;
 WallsFactory		WallsFac;
 BoxFactory			BoxFac;
@@ -26,6 +27,7 @@ LinkFactory			LinkFac;
 
 void RegisterClasses ( CWorld *pWorld )
 {
+	// Real objects
 	pWorld->RegisterFactory("Walls",&WallsFac);
 	pWorld->RegisterFactory("Ground",&GroundFac);
 	pWorld->RegisterFactory("Box",&BoxFac);
@@ -33,6 +35,13 @@ void RegisterClasses ( CWorld *pWorld )
 	pWorld->RegisterFactory("Base",&BaseFac);
 	pWorld->RegisterFactory("Teleporter",&TeleporterFac);
 	pWorld->RegisterFactory("Link",&LinkFac);
+	// Fake objects
+	pWorld->RegisterFactory("Options",&InvalidFac);
+	pWorld->RegisterFactory("World",&InvalidFac);
+	// Not really fake objects, but safely ignored anyway
+	pWorld->RegisterFactory("DynamicColor",&InvalidFac);
+	pWorld->RegisterFactory("Material",&InvalidFac);
+	pWorld->RegisterFactory("TextureMatrix",&InvalidFac);
 }
 
 void World::Write(std::ostream &stream)
@@ -53,29 +62,8 @@ void World::Write( char *data )
 
 	strcat(data,szTemp);
 }
-bool World::Read( char *data )
-{
-	char	line[255];
-	char	*pPtr = data;
-	char	name[255];
 
-	bool	bDone = false;
-	while (!bDone)
-	{
-		bDone = !GetLine( &pPtr, line );
-
-		if (!StdDataField(line))
-		{
-			sscanf(line,"%s",name);
-
-			if (stricmp(name,"end") ==0)
-				bDone = true;
-		}
-	}
-	return true;
-}
-
-// gorund plane
+// ground plane
 
 bool Ground::ShowInInterface ( void )
 {

@@ -244,4 +244,10 @@ public:
 	virtual CBaseObject* New( void ) { return new Link; }
 };
 
+class InvalidFactory : public CBaseObjectFactory
+{
+public:
+	virtual CBaseObject* New( void ) { return NULL; }
+};
+
 #endif

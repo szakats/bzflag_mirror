@@ -511,7 +511,7 @@ bool CWorld::Append ( const char *szFileName )
 
 			iNewItem = AddObject(name);
 
-			if (iNewItem < 0) {
+			if (iNewItem == ERR_UNKNOWNOBJECT) {
 				char msg[511];
 				sprintf(msg, "This world contains unknown objects, and cannot be loaded.  Unknown object type: %s", name);
 				MessageBox(NULL, msg, "Unknown object", MB_ICONERROR | MB_TASKMODAL);
@@ -688,12 +688,15 @@ int	CWorld::AddObject( const char * szType )
 	tmFacotryNameMap::iterator itr = m_vFactoryNameMap.find(str);
 
 	if (itr == m_vFactoryNameMap.end())
-		return -1;
+		return ERR_UNKNOWNOBJECT;
+
+	if (!itr->second)
+		return ERR_FAKEOBJECT;
 
 	CBaseObject	*Item = itr->second->New();
 
 	if (!Item)
-		return -1;
+		return ERR_COULDNTCREATE;
 
 	Item->SetTypeID(itr->second->GetTypeID());
 
