@@ -35,11 +35,16 @@ class BaseSocket:
        specific to UDP or TCP.
        """
     def setNodelay(self, flag=1):
-        # Disable the Nagle algorithm. This is necessary to get
-        # anything near reasonable latency when sending small packets.
+        """Disable the Nagle algorithm. This is necessary to get
+          anything near reasonable latency when sending small packets.
+          """
         self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
     def setBlocking(self, flag=0):
+        """Set nonblocking mode. This is used almost all the time. The one
+           exception is connect(), which is necessary because windows doesn't
+           seem to support a nonblocking version of it, so it throws an exception.
+           """
         self.socket.setblocking(flag)
 
     def close(self):
