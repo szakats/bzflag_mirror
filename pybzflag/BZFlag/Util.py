@@ -134,7 +134,7 @@ def messageDump(msg, f, showContents=True, keyColumnWidth=25):
                 f.write(" " * (keyColumnWidth + 2) + line + "\n")
 
 
-def proxy(server, client, callback):
+def proxy(server, client, callback=None):
     """Set up a proxy between the server and client.
        Currently this only works correctly when there is one client
        connected to the server. It forwards all events (tcp and udp)
