@@ -22,7 +22,6 @@ protocols used by BZFlag.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-
 # The version of the BZFlag protocol this should be compatible with
 protocolVersion = "BZFS109a"
 
@@ -38,5 +37,12 @@ serverWelcomeMessage = "Welcome to the %s Server (code/%s protocol/%s)" % \
 
 # Default pathnames
 cachePath = "~/.bzflag-cache"
+
+# Check the python version here before we proceed further
+requiredPythonVersion = (2,2,1)
+import sys, string
+if sys.version_info < requiredPythonVersion:
+    raise Exception("%s requires at least Python %s" % (
+        name, string.join(map(str, requiredPythonVersion), ".")))
 
 ### The End ###
