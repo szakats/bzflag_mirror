@@ -84,11 +84,8 @@ GameStyle = Bitfield(UInt16, {
     'rabbitChase': 0x0200,
     })
 
-# This is in fact an enum, but rather than being constant it's
-# decided upon during flag negotiation. StatefulClient will
-# create dictionaries to map FlagIds to flag classes with further
-# information and code for each flag.
-FlagId = UInt16
+# Flag IDs are simply the abbreviation, padded to 16 bits
+FlagId = StringField(2)
 
 FlagStatus = Enum(UInt16, [
     'noExist', 'onGround', 'onTank', 'inAir', 'coming', 'going',
