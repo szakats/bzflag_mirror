@@ -180,7 +180,6 @@ class SurfaceArray(VertexArray, GLDrawable):
         (height, width) = self.shape[:2]
         self.crossProducts = zeros((height-1, width-1, 3), self.vertices.typecode())
         self.gridNormals = zeros(self.crossProducts.shape, self.vertices.typecode())
-        self.normals = zeros(self.vertices.shape, self.vertices.typecode())
 
     def prepareIndices(self):
         """Prepare an array with indices into the vertex array for triangle stripss.
