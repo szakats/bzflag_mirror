@@ -10,7 +10,8 @@ Todo list, in no particular order:
 
   - fix panning in 3d view
 
-  - fix lighting in 3d view
+  - fix lighting in 3d view. The lighting shows up now, but it seems to all
+    be relative to the camera.
 
   - fix resizing: what might be an SDL bug is causing the window to get stuck
     resizing to its original size when using a WM or equivalent that does
@@ -27,4 +28,6 @@ Todo list, in no particular order:
     Looks like it would be relatively easy to write an FTGL-like font
     module for python using pygame's freetype wrapper.
 
-
+  - Better textures/lighting possibly, maybe multitexturing so long range
+    views don't look so boring and the 'grass' isn't so bad. This is supposed 
+    to be protocol-compatible with BZFlag, but doesn't have to look just like it :)
