@@ -107,6 +107,14 @@ class MsgUDPLinkEstablished(Common.Message):
         StructEntry(UInt16, 'queueUpdate'),
         ]
 
+class MsgTeleport(Common.Message):
+    messageId = 0x7470
+    entries = [
+        StructEntry(UInt16,          'fromId'),
+        StructEntry(UInt16,          'toId'),
+        ]
+
+
 MsgUDPLinkRequest = Common.MsgUDPLinkRequest
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgShotBegin = Common.MsgShotBegin
