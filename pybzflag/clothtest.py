@@ -77,17 +77,15 @@ if __name__ == '__main__':
     # Enzoomify the camera toward our object
     view.camera.position = (5,0,5)
     view.camera.distance = 20
-    view.camera.azimuth = 0
     view.camera.jump()
 
     # Give us some spiffy blue and yellow highlights
     viewport.clearColor  = (0.3, 0.3, 0.3, 1)
-    view.light0.ambient  = (0,0,0,1)
-    view.light0.diffuse  = (0.5,0.5,0.4,1)
-    view.light0.position = (0,-200,200,1)
-    view.light1.ambient  = (0,0,0,1)
-    view.light1.diffuse  = (0.4,0.4,0.5,1)
-    view.light1.position = (0,-200,200,1)
+
+    view.resetLighting()
+    view.lights[0].enabled  = True
+    view.lights[0].diffuse  = (1, 1, 0.98, 1)
+    view.lights[0].position = (0,-200,200,1)
 
     obj = Flag()
     viewport.onSetupFrame.observe(obj.update)

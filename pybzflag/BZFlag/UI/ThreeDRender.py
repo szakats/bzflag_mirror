@@ -144,17 +144,24 @@ class SmoothedCamera(Camera):
 class Light:
     """Abstraction for an OpenGL light's position and intensity"""
     def __init__(self, lightnum):
+        self.lightnum = lightnum
+        self.reset()
+
+    def reset(self):
+        self.enabled  = False
         self.ambient  = (0, 0, 0, 1.0)
         self.diffuse  = (0, 0, 0, 1.0)
         self.position = (0, 0, 0, 1.0)
-        self.lightnum = lightnum
 
     def set(self):
         """Set up and enable the light in the current OpenGL context"""
-        glLightfv(self.lightnum, GL_AMBIENT, self.ambient)
-        glLightfv(self.lightnum, GL_DIFFUSE, self.diffuse)
-        glLightfv(self.lightnum, GL_POSITION, self.position)
-        glEnable(self.lightnum)
+        if self.enabled:
+            glEnable(self.lightnum)
+            glLightfv(self.lightnum, GL_AMBIENT, self.ambient)
+            glLightfv(self.lightnum, GL_DIFFUSE, self.diffuse)
+            glLightfv(self.lightnum, GL_POSITION, self.position)
+        else:
+            glDisable(self.lightnum)
 
 
 class TextureGroup(Drawable.DisplayList):
@@ -525,15 +532,28 @@ class View:
         self.initLighting()
 
     def initLighting(self):
-        self.light0 = Light(GL_LIGHT0)
-        self.light1 = Light(GL_LIGHT1)
-        self.light0.ambient  = (0.25, 0.25, 0.25, 1.0)
-        self.light0.diffuse  = (0.65, 0.65, 0.65, 1.0)
-        self.light0.position = (400, 400, 400, 1.0)
-        self.light1.ambient  = (0.05, 0.05, 0.05, 1.0)
-        self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
-        self.light1.position = (0, 0, 400, 1.0)
-        self.lights = [self.light0, self.light1]
+        self.lights = []
+        for light in xrange(glGetIntegerv(GL_MAX_LIGHTS)):
+            self.lights.append(Light(GL_LIGHT0 + light))
+        self.defaultLighting()
+
+    def resetLighting(self):
+        for light in self.lights:
+            light.reset()
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (0, 0, 0, 1.0))
+
+    def defaultLighting(self):
+        self.resetLighting()
+        
+        self.lights[0].enabled  = True
+        self.lights[0].ambient  = (0.25, 0.25, 0.25, 1.0)
+        self.lights[0].diffuse  = (0.65, 0.65, 0.65, 1.0)
+        self.lights[0].position = (400, 400, 400, 1.0)
+
+        self.lights[1].enabled  = True
+        self.lights[1].ambient  = (0.05, 0.05, 0.05, 1.0)
+        self.lights[1].diffuse  = (0.85, 0.85, 0.85, 1.0)
+        self.lights[1].position = (0, 0, 400, 1.0)
 
     def render(self):
         """The main entry point for rendering"""
