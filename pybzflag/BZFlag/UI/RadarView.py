@@ -143,8 +143,8 @@ class RadarView:
         glDisable(GL_TEXTURE_2D)
 
         glPushMatrix()
-        glScalef(float(self.zoom) / self.game.world.size[0] * 2,
-                 float(self.zoom) / self.game.world.size[1] * 2, 1)
+        glScalef(float(self.zoom) / self.game.world.size[0] * 1.9,
+                 float(self.zoom) / self.game.world.size[1] * 1.9, 1)
         glRotatef(self.angle, 0,0,1)
         glTranslatef(-self.center[0], -self.center[1], 0)
         self.renderWorld()
