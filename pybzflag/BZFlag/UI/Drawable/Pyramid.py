@@ -141,6 +141,10 @@ class Pyramid(DisplayList):
             self.uvMap2 = self.uvMap
         DisplayList.__init__(self, center, angle, size, flip)
 
+        # XXXXX
+        from BZFlag.UI.Drawable import VRML
+        self.mesh = VRML.load("../extra_media/sphere.wrl").values()[0]
+
     def addCubeMap(self, center, size):
         """Add a cube environment map to make this pyramid shiny"""
         if not (GLExtension.cubeMap and GLExtension.multitexture):
@@ -179,13 +183,23 @@ class Pyramid(DisplayList):
         glRotatef(self.angle, 0.0, 0.0, 1.0)
         if self.envMap:
             glActiveTextureARB(GL_TEXTURE1_ARB)
-            glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
-            glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
-            glTexGenfv(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
-            glEnable(GL_TEXTURE_GEN_S);
-            glEnable(GL_TEXTURE_GEN_T);
-            glEnable(GL_TEXTURE_GEN_R);
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)  # XXXXXX
+            
+            glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
+            glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
+            glTexGenfv(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT)
+            glEnable(GL_TEXTURE_GEN_S)
+            glEnable(GL_TEXTURE_GEN_T)
+            glEnable(GL_TEXTURE_GEN_R)
             glActiveTextureARB(GL_TEXTURE0_ARB)
+
+            # XXXXXXX
+            glPushMatrix()
+            glTranslatef(0,0,20)
+            glScalef(4,4,4)
+            self.mesh.drawToList(rstate)
+            glPopMatrix()
+            
         glBegin(GL_QUADS)
         # Z- side
         glNormal3f(0, 0, -1)
@@ -254,9 +268,9 @@ class Pyramid(DisplayList):
         glEnd()
         if self.envMap:
             glActiveTextureARB(GL_TEXTURE1_ARB)
-            glDisable(GL_TEXTURE_GEN_S);
-            glDisable(GL_TEXTURE_GEN_T);
-            glDisable(GL_TEXTURE_GEN_R);
+            glDisable(GL_TEXTURE_GEN_S)
+            glDisable(GL_TEXTURE_GEN_T)
+            glDisable(GL_TEXTURE_GEN_R)
             glActiveTextureARB(GL_TEXTURE0_ARB)
         if self.flip:
             glFrontFace(GL_CCW)
