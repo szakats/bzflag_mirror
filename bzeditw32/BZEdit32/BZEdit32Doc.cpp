@@ -360,22 +360,28 @@ void CBZEdit32Doc::OnUpdateUtiltyConvertmapfiletorad(CCmdUI* pCmdUI)
 
 void CBZEdit32Doc::OnUtiltyDumpmap() 
 {
-	char szFilter[] = "BZFlagXL Map Files (*.map)|*.map|All Files (*.*)|*.*||";
+	char szFilter[] = "Ogre Test Map Files (*.omap)|*.omap|All Files (*.*)|*.*||";
 		
-	CFileDialog  oFD(false,".map","XLMap.map",OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
+	CFileDialog  oFD(false,".omap","sample.omap",OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 
 	if (oFD.DoModal() == IDOK)
 	{
-		FILE	*fp = fopen (oFD.GetPathName(),"wt");
+		FILE	*fp = fopen (oFD.GetPathName(),"wb");
 		if (!fp)
 			return;
 
-		fprintf (fp,"WLDF\n\n");
-		fprintf (fp,"World: :\nXDim: *M_WorldSize\nYDim: *M_WorldSize\nWallHeigh: 5\nGroundTex:	data/Textures/World/ground\nWallTex:	data/Textures/World/wall\n#End\n\n");
+	//	fprintf (fp,"WLDF\n\n");
+	//	fprintf (fp,"World: :\nXDim: 400\nYDim: 400\nWallHeigh: 5\nGroundTex:	data/Textures/World/ground\nWallTex:	data/Textures/World/wall\n#End\n\n");
 		
 		int iSize = m_oWorld.Size();
+		fwrite(&iSize,4,1,fp);
 		CBaseObject *pObject;
-		float fTemp;
+	//	float fTemp;
+
+		int type;
+		float pos[3];
+		float scale[3];
+		float rot;
 
 		for (int iItem = 0; iItem < iSize; iItem++)
 		{
@@ -387,43 +393,95 @@ void CBZEdit32Doc::OnUtiltyDumpmap()
 				
 				if (str == "Box")
 				{
-					fprintf(fp,"#Box:\n");
-					fprintf(fp,"Pos: %f %f %f\n",pObject->GetXPos(),pObject->GetYPos(),pObject->GetZPos());
-					fprintf(fp,"Scale: %f %f %f\n",pObject->GetXScale(),pObject->GetYScale(),pObject->GetZScale());
-					fprintf(fp,"Rot: %f\n",pObject->GetRotAngle());
-					fprintf(fp,"Texture:	data/Textures/World/boxwall\nTexture:	data/Textures/World/roof\n#End:\n\n");
+					
+					type = 0;
+					pos[0] = pObject->GetXPos();
+					pos[1] = pObject->GetYPos();
+					pos[2] = pObject->GetZPos();
+
+					scale[0] = pObject->GetXScale();
+					scale[1] = pObject->GetYScale();
+					scale[2] = pObject->GetZScale();
+
+					rot = pObject->GetRotAngle();
+					//fprintf(fp,"#Box:\n");
+					//fprintf(fp,"Pos: %f %f %f\n",pObject->GetXPos(),pObject->GetYPos(),pObject->GetZPos());
+					//fprintf(fp,"Scale: %f %f %f\n",pObject->GetXScale(),pObject->GetYScale(),pObject->GetZScale());
+				//	fprintf(fp,"Rot: %f\n",pObject->GetRotAngle());
+					//fprintf(fp,"Texture:	data/Textures/World/boxwall\nTexture:	data/Textures/World/roof\n#End:\n\n");
 				}
 
 				if (str == "Pyramid")
 				{
-					fprintf(fp,"#Pyramid:\n");
+					type = 1;
+					pos[0] = pObject->GetXPos();
+					pos[1] = pObject->GetYPos();
+					pos[2] = pObject->GetZPos();
+
+					scale[0] = pObject->GetXScale();
+					scale[1] = pObject->GetYScale();
+					scale[2] = pObject->GetZScale();
+
+					rot = pObject->GetRotAngle();
+
+				/*	fprintf(fp,"#Pyramid:\n");
 					fprintf(fp,"Pos: %f %f %f\n",pObject->GetXPos(),pObject->GetYPos(),pObject->GetZPos());
 					fprintf(fp,"Scale: %f %f %f\n",pObject->GetXScale(),pObject->GetYScale(),pObject->GetZScale());
 					fprintf(fp,"Rot: %f\n",pObject->GetRotAngle());
-					fprintf(fp,"Texture:	data/Textures/World/pyrwall\n#End:\n\n");
+					fprintf(fp,"Texture:	data/Textures/World/pyrwall\n#End:\n\n"); */
 				}
 
 				if (str == "Teleporter")
 				{
+					type = 0;
+					pos[0] = pObject->GetXPos();
+					pos[1] = pObject->GetYPos();
+					pos[2] = pObject->GetZPos();
+
+					scale[0] = pObject->GetXScale();
+					scale[1] = pObject->GetYScale();
+					scale[2] = pObject->GetZScale();
+
+					rot = pObject->GetRotAngle();
+
+					/*
 					fprintf(fp,"#Teleporter:\n");
 					fprintf(fp,"Pos: %f %f %f\n",pObject->GetXPos(),pObject->GetYPos(),pObject->GetZPos());
 					fprintf(fp,"Scale: %f %f %f\n",pObject->GetXScale(),pObject->GetYScale(),pObject->GetZScale());
 					fprintf(fp,"Rot: %f\n",pObject->GetRotAngle());
 					pObject->GetItemInfo("Border",fTemp);
 					fprintf(fp,"Frame: %f\n",fTemp);
-					fprintf(fp,"Texture:	data/Textures/World/caution\n#End:\n\n");
+					fprintf(fp,"Texture:	data/Textures/World/caution\n#End:\n\n"); */
 				}
 
 				if (str == "Base")
 				{
+					type = 0;
+					pos[0] = pObject->GetXPos();
+					pos[1] = pObject->GetYPos();
+					pos[2] = pObject->GetZPos();
+
+					scale[0] = pObject->GetXScale();
+					scale[1] = pObject->GetYScale();
+					scale[2] = pObject->GetZScale();
+
+					rot = pObject->GetRotAngle();
+					
+					/*
 					fprintf(fp,"#Box:\n");
 					fprintf(fp,"Pos: %f %f %f\n",pObject->GetXPos(),pObject->GetYPos(),pObject->GetZPos());
 					fprintf(fp,"Scale: %f %f %f\n",pObject->GetXScale(),pObject->GetYScale(),pObject->GetZScale());
 					fprintf(fp,"Rot: %f\n",pObject->GetRotAngle());
-					fprintf(fp,"Texture:	data/Textures/World/boxwall\nTexture:	data/Textures/World/roof\n#End:\n\n");
+					fprintf(fp,"Texture:	data/Textures/World/boxwall\nTexture:	data/Textures/World/roof\n#End:\n\n"); */
 				}
+
+				fwrite(&type,4,1,fp);
+				fwrite(pos,4*3,1,fp);
+				fwrite(scale,4*3,1,fp);
+				fwrite(&rot,4,1,fp);
 			}
 		}
+		fclose(fp);
 	}	
 }
 
