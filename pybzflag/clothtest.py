@@ -75,7 +75,7 @@ if __name__ == '__main__':
     viewport.setCaption("Cloth Simulation Test")
 
     # Enzoomify the camera toward our object
-    view.camera.position = (-5,0,-5)
+    view.camera.position = (5,0,5)
     view.camera.distance = 20
     view.camera.azimuth = 0
     view.camera.jump()

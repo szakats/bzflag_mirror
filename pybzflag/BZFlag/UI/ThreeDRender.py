@@ -32,6 +32,7 @@ from OpenGL.GLU import *
 from OpenGL.GL.ARB.multitexture import *
 from OpenGL.GL.EXT.texture_cube_map import *
 import sys, LinearAlgebra
+from Numeric import subtract
 
 
 class RenderState:
@@ -82,12 +83,23 @@ class Camera:
 
     def load(self):
         """Set the current OpenGL matrix according to the camera's location and orientation"""
-        glLoadIdentity()
-        glTranslatef(0, 0, -self.distance)
-        glRotatef(self.elevation, 1.0, 0.0, 0.0)
-        glRotatef(self.azimuth + self.azimuthOffset, 0.0, 0.0, 1.0)
-        glTranslatef(*self.position)
+        self.applyTransform(self.distance,
+                            self.elevation,
+                            self.azimuth,
+                            self.position)
 
+    def applyTransform(self, distance, elevation, azimuth, position):
+        """This applies the camera's modelview matrix transform.
+           Note that position is now the position the camera orbits around,
+           and elevation specifies how far the camera is above the XY plane,
+           in degrees.
+           """
+        glLoadIdentity()
+        glTranslatef(0, 0, -distance)
+        glRotatef(elevation - 90, 1.0, 0.0, 0.0)
+        glRotatef(-(azimuth + self.azimuthOffset), 0.0, 0.0, 1.0)
+        glTranslatef(*subtract((0,0,0), position))
+        
 
 class SmoothedCamera(Camera):
     """Replacement Camera class that smooths all axes with the Animated module"""
@@ -122,12 +134,12 @@ class SmoothedCamera(Camera):
         dt = self.time.step()
         for item in self.animated:
             item.integrate(dt)
-        glLoadIdentity()
-        glTranslatef(0, 0, -self.animatedDistance.value)
-        glRotatef(self.animatedElevation.value, 1.0, 0.0, 0.0)
-        glRotatef(self.animatedAzimuth.value + self.azimuthOffset, 0.0, 0.0, 1.0)
-        glTranslatef(*self.animatedPosition.get())
-
+            
+        self.applyTransform(self.animatedDistance.value,
+                            self.animatedElevation.value,
+                            self.animatedAzimuth.value,
+                            self.animatedPosition.get())
+        
 
 class Light:
     """Abstraction for an OpenGL light's position and intensity"""

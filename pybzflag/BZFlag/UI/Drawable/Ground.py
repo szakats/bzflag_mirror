@@ -35,27 +35,37 @@ class Ground(DisplayList):
 
     def drawToList(self, rstate):
         glPushMatrix()
+
+        # We want to draw both sides of the surface. This will have OpenGL
+        # automatically flip the surface normals when drawing the back side
         glDisable(GL_CULL_FACE)
+        glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1)
+
         glBegin(GL_QUADS)
         glNormal3f(0, 0, 1);
 
         baseTexRepeats = 90
         overlayTexRepeats = 1
-        glTexCoord2f(baseTexRepeats, 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, overlayTexRepeats, 0)
-        glVertex3f(self.size, -self.size, 0)
-        glTexCoord2f(0,0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0,0)
-        glVertex3f(-self.size, -self.size, 0)
-        glTexCoord2f(0, baseTexRepeats)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, overlayTexRepeats)
-        glVertex3f(-self.size, self.size, 0)
+        
         glTexCoord2f(baseTexRepeats, baseTexRepeats)
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, overlayTexRepeats, overlayTexRepeats)
         glVertex3f(self.size, self.size, 0)
 
+        glTexCoord2f(0, baseTexRepeats)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, overlayTexRepeats)
+        glVertex3f(-self.size, self.size, 0)
+
+        glTexCoord2f(0,0)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0,0)
+        glVertex3f(-self.size, -self.size, 0)
+
+        glTexCoord2f(baseTexRepeats, 0)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, overlayTexRepeats, 0)
+        glVertex3f(self.size, -self.size, 0)
+
         glEnd()
         glEnable(GL_CULL_FACE)
+        glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0)
         glPopMatrix()
 
 ### The End ###

@@ -161,10 +161,10 @@ class Viewing:
         self.view = view
         self.viewport = viewport
         self.view.camera = ThreeDRender.SmoothedCamera()
-        view.camera.position = (0, 0, -20)
+        view.camera.position = (0, 0, 20)
         view.camera.distance  = 900
-        view.camera.azimuth   = 180
-        view.camera.elevation = -75
+        view.camera.azimuth   = 0
+        view.camera.elevation = 15
         view.camera.jump()
 
         self.bind(KeyPress, 'f').observe(self.toggleFullscreen)
@@ -190,29 +190,29 @@ class Viewing:
 
     def pan(self, horizontal, vertical):
         (x, y, z) = self.view.camera.position
-        radians = self.view.camera.azimuth * math.pi / 180
+        radians = -self.view.camera.azimuth * math.pi / 180
         cos = math.cos(radians)
         sin = math.sin(radians)
-        x +=  cos*horizontal - sin*vertical
-        y += -sin*horizontal - cos*vertical
+        x -=  cos*horizontal - sin*vertical
+        y -= -sin*horizontal - cos*vertical
         self.view.camera.position = (x, y, z)
 
     def lift(self, ignoredAxis, lift):
         (x, y, z) = self.view.camera.position
-        z -= lift
-        if z > 0:
+        z += lift
+        if z < 0:
             z = 0
-        if z < -1000:
-            z = -1000
+        if z > 1000:
+            z = 1000
         self.view.camera.position = (x, y, z)
 
     def rotate(self, azimuth, elevation):
-        self.view.camera.azimuth += azimuth
+        self.view.camera.azimuth -= azimuth
         self.view.camera.elevation += elevation
-        if self.view.camera.elevation > 0:
+        if self.view.camera.elevation < 0:
             self.view.camera.elevation = 0
-        if self.view.camera.elevation < -135:
-            self.view.camera.elevation = -135
+        if self.view.camera.elevation > 90:
+            self.view.camera.elevation = 90
 
     def toggleFullscreen(self):
         self.viewport.display.toggle_fullscreen()
