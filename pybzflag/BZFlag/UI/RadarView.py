@@ -53,9 +53,6 @@ class RadarView:
         self.angle = 0
         self.follow = None
 
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_LINE_SMOOTH)
-
         viewport.setCaption("%s Radar View" % BZFlag.name)
         def onDrawFrame():
             game.update()

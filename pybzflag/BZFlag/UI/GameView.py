@@ -23,6 +23,28 @@ the full in-game experience.
 #
 
 from BZFlag.UI import Viewport, ThreeDView, RadarView
+from OpenGL.GL import *
+
+
+class HUDBorderView:
+    """A view that draws a darkened background and thin border"""
+    def __init__(self, viewport):
+        self.fov = None
+        viewport.onDrawFrame.observe(self.render)
+
+    def render(self):
+        glEnable(GL_BLEND)
+        glDisable(GL_LIGHTING)
+        glDisable(GL_CULL_FACE)
+        glDisable(GL_COLOR_MATERIAL)
+        glDisable(GL_DEPTH_TEST)
+
+        glBegin(GL_LINE_LOOP)
+        glVertex2f(0,0)
+        glVertex2f(1,0)
+        glVertex2f(1,1)
+        glVertex2f(0,1)
+        glEnd(GL_LINE_LOOP)
 
 
 def attach(game, eventLoop):
@@ -30,5 +52,6 @@ def attach(game, eventLoop):
     view3d   = ThreeDView.ThreeDView(game, viewport)
     ThreeDView.ThreeDController(view3d, viewport)
     RadarView.RadarView(game, viewport.region((50,50,200,200)))
+    HUDBorderView(viewport.region((50,50,600,200)))
 
 ### The End ###

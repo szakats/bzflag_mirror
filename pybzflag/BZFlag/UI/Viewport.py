@@ -164,6 +164,8 @@ class OpenGLViewport(PygameViewport):
         GL.glShadeModel(GL.GL_SMOOTH)
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
         GL.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST)
+        GL.glEnable(GL.GL_LINE_SMOOTH)
+
         def onSetupFrame():
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         self.onSetupFrame.observe(onSetupFrame)
@@ -175,7 +177,8 @@ class OpenGLViewport(PygameViewport):
         GL.glViewport(*(self.viewOrigin + self.size))
         GL.glMatrixMode(GL.GL_PROJECTION)
         GL.glLoadIdentity()
-        GLU.gluPerspective(self.fov, float(self.size[0]) / self.size[1], self.nearClip, self.farClip)
+        if self.fov:
+            GLU.gluPerspective(self.fov, float(self.size[0]) / self.size[1], self.nearClip, self.farClip)
         GL.glMatrixMode(GL.GL_MODELVIEW)
         GL.glLoadIdentity()
 
