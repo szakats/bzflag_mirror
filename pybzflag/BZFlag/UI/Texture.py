@@ -27,6 +27,7 @@ from OpenGL.GLU import *
 
 
 class Texture:
+    """Loads a texture from the given filename into OpenGL"""
     def __init__(self, name):
         self.image = Image.open(name)
         self.w = self.image.size[0]
@@ -50,6 +51,7 @@ class Texture:
         glDeleteTextures(self.texture)
 
     def bind(self):
+        """Bind this texture to GL_TEXTURE_2D in the current OpenGL context"""
         glBindTexture(GL_TEXTURE_2D, self.texture)
 
 ### The End ###
