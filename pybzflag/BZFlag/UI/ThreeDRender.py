@@ -31,7 +31,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GL.ARB.multitexture import *
 from OpenGL.GL.EXT.texture_cube_map import *
-import sys, LinearAlgebra
+import sys, LinearAlgebra, Numeric
 from Numeric import subtract
 
 
@@ -431,6 +431,30 @@ class ReflectionRenderPass(DecalRenderPass):
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
         glDisable(GL_TEXTURE_GEN_R)
+
+class CameraRenderPass(BasicRenderPass):
+    """A rendering pass for any camera-induced artifacts. Most of these will be
+       lense flares, but this could include things such as the cracked glass effect
+       from BZFlag proper
+       """
+    filterPriority = 20
+    renderPriority = 5
+
+    def filter(self, drawable):
+        return drawable.render.camera
+
+    def render(self, rstate):
+        glPushMatrix()
+        # Strip out all but the top 3x3 square of the modelview matrix.
+        # This preserves the camera's location, but keeps it centered at 0,0,0
+        rotation = Numeric.identity(4, Numeric.Float32)
+        rotation[:3,:3] = glGetFloatv(GL_MODELVIEW_MATRIX)[:3,:3]
+        rotation[3,3] = 1
+        glLoadMatrixf(rotation)
+
+        BasicRenderPass.render(self, rstate)
+
+        glPopMatrix()
 
 
 class Scene:

@@ -37,12 +37,13 @@ class RenderSettings:
         self.overlay = False
         self.static = True
         self.decal = False
+	self.camera = False
         self.reflection = False
         self.background = False
 
     def __repr__(self):
         settings = [key for key in self.__dict__.iterkeys() if key[0] != '_']
-        pairs = ["%s=%s" % (key, self.__dict__[key]) for key in settings] 
+        pairs = ["%s=%s" % (key, self.__dict__[key]) for key in settings]
         return "<%s %s>" % (self.__class__.__name__, ", ".join(pairs))
 
 

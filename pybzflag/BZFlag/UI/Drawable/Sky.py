@@ -34,7 +34,7 @@ class Colors(DisplayList):
     textureName = 'sky_colors.png'
     def set(self, sky):
         self.sky = sky
-        
+
         # We render in a z-buffer-isolated pass before all other geometry.
         # This means that we can work with the sky on a scale independent of the rest of the world.
         self.render.background = True
@@ -50,7 +50,7 @@ class Colors(DisplayList):
            """
         # Texture the top half of the sky sphere with our changing gradient,
         # leaving the bottom half clamped to the horizon.
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)       
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
         glDisable(GL_LIGHTING)
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
