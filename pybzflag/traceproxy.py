@@ -13,6 +13,10 @@ argParser = CommandLine.Parser([Server.BaseServer, Client.BaseClient],
                                eventLoop = eventLoop)
 argParser.add_option("-n", "--names", action="store_true", dest="names",
                      help="Disables the output of message contents, shows only their names.")
+argParser.add_option("-d", "--hide", action="append", dest="hide",
+                     help="Hides the given message type.")
+argParser.add_option("-o", "--show", action="append", dest="show",
+                     help="Shows only the given message type.")
 (server, client) = argParser.parse()
 options = client.cmdLineValues
 
@@ -73,7 +77,16 @@ def hexDump(value, bytesPerLine=16, wordSize=2):
 # Dump a message contents to stdout. It should already be
 # mostly human readable, thanks to the Protocol module.
 def dumpMessage(msg, direction):
-    print "%s %s" % (direction, msg.__class__.__name__)
+    name = msg.__class__.__name__
+
+    # Decide whether or not to show the message
+    if options['hide'] and name in options['hide']:
+        return
+    if options['show'] and not name in options['show']:
+        return
+
+    # Always dump the name, but the contents can be disabled
+    print "%s %s" % (direction, name)
     if not options['names']:
         keys = msg.__dict__.keys()
         keys.sort()
