@@ -66,19 +66,28 @@ class Event:
                 self.unhandledCallback(*args, **kw)
 
     def trace(self, fmt):
-        """A debugging aid- whenever this event is triggered,
-           print a line using the supplied format string to
-           represent the call parameters.
+        """A debugging aid, prints a line of text whenever this event is triggered.
+
+           fmt can be a printf-style format string that can include references
+           to both positional and keyword arguments, for example:
+                %(2)s       = The second argument, as a string
+                %(boing)d   = keyword argument 'boing', as an integer
+
+           fmt can also be a callable expression (created with lambda, for example)
+           that will be called with the event's arguments and the result will be print'ed.
            """
         def traceCallback(*args, **kw):
-            # Make a dictionary with both keyword args and normal
-            # args, representing normal args by their place in the
-            # argument list, starting with 1.
-            index = 1
-            for arg in args:
-                kw[str(index)] = arg
-                index += 1
-            print fmt % kw
+            if type(fmt) == str:
+                # Make a dictionary with both keyword args and normal
+                # args, representing normal args by their place in the
+                # argument list, starting with 1.
+                index = 1
+                for arg in args:
+                    kw[str(index)] = arg
+                    index += 1
+                print fmt % kw
+            else:
+                print fmt(*args, **kw)
         self.observe(traceCallback)
 
 

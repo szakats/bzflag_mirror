@@ -71,11 +71,11 @@ class Parser(optik.OptionParser):
 
         if 'server' in availableOpts:
             add("-s", "--server", dest="server", metavar="HOST",
-                help="Sets the BZFlag server to connect to on startup.")
+                help="Sets the BZFlag server to connect to.")
 
         if 'interface' in availableOpts:
             add("-i", "--interface", dest="interface", metavar="HOST:PORT",
-                help="Sets the host and/or the port to listen on.")
+                help="Sets the host and/or the port to listen for clients on.")
 
         if 'identity' in availableOpts:
             add("-c", "--call-sign", dest="callSign", metavar="NAME",
@@ -123,13 +123,10 @@ def client(clientClass=Client.PlayerClient, argv=sys.argv, **extraDefaults):
        and immediately parsing args with it, for the case when you don't
        need to add any extra options.
        """
-    parser = Parser(clientClass, **extraDefaults)
-    return parser.parse(argv)
-
+    return Parser(clientClass, **extraDefaults).parse(argv)
 
 def server(serverClass=Server.StandardServer, argv=sys.argv, **extraDefaults):
     """A similar convenience function for servers"""
-    parser = Parser(serverClass, **extraDefaults)
-    return parser.parse(argv)
+    return Parser(serverClass, **extraDefaults).parse(argv)
 
 ### The End ###

@@ -5,12 +5,9 @@ server = CommandLine.server()
 
 print "Server is listening on %s:%d" % (server.tcp.interface, server.tcp.port)
 
-def onConnect(socket):
-    print "Connected client %d, from %s:%s" % (socket.id, socket.address[0], socket.address[1])
-server.onConnect.observe(onConnect)
-
-def onDisconnect(socket):
-    print "Disconnected client %d, from %s:%s" % (socket.id, socket.address[0], socket.address[1])
-server.onDisconnect.observe(onDisconnect)
+server.onConnect.trace(lambda socket: "Connected client %d, from %s:%s" %
+                       (socket.id, socket.address[0], socket.address[1]))
+server.onDisconnect.trace(lambda socket: "Disconnected client %d, from %s:%s" %
+                          (socket.id, socket.address[0], socket.address[1]))
 
 server.run()
