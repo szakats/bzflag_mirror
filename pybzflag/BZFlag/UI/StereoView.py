@@ -52,8 +52,3 @@ class StereoView:
         ThreeDControl.Viewing(self.lefteye, viewport)
         self.righteye.camera = RightCamera(self.lefteye.camera, 30)
 
-
-def attach(game, eventLoop):
-    viewport = Viewport.OpenGLViewport(eventLoop, (1600, 600))
-    view = StereoView(game, viewport)
-    return viewport
