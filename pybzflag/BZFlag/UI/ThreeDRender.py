@@ -272,7 +272,9 @@ class Scene:
 
 class View:
     """A generic 3D view with multiple rendering passes, usable with OpenGLViewport."""
-    def __init__(self, viewport, scene):
+    def __init__(self, viewport, scene=None):
+        if not scene:
+            scene = Scene()
         self.viewport = viewport
         self.camera = Camera()
         self.scene = scene

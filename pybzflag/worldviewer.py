@@ -9,6 +9,13 @@ import sys
 
 ui = CommandLine.Parser(UI.Any, ui = 'overhead').parse()
 
+try:
+    fileName = ui.cmdLineArgs[0]
+except IndexError:
+    print "A world name must be specified on the command line."
+    print "Try 'help' for information about the name format."
+    sys.exit(0)
+
 game = Game.Game()
 loop = EventLoop()
 game.world.clone(World.load(ui.cmdLineArgs[0]))
