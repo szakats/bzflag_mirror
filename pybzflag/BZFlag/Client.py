@@ -25,6 +25,7 @@ in subclasses.
 import BZFlag
 from BZFlag import Network, Protocol, Errors, Player, Game, World, Util, Flag
 from BZFlag.Protocol import FromServer, ToServer, Common
+from StringIO import StringIO
 
 
 class BaseClient:
@@ -230,6 +231,20 @@ class StatefulClient(BaseClient):
         """Flag negotiation succeeded. This message tells us what IDs we should
            use to represent each flag over the wire.
            """
+        data = StringIO(msg.data)
+        self.flagIdToClass = {}
+        self.flagClassToId = {}
+        flagDict = Flag.getDict()
+        while 1:
+            flag = Common.FlagNegotiationID()
+            if not flag.read(data):
+                break
+            try:
+                cls = flagDict[flag.abbreviation]
+            except KeyError:
+                raise Errors.ProtocolError("Server returned an unknown flag after negotiation")
+            self.flagIdToClass[flag.id] = cls
+            self.flagClassToId[cls] = flag.id
         self.onNegotiateFlags()
 
     def onNegotiateFlags(self):

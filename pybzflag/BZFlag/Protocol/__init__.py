@@ -351,8 +351,14 @@ class Struct:
         pass
 
     def read(self, f):
-        """Read this struct in from a file-like object"""
-        self.unmarshall(f.read(self.getSize()))
+        """Read this struct in from a file-like object, return None
+           if we couldn't read anything, otherwise return the raw data
+           read from the file."""
+        packed = f.read(self.getSize())
+        if not packed:
+            return None
+        self.unmarshall(packed)
+        return packed
 
 
 #  EntryType instances for scalar types, all in network byte order

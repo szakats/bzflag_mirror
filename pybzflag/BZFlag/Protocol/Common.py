@@ -232,6 +232,12 @@ class MsgNegotiateFlags(DataMessage):
         StructEntry(UInt16, 'numFlags'),
         ]
 
+class FlagNegotiationID(Struct):
+    entries = [
+        StructEntry(UInt16,         'id'),
+        StructEntry(StringField(2), 'abbreviation'),
+        ]
+    
     
 def getMessageDict(module):
     """Return a dictionary mapping message IDs to message classes,
