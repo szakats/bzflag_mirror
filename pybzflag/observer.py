@@ -18,4 +18,9 @@ def message(msg):
     print "<%s> %s" % (msg.fromId, msg.message)
 client.onMsgMessage.observe(message)
 
+def worldMunge():
+    for object in client.game.world.scene:
+        print object.__class__.__name__
+client.onLoadWorld.observe(worldMunge)
+
 client.run()

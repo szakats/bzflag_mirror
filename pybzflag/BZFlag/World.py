@@ -49,6 +49,10 @@ class Scene:
            nature so it is forced to test all scene nodes.
            """
         pass
+
+    def __iter__(self):
+        """Scene subclasses must support python's iterator protocol"""
+        pass
     
 
 class SceneList:
@@ -64,6 +68,21 @@ class SceneList:
         for item in self.list:
             if filter(item):
                 action(item)
+
+    def __iter__(self):
+        scene = self
+        class Iterator:
+            def __init__(self):
+                self.index = 0
+            def __iter__(self):
+                return self
+            def next(self):
+                if self.index >= len(scene.list):
+                    raise StopIteration
+                item = scene.list[self.index]
+                self.index += 1
+                return item
+        return Iterator()
 
 
 class TeleporterSide:
