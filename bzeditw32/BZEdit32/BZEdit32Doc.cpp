@@ -539,14 +539,27 @@ BOOL CBZEdit32Doc::SaveModified()
 {
 	if (IsModified())
 	{
-		if (m_oFile.GetLength()==0)
-			OnFileSaveAs();
-		else
-			m_oWorld.Write(m_oFile);
-			
+		int retval = MessageBox(NULL, "This world has been modified.  Do you want to save?", "Save world?", 
+			MB_ICONQUESTION | MB_TASKMODAL | MB_YESNOCANCEL);
+
+		// Yes = save and close
+		// No = close without saving
+		// Cancel = don't close at all
+		if (retval == IDNO)
+			return TRUE;
+		else if (retval == IDCANCEL)
+			return FALSE;
+		else if (retval == IDYES)
+		{
+			if (m_oFile.GetLength()==0)
+				OnFileSaveAs();
+			else
+				m_oWorld.Write(m_oFile);				
+		}
+
 		SetModifiedFlag(false);
 	}
-	return TRUE;//CDocument::SaveModified();
+	return TRUE;
 }
 
 // API
