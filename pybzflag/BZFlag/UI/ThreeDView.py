@@ -136,12 +136,13 @@ class ThreeDView:
     viewport.onDrawFrame.observe(onDrawFrame)
 
     def onMouseButtonDown(event):
+      scale = 1.08
       if event.button == 4:
-        self.camera.distance -= 50
-        if self.camera.distance < 0:
-          self.camera.distance = 0
+        self.camera.distance /= scale
+        if self.camera.distance < 0.1:
+          self.camera.distance = 0.1
       if event.button == 5:
-        self.camera.distance += 50
+        self.camera.distance *= scale
         if self.camera.distance > 1500:
           self.camera.distance = 1500
     viewport.onMouseButtonDown.observe(onMouseButtonDown)
