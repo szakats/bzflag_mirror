@@ -158,16 +158,20 @@ def simpleClient(client, size=(512,512), viewClass=OverheadView):
         global view, screen, lastUpdate
         if view:
             # FIXME: this isn't the right place to handle updating the game state!
+            #        This also isn't the right place to do frame rate limiting
             now = time.time()
             if lastUpdate:
-                client.game.integrate(time.time() - lastUpdate)
+                dt = now - lastUpdate
+                if dt < 0.02:
+                    return
+                client.game.integrate(dt)
             lastUpdate = now
 
             view.render(screen)
             pygame.display.flip()
 
     # FIXME: We need a real timer system
-    client.eventLoop.pollTime = 0.03
+    client.eventLoop.pollTime = 0.02
     client.eventLoop.onPoll.observe(updateView)
 
     # Start up pygame when we first get world data
