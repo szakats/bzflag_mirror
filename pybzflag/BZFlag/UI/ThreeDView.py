@@ -215,7 +215,7 @@ class ThreeDView:
         glRenderMode(GL_SELECT)
         glInitNames()
         glPushName(0)
-        
+
         glMatrixMode(GL_PROJECTION)
 	glPushMatrix()
         glLoadIdentity()
