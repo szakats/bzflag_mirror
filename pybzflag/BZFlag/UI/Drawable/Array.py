@@ -25,14 +25,13 @@ from them.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 from GLDrawable import *
-from DisplayList import *
 from OpenGL.GL import *
 from BZFlag.Geometry import *
 from Numeric import *
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.UI import GLExtension
 
-__all__ = ('VertexArray', 'TriangleArray', 'SurfaceArray', 'TriangleArrayDisplayList')
+__all__ = ('VertexArray', 'TriangleArray', 'SurfaceArray')
 
 
 class VertexArray(object):
@@ -144,21 +143,13 @@ class TriangleArray(VertexArray, GLDrawable):
        unconnected triangles. This is best for meshes that can't be easily decomposed
        into triangle strips or other larger primitives.
        """
-    def __init__(self, size, format):
-        super(TriangleArray, self).__init__((size, 3), format)
+    def __init__(self, shape, format):
+        super(TriangleArray, self).__init__(shape + (3,), format)
+        self.numVertices = multiply.reduce(self.shape)
 
     def draw(self, rstate):
         self.bind()
-        glDrawArrays(GL_TRIANGLES, 0, self.shape[0] * 3)
-
-
-class TriangleArrayDisplayList(TriangleArray, DisplayList):
-    """A triangle array stored in a display list"""
-    def drawToList(self, rstate):
-        TriangleArray.draw(self, rstate)
-
-    def draw(self, rstate):
-        DisplayList.draw(self, rstate)
+        glDrawArrays(GL_TRIANGLES, 0, self.numVertices)
 
 
 class SurfaceArray(VertexArray, GLDrawable):

@@ -25,6 +25,7 @@ calculating surface normals.
 #
 
 from BZFlag.UI.Drawable.Array import *
+from BZFlag.UI.Drawable.DisplayList import *
 from BZFlag.Geometry import *
 from OpenGL.GL import *
 from Numeric import *
@@ -51,7 +52,7 @@ def getTriangles(indices):
     return array(tris)
 
 
-class Mesh(TriangleArrayDisplayList):
+class Mesh(TriangleArray, DisplayList):
     """A drawable mesh model as extracted from the VRML file.
        All relevant VRML nodes should be passed as keyword parameters,
        with their first letter lowercased.
@@ -84,7 +85,7 @@ class Mesh(TriangleArrayDisplayList):
             format = GL_T2F_N3F_V3F
         else:
             format = GL_N3F_V3F
-        super(Mesh, self).__init__(len(vertices), format)
+        super(Mesh, self).__init__(vertices.shape[:-2], format)
         self.vertices[...] = vertices.astype(Float32)
         self.normals[...] = normals.astype(Float32)
         if texcoords:
@@ -145,10 +146,13 @@ class Mesh(TriangleArrayDisplayList):
         # by the transforms applied to each VRML mesh
         glEnable(GL_NORMALIZE)
 
-        TriangleArrayDisplayList.drawToList(self, rstate)
+        TriangleArray.draw(self, rstate)
 
         glPopMatrix()
         glColor4f(1,1,1,1)
         glDisable(GL_NORMALIZE)
+
+    def draw(self, rstate):
+        DisplayList.draw(self, rstate)
 
 ### The End ###
