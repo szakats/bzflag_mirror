@@ -31,8 +31,13 @@ from BZFlag import Event
 
 # Color scheme for radar. Objects not found specifically default to None
 colorScheme = {
-    None:          (0.38, 0.62, 0.62),
-    'Teleporter':  (1,    1,    0   ),
+    None:           (0.38, 0.62, 0.62),
+    'Teleporter':   (1,    1,    0   ),
+    'player':       (1,    1,    1   ),
+    'redPlayer':    (1,    0,    0   ),
+    'greenPlayer':  (0,    1,    0   ),
+    'bluePlayer':   (0,    0,    1   ),
+    'purplePlayer': (0.5,  0,    1   ),
     }
 
 
@@ -60,10 +65,8 @@ class RadarView:
         glEnable(GL_LINE_SMOOTH)
         self.configureOpenGL(self.size)
 
-    def colorScale(self, object, viewHeight):
+    def colorScale(self, z, h, viewHeight):
         """This is the Enhanced Radar (tm) color scaling algorithm from bzflag proper"""
-        z = object.center[2]
-        h = object.size[2]
         if viewHeight >= z + h:
             alpha = 1.0 - (viewHeight - (z + h)) / 40.0
         elif viewHeight <= z:
@@ -73,35 +76,65 @@ class RadarView:
         if alpha < 0.35:
             alpha = 0.35
         return alpha
-        
-    def render(self):
-        glPushMatrix()
-        glTranslatef(0,0,-1200)
+
+    def smoothedPoly(self, poly):
+        """Render a polygon with smoothed edges. This uses GL_POLYGON to render the
+           interior without cracks between triangles, then GL_LINE_LOOP to render
+           the edges smoothly.
+           """
+        glBegin(GL_POLYGON)
+        for vertex in poly:
+            glVertex2f(*vertex)
+        glEnd()
+        glBegin(GL_LINE_LOOP)
+        for vertex in poly:
+            glVertex2f(*vertex)
+        glEnd()
+
+    def polyDot(self, point, dotSize=5):
+        """Convert a point to a polygon that draws a dot at that point.
+           Currently this is always an axis-aligned square.
+           """
+        return ((point[0] - dotSize, point[1] - dotSize),
+                (point[0] + dotSize, point[1] - dotSize),
+                (point[0] + dotSize, point[1] + dotSize),
+                (point[0] - dotSize, point[1] + dotSize))
+      
+    def renderWorld(self):
         for object in self.game.world.blocks:
             try:
                 try:
                     color = colorScheme[object.__class__.__name__]
                 except KeyError:
                     color = colorScheme[None]
-                glColor4f(color[0], color[1], color[2], self.colorScale(object, 0))
-                
-                # Render as a polygon then as an outline to get smoothed edges
-                # without leaving a small crack between the triangles.
-                poly = object.toPolygon()
-                glBegin(GL_POLYGON)
-                for vertex in poly:
-                    glVertex2f(*vertex)
-                glEnd()
-                glBegin(GL_LINE_LOOP)
-                for vertex in poly:
-                    glVertex2f(*vertex)
-                glEnd()
+                z = object.center[2]
+                h = object.size[2]
+                glColor4f(color[0], color[1], color[2], self.colorScale(z, h, 0))
+                self.smoothedPoly(object.toPolygon())
             except AttributeError:
                 pass
+
+    def renderPlayers(self):
+        for player in self.game.players.values():
+            if 'alive' in player.status:
+                # Pick player color based on team, alpha based on height
+                try:
+                    color = colorScheme[player.identity.team + "Player"]
+                except KeyError:
+                    color = colorScheme["player"]
+                pos = player.motion.position
+                glColor4f(color[0], color[1], color[2], self.colorScale(pos[2], 0, 0))
+                self.smoothedPoly(self.polyDot(pos))
+
+    def render(self):
+        glPushMatrix()
+        glTranslatef(0,0,-1200)
+        self.renderWorld()
+        self.renderPlayers()
         glPopMatrix()
 
 
-def attach(game, eventLoop, size=(512,512), targetFrameRate=60):
+def attach(game, eventLoop, size=(512,512), targetFrameRate=40):
     """Set up a window with only an overhead view, on the given game and event loop"""
  
     # Update the view regularly

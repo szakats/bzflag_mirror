@@ -35,7 +35,7 @@ colorScheme = {
     'Teleporter':    (255, 255, 128),
     'playerOutline': (255, 255, 255),
     'flag':          (255, 255, 255),
-    'roguePlayer':   (0,   0,   0  ),
+    'player':        (0,   0,   0  ),
     'redPlayer':     (128, 0,   0  ),
     'greenPlayer':   (0,   128, 0  ),
     'bluePlayer':    (0,   0,   128),
@@ -152,7 +152,10 @@ class OverheadView:
         for player in self.game.players.values():
             if 'alive' in player.status:
                 # Pick player color based on team
-                bg = colorScheme[player.identity.team + "Player"]
+                try:
+                    bg = colorScheme[player.identity.team + "Player"]
+                except KeyError:
+                    bg = colorScheme["player"]
 
                 # Draw a circle with black background and colored outline,
                 # with a line indicating the tank's current heading.
