@@ -1,9 +1,0 @@
-Basic Installation
-==================
-you need GNOME, GTK+, and GtkGLArea to start
-
-./configure
-make
-mkdir /usr/local/share/bzedit
-cp -R data /usr/local/share/bzedit
-cp -R help/bzedit /usr/share/gnome/help
