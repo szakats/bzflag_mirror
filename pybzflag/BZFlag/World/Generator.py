@@ -238,9 +238,9 @@ def Heightmap(name,
             p = img.getpixel((x,y))
             if p:
                 w.storeBlock(WorldObjects.Box(
-                    center = ((float(x) / img.size[0] - 0.5) * size,
-                              (float(y) / img.size[1] - 0.5) * size,
-                              0),
+                    center = ( (float(x) / img.size[0] - 0.5) * size,
+                              -(float(y) / img.size[1] - 0.5) * size,
+                               0),
                     size   = (size / img.size[0],
                               size / img.size[1],
                               p / 255.0 * boxHeight),
