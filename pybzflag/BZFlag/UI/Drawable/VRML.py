@@ -52,7 +52,7 @@ from OpenGL.GL import *
 from BZFlag import Util
 from BZFlag.Geometry import *
 from Numeric import *
-import re, math, BZFlag, cPickle, os
+import re, math, BZFlag, cPickle, os, md5
 
 
 lexicalScanner = re.compile(r"""
@@ -77,7 +77,7 @@ lexicalScanner = re.compile(r"""
     |(?P<hex>          0[xX][\da-fA-F]*)
     |(?P<oct>          0[0-7]*)
     |(?P<dec>          \-?[1-9]\d*)
-   
+
     # Terminal symbols
     |(?P<period>       \.)
     |(?P<comma>        \,)
@@ -87,7 +87,7 @@ lexicalScanner = re.compile(r"""
     |(?P<closeBracket> \])
 
     # Identifiers
-    |(?P<id>           [^\s\,\.\{\}\[\]]+)    
+    |(?P<id>           [^\s\,\.\{\}\[\]]+)
     )""", re.VERBOSE | re.UNICODE)
 
 
@@ -135,7 +135,7 @@ class Reader:
             self.extractMeshes(node)
         del self.parseStack
         del self.namespace
-        
+
     def parse(self, f):
         """Parse the given file object as VRML. Upon returning, there will
            be a nested tuple representation of the VRML file in parseStack
@@ -164,7 +164,7 @@ class Reader:
                 for tokenType, tokenValue in token.groupdict().items():
                     if tokenValue is not None:
                         self.parseToken(tokenType, tokenValue)
-        
+
     def parseHeader(self, line):
         """Parse the #VRML header line. This doesn't make any attempt to validate
            the version yet, it just uses it to set the encoding.
@@ -301,7 +301,7 @@ class Reader:
     def extractMeshes(self, node, parents=()):
         """Recursively traverse a tree of parsed nodes, extracting meshes into Drawables"""
         newParents = (node,) + parents
-        
+
         if node.id == 'IndexedFaceSet':
             # We just found some data we can turn into a drawable. Now we just
             # need to search for the matching coordinates, material, name, and matrix.
@@ -358,7 +358,7 @@ class Mesh(DisplayList):
             self.color = material.value['diffuseColor'] + [1 - material.value['transparency']]
             self.render.blended = self.color[3] != 1
         else:
-            self.color = None            
+            self.color = None
 
         # Walk through the vertex list, storing triangles.
         # Quads will be automatically split into two triangles. We throw
@@ -392,7 +392,7 @@ class Mesh(DisplayList):
         """Add a triangle to our internal representation, calculating normals"""
         # tupleize everything
         vertices = tuple(map(tuple, vertices))
-        
+
         # The triangle will calculate its own face normal. It's up to us to
         # do vertex normals however, because it requires knowledge of the entire mesh.
         tri = Triangle(vertices)
@@ -444,7 +444,7 @@ class Mesh(DisplayList):
         # Our normals are normalized at this point, but they might be scaled
         # by the transforms applied to each VRML mesh
         glEnable(GL_NORMALIZE)
-        
+
         glBegin(GL_TRIANGLES)
         for tri in self.triangles:
             glNormal3f(*tri.normals[0])
@@ -471,13 +471,19 @@ class Cache:
             pass
 
     def getCacheFilename(self, name):
-        return os.path.join(self.path, os.path.basename(name) + ".p")
+        """To uniquely identify this file, take an MD5 checksum of it"""
+        f = open(name)
+        hash = md5.new(f.read()).hexdigest()
+        f.close
+        return os.path.join(self.path, "p%s.meshDict" % hash)
 
     def load(self, name):
         """This checks the in-memory cache first, then the disk cache.
            Returns a dictionary associating mesh names and drawables.
            """
         try:
+            # Use the filename as the memory cache key- we don't want
+            # to checksum the file every time we load it from the memory cache.
             return self.objects[name]
         except KeyError:
             # Not in the memory cache, try the disk cache
@@ -491,20 +497,20 @@ class Cache:
 
             # Not in either cache, load it
             else:
-                meshes = Reader(Util.dataFile(name)).meshes
+                meshes = Reader(name).meshes
                 self.objects[name] = meshes
                 # Try to store it in the disk cache. If we can't, no big deal.
                 try:
-                    f = open(self.getCacheFilename(name), "wb")
+                    f = open(cacheFilename, "wb")
                     cPickle.dump(meshes, f, True)
                     f.close()
                 except IOError:
                     pass
                 return meshes
-            
+
 
 defaultCache = Cache()
 def load(name):
-    return defaultCache.load(name)
+    return defaultCache.load(Util.dataFile(name))
 
 ### The End ###
