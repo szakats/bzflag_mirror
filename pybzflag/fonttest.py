@@ -2,10 +2,13 @@
 #
 # Test rig for our GLText module
 #
+
 from BZFlag.UI import Viewport, GLText, Instrument
 from BZFlag.Event import EventLoop
 from BZFlag import Animated
 from OpenGL.GL import *
+from math import floor
+
 
 # Create a new orthogonal mode viewport
 loop = EventLoop()
@@ -38,7 +41,7 @@ def drawFrame():
     GLText.draw("A little larger", 50)
 
     glLoadIdentity()
-    glTranslatef(viewport.size[0]/2, viewport.size[1]/2, 0)
+    glTranslatef(floor(viewport.size[0]/2), floor(viewport.size[1]/2), 0)
     glRotatef(spin.value, 0,0,1)
     glScalef(zoom.value, zoom.value, zoom.value)
     dt = time.step()
@@ -48,15 +51,15 @@ def drawFrame():
 
     glColor3f(0,0,0)
     glLoadIdentity()
-    glTranslatef(viewport.size[0]/2, viewport.size[1] * 0.75, 0)
+    glTranslatef(floor(viewport.size[0]/2), floor(viewport.size[1] * 0.75), 0)
     GLText.drawCentered("Not-so-spinny-widget")
 
     glLoadIdentity()
-    glTranslatef(viewport.size[0]/2, viewport.size[1] * 0.85, 0)
+    glTranslatef(floor(viewport.size[0]/2), floor(viewport.size[1] * 0.85), 0)
     GLText.drawCentered("(small print)", GLText.smallSize)
 
     glLoadIdentity()
-    glTranslatef(viewport.size[0]/2, viewport.size[1] * 0.95, 0)
+    glTranslatef(floor(viewport.size[0]/2), floor(viewport.size[1] * 0.95), 0)
     glColor3f(0,0,1)
     GLText.drawCentered("bold", fontName="VeraBd.ttf")
 

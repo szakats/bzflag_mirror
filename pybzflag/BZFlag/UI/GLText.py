@@ -86,7 +86,7 @@ class Glyph:
         glTexCoordf(t[0],t[1]+t[3])
         glVertex2f(0, 0)
         glEnd()
-        glTranslatef(v[0], 0, 0)
+        glTranslatef(math.floor(v[0]), 0, 0)
 
 
 class FontPage:
@@ -239,13 +239,13 @@ class Font:
         for char in text:
             # Handle whitespace here
             if char == " ":
-                glTranslatef(rendered.spaceSize[0] * magnification, 0, 0)
+                glTranslatef(math.floor(rendered.spaceSize[0] * magnification), 0, 0)
             elif char == "\n":
                 glPopMatrix()
-                glTranslatef(0, rendered.spaceSize[1] * magnification, 0)
+                glTranslatef(0, math.floor(rendered.spaceSize[1] * magnification), 0)
                 glPushMatrix()
             elif char == "\t":
-                glTranslatef(rendered.spaceSize[0] * 8 * magnification, 0, 0)
+                glTranslatef(math.floor(rendered.spaceSize[0] * 8 * magnification), 0, 0)
 
             else:
                 rendered.draw(char, size)
@@ -264,7 +264,7 @@ class Font:
     def drawCentered(self, text, fontSize=defaultSize):
         """Draw text centered around the origin"""
         size = self.size(text, fontSize)
-        glTranslatef(-size[0]/2, -size[1]/2, 0)
+        glTranslatef(math.floor(-size[0]/2), math.floor(-size[1]/2), 0)
         self.draw(text, fontSize)
 
 
