@@ -223,7 +223,7 @@ class AnimatedPerlinNoise:
        """
     def __init__(self,
                  period          = 50,
-                 persistence     = 0.65,
+                 persistence     = 0.5,
                  numOctaves      = 5,
                  fundamental     = 16,
                  framesPerOctave = 16,
