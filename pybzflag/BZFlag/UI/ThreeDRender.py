@@ -148,6 +148,15 @@ class TextureGroup(Drawable.DisplayList):
         for drawable in self.dynamic:
             drawable.draw()
 
+    def pickingDraw(self, picking):
+        """Alternate draw function used in picking, that assigns names to all drawables"""
+        for drawable in self.static:
+            picking.name(drawable)
+            drawable.draw()
+        for drawable in self.dynamic:
+            picking.name(drawable)
+            drawable.draw()
+
 
 class PickingState:
     """Holds render state information specific to picking. This is passed
@@ -238,16 +247,15 @@ class BasicRenderPass(RenderPass):
            """
         if picking:
             for (texture, group) in self.textureGroups.iteritems():
-                for drawable in group.drawables:
-                    picking.name(drawable)
-                    drawable.draw()
+                group.pickingDraw(picking)
         else:
             for (texture, group) in self.textureGroups.iteritems():
-                if texture is None:
-                    glDisable(GL_TEXTURE_2D)
-                else:
-                    glEnable(GL_TEXTURE_2D)
-                    texture.bind()
+                if not picking:
+                    if texture is None:
+                        glDisable(GL_TEXTURE_2D)
+                    else:
+                        glEnable(GL_TEXTURE_2D)
+                        texture.bind()
                 group.draw()
 
 
