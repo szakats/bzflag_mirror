@@ -21,7 +21,7 @@ Catalog of all supported flag types, and related utilities.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag import Util
+from BZFlag import Util, Errors
 from BZFlag.Protocol import FromServer
 import re
 
