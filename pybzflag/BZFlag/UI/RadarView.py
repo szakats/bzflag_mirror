@@ -154,6 +154,8 @@ class RadarView:
 
 def attach(game, eventLoop):
     from BZFlag.UI.Viewport import OpenGLViewport
-    RadarView(game, OpenGLViewport(eventLoop, (512,512)))
+    viewport = OpenGLViewport(eventLoop, (512,512))
+    RadarView(game, viewport)
+    return viewport
 
 ### The End ###

@@ -68,4 +68,6 @@ def attach(game, eventLoop):
 
     RadarView.RadarView(game, hud.region((10,10,180,180)))
 
+    return viewport
+
 ### The End ###

@@ -61,9 +61,6 @@ def attach(game, eventLoop):
     viewport = OpenGLViewport(eventLoop, (800, 600))
     view = AnaglyphView(game, viewport)
     ThreeDController(view, viewport)
-
-    # Add a Frame Hertz indicator
-    Animated.FrequencyCounter(viewport.onFinishFrame,
-                              lambda hz: "FHz: %.3f (target %.3f)" % (hz, viewport.targetFrameRate))
+    return viewport
 
 ### The End ###

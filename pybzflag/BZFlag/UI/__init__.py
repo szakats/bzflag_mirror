@@ -44,7 +44,7 @@ def attach(name, *args, **kw):
        """
     if name:
         module = find(name)
-        module.attach(*args, **kw)
+        return module.attach(*args, **kw)
 
 
 def list():
@@ -68,6 +68,6 @@ class Any:
         self.options.update(options)
 
     def attach(self, *args, **kw):
-        attach(self.options['ui'], *args, **kw)
+        return attach(self.options['ui'], *args, **kw)
 
 ### The End ###
