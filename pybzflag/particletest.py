@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable
-from BZFlag import Event, Geometry
+from BZFlag import Event, Geometry, Noise
 from OpenGL.GL import *
-import random
-import RandomArray
 
 
 class GlowSphere(Drawable.ParticleArray):
@@ -17,10 +15,9 @@ class GlowSphere(Drawable.ParticleArray):
         self.render.blended = True
 
         # Generate some points on a sphere
-        for i in xrange(numParticles):
-            self.points[i] = [random.random() - 0.5 for j in xrange(3)]
-        Geometry.normalize(self.points, self.points)
-        self.points *= sphereDiameter
+        self.points[...] = Noise.randomVectors((numParticles, 3),
+                                               magnitude = sphereDiameter,
+                                               type      = 'f')
 
     def draw(self, rstate):
         glDisable(GL_LIGHTING)
@@ -35,7 +32,7 @@ class WigglyGlowSphere(GlowSphere):
         GlowSphere.__init__(self, numParticles=1000)
 
     def draw(self, rstate):
-        self.points += (RandomArray.random(self.points.shape)-0.5) * 0.2
+        self.points += Noise.randomVectors(self.points.shape, magnitude=0.2)
         GlowSphere.draw(self, rstate)
 
 

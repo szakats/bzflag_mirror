@@ -22,6 +22,46 @@ Various methods of generating noise quickly using Numeric
 
 from Numeric import *
 from BZFlag import Geometry
+import time, random
+
+# Keep a constantly incrementing seed to use when none is explicitly given.
+# This is necessary to prevent all noise arrays generated in the same second from being the same.
+globalSeed = None
+
+
+def randomArray(shape, seed=None, range=(0,1), type=Float):
+    """Utility to generate a Numeric array full of pseudorandom numbers in the given range.
+       This will attempt to use the RandomArray module, but fall back on using the standard
+       random module in a loop.
+       """
+    global globalSeed
+    if not seed:
+        if not globalSeed:
+            globalSeed = int(time.time())
+        seed = globalSeed
+        # Keep our global seed mixed up enough that many requests for
+        # random arrays consecutively still gives random-looking output.
+        globalSeed = (globalSeed + random.randint(1, 0xFFFFF)) & 0x7FFFFFF
+
+    try:
+        import RandomArray
+        RandomArray.seed(seed+1, seed+1)
+        return (RandomArray.random(shape) * (range[1]-range[0]) + range[0]).astype(type)
+    except ImportError:
+        random.seed(seed)
+        a = zeros(multiply.reduce(shape), Float)
+        for i in xrange(a.shape[0]):
+            a[i] = random.random() * (range[1]-range[0]) + range[0]
+        return reshape(a, shape).astype(type)
+
+
+def randomVectors(shape, seed=None, magnitude=1, type=Float):
+    """Generates a Numeric array full of random vectors with the given magnitude"""
+    a = randomArray(shape, seed, (-1,1), type)
+    Geometry.normalize(a,a)
+    if magnitude != 1:
+        a *= array((magnitude,), type)
+    return a
 
 
 class SmoothNoise:
@@ -180,27 +220,6 @@ class PerlinNoise(SmoothNoise):
         return result
 
 
-def randomArray(shape, seed=None, range=(0,1), type=Float):
-    """Utility to generate a Numeric array full of pseudorandom numbers in the given range.
-       This will attempt to use the RandomArray module, but fall back on using the standard
-       random module in a loop.
-       """
-    try:
-        import RandomArray
-        if seed is None:
-            RandomArray.seed()
-        else:
-            RandomArray.seed(seed+1, seed+1)
-        return (RandomArray.random(shape) * (range[1]-range[0]) + range[0]).astype(type)
-    except ImportError:
-        import random
-        random.seed(seed)
-        a = zeros(multiply.reduce(shape), Float)
-        for i in xrange(a.shape[0]):
-            a[i] = random.random() * (range[1]-range[0]) + range[0]
-        return reshape(a, shape).astype(type)
-
-
 class VectorTable:
     """A table of random unit vectors generated from a seed.
 
@@ -218,8 +237,7 @@ class VectorTable:
         self.dimensions = dimensions
 
         # This generates a random array of numbers between -1 and 1, then normalizes the vectors.
-        self.table = randomArray((self.size, dimensions), type=Float32, range=(-1,1), seed=seed)
-        Geometry.normalize(self.table, self.table)
+        self.table = randomVectors((self.size, dimensions), type=Float32, seed=seed)
 
     def get(self, v):
         """Retrieve a random n-vector given an integer m-vector.
