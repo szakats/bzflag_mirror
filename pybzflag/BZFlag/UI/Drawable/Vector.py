@@ -21,19 +21,18 @@ For debugging and demonstration, a drawable that shows the value of one vector
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from GLDrawable import *
+from DisplayList import *
 from OpenGL.GL import *
 import math, Numeric
 
 
-class Vector(GLDrawable):
+class Vector(DisplayList):
     """A drawable that overlays the magnitude and direction of a vector onto the scene,
        preserving the camera's direction. The size and position of the overlay, in
        camera coordinates, can be supplied. By default the overlay is placed very far
        from the camera so that the effects of perspective are minimized.
        """
-    def __init__(self, vector, color=(0,1,0,1), center=(-200, -200, -1000), size=100):
-        GLDrawable.__init__(self)
+    def set(self, vector, color=(0,1,0,1), center=(-200, -200, -1000), size=100):
         self.vector = vector
         self.center = center
         self.size = size
@@ -46,7 +45,7 @@ class Vector(GLDrawable):
     def unitCircle(self):
         """Draws a unit circle in the current color"""
         glBegin(GL_LINE_LOOP)
-        for theta in Numeric.arange(0, math.pi*2, 0.1):
+        for theta in Numeric.arange(0, math.pi*2, 0.15):
             glVertex2f(math.cos(theta), math.sin(theta))
         glEnd()
 
@@ -59,8 +58,26 @@ class Vector(GLDrawable):
         glVertex2f(-1, 1)
         glEnd()
 
+    def drawToList(self, rstate):
+        """The static portions of our widget are stored in a display list"""
+        # Draw unit circles/squares in the X, Y, and Z planes
+        glColor4f(1,1,1, 0.3)
+        self.unitCircle()
+        self.unitSquare()
+        glPushMatrix()
+        glRotatef(90, 1,0,0)
+        self.unitCircle()
+        self.unitSquare()
+        glPopMatrix()
+        glPushMatrix()
+        glRotatef(90, 0,1,0)
+        self.unitCircle()
+        self.unitSquare()
+        glPopMatrix()
+
     def draw(self, rstate):
         glDisable(GL_LIGHTING)
+        glDisable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
         glEnable(GL_LINE_SMOOTH)
         glPushMatrix()
@@ -79,20 +96,8 @@ class Vector(GLDrawable):
         # Reapply the camera's rotation
         glMultMatrixf(rotation)
 
-        # Draw unit circles/squares in the X, Y, and Z planes
-        glColor4f(1,1,1, 0.3)
-        self.unitCircle()
-        self.unitSquare()
-        glPushMatrix()
-        glRotatef(90, 1,0,0)
-        self.unitCircle()
-        self.unitSquare()
-        glPopMatrix()
-        glPushMatrix()
-        glRotatef(90, 0,1,0)
-        self.unitCircle()
-        self.unitSquare()
-        glPopMatrix()
+        # Draw the static portion from above
+        DisplayList.draw(self, rstate)
 
         # Draw the vector itself
         glColor3f(0,1,0)
@@ -103,6 +108,7 @@ class Vector(GLDrawable):
 
         glPopMatrix()
         glEnable(GL_LIGHTING)
+        glEnable(GL_DEPTH_TEST)
         glDisable(GL_BLEND)
         glDisable(GL_LINE_SMOOTH)
         glColor3f(1,1,1)

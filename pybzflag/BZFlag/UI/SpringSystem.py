@@ -38,16 +38,16 @@ class Cloth:
        which exerts spring forces. Extra affectors can be added for
        gravity, wind, and collisions.
 
-       friction  - Damping for each point mass
-       stiffness - Relative amount of force exerted by springs
-       stepSize  - Size of integration steps taken
-       stepTime  - Wallclock time each integration step corresponds to
+       friction      - Damping for each point mass
+       stiffness     - Relative amount of force exerted by springs
+       stepSize      - Size of integration steps taken
+       stepTime      - Wallclock time each integration step corresponds to
        """
     def __init__(self, initialState,
-                 friction  = 0.02,
-                 stiffness = 200,
-                 stepSize  = 0.04,
-                 stepTime  = 0.01,
+                 friction      = 0.02,
+                 stiffness     = 200,
+                 stepSize      = 0.04,
+                 stepTime      = 0.01,
                  ):
         self.stepSize = stepSize
         self.stepTime = stepTime
@@ -76,8 +76,8 @@ class Cloth:
     def integrate(self, dt):
         """Integrate the spring system. Our simple method of simulation
            will quickly get unstable if our timestep is too large, so
-           we limit the maximum step size here.
-           Returns the number of integration steps performed.
+           we convert the caller's timesteps into zero or more fixed-size
+           time steps. Returns the number of integration steps performed.
            """
         self.dt += dt
         nSteps = 0
@@ -86,14 +86,14 @@ class Cloth:
                 for affector in self.affectors:
                     affector.integrate(self.stepSize)
 
-                # If our simulation got unstable and exploded. Best we can do now is reset it
             except OverflowError:
-                self.reset()
-            except DivideByZeroError:
+                # If our simulation got unstable and exploded. Best we can do now is reset it.
+                # This shouldn't ever happen, but this keeps us from crashing if something goes
+                # terminally wrong with the simulation.
                 self.reset()
                 
             self.dt -= self.stepTime
-            nSteps += 1
+            nSteps += 1            
         return nSteps
 
     def add(self, cls, *args, **kw):
@@ -177,7 +177,7 @@ class VelocityAffector(Affector):
     """Generic affector for applying velocity to mass positions"""
     def integrate(self, dt):
         add(self.model.state, multiply(self.model.velocity, dt), self.model.state)
-    
+             
 
 class FrictionAffector(Affector):
     """Generic affector for applying friction to mass velocities"""
