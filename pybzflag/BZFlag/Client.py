@@ -404,5 +404,9 @@ class PlayerClient(StatefulClient):
         """This is called after we try to enterGame, if we failed."""
         raise Errors.GameException("Unable to enter the game: %s" % msg.reason)
 
+    def sendMessage(self, message, destination='all'):
+        """Send a message to other players"""
+        self.tcp.write(ToServer.MsgMessage(destination = destination,
+                                           message = message))
 
 ### The End ###

@@ -74,6 +74,12 @@ class MsgGetWorld(Common.Message):
 class MsgWantWHash(Common.Message):
     messageId = 0x7768
 
+class MsgMessage(Common.Message):
+    messageId = 0x6D67
+    entries = [
+        StructEntry(Common.PlayerId,  'destination'),
+        StructEntry(StringField(128), 'message'),
+        ]
 
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgPlayerUpdate = Common.MsgPlayerUpdate

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from BZFlag import CommandLine
 from BZFlag.UI import OverheadView
-import readline
 
 client = CommandLine.client(server     = "localhost",
                             callSign   = "@Super Observer Duckie",
@@ -22,5 +21,4 @@ client.onMsgMessage.observe(message)
 
 # Show an overhead view of the world
 OverheadView.attach(client.game, client.eventLoop)
-
 client.run()
