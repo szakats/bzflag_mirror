@@ -26,6 +26,8 @@ from __future__ import division
 from Numeric import *
 from BZFlag.Geometry import *
 from BZFlag.World import Scale
+from BZFlag import Noise
+import random
 
 
 class Model:
@@ -168,17 +170,14 @@ class Cloth(FixedIntegrationModel):
 
 
 class Newtonian(Model):
-    """A simple model for particles with position, acceleration, and velocity"""
+    """A simple model for particles with position and velocity"""
     def __init__(self, initialState):
         Model.__init__(self, initialState)
         self.velocity = zeros(initialState.shape, Float32, savespace=True)
-        self.acceleration = zeros(initialState.shape, Float32, savespace=True)
-        self.add(AccelerationAffector)
         self.add(VelocityAffector)
 
     def reset(self):
         Model.reset(self)
-        self.acceleration[...] = 0
         self.velocity[...] = 0
 
 
@@ -208,6 +207,7 @@ class LifespanAffector(Affector):
 
     def integrate(self, dt):
         add(self.model.life, dt * self.ageRate, self.model.life)
+        self.model.life = array(clip(self.model.life, 0, 1), Float32, savespace=True)
 
 
 class SpriteFountain(Fountain):
@@ -230,9 +230,11 @@ class Emitter(Affector):
     """An affector that scans the model for dead particles and respawns them.
        spawnRate is the maximum particle spawning rate in particles per second.
        """
-    def __init__(self, model, spawnRate):
+    def __init__(self, model, spawnRate, position=(0,0,0), velocity=(0,0,0)):
         Affector.__init__(self, model)
         self.spawnRate = spawnRate
+        self.position = position
+        self.velocity = velocity
         self.spawnBudget = 0
 
     def integrate(self, dt):
@@ -245,7 +247,7 @@ class Emitter(Affector):
 
     def respawn(self, indices):
         """Respawn particles at each model array index in the given list. By default this initializes
-           position, velocity, acceleration, and life according to the emitter. More particle
+           position, velocity, and life according to the emitter. More particle
            qualities for this to set can be added by subclasses.
            """
         numIndices = len(indices)
@@ -255,7 +257,6 @@ class Emitter(Affector):
 
         put(self.model.state, v3indices, self.newState(numIndices))
         put(self.model.velocity, v3indices, self.newVelocity(numIndices))
-        put(self.model.acceleration, v3indices, self.newAcceleration(numIndices))
 
         put(self.model.life, indices, self.newLife(numIndices))
 
@@ -264,17 +265,40 @@ class Emitter(Affector):
            will be repeated as necessary. In particular, it can return a scalar. The other newFoo
            functions here obey the same semantics.
            """
-        return (0,0,0)
+        return self.position
 
     def newVelocity(self, n):
-        return (0,0,1000)
-
-    def newAcceleration(self, n):
-        return (0,0,0)
+        return self.velocity
 
     def newLife(self, n):
         """By default particle lifetimes range from 1 to 0"""
         return 1
+
+
+class RandomEmitter(Emitter):
+    """An emitter that randomly varies the direction and speed of emitted particles.
+       speedRange should be a tuple with the minimum and maximum speed.
+       directionRandoness should be between 0 and 1. 0 gives exactly the given direction,
+       1 gives a completely random direction.
+       """
+    def __init__(self, model, spawnRate, speedRange, direction, directionRandomness=0, position=(0,0,0)):
+        Emitter.__init__(self, model, spawnRate, position)
+        self.speedRange = speedRange
+        self.position = position
+        self.setDirection(direction, directionRandomness)
+
+    def setDirection(self, direction, directionRandomness=0):
+        """Set a new direction, premultiplying it with directionRandomness"""
+        self.directionRandomness = directionRandomness
+        self.premultDirection = normalize(direction) * (1-directionRandomness)
+
+    def newVelocity(self, n):
+        """Generate a new random velocity by blending the given direction with a random unit vector,
+           normalizing it, then multiplying by a randomly generated speed.
+           """
+        return (normalize(self.premultDirection +
+                         Noise.randomVectors((3,)) * self.directionRandomness) *
+                random.uniform(*self.speedRange))
 
 
 class LinearFadeAffector(Affector):
@@ -357,12 +381,6 @@ class VelocityAffector(Affector):
     """Generic affector for applying velocity to particle positions"""
     def integrate(self, dt):
         add(self.model.state, multiply(self.model.velocity, dt), self.model.state)
-
-
-class AccelerationAffector(Affector):
-    """Generic affector for applying acceleration to particle velocities"""
-    def integrate(self, dt):
-        add(self.model.velocity, multiply(self.model.acceleration, dt), self.model.velocity)
 
 
 class FrictionAffector(Affector):

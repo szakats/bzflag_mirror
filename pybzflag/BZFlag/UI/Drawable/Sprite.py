@@ -125,15 +125,16 @@ class PointSpriteRenderer(VertexArray):
         self.points      = self.vertices
         self.pointColors = self.colors
 
+        # This is here only for compatibility at this point, we can only render one global size
+        self.pointSizes  = zeros(shape, Float32, savespace=True)
+
         # Initialize all our colors to one
         self.colors[...] = ones(self.colors.shape, Float32)
 
-        # We can only store one size
-        self.pointSizes  = ones((1,), Float32, savespace=True)
-
     def draw(self, rstate):
         glEnable(GL_POINT_SPRITE_NV)
-        glPointSize(self.pointSizes[0])
+        #glPointSize(self.pointSizes[0])
+        glPointSize(10)
 
         ## FIXME: This isn't correct. It's still yet to be determined whether
         ##        it's possible to get the same size function that normal geometry
