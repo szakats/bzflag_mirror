@@ -108,7 +108,7 @@ class Pyramid(DisplayList):
             v1 = (poly[i][0], poly[i][1], z)
             v2 = (poly[i+1][0], poly[i+1][1], z)
             v3 = (center[0], center[1], z2)
-            glNormal3f(*normalize(cross(subtract(v2,v1), subtract(v3,v1))))
+            glNormal3f(*normalize(cross(subtract(v3,v1), subtract(v2,v1))))
             glVertex3f(*v1)
             glTexCoord2f(*uvstack.pop())
             glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *uvstack2.pop())
