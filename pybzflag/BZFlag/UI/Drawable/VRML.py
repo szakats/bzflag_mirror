@@ -116,6 +116,11 @@ class Node:
         self.children = children  # Nested nodes
 
 
+class AnonymousMeshName:
+    """Class used as the name for meshes that can't be named uniquely"""
+    pass
+
+
 class Reader:
     """Scans a VRML file, instantiating drawables for all readable meshes.
        The file can be specified as a file object, file name, or URI.
@@ -303,9 +308,15 @@ class Reader:
         newParents = (node,) + parents
 
         if node.id == 'IndexedFaceSet':
+            # Try to find a good name for this mesh, but if we end up with duplicates, give
+            # them anonymous names.
+            name = self.findName(newParents)
+            if self.meshes.has_key(name):
+                name = AnonymousMeshName()
+
             # We just found some data we can turn into a drawable. Now we just
             # need to search for the matching coordinates, material, name, and matrix.
-            self.meshes[self.findName(newParents)] = Mesh(
+            self.meshes[name] = Mesh(
                 indexedFaceSet     = node,
                 coordinate3        = self.searchUp('Coordinate3', parents),
                 matrixTransform    = self.searchUp('MatrixTransform', parents),
