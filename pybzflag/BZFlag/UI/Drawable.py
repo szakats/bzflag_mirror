@@ -50,10 +50,6 @@ class GLDrawable:
     def draw(self):
         pass
 
-    def drawWithName(self, name):
-        """Draw the object with the given name. This is used for OpenGL object picking"""
-        pass
-
 
 class DisplayList(GLDrawable):
     """A drawable that stores itself to a display list before rendering"""
