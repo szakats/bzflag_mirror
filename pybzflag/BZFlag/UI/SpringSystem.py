@@ -38,10 +38,11 @@ class Cloth:
        which exerts spring forces. Extra affectors can be added for
        gravity, wind, and collisions.
        """
-    def __init__(self, initialState):
+    def __init__(self, initialState, friction=0.02, stiffness=800):
+        self.friction = friction
+        self.stiffness = stiffness
         self.initialState = array(initialState)
         self.state = array(initialState)
-        self.friction = 0.02
         self.velocity = zeros(initialState.shape, initialState.typecode())
         self.affectors = [ClothSpringAffector(self),
                           FrictionAffector(self),
@@ -112,15 +113,15 @@ class ClothSpringAffector(Affector):
 
         # Apply a force to each mass connected to this spring,
         # proportional to the spring extension in the spring's direction
-        force = dt * direction * 500 * extensionVector
+        force = dt * direction * self.model.stiffness * extensionVector
         vel_s1 += force
         vel_s2 -= force
 
     def integrate(self, dt):
-        # This links each mass to its eight neighbors
         self.integrateSprings(dt, (1,0))
         self.integrateSprings(dt, (0,1))
         self.integrateSprings(dt, (1,1))
+        #self.integrateSprings(dt, (2,2))
 
 
 class VelocityAffector(Affector):
@@ -143,12 +144,5 @@ class ConstantAccelAffector(Affector):
 
     def integrate(self, dt):
         add(self.model.velocity, self.vector, self.model.velocity)
-
-
-class GravityAffector(ConstantAccelAffector):
-    """Generic affector for applying a downward gravity force"""
-    def __init__(self, model):
-        ConstantAccelAffector.__init__(self, model, (0,0,Scale.Gravity))
-
 
 ### The End ###

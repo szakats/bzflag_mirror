@@ -15,7 +15,7 @@ class AnchorAffector(SpringSystem.Affector):
 class ClothObject:
     def __init__(self):
         self.cloth = SpringSystem.Cloth(self.getInitialState())
-        self.cloth.add(SpringSystem.ConstantAccelAffector, (0, 0, -0.02))
+        self.cloth.add(SpringSystem.ConstantAccelAffector, (0.001, 0.001, -0.01))
         self.cloth.add(AnchorAffector)
 
         self.time = Animated.Timekeeper()
@@ -23,8 +23,8 @@ class ClothObject:
         self.drawables[0].render.static = False
 
     def getInitialState(self):
-        xAxis = arange(-2, 2, 0.2)
-        yAxis = arange( 0, 2, 0.2)
+        xAxis = arange(-2, 2, 0.1)
+        yAxis = arange( 0, 2, 0.1)
         size = (len(yAxis), len(xAxis))
         a = zeros(size + (3,), Float)
         a[:,:,0] += 0 - xAxis
@@ -51,10 +51,10 @@ if __name__ == '__main__':
 
     # Give us some spiffy blue and yellow highlights
     view.light0.ambient  = (0,0,0,1)
-    view.light0.diffuse  = (1,1,0.9,1)
+    view.light0.diffuse  = (0.5,0.5,0.4,1)
     view.light0.position = (200,20,20,1)
     view.light1.ambient  = (0,0,0,1)
-    view.light1.diffuse  = (0.8,0.8,1,1)
+    view.light1.diffuse  = (0.4,0.4,0.5,1)
     view.light1.position = (20,200,20,1)
 
     obj = ClothObject()
