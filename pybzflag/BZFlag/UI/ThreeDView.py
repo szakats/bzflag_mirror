@@ -140,6 +140,11 @@ class Scene:
                         self.passes[0][drawable.texture] = [drawable.draw]
 
     def pick(self, pos):
+        """Returns the closest scene object that was rendered at the given screen
+           coordinates. For normal BZFlag world objects, this will be an instance
+           of one of the classes defined in BZFlag.Protocol.WorldObjects. If no
+           object was rendered at this postion, returns None.
+           """
         viewport = glGetIntegerv(GL_VIEWPORT)
         glSelectBuffer(len(self.objects) * 4)
         glRenderMode(GL_SELECT)
