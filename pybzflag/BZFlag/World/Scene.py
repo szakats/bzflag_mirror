@@ -48,9 +48,10 @@ class Scene:
         pass
 
 
-class SceneList:
+class SceneList(Scene):
     """Implementation of Scene using a flat list"""
     def __init__(self):
+        Scene.__init__(self)
         self.list = []
 
     def add(self, block):
