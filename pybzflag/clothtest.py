@@ -1,37 +1,34 @@
 #!/usr/bin/env python
-from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable
-from BZFlag import Event, Util
+from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, Drawable, SpringSystem
+from BZFlag import Event, Util, Animated
 from Numeric import *
 from time import time
 
 
-def buildArray():
-    xAxis = arange(-5, 5, 0.2)
-    yAxis = arange(-5, 5, 0.2)
-    size = (len(xAxis), len(yAxis))
-    a = zeros(size + (3,), Float)
-    a[:,:,0] += xAxis
-    a[:,:,1] += yAxis[:, NewAxis]
-    return a
+class ClothObject:
+    def __init__(self):
+        self.cloth = SpringSystem.Cloth(self.getInitialState())
+        self.cloth.add(SpringSystem.GravityAffector)
 
+        self.time = Animated.Timekeeper()
+        self.drawables = [Drawable.ArraySurface(self.cloth.state)]
+        self.drawables[0].render.static = False
 
-def updateArray(a):
-    t = time()
-    size = a.shape[:2]
-    def f(x,y):
-        x -= size[0]/2
-        y -= size[1]/2
-        d = sqrt(x*x + y*y)
-        return 0.5 * cos(d/3 - t*8) * exp(-d/100)
-    a[:,:,2] = fromfunction(f, size)
-    
-    
-class TestObject:
-    def __init__(self, drawables):
-        self.drawables = drawables
+    def getInitialState(self):
+        xAxis = arange(-2, 2, 0.2)
+        yAxis = arange( 0, 2, 0.2)
+        size = (len(yAxis), len(xAxis))
+        a = zeros(size + (3,), Float)
+        a[:,:,0] += 0 - xAxis
+        a[:,:,2] += yAxis[:, NewAxis]
+        return a
+
     def getDrawables(self):
         return self.drawables
 
+    def update(self):
+        self.cloth.integrate(self.time.step())
+        
 
 if __name__ == '__main__':
     loop = Event.EventLoop()
@@ -52,16 +49,10 @@ if __name__ == '__main__':
     view.light1.diffuse  = (0.8,0.8,1,1)
     view.light1.position = (20,200,20,1)
 
-    a = buildArray()
-    surf = Drawable.ArraySurface(a)
-    surf.render.static = False
-    obj = TestObject([surf])
-
-    def setupFrame():
-        updateArray(a)
-    viewport.onSetupFrame.observe(setupFrame)
-
+    obj = ClothObject()
+    viewport.onSetupFrame.observe(obj.update)
     view.scene.add(obj)
+    
     view.scene.preprocess()
     Util.showFrameRate(viewport)
     loop.run()

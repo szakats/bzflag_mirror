@@ -81,6 +81,7 @@ def calcVertexNormals(vertices):
     # Repeat the last row and column
     result[-1, :-1, :] = grid[-1,:,:]
     result[:-1, -1, :] = grid[:,-1,:]
+    result[-1,  -1, :] = grid[-1,-1,:]
     return result
  
 
@@ -106,7 +107,7 @@ class ArraySurface(GLDrawable):
            has been flattened with reshape().
            """
         indices = []
-        (width, height) = self.vertices.shape[:2]
+        (height, width) = self.vertices.shape[:2]
         for x in xrange(width - 1):
             for y in xrange(height - 1):
                 # The four points in this grid square probably aren't planar, so
