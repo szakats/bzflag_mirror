@@ -234,7 +234,7 @@ class Scene:
 
     def preprocess(self):
         """Rebuilds rendering passes. Currently this is necessary when the world changes."""
-        # Sort the rendreing passes by decreasing render priority
+        # Sort the rendering passes by decreasing render priority
         self.passes.sort(lambda a,b: cmp(b.renderPriority, a.renderPriority))
 
         # Make a list of rendering passes sorted by filter priority
