@@ -94,7 +94,7 @@ class RadarView:
                 (point[0] + dotSize, point[1] - dotSize),
                 (point[0] + dotSize, point[1] + dotSize),
                 (point[0] - dotSize, point[1] + dotSize))
-      
+
     def renderWorld(self):
         for object in self.game.world.blocks:
             try:
@@ -116,7 +116,7 @@ class RadarView:
             if 'alive' in player.status:
                 # XXX - same here
                 self.follow = player
-                
+
                 # Pick player color based on team, alpha based on height
                 try:
                     color = colorScheme[player.identity.team + "Player"]
@@ -144,7 +144,7 @@ class RadarView:
 
         size = self.viewport.size
         glPushMatrix()
-        glScalef(size[0], size[1], 1)                 
+        glScalef(size[0], size[1], 1)
         glTranslatef(0.5, 0.5, 0)
         glScalef(float(self.zoom) / self.game.world.size[0],
                  float(self.zoom) / self.game.world.size[1], 1)

@@ -75,7 +75,7 @@ class FrequencyCounter:
                 if result is not None:
                     print result
 
-        
+
 class Value:
     """A value that changes over time according to a function.
        The given function should take the old value, the time step, and the vector index as parameters.
@@ -121,7 +121,7 @@ class Velocity:
        """
     def __init__(self, value):
         self.value = value
-    
+
     def __call__(self, oldValue, dt, index=None):
         if index is None:
             return oldValue + self.value * dt
@@ -152,7 +152,7 @@ class Approach:
     def f(self, value, target, dt):
         """Approach function. Subclasses must override this."""
         pass
-    
+
 
 class LogApproach(Approach):
     """Approaches a target, fast at first but exponentially slowing down."""
@@ -212,7 +212,7 @@ class SigmoidApproach(LinearApproach):
     def __init__(self, target, speed, range):
         self.range = range
         LinearApproach.__init__(self, target, speed)
-        
+
     def map(self, x):
         normalized = (x - self.range[0]) / (self.range[1] - self.range[0])
         if normalized > 1:

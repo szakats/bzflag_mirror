@@ -50,7 +50,7 @@ def attach(game, eventLoop):
     viewport.onSetupFrame.observe(onSetupFrame)
     viewport.onKeyDown.observe(onKeyDown)
     (remaining, hudRect) = remaining.hSplit(lambda r: (1-hudSize.value) * r[3])
-    
+
     hud = viewport.region(hudRect)
     HUD.Panel(hud)
 
