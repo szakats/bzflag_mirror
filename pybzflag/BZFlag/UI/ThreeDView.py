@@ -31,7 +31,7 @@ from OpenGL.GLU import *
 class Camera:
   def __init__(self):
     self.focus = (0, 0, 4.0)
-    self.distance = 750
+    self.distance = 1500
     self.rotation = 45
     self.elevation = -75
     self.isFocused = True
@@ -74,11 +74,17 @@ class Scene:
   def rebuildTexmap(self):
     for object, drawables in self.objects.items():
       for drawable in drawables:
-	if self.passes.has_key(drawable.texid):
-	    self.passes[drawable.texid].append(drawable)
+	if self.passes.has_key(drawable.texture):
+	    self.passes[drawable.texture].append(drawable)
 	else:
-	    self.passes[drawable.texid] = [drawable]
-	print 'drawable',drawable,'uses texture',drawable.texid
+	    self.passes[drawable.texture] = [drawable]
+	print 'drawable',drawable,'uses texture',drawable.texture
+
+  def render(self):
+    for texture in self.passes.keys():
+# bind texture
+      for drawable in self.passes[texture]:
+	drawable.draw()
 
 class ThreeDView:
   def __init__(self, game):
@@ -120,14 +126,12 @@ class ThreeDView:
     glEnable(GL_LIGHTING)
     self.configureOpenGL(self.size)
 
-  def renderWorld(self):
-    pass
-
   def render(self):
     """Render the view to the given surface. This includes the game
        world, with transient objects such as players and flags"""
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     self.camera.load()
+    self.scene.render()
 
 def attach(game, eventLoop, size=(800,600), targetFrameRate=60):
   """Set up a window and opengl context on the given game and event loop"""

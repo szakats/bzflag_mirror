@@ -49,14 +49,11 @@ class GLDrawable:
     def __init__(self):
     	import OpenGL.GL
         self.list = OpenGL.GL.glGenLists(1)
-	self.texid = None
+	self.texture = None
 
     def __del__(self):
         import OpenGL.GL
 	OpenGL.GL.glDeleteLists(self.list, 1)
-
-    def createList(self):
-        pass
 
     def draw(self):
         pass
@@ -214,31 +211,31 @@ class Wall(WorldObject):
 
     class WallDrawable(GLDrawable):
         def __init__(self, center, angle, size):
+	    import OpenGL.GL
+	    GLDrawable.__init__(self)
 	    self.center = center
 	    self.angle = angle
 	    self.size = size
-	    self.texid = 'wall'
-
-        def createList(self):
-	    import OpenGL.GL
+	    self.texture = 'wall'
 	    OpenGL.GL.glNewList(self.list, OpenGL.GL.GL_COMPILE)
 	    OpenGL.GL.glPushMatrix()
-	    OpenGL.GL.glTranslatefv(self.center)
+	    OpenGL.GL.glTranslatef(self.center[0], self.center[1], self.center[2])
 	    OpenGL.GL.glRotatef(self.angle, 0.0, 0.0, 1.0)
 	    OpenGL.GL.glDisable(OpenGL.GL.GL_CULL_FACE)
+	    OpenGL.GL.glColor3f(1.0, 1.0, 1.0)
 	    OpenGL.GL.glBegin(OpenGL.GL.GL_TRIANGLE_STRIP)
 #	    OpenGL.GL.glTexCoord2f(0, 0)
-	    OpenGL.GL.glVertex3f(-self.size[0], self.size[0], 0)
+	    OpenGL.GL.glVertex3f(0, -self.size[1], 0)
 #	    OpenGL.GL.glTexCoord2f(0, 1)
-	    OpenGL.GL.glVertex3f(-self.size[0], self.size[0], self.size[1])
+	    OpenGL.GL.glVertex3f(0, -self.size[1], self.size[2])
 #	    OpenGL.GL.glTexCoord2f()
-	    OpenGL.GL.glVertex3f(self.size[0], self.size[0], 0)
+	    OpenGL.GL.glVertex3f(0, self.size[1], 0)
 #	    OpenGL.GL.glTexCoord2f()
-	    OpenGL.GL.glVertex3f(self.size[0], self.size[0], self.size[1])
-	    OpenGL.GL.glEnd()
+	    OpenGL.GL.glVertex3f(0, self.size[1], self.size[2])
+#	    OpenGL.GL.glEnd()
 	    OpenGL.GL.glEnable(OpenGL.GL.GL_CULL_FACE)
 	    OpenGL.GL.glEndList()
-	
+
 	def draw(self):
 	    import OpenGL.GL
 	    OpenGL.GL.glCallList(self.list)
