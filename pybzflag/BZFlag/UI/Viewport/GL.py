@@ -204,8 +204,11 @@ class ClearedMode(ViewportMode):
     clearBuffers = ViewportMode.clearBuffers | GL_COLOR_BUFFER_BIT
     
     def __init__(self, clearColor=(0,0,0,1)):
-        glClearColor(*clearColor)
+        self.clearColor = clearColor
 
+    def setupFrame(self):
+        glClearColor(*self.clearColor)
+        ViewportMode.setupFrame(self)
 
 class WireframeMode(ClearedMode):
     """A viewport mode that draws all polygons in wireframe, with
