@@ -207,7 +207,7 @@ def load(name):
     # file-like object or something else that Text() can handle.
     if type(name) != str:
         return Generator.Text(name)
-    
+
     # See if it's a generator
     name = name.strip()
     nameLower = name.lower()
@@ -218,7 +218,7 @@ def load(name):
             # run the generator with defaults and return that.
             if nameLower == gen.lower():
                 return getattr(Generator, gen)()
-            
+
             # If there is a semicolon after the generator name, this is the alternate format
             if nameLower.startswith(nameBase + ":"):
                 argsIn = name[len(nameBase)+1:].split(",")
