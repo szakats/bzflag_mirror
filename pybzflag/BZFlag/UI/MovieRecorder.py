@@ -83,11 +83,11 @@ class Recorder:
     def recordFrame(self):
         """Read a raw frame from OpenGL, and use PIL to compress it."""
         rgb = glReadPixels(self.viewport.rect[0],
-                                 self.viewport.rect[1],
-                                 self.image.size[0],
-                                 self.image.size[1],
-                                 GL_RGB,
-                                 GL_UNSIGNED_BYTE)
+                           self.viewport.rect[1],
+                           self.image.size[0],
+                           self.image.size[1],
+                           GL_RGB,
+                           GL_UNSIGNED_BYTE)
         self.image.fromstring(rgb)
 
         # Encode the frame into a StringIO then stick that in the file,
