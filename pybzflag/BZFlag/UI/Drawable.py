@@ -309,7 +309,7 @@ class Pyramid(DisplayList):
         glTexCoord2f(self.size[0] / 2, 0)
         glVertex3f(-self.size[0], -self.size[1], 0)
         # Y- side
-        norm = cross((-self.size[0], self.size[1], self.size[2]), (0, self.size[1] * 2, 0))
+        norm = cross((-self.size[0], self.size[1], self.size[2]), (0, -self.size[1] * 2, 0))
         glNormal3f(*norm)
         glTexCoord2f(0, 0)
         glVertex3f(-self.size[0], -self.size[1], 0)
