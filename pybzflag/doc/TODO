@@ -8,10 +8,15 @@ Todo list, in no particular order:
   - Clouds:
       * Vary the cloud velocity according to the current global wind speed.
 
-      * Think of more ways to make the conversion from Perlin Noise to clouds run fast
-        enough to animate the clouds in realtime
+      * Find a way to update the clouds frequently enough we can have them form and dissipate
+        properly with changing weather. This could involve finding a replacement for the exp()
+        mapping, or possibly breaking it into multiple steps so the slow process of updating
+        them wouldn't cause noticeable jerkiness. Python 2.2's generators could work very
+        nicely for this. Since the backbuffer would not be preserved between frames, it would
+        make the most sense to implement a way to render the noise textures in many small pieces,
+        then render one new piece each frame.
 
-      * Light the clouds using bump mapping, so we can get nice edge hilights
+      * Light the clouds using bump mapping, so we can get nice edge hilights?
 
       * optional: change all the clouds to use the technique that MS Flight Sim:
         A Century of Flight uses, because it rawks
