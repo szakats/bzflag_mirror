@@ -1,21 +1,16 @@
 #ifndef __WORLD_H__
 #define __WORLD_H__
 
-#include <vector>
-#include <map>
-#include <string>
-#include <ostream>
-#include <iostream>
-#include <fstream>
-#include <iosfwd>
-
 #ifdef WIN32
-#ifndef WINVER
-	#define WINVER 0x0400
-#endif
 	#pragma warning( disable : 4786 )  // Disable warning message for stl maps
 	#include <windows.h>
 #endif
+
+#include <vector>
+#include <map>
+#include <string>
+#include <iostream>
+
 #include "3dtypes.h"
 
 //#include "objects.h"

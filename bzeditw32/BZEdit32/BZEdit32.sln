@@ -1,43 +1,36 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BZEdit32", "BZEdit32.vcproj", "{E9D5DA79-2D35-4D5C-87DB-54347E5AE2B7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BZEdit32", "BZEdit32.vcproj", "{4ACA15F9-36A5-4CF0-9DD8-B41E005A95B9}"
 	ProjectSection(ProjectDependencies) = postProject
-		{D845DAAE-9478-48B8-9A1B-7034A8649525} = {D845DAAE-9478-48B8-9A1B-7034A8649525}
-		{42EA4E1E-9831-4BDB-9732-B086D1E9CD73} = {42EA4E1E-9831-4BDB-9732-B086D1E9CD73}
+		{BE8EE807-B7FD-4ACA-940C-31A8243ED5D3} = {BE8EE807-B7FD-4ACA-940C-31A8243ED5D3}
+		{528F19F5-63BF-4DC2-8FB6-40C7069EE968} = {528F19F5-63BF-4DC2-8FB6-40C7069EE968}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PocketEngine", "..\PocketEngine\PocketEngine.vcproj", "{42EA4E1E-9831-4BDB-9732-B086D1E9CD73}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PocketEngine", "..\PocketEngine\PocketEngine.vcproj", "{528F19F5-63BF-4DC2-8FB6-40C7069EE968}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TextureMngr", "..\TextureMngr\TextureMngr.vcproj", "{D845DAAE-9478-48B8-9A1B-7034A8649525}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TextureMngr", "..\TextureMngr\TextureMngr.vcproj", "{BE8EE807-B7FD-4ACA-940C-31A8243ED5D3}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
 Global
-	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 1
-		SccProjectUniqueName0 = ..\\PocketEngine\\PocketEngine.vcproj
-		SccProjectName0 = \u0022$/POCKETENGINE\u0022,\u0020BAAAAAAA
-		SccLocalPath0 = ..\\PocketEngine
-		SccProvider0 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
-	EndGlobalSection
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
 		Release = Release
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
-		{E9D5DA79-2D35-4D5C-87DB-54347E5AE2B7}.Debug.ActiveCfg = Debug|Win32
-		{E9D5DA79-2D35-4D5C-87DB-54347E5AE2B7}.Debug.Build.0 = Debug|Win32
-		{E9D5DA79-2D35-4D5C-87DB-54347E5AE2B7}.Release.ActiveCfg = Release|Win32
-		{E9D5DA79-2D35-4D5C-87DB-54347E5AE2B7}.Release.Build.0 = Release|Win32
-		{42EA4E1E-9831-4BDB-9732-B086D1E9CD73}.Debug.ActiveCfg = Debug|Win32
-		{42EA4E1E-9831-4BDB-9732-B086D1E9CD73}.Debug.Build.0 = Debug|Win32
-		{42EA4E1E-9831-4BDB-9732-B086D1E9CD73}.Release.ActiveCfg = Release|Win32
-		{42EA4E1E-9831-4BDB-9732-B086D1E9CD73}.Release.Build.0 = Release|Win32
-		{D845DAAE-9478-48B8-9A1B-7034A8649525}.Debug.ActiveCfg = Debug|Win32
-		{D845DAAE-9478-48B8-9A1B-7034A8649525}.Debug.Build.0 = Debug|Win32
-		{D845DAAE-9478-48B8-9A1B-7034A8649525}.Release.ActiveCfg = Release|Win32
-		{D845DAAE-9478-48B8-9A1B-7034A8649525}.Release.Build.0 = Release|Win32
+		{4ACA15F9-36A5-4CF0-9DD8-B41E005A95B9}.Debug.ActiveCfg = Debug|Win32
+		{4ACA15F9-36A5-4CF0-9DD8-B41E005A95B9}.Debug.Build.0 = Debug|Win32
+		{4ACA15F9-36A5-4CF0-9DD8-B41E005A95B9}.Release.ActiveCfg = Release|Win32
+		{4ACA15F9-36A5-4CF0-9DD8-B41E005A95B9}.Release.Build.0 = Release|Win32
+		{528F19F5-63BF-4DC2-8FB6-40C7069EE968}.Debug.ActiveCfg = Debug|Win32
+		{528F19F5-63BF-4DC2-8FB6-40C7069EE968}.Debug.Build.0 = Debug|Win32
+		{528F19F5-63BF-4DC2-8FB6-40C7069EE968}.Release.ActiveCfg = Release|Win32
+		{528F19F5-63BF-4DC2-8FB6-40C7069EE968}.Release.Build.0 = Release|Win32
+		{BE8EE807-B7FD-4ACA-940C-31A8243ED5D3}.Debug.ActiveCfg = Debug|Win32
+		{BE8EE807-B7FD-4ACA-940C-31A8243ED5D3}.Debug.Build.0 = Debug|Win32
+		{BE8EE807-B7FD-4ACA-940C-31A8243ED5D3}.Release.ActiveCfg = Release|Win32
+		{BE8EE807-B7FD-4ACA-940C-31A8243ED5D3}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

@@ -200,7 +200,7 @@ void Box::Write(std::ostream &stream)
 	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << std::endl;
 
         if (m_bDriveThru && m_bShootThru)
-          	stream << "	passable" << std::endl;
+			stream << "	passable" << std::endl;
         else
         {
 	if (m_bDriveThru)
@@ -209,8 +209,8 @@ void Box::Write(std::ostream &stream)
 		stream << "	shootthrough" << std::endl;
         }
 
-	stream << "end" << std::endl;
-	stream << std::endl;
+		stream << "end" << std::endl;
+		stream << std::endl;
 }
 
 void Box::Write( char *data )
@@ -335,7 +335,7 @@ void Pyramid::Write(std::ostream &stream)
 	WriteStdData(stream);
 	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << std::endl;
         if (m_bDriveThru && m_bShootThru)
-            stream << "	passable" << std::endl;
+			stream << "	passable" << std::endl;
         else
         {
 	if (m_bDriveThru)
@@ -344,8 +344,8 @@ void Pyramid::Write(std::ostream &stream)
 		stream << "	shootthrough" << std::endl;
         }
 
-	stream << "end" << std::endl;
-	stream << std::endl;
+		stream << "end" << std::endl;
+		stream << std::endl;
 }
 
 void Pyramid::Write( char *data )
@@ -494,7 +494,7 @@ void Teleporter::Write(std::ostream &stream)
 	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << std::endl;
 	stream << "	border " << border << std::endl;
         if (m_bDriveThru && m_bShootThru)
-            stream << "	passable" << std::endl;
+			stream << "	passable" << std::endl;
         else
         {
 	if (m_bDriveThru)
@@ -502,8 +502,8 @@ void Teleporter::Write(std::ostream &stream)
 	if (m_bShootThru)
 		stream << "	shootthrough" << std::endl;
         }
-	stream << "end" << std::endl;
-	stream << std::endl;
+		stream << "end" << std::endl;
+		stream << std::endl;
 }
 
 void Teleporter::Write( char *data )
@@ -706,7 +706,7 @@ bool Base::Init( void )
 		
 	pModel->SetTexuture(-1);
 
-	float	fTemp = (float)color;
+	float	fTemp = color;
 	pModel->SetItemInfo("Color",&fTemp);
 
 	pModel->Init(m_rPosition,m_rScale,m_fAngle);
@@ -784,7 +784,7 @@ void Base::Write(std::ostream &stream)
 	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << std::endl;
 	stream << "	color " << color << std::endl;
         if (m_bDriveThru && m_bShootThru)
-            stream << "	passable" << std::endl;
+			stream << "	passable" << std::endl;
         else
         {
 	if (m_bDriveThru)
@@ -792,8 +792,8 @@ void Base::Write(std::ostream &stream)
 	if (m_bShootThru)
 		stream << "	shootthrough" << std::endl;
         }
-	stream << "end" << std::endl;
-	stream << std::endl;
+		stream << "end" << std::endl;
+		stream << std::endl;
 }
 
 void Base::Write( char *data )
@@ -1002,7 +1002,7 @@ void Link::Write(std::ostream &stream)
 	stream << "	from " << from_side << std::endl;
 	stream << "	to " << to_side << std::endl;
 	stream << "end" << std::endl;
-	stream <<std:: endl;
+	stream << std::endl;
 }
 
 void Link::Write( char *data )

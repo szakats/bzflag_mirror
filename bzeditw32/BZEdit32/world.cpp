@@ -52,6 +52,10 @@ void CBaseObject::CopyFrom (CBaseObject *r)
 
 	m_pTextureMan =r->m_pTextureMan;
 	m_pModelMan = r->m_pModelMan;
+
+	m_bDriveThru = r->m_bDriveThru;
+	m_bShootThru = r->m_bShootThru;
+	m_bFlipZ = r->m_bFlipZ;
 }
 
 void CBaseObject::SetDefalutData ( void )
@@ -306,8 +310,8 @@ void CBaseObject::ApplyEdit ( void )
 	m_rScale.z = ((CStdObjectInfoPanel*)m_pInterface)->m_fZScale;
 
 	m_fAngle = ((CStdObjectInfoPanel*)m_pInterface)->m_fZRot;
-	m_bShootThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bShootThru != 0;
-	m_bDriveThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bDriveThru != 0;
+	m_bShootThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bShootThru;
+	m_bDriveThru = ((CStdObjectInfoPanel*)m_pInterface)->m_bDriveThru;
 
 	Init();
 }
