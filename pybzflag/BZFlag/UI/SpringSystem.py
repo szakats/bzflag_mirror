@@ -74,12 +74,16 @@ class Cloth:
         """Integrate the spring system. Our simple method of simulation
            will quickly get unstable if our timestep is too large, so
            we limit the maximum step size here.
+           Returns the number of integration steps performed.
            """
         self.dt += dt
+        nSteps = 0
         while self.dt > 0:
             for affector in self.affectors:
                 affector.integrate(self.stepSize)
             self.dt -= self.stepTime
+            nSteps += 1
+        return nSteps
 
     def add(self, cls, *args, **kw):
         """Add an affector to the cloth with the given class and extra

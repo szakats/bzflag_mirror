@@ -27,14 +27,47 @@ from __future__ import division
 import time, math
 
 
-class Timekeeper:
-    """A class that keeps track of the amount of time elapsed between steps"""
+class TimeMaster:
+    """Singleton that keeps track of the master time step that all Timekeepers follow.
+       This is the default implementation, but it may be overridden in situations
+       when the rendering engine is not running in realtime. For example, to record
+       to a movie file at a constant rate, or to synchronize with a server's time.
+       """
     def __init__(self):
-        self.lastTime = None
+        self.step()
+
+    def step(self):
+        """Update the global timebase to the current time.
+           Generally this is stepped by the Viewport. If you are running a
+           simulation without a visual frontend, you will have to call this manually.
+           """
+        self.now = time.time()
 
     def time(self):
-        """Return the current time"""
-        return time.time()
+        """Return the current time, according to the master clock"""
+        return self.now
+
+defaultTimeMaster = TimeMaster()
+    
+
+class Timekeeper:
+    """A class that keeps track of the amount of time elapsed between steps.
+       This is a local abstraction that makes it easy for a particular subsystem
+       to manage its integration and be sure of not integrating twice on the same
+       timestep. All timekeeper instances advance in sync when the TimeMaster takes
+       a step.
+       """
+    def __init__(self, timeMaster=None):
+        self.master = timeMaster
+        self.lastTime = None
+        
+    def time(self):
+        """Return the current time, according to the master clock"""
+        if self.master:
+            return self.master.time()
+        else:
+            global defaultTimeMaster
+            return defaultTimeMaster.time()
 
     def step(self):
         """Take a step, return the number of seconds since the last step."""

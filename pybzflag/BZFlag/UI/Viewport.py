@@ -36,7 +36,7 @@ on the needs of a particular view multiplexer class.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag import Event
+from BZFlag import Event, Animated
 import copy
 
 
@@ -136,8 +136,15 @@ class PygameViewport(Viewport):
            rendering, actually performing the rendering, and finishing the frame.
            """
         import pygame
+
+        # Poll for events
         for event in pygame.event.get():
             self.onEvent(event)
+
+        # Update the global timestep for this frame
+        Animated.defaultTimeMaster.step()
+
+        # Call all of our rendering callbacks. This includes subviewports.
         self.render()
 
     def onFinishFrame(self):
