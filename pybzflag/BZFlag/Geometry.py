@@ -42,9 +42,13 @@ def cross(u, v, result=None):
     vx = v[...,0]
     vy = v[...,1]
     vz = v[...,2]
-    result[...,0] = uz * vy - uy * vz
-    result[...,1] = uz * vx - ux * vz
-    result[...,2] = ux * vy - uy * vx
+    
+    #     [ i  j  k  ]
+    # det [ ux uy uz ]
+    #     [ vx vy vz ]
+    result[...,0] = vz*uy - uz*vy
+    result[...,1] = uz*vx - vz*ux
+    result[...,2] = ux*vy - vx*uy
     return result
 
 
@@ -76,14 +80,16 @@ def magnitude(a):
 def normalize(a, result=None):
     """Normalize a vector or each vector in an n-dimensional array of vectors"""
     a = asarray(a)
-    if result is None:
-        result = zeros(a.shape, a.typecode())
-    if len(a.shape) > 1:
-        divide(a, magnitude(a)[..., NewAxis], result)
-        return result
-    else:
-        return a / magnitude(a)
-    
+    try:
+        if len(a.shape) > 1:
+            if result is None:
+                result = zeros(a.shape, a.typecode())
+            divide(a, magnitude(a)[..., NewAxis], result)
+            return result
+        else:
+            return a / magnitude(a)
+    except:
+        return zeros(a.shape, a.typecode())
 
 def vectorAngle(a,b):
     """Find the angle between vectors, in degrees"""
