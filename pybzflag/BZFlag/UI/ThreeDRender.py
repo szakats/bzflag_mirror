@@ -207,10 +207,10 @@ class BasicRenderPass(RenderPass):
     def add(self, drawable):
         """Files the given drawable according to texture group"""
         groups = self.textureGroups
-        if groups.has_key(drawable.texture):
-            groups[drawable.texture].drawables.append(drawable)
+        if groups.has_key(drawable.render.texture):
+            groups[drawable.render.texture].drawables.append(drawable)
         else:
-            groups[drawable.texture] = TextureGroup([drawable])
+            groups[drawable.render.texture] = TextureGroup([drawable])
 
     def preprocess(self):
         """This builds display lists for all our texture groups"""
@@ -242,7 +242,7 @@ class BlendedRenderPass(BasicRenderPass):
     renderPriority = 90
 
     def filter(self, drawable):
-        return drawable.blended
+        return drawable.render.blended
 
     def render(self, picking=None):
         glDepthMask(0)
@@ -258,7 +258,7 @@ class OverlayRenderPass(BasicRenderPass):
     renderPriority = 80
 
     def filter(self, drawable):
-        return drawable.overlay
+        return drawable.render.overlay
 
     def render(self, picking=None):
         glClear(GL_DEPTH_BUFFER_BIT)

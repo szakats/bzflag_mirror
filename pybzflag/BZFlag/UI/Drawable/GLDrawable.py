@@ -27,7 +27,21 @@ second rendering pass.
 #
 from BZFlag.UI import Texture
 
-__all__ = ['GLDrawable']
+__all__ = ['GLDrawable', 'RenderSettings']
+
+
+class RenderSettings:
+    """Settings that affect how ThreeDRender processes a a drawable"""
+    def __init__(self):
+        self.texture = None
+        self.blended = False
+        self.overlay = False
+
+    def __repr__(self):
+        settings = [key for key in self.__dict__.iterkeys() if key[0] != '_']
+        pairs = ["%s=%s" % (key, self.__dict__[key]) for key in settings] 
+        return "<%s %s>" % (self.__class__.__name__, ", ".join(pairs))
+        
 
 class GLDrawable:
     """Abstract base class for an object that can be drawn to an OpenGL context.
@@ -39,12 +53,9 @@ class GLDrawable:
     textureName = None
 
     def __init__(self):
+        self.render = RenderSettings()
         if self.textureName:
-            self.texture = Texture.load(self.textureName)
-        else:
-            self.texture = None
-        self.blended = False
-        self.overlay = False
+            self.render.texture = Texture.load(self.textureName)
 	self.object = None
 
     def parent(self, parent):

@@ -37,7 +37,7 @@ class Group(DisplayList):
        and have the same texture.
        """
     def set(self, children):
-        self.texture = children[0].texture
+        self.render = children[0].render
         self.children = children
 
     def drawToList(self):
@@ -53,6 +53,7 @@ class Transformer(GLDrawable):
     def __init__(self, child, transforms):
         GLDrawable.__init__(self)
         self.child = child
+        self.render = child.render
         self.transforms = transforms
 
     def draw(self):

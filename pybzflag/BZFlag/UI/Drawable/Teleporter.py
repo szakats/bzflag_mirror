@@ -30,7 +30,7 @@ class TeleporterField(DisplayList):
         self.center = center
         self.angle = angle
         self.size = size
-        self.blended = True
+        self.render.blended = True
 
         texScale  = 8
         texAspect = 1.3

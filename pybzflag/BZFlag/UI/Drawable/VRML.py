@@ -354,7 +354,7 @@ class Mesh(DisplayList):
             self.matrix = None
         if material:
             self.color = material.value['diffuseColor'] + [1 - material.value['transparency']]
-            self.blended = self.color[3] != 1
+            self.render.blended = self.color[3] != 1
         else:
             self.color = None            
 
