@@ -25,11 +25,21 @@ class Sparks(Drawable.SpriteArray):
                                       directionRandomness = 0.2,
                                       position            = position,
                                       )
-        self.model.add(ParticleSystem.LifespanAffector, 1)
-        self.model.add(ParticleSystem.FountainFadeAffector,
-                       sizeRange = (0, 1),
-                       )
+        self.lifespan = self.model.add(ParticleSystem.LifespanAffector, 1)
+        self.fader = self.model.add(ParticleSystem.FountainFadeAffector,
+                                    sizeRange = (0, 1),
+                                    )
         self.constAccel = self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,-50))
+
+        Tweak.Window(
+            Tweak.Attribute(self.emitter, 'spawnRate', range=(0,400)),
+            Tweak.Attribute(self.emitter, 'speedRange', range=(0,200)),
+            Tweak.Attribute(self.emitter, 'direction', range=(-1,1)),
+            Tweak.Attribute(self.emitter, 'directionRandomness'),
+            Tweak.Attribute(self.emitter, 'position', range=(-10,10)),
+            Tweak.Attribute(self.constAccel, 'vector', range=(-100,100)),
+            Tweak.Attribute(self.fader, 'sizeRange', range=(0,10)),
+            )
 
     def draw(self, rstate):
         self.model.integrate(self.time.step())
@@ -98,11 +108,5 @@ if __name__ == '__main__':
 
     sparks = Sparks((0,0,3))
     view.scene.add(sparks)
-
-    Tweak.Window(
-        Tweak.Attribute(sparks.emitter, 'spawnRate', range=(0,400)),
-        Tweak.Attribute(sparks.emitter, 'speedRange', range=(0,200)),
-        Tweak.Attribute(sparks.emitter, 'position', range=(-10,10)),
-        )
 
     Tweak.run(loop)

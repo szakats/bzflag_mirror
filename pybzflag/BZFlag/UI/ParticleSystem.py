@@ -30,7 +30,7 @@ from BZFlag import Noise
 import random
 
 
-class Model:
+class Model(object):
     """An abstract particle simulation model. This defines arrays with the
        model's current state, and manages calling affectors to update the
        simulation state.
@@ -89,7 +89,7 @@ class Model:
         self.attachState(drawable.vertices)
 
 
-class Affector:
+class Affector(object):
     """Abstract base class for an object that affects a simulation model"""
     def __init__(self, model):
         self.model = model
@@ -301,20 +301,43 @@ class RandomEmitter(Emitter):
         Emitter.__init__(self, model, spawnRate, position)
         self.speedRange = speedRange
         self.position = position
-        self.setDirection(direction, directionRandomness)
 
-    def setDirection(self, direction, directionRandomness=0):
-        """Set a new direction, premultiplying it with directionRandomness"""
-        self.direction = direction
-        self.directionRandomness = array(directionRandomness, Float32)
-        self.premultDirection = (normalize(direction) * (1-directionRandomness)).astype(Float32)
+        # We have to initially set the direction and directionRandomness like this,
+        # since both are properties that won't properly update without the other.
+        self._direction = direction
+        self.directionRandomness = directionRandomness
+
+    def updatePremultDirection(self):
+        """We store a version of our current direction and directionRandomness that's premultiplied.
+           Through the magic of properties, this is automatically updated whenever direction or
+           directionRandomness are set normally.
+           """
+        self.premultDirection = (normalize(self._direction) * (1-self._directionRandomness)).astype(Float32)
+
+    def getDirection(self):
+        return tuple(self._direction)
+
+    def setDirection(self, direction):
+        self._direction = direction
+        self.updatePremultDirection()
+
+    direction = property(getDirection, setDirection)
+
+    def getDirectionRandomness(self):
+        return self._directionRandomness
+
+    def setDirectionRandomness(self, directionRandomness):
+        self._directionRandomness = array((directionRandomness,), Float32)
+        self.updatePremultDirection()
+
+    directionRandomness = property(getDirectionRandomness, setDirectionRandomness)
 
     def newVelocity(self, n):
         """Generate a new random velocity by blending the given direction with a random unit vector,
            normalizing it, then multiplying by a randomly generated speed.
            """
         randomDirections = Noise.randomVectors((n, 3), type=Float32)
-        randomDirections *= self.directionRandomness
+        randomDirections *= self._directionRandomness
         randomDirections += self.premultDirection
         normalize(randomDirections, randomDirections)
         randomSpeeds = repeat(Noise.randomArray((n, 1), type=Float32, range=self.speedRange), 3, -1)
@@ -339,14 +362,30 @@ class FountainFadeAffector(Affector):
                  colorFunction = None,
                  ):
         Affector.__init__(self, model)
-        self.sizeConst = sizeRange[0]
-        self.sizeCoeff = sizeRange[1] - sizeRange[0]
-        colorRange = asarray(colorRange)
-        self.colorConst = colorRange[0]
-        self.colorCoeff = colorRange[1] - colorRange[0]
+        self.sizeRange = sizeRange
+        self.colorRange = colorRange
         self.sizeFunction = sizeFunction
         self.colorFunction = colorFunction
         self.lifeFunction = lifeFunction
+
+    def getSizeRange(self):
+        return (self.sizeConst, self.sizeConst + self.sizeCoeff)
+
+    def setSizeRange(self, sizeRange):
+        self.sizeConst = sizeRange[0]
+        self.sizeCoeff = sizeRange[1] - sizeRange[0]
+
+    sizeRange = property(getSizeRange, setSizeRange)
+
+    def getColorRange(self):
+        return (self.colorConst, self.colorConst + self.colorCoeff)
+
+    def setColorRange(self, colorRange):
+        colorRange = asarray(colorRange)
+        self.colorConst = colorRange[0]
+        self.colorCoeff = colorRange[1] - colorRange[0]
+
+    colorRange = property(getColorRange, setColorRange)
 
     def integrate(self, dt):
         if self.lifeFunction:
