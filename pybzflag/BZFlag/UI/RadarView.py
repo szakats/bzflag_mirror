@@ -47,6 +47,9 @@ class RadarView:
        """
     def __init__(self, game):
         self.game = game
+        self.zoom = 1
+        self.center = [0,0,0]
+        self.angle = 0
         
     def configureOpenGL(self, size):
         glViewport(0, 0, size[0], size[1])
@@ -128,7 +131,10 @@ class RadarView:
 
     def render(self):
         glPushMatrix()
-        glTranslatef(0,0,-1200)
+        glTranslatef(0,0,-10)
+        glScalef(0.01 * self.zoom, 0.01 * self.zoom, 1)
+        glTranslatef(*self.center)
+        glRotatef(self.angle, 0,0,1)
         self.renderWorld()
         self.renderPlayers()
         glPopMatrix()
