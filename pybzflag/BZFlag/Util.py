@@ -87,6 +87,26 @@ def initEvents(cls, *args):
         else:
             setattr(cls, arg, Event())
 
+
+def getSubclassDict(module, baseClass, keyAttribute, cacheName='contentsDict'):
+    """Return a dictionary of all the base classes of baseClass in module,
+       keyed by keyAttribute. This dictionary is cached in the module itself
+       under the attribute named cacheName.
+       """
+    if not hasattr(module, cacheName):
+        d = {}
+        for key in module.__dict__:
+            try:
+                value = module.__dict__[key]
+                if issubclass(value, baseClass):
+                    key = getattr(value, keyAttribute, None)
+                    if key is not None:
+                        d[key] = value
+            except TypeError:
+                pass
+        setattr(module, cacheName, d)
+    return getattr(module, cacheName)
+
 ### The End ###
         
     

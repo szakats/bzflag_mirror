@@ -24,6 +24,8 @@ specific to packets to and from the BZFlag server.
 #
 
 from BZFlag.Protocol import *
+from BZFlag import Util
+
 
 # Default BZFlag port
 defaultPort = 5155
@@ -229,16 +231,7 @@ def getMessageDict(module):
     """Return a dictionary mapping message IDs to message classes,
        given a module containing Message subclasses.
        """
-    if not hasattr(module, 'messageDict'):
-        module.messageDict = {}
-        for key in module.__dict__:
-            try:
-                value = module.__dict__[key]
-                if issubclass(value, Message):
-                    module.messageDict[value.messageId] = value
-            except TypeError:
-                pass
-    return module.messageDict
+    return Util.getSubclassDict(module, Message, 'messageId')
 
 ### The End ###
         
