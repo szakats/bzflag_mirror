@@ -6,10 +6,12 @@
 
 class Element {
   public:
+//    enum {BOX, PYRAMID, TELEPORTER, LINK, NONE} type;
     enum {BOX, PYRAMID, TELEPORTER, NONE} type;
     Box *b;
     Pyramid *p;
     Teleporter *t;
+    Link *l;
     string name;
     bool visible;
     bool selected;

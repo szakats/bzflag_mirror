@@ -16,6 +16,7 @@ class World : public vector<Element> {
     bool load(char *filename);
     bool append(char *filename);
     bool write(char *filename);
+    Element getElementByName(string name);
   private:
     GnomePixmap *boxicon;
     GnomePixmap *pyricon;

@@ -8,6 +8,7 @@ Element::Element() {
   b = NULL;
   p = NULL;
   t = NULL;
+  l = NULL;
 }
 
 Element::Element(const Element &r) {
@@ -15,6 +16,7 @@ Element::Element(const Element &r) {
   b = r.b;
   p = r.p;
   t = r.t;
+  l = r.l;
   name = r.name;
   visible = r.visible;
   selected = r.selected;
@@ -25,6 +27,7 @@ Element Element::operator = (const Element &r) {
   b = r.b;
   p = r.p;
   t = r.t;
+  l = r.l;
   name = r.name;
   visible = r.visible;
   selected = r.selected;
@@ -39,6 +42,8 @@ void Element::makeBox() {
     delete p;
   if(t != NULL)
     delete t;
+  if(l != NULL)
+    delete l;
 }
 
 void Element::makePyramid() {
@@ -49,6 +54,8 @@ void Element::makePyramid() {
     p = new Pyramid;
   if(t != NULL)
     delete t;
+  if(l != NULL)
+    delete l;
 }
 
 void Element::makeTeleporter() {
@@ -59,6 +66,8 @@ void Element::makeTeleporter() {
     delete p;
   if(t == NULL)
     t = new Teleporter;
+  if(l != NULL)
+    delete l;
 }
 
 void Element::render(Camera &c, bool transparent) {
@@ -72,6 +81,8 @@ void Element::render(Camera &c, bool transparent) {
     case TELEPORTER:
       t->render(c, transparent);
       return;
+//    case LINK:
+//      return;
     case NONE:
       return;
   }
@@ -84,6 +95,8 @@ ostream & operator << (ostream & dest, Element &src) {
     dest << (*src.p);
   } else if(src.type == Element::TELEPORTER) {
     dest << (*src.t);
+//  } else if(src.type == Element::LINK) {
+//    dest << (*src.l);
   }
   return dest;
 }

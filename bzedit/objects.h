@@ -3,6 +3,9 @@
 
 #include "camera.h"
 #include <iostream.h>
+#include <string>
+
+class World;
 
 class Object {
   public:
@@ -61,23 +64,27 @@ class Teleporter : public Object {
     Teleporter(const Teleporter &r);
     Teleporter operator = (const Teleporter &r);
     void render(Camera &c, bool transparent);
-    friend ostream & operator << (ostream &dest, Teleporter &src);
     void set_border(float border);
-    void set_link1(Teleporter *link1);
-    void set_link1_side(int link1_side);
-    void set_link2(Teleporter *link2);
-    void set_link2_side(int link2_side);
     float get_border();
-    Teleporter *get_link1();
-    int get_link1_side();
-    Teleporter *get_link2();
-    int get_link2_side();
+    friend ostream & operator << (ostream &dest, Teleporter &src);
   protected:
     float border;
-    int link1_side;
-    Teleporter *link1;
-    int link2_side;
-    Teleporter *link2;
+};
+
+class Link {
+  public:
+    Link();
+    Link(const Link &r);
+    Link operator = (const Link &r);
+    void render(Camera &c, World *w);
+    void set_from(string from);
+    void set_to(string to);
+    string get_from();
+    string get_to();
+    friend ostream & operator << (ostream &dest, Link &src);
+  protected:
+    string from;
+    string to;
 };
 
 #endif

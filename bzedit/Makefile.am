@@ -4,6 +4,8 @@ INCLUDES = \
 	@GTKGL_CFLAGS@ \
 	@GL_CFLAGS@
 
+SUBDIRS = . data help
+
 bin_PROGRAMS = bzedit
 noinst_HEADERS = \
 	camera.h \
@@ -34,13 +36,16 @@ bzedit_LDADD = \
 	@GL_LIBS@
 
 EXTRA_DIST = \
+	data/boxicon.png \
 	data/boxwall.tga \
 	data/caution.tga \
 	data/ground.tga \
+	data/pyricon.png \
 	data/pyrwall.tga \
 	data/roof.tga \
+	data/telicon.png \
 	data/wall.tga \
-	help/bzedit/C/index.html \
-	help/bzedit/C/intro.html \
-	help/bzedit/C/mainwin.html \
-	help/bzedit/C/topic.dat
+	help/index.html \
+	help/intro.html \
+	help/mainwin.html \
+	help/topic.dat

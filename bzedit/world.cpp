@@ -154,7 +154,6 @@ bool World::load(char *filename) {
     if(x == "#!name") {
       file >> x;
       nextname = x;
-      cout << "Read name " << nextname << endl;
     } else if(x == "box") {
       el = new Element;
       el->makeBox();
@@ -180,11 +179,12 @@ bool World::load(char *filename) {
 	file >> x;
       }
       if(nextname != "") {
-	cout << "Creating box, name = " << nextname << endl;
 	el->name = nextname;
 	nextname = "";
       }
+      cout << "uniqueName()\n";
       uniqueName(*el);
+      cout << "pushBack()\n";
       push_back(*el);
       delete el;
       continue;
@@ -408,4 +408,12 @@ bool World::write(char *filename) {
     file << (*this)[i];
   }
   return true;
+}
+
+Element World::getElementByName(string name) {
+  for(int i = 0; i < size(); i++) {
+    if((*this)[i].name == name)
+      return (*this)[i];
+  }
+  return Element();
 }

@@ -540,7 +540,7 @@ gint about(GtkWidget *window, gpointer data) {
     gdk_window_raise(dialog->window);
     return TRUE;
   }
-  dialog = gnome_about_new("bzedit", "2.0a", "(c) 2001 David Trowbridge", authors, "Editor for the popular game BZFlag\nWritten out of utter boredom.\nSpecial thanks to:\n  m0nkey_b0y, Gerbil,\n  Quinn Buchanan, Steve Houston,\n  and others.", NULL);
+  dialog = gnome_about_new("bzedit", "2.0a", "(c) 2001 David Trowbridge", authors, "Editor for the popular game BZFlag\nWritten out of utter boredom.\nSpecial thanks to:\n  m0nkey_b0y, Gerbil, Quinn Buchanan,\n  Steve Houston, and others.", NULL);
   // TODO: set parent
   gtk_signal_connect(GTK_OBJECT(dialog), "destroy", GTK_SIGNAL_FUNC(gtk_widget_destroyed), &dialog);
   gtk_widget_show(dialog);

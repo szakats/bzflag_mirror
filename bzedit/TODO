@@ -1,7 +1,7 @@
 1) Make it work
-3) That whole bonobo thing would be nice
+3) That whole GNOME thing would be nice
 	* Add support for GConf (+configuration)
-	* Add support for bonobo
-	* Add support for gnome-vfs
+	* Add support for bonobo (?)
+	* Add support for gnome-vfs (?)
 	* Add support for gnome-print(?)
 2) Release v2.0

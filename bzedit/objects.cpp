@@ -1,4 +1,5 @@
 #include "objects.h"
+#include "world.h"
 #include "textures.h"
 #include <math.h>
 #include <GL/gl.h>
@@ -279,8 +280,6 @@ Teleporter::Teleporter() {
   sz = 20.16;
   angle = 0;
   border = 1;
-  link1 = link2 = NULL;
-  link1_side = link2_side = 0;
 }
 
 Teleporter::Teleporter(const Teleporter &r) {
@@ -292,10 +291,6 @@ Teleporter::Teleporter(const Teleporter &r) {
   this->sz = r.sz;
   this->angle = r.angle;
   this->border = r.border;
-  this->link1 = r.link1;
-  this->link1_side = r.link1_side;
-  this->link2 = r.link2;
-  this->link2_side = r.link2_side;
 }
 
 Teleporter Teleporter::operator = (const Teleporter &r) {
@@ -307,10 +302,6 @@ Teleporter Teleporter::operator = (const Teleporter &r) {
   this->sz = r.sz;
   this->angle = r.angle;
   this->border = r.border;
-  this->link1 = r.link1;
-  this->link1_side = r.link1_side;
-  this->link2 = r.link2;
-  this->link2_side = r.link2_side;
   return *this;
 }
 
@@ -427,47 +418,14 @@ void Teleporter::render(Camera &c, bool transparent) {
     glDisable(GL_BLEND);
     glColor4f(1.0, 1.0, 1.0, 1.0);
   }
-  // draw arrows (pass bool selected?)
 }
 
 void Teleporter::set_border(float border) {
   this->border = border;
 }
 
-void Teleporter::set_link1(Teleporter *link1) {
-  this->link1 = link1;
-}
-
-void Teleporter::set_link1_side(int link1_side) {
-  this->link1_side = link1_side;
-}
-
-void Teleporter::set_link2(Teleporter *link2) {
-  this->link2 = link2;
-}
-
-void Teleporter::set_link2_side(int link2_side) {
-  this->link2_side = link2_side;
-}
-
 float Teleporter::get_border() {
   return border;
-}
-
-Teleporter *Teleporter::get_link1() {
-  return link1;
-}
-
-int Teleporter::get_link1_side() {
-  return link1_side;
-}
-
-Teleporter *Teleporter::get_link2() {
-  return link2;
-}
-
-int Teleporter::get_link2_side() {
-  return link2_side;
 }
 
 ostream & operator << (ostream &dest, Teleporter &src) {
@@ -478,5 +436,50 @@ ostream & operator << (ostream &dest, Teleporter &src) {
   dest << "border " << src.border << endl;
   dest << "end" << endl;
   dest << endl;
+  return dest;
+}
+
+Link::Link() {
+  from = "";
+  to = "";
+}
+
+Link::Link(const Link &r) {
+  from = r.from;
+  to = r.to;
+}
+
+Link Link::operator = (const Link &r) {
+  from = r.from;
+  to = r.to;
+  return *this;
+}
+
+void Link::render(Camera &c, World *w) {
+  Element fromE = w->getElementByName(from);
+  Element toE = w->getElementByName(to);
+}
+
+void Link::set_from(string from) {
+  this->from = from;
+}
+
+void Link::set_to(string to) {
+  this->to = to;
+}
+
+string Link::get_from() {
+  return from;
+}
+
+string Link::get_to() {
+  return to;
+}
+
+ostream & operator << (ostream &dest, Link &src) {
+  dest << "link" << endl;
+  dest << "from " << src.from << endl;
+  dest << "to " << src.to << endl;
+  dest << "end" << endl;
   return dest;
 }
