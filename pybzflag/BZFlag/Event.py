@@ -127,8 +127,9 @@ class Event:
            fmt can also be a callable expression (created with lambda, for example)
            that will be called with the event's arguments and the result will be print'ed.
 
-           Note that traces are currently immortal, since they are referenced
-           strongly and there is no way to unobserve them.
+           A reference is returned to the trace's callback function. The trace is
+           referenced strongly, so it will not disappear if you discard this reference,
+           but the reference can be passed to unobserve() later to cancel the trace.
            """
         def traceCallback(*args, **kw):
             if type(fmt) == str:
@@ -143,6 +144,7 @@ class Event:
             else:
                 print fmt(*args, **kw)
         self.strongObserve(traceCallback)
+        return traceCallback
 
 
 def attach(cls, *args):

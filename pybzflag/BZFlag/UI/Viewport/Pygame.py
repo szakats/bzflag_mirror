@@ -125,6 +125,9 @@ class PygameViewport(Viewport):
            """
         sub = Viewport.region(*args, **kw)
         sub.screen = self.secreen.subsurface(sub.rect)
+
+        # Disable flipping the surface in our subviewport
+        sub.onFinishFrame.empty()
         return sub
 
 ### The End ###
