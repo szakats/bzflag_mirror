@@ -101,8 +101,6 @@ class ThreeDView:
     self.light1 = Light(GL_LIGHT1)
     self.scene = Scene(game)
 
-    self.camera.focus = (0, 0, -90)
-
     # Initialize the opengl view
     self.light0.ambient  = (0.85, 0.85, 0.85, 1.0)
     self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
@@ -135,18 +133,6 @@ class ThreeDView:
       self.camera.rotation += 0.1;
     viewport.onDrawFrame.observe(onDrawFrame)
 
-    def onMouseButtonDown(event):
-      scale = 1.08
-      if event.button == 4:
-        self.camera.distance /= scale
-        if self.camera.distance < 0.1:
-          self.camera.distance = 0.1
-      if event.button == 5:
-        self.camera.distance *= scale
-        if self.camera.distance > 1500:
-          self.camera.distance = 1500
-    viewport.onMouseButtonDown.observe(onMouseButtonDown)
-
   def render(self):
     """Render the view to the given surface. This includes the game
        world, with transient objects such as players and flags"""
@@ -154,6 +140,28 @@ class ThreeDView:
     self.scene.render()
 
 
+class ThreeDController:
+  def __init__(self, view, viewport):
+    self.view = view
+    self.viewport = viewport
+
+    view.camera.focus = (0, 0, -90)
+
+    def onMouseButtonDown(event):
+      scale = 1.08
+      if event.button == 4:
+        view.camera.distance /= scale
+        if view.camera.distance < 0.1:
+          view.camera.distance = 0.1
+      if event.button == 5:
+        view.camera.distance *= scale
+        if view.camera.distance > 1500:
+          view.camera.distance = 1500
+    viewport.onMouseButtonDown.observe(onMouseButtonDown)
+
+
 def attach(game, eventLoop):
     from BZFlag.UI.Viewport import OpenGLViewport
-    ThreeDView(game, OpenGLViewport(eventLoop, (800,600)))
+    viewport = OpenGLViewport(eventLoop, (800,600))
+    view = ThreeDView(game, viewport)
+    ThreeDController(view, viewport)

@@ -52,7 +52,7 @@ def list():
         try:
             find(name)
             available.append(name)
-        except:
+        except ImportError:
             pass
     return available
 
