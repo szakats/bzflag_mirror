@@ -120,7 +120,10 @@ class AnimatedNoise:
        This creates numFrames noise frames using the provided renderer at the given size.
        They are animated over the given period, in seconds.
        """
-    def __init__(self, renderer, size, numFrames, period=1):
+    def __init__(self, size, numFrames, period=1, renderer=None):
+        if not renderer:
+            renderer = NoiseRenderer()
+            
         self.period = period
         self.size = size
         self.frameDuration = period / numFrames
@@ -184,6 +187,62 @@ class AnimatedNoise:
         glDisable(GL_BLEND)
         glDisable(GL_TEXTURE_2D)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+
+class AnimatedPerlinNoise:
+    """Multiple layers of AnimatedNoise blended together into Perlin noise.
+       - 'period' is the total length of the animation in seconds
+       - 'persistence' controls the weighting of the octaves during blending
+       - 'numOctaves' sets the number of noise octaves to animate. Time increases
+         linearly with the number of octaves, memory increases exponentially.
+       - 'fundamental' is the fundamental frequency of the noise in texels
+       - 'framesPerOctave' sets the number of noise frames to render at each octave.
+         More frames will produce a more detailed animation at the expense of memory.
+       - 'renderer' is a NoiseRenderer instance to use. If None, one will be created.
+       """
+    def __init__(self,
+                 period          = 50,
+                 persistence     = 0.65,
+                 numOctaves      = 8,
+                 fundamental     = 2,
+                 framesPerOctave = 32,
+                 renderer        = None):
+        if not renderer:
+            renderer = NoiseRenderer()
+        self.period = period
+        self.persistence = persistence
+        self.octaves = []
+        self.numOctaves = numOctaves
+        self.fundamental = fundamental
+        self.framesPerOctave = framesPerOctave
+        self.renderer = renderer
+
+    def draw(self, size):
+        """Draw the octaves, largest first, with alpha blending.
+           This will correctly make the most prominent octaves the
+           ones with the least detail.
+           """
+        if not self.octaves:
+            self.createOctaves()
+        color = (1,1,1,1)
+        for octave in self.octaves:
+            octave.draw(size, color)
+            color = (1,1,1, 1 - self.persistence)
+
+    def integrate(self, dt):
+        """Advance the animation by 'dt' seconds"""
+        for octave in self.octaves:
+            octave.integrate(dt)
+
+    def createOctaves(self):
+        """Generate all octave textures"""
+        self.octaves = []
+        period = self.period
+        size = self.fundamental
+        for i in xrange(self.numOctaves):
+            self.octaves.insert(0, AnimatedNoise((size,size), self.framesPerOctave, period, self.renderer))
+            period /= 2
+            size   *= 2
     
 ### The End ###
 
