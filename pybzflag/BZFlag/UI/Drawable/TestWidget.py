@@ -1,6 +1,6 @@
-""" BZFlag.UI.Drawable.Wall
+""" BZFlag.UI.Drawable.TestWidget
 
-A class to draw the walls in the world
+A temporary module here to test 3D widget functionality.
 """
 #
 # Python BZFlag Protocol Package
