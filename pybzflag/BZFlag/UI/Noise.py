@@ -52,6 +52,8 @@ class PerlinNoise3:
         self.octaves = octaves
         self.persistence = persistence
         self.table = Vector3Table(seed, logTableSize)
+        self.two = array(2, Float32)
+        self.three = array(3, Float32)
 
     def smoothNoise(self, v):
         """Generate smoothed noise using the random gradient table and interpolation.
@@ -75,20 +77,20 @@ class PerlinNoise3:
 
         # Get random gradient vectors for each sample point
         grad = self.table.get(cubev)
+        cubev = cubev.astype(Float32)
 
         # Get the distance between our vector and each sample point
         dist = repeat(v[...,NewAxis,:], 8, -2) - cubev
 
         # Use dot products to calculate the influence of each sample point
         infl = sum(grad * dist, -1)
-        
-        # 3D interpolation along the curve (3x^2 - 2x^3).
-        # This pushes values close to the grid points closer, and looks a good
-        # deal better than simple linear interpolation.
-        # First calculate the normalized amount of interpolation in each axis
+
+        # Determine the amount of interpolation in each axis.
+        # This uses the curve y = 3x^2 - 2x^3 to give a much more visually
+        # pleasing result. Linearly interpolated perlin noise looks really bad.
         s = dist[...,0,:]
-        s = 3*s**2 - 2*s**3
-        
+        s = s*s*self.three - s*s*s*self.two
+
         # Now perform the interpolation one axis at a time
         # This has been made fairly cryptic in the interest of reducing the
         # number of copies performed- modifying an array in place is much faster
@@ -129,7 +131,7 @@ class PerlinNoise3:
 
     def get(self, v):
         """Using multiple octaves of smoothed noise, generate perlin noise"""
-        result = zeros(v.shape[:-1], Float)
+        result = zeros(v.shape[:-1], Float32, savespace=True)
         fundamental = 1
         amplitude = 1
         for i in xrange(self.octaves):
@@ -150,7 +152,7 @@ class Vector3Table:
 
         # This generates a random array of numbers between -0.5 and 0.5, then normalizes the vectors
         RandomArray.seed(seed)
-        self.table = RandomArray.random((self.size, 3)) - 0.5
+        self.table = (RandomArray.random((self.size, 3)) - 0.5).astype(Float32)
         Geometry.normalize(self.table, self.table)
 
     def get(self, v):
