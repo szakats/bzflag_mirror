@@ -5,7 +5,7 @@
 #
 import OpenGL.GL, sys
 from BZFlag import Event
-from BZFlag.UI import Viewport
+from BZFlag.UI import Viewport, HUD, Layout
 from Cg import *
 
 def CheckCGError():
@@ -24,7 +24,8 @@ CheckCGError()
 
 print 'LAST LISTING----%s----' % cgGetLastListing(context)
 print '---- PROGRAM BEGIN ----'
-print cgGetProgramString(program, CG_COMPILED_PROGRAM)
+programString = cgGetProgramString(program, CG_COMPILED_PROGRAM)
+print programString
 print '---- PROGRAM END ----'
 
 cgGLLoadProgram(program)
@@ -39,7 +40,9 @@ CheckCGError()
 testColor = cgGetNamedParameter(program, 'IN.TestColor')
 CheckCGError()
 
-# do drawing loop
+
+HUD.Text(viewport.region(Layout.Rect(viewport).margin(10)), programString)
+
 loop.run()
 
 cgDestroyProgram(program)
