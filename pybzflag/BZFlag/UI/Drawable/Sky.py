@@ -82,22 +82,18 @@ class Clouds(SkyDrawable):
     def __init__(self, *args, **kw):
         SkyDrawable.__init__(self, *args, **kw)
         self.render.textures = (GLNoise.CloudTexture(),)
+        self.motion = Animated.Value(Animated.Velocity(0.01))
+        self.time = Animated.Timekeeper()
 
     def drawToList(self, rstate):
-        """Our display list only holds an inverted sphere and the static
-           texture coordinates. Texture coordinates must be adjusted for time
-           of day in draw().
-           """
+        """Do all the drawing we can in the display list"""
         glDisable(GL_LIGHTING)
         glColor3f(1,1,1)
         glEnable(GL_BLEND)
-
-        scale = 0.01
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA)
 
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        glTexGenfv(GL_S, GL_OBJECT_PLANE, (scale, 0, 0, 0))
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, scale, 0, 0))
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
@@ -113,8 +109,14 @@ class Clouds(SkyDrawable):
         glEnable(GL_LIGHTING)
         glDisable(GL_BLEND)
         glPopMatrix()
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def draw(self, rstate):
+        """Animate the texture coordinates every frame"""
+        scale = 0.01
+        self.motion.integrate(self.time.step())
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (scale, 0, 0, self.motion.value))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, scale, 0, 0))
         DisplayList.draw(self, rstate)
 
 ### The End ###

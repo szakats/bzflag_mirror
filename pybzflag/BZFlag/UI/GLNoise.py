@@ -330,7 +330,7 @@ class CloudTexture(MappedPerlinTexture):
     """Perlin noise with mapping applied to create a cloud-like texture"""
     def map(self, y):
         try:
-            return log((y-0.3) * 70 + 1) * 0.27
+            return log((y-0.35) * 40 + 1) * 0.27
         except ValueError:
             return 0
 
