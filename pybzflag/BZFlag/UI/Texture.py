@@ -38,13 +38,27 @@ class Texture:
     def __init__(self, name=None):
         self.texture = glGenTextures(1)
         self.texEnv = GL_MODULATE
+
+        # A tuple with method name and parameters to reload this texture.
+        # This is for pickling- if None, this texture can't be pickled.
+        self.loader = None
+
         self.setDefaults()
         if name:
-            self.loadFile(name)
+            self.loadDataFile(name)
+
+    def loadDataFile(self, name):
+        """Load the texture from a file in our data directory.
+           The main reason for this function to exist is so a texture can
+           be pickled without hardcoding the data path in the pickle.
+           """
+        self.loadImage(Image.open(Util.dataFile(name)))
+        self.loader = ('loadDataFile', name)
 
     def loadFile(self, name):
         """Load the texture from disk, using PIL to open the file"""
         self.loadImage(Image.open(name))
+        self.loader = ('loadFile', name)
 
     def loadImage(self, image):
         """Load the texture from a PIL image"""
@@ -78,13 +92,13 @@ class Texture:
            GL_RGB or GL_RGBA that can be passed to gluBuild2DMipmaps.
            """
         self.size = size
-        self.string = string
         self.format = format
         self.components = components
         (w,h) = size
         Texture.bind(self)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
         gluBuild2DMipmaps(self.target, components, w, h, format, GL_UNSIGNED_BYTE, string)
+        self.loader = ('loadRaw', size, string, format, components)
 
     def loadBackbuffer(self, size, position=(0,0), format=GL_RGB):
         """Load this texture from the given location on the backbuffer. This accepts
@@ -103,6 +117,7 @@ class Texture:
 
         # Disable mipmapping, since we're not generating any mipmap levels
         self.setFilter(GL_LINEAR, GL_LINEAR)
+        self.loader = None
 
     def setDefaults(self):
         """Set the default OpenGL options for this texture"""
@@ -122,15 +137,12 @@ class Texture:
         glTexParameteri(self.target, GL_TEXTURE_MIN_FILTER, min)
         glTexParameteri(self.target, GL_TEXTURE_MAG_FILTER, mag)
 
-    def __getstate__(self):
-        """This method is called when pickling a Texture, to return an object which is
-           stored then passed to __setstate__ on unpickling.
-           """
-        return (self.size, self.string, self.format, self.components)
-
     def __setstate__(self, state):
-        """This method is called on unpickling a Texture"""
-        self.loadRaw(*state)
+        """This method is called on unpickling a Texture. It performs the usual dictionary merge,
+           then attempts to load the texture by calling its loader().
+           """
+        self.__dict__.update(state)
+        getattr(self, self.loader[0])(*self.loader[1:])
 
     def __getinitargs__(self):
         """This is here to force __init__ to be called on unpickling, to get us a new texture ID"""
@@ -342,14 +354,12 @@ class Cache:
 
     def load(self, name):
         if not self.textures.has_key(name):
-            filename = Util.dataFile(name)
-
             # If the texture name has a % in it, it is a format specifier
             # for loading animated textures from a sequence of stills.
-            if filename.find("%") >= 0:
-                self.textures[name] = AnimatedTexture(filename)
+            if name.find("%") >= 0:
+                self.textures[name] = AnimatedTexture(name)
             else:
-                self.textures[name] = Texture(filename)
+                self.textures[name] = Texture(name)
 	return self.textures[name]
 
 
