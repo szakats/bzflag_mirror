@@ -194,7 +194,7 @@ class OverheadView:
 
 
 def attach(game, eventLoop):
-    from BZFlag.UI.Viewport import PygameView
-    OverheadView(game, PygameView(eventLoop, (512,512)))
+    from BZFlag.UI.Viewport import PygameViewport
+    OverheadView(game, PygameViewport(eventLoop, (512,512)))
 
 ### The End ###

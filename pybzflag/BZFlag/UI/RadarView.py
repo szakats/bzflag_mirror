@@ -45,29 +45,20 @@ class RadarView:
     """An overhead view implemented using OpenGL, optionally tracking
        the position and orientation of one player.
        """
-    def __init__(self, game):
+    def __init__(self, game, viewport):
         self.game = game
+        self.viewport = viewport
         self.zoom = 1
         self.center = [0,0,0]
         self.angle = 0
         self.follow = None
-        
-    def configureOpenGL(self, size):
-        glViewport(0, 0, size[0], size[1])
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        gluPerspective(45.0, size[0] / size[1], 3.0, 2500.0)
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
-        
-    def initializeOpenGL(self, surface):
-        """Initialize the opengl view"""
-        self.size = surface.get_size()
+
         glClearColor(0.0, 0.0, 0.0, 0.0)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND)
         glEnable(GL_LINE_SMOOTH)
-        self.configureOpenGL(self.size)
+
+        viewport.onDrawFrame.observe(self.render)
 
     def colorScale(self, z, h, viewHeight):
         """This is the Enhanced Radar (tm) color scaling algorithm from bzflag proper"""
@@ -153,26 +144,8 @@ class RadarView:
         glPopMatrix()
 
 
-def attach(game, eventLoop, size=(512,512), targetFrameRate=40):
-    """Set up a window with only an overhead view, on the given game and event loop"""
- 
-    # Update the view regularly
-    def updateView():
-        global view, screen
-        if view:
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-            game.update()
-            view.render()
-            pygame.display.flip()
-    eventLoop.add(Event.PeriodicTimer(1.0 / targetFrameRate, updateView))
-
-    # Start up pygame and init the view
-    global view, screen
-    pygame.init()
-    screen = pygame.display.set_mode(size, pygame.OPENGL | pygame.DOUBLEBUF)
-    pygame.display.set_caption("BZFlag Radar View")
-    view = RadarView(game)
-    view.initializeOpenGL(screen)
-    updateView()
+def attach(game, eventLoop):
+    from BZFlag.UI.Viewport import OpenGLViewport
+    RadarView(game, OpenGLViewport(eventLoop, (512,512)))
 
 ### The End ###

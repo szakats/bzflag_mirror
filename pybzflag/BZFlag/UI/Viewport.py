@@ -45,26 +45,31 @@ class Viewport:
        """
     def __init__(self, eventLoop):
         self.eventLoop = eventLoop
-        Event.attach(self, "onInit")
 
     def setCaption(self, title):
         """Set the window caption on the viewport, if applicable"""
         pass
 
 
-class PygameView(Viewport):
+class PygameViewport(Viewport):
     """A basic viewport for 2D pygame rendering. This handles all pygame
        events, and is subclassed below for 3D rendering via pygame.
        """
     def __init__(self, eventLoop, size=(640,480), targetFrameRate=60):
-        Viewport.__init__(self, eventLoop)
-        Event.attach(self, 'onFrame', 'onSetupFrame', 'onDrawFrame', 'onFinishFrame', 'onResize')
         import pygame
+        Viewport.__init__(self, eventLoop)
+
+        # Add event handlers for all our builtin events, and all the pygame events we can find
+        Event.attach(self, 'onFrame', 'onSetupFrame', 'onDrawFrame', 'onFinishFrame', 'onResize')
+        for i in xrange(100):
+            name = pygame.event.event_name(i)
+            if name != "Unknown":
+                Event.attach(self, 'on' + name)
+        
         pygame.init()
         self.display = pygame.display
         self.resize(size)
         self.init()
-        self.onInit()
         self.frameTimer = None
         self.setTargetFrameRate(targetFrameRate)
 
@@ -80,7 +85,7 @@ class PygameView(Viewport):
     def resize(self, size):
         self.screen = self.display.set_mode(size, self.getModeFlags())
         self.size = size
-        self.onResize(size)
+        self.onResize()
 
     def setCaption(self, title):
         import pygame
@@ -89,11 +94,15 @@ class PygameView(Viewport):
     def setTargetFrameRate(self, rate):
         """Set the target frame rate. This is how often the main loop will
            try to call us for rendering, using a PeriodicTimer.
+           A rate of 'None' will disable continuous rendering.
            """
         if self.frameTimer:
             self.eventLoop.remove(self.frameTimer)
-        self.frameTimer = Event.PeriodicTimer(1.0 / rate, self.onFrame)
-        self.eventLoop.add(self.frameTimer)
+        if rate:
+            self.frameTimer = Event.PeriodicTimer(1.0 / rate, self.onFrame)
+            self.eventLoop.add(self.frameTimer)
+        else:
+            self.frameTimer = None
 
     def onFrame(self):
         """This event is called by the PeriodicTimer to poll for events and
@@ -113,6 +122,43 @@ class PygameView(Viewport):
         self.display.flip()
         
     def onEvent(self, event):
-        print "Event %s" % event.type
+        import pygame
+        getattr(self, 'on' + pygame.event.event_name(event.type))(event)
+
+    def onQuit(self, event):
+        self.eventLoop.stop()
+
+    def onVideoResize(self, event):
+        self.resize(event.size)
+
+
+class OpenGLViewport(PygameViewport):
+    """Subclasses PygameView to provide OpenGL initialization"""
+    def init(self):
+        from OpenGL import GL
+
+        self.nearClip = 3.0
+        self.farClip  = 2500.0
+        self.fov      = 45.0
+
+        def onSetupFrame():
+            GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+        self.onSetupFrame.observe(onSetupFrame)
+
+        self.onResize.observe(self.configureOpenGL)
+        self.configureOpenGL()
+
+    def configureOpenGL(self):
+        from OpenGL import GL, GLU
+        GL.glViewport(0, 0, self.size[0], self.size[1])
+        GL.glMatrixMode(GL.GL_PROJECTION)
+        GL.glLoadIdentity()
+        GLU.gluPerspective(self.fov, float(self.size[0]) / self.size[1], self.nearClip, self.farClip)
+        GL.glMatrixMode(GL.GL_MODELVIEW)
+        GL.glLoadIdentity()
+
+    def getModeFlags(self):
+        import pygame
+        return PygameViewport.getModeFlags(self) | pygame.OPENGL
 
 ### The End ###
