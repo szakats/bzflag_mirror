@@ -179,8 +179,8 @@ class OpenGLViewport(PygameViewport):
         self.nearClip    = 3.0
         self.farClip     = 2500.0
         self.fov         = 45.0
-        self.viewportExp = [0,0] + list(self.size) # A function or list specifying our relative viewport
-        self.viewport    = self.viewportExp        # Our absolute viewport
+        self.rectExp = [0,0] + list(self.size) # A function or list specifying our relative viewport
+        self.rect    = self.rectExp            # Our absolute viewport
         self.wireframe   = False
 
         # Set up some common OpenGL defaults
@@ -196,27 +196,27 @@ class OpenGLViewport(PygameViewport):
         self.onSetupFrame.observe(onSetupFrame)
 
         def onResize():
-            self.viewportExp = [0,0] + list(self.size)
+            self.rectExp = [0,0] + list(self.size)
         self.onResize.observe(onResize)
 
         self.onSetupFrame.observe(self.configureOpenGL)
 
     def evalViewport(self):
         """Evaluate our viewport if necessary, and set up our 'size' and 'viewport' members"""
-        if callable(self.viewportExp):
-            v = self.viewportExp()
+        if callable(self.rectExp):
+            v = self.rectExp()
         else:
-            v = self.viewportExp
+            v = self.rectExp
         if self.parent:
-            v = (v[0] + self.parent.viewport[0],
-                 v[1] + self.parent.viewport[1],
+            v = (v[0] + self.parent.rect[0],
+                 v[1] + self.parent.rect[1],
                  v[2], v[3])
-        self.viewport = v
+        self.rect = v
         self.size = v[2:]
 
     def configureOpenGL(self):
         from OpenGL import GL, GLU
-        GL.glViewport(*self.viewport)
+        GL.glViewport(*self.rect)
 
         # Set up the projection matrix with the current viewport size and FOV.
         # If we have no FOV, set up an orthogonal mode scaled in pixels.
@@ -257,7 +257,7 @@ class OpenGLViewport(PygameViewport):
            """
         sub = copy.copy(self)
         sub.parent = self
-        sub.viewportExp = rect
+        sub.rectExp = rect
         sub.onSetupFrame  = Event.Event(sub.configureOpenGL)
         sub.onDrawFrame   = Event.Event()
         sub.onFinishFrame = Event.Event()
