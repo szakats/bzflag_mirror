@@ -104,7 +104,7 @@ class NoiseTexture(Texture.DynamicTexture):
         glDisable(GL_BLEND)
         glColor3f(1,1,1)
         self.factory.texture.bind()
-        
+
         # Rotate the texture matrix
         glMatrixMode(GL_TEXTURE)
         glLoadIdentity()
@@ -114,7 +114,7 @@ class NoiseTexture(Texture.DynamicTexture):
         glMatrixMode(GL_MODELVIEW)
 
         drawTexRect(self.viewport.size, (self.factory.scale, self.factory.scale))
-        
+
         # Clean up
         glMatrixMode(GL_TEXTURE)
         glLoadIdentity()
@@ -133,11 +133,11 @@ class AnimatedNoise:
     def __init__(self, size, numFrames, period=1, factory=None):
         if not factory:
             factory = NoiseFactory()
-            
+
         self.period = period
         self.size = size
         self.frameDuration = period / numFrames
-        
+
         # Render and store all the frames we'll need
         self.frames = []
         for i in xrange(numFrames):
@@ -247,7 +247,7 @@ class AnimatedPerlinNoise:
 
     def hasRenderState(self):
         return self.octaves[0].hasRenderState()
-    
+
     def draw(self, size):
         """Draw the octaves, largest first, with alpha blending.
            This will correctly make the most prominent octaves the
@@ -267,13 +267,13 @@ class AnimatedPerlinNoise:
         """Generate all octave textures"""
         self.octaves = []
         period = self.period
-        size = self.fundamental        
+        size = self.fundamental
         for i in xrange(self.numOctaves):
             self.octaves.insert(0, AnimatedNoise((size,size), self.framesPerOctave, period, self.factory))
             period /= 2
             size   *= 2
 
-    
+
 class PerlinTexture(Texture.DynamicTexture):
     """Perlin noise, rendered to a dynamic texture"""
     def __init__(self, size=(256,256), noise=None, renderRate=60):
@@ -304,7 +304,7 @@ class MappedPerlinTexture(PerlinTexture):
 
     def render(self):
         """Alternate rendering function that sets up GL_MAP_COLOR tables during the texture copy"""
-        self.draw()        
+        self.draw()
         glPixelTransferi(GL_MAP_COLOR, 1)
         glPixelMapfv(GL_PIXEL_MAP_R_TO_R, self.table)
         self.loadBackbuffer(self.viewport.size, format=self.format)
@@ -316,7 +316,7 @@ class MappedPerlinTexture(PerlinTexture):
         self.table = zeros(mapSize, Float32)
         for i in xrange(mapSize):
             self.table[i] = self.map(i / (mapSize-1))
-              
+
     def map(self, y):
         """Mapping function. Input and output are luminance values from 0 to 1.
            Default is an identity mapping.
@@ -327,7 +327,10 @@ class MappedPerlinTexture(PerlinTexture):
 class CloudTexture(MappedPerlinTexture):
     """Perlin noise with mapping applied to create a cloud-like texture"""
     def map(self, y):
-        return exp(y-1.0)
+        try:
+            return log((y-0.5) * 70 + 1) * 0.27
+        except ValueError:
+            return 0
 
 
 ### The End ###
