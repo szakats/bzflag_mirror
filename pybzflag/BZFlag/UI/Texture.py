@@ -108,7 +108,6 @@ class Texture:
         """Set the default OpenGL options for this texture"""
         self.setRepeat()
         self.setFilter()
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
         if GLExtension.maxAnisotropy > 1:
             glTexParameterf(self.target, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLExtension.maxAnisotropy)
