@@ -511,7 +511,7 @@ bool CWorld::Append ( const char *szFileName )
 
 			iNewItem = AddObject(name);
 
-			if (iNewItem == ERR_UNKNOWNOBJECT) {
+			if (iNewItem == ERR_UNKNOWNOBJECT || iNewItem == ERR_COULDNTCREATE) {
 				char msg[511];
 				sprintf(msg, "This world contains unknown objects, and cannot be loaded.  Unknown object type: %s", name);
 				MessageBox(NULL, msg, "Unknown object", MB_ICONERROR | MB_TASKMODAL);

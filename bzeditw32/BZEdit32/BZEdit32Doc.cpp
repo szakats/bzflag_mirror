@@ -69,21 +69,6 @@ END_MESSAGE_MAP()
 
 CBZEdit32Doc::CBZEdit32Doc()
 {
-	// TODO: add one-time construction code here
-//	
-	m_oTexMan.LoadAll("data\\");
-}
-
-CBZEdit32Doc::~CBZEdit32Doc()
-{
-	m_oTexMan.Flush();
-}
-
-BOOL CBZEdit32Doc::OnNewDocument()
-{
-	if (!CDocument::OnNewDocument())
-		return FALSE;
-
 	char	szPath[512];
 	GetModuleFileName(AfxGetInstanceHandle(),szPath,512);
 
@@ -98,6 +83,18 @@ BOOL CBZEdit32Doc::OnNewDocument()
 	m_oWorld.Init();
 
 	SetTheWorld ( &m_oWorld );
+}
+
+CBZEdit32Doc::~CBZEdit32Doc()
+{
+	m_oTexMan.Flush();
+}
+
+BOOL CBZEdit32Doc::OnNewDocument()
+{
+	if (!CDocument::OnNewDocument())
+		return FALSE;
+
 	SetTheDoc ( this );
 
 	return TRUE;
