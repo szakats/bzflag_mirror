@@ -55,8 +55,8 @@ class OverheadView:
 
     def worldToView(self, point):
         """Convert world coordinates to view coordinates in pixels"""
-        return ((point[0] / self.game.world.size[0] + 0.5) * self.size[0],
-                (point[1] / self.game.world.size[1] + 0.5) * self.size[1])
+        return (( point[0] / self.game.world.size[0] + 0.5) * self.size[0],
+                (-point[1] / self.game.world.size[1] + 0.5) * self.size[1])
 
     def objectToPoly(self, object):
         """Get a polygon representing the location of an object, given as a tuple of points.
@@ -110,7 +110,7 @@ class OverheadView:
         color = self.colorScheme['player']
         for player in self.game.players.values():
             pos = self.worldToView(player.motion.position)
-            pygame.draw.circle(surface, color, pos, 2)
+            pygame.draw.circle(surface, color, pos, 2, 1)
         pass
 
     def renderFlags(self, surface):
