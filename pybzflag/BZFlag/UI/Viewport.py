@@ -238,7 +238,7 @@ class OpenGLViewport(PygameViewport):
         if self.fov:
             GLU.gluPerspective(self.fov, float(self.size[0]) / self.size[1], self.nearClip, self.farClip)
         else:
-            GL.glOrtho(0,self.size[0],0,self.size[1], -self.farClip, self.farClip)
+            GL.glOrtho(0,self.size[0],self.size[1],0, -self.farClip, self.farClip)
 
     def getModeFlags(self):
         import pygame

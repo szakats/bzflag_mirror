@@ -9,8 +9,10 @@ ortho mode, with OpenGL units corresponding directly to pixels.
 Other configurations will work, but only with a 1:1 correspondance
 to pixels can this module render with proper hinting.
 
-The origin of a character is always the top-left corner. OpenGL-style
-coordinates are assumed, where 0,0 is at the bottom-left.
+The origin of a character or string is always the top-left corner.
+Due to the limitations of SDL_ttf, this module never works with raw
+glyph images, it works instead with glyphs padded to include the font
+height and escapement.
 """
 #
 # Python BZFlag Protocol Package
@@ -61,9 +63,9 @@ class Glyph:
         t = self.texCoords
         glBegin(GL_QUADS)
         glTexCoordf(t[0],t[1])
-        glVertex2f(0, -v[1])
+        glVertex2f(0, v[1])
         glTexCoordf(t[0]+t[2],t[1])
-        glVertex2f(v[0], -v[1])
+        glVertex2f(v[0], v[1])
         glTexCoordf(t[0]+t[2],t[1]+t[3])
         glVertex2f(v[0], 0)
         glTexCoordf(t[0],t[1]+t[3])
@@ -223,7 +225,7 @@ class Font:
                 glTranslatef(rendered.spaceSize[0] * magnification, 0, 0)
             elif char == "\n":
                 glPopMatrix()
-                glTranslatef(0, -rendered.spaceSize[1] * magnification, 0)
+                glTranslatef(0, rendered.spaceSize[1] * magnification, 0)
                 glPushMatrix()
             elif char == "\t":
                 glTranslatef(rendered.spaceSize[0] * 8 * magnification, 0, 0)
@@ -243,7 +245,7 @@ class Font:
     def drawCentered(self, text, fontSize=defaultSize):
         """Draw text centered around the origin"""
         size = self.size(text, fontSize)
-        glTranslatef(-size[0]/2, size[1]/2, 0)
+        glTranslatef(-size[0]/2, -size[1]/2, 0)
         self.draw(text, fontSize)
 
 ### The End ###

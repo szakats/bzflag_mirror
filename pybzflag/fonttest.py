@@ -24,16 +24,16 @@ def drawFrame():
     glLoadIdentity()
     glDisable(GL_TEXTURE_2D)
     glBegin(GL_QUADS)
-    glColor3f(1,1,1)
+    glColor3f(0,0,0)
     glVertex2f(0,0)
     glVertex2f(viewport.size[0],0)
-    glColor3f(0,0,0)
+    glColor3f(1,1,1)
     glVertex2f(viewport.size[0],viewport.size[1])
     glVertex2f(0,viewport.size[1])
     glEnd()
 
     glLoadIdentity()
-    glTranslatef(5,viewport.size[1]-5,0)
+    glTranslatef(5,5,0)
     glColor3f(1,1,1)
     f.draw("Boing! This is the default size\n\n")
     glColor3f(1,1,0.5)
@@ -50,11 +50,11 @@ def drawFrame():
 
     glColor3f(0,0,0)
     glLoadIdentity()
-    glTranslatef(viewport.size[0]/2, viewport.size[1]/4, 0)
+    glTranslatef(viewport.size[0]/2, viewport.size[1] * 0.75, 0)
     f.drawCentered("Not-so-spinny-widget")
 
     glLoadIdentity()
-    glTranslatef(viewport.size[0]/2, viewport.size[1]/8, 0)
+    glTranslatef(viewport.size[0]/2, viewport.size[1] * 0.85, 0)
     f.drawCentered("(small print)", 10)
 
 Util.showFrameRate(viewport)
