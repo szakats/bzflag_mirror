@@ -139,12 +139,11 @@ def messageDump(msg, f, showContents=True, keyColumnWidth=25):
                 f.write(" " * (keyColumnWidth + 2) + line + "\n")
 
 
-def proxy(server, client, callback=None):
+def proxy(server, client):
     """Set up a proxy between the server and client.
        Currently this only works correctly when there is one client
        connected to the server. It forwards all events (tcp and udp)
-       from one to the other, optionally calling the given callback
-       for each message.
+       from one to the other.
        """
     # Let the user know when our client connects, and force
     # our server to hand out the same client ID we were given.
@@ -158,16 +157,12 @@ def proxy(server, client, callback=None):
     def onClientMessage(msg):
         try:
             server.clientsByID[client.id].write(msg, msg.protocol)
-            if callback:
-                callback(msg)
         except KeyError:
             pass
     client.onUnhandledMessage.replace(onClientMessage)
 
     def onServerMessage(msg):
         getattr(client, msg.protocol).write(msg)
-        if callback:
-            callback(msg)
     server.onUnhandledMessage.replace(onServerMessage)
 
 ### The End ###

@@ -38,9 +38,8 @@ def showMessage(msg):
     if options['show'] and not name in options['show']:
         return
     Util.messageDump(msg, sys.stdout, not options['names'])
+server.onAnyMessage.observe(showMessage)
+client.onAnyMessage.observe(showMessage)
 
-# Set up a proxy between the client and server,
-# with showMessage as a callback for each message
-Util.proxy(server, client, showMessage)
-
+Util.proxy(server, client)
 eventLoop.run()
