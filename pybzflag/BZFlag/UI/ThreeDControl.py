@@ -67,9 +67,6 @@ class Viewing:
         viewport.onKeyDown.observe(onKeyDown)
 
         def onMouseMotion(event):
-	    if event.buttons[0]:
-		print 'picked: %r' % view.pick(event.pos)
-
             # Panning - shift-right mouse button
 	    if pygame.key.get_mods() & pygame.KMOD_SHIFT:
 	        if event.buttons[2]:
@@ -126,6 +123,12 @@ class Viewing:
 
 class Editing(Viewing):
     """Implement a superset of the Viewing controls, used for editing worlds"""
-    pass
+    def __init__(self, view, viewport):
+        Viewing.__init__(self, view, viewport)
+
+        def onMouseButtonDown(event):
+            if event.button == 1:
+                print 'picked: %r' % view.pick(event.pos)
+        viewport.onMouseButtonDown.observe(onMouseButtonDown)
 
 ### The End ###
