@@ -47,8 +47,6 @@ Todo list, in no particular order:
 
   - Write more documentation :)
 
-  - Unify the world and VRML caches
-
   - Complete the Unicode support in GLText. This means deleting rarely used texture pages
     to prevent uncontrolled memory usage, and automatically loading auxiliary fonts
     when a character can't be located.
@@ -63,4 +61,9 @@ Todo list, in no particular order:
 
   - Use a uniform distribution rather than a normal distribution to decide cubemap
     update times, make the times configurable.
+
+  - Unify the world and VRML caches. There should be a base class that
+    manages creating, storing, and loading the actual cache data, with 
+    subclasses only providing a way to generate cacheable data and create
+    hashes.
 
