@@ -27,7 +27,6 @@ and providing player functionality.
 #
 import BZFlag
 from BZFlag import Network, Protocol, Errors, Player, Game, World, Event, Flag
-from BZFlag.Protocol import FromServer, ToServer, Common
 from StringIO import StringIO
 
 
@@ -37,8 +36,8 @@ class BaseClient(Network.Endpoint):
        basic messages necessary to keep a client-server connection going.
        """
 
-    outgoing = ToServer
-    incoming = FromServer
+    outgoing = Protocol.ToServer
+    incoming = Protocol.FromServer
     
     def init(self):
         self.connected = 0
@@ -63,7 +62,7 @@ class BaseClient(Network.Endpoint):
         if self.tcp:
             self.disconnect()
         self.tcp = Network.Socket()
-        self.tcp.connect(server, Common.defaultPort)
+        self.tcp.connect(server, Protocol.Common.defaultPort)
         self.tcp.setBlocking(0)
         self.eventLoop.add(self.tcp)
 
@@ -97,7 +96,7 @@ class BaseClient(Network.Endpoint):
            """
         # We should have just received a Hello packet with
         # the server version and our client ID.
-        hello = socket.readStruct(FromServer.HelloPacket)
+        hello = socket.readStruct(self.incoming.HelloPacket)
         if hello.version != BZFlag.protocolVersion:
             raise Errors.ProtocolError(
                 "Protocol version mismatch: The server is version " +
@@ -155,7 +154,7 @@ class StatefulClient(BaseClient):
                 return str + chr(0)
             return str
         flagAbbreviations = map(padAbbreviation, Flag.getDict().keys())
-        self.tcp.write(ToServer.MsgNegotiateFlags(
+        self.tcp.write(self.outgoing.MsgNegotiateFlags(
             numFlags = len(flagAbbreviations),
             data = "".join(flagAbbreviations),
             ))
@@ -183,7 +182,7 @@ class StatefulClient(BaseClient):
         flagDict = Flag.getDict()
         unknownFlags = []
         for i in xrange(msg.numFlags):
-            flag = Common.FlagNegotiationID()
+            flag = Protocol.Common.FlagNegotiationID()
             flag.read(data)
             try:
                 cls = flagDict[flag.abbreviation]
@@ -208,7 +207,7 @@ class StatefulClient(BaseClient):
         """Ask for a hash of the binary world data, so we can
            check our cache for it. This will trigger onMsgWantHash()
            """
-        self.tcp.write(ToServer.MsgWantWHash())
+        self.tcp.write(self.outgoing.MsgWantWHash())
 
     def onMsgWantWHash(self, msg):
         """Receive the world hash. If this is a permanent
@@ -239,7 +238,7 @@ class StatefulClient(BaseClient):
            """
         self.onStartWorldDownload()
         self.binaryWorld = ''
-        self.tcp.write(ToServer.MsgGetWorld(offset=0))
+        self.tcp.write(self.outgoing.MsgGetWorld(offset=0))
 
     def onMsgGetWorld(self, msg):
         """We've received one chunk of the binary world. If there's more,
@@ -248,7 +247,7 @@ class StatefulClient(BaseClient):
         self.binaryWorld += msg.data
         if msg.remaining:
             # We need more data!
-            self.tcp.write(ToServer.MsgGetWorld(offset=len(self.binaryWorld)))
+            self.tcp.write(self.outgoing.MsgGetWorld(offset=len(self.binaryWorld)))
         else:
             # Download is complete. Convert the binary world
             # into a World object and discard the binary world.
@@ -346,7 +345,7 @@ class PlayerClient(StatefulClient):
         self.enterGame()
 
     def enterGame(self):
-        msg = ToServer.MsgEnter()
+        msg = self.outgoing.MsgEnter()
         identity = self.options['identity']
         msg.playerType = identity.type
         msg.team = identity.team
@@ -360,7 +359,7 @@ class PlayerClient(StatefulClient):
 
     def exitGame(self):
         self.inGame = 0
-        self.tcp.write(ToServer.MsgExit())
+        self.tcp.write(self.outgoing.MsgExit())
 
     def onMsgAccept(self, msg):
         """This is called after we try to enterGame, if it's successful."""
@@ -373,7 +372,7 @@ class PlayerClient(StatefulClient):
 
     def sendMessage(self, message, destination='all'):
         """Send a message to other players"""
-        self.tcp.write(ToServer.MsgMessage(destination = destination,
-                                           message = message))
+        self.tcp.write(self.outgoing.MsgMessage(destination = destination,
+                                                message = message))
 
 ### The End ###
