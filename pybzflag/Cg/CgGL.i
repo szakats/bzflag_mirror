@@ -5,10 +5,10 @@
 
 // profile functions
 int cgGLIsProfileSupported(int profile);
-void cgGLEnableProfile(CGprofile);
-void cgGLDisableProfile(CGprofile);
-CGprofile cgGLGetLatestProfile(CGGLenum);
-void cgGLSetOptimalOptions(CGprofile);
+void cgGLEnableProfile(int);
+void cgGLDisableProfile(int);
+int cgGLGetLatestProfile(CGGLenum);
+void cgGLSetOptimalOptions(int);
 
 // program management functions
 void cgGLLoadProgram(CGprogram);

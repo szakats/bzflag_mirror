@@ -10,8 +10,8 @@ int cgIsContext(CGcontext);
 char *cgGetLastListing(CGcontext);
 
 // program functions
-CGprogram cgCreateProgram(CGcontext, int, const char *, CGprofile, const char *,  const char **);
-CGprogram cgCreateProgramFromFile(CGcontext, int, const char *, CGprofile, const char *, const char **);
+CGprogram cgCreateProgram(CGcontext, int, const char *, int, const char *,  const char **);
+CGprogram cgCreateProgramFromFile(CGcontext, int, const char *, int, const char *, const char **);
 CGprogram cgCopyProgram(CGprogram);
 void cgDestroyProgram(CGprogram);
 CGprogram cgGetFirstProgram(CGcontext);
@@ -21,7 +21,7 @@ int cgIsProgram(CGprogram);
 void cgCompileProgram(CGprogram);
 int cgIsProgramCompiled(CGprogram);
 const char *cgGetProgramString(CGprogram, int);
-CGprofile cgGetProgramProfile(CGprogram);
+int cgGetProgramProfile(CGprogram);
 
 // parameter functions
 CGparameter cgGetNamedParameter(CGprogram, const char *);
@@ -57,8 +57,8 @@ const char *cgGetResourceString(CGresource);
 CGresource cgGetResource(const char *);
 
 // profile functions
-const char *cgGetProfileString(CGprofile);
-CGprofile cgGetProfile(const char *);
+const char *cgGetProfileString(int);
+int cgGetProfile(const char *);
 
 // error functions
 CGerror cgGetError(void);
