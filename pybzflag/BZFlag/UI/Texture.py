@@ -209,7 +209,9 @@ class ProxyTexture(object):
        the targetName doesn't load.
        """
     def __init__(self, target, errorStandin=None):
+        self._targetName = None
         if type(target) == str or type(target) == unicode:
+            self.targetName = target
             target = load(target)
         self.toLoad = None
         self.errorStandin = errorStandin
@@ -244,10 +246,11 @@ class ProxyTexture(object):
     target = property(getTarget, setTarget)
 
     def getTargetName(self):
-        return self._target.name
+        return self._targetName
 
     def setTargetName(self, name):
         self.toLoad = name
+        self._targetName = name
 
     targetName = property(getTargetName, setTargetName)
 

@@ -84,10 +84,10 @@ class SoftwareSpriteRenderer(VertexArray):
         self.numVertices = multiply.reduce(self.shape)
 
         # Initialize texture coordinates. These are static
-        self.texcoords[...,0,:] = (0,1)
-        self.texcoords[...,1,:] = (1,1)
-        self.texcoords[...,2,:] = (1,0)
-        self.texcoords[...,3,:] = (0,0)
+        self.texcoords[...,0,:] = (0,0)
+        self.texcoords[...,1,:] = (1,0)
+        self.texcoords[...,2,:] = (1,1)
+        self.texcoords[...,3,:] = (0,1)
 
         # Create point color and position arrays
         self.points      = zeros(shape + (3,), Float32, savespace=True)

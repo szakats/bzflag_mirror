@@ -333,7 +333,7 @@ class RandomEmitter(Emitter):
     direction = property(getDirection, setDirection)
 
     def getDirectionRandomness(self):
-        return self._directionRandomness
+        return self._directionRandomness[0]
 
     def setDirectionRandomness(self, directionRandomness):
         self._directionRandomness = array((directionRandomness,), Float32)
@@ -495,10 +495,18 @@ class ConstantAccelAffector(Affector):
     """Generic affector for applying a constant acceleration to particles"""
     def __init__(self, model, vector):
         Affector.__init__(self, model)
-        self.vector = asarray(vector)
+        self.setVector(vector)
+
+    def getVector(self):
+        return self._vector
+
+    def setVector(self, vector):
+        self._vector = asarray(vector)
+
+    vector = property(getVector, setVector)
 
     def integrate(self, dt):
-        add(self.model.velocity, self.vector * dt, self.model.velocity)
+        add(self.model.velocity, self._vector * dt, self.model.velocity)
 
 
 class ClothWindAffector(Affector):

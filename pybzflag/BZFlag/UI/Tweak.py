@@ -62,7 +62,7 @@ class Window:
             if control.name is not None:
                 # Pack the widget in the right side, with a name label in the left
                 l = gtk.Label(control.name + ": ")
-                l.set_alignment(1, 0.75)
+                l.set_alignment(1, 0.5)
                 self.table.attach(l, 0,1, row,row+1, xoptions=gtk.FILL, yoptions=gtk.FILL)
                 l.show()
                 self.table.attach(control.widget, 1,2, row,row+1, yoptions=gtk.FILL)
@@ -100,35 +100,47 @@ class AttributeControl(Control):
             name = "%s.%s" % (object.__class__.__name__, attribute)
 
         # Get the subclass to add subwidgets for each individual value
-        box = gtk.HBox(gtk.FALSE, gtk.FALSE)
-        initialValue = getattr(object, attribute)
+        box = gtk.HBox(gtk.FALSE, 2)
+        self.initialValue = getattr(object, attribute)
 
-        isVector = False
-        if type(initialValue) != str:
+        self.isVector = False
+        if type(self.initialValue) != str:
             try:
-                initialValue[0]
-                isVector = True
+                self.initialValue[0]
+                self.isVector = True
             except TypeError:
                 pass
 
-        if isVector:
-            for index in xrange(len(initialValue)):
+        self.widgets = []
+        if self.isVector:
+            # Make sure our initialValue isn't mutable
+            self.initialValue = tuple(self.initialValue)
+
+            for index in xrange(len(self.initialValue)):
                 def createUpdater(index):
                     # This is necessary so 'index' in the lambda binds with the value at this
                     # iteration, rather than the final value after the loop exits.
-                    return lambda value: self.updateIndex(value, index)
-                w = self.add(initialValue[index],  createUpdater(index))
-                box.pack_start(w, gtk.TRUE, gtk.TRUE, 2)
+                    return lambda value: self.setValueIndex(value, index)
+                w = self.addWidget(self.initialValue[index],  createUpdater(index))
+                box.pack_start(w, gtk.TRUE, gtk.TRUE)
                 w.show()
+                self.widgets.append(w)
         else:
             # Nope, now assume it's a scalar
-            w = self.add(initialValue, self.update)
-            box.pack_start(w, gtk.TRUE, gtk.TRUE, 2)
+            w = self.addWidget(self.initialValue, self.setValue)
+            box.pack_start(w, gtk.TRUE, gtk.TRUE)
             w.show()
+            self.widgets.append(w)
+
+        reset = gtk.Button("Reset")
+        reset.show()
+        box.pack_end(reset, gtk.FALSE, gtk.FALSE)
+        reset.connect("clicked", self.reset)
+        reset.show()
 
         Control.__init__(self, box, name)
 
-    def add(self, initialValue, setFunction):
+    def addWidget(self, initialValue, setFunction):
         """A hook for subclasses to handle adding individual values
            in the attribute. initialValue is the value at initialization,
            setFunction should be called to change it. This should return
@@ -136,10 +148,10 @@ class AttributeControl(Control):
            """
         pass
 
-    def update(self, value):
+    def setValue(self, value):
         setattr(self.object, self.attribute, value)
 
-    def updateIndex(self, value, index):
+    def setValueIndex(self, value, index):
         try:
             getattr(self.object, self.attribute)[index] = value
         except TypeError:
@@ -147,6 +159,19 @@ class AttributeControl(Control):
             l = list(getattr(self.object, self.attribute))
             l[index] = value
             setattr(self.object, self.attribute, l)
+
+    def reset(self, widget=None, event=None):
+        setattr(self.object, self.attribute, self.initialValue)
+        self.refresh()
+
+    def refresh(self):
+        """Update the Tweak controls from the object being tweaked"""
+        value = getattr(self.object, self.attribute)
+        if self.isVector:
+            for index in xrange(len(value)):
+                self.setWidget(self.widgets[index], value[index])
+        else:
+            self.setWidget(self.widgets[0], value)
 
 
 class Quantity(AttributeControl):
@@ -163,19 +188,22 @@ class Quantity(AttributeControl):
         self.pageSize = pageSize
         AttributeControl.__init__(self, object, attribute, name)
 
-    def add(self, initialValue, setFunction):
+    def addWidget(self, initialValue, setFunction):
         adj = gtk.Adjustment(initialValue, self.range[0], self.range[1], self.stepSize, self.pageSize)
         adj.connect("value_changed", lambda adj: setFunction(adj.value))
         scale = gtk.HScale(adj)
         scale.set_digits(3)
         return scale
 
+    def setWidget(self, widget, newValue):
+        widget.get_adjustment().set_value(newValue)
+
 
 class Color(AttributeControl):
     """A control for manipulating a scalar or vector object attribute consisting of 4-tuples
        specifying RGBA colors in the range [0,1]
        """
-    def add(self, initialValue, setFunction):
+    def addWidget(self, initialValue, setFunction):
         box = gtk.VBox(gtk.FALSE, gtk.FALSE)
         label = gtk.Label()
         label.show()
@@ -192,9 +220,9 @@ class Color(AttributeControl):
         drawingArea.color = initialValue
         drawingArea.show()
         box.pack_end(drawingArea)
+        box.drawingArea = drawingArea
 
-        color = map(int, tuple(asarray(initialValue[:3]) * 65535))
-        self.setColor(drawingArea, drawingArea.get_colormap().alloc_color(*color), initialValue[3])
+        self.setWidget(box, initialValue)
         return box
 
     def setColor(self, drawingArea, color, alpha):
@@ -254,14 +282,38 @@ class Color(AttributeControl):
         self.setColor(widget.drawingArea,
                       widget.get_current_color(), widget.get_current_alpha()/65535)
 
+    def setWidget(self, widget, newValue):
+        """Called by AttributeControl to set our widgets' values to the observed values,
+           to implement refresh(). This is also used during initialization.
+           """
+        drawingArea = widget.drawingArea
+        color = map(int, tuple(asarray(newValue[:3]) * 65535))
+        gdkColor = drawingArea.get_colormap().alloc_color(*color)
+        self.setColor(drawingArea, gdkColor, newValue[3])
+
 
 class Text(AttributeControl):
     """A control that lets you directly manipulate strings using text entry boxes"""
-    def add(self, initialValue, setFunction):
+    def addWidget(self, initialValue, setFunction):
         entry = gtk.Entry()
-        entry.set_text(initialValue)
+        self.setWidget(entry, initialValue)
         entry.connect("changed", lambda widget: setFunction(entry.get_text()))
         return entry
+
+    def setWidget(self, widget, newValue):
+        widget.set_text(newValue)
+
+
+class Boolean(AttributeControl):
+    """A control that lets you directly manipulate strings using text entry boxes"""
+    def addWidget(self, initialValue, setFunction):
+        entry = gtk.CheckButton()
+        self.setWidget(entry, initialValue)
+        entry.connect("toggled", lambda widget: setFunction(entry.get_active()))
+        return entry
+
+    def setWidget(self, widget, newValue):
+        widget.set_active(newValue)
 
 
 def run(runnable):
