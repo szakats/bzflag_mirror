@@ -60,7 +60,10 @@ class Socket:
         self.socket = None
 
     def write(self, data):
+        # Queue it, plus try to send it. If we can't send
+        # it yet, it will stay in the queue until it can be sent.
         self.writeBuffer += str(data)
+        self.pollWrite()
 
     def recv(self, size):
         """Low-level recv() wrapper that just provides a little error handling."""
@@ -192,16 +195,19 @@ class Socket:
            """
         self.handler(self, eventLoop)
 
-    def pollWrite(self, eventLoop):
+    def pollWrite(self, eventLoop=None):
         """As with pollWrite, this is called if needsWrite() returns true
            and we can write to the socket without blocking.
            """
+        if len(self.writeBuffer) == 0:
+            return
         try:
             bytes = self.socket.send(self.writeBuffer)
             if not bytes:
                 raise Errors.ConnectionLost()
             self.writeBuffer = self.writeBuffer[bytes:]
         except socket.error:
+            # Not available for sending yet
             pass
 
     def getSelectable(self):

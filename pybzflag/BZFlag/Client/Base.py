@@ -127,7 +127,8 @@ class BaseClient(Network.Endpoint):
 
         # The server won't actually turn on UDP until
         # it gets at least one UDP packet.. so send some
-        self.udp.write(self.outgoing.MsgNull())
+        while True:
+            self.udp.write(self.outgoing.MsgNull())
         
         self.onConnectUDP()
 
