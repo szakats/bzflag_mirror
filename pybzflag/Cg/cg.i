@@ -150,3 +150,10 @@ void cgGLGetMatrixParameterArrayfc(CGparameter, long, long, float *);
 void cgGLGetMatrixParameterArrayfr(CGparameter, long, long, float *);
 void cgGLGetMatrixParameterArraydc(CGparameter, long, long, double *);
 void cgGLGetMatrixParameterArraydr(CGparameter, long, long, double *);
+
+// texture parameter management functions
+void cgGLSetTextureParameter(CGparameter, GLuint);
+GLuint cgGLGetTextureParameter(CGparameter);
+void cgGLEnableTextureParameter(CGparameter);
+void cgGLDisableTextureParameter(CGparameter);
+GLenum cgGLGetTextureEnum(CGparameter);
