@@ -324,29 +324,40 @@ class Mesh(DisplayList):
        All parameters to set() are VRML nodes.
        """
     def set(self, faces, coords, name=None, material=None, matrix=None):
-        self.faces = faces
-        self.coords = coords
         self.name = name
-        self.material = material
-        self.matrix = matrix
+        self.faces = faces.value['coordIndex']
+        self.vertices = coords.value['point']
+        if matrix:
+            self.matrix = matrix.value['matrix']
+        else:
+            self.matrix = None
+        if material:
+            self.color = material.value['diffuseColor'] + [1 - material.value['transparency']]
+        else:
+            self.color = None
 
     def drawToList(self):
-        vertices = self.coords.value['point']
-        faces = self.faces.value['coordIndex']
         polygon = []
         glPushMatrix()
-        glScalef(100,100,100)
-        glBegin(GL_TRIANGLES)
-        for face in faces:
+        glScalef(4,4,4)
+
+        if self.color:
+            glColor4f(*self.color)
+        if self.matrix:
+            glMultMatrixf(self.matrix)
+
+        # In the VRML vertex list, a -1 indicates the end of a polygon.
+        for face in self.faces:
             if face == -1:
                 # Output the buffered polygon
+                glBegin(GL_POLYGON)
                 for vertex in polygon:
                     glVertex3f(*vertex)
+                glEnd()
                 polygon = []
             else:
                 # Toss another vertex on the buffer
-                polygon.append(vertices[face])
-        glEnd()
+                polygon.append(self.vertices[face])
         glPopMatrix()
 
 ### The End ###
