@@ -24,7 +24,7 @@ and saving worlds in binary and text formats.
 
 from BZFlag.Protocol import WorldObjects, Common
 from BZFlag import Errors, Util
-import os, re
+import os, re, math
 from xreadlines import xreadlines
 
 
@@ -140,8 +140,20 @@ class World:
         section = None
         sectionDict = Util.getSubclassDict(WorldObjects, WorldObjects.WorldObject,
                                            'textName', 'textSectionDict')
+        
+        # Start with a fresh map, and add objects that
+        # are implied but not specified in the text map format.
         self.erase()
         self.storeBlock(WorldObjects.Style())
+        self.storeBlock(WorldObjects.Wall(
+            center = [0, 400, 0]
+            angle  = math.pi * 1.5
+            ))
+        self.storeBlock(WorldObjects.Wall(
+            center = [400, 0, 0]
+            angle  = math.pi
+            ))
+
         
         for line in xreadlines(f):
             # If this is a kludge used by map editors to store extra
