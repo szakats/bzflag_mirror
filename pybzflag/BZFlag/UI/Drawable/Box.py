@@ -147,6 +147,7 @@ class PlatformSides(Sides):
 class End(DisplayList):
     """Abstract base class for the top and bottom sides of a box"""
     textureName = 'concrete.jpeg'
+    texScale = 20
 
     def drawToList(self):
         glPushMatrix()
@@ -155,7 +156,7 @@ class End(DisplayList):
         glBegin(GL_POLYGON)
         for i in xrange(4):
             vertex = self.polygon[i]
-            glTexCoord2f(vertex[0] / 20, vertex[1] / 20)
+            glTexCoord2f(vertex[0] / self.texScale, vertex[1] / self.texScale)
             glVertex2f(*vertex)
         glEnd()
         glPopMatrix()
@@ -204,23 +205,42 @@ class TopDecal(DisplayList):
         glPopMatrix()
 
 
+class AlignedTopDecal(TopDecal):
+    """Abstract base class for a TopDecal that has its X axis aligned with the
+       box's major axis and the Y axis with the box's minor axis.
+       """
+    def __init__(self, box):
+        if box.size[1] > box.size[0]:
+            self.texCoords = ( (0,0), (0,1), (1,1), (1,0) )
+        TopDecal.__init__(self, box)
+
+
+class TiledTopDecal(Top):
+    """Abstract base class for a TopDecal that is tiled in world coordinates"""
+    def set(self, box):
+        Top.set(self, box)
+        self.render.decal = True
+
+
 class OilStain(TopDecal):
     """A random oil stain decal"""
     def __init__(self, box):
         self.textureName = random.choice(('oilstain_1.png',
                                           'oilstain_2.png',
-                                          'oilstain_3.png'))
+                                          'oilstain_3.png',
+                                          'swerve_1.png'))
         TopDecal.__init__(self, box)
 
 
-class TreadStain(TopDecal):
-    """A tread stain decal, aligned to the major axis of the box"""
+class TiledOilStain(TiledTopDecal):
+    """An oil stain for large boxes, tiled in world coordinates"""
+    textureName = "tiled_oilstain_1.png"
+    texScale = 100
+
+
+class TreadStain(AlignedTopDecal):
+    """A tread stain decal"""
     textureName = "treadstain_1.png"
-    
-    def __init__(self, box):
-        if box.size[1] > box.size[0]:
-            self.texCoords = ( (0,0), (0,1), (1,1), (1,0) )
-        TopDecal.__init__(self, box)
 
 
 class FixedDecal(DisplayList):
@@ -304,6 +324,17 @@ class DustPuppyDecal(FixedWallDecal):
         FixedWallDecal.set(self, box, random.randint(0,3), 10, (0.5, 0), (0.5, 0))
 
 
+class FixedTopDecal(FixedDecal):
+    """Abstract base class for a fixed-size decal applied to a box top"""
+    def set(self, box, width, position=(0.5, 0.5), anchor=(0.5, 0.5)):
+        poly = box.toPolygon()
+        height = box.center[2] + box.size[2]
+        origin = (poly[0][0], poly[0][1], height)
+        vx = Vector.sub((poly[1][0], poly[1][1], height), origin)
+        vy = Vector.sub((poly[-1][0], poly[-1][1], height), origin)
+        FixedDecal.set(self, origin, vx, vy, width, position, anchor)
+
+
 def detectBoxDrawables(box):
     """Given a box WorldObject, return a list of the drawables that should be used
        to represent it. This looks at the size and placement of the box to determine
@@ -324,14 +355,19 @@ def detectBoxDrawables(box):
     if height < 8 and box.center[2] > 1:
         sides = PlatformSides(box)
 
-    # If the box is fairly large and squareish, use a square oil-stain texture
+    # If the box is fairly large and squareish, use a square oil-stain texture...
     if minorAxis > 10 and axisRatio < 2:
         drawables.append(OilStain(box))
 
-    # If the box is about the same width as a tank, put some tread marks on it
-    if minorAxis > Scale.TankWidth and minorAxis < Scale.TankWidth * 4 and majorAxis > Scale.TankWidth * 4:
+    # ...or, if the box is about the same width as a tank, put some tread marks on it...
+    elif minorAxis > Scale.TankWidth and minorAxis < Scale.TankWidth * 4 and majorAxis > Scale.TankWidth * 4:
         drawables.append(TreadStain(box))
 
+    # ...or if the box is fairly large and we don't have anything better to
+    #    put on it, give it some tileable oil stains.
+    elif minorAxis > 10:
+        drawables.append(TiledOilStain(box))
+    
     # Randomly put BZFlag logos on properly sized boxes
     if minorAxis > 10 and height > 4 and random.random() > 0.7:
         drawables.append(LogoDecal(box))

@@ -260,7 +260,10 @@ class BasicRenderPass(RenderPass):
            If multitexturing is not supported, all but the first texture will
            be ignored.
            """
-        if textures:
+        # Disable all textures if we're in wireframe mode
+        wireframe = glGetIntegerv(GL_POLYGON_MODE)[0] == GL_LINE
+        
+        if textures and not wireframe:
             if GLExtension.multitexture:
                 # We have multitexturing. Enable and bind the texture units we'll be using,
                 # make sure the rest are disabled.
