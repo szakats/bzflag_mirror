@@ -41,18 +41,11 @@ class Setup:
 
         # HUD panel along the bottom of the screen, with animated resize
         hudSize = Animated.Value(Animated.SigmoidApproach(fullHudSize, 15, (0, fullHudSize)), fullHudSize)
-        def onSetupFrame():
-            hudSize.integrate(time.step())
-        def onKeyDown(event):
-            if event.unicode == " ":
-                if hudSize.f.target == fullHudSize:
-                    hudSize.f.target = 0
-                else:
-                    hudSize.f.target = fullHudSize
-        self.viewport.onSetupFrame.observe(onSetupFrame)
-        self.viewport.onKeyDown.observe(onKeyDown)
-        (remaining, hudRect) = remaining.hSplit(lambda r: (1-hudSize.value) * r[3])
+        self.inMotion = False
+        self.viewport.onSetupFrame.observe(self.setupFrame)
+        self.viewport.onKeyDown.observe(self.keyDown)
 
+        (remaining, hudRect) = remaining.hSplit(lambda r: (1-hudSize.value) * r[3])
         hudPanel = self.viewport.region(hudRect)
         self.panel = HUD.Panel(hudPanel)
 
@@ -69,5 +62,15 @@ class Setup:
         # Logo-thingy!
         self.logo = HUD.Text(self.viewport.region(remaining), BZFlag.name,
                              shadow=True, color=(1,1,0,1), fontSize=35)
+
+    def setupFrame():
+        hudSize.integrate(time.step())
+
+    def keyDown(event):
+        if event.unicode == " ":
+            if hudSize.f.target == fullHudSize:
+                hudSize.f.target = 0
+            else:
+                hudSize.f.target = fullHudSize
 
 ### The End ###

@@ -102,7 +102,11 @@ class OpenGLViewport(PygameViewport):
 
     def region(self, rect, renderLink='after'):
         sub = Viewport.region(self, rect, renderLink)
-        sub.onSetupFrame.observe(sub.configureOpenGL)
+
+        # Disable the root viewport's frame setup and finishing code,
+        # but leave configureOpenGL running in each viewport.
+        sub.onSetupFrame.replace(sub.configureOpenGL)
+        sub.onFinishFrame.empty()
         return sub
 
 

@@ -89,9 +89,12 @@ class Event:
         # We don't need to worry with a wrapper class since we don't need a weakref
         self.clients[hash(callback)] = callback
 
+    def empty(self):
+        self.clients = {}
+
     def replace(self, callback):
         """Remove all existing observers for this event, and add the given one"""
-        self.clients = {}
+        self.empty()
         self.observe(callback)
 
     def unobserve(self, callback):

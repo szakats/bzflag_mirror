@@ -118,13 +118,13 @@ class PygameViewport(Viewport):
     def onVideoResize(self, event):
         self.setRect(self.rect[:2] + event.size)
 
-    def region(self, rect, renderLink='after'):
+    def region(self, *args, **kw):
         """Return a class that represents a rectangular subsection of this viewport.
            In addition to what Viewport.region() does, this sets our screen to be
            a subsurface of the original screen.
            """
-        sub = Viewport.region(rect, renderLink)
-        sub.screen = self.secreen.subsurface(rect)
+        sub = Viewport.region(*args, **kw)
+        sub.screen = self.secreen.subsurface(sub.rect)
         return sub
 
 ### The End ###

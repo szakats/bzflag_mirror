@@ -24,33 +24,47 @@ An abstract base class defining the Viewport interface
 from BZFlag import Event
 import copy, weakref
 
-__all__ = ('Viewport',)
+__all__ = ('Viewport', 'RegionMixin')
 
 
-class Viewport:
+class Viewport(object):
     """Abstract base class for a viewport. Defines events and methods
        that all viewports must support.
        """
-    def __init__(self, eventLoop, size):
+    def __init__(self, eventLoop, size=None):
         self.eventLoop = eventLoop
         Event.attach(self, 'onFrame', 'onSetupFrame', 'onDrawFrame', 'onFinishFrame', 'onResize')
-        self.resetRenderSequence()
 
-        self.visible = True
-        self.parent = None
-        self.rootView = self
+        # This makes it easier for RegionMixin to override the parent and rootView
+        # while still having it set correctly for show() below.
+        if not hasattr(self, 'parent'):
+            self.parent = None
+            self.rootView = self
 
         self.rect = None
         self.rectExp = None
         self.size = None
-        self.setRect((0,0) + size)
+        if size is not None:
+            self.setRect((0,0) + size)
 
-    def resetRenderSequence(self):
         self.renderSequence = [
             self.onSetupFrame,
             self.onDrawFrame,
             self.onFinishFrame,
             ]
+
+        self.visible = False
+        self.show()
+
+    def show(self):
+        """Make this viewport visible. the 'visible' attribute must be treated as
+           read-only. This implementation simply sets it, but viewport regions have
+           a much more complex procedure.
+           """
+        self.visible = True
+
+    def hide(self):
+        self.visible = False
 
     def render(self):
         if self.visible and self.size[0] > 0 and self.size[1] > 0:
@@ -96,34 +110,83 @@ class Viewport:
            sequence. 'after' inserts it after all other entries, 'before' before all
            others, None doesn't insert it.
            """
-        sub = copy.copy(self)
-        sub.parent = self
+        class ViewportRegion(RegionMixin, self.__class__):
+            pass
+        return ViewportRegion(self, rect, renderLink)
 
-        # Disconnect all events and the renderSequence from the parent
-        for attribute, value in sub.__dict__.iteritems():
-            if isinstance(value, Event.Event):
-                setattr(sub, attribute, Event.Event())
-        sub.resetRenderSequence()
 
-        # We can safely resize the child now that its events are unplugged
-        sub.setRect(rect)
+class RegionMixin(Viewport):
+    """A mix-in class that implements sub-viewports created with the region() method.
+       This class may perform extra implementation-specific per-region setup.
 
-        # Update the child's rectangle when our rectangle changes size
-        self.onResize.observe(sub.updateRect)
+       parent     - The viewport who had its region() called to create this region
+       rect       - A 4-tuple specifying the x, y, width, and height coordinates of this region,
+                    relative to the parent.
+       renderLink - Specifies how this viewport is inserted into its parent's rendering sequence.
+                    'after' inserts it at the end of the rendering sequence, 'before' inserts it
+                    at the beginning, None doesn't insert it at all.
+       """
+    def __init__(self, parent, rect, renderLink):
+        self.renderLink = renderLink
+        self.parent = parent
+        self.rootView = parent.rootView
 
-        if renderLink == 'after':
+        # Create a weak reference that proxies our render() function.
+        # This is used in setting up the parent's renderSequence in show(),
+        # so that it doesn't hold any strong references to us.
+        self.renderProxy = RenderSequenceProxy(self.rootView, self)
+
+        # Note that we call Viewport's init, rather than our direct subclass.
+        # We don't want to initialize the viewport's underlying video device again.
+        Viewport.__init__(self, parent.eventLoop)
+        self.setRect(rect)
+
+        # Inherit any remaining attributes from the parent
+        for attribute, value in parent.__dict__.iteritems():
+            if not hasattr(self, attribute):
+                setattr(self, attribute, value)
+
+    def setCaption(self, title):
+        """Viewport regions have nowhere to show a caption"""
+        pass
+
+    def show(self):
+        """For viewport regions, this attaches the viewport into the parent's render cycle."""
+        if self.visible:
+            return
+        self.visible = True
+
+        # Update our rectangle when the parent's changes
+        self.parent.onResize.observe(self.updateRect)
+
+        if self.renderLink == 'after':
             # Stick it in our render sequence right before our onFinishFrame which flips the buffer
             # This should be safe for nesting viewport regions-  and the last entry will always be
             # the root viewport's onFinishFrame event.
             self.rootView.renderSequence.insert(len(self.rootView.renderSequence) - 1,
-                                                RenderSequenceProxy(self.rootView, sub))
+                                                self.renderProxy)
 
-        if renderLink == 'before':
-            self.rootView.renderSequence.insert(0, RenderSequenceProxy(self.rootView, sub))
+        elif self.renderLink == 'before':
+            self.rootView.renderSequence.insert(0, self.renderProxy)
 
-        # Ignore the caption on sub-viewports
-        sub.setCaption = lambda title: None
-        return sub
+    def hide(self):
+        """Make the viewport invisible. Invisible viewport regions don't take any time
+           during the render cycle, whereas visible viewports always have some overhead
+           even if they have no handlers attached.
+           """
+        if not self.visible:
+            return
+        self.visible = False
+
+        # Stop updating our parent rectangle
+        parent.onResize.unobserve(self.updateRect)
+
+        # Try to remove our renderProxy from the renderSequence. If this fails, it could
+        # just mean that renderProxy was None when we were last show()'ed, so ignore it.
+        try:
+            self.rootView.renderSequence.remove(self.renderProxy)
+        except ValueError:
+            pass
 
 
 class RenderSequenceProxy:
@@ -139,6 +202,10 @@ class RenderSequenceProxy:
         self.subRef().render(*args, **kw)
 
     def unref(self, ref):
-        self.root.renderSequence.remove(self)
+        try:
+            self.root.renderSequence.remove(self)
+        except ValueError:
+            # This won't be in the list if our viewport isn't visible
+            pass
 
 ### The End ###
