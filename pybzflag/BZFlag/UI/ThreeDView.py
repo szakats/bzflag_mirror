@@ -69,9 +69,7 @@ class Scene:
     self.passes = {}
 
   def onLoadWorld(self):
-    print "loading world..."
     for block in self.game.world.blocks:
-#      print 'block',id(block),'is a',block.__class__
       if isinstance(block, WorldObjects.WorldObject):
         self.objects[block] = block.getGLDrawables()
     self.rebuildTexmap()
@@ -83,7 +81,6 @@ class Scene:
 	    self.passes[drawable.texture].append(drawable)
 	else:
 	    self.passes[drawable.texture] = [drawable]
-#	print 'drawable',drawable,'uses texture',drawable.texture
 
   def render(self):
     for texture in self.passes.keys():
@@ -104,8 +101,8 @@ class ThreeDView:
     self.light1 = Light(GL_LIGHT1)
     self.scene = Scene(game)
 
-    self.camera.focus = (0, 0, -90)    
-    
+    self.camera.focus = (0, 0, -90)
+
     # Initialize the opengl view
     self.light0.ambient  = (0.85, 0.85, 0.85, 1.0)
     self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
