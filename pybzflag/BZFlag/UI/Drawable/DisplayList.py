@@ -33,6 +33,13 @@ class DisplayList(GLDrawable):
         self.set(*args, **kw)
         self.init()
 
+    def __setstate__(self, state):
+        """This is called to unpickle a DisplayList. We perform the usual
+           unpickling by assigning the state to our dictionary, then generate a new list ID
+           """
+        self.__dict__.update(state)
+        self.list = glGenLists(1)
+
     def set(self):
         """Subclasses should use this to change the drawable's state.
            It is called before init(), with the same parameters the class
