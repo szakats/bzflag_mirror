@@ -87,11 +87,12 @@ class MetaClient:
             getMetaserverURL(self.eventLoop, performRequest)
 
     def add(self, serverInfo, callback=None):
+        import binascii
         self.command(("ADD",
                       serverInfo.name,
                       serverInfo.build,
                       serverInfo.version,
-                      serverInfo.gameinfo,
+                      binascii.b2a_hex(str(serverInfo.gameinfo)),
                       serverInfo.title),
                      callback)
 

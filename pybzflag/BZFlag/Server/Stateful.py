@@ -97,7 +97,6 @@ class StatefulServer(BaseServer):
         info.version  = self.protocolVersion
         info.gameinfo = self.game.getGameInfo()
         info.title    = self.options['title']
-        print info.info()
         return info
 
     def onMsgNegotiateFlags(self, msg):

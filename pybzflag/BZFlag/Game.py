@@ -99,20 +99,20 @@ class Game:
         info.shakeWins  = self.world.style.shakeWins
         info.shakeTime  = self.world.style.shakeWins
 
-        info.maxPlayerScore = -1
-        info.maxTeamScore   = -1
-        info.maxTime        = -1
+        info.maxPlayerScore = 0
+        info.maxTeamScore   = 0
+        info.maxTime        = 0
         
         info.rogueCount  = 0
         info.redCount    = 0
         info.greenCount  = 0
         info.blueCount   = 0
         info.purpleCount = 0
-        info.rogueMax    = 5
-        info.redMax      = 5
-        info.greenMax    = 5
-        info.blueMax     = 5
-        info.purpleMax   = 5
+        info.rogueMax    = 20
+        info.redMax      = 20
+        info.greenMax    = 20
+        info.blueMax     = 20
+        info.purpleMax   = 20
         return info
 
     
