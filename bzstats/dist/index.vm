@@ -1,0 +1,105 @@
+#* Example template to generate HTML from statistics *#
+<html>
+    <head>
+        <title>BzFlag statistics</title>
+    </head>
+    <style>
+        body {
+            font-family: verdana,sans-serif;
+            font-size: 8pt;
+        }
+
+        h1 {
+            font-size: 14pt;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 11pt;
+            font-weight: bold;
+        }
+
+        table {
+            background-color: #e0f0e0;
+        }
+
+        caption {
+            font-size: 10pt;
+            font-weight: bold;
+            padding-bottom: 1em;
+            padding-top: 1em;
+        }
+        th {
+            text-align: left;
+        }
+        td,th {
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .good {
+            color: green;
+        }
+        .bad {
+            color: red;
+        }
+        .footnote {
+            font-size: 7pt;
+        }
+    </style>
+    <body>
+        <h1>BzFlag Statistics</h1>
+        <table>
+            <caption>Scores</caption>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Kills</th>
+                <th>Deaths</th>
+                <th>Suicides</th>
+                <th>Score</th>
+                <th>Team</th>
+            </tr>
+            #set ($rank = 1)
+            #foreach ($player in $scores)
+                #if (!($player.LatestTeam == "Observer"))
+                <tr>
+                    <td>$rank</td>
+                    <td>$player.Name</td>
+                    <td>$player.Kills</td>
+                    <td>$player.Deaths</td>
+                    <td>$player.Suicides</td>
+                    <td>$player.Score</td>
+                    <td>$player.LatestTeam</td>
+                </tr>
+                #set ($rank = $rank + 1)
+                #end
+            #end
+        </table>
+
+        <table>
+            <caption>Killratio</caption>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Killratio</th>
+            </tr>
+            #set ($rank = 1)
+            #foreach ($player in $killratios)
+                #if (!($player.LatestTeam == "Observer"))
+                <tr>
+                    <td>$rank</td>
+                    <td>$player.Name</td>
+                    <td>$player.KillRatio</td>
+                </tr>
+                #set ($rank = $rank + 1)
+                #end
+            #end
+        </table>
+
+
+        <h1>Charts</h1>
+        <a href="$piechart"><img width="80" height="50" src="$piechart"/></a>
+        <a href="$historychart"><img width="80" height="50" src="$historychart"/></a>
+    </body>
+</html>

@@ -1,0 +1,24 @@
+<section>
+	<title>Introduction</title>
+	<para>
+		&bzstats; is a utility to capture statistics from a game of
+		<ulink url="http://www.bzflag.org">&bzflag;</ulink>.
+		It has the following features:
+		<itemizedlist>
+			<listitem>
+				<para>Processes logfiles created by using the <command>bzadmin</command> tool.
+				</para>
+			</listitem>
+			<listitem>
+				<para>Creates charts.</para>
+			</listitem>
+			<listitem>
+				<para>Renders output using user-defined
+					<ulink url="http://jakarta.apache.org/velocity">Velocity</ulink> templates,
+					for instance to HTML (template included).
+				</para>
+			</listitem>
+		</itemizedlist>
+	</para>
+</section>
+

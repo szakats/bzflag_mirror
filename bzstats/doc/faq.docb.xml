@@ -1,0 +1,65 @@
+<section>
+	<title>Frequently Asked Questions (FAQ)</title>
+	<qandaset>
+		<qandaentry>
+			<question>
+				<para>Why are there no times?</para>
+			</question>
+			<answer>
+				<para>The logfile obtained from an Observer doesn't contain any time information.
+				Time is measured simply as the order in which the events are found in the logfile.
+				Each recognized event progresses &quot;time&quot; by one unit.</para>
+			</answer>
+		</qandaentry>
+		<qandaentry>
+			<question>
+				<para>I think the player scores are wrong.</para>
+			</question>
+			<answer>
+				<para>The scores that you see during the game are not logged to the logfile.
+				The score that &bzstats; reports are based on the kills, deaths and suicides
+				it sees in the logfile. This accounts for the score over the period that is logged
+				in the logfile.</para>
+			</answer>
+		</qandaentry>
+		<qandaentry>
+			<question>
+				<para>I think the team statistics are wrong.</para>
+			</question>
+			<answer>
+				<para>A player's team is only logged when joining the game.
+				If the Observer that creates the logfile joins after a player did, &bzstats; will
+				not be able to determine the team that player is on and will assign that
+				player to the <quote>Unknown</quote> team.
+				</para>
+			</answer>
+		</qandaentry>
+		<qandaentry>
+			<question>
+				<para>How can I contribute?</para>
+			</question>
+			<answer>
+				<para>You can contribute by
+				<itemizedlist>
+					<listitem>
+						<para>Submitting ideas, bugreports and change requests.</para>
+					</listitem>
+					<listitem>
+						<para>Creating nice default templates for reports and sending them to
+						the development team.</para>
+					</listitem>
+					<listitem>
+						<para>Promoting &bzstats; on forums and among your friends.</para>
+					</listitem>
+					<listitem>
+						<para>Creating some nice graphics for the reports or the website.</para>
+					</listitem>
+					<listitem>
+						<para>Joining the development team.</para>
+					</listitem>
+				</itemizedlist>
+				</para>
+			</answer>
+		</qandaentry>
+	</qandaset>
+</section>

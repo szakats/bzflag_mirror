@@ -1,0 +1,44 @@
+<section id="createlogfile">
+	<title>Creating a logfile</title>
+	<para>
+		A logfile suitable for processing by &bzstats; can be obtained by running
+		the <command>bzadmin</command> tool in the following way:
+		<blockquote>
+			<para>
+				<command>bzadmin</command>
+				<option>-ui stdout</option>
+				<parameter>user@host</parameter>
+				&gt; <parameter>logfile</parameter>
+			</para>
+		</blockquote>
+
+		Parameters:
+		<variablelist>
+			<varlistentry>
+				<term><parameter>host</parameter></term>
+				<listitem><para>The hostname or ip of the &bzflag; server.</para></listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><parameter>user</parameter></term>
+				<listitem><para>The player name you want to use for the observer.</para></listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><parameter>logfile</parameter></term>
+				<listitem><para>The logfile to create.</para></listitem>
+			</varlistentry>
+		</variablelist>
+
+		This will connect you to the server as an <quote>Observer</quote>. If the server doesn't allow
+		observers, you're in bad luck.
+
+		<example>
+			<title>Capturing a logfile from <command>bzadmin</command>.</title>
+			<blockquote>
+				<para>
+					<command>bzadmin -showkills -ui stdout lurker@localhost	&gt; lurker.log</command>
+				</para>
+			</blockquote>
+		</example>
+	</para>
+</section>
+

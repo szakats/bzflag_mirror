@@ -1,0 +1,33 @@
+<section>
+	<title>Installing &bzstats;</title>
+	<section>
+		<title>Prerequisites</title>
+		<para>
+			<itemizedlist>
+				<listitem>
+					<para>
+						Java runtime 1.4 or higher, obtainable at the
+						<ulink url="http://java.sun.com">SUN Java site</ulink>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						&bzflag; 2. For now, &bzflag; 1 is not supported.
+						&bzflag; can be
+						downloaded at the <ulink
+							url="http://bzflag.sf.net">&bzflag; site</ulink>. You need the
+						<command>bzadmin</command> tool included with &bzflag;.
+					</para>
+				</listitem>
+			</itemizedlist>
+		</para>
+	</section>
+	<section>
+		<title>Installation</title>
+		<para>
+			All you really need to use &bzstats; is the file <filename>bzstats.jar</filename> contained within the
+			distribution archive.
+		</para>
+	</section>
+</section>
+

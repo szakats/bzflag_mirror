@@ -1,0 +1,342 @@
+<!-- ***** BEGIN LICENSE BLOCK *****
+Version: MPL 1.1
+
+The contents of this file are subject to the Mozilla Public License Version
+1.1 (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+for the specific language governing rights and limitations under the
+License.
+
+The Original Code is BZStats.
+
+The Initial Developer of the Original Code is
+Michel de Bree (youth).
+Portions created by the Initial Developer are Copyright (C) 2005
+the Initial Developer. All Rights Reserved.
+
+Contributor(s):
+
+***** END LICENSE BLOCK ***** -->
+
+<project name="BZStats" default="usage" basedir=".">
+
+	<property file="build.properties"/>
+	<property name="build" value="build"/>
+	<property name="download" value="${build}/download"/>
+	<property name="distro" value="."/>
+	<property name="classes" value="${build}/classes"/>
+	<property name="doc.generated" value="${build}/doc"/>
+	<property name="docbook.xsl" value="lib/docbook-xsl-1.68.1"/>
+
+	<setproxy proxyhost="${proxy.host}" proxyport="${proxy.port}"/>
+
+	<!-- build path -->
+	<path id="path.build">
+		<fileset dir="lib">
+			<include name="**/*.jar" />
+		</fileset>
+		<pathelement path="${classes}" />
+		<pathelement location="${classes}" />
+	</path>
+
+	<!-- java sources -->
+	<path id="path.src">
+		<pathelement location="src"/>
+	</path>
+
+	<!-- catalog for docbook -->
+	<xmlcatalog id="catalog">
+		<dtd publicId="-//oasis//dtd docbook v4.2//en" location="lib/docbookdtd/docbookx.dtd"/>
+	</xmlcatalog>
+
+	<available file="lib" property="dependencies.available" type="dir"/>
+
+	<target name="usage">
+		<echo message="USAGE: ant &lt;target&gt;, where target is:"/>
+		<echo message="   compile: compile sourcecode to directory ${classes}"/>
+		<echo message="   build  : make a complete build in directory ${build}"/>
+		<echo message="   distro : make distribution files in ${distro}"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${classes}" />
+		<javac  destdir="${classes}" listfiles="true" optimize="false">
+			<src refid="path.src"/>
+			<classpath refid="path.build" />
+		</javac>
+		<copy todir="${classes}">
+			<fileset dir="src">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+
+    <target name="build" depends="getdependencies,cleanbuild,jar,doc">
+        <copy todir="${build}">
+            <fileset dir="dist"/>
+        </copy>
+    </target>
+
+    <target name="distro" depends="srcdistro,build">
+        <zip basedir="${build}" destfile="bzstats-${version}-bin.zip"/>
+    </target>
+
+    <target name="srcdistro">
+		<zip basedir="."
+			destfile="bzstats-${version}-src.zip"
+			excludes="*.log,.*,bzstats-*.zip,lib/**,build/**"
+		/>
+    </target>
+
+	<target name="cleanbuild">
+		<delete dir="${build}"/>
+	</target>
+
+    <target name="clean" depends="cleanbuild">
+        <delete dir="bin"/>
+		<delete dir="lib"/>
+		<delete>
+			<fileset defaultexcludes="false" dir=".">
+				<include name="**/*.log"/>
+			</fileset>
+			<fileset defaultexcludes="false" dir=".">
+				<include name="**/*.*~"/>
+			</fileset>
+		</delete>
+    </target>
+
+	<target name="expandlib">
+		<unzip dest="${classes}">
+			<fileset dir="lib">
+				<include name="commons-collections.jar"/>
+				<include name="jcommon-*.jar"/>
+				<include name="jfreechart-*.jar"/>
+				<include name="velocity-*.jar"/>
+				<include name="log4j-*.jar"/>
+			</fileset>
+		</unzip>
+	</target>
+
+	<target name="jar" depends="compile,expandlib">
+		<jar destfile="${build}/bzstats.jar" compress="true" basedir="${classes}">
+			<manifest>
+				<attribute name="Main-Class" value="bzstats.tool.BzStats"/>
+                <attribute name="Version" value="${version}"/>
+			</manifest>
+		</jar>
+		<delete dir="${classes}"/>
+	</target>
+
+	<!-- doc -->
+	<target name="doc">
+		<style
+			in="doc/bzstats.docb.xml"
+			out="${build}/bzstats.html"
+			style="${docbook.xsl}/xhtml/docbook.xsl"
+		>
+			<!--param name="html.stylesheet" expression="doc.css"/-->
+			<param name="section.autolabel" expression="1"/>
+			<xmlcatalog refid="catalog"/>
+		</style>
+	</target>
+
+	<target name="fo">
+		<style
+			in="doc/bzstats.docb.xml"
+			out="${build}/bzstats.fo"
+			style="${docbook.xsl}/fo/docbook.xsl">
+		<!-- find defined parameters in param.xsl included in xsl stylesheets -->
+			<param name="draft.watermark.image" expression=""/>
+			<param name="paper.type" expression="A4"/>
+			<param name="section.autolabel" expression="1"/>
+			<param name="fop.extensions" expression="1"/>
+			<param name="ulink.footnotes" expression="0"/>
+			<param name="passivetex.extensions" expression="0"/>
+			<xmlcatalog refid="catalog"/>
+		</style>
+	</target>
+
+	<target name="pdf" description="PDF" depends="fo">
+		<java classname="org.apache.fop.apps.Fop" classpathref="path.build">
+			<arg value="-fo"/>
+			<arg file="${build}/bzstats.fo"/>
+			<arg value="-pdf"/>
+			<arg file="${build}/bzstats.pdf"/>
+		</java>
+        <delete file="${build}/bzstats.fo"/>
+	</target>
+
+	<!-- make uml diagrams -->
+	<target name="uml">
+		<mkdir dir="${doc.generated}" />
+		<javadoc classpathref="path.build" access="public"
+		sourcepathref="path.src"
+		>
+			<doclet pathref="path.build" name="UmlGraph">
+				<param name="-output" value="${doc.generated}/bzstats.dot" />
+				<param name="-nodefillcolor" value="#ffffd0" />
+				<param name="-nodefontname" value="arial" />
+				<param name="-nodefontabstractname" value="ariali" />
+				<param name="-attributes" />
+				<param name="-operations" />
+				<param name="-visibility" />
+				<param name="-types" />
+			</doclet>
+			<package name="bzstats.*"/>
+		</javadoc>
+		<exec executable="${graphviz}/bin/dot.exe">
+			<arg value="-TPNG" />
+			<arg value="-o${doc.generated}/bzstats.png" />
+			<arg file="${doc.generated}/bzstats.dot" />
+		</exec>
+	</target>
+
+	<target name="vizant">
+		<mkdir dir="${doc.generated}" />
+		<taskdef classname="net.sourceforge.vizant.Vizant" classpathref="path.build" name="vizant"/>
+		<vizant antfile="build.xml" outfile="${doc.generated}/build.dot"/>
+		<exec executable="${graphviz}/bin/dot.exe">
+			<arg value="-TPNG" />
+			<arg value="-o${doc.generated}/build.png" />
+			<arg file="${doc.generated}/build.dot" />
+		</exec>
+	</target>
+
+	<target name="getdependencies" unless="dependencies.available">
+		<mkdir dir="${download}"/>
+
+		<get
+			src="${url.log4j}"
+			dest="${download}/log4j.zip"
+			usetimestamp="yes"
+			verbose="yes"
+		/>
+		<unzip dest="${download}" src="${download}/log4j.zip">
+			<patternset>
+				<include name="**/log4j-*.jar"/>
+			</patternset>
+		</unzip>
+
+		<get
+			src="${url.velocity}"
+			dest="${download}/velocity.zip"
+			usetimestamp="yes"
+			verbose="yes"
+		/>
+		<unzip dest="${download}" src="${download}/velocity.zip">
+			<patternset>
+				<include name="**/velocity-*.jar"/>
+				<exclude name="**/velocity-dep*"/>
+				<include name="**/commons-collections.jar"/>
+			</patternset>
+		</unzip>
+
+		<get
+			src="${url.jfreechart}"
+			dest="${download}/jfreechart.zip"
+			usetimestamp="yes"
+			verbose="yes"
+		/>
+		<unzip dest="${download}" src="${download}/jfreechart.zip">
+			<patternset>
+				<include name="**/jfreechart-*.jar"/>
+				<exclude name="**/jfreechart*-demo*"/>
+				<include name="**/jcommon-*.jar"/>
+			</patternset>
+		</unzip>
+
+		<get
+			src="${url.junit}"
+			dest="${download}/junit.zip"
+			usetimestamp="yes"
+			verbose="yes"
+		/>
+		<unzip dest="${download}" src="${download}/junit.zip">
+			<patternset>
+				<include name="**/junit.jar"/>
+			</patternset>
+		</unzip>
+
+		<copy flatten="true" todir="lib">
+			<fileset dir="${download}">
+				<include name="**/*.jar"/>
+			</fileset>
+		</copy>
+
+		<!-- docbook dependencies -->
+		<get
+			src="${url.docbookdtd}"
+			dest="${download}/docbookdtd.zip"
+			usetimestamp="yes"
+			verbose="yes"
+		/>
+		<unzip dest="lib/docbookdtd" src="${download}/docbookdtd.zip"/>
+
+		<get
+			src="${url.docbookxsl}"
+			dest="${download}/docbookxsl.zip"
+			usetimestamp="yes"
+			verbose="yes"
+		/>
+		<unzip dest="lib" src="${download}/docbookxsl.zip"/>
+
+
+
+	</target>
+
+
+	<target name="api">
+		<javadoc classpathref="path.build" access="public"
+				sourcepathref="path.src">
+			<classpath id="path.dbdoclet">
+
+			<fileset dir="/java/dbdoclet-0.63.0/share/dbdoclet/jars">
+				<include name="**/*.jar"/>
+			</fileset>
+			</classpath>
+			<doclet pathref="path.dbdoclet" name="org.dbdoclet.doclet.docbook.DocBookDoclet">
+				<param name="-d" value="${doc.generated}"/>
+				<param name="-nostatistics" value="true"/>
+			</doclet>
+			<package name="bzstats.*"/>
+		</javadoc>
+
+		<style
+			in="${doc.generated}/Reference.xml"
+			out="${doc.generated}/Reference.fo"
+			style="${docbook.xsl}/fo/docbook.xsl">
+		<!-- find defined parameters in param.xsl included in xsl stylesheets -->
+			<param name="draft.watermark.image" expression=""/>
+			<param name="paper.type" expression="A4"/>
+			<param name="section.autolabel" expression="1"/>
+			<param name="fop.extensions" expression="1"/>
+			<param name="ulink.footnotes" expression="0"/>
+			<param name="passivetex.extensions" expression="0"/>
+			<xmlcatalog refid="catalog"/>
+		</style>
+
+		<style
+			in="${doc.generated}/Reference.xml"
+			out="${doc.generated}/Reference.html"
+			style="${docbook.xsl}/xhtml/docbook.xsl"
+		>
+			<!--param name="html.stylesheet" expression="doc.css"/-->
+			<param name="section.autolabel" expression="1"/>
+			<xmlcatalog refid="catalog"/>
+		</style>
+
+
+		<java classname="org.apache.fop.apps.Fop" classpathref="path.build">
+			<arg value="-fo"/>
+			<arg file="${doc.generated}/Reference.fo"/>
+			<arg value="-pdf"/>
+			<arg file="${doc.generated}/Reference.pdf"/>
+		</java>
+
+	</target>
+
+</project>

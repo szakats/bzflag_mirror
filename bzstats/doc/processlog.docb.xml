@@ -1,0 +1,70 @@
+<section id="processlog">
+	<title>Processing a logfile</title>
+	<para>
+		&bzstats; treats a log file as one game. It is up to you how you keep the log files that
+		you offer to &bzstats;. You might process a daily logfile, a weekly logfile, or a logfile for each
+		game. The important thing to remember is that &bzstats; treats the <emphasis>entire logfile</emphasis>
+		as <emphasis>one game</emphasis>. &bzstats; has no notion of time-limited or score-limited games, or
+		server restarts.
+	</para>
+	<important><para>Any existing files will be overwritten by the output
+			files of &bzstats;.</para></important>
+	<para>
+		To process a log file, run <filename>bzstats.jar</filename> like
+		so:
+		<blockquote>
+			<para>
+			<command>java</command>
+			<option>-jar bzstats.jar</option>
+			<parameter>logfile</parameter>
+			<parameter><optional>outputfile</optional></parameter>
+			<parameter><optional>template</optional></parameter>
+			</para>
+			<para>
+			Parameters:
+			<variablelist>
+				<varlistentry>
+					<term><parameter>logfile</parameter></term>
+					<listitem><para>The logfile as described in <xref linkend="createlogfile"/></para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><parameter><optional>outputfile</optional></parameter></term>
+					<listitem><para>The report file to create, default is <filename>index.html</filename>.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><parameter><optional>template</optional></parameter></term>
+					<listitem><para>The template to use, default is <filename>index.vm</filename>.</para></listitem>
+				</varlistentry>
+			</variablelist>
+			</para>
+		</blockquote>
+
+		<example>
+			<title>Processing a logfile (standard).</title>
+			<blockquote>
+				<para>
+					<command>java -jar bzstats.jar lurker.log</command>
+				</para>
+			</blockquote>
+			<para>
+			This creates the file <filename>index.html</filename> and image files with
+			the extension <filename>.png</filename>.
+			</para>
+		</example>
+
+		<example>
+			<title>Processing a logfile (custom).</title>
+			<blockquote>
+				<para>
+					<command>java -jar bzstats.jar lurker.log page.html mytemplate.vm</command>
+				</para>
+			</blockquote>
+			<para>
+			This creates the file <filename>page.html</filename> and image files with
+			the extension <filename>.png</filename>.
+			The template <filename>mytemplate.vm</filename> is used.
+			</para>
+		</example>
+	</para>
+</section>
+
