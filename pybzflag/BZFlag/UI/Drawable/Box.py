@@ -131,7 +131,7 @@ class PlatformSides(Sides):
        bolts holding it all together. Looks a bit better than a very thin
        section of brick.
        """
-    textureNames = ["platform_side.jpeg", "wall_grime.jpeg"]
+    textureNames = ("platform_side.jpeg", "wall_grime.jpeg")
     def __init__(self, box):
         aspect = 8/10
         self.texRepeats = (box.size[0] / box.size[2] * 2 * aspect,

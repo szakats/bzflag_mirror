@@ -54,7 +54,7 @@ class WallSides(Box.Sides):
 
 
 class WallTop(DisplayList):
-    textureName = 'concrete.jpeg'
+    textureName = 'field_generator.jpeg'
     def set(self, wall):
         self.angle = wall.angle
         (self.center, self.size) = thickify(wall.center, wall.size, wall.angle)
