@@ -176,7 +176,7 @@ class OpenGLViewport(PygameViewport):
     def init(self):
         from OpenGL import GL
 
-        self.nearClip    = 3.0
+        self.nearClip    = 0.01
         self.farClip     = 2500.0
         self.fov         = 45.0
         self.rectExp = [0,0] + list(self.size) # A function or list specifying our relative viewport
