@@ -16,9 +16,6 @@ Todo list, in no particular order:
 
       * Vary the cloud velocity according to the current global wind speed.
 
-      * Light the clouds correctly. This probably entails pulling a color from the sky near
-        the horizon as well.
-
       * Clouds near the horizon should be obscured by haze.
 
       * Clouds should get a good deal smaller as they approach the horizon
