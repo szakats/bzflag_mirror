@@ -73,6 +73,10 @@ class PygameViewport(Viewport):
             self.onFinishFrame,
             ]
 
+        # For subviews created with region()
+        self.parent = None
+        self.rootView = self
+
         pygame.init()
         self.display = pygame.display
         self.resize(size)
@@ -144,6 +148,7 @@ class PygameViewport(Viewport):
         sub = copy.copy(self)
         sub.screen = self.secreen.subsurface(rect)
         sub.size = rect[2:]
+        sub.parent = self
         return sub
 
 
@@ -199,15 +204,24 @@ class OpenGLViewport(PygameViewport):
            sequence.
            """
         sub = copy.copy(self)
-        sub.setViewport(rect)
+        sub.parent = self
+        sub.setViewport((self.viewOrigin[0] + rect[0],
+                         self.viewOrigin[1] + rect[1],
+                         rect[2],
+                         rect[3]))
         sub.onSetupFrame  = Event.Event(sub.configureOpenGL)
         sub.onDrawFrame   = Event.Event()
         sub.onFinishFrame = Event.Event()
 
         # Stick it in our render sequence right before our onFinishFrame which flips the buffer
-        self.renderSequence = self.renderSequence[:-1] + \
-                              [sub.onSetupFrame, sub.onDrawFrame, sub.onFinishFrame] + \
-                              self.renderSequence[-1:]
+        # This should be safe for nesting viewport regions-  and the last entry will always be
+        # the root viewport's onFinishFrame event.
+        self.rootView.renderSequence = self.rootView.renderSequence[:-1] + \
+                                       [sub.onSetupFrame, sub.onDrawFrame, sub.onFinishFrame] + \
+                                       self.rootView.renderSequence[-1:]
+
+        # A forceful reminder that we don't manage our own rendering any more
+        sub.renderSequence = None
         return sub
 
 ### The End ###

@@ -27,7 +27,7 @@ from OpenGL.GL import *
 
 
 class HUDBorderView:
-    """A view that draws a darkened background and thin border"""
+    """A view that draws a shaded background and thin border"""
     def __init__(self, viewport):
         viewport.fov = None
         viewport.onDrawFrame.observe(self.render)
@@ -48,7 +48,7 @@ class HUDBorderView:
         glVertex2f(0,1)
         glEnd()
 
-        glColor4f(1,1,1,0.2)
+        glColor4f(0,0,0,0.2)
         glBegin(GL_POLYGON)
         glVertex2f(0,0)
         glVertex2f(1,0)
@@ -59,9 +59,13 @@ class HUDBorderView:
 
 def attach(game, eventLoop):
     viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
+
     view3d   = ThreeDView.ThreeDView(game, viewport)
     ThreeDView.ThreeDController(view3d, viewport)
-    RadarView.RadarView(game, viewport.region((50,50,200,200)))
-    HUDBorderView(viewport.region((50,50,600,200)))
+
+    hud = viewport.region((50,50,600,200))
+    HUDBorderView(hud)
+
+    RadarView.RadarView(game, hud.region((10,10,180,180)))
 
 ### The End ###

@@ -52,6 +52,7 @@ class RadarView:
         self.center = [0,0,0]
         self.angle = 0
         self.follow = None
+        viewport.fov = None
 
         viewport.setCaption("%s Radar View" % BZFlag.name)
         def onDrawFrame():
@@ -132,16 +133,18 @@ class RadarView:
             self.zoom   = 2
 
     def render(self):
+        self.updateFollowing()
+
         glEnable(GL_BLEND)
         glDisable(GL_LIGHTING)
         glDisable(GL_CULL_FACE)
         glDisable(GL_COLOR_MATERIAL)
         glDisable(GL_DEPTH_TEST)
-        
+
         glPushMatrix()
-        glTranslatef(0,0,-10)
-        self.updateFollowing()
-        glScalef(0.01 * self.zoom, 0.01 * self.zoom, 1)
+        glTranslatef(0.5, 0.5, 0)
+        glScalef(float(self.zoom) / self.game.world.size[0],
+                 float(self.zoom) / self.game.world.size[1], 1)
         glRotatef(self.angle, 0,0,1)
         glTranslatef(-self.center[0], -self.center[1], 0)
         self.renderWorld()
