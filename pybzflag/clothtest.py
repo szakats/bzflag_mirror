@@ -15,9 +15,11 @@ class Wind:
         self.drawables = None
         
         # Wind, with speed and direction varying over time with a perlin noise function
-        self.vector = Animated.Vector(Animated.PerlinNoise(persistence = 0.1,
-                                                           amplitude = 1,
-                                                           frequency = 0.01))
+        self.vector = Animated.Vector(Animated.PerlinNoise(persistence = 0.8,
+                                                           octaves     = 10,
+                                                           amplitude   = 1,
+                                                           frequency   = 0.01,
+                                                           ))
         
     def integrate(self, dt):
         self.vector.integrate(dt)

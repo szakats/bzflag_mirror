@@ -224,6 +224,7 @@ class RadarView:
         glDisable(GL_DEPTH_TEST)
         GLExtension.disableMultitex()
         glDisable(GL_TEXTURE_2D)
+        glEnable(GL_LINE_SMOOTH)
 
         size = self.viewport.size
         glPushMatrix()

@@ -62,6 +62,7 @@ class Vector(GLDrawable):
     def draw(self, rstate):
         glDisable(GL_LIGHTING)
         glEnable(GL_BLEND)
+        glEnable(GL_LINE_SMOOTH)
         glPushMatrix()
 
         # Save the top 3x3 part of the modelview matrix so we can
@@ -103,6 +104,7 @@ class Vector(GLDrawable):
         glPopMatrix()
         glEnable(GL_LIGHTING)
         glDisable(GL_BLEND)
+        glDisable(GL_LINE_SMOOTH)
         glColor3f(1,1,1)
 
 ### The End ###
