@@ -185,10 +185,7 @@ class RadarView:
         self.dot = RegularPolygon(8)
 
         viewport.setCaption("%s Radar View" % BZFlag.name)
-        def onDrawFrame():
-            game.update()
-            self.render()
-        viewport.onDrawFrame.observe(onDrawFrame)
+        viewport.onDrawFrame.observe(self.render)
 
     def renderPlayers(self, rstate):
         # XXX - setting self.follow here is just for testing

@@ -32,7 +32,7 @@ class BaseClient(Network.Endpoint):
 
     outgoing = Protocol.ToServer
     incoming = Protocol.FromServer
-    
+
     def init(self):
         Network.Endpoint.init(self)
         self.connected = 0
@@ -42,10 +42,10 @@ class BaseClient(Network.Endpoint):
             })
         Event.attach(self, 'onConnect', 'onDisconnect', 'onConnectUDP')
 
-        def setOptions(**options):
-            if 'server' in options.keys():
-                self.connect(options['server'])
-        self.onSetOptions.observe(setOptions)
+    def setOptions(self, **options):
+        Network.Endpoint.setOptions(self, **options)
+        if 'server' in options.keys():
+            self.connect(options['server'])
 
     def connect(self, server):
         """This does the bare minimum necessary to connect to the

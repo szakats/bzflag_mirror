@@ -34,9 +34,7 @@ class AnaglyphGame(AnaglyphView):
         AnaglyphView.__init__(self, viewport, Scene(game))
         viewport.setCaption("%s Anaglyph View" % BZFlag.name)
 
-        def onDrawFrame():
-            game.update()
-        viewport.onDrawFrame.observe(onDrawFrame)
+        viewport.onDrawFrame.observe(game.update)
 
 
 def attach(game, eventLoop):

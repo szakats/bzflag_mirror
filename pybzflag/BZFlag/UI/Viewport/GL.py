@@ -58,8 +58,10 @@ class OpenGLViewport(PygameViewport):
         # Set up the Mode object that handles viewport-wide per-frame modes.
         # By default we use ClearedMode.
         self.mode = ClearedMode()
-        self.onSetupFrame.observe(lambda: self.mode.setupFrame())
-        self.onSetupFrame.observe(self.configureOpenGL)
+
+    def onSetupFrame(self):
+        self.configureOpenGL()
+        self.mode.setupFrame()
 
     def onFinishFrame(self):
         self.mode.finishFrame()

@@ -54,15 +54,16 @@ class StereoView:
         self.lefteye.camera  = EyeCamera(self, -30)
         self.righteye.camera = EyeCamera(self,  30)
 
-        def setupLeft():
-            if glGetBooleanv(GL_STEREO):
-                glDrawBuffer(GL_LEFT_BACK)
-        self.lefteye.viewport.onDrawFrame.observe(setupLeft)
+        self.lefteye.viewport.onDrawFrame.observe(self.setupLeft)
+        self.righteye.viewport.onDrawFrame.observe(self.setupRight)
 
-        def setupRight():
-            if glGetBooleanv(GL_STEREO):
-                glDrawBuffer(GL_RIGHT_BACK)
-        self.righteye.viewport.onDrawFrame.observe(setupRight)
+    def setupLeft(self):
+        if glGetBooleanv(GL_STEREO):
+            glDrawBuffer(GL_LEFT_BACK)
+
+    def setupRight(self):
+        if glGetBooleanv(GL_STEREO):
+            glDrawBuffer(GL_RIGHT_BACK)
 
 ### The End ###
 

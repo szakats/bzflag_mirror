@@ -24,7 +24,7 @@ into observable and traceable events.
 #
 
 from BZFlag import Network, Errors
-import select, time, sys
+import select, time, sys, weakref, types
 
 
 class Event:
@@ -42,24 +42,68 @@ class Event:
        set up Event wrappers on member functions in bulk.
        """
     def __init__(self, *args):
+        # Our client dict maps from callback IDs to callables.
+        # This makes using weakref proxy objects easy without making unobserve() a pain.
+        # Note that we must use the id rather than the object itself, since the whole
+        # point is to avoid requiring a reference to the callable.
         self.clients = {}
         for arg in args:
             self.observe(arg)
         self.unhandledCallback = None
 
     def observe(self, callback):
-        self.clients[callback] = 1
+        """Call the supplied calllback with the same arguments when this event is called.
+           Callbacks are referenced weakly, so their observation ends when the callback
+           is not used anywhere else.
+
+           This means that lines like the following won't work, since the callback immediately
+           becomes unreferenced and is removed:
+               foo.observe(lambda: self.boing(5))
+               foo.observe(SuperClass().frob)
+
+           To solve these issues you must reference the callback at least one other place.
+           This could be in the local namespace of your script, in your class' dictionary, etc.
+           It is usually best to replace lambda expressions with class member functions.
+           The same is true of functions declared inside another function's body.
+           """
+        if type(callback) is types.MethodType:
+            # We tread bound method objects as a special case. Bound methods
+            # are created when a class.method expression is evaluated, tying
+            # the class and method together into a single callable object.
+            # Unfortunately, these objects don't have the lifetime of the class
+            # in question, they are usually discarded immediately. Here we
+            # detect bound methods, and store proper weakrefs to the method
+            # and the class.
+            self.clients[hash(callback)] = EventMethodObserver(self, callback)
+        else:
+            # The default wrapper for weak references. This class handles
+            # deleting the client list entry properly when the callback
+            # is deleted.
+            self.clients[hash(callback)] = EventObserver(self, callback)
+
+    def strongObserve(self, callback):
+        """Like observe(), but use a normal reference rather than a weak ref. This is
+           necessary for using lambdas or other types of temporary functions as obsrvers.
+           The only way for these observers to be removed is explicitly calling unobserve().
+           """
+        # We don't need to worry with a wrapper class since we don't need a weakref
+        self.clients[hash(callback)] = callback
 
     def replace(self, callback):
+        """Remove all existing observers for this event, and add the given one"""
         self.clients = {}
         self.observe(callback)
 
     def unobserve(self, callback):
-        del self.clients[callback]
+        """Stop calling callback() when this event is triggered"""
+        del self.clients[hash(callback)]
 
     def __call__(self, *args, **kw):
+        """Trigger this event by calling it. The parameters passed to the event will
+           be broadcast to all of its observers.
+           """
         if self.clients:
-            for client in self.clients.keys():
+            for client in self.clients.itervalues():
                 r = client(*args, **kw)
                 # Allow the client to abort
                 if r:
@@ -79,6 +123,9 @@ class Event:
 
            fmt can also be a callable expression (created with lambda, for example)
            that will be called with the event's arguments and the result will be print'ed.
+
+           Note that traces are currently immortal, since they are referenced
+           strongly and there is no way to unobserve them.
            """
         def traceCallback(*args, **kw):
             if type(fmt) == str:
@@ -92,7 +139,7 @@ class Event:
                 print fmt % kw
             else:
                 print fmt(*args, **kw)
-        self.observe(traceCallback)
+        self.strongObserve(traceCallback)
 
 
 def attach(cls, *args):
@@ -108,6 +155,40 @@ def attach(cls, *args):
             setattr(cls, arg, Event(getattr(cls, arg)))
         else:
             setattr(cls, arg, Event())
+
+
+class EventObserver:
+    """A helper class for Event that wraps the callback in a weakref and
+       automatically self-destructs when it's time.
+       """
+    def __init__(self, event, callback):
+        self.event = event
+        self.callbackHash = hash(callback)
+        self.ref = weakref.ref(callback, self.unref)
+
+    def __call__(self, *args, **kw):
+        self.ref(*args, **kw)
+
+    def unref(self, ref):
+        del self.event.clients[self.callbackHash]
+
+
+class EventMethodObserver:
+    """An alternative to EventObserver that is used for bound methods.
+       Since bound methods are usually one-time-use objects, this stores the
+       unbound method and a weakref to the bound method's instance.
+       """
+    def __init__(self, event, callback):
+        self.event = event
+        self.callbackHash = hash(callback)
+        self.im_self_ref = weakref.ref(callback.im_self, self.unref)
+        self.im_func = callback.im_func
+
+    def __call__(self, *args, **kw):
+        self.im_func(self.im_self_ref(), *args, **kw)
+
+    def unref(self, ref):
+        del self.event.clients[self.callbackHash]
 
 
 class Timer:

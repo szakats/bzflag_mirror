@@ -67,7 +67,9 @@ class ChatThread(Thread):
                 return
             # Strip off the newline and all other trailing space
             client.sendMessage(line.rstrip())
-client.onEnterGame.observe(ChatThread().start)
+
+cthread = ChatThread()
+client.onEnterGame.observe(cthread.start)
 
 ui.attach(client.game, client.eventLoop)
 client.run()

@@ -52,25 +52,27 @@ class StatefulServer(BaseServer):
         Event.attach(self, 'onAttemptEnter', 'onEnter', 'onFinishEnter',
                      'onWelcome')
 
-        def setOptions(**options):
-            if 'world' in options.keys() and options['world']:
-                self.game.world = World.load(options['world'])
+        self.onListen.observe(self.publicize)
 
-            if 'gameStyle' in options.keys():
-                self.game.world.style.gameStyle = options['gameStyle']
-                
-            if 'shots' in options.keys():
-                self.game.world.style.shots = int(options['shots'])
-                
-        self.onSetOptions.observe(setOptions)
+    def setOptions(self, **options):
+        Network.Endpoint.setOptions(self, **options)
+        if 'world' in options.keys() and options['world']:
+            self.game.world = World.load(options['world'])
 
-        def onListen():
-            if self.options['publicTitle']:
-                self.publicize()
-        self.onListen.observe(onListen)
+        if 'gameStyle' in options.keys():
+            self.game.world.style.gameStyle = options['gameStyle']
 
-    def publicize(self, enable=1):
-        """Periodically post information about this server to the metaserver"""
+        if 'shots' in options.keys():
+            self.game.world.style.shots = int(options['shots'])
+
+    def publicize(self, enable=None):
+        """Periodically post information about this server to the metaserver.
+           If enable is None, it is automatically set according to whether or
+           not the publicTitle option is true.
+           """
+        if enable is None:
+            enable = self.options['publicTitle']
+
         if self.publicityTimer:
             # Remove any old timers
             self.eventLoop.remove(self.publicityTimer)

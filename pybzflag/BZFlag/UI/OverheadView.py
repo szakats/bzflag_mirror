@@ -97,7 +97,7 @@ def worldToImage(world, size, oversample=2, colors=colorScheme):
                 color = colorsys.hsv_to_rgb(*hsv)
                 color = (color[0]*255, color[1]*255, color[2]*255)
                 draw.polygon(poly, fill=color, outline=colors['outline'])
-    
+
     return img.resize(size, Image.ANTIALIAS)
 
 
@@ -109,19 +109,17 @@ class OverheadView:
     def __init__(self, game, viewport):
         self.game = game
         self.viewport = viewport
-        self.cachedWorld = None
+        self.resetCache()
 
         # When the world is reloaded, invalidate our cached rendering of it
-        def onLoadWorld():
-            self.cachedWorld = None
-        game.world.onLoad.observe(onLoadWorld)
+        game.world.onLoad.observe(self.resetCache)
 
         # Set ourselves up to render to the given viewport
         viewport.setCaption("%s Overhead View" % BZFlag.name)
-        def onDrawFrame():
-            game.update()
-            self.render(viewport.screen)
-        viewport.onDrawFrame.observe(onDrawFrame)
+        viewport.onDrawFrame.observe(self.render)
+
+    def resetCache(self):
+        self.cachedWorld = None
 
     def worldToView(self, point):
         return coordWorldToView(self.size, self.game.world, point)
@@ -135,12 +133,13 @@ class OverheadView:
         img = worldToImage(self.game.world, self.size)
         surface.blit(pygame.image.fromstring(img.tostring(), img.size, "RGB"), (0,0))
 
-    def render(self, surface):
+    def render(self):
         """Render the overhead view to the given surface. This includes the
            game world, with transient objects such as players and flags overlaid on top.
            """
         import pygame
         self.size = surface.get_size()
+        surface = self.viewport.screen
 
         # Since the game world doesn't usually change, we cache a rendered version of it.
         if (not self.cachedWorld) or self.cachedWorld.get_size() != surface.get_size():

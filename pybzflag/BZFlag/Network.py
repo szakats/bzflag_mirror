@@ -318,21 +318,21 @@ class Endpoint:
          - Event handlers for other events should be of the form onFoo()
 
        All onFoo() and onMsgFoo() events are observable and traceable,
-       See the Event class for more information about this feature.      
+       See the Event class for more information about this feature.
        """
-    
+
     # Protocol modules for the messages sent in and out of this endpoint
     outgoing = None
     incoming = None
-    
+
     def __init__(self, **options):
         """Any options passed to the constructor will be sent to setOptions"""
         self.tcp = None
         self.udp = None
         self.options = {}
-        
+
         from BZFlag import Event
-        Event.attach(self, 'onAnyMessage', 'onUnhandledMessage', 'onSetOptions')
+        Event.attach(self, 'onAnyMessage', 'onUnhandledMessage')
 
         # Add events for all messages, with onUnhandledMessage as an
         # unhandled event handler.
@@ -346,19 +346,9 @@ class Endpoint:
             setattr(self, eventName, event)
 
         self.init()
-        self.onSetOptions(**options)
+        self.setOptions(**options)
 
     def setOptions(self, **options):
-        self.onSetOptions(**options)
-
-    def init(self):
-        """A hook for subclasses to add initialization in the proper sequence"""
-        pass
-
-    def getMsgHandlerName(self, messageClass):
-        return "on%s" % messageClass.__name__
-
-    def onSetOptions(self, **options):
         self.options.update(options)
 
         if 'eventLoop' in options.keys():
@@ -366,6 +356,13 @@ class Endpoint:
         else:
             from BZFlag import Event
             self.eventLoop = Event.EventLoop()
+
+    def init(self):
+        """A hook for subclasses to add initialization in the proper sequence"""
+        pass
+
+    def getMsgHandlerName(self, messageClass):
+        return "on%s" % messageClass.__name__
 
     def getSupportedOptions(self):
         return self.options.keys()

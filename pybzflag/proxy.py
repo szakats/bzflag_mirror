@@ -18,5 +18,5 @@ server.onConnect.trace(lambda socket: "--- Connected client %d, from %s:%s" %
 server.onDisconnect.trace(lambda socket: "--- Disconnected client %d, from %s:%s" %
                           (socket.id, socket.address[0], socket.address[1]))
 
-Util.proxy(server, client)
+proxy = Util.Proxy(server, client)
 eventLoop.run()

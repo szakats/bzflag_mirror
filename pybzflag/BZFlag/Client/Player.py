@@ -49,15 +49,13 @@ class PlayerClient(StatefulClient):
 
         # Set up an observer for the game's onAddPlayer that will set
         # up our player member whenever that MsgAddPlayer is received.
-        def onAddPlayer(game, player):
-            if player.identity.playerId == self.id:
-                self.player = player
-                self.onEnterGame()
-        self.game.onAddPlayer.observe(onAddPlayer)
+        self.game.onAddPlayer.observe(self.addPlayer)
+        self.game.world.onLoad.observe(self.enterGame)
 
-        def onLoadWorld():
-            self.enterGame()
-        self.game.world.onLoad.observe(onLoadWorld)
+    def addPlayer(self, game, player):
+        if player.identity.playerId == self.id:
+            self.player = player
+            self.onEnterGame()
 
     def enterGame(self):
         msg = self.outgoing.MsgEnter()
@@ -65,7 +63,7 @@ class PlayerClient(StatefulClient):
                                    self.options['team'],
                                    self.options['email'],
                                    self.options['playerType'])
-                                   
+
         if not identity.callSign:
             raise Errors.ProtocolError("A call sign is required to enter the game")
         msg.playerType = identity.type

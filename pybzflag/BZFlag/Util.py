@@ -77,31 +77,34 @@ def hexDump(src, dest, bytesPerLine=16, wordSize=2):
         dest.write("\n")
 
 
-def proxy(server, client):
+class Proxy:
     """Set up a proxy between the server and client.
        Currently this only works correctly when there is one client
        connected to the server. It forwards all events (tcp and udp)
        from one to the other.
        """
-    # Let the user know when our client connects, and force
-    # our server to hand out the same client ID we were given.
-    def onClientConnect():
+    def __init__(self, server, client):
+        # Let the user know when our client connects, and force
+        # our server to hand out the same client ID we were given.
+        client.onConnect.observe(self.onClientConnect)
+
+        # Set up events to forward messages between
+        # client and server, dumping them to stdout
+        client.onUnhandledMessage.replace(self.onClientMessage)
+        server.onUnhandledMessage.replace(self.onServerMessage)
+
+    def onClientConnect(self):
         server.nextClientID = client.id
         server.clientIDIncrement = 0
-    client.onConnect.observe(onClientConnect)
 
-    # Set up events to forward messages between
-    # client and server, dumping them to stdout
-    def onClientMessage(msg):
+    def onClientMessage(self, msg):
         try:
             server.clientsByID[client.id].write(msg, msg.protocol)
         except KeyError:
             pass
-    client.onUnhandledMessage.replace(onClientMessage)
 
-    def onServerMessage(msg):
+    def onServerMessage(self, msg):
         getattr(client, msg.protocol).write(msg)
-    server.onUnhandledMessage.replace(onServerMessage)
 
 
 def autoFile(name, mode="r"):

@@ -41,5 +41,5 @@ def showMessage(msg):
 server.onAnyMessage.observe(showMessage)
 client.onAnyMessage.observe(showMessage)
 
-Util.proxy(server, client)
+proxy = Util.Proxy(server, client)
 eventLoop.run()

@@ -127,10 +127,17 @@ class KeyAxis(Event.Event):
     """A combination of two keys that simulate a scalar axis"""
     def __init__(self, viewport, keyPlus, keyMinus, scale=1, modifiers=None):
         Event.Event.__init__(self)
+        self.scale = scale
         self.keyPlus = KeyPress(viewport, keyPlus, modifiers)
         self.keyMinus = KeyPress(viewport, keyMinus, modifiers)
-        self.keyPlus.observe(lambda: self(scale))
-        self.keyMinus.observe(lambda: self(-scale))
+        self.keyPlus.observe(self.increment)
+        self.keyMinus.observe(self.decrement)
+
+    def increment(self):
+        self(self.scale)
+
+    def decrement(self):
+        self(-self.scale)
 
 
 class MouseWheel(Event.Event):
@@ -161,9 +168,10 @@ class Viewing:
         self.viewport = viewport
         self.movieRecorder = None
         self.savedMode = None
+        self.bindings = []
 
         # Need to make this toggleable...
-        Instrument.FrameRate(viewport)
+        self.frameRateInstrument = Instrument.FrameRate(viewport)
 
         self.view.camera = ThreeDRender.SmoothedCamera()
         view.camera.position = (0, 0, 20)
@@ -189,12 +197,13 @@ class Viewing:
         self.bind(MouseDrag, dragButton, pygame.KMOD_CTRL).observe(self.lift)
 
     def bind(self, cls, *args, **kw):
-        """Set up a key or mouse binding using the given class. Returns the clas
-           instance ready for binding. At the moment this function doesn't do much,
-           but it will probably be used in the future to make the list of key
-           bindings editable and removable.
+        """Set up a key or mouse binding using the given class. Returns the class
+           instance ready for binding to an observer, and stores the event for later
+           editing.
            """
-        return cls(self.viewport, *args, **kw)
+        binding = cls(self.viewport, *args, **kw)
+        self.bindings.append(binding)
+        return binding
 
     def pan(self, horizontal, vertical):
         (x, y, z) = self.view.camera.position
@@ -286,10 +295,10 @@ class Editing(Viewing):
     """Implement a superset of the Viewing controls, used for editing worlds"""
     def __init__(self, view, viewport):
         Viewing.__init__(self, view, viewport)
+        viewport.onMouseButtonDown.observe(self.mouseButtonDown)
 
-        def onMouseButtonDown(event):
-            if event.button == 1:
-                print 'picked: %r' % view.pick(event.pos)
-        viewport.onMouseButtonDown.observe(onMouseButtonDown)
+    def mouseButtonDown(event):
+        if event.button == 1:
+            print 'picked: %r' % view.pick(event.pos)
 
 ### The End ###

@@ -103,6 +103,7 @@ class Viewport:
         sub.setRect(rect)
 
         # Disconnect events and the renderSequence from the parent
+        sub.onFrame       = Event.Event()
         sub.onSetupFrame  = Event.Event()
         sub.onDrawFrame   = Event.Event()
         sub.onFinishFrame = Event.Event()

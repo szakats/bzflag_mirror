@@ -135,10 +135,11 @@ class ThreeDView(ThreeDRender.View):
         # We don't need the viewport to clear the color buffer for us, since we have the sky
         viewport.mode = Viewport.GL.UnclearedMode()
 
-        def onDrawFrame():
-            game.update()
-            self.scene.update()
-        viewport.onDrawFrame.observe(onDrawFrame)
+        viewport.onDrawFrame.observe(self.drawFrame)
+
+    def drawFrame(self):
+        game.update()
+        self.scene.update()
 
 
 def attach(game, eventLoop):

@@ -53,7 +53,7 @@ class BaseServer(Network.Endpoint):
     outgoing = Protocol.FromServer
     incoming = Protocol.ToServer
     clientInfoClass = ClientInfo
-    
+
     def init(self):
         Network.Endpoint.init(self)
         self.protocolVersion = BZFlag.protocolVersion
@@ -67,10 +67,10 @@ class BaseServer(Network.Endpoint):
             })
         Event.attach(self, 'onListen', 'onConnect', 'onDisconnect')
 
-        def setOptions(**options):
-            if 'interface' in options.keys():
-                self.listen(options['interface'])
-        self.onSetOptions.observe(setOptions)
+    def setOptions(self, **options):
+        Network.Endpoint.setOptions(self, **options)
+        if 'interface' in options.keys():
+            self.listen(options['interface'])
 
     def listen(self, interface):
         """Listen for multiple protocols on the same interface and port"""
