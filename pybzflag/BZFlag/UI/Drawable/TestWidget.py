@@ -24,13 +24,16 @@ from DisplayList import *
 from OpenGL.GL import *
 
 class TestWidget(DisplayList):
-    def drawToList(self, center):
+    def set(self, center):
+        self.center = center
+
+    def drawToList(self):
         size = 0.2
         glPushMatrix()
 	glLoadIdentity()
         glColor3f(1.0, 0.0, 0.0)
         # lower left corner
-	glTranslatef(*center)
+	glTranslatef(*self.center)
 	glBegin(GL_QUADS)
         # front
 	glVertex3f(-size, size, -size)
