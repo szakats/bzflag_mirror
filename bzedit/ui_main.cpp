@@ -280,7 +280,7 @@ void MainWindow::update(short updates) {
 	  case Element::TELEPORTER:
 	    if(updates & MW::SPINVALUES) {
 	      gtk_spin_button_set_value(GTK_SPIN_BUTTON(sbpx), (*world)[i].t->get_px());
-	      gtk_spin_button_set_value(GTK_SPIN_BUTTON(sbpy), 0.0);
+	      gtk_spin_button_set_value(GTK_SPIN_BUTTON(sbpy), (*world)[i].t->get_py());
 	      gtk_spin_button_set_value(GTK_SPIN_BUTTON(sbpz), (*world)[i].t->get_pz());
 	      gtk_spin_button_set_value(GTK_SPIN_BUTTON(sbsx), (*world)[i].t->get_sx());
 	      gtk_spin_button_set_value(GTK_SPIN_BUTTON(sbsy), (*world)[i].t->get_sy());
@@ -602,6 +602,7 @@ gint about(GtkWidget *window, gpointer data) {
   static GtkWidget *dialog = NULL;
   const char *authors[] = {
     "David Trowbridge",
+    "Jeff Myers",
     NULL
   };
   if(dialog) {

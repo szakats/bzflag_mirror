@@ -1,4 +1,5 @@
 1) Make it work
+2) Combine with Jeff M's windows code, create a common code base
 3) That whole GNOME thing would be nice
 	* Add support for GConf (+configuration)
 	* Add support for bonobo (?)
