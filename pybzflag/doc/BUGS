@@ -7,8 +7,3 @@
  - fix resizing: what might be an SDL bug is causing the window to get stuck
    resizing to its original size when using a WM or equivalent that does
    opaque resizing. Known to break under sawfish, win32, and OS X.
-
- - I introduced an odd bug into DynamicTexture when optimizing it for showing/hiding
-   viewports: it seems to be calling the root viewport's onFinishFrame, or something.
-   The dynamic texture init goes much slower than before, and some of the textures
-   appear on the front buffer.
