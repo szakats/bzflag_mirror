@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from BZFlag import CommandLine, Server
 
-argParser = CommandLine.Parser(Server.StandardServer,
+argParser = CommandLine.Parser(Server.StrictServer,
                                world = "Random")
 argParser.add_option("-v", "--view", dest="view", action="store_true", 
                      help="Shows an overhead view of the game in progress")

@@ -1,8 +1,7 @@
-""" BZFlag.Server
+""" BZFlag.Server.Strict
 
-Package providing a collection of classes implementing the BZFlag server.
-The server is fundamentally responsible for allowing a group of clients
-to interact with a game state object.
+Provides the StrictServer class, extending StandardServer with
+anti-cheating measures.
 """
 #
 # Python BZFlag Protocol Package
@@ -23,9 +22,13 @@ to interact with a game state object.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from Base import *
-from Stateful import *
-from Standard import *
-from Strict import *
+from BZFlag.Server.Standard import StandardServer
+
+
+class StrictServer(StandardServer):
+    """A server that implements strict anti-cheating rules on top of the
+       basic game rules provided by StandardServer
+       """
+    pass
 
 ### The End ###

@@ -126,7 +126,7 @@ def client(clientClass=Client.PlayerClient, argv=sys.argv, **extraDefaults):
        """
     return Parser(clientClass, **extraDefaults).parse(argv)
 
-def server(serverClass=Server.StandardServer, argv=sys.argv, **extraDefaults):
+def server(serverClass=Server.StrictServer, argv=sys.argv, **extraDefaults):
     """A similar convenience function for servers"""
     return Parser(serverClass, **extraDefaults).parse(argv)
 
