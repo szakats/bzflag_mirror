@@ -156,27 +156,29 @@ class ThreeDView:
 
 class ThreeDController:
   def __init__(self, view, viewport):
-    self.view = view
-    self.viewport = viewport
-    self.time = Animated.Timekeeper()
+    time = Animated.Timekeeper()
+    distance = Animated.Value(view.camera.distance,
+                              Animated.LogApproach(view.camera.distance, 4))
 
     view.camera.focus = (0, 0, -90)
 
     def onSetupFrame():
-      dt = self.time.step()
+      dt = time.step()
+      distance.integrate(dt)
+      view.camera.distance = distance.value
       view.camera.rotation += 6 * dt
     viewport.onSetupFrame.observe(onSetupFrame)
 
     def onMouseButtonDown(event):
       scale = 1.08
       if event.button == 4:
-        view.camera.distance /= scale
-        if view.camera.distance < 0.1:
-          view.camera.distance = 0.1
+        distance.f.target /= scale
+        if distance.f.target < 0.1:
+          distance.f.target = 0.1
       if event.button == 5:
-        view.camera.distance *= scale
-        if view.camera.distance > 1500:
-          view.camera.distance = 1500
+        distance.f.target *= scale
+        if distance.f.target > 1500:
+          distance.f.target = 1500
     viewport.onMouseButtonDown.observe(onMouseButtonDown)
 
 

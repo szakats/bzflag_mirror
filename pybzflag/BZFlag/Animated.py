@@ -103,5 +103,19 @@ class Velocity:
         self.value[i] = v
 
 
+class LogApproach:
+    """A class that can be used as an integration function for Value and Vector.
+       Approaches a target, fast at first but exponentially slowing down to approach it.
+       """
+    def __init__(self, target, speed):
+        self.target = target
+        self.speed  = speed
+
+    def __call__(self, oldValue, dt, index=None):
+        if index is None:
+            t = self.target
+        else:
+            t = self.target[index]
+        return oldValue + (t - oldValue) * dt * self.speed
 
 ### The End ###
