@@ -53,6 +53,12 @@ from BZFlag import Util
 import re
 
 
+lexicalScanner = re.compile(r"""
+    ((?P<boing>  [0-9])
+    |(?P<dot>    \.)
+    )""", re.VERBOSE | re.UNICODE)
+
+
 class Reader:
     """Scans a VRML file, instantiating drawables for all readable meshes.
        The file can be specified as a file object, file name, or URI.
@@ -82,10 +88,12 @@ class Reader:
             line = unicode(line, self.encoding)
             line = re.sub("#.*", "", line)
 
-            # Tokenize and resume processing the individual tokens
-            for token in re.split("\s+", line):
-                if token:
-                    self.parseToken(token)
+            # Thanks to Python 2.2's finditer method, we can implement a fairly
+            # complete lexical scanner using only a regular expression.
+            for token in lexicalScanner.finditer(line):
+                for tokenType, tokenValue in token.groupdict().items():
+                    if tokenValue is not None:
+                        self.parseToken(tokenType, tokenValue)
 
     def parseHeader(self, line):
         """Parse the #VRML header line. This doesn't make any attempt to validate
@@ -93,7 +101,7 @@ class Reader:
            """
         self.encoding = re.split("\s+", line)[2]
 
-    def parseToken(self, token):
-        print token
+    def parseToken(self, type, value):
+        print type, value
 
 ### The End ###
