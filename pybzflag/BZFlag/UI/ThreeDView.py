@@ -204,8 +204,8 @@ class ThreeDView:
 
 
 def attach(game, eventLoop):
-    from BZFlag.UI import OpenGLViewport, ThreeDControl
-    viewport = OpenGLViewport.OpenGLViewport(eventLoop, (800,600))
+    from BZFlag.UI import Viewport, ThreeDControl
+    viewport = Viewport.OpenGLViewport(eventLoop, (800,600))
     view = ThreeDView(game, viewport)
     ThreeDControl.Viewing(view, viewport)
     return viewport
