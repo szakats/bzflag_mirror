@@ -132,7 +132,7 @@ class Socket:
             self.socket.connect((host, port))
         except socket.error:
             # "Operation now in progress" isn't an error
-            if sys.exc_info()[1][0] != 115:
+            if not sys.exc_info()[1][1].endswith('progress'):
                 raise
 
     def listen(self, host, port=None):
