@@ -19,6 +19,17 @@ public:
 	virtual bool Read( char *data );
 };
 
+class StoredObject : public CBaseObject
+{
+public:
+	virtual void Write( std::ostream &Stream );
+	virtual void Write( char *data );
+	virtual bool Read( char *data );
+
+private:
+	std::string m_data;
+};
+
 class Ground : public CBaseObject
 {
 public:
@@ -244,10 +255,10 @@ public:
 	virtual CBaseObject* New( void ) { return new Link; }
 };
 
-class InvalidFactory : public CBaseObjectFactory
+class StoreFactory : public CBaseObjectFactory
 {
 public:
-	virtual CBaseObject* New( void ) { return NULL; }
+	virtual CBaseObject* New( void ) { return new StoredObject; }
 };
 
 #endif

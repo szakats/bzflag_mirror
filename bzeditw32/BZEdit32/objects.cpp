@@ -16,7 +16,7 @@
 
 #include "Utils.h"
 
-InvalidFactory		InvalidFac;
+StoreFactory		StoreFac;
 GroundFactory		GroundFac;
 WallsFactory		WallsFac;
 BoxFactory			BoxFac;
@@ -36,12 +36,12 @@ void RegisterClasses ( CWorld *pWorld )
 	pWorld->RegisterFactory("Teleporter",&TeleporterFac);
 	pWorld->RegisterFactory("Link",&LinkFac);
 	// Fake objects
-	pWorld->RegisterFactory("Options",&InvalidFac);
-	pWorld->RegisterFactory("World",&InvalidFac);
+	pWorld->RegisterFactory("Options",&StoreFac);
+	pWorld->RegisterFactory("World",&StoreFac);
 	// Not really fake objects, but safely ignored anyway
-	pWorld->RegisterFactory("DynamicColor",&InvalidFac);
-	pWorld->RegisterFactory("Material",&InvalidFac);
-	pWorld->RegisterFactory("TextureMatrix",&InvalidFac);
+	pWorld->RegisterFactory("DynamicColor",&StoreFac);
+	pWorld->RegisterFactory("Material",&StoreFac);
+	pWorld->RegisterFactory("TextureMatrix",&StoreFac);
 }
 
 void World::Write(std::ostream &stream)
@@ -61,6 +61,49 @@ void World::Write( char *data )
 	sprintf(szTemp,"end\n\n");
 
 	strcat(data,szTemp);
+}
+
+bool StoredObject::Read( char *data )
+{
+	char	line[255];
+ 	char	*pPtr = data;
+ 	char	name[255];
+	bool	first = true;
+ 
+ 	bool	bDone = false;
+ 	while (!bDone)
+ 	{
+ 		bDone = !GetLine(&pPtr, line);
+ 
+ 		sscanf(line, "%s", name);
+
+		// remember the data
+		if (stricmp(name, "end") == 0) {
+ 			bDone = true;
+			m_data += line;
+			m_data += "\n";
+		} else {
+			if (first) {
+				first = false;
+			} else {
+				m_data += "\t";
+			}
+			m_data += line;
+			m_data += "\n";
+		}
+ 	}
+ 	return true;
+}
+
+void StoredObject::Write(std::ostream &stream)
+{
+	stream << m_data << std::endl;
+	stream << std::endl;
+}
+
+void StoredObject::Write( char *data )
+{
+	strcat(data, m_data.c_str());
 }
 
 // ground plane
