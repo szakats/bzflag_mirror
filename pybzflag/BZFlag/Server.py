@@ -22,10 +22,12 @@ in subclasses.
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-from BZFlag import Network, Protocol
+
+import BZFlag
+from BZFlag import Network, Protocol, Event, Errors
 
 
-class BaseServer:
+class BaseServer(Network.Endpoint):
     """On top of the basic message processing provided by Network.Endpoint,
        this class manages connections from clients.
        """
@@ -36,6 +38,7 @@ class BaseServer:
     def init(self):
         Network.Endpoint.init(self)
         self.clients = {}
+        self.nextClientID = 0
         self.options.update({
             'interface': None,
             })
@@ -43,10 +46,54 @@ class BaseServer:
 
         def setOptions(**options):
             if 'interface' in options.keys():
-                self.bind(options['interface'])
+                self.listen(options['interface'])
         self.onSetOptions.observe(setOptions)
 
-    def bind(self, interface):
+    def listen(self, interface):
+        self.tcp = Network.Socket()
+        self.tcp.listen(interface, Protocol.Common.defaultPort)
+        self.tcp.setBlocking(0)
+        self.tcp.handler = self.handleConnection
+        self.eventLoop.add(self.tcp)
 
+    def getNewClientID(self):
+        id = self.nextClientID
+        self.nextClientID += 1
+        return id
+
+    def handleConnection(self, socket, eventLoop):
+        """This is called when a new connection to the server is made.
+           It sends the hello packet, and sets up a new client socket.
+           """
+        # On a new client connection, send them the
+        # hello packet and add to our dict of clients.
+        clientSocket = socket.accept()
+        clientId = self.getNewClientID()
+        clientSocket.id = clientId
+        self.clients[clientId] = clientSocket
+        hello = self.outgoing.HelloPacket(version = BZFlag.protocolVersion,
+                                          clientId = self.getNewClientID())
+        self.eventLoop.add(clientSocket)
+        clientSocket.setBlocking(0)
+        clientSocket.handler = self.handleMessage
+        clientSocket.write(hello)
+        self.onConnect(clientSocket)
+
+    def handleMessage(self, socket, eventLoop):
+        """This is called when new data is received from the client.
+           It is a wrapper around Network.Endpoint.handleMessage which
+           catches ConnectionLost exceptions and disconnects the client
+           safely.
+           """
+        try:
+            Network.Endpoint.handleMessage(self, socket, eventLoop)
+        except Errors.ConnectionLost:
+            try:
+                del self.clients[socket.id]
+                self.eventLoop.remove(socket)
+                self.onDisconnect(socket)
+            except KeyError:
+                # Already disconnected
+                pass
 
 ### The End ###

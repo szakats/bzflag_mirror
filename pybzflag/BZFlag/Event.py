@@ -156,14 +156,23 @@ class EventLoop:
         self.timers  = []
         self.showNonfatalExceptions = 1
         self.nextTimerActivation = None
+        self.selectDict = {}
 
     def add(self, item):
         if isinstance(item, Network.Socket):
             self.sockets.append(item)
+
+            # Make a dictionary for quickly detecting which socket has activity
+            self.selectDict = {}
+            for socket in self.sockets:
+                selectable = socket.getSelectable()
+                self.selectDict[selectable] = socket
+            
         elif isinstance(item, Timer):
             self.timers.append(item)
             item.setEventLoop(self)
             self.updateNextTimerActivation()
+
         else:
             raise TypeError("Only Sockets and Timers are supported by this event loop")
 
@@ -187,13 +196,6 @@ class EventLoop:
     def run(self):
         self.running = 1
         try:
-            # Make a dictionary for quickly detecting which socket has activity
-            selectDict = {}
-            for socket in self.sockets:
-                selectable = socket.getSelectable()
-                selectDict[selectable] = socket
-            selectables = selectDict.keys()
-
             while self.running:
                 # The poll time we'll actually use depends on both pollTime and nextTimerActivation.
                 pollTime = self.pollTime
@@ -210,7 +212,7 @@ class EventLoop:
                 # This waits until either a socket has activity, or
                 # our pollTime has expired and we need to check timers
                 try:
-                    (iwtd, owtd, ewtd) = self.select(selectables, [], [], pollTime)
+                    (iwtd, owtd, ewtd) = self.select(self.selectDict.keys(), [], [], pollTime)
                 except select.error:
                     raise Errors.ConnectionLost()
 
@@ -218,7 +220,7 @@ class EventLoop:
                 readyList = iwtd + owtd + ewtd
                 for ready in readyList:
                     try:
-                        selectDict[ready].poll(self)
+                        self.selectDict[ready].poll(self)
                     except Errors.NonfatalException:
                         self.onNonfatalException(sys.exc_info())
 
@@ -239,11 +241,11 @@ class EventLoop:
     def stop(self):
         self.running = 0
 
-    def select(self, i, o, e, time):
+    def select(self, iwtd, owtd, ewtd, time):
         """This is a hook for subclasses to easily override the
            select function that this event loop uses.
            """
-        return select.select(i, o, e, time)
+        return select.select(iwtd, owtd, ewtd, time)
 
     def onNonfatalException(self, info):
         if self.showNonfatalExceptions:

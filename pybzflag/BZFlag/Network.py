@@ -43,10 +43,7 @@ class Socket:
 
         # Disable the nagle algorithm. This is necessary to get
         # anything near reasonable latency when sending small packets.
-        try:
-            tcp.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        except:
-            pass
+        tcp.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         return tcp
 
     def newUDPSocket(self):
@@ -122,13 +119,24 @@ class Socket:
             port = int(port)
         self.socket.connect((host, port))
 
-    def bind(self, port, interface=None):
-        """Bind this socket to the given port and optional interface,
-           and start listening for connections.
+    def listen(self, host, port=None):
+        """The arguments for this are processed just like for connect(),
+           plus a blank hostname is interpreted as all interfaces.
+           To listen on a different port on all interfaces for example,
+           you can use a hostname like ':1234'
            """
-        if interface is None:
-            interface = socket.gethostname()
-        self.socket.bind(interface, port)
+        if host.find(":") >= 0:
+            (host, port) = host.split(":")
+            port = int(port)
+        if not host:
+            host = socket.gethostname()
+
+        # Avoid having this port clogged up for a while after the server dies
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        
+        self.socket.bind((host, port))
+        self.interface = host
+        self.port = port
         self.socket.listen(5)
 
     def accept(self):
