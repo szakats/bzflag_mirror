@@ -46,14 +46,14 @@ class StatefulServer(BaseServer):
             'publicTitle':        None,
             'publicityInterval':  30 * 60,
             'gameStyle':          [],
-            'shots':              None,
+            'shots':              1,
             })
 
         Event.attach(self, 'onAttemptEnter', 'onEnter', 'onFinishEnter',
                      'onWelcome')
 
         def setOptions(**options):
-            if 'world' in options.keys():
+            if 'world' in options.keys() and options['world']:
                 # Load world
                 f = open(options['world'])
                 self.game.world.loadText(f)

@@ -42,7 +42,7 @@ class BaseServer(Network.Endpoint):
         self.nextClientID = 0
         self.clientIDIncrement = 1
         self.options.update({
-            'interface': None,
+            'interface': '',
             })
         Event.attach(self, 'onListen', 'onConnect', 'onDisconnect')
 
