@@ -100,7 +100,7 @@ class OpenGLViewport(PygameViewport):
 
     def region(self, rect, renderLink='after'):
         sub = Viewport.region(self, rect, renderLink)
-        sub.onSetupFrame.observe(self.configureOpenGL)
+        sub.onSetupFrame.observe(sub.configureOpenGL)
         return sub
 
 
