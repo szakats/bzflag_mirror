@@ -46,7 +46,7 @@ class AnaglyphView(ThreeDView):
         """Render the view to the given surface. This includes the game
            world, with transient objects such as players and flags
            """
-	eyesep = 100
+	eyesep = 50
 	angle = math.atan(eyesep / self.camera.distance)
         # draw left eye (blue-green)
 	self.camera.azimuthOffset = -angle
