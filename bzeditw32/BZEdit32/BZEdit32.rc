@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -27,18 +27,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_OLE_RESOURCES\r\n"
@@ -67,30 +67,30 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\BZEdit32.ico"
-IDR_BZWLDTYPE           ICON    DISCARDABLE     "res\\BZEdit32Doc.ico"
-IDI_BOXWALL_ICON        ICON    DISCARDABLE     "res\\icon1.ico"
-IDI_LINK_ICON           ICON    DISCARDABLE     "res\\link_ico.ico"
-IDI_BASE_ICON           ICON    DISCARDABLE     "res\\ico00001.ico"
-IDI_TPORT_ICON          ICON    DISCARDABLE     "res\\ico00002.ico"
-IDI_PYRAMID_ICON        ICON    DISCARDABLE     "res\\pyramid_.ico"
+IDR_MAINFRAME           ICON                    "res\\BZEdit32.ico"
+IDR_BZWLDTYPE           ICON                    "res\\BZEdit32Doc.ico"
+IDI_BOXWALL_ICON        ICON                    "res\\icon1.ico"
+IDI_LINK_ICON           ICON                    "res\\link_ico.ico"
+IDI_BASE_ICON           ICON                    "res\\ico00001.ico"
+IDI_TPORT_ICON          ICON                    "res\\ico00002.ico"
+IDI_PYRAMID_ICON        ICON                    "res\\pyramid_.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
 //
 
-IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
-IDB_LIST_IMAGES         BITMAP  DISCARDABLE     "res\\bitmap1.bmp"
-IDB_SPLASH              BITMAP  DISCARDABLE     "res\\bmp00001.bmp"
-IDR_NEWENT_BAR          BITMAP  DISCARDABLE     "res\\toolbar1.bmp"
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDB_LIST_IMAGES         BITMAP                  "res\\bitmap1.bmp"
+IDB_SPLASH              BITMAP                  "res\\bmp00001.bmp"
+IDR_NEWENT_BAR          BITMAP                  "res\\toolbar1.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR DISCARDABLE  16, 15
+IDR_MAINFRAME TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_OPEN
@@ -123,7 +123,7 @@ BEGIN
     BUTTON      ID_BUTTON32806
 END
 
-IDR_NEWENT_BAR TOOLBAR DISCARDABLE  16, 15
+IDR_NEWENT_BAR TOOLBAR  16, 15
 BEGIN
     BUTTON      ID_BOX_BUTON
     BUTTON      ID_PYR_BUTON
@@ -138,7 +138,7 @@ END
 // Menu
 //
 
-IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+IDR_MAINFRAME MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -206,7 +206,7 @@ END
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+IDR_MAINFRAME ACCELERATORS 
 BEGIN
     "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
@@ -230,8 +230,8 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 313, 81
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_ABOUTBOX DIALOG  0, 0, 313, 81
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About BZEdit32"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -241,8 +241,8 @@ BEGIN
     CONTROL         139,IDC_STATIC,"Static",SS_BITMAP,7,7,167,67
 END
 
-IDD_ELEMENT_LIST_DLOG DIALOG DISCARDABLE  0, 0, 141, 277
-STYLE WS_CHILD | WS_VISIBLE | WS_BORDER
+IDD_ELEMENT_LIST_DLOG DIALOG  0, 0, 141, 277
+STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE | WS_BORDER
 FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "Elements",IDC_STATIC,7,7,30,8
@@ -265,8 +265,8 @@ BEGIN
     PUSHBUTTON      "Add",IDC_ADD,91,15,27,14
 END
 
-IDD_ELEMENT_INSP DIALOG DISCARDABLE  0, 0, 436, 107
-STYLE WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_BORDER
+IDD_ELEMENT_INSP DIALOG  0, 0, 436, 107
+STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_BORDER
 FONT 8, "MS Sans Serif"
 BEGIN
     PUSHBUTTON      "Remove",IDC_REMOVE_ITEM,280,11,50,14
@@ -280,8 +280,8 @@ BEGIN
     LTEXT           "",IDC_CHILD_DLOG_FRAME,13,30,416,72,NOT WS_GROUP
 END
 
-IDD_STD_INFO_DLOG DIALOG DISCARDABLE  0, 0, 434, 83
-STYLE WS_CHILD
+IDD_STD_INFO_DLOG DIALOG  0, 0, 434, 83
+STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "Position",IDC_STATIC,1,0,116,65
@@ -314,8 +314,8 @@ BEGIN
                     NOT WS_VISIBLE | WS_TABSTOP,251,49,81,10
 END
 
-IDD_LINK_INTERFACE DIALOG DISCARDABLE  0, 0, 347, 62
-STYLE WS_CHILD
+IDD_LINK_INTERFACE DIALOG  0, 0, 347, 62
+STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "Source ( From )",IDC_STATIC,2,1,125,54
@@ -330,8 +330,8 @@ BEGIN
                     WS_TABSTOP
 END
 
-IDD_DUPE_AND DIALOG DISCARDABLE  0, 0, 394, 118
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_DUPE_AND DIALOG  0, 0, 394, 118
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Duplicate and..."
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -367,7 +367,6 @@ BEGIN
 END
 
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -390,18 +389,13 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "\0"
-            VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "BZEdit32 MFC Application\0"
-            VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "BZEdit32\0"
-            VALUE "LegalCopyright", "Copyright (C) 2001\0"
-            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "BZEdit32.EXE\0"
-            VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "BZEdit32 Application\0"
-            VALUE "ProductVersion", "1, 0, 0, 1\0"
-            VALUE "SpecialBuild", "\0"
+            VALUE "FileDescription", "BZEdit32 MFC Application"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "BZEdit32"
+            VALUE "LegalCopyright", "Copyright (C) 2001"
+            VALUE "OriginalFilename", "BZEdit32.EXE"
+            VALUE "ProductName", "BZEdit32 Application"
+            VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
     BLOCK "VarFileInfo"
@@ -410,8 +404,6 @@ BEGIN
     END
 END
 
-#endif    // !_MAC
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -419,7 +411,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
@@ -477,18 +469,18 @@ END
 // String Table
 //
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE 
 BEGIN
-    IDR_MAINFRAME           "BZEdit32\n\nBZ Flag World\nBZFlag World Files (*.map)\n.map\nBZEdit32.Document\nBZFlag World Document"
+    IDR_MAINFRAME           "BZEdit32\n\nBZ Flag World\nBZFlag World Files (*./bzw)\n./bzw\nBZEdit32.Document\nBZFlag World Document"
 END
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE 
 BEGIN
     AFX_IDS_APP_TITLE       "BZEdit32"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_INDICATOR_EXT        "EXT"
     ID_INDICATOR_CAPS       "CAP"
@@ -498,7 +490,7 @@ BEGIN
     ID_INDICATOR_REC        "REC"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_FILE_NEW             "Create a new document\nNew"
     ID_FILE_OPEN            "Open an existing document\nOpen"
@@ -511,13 +503,13 @@ BEGIN
     ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
     ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_FILE_MRU_FILE1       "Open this document"
     ID_FILE_MRU_FILE2       "Open this document"
@@ -537,18 +529,18 @@ BEGIN
     ID_FILE_MRU_FILE16      "Open this document"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
     ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_EDIT_CLEAR           "Erase the selection\nErase"
     ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
@@ -563,13 +555,13 @@ BEGIN
     ID_EDIT_REDO            "Redo the previously undone action\nRedo"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
     ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
@@ -580,13 +572,13 @@ BEGIN
     AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     AFX_IDS_SCRESTORE       "Restore the window to normal size"
     AFX_IDS_SCTASKLIST      "Activate Task List"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
 END

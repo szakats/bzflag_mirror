@@ -10,6 +10,15 @@
 
 void RegisterClasses ( CWorld *pWorld );
 
+class World : public CBaseObject
+{
+public:
+	virtual bool Init ( void );
+	virtual void Write( std::ostream &Stream );
+	virtual void Write( char *data );
+	virtual bool Read( char *data );
+};
+
 class Ground : public CBaseObject
 {
 public:

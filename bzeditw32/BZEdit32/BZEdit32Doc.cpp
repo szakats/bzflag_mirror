@@ -185,9 +185,9 @@ void CBZEdit32Doc::OnUpdateFileNew(CCmdUI* pCmdUI)
 
 void CBZEdit32Doc::OnFileOpen() 
 {
-	char szFilter[] = "BZFlag Map Files (*.map)|*.map|All Files (*.*)|*.*||";
+	char szFilter[] = "BZFlag Map Files (*.bzw;*.map)|*.bzw;*.map|All Files (*.*)|*.*||";
 		
-	CFileDialog  oFD(true,".map","*.map",OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
+	CFileDialog  oFD(true,".map;.bzw","*.map;*.bzw",OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 
 	if (oFD.DoModal() == IDOK)
 	{
@@ -224,9 +224,9 @@ void CBZEdit32Doc::OnUpdateFileSave(CCmdUI* pCmdUI)
 
 void CBZEdit32Doc::OnFileSaveAs() 
 {
-	char szFilter[] = "BZFlag Map Files (*.map)|*.map|All Files (*.*)|*.*||";
+	char szFilter[] = "BZFlag Map Files (*.bzw;*.map)|*.bzw;*.map|All Files (*.*)|*.*||";
 
-	CFileDialog  oFD(false,".map",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
+	CFileDialog  oFD(false,".bzw",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 
 	if (oFD.DoModal() == IDOK)
 	{
@@ -303,9 +303,9 @@ void CBZEdit32Doc::OnUpdateEditMakeanglesrot(CCmdUI* pCmdUI)
 
 void CBZEdit32Doc::OnUtiltyConvertmapfiletodeg() 
 {
-	char szFilter[] = "BZFlag Map Files (*.map)|*.map|All Files (*.*)|*.*||";
+	char szFilter[] = "BZFlag Map Files (*.bzw;*.map)|*.bzw;*.map|All Files (*.*)|*.*||";
 		
-	CFileDialog  oFD(true,".map","*.map",OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
+	CFileDialog  oFD(true,".bzw","*.bzw",OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 
 	if (oFD.DoModal() == IDOK)
 	{
@@ -331,9 +331,9 @@ void CBZEdit32Doc::OnUpdateUtiltyConvertmapfiletodeg(CCmdUI* pCmdUI)
 
 void CBZEdit32Doc::OnUtiltyConvertmapfiletorad() 
 {
-	char szFilter[] = "BZFlag Map Files (*.map)|*.map|All Files (*.*)|*.*||";
+	char szFilter[] = "BZFlag Map Files (*.bzw;*.map)|*.bzw;*.map|All Files (*.*)|*.*||";
 		
-	CFileDialog  oFD(true,".map","*.map",OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
+	CFileDialog  oFD(true,".bzw","*.bzw",OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 
 	if (oFD.DoModal() == IDOK)
 	{

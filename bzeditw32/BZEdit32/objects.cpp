@@ -34,6 +34,47 @@ void RegisterClasses ( CWorld *pWorld )
 	pWorld->RegisterFactory("Teleporter",&TeleporterFac);
 	pWorld->RegisterFactory("Link",&LinkFac);
 }
+
+void World::Write(std::ostream &stream)
+{
+	WriteStdData(stream);
+	stream << "	size " << m_rScale.x << std::endl;
+	stream << "end" << std::endl;
+	stream << std::endl;
+}
+
+void World::Write( char *data )
+{
+	char	szTemp[1024] = {0};
+
+	WriteStdData(data);
+	sprintf(szTemp,"\tsize %f\n",m_rScale.x);
+	sprintf(szTemp,"end\n\n");
+
+	strcat(data,szTemp);
+}
+bool World::Read( char *data )
+{
+	char	line[255];
+	char	*pPtr = data;
+	char	name[255];
+
+	bool	bDone = false;
+	while (!bDone)
+	{
+		bDone = !GetLine( &pPtr, line );
+
+		if (!StdDataField(line))
+		{
+			sscanf(line,"%s",name);
+
+			if (stricmp(name,"end") ==0)
+				bDone = true;
+		}
+	}
+	return true;
+}
+
 // gorund plane
 
 bool Ground::ShowInInterface ( void )

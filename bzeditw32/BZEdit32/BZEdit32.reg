@@ -4,6 +4,7 @@ REGEDIT
 ;   registered in your InitInstance automatically with a call to
 ;   CWinApp::RegisterShellFileTypes and COleObjectFactory::UpdateRegistryAll.
 
+HKEY_CLASSES_ROOT\.bzw = BZEdit32.Document
 HKEY_CLASSES_ROOT\.map = BZEdit32.Document
 HKEY_CLASSES_ROOT\BZEdit32.Document\shell\open\command = BZEDIT32.EXE %1
 HKEY_CLASSES_ROOT\BZEdit32.Document\shell\open\ddeexec = [open("%1")]
