@@ -169,36 +169,29 @@ class BasicRenderPass(RenderPass):
            This routine is careful that only the texture targets and units specified
            are enabled, and all others are disabled.
            """
-        if textures:
-            if GLExtension.multitexture:
-                # We have multitexturing. Enable and bind the texture units we'll be using,
-                # make sure the rest are disabled.
-                texIndex = 0
-                for unit in GLExtension.textureUnits:
-                    glActiveTextureARB(unit)
-                    for target in GLExtension.textureTargets:
-                        glDisable(target)
-                    if texIndex < len(textures):
-                        t = textures[texIndex]
-                        t.bind(rstate)
-                        glEnable(t.target)
-                    texIndex += 1
-
-                # Leave the first texture unit active
-                glActiveTextureARB(GLExtension.textureUnits[0])
-            else:
-                # No multitexturing, only enable the current texture unit
+        if GLExtension.multitexture:
+            # We have multitexturing. Enable and bind the texture units we'll be using,
+            # make sure the rest are disabled.
+            texIndex = 0
+            for unit in GLExtension.textureUnits:
+                glActiveTextureARB(unit)
                 for target in GLExtension.textureTargets:
                     glDisable(target)
+                if texIndex < len(textures):
+                    t = textures[texIndex]
+                    t.bind(rstate)
+                    glEnable(t.target)
+                texIndex += 1
+
+            # Leave the first texture unit active
+            glActiveTextureARB(GLExtension.textureUnits[0])
+        else:
+            # No multitexturing, only enable the current texture unit
+            for target in GLExtension.textureTargets:
+                glDisable(target)
+            if textures:
                 glEnable(textures[0].target)
                 textures[0].bind(rstate)
-        else:
-            if GLExtension.multitexture:
-                GLExtension.disableMultitex()
-            else:
-                # No multitexturing, only disable the current texture unit
-                for target in GLExtension.textureTargets:
-                    glDisable(target)
 
 
 class BlendedRenderPass(BasicRenderPass):

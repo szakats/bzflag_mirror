@@ -80,6 +80,7 @@ class Clouds(SkyDrawable):
         self.render.textures = (GLNoise.CloudTexture(),)
         self.motion = Animated.Value(Animated.RampFunction(200))
         self.time = Animated.Timekeeper()
+        self.scale = 0.2
 
     def drawToList(self, rstate):
         """Do all the drawing we can in the display list"""
@@ -92,6 +93,7 @@ class Clouds(SkyDrawable):
 
         # Set up texture coordinate generation. The plane equations
         # are set up every frame in draw() to animate the clouds' motion
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, self.scale, 0, 0))
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glEnable(GL_TEXTURE_GEN_S)
@@ -107,21 +109,13 @@ class Clouds(SkyDrawable):
 
     def draw(self, rstate):
         """Animate the texture coordinates every frame"""
-        scale = 1
         self.motion.integrate(self.time.step())
-        glTexGenfv(GL_S, GL_OBJECT_PLANE, (scale, 0, 0, self.motion.value))
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, scale, 0, 0))
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (self.scale, 0, 0, self.motion.value))
         DisplayList.draw(self, rstate)
 
 
 class Horizon(SkyDrawable):
     """Some mountains and a chasm to cover up the horizon"""
-    def __init__(self, *args, **kw):
-        SkyDrawable.__init__(self, *args, **kw)
-        self.render.textures = (GLNoise.CloudTexture(),)
-        self.motion = Animated.Value(Animated.RampFunction(200))
-        self.time = Animated.Timekeeper()
-
     def drawToList(self, rstate):
         glEnable(GL_BLEND)
 
@@ -134,7 +128,7 @@ class Horizon(SkyDrawable):
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
-        #VRML.load('sky.wrl')['horizon'].drawToList(rstate)
+        VRML.load('sky.wrl')['horizon'].drawToList(rstate)
 
         # Cleanup!
         glDisable(GL_TEXTURE_GEN_S)
