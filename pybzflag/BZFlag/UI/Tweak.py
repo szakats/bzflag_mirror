@@ -78,57 +78,77 @@ class Control:
         self.widget = widget
 
 
-class Attribute(Control):
-    """A control that lets you directly manipulate a scalar or vector object attribute"""
-    def __init__(self, object, attribute, range=(0,1), name=None, stepSize=None, pageSize=None):
+class AttributeControl(Control):
+    """A control which operates on a vector or scalar object attribute"""
+    def __init__(self, object, attribute, name=None):
         self.object = object
         self.attribute = attribute
-
         if not name:
             name = "%s.%s" % (object.__class__.__name__, attribute)
+
+        # Get the subclass to add subwidgets for each individual value
+        box = gtk.HBox(gtk.FALSE, gtk.FALSE)
+        initialValue = getattr(object, attribute)
+        try:
+            # First assume it's a vector attribute
+            for index in xrange(len(initialValue)):
+                def createUpdater(index):
+                    # This is necessary so 'index' in the lambda binds with the value at this
+                    # iteration, rather than the final value after the loop exits.
+                    return lambda value: self.updateIndex(value, index)
+                w = self.add(initialValue[index],  createUpdater(index))
+                box.pack_start(w, gtk.TRUE, gtk.TRUE, 0)
+                w.show()
+        except TypeError:
+            # Nope, now assume it's a scalar
+            w = self.add(initialValue, self.update)
+            box.pack_start(w, gtk.TRUE, gtk.TRUE, 0)
+            w.show()
+
+        Control.__init__(self, name, box)
+
+    def add(self, initialValue, setFunction):
+        """A hook for subclasses to handle adding individual values
+           in the attribute. initialValue is the value at initialization,
+           setFunction should be called to change it. This should return
+           a widget, which will be packed into the control's HBox.
+           """
+        pass
+
+    def update(self, value):
+        setattr(self.object, self.attribute)
+
+    def updateIndex(self, value, index):
+        try:
+            getattr(self.object, self.attribute)[index] = value
+        except TypeError:
+            # If it's a tuple, it won't support setting indices directly, we have to build a new object
+            l = list(getattr(self.object, self.attribute))
+            l[index] = value
+            setattr(self.object, self.attribute, l)
+
+
+class Quantity(AttributeControl):
+    """A control that lets you directly manipulate a scalar or
+       vector object attribute, using the gtk Scale widget.
+       """
+    def __init__(self, object, attribute, range=(0,1), name=None, stepSize=None, pageSize=None):
+        self.range = range
         if not stepSize:
             stepSize = (range[1] - range[0]) / 200
         if not pageSize:
             pageSize = (range[1] - range[0]) / 50
-        initialValue = getattr(object, attribute)
+        self.stepSize = stepSize
+        self.pageSize = pageSize
+        AttributeControl.__init__(self, object, attribute, name)
 
-        # Create a list of gtk Adjustments for our attribute
-        adjustments = []
-        try:
-            # First assume it's a vector attribute
-            for index in xrange(len(initialValue)):
-                adj = gtk.Adjustment(initialValue[index], range[0], range[1], stepSize, pageSize)
-                adj.index = index
-                adj.connect("value_changed", lambda adj: self.updateIndex(adj))
-                adjustments.append(adj)
-        except TypeError:
-            # Nope, now assume it's a scalar
-            adj = gtk.Adjustment(initialValue, range[0], range[1], stepSize, pageSize)
-            adj.connect("value_changed", self.update)
-            adjustments.append(adj)
-
-        # Build corresponding HScales inside a HBox
-        box = gtk.HBox(gtk.FALSE, gtk.FALSE)
-        for adj in adjustments:
-            scale = gtk.HScale(adj)
-            scale.set_digits(3)
-            box.pack_start(scale, gtk.TRUE, gtk.TRUE, 0)
-            scale.show()
-
-        Control.__init__(self, name, box)
-
-    def update(self, adj):
-        setattr(self.object, self.attribute, adj.value)
-
-    def updateIndex(self, adj):
-        index = adj.index
-        try:
-            getattr(self.object, self.attribute)[index] = adj.value
-        except TypeError:
-            # If it's a tuple, it won't support setting indices directly, we have to build a new object
-            l = list(getattr(self.object, self.attribute))
-            l[index] = adj.value
-            setattr(self.object, self.attribute, l)
+    def add(self, initialValue, setFunction):
+        print (initialValue, self.range[0], self.range[1], self.stepSize, self.pageSize)
+        adj = gtk.Adjustment(initialValue, self.range[0], self.range[1], self.stepSize, self.pageSize)
+        adj.connect("value_changed", lambda adj: setFunction(adj.value))
+        scale = gtk.HScale(adj)
+        scale.set_digits(3)
+        return scale
 
 
 def run(runnable):
