@@ -152,7 +152,7 @@ class World:
         # Start with a fresh map, and add objects that
         # are implied but not specified in the text map format.
         self.erase()
-        self.storeSkeleton()
+        self.storeSkeletonHeader()
         
         for line in xreadlines(f):
             # If this is a kludge used by map editors to store extra
