@@ -29,7 +29,7 @@ that creates its own viewport.
 
 from __future__ import division
 from BZFlag.UI import Texture
-from BZFlag import Noise
+from BZFlag import Noise, Animated
 from Numeric import *
 from OpenGL.GL import *
 
@@ -170,6 +170,9 @@ class AnimatedNoise:
         if not size:
             size = self.frames[0].size
 
+        glDisable(GL_LIGHTING)
+        glDisable(GL_DEPTH_TEST)
+        glDisable(GL_CULL_FACE)
         glEnable(GL_BLEND)
 
         # To smoothly blend between two frames, we will need to know which two frames
@@ -276,6 +279,7 @@ class PerlinTexture(Texture.DynamicTexture):
         if not noise:
             noise = AnimatedPerlinNoise()
         self.noise = noise
+        self.time = Animated.Timekeeper()
         Texture.DynamicTexture.__init__(self, size)
 
     def attachRenderState(self, rstate):
@@ -284,6 +288,11 @@ class PerlinTexture(Texture.DynamicTexture):
 
     def draw(self):
         self.noise.draw(self.viewport.size)
+        self.noise.integrate(self.time.step())
+
+    def drawFrame(self):
+        Texture.DynamicTexture.drawFrame(self)
+        self.dirty = True
 
 ### The End ###
 
