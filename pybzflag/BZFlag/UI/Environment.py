@@ -23,6 +23,7 @@ atmospheric effects like rain.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+from __future__ import division
 from BZFlag.UI import Drawable
 from BZFlag import Animated
 
