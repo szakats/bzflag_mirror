@@ -96,10 +96,13 @@ if __name__ == '__main__':
         r.render(octaves[2], (128,128))        
         r.render(octaves[1], (256,256))
         r.render(octaves[0], (512,512))
+
+        glClearColor(0.5, 0.5, 0.5, 1)
+        glClear(GL_COLOR_BUFFER_BIT)
         
         glEnable(GL_TEXTURE_2D)
         glEnable(GL_BLEND)
-        glColor4f(1,1,1,0.5)
+        glColor4f(1,1,1,0.3)
 
         for octave in octaves:
             octave.bind()
