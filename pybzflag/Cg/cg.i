@@ -130,3 +130,23 @@ void cgGLEnableClientState(CGparameter);
 void cgGLDisableClientState(CGparameter);
 
 // matrix parameter management functions
+void cgGLSetMatrixParameterdr(CGparameter, const double *);
+void cgGLSetMatrixParameterfr(CGparameter, const float *);
+void cgGLSetMatrixParameterdc(CGparameter, const double *);
+void cgGLSetMatrixParameterfc(CGparameter, const float *);
+
+void cgGLGetMatrixParameterdr(CGparameter, double *);
+void cgGLGetMatrixParameterfr(CGparameter, float *);
+void cgGLGetMatrixParameterdc(CGparameter, double *);
+void cgGLGetMatrixParameterfc(CGparameter, float *);
+
+void cgGLSetStateMatrixParameter(CGparameter, CGGLenum, CGGLenum);
+void cgGLSetMatrixParameterArrayfc(CGparameter, long, long, const float *);
+void cgGLSetMatrixParameterArrayfr(CGparameter, long, long, const float *);
+void cgGLSetMatrixParameterArraydc(CGparameter, long, long, const double *);
+void cgGLSetMatrixParameterArraydr(CGparameter, long, long, const double *);
+
+void cgGLGetMatrixParameterArrayfc(CGparameter, long, long, float *);
+void cgGLGetMatrixParameterArrayfr(CGparameter, long, long, float *);
+void cgGLGetMatrixParameterArraydc(CGparameter, long, long, double *);
+void cgGLGetMatrixParameterArraydr(CGparameter, long, long, double *);
