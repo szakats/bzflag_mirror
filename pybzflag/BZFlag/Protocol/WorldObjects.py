@@ -184,11 +184,13 @@ class Style(Block):
         StructEntry(UInt32,           'serverTime',           0),
         ]
 
+
 ObjectOptions = Bitfield(UInt8, {
     'driveThrough':  0x01,
     'shootThrough':  0x02,
     'flipZ':         0x04,
     })
+
 
 class TeamBase(WorldObject):
     textName = 'base'
@@ -200,6 +202,7 @@ class TeamBase(WorldObject):
         StructEntry(Common.Vector2,   'size',   [1,1,1]),
         StructEntry(Common.Vector3,   'safety', [0,0,0]),
         ]
+
 
 class Wall(WorldObject):
     messageId = 0x776C
@@ -244,6 +247,7 @@ class Wall(WorldObject):
     def getGLDrawables(self):
         return [self.WallDrawable(self.center, self.angle, self.size)]
 
+
 class Box(WorldObject):
     textName = 'box'
     messageId = 0x6278
@@ -254,6 +258,7 @@ class Box(WorldObject):
         StructEntry(ObjectOptions,    'options',      []),
         ]
 
+
 class Pyramid(WorldObject):
     textName = 'pyramid'
     messageId = 0x7079
@@ -263,6 +268,7 @@ class Pyramid(WorldObject):
         StructEntry(Common.Vector3,   'size',         [1,1,1]),
         StructEntry(ObjectOptions,    'options',      []),
         ]
+
 
 class Teleporter(WorldObject):
     textName = 'teleporter'
@@ -275,6 +281,7 @@ class Teleporter(WorldObject):
         StructEntry(Float,            'border',       1.0),
         ]
 
+
 class TeleporterLink(WorldObject):
     textName = 'link'
     messageId = 0x6C6E
@@ -282,6 +289,7 @@ class TeleporterLink(WorldObject):
         StructEntry(UInt16, 'fromSide'),
         StructEntry(UInt16, 'toSide'),
         ]
+
 
 class EndOfData(Block):
     messageId = 0x6564
