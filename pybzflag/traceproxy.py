@@ -3,7 +3,7 @@
 # A utility that acts as a BZFlag proxy server, showing all
 # messages in a human readable form.
 #
-from BZFlag import CommandLine, Server, Client, Event
+from BZFlag import CommandLine, Server, Client, Event, Protocol
 from StringIO import StringIO
 
 
@@ -38,46 +38,63 @@ def onClientConnect():
 client.onConnect.observe(onClientConnect)
 
 
-# A hex dump utility used to format 'data' fields
-def hexDump(value, bytesPerLine=16, wordSize=2):
-    src = StringIO(value)
-    dest = StringIO()
-    addr = 0
-    while 1:
-        srcLine = src.read(bytesPerLine)
-        if not srcLine:
-            break
-        
-        # Address
-        dest.write("%04X: " % addr)
-        addr += len(srcLine)
-
-        # Hex values
-        for i in xrange(bytesPerLine):
-            if i < len(srcLine):
-                dest.write("%02X" % ord(srcLine[i]))
-            else:
-                dest.write("  ")
-            if not (i+1) % wordSize:
-                dest.write(" ")
-        dest.write(" ")
-        
-        # ASCII representation
-        for byte in srcLine:
-            if ord(byte) >= 32 and ord(byte) < 128:
-                dest.write(byte)
-            else:
-                dest.write(".")
-        for i in xrange(bytesPerLine - len(srcLine)):
-            dest.write(" ")
-        dest.write("\n")
-    return dest.getvalue()
-
-
 # Dump a message contents to stdout. It should already be
 # mostly human readable, thanks to the Protocol module.
 def dumpMessage(msg, direction):
     name = msg.__class__.__name__
+
+    # A hex dump utility used to format 'data' fields
+    def hexDump(value, bytesPerLine=16, wordSize=2):
+        src = StringIO(value)
+        dest = StringIO()
+        addr = 0
+        while 1:
+            srcLine = src.read(bytesPerLine)
+            if not srcLine:
+                break
+
+            # Address
+            dest.write("%04X: " % addr)
+            addr += len(srcLine)
+
+            # Hex values
+            for i in xrange(bytesPerLine):
+                if i < len(srcLine):
+                    dest.write("%02X" % ord(srcLine[i]))
+                else:
+                    dest.write("  ")
+                if not (i+1) % wordSize:
+                    dest.write(" ")
+            dest.write(" ")
+
+            # ASCII representation
+            for byte in srcLine:
+                if ord(byte) >= 32 and ord(byte) < 128:
+                    dest.write(byte)
+                else:
+                    dest.write(".")
+            for i in xrange(bytesPerLine - len(srcLine)):
+                dest.write(" ")
+            dest.write("\n")
+        return dest.getvalue()
+
+
+    # Recursively build a list of (key,value) tuples that will be displayed
+    # to represent a message. This handles traversing into substructures
+    # like FlagUpdate.
+    def buildKeys(object, prefix=""):
+        keys = object.__dict__.keys()
+        keys.sort()
+        lst = []
+        for key in keys:
+            if key[0] != '_' and not key in ('eventLoop', 'socket', 'header'):
+                value = object.__dict__[key]
+                if isinstance(value, Protocol.Struct):
+                    lst.extend(buildKeys(value, prefix + key + "."))
+                else:
+                    lst.append((prefix + key, value))
+        return lst
+
 
     # Decide whether or not to show the message
     if options['hide'] and name in options['hide']:
@@ -88,25 +105,21 @@ def dumpMessage(msg, direction):
     # Always dump the name, but the contents can be disabled
     print "%s %s" % (direction, name)
     if not options['names']:
-        keys = msg.__dict__.keys()
-        keys.sort()
-        for key in keys:
-            if key[0] != '_' and not key in ('eventLoop', 'socket', 'header'):
-                value = msg.__dict__[key]
-                if key == 'data':
-                    # Special decoding for 'data' members- do a hex dump
-                    value = hexDump(value)
-                else:
-                    # Let python decode everything else
-                    value = repr(value)
-
-                # Handle printing multiline values properly
-                keyColumnWidth = 15
-                lines = value.split("\n")
-                print ("%%%ss: %%s" % keyColumnWidth) % (key, lines[0])
-                for line in lines[1:]:
-                    if line:
-                        print " " * (keyColumnWidth + 2) + line
+        for (key, value) in buildKeys(msg):
+            if key == 'data':
+                # Special decoding for 'data' members- do a hex dump
+                value = hexDump(value)
+            else:
+                # Let python decode everything else
+                value = repr(value)
+                
+            # Handle printing multiline values properly
+            keyColumnWidth = 25
+            lines = value.split("\n")
+            print ("%%%ss: %%s" % keyColumnWidth) % (key, lines[0])
+            for line in lines[1:]:
+                if line:
+                    print " " * (keyColumnWidth + 2) + line
 
 
 # Set up events to forward messages between
