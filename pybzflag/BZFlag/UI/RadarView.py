@@ -77,10 +77,13 @@ class RadarLayer(Drawable.DisplayList):
        This class represents one slice that draws a list of pre-sliced
        world objects.
        """
-    def drawToList(self, color, z, objects):
+    def set(self, color, z, objects):
         self.color = color
         self.z = z
-        for object in objects:
+        self.objects = objects
+
+    def drawToList(self):
+        for object in self.objects:
             smoothedPoly(object.toPolygon())
 
 
@@ -89,10 +92,13 @@ class RegularPolygon(Drawable.DisplayList):
        Radius is 1 and polygon is at the origin. The drawAt() function
        scales these at render-time.
        """
-    def drawToList(self, sides):
+    def set(self, sides):
+        self.sides = sides
+
+    def drawToList(self):
         points = []
-        sideRadians = math.pi * 2 / sides
-        for side in xrange(sides):
+        sideRadians = math.pi * 2 / self.sides
+        for side in xrange(self.sides):
             theta = side * sideRadians
             points.append((math.cos(theta), math.sin(theta)))
         smoothedPoly(points)
@@ -222,8 +228,8 @@ class RadarView:
         glPushMatrix()
         glScalef(size[0], size[1], 1)
         glTranslatef(0.5, 0.5, 0)
-        glScalef(float(self.zoom) / self.game.world.size[0],
-                 float(self.zoom) / self.game.world.size[1], 1)
+        glScalef( float(self.zoom) / self.game.world.size[0],
+                 -float(self.zoom) / self.game.world.size[1], 1)
         glRotatef(self.angle, 0,0,1)
         glTranslatef(-self.center[0], -self.center[1], 0)
         self.scene.render(self.center[2])
