@@ -87,23 +87,29 @@ class Clouds(SkyDrawable):
 
     def drawToList(self, rstate):
         """Do all the drawing we can in the display list"""
+
+        # Disable lighting, set up blending to use only the texture's alpha
+        # channel, disregarding its color channels
         glDisable(GL_LIGHTING)
         glColor3f(1,1,1)
         glEnable(GL_BLEND)
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA)
 
+        # Set up texture coordinate generation. The plane equations
+        # are set up every frame in draw() to animate the clouds' motion
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
+        # Create a very large sphere with the camera near the top
         glPushMatrix()
         glTranslatef(0, 0, -990)
-
         quad = gluNewQuadric()
         gluQuadricOrientation(quad, GLU_INSIDE)
         gluSphere(quad, 1000, 80, 80)
 
+        # Cleanup!
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
         glEnable(GL_LIGHTING)
