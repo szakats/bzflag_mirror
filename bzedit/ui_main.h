@@ -30,6 +30,7 @@ gint abox(GtkWidget *window, gpointer data);
 gint apyr(GtkWidget *window, gpointer data);
 gint atel(GtkWidget *window, gpointer data);
 gint alnk(GtkWidget *window, gpointer data);
+gint abas(GtkWidget *window, gpointer data);
 gint undo(GtkWidget *window, gpointer data);
 gint redo(GtkWidget *window, gpointer data);
 gint cut(GtkWidget *window, gpointer data);
@@ -141,6 +142,8 @@ class MainWindow {
   protected:
     GtkWidget *window;
     GtkWidget *statusbar;
+    GtkWidget *toolbar;
+    GtkWidget *addboxicon, *addpyricon, *addtelicon, *addlnkicon, *addbasicon;
     GtkWidget *table;
     GtkWidget *lpos, *lrot, *lsize, *lbor, *lname;
     GtkWidget *sbpx, *sbpy, *sbpz;

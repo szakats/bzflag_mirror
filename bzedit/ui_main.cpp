@@ -36,88 +36,102 @@ MainWindow::MainWindow() {
   gtk_object_set_data(GTK_OBJECT(MW::help_menu[0].widget), "main_window", this);
 
   // Create and fill the table
-  table = gtk_table_new(11, 3, FALSE);
+  table = gtk_table_new(12, 3, FALSE);
+  // load images
+  addboxicon = gnome_pixmap_new_from_file("/usr/local/share/bzedit/data/aboxicon.png");
+  addpyricon = gnome_pixmap_new_from_file("/usr/local/share/bzedit/data/apyricon.png");
+  addtelicon = gnome_pixmap_new_from_file("/usr/local/share/bzedit/data/atelicon.png");
+  addlnkicon = gnome_pixmap_new_from_file("/usr/local/share/bzedit/data/alnkicon.png");
+  addbasicon = gnome_pixmap_new_from_file("/usr/local/share/bzedit/data/abasicon.png");
+  // toolbar
+  toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
+  gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, "Add a box to the current world", "Add a box to the current world", addboxicon, (void (*)()) MW::abox, this);
+  gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, "Add a pyramid to the current world", "Add a pyramid to the current world", addpyricon, (void (*)()) MW::apyr, this);
+  gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, "Add a teleporter to the current world", "Add a teleporter to the current world", addtelicon, (void (*)()) MW::atel, this);
+  gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, "Add a link to the current world", "Add a link to the current world", addlnkicon, (void (*)()) MW::alnk, this);
+  gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, "Add a base to the current world", "Add a base to the current world", addbasicon, (void (*)()) MW::abas, this);
+  gtk_table_attach_defaults(GTK_TABLE(table), toolbar, 0, 3, 0, 1);
   // label: Position
   lpos = gtk_label_new("Position");
-  gtk_table_attach_defaults(GTK_TABLE(table), lpos, 0, 3, 0, 1);
+  gtk_table_attach_defaults(GTK_TABLE(table), lpos, 0, 3, 1, 2);
   // spin: position-x
   sa = (GtkAdjustment *) gtk_adjustment_new(0.0, -400.0, 400.0, 0.1, 1.0, 1.0);
   sbpx = gtk_spin_button_new(sa, 0.1, 1);
   gtk_signal_connect(GTK_OBJECT(sbpx), "changed", GTK_SIGNAL_FUNC(MW::chpx), NULL);
   gtk_widget_set_sensitive(sbpx, FALSE);
-  gtk_table_attach_defaults(GTK_TABLE(table), sbpx, 0, 1, 1, 2);
+  gtk_table_attach_defaults(GTK_TABLE(table), sbpx, 0, 1, 2, 3);
   gtk_object_set_data(GTK_OBJECT(sbpx), "main_window", this);
   // spin: position-y
   sa = (GtkAdjustment *) gtk_adjustment_new(0.0, -400.0, 400.0, 0.1, 1.0, 1.0);
   sbpy = gtk_spin_button_new(sa, 0.1, 1);
   gtk_signal_connect(GTK_OBJECT(sbpy), "changed", GTK_SIGNAL_FUNC(MW::chpy), NULL);
   gtk_widget_set_sensitive(sbpy, FALSE);
-  gtk_table_attach_defaults(GTK_TABLE(table), sbpy, 1, 2, 1, 2);
+  gtk_table_attach_defaults(GTK_TABLE(table), sbpy, 1, 2, 2, 3);
   gtk_object_set_data(GTK_OBJECT(sbpy), "main_window", this);
   // spin: position-z
   sa = (GtkAdjustment *) gtk_adjustment_new(0.0, 0.0, 1500.0, 0.1, 1.0, 1.0);
   sbpz = gtk_spin_button_new(sa, 0.1, 1);
   gtk_signal_connect(GTK_OBJECT(sbpz), "changed", GTK_SIGNAL_FUNC(MW::chpz), NULL);
   gtk_widget_set_sensitive(sbpz, FALSE);
-  gtk_table_attach_defaults(GTK_TABLE(table), sbpz, 2, 3, 1, 2);
+  gtk_table_attach_defaults(GTK_TABLE(table), sbpz, 2, 3, 2, 3);
   gtk_object_set_data(GTK_OBJECT(sbpz), "main_window", this);
   // label: Rotation
   lrot = gtk_label_new("Rotation");
-  gtk_table_attach_defaults(GTK_TABLE(table), lrot, 0, 3, 2, 3);
+  gtk_table_attach_defaults(GTK_TABLE(table), lrot, 0, 3, 3, 4);
   // spin: rotation
   sa = (GtkAdjustment *) gtk_adjustment_new(0.0, 0.0, 360.0, 0.1, 1.0, 1.0);
   sbangle = gtk_spin_button_new(sa, 0.1, 1);
   gtk_signal_connect(GTK_OBJECT(sbangle), "changed", GTK_SIGNAL_FUNC(MW::changle), NULL);
   gtk_widget_set_sensitive(sbangle, FALSE);
-  gtk_table_attach_defaults(GTK_TABLE(table), sbangle, 0, 3, 3, 4);
+  gtk_table_attach_defaults(GTK_TABLE(table), sbangle, 0, 3, 4, 5);
   gtk_object_set_data(GTK_OBJECT(sbangle), "main_window", this);
   // label: size
   lsize = gtk_label_new("Size");
-  gtk_table_attach_defaults(GTK_TABLE(table), lsize, 0, 3, 4, 5);
+  gtk_table_attach_defaults(GTK_TABLE(table), lsize, 0, 3, 5, 6);
   // spin: size-x
   sa = (GtkAdjustment *) gtk_adjustment_new(0.0, 0.0, 1200.0, 0.1, 1.0, 1.0);
   sbsx = gtk_spin_button_new(sa, 0.1, 1);
   gtk_signal_connect(GTK_OBJECT(sbsx), "changed", GTK_SIGNAL_FUNC(MW::chsx), NULL);
   gtk_widget_set_sensitive(sbsx, FALSE);
-  gtk_table_attach_defaults(GTK_TABLE(table), sbsx, 0, 1, 5, 6);
+  gtk_table_attach_defaults(GTK_TABLE(table), sbsx, 0, 1, 6, 7);
   gtk_object_set_data(GTK_OBJECT(sbsx), "main_window", this);
   // spin: size-y
   sa = (GtkAdjustment *) gtk_adjustment_new(0.0, 0.0, 1200.0, 0.1, 1.0, 1.0);
   sbsy = gtk_spin_button_new(sa, 0.1, 1);
   gtk_signal_connect(GTK_OBJECT(sbsy), "changed", GTK_SIGNAL_FUNC(MW::chsy), NULL);
   gtk_widget_set_sensitive(sbsy, FALSE);
-  gtk_table_attach_defaults(GTK_TABLE(table), sbsy, 1, 2, 5, 6);
+  gtk_table_attach_defaults(GTK_TABLE(table), sbsy, 1, 2, 6, 7);
   gtk_object_set_data(GTK_OBJECT(sbsy), "main_window", this);
   // spin: size-z
   sa = (GtkAdjustment *) gtk_adjustment_new(0.0, 0.0, 3000.0, 0.1, 1.0, 1.0);
   sbsz = gtk_spin_button_new(sa, 0.1, 1);
   gtk_signal_connect(GTK_OBJECT(sbsz), "changed", GTK_SIGNAL_FUNC(MW::chsz), NULL);
   gtk_widget_set_sensitive(sbsz, FALSE);
-  gtk_table_attach_defaults(GTK_TABLE(table), sbsz, 2, 3, 5, 6);
+  gtk_table_attach_defaults(GTK_TABLE(table), sbsz, 2, 3, 6, 7);
   gtk_object_set_data(GTK_OBJECT(sbsz), "main_window", this);
   // label: border
   lbor = gtk_label_new("Border");
-  gtk_table_attach_defaults(GTK_TABLE(table), lbor, 0, 3, 6, 7);
+  gtk_table_attach_defaults(GTK_TABLE(table), lbor, 0, 3, 7, 8);
   // spin: border
   sa = (GtkAdjustment *) gtk_adjustment_new(1.0, 0.0, 20.0, 0.1, 1.0, 1.0);
   sbborder = gtk_spin_button_new(sa, 0.1, 1);
   gtk_signal_connect(GTK_OBJECT(sbborder), "changed", GTK_SIGNAL_FUNC(MW::chborder), NULL);
   gtk_widget_set_sensitive(sbborder, FALSE);
-  gtk_table_attach_defaults(GTK_TABLE(table), sbborder, 0, 3, 7, 8);
+  gtk_table_attach_defaults(GTK_TABLE(table), sbborder, 0, 3, 8, 9);
   gtk_object_set_data(GTK_OBJECT(sbborder), "main_window", this);
   // label: name
   lname = gtk_label_new("Name");
-  gtk_table_attach_defaults(GTK_TABLE(table), lname, 0, 3, 8, 9);
+  gtk_table_attach_defaults(GTK_TABLE(table), lname, 0, 3, 9, 10);
   // entry: name
   enname = gtk_entry_new();
   gtk_signal_connect(GTK_OBJECT(enname), "changed", GTK_SIGNAL_FUNC(MW::chname), NULL);
   gtk_object_set_data(GTK_OBJECT(enname), "main_window", this);
   gtk_widget_set_sensitive(enname, FALSE);
-  gtk_table_attach_defaults(GTK_TABLE(table), enname, 0, 3, 9, 10);
+  gtk_table_attach_defaults(GTK_TABLE(table), enname, 0, 3, 10, 11);
   // button: test
   testworld = gtk_button_new_with_label("Test World");
   gtk_signal_connect(GTK_OBJECT(testworld), "clicked", GTK_SIGNAL_FUNC(MW::testw), this);
-  gtk_table_attach_defaults(GTK_TABLE(table), testworld, 0, 3, 10, 11);
+  gtk_table_attach_defaults(GTK_TABLE(table), testworld, 0, 3, 11, 12);
 
   lw.setWorld(world);
   lw.setMain(this);
@@ -313,6 +327,12 @@ void MainWindow::update(short updates) {
       }
     }
   } else if(updates & MW::SPINS) {
+    for(unsigned int j = 0; j < edits.size(); j++) {
+      edits[j]->getCamera().fx = 0;
+      edits[j]->getCamera().fy = 0;
+      edits[j]->getCamera().fz = 0;
+      update(MW::EDITWINS);
+    }
     disable_all();
   }
   if(updates & MW::LIST) {
@@ -566,6 +586,18 @@ gint alnk(GtkWidget *window, gpointer data) {
   mainWin->getWorld()->push_back(link);
   mainWin->update(MW::SPINVALUES | MW::LIST | MW::EDITWINS | MW::LIST);
   mainWin->showLinkWin(&(*mainWin->getWorld())[mainWin->getWorld()->size() - 1]);
+  return TRUE;
+}
+
+gint abas(GtkWidget *window, gpointer data) {
+  MainWindow *mainWin = (MainWindow *) gtk_object_get_data(GTK_OBJECT(window), "main_window");
+//  ListWindow &lw = mainWin->getListWindow();
+//  GtkWidget *list = lw.getList();
+//  Element base;
+//  base.makeBase();
+//  for(unsigned int i = 0; i < mainWin->getWorld()->size(); i++) {
+//    (*(mainWin->getWorld()))[i].selected = false;
+//  }
   return TRUE;
 }
 

@@ -9,4 +9,9 @@ data1_DATA = boxwall.tga \
 	    pyricon.png \
 	    telicon.png \
 	    lnkicon.png \
-	    basicon.png
+	    basicon.png \
+	    aboxicon.png \
+	    apyricon.png \
+	    atelicon.png \
+	    alnkicon.png \
+	    abasicon.png

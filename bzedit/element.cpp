@@ -9,6 +9,7 @@ Element::Element() {
   p = NULL;
   t = NULL;
   l = NULL;
+  ba = NULL;
 }
 
 Element::Element(const Element &r) {
@@ -44,6 +45,8 @@ void Element::makeBox() {
     delete t;
   if(l != NULL)
     delete l;
+  if(ba != NULL)
+    delete ba;
 }
 
 void Element::makePyramid() {
@@ -56,6 +59,8 @@ void Element::makePyramid() {
     delete t;
   if(l != NULL)
     delete l;
+  if(ba != NULL)
+    delete ba;
 }
 
 void Element::makeTeleporter() {
@@ -68,6 +73,8 @@ void Element::makeTeleporter() {
     t = new Teleporter;
   if(l != NULL)
     delete l;
+  if(ba != NULL)
+    delete ba;
 }
 
 void Element::makeLink() {
@@ -80,6 +87,22 @@ void Element::makeLink() {
     delete t;
   if(l == NULL)
     l = new Link;
+  if(ba != NULL)
+    delete ba;
+}
+
+void Element::makeBase() {
+  type = BASE;
+  if(b != NULL)
+    delete b;
+  if(p != NULL)
+    delete p;
+  if(t != NULL)
+    delete t;
+  if(l != NULL)
+    delete l;
+  if(ba == NULL)
+    ba = new Base;
 }
 
 void Element::render(Camera &c, bool transparent) {

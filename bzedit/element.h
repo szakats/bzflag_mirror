@@ -6,11 +6,12 @@
 
 class Element {
   public:
-    enum {BOX, PYRAMID, TELEPORTER, LINK, NONE} type;
+    enum {BOX, PYRAMID, TELEPORTER, LINK, BASE, NONE} type;
     Box *b;
     Pyramid *p;
     Teleporter *t;
     Link *l;
+    Base *ba;
     string name;
     bool visible;
     bool selected;
@@ -22,6 +23,7 @@ class Element {
     void makePyramid();
     void makeTeleporter();
     void makeLink();
+    void makeBase();
     void render(Camera &c, bool transparent);
     float get_px();
     float get_py();
