@@ -1,10 +1,6 @@
 #include <string>
 #include <stdio.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include "tga.h"
-
-GLenum texFormat;
 
 bool checkSize(int x) {
   if(x == 2 || x == 4 || x == 8 || x == 16 || x == 32 || x == 64 || x == 128 || x == 256 || x == 512)
@@ -12,7 +8,7 @@ bool checkSize(int x) {
   return false;
 }
 
-unsigned char *getRGBA(FILE *s, int size) {
+unsigned char *getRGBA(FILE *s, int size, GLenum &texFormat) {
   unsigned char *rgba;
   unsigned char temp;
   int bread;
@@ -34,7 +30,7 @@ unsigned char *getRGBA(FILE *s, int size) {
   return rgba;
 }
 
-unsigned char *getRGB(FILE *s, int size) {
+unsigned char *getRGB(FILE *s, int size, GLenum &texFormat) {
   unsigned char *rgb;
   unsigned char temp;
   int bread;
@@ -56,7 +52,7 @@ unsigned char *getRGB(FILE *s, int size) {
   return rgb;
 }
 
-unsigned char *getGrey(FILE *s, int size) {
+unsigned char *getGrey(FILE *s, int size, GLenum &texFormat) {
   unsigned char *grey;
   int bread;
 
@@ -72,53 +68,13 @@ unsigned char *getGrey(FILE *s, int size) {
   return grey;
 }
 
-unsigned char *getData(FILE *s, int size, int bits) {
+unsigned char *getData(FILE *s, int size, int bits, GLenum &texFormat) {
   switch(bits) {
     case 32:
-      return getRGBA(s, size);
+      return getRGBA(s, size, texFormat);
     case 24:
-      return getRGB(s, size);
+      return getRGB(s, size, texFormat);
     case 8:
-      return getGrey(s, size);
+      return getGrey(s, size, texFormat);
   }
-}
-
-bool loadTGA(char *name, int id) {
-  unsigned char type[4];
-  unsigned char info[7];
-  unsigned char *imageData = NULL;
-  int w, h;
-  int bits, size;
-  FILE *s;
-
-  if(!(s = fopen(name, "rb")))
-    return false;
-  fread(&type, sizeof(char), 3, s);
-  fseek(s, 12, SEEK_SET);
-  fread(&info, sizeof(char), 6, s);
-  if(type[1] != 0 || (type[2] != 2 && type[2] != 3))
-    return false;
-  w = info[0] + info[1] * 256;
-  h = info[2] + info[3] * 256;
-  bits = info[4];
-  size = w * h;
-  if(!checkSize(w) || !checkSize(h))
-    return false;
-  if(bits != 32 && bits != 24 && bits != 8)
-    return false;
-  imageData = getData(s, size, bits);
-  if(imageData == NULL)
-    return false;
-  fclose(s);
-  glBindTexture(GL_TEXTURE_2D, id);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-  glTexImage2D(GL_TEXTURE_2D, 0, texFormat, w, h, 0, texFormat, GL_UNSIGNED_BYTE, imageData);
-  gluBuild2DMipmaps(GL_TEXTURE_2D, texFormat, w, h, texFormat, GL_UNSIGNED_BYTE, imageData);
-  free(imageData);
-  return true;
 }

@@ -1,6 +1,6 @@
 Basic Installation
 ==================
-you need GNOME, GTK+, and GtkGLArea to start
+you need GNOME 2.x, GTK+-2.x, and GtkGLArea to start
 
 ./configure
 make

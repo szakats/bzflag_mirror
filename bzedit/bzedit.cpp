@@ -1,20 +1,26 @@
 #include <gnome.h>
-#include "ui_main.h"
-#include "ui_edit.h"
+#include <cstring>
 #include "world.h"
-#include "textures.h"
+#include "globals.h"
 
 int main(int argc, char **argv) {
   // Initialize GNOME
-  gnome_init("bzedit", "2.0", argc, argv);
+  GnomeProgram *program;
+  program = gnome_program_init("bzedit", "2.1", LIBGNOMEUI_MODULE, argc, argv, NULL);
 
-  // Declare our objects
-  UI::MainWindow win;
-  World world;
+  string file;
+  if (argc >= 2 && *argv[1] != '-') {
+    argc--;
+    file=argv[1];
+    argv = &argv[1];
+  }
 
-  // Fill the list window
-  world.buildList(win.getListWindow().getList());
-  win.setWorld(&world);
+  // Create our objects
+  doc = NULL;
+  mainwin = new UI::MainWindow;
+  doc = new Document(file);
+  mainwin->setsignals();
+  mainwin->redraw();
 
   // Enter our main processing loop
   gtk_main();

@@ -2,37 +2,40 @@
 #define __ELEMENT_H__
 
 #include <string>
-#include "objects.h"
+#include "object.h"
+
+typedef enum {
+  BOX = 0,
+  PYRAMID,
+  TELEPORTER,
+  LINK,
+  BASE,
+  NONE
+} ObjectType;
 
 class Element {
   public:
-    enum {BOX, PYRAMID, TELEPORTER, LINK, BASE, NONE} type;
-    Box *b;
-    Pyramid *p;
-    Teleporter *t;
-    Link *l;
-    Base *ba;
-    string name;
-    bool visible;
-    bool selected;
-
     Element();
-    Element(const Element &r);
-    Element operator = (const Element &r);
+    Element(const Element &e);
+    Element operator = (const Element &e);
+
+    void init();
     void makeBox();
     void makePyramid();
     void makeTeleporter();
     void makeLink();
     void makeBase();
-    void render(Camera &c, bool transparent);
-    float get_px();
-    float get_py();
-    float get_pz();
-    float get_angle();
-    float get_sx();
-    float get_sy();
-    float get_sz();
-    friend ostream & operator << (ostream & dest, Element &src);
+
+    void render(bool transparent, bool selected, int name = -1);
+
+    ObjectType type;
+    Object *obj;
+
+    std::string name;
+    bool visible;
+    bool selected;
+
+    int listID;
 };
 
 #endif

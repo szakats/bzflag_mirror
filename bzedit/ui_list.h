@@ -1,38 +1,56 @@
-#ifndef __LIST_WINDOW__
-#define __LIST_WINDOW__
+#ifndef __UI_LIST_H__
+#define __UI_LIST_H__
 
 #include <gnome.h>
-#include "element.h"
-#include "world.h"
+#include "document.h"
+#include "callbacks.h"
+
+// xpms
+#include "data/stub.xpm"
+#include "data/basicon.xpm"
+#include "data/boxicon.xpm"
+#include "data/lnkicon.xpm"
+#include "data/pyricon.xpm"
+#include "data/telicon.xpm"
+
+typedef enum {
+  ALL,
+  BOXES,
+  PYRAMIDS,
+  TELEPORTERS,
+  LINKS,
+  BASES
+} ViewType;
 
 namespace UI {
-
-class MainWindow;
 
 class ListWindow {
   public:
     ListWindow();
 
-    void hideW();
-    void showW();
+    void setView(ViewType view);
+    ViewType getView();
 
-    GtkWidget *getList();
-    void setWorld(World *world);
-    void setMain(MainWindow *mw);
-  protected:
+    void selectItem(Element e);
+    void unselectAll();
+    void addItem(Element e);
+    void removeItem(Element e);
+
+    GtkWidget *getWidget();
+
+  private:
+    ViewType view;
+
     GtkWidget *window;
+    GtkWidget *vbox;
+    GtkWidget *pickbox;
     GtkWidget *swindow;
     GtkWidget *list;
+    GtkListStore *liststore;
+
+    GdkPixbuf *boxicon, *pyricon, *telicon, *lnkicon, *basicon;
 };
 
-namespace TW {
-
-gint hide(GtkWidget *window, ListWindow *lw);
-gint select_row(GtkCList *clist, gint row, gint column, GdkEventButton *event, gpointer data);
-gint unselect_row(GtkCList *clist, gint row, gint column, GdkEventButton *event, gpointer data);
-
-} // ns: UI::TW
-
-} // ns: UI
+}
 
 #endif
