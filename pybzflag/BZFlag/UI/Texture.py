@@ -159,8 +159,8 @@ class Cache:
 	return self.textures[name]
 
 
-default_cache = Cache()
+defaultCache = Cache()
 def load(name):
-    return default_cache.load(name)
+    return defaultCache.load(name)
 
 ### The End ###

@@ -6,7 +6,7 @@
 from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl
 from BZFlag.UI.Drawable import Box, VRML
 from BZFlag.Event import EventLoop
-import sys
+import sys, os
 
 try:
     fileName = sys.argv[1]
@@ -27,13 +27,13 @@ view.camera.distance = 60
 view.camera.jump()
 
 # Read in the VRML file, putting each mesh in a separate object
-r = VRML.Reader(fileName)
+meshes = VRML.load(os.path.abspath(fileName))
 class MeshObject:
     def __init__(self, name):
         self.name = name
     def __repr__(self):
         return "<%s %r>" % (self.__class__.__name__, self.name)
-for name, drawable in r.meshes.items():
+for name, drawable in meshes.items():
     view.scene.add(MeshObject(name), [drawable])
 
 # Let the user pick objects with the left mouse button, printing the mesh name

@@ -50,7 +50,7 @@ but it has successfully loaded files exported by other software.
 from DisplayList import *
 from OpenGL.GL import *
 from BZFlag import Vector, Util
-import re, math
+import re, math, BZFlag, cPickle, os
 
 
 lexicalScanner = re.compile(r"""
@@ -455,5 +455,54 @@ class Mesh(DisplayList):
             glVertex3f(*tri.vertices[2])
         glEnd()
         glPopMatrix()
+
+
+class Cache:
+    """This is both an in-memory and on-disk cache for VRML objects."""
+    def __init__(self, path=BZFlag.cachePath):
+        self.objects = {}
+        self.path = os.path.expanduser(path)
+        try:
+            os.makedirs(self.path)
+        except OSError:
+            # Path could already exist or it could be unreachable. We don't care.
+            pass
+
+    def getCacheFilename(self, name):
+        return os.path.join(self.path, os.path.basename(name) + ".p")
+
+    def load(self, name):
+        """This checks the in-memory cache first, then the disk cache.
+           Returns a dictionary associating mesh names and drawables.
+           """
+        try:
+            return self.objects[name]
+        except KeyError:
+            # Not in the memory cache, try the disk cache
+            cacheFilename = self.getCacheFilename(name)
+            if os.path.isfile(cacheFilename):
+                f = open(cacheFilename, "rb")
+                meshes = cPickle.load(f)
+                f.close()
+                self.objects[name] = meshes
+                return meshes
+
+            # Not in either cache, load it
+            else:
+                meshes = Reader(Util.dataFile(name)).meshes
+                self.objects[name] = meshes
+                # Try to store it in the disk cache. If we can't, no big deal.
+                try:
+                    f = open(self.getCacheFilename(name), "wb")
+                    cPickle.dump(meshes, f, True)
+                    f.close()
+                except IOError:
+                    pass
+                return meshes
+            
+
+defaultCache = Cache()
+def load(name):
+    return defaultCache.load(name)
 
 ### The End ###

@@ -35,4 +35,7 @@ about = "%s - code version %s, protocol version %s" % \
 serverWelcomeMessage = "Welcome to the %s Server (code/%s protocol/%s)" % \
                        (name, version, protocolVersion)
 
+# Default pathnames
+cachePath = "~/.bzflag-cache"
+
 ### The End ###

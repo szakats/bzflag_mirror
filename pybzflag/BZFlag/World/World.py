@@ -161,7 +161,7 @@ class Cache:
     """Cache worlds on disk according to a server-generated hash,
        so we don't always have to send them over the wire.
        """
-    def __init__(self, path="~/.bzflag-cache"):
+    def __init__(self, path=BZFlag.cachePath):
         self.path = os.path.expanduser(path)
         try:
             os.makedirs(self.path)
