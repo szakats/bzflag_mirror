@@ -1,4 +1,4 @@
-%module cg
+%module Cg
 %{
 #include <cg.h>
 #include <cgGL.h>

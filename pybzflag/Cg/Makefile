@@ -1,9 +1,9 @@
-all:	_cg.so
+all:	_Cg.so
 
-_cg.so:	cg.i
-	swig -python cg.i
-	gcc -c cg_wrap.c -I/usr/include/Cg -I/usr/include/python2.2
-	ld -shared cg_wrap.o -o _cg.so -lCg -lCgGL -lGL
+_Cg.so:	Cg.i
+	swig -python Cg.i
+	gcc -c Cg_wrap.c -I/usr/include/Cg -I/usr/include/python2.2
+	ld -shared Cg_wrap.o -o _Cg.so -lCg -lCgGL -lGL
 
 clean:
-	rm -f *.o *.so cg.py *.pyc *.c
+	rm -f *.o *.so Cg.py *.pyc *.c
