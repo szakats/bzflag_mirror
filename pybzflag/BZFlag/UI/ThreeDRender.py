@@ -248,9 +248,11 @@ class BlendedRenderPass(BasicRenderPass):
         return drawable.blended
 
     def render(self, picking=None):
+        glDepthMask(0)
         glEnable(GL_BLEND)
         BasicRenderPass.render(self, picking)
         glDisable(GL_BLEND)
+        glDepthMask(1)
 
 
 class OverlayRenderPass(BasicRenderPass):
