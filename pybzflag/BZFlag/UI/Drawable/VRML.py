@@ -25,8 +25,8 @@ VRML seemed to be the only format meeting all the criteria. There is
 already a comprehensive VRML97 browser as part of the OpenGLContext
 package, but that would be extreme overkill for our simple needs here.
 
-This has been tested the most with VRML files produced by blender,
-but it has successfully loaded files exported by other software.
+This has been tested with VRML files from Blender and Milkshape 3D,
+as well as a few random VRML files found on the 'net.
 """
 #
 # Python BZFlag Package
