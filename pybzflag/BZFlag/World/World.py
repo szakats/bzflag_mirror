@@ -193,9 +193,15 @@ def load(name):
             with optional parameters. Note that this is
             evaluated as a python expression, so world names
             should not be sent here from an untrusted source.
+            An alternate syntax with no parenthesis is also
+            provided for convenience on the command line.
+            Note that the alternate format sacrifices
+            predictability for terseness, so if you have trouble
+            with it, try the normal format.
             
             Examples:
-               Random(randomHeights=True)
+               Random(randomHeights=True, size=1000)
+               text:bunnyhunt.bzw,size=450
                random
                empty
 
@@ -211,14 +217,35 @@ def load(name):
         return Generator.Text(name)
     
     # See if it's a generator
-    nameLower = name.strip().lower()
-    nameBase = re.sub(r"\(.*", "", name).strip().lower()
+    name = name.strip()
+    nameLower = name.lower()
+    nameBase = re.sub(r"[\(:].*", "", name).strip().lower()
     for gen in Generator.__all__:
         if nameBase == gen.lower():
             # Found a generator. If it's an exact (case insensitive) match,
             # run the generator with defaults and return that.
             if nameLower == gen.lower():
                 return getattr(Generator, gen)()
+            
+            # If there is a semicolon after the generator name, this is the alternate format
+            if nameLower.startswith(nameBase + ":"):
+                argsIn = name[len(nameBase)+1:].split(",")
+                argsOut = []
+                # Automatically quote any args that don't parse as-is
+                for arg in argsIn:
+                    try:
+                        if arg.find("=") > 0:
+                            # This looks like a keyword argument,
+                            # use only the argument part
+                            eval(arg.split("=")[1], Generator.__dict__)
+                        else:
+                            eval(arg.split("=")[1], Generator.__dict__)
+                    except:
+                        arg = '"' + arg + '"'
+                    argsOut.append(arg)
+                return eval("%s(%s)" % (gen, ",".join(argsOut)),
+                            Generator.__dict__)
+
             # Nope, we'll need to evaluate this as a python expression
             return eval(name, Generator.__dict__)
 

@@ -173,7 +173,8 @@ def autoFile(name):
     if type(name) == str:
         # If it doesn't look like a URL, don't bother loading urllib2
         if name.find("://") < 0:
-            return open(name)
+            import os
+            return open(os.path.expanduser(name))
         else:
             import urllib2
             return urllib2.urlopen(name)
