@@ -44,7 +44,7 @@ class Camera:
     glRotatef(self.elevation, 1.0, 0.0, 0.0)
     glRotatef(self.rotation, 0.0, 0.0, 1.0)
     if self.isFocused:
-      glTranslatef(self.focus[0], self.focus[1], self.focus[2])
+      glTranslatef(*self.focus)
 
 
 class Light:
