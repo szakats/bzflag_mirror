@@ -30,6 +30,7 @@ from BZFlag import Animated, Noise
 from BZFlag.UI import GLNoise, Texture
 import VRML, math
 from Numeric import *
+from OpenGL.GL.ARB.multitexture import *
 
 
 class SkyDrawable(DisplayList):
@@ -49,19 +50,16 @@ class SkyDrawable(DisplayList):
 class Colors(SkyDrawable):
     """The sky itself, with colors changing over the course of the day"""
     textureName = 'sky_colors.png'
-    def __init__(self, sky):
-        SkyDrawable.__init__(self, sky)
-        self.render.textures[0].setRepeat(GL_REPEAT, GL_CLAMP)
-
     def drawToList(self, rstate):
         """Our display list only holds an inverted sphere and the static
            texture coordinates. Texture coordinates must be adjusted for time
            of day in draw().
            """
         # Texture the sky dome vertically with the Y axis of our gradient.
+        # The sky dome gets the top half of our sky_colors texture
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 1, 0))
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 31/64, 32.5/64))
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
 
@@ -139,7 +137,8 @@ class MountainTexture(Texture.DynamicTexture):
         self.format = GL_INTENSITY8
 
     def draw(self):
-        # To get the most quality for our texel, sample the perlin noise twice per texel.
+        # To get the most quality for our texel, sample the perlin noise
+        # at twice our texture's horizontal resolution.
         samples = arange(0, 1, 1/(self.viewport.size[0] * 2))
         heights = self.noise.get(samples)
 
@@ -165,38 +164,57 @@ class MountainTexture(Texture.DynamicTexture):
 
 class Mountains(SkyDrawable):
     """Some mountains and a chasm to cover up the horizon"""
+    textureName = 'sky_colors.png'
     def __init__(self, *args, **kw):
         SkyDrawable.__init__(self, *args, **kw)
-        self.render.textures = (MountainTexture(),)
+        self.render.textures += (MountainTexture(),)
 
     def drawToList(self, rstate):
-        # FIXME: the color of the mountains
-        glColor3f(0,1,0)
-
-        # Set up blending to use only the texture's alpha
-        # channel, disregarding its color channels
+        """Do everything except the frame-dependent texgen setup in the display list"""
         glEnable(GL_BLEND)
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA)
 
-        # Set up texture coordinates. We can't do cylindrical mapping with
-        # glTexGen, and we don't have texture coordinates in the VRML loader
-        # yet, so just fudge something reasonableish with linear mapping.
+        # Set up texture coordinates for the mountain silhouette.
+        # We can't do cylindrical mapping with glTexGen, and we don't have
+        # texture coordinates in the VRML loader yet, so just fudge
+        # something reasonableish with linear mapping.
+        glActiveTextureARB(GL_TEXTURE1_ARB)
         glTexGenfv(GL_S, GL_OBJECT_PLANE, (3, 0, 0, 0))
         glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 1, 0))
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
+        glActiveTextureARB(GL_TEXTURE0_ARB)
+
+        # Texture coordinate generation for the sky colors
+        # This is a band of 8 texels that sits right below
+        # the sky colors.
+        glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 7.5/64, 24/64))
+        glEnable(GL_TEXTURE_GEN_S)
+        glEnable(GL_TEXTURE_GEN_T)
 
         VRML.load('sky.wrl')['horizon'].drawToList(rstate)
 
         # Cleanup!
+        glActiveTextureARB(GL_TEXTURE1_ARB)
+        glDisable(GL_TEXTURE_GEN_S)
+        glDisable(GL_TEXTURE_GEN_T)
+        glActiveTextureARB(GL_TEXTURE0_ARB)
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
         glDisable(GL_BLEND)
         glColor3f(1,1,1)
         glDisable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+    def draw(self, rstate):
+        # Use texture coordinate generation to set the time of day.
+        # The X axis of our texture is time, representing one day. The Y axis is spacial,
+        # stretching from the bottom of the sky sphere to the top.
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (0, 0, 0, self.sky.unitDayTime))
+        DisplayList.draw(self, rstate)
 
 
 class Void(SkyDrawable):

@@ -32,7 +32,7 @@ from Numeric import *
 class Pyramid(DisplayList):
     """A default pyramid, with XY planar texture mapping and a marble texture"""
     textureName = "black_marble.jpeg"
-    
+
     def __init__(self, pyramid):
         self.uvMap = self.getUVMap(pyramid)
         self.uvMap2 = self.getUVMap2(pyramid)
@@ -58,7 +58,7 @@ class Pyramid(DisplayList):
                 (0, repeats[1]),
                 (0, 0),
                 (repeats[0]/2, repeats[1]/2),
-                
+
                 (0, 0),
                 (repeats[0], 0),
                 (repeats[0]/2, repeats[1]/2))
@@ -92,7 +92,7 @@ class Pyramid(DisplayList):
         if flip:
             glNormal3f(0, 0, 1)
         else:
-            glNormal3f(0, 0, -1)            
+            glNormal3f(0, 0, -1)
         rpoly = poly[:]
         rpoly.reverse()
         for vertex in rpoly:
@@ -100,7 +100,7 @@ class Pyramid(DisplayList):
             glMultiTexCoord2fARB(GL_TEXTURE1_ARB, *uvstack2.pop())
             glVertex3f(vertex[0], vertex[1], z)
         glEnd()
-        
+
         # Sides
         glBegin(GL_TRIANGLES)
         center = sum(array(poly)) / len(poly)
@@ -136,11 +136,11 @@ class Pillar(Pyramid):
                 (1/4, 3/4),
                 (1/4, 1),
                 (0,   1),
-                
+
                 (0, 0),
                 (1, 0),
                 (0.5, 1),
-                
+
                 (0, 0),
                 (1, 0),
                 (0.5, 1),
@@ -181,18 +181,18 @@ class Water(Pyramid):
         glTexGenfv(GL_T, GL_OBJECT_PLANE, (0,1/causticScale,0,0))
         glEnable(GL_TEXTURE_GEN_S)
         glEnable(GL_TEXTURE_GEN_T)
-        
+
         glColor4f(1,1,1, 0.6)
         Pyramid.drawToList(self, rstate)
         glColor4f(1,1,1,1)
-        
+
         glActiveTextureARB(GL_TEXTURE1_ARB)
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
         glActiveTextureARB(GL_TEXTURE0_ARB)
         glDisable(GL_TEXTURE_GEN_S)
         glDisable(GL_TEXTURE_GEN_T)
-        
+
 
 class Reflection(Pyramid):
     """A reflective surface applied on top of a normal pyramid"""
