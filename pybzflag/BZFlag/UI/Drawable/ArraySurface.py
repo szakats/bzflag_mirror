@@ -65,7 +65,7 @@ def calcGridNormals(vertices):
        """
     vx = vertices[1:,:-1,:] - vertices[:-1,:-1,:]
     vy = vertices[:-1,1:,:] - vertices[:-1,:-1,:]
-    return normalize(cross(vx, vy))
+    return normalize(cross(vy, vx))
         
     
 def calcVertexNormals(vertices):

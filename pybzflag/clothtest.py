@@ -47,10 +47,10 @@ if __name__ == '__main__':
     # Give us some spiffy blue and yellow highlights
     view.light0.ambient  = (0,0,0,1)
     view.light0.diffuse  = (1,1,0.9,1)
-    view.light0.position = (-200,-20,-20,1)
+    view.light0.position = (200,20,20,1)
     view.light1.ambient  = (0,0,0,1)
     view.light1.diffuse  = (0.8,0.8,1,1)
-    view.light1.position = (-20,-200,-20,1)
+    view.light1.position = (20,200,20,1)
 
     a = buildArray()
     surf = Drawable.ArraySurface(a)
