@@ -37,7 +37,7 @@ class Sparks(Drawable.SpriteArray):
             Tweak.Quantity(self.emitter, 'position', range=(-10,10)),
             Tweak.Quantity(self.lifespan, 'lifespan', range=(0,10)),
             Tweak.Quantity(self.fader, 'sizeRange', range=(0,10)),
-            #Tweak.Quantity(self.fader, 'colorRange', range=(0,1)),
+            Tweak.Color(self.fader, 'colorRange'),
             Tweak.Quantity(self.constAccel, 'vector', range=(-100,100)),
             )
 

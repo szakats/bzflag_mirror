@@ -26,7 +26,7 @@ This implementation uses pygtk.
 
 from __future__ import division
 import gtk, threading
-
+from Numeric import asarray
 
 class Thread(threading.Thread):
     """The thread running GTK's main loop, and therefore all the widget callbacks"""
@@ -89,20 +89,26 @@ class AttributeControl(Control):
         # Get the subclass to add subwidgets for each individual value
         box = gtk.HBox(gtk.FALSE, gtk.FALSE)
         initialValue = getattr(object, attribute)
+
         try:
-            # First assume it's a vector attribute
+            initialValue[0]
+            isVector = True
+        except TypeError:
+            isVector = False
+
+        if isVector:
             for index in xrange(len(initialValue)):
                 def createUpdater(index):
                     # This is necessary so 'index' in the lambda binds with the value at this
                     # iteration, rather than the final value after the loop exits.
                     return lambda value: self.updateIndex(value, index)
                 w = self.add(initialValue[index],  createUpdater(index))
-                box.pack_start(w, gtk.TRUE, gtk.TRUE, 0)
+                box.pack_start(w, gtk.TRUE, gtk.TRUE, 2)
                 w.show()
-        except TypeError:
+        else:
             # Nope, now assume it's a scalar
             w = self.add(initialValue, self.update)
-            box.pack_start(w, gtk.TRUE, gtk.TRUE, 0)
+            box.pack_start(w, gtk.TRUE, gtk.TRUE, 2)
             w.show()
 
         Control.__init__(self, name, box)
@@ -116,7 +122,7 @@ class AttributeControl(Control):
         pass
 
     def update(self, value):
-        setattr(self.object, self.attribute)
+        setattr(self.object, self.attribute, value)
 
     def updateIndex(self, value, index):
         try:
@@ -143,12 +149,90 @@ class Quantity(AttributeControl):
         AttributeControl.__init__(self, object, attribute, name)
 
     def add(self, initialValue, setFunction):
-        print (initialValue, self.range[0], self.range[1], self.stepSize, self.pageSize)
         adj = gtk.Adjustment(initialValue, self.range[0], self.range[1], self.stepSize, self.pageSize)
         adj.connect("value_changed", lambda adj: setFunction(adj.value))
         scale = gtk.HScale(adj)
         scale.set_digits(3)
         return scale
+
+
+class Color(AttributeControl):
+    """A control for manipulating a scalar or vector object attribute consisting of 4-tuples
+       specifying RGBA colors in the range [0,1]
+       """
+    def add(self, initialValue, setFunction):
+        box = gtk.VBox(gtk.FALSE, gtk.FALSE)
+        label = gtk.Label()
+        label.show()
+        box.pack_start(label)
+
+        drawingArea = gtk.DrawingArea()
+        drawingArea.set_events(gtk.gdk.BUTTON_PRESS_MASK)
+        drawingArea.set_size_request(20,20)
+        drawingArea.connect("event", self.event)
+        drawingArea.box = box
+        drawingArea.label = label
+        drawingArea.colorDialog = None
+        drawingArea.setFunction = setFunction
+        drawingArea.color = initialValue
+        drawingArea.show()
+        box.pack_end(drawingArea)
+
+        color = map(int, tuple(asarray(initialValue[:3]) * 65535))
+        self.setColor(drawingArea, drawingArea.get_colormap().alloc_color(*color), initialValue[3])
+        return box
+
+    def setColor(self, drawingArea, color, alpha):
+        """Accepts a gdkcolor and a floating point alpha, showing their values in the control widgets
+           and setting the attached object attribute to the new color value.
+           """
+        drawingArea.gdkColor = color
+        drawingArea.modify_bg(gtk.STATE_NORMAL, color)
+        drawingArea.colorTuple = (color.red   / 65535,
+                                  color.green / 65535,
+                                  color.blue  / 65535,
+                                  alpha)
+
+        # Show the color in hex, since floating point takes too much space
+        drawingArea.label.set_text("#%02X%02X%02X%02X" %
+                                   tuple(asarray(drawingArea.colorTuple)*255))
+        drawingArea.setFunction(drawingArea.colorTuple)
+
+    def event(self, drawingArea, event):
+        handled = gtk.FALSE
+        if event.type == gtk.gdk.BUTTON_PRESS:
+            handled = gtk.TRUE
+            if not drawingArea.colorDialog:
+                self.openColorDialog(drawingArea)
+        return handled
+
+    def openColorDialog(self, drawingArea):
+        drawingArea.colorDialog = gtk.ColorSelectionDialog(self.name)
+        colorsel = drawingArea.colorDialog.colorsel
+        colorsel.drawingArea = drawingArea
+
+        oldGdkColor = drawingArea.gdkColor
+        oldAlpha = drawingArea.colorTuple[3]
+
+        colorsel.set_previous_color(drawingArea.gdkColor)
+        colorsel.set_previous_alpha(int(drawingArea.colorTuple[3] * 65535))
+        colorsel.set_current_color(drawingArea.gdkColor)
+        colorsel.set_current_alpha(int(drawingArea.colorTuple[3] * 65535))
+        colorsel.set_has_palette(gtk.TRUE)
+
+        colorsel.connect("color_changed", self.colorChanged)
+        response = drawingArea.colorDialog.run()
+
+        if response != gtk.RESPONSE_OK:
+            # Restore the original color
+            self.setColor(oldGdkColor, oldAlpha)
+
+        drawingArea.colorDialog.hide()
+        drawingArea.colorDialog = None
+
+    def colorChanged(self, widget):
+        self.setColor(widget.drawingArea,
+                      widget.get_current_color(), widget.get_current_alpha()/65535)
 
 
 def run(runnable):
