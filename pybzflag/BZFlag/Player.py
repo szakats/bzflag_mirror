@@ -22,7 +22,7 @@ areas like identity and motion that may be managed individually.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag import Event
+from BZFlag import Event, Animated
 
 
 class Identity:
@@ -41,18 +41,14 @@ class Identity:
 class Motion:
     """Contains information about a player's motion, integrates velocity over time"""
     def __init__(self, position=[0,0,0], azimuth=0, velocity=[0,0,0], angularVelocity=0):
-        self.position = position
+        self.velocity = list(velocity)
+        self.position = Animated.Vector(position, Animated.Velocity(self.velocity))
         self.azimuth = azimuth
-        self.velocity = velocity
         self.angularVelocity = angularVelocity
 
     def integrate(self, dt):
         self.azimuth += dt * self.angularVelocity
-        self.position = [
-            self.position[0] + self.velocity[0] * dt,
-            self.position[1] + self.velocity[1] * dt,
-            self.position[2] + self.velocity[2] * dt,
-            ]
+        self.position.integrate(dt)
 
 
 class Score:
@@ -85,8 +81,8 @@ class Player:
     def updateFromMessage(self, msg):
         """Update the player from a MsgPlayerUpdate"""
         self.status = msg.status
-        self.motion.position = msg.position
-        self.motion.velocity = msg.velocity
+        self.motion.position.set(msg.position)
+        self.motion.velocity[:] = list(msg.velocity)
         self.motion.azimuth = msg.azimuth
         self.motion.angularVelocity = msg.angularVelocity
         self.onUpdate()

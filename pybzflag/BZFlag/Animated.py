@@ -46,23 +46,31 @@ class Timekeeper:
 
 class Value:
     """A value that changes over time according to a function.
-       The given function should take the old value and the time step as parameters.
+       The given function should take the old value, the time step, and the vector index as parameters.
+       The vector index will always be None if this value isn't used in a vector.
        This module provides several callable classes that be used in place of an actual function.
        """
     def __init__(self, value, f):
         self.value = value
         self.f = f
 
-    def integrate(self, dt):
-        self.value = self.f(self.value, dt)
+    def integrate(self, dt, index=None):
+        self.value = self.f(self.value, dt, index)
 
 
-class TransparentSequence:
-    """Base class for objects that need to contain a sequence as 'value' but still
-       provide access to it transparently via getitem and setitem.
+class Vector:
+    """A vector of Animated.Values.
+       The given function should take the old value, the time step, and the vector index as parameters.
+       This module provides several callable classes that be used in place of an actual function.
+       The vector contents can be accessed transparently from this class.
        """
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, value, f):
+        self.f = f
+        self.set(value)
+
+    def integrate(self, dt):
+        for i in xrange(len(self.values)):
+            self.values[i].integrate(dt, i)
 
     def __getitem__(self, i):
         return self.values[i].value
@@ -70,26 +78,29 @@ class TransparentSequence:
     def __setitem__(self, i, v):
         self.values[i].value = v
 
-
-class Vector(TransparentSequence):
-    """A vector of Animated.Values.
-       The given function should take the old value, the time step, and the vector index as parameters.
-       This module provides several callable classes that be used in place of an actual function.
-       """
-    def __init__(self, value, f):
-        self.values = [Value(v, f) for v in value]
-        self.f = f
-
-    def integrate(self, dt):
-        for value in self.values:
-            value.integrate(dt)
+    def set(self, value):
+        self.values = [Value(v, self.f) for v in value]
 
 
-class Velocity(TransparentSequence):
+class Velocity:
     """A class that can be used as an integration function for Value and Vector.
        The given velocity should match the data type and number of elements.
+       The velocity vector contents can be accessed transparently from this class.
        """
-    pass
+    def __init__(self, value):
+        self.value = value
+    
+    def __call__(self, oldValue, dt, index=None):
+        if index is None:
+            return oldValue + self.value * dt
+        else:
+            return oldValue + self.value[index] * dt
+
+    def __getitem__(self, i):
+        return self.value[i]
+
+    def __setitem__(self, i, v):
+        self.value[i] = v
 
 
 
