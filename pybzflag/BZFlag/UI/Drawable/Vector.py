@@ -76,7 +76,6 @@ class Vector(GLDrawable):
         glScalef(self.size, self.size, self.size)
 
         # Reapply the camera's rotation
-        print rotation
         glMultMatrixf(rotation)
 
         # Draw unit circles/squares in the X, Y, and Z planes
