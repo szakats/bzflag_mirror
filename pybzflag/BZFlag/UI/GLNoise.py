@@ -220,9 +220,9 @@ class AnimatedPerlinNoise:
     def __init__(self,
                  period          = 50,
                  persistence     = 0.65,
-                 numOctaves      = 8,
-                 fundamental     = 2,
-                 framesPerOctave = 32,
+                 numOctaves      = 6,
+                 fundamental     = 16,
+                 framesPerOctave = 16,
                  factory         = None):
         if not factory:
             factory = NoiseFactory()

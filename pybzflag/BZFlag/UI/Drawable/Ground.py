@@ -28,6 +28,8 @@ from BZFlag.UI import GLExtension
 
 class Ground(DisplayList):
     textureNames = ('grass.jpeg', 'lightmap.jpeg')
+    baseTexRepeats = 90
+    overlayTexRepeats = 1
 
     def set(self, size):
         self.size = size / 2
@@ -43,24 +45,21 @@ class Ground(DisplayList):
 
         glBegin(GL_QUADS)
         glNormal3f(0, 0, 1);
-
-        baseTexRepeats = 90
-        overlayTexRepeats = 1
         
-        glTexCoord2f(baseTexRepeats, baseTexRepeats)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, overlayTexRepeats, overlayTexRepeats)
+        glTexCoord2f(self.baseTexRepeats, self.baseTexRepeats)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.overlayTexRepeats, self.overlayTexRepeats)
         glVertex3f(self.size, self.size, 0)
 
-        glTexCoord2f(0, baseTexRepeats)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, overlayTexRepeats)
+        glTexCoord2f(0, self.baseTexRepeats)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, self.overlayTexRepeats)
         glVertex3f(-self.size, self.size, 0)
 
         glTexCoord2f(0,0)
         glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0,0)
         glVertex3f(-self.size, -self.size, 0)
 
-        glTexCoord2f(baseTexRepeats, 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, overlayTexRepeats, 0)
+        glTexCoord2f(self.baseTexRepeats, 0)
+        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, self.overlayTexRepeats, 0)
         glVertex3f(self.size, -self.size, 0)
 
         glEnd()
