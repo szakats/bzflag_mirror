@@ -27,6 +27,8 @@ second rendering pass.
 #
 from BZFlag.UI import Texture
 
+__all__ = ['GLDrawable']
+
 class GLDrawable:
     """Abstract base class for an object that can be drawn to an OpenGL context.
        This is the basic unit used by the ThreeDView to sort objects by texture,
