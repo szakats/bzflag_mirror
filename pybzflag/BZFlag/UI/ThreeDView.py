@@ -58,15 +58,15 @@ class PlayerTransform(Drawable.Transform):
     def unapply(self):
         glColor3f(1,1,1)
         glPopMatrix()
-    
+
 
 class Tank:
     """A Scene object representing a player's tank"""
-    def __init__(self, player): 
+    def __init__(self, player):
         # Load the tank from disk. The tank is divided into separate meshes
         # for the barrel, turret, body, and each tread.
         meshes = Drawable.VRML.load("tank.wrl")
-        
+
         # Group all the tank's pieces together into one
         # display list, since we generally move them together.
         meshGroup = Drawable.Group(meshes.values())
@@ -127,7 +127,7 @@ class Scene(ThreeDRender.Scene):
 
     def update(self):
         self.sky.update()
-        
+
 
 class ThreeDView(ThreeDRender.View):
     """Shows a 3D view of the BZFlag game, renderable to an OpenGLViewport.
