@@ -27,6 +27,7 @@ from __future__ import division
 from Array import *
 from GLDrawable import *
 from OpenGL.GL import *
+from OpenGL.GLU import gluProject
 from OpenGL.GL.EXT.point_parameters import *
 from OpenGL.GL.ARB.multitexture import *
 from BZFlag.Geometry import *
@@ -94,6 +95,9 @@ class SoftwareSpriteRenderer(VertexArray):
         self.pointSizes  = zeros(shape, Float32, savespace=True)
         self.pointColors = ones(shape + (4,), Float32, savespace=True)
 
+        # Z-sorting is on by default
+        self.zSort = True
+
     def draw(self, rstate):
         # Stretch our point colors over each whole quad
         self.colors[...,0,:] = self.pointColors
@@ -111,8 +115,29 @@ class SoftwareSpriteRenderer(VertexArray):
         self.vertices[...,2,:] = self.points + right + up;
         self.vertices[...,3,:] = self.points - right + up;
 
+        # Get VertexArray to make self.interleaved current in our OpenGL context
         self.bind()
-        glDrawArrays(GL_QUADS, 0, self.numVertices)
+
+        if self.zSort:
+            # If we're z-sorting, project each particle into window coordinates,
+            # and generate a list of vertex indices by sorting the particle distances.
+            numPoints = len(self.points)
+            distances = array(map(gluProject,
+                                  self.points[:,0],
+                                  self.points[:,1],
+                                  self.points[:,2],
+                                  [glGetDoublev(GL_MODELVIEW_MATRIX)]  * numPoints,
+                                  [glGetDoublev(GL_PROJECTION_MATRIX)] * numPoints,
+                                  [glGetIntegerv(GL_VIEWPORT)]         * numPoints),
+                              'd')[:,2]
+            indices = repeat(argsort(distances)[::-1] * 4,
+                             ones((numPoints,), 'i') * 4)
+            indices[1::4] += 1
+            indices[2::4] += 2
+            indices[3::4] += 3
+            glDrawElementsui(GL_QUADS, indices)
+        else:
+            glDrawArrays(GL_QUADS, 0, self.numVertices)
 
 
 class PointSpriteRenderer(VertexArray):

@@ -35,6 +35,7 @@ class ParticleTest(Drawable.SpriteArray):
         Tweak.Window(
             Tweak.Text(texProxy, 'targetName'),
             Tweak.Boolean(self, 'glowing'),
+            Tweak.Boolean(self.renderer, 'zSort'),
             Tweak.Separator(),
             Tweak.Quantity(self.emitter, 'spawnRate', range=(0,200)),
             Tweak.Quantity(self.emitter, 'speedRange', range=(0,100)),
