@@ -27,12 +27,14 @@ from DisplayList import *
 from Ground import *
 from Wall import *
 from Teleporter import *
-from Base import *
 from ArraySurface import *
 from TestWidget import *
 from Vector import *
+
 from Box import detectBoxDrawables
 from Pyramid import detectPyramidDrawables
+from Base import detectBaseDrawables
+
 import VRML
 import Sky
 

@@ -213,13 +213,7 @@ class TeamBase(WorldObject):
     def getDrawables(self):
         from BZFlag.UI import Drawable
         if self.drawables == None:
-            if self.center[2] != 0:
-                self.drawables = [
-                    Drawable.BaseTops(self.team, self.center, self.angle, self.size),
-                    Drawable.BoxSides(self.center, self.angle, self.size),
-                    ]
-            else:
-                self.drawables = [Drawable.BaseTops(self.team, self.center, self.angle, self.size)]
+            self.drawables = Drawable.detectBaseDrawables(self)
         return self.drawables
 
 

@@ -22,43 +22,36 @@ Class for drawing the team bases in the world
 #
 from DisplayList import *
 from OpenGL.GL import *
+import Box
 
 
-class BaseTops(DisplayList):
-    def set(self, team, center, angle, size):
-        self.team = team
-        self.center = center
-        self.angle = angle
-        self.size = size
+colorScheme = {
+    'red':    (1, 0.5, 0.5),
+    'green':  (0.7, 1, 0.7),
+    'blue':   (0.7, 0.7, 1),
+    'purple': (1, 0.5, 0.8),
+    }
+
+
+class BaseDecal(Box.TopDecal):
+    textureName = "basedecal%02d.png:40"
+    def set(self, base):
+        Box.TopDecal.set(self, base)
+        self.color = colorScheme[base.team]
 
     def drawToList(self, rstate):
-        glPushMatrix()
-        glTranslatef(*self.center)
-        glRotatef(self.angle, 0.0, 0.0, 1.0)
-        if self.team == 'red':
-            glColor3f(1.0, 0.0, 0.0)
-        if self.team == 'green':
-            glColor3f(0.0, 1.0, 0.0)
-        if self.team == 'blue':
-            glColor3f(0.0, 0.0, 1.0)
-        if self.team == 'purple':
-            glColor3f(1.0, 0.0, 1.0)
-        glBegin(GL_QUADS)
-        # Z+
-        glNormal3f(0, 0, 1);
-        glVertex3f(self.size[0], -self.size[1], self.size[2]);
-        glVertex3f(self.size[0], self.size[1], self.size[2]);
-        glVertex3f(-self.size[0], self.size[1], self.size[2]);
-        glVertex3f(-self.size[0], -self.size[1], self.size[2]);
-        # Z-
-        glNormal3f(0, 0, -1);
-        glVertex3f(-self.size[0], -self.size[1], 0);
-        glVertex3f(-self.size[0], self.size[1], 0);
-        glVertex3f(self.size[0], self.size[1], 0);
-        glVertex3f(self.size[0], -self.size[1], 0);
-        glEnd()
-        glColor3f(1.0, 1.0, 1.0)
-        glPopMatrix()
+        glDisable(GL_LIGHTING)
+        glColor3f(*self.color)
+        Box.TopDecal.drawToList(self, rstate)
+        glEnable(GL_LIGHTING)
 
+
+def detectBaseDrawables(base):
+    """Given a base WorldObject, return a list of the drawables that should be used
+       to represent it. This starts with a box, then adds some decorations to make it a base.
+       """
+    drawables = Box.detectBoxDrawables(base)
+    drawables.append(BaseDecal(base))
+    return drawables
 
 ### The End ###
