@@ -39,7 +39,9 @@ class RenderPass:
     # Rendering passes with a higher priority get a chance to filter drawables first
     priority = None
 
-    def __init__(self):
+    def __init__(self, filterPriority, renderPriority):
+        self.filterPriority = filterPriority
+        self.renderPriority = renderPriority
         self.erase()
 
     def render(self, rstate):
@@ -113,9 +115,6 @@ class BasicRenderPass(RenderPass):
        This is the lowest priority render pass, and will collect all drawables
        left over from other passes.
        """
-    filterPriority = 0
-    renderPriority = 100
-
     def filter(self, drawable):
         return True
 
@@ -193,9 +192,6 @@ class BasicRenderPass(RenderPass):
 
 class BlendedRenderPass(BasicRenderPass):
     """A rendering pass that collects blended objects and renders them after most other objects."""
-    filterPriority = 10
-    renderPriority = 80
-
     def filter(self, drawable):
         return drawable.render.blended
 
@@ -209,9 +205,6 @@ class BlendedRenderPass(BasicRenderPass):
 
 class DecalRenderPass(BasicRenderPass):
     """A rendering pass that collects decal objects and renders them after solid objects."""
-    filterPriority = 10
-    renderPriority = 90
-
     def filter(self, drawable):
         return drawable.render.decal
 
@@ -228,9 +221,6 @@ class DecalRenderPass(BasicRenderPass):
 
 class OverlayRenderPass(BasicRenderPass):
     """A rendering pass that draws objects overlaid on the current scene."""
-    filterPriority = 20
-    renderPriority = 10
-
     def filter(self, drawable):
         return drawable.render.overlay
 
@@ -247,9 +237,6 @@ class BackgroundRenderPass(BasicRenderPass):
     """A rendering pass that draws objects behind the scene, with the camera's
        translation removed and Z-buffer writes disabled.
        """
-    filterPriority = 20
-    renderPriority = 110
-
     def filter(self, drawable):
         return drawable.render.background
 
@@ -277,9 +264,6 @@ class ReflectionRenderPass(DecalRenderPass):
        objects in a separate pass, and require the texture matrix to be set up as
        the inverse of the modelview matrix's 3x3 top-left corner.
        """
-    filterPriority = 10
-    renderPriority = 95
-
     def filter(self, drawable):
         return drawable.render.reflection
 
@@ -320,9 +304,6 @@ class CameraRenderPass(BasicRenderPass):
        lense flares, but this could include things such as the cracked glass effect
        from BZFlag proper
        """
-    filterPriority = 20
-    renderPriority = 5
-
     def filter(self, drawable):
         return drawable.render.camera
 
@@ -345,11 +326,18 @@ class CameraRenderPass(BasicRenderPass):
 
 
 def getRenderPasses():
-    return [BasicRenderPass(),
-            BlendedRenderPass(),
-            OverlayRenderPass(),
-            DecalRenderPass(),
-            ReflectionRenderPass(),
-            BackgroundRenderPass()]
+    """Return a list of freshly created render pass instances. This function serves mostly
+       as a way to keep the list of render passes and the priorities for each in one place,
+       to make it easier to see the big picture regarding how the various passes interoperate.
+       """
+    return [
+        BackgroundRenderPass (filterPriority= 20, renderPriority=110),
+        BasicRenderPass      (filterPriority=  0, renderPriority=100),
+        ReflectionRenderPass (filterPriority= 10, renderPriority= 95),
+        DecalRenderPass      (filterPriority= 10, renderPriority= 90),
+        BlendedRenderPass    (filterPriority= 10, renderPriority= 80),
+        OverlayRenderPass    (filterPriority= 20, renderPriority= 10),
+        CameraRenderPass     (filterPriority= 20, renderPriority=  5),
+        ]
 
 ### The End ###
