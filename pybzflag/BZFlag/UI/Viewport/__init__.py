@@ -41,14 +41,17 @@ from Base import *
 # Lazily import the actual viewport implementations, to keep dependencies in check
 
 def PygameViewport(*args, **kw):
+    global Pygame
     import Pygame
     return Pygame.PygameViewport(*args, **kw)
 
 def OpenGLViewport(*args, **kw):
+    global GL
     import GL
     return GL.OpenGLViewport(*args, **kw)
 
 def StereoGLViewport(*args, **kw):
+    global GL
     import GL
     return GL.StereoGLViewport(*args, **kw)
 

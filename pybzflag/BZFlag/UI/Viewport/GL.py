@@ -36,29 +36,6 @@ from BZFlag import Event
 import pygame, copy
 
 
-class ViewportMode:
-    """Abstract base class for a mode that affects the rendering
-       initialization and completion of an entire viewport.
-       """
-    def setupFrame(self):
-        """Called during the viewport's onSetupFrame event"""
-        pass
-
-    def finishFrame(self):
-        """Called during the viewport's onFinishFrame event, before the page flip"""
-        pass
-
-
-class ClearedMode(ViewportMode):
-    """A viewport mode in which the color buffer is cleared each frame"""
-    def __init__(self, clearColor=(0,0,0,1)):
-        glClearColor(*clearColor)
-
-    def setupFrame(self):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        
-
-
 class OpenGLViewport(PygameViewport):
     """Subclasses PygameView to provide OpenGL initialization"""
     def init(self):
@@ -70,10 +47,6 @@ class OpenGLViewport(PygameViewport):
         self.fov         = 45.0
         self.rectExp     = [0,0] + list(self.size)  # A function or list specifying our relative viewport
         self.rect        = self.rectExp             # Our absolute viewport
-        self.clearColor  = (0,0,0,1)
-
-        self.wireframe   = False
-        self.wireframeClearColor = (0.5, 0.5, 0.5, 1)
 
         # Set up some common OpenGL defaults
         glClearDepth(1.0)
@@ -82,20 +55,20 @@ class OpenGLViewport(PygameViewport):
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
 
-        def onSetupFrame():
-            # Always clear in wireframe mode, but in normal mode it can be optional.
-            # Set clearColor to None to disable it.
-            if self.wireframe or self.clearColor:
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-            else:
-                glClear(GL_DEPTH_BUFFER_BIT)
-        self.onSetupFrame.observe(onSetupFrame)
+        # Set up the Mode object that handles viewport-wide per-frame modes.
+        # By default we use ClearedMode.
+        self.mode = ClearedMode()
+        self.onSetupFrame.observe(lambda: self.mode.setupFrame())
 
         def onResize():
             self.rectExp = [0,0] + list(self.size)
         self.onResize.observe(onResize)
 
         self.onSetupFrame.observe(self.configureOpenGL)
+
+    def onFinishFrame(self):
+        self.mode.finishFrame()
+        PygameViewport.onFinishFrame(self)
 
     def evalViewport(self):
         """Evaluate our viewport if necessary, and set up our 'size' and 'viewport' members"""
@@ -121,15 +94,6 @@ class OpenGLViewport(PygameViewport):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glDepthRange(0.01,2000)
-
-        # Enable/disable wireframe on a per-viewport basis
-        if self.wireframe:
-            glClearColor(*self.wireframeClearColor)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        else:
-            if self.clearColor:
-                glClearColor(*self.clearColor)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     def setProjectionMatrix(self):
         if self.fov:
@@ -200,5 +164,57 @@ class StereoGLViewport(OpenGLViewport):
        """
     def setGLAttributes(self):
 	pygame.display.gl_set_attribute(pygame.GL_STEREO, 1)
+
+
+class ViewportMode:
+    """Abstract base class for a mode that affects the rendering
+       initialization and completion of an entire viewport.
+       """
+    clearBuffers = GL_DEPTH_BUFFER_BIT
+    
+    def __init__(self):
+        if self.__class__ == ViewportMode:
+            raise Exception("ViewportMode is an abstract base class and cannot be instantiated")
+    
+    def setupFrame(self):
+        """Called during the viewport's onSetupFrame event"""
+        self.setPolygonMode()
+        if self.clearBuffers:
+            glClear(self.clearBuffers)
+
+    def finishFrame(self):
+        """Called during the viewport's onFinishFrame event, before the page flip"""
+        pass
+
+    def setPolygonMode(self):
+        """A hook for setting the polygon mode. Default is GL_FILL"""
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+
+class UnclearedMode(ViewportMode):
+    """A viewport mode in which the color buffer is not cleared
+       each frame, but the depth buffer is still cleared.
+       This happens to be the default.
+       """
+    pass
+
+
+class ClearedMode(ViewportMode):
+    """A viewport mode in which the color buffer is cleared each frame"""
+    clearBuffers = ViewportMode.clearBuffers | GL_COLOR_BUFFER_BIT
+    
+    def __init__(self, clearColor=(0,0,0,1)):
+        glClearColor(*clearColor)
+
+
+class WireframeMode(ClearedMode):
+    """A viewport mode that draws all polygons in wireframe, with
+       a different clear color that makes them stand out better.
+       """
+    def __init__(self, clearColor=(0.5, 0.5, 0.5, 1)):
+        ClearedMode.__init__(self, clearColor)
+
+    def setPolygonMode(self):
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 ### The End ###

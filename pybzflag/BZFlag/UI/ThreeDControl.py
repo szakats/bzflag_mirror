@@ -23,7 +23,7 @@ Controller classes for manipulating 3D views
 
 import math, sys, pygame
 from BZFlag import Animated, Event
-from BZFlag.UI import ThreeDRender
+from BZFlag.UI import ThreeDRender, Viewport
 
 
 class Modifiers:
@@ -160,6 +160,7 @@ class Viewing:
         self.view = view
         self.viewport = viewport
         self.movieRecorder = None
+        self.savedMode = None
         
         self.view.camera = ThreeDRender.SmoothedCamera()
         view.camera.position = (0, 0, 20)
@@ -170,6 +171,7 @@ class Viewing:
 
         self.bind(KeyPress, 'f').observe(self.toggleFullscreen)
         self.bind(KeyPress, 'w').observe(self.toggleWireframe)
+        self.bind(KeyPress, 'x').observe(self.toggleXRay)
         self.bind(KeyPress, 'r').observe(self.toggleRecorder)
         self.bind(KeyPress, 'q').observe(self.quit)
         self.bind(KeyPress, pygame.K_ESCAPE).observe(self.quit)
@@ -219,8 +221,25 @@ class Viewing:
     def toggleFullscreen(self):
         self.viewport.display.toggle_fullscreen()
 
+    def toggleViewportMode(self, modeClass, *args, **kw):
+        """Toggles into or out of a given viewport mode, saving the old mode properly"""
+        if isinstance(self.viewport.mode, modeClass):
+            # Toggle out back to the saved mode
+            self.viewport.mode = self.savedMode
+            self.savedMode = None
+        else:
+            # If we aren't already in another mode we set, save the current mode
+            if not self.savedMode:
+                self.savedMode = self.viewport.mode
+            
+            # Toggle into the new mode
+            self.viewport.mode = modeClass(*args, **kw)
+
     def toggleWireframe(self):
-        self.viewport.wireframe = not self.viewport.wireframe
+        self.toggleViewportMode(Viewport.GL.WireframeMode)
+
+    def toggleXRay(self):
+        self.toggleViewportMode(Viewport.GL.XRayMode)
 
     def quit(self):
         self.viewport.eventLoop.stop()

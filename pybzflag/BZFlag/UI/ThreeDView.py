@@ -22,7 +22,7 @@ A 3d scene renderer similar to BZFlag proper
 #
 
 import BZFlag
-from BZFlag.UI import ThreeDRender, Drawable, Environment
+from BZFlag.UI import ThreeDRender, Drawable, Environment, Viewport
 from BZFlag.Protocol import WorldObjects
 from OpenGL.GL import *
 
@@ -138,7 +138,7 @@ class ThreeDView(ThreeDRender.View):
         viewport.setCaption("%s 3D View" % BZFlag.name)
 
         # We don't need the viewport to clear the color buffer for us, since we have the sky
-        viewport.clearColor = None
+        viewport.mode = Viewport.GL.UnclearedMode()
 
         def onDrawFrame():
             game.update()
