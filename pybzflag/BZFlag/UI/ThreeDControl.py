@@ -162,6 +162,10 @@ class Viewing:
         self.viewport = viewport
         self.view.camera = ThreeDRender.SmoothedCamera()
         view.camera.position = (0, 0, -20)
+        view.camera.distance  = 900
+        view.camera.azimuth   = 180
+        view.camera.elevation = -75
+        view.camera.jump()
 
         self.bind(KeyPress, 'f').observe(self.toggleFullscreen)
         self.bind(KeyPress, 'w').observe(self.toggleWireframe)

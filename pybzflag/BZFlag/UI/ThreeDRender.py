@@ -39,11 +39,18 @@ class Camera:
        to a nonzero value.
        """
     def __init__(self):
-        self.position  = (0, 0, 4.0)
-        self.distance  = 900
-        self.azimuth   = 180
-        self.elevation = -75
+        self.position  = (0, 0, 0)
+        self.distance  = 0
+        self.azimuth   = 0
+        self.elevation = 0
 	self.azimuthOffset = 0
+
+    def jump(self):
+        """If this camera class implements any animation techniques, this method
+           should ensure that the camera arrives instantly at its destination after
+           the coordinates have been changed.
+           """
+        pass
 
     def load(self):
         """Set the current OpenGL matrix according to the camera's location and orientation"""
@@ -71,6 +78,13 @@ class SmoothedCamera(Camera):
                          self.animatedPosition,
                          self.animatedAzimuth,
                          self.animatedElevation]
+
+    def jump(self):
+        """This cuts directly to the target position, without all that pesky animation"""
+        self.animatedDistance.value  = self.distance
+        self.animatedPosition.set(self.position)
+        self.animatedAzimuth.value = self.azimuth
+        self.animatedElevation.value = self.elevation
 
     def load(self):
         self.animatedDistance.f.target  = self.distance

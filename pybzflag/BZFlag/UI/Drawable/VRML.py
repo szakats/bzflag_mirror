@@ -66,7 +66,10 @@ class Reader:
     def parse(self, f):
         """Parse the given file object as VRML"""
         while True:
-            line = f.readline().strip()
+            line = f.readline()
+            if not line:
+                break
+            line = line.strip()
 
             # Process the VRML header that sets the version and encoding
             if line.startswith("#VRML"):
@@ -81,7 +84,14 @@ class Reader:
 
             # Tokenize and resume processing the individual tokens
             for token in re.split("\s+", line):
-                self.parseToken(token)
+                if token:
+                    self.parseToken(token)
+
+    def parseHeader(self, line):
+        """Parse the #VRML header line. This doesn't make any attempt to validate
+           the version yet, it just uses it to set the encoding.
+           """
+        self.encoding = re.split("\s+", line)[2]
 
     def parseToken(self, token):
         print token

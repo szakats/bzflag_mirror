@@ -4,7 +4,7 @@
 # Give the file name or URL to a .wrl model on the command line.
 #
 from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl
-from BZFlag.UI.Drawable import Box
+from BZFlag.UI.Drawable import Box, VRML
 from BZFlag.Event import EventLoop
 import sys
 
@@ -21,11 +21,20 @@ viewport.setCaption("Model Viewer - %s" % fileName)
 view = ThreeDRender.View(viewport)
 control = ThreeDControl.Viewing(view, viewport)
 
+# Move the camera a little closer in, and down to the origin
+view.camera.position = (0,0,0)
+view.camera.distance = 60
+view.camera.jump()
+
+# Debugging the model loader...
+r = VRML.Reader(fileName)
+
+# Just draw a box until the model loader works, to make this file less than completely useless
 class ViewerModel:
     pass
+view.scene.objects[ViewerModel()] = [Box.BoxSides( (0,0,-10), 0, (10,10,20) ),
+                                     Box.BoxTops( (0,0,-10), 0, (10,10,20) )]
 
-view.scene.objects[ViewerModel()] = [Box.BoxSides( (0,0,0), 0, (100,100,50) ),
-                                     Box.BoxTops( (0,0,0), 0, (100,100,50) )]
 view.scene.preprocess()
 loop.run()
 
