@@ -39,6 +39,7 @@ class DisplayList(GLDrawable):
            """
         self.__dict__.update(state)
         self.list = glGenLists(1)
+        self.dirty = True
 
     def set(self):
         """Subclasses should use this to change the drawable's state.

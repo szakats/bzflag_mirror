@@ -91,7 +91,7 @@ class GLDrawable:
                 textures.append(Texture.load(name))
             elif name:
                 textures.append(name)
-                
+
         self.render.textures = tuple(textures)
 
     def parent(self, parent):

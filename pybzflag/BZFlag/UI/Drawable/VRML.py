@@ -87,7 +87,7 @@ lexicalScanner = re.compile(r"""
     |(?P<closeBracket> \])
 
     # Identifiers
-    |(?P<id>           [^\s\,\.\{\}\[\]]+)
+    |(?P<id>           [^\s\,\{\}\[\]]+)
     )""", re.VERBOSE | re.UNICODE)
 
 
@@ -305,18 +305,14 @@ class Reader:
         if node.id == 'IndexedFaceSet':
             # We just found some data we can turn into a drawable. Now we just
             # need to search for the matching coordinates, material, name, and matrix.
-            name = self.findName(newParents)
-            coords = self.searchUp('Coordinate3', parents)
-            material = self.searchUp('Material', parents)
-            matrix = self.searchUp('MatrixTransform', parents)
-            if not coords:
-                raise VRMLParseError("Could not find required Coordinate3 section")
-
-            self.meshes[name] = Mesh(faces = node,
-                                     coords = coords,
-                                     name = name,
-                                     material = material,
-                                     matrix = matrix)
+            self.meshes[self.findName(newParents)] = Mesh(
+                indexedFaceSet     = node,
+                coordinate3        = self.searchUp('Coordinate3', parents),
+                matrixTransform    = self.searchUp('MatrixTransform', parents),
+                material           = self.searchUp('Material', parents),
+                textureCoordinate2 = self.searchUp('TextureCoordinate2', parents),
+                texture2           = self.searchUp('Texture2', parents),
+                )
 
         for child in node.children:
             self.extractMeshes(child, newParents)
@@ -324,8 +320,9 @@ class Reader:
 
 class Triangle:
     """Container for a triangle's vertices and normals"""
-    def __init__(self, vertices):
+    def __init__(self, vertices, texcoords=((0,0), (0,0), (0,0))):
         self.vertices = vertices
+        self.texcoords = texcoords
         self.calcFaceNormal()
 
         # Vertex normals default to the face normal
@@ -343,20 +340,40 @@ class Triangle:
 
 class Mesh(DisplayList):
     """A drawable mesh model as extracted from the VRML file.
-       All parameters to set() are VRML nodes.
+       All relevant VRML nodes should be passed as keyword parameters,
+       with their first letter lowercased.
        """
-    def set(self, faces, coords, name=None, material=None, matrix=None, creaseAngle=60):
-        self.name = name
-        self.creaseAngle = creaseAngle
-        faces = faces.value['coordIndex']
-        vertices = coords.value['point']
-        if matrix:
-            self.matrix = matrix.value['matrix']
+    creaseAngle = 60
+
+    def set(self, **nodes):
+        # Store a mesh matrix if we have one
+        if nodes.get('matrixTransform', None):
+            self.matrix = nodes['matrixTransform'].value['matrix']
         else:
             self.matrix = None
-        if material:
-            self.color = material.value['diffuseColor'] + [1 - material.value['transparency']]
-            self.render.blended = self.color[3] != 1
+
+        # Store and load a texture if we have one
+        if nodes.get('texture2', None):
+            children = nodes['texture2'].children
+            assert(children[-1].value == 'filename')
+            self.textureName = children[-2].value
+            self.loadTextures()
+
+        # Store material color if we have it
+        if nodes.get('material', None):
+            self.color = [1,1,1,1]
+            if nodes['material'].value.has_key('diffuseColor'):
+                if type(nodes['material'].value['diffuseColor'][0]) is float:
+                    # Mesh has a single color value
+                    self.color[:3] = nodes['material'].value['diffuseColor'][:3]
+                else:
+                    # Mesh has vertex colors- not implemented yet
+                    pass
+
+            if nodes['material'].value.has_key('transparency'):
+                # Mesh has an alpha value
+                self.color[3] = 1 - nodes['material'].value['transparency']
+                self.render.blended = self.color[3] != 1
         else:
             self.color = None
 
@@ -366,7 +383,8 @@ class Mesh(DisplayList):
         # it's not worth trying to tesselate them.
         self.erase()
         polygon = []
-        for face in faces:
+        vertices = nodes['coordinate3'].value['point']
+        for face in nodes['indexedFaceSet'].value['coordIndex']:
             if face == -1:
                 # -1 is the end-of-polygon marker
                 if len(polygon) == 3:
@@ -448,10 +466,13 @@ class Mesh(DisplayList):
         glBegin(GL_TRIANGLES)
         for tri in self.triangles:
             glNormal3f(*tri.normals[0])
+            glTexCoord2f(*tri.texcoords[0])
             glVertex3f(*tri.vertices[0])
             glNormal3f(*tri.normals[1])
+            glTexCoord2f(*tri.texcoords[1])
             glVertex3f(*tri.vertices[1])
             glNormal3f(*tri.normals[2])
+            glTexCoord2f(*tri.texcoords[2])
             glVertex3f(*tri.vertices[2])
         glEnd()
         glPopMatrix()
