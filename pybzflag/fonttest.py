@@ -16,8 +16,8 @@ viewport.fov = None
 f = GLText.Font("Vera.ttf")
 
 time = Animated.Timekeeper()
-spin = Animated.Value(0, Animated.Velocity(-180))
-zoom = Animated.Value(0, Animated.Velocity(-180))
+spin = Animated.Value(Animated.Velocity(-80))
+zoom = Animated.Value(Animated.SineFunction(0.5, (1,1.4)))
 
 def drawFrame():
     # Gradient
@@ -42,7 +42,10 @@ def drawFrame():
     glLoadIdentity()
     glTranslatef(viewport.size[0]/2, viewport.size[1]/2, 0)
     glRotatef(spin.value, 0,0,1)
-    spin.integrate(time.step())
+    glScalef(zoom.value, zoom.value, zoom.value)
+    dt = time.step()
+    spin.integrate(dt)
+    zoom.integrate(dt)
     f.drawCentered("Spinny-widget")
 
     glColor3f(0,0,0)

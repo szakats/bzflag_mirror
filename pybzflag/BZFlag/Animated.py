@@ -257,7 +257,7 @@ class PeriodicFunction:
 
 class SineFunction(PeriodicFunction):
     def f(self, x):
-        return sin(x / (math.pi * 2)) * 0.5 + 0.5
+        return math.sin(x * math.pi * 2) * 0.5 + 0.5
 
 class RampFunction(PeriodicFunction):
     def f(self, x):
