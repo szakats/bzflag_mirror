@@ -152,7 +152,8 @@ class Reader:
             # Convert to Unicode using the current encoding, strip out comments.
             # Note that this makes no attempt to handle strings properly, since
             # none of the data we currently need involves strings.
-            line = unicode(line, self.encoding)
+            if self.encoding != 'ascii':
+                line = unicode(line, self.encoding)
             line = re.sub("#.*", "", line)
 
             # Thanks to Python 2.2's finditer method, we can implement a fairly
