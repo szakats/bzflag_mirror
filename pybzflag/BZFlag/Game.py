@@ -25,6 +25,8 @@ over the network, frontends display and modify it.
 #
 
 from BZFlag import World, Event
+import time
+
 
 class Game:
     """Container for all game state information.
@@ -37,8 +39,16 @@ class Game:
         self.flags = {}      # Indexed by flag number (not Id)
         self.teams = {}      # Indexed by color, represented as a string
         self.world = World.World()
+        self.lastUpdateTime = None
         Event.attach(self, 'onChangePlayerList', 'onAddPlayer', 'onRemovePlayer',
                      'onLoadWorld', 'onAddFlag')
+
+    def update(self):
+        """Update all time-dependant game state"""
+        now = time.time()
+        if self.lastUpdateTime is not None:
+            self.integrate(now - self.lastUpdateTime)
+        self.lastUpdateTime = now
 
     def integrate(self, dt):
         """Integrate velocity with respect to time everywhere it's needed"""

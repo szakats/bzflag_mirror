@@ -23,7 +23,7 @@ into observable and traceable events.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag import Network
+from BZFlag import Network, Errors
 import select, time
 
 
@@ -206,8 +206,6 @@ class EventLoop:
                     else:
                         if untilNextTimer < pollTime:
                             pollTime = untilNextTimer
-
-                print pollTime
 
                 # This waits until either a socket has activity, or
                 # our pollTime has expired and we need to check timers

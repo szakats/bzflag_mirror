@@ -23,6 +23,8 @@ A 2D overhead view of the game, implemented using pygame.
 
 import pygame, math
 from pygame.locals import *
+from BZFlag import Event
+
 
 class OverheadView:
     """Shows an overhead view of the BZFlag game, renderable to a pygame
@@ -133,32 +135,17 @@ class OverheadView:
         pass
 
 
-def attach(game, eventLoop, size=(512,512), viewClass=OverheadView):
+def attach(game, eventLoop, size=(512,512), viewClass=OverheadView, targetFrameRate=30):
     """Set up a window with only an overhead view, on the given game and event loop"""
 
     # Update the view regularly
-    import time
-    global lastUpdate
-    lastUpdate = None
     def updateView():
-        global view, screen, lastUpdate
+        global view, screen
         if view:
-            # FIXME: this isn't the right place to handle updating the game state!
-            #        This also isn't the right place to do frame rate limiting
-            now = time.time()
-            if lastUpdate:
-                dt = now - lastUpdate
-                if dt < 0.02:
-                    return
-                game.integrate(dt)
-            lastUpdate = now
-
+            game.update()
             view.render(screen)
             pygame.display.flip()
-
-    # FIXME: We need a real timer system
-    eventLoop.pollTime = 0.02
-    eventLoop.onPoll.observe(updateView)
+    eventLoop.add(Event.PeriodicTimer(1.0 / targetFrameRate, updateView))
 
     # Start up pygame when we first get world data
     global view, screen
