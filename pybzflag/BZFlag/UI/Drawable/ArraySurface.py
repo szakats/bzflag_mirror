@@ -73,19 +73,18 @@ class ArraySurface(GLDrawable):
         self.prepareIndices()
 
     def prepareIndices(self):
-        """Prepare an array with indices into the vertex array for GL_QUADS,
+        """Prepare an array with indices into the vertex array for triangle stripss.
            Note that these indices correspond to the vertex array only after it
            has been flattened with reshape().
            """
-        indices = []
+        self.indices = []
         (height, width) = self.vertices.shape[:2]
-        for x in xrange(width - 1):
-            for y in xrange(height - 1):
-                indices.append(x + y * width)
-                indices.append((x+1) + y * width)
-                indices.append((x+1) + (y+1) * width)
-                indices.append(x + (y+1) * width)
-        self.indices = array(indices)
+        for y in xrange(height - 1):
+            row = []
+            for x in xrange(width - 1):
+                row.append(x + (y+1) * width)
+                row.append(x + y * width)
+            self.indices.append(array(row))
 
     def draw(self, rstate):
         """Calculate normals and blast our vertex array out to OpenGL"""
@@ -93,7 +92,8 @@ class ArraySurface(GLDrawable):
         glNormalPointerd(reshape(calcVertexNormals(self.vertices), (-1, 3)))
         glEnable(GL_VERTEX_ARRAY)
         glEnable(GL_NORMAL_ARRAY)
-        glDrawElementsui(GL_QUADS, self.indices)
+        for row in self.indices:
+            glDrawElementsui(GL_TRIANGLE_STRIP, row)
         glDisable(GL_VERTEX_ARRAY)
         glDisable(GL_NORMAL_ARRAY)
 

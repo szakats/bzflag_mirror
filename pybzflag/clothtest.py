@@ -43,6 +43,7 @@ if __name__ == '__main__':
     viewport = Viewport.OpenGLViewport(loop, (800,600), 1000)
     view = ThreeDRender.View(viewport)
     control = ThreeDControl.Viewing(view, viewport)
+    viewport.setCaption("Cloth Simulation Test")
 
     # Enzoomify the camera toward our object
     view.camera.position = (0,0,0)
