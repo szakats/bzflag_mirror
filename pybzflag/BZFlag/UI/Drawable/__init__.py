@@ -29,6 +29,7 @@ from Wall import *
 from Pyramid import *
 from Teleporter import *
 from Base import *
+from ArraySurface import *
 from TestWidget import *
 from Box import detectBoxDrawables
 import VRML

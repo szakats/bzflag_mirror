@@ -6,7 +6,6 @@ so it is required that the drawable have at most one texture.
 The blended flag is used to put objects that need blending into a
 second rendering pass.
 """
-
 #
 # Python BZFlag Protocol Package
 # Copyright (C) 2003 Micah Dowty <micahjd@users.sourceforge.net>
