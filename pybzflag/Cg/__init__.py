@@ -27,14 +27,15 @@ from CgGL import *
 def cgCreateProgramFromFile(context, type, file, profile, entry, args):
     import Cg
     if args is None:
-        Cg.cgCreateProgramFromFile(context, type, file, profile, entry, args)
+        return Cg.cgCreateProgramFromFile(context, type, file, profile, entry, args)
     else:
         pargs = Cg.new_stringArray(len(args))
         if len(args) > 0:
             for index,arg in args,range(len(args)):
                 Cg.stringArray_setitem(pargs, index, arg)
-        Cg.cgCreateProgramFromFile(context, type, file, profile, entry, pargs)
+        prog = Cg.cgCreateProgramFromFile(context, type, file, profile, entry, pargs)
         Cg.delete_stringArray(pargs)
+	return prog
 
 # yay for constants
 CG_UNKNOWN_TYPE                   = 0
