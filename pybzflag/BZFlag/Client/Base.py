@@ -126,7 +126,7 @@ class BaseClient(Network.Endpoint):
         self.tcp.write(self.outgoing.MsgUDPLinkEstablished())
         self.onConnectUDP()
 
-    def onMsgNetworkRelay(self msg):
+    def onMsgNetworkRelay(self, msg):
         """The server is asking us to send everything directly to it rather than using
            Multicast. This isn't a problem, since bzflag doesn't use multicast yet anyway.
            """
