@@ -1,6 +1,7 @@
 """ BZFlag.UI.Drawable.Sky
 
-A class to draw a sky cube at various times of day
+Drawables used in creating PyBZFlag's sky. These drawables are all
+used in BZFlag.UI.Environment.Sky
 """
 #
 # Python BZFlag Package
@@ -20,11 +21,13 @@ A class to draw a sky cube at various times of day
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
+
 from DisplayList import DisplayList
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import VRML
 from BZFlag import Animated
+
 
 class Colors(DisplayList):
     """The sky itself, with colors changing over the course of the day"""
