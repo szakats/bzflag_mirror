@@ -44,6 +44,7 @@ class Texture:
         self.loader = None
 
         self.setDefaults()
+        self.name = name
         if name:
             self.loadDataFile(name)
 
@@ -54,11 +55,13 @@ class Texture:
            """
         self.loadImage(Image.open(Util.dataFile(name)))
         self.loader = ('loadDataFile', name)
+        self.name = name
 
     def loadFile(self, name):
         """Load the texture from disk, using PIL to open the file"""
         self.loadImage(Image.open(name))
         self.loader = ('loadFile', name)
+        self.name = name
 
     def loadImage(self, image):
         """Load the texture from a PIL image"""

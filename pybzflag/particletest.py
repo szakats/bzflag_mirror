@@ -30,14 +30,18 @@ class Sparks(Drawable.SpriteArray):
         self.constAccel = self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,-50))
 
         Tweak.Window(
+#            Tweak.Text(self, 'loadedTextureNames'),
+            Tweak.Separator(),
             Tweak.Quantity(self.emitter, 'spawnRate', range=(0,400)),
             Tweak.Quantity(self.emitter, 'speedRange', range=(0,200)),
             Tweak.Quantity(self.emitter, 'direction', range=(-1,1)),
             Tweak.Quantity(self.emitter, 'directionRandomness'),
             Tweak.Quantity(self.emitter, 'position', range=(-10,10)),
+            Tweak.Separator(),
             Tweak.Quantity(self.lifespan, 'lifespan', range=(0,10)),
             Tweak.Quantity(self.fader, 'sizeRange', range=(0,10)),
             Tweak.Color(self.fader, 'colorRange'),
+            Tweak.Separator(),
             Tweak.Quantity(self.constAccel, 'vector', range=(-100,100)),
             )
 

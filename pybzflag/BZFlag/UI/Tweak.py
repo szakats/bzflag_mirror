@@ -59,12 +59,17 @@ class Window:
 
         row = 0
         for control in controls:
-            l = gtk.Label(control.name + ": ")
-            l.set_alignment(1, 0.75)
-            self.table.attach(l, 0,1, row,row+1, xoptions=gtk.FILL, yoptions=gtk.FILL)
-            l.show()
+            if control.name is not None:
+                # Pack the widget in the right side, with a name label in the left
+                l = gtk.Label(control.name + ": ")
+                l.set_alignment(1, 0.75)
+                self.table.attach(l, 0,1, row,row+1, xoptions=gtk.FILL, yoptions=gtk.FILL)
+                l.show()
+                self.table.attach(control.widget, 1,2, row,row+1, yoptions=gtk.FILL)
+            else:
+                # Stretch the widget all the way across
+                self.table.attach(control.widget, 0,2, row,row+1, yoptions=gtk.FILL)
 
-            self.table.attach(control.widget, 1,2, row,row+1, yoptions=gtk.FILL)
             control.widget.show()
             row += 1
 
@@ -73,9 +78,17 @@ class Window:
 
 class Control:
     """A control which can be placed in a Tweak.Window"""
-    def __init__(self, name, widget):
+    def __init__(self, widget, name=None):
         self.name = name
         self.widget = widget
+
+
+class Separator(Control):
+    """A control that doesn't actually do anything, just provides visual separation"""
+    def __init__(self):
+        sep = gtk.HSeparator()
+        sep.set_size_request(16, 16)
+        Control.__init__(self, sep)
 
 
 class AttributeControl(Control):
@@ -90,11 +103,13 @@ class AttributeControl(Control):
         box = gtk.HBox(gtk.FALSE, gtk.FALSE)
         initialValue = getattr(object, attribute)
 
-        try:
-            initialValue[0]
-            isVector = True
-        except TypeError:
-            isVector = False
+        isVector = False
+        if type(initialValue) != str:
+            try:
+                initialValue[0]
+                isVector = True
+            except TypeError:
+                pass
 
         if isVector:
             for index in xrange(len(initialValue)):
@@ -111,7 +126,7 @@ class AttributeControl(Control):
             box.pack_start(w, gtk.TRUE, gtk.TRUE, 2)
             w.show()
 
-        Control.__init__(self, name, box)
+        Control.__init__(self, box, name)
 
     def add(self, initialValue, setFunction):
         """A hook for subclasses to handle adding individual values
@@ -207,10 +222,15 @@ class Color(AttributeControl):
         return handled
 
     def openColorDialog(self, drawingArea):
-        drawingArea.colorDialog = gtk.Window()
-        drawingArea.colorDialog.set_border_width(8)
+        # Create our own window for the color selector. The
+        # ColorSelectorDialog is modal, which is a Bad Thing.
+        window = gtk.Window()
+        drawingArea.colorDialog = window
+        window.set_border_width(8)
+        window.set_title(self.name)
+
         colorsel = gtk.ColorSelection()
-        drawingArea.colorDialog.add(colorsel)
+        window.add(colorsel)
         colorsel.show()
         colorsel.drawingArea = drawingArea
 
@@ -222,9 +242,9 @@ class Color(AttributeControl):
         colorsel.set_has_palette(gtk.TRUE)
         colorsel.connect("color_changed", self.colorChanged)
 
-        drawingArea.colorDialog.connect("delete_event", self.closeColorDialog)
-        drawingArea.colorDialog.drawingArea = drawingArea
-        drawingArea.colorDialog.show()
+        window.connect("delete_event", self.closeColorDialog)
+        window.drawingArea = drawingArea
+        window.show()
 
     def closeColorDialog(self, widget, event):
         widget.hide()
@@ -233,6 +253,15 @@ class Color(AttributeControl):
     def colorChanged(self, widget):
         self.setColor(widget.drawingArea,
                       widget.get_current_color(), widget.get_current_alpha()/65535)
+
+
+class Text(AttributeControl):
+    """A control that lets you directly manipulate strings using text entry boxes"""
+    def add(self, initialValue, setFunction):
+        entry = gtk.Entry()
+        entry.set_text(initialValue)
+        entry.connect("changed", lambda widget: setFunction(entry.get_text()))
+        return entry
 
 
 def run(runnable):
