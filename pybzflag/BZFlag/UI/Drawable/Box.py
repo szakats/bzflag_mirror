@@ -82,20 +82,22 @@ class BoxSides(DisplayList):
         glPopMatrix()
 
 
-class BoxTops(DisplayList):
+class BoxTop(DisplayList):
     # Use two concrete textures if we have multitexturing, if not
     # fall back to the classic BZFlag texture.
     textureNames = ('concrete_base.jpeg', 'concrete_overlay.png')
     textureName = 'boxtops.png'
     
-    def set(self, polygon, base, height):
+    def set(self, polygon, height):
         self.polygon = polygon
-        self.base = base
         self.height = height
         if GLExtension.multitexture:
             self.render.textures[1].texEnv = GL_BLEND
 
-    def drawSide(self):
+    def drawToList(self):
+        glPushMatrix()
+        glTranslatef(0, 0, self.height)
+        glNormal3f(0, 0, 1)
         glBegin(GL_POLYGON)
         if GLExtension.multitexture:
             for vertex in self.polygon:
@@ -107,18 +109,26 @@ class BoxTops(DisplayList):
                 glTexCoord2f(vertex[0] / 2, vertex[1] / 2)
                 glVertex2f(*vertex)
         glEnd()
+        glPopMatrix()
+
+
+class BoxBottom(DisplayList):
+    textureName = 'concrete_underside.jpeg'
+    
+    def set(self, polygon, height):
+        self.polygon = polygon
+        self.polygon.reverse()
+        self.height = height
 
     def drawToList(self):
         glPushMatrix()
-        glTranslatef(0, 0, self.base)
-        glNormal3f(0, 0, -1)
-        glFrontFace(GL_CW)
-        if self.base:
-            self.drawSide()
-        glFrontFace(GL_CCW)
         glTranslatef(0, 0, self.height)
-        glNormal3f(0, 0, 1)
-        self.drawSide()
+        glNormal3f(0, 0, -1)
+        glBegin(GL_POLYGON)
+        for vertex in self.polygon:
+            glTexCoord2f(vertex[0] / 30, vertex[1] / 30)
+            glVertex2f(*vertex)
+        glEnd()
         glPopMatrix()
 
 ### The End ###

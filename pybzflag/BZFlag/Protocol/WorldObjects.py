@@ -245,7 +245,8 @@ class Box(WorldObject):
         if self.drawables == None:
             self.drawables = [
                 Drawable.BoxSides(self.center, self.angle, self.size),
-                Drawable.BoxTops(self.toPolygon(), self.center[2], self.size[2]),
+                Drawable.BoxTop(self.toPolygon(), self.center[2]+self.size[2]),
+                Drawable.BoxBottom(self.toPolygon(), self.center[2]),
                 ]
             for drawable in self.drawables:
                 drawable.parent(self)
