@@ -30,7 +30,7 @@ if not client.cmdLineValues['silent']:
         client.onConnect.trace("--- Connected to %s" % client.options['server'])
         client.onStartWorldDownload.trace("--- Downloading world...")
         client.onEnterGame.trace("--- Entered the game.")
-        client.game.onLoadWorld.trace("--- World loaded.")
+        client.game.world.onLoad.trace("--- World loaded.")
         client.game.onAddPlayer.trace("--> Joined : %(2)s")
         client.game.onRemovePlayer.trace("<-- Parted : %(2)s")
 
