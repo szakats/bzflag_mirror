@@ -6,6 +6,7 @@
 from BZFlag.UI import Viewport, ThreeDRender, ThreeDControl, StereoView
 from BZFlag.UI.Drawable import Box, VRML
 from BZFlag.Event import EventLoop
+import TrackD
 import sys
 
 try:
@@ -41,6 +42,15 @@ def onMouseButtonDown(event):
     if event.button == 1:
         print 'picked: %r' % view.pick(event.pos)
 viewport.onMouseButtonDown.observe(onMouseButtonDown)
+
+tracker = TrackD.trackdInitTrackerReader(4126)
+controller = TrackD.trackdInitControllerReader(4127)
+
+# preliminary trackd support
+def onSetupFrame():
+    if TrackD.trackdGetButton(controller, 0):
+        print 'hello!'
+viewport.onSetupFrame.observe(onSetupFrame)
 
 view.scene.preprocess()
 loop.run()
