@@ -242,24 +242,24 @@ class EventLoop:
                         (iwtd, owtd, ewtd) = self.select(iwtd, owtd, [], pollTime)
                     except select.error:
                         raise Errors.ConnectionLost()
+
+                    # Poll available sockets, for reading and for writing
+                    for ready in iwtd:
+                        try:
+                            self.selectDict[ready].pollRead(self)
+                        except Errors.NonfatalException:
+                            self.onNonfatalException(sys.exc_info())
+                    for ready in owtd:
+                        try:
+                            self.selectDict[ready].pollWrite(self)
+                        except Errors.NonfatalException:
+                            self.onNonfatalException(sys.exc_info())
                 else:
                     # No sockets to wait on. We can't call select with three
                     # empty lists on win32, so this has to be a special case.
                     if pollTime > 0:
                         time.sleep(pollTime)
   
-                # Poll available sockets, for reading and for writing
-                for ready in iwtd:
-                    try:
-                        self.selectDict[ready].pollRead(self)
-                    except Errors.NonfatalException:
-                        self.onNonfatalException(sys.exc_info())
-                for ready in owtd:
-                    try:
-                        self.selectDict[ready].pollWrite(self)
-                    except Errors.NonfatalException:
-                        self.onNonfatalException(sys.exc_info())
-
                 # Poll timers, updating the time of next activation if necessary
                 now = time.time()
                 timesChanged = 0
