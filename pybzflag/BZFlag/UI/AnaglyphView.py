@@ -21,27 +21,14 @@ A 3d scene renderer that does anaglyph stereo
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import pygame, math, BZFlag
-from pygame.locals import *
-from BZFlag.UI.ThreeDRender import Light
-from BZFlag.UI.ThreeDView import ThreeDView
+import math
+from BZFlag.UI.ThreeDRender import View
 from OpenGL.GL import *
-import sys
 
-class AnaglyphView(ThreeDView):
-    """Shows an anaglyph-stereo 3d view of the BZFlag game, renderable to an
-       OpenGLViewport. Probably not too useful, as anaglyph gives people headaches fast
-       """
-    def __init__(self, game, viewport):
-        ThreeDView.__init__(self, game, viewport)
-        self.light0 = Light(GL_LIGHT0)
-        self.light1 = Light(GL_LIGHT1)
-        self.light0.ambient  = (0.05, 0.05, 0.05, 1.0)
-        self.light0.diffuse  = (0.85, 0.85, 0.85, 1.0)
-        self.light0.position = (400, 400, 400, 1.0)
-        self.light1.ambient  = (0.05, 0.05, 0.05, 1.0)
-        self.light1.diffuse  = (0.85, 0.85, 0.85, 1.0)
-        self.light1.position = (0, 0, 400, 1.0)
+class AnaglyphView(View):
+    """Shows an anaglyph-stereo 3d view"""
+    def __init__(self, viewport, scene=None):
+        View.__init__(self, viewport, scene)
 
     def render(self):
         """Render the view to the given surface. This includes the game
@@ -66,12 +53,5 @@ class AnaglyphView(ThreeDView):
 	self.light1.set()
         self.scene.render()
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)
-
-def attach(game, eventLoop):
-    from BZFlag.UI import Viewport, ThreeDControl
-    viewport = Viewport.OpenGLViewport(eventLoop, (800, 600))
-    view = AnaglyphView(game, viewport)
-    ThreeDControl.Viewing(view, viewport)
-    return viewport
 
 ### The End ###

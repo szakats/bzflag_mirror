@@ -42,7 +42,7 @@ class RightCamera(ThreeDRender.Camera):
         self.left.load()
         self.left.azimuthOffset = -angle
 
-        
+
 class StereoView:
     """Shows a side-by-side stereo view of the BZFlag game, renderable
        to an OpenGLViewport.
