@@ -23,13 +23,14 @@ A 2D overhead view of the game, implemented using pygame.
 
 import math
 from BZFlag import Event
+import colorsys
 
 
 colorScheme = {
     'background':    (88,  112, 88 ),
     'outline':       (0,   0,   0  ),
-    'Box':           (188, 187, 167),
-    'Pyramid':       (165, 169, 183),
+    'Box':           (147, 147, 131),
+    'Pyramid':       (130, 130, 145),
     'Wall':          (255, 255, 0  ),
     'Teleporter':    (255, 255, 128),
     'playerOutline': (255, 255, 255),
@@ -63,7 +64,14 @@ def worldToImage(world, size, oversample=2, colors=colorScheme):
     draw = ImageDraw.Draw(img)
     toView = lambda point: coordWorldToView(img.size, world, point)
 
-    for object in world.blocks:
+    # Z-sort the world blocks and remember the highest object
+    sorted = filter(lambda b: hasattr(b,'center'), world.blocks)
+    def zSort(a, b):
+        return cmp(a.center[2], b.center[2])
+    sorted.sort(zSort)
+    highest = sorted[-1].center[2]
+
+    for object in sorted:
         objClassName = object.__class__.__name__
         if objClassName == 'TeamBase':
             # Color the bases by team
@@ -77,14 +85,12 @@ def worldToImage(world, size, oversample=2, colors=colorScheme):
                 poly = map(toView, object.toPolygon())
                 if len(poly) > 2:
                     # Shade the color according to height
-                    try:
-                        h = object.center[2] + object.size[2]
-                        shade = 1 - (3/h)
-                        color = (color[0] * shade,
-                                 color[1] * shade,
-                                 color[2] * shade)
-                    except AttributeError:
-                        pass
+                    hsv = list(colorsys.rgb_to_hsv(color[0]/255.0,
+                                                   color[1]/255.0,
+                                                   color[2]/255.0))
+                    hsv[2] += object.center[2] / highest * 0.6
+                    color = colorsys.hsv_to_rgb(*hsv)
+                    color = (color[0]*255, color[1]*255, color[2]*255)
                     draw.polygon(poly, fill=color, outline=colors['outline'])
                 else:
                     # 2D objects, 1D in overhead. This only includes walls at the moment.
