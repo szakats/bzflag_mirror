@@ -112,9 +112,11 @@ class StatefulServer(BaseServer):
 
         self.options.update({
             'world': None,
+            'welcomeMessage': BZFlag.serverWelcomeMessage,
             })
 
-        Event.attach(self, 'onAttemptEnter', 'onEnter')
+        Event.attach(self, 'onAttemptEnter', 'onEnter', 'onFinishEnter',
+                     'onWelcome')
 
         def setOptions(**options):
             if 'world' in options.keys():
@@ -160,8 +162,21 @@ class StatefulServer(BaseServer):
            the onEnter event provides a hook for denying the
            requests. Default is to allow.
 
-           To veto the join request, onEnter should return a string
-           corresponding to one of the Common.RejectionCode values.
+           Events:
+
+             onAttemptEnter(msg) - Sent when a client is trying to enter.
+                                   Return a Common.RejectionCode string to
+                                   veto the entry.
+
+             onEnter(msg)        - Perform tasks necessary to enter the
+                                   player into the game, such as sending
+                                   initial score updates.
+
+             onFinishEnter(msg)  - Send a MsgAddPlayer for the new player,
+                                   ending the entering process.
+
+             onWelcome(msg)      - Send a message to the player indicating
+                                   that they have entered the game.
            """
         reason = self.onAttemptEnter(msg)
         if reason:
@@ -172,7 +187,32 @@ class StatefulServer(BaseServer):
             # Accept it. The player is now in the game.
             msg.socket.write(self.outgoing.MsgAccept())
             self.onEnter(msg)
+            self.onFinishEnter(msg)
+            self.onWelcome(msg)
 
+    def onFinishEnter(self, msg):
+        """Finish the process of entering a client into the game by
+           sending it a MsgAddPlayer for itself.
+           """
+        msg.socket.write(self.outgoing.MsgAddPlayer(
+            id           = msg.socket.id,
+            type         = msg.playerType,
+            team         = msg.team,
+            wins         = 0,
+            losses       = 0,
+            teamKills    = 0,
+            callSign     = msg.callSign,
+            emailAddress = msg.emailAddress))
+
+    def onWelcome(self, msg):
+        """Event triggered after a player has completely entered the
+           game, to welcome them in with a message.
+           """
+        msg.socket.write(self.outgoing.MsgMessage(
+            fromId = 'server',
+            toId = msg.socket.id,
+            message = self.options['welcomeMessage']))
+ 
 
 class StandardServer(StatefulServer):
     """A server that implements standard game rules in the world supplied

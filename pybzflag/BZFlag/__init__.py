@@ -25,4 +25,11 @@ protocols used by BZFlag.
 # The version of the BZFlag protocol this should be compatible with
 protocolVersion = "BZFS109a"
 
+# Information about this implementation
+name    = "PyBZFlag"
+version = "cvs-dev"
+
+serverWelcomeMessage = "Welcome to the %s Server (code/%s protocol/%s)" % \
+                       (name, version, protocolVersion)
+
 ### The End ###
