@@ -22,10 +22,6 @@ used by the metaserver.
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-from BZFlag.Protocol import Common
-import binascii
-
-
 class ServerInfo:
     """Represents information about one BZFlag server"""
     def __init__(self, specifier=None):
@@ -36,6 +32,8 @@ class ServerInfo:
         self.title = None
         self.build = 0
         if specifier:
+            from BZFlag.Protocol import Common
+            import binascii
             (self.name, self.version, self.gameinfo, self.ip, self.title) = specifier.split(" ",4)
             self.gameinfo = Common.GameInfo(binascii.a2b_hex(self.gameinfo))
 

@@ -144,8 +144,6 @@ class Socket:
         if host.find(":") >= 0:
             (host, port) = host.split(":")
             port = int(port)
-        if not host:
-            host = socket.gethostname()
 
         # Avoid having this port clogged up for a while after the server dies
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
