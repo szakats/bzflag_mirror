@@ -33,9 +33,7 @@ class Recorder:
     """Movie Recorder that attaches to a Viewport and records frames to
        a NuppelVideo file as they're rendered.
        """
-    def __init__(self, viewport, fileTemplate="snapshot%02d.bzm", frameRate=None):
-        if not frameRate:
-            frameRate = viewport.targetFrameRate
+    def __init__(self, viewport, fileTemplate="snapshot%02d.bzm", frameRate=30.0):
         self.frameRate = frameRate
         self.viewport = viewport
         self.fileTemplate = fileTemplate

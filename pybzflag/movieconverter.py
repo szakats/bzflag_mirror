@@ -1,30 +1,32 @@
 #!/usr/bin/env python
-"""
-Simple utility to transcode (recompress) movies recorded with the
-in-game movie recorder. This requires mencoder to be installed
-correctly with libavcodec.
-
- usage:
-  movieconverter.py input.bzm [output.avi [mpeg4rate]]
-"""
+#
+# Simple utility to transcode (recompress) movies recorded with the
+# in-game movie recorder. This requires mencoder to be installed
+# correctly with libavcodec.
+#
 from BZFlag.UI import MovieRecorder
+from BZFlag import optik
 import sys, re
 
-try:
-    inFile = sys.argv[1]
-except:
-    print __doc__
-    sys.exit(0)
+parser = optik.OptionParser(usage = "usage: %prog [options] recording.bzw")
+parser.add_option("-o", "--output", metavar="FILE", dest="file",
+                  help="Sets the output AVI file")
+parser.add_option("-r", "--resolution", metavar="WIDTHxHEIGHT", dest="resolution",
+                  help="Sets the output resolution. Default is 512x384.", default="512x384")
+parser.add_option("-b", "--bitrate", metavar="KBPS", dest="bitrate",
+                  help="Sets the mpeg4 encoder bit rate. Default is 1000.", default=1000)
+(options, args) = parser.parse_args()
 
 try:
-    outFile = sys.argv[2]
+    inFile = args[0]
 except IndexError:
-    outFile = re.sub("\..*", "", inFile) + ".avi"
+    parser.error("A recording filename must be specified on the command line.")
 
-try:
-    rate = sys.argv[3]
-except IndexError:
-    rate = 1000
+if not options.file:
+    options.file = re.sub("\..*", "", inFile) + ".avi"
+
+(width, height) = options.resolution.split("x")
 
 t = MovieRecorder.Transcoder(inFile)
-t.encode("-o %s -idx -forceidx -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=%s" % (outFile, rate))
+t.encode("-o %s -vop scale=%s:%s -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=%s" %
+         (options.file, width, height, options.bitrate))
