@@ -29,6 +29,13 @@ from OpenGL.GLU import *
 from BZFlag import Event
 
 
+# Color scheme for radar. Objects not found specifically default to None
+colorScheme = {
+    None:          (0.38, 0.62, 0.62),
+    'Teleporter':  (1,    1,    0   ),
+    }
+
+
 class RadarView:
     """An overhead view implemented using OpenGL, optionally tracking
        the position and orientation of one player.
@@ -72,7 +79,11 @@ class RadarView:
         glTranslatef(0,0,-1200)
         for object in self.game.world.blocks:
             try:
-                glColor4f(0.38, 0.62, 0.62, self.colorScale(object, 0))
+                try:
+                    color = colorScheme[object.__class__.__name__]
+                except KeyError:
+                    color = colorScheme[None]
+                glColor4f(color[0], color[1], color[2], self.colorScale(object, 0))
                 
                 # Render as a polygon then as an outline to get smoothed edges
                 # without leaving a small crack between the triangles.
