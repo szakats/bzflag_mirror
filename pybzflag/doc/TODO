@@ -1,6 +1,5 @@
 Todo list, in no particular order:
 
-
   - Add some sort of color-selection mechanism (for showing selected objects, widget
     highlighting, etc)
 
@@ -14,21 +13,15 @@ Todo list, in no particular order:
 
       * Clouds near the horizon should be obscured by haze.
 
-      * Try replacing the exp() function in CloudTexture with a bias+scale that can be implemented
-        using two blending passes. This should make cloud rendering fast enough that the clouds
-        can be slowly animated over time.
+      * Think of more ways to make the conversion from Perlin Noise to clouds run fast
+        enough to animate the clouds in realtime
 
       * Light the clouds using bump mapping, so we can get nice edge hilights
 
       * optional: change all the clouds to use the technique that MS Flight Sim:
         A Century of Flight uses, because it rawks
 
-  - Figure out what should be at and below the horizon
-
   - Stars, sun and the moon
-
-  - Convert observers and render sequence callbacks to use weak references so it's possible
-    to properly delete objects that register callbacks.
 
   - Enhance the ThreeDController binding system: move functionality to detect pressed
     buttons and modifiers to separate Criteria classes that can be listed when setting
@@ -46,9 +39,6 @@ Todo list, in no particular order:
     executed in the Config module's namespace.
 
   - Unify the world cache and VRML cache
-
-  - Add gamma correction to GLText so that the alpha blending doesn't look hideous
-    when drawing light text on a dark background.
 
   - Write more documentation :)
 
