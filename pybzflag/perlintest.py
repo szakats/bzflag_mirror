@@ -14,11 +14,11 @@ n.smoothNoise((1,2,3))
 
 # Create a viewport for displaying animated perlin noise
 loop = Event.EventLoop()
-viewport = Viewport.PygameViewport(loop, (256,256), resizable=False)
+viewport = Viewport.PygameViewport(loop, (96,96), resizable=False)
 
 # Set up the input array for perlin noise with x and y values
 # proportional to the pixel locations. We'll vary the z value every frame.
-i = indices(viewport.size) / 40.0
+i = indices(viewport.size) / 20.0
 input = zeros(viewport.size + (3,), Float)
 input[:,:,0] = i[0]
 input[:,:,1] = i[1]

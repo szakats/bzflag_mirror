@@ -51,9 +51,19 @@ class PerlinNoise3:
     def __init__(self, seed=0, octaves=1, persistence=0.5, logTableSize=10):
         self.octaves = octaves
         self.persistence = persistence
+        
         self.table = Vector3Table(seed, logTableSize)
+
         self.two = array(2, Float32)
         self.three = array(3, Float32)
+        self.cube = array(((0,0,0),
+                           (0,0,1),
+                           (0,1,0),
+                           (0,1,1),
+                           (1,0,0),
+                           (1,0,1),
+                           (1,1,0),
+                           (1,1,1)))
 
     def smoothNoise(self, v):
         """Generate smoothed noise using the random gradient table and interpolation.
@@ -62,18 +72,12 @@ class PerlinNoise3:
            """
         v = asarray(v).astype(Float32)
         intv = v.astype(Int)
-        
+            
         # Define a sampling pattern of 8 vertices around intv
         # The last axis of this array will be the vertex, the next-to-last will be the
         # cube point, all other axes are as used by the caller.
         cubev = repeat(intv[...,NewAxis,:], 8, -2)
-        cubev[...,1,2] += 1
-        cubev[...,2,1] += 1
-        cubev[...,3,:] += (0,1,1)
-        cubev[...,4,0] += 1
-        cubev[...,5,:] += (1,0,1)
-        cubev[...,6,:] += (1,1,0)
-        cubev[...,7,:] += (1,1,1)
+        cubev += self.cube
 
         # Get random gradient vectors for each sample point
         grad = self.table.get(cubev)
@@ -147,7 +151,7 @@ class Vector3Table:
        it must be a power of two. This is to avoid division in the get() function
        when it's necessary to constrain the input vector hash to the table size.
        """
-    def __init__(self, seed=0, logTableSize=10):
+    def __init__(self, seed, logTableSize):
         self.size = 1 << logTableSize
 
         # This generates a random array of numbers between -0.5 and 0.5, then normalizes the vectors
