@@ -48,6 +48,7 @@ public:
 #endif
 
 protected:
+	virtual void InitTextureManager();
 
 // Generated message map functions
 protected:

@@ -69,6 +69,11 @@ END_MESSAGE_MAP()
 
 CBZEdit32Doc::CBZEdit32Doc()
 {
+	InitTextureManager();
+}
+
+void CBZEdit32Doc::InitTextureManager()
+{
 	char	szPath[512];
 	GetModuleFileName(AfxGetInstanceHandle(),szPath,512);
 
@@ -80,6 +85,7 @@ CBZEdit32Doc::CBZEdit32Doc()
 	m_oTexMan.LoadAll("data\\");
 
 	m_oWorld.SetTextureMan(&m_oTexMan);
+	
 	m_oWorld.Init();
 
 	SetTheWorld ( &m_oWorld );
@@ -94,6 +100,8 @@ BOOL CBZEdit32Doc::OnNewDocument()
 {
 	if (!CDocument::OnNewDocument())
 		return FALSE;
+
+	InitTextureManager();
 
 	SetTheDoc ( this );
 
@@ -135,7 +143,10 @@ void CBZEdit32Doc::Dump(CDumpContext& dc) const
 
 BOOL CBZEdit32Doc::OnOpenDocument(LPCTSTR lpszPathName) 
 {
-	m_oWorld.Load(lpszPathName);
+	InitTextureManager();
+
+	if (!m_oWorld.Load(lpszPathName))
+		return FALSE;
 
 	SetPathName(lpszPathName,true);
 
