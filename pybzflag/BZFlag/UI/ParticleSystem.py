@@ -207,7 +207,6 @@ class LifespanAffector(Affector):
 
     def integrate(self, dt):
         add(self.model.life, dt * self.ageRate, self.model.life)
-        self.model.life = array(clip(self.model.life, 0, 1), Float32, savespace=True)
 
 
 class SpriteFountain(Fountain):
@@ -239,26 +238,36 @@ class Emitter(Affector):
 
     def integrate(self, dt):
         """Find all particles with life <= 0. Spawn them, limiting according to our spawn rate"""
+        # Add this time step's allowance to our spawn budget
         self.spawnBudget += self.spawnRate * dt
+
+        # Find all the particles with no life left in them
         deadIndices = nonzero(less_equal(self.model.life, 0))
+
+        # Spawn all the particles we're allowed to this time step...
         spawnIndices = deadIndices[:int(self.spawnBudget)]
         if spawnIndices:
+            # put() requires flattened indexes, so expand our index list for 3-vectors
+            v3indices = (reshape(repeat(spawnIndices, 3), (-1,3)) * 3 + (0,1,2)).flat
             self.spawnBudget -= len(spawnIndices)
-            self.respawn(spawnIndices)
+            self.respawn(spawnIndices, v3indices)
 
-    def respawn(self, indices):
+        # ...and store a list of particles that should be hidden.
+        #    this will be used by other affectors, probably whichever one is
+        #    in charge of the particle's size.
+        self.model.hiddenIndices = deadIndices[int(self.spawnBudget):]
+
+    def respawn(self, indices, v3indices):
         """Respawn particles at each model array index in the given list. By default this initializes
            position, velocity, and life according to the emitter. More particle
            qualities for this to set can be added by subclasses.
+           indices is a list of particle indices, v3indices is a list of all elements in
+           3-vectors corresponding to indices. This is helpful since put() operates on the
+           indices of the flattened array.
            """
         numIndices = len(indices)
-
-        # put() requires flattened indexes, so expand our index list for 3-vectors
-        v3indices = (reshape(repeat(indices, 3), (-1,3)) * 3 + (0,1,2)).flat
-
         put(self.model.state, v3indices, self.newState(numIndices))
         put(self.model.velocity, v3indices, self.newVelocity(numIndices))
-
         put(self.model.life, indices, self.newLife(numIndices))
 
     def newState(self, n):
@@ -301,12 +310,15 @@ class RandomEmitter(Emitter):
         randomDirections *= self.directionRandomness
         randomDirections += self.premultDirection
         normalize(randomDirections, randomDirections)
-        randomDirections *= repeat(Noise.randomArray((n, 1), type=Float32, range=self.speedRange), 3, -1)
+        randomSpeeds = repeat(Noise.randomArray((n, 1), type=Float32, range=self.speedRange), 3, -1)
+        randomDirections *= randomSpeeds
         return randomDirections
 
 
 class LinearFadeAffector(Affector):
-    """Causes particles to shrink and/or change color linearly over the course of their life"""
+    """Causes particles to shrink and/or change color linearly over the course of their life.
+       Must be used with a Fountain instance as the model, and the model must have an Emitter attached.
+       """
     def __init__(self, model, sizeRange=(0,1), colorRange=((0,0,0,0), (1,1,1,1))):
         Affector.__init__(self, model)
         self.sizeConst = sizeRange[0]
@@ -317,6 +329,7 @@ class LinearFadeAffector(Affector):
 
     def integrate(self, dt):
         self.model.sizes[...] = self.model.life * self.sizeCoeff + self.sizeConst
+        put(self.model.sizes, self.model.hiddenIndices, 0)
         self.model.colors[...,0] = self.model.life * self.colorCoeff[...,0] + self.colorConst[...,0]
         self.model.colors[...,1] = self.model.life * self.colorCoeff[...,1] + self.colorConst[...,1]
         self.model.colors[...,2] = self.model.life * self.colorCoeff[...,2] + self.colorConst[...,2]

@@ -7,7 +7,8 @@ import math
 
 class Sparks(Drawable.SpriteArray):
     textureName = 'spark.png'
-    def __init__(self, position=(0,0,0), numParticles=200):
+    def __init__(self, position=(0,0,0)):
+        numParticles = 200
         self.model = ParticleSystem.SpriteFountain(numParticles)
         Drawable.SpriteArray.__init__(self, numParticles, allowPointSprite=False)
         self.model.attachDrawable(self)
@@ -18,14 +19,16 @@ class Sparks(Drawable.SpriteArray):
 
         self.model.add(ParticleSystem.RandomEmitter,
                        spawnRate           = 95,
-                       speedRange          = (4, 50),
+                       speedRange          = (4, 30),
                        direction           = (0, 0, 1),
                        directionRandomness = 0.2,
                        position            = position,
                        )
         self.model.add(ParticleSystem.LifespanAffector, 1)
-        self.model.add(ParticleSystem.LinearFadeAffector)
-        self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,-0.4))
+        self.model.add(ParticleSystem.LinearFadeAffector,
+                       sizeRange = (0, 1),
+                       )
+        self.model.add(ParticleSystem.ConstantAccelAffector, (0,0,-0.5))
 
     def draw(self, rstate):
         self.model.integrate(self.time.step())
@@ -38,7 +41,8 @@ class Sparks(Drawable.SpriteArray):
 
 class Smoke(Drawable.SpriteArray):
     textureName = 'cloud.png'
-    def __init__(self, position=(0,0,0), numParticles=450):
+    def __init__(self, position=(0,0,0)):
+        numParticles = 450
         self.model = ParticleSystem.SpriteFountain(numParticles)
         Drawable.SpriteArray.__init__(self, numParticles, allowPointSprite=False)
         self.model.attachDrawable(self)
@@ -77,7 +81,7 @@ if __name__ == '__main__':
 
     viewport.mode = Viewport.GL.ClearedMode(clearColor=(0.2, 0.2, 0.2, 1))
 
-    view.camera.position = (0,0,3)
+    view.camera.position = (0,0,6)
     view.camera.distance = 20
     view.camera.jump()
 
