@@ -149,7 +149,7 @@ class RenderPass:
     def __init__(self):
         self.erase()
 
-    def render(self):
+    def render(self, names = None, curname = None):
         pass
 
     def filter(self, drawable):
@@ -199,17 +199,25 @@ class BasicRenderPass(RenderPass):
         for texgroup in self.textureGroups.values():
             texgroup.buildList()
 
-    def render(self):
+    def render(self, names = None, curname = None):
         """Perform one render pass- iterates through each texture group in the pass,
            binding the pass' texture and drawing the texture group.
            """
-        for (texture, group) in self.textureGroups.items():
-            if texture is None:
-                glDisable(GL_TEXTURE_2D)
-            else:
-                glEnable(GL_TEXTURE_2D)
-                texture.bind()
-            group.draw()
+        if names == None:
+            for (texture, group) in self.textureGroups.items():
+                if texture is None:
+                    glDisable(GL_TEXTURE_2D)
+                else:
+                    glEnable(GL_TEXTURE_2D)
+                    texture.bind()
+                group.draw()
+        else:
+            for (texture, group) in self.textureGroups.items():
+                for drawable in group.drawables:
+                    names[curname] = drawable
+                    glLoadName(curname)
+                    drawable.draw()
+                    curname += 1
 
 
 class BlendedRenderPass(BasicRenderPass):
@@ -220,9 +228,9 @@ class BlendedRenderPass(BasicRenderPass):
     def filter(self, drawable):
         return drawable.blended
 
-    def render(self):
+    def render(self, names = None, curname = None):
         glEnable(GL_BLEND)
-        BasicRenderPass.render(self)
+        BasicRenderPass.render(self, names, curname)
         glDisable(GL_BLEND)
 
 
@@ -234,9 +242,9 @@ class OverlayRenderPass(BasicRenderPass):
     def filter(self, drawable):
         return drawable.overlay
 
-    def render(self):
-	glClear(GL_DEPTH_BUFFER_BIT)
-	BasicRenderPass.render(self)
+    def render(self, names = None, curname = None):
+        glClear(GL_DEPTH_BUFFER_BIT)
+        BasicRenderPass.render(self, names, curname)
 
 
 class Scene:
@@ -290,6 +298,45 @@ class Scene:
         for rpass in self.passes:
             rpass.render()
 
+    def pick(self, viewport, pos):
+        """Returns the nearest scene object that was rendered at the given screen
+           coordinates. If no object was rendered at this postion, returns None.
+           """
+        # Flip the Y axis to convert from the traditional top-left-based coordinate
+        # system to OpenGL's bottom-left-based coordinate system.
+        pos = (pos[0], viewport.size[1] - pos[1])
+
+        glSelectBuffer(len(self.objects) * 4)
+        glRenderMode(GL_SELECT)
+        glInitNames()
+        glPushName(0)
+
+        glMatrixMode(GL_PROJECTION)
+        glPushMatrix()
+        glLoadIdentity()
+        gluPickMatrix(pos[0], pos[1], 5, 5, viewport.rect)
+        viewport.setProjectionMatrix()
+        glMatrixMode(GL_MODELVIEW)
+
+        names = {}
+        curname = 1
+        for rpass in self.passes:
+            rpass.render(names, curname)
+
+        glMatrixMode(GL_PROJECTION)
+        glPopMatrix()
+        glMatrixMode(GL_MODELVIEW)
+
+        hits = glRenderMode(GL_RENDER)
+        if len(hits) > 0:
+            depth = hits[0][1]
+            choose = hits[0][2]
+            for hit in hits:
+                if hit[1] < depth:
+                    depth = hit[1]
+                    choose = hit[2]
+            return names[choose[0]].object
+        return None
 
 class View:
     """A generic 3D view with multiple rendering passes, usable with OpenGLViewport."""
@@ -321,48 +368,7 @@ class View:
         self.scene.render()
 
     def pick(self, pos):
-        """Returns the nearest scene object that was rendered at the given screen
-           coordinates. If no object was rendered at this postion, returns None.
-           """
-        # Flip the Y axis to convert from the traditional top-left-based coordinate
-        # system to OpenGL's bottom-left-based coordinate system.
-        pos = (pos[0], self.viewport.size[1] - pos[1])
-
-        glSelectBuffer(len(self.scene.objects) * 4)
-        glRenderMode(GL_SELECT)
-        glInitNames()
-        glPushName(0)
-
-        glMatrixMode(GL_PROJECTION)
-	glPushMatrix()
-        glLoadIdentity()
-        gluPickMatrix(pos[0], pos[1], 5, 5, self.viewport.rect)
-        self.viewport.setProjectionMatrix()
-        glMatrixMode(GL_MODELVIEW)
         self.camera.load()
-
-	names = {}
-	curname = 1
-        for object, drawables in self.scene.objects.items():
-	    names[curname] = object
-            glLoadName(curname)
-            curname += 1
-            for drawable in drawables:
-                drawable.draw()
-
-        glMatrixMode(GL_PROJECTION)
-	glPopMatrix()
-	glMatrixMode(GL_MODELVIEW)
-
-        hits = glRenderMode(GL_RENDER)
-	if len(hits) > 0:
-	    depth = hits[0][1]
-	    choose = hits[0][2]
-	    for hit in hits:
-	        if hit[1] < depth:
-		    depth = hit[1]
-		    choose = hit[2]
-            return names[choose[0]]
-	return None
+        return self.scene.pick(self.viewport, pos)
 
 ### The End ###

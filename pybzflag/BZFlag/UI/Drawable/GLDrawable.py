@@ -45,8 +45,12 @@ class GLDrawable:
             self.texture = None
         self.blended = False
         self.overlay = False
+	self.object = None
 
-    def draw(self):
+    def parent(self, parent):
+        self.object = parent
+
+    def draw(self, names = None, curname = None):
         pass
 
 

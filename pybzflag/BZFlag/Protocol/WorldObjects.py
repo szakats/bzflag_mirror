@@ -55,6 +55,7 @@ class WorldObject(Block):
     def __init__(self, packed=None, **kw):
         self.unknownMapKeywords = {}
         Block.__init__(self, packed, **kw)
+        self.drawables = None
 
     def textRead(self, lines):
         """This accepts a list of text lines, with comments and
@@ -146,7 +147,11 @@ class WorldObject(Block):
 
     def getGLDrawables(self):
         from BZFlag.UI import Drawable
-        return [Drawable.GLDrawable()]
+        if self.drawables == None:
+            self.drawables = [Drawable.GLDrawable()]
+            for drawable in self.drawables:
+                drawable.parent(self)
+        return self.drawables
 
 
 class Style(WorldObject):
@@ -170,7 +175,11 @@ class Style(WorldObject):
 
     def getGLDrawables(self):
         from BZFlag.UI import Drawable
-        return [Drawable.Ground(self.worldSize)]
+        if self.drawables == None:
+            self.drawables = [Drawable.Ground(self.worldSize)]
+            for drawable in self.drawables:
+                drawable.parent(self)
+        return self.drawables
 
 
 ObjectOptions = Bitfield(UInt8, {
@@ -193,13 +202,17 @@ class TeamBase(WorldObject):
 
     def getGLDrawables(self):
         from BZFlag.UI import Drawable
-        if self.center[2] != 0:
-	    self.size[2] = 1
-	    return [
-	        Drawable.BaseTops(self.team, self.center, self.angle, self.size),
-		Drawable.BoxSides(self.center, self.angle, self.size),
-		]
-        return [Drawable.BaseTops(self.team, self.center, self.angle, self.size)]
+        if self.drawables == None:
+            if self.center[2] != 0:
+                self.drawables = [
+                    Drawable.BaseTops(self.team, self.center, self.angle, self.size),
+                    Drawable.BoxSides(self.center, self.angle, self.size),
+                    ]
+            else:
+                self.drawables = [Drawable.BaseTops(self.team, self.center, self.angle, self.size)]
+            for drawable in self.drawables:
+                drawable.parent(self)
+        return self.drawables
 
 
 class Wall(WorldObject):
@@ -212,7 +225,11 @@ class Wall(WorldObject):
 
     def getGLDrawables(self):
         from BZFlag.UI import Drawable
-        return [Drawable.Wall(self.center, self.angle, self.size)]
+	if self.drawables == None:
+	    self.drawables = [Drawable.Wall(self.center, self.angle, self.size)]
+	    for drawable in self.drawables:
+                drawable.parent(self)
+        return self.drawables
 
 
 class Box(WorldObject):
@@ -227,10 +244,14 @@ class Box(WorldObject):
 
     def getGLDrawables(self):
         from BZFlag.UI import Drawable
-        return [
-	    Drawable.BoxSides(self.center, self.angle, self.size),
-	    Drawable.BoxTops(self.center, self.angle, self.size),
-	    ]
+        if self.drawables == None:
+            self.drawables = [
+                Drawable.BoxSides(self.center, self.angle, self.size),
+                Drawable.BoxTops(self.center, self.angle, self.size),
+                ]
+            for drawable in self.drawables:
+                drawable.parent(self)
+        return self.drawables
 
 
 class Pyramid(WorldObject):
@@ -245,7 +266,11 @@ class Pyramid(WorldObject):
 
     def getGLDrawables(self):
         from BZFlag.UI import Drawable
-        return [Drawable.Pyramid(self.center, self.angle, self.size, 'flipZ' in self.options)]
+        if self.drawables == None:
+            self.drawables = [Drawable.Pyramid(self.center, self.angle, self.size, 'flipZ' in self.options)]
+            for drawable in self.drawables:
+                drawable.parent(self)
+        return self.drawables
 
 
 class Teleporter(WorldObject):
@@ -261,10 +286,14 @@ class Teleporter(WorldObject):
 
     def getGLDrawables(self):
         from BZFlag.UI import Drawable
-        return [
-	    Drawable.TeleporterField(self.center, self.angle, self.size),
-	    Drawable.TeleporterBorder(self.center, self.angle, self.size, self.border),
-	    ]
+        if self.drawables == None:
+            self.drawables = [
+                Drawable.TeleporterField(self.center, self.angle, self.size),
+                Drawable.TeleporterBorder(self.center, self.angle, self.size, self.border),
+                ]
+            for drawable in self.drawables:
+                drawable.parent(self)
+        return self.drawables
 
 
 class TeleporterLink(WorldObject):
