@@ -27,7 +27,7 @@ from DisplayList import *
 from Ground import *
 from Wall import *
 from Teleporter import *
-from ArraySurface import *
+from Array import *
 from TestWidget import *
 from Vector import *
 
