@@ -324,15 +324,15 @@ class PerlinNoise:
         self.amplitude = amplitude
         self.frequency = frequency
         self.offset = offset
-        self.noise = (Noise.PerlinNoise(1, seed=seed+1, octaves=octaves, persistence=persistence),
-                      Noise.PerlinNoise(1, seed=seed+2, octaves=octaves, persistence=persistence),
-                      Noise.PerlinNoise(1, seed=seed+3, octaves=octaves, persistence=persistence))
+        self.noise = (Noise.PerlinNoise(seed=seed+1, octaves=octaves, persistence=persistence),
+                      Noise.PerlinNoise(seed=seed+2, octaves=octaves, persistence=persistence),
+                      Noise.PerlinNoise(seed=seed+3, octaves=octaves, persistence=persistence))
         self.time = 0
 
     def __call__(self, value, dt, index=None):
         self.time += dt
         if not index:
             index = 0
-        return self.noise[index].get((self.time * self.frequency,)) * self.amplitude + self.offset
+        return self.noise[index].get(self.time * self.frequency) * self.amplitude + self.offset
 
 ### The End ###
