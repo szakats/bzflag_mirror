@@ -220,7 +220,8 @@ class Wall(WorldObject):
     def getDrawables(self):
         from BZFlag.UI import Drawable
 	if self.drawables == None:
-	    self.drawables = [Drawable.Wall(self.center, self.angle, self.size)]
+	    self.drawables = [Drawable.WallSides(self),
+                              Drawable.WallTop(self)]
         return self.drawables
 
 

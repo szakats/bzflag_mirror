@@ -20,38 +20,62 @@ A class to draw the walls in the world
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
+
 from DisplayList import *
 from OpenGL.GL import *
-from OpenGL.GL.ARB.multitexture import *
+import Box, math
 
-class Wall(DisplayList):
+
+def thickify(center, size, angle, thickness=0.75):
+    """Add some thickness to an otherwise flat wall.
+       Returns a (center, size) tuple.
+       """
+    size = (thickness,
+            size[1],
+            size[2])
+    radians = angle * math.pi / 180
+    center = (center[0] - math.cos(radians) * thickness,
+              center[1] - math.sin(radians) * thickness,
+              center[2])
+    return (center, size)
+
+
+class WallSides(Box.Sides):
     textureNames = ('outer_wall.jpeg', 'wall_grime.jpeg')
-    def set(self, center, angle, size):
-        self.center = center
-        self.angle = angle
-        self.size = size
-        self.render.textures[1].texEnv = GL_MODULATE
+    def set(self, wall):
+        Box.Sides.set(self, wall)
+        (self.center, self.size) = thickify(self.center, self.size, self.angle)
+        self.texRepeats = (self.size[0] / self.size[2],
+                           self.size[1] / self.size[2],
+                           1)                           
+        self.tex2Repeats = (self.size[0] / 20,
+                            self.size[1] / 20,
+                            1)
 
+
+class WallTop(DisplayList):
+    textureName = 'concrete.jpeg'
+    def set(self, wall):
+        self.angle = wall.angle
+        (self.center, self.size) = thickify(wall.center, wall.size, wall.angle)
+        
     def drawToList(self):
         glPushMatrix()
         glTranslatef(*self.center)
+        glTranslatef(0, 0, self.size[2])
         glRotatef(self.angle, 0.0, 0.0, 1.0)
-        glDisable(GL_CULL_FACE)
-        glBegin(GL_TRIANGLE_STRIP)
-        glTexCoord2f(0, 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 0)
-        glVertex3f(0, -self.size[1], 0)
-        glTexCoord2f(0, 1)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0, 1)
-        glVertex3f(0, -self.size[1], self.size[2])
-        glTexCoord2f((self.size[1] * 2) / self.size[2], 0)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 10, 0)
-        glVertex3f(0, self.size[1], 0)
-        glTexCoord2f((self.size[1] * 2) / self.size[2], 1)
-        glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 10, 1)
-        glVertex3f(0, self.size[1], self.size[2])
+        glNormal3f(0, 0, 1)
+        glBegin(GL_QUADS)
+        glTexCoord2f(0,0)
+        glVertex2f(-self.size[0], -self.size[1])
+        glTexCoord2f(1,0)
+        glVertex2f( self.size[0], -self.size[1])
+        glTexCoord2f(1, self.size[1] / self.size[0])
+        glVertex2f( self.size[0],  self.size[1])
+        glTexCoord2f(0, self.size[1] / self.size[0])
+        glVertex2f(-self.size[0],  self.size[1])
         glEnd()
-        glEnable(GL_CULL_FACE)
         glPopMatrix()
+    pass
 
 ### The End ###
