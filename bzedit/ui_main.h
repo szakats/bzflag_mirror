@@ -1,7 +1,6 @@
 #ifndef __UI_MAIN_H__
 #define __UI_MAIN_H__
 
-#include <gnome.h>
 #include <gtkgl/gtkglarea.h>
 #include <GL/gl.h>
 #include <GL/glu.h>

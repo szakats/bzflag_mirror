@@ -1,7 +1,7 @@
 #ifndef __CALLBACKS_H__
 #define __CALLBACKS_H__
 
-#include <gnome.h>
+#include <gtk/gtk.h>
 #include <gtkgl/gtkglarea.h>
 #include <GL/gl.h>
 #include <GL/glu.h>

@@ -1,4 +1,3 @@
-#include <gnome.h>
 #include <cstring>
 #include "world.h"
 #include "globals.h"

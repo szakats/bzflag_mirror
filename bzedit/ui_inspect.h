@@ -1,7 +1,6 @@
 #ifndef __UI_INSPECT_H__
 #define __UI_INSPECT_H__
 
-#include <gnome.h>
 #include "document.h"
 #include "callbacks.h"
 

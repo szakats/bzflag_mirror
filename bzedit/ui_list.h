@@ -1,7 +1,6 @@
 #ifndef __UI_LIST_H__
 #define __UI_LIST_H__
 
-#include <gnome.h>
 #include "document.h"
 #include "callbacks.h"
 
