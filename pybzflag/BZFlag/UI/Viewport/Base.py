@@ -34,7 +34,6 @@ class Viewport:
     def __init__(self, eventLoop, size):
         self.eventLoop = eventLoop
         Event.attach(self, 'onFrame', 'onSetupFrame', 'onDrawFrame', 'onFinishFrame', 'onResize')
-        self.resetChildren()
         self.resetRenderSequence()
 
         self.visible = True
@@ -46,9 +45,6 @@ class Viewport:
         self.size = None
         self.setRect((0,0) + size)
 
-    def resetChildren(self):
-        self.children = []
-
     def resetRenderSequence(self):
         self.renderSequence = [
             self.onSetupFrame,
@@ -57,8 +53,6 @@ class Viewport:
             ]
 
     def render(self):
-#        if not self.parent:
-#            print self.renderSequence
         if self.visible and self.size[0] > 0 and self.size[1] > 0:
             for f in self.renderSequence:
                 f()
@@ -88,8 +82,6 @@ class Viewport:
                              self.rect[3])
             self.size = self.rect[2:]
             self.onResize()
-            for child in self.children:
-                child.updateRect()
 
     def setCaption(self, title):
         """Set the window caption on the viewport, if applicable"""
@@ -106,8 +98,6 @@ class Viewport:
            """
         sub = copy.copy(self)
         sub.parent = self
-        sub.resetChildren()
-        self.children.append(sub)
 
         # Disconnect all events and the renderSequence from the parent
         for attribute, value in sub.__dict__.iteritems():
@@ -117,6 +107,9 @@ class Viewport:
 
         # We can safely resize the child now that its events are unplugged
         sub.setRect(rect)
+
+        # Update the child's rectangle when our rectangle changes size
+        self.onResize.observe(sub.updateRect)
 
         if renderLink == 'after':
             # Stick it in our render sequence right before our onFinishFrame which flips the buffer
