@@ -25,6 +25,7 @@ from OpenGL.GL import *
 
 
 class TeleporterField(DisplayList):
+    textureName = 'caust%02d.bw.jpeg:30.0'
     def set(self, center, angle, size):
         self.center = center
         self.angle = angle
@@ -32,28 +33,38 @@ class TeleporterField(DisplayList):
         self.blended = True
 
     def drawToList(self):
+        glBlendFunc(GL_ONE, GL_ONE)
         glPushMatrix()
         glTranslatef(*self.center)
         glRotatef(self.angle, 0.0, 0.0, 1.0)
-        glColor4f(0.0, 0.0, 0.0, 0.3)
+        glColor4f(1.0, 1.0, 1.0, 0.3)
         glDepthMask(0)
         glBegin(GL_QUADS)
         # X+ side
         glNormal3f(1, 0, 0)
+        glTexCoord2f(0,0)
         glVertex3f(self.size[0] / 2, self.size[1], 0)
+        glTexCoord2f(1,0)
         glVertex3f(self.size[0] / 2, self.size[1], self.size[2])
+        glTexCoord2f(1,1)
         glVertex3f(self.size[0] / 2, -self.size[1], self.size[2])
+        glTexCoord2f(0,1)
         glVertex3f(self.size[0] / 2, -self.size[1], 0)
         # X- side
         glNormal3f(-1, 0, 0)
+        glTexCoord2f(0,0)
         glVertex3f(-self.size[0] / 2, -self.size[1], 0)
+        glTexCoord2f(1,0)
         glVertex3f(-self.size[0] / 2, -self.size[1], self.size[2])
+        glTexCoord2f(1,1)
         glVertex3f(-self.size[0] / 2, self.size[1], self.size[2])
+        glTexCoord2f(0,1)
         glVertex3f(-self.size[0] / 2, self.size[1], 0)
         glEnd()
         glDepthMask(1)
         glColor3f(1.0, 1.0, 1.0)
         glPopMatrix()
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 	
 
 class TeleporterBorder(DisplayList):

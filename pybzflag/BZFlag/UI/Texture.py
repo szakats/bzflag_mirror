@@ -24,7 +24,7 @@ Texture loading utilities
 import Image
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from BZFlag import Util
+from BZFlag import Util, Animated
 
 
 class Texture:
@@ -59,6 +59,39 @@ class Texture:
         glBindTexture(GL_TEXTURE_2D, self.texture)
 
 
+class AnimatedTexture:
+    """Load a sequence of still images for an animated texture.
+       Animated textures have a printf-style format specifier to
+       insert a frame number, and end with a colon and a frame rate.
+       For example, radar%02d.png:15
+       """
+    def __init__(self, name):
+        (filename, framerate) = name.split(":")
+        self.frameDuration = 1 / float(framerate)
+        self.frames = []
+        self.frameScreenTime = 0
+        self.frameNumber = 0
+        self.time = Animated.Timekeeper()
+
+        # Try to load texture frames. An error on the
+        # first frame is fatal, but an error after that simply stops the loading.
+        try:
+            frameNumber = 0
+            while True:
+                self.frames.append(Texture(filename % frameNumber))
+                frameNumber += 1
+        except IOError:
+            if not self.frames:
+                raise
+
+    def bind(self):
+        self.frameScreenTime += self.time.step()
+        self.frameNumber += int(self.frameScreenTime / self.frameDuration)
+        self.frameScreenTime %= self.frameDuration
+        self.frameNumber %= len(self.frames)
+        self.frames[self.frameNumber].bind()
+        
+
 class Cache:
     """Keeps track of which textures are already loaded, so we never
        duplicate texture ids
@@ -68,7 +101,14 @@ class Cache:
 
     def load(self, name):
         if not self.textures.has_key(name):
-	    self.textures[name] = Texture(Util.dataFile(name))
+            filename = Util.dataFile(name)
+            
+            # If the texture name has a % in it, it is a format specifier
+            # for loading animated textures from a sequence of stills.
+            if filename.find("%") >= 0:
+                self.textures[name] = AnimatedTexture(filename)
+            else:
+                self.textures[name] = Texture(filename)
 	return self.textures[name]
 
 
