@@ -198,16 +198,30 @@ class World:
         self.gameStyle = None
         self.lifetime = 'permanent'     # For client-side world caching
 
-    def storeSkeletonHeader(self):
+    def storeSkeletonHeader(self, size=800, wallHeight=6.15):
         """Adds required objects to the world that are only present in the binary format"""
-        self.storeBlock(WorldObjects.Style())
-        self.storeBlock(WorldObjects.Wall(
-            center = [0, 400, 0],
-            angle  = math.pi * 1.5,
+        self.storeBlock(WorldObjects.Style(
+            worldSize = size
             ))
         self.storeBlock(WorldObjects.Wall(
-            center = [400, 0, 0],
+            center = [0, size/2, 0],
+            angle  = math.pi * 1.5,
+            size   = [size/2, wallHeight]
+            ))
+        self.storeBlock(WorldObjects.Wall(
+            center = [size/2, 0, 0],
             angle  = math.pi,
+            size   = [size/2, wallHeight]
+            ))
+        self.storeBlock(WorldObjects.Wall(
+            center = [0, -size/2, 0],
+            angle  = math.pi * 0.5,
+            size   = [size/2, wallHeight]
+            ))
+        self.storeBlock(WorldObjects.Wall(
+            center = [-size/2, 0, 0],
+            angle  = 0,
+            size   = [size/2, wallHeight]
             ))
 
     def storeSkeletonFooter(self):

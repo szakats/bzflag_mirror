@@ -176,7 +176,7 @@ class Wall(WorldObject):
     entries = [
         StructEntry(Common.Vector3,   'center', [0,0,0]),
         StructEntry(Float,            'angle',  0),
-        StructEntry(Common.Vector2,   'size',   [400.0, 6.15]),
+        StructEntry(Common.Vector2,   'size',   [1,1]),
         ]
 
 class Box(WorldObject):
