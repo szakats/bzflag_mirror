@@ -75,6 +75,8 @@ for inFile in args:
     try:
         world = World.load(inFile)
         sys.stderr.write("- Thumbnailing '%s'\n" % inFile)
+    except KeyboardInterrupt:
+        raise
     except:
         sys.stderr.write("* Error loading '%s': %s\n" % (inFile, sys.exc_info()[1]))
         continue
