@@ -145,18 +145,34 @@ class PerlinNoise(SmoothNoise):
 
           dimensions    - Number of dimensions the noise is generated in, and the length of the
                           expected input vectors for get()
+
+          fundamental   - Frequency of the first octave
+
+          amplitude     - Amplitude of the first octave
        """
-    def __init__(self, dimensions, octaves=3, persistence=0.5, seed=None, logTableSize=None):
+    def __init__(self,
+                 dimensions   = 1,
+                 octaves      = 3,
+                 persistence  = 0.5,
+                 seed         = None,
+                 logTableSize = None,
+                 fundamental  = 1,
+                 amplitude    = 1):
         SmoothNoise.__init__(self, dimensions, seed, logTableSize)
         self.octaves = octaves
         self.persistence = persistence
+        self.fundamental = fundamental
+        self.amplitude = amplitude
 
     def get(self, v):
         """Using multiple octaves of smoothed noise, generate perlin noise"""
         v = asarray(v)
+        if self.dimensions == 1:
+            # Accept scalars rather than 1-length vectors
+            v = v[...,NewAxis]
         result = zeros(v.shape[:-1], Float)
-        fundamental = 1
-        amplitude = 1
+        fundamental = self.fundamental
+        amplitude = self.amplitude
         for i in xrange(self.octaves):
             result += SmoothNoise.get(self, v * fundamental) * amplitude
             fundamental *= 2

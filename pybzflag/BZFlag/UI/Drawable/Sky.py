@@ -87,51 +87,6 @@ class CloudTexture(GLNoise.MappedPerlinTexture):
             return 0
 
 
-class MountainTexture(Texture.DynamicTexture):
-    """Perlin-noise-based mountain range silhouette"""
-    def __init__(self, size=(512,32), noise=None):
-        if not noise:
-            noise = Noise.PerlinNoise(1, octaves=12, persistence=0.4)
-        self.noise = noise
-        Texture.DynamicTexture.__init__(self, size)
-        self.setRepeat(GL_REPEAT, GL_CLAMP)
-        self.format = GL_INTENSITY8
-
-    def draw(self):
-        # To get the most quality for our texel, sample the perlin noise twice per texel.
-        samples = arange(0, 1, 1/(self.viewport.size[0] * 2))
-        heights = self.noise.get(samples[...,NewAxis])
-
-        glClearColor(0,0,0,1)
-        glClear(GL_COLOR_BUFFER_BIT)
-        glDisable(GL_DEPTH_TEST)
-        glDisable(GL_CULL_FACE)
-        glDisable(GL_LIGHTING)
-        glEnable(GL_BLEND)
-        glEnable(GL_LINE_SMOOTH)
-        glColor3f(1,1,1)
-
-        def vertices():
-            for i in xrange(len(samples)):
-                glVertex2f(samples[i] * self.viewport.size[0],
-                           (-heights[i]/2 +0.5) * self.viewport.size[1])
-
-        # The mountains themselves
-        glBegin(GL_POLYGON)
-        glVertex2f(0,self.viewport.size[1])
-        vertices()
-        glVertex2f(self.viewport.size[0],self.viewport.size[1])
-        glEnd()
-
-        # Smoothed outline
-        glBegin(GL_LINE_STRIP)
-        vertices()
-        glEnd()
-
-        glDisable(GL_BLEND)
-        glDisable(GL_LINE_SMOOTH)
-
-
 class Clouds(SkyDrawable):
     """Dynamic perlin-noise-based clouds"""
     def __init__(self, *args, **kw):
@@ -173,6 +128,55 @@ class Clouds(SkyDrawable):
         DisplayList.draw(self, rstate)
 
 
+class MountainTexture(Texture.DynamicTexture):
+    """Perlin-noise-based mountain range silhouette"""
+    def __init__(self, size=(512,32), noise=None):
+        if not noise:
+            noise = Noise.PerlinNoise(octaves=12, persistence=0.4, fundamental=10)
+        self.noise = noise
+        Texture.DynamicTexture.__init__(self, size)
+        self.setRepeat(GL_REPEAT, GL_CLAMP)
+        self.format = GL_INTENSITY8
+
+    def draw(self):
+        # To get the most quality for our texel, sample the perlin noise twice per texel.
+        samples = arange(0, 1, 1/(self.viewport.size[0] * 2))
+        heights = self.noise.get(samples)
+
+        glClearColor(0,0,0,1)
+        glClear(GL_COLOR_BUFFER_BIT)
+        glDisable(GL_DEPTH_TEST)
+        glDisable(GL_CULL_FACE)
+        glDisable(GL_LIGHTING)
+        glEnable(GL_BLEND)
+        glEnable(GL_LINE_SMOOTH)
+        glColor3f(1,1,1)
+
+        def vertices():
+            for i in xrange(len(samples)):
+                glVertex2f(samples[i] * self.viewport.size[0],
+                           (-heights[i]/2 +0.5) * self.viewport.size[1])
+
+        # The mountains themselves
+        glBegin(GL_POLYGON)
+        glVertex2f(0,self.viewport.size[1])
+        vertices()
+        glVertex2f(self.viewport.size[0],self.viewport.size[1])
+        glEnd()
+
+        # Smoothed outline
+        glBegin(GL_LINE_STRIP)
+        vertices()
+        glEnd()
+
+        glDisable(GL_BLEND)
+        glDisable(GL_LINE_SMOOTH)
+
+        self.viewport.display.flip()
+        import time
+        time.sleep(1)
+
+
 class Horizon(SkyDrawable):
     """Some mountains and a chasm to cover up the horizon"""
     def __init__(self, *args, **kw):
@@ -192,7 +196,7 @@ class Horizon(SkyDrawable):
         glEnable(GL_TEXTURE_GEN_T)
 
         # FIXME: the color of the mountains
-        glColor3f(0,0,0.25)
+        glColor3f(0,1,0)
 
         VRML.load('sky.wrl')['horizon'].drawToList(rstate)
 
