@@ -149,6 +149,7 @@ class MountainTexture(Texture.DynamicTexture):
         glDisable(GL_LIGHTING)
         glEnable(GL_BLEND)
         glEnable(GL_LINE_SMOOTH)
+        glDisable(GL_TEXTURE_2D)
         glColor3f(1,1,1)
 
         glBegin(GL_LINES)
@@ -178,7 +179,7 @@ class Mountains(SkyDrawable):
         # texture coordinates in the VRML loader yet, so just fudge
         # something reasonableish with linear mapping.
         glActiveTextureARB(GL_TEXTURE1_ARB)
-        glTexGenfv(GL_S, GL_OBJECT_PLANE, (3, 0, 0, 0))
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, (2, 0, 0, 0))
         glTexGenfv(GL_T, GL_OBJECT_PLANE, (0, 0, 1, 0))
         glTexGenfv(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
         glTexGenfv(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
