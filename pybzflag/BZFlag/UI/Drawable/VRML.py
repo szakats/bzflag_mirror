@@ -25,8 +25,8 @@ VRML seemed to be the only format meeting all the criteria. There is
 already a comprehensive VRML97 browser as part of the OpenGLContext
 package, but that would be extreme overkill for our simple needs here.
 
-This loader has only been tested with Blender, though there's a chance
-it may work with VRML files produced by other modelers.
+This has been tested the most with VRML files produced by blender,
+but it has successfully loaded files exported by other software.
 """
 #
 # Python BZFlag Protocol Package
@@ -319,6 +319,25 @@ class Reader:
             self.extractMeshes(child, newParents)
 
 
+class Triangle:
+    """Container for a triangle's vertices and normals"""
+    def __init__(self, vertices):
+        self.vertices = vertices
+        self.calcFaceNormal()
+
+    def calcFaceNormal(self):
+        # Calculate a face normal
+        tri = self.vertices
+        n = Util.cross((tri[1][0] - tri[0][0],
+                        tri[1][1] - tri[0][1],
+                        tri[1][2] - tri[0][2]),
+                       (tri[2][0] - tri[0][0],
+                        tri[2][1] - tri[0][1],
+                        tri[2][2] - tri[0][2]))
+        s = math.sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2])
+        self.faceNormal = (n[0]/s, n[1]/s, n[2]/s)
+      
+
 class Mesh(DisplayList):
     """A drawable mesh model as extracted from the VRML file.
        All parameters to set() are VRML nodes.
@@ -333,41 +352,55 @@ class Mesh(DisplayList):
             self.matrix = None
         if material:
             self.color = material.value['diffuseColor'] + [1 - material.value['transparency']]
+            self.blended = self.color[3] != 1
         else:
             self.color = None
+        self.erase()
 
-    def drawToList(self):
+        # Walk through the vertex list, storing triangles.
+        # Quads will be automatically split into two triangles. We throw
+        # a parse error for larger polygons, as they are used so infrequently
+        # it's not worth trying to tesselate them.
         polygon = []
-        glPushMatrix()
-
-        if self.color:
-            glColor4f(*self.color)
-            self.blended = self.color[3] != 1
-        if self.matrix:
-            glMultMatrixf(self.matrix)
-
-        # In the VRML vertex list, a -1 indicates the end of a polygon.
         for face in self.faces:
             if face == -1:
-                # Calculate a face normal
-                n = Util.cross((polygon[1][0] - polygon[0][0],
-                                polygon[1][1] - polygon[0][1],
-                                polygon[1][2] - polygon[0][2]),
-                               (polygon[2][0] - polygon[0][0],
-                                polygon[2][1] - polygon[0][1],
-                                polygon[2][2] - polygon[0][2]))
-                s = math.sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2])
-                glNormal3f(n[0]/s, n[1]/s, n[2]/s)
-
-                # Output the buffered polygon
-                glBegin(GL_POLYGON)
-                for vertex in polygon:
-                    glVertex3f(*vertex)
-                glEnd()
+                # -1 is the end-of-polygon marker
+                if len(polygon) == 3:
+                    self.storeTriangle(polygon)
+                elif len(polygon) == 4:
+                    self.storeTriangle((polygon[0], polygon[1], polygon[2]))
+                    self.storeTriangle((polygon[0], polygon[2], polygon[3]))
+                else:
+                    raise VRMLParseError("Only triangles and quads are supported. " +
+                                         "Found a polygon with %s sides" % len(polygon))
                 polygon = []
             else:
                 # Toss another vertex on the buffer
                 polygon.append(self.vertices[face])
+
+    def erase(self):
+        """Clear our internal representation of the model"""
+        self.triangles = []
+
+    def storeTriangle(self, tri):
+        """Add a triangle to our internal representation, calculating normals"""
+        self.triangles.append(Triangle(tri))
+
+    def drawToList(self):
+        glPushMatrix()
+
+        if self.color:
+            glColor4f(*self.color)
+        if self.matrix:
+            glMultMatrixf(self.matrix)
+
+        glBegin(GL_TRIANGLES)
+        for tri in self.triangles:
+            glNormal3f(*tri.faceNormal)
+            glVertex3f(*tri.vertices[0])
+            glVertex3f(*tri.vertices[1])
+            glVertex3f(*tri.vertices[2])
+        glEnd()
         glPopMatrix()
 
 ### The End ###
