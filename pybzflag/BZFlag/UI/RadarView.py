@@ -119,8 +119,11 @@ class RadarView:
                 pass
 
     def renderPlayers(self):
+        # XXX - setting self.follow here is just for testing
+        self.follow = None
         for player in self.game.players.values():
             if 'alive' in player.status:
+                # XXX - same here
                 self.follow = player
                 
                 # Pick player color based on team, alpha based on height
