@@ -196,7 +196,7 @@ class BasicRenderPass(RenderPass):
 
     def preprocess(self):
         """This builds display lists for all our texture groups"""
-        for texgroup in self.textureGroups.values():
+        for texgroup in self.textureGroups.itervalues():
             texgroup.buildList()
 
     def render(self, names = None, curname = None):
@@ -204,7 +204,7 @@ class BasicRenderPass(RenderPass):
            binding the pass' texture and drawing the texture group.
            """
         if names == None:
-            for (texture, group) in self.textureGroups.items():
+            for (texture, group) in self.textureGroups.iteritems():
                 if texture is None:
                     glDisable(GL_TEXTURE_2D)
                 else:
@@ -212,7 +212,7 @@ class BasicRenderPass(RenderPass):
                     texture.bind()
                 group.draw()
         else:
-            for (texture, group) in self.textureGroups.items():
+            for (texture, group) in self.textureGroups.iteritems():
                 for drawable in group.drawables:
                     names[curname] = drawable
                     glLoadName(curname)
@@ -273,7 +273,7 @@ class Scene:
             rpass.erase()
 
         # Divy up the drawables into rendering passes using the passes' filter functions
-        for object, drawables in self.objects.items():
+        for object, drawables in self.objects.iteritems():
             for drawable in drawables:
                 for rpass in filterPasses:
                     if rpass.filter(drawable):
