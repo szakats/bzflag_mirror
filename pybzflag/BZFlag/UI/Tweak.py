@@ -57,8 +57,8 @@ class Window:
         row = 0
         for control in controls:
             l = gtk.Label(control.name)
-            self.table.attach(l, 0,1, row,row+1)
-            self.table.attach(control.widget, 1,2, row,row+1)
+            self.table.attach(l, 0,1, row,row+1, xoptions=0, yoptions=gtk.FILL)
+            self.table.attach(control.widget, 1,2, row,row+1, yoptions=gtk.FILL)
             l.show()
             control.widget.show()
             row += 1

@@ -229,11 +229,12 @@ class Emitter(Affector):
     """An affector that scans the model for dead particles and respawns them.
        spawnRate is the maximum particle spawning rate in particles per second.
        """
-    def __init__(self, model, spawnRate, position=(0,0,0), velocity=(0,0,0)):
+    def __init__(self, model, spawnRate, position=(0,0,0), velocity=(0,0,0), maxSpawnBudget=5):
         Affector.__init__(self, model)
         self.spawnRate = spawnRate
         self.position = position
         self.velocity = velocity
+        self.maxSpawnBudget = maxSpawnBudget
         self.spawnBudget = 0
 
     def integrate(self, dt):
@@ -251,6 +252,11 @@ class Emitter(Affector):
             v3indices = (reshape(repeat(spawnIndices, 3), (-1,3)) * 3 + (0,1,2)).flat
             self.spawnBudget -= len(spawnIndices)
             self.respawn(spawnIndices, v3indices)
+
+        # Put an upper limit on our leftover spawnBudget, so we don't get a backlog
+        # of particles to emit if our spawnRate was set too high.
+        if self.spawnBudget > self.maxSpawnBudget:
+            self.spawnBudget = self.maxSpawnBudget
 
         # ...and store a list of particles that should be hidden.
         #    this will be used by other affectors, probably whichever one is
