@@ -197,13 +197,7 @@ class Water(Pyramid):
 class Reflection(Pyramid):
     """A reflective surface applied on top of a normal pyramid"""
     def __init__(self, pyramid):
-        if 'flipZ' in pyramid.options:
-            sizeScale = (0, 0, -0.5)
-        else:
-            sizeScale = (0, 0, 1)
-
-        mapCenter = add(pyramid.center, multiply(sizeScale, pyramid.size))
-
+        mapCenter = add(pyramid.center, multiply((0,0,0.5), pyramid.size))
         self.textureName = CubeMap.CubeMap(mapCenter)
         Pyramid.__init__(self, pyramid)
         self.render.reflection = True
