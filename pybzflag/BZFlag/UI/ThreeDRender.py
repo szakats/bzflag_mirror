@@ -231,8 +231,11 @@ class Scene:
        with blended objects, and texture sorting is an important OpenGL optimization.
        """
     def __init__(self):
-        self.objects = {}
+        self.erase()
         self.passes = [BasicRenderPass(), BlendedRenderPass(), OverlayRenderPass()]
+
+    def erase(self):
+        self.objects = {}
 
     def preprocess(self):
         """Rebuilds rendering passes. Currently this is necessary when the world changes."""
@@ -242,6 +245,10 @@ class Scene:
         # Make a list of rendering passes sorted by filter priority
         filterPasses = self.passes[:]
         filterPasses.sort(lambda a,b: cmp(b.filterPriority, a.filterPriority))
+
+        # Clean out each rendering pass
+        for rpass in self.passes:
+            rpass.erase()
 
         # Divy up the drawables into rendering passes using the passes' filter functions
         for object, drawables in self.objects.items():

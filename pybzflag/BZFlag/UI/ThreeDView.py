@@ -40,6 +40,7 @@ class Scene(ThreeDRender.Scene):
 
     def reloadWorld(self):
         """Rebuild the internal scene structures from the game's world"""
+        self.erase()
         for block in self.game.world.blocks:
             if isinstance(block, WorldObjects.WorldObject):
                 self.objects[block] = block.getGLDrawables()
