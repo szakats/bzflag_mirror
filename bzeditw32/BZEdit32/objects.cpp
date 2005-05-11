@@ -446,21 +446,22 @@ void Pyramid::Write(std::ostream &stream)
 {
 	WriteStdData(stream);
 	stream << "	size " << m_rScale.x << ' ' << m_rScale.y << ' ' << m_rScale.z << std::endl;
-        if (m_bDriveThru && m_bShootThru)
-			stream << "	passable" << std::endl;
-        else
-        {
-	if (m_bDriveThru)
-		stream << "	drivethrough" << std::endl;
-	if (m_bShootThru)
-		stream << "	shootthrough" << std::endl;
-	if (m_bFlipZ)
+	if (m_bDriveThru && m_bShootThru) {
+	  stream << "	passable" << std::endl;
+	  if (m_bFlipZ)
 		stream << "	flipz" << std::endl;
-		}
+	} else {
+	  if (m_bDriveThru)
+		stream << "	drivethrough" << std::endl;
+	  if (m_bShootThru)
+		stream << "	shootthrough" << std::endl;
+	  if (m_bFlipZ)
+		stream << "	flipz" << std::endl;
+	}
 
 
-		stream << "end" << std::endl;
-		stream << std::endl;
+	stream << "end" << std::endl;
+	stream << std::endl;
 }
 
 void Pyramid::Write( char *data )
@@ -471,16 +472,17 @@ void Pyramid::Write( char *data )
 	sprintf(szTemp,"\tsize %f %f %f\n",m_rScale.x,m_rScale.y,m_rScale.z);
 	strcat(data,szTemp);
 
-        if (m_bDriveThru && m_bShootThru)
-	    sprintf(szTemp,"\tpassable\n");
-        else
-        {
-	  if (m_bDriveThru)
-		  sprintf(szTemp,"\tdrivethrough\n");
-	  if (m_bShootThru)
-		  sprintf(szTemp,"\tshootthrough\n");
+	if (m_bDriveThru && m_bShootThru) {
+	  sprintf(szTemp,"\tpassable\n");
 	  if (m_bFlipZ)
-		  sprintf(szTemp,"\tflipz\n");
+		sprintf(szTemp,"\tflipz\n");
+	} else {
+	  if (m_bDriveThru)
+		sprintf(szTemp,"\tdrivethrough\n");
+	  if (m_bShootThru)
+		sprintf(szTemp,"\tshootthrough\n");
+	  if (m_bFlipZ)
+		sprintf(szTemp,"\tflipz\n");
         }
 	strcat(data,szTemp);
 	strcat(data,"end\n\n");
