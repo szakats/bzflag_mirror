@@ -74,6 +74,9 @@ class Texture:
         elif image.mode == "L":
             string = image.tostring('raw', 'L', 0, -1)
             self.loadRaw(image.size, string, GL_LUMINANCE, 1)
+        elif image.mode == "LA":
+            string = image.tostring('raw', 'LA', 0, -1)
+            self.loadRaw(image.size, string, GL_LUMINANCE_ALPHA, 2) 
         else:
             raise Exception("Unsupported image mode '%s'" % image.mode)
 

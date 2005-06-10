@@ -112,6 +112,16 @@ FlagType = Enum(UInt16, [
     'normal', 'unstable', 'sticky',
     ])
 
+class TeamUpdateBlock(Struct):
+    """The information to update a particular team"""
+    entries = [
+        StructEntry(TeamColor, 'Team'),
+        StructEntry(UInt16,    'Size'),
+        StructEntry(UInt16,    'Active'),
+        StructEntry(UInt16,    'Wins'),
+        StructEntry(UInt16,    'Losses'),
+        ] 
+
 
 class ServerId(Struct):
     """class ServerId from Address.h"""
@@ -319,18 +329,11 @@ class MsgShotEnd(Message):
         StructEntry(UInt16,   'reason'),
         ]
 
-class MsgSetTTL(Message):
-    messageId = 0x7474
-    entries = [
-        StructEntry(UInt16, 'ttl'),
-        ]
-
 class MsgUDPLinkRequest(Message):
     messageId = 0x6f66
     entries = [
         StructEntry(UInt16, 'port'),
         ]
-
 
 class FlagNegotiationID(Struct):
     entries = [

@@ -33,6 +33,7 @@ import re, math
 
 class BlockHeader(Struct):
     entries = [
+        StructEntry(UInt16, 'size'), 
         StructEntry(UInt16, 'id'),
         ]
 
@@ -120,7 +121,7 @@ class WorldObject(Block):
         if hasattr(self, 'toSide'):
             f.write("to %s\n" % self.toSide)
         if hasattr(self, 'team'):
-            f.write("color %s\n" % Common.TeamColor.reverseDict(self.team))
+            f.write("color %s\n" % Common.TeamColor.reverseDict[self.team])
         if 'driveThrough' in self.options:
             f.write("drivethrough\n")
         if 'shootThrough' in self.options:
@@ -167,11 +168,8 @@ class WorldObject(Block):
 
 
 class Style(WorldObject):
-    messageId = 0x7374
+    messageId = 0x6865
     entries = [
-        # This first field is the size, but since this is the only
-        # block that has it, we'll just treat it as a magical constant.
-        ConstStructEntry(UInt16, 30,  Errors.ProtocolError("Bad size in world style block")),
         ConstStructEntry(UInt16, 1,   Errors.ProtocolError("Bad version in world size block")),
         StructEntry(Float,            'worldSize',            800.0),
         StructEntry(Common.GameStyle, 'gameStyle',            []),
@@ -206,7 +204,7 @@ class TeamBase(WorldObject):
         StructEntry(Common.TeamColor, 'team'),
         StructEntry(Common.Vector3,   'center', [0,0,0]),
         StructEntry(Common.Radians,   'angle',  0),
-        StructEntry(Common.VectorXY,  'size',   [1,1,0]),
+        StructEntry(Common.Vector3,   'size',   [1,1,1]),
         StructEntry(Common.Vector3,   'safety', [0,0,0]),
         ]
 

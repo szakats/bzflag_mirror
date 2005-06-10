@@ -5,7 +5,7 @@ from BZFlag import CommandLine, Server, UI
                                   world = "Random").parse()
 
 # Trace connections and disconnections
-print "Server is listening on %s:%d" % (server.tcp.interface, server.tcp.port)
+# print "Server is listening on %s:%d" % (server.tcp.interface, server.tcp.port)
 server.onConnect.trace("Connected %(1)s")
 server.onDisconnect.trace("Disconnected %(1)s")
 

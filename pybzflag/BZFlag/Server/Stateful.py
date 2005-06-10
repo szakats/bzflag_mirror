@@ -23,7 +23,7 @@ support updating a game state and transmitting changes.
 #
 
 import BZFlag
-from BZFlag import Event, Game, Flag, Meta, World, Player
+from BZFlag import Network, Event, Game, Flag, Meta, World, Player
 from StringIO import StringIO
 from BZFlag.Server.Base import BaseServer
 

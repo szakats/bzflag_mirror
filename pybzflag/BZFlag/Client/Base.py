@@ -112,8 +112,6 @@ class BaseClient(Network.Endpoint):
 
     def onConnect(self):
         """We just established a TCP link. This handler tries to set up a UDP link too"""
-        # We don't use multicast, so notify the server that we need it to relay messages
-        self.tcp.write(self.outgoing.MsgNetworkRelay())
 
         # Start trying to set up a UDP connection
         self.udp = Network.UDPSocket()
@@ -130,11 +128,5 @@ class BaseClient(Network.Endpoint):
         self.udp.connect(self.tcp.remoteHost, msg.port)
         self.udp.write(self.outgoing.MsgUDPLinkEstablished())
         self.onConnectUDP()
-
-    def onMsgNetworkRelay(self, msg):
-        """The server is asking us to send everything directly to it rather than using
-           Multicast. This isn't a problem, since bzflag doesn't use multicast yet anyway.
-           """
-        pass
 
 ### The End ###

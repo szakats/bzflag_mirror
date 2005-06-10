@@ -106,13 +106,19 @@ class MsgPause(Common.Message):
         StructEntry(UInt8, 'paused'),
         ]
 
+class MsgTransferFlag(Common.Message):
+    messageId = 0x7466
+    entries = [
+        StructEntry(Common.PlayerId, 'fromId'),
+        StructEntry(Common.PlayerId, 'toId'),
+    ]
+
 
 MsgUDPLinkRequest = Common.MsgUDPLinkRequest
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgShotBegin = Common.MsgShotBegin
 MsgShotEnd = Common.MsgShotEnd
 MsgPlayerUpdate = Common.MsgPlayerUpdate
-MsgSetTTL = Common.MsgSetTTL
 MsgNull = Common.MsgNull
 
 ### The End ###

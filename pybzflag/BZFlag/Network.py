@@ -251,6 +251,7 @@ class TCPSocket(BaseSocket):
     def readMessage(self, msgModule):
         """Read a message, using the supplied module full of Message subclasses."""
         header = self.readStruct(Common.MessageHeader)
+        print header #fixme - debug  
         if not header:
             return None
         if header.length > 0:

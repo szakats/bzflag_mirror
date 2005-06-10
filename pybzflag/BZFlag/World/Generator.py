@@ -116,7 +116,6 @@ def Text(name,
         size       : Default distance along each side of the generated square world
         wallHeight : Height of the world's walls
     """
-    from xreadlines import xreadlines
     import re
     
     f = Util.autoFile(name)
@@ -132,7 +131,7 @@ def Text(name,
     w.erase()
     blocks = []
         
-    for line in xreadlines(f):
+    for line in f:
         # If this is a kludge used by map editors to store extra
         # attributes. Don't process any comments on the line.
         if not line.startswith("#!"):

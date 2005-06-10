@@ -47,14 +47,10 @@ class MsgReject(Common.Message):
         StructEntry(Common.RejectionCode, 'reason'),
         ]
 
-class MsgTeamUpdate(Common.Message):
+class MsgTeamUpdate(Common.DataMessage):
     messageId = 0x7475
     entries = [
-        StructEntry(Common.TeamColor, 'team'),
-        StructEntry(UInt16,           'size'),
-        StructEntry(UInt16,           'active'),
-        StructEntry(UInt16,           'wins'),
-        StructEntry(UInt16,           'losses'),
+        StructEntry(UInt8, 'numTeams'),
         ]
 
 class MsgFlagUpdate(Common.Message):
@@ -108,11 +104,8 @@ class MsgAlive(Common.Message):
     entries = [
         StructEntry(Common.PlayerId, 'id'),
         StructEntry(Common.Vector3,  'position'),
-        StructEntry(Common.Vector3,  'forward'),
+        StructEntry(Float,           'forward'),
         ]
-
-class MsgNetworkRelay(Common.Message):
-    messageId = 0x6e72
 
 class MsgDropFlag(Common.Message):
     messageId = 0x6466
@@ -175,13 +168,26 @@ class MsgScore(Common.Message):
         StructEntry(UInt16,          'teamKills'),
         ]
 
+class MsgSetVar(Common.DataMessage):
+    messageID = 0x7376
+    entries = [
+        StructEntry(UInt16, 'numVars'),
+    ]
+
+class MsgTransferFlag(Common.Message):
+    messageId = 0x7466
+    entries = [
+        StructEntry(Common.PlayerId,              'fromId'),
+        StructEntry(Common.PlayerId,              'toId'),
+        StructEntry(UInt16,                       'flagId'),
+        StructEntry(SubStruct(Common.FlagUpdate), 'update'),
+    ] 
 
 MsgUDPLinkRequest = Common.MsgUDPLinkRequest
 MsgNegotiateFlags = Common.MsgNegotiateFlags
 MsgShotBegin = Common.MsgShotBegin
 MsgShotEnd = Common.MsgShotEnd
 MsgPlayerUpdate = Common.MsgPlayerUpdate
-MsgSetTTL = Common.MsgSetTTL
 MsgNull = Common.MsgNull
 
 ### The End ###

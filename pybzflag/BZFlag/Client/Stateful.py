@@ -145,7 +145,7 @@ class StatefulClient(BaseClient):
             flag = self.game.getFlag(msg.flagNum, Flag.getDict()[msg.update.id])
             flag.updateFromMessage(msg)
         except KeyError:
-            raise Errors.ProtocolWarning("Can't update flag number %d with unknown ID %d" %
+            raise Errors.ProtocolWarning("Can't update flag number %d with unknown ID %s" %
                                          (msg.flagNum, msg.update.id))
 
     def onMsgFlagUpdate(self, msg):

@@ -88,7 +88,7 @@ class BaseRotorDecal(Box.FixedTopDecal):
         # Use the texture matrix to rotate our decal around the texture's center
         glMatrixMode(GL_TEXTURE)
         glTranslatef(0.5, 0.5, 0)
-        glRotatef(self.rotorAngle, 0,0,1)
+        glRotatef(self.rotorAngle.value, 0,0,1)
         glTranslatef(-0.5, -0.5, 0)
         glMatrixMode(GL_MODELVIEW)
 

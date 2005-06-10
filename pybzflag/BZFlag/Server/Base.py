@@ -180,16 +180,6 @@ class BaseServer(Network.Endpoint):
             msg.client = self.clientsBySocket[msg.socket]
         Network.Endpoint.dispatchMessage(self, msg)
 
-    def onMsgNetworkRelay(self, msg):
-        """This is sent by the client when it can't do multicast.
-           Since we don't do multicast yet, ignore this.
-           """
-        pass
-
-    def onMsgSetTTL(self, msg):
-        """Also ignored because we don't do multicast"""
-        pass
-
     def onMsgUDPLinkRequest(self, msg):
         """Client just sent us its UDP port, and wants to know ours"""
         msg.client.udpPort = msg.port
