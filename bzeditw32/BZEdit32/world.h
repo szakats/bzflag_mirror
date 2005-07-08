@@ -207,6 +207,7 @@ public:
 
 	CBaseObject *GetNthObjectOfType ( const char *szType, int iN );
 	int GetObjectListOfType ( const char *szType, trObjectList	&rList );
+	int GetObjectList ( trObjectList &rList );
 
 	int GetSelItem ( void ) { return m_iSelItem; }
 	void SetSelItem ( int iSel ) { m_iSelItem = iSel; }

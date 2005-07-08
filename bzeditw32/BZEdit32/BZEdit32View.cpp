@@ -650,7 +650,8 @@ void CBZEdit32View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			if (GetDocument()->m_oWorld.Inited() && (GetDocument()->m_oWorld.GetSelItem() != -1))
 			{
 				CBaseObject *pObject = GetDocument()->m_oWorld.GetObject(GetDocument()->m_oWorld.GetSelItem());
-				pObject->CloseEditInterface();
+				if (pObject)
+					pObject->CloseEditInterface();
 
 				GetDocument()->m_oWorld.RemoveObject(GetDocument()->m_oWorld.GetSelItem());
 				GetDocument()->m_oWorld.SetSelItem(1);

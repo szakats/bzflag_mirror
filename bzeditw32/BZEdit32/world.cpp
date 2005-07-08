@@ -639,6 +639,19 @@ CBaseObject* CWorld::GetNthObjectOfType ( const char *szType, int n )
 	return NULL;
 }
 
+int CWorld::GetObjectList(trObjectList &rList)
+{
+	trObjectMap::iterator ObjItr = m_vObjList.begin();
+
+	rList.clear();
+	while (ObjItr != m_vObjList.end())
+	{
+		rList.push_back(ObjItr->second);
+		ObjItr++;
+	}
+	return rList.size();
+}
+
 int CWorld::GetObjectListOfType ( const char *szType, trObjectList	&rList )
 {
 	if (!szType)

@@ -188,24 +188,27 @@ void CElementListDlog::OnSelchangeElementFilter()
 	CString	ObjectType;
 
 	int iListType;
-	int	iObjectType;
+	int iObjectType;
 
 	if (iCurSel != 0)
-		iListType= m_oListFilter.GetItemData(iCurSel);
+		iListType = m_oListFilter.GetItemData(iCurSel);
 
 	m_oNewITemButton.EnableWindow(iCurSel != 0);
 	
 	if (m_pDoc && (m_pDoc->m_oWorld.Size()>0) )
 	{
-		int		iCount = 0;
+		int	iCount = 0;
 		bool	bAd;
 
-		for (int i = 0; i < m_pDoc->m_oWorld.Size();i++)
+		trObjectList objs;
+		m_pDoc->m_oWorld.GetObjectList(objs);
+
+		for (trObjectList::iterator itr = objs.begin();
+		     itr != objs.end(); itr++)
 		{
-			CBaseObject	*pObject = m_pDoc->m_oWorld.GetObject(i);
-			if (pObject)
+			if (*itr)
 			{
-				iObjectType = pObject->GetTypeID();
+				iObjectType = (*itr)->GetTypeID();
 				bAd = false;
 
 				if (iCurSel == 0)
@@ -215,8 +218,8 @@ void CElementListDlog::OnSelchangeElementFilter()
 
 				if (bAd)
 				{
-					m_oListCtl.InsertItem(iCount,pObject->GetListName(),iObjectType);
-					m_oListCtl.SetItemData(iCount,i);
+					m_oListCtl.InsertItem(iCount,(*itr)->GetListName(),iObjectType);
+					m_oListCtl.SetItemData(iCount,(*itr)->GetID());
 					iCount++;
 				}
 			}
