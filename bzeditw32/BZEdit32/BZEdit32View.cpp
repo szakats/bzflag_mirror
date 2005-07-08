@@ -209,7 +209,7 @@ void CBZEdit32View::DrawNiceGrid ( void )
 		glVertex3f(17,M_WORLDSIZE,50);
 	glEnd();
 
-		// y+
+	// y-
 	glBegin(GL_LINES);
 	glColor4f(1,1,1,1.0f);
 
@@ -649,6 +649,9 @@ void CBZEdit32View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		case VK_BACK:
 			if (GetDocument()->m_oWorld.Inited() && (GetDocument()->m_oWorld.GetSelItem() != -1))
 			{
+				CBaseObject *pObject = GetDocument()->m_oWorld.GetObject(GetDocument()->m_oWorld.GetSelItem());
+				pObject->CloseEditInterface();
+
 				GetDocument()->m_oWorld.RemoveObject(GetDocument()->m_oWorld.GetSelItem());
 				GetDocument()->m_oWorld.SetSelItem(1);
 

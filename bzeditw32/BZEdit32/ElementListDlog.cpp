@@ -106,8 +106,8 @@ void CElementListDlog::SelectItem(int iItem )
 
 	if ( iCurSel != 0 )
 	{
-		CString		sThisType = m_pDoc->m_oWorld.GetFactoryName(m_oListFilter.GetItemData(iCurSel));
-		CString		sObjType = pObject->GetTypeName();
+		// CString	sThisType = m_pDoc->m_oWorld.GetFactoryName(m_oListFilter.GetItemData(iCurSel));
+		// CString	sObjType = pObject->GetTypeName();
 
 		int iFactoryID = m_oListFilter.GetItemData(iCurSel);
 		int iTypeID =  pObject->GetTypeID();
@@ -115,7 +115,7 @@ void CElementListDlog::SelectItem(int iItem )
 		if (iFactoryID != iTypeID)
 		{
 			int iThisTypeItem = 0;
-			for ( int i = 0; i < m_oListFilter.GetCount();i++)
+			for (int i = 0; i < m_oListFilter.GetCount(); i++)
 			{
 				int iData = m_oListFilter.GetItemData(i);
 				if (iData == iTypeID)
