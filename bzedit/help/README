@@ -1,7 +1,0 @@
-                        bzedit
-                        ------
-
-bzedit is an application to allow you to create worlds for
-the game BZFlag (see http://www.bzflag.org/). It runs
-under the GNOME/GTK+ environment on linux, and uses
-OpenGL/gtkglarea for visualization.
