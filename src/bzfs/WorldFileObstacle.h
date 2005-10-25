@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 #ifndef __WORLDFILEOBSTACLE_H__
 #define __WORLDFILEOBSTACLE_H__
@@ -16,21 +16,17 @@
 #include <iostream>
 
 // bzfs-specific headers
-#include "WorldFileObject.h"
+#include "WorldFileLocation.h"
 
 
-class WorldFileObstacle : public WorldFileObject {
+class WorldFileObstacle : public WorldFileLocation {
 public:
   WorldFileObstacle();
   virtual bool read(const char *cmd, std::istream&);
 
 protected:
-  float pos[3];
-  float rotation;
-  float size[3];
   bool driveThrough;
   bool shootThrough;
-  bool flipZ;
 };
 
 #endif /* __WORLDFILEOBSTACLE_H__ */

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,21 +7,31 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// bzflag common header
+#include "common.h"
+
+// interface header
+#include "BoltSceneNode.h"
+
+// system headers
 #include <stdlib.h>
 #include <math.h>
-#include "common.h"
-#include "BoltSceneNode.h"
-#include "ViewFrustum.h"
-#include "SceneRenderer.h"
-#include "OpenGLTexture.h"
+
+// common implementation headers
 #include "StateDatabase.h"
+#include "BZDBCache.h"
+
+// local implementation headers
+#include "ViewFrustum.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
+#include "SceneRenderer.h"
 
 BoltSceneNode::BoltSceneNode(const GLfloat pos[3]) :
 				drawFlares(false),
-				blending(false),
 				texturing(false),
 				colorblind(false),
 				size(1.0f),
@@ -59,12 +69,22 @@ void			BoltSceneNode::setSize(float radius)
   size = radius;
   setRadius(size * size);
 }
-
-void			BoltSceneNode::setColor(GLfloat r, GLfloat g, GLfloat b)
+void			BoltSceneNode::setTextureColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 {
   color[0] = r;
   color[1] = g;
   color[2] = b;
+  color[3] = a;
+  light.setColor(1.5f * r, 1.5f * g, 1.5f * b);
+  renderNode.setTextureColor(color);
+}
+
+void			BoltSceneNode::setColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
+{
+  color[0] = r;
+  color[1] = g;
+  color[2] = b;
+  color[3] = a;
   light.setColor(1.5f * r, 1.5f * g, 1.5f * b);
   renderNode.setColor(color);
 }
@@ -84,13 +104,12 @@ void			BoltSceneNode::setColorblind(bool _colorblind)
   colorblind = _colorblind;
 }
 
-void			BoltSceneNode::setTexture(const OpenGLTexture& texture)
+void			BoltSceneNode::setTexture(const int texture)
 {
   OpenGLGStateBuilder builder(gstate);
   builder.setTexture(texture);
-  builder.enableTexture(texture.isValid());
+  builder.enableTexture(texture>=0);
   gstate = builder.getState();
-  forceNotifyStyleChange();
 }
 
 void			BoltSceneNode::setTextureAnimation(int cu, int cv)
@@ -111,14 +130,12 @@ void			BoltSceneNode::addLight(
   renderer.addLight(light);
 }
 
-void			BoltSceneNode::notifyStyleChange(
-				const SceneRenderer&)
+void			BoltSceneNode::notifyStyleChange()
 {
-  blending = BZDB.isTrue("blend");
-  texturing = BZDB.isTrue("texture") && blending;
+  texturing = BZDBCache::texture && BZDBCache::blend;
   OpenGLGStateBuilder builder(gstate);
   builder.enableTexture(texturing);
-  if (blending) {
+  if (BZDBCache::blend) {
     builder.setBlending(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     builder.setStipple(1.0f);
     builder.setAlphaFunc();
@@ -151,13 +168,13 @@ GLfloat			BoltSceneNode::BoltRenderNode::core[9][2];
 GLfloat			BoltSceneNode::BoltRenderNode::corona[8][2];
 const GLfloat		BoltSceneNode::BoltRenderNode::ring[8][2] = {
 				{ 1.0f, 0.0f },
-				{ M_SQRT1_2, M_SQRT1_2 },
+				{ (float)M_SQRT1_2, (float)M_SQRT1_2 },
 				{ 0.0f, 1.0f },
-				{ -M_SQRT1_2, M_SQRT1_2 },
+				{ (float)-M_SQRT1_2, (float)M_SQRT1_2 },
 				{ -1.0f, 0.0f },
-				{ -M_SQRT1_2, -M_SQRT1_2 },
+				{ (float)-M_SQRT1_2, (float)-M_SQRT1_2 },
 				{ 0.0f, -1.0f },
-				{ M_SQRT1_2, -M_SQRT1_2 }
+				{ (float)M_SQRT1_2, (float)-M_SQRT1_2 }
 			};
 
 BoltSceneNode::BoltRenderNode::BoltRenderNode(
@@ -178,6 +195,12 @@ BoltSceneNode::BoltRenderNode::BoltRenderNode(
       corona[i][1] = ring[i][1];
     }
   }
+
+  textureColor[0] = 1.0f;
+  textureColor[1] = 1.0f;
+  textureColor[2] = 1.0f;
+  textureColor[3] = 1.0f;
+
   setAnimation(1, 1);
 }
 
@@ -200,32 +223,42 @@ void			BoltSceneNode::BoltRenderNode::setAnimation(
   v = index / cu;
   if (v >= cv) v = 0;
 }
+void			BoltSceneNode::BoltRenderNode::setTextureColor(const GLfloat* rgba)
+{
+  textureColor[0] = rgba[0];
+  textureColor[1] = rgba[1];
+  textureColor[2] = rgba[2];
+  textureColor[3] = rgba[3];
+}
+
 
 void			BoltSceneNode::BoltRenderNode::setColor(
-				const GLfloat* rgb)
+				const GLfloat* rgba)
 {
-  mainColor[0] = rgb[0];
-  mainColor[1] = rgb[1];
-  mainColor[2] = rgb[2];
+  mainColor[0] = rgba[0];
+  mainColor[1] = rgba[1];
+  mainColor[2] = rgba[2];
+  mainColor[3] = rgba[3];
 
   innerColor[0] = mainColor[0] + 0.5f * (1.0f - mainColor[0]);
   innerColor[1] = mainColor[1] + 0.5f * (1.0f - mainColor[1]);
   innerColor[2] = mainColor[2] + 0.5f * (1.0f - mainColor[2]);
+  innerColor[3] = rgba[3];
 
   outerColor[0] = mainColor[0];
   outerColor[1] = mainColor[1];
   outerColor[2] = mainColor[2];
-  outerColor[3] = 0.1f;
+  outerColor[3] = (rgba[3] == 1.0f )? 0.1f: rgba[3];
 
   coronaColor[0] = mainColor[0];
   coronaColor[1] = mainColor[1];
   coronaColor[2] = mainColor[2];
-  coronaColor[3] = 0.5f;
+  coronaColor[3] = (rgba[3] == 1.0f )? 0.5f : rgba[3];
 
   flareColor[0] = mainColor[0];
   flareColor[1] = mainColor[1];
   flareColor[2] = mainColor[2];
-  flareColor[3] = 0.667f;
+  flareColor[3] = (rgba[3] == 1.0f )? 0.667f : rgba[3];
 }
 
 void			BoltSceneNode::BoltRenderNode::render()
@@ -236,23 +269,23 @@ void			BoltSceneNode::BoltRenderNode::render()
   const GLfloat* sphere = sceneNode->getSphere();
   glPushMatrix();
     glTranslatef(sphere[0], sphere[1], sphere[2]);
-    SceneRenderer::getInstance()->getViewFrustum().executeBillboard();
+    RENDERER.getViewFrustum().executeBillboard();
     glScalef(sceneNode->size, sceneNode->size, sceneNode->size);
 
     // draw some flares
     if (sceneNode->drawFlares) {
-      if (!SceneRenderer::getInstance()->isSameFrame()) {
+      if (!RENDERER.isSameFrame()) {
 	numFlares = 3 + int(3.0f * (float)bzfrand());
 	for (int i = 0; i < numFlares; i++) {
-	  theta[i] = 2.0f * M_PI * (float)bzfrand();
+	  theta[i] = (float)(2.0 * M_PI * bzfrand());
 	  phi[i] = (float)bzfrand() - 0.5f;
-	  phi[i] *= 2.0f * M_PI * fabsf(phi[i]);
+	  phi[i] *= (float)(2.0 * M_PI * fabsf(phi[i]));
 	}
       }
 
       if (sceneNode->texturing) glDisable(GL_TEXTURE_2D);
       myColor4fv(flareColor);
-      if (!sceneNode->blending) myStipple(flareColor[3]);
+      if (!BZDBCache::blend) myStipple(flareColor[3]);
       glBegin(GL_QUADS);
       for (int i = 0; i < numFlares; i++) {
 	// pick random direction in 3-space.  picking a random theta with
@@ -270,11 +303,13 @@ void			BoltSceneNode::BoltRenderNode::render()
       }
       glEnd();
       if (sceneNode->texturing) glEnable(GL_TEXTURE_2D);
+
+      addTriangleCount(numFlares * 2);
     }
 
     if (sceneNode->texturing) {
       // draw billboard square
-      myColor3f(1.0f, 1.0f, 1.0f);
+      myColor4fv(textureColor); // 1.0f all
       glBegin(GL_QUADS);
       glTexCoord2f(   u0,    v0);
       glVertex2f  (-1.0f, -1.0f);
@@ -285,54 +320,55 @@ void			BoltSceneNode::BoltRenderNode::render()
       glTexCoord2f(   u0, dv+v0);
       glVertex2f  (-1.0f,  1.0f);
       glEnd();
+      addTriangleCount(2);
     }
 
-    else if (sceneNode->blending) {
+    else if (BZDBCache::blend) {
       // draw corona
       glBegin(GL_QUAD_STRIP);
-      myColor3fv(mainColor);
+      myColor4fv(mainColor);
       glVertex2fv(core[1]);
       myColor4fv(outerColor);
       glVertex2fv(corona[0]);
-      myColor3fv(mainColor);
+      myColor4fv(mainColor);
       glVertex2fv(core[2]);
       myColor4fv(outerColor);
       glVertex2fv(corona[1]);
-      myColor3fv(mainColor);
+      myColor4fv(mainColor);
       glVertex2fv(core[3]);
       myColor4fv(outerColor);
       glVertex2fv(corona[2]);
-      myColor3fv(mainColor);
+      myColor4fv(mainColor);
       glVertex2fv(core[4]);
       myColor4fv(outerColor);
       glVertex2fv(corona[3]);
-      myColor3fv(mainColor);
+      myColor4fv(mainColor);
       glVertex2fv(core[5]);
       myColor4fv(outerColor);
       glVertex2fv(corona[4]);
-      myColor3fv(mainColor);
+      myColor4fv(mainColor);
       glVertex2fv(core[6]);
       myColor4fv(outerColor);
       glVertex2fv(corona[5]);
-      myColor3fv(mainColor);
+      myColor4fv(mainColor);
       glVertex2fv(core[7]);
       myColor4fv(outerColor);
       glVertex2fv(corona[6]);
-      myColor3fv(mainColor);
+      myColor4fv(mainColor);
       glVertex2fv(core[8]);
       myColor4fv(outerColor);
       glVertex2fv(corona[7]);
-      myColor3fv(mainColor);
+      myColor4fv(mainColor);
       glVertex2fv(core[1]);
       myColor4fv(outerColor);
       glVertex2fv(corona[0]);
-      glEnd();
+      glEnd(); // 18 verts -> 16 tris
 
       // draw core
       glBegin(GL_TRIANGLE_FAN);
-      myColor3fv(innerColor);
+      myColor4fv(innerColor);
       glVertex2fv(core[0]);
-      myColor3fv(mainColor);
+      myColor4fv(mainColor);
       glVertex2fv(core[1]);
       glVertex2fv(core[2]);
       glVertex2fv(core[3]);
@@ -342,12 +378,14 @@ void			BoltSceneNode::BoltRenderNode::render()
       glVertex2fv(core[7]);
       glVertex2fv(core[8]);
       glVertex2fv(core[1]);
-      glEnd();
+      glEnd(); // 10 verts -> 8 tris
+
+      addTriangleCount(24);
     }
 
     else {
       // draw corona
-      myColor3fv(coronaColor);
+      myColor4fv(coronaColor);
       myStipple(coronaColor[3]);
       glBegin(GL_QUAD_STRIP);
       glVertex2fv(core[1]);
@@ -368,14 +406,14 @@ void			BoltSceneNode::BoltRenderNode::render()
       glVertex2fv(corona[7]);
       glVertex2fv(core[1]);
       glVertex2fv(corona[0]);
-      glEnd();
+      glEnd(); // 18 verts -> 16 tris
 
       // draw core
       myStipple(1.0f);
       glBegin(GL_TRIANGLE_FAN);
-      myColor3fv(innerColor);
+      myColor4fv(innerColor);
       glVertex2fv(core[0]);
-      myColor3fv(mainColor);
+      myColor4fv(mainColor);
       glVertex2fv(core[1]);
       glVertex2fv(core[2]);
       glVertex2fv(core[3]);
@@ -385,14 +423,16 @@ void			BoltSceneNode::BoltRenderNode::render()
       glVertex2fv(core[7]);
       glVertex2fv(core[8]);
       glVertex2fv(core[1]);
-      glEnd();
+      glEnd(); // 10 verts -> 8 tris
 
       myStipple(0.5f);
+
+      addTriangleCount(24);
     }
 
   glPopMatrix();
 
-  if (SceneRenderer::getInstance()->isLastFrame()) {
+  if (RENDERER.isLastFrame()) {
     if (++u == cu) {
       u = 0;
       if (++v == cv) v = 0;

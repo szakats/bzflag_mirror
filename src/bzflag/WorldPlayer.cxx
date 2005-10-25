@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,10 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
-#include "global.h"
+// interface header
 #include "WorldPlayer.h"
 
 WorldPlayer::WorldPlayer() :
@@ -45,17 +44,18 @@ void			WorldPlayer::addShot(const FiringInfo& info)
 
 ShotPath*		WorldPlayer::getShot(int index) const
 {
+  if ((index & 255) >= (int)shots.size()) return NULL;
   return shots[index & 255];
 }
 
 bool			WorldPlayer::doEndShot(
-				int id, bool isHit, float* pos)
+				int ident, bool isHit, float* pos)
 {
-  const int index = id & 255;
-  const int salt = (id >> 8) & 127;
+  const int index = ident & 255;
+  const int salt = (ident >> 8) & 127;
 
   // special id used in some messages (and really shouldn't be sent here)
-  if (id == -1)
+  if (ident == -1)
     return false;
 
   // ignore bogus shots (those with a bad index or for shots that don't exist)

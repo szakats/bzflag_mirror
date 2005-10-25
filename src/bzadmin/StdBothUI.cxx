@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,23 +7,24 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _WIN32
-#pragma warning( 4: 4786)
-#endif
+/* interface header */
+#include "StdBothUI.h"
+
+/* system implementation headers */
 #include <iostream>
+
 #ifdef _WIN32
-#include <stdlib.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <wincon.h>
+#  include <stdlib.h>
+#  include <wincon.h>
 #else
-#include <sys/select.h>
+#  include <sys/types.h>
+#  include <sys/select.h>
 #endif
 
-#include "StdBothUI.h"
+/* implementation headers */
 #include "global.h"
 
 #ifdef _WIN32
@@ -47,8 +48,7 @@ unsigned long __stdcall winInput(void *that)
 // add this UI to the map
 UIAdder StdBothUI::uiAdder("stdboth", &StdBothUI::creator);
 
-StdBothUI::StdBothUI()
-{
+StdBothUI::StdBothUI(BZAdminClient& c) : BZAdminUI(c), atEOF(false) {
 #ifdef _WIN32
   unsigned long tid;
   console = GetStdHandle(STD_INPUT_HANDLE);
@@ -59,7 +59,7 @@ StdBothUI::StdBothUI()
 #endif
 }
 
-void StdBothUI::outputMessage(const std::string& msg) {
+void StdBothUI::outputMessage(const std::string& msg, ColorCode) {
   std::cout<<msg<<std::endl;
 }
 
@@ -85,17 +85,27 @@ bool StdBothUI::checkCommand(std::string& str) {
 #else
 
 bool StdBothUI::checkCommand(std::string& str) {
+  // if we read EOF last time, quit now
+  if (atEOF) {
+    str = "/quit";
+    return true;
+  }
+
   static char buffer[MessageLen + 1];
   static int pos = 0;
 
   fd_set rfds;
   timeval tv;
   FD_ZERO(&rfds);
-  FD_SET(0, &rfds);
+  FD_SET((unsigned int)0, &rfds);
   tv.tv_sec = 0;
   tv.tv_usec = 0;
   if (select(1, &rfds, NULL, NULL, &tv) > 0) {
-    read(0, &buffer[pos], 1);
+    if (read(0, &buffer[pos], 1) == 0) {
+      // select says we have data, but there's nothing to read - assume EOF
+      buffer[pos] = '\n';
+      atEOF = true;
+    }
     if (buffer[pos] == '\n' || pos == MessageLen - 1) {
       buffer[pos] = '\0';
       str = buffer;
@@ -112,8 +122,8 @@ bool StdBothUI::checkCommand(std::string& str) {
 #endif
 
 
-BZAdminUI* StdBothUI::creator(const std::map<PlayerId, std::string>&, PlayerId) {
-  return new StdBothUI();
+BZAdminUI* StdBothUI::creator(BZAdminClient& client) {
+  return new StdBothUI(client);
 }
 
 // Local Variables: ***

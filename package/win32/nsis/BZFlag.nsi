@@ -3,22 +3,22 @@
 ; This script is based on example1.nsi, but adds uninstall support
 ; and (optionally) start menu shortcuts.
 ;
-; It will install notepad.exe into a directory that the user selects,
+; It will install BZFlag into a directory that the user selects.
 ;
 
-!define VER_MAJOR 1.10
-!define VER_MINOR .2
+!define VER_MAJOR 2.0
+!define VER_MINOR .5b2
 
 ; Main Installer Options
 Name "BZFlag"
-Icon ..\..\..\win32\bzflag.ico
+;Icon ..\..\..\win32\bzflag.ico
 WindowIcon On
-EnabledBitmap "EnableCheck.bmp"
-DisabledBitmap "DisableCheck.bmp"
+;EnabledBitmap "EnableCheck.bmp"
+;DisabledBitmap "DisableCheck.bmp"
 Caption "BZFlag ${VER_MAJOR}${VER_MINOR}: - Setup"
 
 ; The file to write
-OutFile "..\..\..\dist\bzflag${VER_MAJOR}${VER_MINOR}.exe"
+OutFile "..\..\..\dist\bzflag-${VER_MAJOR}${VER_MINOR}.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\BZFlag${VER_MAJOR}${VER_MINOR}
@@ -37,7 +37,7 @@ ComponentText "This will install the BZFlag ${VER_MAJOR}${VER_MINOR} game and se
 ; The text to prompt the user to enter a directory
 DirText "Please choose a directory to install into:"
 
-CompletedText " Thank you for installing BZFlag ${VER_MAJOR}${VER_MINOR}."
+CompletedText "Thank you for installing BZFlag ${VER_MAJOR}${VER_MINOR}."
 ; The stuff to install
 
 Section "BZFlag (required)"
@@ -47,6 +47,20 @@ Section "BZFlag (required)"
 	File ..\..\..\src\bzflag\bzflag.exe
 	File ..\..\..\src\bzadmin\bzadmin.exe
 	File ..\..\..\src\bzfs\bzfs.exe
+	File ..\..\..\libcurl.dll
+	File ..\..\..\curses.dll
+	File ..\..\..\zlibwapi.dll
+	File ..\..\..\plugins\*.dll
+
+	; See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_crt_c_run.2d.time_libraries.asp
+	; "An application should use and redistribute msvcr71.dll [and msvcp71.dll], and it should avoid placing a copy or using an existing copy of msvcr71.dll in the system directory. Instead, the application should keep a copy of msvcr71.dll [and msvcp71.dll] in its application directory with the program executable."
+	File ..\..\..\msvcr71.dll
+	File ..\..\..\msvcp71.dll
+
+
+	SetOutPath $INSTDIR\API
+	File ..\..\..\src\bzfs\bzfs.lib
+	File ..\..\..\include\bzfsAPI.h
 
 	; make the data dir
 	SetOutPath $INSTDIR\data
@@ -59,17 +73,25 @@ Section "BZFlag (required)"
 	SetOutPath $INSTDIR\data\l10n
 	File ..\..\..\data\l10n\*.*
 
+	; make the fonts dir
+	SetOutPath $INSTDIR\data\fonts
+	File ..\..\..\data\fonts\*.*
+
 	; make the doc dir
 	SetOutPath $INSTDIR\doc
 	File ..\..\..\doc\*.*
 	File ..\ReadMe.win32.html
 	File ..\..\..\COPYING
 
+	; make the plugin docs dir
+	SetOutPath $INSTDIR\doc\plugin
+	File ..\..\..\plugins\doc\*.*
+
 	; Write the installation path into the registry
 	WriteRegStr HKLM SOFTWARE\BZFlag "Install_Dir" "$INSTDIR"
 
 	; Write the uninstall keys for Windows
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZFlag${VER_MAJOR}${VER_MINOR}" "DisplayName" "BZFlag(remove only)"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZFlag${VER_MAJOR}${VER_MINOR}" "DisplayName" "BZFlag${VER_MAJOR}${VER_MINOR} (remove only)"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZFlag${VER_MAJOR}${VER_MINOR}" "UninstallString" '"$INSTDIR\uninstall.exe"'
 	WriteUninstaller "uninstall.exe"
 SectionEnd
@@ -119,15 +141,22 @@ UninstallText "This will uninstall BZFlag. Please hit next to continue with the 
 Section "Uninstall"
 	; remove registry keys
 
-	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZFlag"
-	DeleteRegKey HKLM SOFTWARE\BZFlag
+	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZFlag${VER_MAJOR}${VER_MINOR}"
+	DeleteRegKey HKLM "Software\BZFlag${VER_MAJOR}${VER_MINOR}"
 	; remove files
 
 	Delete $INSTDIR\bzflag.exe
 	Delete $INSTDIR\bzfs.exe
 	Delete $INSTDIR\bzadmin.exe
+	Delete $INSTDIR\doc\plugin\*.*
 	Delete $INSTDIR\doc\*.*
+	Delete $INSTDIR\data\fonts\*.*
 	Delete $INSTDIR\data\*.*
+	Delete $INSTDIR\data\l10n\*.*
+	Delete $INSTDIR\API\*.*
+
+	; This nails libcurl, the msvcrts, and any plugins
+	Delete $INSTDIR\*.dll
 
 	; MUST REMOVE UNINSTALLER, too
 	Delete $INSTDIR\uninstall.exe
@@ -142,8 +171,11 @@ Section "Uninstall"
 	RMDir "$SMPROGRAMS\BZFlag${VER_MAJOR}${VER_MINOR}\Server"
 	RMDir "$SMPROGRAMS\BZFlag${VER_MAJOR}${VER_MINOR}\Doc"
 	RMDir "$SMPROGRAMS\BZFlag${VER_MAJOR}${VER_MINOR}"
+	RMDir "$INSTDIR\data\l10n"
+	RMDir "$INSTDIR\data\fonts"
 	RMDir "$INSTDIR\data"
 	RMDir "$INSTDIR\doc"
+	RMDir "$INSTDIR\API"
 	RMDir "$INSTDIR"
 SectionEnd
 

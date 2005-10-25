@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,32 +7,25 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef CURSESUI_H
 #define CURSESUI_H
 
+/* bzflag special common - 1st one */
+#include "common.h"
+
 #include <iostream>
 #include <map>
 #include <string>
-
-#include "config.h"
-
-// which curses?
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#else
-#ifdef HAVE_NCURSES_H
-#include <ncurses.h>
-#else
-#include "pdcurses_adapter.h"
-#endif
-#endif
+#include <utility>
 
 #include "Address.h"
 #include "AutoCompleter.h"
 #include "BZAdminUI.h"
+#include "curses_wrapper.h"
+#include "CursesMenu.h"
 #include "global.h"
 #include "UIMap.h"
 
@@ -45,14 +38,17 @@ protected:
 
   /** The parameters to this constructor are a map of all players and the
       local player's PlayerId. */
-  CursesUI(const std::map<PlayerId, std::string>& p, PlayerId m);
+  CursesUI(BZAdminClient& c);
 
 public:
 
   ~CursesUI();
 
   /** This function prints a message in the main window. */
-  virtual void outputMessage(const std::string& msg);
+  virtual void outputMessage(const std::string& msg, ColorCode color);
+
+  /** This function is called by the client when a new packet has arrived. */
+  virtual void handleNewPacket(uint16_t msgType);
 
   /** See if the user has entered a command, if it has, store it in str and
       return true. */
@@ -70,13 +66,22 @@ public:
 
   /** This function returns a pointer to a dynamically allocated
       CursesUI object. */
-  static BZAdminUI* creator(const std::map<PlayerId, std::string>& players, PlayerId me);
+  static BZAdminUI* creator(BZAdminClient& client);
 
 protected:
 
   /** This function moves and resizes the windows when the terminal has been
       resized. */
   void handleResize(int lines, int cols);
+
+  /** All messages that are written in the main window are saved in a buffer.
+      This function updates the main window with the contents of that buffer.
+      It is useful to do this when the window has been resized (because
+      the terminal has been resized, or because the menu has been toggled).
+      @param numberOfMessages The last @c numberOfMessages messages from the
+			      buffer will be written to the window.
+  */
+  void updateMainWinFromBuffer(unsigned int numberOfMessages);
 
   /** This function redraws the target window (the line that says who you are
       talking to). */
@@ -86,17 +91,52 @@ protected:
       messages). */
   void updateCmdWin();
 
+  /** This function toggles the visibility of the menu window. */
+  void toggleMenu();
+
+  /** This function sets the menu to the main menu. */
+  static void initMainMenu(CursesMenu& menu);
+
+  /** This function sets the menu to the player menu. */
+  static void initPlayerMenu(CursesMenu& menu);
+
+  /** This function sets the menu to the ban menu. */
+  static void initBanMenu(CursesMenu& menu);
+
+  /** This function sets the menu to the "Set server variables" submenu. */
+  static void initServerVarMenu(CursesMenu& menu);
+
+  /** Add a single BZDBCMItem to the menu. */
+  static void addBZDBCMItem(const std::string& name, void* menu);
+
+  /** This function sets the menu to the filter menu. */
+  static void initFilterMenu(CursesMenu& menu);
+
   WINDOW* mainWin;
   WINDOW* targetWin;
   WINDOW* cmdWin;
+  WINDOW* menuWin;
+
+  enum {
+    NoMenu,
+    VisibleActive,
+    VisibleInactive
+  } menuState;
+  CursesMenu menu;
+
+  BZAdminClient& client;
   std::string cmd;
-  const std::map<PlayerId, std::string>& players;
-  std::map<PlayerId, std::string>::const_iterator targetIter;
+  const PlayerIdMap& players;
+  PlayerIdMap additionalTargets;
+  PlayerIdMap::const_iterator targetIter;
   PlayerId me;
-  AutoCompleter comp;
+  DefaultCompleter comp;
   std::vector<std::string> history;
   unsigned int maxHistory;
   unsigned int currentHistory;
+  std::vector<std::pair<std::string, ColorCode> > msgBuffer;
+  unsigned int maxBufferSize;
+  unsigned int scrollOffset;
 
   static UIAdder uiAdder;
 };

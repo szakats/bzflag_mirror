@@ -31,7 +31,6 @@ process_line();
 char *
 get_token(char *inp, char *buf)
 {
-  char *obuf = buf;
   int quoted = 0;
   /* skip whitespace */
   while (*inp && isspace(*inp))
@@ -297,13 +296,14 @@ clean(char *cp)
   strcpy(ocp, foo);
 }
 
-un_bi()
+int un_bi()
 {
   if (current_BI)
   {
     printf("</%c>", current_BI);
     current_BI = 0;
   }
+  return 0;
 }
 
 int
@@ -498,7 +498,7 @@ process_line()
       need_undl = 0;
     }
     printf("\n</ul><H2>");
-    while (cp = get_token(cp, token))
+    while ((cp = get_token(cp, token)))
     {
       got_token = 1;
       clean(token);
@@ -622,7 +622,7 @@ process_line()
 }
 
 
-main()
+int main()
 {
   while (process_line());
   printf("</ul>\n<!--#exec cmd=\"trailer\" -->\n");

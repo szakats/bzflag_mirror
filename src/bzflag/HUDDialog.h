@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,26 +7,30 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/*
- * HUDDialog:
- *	A dialog of HUDuiControls.
- */
+#ifndef	__HUDDIALOG_H__
+#define	__HUDDIALOG_H__
 
-#ifndef	BZF_HUDDIALOG_H
-#define	BZF_HUDDIALOG_H
-
+/* common */
 #include "common.h"
-#include "HUDui.h"
 
-#if defined(_WIN32)
+#if defined(_MSC_VER)
 	#pragma warning(disable: 4786)
 #endif
 
+/* system headers */
 #include <vector>
 
+/* local interface headers */
+class HUDuiControl;
+class HUDuiDefaultKey;
+
+/**
+ * HUDDialog:
+ *	A dialog of HUDuiControls.
+ */
 class HUDDialog {
   public:
 			HUDDialog();
@@ -39,6 +43,7 @@ class HUDDialog {
     virtual void		execute() = 0;
     virtual void		dismiss() { }
     virtual void		resize(int _width, int _height);
+    virtual void		setFailedMessage(const char *) {;};
 
     HUDuiControl*		getFocus() const;
     void			setFocus(HUDuiControl*);
@@ -62,29 +67,8 @@ class HUDDialog {
     HUDuiControl*		focus;
 };
 
-class HUDDialogStack {
-  public:
-    static HUDDialogStack*	get();
 
-    bool		isActive() const;
-    HUDDialog*		top() const;
-    void		push(HUDDialog*);
-    void		pop();
-
-    void		render();
-
-			HUDDialogStack();
-			~HUDDialogStack();
-
-  private:
-    static void		resize(void*);
-
-  private:
-    std::vector<HUDDialog*>	stack;
-    static HUDDialogStack globalStack;
-};
-
-#endif /* BZF_HUDDIALOG_H */
+#endif /* __HUDDIALOG_H__ */
 
 // Local Variables: ***
 // mode:C++ ***

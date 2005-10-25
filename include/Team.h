@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -20,6 +20,7 @@
 
 #include "common.h"
 #include "global.h"
+#include <string>
 
 const int		TeamPLen = 10;
 
@@ -30,12 +31,14 @@ struct Team {
     void*		pack(void*) const;
     void*		unpack(void*);
 
-  static const char*	getName(TeamColor); // const
-  static const float*	getTankColor(TeamColor); // const
-  static const float*	getRadarColor(TeamColor); // const
-  static bool	isColorTeam(TeamColor); // const
+    static const std::string  getImagePrefix(TeamColor); // const
+    static const char*	getName(TeamColor); // const
+    static const TeamColor	getTeam(const std::string name); // const
+    static const float*	getTankColor(TeamColor); // const
+    static const float*	getRadarColor(TeamColor team, bool rabbitMode = false); // const
+    static bool	isColorTeam(TeamColor); // const
 
-    static void		setColors(TeamColor,
+  static void		setColors(TeamColor,
 				const float* tank,
 				const float* radar);
 
@@ -46,6 +49,8 @@ struct Team {
 
     static float	tankColor[NumTeams][3];
     static float	radarColor[NumTeams][3];
+
+	static float	hunterRadarColor[3];
 };
 
 #endif // BZF_TEAM_H

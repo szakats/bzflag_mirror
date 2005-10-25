@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* BaseResources:
@@ -17,13 +17,10 @@
 #ifndef BZF_BASE_RESOURCES_H
 #define	BZF_BASE_RESOURCES_H
 
-#ifdef _WIN32
-#pragma warning( 4: 4786 )
-#endif
-
 #include "common.h"
-#include <string>
+
 #include <vector>
+#include <string>
 
 class std::ostream;
 

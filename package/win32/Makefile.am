@@ -1,13 +1,8 @@
-SUBDIRS = include nsis src
+SUBDIRS = nsis
 
 EXTRA_DIST =	\
-	bzfinst.dsp	\
-	bzflag.spc	\
-	bzfuinst.dsp	\
-	install.dsw	\
-	makedb.dsp	\
-	README.win32.html	\
-	runmakedb.dsp
+	README.win32.html\
+	installer_2.0.nsi
 
 MAINTAINERCLEANFILES = \
 	Makefile.in

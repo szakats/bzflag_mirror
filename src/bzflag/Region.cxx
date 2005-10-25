@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,16 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <math.h>
-#include "common.h"
+/* interface header */
 #include "Region.h"
 
-//
-// RegionPoint
-//
+/* system implementation headers */
+#include <math.h>
+#include <vector>
+
 
 RegionPoint::RegionPoint(float x, float y)
 {
@@ -35,7 +35,7 @@ RegionPoint::~RegionPoint()
   // do nothing
 }
 
-const float*		RegionPoint::get() const
+const float* RegionPoint::get() const
 {
   return p;
 }
@@ -53,7 +53,7 @@ BzfRegion::BzfRegion() : mailbox(0), target(0), A(0.0, 0.0)
 }
 
 BzfRegion::BzfRegion(int sides, const float p[][2]) :
-				mailbox(0), target(0), A(0.0, 0.0)
+  mailbox(0), target(0), A(0.0, 0.0)
 {
   for (int i = 0; i < sides; i++) {
     corners.push_back(RegionPoint(p[i]));
@@ -70,7 +70,7 @@ BzfRegion::~BzfRegion()
       neighbors[i]->setNeighbor(this, 0);
 }
 
-bool			BzfRegion::isInside(const float p[2]) const
+bool BzfRegion::isInside(const float p[2]) const
 {
   // see if testPoint is inside my edges
   const int count = corners.size();
@@ -88,15 +88,14 @@ bool			BzfRegion::isInside(const float p[2]) const
     else {
       float tolerance = (p1[1] < p2[1]) ? -0.001f : 0.001f;
       if ((p[1] - p1[1]) * (p2[0] - p1[0]) / (p2[1] - p1[1]) >=
-						p[0] - p1[0] + tolerance)
+	  p[0] - p1[0] + tolerance)
 	inside = !inside;
     }
   }
   return inside;
 }
 
-float			BzfRegion::getDistance(const float p[2],
-					       float nearest[2]) const
+float BzfRegion::getDistance(const float p[2], float nearest[2]) const
 {
   const int count = corners.size();
   float currentDistance = maxDistance;
@@ -105,11 +104,11 @@ float			BzfRegion::getDistance(const float p[2],
   //compute distance from any edge
   const float* p1 = corners[count - 1].get();
   const float* p2 = NULL;
-  float        d[2];
-  float        m[2];
-  float        t;
-  float        edgeSquareDist;
-  float        x, y;
+  float	d[2];
+  float	m[2];
+  float	t;
+  float	edgeSquareDist;
+  float	x, y;
   for (int c = 0; c < count; c++) {
     p2   = corners[c].get();
     d[0] = p2[0] - p1[0];
@@ -141,8 +140,7 @@ float			BzfRegion::getDistance(const float p[2],
   return currentDistance;
 }
 
-int			BzfRegion::classify(const float e1[2],
-						const float e2[2]) const
+int BzfRegion::classify(const float e1[2], const float e2[2]) const
 {
   // return true if all points lie to right side of edge
   const float dx = e2[0] - e1[0];
@@ -161,23 +159,22 @@ int			BzfRegion::classify(const float e1[2],
   return -1;					// all to left
 }
 
-int			BzfRegion::getNumSides() const
+int BzfRegion::getNumSides() const
 {
   return neighbors.size();
 }
 
-const RegionPoint&	BzfRegion::getCorner(int index) const
+const RegionPoint& BzfRegion::getCorner(int index) const
 {
   return corners[index];
 }
 
-BzfRegion*		BzfRegion::getNeighbor(int index) const
+BzfRegion* BzfRegion::getNeighbor(int index) const
 {
   return neighbors[index];
 }
 
-BzfRegion*		BzfRegion::orphanSplitRegion(const float e1[2],
-						const float e2[2])
+BzfRegion* BzfRegion::orphanSplitRegion(const float e1[2], const float e2[2])
 {
   // if edge p1,p2 intersects me then split myself along that edge.
   // return new region (the other half of the split), or NULL if no
@@ -221,13 +218,13 @@ BzfRegion*		BzfRegion::orphanSplitRegion(const float e1[2],
 
   // done if no intersections
   if (split != 2 ||
-	(etsplit[0] <= 0.0 && etsplit[1] <= 0.0) ||
-	(etsplit[0] >= 1.0 && etsplit[1] >= 1.0))
+      (etsplit[0] <= 0.0 && etsplit[1] <= 0.0) ||
+      (etsplit[0] >= 1.0 && etsplit[1] >= 1.0))
     return 0;
 
   // corner is t the left of cutting edge -- new region between edge 1 and 0
   if (!fistCornerRight) {
-    int i = edge[0];
+    i = edge[0];
     edge[0] = edge[1];
     edge[1] = i;
     float tsplitTemp = tsplit[0];
@@ -239,11 +236,11 @@ BzfRegion*		BzfRegion::orphanSplitRegion(const float e1[2],
   p1 = corners[edge[1]].get();
   const float* p2 = corners[(edge[1]+1) % count].get();
   RegionPoint n2(p1[0] + tsplit[1] * (p2[0] - p1[0]),
-		p1[1] + tsplit[1] * (p2[1] - p1[1]));
+		 p1[1] + tsplit[1] * (p2[1] - p1[1]));
   p1 = corners[edge[0]].get();
   p2 = corners[(edge[0]+1) % count].get();
   RegionPoint n1(p1[0] + tsplit[0] * (p2[0] - p1[0]),
-		p1[1] + tsplit[0] * (p2[1] - p1[1]));
+		 p1[1] + tsplit[0] * (p2[1] - p1[1]));
   BzfRegion* newRegion = new BzfRegion;
 
   // add sides to new region and remove them from me.  the new region
@@ -302,10 +299,10 @@ BzfRegion*		BzfRegion::orphanSplitRegion(const float e1[2],
   return newRegion;
 }
 
-void			BzfRegion::splitEdge(const BzfRegion* oldNeighbor,
-						BzfRegion* newNeighbor,
-						const RegionPoint& p,
-						bool onRight)
+void BzfRegion::splitEdge(const BzfRegion* oldNeighbor,
+			  BzfRegion* newNeighbor,
+			  const RegionPoint& p,
+			  bool onRight)
 {
   // split my edge which has neighbor oldNeighbor at point p.
   // set the neighbor for the edge on the right if onRight is true
@@ -331,15 +328,14 @@ void			BzfRegion::splitEdge(const BzfRegion* oldNeighbor,
     }
 }
 
-void			BzfRegion::addSide(const RegionPoint& p,
-						BzfRegion* neighbor)
+void BzfRegion::addSide(const RegionPoint& p, BzfRegion* neighbor)
 {
   corners.push_back(p);
   neighbors.push_back(neighbor);
 }
 
-void			BzfRegion::setNeighbor(const BzfRegion* oldNeighbor,
-						BzfRegion* newNeighbor)
+void BzfRegion::setNeighbor(const BzfRegion* oldNeighbor,
+			    BzfRegion* newNeighbor)
 {
   const int count = corners.size();
   for (int i = 0; i < count; i++)
@@ -349,14 +345,14 @@ void			BzfRegion::setNeighbor(const BzfRegion* oldNeighbor,
     }
 }
 
-void			BzfRegion::tidy()
+void BzfRegion::tidy()
 {
   // throw out degenerate edges
   int count = corners.size();
   for (int i = 0; i < count; i++) {
     const float* p1 = corners[i].get();
     const float* p2 = corners[(i+1)%count].get();
-    if (fabs(p1[0] - p2[0]) < 1.0e-5 && fabs(p1[1] - p2[1]) < 1.0e-5) {
+    if (fabs(p1[0] - p2[0]) < ZERO_TOLERANCE && fabs(p1[1] - p2[1]) < ZERO_TOLERANCE) {
       std::vector<RegionPoint>::iterator it1 = corners.begin();
       for(int j = 0; j < i; j++) it1++;
       corners.erase(it1);
@@ -369,14 +365,14 @@ void			BzfRegion::tidy()
   }
 }
 
-bool			BzfRegion::test(int mailboxIndex)
+bool BzfRegion::test(int mailboxIndex)
 {
   return (mailbox != mailboxIndex);
 }
 
-void			BzfRegion::setPathStuff(float _distance,
-					BzfRegion* _target,
-					const float _a[2], int mailboxIndex)
+void BzfRegion::setPathStuff(float _distance,
+			     BzfRegion* _target,
+			     const float _a[2], int mailboxIndex)
 {
   distance = _distance;
   target = _target;
@@ -384,86 +380,26 @@ void			BzfRegion::setPathStuff(float _distance,
   mailbox = mailboxIndex;
 }
 
-float			BzfRegion::getDistance() const
+float BzfRegion::getDistance() const
 {
   return distance;
 }
 
-BzfRegion*		BzfRegion::getTarget() const
+BzfRegion* BzfRegion::getTarget() const
 {
   return target;
 }
 
-const float*		BzfRegion::getA() const
+const float* BzfRegion::getA() const
 {
   return A.get();
 }
 
-//
-// RegionPriorityQueue
-//
-// FIXME -- use a heap
-
-RegionPriorityQueue::Node::Node(BzfRegion* _region, float _priority) :
-				next(0), region(_region), priority(_priority)
-{
-}
-
-RegionPriorityQueue::RegionPriorityQueue() : head(0)
-{
-}
-
-RegionPriorityQueue::~RegionPriorityQueue()
-{
-  removeAll();
-}
-
-void			RegionPriorityQueue::insert(BzfRegion* region,
-							float priority)
-{
-  Node* node = new Node(region, priority);
-  if (!head || priority < head->priority) {
-    node->next = head;
-    head = node;
-  }
-  else {
-    Node* scan = head;
-    while (scan->next && priority >= scan->next->priority)
-      scan = scan->next;
-    node->next = scan->next;
-    scan->next = node;
-  }
-}
-
-BzfRegion*		RegionPriorityQueue::remove()
-{
-  Node* tmp = head;
-  head = head->next;
-  BzfRegion* region = tmp->region;
-  delete tmp;
-  return region;
-}
-
-void			RegionPriorityQueue::removeAll()
-{
-  while (head) {
-    Node* next = head->next;
-    delete head;
-    head = next;
-  }
-  head = 0;
-}
-
-bool			RegionPriorityQueue::isEmpty() const
-{
-  return (head == 0);
-}
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

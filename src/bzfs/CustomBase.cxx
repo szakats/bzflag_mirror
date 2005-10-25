@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,71 +7,54 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _WIN32
-#pragma warning( 4: 4786 )
-#endif
-
-// class interface header
+/* interface header */
 #include "CustomBase.h"
 
-// bzfs-specific headers
-#include "CmdLineOptions.h"
+/* common implementation headers */
+#include "global.h" // for CtfTeams
+#include "BaseBuilding.h"
+#include "ObstacleMgr.h"
 
-// external dependancies
-extern const int CtfTeams;
-extern bool hasBase[];
-extern CmdLineOptions *clOptions;
-extern float basePos[][3];
-extern float baseRotation[];
-extern float baseSize[][3];
-extern float safetyBasePos[][3];
 
 CustomBase::CustomBase()
 {
   pos[0] = pos[1] = pos[2] = 0.0f;
   rotation = 0.0f;
-  size[0] = size[1] = BaseSize;
+  size[0] = size[1] = BZDB.eval(StateDatabase::BZDB_BASESIZE);
   color = 0;
+
+  triggerWorldWep = false;
+  worldWepType = "SW";
 }
 
 
 bool CustomBase::read(const char *cmd, std::istream& input) {
   if (strcmp(cmd, "color") == 0) {
     input >> color;
-    if ((color >= 0) && (color < CtfTeams)) {
-      hasBase[color] = true;
-    }
-    else
+    if ((color <= 0) || (color >= CtfTeams))
       return false;
-  }
-  else {
+  } else if (strcmp(cmd, "oncap") == 0) {
+    triggerWorldWep = true;
+    input >> worldWepType;
+  } else {
     if (!WorldFileObstacle::read(cmd, input))
       return false;
-    if(!clOptions->flagsOnBuildings && (pos[2] != 0)) {
-      printf("Dropping team base down to 0 because -fb not set\n");
-      pos[2] = 0;
-    }
   }
   return true;
 }
 
 
-void CustomBase::write(WorldInfo* world) const {
-  basePos[color][0] = pos[0];
-  basePos[color][1] = pos[1];
-  basePos[color][2] = pos[2];
-  baseRotation[color] = rotation;
-  baseSize[color][0] = size[0];
-  baseSize[color][1] = size[1];
-  baseSize[color][2] = size[2];
-  safetyBasePos[color][0] = 0;
-  safetyBasePos[color][1] = 0;
-  safetyBasePos[color][2] = 0;
-  world->addBase(pos[0], pos[1], pos[2], rotation, size[0], size[1], size[2],
-		 driveThrough, shootThrough);
+void CustomBase::writeToGroupDef(GroupDefinition *groupdef) const
+{
+  float absSize[3] = { fabsf(size[0]), fabsf(size[1]), fabsf(size[2]) };
+  BaseBuilding* base = new BaseBuilding(pos, rotation, absSize, color);
+  groupdef->addObstacle(base);
+
+  if (triggerWorldWep)
+    worldEventManager.addEvent(bz_eCaptureEvent,new WorldWeaponGlobalEventHandler(Flag::getDescFromAbbreviation(worldWepType.c_str()), pos, rotation, 0,(TeamColor)color));
 }
 
 // Local variables: ***

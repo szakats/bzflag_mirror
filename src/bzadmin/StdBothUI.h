@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,14 +7,18 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef STDBOTHUI_H
 #define STDBOTHUI_H
 
+/* interface headers */
 #include "BZAdminUI.h"
 #include "UIMap.h"
+
+
+class BZAdminClient;
 
 
 /** This interface is a combination of StdInUI and StdOutUI. It reads commands
@@ -24,17 +28,20 @@
     systems. It should work on most UNIX-like systems though. */
 class StdBothUI : public BZAdminUI {
 public:
-  StdBothUI();
-  virtual void outputMessage(const std::string& msg);
+  StdBothUI(BZAdminClient& c);
+  virtual void outputMessage(const std::string& msg, ColorCode color);
   virtual bool checkCommand(std::string& str);
 
   /** This function returns a pointer to a dynamically allocated
       StdBothUI object. */
-  static BZAdminUI* creator(const std::map<PlayerId, std::string>& players, PlayerId me);
+  static BZAdminUI* creator(BZAdminClient&);
 
  protected:
 
   static UIAdder uiAdder;
+
+  bool atEOF;
+
 #ifdef _WIN32
  public:
   HANDLE console;

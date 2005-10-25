@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet type="text/xsl" href="../doc.xsl"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
 "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
 <!--
- Copyright (c) 1993 - 2003 Tim Riker
+ Copyright (c) 1993 - 2005 Tim Riker
 
  This package is free software; you can redistribute it and/or modify
  it under the terms of the license found in the file named COPYING
@@ -10,7 +11,7 @@
 
  THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
  WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
- MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 -->
 ]>
 
@@ -56,10 +57,9 @@
     communication.</para>
 
     <para>BZFlag uses two distinct transport protocols to communicate
-    with the server and with other players. Server communication uses
-    TCP/IP for reliability. Player communication uses UDP multicast
-    for speed and efficiency. See the other pages for more
-    details.</para>
+    with the server. Server communication uses TCP/IP for reliability.
+    Live game data communication uses UDP for speed and efficiency.
+    See the other pages for more details.</para>
 
   </chapter>
 
@@ -112,11 +112,10 @@
     necessarily suffer from the same drawbacks.</para>
 
     <para>There are some instances where client/server communication
-    doesn't use TCP/IP. These all involve client attempts to locate
-    servers on the network. Clients send broadcast and multicast
-    `pings' which the servers listen for and respond to in kind. These
-    messages are not part of normal game communication, which all
-    takes place using TCP/IP.</para>
+    doesn't use TCP/IP. One example is client attempts to locate
+    servers on the network. Clients send broadcast `pings' which
+    the servers listen for and respond to in kind. These
+    messages are not part of normal game communication.</para>
 
   </chapter>
 
@@ -161,23 +160,10 @@
     only clients on the same subnet of the same local area network
     could play together.</para>
 
-    <para>And finally, the technique BZFlag actually uses, is
-    multicasting. Multicast is similar to broadcast in that a packet
-    is sent once and delivered to multiple computers. However,
-    multicast messages can be routed, and routed
-    efficiently. Multicast routers communicate with each other to
-    ensure that multicast traffic is only delivered to those subnets
-    with at least one computer interested in that traffic. Note that
-    multicast in a subnet is automatic, being equivalent to
-    broadcast.</para>
-
-    <para>Unfortunately, multicast routers aren't widespread yet. So
-    BZFlag must have a fallback. It uses the second technique, using
-    the server as a relay system. The server uses multicast as much as
-    possible, and uses the regular client/server connection to send
-    client traffic that can't be delivered via multicast. It would be
-    better to use UDP for this, but the client/server connection was
-    already there and I was lazy.</para>
+    <para>BZFlag uses the second technique, using the server as a
+    relay system. The server uses the TCP client/server connection to send
+    client traffic that must be reliable and UDP for information that
+    must be timely but does not need to be reliable.</para>
 
   </chapter>
 
@@ -186,33 +172,43 @@
 
     <title>Protocol</title>
 
-    <screen>
+    <para>
 
 This description is not up to date, most recent changes in code have not
 been reflected in here, for example the move to 1 byte playerids, changes to
 MsgMessage, MsgNewRabbit etc.
+</para>
+
+<para>
 
 BZFlag network protocol
 -----------------------
 [ This is a work in progress.  It is mostly done but still incomplete. ]
+</para>
+<screen>
 
 --&gt; means from client to server
 &lt;-- means from server to client
-
+</screen>
+<para>
 All multi-byte data is in network byte order (aka big endian);  that is, the most
 significant byte comes first followed by successively less significant bytes.
+</para>
+<para>
 
 All numbers are integers unless otherwise specified.  Integers can be 8, 16, or 32
 bit signed 2's compliment or unsigned (encoding is the same in regardless of signed
 status).  Values in this document in byte boxes are given in hexadecimal.  Values
 in the text are given in decimal unless otherwise noted.
-
+</para>
+<para>
 Bitfields are encoded as unsigned integers.
 
 All floating point numbers are in standard IEEE-754 single precision format.
 
 Multibyte values are *not* necessarily aligned on 2 or 4 byte boundaries.
-
+</para>
+<para>
 A client normally follows the following sequence during game play:
 
   connect to server
@@ -221,18 +217,24 @@ A client normally follows the following sequence during game play:
   send/receive game messages
   leave game
   disconnect from server
-
-
+</para>
+<para>
 common message structures
 -------------------------
 Most messages begin with the length of the message in bytes followed by a 16 bit code.
 The length is 16 bits and excludes itself and the code, so it's the actual length of
 the message minus 4.
+</para>
+<screen>
 
 Player identifiers are 1 byte and are used in many messages.
 
-
-	FIXME list "special" playerids
+          0 - 243 : Regular Players
+        244 - 250 : Special Team Ids
+        251 - 252 : Unused IDs
+              253 : ServerPlayer (World weapons, etc)
+              254 : All Players
+              255 : No Player (Invalid Player)
 
 Flag status is common to a few message types:
 
@@ -252,10 +254,12 @@ Flag status is common to a few message types:
 	float	flight time
 	float	flight end time
 	float	initial velocity
-
+</screen>
+<para>
 `Position,' `launch,' `landing,' `flight time,' `flight end,' and `initial velocity'
 are all floating point numbers.  `Flag id' is the type of flag,enumerated in FlagId.
-
+</para>
+<screen>
 `Status' gives the current location of the flag:
   FlagNoExist  -- the flag is not active (i.e. not in the game)
   FlagOnGround -- the flag is sitting on the ground ready to get picked up
@@ -263,59 +267,93 @@ are all floating point numbers.  `Flag id' is the type of flag,enumerated in Fla
   FlagInAir    -- the flag is in the air and will fall back down
   FlagComing   -- the flag just appeared and is falling to the ground
   FlagGoing    -- the flag was thrown in the air and is disappearing
-
+</screen>
+<para>
 `Type' indicates the behavior of the flag:  FlagNormal means the flag is permanent
 and can be dropped normally (e.g. a team flag);  FlagUnstable means the flag may
 disappear after use (e.g. a good super flag);  FlagSticky means the flag cannot be
 dropped normally (e.g. a bad super flag).
-
+</para>
+<para>
 `Player id' indicates which player has the flag when `status' is FlagOnTank.  It
 isn't used for any other status.
-
+</para>
+<para>
 `Position' is the location of the flag on the ground.  It only has meaning when
 `status' is FlagOnGround.  The position of a flag when on a tank is the position
 of the tank (centered on and at the top of the tank)
-
+</para>
+<para>
 `Launch' is the location of the flag where it was thrown in the air.  `Landing' is
 the location where the flag will/would touch ground.  These are used when `status'
 is FlagInAir, FlagComing, and FlagGoing.  The client should make the flag follow a
 reasonable flight path (e.g. a parabolic arc) from `launch' to `landing.'
-
+</para>
+<para>
 `Flight time' is the time elapsed since the flag was thrown into the air.  `Flight
 end' the time when the flag will reach the ground.  `Initial velocity' gives the
 vertical (z) velocity of the flag when lanuched.  The vertical position of the flag
 at time t (ranging from 0 to `flight end') is:  z = z0 + v * t + 0.5 * g * t * t.
 z0 = `launch z;' v = `initial velocity;'  g = acceleration due to gravity.
-
+</para>
+<screen>
 
 connect to server
 -----------------
   --&gt;   connect(server port)
-  &lt;--   +----+----+----+----+----+----+----+----+
-	| 42 | 5a | 46 | 53 | 31 | 30 | 37 | 62 |       BZFS107b        version
-	+----+----+----+----+----+----+----+----+
-	|   port  |
-	+----+----+
-  -->   close
-  -->   connect(port)
+  &lt;--   +----+----+----+----+----+----+----+----+----+
+	| 42 | 5a | 46 | 53 | 31 | 39 | 31 | 30 | FF |     BZFS1910        FF
+	+----+----+----+----+----+----+----+----+----+
 
-
+</screen>
+<para>
 Client should verify the version.  The first four bytes indicates a BZFlag server,
 the next byte indicates the major version number (as an ascii digit), the two bytes
-after that are the minor version number (as ascii digits), and the 8th byte is the
+after that are the minor version number (as ascii digits), and the 7th byte is the
 revision.  Major and minor version number changes indicate incompatible protocol
 changes.  Different revisions of a given version are compatible and usually just
-indicate client user interface changes.
+indicate client user interface changes. A following FF ends the packet.
+</para>
+<screen>
 
-The reconnect port is the port the client should reconnect to the server at.  If
-the connection is rejected for some reason then this port will be zero.  Yes, this
-step is really pointless, complicates firewall tunnels, and it could just as well
-use the original connection.  It's unfortunate historical cruft.  Note that the
-server will not wait long for the reconnection.
+negotiating world flags
+-----------------------
+  --&gt;   +----+----+----+----+----+----+----+----+----+----+
+	| length  | 6E | 66 | FlagID1 | FlagID2 | ....... |     MsgNegotiateFlags
+	+----+----+----+----+----+----+----+----+----+----+     (List of client flag ids)
+  &lt;--   +----+----+----+----+----+----+----+----+----+----+
+	| length  | 6E | 66 | FlagID1 | FlagID2 | ....... |     MsgNegotiateFlags
+	+----+----+----+----+----+----+----+----+----+----+     (List of server flag ids, that client doesn't know)
 
-The reconnected socket should have TCP_NODELAY enabled (Nagle algorithm disabled)
-to prevent the client from batching the many small packets.
+</screen>
+<para>
+Client sends to the server the two byte representation of all flags known to the client.
+In the case that a flag is only one letter, (N) for instance, the second byte is null.
+Otherwise, the null byte is implied at position 3. The server upon receipt of this list,
+finds all flags that are used by the server, but not known by the client, and sends this
+list to the client. The client upon receipt of the list, either disallows play, if flags exist,
+or continues if the list is empty.
+</para>
+<screen>
 
+getting the world hash
+----------------------
+  --&gt;   +----+----+----+----+
+	| 00 | 00 | 77 | 68 |                         MsgWantWHash
+	+----+----+----+----+
+  &lt;--   +----+----+----+----+----+----+----+----+
+	| length  | 77 | 68 | world hash data... |     MsgWantWHash
+	+----+----+----+----+----+----+----+----+
+</screen>
+<para>
+To improve performance World (bzc) files are cached on the client. The name of the
+cache file is an md5 hash of the file that is computed on the server. this hash is
+sent to the client, and the client looks for a file by that name in the bz world
+cache directory. If the hash starts with a 't', the world is a random world.
+If the hash starts with a 'p' the world is from a world file. If the client can
+find the file locally, it does not sent the following MsgGetWorld packet.
+</para>
+<screen>
 
 getting the world database
 --------------------------
@@ -330,6 +368,8 @@ getting the world database
 	| 00 | 00 | 73 | 6b |                           MsgSuperKill
 	+----+----+----+----+
 
+</screen>
+<para>
 Client sends MsgGetWorld requests until it has read the entire world database.
 Clients should send an `offset' of 0 for the first request and increase `offset'
 by however much data was sent in reply.
@@ -345,38 +385,50 @@ database.  The client should immediately close the connection to the server.
 
 No other messages should be returned by the server as long as the client sends
 only MsgGetWorld requests.
+</para>
+<screen>
 
 The `data' has the following encoding:
 
-	+----+----+----+----+----+----+----+----+
-	| 73 | 74 | 00 | 18 |  style  | players |       WorldCodeStyle, length of data
-	+----+----+----+----+----+----+----+----+
-	|  shots  |  flags  |linear acceleration|
-	+----+----+----+----+----+----+----+----+
-	|angulr acceleration| shake t | shake w |
-	+----+----+----+----+----+----+----+----+
-	|    server time    |
 	+----+----+----+----+
+	| 00 | 1E | 73 | 74 |        length of data, WorldCodeStyle
+	+----+----+----+----+----+----+
+	| version |      worldsize    |
+        +----+----+----+----+----+----+----+----+
+        |  style  | mxPlyrs | mxShots | mxFlags |
+        +----+----+----+----+----+----+----+----+
+	|linear acceleration|angulr acceleration|
+	+----+----+----+----+----+----+----+----+
+	| shake t | shake w |    epoch offset   |
+	+----+----+----+----+----+----+----+----+
 
 Values are:
+  version:      version of the bzw format
+  worldsize:    size in meters of world
   style:        bitfield of game style
-  players:      maximum number of players
-  shots:        maximum number of shots at once per player
-  flags:        maximum number of flags that may exist at once
+  maxPlayrs:    maximum number of players
+  maxShots:     maximum number of shots at once per player
+  maxFlags:     maximum number of flags that may exist at once
   linear acc.:  linear acceleration limit (float)
   angulr acc.:  angular acceleration limit (float)
   shake t:      time to shake a bad flag (1/10ths of seconds)
   shake w:      number of wins to shake a bad flag
-  server time:  seconds since midnight Jan 1, 1970 GMT on the server, used when
+  epoch offset: seconds since midnight Jan 1, 1970 GMT on the server, used when
 		synchronizing times across clients
 
+</screen>
+<para>
 The rest of the world database is encoded in individual blocks decribing each
 object.  Only permanent immovable objects are included.  The encodings for each
 type of object are:
+</para>
+<screen>
 
   team base:
-	+----+----+----+----+----+----+----+----+
-	| 62 | 61 | team id |     center (x)    |
+        +----+----+----+----+
+        | 00 | 2A | 62 | 61 | length of base data, team code
+	+----+----+----+----+----+----+
+	| team id |     center (x)    |
 	+----+----+----+----+----+----+----+----+
 	|     center (y)    |     center (z)    |
 	+----+----+----+----+----+----+----+----+
@@ -390,60 +442,68 @@ type of object are:
 	+----+----+----+----+
 
   wall:
+        +----+----+----+----+
+        | 00 | 18 | 77 | 6C | length of wall data, wall code
 	+----+----+----+----+----+----+----+----+
-	| 77 | 6c |    center (x)     | center...
+	|    center (x)     |    center (y)     |
 	+----+----+----+----+----+----+----+----+
-	 (y)      |    center (z)     | angle...
+	|    center (z)     |    angle...       |
 	+----+----+----+----+----+----+----+----+
-		  |       width       | height...
+	|       width       |       height      |
 	+----+----+----+----+----+----+----+----+
-		  |
-	+----+----+
+
 
   pyramid:
+        +----+----+----+----+
+        | 00 | 1D | 70 | 79 | length of pyramid data, pyramid code
 	+----+----+----+----+----+----+----+----+
-	| 70 | 79 |    center (x)     | center...
+	|    center (x)     |    center (y)     |
 	+----+----+----+----+----+----+----+----+
-	 (y)      |    center (z)     | angle...
+	|    center (z)     |     angle         |
 	+----+----+----+----+----+----+----+----+
-		  |       width       | depth...
+	|       width       |     depth         |
 	+----+----+----+----+----+----+----+----+
-		  |      height       |
-	+----+----+----+----+----+----+
+	|      height       | sdf|
+	+----+----+----+----+----+
 
   box:
+        +----+----+----+----+
+        | 00 | 1D | 62 | 78 | length of box data, box code
 	+----+----+----+----+----+----+----+----+
-	| 62 | 78 |    center (x)     | center...
+	|    center (x)     |    center (y)     |
 	+----+----+----+----+----+----+----+----+
-	 (y)      |    center (z)     | angle...
+	|    center (z)     |     angle         |
 	+----+----+----+----+----+----+----+----+
-		  |       width       | depth...
+	|       width       |     depth         |
 	+----+----+----+----+----+----+----+----+
-		  |      height       |
-	+----+----+----+----+----+----+
+	|      height       | sdf|
+	+----+----+----+----+----+
 
   teleporter:
+        +----+----+----+----+
+        | 00 | 21 | 74 | 65 | length of teleporter data, teleporter code
 	+----+----+----+----+----+----+----+----+
-	| 74 | 65 |    center (x)     | center...
+	|    center (x)     |    center (y)     |
 	+----+----+----+----+----+----+----+----+
-	 (y)      |    center (z)     | angle...
+	|    center (z)     |       angle       |
 	+----+----+----+----+----+----+----+----+
-		  |       width       | depth...
+	|       width       |       depth       |
 	+----+----+----+----+----+----+----+----+
-		  |      height       | border...
+	|      height       |       border      |
 	+----+----+----+----+----+----+----+----+
-		  |
-	+----+----+
+	| sdf|
+	+----+
 
   teleporter link:
-	+----+----+----+----+----+----+
-	| 6c | 6e |  from   |   to    |
-	+----+----+----+----+----+----+
-
+	+----+----+----+----+
+	| 00 | 04 | 6C | 6E | length of link data, link code
+	+----+----+----+----+
+        |  from   |   to    |
+        +----+----+----+----+
   end of data:
-	+----+----+
-	| 65 | 64 |
-	+----+----+
+	+----+----+----+----+
+	| 00 | 00 | 65 | 64 | length of worldcodeend data, worldcodeend code
+	+----+----+----+----+
 
 The above values are interpreted as follows:
 
@@ -459,13 +519,16 @@ The above values are interpreted as follows:
 			in the world data has face indices 2*N and 2*N+1.  teleporter
 			links indicate which face teleports to which face;  faces may
 			teleport to themselves.
+  sdf (byte):           bit mask:
+                              drive through is bitmask 0x01
+                              shoot through is bitmask 0x02
 
-
+</screen>
+<screen>
 join game
 ---------
 Once connected a player normally requests to join the game.  The server replies with
 MsgSuperKill, MsgReject, or MsgAccept.
-
 
   --&gt;   +----+----+----+----+----+----+----+----+
 	| length  | 65 | 6e |  player id...             MsgEnter
@@ -531,7 +594,6 @@ only receive the following kinds of messages:
 	MsgFlagUpdate
 	MsgTeamUpdate
 	MsgAddPlayer
-	MsgNetworkRelay
 
 Players of type ComputerPlayer are not sent team or flag updates and only get the
 MsgAddPlayer for themselves.  This probably wasn't a good idea, but there it is.
@@ -585,37 +647,6 @@ enters a game.  Clients must be prepared to handle them in any order.
 
 	If `team id' is NoTeam then `player id' indicates which player has won.
 	Otherwise `team id' indicates which team won.
-
-  MsgSetTTL
-  &lt;--   +----+----+----+----+----+----+
-	| 00 | 02 | 74 | 74 | new TTL |
-	+----+----+----+----+----+----+
-	Should a client join with a larger TTL than any other client, the server
-	notifies all the clients of the new minimum TTL.  The TTL is the time-
-	to-live for the multicast player-to-player packets.  Upon receipt of this
-	message a client should change the TTL of outgoing multicast packets to
-	at least `new TTL.'
-
-  MsgNetworkRelay
-  &lt;--   +----+----+----+----+
-	| 00 | 00 | 6e | 72 |
-	+----+----+----+----+
-	This message means that the client must start sending messages normally
-	sent via multicast directly to the server.  The server will send the
-	messages to each client.  The server may send this when a client first
-	enters a game or later when another client requests multicast-over-tcp
-	relaying.  If the server itself cannot do multicasting then it must
-	force all clients to do multicast-over-tcp.
-
-  --&gt;   +----+----+----+----+
-	| 00 | 00 | 6e | 72 |
-	+----+----+----+----+
-	When a client can't do multicasting it notifies the server of that fact
-	and the server begins listening for multicast traffic on behalf of the
-	client and forwarding it to that client via tcp.  It also sends messages
-	from that client via multicast to other clients.  Send this message to
-	the server soon after connecting if you cannot contact the server via
-	multicast so you don't miss messages from other players.
 
   MsgAddPlayer
   &lt;--   +----+----+----+----+----+----+----+----+
@@ -1026,8 +1057,7 @@ enters a game.  Clients must be prepared to handle them in any order.
 		  | angular velocity  |
 	+----+----+----+----+----+----+
 	Sent by players to notify other players of changes in its status,
-	position, or velocity.  This message may be received directly from
-	other players via multicast or from the server.
+	position, or velocity.
 
 	`Status' is the tank's current status.  See PlayerStatus for the
 	meaning of the bitfield's bits.  The FlagActive bit indicates whether
@@ -1075,8 +1105,7 @@ enters a game.  Clients must be prepared to handle them in any order.
 		  |
 	+----+----+
 	Sent by players with active guided missiles to notify other players
-	of changes to the motion of the guided missile.  This message may be
-	received directly from other players via multicast or from the server.
+	of changes to the motion of the guided missile.
 
 	See MsgShotBegin for the meaning of most items.  `Time' is the current
 	age of the shot (the time since being fired).  `Target id' is the
@@ -1102,6 +1131,16 @@ enters a game.  Clients must be prepared to handle them in any order.
 	lost or severely delayed messages. On each ping sent by the server,
 	the sequence number is incremented (modulo 10000). The server
 	manages this number on a per player basis.
+
+  MsgReplayReset
+	+----+----+----+----+----+
+	| 00 | 01 | 72 | 72 | lp |
+	+----+----+----+----+----+
+	Sent by the server to active replay observers to remove state
+	information that they might have regarding players and flags.
+	The 'lp' value is the last player to be removed. PlayerId's above
+	'lp' are replay observers, and are not removed.
+
 
 UDP negotiation:
 

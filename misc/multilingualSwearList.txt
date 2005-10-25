@@ -407,6 +407,7 @@ basterd
 bastid
 biach
 biatch
+biotch
 bicht
 bigass
 bigassball
@@ -450,8 +451,8 @@ bitemyass
 bitemyprick
 biyotch
 blowjob
-bltch
 boner
+bulshit
 bumfuck
 bumhole
 bumholeengineer
@@ -666,6 +667,7 @@ fuckyoucock
 fuckyoucunt
 fuckyougm
 fuckyouii
+fuckyu
 fucoff
 fucq
 fucqdat
@@ -674,13 +676,20 @@ fuct
 fuctup
 fucxyou
 fucya
+fucyoo
 fucyou
 fucyoubich
+fucyu
 fudgehole
 fudgepack
 fudpuck
 fugm
 fugmpuke
+fuhk
+fuhku
+fuhkyoo
+fuhkyou
+fuhkyu
 fuhq
 fuk
 fukad
@@ -759,6 +768,7 @@ fukyallmofo
 fukyermom
 fukyew
 fukyoass
+fukyoo
 fukyou
 fukyouanddie
 fukyouus
@@ -818,6 +828,7 @@ jewboy
 jewboynigger
 jewishnazi
 jewishwhore
+jigaboo
 jiz
 killaniga
 kunt
@@ -853,28 +864,25 @@ mydick
 nazijewraper
 naziskinhead
 niga
-nigahbytch
+nigaboo
+nigafag
+nigah
+nigah
 nigaretto
 nigatrash
 nigazbiotch
 nigbeater
 nigerbeater
 nigerman
-nigga
-niggaboo
-niggafag
-niggah
 nigge
-nigghaz
-niggher
-niggkilla
 niggor
 niggr
 niggrian
-nigguh
-niggurs
 niggy
+nighaz
+nigher
 nigiro
+nigkilla
 niglet
 nigletbard
 nigletmaster
@@ -882,11 +890,14 @@ nigofger
 nigore
 nigrkill
 nigromance
+niguh
+nigurs
 nigz
 nipalicious
 nipplelicker
 penis
 pinktaco
+poontang
 pootang
 prick
 punkass
@@ -931,7 +942,6 @@ suckme
 suckmydick
 sucmybawl
 supabiatch
-tit
 twat
 vageyenuh
 vagina
@@ -1087,7 +1097,6 @@ tsaunima		# zh - fuck your mother
 # Dutch (Holland-Belgium)
 dikzak                  # nl - fatty
 eikel                   # nl - dickhead
-ekrem			# nl - ??
 godverdomme             # nl - damn
 #hoer                    # nl - hooker/hoar
 hoerenzoon              # nl - son of a prostitute
@@ -1131,8 +1140,6 @@ vitt/puts               # et - cunt
 runkkari		# fi - wanker
 kusi	   		# fi - piss
 kusipaeae               # fi - pisshead
-kyrpa			# fi - ??
-mulkku			# fi - ??
 munaa			# fi - cock
 paska                   # fi - shit
 paskiainen              # fi - bastard
@@ -1205,9 +1212,14 @@ pogue mahone            # gd - kiss my ass
 
 
 # German
+# arch                  # de - ass
+akrampe                 # de - asshole
 arsch                   # de - ass
+arschficker             # de - assfucker
 arschgesicht            # de - "assface" (butthead)
-asch      		# de - ass
+arschkrampe             # de - asshole
+arschlock               # de - asshole
+asch                    # de - ass
 auf wiedersehen fickakopf 	 # de - goodbye fuckhead
 blode fotze             # de - stupid cunt
 blodes arschloch        # de - stupid asshole
@@ -1216,33 +1228,45 @@ depp                    # de - idiot
 drecksau                # de - dirty pig
 du verdammter arschficker 	 # de - you damn assfucker
 dummcopf                # de - (lit. stupid head)
+dummkopf                # de - (lit. stupid head)
 dummes huhn             # de - stupid chicken
-fick dich               # de - fuck you
-fick mich               # de - fuck me
+fick                    # de - fuck
 fotze                   # de - cunt
 himmeldonnerwetter      # de - *no translation--very strong curse*  (lit. heaven thunder weather)
 hosenschlange           # de - lit. - lick my trouser snake
 hure                    # de - whore
 hurensohn               # de - sonuvabitch
 ich moechte mit dir schlafen 	 # de - i want to sleep with (fuck) you
-lleck mich am arsch     # de - lick my ass
+kacke                   # de - shit
+kanacke                 # de - ? (insinuating something bad about the roots of a person (lit. human))
+kot                     # de - shit
+kotklumpen              # de - piece of shit
+leck mich am arsch      # de - lick my ass
 lesbe                   # de - lesbian
 mach es dir selber      # de - go fuck yourself
 mutterficker            # de - motherfucker
-schies                  # de - shit
+neger                   # de - nigger
+nutte                   # de - whore
+penner                  # de - homeless person (vulgar)
+pimmel                  # de - penis
+poppen                  # de - fuck
+rammel                  # de - fuck
+rammeln                 # de - fuck
 scheis                  # de - shit
-schiese                 # de - shit
 scheise                 # de - shit
+scheissdreck            # de - fucking business (lit: shit)
 scheissekopf            # de - shithead
+schiese                 # de - shit
 schlampe                # de - tramp or slut
 schnoodle noodle        # de - dick snot
 schweinhund             # de - (dumb) pigdog (archaic)
+schwuchtel              # de - faggot (noun)
 schwuchtl               # de - faggot (noun)
-shies                   # de - shit
-sheis                   # de - shit
-shiese                  # de - shit
-sheise                  # de - shit
-vig dischen swaenen     # de - you fucking bastard
+sheiss                  # de - shit
+shiess                  # de - shit
+shiesse                 # de - shit
+sheisse                 # de - shit
+wichser                 # de - motherfucker
 
 
 # Greek
@@ -1263,7 +1287,6 @@ paliarhido              # el - old balls
 poustis                 # el - faggot
 poutsos                 # el - dick
 salta gamisou           # el - go fuck yourself
-se gamo kai hino, les na pahino?       # el - ???
 segrafa sta archidia-mu # el - bullshit. (lit. i write that on my balls.)
 skila                   # el - bitch
 su gamo to spiti, ti mana kai to theo  # el - i'll fuck your family one by one,the god that you believe in and especially your mother(the absolute greek insult)
@@ -1446,22 +1469,40 @@ teras                   # ?? - cpe - your ass
 # Japanese (phonetic, more or less)
 ahraywah ohmankogah skeeda 			 # ja - i enjoy pussy very much
 ama                     # ja -  bitch
+aho						# ja -  asshole
 anato wa onani o shimasuka is		# ja - do you masterbate
+baita					# ja - Female of ill repute S**t
 baka kuso atama         # ja - stupid shit head
 baka yaroo              # ja - stupid bastard
+baka tare		        # ja - stupid bitch
 chikushoo               # ja - oh fuck! (literally: "animal")
+chikushou               # ja - shit
+chiku sho               # ja - shit
 chinchin                # ja - penis ("thingie")
+chimpo	                # ja - penis ("thingie")
+chinko		            # ja - penis ("thingie")
+chinpo	                # ja - penis ("thingie")
+fukuro					# ja - Male Scrotum Vulgar
 ketsunoana              # ja - asshole
 kin tama                # ja - golden balls
+kintama					# ja - Testicles Vulgar
+tama 					# ja - Testicles Vulgar
 kisama                  # ja - lord of the donkeys (very rude word meaning "you")
 kuso                    # ja - shit
 kusu o taberu na!       # ja - eat fucking shit
+kono yaroo				# ja - This guy (usually how Japanese start fights with each other) It doesn't make sense in English much like the German insult "thick head"
 manko                   # ja - pussy
+manuke					# ja - Out of place (Eng Equiv Dumb***)
+manju Bean Jam bun		# ja - refers to female privates
 onani                   # ja - masterbate
 onara                   # ja - fart
 onara atama             # ja - fart head
 pai pai                 # ja - breasts, nipples
-
+omanko                  # ja - Female Privates Extremely Vulgar C**t equivalent
+omanko suru to do		# ja - Female privates...f***  Extroardinarily nasty phrase
+omanko suru to do suru	# ja - Female privates...f***  Extroardinarily nasty phrase
+wakazo					# ja - Young Punk
+yada					# ja - female
 
 # Korean (phonetic more or less)
 dong-mogo               # ko - eat shit
@@ -1556,22 +1597,16 @@ pedar sag               # fa - (lit.) your father is a dog
 
 # Polish
 coorva                  # pl - fuck
-# chuj			# pl - ??
-# dupa			# pl - ?? ass
 dupek                   # pl - asshole
 dziwka                  # pl - whore (light)
 gowno                   # pl - shit
 huj                     # pl - dick
-huju			# pl - ??
-kurva                   # pl - ??
 kurwa                   # pl - whore (hard), fig. "oh shit!"
-odpierdol		# pl - ??
 pierdol	      	      	# pl - fuck
 pierdolec               # pl - fucker
 pojebany                # pl - fucked up
 spieprzaj               # pl - piss off
 spierdalaj              # pl - fuck off
-# supa			# pl - ??
 zajebiste               # pl - "fucking awesome"
 zapierdol	      	# pl - fuck
 zapierdole	      	# pl - fuck
@@ -1605,11 +1640,6 @@ caralho                 # pt - cock
 cabra                   # pt - bitch
 voi te foder            # pt - fuck you
 vai para o caralho      # pt - go piss off (go to hell)
-
-# Romanian
-pula			# ro - ??
-muie			# ro - ??
-pizda			# ro - ??
 
 # Russian
 baltattsya kak govno v prorubi # ru - to be flighty or indecisive (Lit. to bob like shit in a hole in the ice)
@@ -1753,7 +1783,7 @@ murrda			# es - shit (slang)
 nema			# es - cock/penis (n~ema)
 nido			# es - cunt (mexican slang)
 ojete                   # es - asshole
-orto			# es - ass (argentinian and uruguayan)
+# orto			# es - ass (argentinian and uruguayan)
 panocha                 # es - pussy (extremely vulgar, mex)
 peha                    # es - dick
 pelotuda		# es - dumbass
@@ -1779,7 +1809,7 @@ rejuego			# es - prostitute (mexican/guatemalan slang)
 remame			# es - cunt (mexican slang)
 rene			# es - nigger (mexican slang)
 riata			# es - dick (mexican slang)
-rul			# es - asshole (mexican slang)
+# rul			# es - asshole (mexican slang)
 sacale la leche         # es - make her cum (lit. take the milk out of her)
 taconera  		# es - prostitute (lit. high-heeler)
 trastero		# es - asshole (lit. anus)
@@ -1880,7 +1910,7 @@ chraa
 ayir
 atouche
 futkretzn
-pimmel
+
 
 # Local Variables: ***
 # mode:Text ***

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,18 +7,19 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __TEXTCHUNKMANAGER_H__
 #define __TEXTCHUNKMANAGER_H__
 
+#include "common.h"
+
+/* system interface headers */
 #include <vector>
 #include <map>
 #include <string>
-#include <fstream>
 
-#include "global.h"
 
 // maintains a list of lists of strings, more or less a bunch
 // of files that can be read into and managed by this class.
@@ -36,7 +37,7 @@ protected:
     {
       return theVector.size();
     }
-    void push_back(std::string x)
+    void push_back(const std::string &x)
     {
       theVector.push_back(x);
     }
@@ -57,15 +58,16 @@ public:
 
   // get a chunk given a name of the chunk returns null if it
   // can't find it
-  const std::vector<std::string>* getTextChunk(const std::string chunkName);
+  const std::vector<std::string>* getTextChunk(const std::string &chunkName) const;
 
-  const std::vector<std::string>& getChunkNames()
+  const std::vector<std::string>& getChunkNames() const
   {
     return chunkNames;
   }
 
 private:
-  std::map<std::string, StringVector> theChunks; // a mapping of names of chunks to chunks
+  typedef std::map<std::string, StringVector> StringChunkMap;
+  StringChunkMap theChunks; // a mapping of names of chunks to chunks
   std::vector<std::string> chunkNames; // vector of all the names of the chunks
 };
 

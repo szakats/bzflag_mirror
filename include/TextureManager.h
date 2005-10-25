@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,8 +7,10 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+#ifndef _TEXTURE_MANAGER_H
+#define _TEXTURE_MANAGER_H
 
 #include <string>
 #include <map>
@@ -16,38 +18,66 @@
 #include "OpenGLTexture.h"
 #include "Singleton.h"
 
-typedef enum TextureType { TX_BOLT, TX_TRANSBOLT, TX_LASER, TX_THIEF, TX_MISSILE,
-                           TX_GROUND, TX_CLOUDS, TX_MOUNTAIN, TX_EXPLOSION,
-			   TX_TANK, TX_FLAG, TX_WALL, TX_BOX, TX_ROOF, TX_PYRAMID,
-			   TX_CAUTION, TX_TITLEFONT, TX_NOISE
-			};
 
 struct FileTextureInit
 {
-  TextureType		type;
-  int			variant;
-  char*			fileName;
+  std::string		name;
   OpenGLTexture::Filter	filter;
 };
 
+
+typedef  struct
+{
+  int   id;
+  int   x;
+  int   y;
+  bool  alpha;
+  OpenGLTexture *texture;
+  std::string   name;
+} ImageInfo;
+
+class TextureManager;
+
 struct ProcTextureInit
 {
-  TextureType		type;
-  int			variant;
-  OpenGLTexture*	(*proc)(ProcTextureInit &init);
+  std::string		name;
+  TextureManager	*manager;
   OpenGLTexture::Filter	filter;
+  int			(*proc)(ProcTextureInit &init);
 };
+
 
 class TextureManager : public Singleton<TextureManager>
 {
 public:
-  OpenGLTexture* getTexture( TextureType type );
-  OpenGLTexture* getTexture( TextureType type, int variant );
-  void addTexture( TextureType type, OpenGLTexture *texture );
-  void addTexture( TextureType type, int variant, OpenGLTexture *texture );
+  int getTextureID( const char* name, bool reportFail = true );
 
-  static OpenGLTexture* noiseProc( ProcTextureInit &init );
+  bool isLoaded(const std::string& name);
+  bool removeTexture(const std::string& name);
+  bool reloadTextures();
+  bool reloadTextureImage(const std::string& name);
 
+  void updateTextureFilters();
+  void setTextureFilter(int texId, OpenGLTexture::Filter filter);
+  OpenGLTexture::Filter getTextureFilter(int texId);
+
+  bool bind ( int id );
+  bool bind ( const char* name );
+
+  const ImageInfo& getInfo ( int id );
+  const ImageInfo& getInfo ( const char* name );
+
+  bool getColorAverages(int texId, float rgba[4], bool factorAlpha) const;
+
+  OpenGLTexture::Filter getMaxFilter ( void );
+  std::string getMaxFilterName ( void );
+  void setMaxFilter ( OpenGLTexture::Filter filter );
+  void setMaxFilter ( std::string filter );
+
+  float GetAspectRatio ( int id );
+
+  int newTexture (const char* name, int x, int y, unsigned char* data,
+		  OpenGLTexture::Filter filter, bool repeat = true, int format = 0);
 protected:
   friend class Singleton<TextureManager>;
 
@@ -57,13 +87,20 @@ private:
   TextureManager& operator=(const TextureManager &tm);
   ~TextureManager();
 
-  OpenGLTexture* loadTexture( FileTextureInit &init );
-  void           loadBigTexture(TextureType type, FileTextureInit &init);
+  int addTexture( const char*, OpenGLTexture *texture  );
+  OpenGLTexture* loadTexture( FileTextureInit &init, bool reportFail = true  );
 
+  typedef std::map<std::string, ImageInfo> TextureNameMap;
+  typedef std::map<int, ImageInfo*> TextureIDMap;
 
-  std::map<int, OpenGLTexture*> m_Textures;
+  int	    lastImageID;
+  int	    lastBoundID;
+  TextureIDMap   textureIDs;
+  TextureNameMap textureNames;
 };
 
+
+#endif //_TEXTURE_MANAGER_H
 
 // Local Variables: ***
 // mode: C++ ***

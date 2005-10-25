@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -18,14 +18,20 @@
 #define BZF_KEYMANAGER_H
 
 #include "common.h"
+
+// system headers
 #include <string>
 #include <map>
 #include <vector>
+
+// local implementation headers
 #include "BzfEvent.h"
 #include "CallbackList.h"
 #include "Singleton.h"
 
 #define KEYMGR (KeyManager::instance())
+
+
 
 class KeyManager : public Singleton<KeyManager> {
 public:
@@ -37,6 +43,9 @@ public:
   void			bind(const BzfKeyEvent&,
 			     bool press, const std::string& cmd);
   void			unbind(const BzfKeyEvent&, bool press);
+
+  // unbind all keys bound to a specific command
+  void			unbindCommand(const char* command);
 
   // get the command for a key event press or release
   std::string		get(const BzfKeyEvent&, bool press) const;
@@ -76,11 +85,11 @@ private:
   static bool		onCallback(ChangeCallback, void*, void*);
 
 private:
-  class KeyEventLess {
-  public:
-    bool		operator()(const BzfKeyEvent&,
-				   const BzfKeyEvent&) const;
-  };
+	class KeyEventLess {
+	public:
+		bool		operator()(const BzfKeyEvent&,
+			const BzfKeyEvent&) const;
+	};
 
   typedef std::map<BzfKeyEvent, std::string, KeyEventLess> EventToCommandMap;
   typedef std::map<std::string, BzfKeyEvent> StringToEventMap;

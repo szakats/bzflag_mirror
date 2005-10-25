@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __SINGLETON_H__
@@ -38,6 +38,13 @@ using std::atexit;
  *
  *   friend class Singleton<Whatever>;
  *
+ * The class will also need to initialize it's own instance in a single
+ * compilation unit (a .cxx file):
+ *
+ *   // statically initialize the instance to nothing
+ *   template <>
+ *   Whatever* Singleton<Whatever>::_instance = 0;
+ *
  * The class can easily be extended to support different allocation
  * mechanisms or multithreading access.  This implementation, however,
  * only uses new/delete and is not thread safe.
@@ -57,7 +64,7 @@ protected:
 
   // protection from instantiating a non-singleton Singleton
   Singleton() { }
-  Singleton(T* pInstance) { _instance = pInstance; }
+  Singleton(T* instancePointer) { _instance = instancePointer; }
   Singleton(const Singleton &) { } // do not use
   Singleton& operator=(const Singleton&) { return *this; } // do not use
   ~Singleton() { _instance = 0; } // do not delete
@@ -89,10 +96,8 @@ public:
   inline static T* pInstance() {
     if (_instance == 0) {
       _instance = new T;
-#ifdef _WIN32
+#ifdef HAVE_ATEXIT
       atexit(Singleton::destroy);
-#else
-      std::atexit(Singleton::destroy);
 #endif
     }
     return Singleton::_instance;
@@ -102,10 +107,6 @@ public:
    */
   inline static const T& constInstance() { return *instance(); }
 };
-
-// statically initialize the instance to nothing
-//template < typename T >
-//T* Singleton<T>::_instance = 0;
 
 #endif /* __SINGLETON_H__ */
 
@@ -117,4 +118,3 @@ public:
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

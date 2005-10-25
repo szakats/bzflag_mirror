@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\lib\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="..\..\src\geometry\"
+			IntermediateDirectory="..\..\src\geometry\"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -22,10 +22,12 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				StringPooling="TRUE"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\Release/geometry.pch"
 				AssemblerListingLocation=".\Release/"
@@ -63,8 +65,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\lib\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="..\..\src\geometry\Debug\"
+			IntermediateDirectory="..\..\src\geometry\Debug\"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -81,6 +83,7 @@
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
+				WarnAsError="FALSE"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
 				CompileAs="0"/>
@@ -111,6 +114,249 @@
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
+		<Configuration
+			Name="KRB5 Debug|Win32"
+			OutputDirectory=".\..\..\src\geometry\krb5_debug"
+			IntermediateDirectory=".\..\..\src\geometry\krb5_debug"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				PrecompiledHeaderFile=".\Debug/geometry.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="..\..\src\geometry\krb5_Debug\geometry.lib"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="KRB5 Release|Win32"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1">
+			<Tool
+				Name="VCCLCompilerTool"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="release_modern|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
+				OptimizeForProcessor="3"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
+				EnableEnhancedInstructionSet="1"
+				PrecompiledHeaderFile=".\Release/geometry.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="..\..\src\geometry\geometry.lib"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="release_modern_p3|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="2"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
+				EnableEnhancedInstructionSet="1"
+				PrecompiledHeaderFile=".\Release/geometry.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="..\..\src\geometry\geometry.lib"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Release_pdcurses|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="TRUE"
+				PrecompiledHeaderFile=".\Release/geometry.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="..\..\src\geometry\geometry.lib"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -118,6 +364,9 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
+			<File
+				RelativePath="..\..\src\geometry\AnimatedTreads.cxx">
+			</File>
 			<File
 				RelativePath="..\..\src\geometry\BillboardSceneNode.cxx">
 				<FileConfiguration
@@ -136,6 +385,39 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -157,6 +439,39 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\EighthDBaseSceneNode.cxx">
@@ -176,6 +491,39 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -197,6 +545,39 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\EighthDimSceneNode.cxx">
@@ -217,6 +598,42 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\EighthDimShellNode.cxx">
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\EighthDPyrSceneNode.cxx">
@@ -236,6 +653,39 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -257,6 +707,39 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\FlagWarpSceneNode.cxx">
@@ -276,6 +759,39 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -297,6 +813,57 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\MeshDrawMgr.cxx">
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\MeshFragSceneNode.cxx">
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\MeshPolySceneNode.cxx">
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\MeshRenderNode.cxx">
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\MeshSceneNode.cxx">
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\OccluderSceneNode.cxx">
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\PolyWallSceneNode.cxx">
@@ -316,6 +883,39 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -337,6 +937,39 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\QuadWallSceneNode.cxx">
@@ -357,11 +990,17 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\geometry\Ray.cxx">
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="2"
@@ -369,13 +1008,20 @@
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="release_modern_p3|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
-						Optimization="0"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"/>
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -397,6 +1043,39 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\ShellSceneNode.cxx">
@@ -416,6 +1095,39 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -437,6 +1149,42 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\TankGeometryMgr.cxx">
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\TankSceneNode.cxx">
@@ -456,6 +1204,39 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -477,6 +1258,39 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\TriWallSceneNode.cxx">
@@ -496,6 +1310,39 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -517,6 +1364,39 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\WallSceneNode.cxx">
@@ -537,347 +1417,87 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<Filter
-				Name="hitank"
+				Name="Tank"
 				Filter="">
 				<File
-					RelativePath="..\..\src\geometry\models\hitank\barrel.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\high_barrel.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\hitank\body.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\high_body.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\hitank\ltread.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\high_ltread.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\hitank\rtread.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\high_rtread.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\hitank\turret.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
-				</File>
-			</Filter>
-			<Filter
-				Name="medtank"
-				Filter="">
-				<File
-					RelativePath="..\..\src\geometry\models\medtank\barrel.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\high_turret.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\medtank\body.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\low_barrel.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\medtank\ltread.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\low_body.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\medtank\rtread.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\low_ltread.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\medtank\turret.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
-				</File>
-			</Filter>
-			<Filter
-				Name="lowtank"
-				Filter="">
-				<File
-					RelativePath="..\..\src\geometry\models\lowtank\barrel.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\low_rtread.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\lowtank\body.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\low_turret.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\lowtank\ltread.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\medium_barrel.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\lowtank\rtread.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\medium_body.cxx">
 				</File>
 				<File
-					RelativePath="..\..\src\geometry\models\lowtank\turret.c">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"/>
-					</FileConfiguration>
+					RelativePath="..\..\src\geometry\models\tank\medium_ltread.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\geometry\models\tank\medium_rtread.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\geometry\models\tank\medium_turret.cxx">
 				</File>
 			</Filter>
 		</Filter>
@@ -885,97 +1505,112 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath="..\include\BillboardSceneNode.h">
+				RelativePath="..\..\include\BillboardSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\BoltSceneNode.h">
+				RelativePath="..\..\include\BoltSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\bzfgl.h">
+				RelativePath="..\..\include\bzfgl.h">
 			</File>
 			<File
-				RelativePath="..\include\common.h">
+				RelativePath="..\..\include\common.h">
 			</File>
 			<File
-				RelativePath="..\include\EighthDBaseSceneNode.h">
+				RelativePath="..\..\include\EighthDBaseSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\EighthDBoxSceneNode.h">
+				RelativePath="..\..\include\EighthDBoxSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\EighthDimSceneNode.h">
+				RelativePath="..\..\include\EighthDimSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\EighthDPyrSceneNode.h">
+				RelativePath="..\..\include\EighthDimShellNode.h">
 			</File>
 			<File
-				RelativePath="..\include\FlagSceneNode.h">
+				RelativePath="..\..\include\EighthDPyrSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\FlagWarpSceneNode.h">
+				RelativePath="..\..\include\FlagSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\global.h">
+				RelativePath="..\..\include\FlagWarpSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\LaserSceneNode.h">
+				RelativePath="..\..\include\global.h">
 			</File>
 			<File
-				RelativePath="..\include\OpenGLGState.h">
+				RelativePath="..\..\include\LaserSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\OpenGLLight.h">
+				RelativePath="..\..\include\MeshDrawMgr.h">
 			</File>
 			<File
-				RelativePath="..\include\OpenGLMaterial.h">
+				RelativePath="..\..\include\MeshFragSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\OpenGLTexture.h">
+				RelativePath="..\..\src\geometry\MeshRenderNode.h">
 			</File>
 			<File
-				RelativePath="..\include\PolyWallSceneNode.h">
+				RelativePath="..\..\include\MeshSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\PTSceneNode.h">
+				RelativePath="..\..\include\OpenGLGState.h">
 			</File>
 			<File
-				RelativePath="..\include\QuadWallSceneNode.h">
+				RelativePath="..\..\include\OpenGLLight.h">
 			</File>
 			<File
-				RelativePath="..\include\Ray.h">
+				RelativePath="..\..\include\OpenGLMaterial.h">
 			</File>
 			<File
-				RelativePath="..\include\RenderNode.h">
+				RelativePath="..\..\include\OpenGLTexture.h">
 			</File>
 			<File
-				RelativePath="..\include\SceneNode.h">
+				RelativePath="..\..\include\PolyWallSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\SceneRenderer.h">
+				RelativePath="..\..\include\PTSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\ShellSceneNode.h">
+				RelativePath="..\..\include\QuadWallSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\ShotSceneNode.h">
+				RelativePath="..\..\include\RenderNode.h">
 			</File>
 			<File
-				RelativePath="..\include\SphereSceneNode.h">
+				RelativePath="..\..\include\SceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\TankSceneNode.h">
+				RelativePath="..\..\include\SceneRenderer.h">
 			</File>
 			<File
-				RelativePath="..\include\TracerSceneNode.h">
+				RelativePath="..\..\include\ShellSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\TriWallSceneNode.h">
+				RelativePath="..\..\include\ShotSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\ViewFrustum.h">
+				RelativePath="..\..\include\SphereSceneNode.h">
 			</File>
 			<File
-				RelativePath="..\include\WallSceneNode.h">
+				RelativePath="..\..\include\TankGeometryMgr.h">
+			</File>
+			<File
+				RelativePath="..\..\include\TankSceneNode.h">
+			</File>
+			<File
+				RelativePath="..\..\include\TracerSceneNode.h">
+			</File>
+			<File
+				RelativePath="..\..\include\TriWallSceneNode.h">
+			</File>
+			<File
+				RelativePath="..\..\include\ViewFrustum.h">
+			</File>
+			<File
+				RelativePath="..\..\include\WallSceneNode.h">
 			</File>
 		</Filter>
 	</Files>

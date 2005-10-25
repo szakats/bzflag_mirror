@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // Jeff Myers 10/8/97 added hooks to display setings dialog
@@ -21,12 +21,13 @@
 WinWindow*		WinWindow::first = NULL;
 HPALETTE		WinWindow::colormap = NULL;
 
+HWND WinWindow::hwnd = NULL;
+
 WinWindow::WinWindow(const WinDisplay* _display, WinVisual* _visual) :
 				BzfWindow(_display),
 				display(_display),
 				visual(*_visual),
 				inDestroy(false),
-				hwnd(NULL),
 				hwndChild(NULL),
 				hRC(NULL),
 				hDC(NULL),
@@ -146,7 +147,7 @@ void			WinWindow::setSize(int width, int height)
   MoveWindow(hwndChild, 0, 0, width, height, FALSE);
 }
 
-void			WinWindow::setMinSize(int width, int height)
+void			WinWindow::setMinSize(int, int)
 {
   // FIXME
 }
@@ -169,6 +170,11 @@ void			WinWindow::setFullscreen()
   int width, height;
   getSize(width, height);
   MoveWindow(hwndChild, 0, 0, width, height, FALSE);
+}
+
+void			WinWindow::iconify()
+{
+  ShowWindow(hwnd, SW_MINIMIZE);
 }
 
 void			WinWindow::warpMouse(int x, int y)
@@ -421,7 +427,7 @@ void			WinWindow::reactivateAll()
     OpenGLGState::initContext();
 }
 
-HWND			WinWindow::getHandle() const
+HWND			WinWindow::getHandle()
 {
   return hwnd;
 }
@@ -627,7 +633,7 @@ void			WinWindow::makeColormap(
     ::SetPaletteEntries(colormap, 0, n, logicalPalette->palPalEntry + 0);
 
   // free the cruft
-  delete[] (void*)logicalPalette;
+  delete [] logicalPalette;
 }
 
 // Local Variables: ***

@@ -1,28 +1,112 @@
 recent bugs
 ------------
 
-- list server includes counts for players running on non-public servers on
-  the same machine on different ports
+- bzfs sometimes gets into a mode where CTF team flags spawn at random places,
+  not on bases.  Also, players spawn at random spots after flag cap.
 
-- bunny hunt issues.  observed the player selection consistently toggle
-  between the best player (score-wise) and one of the worst players non-stop
-  for several (10+) minutes without choosing many intermediate players that
-  not only had better scores and were not dead and were not previously bunny
-  and had a much better value for 	killCount * (killCount - deathCount)
-  mac suspects valid players are getting skipped altogether for some reason..
-  need to test that theory.
+- Zbuffer flickering with Narrow and Covered animated treads
+
+- ANSI codes can be used in the server -public messages
+  The best solution is probably to strip the codes at the listserver
+
+- at high frame rates (approx. > 500), isDeadReckoningWrong() often returns true
+  when tank is moving at constant speed. This leads to many unnecessary
+  MsgPlayerUpdate packets to be sent. Maybe floating point inaccuracies?
+
+- some ATI cards get font rendering to have variable alpha values
+  on each letter. The gl restate was removed from the font manager.
+  It should be put in and tied to a config option that defaults to
+  off.
+
+- teleporting is blocking when going from a ground teleporter to
+  a teleporter sitting on a mesh object. fix during next protocol
+  breakage  (workaround by dropping the ground teleporter by a
+  small amount... causing the burrow sound)
+
+- the last shot fired with a shot-limited flag doesn't carry the flag
+  type (or is dropped by the server?)...e.g. if I have G, limited to
+  5 shots, and kill someone with the fifth shot, only that player dies
+  because the flag was dropped by the time the kill was scored...
+  even though the shot was fired while I still had the flag.
+
+- spin inversion bug, fix in MeshTransform.cxx (around line 300)
+  during the next protocol breakage
+
+- do all Riva128 systems require "noMeshClusers"? Is there a 
+  workaround to make vertex array work on those cards?
+
+- Mac OS X client sometimes (50/50) seems to now start to a black
+  screen (only the console tab tabs render).  must be recent..
+
+- Too many flags caused "drop, unresponsive with 16687 bytes queued"
+  (+f good{40} was the breaking point, linux, local bzfs server)
+  admittedly, an unreasonable number of flags
+
+- Bad BZDB: some BZDB variables are not range checked:
+  "/set _syncTime -" goes boom on the client side.
+  (StateDatabase::ExpressionToken::operator=, StateDatabase.cxx:890)
+ "/set _tankSpeed foo" if you set the tank speed to something
+  non numeric the server and clients crash.
+
+- Material properties for mesh containers are not adjusted by
+  ObstacleModifier, and will not save correctly if using saveFlatFile.
+
+- Observer movement controls seems to get locked-up in Hunt mode.
+
+- Burrowed tank shadows should be ground clipped
+  (the shadow perspective matrix messes with the clip plane?)
+
+- if you start the client windowed on a multidisplay system, and then
+  move the window to a secondary monitor, you cannot control the
+  brightness of the (SDL) window since it presently modifying the
+  gamma of the display that started it.
+
+- dropping a team flag, when the related team is empty, start a timeout.
+  The related code does not take into account that we can have now
+  multiple team flags.
+
+- if the display cannot initialize properly, it will start bzflag with a
+  black screen.  need to prevent this by either detecting if there is an
+  available mode that is possible, lowering memory usage, or reporting
+  an error and aborting.
+
+- XIJoystick does not compile
+
+- time limiter does not take jumping into consideration when holding Agility
+
+- shooting straight shots with the Agility flag while just having accelerated
+  forward (common tactic to shoot "fast shots") will miss targets that are
+  rather stationary and directly in the shot's path.
+
+- bullets now travel through the top of a block instead of reflecting off.
+  The bullets appear to be half(or more) submerged into the block.
+
+- world weapons seem to lag the server when there are many players joined.
+  might be related to a rapidly repeating world weapon as well (like once
+  a second, use _weapons BZDB var to test...)
+
+- reached assertion on either World::getTeleportTarget() or
+  World::getTeleporter() after getting killed while jumping towards a
+  teleporter (and landing in front of the teleporter, albeit dead).  i
+  didn't respawn, waited a couple sec (was chatting), then the assertion was
+  raised.
+
+- list server includes counts for players running on non-public/mis-configured
+  servers on the same machine on different ports.  if server runs on port 5156
+  with publicaddr set to machine:5156 and then also runs another on 59999 with
+  publicaddr set to machine:5156 (by accident or otherwise), then player joins
+  to the 59999 server mask the 5156 server.  it'd be easy to blow this off as
+  expected behavior, but I expect one can also trojan any server's counts
+  using this same technique..
+
+- client crashes upon receipt of a corrupted MsgFlagUpdate message.
+  (See http://bzflag.secretplace.us/packet.txt for an example)
+
+- doc/guide/NetworkProtocol.xml is not up to date
 
 - Shift+Tab seems to be bound to jump without being bound to jump
-
-- menu does not display modified values after quitting and returning, although
-  the bindings appear to remain in effect.
-
-- issuing a /set command in bzadmin with no arguments does not provide a list
-  of settable variables. This is because /set is a local command that lists
-  the variables in the local BZDB, and bzadmin does not have a BZDB.
-
-- thief sound is too dang loud.  the players are all gonna go deaf if someone
-  doesn't tone that puppy down a bit.
+  It doesn't happen on Linux. Shift+Tab action is untranslated by XLookupString
+  (xfree86 4.3), so need custom code to go into bzflag.
 
 - Flaghelp falls into the radar area when radar is 'bigger'
 
@@ -31,32 +115,10 @@ recent bugs
   0xbfffd7ed) Could we be running off the end of the packet (ie count is
   fubar'ed?) Perhaps add sanity check for not overruning end of buffer.
 
-- On a FFA game, where no purple was allowed a Team size of 65535 was displayed
-  for Purple.
-
-- Rabbit selection is borken. Two things. A player often is Rabbit two times
-  in a row, which was intended to be illegal, and high scoring tanks get
-  bypassed.  Was playing on ducati where a player was consistantly in #1 slot,
-  but NEVER was rabbit. (The latter probaby happens when all players have a
-  negative score, the formula does not work well then). Nope: Top player was
-  44-31 or there abouts. HMM. I played again and the picking was fine. Could it
-  be a cheat client, causing havoc?
-
 - bzadmin seems to be less responsive over the network than bzflag - a
   bzadmin client can get kicked from a very active game by the server
   for causing it to queue too many packages (there's a limit at 20kB, when I
   removed it the queue went up to at least 64kB)
-
-- Player continues to see the locked on me message after death until
-  shooter locked onto a different target. (Nidhoggr reported this)
-
-- Killed tanks continue drifting and leave tank bits floating around on the
-  modified gravity ducati.  players seem to continue forwarding after landing
-  until X time as if gravity was unchanged.
-
-- os x client audio is very choppy when the user has a sound card installed
-
-- bzfs should re-resolve the list server IP if it can't reach it for an update
 
 - make maintainer-clean does not enter DIST_SUBDIRS
   so all Makefile.in and Makefile files are not removed correctly
@@ -64,9 +126,6 @@ recent bugs
 
 older bugs in BZFlag
 ---------------------
-
-see the bug tracker on SourceForge for more
-http://SourceForge.net/tracker/?group_id=3248&atid=103248
 
 * exploding tank parts sometimes move along the ground instead of
    flying up into the air.
@@ -96,3 +155,7 @@ http://SourceForge.net/tracker/?group_id=3248&atid=103248
 
 * error dialogs on win32 may appear off screen
    only when display resolution was changed
+
+---
+see the bug tracker on SourceForge for more
+http://SourceForge.net/tracker/?group_id=3248&atid=103248

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,18 +7,28 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#if defined(WIN32)
+#if defined(_MSC_VER)
 #pragma warning(4:4503)
 #endif
 
+// interface header
 #include "KeyManager.h"
+
+// system headers
 #include <assert.h>
 #include <ctype.h>
+#include <string.h> // strstr, etc
+#include <string>   // std::string
+#include <vector>
+
+// local implementation headers
+#include "BzfEvent.h"
 
 // initialize the singleton
+template <>
 KeyManager* Singleton<KeyManager>::_instance = (KeyManager*)0;
 
 const char*		KeyManager::buttonNames[] = {
@@ -33,7 +43,25 @@ const char*		KeyManager::buttonNames[] = {
   "Page Up",
   "Page Down",
   "Insert",
+  "Backspace",
   "Delete",
+  "Kp0",
+  "Kp1",
+  "Kp2",
+  "Kp3",
+  "Kp4",
+  "Kp5",
+  "Kp6",
+  "Kp7",
+  "Kp8",
+  "Kp9",
+  "Kp_Period",
+  "Kp_Divide",
+  "Kp_Multiply",
+  "Kp_Minus",
+  "Kp_Plus",
+  "Kp_Enter",
+  "Kp_Equals",
   "F1",
   "F2",
   "F3",
@@ -46,9 +74,35 @@ const char*		KeyManager::buttonNames[] = {
   "F10",
   "F11",
   "F12",
+  "Help",
+  "Print",
+  "Sysreq",
+  "Break",
+  "Menu",
+  "Power",
+  "Euro",
+  "Undo",
   "Left Mouse",
   "Middle Mouse",
-  "Right Mouse"
+  "Right Mouse",
+  "Wheel Up",
+  "Wheel Down",
+  "Mouse Button 6",
+  "Mouse Button 7",
+  "Mouse Button 8",
+  "Mouse Button 9",
+  "Mouse Button 10",
+  "Joystick Button 1",
+  "Joystick Button 2",
+  "Joystick Button 3",
+  "Joystick Button 4",
+  "Joystick Button 5",
+  "Joystick Button 6",
+  "Joystick Button 7",
+  "Joystick Button 8",
+  "Joystick Button 9",
+  "Joystick Button 10",
+  "LastButton"  // should always be last item listed
 };
 const char*		KeyManager::asciiNames[][2] = {
   { "Tab",		"\t" },
@@ -65,7 +119,7 @@ KeyManager::KeyManager()
   BzfKeyEvent key;
   key.ascii  = 0;
   key.shift  = 0;
-  for (i = BzfKeyEvent::Pause; i <= BzfKeyEvent::RightMouse; ++i) {
+  for (i = BzfKeyEvent::Pause; i < BzfKeyEvent::LastButton; ++i) {
     key.button = static_cast<BzfKeyEvent::Button>(i);
     stringToEvent.insert(std::make_pair(std::string(buttonNames[i]), key));
   }
@@ -107,6 +161,34 @@ void			KeyManager::unbind(const BzfKeyEvent& key,
   else
     releaseEventToCommand.erase(key);
   notify(key, press, "");
+}
+
+void			KeyManager::unbindCommand(const char* command)
+{
+  EventToCommandMap::iterator index;
+  EventToCommandMap::iterator deleteme;
+
+  index = pressEventToCommand.begin();
+  while (index != pressEventToCommand.end()) {
+    if (index->second == command) {
+      deleteme = index;
+      index++;
+      unbind(deleteme->first, true);
+    } else {
+      index++;
+    }
+  }
+
+  index = releaseEventToCommand.begin();
+  while (index != releaseEventToCommand.end()) {
+    if (index->second == command) {
+      deleteme = index;
+      index++;
+      unbind(deleteme->first, false);
+    } else {
+      index++;
+    }
+  }
 }
 
 std::string		KeyManager::get(const BzfKeyEvent& key,
@@ -165,7 +247,7 @@ std::string		KeyManager::keyEventToString(
     case ' ':
       return name + "Space";
     default:
-      if (!isspace(key.ascii))
+      if (!isspace((unsigned char)key.ascii))
 	return name + std::string(&key.ascii, 1);
       return name + "???";
   }
@@ -250,7 +332,7 @@ bool			KeyManager::onCallback(
 				void* userData,
 				void* vinfo)
 {
-  CallbackInfo* info = reinterpret_cast<CallbackInfo*>(vinfo);
+  CallbackInfo* info = static_cast<CallbackInfo*>(vinfo);
   callback(info->name, info->press, info->cmd, userData);
   return true;
 }

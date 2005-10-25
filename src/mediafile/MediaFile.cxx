@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,28 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/* interface header */
 #include "MediaFile.h"
+
+/* system implementation headers */
 #include <iostream>
+#include <string>
+#include <algorithm>
+
+/* common implementation headers */
+#include "CacheManager.h"
+
+
+#ifdef WIN32
+static void ConvertPath(std::string &path)
+{
+  std::replace(path.begin(), path.end(), '/', '\\');
+}
+#endif
+
 
 //
 // MediaFile
@@ -129,9 +146,17 @@ do {							\
 } while (0)
 
 unsigned char*		MediaFile::readImage(
-				const std::string& filename,
+				std::string filename,
 				int* width, int* height)
 {
+  // get the absolute filename for cache textures
+  if (CACHEMGR.isCacheFileType(filename)) {
+    filename = CACHEMGR.getLocalName(filename);
+  }
+#ifdef WIN32
+  // cheat and make sure the file is a windows file path
+  ConvertPath(filename);
+#endif //WIN32
   // try opening file as an image
   std::istream* stream;
   ImageFile* file = NULL;
@@ -146,7 +171,7 @@ unsigned char*		MediaFile::readImage(
     // get the image size
     int dx = *width  = file->getWidth();
     int dy = *height = file->getHeight();
-    int dz =           file->getNumChannels();
+    int dz =	   file->getNumChannels();
 
     // make buffer for final image
     image = new unsigned char[dx * dy * 4];
@@ -226,7 +251,7 @@ float*		MediaFile::readSound(
   float* audio = NULL;
   if (file != NULL) {
     // get the audio info
-    *rate           = file->getFramesPerSecond();
+    *rate	   = file->getFramesPerSecond();
     int numChannels = file->getNumChannels();
     int numFrames   = file->getNumFrames();
     int sampleWidth = file->getSampleWidth();

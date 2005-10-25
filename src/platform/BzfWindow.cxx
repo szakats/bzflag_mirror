@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,20 +7,29 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "ErrorHandler.h"
+// interface header
 #include "BzfWindow.h"
+
+// system headers
+#include <vector>
+
+// common implementation headers
+#include "ErrorHandler.h"
 
 BzfWindow::BzfWindow(const BzfDisplay* _display) : display(_display)
 {
-  // do nothing
 }
 
 BzfWindow::~BzfWindow()
 {
-  // do nothing
+}
+
+void BzfWindow::setFullscreen(bool on) {
+  if (on)
+    setFullscreen();
 }
 
 void			BzfWindow::callExposeCallbacks() const
@@ -81,13 +90,6 @@ void			BzfWindow::removeResizeCallback(
       break;
     }
   }
-}
-
-void			BzfWindow::initJoystick(const char* joystickName)
-{
-  std::vector<std::string> args;
-  args.push_back(joystickName);
-  printError("joystick '{1}' not supported...", &args);
 }
 
 void			BzfWindow::yieldCurrent(void)

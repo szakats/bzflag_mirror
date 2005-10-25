@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,28 +7,35 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __CUSTOMGATE_H__
 #define __CUSTOMGATE_H__
 
-// system headers
+#include "common.h"
+
+/* interface header */
+#include "WorldFileObstacle.h"
+
+/* system interface headers */
+#include <string>
 #include <iostream>
 
-// bzfs-specific headers
-#include "WorldFileObstacle.h"
+/* local interface headers */
 #include "WorldInfo.h"
 
 
 class CustomGate : public WorldFileObstacle {
   public:
-    CustomGate();
-  virtual bool read(const char *cmd, std::istream&);
-    virtual void write(WorldInfo*) const;
+    CustomGate(const char* telename);
+    virtual bool read(const char *cmd, std::istream&);
+    virtual void writeToGroupDef(GroupDefinition*) const;
 
   protected:
+    std::string telename;
     float border;
+    bool horizontal;
 };
 
 #endif  /* __CUSTOMGATE_H__ */

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,22 +7,29 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef UIMAP_H
 #define UIMAP_H
 
+/* global interface headers */
+#include "common.h"
+
+/* system interface headers */
 #include <map>
 #include <string>
 
 #include "BZAdminUI.h"
+#include "PlayerInfo.h"
 #include "Singleton.h"
 
 
+class BZAdminClient;
+
+
 /** The function type that creates interface objects. */
-typedef BZAdminUI* (*UICreator)(const std::map<PlayerId, std::string>& players,
-				PlayerId me);
+typedef BZAdminUI* (*UICreator)(BZAdminClient&);
 
 
 /** This class maps strings to BZAdmin interfaces (subclasses of

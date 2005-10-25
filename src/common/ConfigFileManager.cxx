@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "common.h"
@@ -17,24 +17,37 @@
 #include "StateDatabase.h"
 #include "KeyManager.h"
 
-static const int        MaximumLineLength = 1024;
+static const int	MaximumLineLength = 1024;
 
 // initialize the singleton
+template <>
 ConfigFileManager* Singleton<ConfigFileManager>::_instance = (ConfigFileManager*)0;
 
 void writeBZDB(const std::string& name, void *stream)
 {
-  std::ostream& s = *reinterpret_cast<std::ostream*>(stream);
+  std::ostream& s = *static_cast<std::ostream*>(stream);
   std::string value = BZDB.get(name);
-  // quotify anything with a space
-  if (value.find(' ') != value.npos)
+  std::string defaultVal = BZDB.getDefault(name);
+  std::string newkey;
+  bool commentOut = (value == defaultVal);
+
+  // quotify anything with a space and empty strings
+  if ((value.find(' ') != value.npos) || (value.size() == 0)) {
     value = std::string("\"") + value + "\"";
-  s << "set " << name << ' ' << value << std::endl;
+  }
+
+  // quotify the key if there's a space
+  if (name.find(' ') != name.npos)
+    newkey = std::string("\"") + name + "\"";
+  else
+    newkey = name;
+
+  s << (commentOut ? "#set " : "set ") << newkey << ' ' << value << std::endl;
 }
 
 void writeKEYMGR(const std::string& name, bool press, const std::string& command, void* stream)
 {
-  std::ostream& s = *reinterpret_cast<std::ostream*>(stream);
+  std::ostream& s = *static_cast<std::ostream*>(stream);
   // quotify anything with a space
   std::string value = name;
   if (value.find(' ') != value.npos)

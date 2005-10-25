@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,16 +7,20 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
-#include "playing.h"
+// interface header
 #include "ShotPath.h"
-#include "ShotStrategy.h"
-#include "LocalPlayer.h"
-#include "Protocol.h"
-#include "Flag.h"
+
+/* system headers */
+#include <assert.h>
+
+/* local implementation headers */
+#include "SegmentedShotStrategy.h"
+#include "GuidedMissleStrategy.h"
+#include "ShockWaveStrategy.h"
+
 
 //
 // FiringInfo (with BaseLocalPlayer)
@@ -34,8 +38,14 @@ FiringInfo::FiringInfo(const BaseLocalPlayer& tank, int id)
   shot.vel[1] = tankVel[1] + shotSpeed * dir[1];
   shot.vel[2] = tankVel[2] + shotSpeed * dir[2];
   shot.dt = 0.0f;
+
   flagType = tank.getFlag();
-  lifetime = BZDB.eval(StateDatabase::BZDB_RELOADTIME);
+  // wee bit o hack -- if phantom flag but not phantomized
+  // the shot flag is normal -- otherwise FiringInfo will have
+  // to be changed to add a real bitwise status variable
+  if (tank.getFlag() == Flags::PhantomZone && !tank.isFlagActive()){
+    flagType = Flags::Null;
+  }
   lifetime = BZDB.eval(StateDatabase::BZDB_RELOADTIME);
 }
 
@@ -74,6 +84,8 @@ ShotPath::ShotPath(const FiringInfo& info) :
       strategy = new ShockWaveStrategy(this);
     else if (firingInfo.flagType == Flags::Thief)
       strategy = new ThiefStrategy(this);
+    else if (firingInfo.flagType == Flags::PhantomZone)
+      strategy = new PhantomBulletStrategy(this);
     else
       assert(0);    // shouldn't happen
   }
@@ -112,9 +124,10 @@ void			ShotPath::updateShot(float dt)
   currentTime += dt;
 
   // update shot
-  if (!expired)
+  if (!expired) {
     if (expiring) setExpired();
     else getStrategy()->update(dt);
+  }
 }
 
 void			ShotPath::setReloadTime(float _reloadTime)

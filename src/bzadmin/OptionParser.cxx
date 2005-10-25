@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,13 +7,14 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning( 4: 4786)
 #endif
 
+/* interface header */
 #include "OptionParser.h"
 
 
@@ -24,7 +25,7 @@ OptionParser::OptionParser(const std::string& helpPrefix,
 }
 
 OptionParser::~OptionParser() {
-  std::map<std::string, Parser*>::iterator iter;
+  ParserMap::iterator iter;
   for (iter = parsers.begin(); iter != parsers.end(); ++iter)
     delete iter->second;
 }
@@ -43,15 +44,17 @@ const std::vector<std::string>& OptionParser::getParameters() const {
 bool OptionParser::parse(int argc, char** argv) {
   parameters.clear();
   error = "";
-  std::map<std::string, Parser*>::iterator iter;
+  ParserMap::iterator iter;
   for (int i = 1; i < argc; ++i) {
     if (!strcmp(argv[i], "-help")) {
       printHelp(std::cout, argv[0]);
       return false;
     }
-    if (argv[i][0] != '-')
+    if (argv[i][0] != '-') {
       parameters.push_back(argv[i]);
-    else {
+      // should just blank out the password, but we don't really parse it here
+      memset(argv[i], ' ', strlen(argv[i]));
+    } else {
       iter = parsers.find(&argv[i][1]);
       if (iter == parsers.end()) {
 	error = error + "Unknown option \"" + argv[i] + "\"";
@@ -74,7 +77,7 @@ void OptionParser::printHelp(std::ostream& os, const std::string& progName) cons
   os<<helpPre<<std::endl<<std::endl;
   printUsage(os, progName);
   os<<std::endl<<std::endl;
-  std::map<std::string, Parser*>::const_iterator iter;
+  ParserMap::const_iterator iter;
   os<<"   -help: print this help message"<<std::endl;
   for (iter = parsers.begin(); iter != parsers.end(); ++iter)
     os<<"   -"<<iter->first<<": "<<iter->second->help<<std::endl;
@@ -82,7 +85,7 @@ void OptionParser::printHelp(std::ostream& os, const std::string& progName) cons
 
 
 void OptionParser::printUsage(std::ostream& os, const std::string& progName) const {
-  std::map<std::string, Parser*>::const_iterator iter;
+  ParserMap::const_iterator iter;
   os<<"Usage: "<<progName<<" [-help] ";
   for (iter = parsers.begin(); iter != parsers.end(); ++iter)
     os<<iter->second->usage<<" ";

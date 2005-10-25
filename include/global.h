@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,24 +7,32 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- */
-
-/*
- * Global constants
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	BZF_GLOBAL_H
 #define	BZF_GLOBAL_H
 
-#include <math.h>
+/*
+ * Global constants
+ */
+
 #include "common.h"
+
+/* system headers */
+#include <math.h>
+
+/* common headers */
 #include "StateDatabase.h"
+
 
 
 // values affecting struct and class layout
 const int		CallSignLen = 32;	// including terminating NUL
+const int		PasswordLen = 32;	// including terminating NUL
 const int		EmailLen = 128;		// including terminating NUL
+const int		TokenLen = 22;		// opaque string (now int(10)) and terminating NUL
+const int		VersionLen = 60;	// including terminating NUL
 const int		MessageLen = 128;	// including terminating NUL
 
 // types of things we can be
@@ -54,63 +62,37 @@ enum TeamColor {
 #endif
 
 // epsilon and very far for ray intersections
-const float		Epsilon =	1.0e-5f;	// arbitrary
+const float		Epsilon =	ZERO_TOLERANCE;	// arbitrary
 const float		Infinity =	MAXFLOAT;	// arbitrary
 
-#define	DEFAULT_GRAVITY	-9.81f
 #define DEFAULT_WORLD	800
-
-// universe info
-const float		BaseSize =	60.0f;					// meters
-
-// rough shot geometry
-const float		ShotRadius =	0.5f;		// meters
-const float		ShotLength =	0.5f;		// meters
-const float		ShotTailLength=	4.0f;		// meters
-
-// box geometry
-const float		BoxBase =	30.0f;// meters
-
-// teleporter geometry (My God, it's full of stars...)
-const float		TeleUnit =	1.12f;// meters
-const float		TeleWidth =	1.0f * TeleUnit;// meters
-const float		TeleBreadth =	4.0f * TeleUnit;// meters
-const float		TeleHeight =	9.0f * TeleUnit;// meters
-
-// city geometry
-const int		CitySize =	5;
-const float		AvenueSize =	2.0f * BoxBase;	// meters
 
 // readout stuff
 const int		MaxMessages =	20;		// msg. history length
-const float		FlashOnTime =	1.0f;		// seconds
-const float		FlashOffTime =	0.2f;		// seconds
 const int		MinX = 256;
 const int		MinY = 192;
 const int		NoMotionSize =	10;		// no motion zone size
 const int		MaxMotionSize = 37;		// motion zone size
-const float		RadarLowRangeFactor =	0.25f;// low radar range
-const float		RadarMedRangeFactor =	0.5f;	// medium radar range
-const float		RadarHiRangeFactor =	1.0f;	// high radar range
 
 // game styles
 enum GameStyle {
 	PlainGameStyle =		0x0000,
 	TeamFlagGameStyle =		0x0001,	// capture the flag
 	SuperFlagGameStyle =		0x0002,	// superflags allowed
-	//UnusedGameStyle =		0x0004,	// was rogue, now we use team counts
+	//FormerRogueStyle =		0x0004,	// used to be rogue, but now we have rogue maxplayers
 	JumpingGameStyle =		0x0008,	// jumping allowed
 	InertiaGameStyle =		0x0010,	// momentum for all
 	RicochetGameStyle =		0x0020,	// all shots ricochet
 	ShakableGameStyle =		0x0040,	// can drop bad flags
 	AntidoteGameStyle =		0x0080,	// anti-bad flags
-	TimeSyncGameStyle =		0x0100,	// time sync'd to srvr
+	HandicapGameStyle =		0x0100,	// handicap players based on score (eek! was TimeSyncGameStyle)
 	RabbitChaseGameStyle =		0x0200	// rabbit chase
+	// add here before reusing old ones above
 };
 
 // map object flags
 #define _DRIVE_THRU	0x01
-#define _SHOOT_THRU 0x02
+#define _SHOOT_THRU	0x02
 #define _FLIP_Z		0x04
 
 const int mapVersion = 1;
@@ -122,16 +104,15 @@ struct GlobalDBItem {
     bool			persistent;
     StateDatabase::Permission	permission;
 };
-extern const unsigned int		numGlobalDBItems;
-extern const GlobalDBItem		globalDBItems[];
+extern const unsigned int numGlobalDBItems;
+extern const struct GlobalDBItem globalDBItems[];
 
 #endif // BZF_GLOBAL_H
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

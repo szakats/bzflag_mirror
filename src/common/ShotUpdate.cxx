@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,16 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif
 
-#include "common.h"
+// interface header
 #include "ShotUpdate.h"
+
+// implementation headers
+#include "common.h"
+#include "Pack.h"
 
 //
 // ShotUpdate
@@ -40,8 +40,9 @@ void*			ShotUpdate::unpack(void* buf)
   buf = nboUnpackVector(buf, pos);
   buf = nboUnpackVector(buf, vel);
   buf = nboUnpackFloat(buf, dt);
-  short temp = team;
+  short temp;
   buf = nboUnpackShort(buf, temp);
+  team = (TeamColor)temp;
   return buf;
 }
 
@@ -56,6 +57,7 @@ FiringInfo::FiringInfo()
 
 void*			FiringInfo::pack(void* buf) const
 {
+  buf = nboPackFloat(buf, timeSent);
   buf = shot.pack(buf);
   buf = flagType->pack(buf);
   buf = nboPackFloat(buf, lifetime);
@@ -64,6 +66,7 @@ void*			FiringInfo::pack(void* buf) const
 
 void*			FiringInfo::unpack(void* buf)
 {
+  buf = nboUnpackFloat(buf, timeSent);
   buf = shot.unpack(buf);
   buf = FlagType::unpack(buf, flagType);
   buf = nboUnpackFloat(buf, lifetime);

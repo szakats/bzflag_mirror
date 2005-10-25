@@ -1,40 +1,78 @@
-SUBDIRS = data include man package src doc
-DIST_SUBDIRS = data debian include misc man package win32 src doc
+# $Id$
 
-package: FORCE
-	cd package && $(MAKE) targets
+AUTOMAKE_OPTIONS = 1.6 dist-zip dist-bzip2
+ACLOCAL_AMFLAGS = -I m4
 
-FORCE:
+traversal_dirs = \
+	data \
+	doc \
+	include \
+	man \
+	package \
+	src
+
+if BUILD_PLUGINS
+PLUGINS=plugins
+else
+PLUGINS=
+endif
+
+SUBDIRS = \
+	$(traversal_dirs) \
+	$(PLUGINS)
+
+DIST_SUBDIRS = \
+	$(traversal_dirs) \
+	Dev-C++ \
+	debian \
+	m4 \
+	misc \
+	plugins \
+	tools \
+	win32 \
+	BZFlag.xcode
 
 EXTRA_DIST = \
 	autogen.sh \
 	BUGS \
+	bzflag.info \
 	bzflag.lsm \
 	bzflag.spec \
 	DEVINFO \
 	PORTING \
+	README.BeOS \
+	README.DEVC++ \
 	README.IRIX \
 	README.Linux \
 	README.MINGW32 \
-	README.OSX \
+	README.MacOSX \
+	README.SDL \
 	README.SOLARIS \
 	README.UNIX \
 	README.WIN32 \
+	README.XMINGW	\
 	RELNOTES
 
 MAINTAINERCLEANFILES = \
-	aclocal.m4 \
-	config.guess \
-	config.sub \
 	configure \
+	bzflag.info \
 	bzflag.spec \
 	INSTALL \
-	install-sh \
-	missing \
-	mkinstalldirs \
 	Makefile.in
 
-deb: dist
+.PHONY: package debian-cvs debian-release
+
+package:
+	cd package && $(MAKE) targets
+
+debian-cvs: dist
 	-rm -rf $(distdir)
-	GZIP=$(GZIP_ENV) $(TAR) zxf $(distdir).tar.gz
+	GZIP=$(GZIP_ENV) $(AMTAR)$(TAR) zxf $(distdir).tar.gz
 	(cd $(distdir) && debian/buildsnap cvs)
+
+debian-release: debian/changelog dist
+	-rm -rf $(distdir)
+	GZIP=$(GZIP_ENV) $(AMTAR)$(TAR) zxf $(distdir).tar.gz
+	cp debian/changelog $(distdir)/debian/
+	(cd $(distdir) && debian/buildsnap release)
+

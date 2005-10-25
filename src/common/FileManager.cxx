@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,15 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// interface header
 #include "FileManager.h"
-#include "string"
-#include "StateDatabase.h"
+
+// system headers
+#include <string>
 #include <ctype.h>
 #include <fstream>
-
 #include <sys/stat.h>
 #ifndef _WIN32
 #include <sys/types.h>
@@ -23,11 +24,15 @@
 #include <direct.h>
 #endif
 
+// local implementation headers
+#include "StateDatabase.h"
+
 //
 // FileManager
 //
 
 // initialize the singleton
+template <>
 FileManager* Singleton<FileManager>::_instance = (FileManager*)0;
 
 FileManager::FileManager()
@@ -176,8 +181,6 @@ bool				FileManager::isAbsolute(const std::string& path) const
   if (path.size() >= 3 && isalpha(cpath[0]) && cpath[1] == ':' &&
       (cpath[2] == '\\' || cpath[2] == '/'))
     return true;
-#elif defined(macintosh)
-#error FIXME -- what indicates an absolute path on mac?
 #else
   if (path.c_str()[0] == '/')
     return true;
@@ -196,28 +199,21 @@ std::string			FileManager::catPath(
   if (b.empty())
     return a;
 
+  std::string c = a;
 #if defined(_WIN32)
-  std::string c = a;
   c += "\\";
-  c += b;
-  return c;
-#elif defined(macintosh)
-  std::string c = a;
-  c += ':';
-  c += b;
 #else
-  std::string c = a;
   c += "/";
+#endif
   c += b;
   return c;
-#endif
 }
 
+
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

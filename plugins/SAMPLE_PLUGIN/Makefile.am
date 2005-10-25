@@ -1,0 +1,14 @@
+lib_LTLIBRARIES = SAMPLE_PLUGIN.la
+
+SAMPLE_PLUGIN_la_SOURCES = SAMPLE_PLUGIN.cpp
+SAMPLE_PLUGIN_la_CPPFLAGS = -I$(top_srcdir)/include
+SAMPLE_PLUGIN_la_LDFLAGS = -module -avoid-version
+
+EXTRA_DIST = \
+	README.txt \
+	SAMPLE_PLUGIN.def \
+	SAMPLE_PLUGIN.sln \
+	SAMPLE_PLUGIN.vcproj
+
+MAINTAINERCLEANFILES =	\
+	Makefile.in

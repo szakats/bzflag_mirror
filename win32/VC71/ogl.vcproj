@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\lib\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="..\..\src\ogl\Debug\"
+			IntermediateDirectory="..\..\src\ogl\Debug\"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -30,6 +30,7 @@
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
+				WarnAsError="FALSE"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
 				CompileAs="0"/>
@@ -62,8 +63,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\lib\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="..\..\src\ogl\"
+			IntermediateDirectory="..\..\src\ogl\"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -72,10 +73,255 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="TRUE"
+				PrecompiledHeaderFile=".\Release/ogl.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="..\..\src\ogl\Release\ogl.lib"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="KRB5 Debug|Win32"
+			OutputDirectory="..\..\src\ogl\krb5_debug\"
+			IntermediateDirectory="..\..\src\ogl\krb5_debug\"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				PrecompiledHeaderFile=".\Debug/ogl.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="..\..\src\ogl\krb5_debug\ogl.lib"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="KRB5 Release|Win32"
+			ConfigurationType="1">
+			<Tool
+				Name="VCCLCompilerTool"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="release_modern|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
+				OptimizeForProcessor="3"
+				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
+				EnableEnhancedInstructionSet="1"
+				PrecompiledHeaderFile=".\Release/ogl.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="..\..\src\ogl\Release\ogl.lib"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="release_modern_p3|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
+				EnableEnhancedInstructionSet="1"
+				PrecompiledHeaderFile=".\Release/ogl.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="..\..\src\ogl\Release\ogl.lib"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Release_pdcurses|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\Release/ogl.pch"
 				AssemblerListingLocation=".\Release/"
@@ -137,6 +383,39 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\ogl\OpenGLGState.cxx">
@@ -151,6 +430,39 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="2"
@@ -177,6 +489,39 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\ogl\OpenGLMaterial.cxx">
@@ -197,11 +542,8 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\ogl\OpenGLTexFont.cxx">
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="KRB5 Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -210,7 +552,23 @@
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="2"
@@ -237,6 +595,39 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\ogl\RenderNode.cxx">
@@ -257,46 +648,70 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\ogl\TextureManager.cxx">
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath="..\include\bzfgl.h">
+				RelativePath="..\..\include\bzfgl.h">
 			</File>
 			<File
-				RelativePath="..\include\bzfio.h">
+				RelativePath="..\..\include\bzfio.h">
 			</File>
 			<File
-				RelativePath="..\include\common.h">
+				RelativePath="..\..\include\common.h">
 			</File>
 			<File
-				RelativePath="..\include\OpenGLDisplayList.h">
+				RelativePath="..\..\include\OpenGLDisplayList.h">
 			</File>
 			<File
-				RelativePath="..\include\OpenGLGState.h">
+				RelativePath="..\..\include\OpenGLGState.h">
 			</File>
 			<File
-				RelativePath="..\include\OpenGLLight.h">
+				RelativePath="..\..\include\OpenGLLight.h">
 			</File>
 			<File
-				RelativePath="..\include\OpenGLMaterial.h">
+				RelativePath="..\..\include\OpenGLMaterial.h">
 			</File>
 			<File
-				RelativePath="..\include\OpenGLTexFont.h">
+				RelativePath="..\..\include\OpenGLTexture.h">
 			</File>
 			<File
-				RelativePath="..\include\OpenGLTexture.h">
-			</File>
-			<File
-				RelativePath="..\include\RenderNode.h">
-			</File>
-			<File
-				RelativePath="..\..\include\TextureManager.h">
+				RelativePath="..\..\include\RenderNode.h">
 			</File>
 		</Filter>
 	</Files>

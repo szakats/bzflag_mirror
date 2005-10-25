@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,34 +7,41 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _WIN32
-#pragma warning( 4: 4786 )
-#endif
+#include "common.h"
 
-// class-interface header
+/* interface header */
 #include "CustomBox.h"
 
-// common-interface headers
+/* system implementation headers */
+#include <math.h>
+
+/* common implementation headers */
+#include "BoxBuilding.h"
 #include "StateDatabase.h"
+#include "ObstacleMgr.h"
 
 
 CustomBox::CustomBox()
 {
-  size[0] = size[1] = BoxBase;
+  size[0] = size[1] = BZDB.eval(StateDatabase::BZDB_BOXBASE);
   size[2] = BZDB.eval(StateDatabase::BZDB_BOXHEIGHT);
 }
 
 
-void CustomBox::write(WorldInfo *world) const
+void CustomBox::writeToGroupDef(GroupDefinition *groupdef) const
 {
-  world->addBox(pos[0], pos[1], pos[2], rotation, size[0], size[1], size[2],driveThrough,shootThrough);
+  BoxBuilding* box =
+    new BoxBuilding(pos, rotation,
+		    fabsf(size[0]), fabsf(size[1]), fabsf(size[2]),
+		    driveThrough, shootThrough);
+  groupdef->addObstacle(box);
 }
 
 // Local variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

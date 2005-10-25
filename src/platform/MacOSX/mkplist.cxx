@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "version.h"
 
@@ -37,7 +38,7 @@ main(int argc, char *argv[])
   int status, i, size, versionsize;
   struct stat statbuf;
   char *inp, *outp;
-  char versionstring[16];
+  char versionstring[128];
   char *filename = INNAME;
 
   if (atexit(cleanup) < 0){
@@ -46,8 +47,8 @@ main(int argc, char *argv[])
   }
   if (argc > 1)
     filename = argv[1];
-  versionsize = sprintf(versionstring, "%d.%d.%d", BZ_MAJOR_VERSION,
-			BZ_MINOR_VERSION, BZ_REV);
+
+  versionsize = sprintf(versionstring, "%s", getAppVersion());
   versionstring[versionsize] = 0;
   /* Open the plist file */
   fd = open(filename, O_RDONLY);

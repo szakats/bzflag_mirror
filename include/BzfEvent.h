@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* BzfEvent:
@@ -50,6 +50,8 @@ class BzfKeyEvent {
     enum Button {
 			NoButton = 0,
 			Pause,
+
+			/* Arrows + Home/End pad */
 			Home,
 			End,
 			Left,
@@ -59,7 +61,28 @@ class BzfKeyEvent {
 			PageUp,
 			PageDown,
 			Insert,
+			/* Ascii character */
+			Backspace,
 			Delete,
+			/* Numeric keypad */
+			Kp0,
+			Kp1,
+			Kp2,
+			Kp3,
+			Kp4,
+			Kp5,
+			Kp6,
+			Kp7,
+			Kp8,
+			Kp9,
+			Kp_Period,
+			Kp_Divide,
+			Kp_Multiply,
+			Kp_Minus,
+			Kp_Plus,
+			Kp_Enter,
+			Kp_Equals,
+			/* Function keys */
 			F1,
 			F2,
 			F3,
@@ -72,16 +95,38 @@ class BzfKeyEvent {
 			F10,
 			F11,
 			F12,
+			/* Miscellaneous function keys */
+			Help,
+			Print,
+			Sysreq,
+			Break,
+			Menu,
+			Power,
+			Euro,
+			Undo,
+			/* Mouse buttons */
 			LeftMouse,
 			MiddleMouse,
 			RightMouse,
-			BZ_Mouse_Button_4,
-			BZ_Mouse_Button_5,
-			BZ_Mouse_Button_6,
-			BZ_Mouse_Button_7,
-			BZ_Mouse_Button_8,
-			BZ_Mouse_Button_9,
-			Tab
+			WheelUp,
+			WheelDown,
+			MouseButton6,
+			MouseButton7,
+			MouseButton8,
+			MouseButton9,
+			MouseButton10,
+			/* Joystick buttons */
+			BZ_Button_1,
+			BZ_Button_2,
+			BZ_Button_3,
+			BZ_Button_4,
+			BZ_Button_5,
+			BZ_Button_6,
+			BZ_Button_7,
+			BZ_Button_8,
+			BZ_Button_9,
+			BZ_Button_10,
+			LastButton  // special marker that must be last
     };
     enum {
 			ShiftKey = 1,
@@ -121,10 +166,10 @@ class BzfEvent {
 	BzfKeyEvent	keyDown;
     };
     BzfEvent() :
-        type(Unset),
-        window((BzfWindow*)NULL)
+	type(Unset),
+	window((BzfWindow*)NULL)
     {
-        mouseMove.x=mouseMove.y=resize.width=resize.height=keyUp.ascii=keyUp.button=keyUp.shift=0;
+	mouseMove.x=mouseMove.y=resize.width=resize.height=keyUp.ascii=keyUp.button=keyUp.shift=0;
     }
 };
 

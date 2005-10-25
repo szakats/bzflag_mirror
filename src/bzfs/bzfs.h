@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,29 +7,22 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __BZFS_H__
 #define __BZFS_H__
 
-static const char copyright[] = "Copyright (c) 1993 - 2003 Tim Riker";
-
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning( 4 : 4786 )
 #endif
 
 // to dump score info to stdout
 #define PRINTSCORE to include code to dump score info to stdout
 
-// Like verbose debug messages?
-#define DEBUG1 if (clOptions->debug >= 1) printf
-#define DEBUG2 if (clOptions->debug >= 2) printf
-#define DEBUG3 if (clOptions->debug >= 3) printf
-#define DEBUG4 if (clOptions->debug >= 4) printf
-
 #define SERVERLOGINMSG true
 
+#include "common.h"
 
 // must be before network.h because that defines a close() macro which
 // messes up fstreams.	luckily, we don't need to call the close() method
@@ -38,79 +31,80 @@ static const char copyright[] = "Copyright (c) 1993 - 2003 Tim Riker";
 
 // must be before windows.h
 #include "network.h"
-#include <iomanip>
 
-#if defined(_WIN32)
-  #pragma warning(disable: 4786)
-#endif
-
-#if defined(_WIN32)
-#include <windows.h>
-#define popen _popen
-#define pclose _pclose
-#define sleep(_x) Sleep(1000 * (_x))
-#endif /* defined(_WIN32) */
-
-#include <stdio.h>
-#if !defined(_WIN32)
-#include <fcntl.h>
-#endif
-
-// system headers
-#include <string>
-#include <string.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include "bzsignal.h"
-#include <time.h>
-
-// common-interface headers
-#include "common.h"
-#include "global.h"
-#include "Protocol.h"
+// common interface headers
 #include "Address.h"
-#include "Pack.h"
-#include "PlayerState.h"
-#include "TimeKeeper.h"
 #include "Flag.h"
-#include "Team.h"
 #include "Ping.h"
-#include "multicast.h"
-#include "TimeBomb.h"
-#include "md5.h"
-#include "ShotUpdate.h"
-#include "ConfigFileManager.h"
-#include "CommandManager.h"
-#include "BZDBCache.h"
-#include "TextUtils.h"
 
-/* bzfs class-specific headers */
-#include "version.h"
-#include "commands.h"
-#include "TextChunkManager.h"
-#include "AccessControlList.h"
+// bzfs specific headers
+#include "TeamBases.h"
 #include "CmdLineOptions.h"
-#include "WorldInfo.h"
-#include "Permissions.h"
-#include "WorldWeapons.h"
+#include "GameKeeper.h"
 #include "FlagInfo.h"
-#include "VotingArbiter.h"
-#include "PlayerInfo.h"
-#include "PackVars.h"
+#include "WorldInfo.h"
 
-// types for reading world files
-#include "WorldFileObstacle.h"
-#include "CustomBox.h"
-#include "CustomPyramid.h"
-#include "CustomGate.h"
-#include "CustomLink.h"
-#include "CustomBase.h"
-#include "CustomWeapon.h"
-#include "CustomWorld.h"
+extern void sendMessage(int         playerIndex,
+			PlayerId    dstPlayer,
+			const char *message);
+extern void removePlayer(int         playerIndex, 
+			 const char *reason,
+			 bool        notify = true);
+extern void playerKilled(int             victimIndex,
+			 int             killerIndex,
+			 int             reason,
+			 int16_t         shotIndex,
+			 const FlagType *flagType,
+			 int             phydrv,
+			 bool            respawnOnBase = false);
+extern void sendPlayerMessage(GameKeeper::Player *playerData,
+			      PlayerId dstPlayer,
+			      const char *message);
+extern char *getDirectMessageBuffer();
+extern void  broadcastMessage(uint16_t code, int len, const void *msg);
+extern void  sendTeamUpdate(int playerIndex = -1,
+			    int teamIndex1 = -1,
+			    int teamIndex2 = -1);
+extern void  sendFlagUpdate(FlagInfo &flag);
+extern void  sendDrop(FlagInfo &flag);
+extern void  sendIPUpdate(int targetPlayer = -1, int playerIndex = -1);
+extern void  sendPlayerInfo(void);
+extern void  directMessage(int playerIndex, uint16_t code,
+			   int len, const void *msg);
+extern int   getCurMaxPlayers();
+extern bool  areFoes(TeamColor team1, TeamColor team2);
+extern PingPacket getTeamCounts();
+extern void       zapFlagByPlayer(int playerIndex);
+extern void       resetFlag(FlagInfo &flag);
+extern void       publicize();
+extern TeamColor  whoseBase(float x, float y, float z);
 
+// initialize permission groups
+extern void initGroups();
+
+extern BasesList bases;
+extern CmdLineOptions *clOptions;
+extern uint16_t        curMaxPlayers;
+extern bool            done;
+extern bool            gameOver;
+extern TeamInfo        team[NumTeams];
+extern int             numFlags;
+extern bool            countdownActive;
+extern int             countdownDelay;
+extern TimeKeeper      countdownPauseStart;
+extern char            hexDigest[50];
+extern WorldInfo      *world;
+extern char           *worldDatabase;
+extern uint32_t        worldDatabaseSize;
+extern char            worldSettings[4 + WorldSettingsSize];
+extern uint8_t         rabbitIndex;
+extern float           speedTolerance;
+extern bool            handlePings;
+extern uint16_t        maxPlayers;
+extern uint16_t        maxRealPlayers;
+extern float           pluginWorldSize;
+extern float           pluginWorldHeight;
+extern float           pluginMaxWait;
 
 #endif
 

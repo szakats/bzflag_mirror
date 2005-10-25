@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -17,18 +17,22 @@
 #ifndef BZF_MYIO
 #define BZF_MYIO
 
+#include "common.h"
+
+void setDebugTimestamp (bool enable, bool doMicros);
+void formatDebug(const char* fmt, ...);
+
 /* egcs headers on linux define NULL as (void*)0.  that's a no no in C++. */
 #if defined(NULL)
-#undef NULL
+#  undef NULL
 #endif
 #define NULL 0
 
 /* insert any other broken OS conditionals here */
-#if !defined(_WIN32)
-#endif
 #include <iostream>
 
 #endif
+
 
 
 /*

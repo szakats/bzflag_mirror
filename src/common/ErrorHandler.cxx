@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,17 +7,21 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+
+// interface header
 #include "ErrorHandler.h"
+
+// system headers
 #include <stdio.h>
 #include <stdarg.h>
+#include <vector>
+#include <string>
+
+// local implementation headers
 #include "bzfio.h"
-#if defined(_WIN32)
-#include <windows.h>
-#endif
-#include "common.h"
 #include "BundleMgr.h"
 #include "Bundle.h"
 
@@ -46,7 +50,7 @@ void			printError(const std::string &fmt, const std::vector<std::string> *parms)
 #if defined(_WIN32)
   else { OutputDebugString(msg.c_str()); OutputDebugString("\n"); }
 #else
-  else fprintf(stderr, "%s\n", msg.c_str());
+  else std::cerr << msg << std::endl;
 #endif
 }
 

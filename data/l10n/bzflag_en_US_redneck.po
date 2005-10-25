@@ -429,8 +429,8 @@ msgstr "Code Contributo's:"
 #msgid "Special Thanks:"
 #msgstr ""
 
-msgid "Send:"
-msgstr ""
+#msgid "Send:"
+#msgstr ""
 
 msgid "Servers"
 msgstr "Servahs"
@@ -558,19 +558,7 @@ msgstr "Daid"
 #msgid "openBroadcast: No udp service {1}"
 #msgstr ""
 
-#msgid "openMulticast: No udp service {1}"
-#msgstr ""
-
-#msgid "openMulticast: Invalid port {1}"
-#msgstr ""
-
-#msgid "openMulticast: Can't get address of {1}"
-#msgstr ""
-
 #msgid "joystick '{1}' not supported..."
-#msgstr ""
-
-#msgid "Using multicast relay"
 #msgstr ""
 
 #msgid "Server did send endpoint information, UDP connection up"
@@ -639,8 +627,8 @@ msgstr "Daid"
 #msgid "Kills"
 #msgstr ""
 
-#msgid "Team Score"
-#msgstr ""
+msgid "Team Score"
+msgstr "How weez doin"
 
 #msgid "Locale:"
 #msgstr ""
@@ -1468,7 +1456,7 @@ msgstr "flags is in th' team colo', superflags is white, an' th' antidote flag"
 #msgid "None"
 #msgstr ""
 
-#msgid "Blinking"
+#msgid "Pulsating"
 #msgstr ""
 
 #msgid "Underline"
@@ -1777,3 +1765,6 @@ msgstr "time until a bad flag is dropped (if thar's a time limit)."
 
 msgid "Other informational messages may occasionally flash on the HUD."
 msgstr "Other info'mashunal messages may occashunally flash on th' HUD."
+
+msgid "Teams"
+msgstr "Teem Bigness"
