@@ -1,4 +1,4 @@
-SUBDIRS = lowtank medtank hitank
+SUBDIRS = tank
 
 MAINTAINERCLEANFILES = \
 	Makefile.in

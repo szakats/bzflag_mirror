@@ -16,9 +16,9 @@ build-stamp:
 	# compile for i486 cause GL on i386 is hopeless
 	echo DEB_BUILD_OPTIONS=$(DEB_BUILD_OPTIONS)
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
-	./configure --enable-debug --prefix=/usr
+	./configure --prefix=/usr --enable-debug
 else
-	case $(DEB_BUILD_ARCH) in \
+	case "$(DEB_BUILD_ARCH)" in \
 		i386) ./configure --prefix=/usr --host=i486-pc-linux-gnu ;; \
 		*) ./configure --prefix=/usr ;; \
 	esac
@@ -34,7 +34,7 @@ clean:
 	rm -f build-stamp
 
 	# Add here commands to clean up after the build process.
-	-$(MAKE) distclean
+	-$(MAKE) clean
 
 	dh_clean
 
@@ -62,9 +62,11 @@ bzflag: build
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	dh_installdirs -p$@
+	dh_installdirs -p$@ usr/games usr/share/bzflag/l10n usr/share/bzflag/fonts usr/share/man/man6
 	# copy files into debian/$@/ here
-	cp -pr data/[^C]* debian/$@/usr/share/bzflag/
+	-cp -p data/[^CM]* debian/$@/usr/share/bzflag/
+	cp -p data/l10n/[^CM]* debian/$@/usr/share/bzflag/l10n/
+	cp -p data/fonts/[^CM]* debian/$@/usr/share/bzflag/fonts/
 	cp -p man/bzflag.6 debian/$@/usr/share/man/man6/
 	cp -p src/bzflag/bzflag debian/$@/usr/games/
 #	dh_installdebconf -p$@
@@ -73,8 +75,8 @@ bzflag: build
 #	dh_installmanpages -p$@
 	dh_installinfo -p$@
 #	dh_undocumented -p$@
-	dh_installchangelogs -p$@
-ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	dh_installchangelogs -p$@ ChangeLog
+ifneq (nostrip,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 	dh_strip -p$@
 endif
 	dh_link -p$@
@@ -93,11 +95,12 @@ bzflag-server: build
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	dh_installdirs -p$@
+	dh_installdirs -p$@ usr/games usr/share/man/man6
 	# copy files into debian/$@/ here
-	cp -p man/bzfs.6 man/bzfrelay.6 man/bzfls.6 debian/$@/usr/share/man/man6
-	cp -p src/bzfs/bzfs src/bzfrelay/bzfrelay src/bzfls/bzfls misc/bzfquery.pl debian/$@/usr/games
-	chmod a+rx debian/$@/usr/games/bzfquery.pl
+	cp -p man/bzadmin.6 man/bzfquery.6 man/bzfs.6 debian/$@/usr/share/man/man6
+	cp -p src/bzfs/bzfs src/bzadmin/bzadmin debian/$@/usr/games
+	cp -p misc/bzfquery.pl debian/$@/usr/games/bzfquery
+	chmod a+rx debian/$@/usr/games/bzfquery
 #	dh_installdebconf -p$@
 	dh_installdocs -p$@
 	cp -p misc/*.bzw debian/$@/usr/share/doc/$@/
@@ -111,7 +114,7 @@ bzflag-server: build
 	dh_installinfo -p$@
 #	dh_undocumented -p$@ bzfquery.pl.6
 	dh_installchangelogs -p$@
-ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+ifneq (nostrip,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 	dh_strip -p$@
 endif
 	dh_link -p$@

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,20 +7,29 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// bzflag common header
+#include "common.h"
+
+// inteface header
+#include "EighthDBaseSceneNode.h"
+
+// system headers
 #include <stdlib.h>
 #include <math.h>
-#include "common.h"
-#include "EighthDBaseSceneNode.h"
-#include "SceneRenderer.h"
+
+// common implementation header
 #include "StateDatabase.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
+#include "SceneRenderer.h"
 
 const int		BasePolygons = 60;
 
 EighthDBaseSceneNode::EighthDBaseSceneNode(const float pos[3],
-		    		const float size[3], float rotation) :
+				const float size[3], float rotation) :
 				EighthDimSceneNode(BasePolygons),
 				renderNode(this, pos, size, rotation)
 {
@@ -68,12 +77,12 @@ EighthDBaseSceneNode::~EighthDBaseSceneNode()
   // do nothing
 }
 
-void EighthDBaseSceneNode::notifyStyleChange(const SceneRenderer& renderer)
+void EighthDBaseSceneNode::notifyStyleChange()
 {
-  EighthDimSceneNode::notifyStyleChange(renderer);
+  EighthDimSceneNode::notifyStyleChange();
 
   OpenGLGStateBuilder builder(gstate);
-  if (BZDB->isTrue("smooth")) {
+  if (BZDB.isTrue("smooth")) {
     builder.setBlending(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     builder.setSmoothing();
   } else {
@@ -90,8 +99,8 @@ void EighthDBaseSceneNode::addRenderNodes(SceneRenderer& renderer)
 }
 
 EighthDBaseSceneNode::EighthDBaseRenderNode::EighthDBaseRenderNode(
-    			const EighthDBaseSceneNode * _sceneNode,
-		    	const float pos[3],
+			const EighthDBaseSceneNode * _sceneNode,
+			const float pos[3],
 			const float size[3], float rotation) :
 			sceneNode(_sceneNode)
 {
@@ -139,4 +148,12 @@ void EighthDBaseSceneNode::EighthDBaseRenderNode::render()
   glVertex3fv(corner[3]); glVertex3fv(corner[7]);
   glEnd();
 }
+
+// Local Variables: ***
+// mode:C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8
+

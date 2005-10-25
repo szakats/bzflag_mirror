@@ -1,0 +1,13 @@
+README for Mac OS X platforms
+-----------------------------
+
+BZFlag should run rather nicely on Mac OS X.  As of BZFlag 2.0, the
+Mac OS X port of BZFlag is feature-wise complete and equivalent to the
+other fully-supported platforms.
+
+BZFlag may be built either using the same instructions as those for
+Unix following ./autogen.sh && ./configure && make, or using the XCode
+project in the top-level directory to end up with a double-clickable
+BZFlag.app build.
+
+See the generic install instructions in README for more details.

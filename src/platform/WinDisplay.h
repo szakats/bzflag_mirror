@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* WinDisplay:
@@ -16,10 +16,8 @@
 
 #ifndef BZF_WINDISPLAY_H
 #define	BZF_WINDISPLAY_H
-
 #include "common.h"
 #include "BzfDisplay.h"
-#include <windows.h>
 #include "bzfgl.h"
 
 class BzfKeyEvent;
@@ -31,15 +29,20 @@ class WinDisplay : public BzfDisplay {
 				const char* videoFormat);
 			~WinDisplay();
 
-    bool		isValid() const;
+    virtual bool	isValid() const;
     bool		isEventPending() const;
     bool		getEvent(BzfEvent&) const;
+    bool		hasGetKeyMode() {return true;};
+    void		getModState(bool &shift, bool &control, bool &alt);
 
     bool		setDefaultResolution();
 
     bool		isFullScreenOnly() const;
     int			getFullWidth() const;
     int			getFullHeight() const;
+
+	bool		peekEvent(BzfEvent& event) const;
+
 
     // for other Windows stuff
     class Rep {
@@ -72,6 +75,8 @@ class WinDisplay : public BzfDisplay {
     ResInfo**		getVideoFormats(int& num, int& current);
     static bool		canChangeDepth();
 
+	bool windowsEventToBZFEvent ( MSG &msg, BzfEvent& event ) const;
+
   private:
     Rep*		rep;
 
@@ -93,4 +98,12 @@ class WinDisplay : public BzfDisplay {
 };
 
 #endif // BZF_WINDISPLAY_H
+
+// Local Variables: ***
+// mode:C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8
+

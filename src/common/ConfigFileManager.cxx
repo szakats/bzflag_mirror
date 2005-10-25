@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "common.h"
@@ -15,18 +15,48 @@
 #include "FileManager.h"
 #include "CommandManager.h"
 #include "StateDatabase.h"
+#include "KeyManager.h"
 
-ConfigFileManager* ConfigFileManager::mgr = NULL;
-static const int        MaximumLineLength = 1024;
+static const int	MaximumLineLength = 1024;
 
-void writeEntry(const std::string& name, void *stream)
+// initialize the singleton
+template <>
+ConfigFileManager* Singleton<ConfigFileManager>::_instance = (ConfigFileManager*)0;
+
+void writeBZDB(const std::string& name, void *stream)
 {
-  std::ostream &s = *reinterpret_cast<std::ostream*>(stream);
-  std::string value = BZDB->get(name);
+  std::ostream& s = *static_cast<std::ostream*>(stream);
+  std::string value = BZDB.get(name);
+  std::string defaultVal = BZDB.getDefault(name);
+  std::string newkey;
+  bool commentOut = (value == defaultVal);
+
+  // quotify anything with a space and empty strings
+  if ((value.find(' ') != value.npos) || (value.size() == 0)) {
+    value = std::string("\"") + value + "\"";
+  }
+
+  // quotify the key if there's a space
+  if (name.find(' ') != name.npos)
+    newkey = std::string("\"") + name + "\"";
+  else
+    newkey = name;
+
+  s << (commentOut ? "#set " : "set ") << newkey << ' ' << value << std::endl;
+}
+
+void writeKEYMGR(const std::string& name, bool press, const std::string& command, void* stream)
+{
+  std::ostream& s = *static_cast<std::ostream*>(stream);
   // quotify anything with a space
+  std::string value = name;
   if (value.find(' ') != value.npos)
     value = std::string("\"") + value + "\"";
-  s << "set " << name << ' ' << value << std::endl;
+  s << "bind " << value << ' ' << (press ? "down " : "up ");
+  value = command;
+  if (value.find(' ') != value.npos)
+    value = std::string("\"") + value + "\"";
+  s << value << std::endl;
 }
 
 ConfigFileManager::ConfigFileManager()
@@ -36,8 +66,6 @@ ConfigFileManager::ConfigFileManager()
 
 ConfigFileManager::~ConfigFileManager()
 {
-  if (mgr == this)
-    mgr = NULL;
 }
 
 bool				ConfigFileManager::parse(std::istream& stream)
@@ -45,18 +73,17 @@ bool				ConfigFileManager::parse(std::istream& stream)
   char buffer[MaximumLineLength];
   while (!stream.eof()) {
     stream.getline(buffer, MaximumLineLength);
-    CMDMGR->run(buffer);
+    CMDMGR.run(buffer);
   }
   return true;
 }
 
-bool				ConfigFileManager::read(std::string filename)
+bool				ConfigFileManager::read(const std::string& filename)
 {
-  // FIXME - temporarily add '19' on the end of the file name
-  filename.append("19");
-  std::istream* stream = FILEMGR->createDataInStream(filename);
-  if (stream == NULL)
+  std::istream* stream = FILEMGR.createDataInStream(filename);
+  if (stream == NULL) {
     return false;
+  }
   bool ret = parse(*stream);
   delete stream;
   return ret;
@@ -67,44 +94,23 @@ void				ConfigFileManager::read(std::istream& stream)
   parse(stream);
 }
 
-bool				ConfigFileManager::write(std::string filename)
+bool				ConfigFileManager::write(const std::string& filename)
 {
-  // FIXME - temporarily add '19' on the end of the file name
-  filename.append("19");
-  std::ostream* stream = FILEMGR->createDataOutStream(filename);
-  if (stream == NULL)
+  std::ostream* stream = FILEMGR.createDataOutStream(filename);
+  if (stream == NULL) {
     return false;
-  BZDB->write(writeEntry, stream);
+  }
+  BZDB.write(writeBZDB, stream);
+  KEYMGR.iterate(writeKEYMGR, stream);
   delete stream;
   return true;
 }
 
-void				ConfigFileManager::addDefaults()
-{
-  BZDB->setDefault("udpnet", "yes");
-  BZDB->setDefault("team", "Rogue");
-  BZDB->setDefault("list", "http://BZFlag.SourceForge.net/list-server.txt");
-  BZDB->setDefault("volume", "10");
-  BZDB->setDefault("latitude", "37.5");
-  BZDB->setDefault("longitude", "122");
-  // FIXME: keys?
-  BZDB->setDefault("joystick", "no");
-  BZDB->setDefault("enhancedRadar", "yes");
-  BZDB->setDefault("coloredradarshots", "yes");
-  BZDB->setDefault("linedradarshots", "0");
-  BZDB->setDefault("panelopacity", "0.3");
-  BZDB->setDefault("radarsize", "4");
-  BZDB->setDefault("mouseboxsize", "5");
-  BZDB->setDefault("bigfont", "no");
-  BZDB->setDefault("colorful", "yes");
-  BZDB->setDefault("underline", "0");
-  BZDB->setDefault("killerhighlight", "0");
-  BZDB->setDefault("serverCacheAge", "0");
-}
 
-ConfigFileManager*		ConfigFileManager::getInstance()
-{
-  if (mgr == NULL)
-    mgr = new ConfigFileManager;
-  return mgr;
-}
+// Local Variables: ***
+// mode:C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,16 +7,20 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
+/* interface header */
 #include "RemotePlayer.h"
+
+/* common implementation headers */
 #include "World.h"
 
-RemotePlayer::RemotePlayer(const PlayerId& id, TeamColor team,
-					const char* name, const char* email) :
-				Player(id, team, name, email)
+
+RemotePlayer::RemotePlayer(const PlayerId& _id, TeamColor _team,
+			   const char* _name, const char* _email,
+			   const PlayerType _type) :
+  Player(_id, _team, _name, _email, _type)
 {
   numShots = World::getWorld()->getMaxShots();
   shots = new RemoteShotPath*[numShots];
@@ -41,37 +45,44 @@ void			RemotePlayer::addShot(const FiringInfo& info)
   shots[shotNum] = newShot;
   // Update tanks position and set dead reckoning for better lag handling
   // shot origin is center of tank for shockwave
-  if (info.flag == ShockWaveFlag) {
+  if (info.flagType == Flags::ShockWave) {
     newpos[0] = info.shot.pos[0];
     newpos[1] = info.shot.pos[1];
     newpos[2] = info.shot.pos[2];
   }
   // shot origin is muzzle for other shots
   else {
-    float front = MuzzleFront;
-    if (info.flag == ObesityFlag) front *= ObeseFactor;
-    else if (info.flag == TinyFlag) front *= TinyFactor;
-    newpos[0] = info.shot.pos[0]-(front * f[0]);
-    newpos[1] = info.shot.pos[1]-(front * f[1]);
-    newpos[2] = info.shot.pos[2]-(front * f[2])-MuzzleHeight;
+    float front = BZDB.eval(StateDatabase::BZDB_MUZZLEFRONT);
+    if (info.flagType == Flags::Obesity) front *= BZDB.eval(StateDatabase::BZDB_OBESEFACTOR);
+    else if (info.flagType == Flags::Tiny) front *= BZDB.eval(StateDatabase::BZDB_TINYFACTOR);
+    else if (info.flagType == Flags::Thief) front *= BZDB.eval(StateDatabase::BZDB_THIEFTINYFACTOR);
+    newpos[0] = info.shot.pos[0] - (front * f[0]);
+    newpos[1] = info.shot.pos[1] - (front * f[1]);
+    newpos[2] = info.shot.pos[2] - BZDB.eval(StateDatabase::BZDB_MUZZLEHEIGHT);
   }
+  shotStatistics.recordFire(info.flagType);
+  // FIXME - with dynamic dimensions, this may not be a good idea
+  //	 (flag each shot with a 'default dimensions' state?)
   move(newpos, getAngle());
-  setDeadReckoning();
+  setDeadReckoning(info.timeSent);
 }
 
 ShotPath*		RemotePlayer::getShot(int index) const
 {
-  return shots[index & 255];
+  index &= 0x00FF;
+  if ((index < 0) || (index >= World::getWorld()->getMaxShots()))
+    return NULL;
+  return shots[index];
 }
 
 bool			RemotePlayer::doEndShot(
-				int id, bool isHit, float* pos)
+				int ident, bool isHit, float* pos)
 {
-  const int index = id & 255;
-  const int salt = (id >> 8) & 127;
+  const int index = ident & 255;
+  const int salt = (ident >> 8) & 127;
 
   // special id used in some messages (and really shouldn't be sent here)
-  if (id == -1)
+  if (ident == -1)
     return false;
 
   // ignore bogus shots (those with a bad index or for shots that don't exist)
@@ -88,6 +99,9 @@ bool			RemotePlayer::doEndShot(
   // so we can identify an old shot from a new one.
   if (salt != ((shots[index]->getShotId() >> 8) & 127))
     return false;
+
+  // keep statistics
+  shotStatistics.recordHit(shots[index]->getFlag());
 
   // don't stop if it's because were hitting something and we don't stop
   // when we hit something.
@@ -109,4 +123,12 @@ void			RemotePlayer::updateShots(float dt)
     if (shots[i])
       shots[i]->update(dt);
 }
+
+// Local Variables: ***
+// mode:C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8
+

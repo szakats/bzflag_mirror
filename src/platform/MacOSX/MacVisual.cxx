@@ -69,7 +69,7 @@ void MacVisual::removeAttribute2(GLint attribute) {
   }
 }
 
-void MacVisual::setLevel(int level) {
+void MacVisual::setLevel(int /* level */) {
   //addAttribute2(GL_LEVEL, level);
 }
 
@@ -118,7 +118,7 @@ void MacVisual::setAccum(int r, int g, int b, int a) {
 */
 }
 
-void MacVisual::setStereo(bool stereo) {
+void MacVisual::setStereo(bool /*stereo*/) {
 /*
   if (stereo)
     addAttribute1(AGL_STEREO);
@@ -145,8 +145,16 @@ bool MacVisual::build() {
   return true;
 }
 
-void MacVisual::setMultisample(int value) {
+void MacVisual::setMultisample(int) {
   // I couldn't find this attribute in agl docs
   return;
 }
+
+// Local Variables: ***
+// mode:C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8
+

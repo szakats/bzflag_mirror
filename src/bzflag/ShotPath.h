@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -22,20 +22,22 @@
  *	Created by a LocalPlayer on behalf of a RemotePlayer.
  */
 
-#ifndef	BZF_SHOT_PATH_H
-#define	BZF_SHOT_PATH_H
+#ifndef	__SHOTPATH_H__
+#define	__SHOTPATH_H__
 
 #include "common.h"
-#include "global.h"
+
+/* common interface headers */
 #include "TimeKeeper.h"
-#include "Pack.h"
-#include "Address.h"
-#include "Player.h"
+#include "Flag.h"
 #include "ShotUpdate.h"
 
+/* local interface headers */
+#include "BaseLocalPlayer.h"
+#include "ShotStrategy.h"
+#include "SceneDatabase.h"
+
 class ShotStrategy;
-class BaseLocalPlayer;
-class SceneDatabase;
 
 class ShotPath {
   public:
@@ -46,7 +48,7 @@ class ShotPath {
     bool		isReloaded() const;
     const PlayerId&	getPlayer() const;
     uint16_t		getShotId() const;
-    FlagId		getFlag() const;
+    FlagType*		getFlag() const;
     float		getLifetime() const;
     float		getReloadTime() const;
     const TimeKeeper&	getStartTime() const;
@@ -64,7 +66,7 @@ class ShotPath {
 
     void		radarRender() const;
     FiringInfo&		getFiringInfo();
-
+    TeamColor		getTeam() const;
   protected:
 			ShotPath(const FiringInfo&);
     void		updateShot(float dt);
@@ -133,9 +135,9 @@ inline uint16_t		ShotPath::getShotId() const
   return firingInfo.shot.id;
 }
 
-inline FlagId		ShotPath::getFlag() const
+inline FlagType*	ShotPath::getFlag() const
 {
-  return firingInfo.flag;
+  return firingInfo.flagType;
 }
 
 inline float		ShotPath::getLifetime() const
@@ -173,6 +175,11 @@ inline FiringInfo&	ShotPath::getFiringInfo()
   return firingInfo;
 }
 
+inline	TeamColor	ShotPath::getTeam() const
+{
+  return firingInfo.shot.team;
+}
+
 inline const ShotStrategy*	ShotPath::getStrategy() const
 {
   return strategy;
@@ -183,5 +190,12 @@ inline ShotStrategy*	ShotPath::getStrategy()
   return strategy;
 }
 
-#endif // BZF_SHOT_PATH_H
+#endif /* __SHOTPATH_H__ */
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

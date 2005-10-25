@@ -1,20 +1,30 @@
-#ifdef WIN32
-#pragma warning(4:4786)
-#endif
+/* bzflag
+ * Copyright (c) 1993 - 2005 Tim Riker
+ *
+ * This package is free software;  you can redistribute it and/or
+ * modify it under the terms of the license found in the file
+ * named COPYING that should have accompanied this file.
+ *
+ * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
 
+// interface header
+#include "BundleMgr.h"
+
+// system headers
 #if (!defined(_WIN32) && !defined(WIN32))
 #include <sys/types.h>
 #include <dirent.h>
-#else
-#include <windows.h>
 #endif
-
 #include <string>
+
+// local implementation headers
 #include "common.h"
-#include "BundleMgr.h"
 #include "Bundle.h"
 
-Bundle 		*BundleMgr::currentBundle 	= NULL;
+Bundle		*BundleMgr::currentBundle	= NULL;
 
 std::string	BundleMgr::bundlePath		= "./data";
 
@@ -58,14 +68,17 @@ Bundle *BundleMgr::getBundle(const std::string &locale, bool setcur /*= true*/)
   if (locale.length() > 0)
     path += "_" + locale;
   path += ".po";
-  
-#ifdef __APPLE__
+
+  /* FIXME -- this needs to be in libplatform not here -- causes libcommon
+   * to require corefoundation framework
+   */
+#if defined(__APPLE__)
   // This is MacOS X. Use the CoreFoundation resource location API
   // to find the correct language resource if 'default' is specified.
   if (locale.length() == 7 && locale.compare("default") == 0) {
     char	localePath[512];
     CFBundleRef	mainBundle = CFBundleGetMainBundle();
-    CFArrayRef	locales 	= NULL;
+    CFArrayRef	locales	= NULL;
     CFURLRef	localeURL	= NULL;
     // Look for a resource in the main bundle by name and type.
     do {
@@ -82,13 +95,13 @@ Bundle *BundleMgr::getBundle(const std::string &locale, bool setcur /*= true*/)
     CFRelease(locales);
   }
 #endif
-  
+
   pB->load(path);
 
   bundles.insert(std::pair<std::string,Bundle*>(locale, pB));
 
   if (setcur) currentBundle = pB;
-  
+
   return pB;
 }
 
@@ -101,16 +114,16 @@ bool BundleMgr::getLocaleList(std::vector<std::string> *list) {
   if (list == NULL) return false;
   // There could have been stuff added to the list
   // prior to this call. Save the list count.
-  int 	initSize = list->size();
-  
+  int	initSize = list->size();
+
   do {
-	  
+
 #if (defined(_WIN32) || defined(WIN32))
-    char fileName[255], *end = NULL;
+    char fileName[255];
 
     // Prepare the wildcarded file path to search for and copy it to fileName
     sprintf(fileName, "%s\\l10n\\bzflag_*.po", bundlePath.c_str());
-    
+
     HANDLE		hFoundFile	= NULL;
     WIN32_FIND_DATA	data;
 
@@ -132,15 +145,14 @@ bool BundleMgr::getLocaleList(std::vector<std::string> *list) {
 
     FindClose(hFoundFile);
     break;
-    
+
 #else
 
     // This should work for most of the currently supported
     // non Windows platforms i believe.
     DIR *localedir = opendir((bundlePath + "/l10n/").c_str());
     if (localedir == NULL) break;
-    
-    struct dirent 	*dirinfo = NULL;
+    struct dirent	*dirinfo = NULL;
     while ((dirinfo = readdir(localedir)) != NULL) {
 
       std::string poFile = dirinfo->d_name;
@@ -156,11 +168,19 @@ bool BundleMgr::getLocaleList(std::vector<std::string> *list) {
     }
 
     closedir(localedir);
-	
+
 #endif
 
   } while (0);
 
   return ((int)list->size() > initSize) ? true : false;
 }
+
+// Local Variables: ***
+// mode:C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8
+

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* FlagSceneNode:
@@ -20,55 +20,64 @@
 #include "common.h"
 #include "SceneNode.h"
 
+const int maxChunks = 20;
 class FlagSceneNode : public SceneNode {
   public:
 			FlagSceneNode(const GLfloat pos[3]);
 			~FlagSceneNode();
 
-    void		waveFlag(float dt, float droop);
+    static void		waveFlag(float dt);
+    static void		freeFlag();
+    
     void		move(const GLfloat pos[3]);
-    void		turn(GLfloat angle);
+    void		setAngle(GLfloat angle);
+    void		setWind(const GLfloat wind[3], float dt);
     void		setBillboard(bool billboard);
 
     const GLfloat*	getColor() const { return color; }
     void		setColor(GLfloat r, GLfloat g,
 				 GLfloat b, GLfloat a = 1.0f);
     void		setColor(const GLfloat* rgba);
-    void		setTexture(const OpenGLTexture&);
+    void		setTexture(const int);
 
-    void		notifyStyleChange(const SceneRenderer&);
+    void		notifyStyleChange();
     void		addRenderNodes(SceneRenderer&);
     void		addShadowNodes(SceneRenderer&);
 
+    bool		cullShadow(int planeCount,
+                                   const float (*planes)[4]) const;
   protected:
     class FlagRenderNode : public RenderNode {
       public:
 			FlagRenderNode(const FlagSceneNode*);
 			~FlagRenderNode();
 	void		render();
-	const GLfloat*	getPosition() { return sceneNode->getSphere(); }
+	const GLfloat*	getPosition() const { return sceneNode->getSphere(); }
       private:
 	const FlagSceneNode* sceneNode;
+	int	     waveReference;
     };
     friend class FlagRenderNode;
 
   private:
     bool		billboard;
     GLfloat		angle;
-    float		ripple1, ripple2;
+    GLfloat		tilt;
+    GLfloat		hscl;
     GLfloat		color[4];
     bool		transparent;
-    bool		blending;
     bool		texturing;
     OpenGLGState	gstate;
     FlagRenderNode	renderNode;
-    static const GLfloat Width;
-    static const GLfloat Height;
-    static const GLfloat Base;
-    static const float	RippleSpeed1;
-    static const float	RippleSpeed2;
-    static const float	DroopFactor;
 };
 
 #endif // BZF_FLAG_SCENE_NODE_H
+
+// Local Variables: ***
+// mode:C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8
+

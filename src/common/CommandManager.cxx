@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,14 +7,25 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/* interface header */
 #include "CommandManager.h"
+
+/* system implementation headers */
 #include <ctype.h>
 #include <stdio.h>
+#include <assert.h>
+#include <string>
 
-CommandManager*			CommandManager::mgr = NULL;
+/* common implementation headers */
+#include "TextUtils.h"
+
+
+// initialize the singleton
+template <>
+CommandManager* Singleton<CommandManager>::_instance = (CommandManager*)0;
 
 CommandManager::CommandManager()
 {
@@ -23,7 +34,7 @@ CommandManager::CommandManager()
 
 CommandManager::~CommandManager()
 {
-  mgr = NULL;
+  // do nothing
 }
 
 void				CommandManager::add(const std::string& name,
@@ -54,18 +65,23 @@ std::string			CommandManager::getHelp(const std::string& name) const
 }
 
 std::string			CommandManager::run(const std::string& name,
-							    const ArgList& args) const
+							    const ArgList& args, bool* ret) const
 {
   // look up command
   Commands::const_iterator index = commands.find(name);
   if (index == commands.end())
-    return string_util::format("Command %s not found", name.c_str());
-
+  {
+    return TextUtils::format("Command %s not found", name.c_str());
+	if (ret)
+		*ret = false;
+  }
+  if (ret)
+	  *ret = true;
   // run it
-  return (*index->second.func)(name, args);
+  return (*index->second.func)(name, args,ret);
 }
 
-std::string			CommandManager::run(const std::string& cmd) const
+std::string			CommandManager::run(const std::string& cmd,bool *ret) const
 {
   std::string result;
   const char* scan = cmd.c_str();
@@ -86,16 +102,20 @@ std::string			CommandManager::run(const std::string& cmd) const
       std::string value;
       scan = readValue(scan, &value);
       if (scan != NULL) {
-        scan = skipWhitespace(scan);
-        args.push_back(value);
+	scan = skipWhitespace(scan);
+	args.push_back(value);
       }
     }
 
     // run it or report error
     if (scan == NULL)
+	{
+		if (ret)
+			*ret = false;
       return std::string("Error parsing command");
-    else
-      result = run(name, args);
+	}
+    else if (name[0] != '#')
+      result = run(name, args,ret);
 
     // discard ; and empty commands
     while (scan != NULL && *scan == ';') {
@@ -118,12 +138,6 @@ void				CommandManager::iterate(Callback callback,
     (*callback)(index->first, userData);
 }
 
-CommandManager*			CommandManager::getInstance()
-{
-  if (mgr == NULL)
-    mgr = new CommandManager;
-  return mgr;
-}
 
 const char*			CommandManager::readValue(const char* string,
 							  std::string* value)
@@ -155,12 +169,12 @@ const char*			CommandManager::readQuoted(const char* string,
   for (; *string != '\0'; ++string) {
     if (escaped) {
       switch (*string) {
-        case 't': value->append("\t", 1); break;
-        case 'n': value->append("\n", 1); break;
-        case 'r': value->append("\r", 1); break;
-        case '\\': value->append("\\", 1); break;
-        case '\"': value->append("\"", 1); break;
-        default: value->append(string, 1); break;
+	case 't': value->append("\t", 1); break;
+	case 'n': value->append("\n", 1); break;
+	case 'r': value->append("\r", 1); break;
+	case '\\': value->append("\\", 1); break;
+	case '\"': value->append("\"", 1); break;
+	default: value->append(string, 1); break;
       }
       escaped = false;
     } else if (*string == '\\') {
@@ -182,4 +196,12 @@ const char*			CommandManager::skipWhitespace(const char* string)
     ++string;
   return string;
 }
+
+// Local Variables: ***
+// mode:C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8
+

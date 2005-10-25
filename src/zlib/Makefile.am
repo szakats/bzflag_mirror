@@ -1,28 +1,25 @@
-noinst_LIBRARIES = libz.a
+noinst_LTLIBRARIES = libz.la
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
-libz_a_SOURCES =	\
+libz_la_LDFLAGS = -static
+libz_la_SOURCES =	\
 	adler32.c	\
 	compress.c	\
 	crc32.c		\
+	crc32.h		\
 	deflate.c	\
 	deflate.h	\
 	gzio.c		\
-	infblock.c	\
-	infblock.h	\
-	infcodes.c	\
-	infcodes.h	\
+	infback.c	\
 	inffast.c	\
 	inffast.h	\
 	inffixed.h	\
 	inflate.c	\
+	inflate.h	\
 	inftrees.c	\
 	inftrees.h	\
-	infutil.c	\
-	infutil.h	\
-	maketree.c	\
 	trees.c		\
 	trees.h		\
 	uncompr.c	\
@@ -31,4 +28,6 @@ libz_a_SOURCES =	\
 	zutil.c		\
 	zutil.h
 
-EXTRA_DIST = zlib.html
+EXTRA_DIST = \
+	README \
+	zlib.html

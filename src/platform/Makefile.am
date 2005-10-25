@@ -1,7 +1,35 @@
+if CLIENT_INCLUDED
+noinst_LTLIBRARIES = libPlatform.la
+endif
+
+libPlatform_la_LDFLAGS = -static
+
+if HAVE_SDL
 if LINUX
-libPlatform_a_SOURCES =				\
+libPlatform_la_SOURCES =			\
 	PlatformFactory.cxx			\
 	BzfDisplay.cxx				\
+	BzfJoystick.cxx				\
+	BzfVisual.cxx				\
+	BzfWindow.cxx				\
+	BzfMedia.cxx				\
+	SDLJoystick.cxx				\
+	SDLJoystick.h				\
+	EvdevJoystick.cxx			\
+	EvdevJoystick.h				\
+	SDLPlatformFactory.cxx			\
+	SDLPlatformFactory.h			\
+	SDLMedia.cxx				\
+	SDLMedia.h				\
+	SDLDisplay.h				\
+	SDLDisplay.cxx
+endif
+else
+if LINUX
+libPlatform_la_SOURCES =			\
+	PlatformFactory.cxx			\
+	BzfDisplay.cxx				\
+	BzfJoystick.cxx				\
 	BzfVisual.cxx				\
 	BzfWindow.cxx				\
 	BzfMedia.cxx				\
@@ -13,18 +41,26 @@ libPlatform_a_SOURCES =				\
 	LinuxDisplay.h				\
 	LinuxMedia.cxx				\
 	LinuxMedia.h				\
-	usbjoy.cxx				\
+	EvdevJoystick.cxx			\
+	EvdevJoystick.h				\
+	USBJoystick.cxx				\
+	USBJoystick.h				\
+	XIJoystick.cxx				\
+	XIJoystick.h				\
 	XDisplay.cxx				\
 	XDisplay.h				\
 	XVisual.cxx				\
 	XVisual.h				\
 	XWindow.cxx				\
 	XWindow.h
-else
+endif
+endif
+
 if SOLARIS
-libPlatform_a_SOURCES = 			\
+libPlatform_la_SOURCES =			\
 	PlatformFactory.cxx			\
 	BzfDisplay.cxx				\
+	BzfJoystick.cxx				\
 	BzfVisual.cxx				\
 	BzfWindow.cxx				\
 	BzfMedia.cxx				\
@@ -40,11 +76,13 @@ libPlatform_a_SOURCES = 			\
 	XVisual.h				\
 	XWindow.cxx				\
 	XWindow.h
-else
+endif
+
 if IRIX
-libPlatform_a_SOURCES =				\
+libPlatform_la_SOURCES =			\
 	PlatformFactory.cxx			\
 	BzfDisplay.cxx				\
+	BzfJoystick.cxx				\
 	BzfVisual.cxx				\
 	BzfWindow.cxx				\
 	BzfMedia.cxx				\
@@ -62,34 +100,53 @@ libPlatform_a_SOURCES =				\
 	XVisual.h				\
 	XWindow.cxx				\
 	XWindow.h
-else
+endif
+
 if MACOS
-libPlatform_a_SOURCES =				\
+SUBDIRS = MacOSX
+
+if HAVE_SDL
+libPlatform_la_SOURCES =			\
 	PlatformFactory.cxx			\
 	BzfDisplay.cxx				\
+	BzfJoystick.cxx				\
+	BzfVisual.cxx				\
+	BzfWindow.cxx				\
+	BzfMedia.cxx				\
+	SDLJoystick.cxx				\
+	SDLJoystick.h				\
+	SDLMedia.cxx				\
+	SDLMedia.h				\
+	SDLDisplay.h				\
+	SDLDisplay.cxx				\
+	wave.cxx				\
+	wave.h
+else
+libPlatform_la_SOURCES =			\
+	PlatformFactory.cxx			\
+	BzfDisplay.cxx				\
+	BzfJoystick.cxx				\
 	BzfVisual.cxx				\
 	BzfWindow.cxx				\
 	BzfMedia.cxx				\
 	wave.cxx				\
 	wave.h
-# SUBDIRS is processed conditionally.
-# automake will prepare a subdist for us including MacOSX
-# In not MacOS system this subdirectory will then not being navigated for 
-#  normal make
-SUBDIRS = MacOSX
+endif
+endif
+DIST_SUBDIRS = MacOSX
 
-else
 if BEOS
-libPlatform_a_SOURCES =				\
+libPlatform_la_SOURCES =			\
 	PlatformFactory.cxx			\
 	BzfDisplay.cxx				\
+	BzfJoystick.cxx				\
 	BzfVisual.cxx				\
 	BzfWindow.cxx				\
 	BzfMedia.cxx				\
 	wave.cxx				\
 	wave.h					\
-	BeOSPlatformFactory.cxx 		\
-	BeOSPlatformFactory.h 			\
+	BeOSPlatformFactory.cxx			\
+	BeOSPlatformFactory.h			\
 	BeOSDisplay.cxx				\
 	BeOSDisplay.h				\
 	BeOSVisual.cxx				\
@@ -98,20 +155,32 @@ libPlatform_a_SOURCES =				\
 	BeOSWindow.h				\
 	BeOSMedia.cxx				\
 	BeOSMedia.h
-else
+endif
+
 if WIN32
-libPlatform_a_SOURCES =				\
+libPlatform_la_SOURCES =			\
 	PlatformFactory.cxx			\
 	BzfDisplay.cxx				\
+	BzfJoystick.cxx				\
 	BzfVisual.cxx				\
 	BzfWindow.cxx				\
 	BzfMedia.cxx				\
+	SDLDisplay.h				\
+	SDLDisplay.cxx				\
+	SDLJoystick.h				\
+	SDLJoystick.cxx				\
+	SDLMedia.cxx				\
+	SDLMedia.h				\
 	wave.cxx				\
 	wave.h					\
-	WinPlatformFactory.cxx 			\
-	WinPlatformFactory.h 			\
+	WinPlatformFactory.cxx			\
+	WinPlatformFactory.h			\
 	WinDisplay.cxx				\
 	WinDisplay.h				\
+	DXJoystick.cxx				\
+	DXJoystick.h				\
+	WinJoystick.cxx				\
+	WinJoystick.h				\
 	WinVisual.cxx				\
 	WinVisual.h				\
 	WinWindow.cxx				\
@@ -119,72 +188,77 @@ libPlatform_a_SOURCES =				\
 	WinMedia.cxx				\
 	WinMedia.h
 endif
-endif
-endif
-endif
-endif
-endif
 
-if CLIENT_INCLUDED
-noinst_LIBRARIES = libPlatform.a
-endif
-
-EXTRA_libPlatform_a_SOURCES = 		\
- 	XDisplay.cxx			\
- 	XDisplay.h			\
- 	XVisual.cxx			\
- 	XVisual.h			\
- 	XWindow.cxx			\
- 	XWindow.h			\
- 	LinuxPlatformFactory.cxx	\
- 	LinuxPlatformFactory.h		\
- 	LinuxDisplay.cxx		\
- 	LinuxDisplay.h			\
- 	LinuxMedia.cxx			\
- 	LinuxMedia.h			\
- 	usbjoy.cxx			\
- 	SolarisPlatformFactory.cxx	\
- 	SolarisPlatformFactory.h	\
- 	SolarisMedia.cxx		\
- 	SolarisMedia.h			\
- 	SGIPlatformFactory.cxx		\
- 	SGIPlatformFactory.h		\
- 	SGIDisplay.cxx			\
- 	SGIDisplay.h			\
- 	SGIMedia.cxx			\
- 	SGIMedia.h			\
- 	MacPlatformFactory.cxx 		\
- 	MacPlatformFactory.h 		\
- 	MacDisplay.cxx			\
- 	MacDisplay.h			\
- 	MacVisual.cxx			\
- 	MacVisual.h			\
- 	MacWindow.cxx			\
- 	MacWindow.h			\
- 	MacMedia.cxx			\
- 	MacMedia.h			\
-	BeOSPlatformFactory.cxx 	\
-	BeOSPlatformFactory.h 		\
+EXTRA_libPlatform_la_SOURCES =		\
+	BeOSPlatformFactory.cxx		\
+	BeOSPlatformFactory.h		\
 	BeOSDisplay.cxx			\
 	BeOSDisplay.h			\
 	BeOSVisual.cxx			\
 	BeOSVisual.h			\
 	BeOSWindow.cxx			\
 	BeOSWindow.h			\
+	BeOSWindow2.cxx			\
 	BeOSMedia.cxx			\
 	BeOSMedia.h			\
- 	WinPlatformFactory.cxx 		\
- 	WinPlatformFactory.h 		\
- 	WinDisplay.cxx			\
- 	WinDisplay.h			\
- 	WinVisual.cxx			\
- 	WinVisual.h			\
- 	WinWindow.cxx			\
- 	WinWindow.h			\
- 	WinMedia.cxx			\
- 	WinMedia.h
+	LinuxPlatformFactory.cxx	\
+	LinuxPlatformFactory.h		\
+	LinuxDisplay.cxx		\
+	LinuxDisplay.h			\
+	LinuxMedia.cxx			\
+	LinuxMedia.h			\
+	SDLJoystick.cxx			\
+	SDLJoystick.h			\
+	EvdevJoystick.cxx		\
+	EvdevJoystick.h			\
+	SDLPlatformFactory.cxx		\
+	SDLPlatformFactory.h		\
+	SDLMedia.cxx			\
+	SDLMedia.h			\
+	SDLDisplay.h			\
+	SDLDisplay.cxx			\
+	SGIPlatformFactory.cxx		\
+	SGIPlatformFactory.h		\
+	SGIDisplay.cxx			\
+	SGIDisplay.h			\
+	SGIMedia.cxx			\
+	SGIMedia.h			\
+	SolarisPlatformFactory.cxx	\
+	SolarisPlatformFactory.h	\
+	SolarisMedia.cxx		\
+	SolarisMedia.h			\
+	USBJoystick.cxx			\
+	USBJoystick.h			\
+	WinPlatformFactory.cxx		\
+	WinPlatformFactory.h		\
+	WinDisplay.cxx			\
+	WinDisplay.h			\
+	WinJoystick.cxx			\
+	WinJoystick.h			\
+	WinVisual.cxx			\
+	WinVisual.h			\
+	WinWindow.cxx			\
+	WinWindow.h			\
+	WinMedia.cxx			\
+	WinMedia.h			\
+	XDisplay.cxx			\
+	XDisplay.h			\
+	XIJoystick.cxx			\
+	XIJoystick.h			\
+	XVisual.cxx			\
+	XVisual.h			\
+	XWindow.cxx			\
+	XWindow.h			\
+	wave.cxx			\
+	wave.h
 
-EXTRA_DIST = MacBZFlag.icns MacBZFlag-prefix.h NewMedia.cxx NewMedia.h
+AM_CPPFLAGS = -I$(top_srcdir)/include $(SDL_CFLAGS)
+
+
+EXTRA_DIST = \
+	NewMedia.cxx \
+	NewMedia.h \
+	README
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
