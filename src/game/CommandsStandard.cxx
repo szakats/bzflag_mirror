@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
@@ -16,6 +16,7 @@
 /* system implementation headers */
 #include <stdio.h>
 #include <ctype.h>
+#include <string>
 
 /* common implementation headers */
 #include "CommandManager.h"
@@ -30,7 +31,7 @@ static bool			quitFlag = false;
 //
 
 static std::string		cmdQuit(const std::string&,
-					const CommandManager::ArgList&)
+					const CommandManager::ArgList&, bool*)
 {
   CommandsStandard::quit();
   return std::string();
@@ -39,13 +40,13 @@ static std::string		cmdQuit(const std::string&,
 static void			onHelpCB(const std::string& name,
 					 void* userData)
 {
-  std::string& result = *reinterpret_cast<std::string*>(userData);
+  std::string& result = *static_cast<std::string*>(userData);
   result += name;
   result += "\n";
 }
 
 static std::string		cmdHelp(const std::string&,
-					const CommandManager::ArgList& args)
+					const CommandManager::ArgList& args, bool*)
 {
   switch (args.size()) {
     case 0: {
@@ -63,7 +64,7 @@ static std::string		cmdHelp(const std::string&,
 }
 
 static std::string		cmdPrint(const std::string&,
-					 const CommandManager::ArgList& args)
+					 const CommandManager::ArgList& args, bool*)
 {
   // merge all arguments into one string
   std::string arg;
@@ -122,7 +123,7 @@ static void			onSetCB(const std::string& name,
 					void* userData)
 {
   // don't show names starting with _
-  std::string& result = *reinterpret_cast<std::string*>(userData);
+  std::string& result = *static_cast<std::string*>(userData);
   if (!name.empty() && name.c_str()[0] != '_') {
     result += name;
     result += " = ";
@@ -132,11 +133,12 @@ static void			onSetCB(const std::string& name,
 }
 
 static std::string		cmdSet(const std::string&,
-				       const CommandManager::ArgList& args)
+				       const CommandManager::ArgList& args, bool* error)
 {
+	if(error) *error = false;
   switch (args.size()) {
 
-    case 0: 
+    case 0:
       {
 	// print out all values that are set
 	std::string result;
@@ -146,9 +148,10 @@ static std::string		cmdSet(const std::string&,
     case 1:
       {
 	// the string was set to nothing, so just print value
-        if (BZDB.isSet(args[0])) {
+	if (BZDB.isSet(args[0])) {
 	  return args[0] + " is " + BZDB.get(args[0]);
 	} else {
+	  if(error) *error = true;
 	  return "variable " + args[0] + " does not exist";
 	}
       }
@@ -160,13 +163,14 @@ static std::string		cmdSet(const std::string&,
       }
     default:
       {
+    if(error) *error = true;
 	return "usage: set <name> [<value>]";
       }
   }
 }
 
 static std::string		cmdUnset(const std::string&,
-					 const CommandManager::ArgList& args)
+					 const CommandManager::ArgList& args, bool*)
 {
   if (args.size() != 1)
     return "usage: unset <name>";
@@ -178,7 +182,7 @@ static std::string		cmdUnset(const std::string&,
 static void			onBindCB(const std::string& name, bool press,
 					 const std::string& cmd, void* userData)
 {
-  std::string& result = *reinterpret_cast<std::string*>(userData);
+  std::string& result = *static_cast<std::string*>(userData);
   result += name;
   result += (press ? " down " : " up ");
   result += cmd;
@@ -186,7 +190,7 @@ static void			onBindCB(const std::string& name, bool press,
 }
 
 static std::string		cmdBind(const std::string&,
-					const CommandManager::ArgList& args)
+					const CommandManager::ArgList& args, bool*)
 {
   if (args.size() == 0) {
     std::string result;
@@ -222,7 +226,7 @@ static std::string		cmdBind(const std::string&,
 }
 
 static std::string		cmdUnbind(const std::string&,
-					  const CommandManager::ArgList& args)
+					  const CommandManager::ArgList& args, bool*)
 {
   if (args.size() != 2)
     return "usage: unbind <button-name> {up|down}";
@@ -246,7 +250,7 @@ static std::string		cmdUnbind(const std::string&,
 }
 
 static std::string		cmdToggle(const std::string&,
-					  const CommandManager::ArgList& args)
+					  const CommandManager::ArgList& args, bool*)
 {
   if (args.size() != 1)
     return "usage: toggle <name>";
@@ -258,7 +262,7 @@ static std::string		cmdToggle(const std::string&,
   return std::string();
 }
 
-static std::string cmdMult(const std::string&, const CommandManager::ArgList& args)
+static std::string cmdMult(const std::string&, const CommandManager::ArgList& args, bool*)
 {
   if (args.size() != 2)
     return "usage: mult <name> <value>";
@@ -269,7 +273,7 @@ static std::string cmdMult(const std::string&, const CommandManager::ArgList& ar
   if (sscanf(args[1].c_str(), "%f", &amount) != 1)
     amount = 1.0;
   value *= amount;
-  BZDB.set(args[0], string_util::format("%f", value), StateDatabase::User);
+  BZDB.set(args[0], TextUtils::format("%f", value), StateDatabase::User);
   return std::string();
 }
 

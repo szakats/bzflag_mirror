@@ -1,9 +1,20 @@
-if CLIENT_INCLUDED
 bin_PROGRAMS = bzflag
-endif
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
+
+EXTRA_bzflag_SOURCES = \
+	ClientAuthentication.cxx	\
+	ClientAuthentication.h		\
+	LoginMenu.cxx			\
+	LoginMenu.h
+
+if HAVE_KRB5
+KRB5 =	ClientAuthentication.cxx	\
+	ClientAuthentication.h		\
+	LoginMenu.cxx			\
+	LoginMenu.h
+endif
 
 bzflag_SOURCES =			\
 	ActionBinding.cxx		\
@@ -11,19 +22,36 @@ bzflag_SOURCES =			\
 	AudioMenu.cxx			\
 	AudioMenu.h			\
 	AutoPilot.cxx			\
+	AutoPilot.h			\
 	BackgroundRenderer.cxx		\
 	BackgroundRenderer.h		\
 	BaseLocalPlayer.cxx		\
 	BaseLocalPlayer.h		\
+	CacheMenu.cxx			\
+	CacheMenu.h			\
+	clientConfig.cxx			\
+	clientConfig.h			\
+	CommandsImplementation.cxx	\
 	ComposeDefaultKey.cxx		\
 	ComposeDefaultKey.h		\
 	ControlPanel.cxx		\
 	ControlPanel.h			\
+	defaultBZDB.h			\
+	defaultBZDB.cxx			\
 	DisplayMenu.cxx			\
 	DisplayMenu.h			\
+	Downloads.cxx			\
+	Downloads.h			\
+	EffectsMenu.cxx			\
+	EffectsMenu.h			\
+	effectsRenderer.cxx			\
+	effectsRenderer.h			\
+	EntryZone.cxx			\
 	EntryZone.h			\
 	FlashClock.cxx			\
 	FlashClock.h			\
+	ForceFeedback.cxx		\
+	ForceFeedback.h			\
 	FormatMenu.cxx			\
 	FormatMenu.h			\
 	GuidedMissleStrategy.cxx	\
@@ -58,7 +86,8 @@ bzflag_SOURCES =			\
 	InputMenu.h			\
 	KeyboardMapMenu.cxx		\
 	KeyboardMapMenu.h		\
-	ListServer.h			\
+	LocalCommand.cxx		\
+	LocalCommand.h			\
 	LocalPlayer.cxx			\
 	LocalPlayer.h			\
 	MainMenu.cxx			\
@@ -67,10 +96,14 @@ bzflag_SOURCES =			\
 	MainWindow.h			\
 	MenuDefaultKey.h		\
 	MenuDefaultKey.cxx		\
+	motd.h				\
+	motd.cxx			\
 	OptionsMenu.cxx			\
 	OptionsMenu.h			\
 	Player.cxx			\
 	Player.h			\
+	Plan.cxx			\
+	Plan.h			\
 	QuickKeysMenu.cxx		\
 	QuickKeysMenu.h			\
 	QuitMenu.cxx			\
@@ -83,8 +116,12 @@ bzflag_SOURCES =			\
 	RegionPriorityQueue.h		\
 	RemotePlayer.cxx		\
 	RemotePlayer.h			\
+	Roaming.cxx			\
+	Roaming.h			\
 	RobotPlayer.cxx			\
 	RobotPlayer.h			\
+	RoofTops.cxx			\
+	RoofTops.h			\
 	Roster.cxx			\
 	Roster.h			\
 	SaveWorldMenu.cxx		\
@@ -92,16 +129,12 @@ bzflag_SOURCES =			\
 	SceneBuilder.cxx		\
 	SceneBuilder.h			\
 	SceneRenderer.cxx		\
+	ScoreboardRenderer.cxx		\
+	ScoreboardRenderer.h		\
 	SegmentedShotStrategy.cxx	\
 	SegmentedShotStrategy.h		\
 	ServerCommandKey.cxx		\
 	ServerCommandKey.h		\
-	ServerItem.cxx			\
-	ServerItem.h			\
-	ServerList.cxx			\
-	ServerList.h			\
-	ServerListCache.cxx		\
-	ServerListCache.h		\
 	ServerLink.cxx			\
 	ServerLink.h			\
 	ServerMenu.cxx			\
@@ -114,14 +147,24 @@ bzflag_SOURCES =			\
 	ShotPath.h			\
 	ShotPathSegment.cxx		\
 	ShotPathSegment.h		\
+	ShotStats.cxx			\
+	ShotStats.h			\
+	ShotStatsDefaultKey.cxx		\
+	ShotStatsDefaultKey.h		\
+	ShotStatistics.h		\
+	ShotStatistics.cxx		\
 	ShotStrategy.cxx		\
 	ShotStrategy.h			\
 	SilenceDefaultKey.cxx		\
 	SilenceDefaultKey.h		\
-	StartupInfo.h			\
 	TargetingUtils.cxx		\
 	TargetingUtils.h		\
+	TrackMarks.cxx			\
+	TrackMarks.h			\
+	Weapon.cxx			\
 	Weapon.h			\
+	WeatherRenderer.h		\
+	WeatherRenderer.cxx		\
 	World.cxx			\
 	World.h				\
 	WorldBuilder.cxx		\
@@ -129,6 +172,7 @@ bzflag_SOURCES =			\
 	WorldPlayer.cxx			\
 	WorldPlayer.h			\
 	bzflag.cxx			\
+	bzflag.h			\
 	callbacks.cxx			\
 	callbacks.h			\
 	clientCommands.cxx		\
@@ -140,7 +184,8 @@ bzflag_SOURCES =			\
 	sound.cxx			\
 	sound.h				\
 	stars.cxx			\
-	stars.h
+	stars.h				\
+	$(KRB5)
 
 
 if WIN32
@@ -150,45 +195,52 @@ RESOURCE =
 endif
 
 if BUILDZLIB
-ZLIB = ../zlib/libz.a
+ZLIB = ../zlib/libz.la
 else
 ZLIB = -lz
 endif
 
+if BUILDCARES
+CARESLIB = ../c-ares/libcares.la
+else
+CARESLIB = -lcares
+endif
+
 if MACOS
-NACLIB =	\
-	../platform/MacOSX/libMac.a
+NACLIB = \
+	../platform/MacOSX/libMac.la
 endif
 
 if BUILD_REGEX
 REGEX = \
-	../regex/libregex.a
+	../regex/libregex.la
 endif
 
 LDADD =	\
-	../3D/lib3D.a			\
-	../net/libNet.a			\
-	../common/libCommon.a		\
-	../game/libGame.a		\
-	../obstacle/libObstacle.a	\
+	../3D/lib3D.la			\
+	../game/libGame.la		\
+	../net/libNet.la		\
+	../obstacle/libObstacle.la	\
 	$(NACLIB)			\
-	../platform/libPlatform.a	\
-	../ogl/libGLKit.a		\
-	../scene/libSceneDB.a		\
-	../geometry/libGeometry.a	\
-	../mediafile/libMediaFile.a	\
+	../platform/libPlatform.la	\
+	../ogl/libGLKit.la		\
+	../scene/libSceneDB.la		\
+	../geometry/libGeometry.la	\
+	../mediafile/libMediaFile.la	\
+	../common/libCommon.la		\
+	$(CARESLIB)			\
 	$(REGEX)			\
 	$(ZLIB)				\
+	$(KRB5_LIBS)			\
 	$(RESOURCE)			\
 	$(SDL_LIBS)			\
-	$(GLIBS)
+	$(GLIBS)			\
+	../date/libDate.la
 # This is required to hook in ogg/vorbis libraries
 #	$(ALIBS)
 
-AM_CPPFLAGS = $(X_CFLAGS) $(SDL_CFLAGS)
-
-bzflag_LDFLAGS = ../date/buildDate.o
+AM_CPPFLAGS = -I$(top_srcdir)/include $(SDL_CFLAGS) @CURL_CFLAGS@
 
 bzflag.res: $(top_srcdir)/win32/bzflag.rc $(top_srcdir)/win32/bzflag.ico
-	windres --include-dir=$(top_srcdir)/win32/ -i $(top_srcdir)/win32/bzflag.rc -o bzflag.res \
+	$(WINDRES) --include-dir=$(top_srcdir)/win32/ -i $(top_srcdir)/win32/bzflag.rc -o bzflag.res \
 	-O coff

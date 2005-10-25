@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -28,16 +28,12 @@
 #include "common.h"
 
 /* common interface headers */
-#include "global.h"
 #include "TimeKeeper.h"
-#include "Pack.h"
-#include "Address.h"
 #include "Flag.h"
 #include "ShotUpdate.h"
 
 /* local interface headers */
 #include "BaseLocalPlayer.h"
-#include "Player.h"
 #include "ShotStrategy.h"
 #include "SceneDatabase.h"
 
@@ -179,7 +175,7 @@ inline FiringInfo&	ShotPath::getFiringInfo()
   return firingInfo;
 }
 
-inline 	TeamColor	ShotPath::getTeam() const
+inline	TeamColor	ShotPath::getTeam() const
 {
   return firingInfo.shot.team;
 }

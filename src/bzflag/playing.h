@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -17,25 +17,25 @@
 #ifndef	BZF_PLAYING_H
 #define	BZF_PLAYING_H
 
-#if defined(_MSC_VER)
-#pragma warning(disable: 4786)
-#pragma warning(disable: 4100)
-#pragma warning(disable: 4511)
-#endif
+#include "common.h"
 
 // system includes
 #include <string>
 #include <vector>
 
-#include "BzfDisplay.h"
-#include "MainWindow.h"
-#include "SceneRenderer.h"
-#include "Player.h"
+/* common headers */
 #include "StartupInfo.h"
+#include "AutoCompleter.h"
+
+/* local headers */
+#include "MainWindow.h"
+#include "ControlPanel.h"
+#include "HUDRenderer.h"
 
 #define MAX_MESSAGE_HISTORY (20)
 
 typedef void		(*JoinGameCallback)(bool success, void* data);
+typedef void		(*ConnectStatusCallback)(std::string& str);
 typedef void		(*PlayingCallback)(void*);
 struct PlayingCallbackItem {
   public:
@@ -58,20 +58,22 @@ void			notifyBzfKeyMapChanged();
 bool			setVideoFormat(int, bool test = false);
 Player*			lookupPlayer(PlayerId id);
 void			startPlaying(BzfDisplay* display,
-				SceneRenderer&,
-				StartupInfo*);
+				     SceneRenderer&);
 
 bool			addExplosion(const float* pos,
 				float size, float duration);
 void			addTankExplosion(const float* pos);
 void			addShotExplosion(const float* pos);
-void			addShotPuff(const float* pos);
+void			addShotPuff(const float* pos, float azimuth, float elevation);
 void			warnAboutMainFlags();
 void			warnAboutRadarFlags();
+void                    warnAboutRadar();
+void                    warnAboutConsole();
 void			addPlayingCallback(PlayingCallback, void* data);
 void			removePlayingCallback(PlayingCallback, void* data);
 
 void			joinGame(JoinGameCallback, void* userData);
+void                    leaveGame();
 std::vector<std::string>& getSilenceList();
 void			updateEvents();
 void			addMessage(const Player* player,
@@ -80,18 +82,36 @@ void			addMessage(const Player* player,
 				   bool highlight = false,
 				   const char* oldColor = NULL);
 
+int			curlProgressFunc(void* clientp,
+					 double dltotal, double dlnow,
+					 double ultotal, double ulnow);
+
 void selectNextRecipient (bool forward, bool robotIn);
 void handleFlagDropped(Player* tank);
 void setTarget();
 bool shouldGrabMouse();
-void setRoamingLabel(bool force);
+void setRoamingLabel();
+void drawFrame(const float dt);
+
+extern void joinGame();
 
 extern HUDRenderer	*hud;
 extern char		messageMessage[PlayerIdPLen + MessageLen];
 extern ServerLink*	serverLink;
-extern bool		admin; // am I an admin?
 extern int		numFlags;
-
+extern StartupInfo	startupInfo;
+extern DefaultCompleter completer;
+extern bool             gameOver;
+extern ControlPanel    *controlPanel;
+extern bool             fireButton;
+extern float            destructCountdown;
+extern bool             pausedByUnmap;
+extern int              savedVolume;
+extern MainWindow      *mainWindow;
+extern float            pauseCountdown;
+extern float            clockAdjust;
+extern float            roamDZoom;
+extern bool             roamButton;
 
 #endif // BZF_PLAYING_H
 

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,25 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "HUDDialogStack.h"
 
-/* system implementation headers */
-#include <vector>
-
-/* common implementation headers */
-#include "BzfWindow.h"
-
 /* local implementation headers */
+#include "playing.h"
 #include "HUDui.h"
-#include "MainWindow.h"
-
-/* from playing.cxx */
-MainWindow*		getMainWindow();
-
+#include "HUDDialog.h"
 
 HUDDialogStack HUDDialogStack::globalStack;
 
@@ -114,6 +105,11 @@ void HUDDialogStack::resize(void* _self)
 			getMainWindow()->getHeight());
 }
 
+void HUDDialogStack::setFailedMessage(const char *msg)
+{
+  if (isActive())
+    stack[stack.size() - 1]->setFailedMessage(msg);
+}
 
 // Local Variables: ***
 // mode: C++ ***

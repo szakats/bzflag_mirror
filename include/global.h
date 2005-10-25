@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,24 +7,32 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- */
-
-/*
- * Global constants
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	BZF_GLOBAL_H
 #define	BZF_GLOBAL_H
 
-#include <math.h>
+/*
+ * Global constants
+ */
+
 #include "common.h"
+
+/* system headers */
+#include <math.h>
+
+/* common headers */
 #include "StateDatabase.h"
+
 
 
 // values affecting struct and class layout
 const int		CallSignLen = 32;	// including terminating NUL
+const int		PasswordLen = 32;	// including terminating NUL
 const int		EmailLen = 128;		// including terminating NUL
+const int		TokenLen = 22;		// opaque string (now int(10)) and terminating NUL
+const int		VersionLen = 60;	// including terminating NUL
 const int		MessageLen = 128;	// including terminating NUL
 
 // types of things we can be
@@ -71,16 +79,15 @@ enum GameStyle {
 	PlainGameStyle =		0x0000,
 	TeamFlagGameStyle =		0x0001,	// capture the flag
 	SuperFlagGameStyle =		0x0002,	// superflags allowed
-	RunFlagGameStyle =		0x0004,	// run the flag (formerly hold-the-flag)
-
+	//FormerRogueStyle =		0x0004,	// used to be rogue, but now we have rogue maxplayers
 	JumpingGameStyle =		0x0008,	// jumping allowed
 	InertiaGameStyle =		0x0010,	// momentum for all
 	RicochetGameStyle =		0x0020,	// all shots ricochet
 	ShakableGameStyle =		0x0040,	// can drop bad flags
 	AntidoteGameStyle =		0x0080,	// anti-bad flags
-	HandicapGameStyle =		0x0100, // hadicap players based on ability
-
+	HandicapGameStyle =		0x0100,	// handicap players based on score (eek! was TimeSyncGameStyle)
 	RabbitChaseGameStyle =		0x0200	// rabbit chase
+	// add here before reusing old ones above
 };
 
 // map object flags

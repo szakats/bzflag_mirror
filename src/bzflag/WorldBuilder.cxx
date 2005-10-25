@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,20 +7,25 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "WorldBuilder.h"
 
 /* common implementation headers */
-#include "StateDatabase.h"
-#include "Pack.h"
 #include "TextUtils.h"
 #include "Protocol.h"
-#include "EighthDBoxSceneNode.h"
-#include "EighthDPyrSceneNode.h"
-#include "EighthDBaseSceneNode.h"
+#include "DynamicColor.h"
+#include "TextureMatrix.h"
+#include "PhysicsDriver.h"
+#include "FlagSceneNode.h"
+#include "ObstacleMgr.h"
+#include "BaseBuilding.h"
+
+/* compression library header */
+#include "../zlib/zlib.h"
+
 
 WorldBuilder::WorldBuilder()
 {
@@ -28,13 +33,17 @@ WorldBuilder::WorldBuilder()
   owned = true;
 }
 
+
 WorldBuilder::~WorldBuilder()
 {
   if (owned) delete world;
 }
 
+
 void* WorldBuilder::unpack(void* buf)
 {
+  TimeKeeper start = TimeKeeper::getCurrent();
+
   // unpack world database from network transfer
   // read style header
   uint16_t code, len;
@@ -43,14 +52,162 @@ void* WorldBuilder::unpack(void* buf)
   if (code != WorldCodeHeader) return NULL;
 
   // read style
-  uint16_t gameStyle, maxPlayers, maxShots, maxFlags,serverMapVersion;
+  uint16_t serverMapVersion;
   buf = nboUnpackUShort(buf, serverMapVersion);
-  if (serverMapVersion != mapVersion)
+  if (serverMapVersion != mapVersion) {
+    DEBUG1 ("WorldBuilder::unpack() bad map version\n");
     return NULL;
+  }
+
+  // decompress
+  uint32_t compressedSize, uncompressedSize;
+  buf = nboUnpackUInt (buf, uncompressedSize);
+  buf = nboUnpackUInt (buf, compressedSize);
+  uLongf destLen = uncompressedSize;
+  char *uncompressedWorld = new char[destLen];
+  char *compressedWorld = (char*) buf;
+
+  if (uncompress ((Bytef*)uncompressedWorld, &destLen,
+		  (Bytef*)compressedWorld, compressedSize) != Z_OK) {
+    delete[] uncompressedWorld;
+    DEBUG1 ("WorldBuilder::unpack() could not decompress\n");
+    return NULL;
+  }
+  char* uncompressedEnd = uncompressedWorld + uncompressedSize;;
+
+  buf = uncompressedWorld;
+
+  // setup the buffer overrun checking
+  nboUseErrorChecking(true);
+  nboSetBufferLength(uncompressedSize);
+  nboClearBufferError();
+
+  // unpack dynamic colors
+  DYNCOLORMGR.clear();
+  buf = DYNCOLORMGR.unpack(buf);
+
+  // unpack texture matrices
+  TEXMATRIXMGR.clear();
+  buf = TEXMATRIXMGR.unpack(buf);
+
+  // unpack materials
+  MATERIALMGR.clear();
+  buf = MATERIALMGR.unpack(buf);
+
+  // unpack physics drivers
+  PHYDRVMGR.clear();
+  buf = PHYDRVMGR.unpack(buf);
+
+  // unpack obstacle transforms
+  TRANSFORMMGR.clear();
+  buf = TRANSFORMMGR.unpack(buf);
+
+  // unpack the obstacles
+  OBSTACLEMGR.clear();
+  buf = OBSTACLEMGR.unpack(buf);
+
+  // unpack the teleporter links
+  world->links.clear();
+  buf = world->links.unpack(buf);
+
+  // unpack water level
+  buf = nboUnpackFloat(buf, world->waterLevel);
+  if (world->waterLevel >= 0.0f) {
+    int32_t matindex;
+    buf = nboUnpackInt(buf, matindex);
+    world->waterMaterial = MATERIALMGR.getMaterial(matindex);
+  }
+
+  uint32_t i, count;
+
+  // unpack the weapons
+  buf = nboUnpackUInt(buf, count);
+  for (i = 0; i < count; i++) {
+    Weapon weapon;
+    buf = weapon.unpack(buf);
+    world->weapons.push_back(weapon);
+  }
+
+  // unpack the entry zones
+  buf = nboUnpackUInt(buf, count);
+  for (i = 0; i < count; i++) {
+    EntryZone zone;
+    buf = zone.unpack(buf);
+    world->entryZones.push_back(zone);
+  }
+
+  // check if the unpacking was successful
+  nboUseErrorChecking(false);
+  if (nboGetBufferError()) {
+    delete[] uncompressedWorld;
+    DEBUG1 ("WorldBuilder::unpack() overrun\n");
+    return NULL;
+  }
+  if ((char*)buf != uncompressedEnd) {
+    delete[] uncompressedWorld;
+    DEBUG1 ("WorldBuilder::unpack() ending mismatch (%i)\n",
+	    (char*)buf - uncompressedEnd);
+    return NULL;
+  }
+
+  // switch back to the original buffer
+  buf = compressedWorld + compressedSize;
+  buf = nboUnpackUShort(buf, len);
+  buf = nboUnpackUShort(buf, code);
+  if ((code != WorldCodeEnd) || (len != WorldCodeEndSize)) {
+    delete[] uncompressedWorld;
+    DEBUG1 ("WorldBuilder::unpack() bad ending\n");
+    return NULL;
+  }
+
+  // delete the buffer
+  delete[] uncompressedWorld;
+
+  // build the world obstacles
+  OBSTACLEMGR.makeWorld();
+
+  // link the teleporters
+  world->links.doLinking();
+
+  // make the team bases
+  if (world->gameStyle & TeamFlagGameStyle) {
+    const ObstacleList& bases = OBSTACLEMGR.getBases();
+    for (i = 0; i < bases.size(); i++) {
+      const BaseBuilding* base = (const BaseBuilding*) bases[i];
+      setBase((TeamColor)base->getTeam(),
+	      base->getPosition(), base->getRotation(),
+	      base->getWidth(), base->getBreadth(), base->getHeight());
+    }
+  } else {
+    OBSTACLEMGR.replaceBasesWithBoxes();
+  }
+
+  world->makeLinkMaterial();
+
+  world->makeMeshDrawMgrs();
+
+  // NOTE: relying on checkCollisionManager() to do the first loading
+  //       of ColiisionManager, because the BZDB variables come in later,
+  //       and would cause a double loading if we did it now.
+
+  if (debugLevel >= 3) {
+    TimeKeeper end = TimeKeeper::getCurrent();
+    const float elapsed = (float)(end - start);
+    DEBUG0("WorldBuilder::unpack() processed in %f seconds.\n", elapsed);
+  }
+
+  return buf;
+}
+
+
+void* WorldBuilder::unpackGameSettings(void* buf)
+{
+  // read style
+  uint16_t gameStyle, maxPlayers, maxShots, maxFlags;
 
   float worldSize;
   buf = nboUnpackFloat(buf, worldSize);
-  BZDB.set(StateDatabase::BZDB_WORLDSIZE, string_util::format("%f", worldSize));
+  BZDB.set(StateDatabase::BZDB_WORLDSIZE, TextUtils::format("%f", worldSize));
   buf = nboUnpackUShort(buf, gameStyle);
   setGameStyle(short(gameStyle));
   buf = nboUnpackUShort(buf, maxPlayers);
@@ -66,221 +223,28 @@ void* WorldBuilder::unpack(void* buf)
   setShakeTimeout(0.1f * float(shakeTimeout));
   buf = nboUnpackUShort(buf, shakeWins);
   setShakeWins(shakeWins);
-  uint32_t epochOffset;
-  buf = nboUnpackUInt(buf, epochOffset);
-  setEpochOffset(epochOffset);
-
-  // read geometry
-  buf = nboUnpackUShort(buf, len);
-  buf = nboUnpackUShort(buf, code);
-  while (code != WorldCodeEnd) {
-    switch (code) {
-      case WorldCodeBox: {
-	float data[7];
-	unsigned char tempflags;
-
-	if (len != WorldCodeBoxSize)
-	  return NULL;
-
-	memset(data, 0, sizeof(float) * 7);
-	buf = nboUnpackFloat(buf, data[0]);
-	buf = nboUnpackFloat(buf, data[1]);
-	buf = nboUnpackFloat(buf, data[2]);
-	buf = nboUnpackFloat(buf, data[3]);
-	buf = nboUnpackFloat(buf, data[4]);
-	buf = nboUnpackFloat(buf, data[5]);
-	buf = nboUnpackFloat(buf, data[6]);
-	buf = nboUnpackUByte(buf, tempflags);
-	BoxBuilding box(data, data[3], data[4], data[5], data[6],
-			(tempflags & _DRIVE_THRU)!=0, (tempflags & _SHOOT_THRU)!=0);
-	append(box);
-	break;
-      }
-      case WorldCodePyramid: {
-	float data[7];
-	unsigned char tempflags;
-
-	if (len != WorldCodePyramidSize)
-	  return NULL;
-
-	buf = nboUnpackFloat(buf, data[0]);
-	buf = nboUnpackFloat(buf, data[1]);
-	buf = nboUnpackFloat(buf, data[2]);
-	buf = nboUnpackFloat(buf, data[3]);
-	buf = nboUnpackFloat(buf, data[4]);
-	buf = nboUnpackFloat(buf, data[5]);
-	buf = nboUnpackFloat(buf, data[6]);
-	buf = nboUnpackUByte(buf, tempflags);
-
-	PyramidBuilding pyr(data, data[3], data[4], data[5], data[6],
-			    (tempflags & _DRIVE_THRU)!=0, (tempflags & _SHOOT_THRU)!=0);
-	if (tempflags & _FLIP_Z)
-	  pyr.setZFlip();
-
-	append(pyr);
-	break;
-      }
-      case WorldCodeTeleporter: {
-	float data[8];
-	unsigned char tempflags;
-
-	if (len != WorldCodeTeleporterSize)
-	  return NULL;
-
-	buf = nboUnpackFloat(buf, data[0]);
-	buf = nboUnpackFloat(buf, data[1]);
-	buf = nboUnpackFloat(buf, data[2]);
-	buf = nboUnpackFloat(buf, data[3]);
-	buf = nboUnpackFloat(buf, data[4]);
-	buf = nboUnpackFloat(buf, data[5]);
-	buf = nboUnpackFloat(buf, data[6]);
-	buf = nboUnpackFloat(buf, data[7]);
-	buf = nboUnpackUByte(buf, tempflags);
-	Teleporter tele(data, data[3], data[4], data[5], data[6],data[7],
-			(tempflags & _DRIVE_THRU)!=0, (tempflags & _SHOOT_THRU)!=0);
-	append(tele);
-	break;
-      }
-      case WorldCodeLink: {
-	uint16_t data[2];
-
-	if (len != WorldCodeLinkSize)
-	  return NULL;
-
-	buf = nboUnpackUShort(buf, data[0]);
-	buf = nboUnpackUShort(buf, data[1]);
-	setTeleporterTarget(int(data[0]), int(data[1]));
-	break;
-      }
-      case WorldCodeWall: {
-	float data[6];
-
-	if (len != WorldCodeWallSize)
-	  return NULL;
-
-	buf = nboUnpackFloat(buf, data[0]);
-	buf = nboUnpackFloat(buf, data[1]);
-	buf = nboUnpackFloat(buf, data[2]);
-	buf = nboUnpackFloat(buf, data[3]);
-	buf = nboUnpackFloat(buf, data[4]);
-	buf = nboUnpackFloat(buf, data[5]);
-	WallObstacle wall(data, data[3], data[4], data[5]);
-	append(wall);
-	break;
-      }
-      case WorldCodeBase: {
-	uint16_t team;
-	float data[10];
-
-	if (len != WorldCodeBaseSize)
-	  return NULL;
-
-	buf = nboUnpackUShort(buf, team);
-	buf = nboUnpackFloat(buf, data[0]);
-	buf = nboUnpackFloat(buf, data[1]);
-	buf = nboUnpackFloat(buf, data[2]);
-	buf = nboUnpackFloat(buf, data[3]);
-	buf = nboUnpackFloat(buf, data[4]);
-	buf = nboUnpackFloat(buf, data[5]);
-	buf = nboUnpackFloat(buf, data[6]);
-	buf = nboUnpackFloat(buf, data[7]);
-	buf = nboUnpackFloat(buf, data[8]);
-	buf = nboUnpackFloat(buf, data[9]);
-	BaseBuilding base(data, data[3], data +4, team);
-	append(base);
-	setBase(TeamColor(team), data, data[3], data[4], data[5], data[6]);
-	break;
-      }
-      case WorldCodeWeapon: {
-	Weapon weapon;
-        uint16_t delays; 
-
-	buf = FlagType::unpack(buf, weapon.type);
-	buf = nboUnpackFloat(buf, weapon.pos[0]);
-	buf = nboUnpackFloat(buf, weapon.pos[1]);
-	buf = nboUnpackFloat(buf, weapon.pos[2]);
-	buf = nboUnpackFloat(buf, weapon.dir);
-	buf = nboUnpackFloat(buf, weapon.initDelay);
-	buf = nboUnpackUShort(buf, delays);
-	
-	uint16_t weapon_len = WorldCodeWeaponSize + (delays * sizeof(float));
-	if (len != weapon_len) {
-	  return NULL;
-	}
-	
-	int i;
-	for (i = 0; i < delays; i++) {
-	  float delay;
-  	  buf = nboUnpackFloat(buf, delay);
-  	  weapon.delay.push_back(delay);
-  	}
-	append(weapon);
-	break;
-      }
-      case WorldCodeZone: {
-        EntryZone zone;
-        uint16_t flags, teams, safety;
-
-	buf = nboUnpackFloat(buf, zone.pos[0]);
-	buf = nboUnpackFloat(buf, zone.pos[1]);
-	buf = nboUnpackFloat(buf, zone.pos[2]);
-	buf = nboUnpackFloat(buf, zone.size[0]);
-	buf = nboUnpackFloat(buf, zone.size[1]);
-	buf = nboUnpackFloat(buf, zone.size[2]);
-	buf = nboUnpackFloat(buf, zone.rot);
-	buf = nboUnpackUShort(buf, flags);
-	buf = nboUnpackUShort(buf, teams);
-	buf = nboUnpackUShort(buf, safety);
-
-        uint16_t zone_len = WorldCodeZoneSize;
-        zone_len += FlagType::packSize * flags;
-        zone_len += sizeof(uint16_t) * teams;
-        zone_len += sizeof(uint16_t) * safety;
-	if (len != zone_len) {
-	  return NULL;
-	}
-
-        int i;
-	for (i = 0; i < flags; i++) {
-	  FlagType *type;
-  	  buf = FlagType::unpack (buf, type);
-  	  zone.flags.push_back(type);
-  	}
-	for (i = 0; i < teams; i++) {
-	  uint16_t team;
-  	  buf = nboUnpackUShort(buf, team);
-  	  zone.teams.push_back((TeamColor)team);
-  	}
-	for (i = 0; i < safety; i++) {
-	  uint16_t safety;
-  	  buf = nboUnpackUShort(buf, safety);
-  	  zone.safety.push_back((TeamColor)safety);
-  	}
-	append(zone);
-	break;
-      }
-      default:
-	return NULL;
-    }
-    buf = nboUnpackUShort(buf, len);
-    buf = nboUnpackUShort(buf, code);
-  }
+  uint32_t UsedToBeSyncTime; // FIXME
+  buf = nboUnpackUInt(buf, UsedToBeSyncTime);
 
   return buf;
 }
 
 void WorldBuilder::preGetWorld()
 {
-  // if no inertia gameStyle then make sure accelerations are zero (disabled)
-  if (!(world->gameStyle & short(InertiaGameStyle)))
-    setInertia(0.0, 0.0);
-
   // prepare players array
-  if (world->players) delete[] world->players;
-  world->players = new RemotePlayer*[world->maxPlayers];
+  if (world->players) {
+    delete[] world->players;
+  }
+  // FIXME
+  // world->maxPlayers do not work as bzfs uses more player slot than
+  // real players. Any tcp connection is assigned a slot.
+  // So I put now 216. We should fix it though.
+  const int maxPlayers = 216;
+  world->players = new RemotePlayer*[maxPlayers];
   int i;
-  for (i = 0; i < world->maxPlayers; i++)
+  for (i = 0; i < maxPlayers; i++) {
     world->players[i] = NULL;
+  }
 
   // prepare flags array
   world->freeFlags();
@@ -298,42 +262,9 @@ void WorldBuilder::preGetWorld()
     world->flagNodes[i]->setTexture(World::flagTexture);
   }
 
-  // prepare inside nodes arrays
-  world->freeInsideNodes();
-  GLfloat obstacleSize[3];
-  const int numBoxes = world->boxes.size();
-  world->boxInsideNodes = new EighthDimSceneNode*[numBoxes];
-  for (i = 0; i < numBoxes; i++) {
-    const Obstacle& o = world->boxes[i];
-    obstacleSize[0] = o.getWidth();
-    obstacleSize[1] = o.getBreadth();
-    obstacleSize[2] = o.getHeight();
-    world->boxInsideNodes[i] = new EighthDBoxSceneNode(o.getPosition(),
-						       obstacleSize, o.getRotation());
-  }
-  const int numPyramids = world->pyramids.size();
-  world->pyramidInsideNodes = new EighthDimSceneNode*[numPyramids];
-  for (i = 0; i < numPyramids; i++) {
-    const Obstacle& o = world->pyramids[i];
-    obstacleSize[0] = o.getWidth();
-    obstacleSize[1] = o.getBreadth();
-    obstacleSize[2] = o.getHeight();
-    world->pyramidInsideNodes[i] = new EighthDPyrSceneNode(o.getPosition(),
-							   obstacleSize, o.getRotation());
-  }
-  const int numBases = world->basesR.size();
-  world->baseInsideNodes = new EighthDimSceneNode*[numBases];
-  for (i = 0; i < numBases; i++) {
-    const Obstacle& o = world->basesR[i];
-    obstacleSize[0] = o.getWidth();
-    obstacleSize[1] = o.getBreadth();
-    obstacleSize[2] = o.getHeight();
-    world->baseInsideNodes[i] = new EighthDBaseSceneNode(o.getPosition(),
-							 obstacleSize, o.getRotation());
-  }
-
-  world->teleportTargets = teleportTargets;
+  return;
 }
+
 
 World* WorldBuilder::getWorld()
 {
@@ -342,21 +273,17 @@ World* WorldBuilder::getWorld()
   return world;
 }
 
+
 World* WorldBuilder::peekWorld()
 {
   preGetWorld();
   return world;
 }
 
+
 void WorldBuilder::setGameStyle(short gameStyle)
 {
   world->gameStyle = gameStyle;
-}
-
-void WorldBuilder::setInertia(float linearAccel,	float angularAccel)
-{
-  world->linearAcceleration = linearAccel;
-  world->angularAcceleration = angularAccel;
 }
 
 void WorldBuilder::setMaxPlayers(int maxPlayers)
@@ -382,56 +309,6 @@ void WorldBuilder::setShakeTimeout(float timeout) const
 void WorldBuilder::setShakeWins(int wins) const
 {
   world->shakeWins = wins;
-}
-
-void WorldBuilder::setEpochOffset(uint32_t seconds) const
-{
-  world->epochOffset = seconds;
-}
-
-void WorldBuilder::append(const WallObstacle& wall)
-{
-  world->walls.push_back(wall);
-}
-
-void WorldBuilder::append(const BoxBuilding& box)
-{
-  world->boxes.push_back(box);
-}
-
-void WorldBuilder::append(const PyramidBuilding& pyramid)
-{
-  world->pyramids.push_back(pyramid);
-}
-
-void WorldBuilder::append(const BaseBuilding& base)
-{
-  world->basesR.push_back(base);
-}
-
-void WorldBuilder::append(const Teleporter& teleporter)
-{
-  // save teleporter
-  world->teleporters.push_back(teleporter);
-}
-
-void WorldBuilder::append(const Weapon& weapon)
-{
-  world->weapons.push_back(weapon);
-}
-
-void WorldBuilder::append(const EntryZone& zone)
-{
-  world->entryZones.push_back(zone);
-}
-
-void WorldBuilder::setTeleporterTarget(int src, int tgt)
-{
-  if ((int)teleportTargets.size() < src+1)
-    teleportTargets.resize(((src/2)+1)*2);
-
-  // record target in source entry
-  teleportTargets[src] = tgt;
 }
 
 void WorldBuilder::setBase(TeamColor team,

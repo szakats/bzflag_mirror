@@ -8,7 +8,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
  * This file was "inspired" by the joy_usb.c file that is part of the
  * xmame project. To the extent that code was copied from that file,
@@ -24,6 +24,8 @@
 #include <X11/Intrinsic.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <vector>
+#include <string>
 
 #include <stdio.h>
 
@@ -35,10 +37,10 @@ public:
 	~USBJoystick();
     void	initJoystick(const char* joystickName);
     bool	joystick() const;
-    void	getJoy(int& x, int& y) const;
-    unsigned long getJoyButtons() const;
-    void        getJoyDevices(std::vector<std::string> &list) const;
-    
+    void	getJoy(int& x, int& y);
+    unsigned long getJoyButtons();
+    void	getJoyDevices(std::vector<std::string> &list) const;
+
 private:
     void    poll();
     int	    num_axis;

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,14 +7,15 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-
-/* system implementation headers */
-#include <math.h>
 
 /* interface header */
 #include "Region.h"
+
+/* system implementation headers */
+#include <math.h>
+#include <vector>
 
 
 RegionPoint::RegionPoint(float x, float y)
@@ -103,11 +104,11 @@ float BzfRegion::getDistance(const float p[2], float nearest[2]) const
   //compute distance from any edge
   const float* p1 = corners[count - 1].get();
   const float* p2 = NULL;
-  float        d[2];
-  float        m[2];
-  float        t;
-  float        edgeSquareDist;
-  float        x, y;
+  float	d[2];
+  float	m[2];
+  float	t;
+  float	edgeSquareDist;
+  float	x, y;
   for (int c = 0; c < count; c++) {
     p2   = corners[c].get();
     d[0] = p2[0] - p1[0];
@@ -223,7 +224,7 @@ BzfRegion* BzfRegion::orphanSplitRegion(const float e1[2], const float e2[2])
 
   // corner is t the left of cutting edge -- new region between edge 1 and 0
   if (!fistCornerRight) {
-    int i = edge[0];
+    i = edge[0];
     edge[0] = edge[1];
     edge[1] = i;
     float tsplitTemp = tsplit[0];

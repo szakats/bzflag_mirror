@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* Address:
@@ -21,11 +21,15 @@
 #ifndef	BZF_INET_ADDR_H
 #define	BZF_INET_ADDR_H
 
+// system headers
 #include <sys/types.h>
+#include <vector>
+#include <string>
+
+// local headers
 #include "common.h"
 #include "network.h"
 #include "Pack.h"
-#include <vector>
 
 typedef struct in_addr	InAddr;			// shorthand
 
@@ -43,19 +47,19 @@ class Address {
     bool		operator==(const Address&) const;
     bool		operator!=(const Address&) const;
     bool		isAny() const;
+    bool		isPrivate() const;
     std::string		getDotNotation() const;
     uint8_t		getIPVersion() const;
-  
+
     void*		pack(void*) const;
     void*		unpack(void*);
 
     static Address	getHostAddress(const std::string hostname = std::string(""));
     static std::string	getHostByAddress(InAddr);
-    static const std::string	getHostName(const std::string hostname = std::string(""));
+    static const std::string getHostName(const std::string hostname = std::string(""));
 
   private:
-    std::vector <InAddr>      addr;
-    static Address	localAddress;
+    std::vector <InAddr> addr;
 };
 
 typedef uint8_t		PlayerId;

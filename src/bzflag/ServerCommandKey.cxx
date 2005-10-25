@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,20 +7,18 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
-#include <vector>
-
+/* interface header */
 #include "ServerCommandKey.h"
-#include "Player.h"
+
 #include "LocalPlayer.h"
 #include "HUDRenderer.h"
 #include "TextUtils.h"
 #include "KeyManager.h"
-
-#include "playing.h" // THIS IS TEMPORARY...TO BE REMOVED...BABY STEPS
+#include "playing.h"
+#include "HUDui.h"
 
 
 const ServerCommandKey::Mode ServerCommandKey::nonAdminModes [8] = {LagStats, IdleStats, FlagHistory, Report, Password, Register, Identify, ClientQuery};
@@ -64,6 +62,10 @@ void			ServerCommandKey::updatePrompt()
   // decide what should be on the composing prompt
 
   LocalPlayer *myTank = LocalPlayer::getMyTank();
+  if (!myTank) {
+    // make sure we actually have a tank
+    return;
+  }
   const Player * recipient = myTank->getRecipient();
   if (mode >= Kick && mode <= Ghost) { // more complicated modes here
     if (recipient) {
@@ -83,6 +85,13 @@ void			ServerCommandKey::updatePrompt()
 	 hud->setComposing(composePrompt, true);
 	*/
 	break;
+
+	  case Kill:
+    composePrompt = "Kill -> ";
+	composePrompt = composePrompt + recipient->getCallSign() + " :";
+	hud->setComposing(composePrompt, true);
+    break;
+
       case Setgroup: composePrompt = "Set players group ";
 	composePrompt = composePrompt +  " -> " + recipient->getCallSign() + " :";
 	hud->setComposing(composePrompt, true);
@@ -107,6 +116,9 @@ void			ServerCommandKey::updatePrompt()
       switch (mode) {
       case Kick:
 	hud->setComposing("Kick :", true);
+	break;
+	  case Kill:
+	hud->setComposing("Kill :", true);
 	break;
       case BanIp: case Ban1: case Ban2: case Ban3:
 	hud->setComposing("Ban :", true);
@@ -171,7 +183,7 @@ std::string		ServerCommandKey::makePattern(const InAddr& address)
   const char * c = inet_ntoa(address);
   if (c == NULL) return "";
   std::string dots = c;
-  std::vector<std::string> dotChunks = string_util::tokenize(dots, ".");
+  std::vector<std::string> dotChunks = TextUtils::tokenize(dots, ".");
   if (dotChunks.size() != 4) return "";
 
   switch (mode) {
@@ -196,7 +208,7 @@ bool			ServerCommandKey::keyPress(const BzfKeyEvent& key)
   LocalPlayer *myTank = LocalPlayer::getMyTank();
   if (KEYMGR.get(key, true) == "jump") {
     // jump while typing
-    myTank->jump();
+    myTank->setJump();
   }
 
   if (myTank->getInputMethod() != LocalPlayer::Keyboard) {
@@ -237,9 +249,17 @@ bool			ServerCommandKey::keyPress(const BzfKeyEvent& key)
 
 	case Kick:
 	  // escape the name
-	  name = string_util::replace_all(name, "\\", "\\\\");
-	  name = string_util::replace_all(name, "\"", "\\\"");
+	  name = TextUtils::replace_all(name, "\\", "\\\\");
+	  name = TextUtils::replace_all(name, "\"", "\\\"");
 	  sendMsg="/kick \"" + name + "\"";
+	  if (message != "") sendMsg = sendMsg + " " + message;
+	  break;
+
+	case Kill:
+	  // escape the name
+	  name = TextUtils::replace_all(name, "\\", "\\\\");
+	  name = TextUtils::replace_all(name, "\"", "\\\"");
+	  sendMsg="/kill \"" + name + "\"";
 	  if (message != "") sendMsg = sendMsg + " " + message;
 	  break;
 
@@ -251,7 +271,7 @@ bool			ServerCommandKey::keyPress(const BzfKeyEvent& key)
 	   sendMsg="/ban " + banPattern;
 
 	   if (message != ""){ // add ban length if something is there
-  	     sendMsg = sendMsg + " " + message;
+	     sendMsg = sendMsg + " " + message;
 	   }
 	  */
 	  break;
@@ -281,6 +301,7 @@ bool			ServerCommandKey::keyPress(const BzfKeyEvent& key)
 
 	switch (mode) {
 	case Kick: sendMsg = "/kick"; break;
+	case Kill: sendMsg = "/kill"; break;
 	case BanIp: sendMsg = "/ban"; break;
 	case Setgroup: sendMsg = "/setgroup"; break;
 	case Removegroup: sendMsg = "/removegroup"; break;
@@ -289,7 +310,7 @@ bool			ServerCommandKey::keyPress(const BzfKeyEvent& key)
 	default: /* shouldn't happen */ break;
 	}
 
-        if (message != "") sendMsg = sendMsg + " " + message;
+	if (message != "") sendMsg = sendMsg + " " + message;
 
       }
     } else { // handle less complicated messages
@@ -362,7 +383,7 @@ bool			ServerCommandKey::keyRelease(const BzfKeyEvent& key)
 
       // choose which mode we are in
       int maxModes;
-      if (admin) {
+      if (myTank->isAdmin()) {
 	maxModes = numModes;
       } else {
 	maxModes = numNonAdminModes;
@@ -370,7 +391,7 @@ bool			ServerCommandKey::keyRelease(const BzfKeyEvent& key)
 
       if (key.button == BzfKeyEvent::Down) {
 	int newMode = mode;
-	if (!admin) {
+	if (!myTank->isAdmin()) {
 	  bool foundIt = false;
 	  for (int i = 0; i < numNonAdminModes; i++) {
 	    if (mode == nonAdminModes[i]) {
@@ -383,7 +404,7 @@ bool			ServerCommandKey::keyRelease(const BzfKeyEvent& key)
 
 	newMode++;
 	if (newMode >= maxModes) newMode = 0;
-	mode = (admin ? ((Mode)newMode) : nonAdminModes[newMode]);
+	mode = (myTank->isAdmin() ? ((Mode)newMode) : nonAdminModes[newMode]);
 	// if no recipient skip Ban1,2,3 -- applies to admin mode
 	if (!recipient && (mode >= Ban1 && mode <= Ban3))
 	  mode = Unban;
@@ -392,7 +413,7 @@ bool			ServerCommandKey::keyRelease(const BzfKeyEvent& key)
 	int newMode = (int) mode;
 
 	bool foundIt = false;
-	if (!admin) {
+	if (!myTank->isAdmin()) {
 	  for (int i = 0; i < numNonAdminModes; i++) {
 	    if (mode == nonAdminModes[i]) {
 	      newMode = i;
@@ -404,7 +425,7 @@ bool			ServerCommandKey::keyRelease(const BzfKeyEvent& key)
 
 	newMode--;
 	if (newMode < 0) newMode = maxModes -1;
-	mode = (admin ? ((Mode) newMode) : nonAdminModes[newMode]);
+	mode = (myTank->isAdmin() ? ((Mode) newMode) : nonAdminModes[newMode]);
 	// if no recipient skip Ban1,2,3 -- applies to admin mode
 	if (!recipient && (mode >= Ban1 && mode <= Ban3))
 	  mode = BanIp;

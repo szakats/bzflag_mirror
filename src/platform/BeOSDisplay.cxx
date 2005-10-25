@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "BeOSDisplay.h"
@@ -68,6 +68,11 @@ bool					BeOSDisplay::isEventPending() const
   }
   //  snooze(10000);
   return (port_buffer_size_etc(eventPort, B_TIMEOUT, 0LL) > 0);
+}
+
+bool					BeOSDisplay::peekEvent(BzfEvent& event) const
+{
+  return false;
 }
 
 bool					BeOSDisplay::getEvent(BzfEvent& event) const

@@ -5,7 +5,7 @@
 // original by D. John <g33k@despammed.com>
 // php native code by Tim Riker <Tim@Rikers.org>
 //
-// Copyright (c) 1993 - 2004 Tim Riker
+// Copyright (c) 1993 - 2005 Tim Riker
 //
 // This package is free software;  you can redistribute it and/or
 // modify it under the terms of the license found in the file
@@ -13,13 +13,12 @@
 //
 // THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
 // IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
-// WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 //
 // This is a simple script that reports current public servers
 // and creates links to server stats.
 
-
-$listserver = 'http://db.bzflag.org/db/?action=LIST';
+$listserver = 'http://my.BZFlag.org/db/?action=LIST';
 
 $title="BZFlag Server List";
 
@@ -27,42 +26,7 @@ if ($_GET["hostport"]) {
   $title .= " for " .$_GET["hostport"];
 }
 
-function query ($hostport) {
-  list($server['host'], $server['port']) = split(":", $hostport, 2);
-  $protocol = 'tcp';
-  $get_prot = getprotobyname($protocol);
-  if ($get_prot == -1) {
-     // if nothing found, returns -1
-     echo 'Invalid Protocol';
-     return $server;
-  }
-  if (!$server['port']) {
-    $server['port'] = 5154;
-  } elseif (!ctype_digit($server['port'])) {
-    $server['port'] = getservbyname($server['port'], $protocol);
-  }
-  $server['ip'] = gethostbyname($server['host']);
-  $fp = fsockopen($server['host'], $server['port'], $errno, $errstr, 5);
-  if (!$fp) {
-    echo "$errstr ($errno)\n";
-    return $server;
-  }
-  $buffer=fread($fp, 9);
-  //var_dump($buffer);
-  # parse reply
-  $server += unpack("a4magic/a4protocol/Cid", $buffer);
-  //var_dump($server);
-  if ($server['magic'] != "BZFS") {
-    echo "not a bzflag server\n";
-    fclose($fp);
-    return $server;
-  }
-  if ($server['protocol'] != "1910") {
-    # FIXME should be a case statement and handle other bzfs versions
-    echo "incompatible version\n";
-    fclose($fp);
-    return $server;
-  }
+function bzfquery1910 ($server,$fp) {
   # MsgQueryGame + MsgQueryPlayers
   $request = pack("n2", 0, 0x7167);
   $request .= pack("n2", 0, 0x7170);
@@ -99,18 +63,59 @@ function query ($hostport) {
   return $server;
 }
 
-function dump ($server) {
+function bzfquery ($hostport) {
+  list($server['host'], $server['port']) = split(":", $hostport, 2);
+  $protocol = 'tcp';
+  $get_prot = getprotobyname($protocol);
+  if ($get_prot == -1) {
+     // if nothing found, returns -1
+     echo 'Invalid Protocol';
+     return $server;
+  }
+  if (!$server['port']) {
+    $server['port'] = 5154;
+  } elseif (!ctype_digit($server['port'])) {
+    $server['port'] = getservbyname($server['port'], $protocol);
+  }
+  $server['ip'] = gethostbyname($server['host']);
+  $fp = fsockopen($server['host'], $server['port'], $errno, $errstr, 5);
+  if (!$fp) {
+    echo "$errstr ($errno)\n";
+    return $server;
+  }
+  $buffer=fread($fp, 9);
+  //var_dump($buffer);
+  # parse reply
+  $server += unpack("a4magic/a4protocol/Cid", $buffer);
+  //var_dump($server);
+  if ($server['magic'] != "BZFS") {
+    echo "not a bzflag server\n";
+    fclose($fp);
+    return $server;
+  }
+  switch ($server['protocol']) {
+  case "1910":
+  case "0011":
+   return bzfquery1910($server,$fp);
+   break;
+  default:
+    echo "incompatible version\n";
+    fclose($fp);
+    return $server;
+  }
+}
+
+function bzfdump ($server) {
   echo $server['host'] . ":" . $server['port'] . " (" . $server['ip'] . ")\n";
   echo "style:";
   if ($server['style'] & 0x0001) echo " CTF";
   if ($server['style'] & 0x0002) echo " flags";
-  if ($server['style'] & 0x0004) echo " rogues";
   if ($server['style'] & 0x0008) echo " jumping";
   if ($server['style'] & 0x0010) echo " inertia";
   if ($server['style'] & 0x0020) echo " ricochet";
   if ($server['style'] & 0x0040) echo " shaking";
   if ($server['style'] & 0x0080) echo " antidote";
-  if ($server['style'] & 0x0100) echo " time-sync";
+  if ($server['style'] & 0x0100) echo " handicap";
   if ($server['style'] & 0x0200) echo " rabbit-hunt";
   echo "\n";
   echo "maxPlayers: " . $server['maxPlayers'] . "\n";
@@ -165,7 +170,7 @@ if($_GET["hostport"]) {
   <table border=0 cellpadding=0 cellspacing=0>
     <tr>
       <td>
-	<pre><? dump(query($hostport)); echo "\n"; ?></pre>
+	<pre><? bzfdump(bzfquery($hostport)); echo "\n"; ?></pre>
 	<!-- <pre><? #system("bzfquery.pl $hostport"); ?></pre> -->
       </td>
     </tr>

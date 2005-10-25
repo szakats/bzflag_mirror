@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "BzfMedia.h"
@@ -17,6 +17,8 @@
 #endif
 #include "MediaFile.h"
 #include <string.h>
+#include <string>
+#include <stdio.h>
 
 BzfMedia::BzfMedia() : mediaDir(DEFAULT_MEDIA_DIR) { }
 BzfMedia::~BzfMedia() { }
@@ -397,7 +399,7 @@ bool			BzfMedia::doReadRLE(FILE* file,
 float*			BzfMedia::doReadSound(const std::string&, int&, int&) const
 {
   return NULL;
-};
+}
 #else
 float*			BzfMedia::doReadSound(const std::string& filename,
 				int& numFrames, int& rate) const
@@ -469,12 +471,17 @@ float*			BzfMedia::doReadSound(const std::string& filename,
 #endif
 
 // Setting Audio Driver
-void        BzfMedia::setDriver(std::string) {
-};
+void	BzfMedia::setDriver(std::string) {
+}
 
 // Setting Audio Device
-void        BzfMedia::setDevice(std::string) {
-};
+void	BzfMedia::setDevice(std::string) {
+}
+
+void BzfMedia::audioDriver(std::string& driverName)
+{
+  driverName = "";
+}
 
 // Local Variables: ***
 // mode:C++ ***

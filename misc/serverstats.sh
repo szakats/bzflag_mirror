@@ -13,7 +13,7 @@
 
 echo "BZFlag Server Statistics"
 echo "========================"
-echo 
+echo
 echo "Processing BEGINS ..."
 
 
@@ -35,8 +35,8 @@ echo " okay"
 
 
 echo -n "... getting list of servers ..."
-servers=`curl http://db.bzflag.org/db/ 2>/dev/null`
-[ $? != 0 ] && echo " NOT okay" && echo "ERROR: unable to curl http://db.bzflag.org/db" && exit 1
+servers=`curl http://my.BZFlag.org/db/?action=LIST 2>/dev/null`
+[ $? != 0 ] && echo " NOT okay" && echo "ERROR: unable to curl http://my.BZFlag.org/db/?action=LIST" && exit 1
 echo " okay"
 
 
@@ -151,12 +151,12 @@ echo " okay"
 
 echo "... processing COMPLETE"
 
-echo 
+echo
 echo "Server Summary"
 echo "--------------"
 echo "Servers Listed:	$servercount "
 echo "Servers Reached:	$reachcount "
-echo 
+echo
 echo "Versions:"
 seen_versions=""
 for i in $server_versions ; do

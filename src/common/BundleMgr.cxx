@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,17 +7,21 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
+// interface header
+#include "BundleMgr.h"
 
+// system headers
 #if (!defined(_WIN32) && !defined(WIN32))
 #include <sys/types.h>
 #include <dirent.h>
 #endif
+#include <string>
 
-#include "BundleMgr.h"
+// local implementation headers
+#include "common.h"
 #include "Bundle.h"
 
 Bundle		*BundleMgr::currentBundle	= NULL;
@@ -110,7 +114,7 @@ bool BundleMgr::getLocaleList(std::vector<std::string> *list) {
   if (list == NULL) return false;
   // There could have been stuff added to the list
   // prior to this call. Save the list count.
-  int 	initSize = list->size();
+  int	initSize = list->size();
 
   do {
 

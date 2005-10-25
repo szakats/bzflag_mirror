@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /** @file
@@ -49,6 +49,7 @@
 /* system interface headers */
 #include <set>
 #include <map>
+#include <string>
 
 /* common interface headers */
 #include "global.h"
@@ -82,7 +83,7 @@ enum FlagEndurance {
   FlagSticky = 2
 };
 
-/** This enum tells the "quality" of the flag type, i.e. whether it's good 
+/** This enum tells the "quality" of the flag type, i.e. whether it's good
     or bad */
 enum FlagQuality {
   FlagGood = 0,
@@ -103,6 +104,8 @@ class FlagType;
 typedef std::map<std::string, FlagType*> FlagTypeMap;
 typedef std::set<FlagType*> FlagSet;
 
+#define FlagPackSize 2
+
 /** This class represents a flagtype, like "GM" or "CL". */
 class FlagType {
 public:
@@ -120,7 +123,7 @@ public:
      * std::set compiler bug of making flagSets a fixed array.
      */
     if (flagSets == NULL) {
-      flagSets = new FlagSet[2];
+      flagSets = new FlagSet[NumQualities];
     }
 
     flagSets[flagQuality].insert(this);
@@ -144,12 +147,13 @@ public:
 
   /** network serialization */
   void* pack(void* buf) const;
+  void* fakePack(void* buf) const;
 
   /** network deserialization */
   static void* unpack(void* buf, FlagType* &desc);
 
   /** Static wrapper function that makes sure that the flag map is
-   * initialized before it's used. 
+   * initialized before it's used.
    */
   static FlagTypeMap& getFlagMap();
 
@@ -163,7 +167,7 @@ public:
 
   static int flagCount;
   static FlagSet *flagSets;
-  static int packSize;
+  static const int packSize;
 };
 
 
@@ -175,24 +179,27 @@ public:
   /** This function serializes this object into a @c void* buffer for network
       transfer. */
   void* pack(void*) const;
+  /** This function serializes this object into a @c void* buffer for network
+      transfer. */
+  void* fakePack(void*) const;
   /** This function uses the given serialization to set the member variables
-      of this object. */
+      of this object. This really hide the type of flag */
   void* unpack(void*);
 
   /** This function returns a set of all good flagtypes that are available in
-      the game. 
+      the game.
       @see FlagType
-      @see FlagQuality 
+      @see FlagQuality
   */
   static FlagSet& getGoodFlags();
-  
+
   /** This function returns a set of all bad flagtypes that are available in
-      the game. 
+      the game.
       @see FlagType
       @see FlagQuality
   */
   static FlagSet& getBadFlags();
-  
+
   /** This function returns a pointer to the FlagType object that is associated
       with the given abbreviation. If there is no such FlagType object, NULL
       is returned. */
@@ -210,10 +217,10 @@ public:
   float initialVelocity;	// initial launch velocity
 };
 
-/** Flags no longer use enumerated IDs. Over the wire, flags are all 
-    represented by their abbreviation, null-padded to two bytes. Internally, 
+/** Flags no longer use enumerated IDs. Over the wire, flags are all
+    represented by their abbreviation, null-padded to two bytes. Internally,
     flags are now represented by pointers to singleton FlagType classes.
-    
+
     For more information about these flags, see Flag.cxx where these FlagType
     instances are created.
 */
@@ -226,13 +233,14 @@ namespace Flags {
     *Shield, *Steamroller, *ShockWave, *PhantomZone, *Genocide, *Jumping,
     *Identify, *Cloaking, *Useless, *Masquerade, *Seer, *Thief, *Burrow,
     *Wings, *ReverseControls, *Agility,
-    *Colorblindness, *Obesity, *LeftTurnOnly, *RightTurnOnly, *Momentum, 
+    *Colorblindness, *Obesity, *LeftTurnOnly, *RightTurnOnly, *Momentum,
     *Blindness, *Jamming, *WideAngle, *NoJumping, *TriggerHappy,
-    *ReverseOnly, *ForwardOnly, *Bouncy, *Lag;
-  
-  /** This function initializes all the FlagType objects in the Flags 
+    *ReverseOnly, *ForwardOnly, *Bouncy;
+
+  /** This function initializes all the FlagType objects in the Flags
       namespace. */
   void init();
+  void kill();
 }
 
 #endif // BZF_FLAG_H

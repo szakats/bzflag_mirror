@@ -562,18 +562,6 @@ msgstr "Zoned"
 #msgid "openBroadcast: No udp service {1}"
 #msgstr ""
 
-#msgid "openMulticast: No udp service {1}"
-#msgstr ""
-
-#msgid "openMulticast: Invalid port {1}"
-#msgstr ""
-
-#msgid "openMulticast: Can't get address of {1}"
-#msgstr ""
-
-#msgid "Using multicast relay"
-#msgstr ""
-
 #msgid "Server did send endpoint information, UDP connection up"
 #msgstr ""
 
@@ -1469,7 +1457,7 @@ msgstr "Je tank is altijd in het midden en voorwaarste is altijd omhoog op de ra
 #msgid "None"
 #msgstr ""
 
-#msgid "Blinking"
+#msgid "Pulsating"
 #msgstr ""
 
 #msgid "Underline"

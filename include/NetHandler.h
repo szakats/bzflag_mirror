@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,16 +7,23 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __NETHANDLER_H__
 #define __NETHANDLER_H__
 
+/* common header */
+#include "common.h"
+
+/* system headers */
+#include <string>
+#include <map>
+
 /* common interface headers */
 #include "PlayerInfo.h"
 #include "Address.h"
-#include "AdnsHandler.h"
+#include "AresHandler.h"
 
 enum RxStatus {
   ReadAll,
@@ -35,11 +42,8 @@ const int maxHandlers = LastRealPlayer;
 #ifdef NETWORK_STATS
 struct MessageCount {
   uint32_t count;
-  uint16_t code;
   uint16_t maxSize;
 };
-// does not include MsgNull
-#define MessageTypes 43
 #endif
 
 /** This class is a client that connects to a BZFlag client and has
@@ -60,12 +64,6 @@ public:
   */
   ~NetHandler();
 
-  /** General purpose function to get the Handler given the index, or
-      test its existence
-  */
-  static bool exists(int _playerIndex);
-  static NetHandler *getHandler(int _playerIndex);
-
   /** Class-Wide initialization and destruction
       Should be called before any other operation on any clas instance
       InitHandlers needs the addr structure filled to point to the local port
@@ -74,24 +72,18 @@ public:
   static bool initHandlers(struct sockaddr_in addr);
   static void destroyHandlers();
 
-  /** Class-Wide update
-      Should be called any available time to update NetHandler internal
-      structure.
-  */
-  static void updateHandlers();
-
-  /** General function to support the select statement
-   */
+  /// General function to support the select statement
   static void setFd(fd_set *read_set, fd_set *write_set, int &maxFile);
   static bool isUdpFdSet(fd_set *read_set);
-  bool        isFdSet(fd_set *set);
+  bool	isFdSet(fd_set *set);
 
-  /**
-     return the opened socket, usable from all other network internal client
-  */
+  /// Supporting DNS Asynchronous resolver
+  static void checkDNS(fd_set *read_set, fd_set *write_set);
+
+  /// return the opened socket, usable from all other network internal client
   static int  getUdpSocket();
 
-  /** 
+  /**
       udpReceive will try to get the next udp message received
 
       return the playerIndex if found, -1 when no player had an open udp
@@ -120,22 +112,29 @@ public:
   RxStatus    tcpReceive();
   void       *getTcpBuffer();
 
-  int         pwrite(const void *b, int l);
-  int         pflush(fd_set *set);
-  std::string reasonToKick();
-  void        getPlayerList(char *list); 
-  const char *getTargetIP();
-  int         sizeOfIP();
-  void       *packAdminInfo(void *buf);
-  static int  whoIsAtIP(const std::string& IP);
-  in_addr     getIPAddress();
-  const char *getHostname();
-  /**
-     Notify that the channel is going to be close.
-     In the meantime any pwrite call will do nothing.
-     Cannot be undone.
-  */
-  void        closing();
+  /// Request if there is any buffered udp messages waiting to be sent
+  static bool	anyUDPPending() {return pendingUDP;};
+
+  /// Send all buffered UDP messages, if any
+  void		flushUDP();
+  static void	flushAllUDP();
+
+  int		pwrite(const void *b, int l);
+  int		pflush(fd_set *set);
+  std::string	reasonToKick();
+  void		getPlayerList(char *list);
+  const char*	getTargetIP();
+  int		sizeOfIP();
+  void*		packAdminInfo(void *buf);
+  static int	whoIsAtIP(const std::string& IP);
+  in_addr	getIPAddress();
+  const char*	getHostname();
+  bool	  reverseDNSDone();
+
+  /// Notify that the channel is going to be close.
+  /// In the meantime any pwrite call will do nothing.
+  /// Cannot be undone.
+  void		closing();
 
 private:
   int  send(const void *buffer, size_t length);
@@ -144,47 +143,53 @@ private:
   bool isMyUdpAddrPort(struct sockaddr_in uaddr);
   RxStatus    receive(size_t length);
 #ifdef NETWORK_STATS
-  void        countMessage(uint16_t code, int len, int direction);
-  void        dumpMessageStats();
+  void	countMessage(uint16_t code, int len, int direction);
+  void	dumpMessageStats();
 #endif
-#ifdef HAVE_ADNS_H
-  AdnsHandler *adns;
-#endif
+  AresHandler	   ares;
 
-//On win32, a socket is typedef UINT_PTR SOCKET;
-//Hopefully int will be ok
-  static int                udpSocket;
-  static NetHandler        *netPlayer[maxHandlers];
-  PlayerInfo               *info;
-  struct sockaddr_in        uaddr;
-  int                       playerIndex;
-  // socket file descriptor
-  int                       fd;
+  /// On win32, a socket is typedef UINT_PTR SOCKET;
+  /// Hopefully int will be ok
+  static int		udpSocket;
+  static NetHandler*	netPlayer[maxHandlers];
+  PlayerInfo*		info;
+  struct sockaddr_in	uaddr;
+  int			playerIndex;
+  /// socket file descriptor
+  int			fd;
 
-  // peer's network address
-  Address                   peer;
+  /// peer's network address
+  Address peer;
+  /* peer->getDotNotation returns a temp variable that is not safe
+   * to pass around.  This variable lets us keep a copy in allocated
+   * memory for as long as we need to */
+  std::string dotNotation;
 
-  // input buffers
-  // bytes read in current msg
-  int tcplen;
-  // current TCP msg
+  /// input buffers
+  /// current TCP msg
   char tcpmsg[MaxPacketLen];
+  /// bytes read in current msg
+  int tcplen;
 
-  // Closing flag
+  /// Closing flag
   bool closed;
 
-  // output buffer
+  /// output buffer
   int outmsgOffset;
   int outmsgSize;
   int outmsgCapacity;
-  char *outmsg;
+  char* outmsg;
 
-  // UDP connection
+  char udpOutputBuffer[MaxPacketLen];
+  int udpOutputLen;
+  static bool pendingUDP;
+
+  /// UDP connection
   bool udpin; // udp inbound up, player is sending us udp
   bool udpout; // udp outbound up, we can send udp
 
-  bool                      toBeKicked;
-  std::string               toBeKickedReason;
+  bool toBeKicked;
+  std::string toBeKickedReason;
 
   // time accepted
   TimeKeeper time;
@@ -196,13 +201,16 @@ private:
   uint32_t perSecondCurrentMsg[2];
   uint32_t perSecondMaxMsg[2];
   uint32_t msgBytes[2];
-  struct MessageCount msg[2][MessageTypes];
+
+  typedef std::map<const uint16_t, struct MessageCount> MessageCountMap;
+  MessageCountMap msg[2];
 #endif
 };
+
 #endif
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

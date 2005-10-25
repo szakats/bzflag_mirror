@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,14 +7,14 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "KeyboardMapMenu.h"
 
-/* system implementation headers */
-#include <vector>
+// System headers
+#include <ctype.h>
 
 /* common implementation headers */
 #include "KeyManager.h"
@@ -24,12 +24,8 @@
 #include "ActionBinding.h"
 #include "HUDDialogStack.h"
 #include "MainMenu.h"
-#include "HUDuiControl.h"
-#include "HUDuiLabel.h"
-
-/* FIXME -- from playing.h */
-void notifyBzfKeyMapChanged();
-
+#include "playing.h"
+#include "HUDui.h"
 
 KeyboardMapMenuDefaultKey::KeyboardMapMenuDefaultKey(KeyboardMapMenu* _menu) :
   menu(_menu)
@@ -86,6 +82,8 @@ KeyboardMapMenu::KeyboardMapMenu() : defaultKey(this), editing(-1), quickKeysMen
   controls.push_back(createLabel(NULL, "Jump:"));
   controls.push_back(createLabel(NULL, "Binoculars:"));
   controls.push_back(createLabel(NULL, "Toggle Score:"));
+  controls.push_back(createLabel(NULL, "Toggle Radar:"));
+  controls.push_back(createLabel(NULL, "Toggle Console:"));
   controls.push_back(createLabel(NULL, "Tank Labels:"));
   controls.push_back(createLabel(NULL, "Flag Help:"));
   controls.push_back(createLabel(NULL, "Time Forward:"));
@@ -101,7 +99,12 @@ KeyboardMapMenu::KeyboardMapMenu() : defaultKey(this), editing(-1), quickKeysMen
   controls.push_back(createLabel(NULL, "Silence/UnSilence Key:"));
   controls.push_back(createLabel(NULL, "Server Command Key:"));
   controls.push_back(createLabel(NULL, "Hunt Key:"));
+  controls.push_back(createLabel(NULL, "Add/Modify Hunt Key:"));
   controls.push_back(createLabel(NULL, "AutoPilot Key: "));
+  controls.push_back(createLabel(NULL, "Main Message Tab: "));
+  controls.push_back(createLabel(NULL, "Chat Message Tab: "));
+  controls.push_back(createLabel(NULL, "Server Message Tab: "));
+  controls.push_back(createLabel(NULL, "Misc Message Tab: "));
   controls.push_back(createLabel(NULL, "Forward Key: "));
   controls.push_back(createLabel(NULL, "Reverse Key: "));
   controls.push_back(createLabel(NULL, "Left Key: "));
@@ -112,7 +115,7 @@ KeyboardMapMenu::KeyboardMapMenu() : defaultKey(this), editing(-1), quickKeysMen
   controls.push_back(quickKeys = createLabel(NULL, "Define Quick Keys"));
 
   initNavigation(controls, 2, controls.size()-1);
-  
+
   int i = 3;
   initkeymap("fire", i);
   initkeymap("drop", ++i);
@@ -126,8 +129,10 @@ KeyboardMapMenu::KeyboardMapMenu() : defaultKey(this), editing(-1), quickKeysMen
   initkeymap("send recipient", ++i);
   initkeymap("send admin",++i);
   initkeymap("jump", ++i);
-  initkeymap("toggle displayBinoculars", ++i);
+  initkeymap("viewZoom toggle", ++i);
   initkeymap("toggle displayScore", ++i);
+  initkeymap("toggleRadar", ++i);
+  initkeymap("toggleConsole", ++i);
   initkeymap("toggle displayLabels", ++i);
   initkeymap("toggle displayFlagHelp", ++i);
   initkeymap("time forward", ++i);
@@ -143,7 +148,12 @@ KeyboardMapMenu::KeyboardMapMenu() : defaultKey(this), editing(-1), quickKeysMen
   initkeymap("silence", ++i);
   initkeymap("servercommand", ++i);
   initkeymap("hunt", ++i);
+  initkeymap("addhunt", ++i);
   initkeymap("autopilot", ++i);
+  initkeymap("messagepanel all", ++i);
+  initkeymap("messagepanel chat", ++i);
+  initkeymap("messagepanel server", ++i);
+  initkeymap("messagepanel misc", ++i);
   initkeymap("drive forward", ++i);
   initkeymap("drive reverse", ++i);
   initkeymap("turn left", ++i);
@@ -183,21 +193,19 @@ void KeyboardMapMenu::setKey(const BzfKeyEvent& event)
 
 void KeyboardMapMenu::execute()
 {
-  const HUDuiControl* const focus = HUDui::getFocus();
-  if (focus == reset) {
+  const HUDuiControl* const _focus = HUDui::getFocus();
+  if (_focus == reset) {
     ActionBinding::instance().resetBindings();
     update();
-  }
-  else if (focus == quickKeys) {
+  } else if (_focus == quickKeys) {
     if (!quickKeysMenu) quickKeysMenu = new QuickKeysMenu;
     HUDDialogStack::get()->push(quickKeysMenu);
-  }
-  else {
+  } else {
     // start editing
-    std::vector<HUDuiControl*>& list = getControls();
+    std::vector<HUDuiControl*>& listHUD = getControls();
     KeyKeyMap::iterator it;
     for (it = mappable.begin(); it != mappable.end(); it++) {
-      if (list[it->second.index] == focus) {
+      if (listHUD[it->second.index] == _focus) {
 	editing = it->second.index;
 	if (!it->second.key1.empty() && !it->second.key2.empty()) {
 	  ActionBinding::instance().deassociate(it->first);
@@ -214,56 +222,56 @@ void KeyboardMapMenu::dismiss()
   notifyBzfKeyMapChanged();
 }
 
-void KeyboardMapMenu::resize(int width, int height)
+void KeyboardMapMenu::resize(int _width, int _height)
 {
-  HUDDialog::resize(width, height);
+  HUDDialog::resize(_width, _height);
 
   int i;
   // use a big font for title, smaller font for the rest
-  const float titleFontSize = (float)height / 15.0f;
-  const float bigFontSize = (float)height / 42.0f;
-  const float fontSize = (float)height / 57.0f;
+  const float titleFontSize = (float)_height / 15.0f;
+  const float bigFontSize = (float)_height / 42.0f;
+  const float fontSize = (float)_height / 100.0f;
   FontManager &fm = FontManager::instance();
   const int fontFace = MainMenu::getFontFace();
 
   // reposition title
-  std::vector<HUDuiControl*>& list = getControls();
-  HUDuiLabel* title = (HUDuiLabel*)list[0];
+  std::vector<HUDuiControl*>& listHUD = getControls();
+  HUDuiLabel* title = (HUDuiLabel*)listHUD[0];
   title->setFontSize(titleFontSize);
   const float titleWidth = fm.getStrLength(fontFace, titleFontSize, title->getString());
   const float titleHeight = fm.getStrHeight(fontFace, titleFontSize, " ");
-  float x = 0.5f * ((float)width - titleWidth);
-  float y = (float)height - titleHeight;
+  float x = 0.5f * ((float)_width - titleWidth);
+  float y = (float)_height - titleHeight;
   title->setPosition(x, y);
 
   // reposition help
-  HUDuiLabel* help = (HUDuiLabel*)list[1];
+  HUDuiLabel* help = (HUDuiLabel*)listHUD[1];
   help->setFontSize(bigFontSize);
   const float helpWidth = fm.getStrLength(fontFace, bigFontSize, help->getString());
-  x = 0.5f * ((float)width - helpWidth);
+  x = 0.5f * ((float)_width - helpWidth);
   y -= 1.1f * fm.getStrHeight(fontFace, bigFontSize, " ");
   help->setPosition(x, y);
 
   // reposition options in two columns
-  x = 0.30f * (float)width;
+  x = 0.30f * (float)_width;
   const float topY = y - (0.6f * titleHeight);
   y = topY;
-  list[2]->setFontSize(fontSize);
+  listHUD[2]->setFontSize(fontSize);
   const float h = fm.getStrHeight(fontFace, fontSize, " ");
-  const int count = list.size() - 2;
+  const int count = listHUD.size() - 2;
   const int mid = (count / 2);
 
   for (i = 2; i <= mid+1; i++) {
-    list[i]->setFontSize(fontSize);
-    list[i]->setPosition(x, y);
+    listHUD[i]->setFontSize(fontSize);
+    listHUD[i]->setPosition(x, y);
     y -= 1.0f * h;
   }
 
-  x = 0.80f * (float)width;
+  x = 0.80f * (float)_width;
   y = topY;
   for (i = mid+2; i < count+2; i++) {
-    list[i]->setFontSize(fontSize);
-    list[i]->setPosition(x, y);
+    listHUD[i]->setFontSize(fontSize);
+    listHUD[i]->setPosition(x, y);
     y -= 1.0f * h;
   }
 
@@ -280,7 +288,7 @@ void KeyboardMapMenu::update()
   }
   // load current settings
   KEYMGR.iterate(&onScanCB, this);
-  std::vector<HUDuiControl*>& list = getControls();
+  std::vector<HUDuiControl*>& listHUD = getControls();
   for (it = mappable.begin(); it != mappable.end(); it++) {
     std::string value = "";
     if (it->second.key1.empty()) {
@@ -296,7 +304,7 @@ void KeyboardMapMenu::update()
 	value += " or ???";
       }
     }
-    ((HUDuiLabel*)list[it->second.index])->setString(value);
+    ((HUDuiLabel*)listHUD[it->second.index])->setString(value);
   }
 }
 
@@ -317,7 +325,7 @@ void KeyboardMapMenu::onScan(const std::string& name, bool press,
 void KeyboardMapMenu::onScanCB(const std::string& name, bool press,
 			       const std::string& cmd, void* userData)
 {
-  reinterpret_cast<KeyboardMapMenu*>(userData)->onScan(name, press, cmd);
+  static_cast<KeyboardMapMenu*>(userData)->onScan(name, press, cmd);
 }
 
 HUDuiLabel* KeyboardMapMenu::createLabel(const char* str, const char* _label)

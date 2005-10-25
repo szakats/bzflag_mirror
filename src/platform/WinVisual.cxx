@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "WinVisual.h"
@@ -62,21 +62,12 @@ WinVisual::~WinVisual()
   display->unref();
 }
 
-#ifdef __MINGW32__
 void			WinVisual::setLevel(int level)
 {
   if (level < 0) pfd.iLayerType = (BYTE)PFD_UNDERLAY_PLANE;
   else if (level > 0) pfd.iLayerType = PFD_OVERLAY_PLANE;
   else pfd.iLayerType = PFD_MAIN_PLANE;
 }
-#else
-void			WinVisual::setLevel(int level)
-{
-  if (level < 0) pfd.iLayerType = PFD_UNDERLAY_PLANE;
-  else if (level > 0) pfd.iLayerType = PFD_OVERLAY_PLANE;
-  else pfd.iLayerType = PFD_MAIN_PLANE;
-}
-#endif
 
 void			WinVisual::setDoubleBuffer(bool on)
 {

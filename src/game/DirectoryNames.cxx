@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
@@ -33,8 +33,29 @@
 
 // NOTE: terminate all strings with '/' or '\\'
 
-std::string		getConfigDirName()
+std::string configDir(bool set, const char *str)
 {
+  static std::string customConfigDir = std::string("");
+  if (set) {
+    customConfigDir = std::string(str);
+  }
+  return customConfigDir;
+}
+
+
+void			setCustomConfigDir(const char *str)
+{
+  configDir(1, str);
+}
+
+
+std::string		getConfigDirName( const char* versionName )
+{
+  std::string customConfigDir = configDir(0, NULL);
+
+  if (customConfigDir.size() > 0)
+    return customConfigDir;
+
 #if defined(_WIN32)
   std::string name("C:");
   char dir[MAX_PATH];
@@ -55,7 +76,11 @@ std::string		getConfigDirName()
 
   // yes your suposed to have the "my" in front of it. I know it's silly, but it's the MS way.
   name += "\\My BZFlag Files\\";
-  
+  if (versionName) {
+    name += versionName;
+    name += "\\";
+  }
+  customConfigDir = name;
   return name;
 
 #elif defined(__APPLE__)
@@ -68,9 +93,14 @@ std::string		getConfigDirName()
     err = ::FSRefMakePath(&libraryFolder, (UInt8*)buff, sizeof(buff));
     if(err == ::noErr) {
       std::strcat(buff, "/BZFlag/");
-      name = buff;
+      if (versionName) {
+	std::strcat(buff, versionName);
+	std::strcat(buff, "/");
+      }
+     name = buff;
     }
   }
+  customConfigDir = name;
   return name;
 #else
   std::string name;
@@ -80,18 +110,30 @@ std::string		getConfigDirName()
     name += "/";
   }
   name += ".bzf/";
-
+  if (versionName) {
+    name += versionName;
+    name += "/";
+  }
+  customConfigDir = name;
   return name;
 #endif
 }
 
+static std::string		setupString(std::string dir)
+{
+  std::string name = getConfigDirName();
+  name += dir;
+  name += DirectorySeparator;
+  return name;
+}
 
-extern std::string		getCacheDirName()
+std::string getCacheDirName()
 {
   std::string name = getConfigDirName();
   name += "cache";
 #if !defined (_WIN32) && !defined (__APPLE__)
   // add in hostname on UNIX
+  // FIXME should be able to share the cache
   if (getenv("HOST")) {
     name += ".";
     name += getenv("HOST");
@@ -102,32 +144,38 @@ extern std::string		getCacheDirName()
 }
 
 
-extern std::string		getRecordDirName()
+std::string getRecordDirName()
 {
+  return setupString("recordings");
+}
+
+std::string getScreenShotDirName()
+{
+  return setupString("screenshots");
+}
+
+std::string getTempDirName()
+{
+// FIXME: needs something for Windows and maybe other platforms
+#if defined(_WIN32)
   std::string name = getConfigDirName();
-  name += "recordings";
+  name += "temp";
+#else
+  std::string name;
+  if (getenv("TMPDIR")) {
+    name = getenv("TMPDIR");
+  } else {
+    name = "/tmp";
+  }
+#endif
   name += DirectorySeparator;
   return name;
 }
 
-
-extern std::string		getScreenShotDirName()
+std::string getWorldDirName()
 {
-  std::string name = getConfigDirName();
-  name += "screenshots";
-  name += DirectorySeparator;
-  return name;
+  return setupString("worlds");
 }
-
-
-extern std::string		getWorldDirName()
-{
-  std::string name = getConfigDirName();
-  name += "worlds";
-  name += DirectorySeparator;
-  return name;
-}
-
 
 // Local Variables: ***
 // mode: C++ ***

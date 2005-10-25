@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -48,6 +48,7 @@ class RobotPlayer : public LocalPlayer {
   private:
     void		doUpdate(float dt);
     void		doUpdateMotion(float dt);
+    virtual int	 getHandicapScoreBase() const;
     BzfRegion*		findRegion(const float p[2], float nearest[2]) const;
     float		getRegionExitPoint(
 				const float p1[2], const float p2[2],
@@ -65,7 +66,7 @@ class RobotPlayer : public LocalPlayer {
     std::vector<RegionPoint>	path;
     int			pathIndex;
     float		timerForShot;
-    bool                drivingForward;
+    bool		drivingForward;
     static std::vector<BzfRegion*>* obstacleList;
 };
 

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,15 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
-#include "global.h"
+
+/* interface headers */
 #include "MainWindow.h"
-#include "BzfWindow.h"
+
+/* common implementation headers */
+#include "global.h"
 #include "SceneRenderer.h"
-#include "bzfgl.h"
 
 //
 // MainWindow
@@ -33,7 +34,8 @@ MainWindow::MainWindow(BzfWindow* _window, BzfJoystick* _joystick) :
 				zoomFactor(1),
 				width(0),
 				minWidth(MinX),
-				minHeight(MinY)
+				minHeight(MinY),
+				faulting(false)
 {
   window->addResizeCallback(resizeCB, this);
   resize();
@@ -62,9 +64,9 @@ void			MainWindow::setPosition(int x, int y)
   window->setPosition(x, y);
 }
 
-void			MainWindow::setSize(int width, int height)
+void			MainWindow::setSize(int _width, int _height)
 {
-  window->setSize(width, height);
+  window->setSize(_width, _height);
   resize();
 }
 
@@ -152,10 +154,11 @@ void			MainWindow::setQuadrant(Quadrant _quadrant)
     case FullWindow:
       width = inWidth;
       height = inHeight;
-      if (isFullView)
+      if (isFullView) {
 	viewHeight = height;
-      else
-	viewHeight = inHeight * (46 - SceneRenderer::getInstance()->getRadarSize()) / 60;
+      } else {
+	viewHeight = inHeight * (46 - RENDERER.getRadarSize()) / 60;
+      }
       xOrigin = 0;
       yOrigin = 0;
       break;
@@ -222,7 +225,8 @@ void			MainWindow::resize()
 {
   window->getSize(trueWidth, trueHeight);
   window->makeCurrent();
-  window->create();
+  if (!window->create())
+    faulting = true;
   setQuadrant(quadrant);
 }
 
@@ -250,20 +254,36 @@ void			MainWindow::getJoyPosition(int& mx, int& my) const
   my = ((height >> 1) * my) / (900);
 }
 
-unsigned long                  MainWindow::getJoyButtonSet() const
+unsigned long		  MainWindow::getJoyButtonSet() const
 {
   return joystick->getJoyButtons();
 }
 
-void                    MainWindow::getJoyDevices(std::vector<std::string>
+void		    MainWindow::getJoyDevices(std::vector<std::string>
 						  &list) const
 {
   joystick->getJoyDevices(list);
 }
 
-void	                MainWindow::initJoystick(std::string &joystickName) {
-  joystick->initJoystick(joystickName.c_str());  
-};
+void		    MainWindow::getJoyDeviceAxes(std::vector<std::string>
+						 &list) const
+{
+  joystick->getJoyDeviceAxes(list);
+}
+
+void		    MainWindow::setJoyXAxis(const std::string axis)
+{
+  joystick->setXAxis(axis);
+}
+
+void		    MainWindow::setJoyYAxis(const std::string axis)
+{
+  joystick->setYAxis(axis);
+}
+
+void			MainWindow::initJoystick(std::string &joystickName) {
+  joystick->initJoystick(joystickName.c_str());
+}
 
 // Local Variables: ***
 // mode:C++ ***

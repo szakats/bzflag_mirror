@@ -1,8 +1,9 @@
-if BUILD_REGEX
-noinst_LIBRARIES = libregex.a
-endif
+noinst_LTLIBRARIES = libregex.la
 
-libregex_a_SOURCES  =	\
+AM_CPPFLAGS = -I$(top_srcdir)/include
+
+libregex_la_LDFLAGS = -static
+libregex_la_SOURCES  =	\
 	cclass.h	\
 	cname.h		\
 	regcomp.c	\

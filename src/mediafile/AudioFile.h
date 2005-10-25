@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef BZF_AUDIO_FILE_H
@@ -31,7 +31,7 @@ public:
       order for stereo files. Samples are in host byte order.
       Client must not attempt to read past last sample. Returns
       false on error. A frame is one sample for each channel.
-      @c buffer must be @c numFrames * @c getNumChannels() * 
+      @c buffer must be @c numFrames * @c getNumChannels() *
       @c getSampleWidth() bytes at least. */
   virtual bool read(void* buffer, int numFrames) = 0;
 
@@ -41,14 +41,14 @@ public:
   /** Get the frame rate of the audio file. A frame is one sample
       for each channel. */
   int			getFramesPerSecond() const;
-  
+
   /** Get the number of channels in the audio file. */
   int			getNumChannels() const;
-  
+
   /** Get the number of frames in the audio file. A frame is one sample
       for each channel. */
   int			getNumFrames() const;
-  
+
   /** Get the sample width of the audio file, in bytes. */
   int			getSampleWidth() const;
 

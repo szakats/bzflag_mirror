@@ -407,6 +407,7 @@ basterd
 bastid
 biach
 biatch
+biotch
 bicht
 bigass
 bigassball
@@ -450,7 +451,6 @@ bitemyass
 bitemyprick
 biyotch
 blowjob
-bltch
 boner
 bulshit
 bumfuck
@@ -667,6 +667,7 @@ fuckyoucock
 fuckyoucunt
 fuckyougm
 fuckyouii
+fuckyu
 fucoff
 fucq
 fucqdat
@@ -675,13 +676,20 @@ fuct
 fuctup
 fucxyou
 fucya
+fucyoo
 fucyou
 fucyoubich
+fucyu
 fudgehole
 fudgepack
 fudpuck
 fugm
 fugmpuke
+fuhk
+fuhku
+fuhkyoo
+fuhkyou
+fuhkyu
 fuhq
 fuk
 fukad
@@ -760,6 +768,7 @@ fukyallmofo
 fukyermom
 fukyew
 fukyoass
+fukyoo
 fukyou
 fukyouanddie
 fukyouus
@@ -819,6 +828,7 @@ jewboy
 jewboynigger
 jewishnazi
 jewishwhore
+jigaboo
 jiz
 killaniga
 kunt
@@ -854,28 +864,25 @@ mydick
 nazijewraper
 naziskinhead
 niga
-nigahbytch
+nigaboo
+nigafag
+nigah
+nigah
 nigaretto
 nigatrash
 nigazbiotch
 nigbeater
 nigerbeater
 nigerman
-nigga
-niggaboo
-niggafag
-niggah
 nigge
-nigghaz
-niggher
-niggkilla
 niggor
 niggr
 niggrian
-nigguh
-niggurs
 niggy
+nighaz
+nigher
 nigiro
+nigkilla
 niglet
 nigletbard
 nigletmaster
@@ -883,11 +890,14 @@ nigofger
 nigore
 nigrkill
 nigromance
+niguh
+nigurs
 nigz
 nipalicious
 nipplelicker
 penis
 pinktaco
+poontang
 pootang
 prick
 punkass
@@ -932,7 +942,6 @@ suckme
 suckmydick
 sucmybawl
 supabiatch
-tit
 twat
 vageyenuh
 vagina
@@ -1203,9 +1212,14 @@ pogue mahone            # gd - kiss my ass
 
 
 # German
+# arch                  # de - ass
+akrampe                 # de - asshole
 arsch                   # de - ass
+arschficker             # de - assfucker
 arschgesicht            # de - "assface" (butthead)
-asch      		# de - ass
+arschkrampe             # de - asshole
+arschlock               # de - asshole
+asch                    # de - ass
 auf wiedersehen fickakopf 	 # de - goodbye fuckhead
 blode fotze             # de - stupid cunt
 blodes arschloch        # de - stupid asshole
@@ -1214,33 +1228,45 @@ depp                    # de - idiot
 drecksau                # de - dirty pig
 du verdammter arschficker 	 # de - you damn assfucker
 dummcopf                # de - (lit. stupid head)
+dummkopf                # de - (lit. stupid head)
 dummes huhn             # de - stupid chicken
-fick dich               # de - fuck you
-fick mich               # de - fuck me
+fick                    # de - fuck
 fotze                   # de - cunt
 himmeldonnerwetter      # de - *no translation--very strong curse*  (lit. heaven thunder weather)
 hosenschlange           # de - lit. - lick my trouser snake
 hure                    # de - whore
 hurensohn               # de - sonuvabitch
 ich moechte mit dir schlafen 	 # de - i want to sleep with (fuck) you
-lleck mich am arsch     # de - lick my ass
+kacke                   # de - shit
+kanacke                 # de - ? (insinuating something bad about the roots of a person (lit. human))
+kot                     # de - shit
+kotklumpen              # de - piece of shit
+leck mich am arsch      # de - lick my ass
 lesbe                   # de - lesbian
 mach es dir selber      # de - go fuck yourself
 mutterficker            # de - motherfucker
-schies                  # de - shit
+neger                   # de - nigger
+nutte                   # de - whore
+penner                  # de - homeless person (vulgar)
+pimmel                  # de - penis
+poppen                  # de - fuck
+rammel                  # de - fuck
+rammeln                 # de - fuck
 scheis                  # de - shit
-schiese                 # de - shit
 scheise                 # de - shit
+scheissdreck            # de - fucking business (lit: shit)
 scheissekopf            # de - shithead
+schiese                 # de - shit
 schlampe                # de - tramp or slut
 schnoodle noodle        # de - dick snot
 schweinhund             # de - (dumb) pigdog (archaic)
+schwuchtel              # de - faggot (noun)
 schwuchtl               # de - faggot (noun)
-shiess                  # de - shit
 sheiss                  # de - shit
+shiess                  # de - shit
 shiesse                 # de - shit
 sheisse                 # de - shit
-vig dischen swaenen     # de - you fucking bastard
+wichser                 # de - motherfucker
 
 
 # Greek
@@ -1476,7 +1502,7 @@ omanko                  # ja - Female Privates Extremely Vulgar C**t equivalent
 omanko suru to do		# ja - Female privates...f***  Extroardinarily nasty phrase
 omanko suru to do suru	# ja - Female privates...f***  Extroardinarily nasty phrase
 wakazo					# ja - Young Punk
-yada					# ja - female 
+yada					# ja - female
 
 # Korean (phonetic more or less)
 dong-mogo               # ko - eat shit
@@ -1757,7 +1783,7 @@ murrda			# es - shit (slang)
 nema			# es - cock/penis (n~ema)
 nido			# es - cunt (mexican slang)
 ojete                   # es - asshole
-orto			# es - ass (argentinian and uruguayan)
+# orto			# es - ass (argentinian and uruguayan)
 panocha                 # es - pussy (extremely vulgar, mex)
 peha                    # es - dick
 pelotuda		# es - dumbass
@@ -1783,7 +1809,7 @@ rejuego			# es - prostitute (mexican/guatemalan slang)
 remame			# es - cunt (mexican slang)
 rene			# es - nigger (mexican slang)
 riata			# es - dick (mexican slang)
-rul			# es - asshole (mexican slang)
+# rul			# es - asshole (mexican slang)
 sacale la leche         # es - make her cum (lit. take the milk out of her)
 taconera  		# es - prostitute (lit. high-heeler)
 trastero		# es - asshole (lit. anus)
@@ -1884,7 +1910,7 @@ chraa
 ayir
 atouche
 futkretzn
-pimmel
+
 
 # Local Variables: ***
 # mode:Text ***

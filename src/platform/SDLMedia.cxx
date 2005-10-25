@@ -1,6 +1,6 @@
 
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -8,13 +8,14 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "common.h"
 
 #ifdef HAVE_SDL
 #include <stdlib.h>
+#include <string>
 #include "SDLMedia.h"
 #include "ErrorHandler.h"
 
@@ -28,7 +29,7 @@ static const int defaultAudioRate=22050;
 // SDLMedia
 //
 
-SDLMedia::SDLMedia() : BzfMedia()
+SDLMedia::SDLMedia() : BzfMedia(), outputBuffer(NULL)
 {
   cmdFill       = 0;
   audioReady    = false;
@@ -50,12 +51,6 @@ double			SDLMedia::stopwatch(bool start)
     return (double) currentTick * 0.001;
 }
 
-void			SDLMedia::sleep(float timeInSeconds)
-{
-  // Not used ... however ... here it is
-  SDL_Delay((Uint32) (timeInSeconds * 1000.0));
-}
-
 bool			SDLMedia::openAudio()
 {
   // don't re-initialize
@@ -64,16 +59,17 @@ bool			SDLMedia::openAudio()
   if (SDL_InitSubSystem(SDL_INIT_AUDIO) == -1) {
     printFatalError("Could not initialize SDL-Audio: %s.\n", SDL_GetError());
     exit(-1);
-  }; 
+  };
 
   static SDL_AudioSpec desired;
- 
+
   // what the frequency?
   audioOutputRate = defaultAudioRate;
 
   // how big a fragment to use?  we want to hold at around 1/10th of
   // a second.
-  int fragmentSize = (int)(0.08f * (float)audioOutputRate);
+  // probably SDL is using multiple buffering, make it a 3rd
+  int fragmentSize = (int)(0.03f * (float)audioOutputRate);
   int n;
 
   n = 0;
@@ -88,7 +84,7 @@ bool			SDLMedia::openAudio()
   desired.channels   = 2;
   desired.samples    = audioBufferSize >> 1; // In stereo samples
   desired.callback   = &fillAudioWrapper;
-  desired.userdata   = (void *) this;        // To handle Wrap of func
+  desired.userdata   = (void *) this;	// To handle Wrap of func
 
   /* Open the audio device, forcing the desired format */
   if (SDL_OpenAudio(&desired, NULL) < 0) {
@@ -131,13 +127,13 @@ void			SDLMedia::writeSoundCommand(const void* cmd, int len)
 
   SDL_LockAudio();
 
-   // Discard command if full
-   if ((cmdFill + len) < 2048) {
-     memcpy(&cmdQueue[cmdFill], cmd, len);
-     // We should awake audioSleep - but game become unplayable
-     // using here an SDL_CondSignal(wakeCond)
-     cmdFill += len;
-   }
+  // Discard command if full
+  if ((cmdFill + len) < 2048) {
+    memcpy(&cmdQueue[cmdFill], cmd, len);
+    // We should awake audioSleep - but game become unplayable
+    // using here an SDL_CondSignal(wakeCond)
+    cmdFill += len;
+  }
 
   SDL_UnlockAudio();
 }
@@ -174,7 +170,7 @@ int			SDLMedia::getAudioBufferChunkSize() const
 void SDLMedia::fillAudio (Uint8 * stream, int len)
 {
   userCallback();
-  Uint8* soundBuffer        = stream;
+  Uint8* soundBuffer	= stream;
 
   int transferSize = (audioBufferSize - sampleToSend) * 2;
   if (transferSize > len)
@@ -186,7 +182,7 @@ void SDLMedia::fillAudio (Uint8 * stream, int len)
 	 transferSize);
   sampleToSend    += transferSize / 2;
   soundBuffer     += transferSize;
-  len             -= transferSize;
+  len	     -= transferSize;
 
 }
 
@@ -194,7 +190,7 @@ void SDLMedia::fillAudioWrapper (void * userdata, Uint8 * stream, int len)
 {
   SDLMedia * me = (SDLMedia *) userdata;
   me->fillAudio(stream, len);
-};
+}
 
 void			SDLMedia::writeAudioFrames(
 				const float* samples, int numFrames)
@@ -231,36 +227,36 @@ void			SDLMedia::writeAudioFrames(
 }
 
 // Setting Audio Driver
-void        SDLMedia::setDriver(std::string driverName) {
-  char envAssign[256];
+void	SDLMedia::setDriver(std::string driverName) {
+  static char envAssign[256];
   std::string envVar = "SDL_AUDIODRIVER=" + driverName;
   strncpy(envAssign, envVar.c_str(), 255);
   envAssign[255]     = '\0';
   putenv(envAssign);
-};
+}
 
 // Setting Audio Device
-void        SDLMedia::setDevice(std::string deviceName) {
-  char envAssign[256];
-  std::string envVar = "SDL_PATH_DSP=" + deviceName;
+void	SDLMedia::setDevice(std::string deviceName) {
+  static char envAssign[256];
+  std::string envVar = "AUDIODEV=" + deviceName;
   strncpy(envAssign, envVar.c_str(), 255);
   envAssign[255]     = '\0';
   putenv(envAssign);
-};
+}
 
 float*	    SDLMedia::doReadSound(const std::string &filename, int &numFrames,
 				  int &rate) const
 {
   SDL_AudioSpec wav_spec;
-  Uint32        wav_length;
-  Uint8        *wav_buffer;
-  int           ret;
+  Uint32	wav_length;
+  Uint8	*wav_buffer;
+  int	   ret;
   SDL_AudioCVT  wav_cvt;
   int16_t      *cvt16;
-  int           i;
+  int	   i;
 
-  float        *data = NULL;
-  rate        = defaultAudioRate;
+  float	*data = NULL;
+  rate	= defaultAudioRate;
   if (SDL_LoadWAV(filename.c_str(), &wav_spec, &wav_buffer, &wav_length)) {
     /* Build AudioCVT */
     ret = SDL_BuildAudioCVT(&wav_cvt,
@@ -287,6 +283,16 @@ float*	    SDLMedia::doReadSound(const std::string &filename, int &numFrames,
     SDL_FreeWAV(wav_buffer);
   }
   return data;
+}
+
+void SDLMedia::audioDriver(std::string& driverName)
+{
+  char driver[128];
+  char *result = SDL_AudioDriverName(driver, sizeof(driver));
+  if (result)
+    driverName = driver;
+  else
+    driverName = "audio not available";
 }
 
 #endif //HAVE_SDL

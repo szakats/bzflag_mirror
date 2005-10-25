@@ -3,33 +3,77 @@ bin_PROGRAMS = bzfs
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
+AM_CPPFLAGS = -I$(top_srcdir)/include $(CURL_CFLAGS) -DINSIDE_BZ
+
+if BUILD_PLUGINS
+plugin_files = bzfsPlugins.h bzfsPlugins.cxx
+else
+plugin_files =
+endif
+
+bzfs_LDFLAGS = -export-dynamic
 bzfs_SOURCES = \
+	${plugin_files}	\
 	AccessControlList.cxx \
 	AccessControlList.h \
+	Authentication.cxx \
+	Authentication.h \
+	BanCommands.cxx \
+	bzfsAPI.cxx \
 	BZWError.cxx \
 	BZWError.h \
 	BZWReader.cxx \
 	BZWReader.h \
 	CmdLineOptions.cxx \
 	CmdLineOptions.h \
+	CustomArc.cxx \
+	CustomArc.h \
 	CustomBase.cxx \
 	CustomBase.h \
 	CustomBox.cxx \
 	CustomBox.h \
+	CustomCone.cxx \
+	CustomCone.h \
+	CustomDynamicColor.cxx \
+	CustomDynamicColor.h \
 	CustomGate.cxx \
 	CustomGate.h \
+	CustomGroup.cxx \
+	CustomGroup.h \
 	CustomLink.cxx \
 	CustomLink.h \
+	CustomMaterial.h \
+	CustomMaterial.cxx \
+	CustomMesh.cxx \
+	CustomMesh.h \
+	CustomMeshFace.cxx \
+	CustomMeshFace.h \
+	CustomMeshTransform.cxx \
+	CustomMeshTransform.h \
+	CustomPhysicsDriver.cxx \
+	CustomPhysicsDriver.h \
+	CustomSphere.cxx \
+	CustomSphere.h \
+	CustomTextureMatrix.cxx \
+	CustomTextureMatrix.h \
 	CustomPyramid.cxx \
 	CustomPyramid.h \
+	CustomTetra.cxx \
+	CustomTetra.h \
+	CustomWaterLevel.cxx \
+	CustomWaterLevel.h \
 	CustomWeapon.cxx \
 	CustomWeapon.h \
 	CustomWorld.cxx \
 	CustomWorld.h \
 	CustomZone.cxx \
 	CustomZone.h \
+	DropGeometry.cxx \
+	DropGeometry.h \
 	EntryZones.cxx \
 	EntryZones.h \
+	Filter.cxx	\
+	Filter.h	\
 	FlagHistory.cxx	\
 	FlagHistory.h	\
 	FlagInfo.cxx \
@@ -38,7 +82,11 @@ bzfs_SOURCES = \
 	GameKeeper.h	\
 	ListServerConnection.cxx \
 	ListServerConnection.h \
+	MasterBanList.cxx \
+	MasterBanList.h \
 	PackVars.h \
+	ParseMaterial.cxx \
+	ParseMaterial.h \
 	Permissions.h \
 	Permissions.cxx \
 	RecordReplay.cxx \
@@ -47,6 +95,8 @@ bzfs_SOURCES = \
 	RejoinList.h \
 	Score.h	\
 	Score.cxx	\
+	ServerCommand.cxx		\
+	ServerCommand.h			\
 	SpawnPosition.cxx \
 	SpawnPosition.h \
 	TeamBases.cxx \
@@ -59,10 +109,13 @@ bzfs_SOURCES = \
 	WorldFileObject.h \
 	WorldFileObstacle.cxx \
 	WorldFileObstacle.h \
+	WorldGenerators.cxx \
+	WorldGenerators.h \
 	WorldInfo.cxx \
 	WorldInfo.h \
 	WorldWeapons.cxx \
 	WorldWeapons.h \
+	WorldEventManager.cxx \
 	commands.cxx \
 	commands.h \
 	bzfs.cxx \
@@ -70,13 +123,28 @@ bzfs_SOURCES = \
 
 if BUILD_REGEX
 REGEX = \
-	../regex/libregex.a
+	../regex/libregex.la
+endif
+
+if BUILDZLIB
+ZLIB = ../zlib/libz.la
+else
+ZLIB = -lz
+endif
+
+if BUILDCARES
+CARESLIB = ../c-ares/libcares.la
+else
+CARESLIB = -lcares
 endif
 
 LDADD = \
-	../game/libGame.a	\
-	../net/libNet.a		\
-	../common/libCommon.a	\
-	$(REGEX)
-
-bzfs_LDFLAGS = ../date/buildDate.o
+	../obstacle/libObstacle.la	\
+	../game/libGame.la		\
+	../net/libNet.la		\
+	../common/libCommon.la		\
+	$(CARESLIB)			\
+	$(REGEX)			\
+	$(ZLIB)			\
+	$(KRB5_LIBS)			\
+	../date/libDate.la

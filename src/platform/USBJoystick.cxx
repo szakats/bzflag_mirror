@@ -8,7 +8,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
  * This file was "inspired" by the joy_usb.c file that is part of the
  * xmame project. To the extent that code was copied from that file,
@@ -23,6 +23,9 @@
 #ifndef BSD
 #error Native USB Joystick support requires BSD. On other platforms please enable SDL or XIJOYSTICK.
 #endif
+
+#include <vector>
+#include <string>
 
 // Moved bodily from XWindow.h - hope it still works :)
 #ifdef __cplusplus
@@ -108,9 +111,9 @@ void USBJoystick::initJoystick(const char *name)
 	default: interesting_hid = FALSE;
       }
       if (interesting_hid) {
-	axis_const[which_axis] = 1000 + (2000 * h.logical_maximum) / 
+	axis_const[which_axis] = 1000 + (2000 * h.logical_maximum) /
 	  (h.logical_minimum - h.logical_maximum);
-	axis_scale[which_axis] = (2000 * 10000) / 
+	axis_scale[which_axis] = (2000 * 10000) /
 	  (h.logical_maximum - h.logical_minimum);
 	axis[which_axis] = (h.logical_minimum + h.logical_maximum) / 2;
 	if (num_axis < (which_axis + 1))
@@ -133,7 +136,7 @@ void USBJoystick::initJoystick(const char *name)
   status = true;
 }
 
-void USBJoystick::poll() 
+void USBJoystick::poll()
 {
   int len;
 
@@ -177,7 +180,7 @@ bool USBJoystick::joystick() const
   return status;
 }
 
-void USBJoystick::getJoy(int &x, int &y) const
+void USBJoystick::getJoy(int &x, int &y)
 {
   if (status) {
     poll();
@@ -188,7 +191,7 @@ void USBJoystick::getJoy(int &x, int &y) const
   }
 }
 
-unsigned long USBJoystick::getJoyButtons() const
+unsigned long USBJoystick::getJoyButtons()
 {
   if (status) {
     poll();

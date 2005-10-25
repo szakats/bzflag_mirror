@@ -583,20 +583,8 @@ msgstr ""
 msgid "openBroadcast: No udp service {1}"
 msgstr ""
 
-msgid "openMulticast: No udp service {1}"
-msgstr ""
-
-msgid "openMulticast: Invalid port {1}"
-msgstr ""
-
-msgid "openMulticast: Can't get address of {1}"
-msgstr ""
-
 msgid "joystick '{1}' not supported..."
 msgstr ""
-
-#msgid "Using multicast relay"
-#msgstr ""
 
 #msgid "Server did send endpoint information, UDP connection up"
 #msgstr ""
@@ -1493,7 +1481,7 @@ msgstr ""
 #msgid "None"
 #msgstr ""
 
-#msgid "Blinking"
+#msgid "Pulsating"
 #msgstr ""
 
 #msgid "Underline"
@@ -1795,4 +1783,7 @@ msgid "malformed address"
 msgstr ""
 
 msgid "removed IP pattern"
+msgstr ""
+
+msgid "Teams"
 msgstr ""

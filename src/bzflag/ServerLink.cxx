@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,44 +7,45 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 #if defined(_MSC_VER)
   #pragma warning(disable: 4786)
 #endif
 
-#include <string.h>
-#include <sys/types.h>
-#include <ctype.h>
-#include <time.h>
-
-#include "network.h"
+// interface header
 #include "ServerLink.h"
-#include "Pack.h"
-#include "LocalPlayer.h"
-#include "ErrorHandler.h"
-#include "common.h"
-
-// invoke persistent rebuilding for current version dates
-#include "version.h"
-
-#if !defined(_WIN32)
-#include <unistd.h>
-#include <errno.h>
-#endif
-
-#include "bzsignal.h"
-
-#define UDEBUG if (UDEBUGMSG) printf
-#define UDEBUGMSG false
 
 #if defined(DEBUG)
 #define NETWORK_STATS
 #endif
 
+// system headers
+#include <string.h>
+#include <sys/types.h>
+#include <ctype.h>
+#include <time.h>
+#include <vector>
+#if !defined(_WIN32)
+#include <unistd.h>
+#include <errno.h>
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+
+// common implementation headers
+#include "ErrorHandler.h"
+// invoke persistent rebuilding for current version dates
+#include "version.h"
 #if defined(NETWORK_STATS)
 #include "bzfio.h"
+#endif
 #include "TimeKeeper.h"
+
+#define UDEBUG if (UDEBUGMSG) printf
+#define UDEBUGMSG false
+
+#if defined(NETWORK_STATS)
 static TimeKeeper	startTime;
 static uint32_t		bytesSent;
 static uint32_t		bytesReceived;
@@ -78,9 +79,6 @@ DWORD WINAPI ThreadConnect(LPVOID params)
 #endif // !defined(_WIN32)
 
 // FIXME -- packet recording
-#include <stdio.h>
-#include <stdlib.h>
-#include "TimeKeeper.h"
 FILE* packetStream = NULL;
 TimeKeeper packetStartTime;
 static const unsigned long serverPacket = 1;
@@ -88,12 +86,12 @@ static const unsigned long endPacket = 0;
 
 ServerLink*		ServerLink::server = NULL;
 
-ServerLink::ServerLink(const Address& serverAddress, int port, int) :
+ServerLink::ServerLink(const Address& serverAddress, int port) :
 				state(SocketError),	// assume failure
-				fd(-1)			// assume failure
+				fd(-1),			// assume failure
+				udpLength(0)
 {
   int i;
-  char cServerVersion[128];
 
   struct protoent* p;
 #if defined(_WIN32)
@@ -146,7 +144,7 @@ ServerLink::ServerLink(const Address& serverAddress, int port, int) :
       return;
     }
     FD_ZERO(&write_set);
-    FD_SET(query, &write_set);
+    FD_SET((unsigned int)query, &write_set);
     timeout.tv_sec = long(5);
     timeout.tv_usec = 0;
     nfound = select(fdMax + 1, NULL, (fd_set*)&write_set, NULL, &timeout);
@@ -176,7 +174,7 @@ ServerLink::ServerLink(const Address& serverAddress, int port, int) :
   // Create event
   hConnected = CreateEvent(NULL, FALSE, FALSE, "Connected Event");
 
-  hThread=CreateThread(NULL, 0, ThreadConnect, &conn, 0, &ThreadID);
+  hThread = CreateThread(NULL, 0, ThreadConnect, &conn, 0, &ThreadID);
   const bool okay = (WaitForSingleObject(hConnected, 5000) == WAIT_OBJECT_0);
   if(!okay)
     TerminateThread(hThread ,1);
@@ -192,7 +190,7 @@ ServerLink::ServerLink(const Address& serverAddress, int port, int) :
   // get server version and verify
 #if !defined(_WIN32)
   FD_ZERO(&read_set);
-  FD_SET(query, &read_set);
+  FD_SET((unsigned int)query, &read_set);
   timeout.tv_sec = long(5);
   timeout.tv_usec = 0;
   nfound = select(fdMax + 1, (fd_set*)&read_set, NULL, NULL, &timeout);
@@ -205,20 +203,36 @@ ServerLink::ServerLink(const Address& serverAddress, int port, int) :
   if (i < 8)
     goto done;
 
-  sprintf(cServerVersion,"Server version: '%8s'",version);
-  printError(cServerVersion);
+  if (debugLevel >= 1) {
+    char cServerVersion[128];
+    sprintf(cServerVersion,"Server version: '%8s'",version);
+    printError(cServerVersion);
+  }
 
   // FIXME is it ok to try UDP always?
   server_abilities |= CanDoUDP;
   if (strcmp(version, getServerVersion()) != 0) {
     state = BadVersion;
+
+    if (strcmp(version, BanRefusalString) == 0) {
+      state = Refused;
+      char message[512];
+      int len = recv(query, (char*)message, 512, 0);
+      if (len > 0) {
+	message[len - 1] = 0;
+      } else {
+	message[0] = 0;
+      }
+      rejectionMessage = message;
+    }
+
     goto done;
   }
 
   // read local player's id
 #if !defined(_WIN32)
   FD_ZERO(&read_set);
-  FD_SET(query, &read_set);
+  FD_SET((unsigned int)query, &read_set);
   timeout.tv_sec = long(5);
   timeout.tv_usec = 0;
   nfound = select(fdMax + 1, (fd_set*)&read_set, NULL, NULL, &timeout);
@@ -289,7 +303,7 @@ if (packetStream) {
 }
 
 #if defined(NETWORK_STATS)
-  const float dt = TimeKeeper::getCurrent() - startTime;
+  const float dt = float(TimeKeeper::getCurrent() - startTime);
   DEBUG1("Server network statistics:\n");
   DEBUG1("  elapsed time    : %f\n", dt);
   DEBUG1("  bytes sent      : %d (%f/sec)\n", bytesSent, (float)bytesSent / dt);
@@ -331,8 +345,6 @@ void			ServerLink::send(uint16_t code, uint16_t len,
       case MsgPlayerUpdate:
       case MsgPlayerUpdateSmall:
       case MsgGMUpdate:
-      case MsgAudio:
-      case MsgVideo:
       case MsgUDPLinkRequest:
       case MsgUDPLinkEstablished:
 	needForSpeed=true;
@@ -380,7 +392,7 @@ void			ServerLink::send(uint16_t code, uint16_t len,
 
 #ifndef socklen_t
 	#define socklen_t int
-#endif 
+#endif
 #endif //WIN32
 
 int			ServerLink::read(uint16_t& code, uint16_t& len,
@@ -395,18 +407,32 @@ int			ServerLink::read(uint16_t& code, uint16_t& len,
   if ((urecvfd >= 0) /* && ulinkup */) {
     int n;
 
-    AddrLen recvlen = sizeof(urecvaddr);
-    unsigned char ubuf[MaxPacketLen];
-    n = recvfrom(urecvfd, (char *)ubuf, MaxPacketLen, 0, &urecvaddr, (socklen_t*) &recvlen);
-    if (n>0) {
+    if (!udpLength) {
+      AddrLen recvlen = sizeof(urecvaddr);
+      n = recvfrom(urecvfd, ubuf, MaxPacketLen, 0, &urecvaddr,
+		   (socklen_t*) &recvlen);
+      if (n > 0) {
+	udpLength    = n;
+	udpBufferPtr = ubuf;
+      }
+    }
+    if (udpLength) {
       // unpack header and get message
-      void* buf = ubuf;
-      buf = nboUnpackUShort(buf, len);
-      buf = nboUnpackUShort(buf, code);
-      UDEBUG("<** UDP Packet Code %x Len %x\n",code, len);
-      if (len > MaxPacketLen)
+      udpLength -= 4;
+      if (udpLength < 0) {
+	udpLength = 0;
 	return -1;
-      memcpy((char *)msg,(char *)buf, len);
+      }
+      udpBufferPtr = (char *)nboUnpackUShort(udpBufferPtr, len);
+      udpBufferPtr = (char *)nboUnpackUShort(udpBufferPtr, code);
+      UDEBUG("<** UDP Packet Code %x Len %x\n",code, len);
+      if (len > udpLength) {
+	udpLength = 0;
+	return -1;
+      }
+      memcpy((char *)msg, udpBufferPtr, len);
+      udpBufferPtr += len;
+      udpLength    -= len;
       return 1;
     }
     if (UDEBUGMSG) printError("Fallback to normal TCP receive");
@@ -424,7 +450,7 @@ int			ServerLink::read(uint16_t& code, uint16_t& len,
   // only check server
   fd_set read_set;
   FD_ZERO(&read_set);
-  _FD_SET(fd, &read_set);
+  FD_SET((unsigned int)fd, &read_set);
   int nfound = select(fd+1, (fd_set*)&read_set, NULL, NULL,
 			(struct timeval*)(blockTime >= 0 ? &timeout : NULL));
   if (nfound == 0) return 0;
@@ -447,7 +473,7 @@ int			ServerLink::read(uint16_t& code, uint16_t& len,
   while (rlen >= 1 && tlen < 4) {
     printError("ServerLink::read() loop");
     FD_ZERO(&read_set);
-    _FD_SET(fd, &read_set);
+    FD_SET((unsigned int)fd, &read_set);
     nfound = select(fd+1, (fd_set*)&read_set, NULL, NULL, NULL);
     if (nfound == 0) continue;
     if (nfound < 0) return -1;
@@ -481,7 +507,7 @@ int			ServerLink::read(uint16_t& code, uint16_t& len,
   tlen = rlen;
   while (rlen >= 1 && tlen < int(len)) {
     FD_ZERO(&read_set);
-    _FD_SET(fd, &read_set);
+    FD_SET((unsigned int)fd, &read_set);
     nfound = select(fd+1, (fd_set*)&read_set, 0, 0, NULL);
     if (nfound == 0) continue;
     if (nfound < 0) return -1;
@@ -508,10 +534,11 @@ if (packetStream) {
 void			ServerLink::sendEnter(PlayerType type,
 						TeamColor team,
 						const char* name,
-						const char* email)
+						const char* email,
+						const char* token)
 {
   if (state != Okay) return;
-  char msg[PlayerIdPLen + 4 + CallSignLen + EmailLen];
+  char msg[PlayerIdPLen + 4 + CallSignLen + EmailLen + TokenLen + VersionLen];
   ::memset(msg, 0, sizeof(msg));
   void* buf = msg;
   buf = nboPackUShort(buf, uint16_t(type));
@@ -520,41 +547,45 @@ void			ServerLink::sendEnter(PlayerType type,
   buf = (void*)((char*)buf + CallSignLen);
   ::memcpy(buf, email, ::strlen(email));
   buf = (void*)((char*)buf + EmailLen);
+  ::memcpy(buf, token, ::strlen(token));
+  buf = (void*)((char*)buf + TokenLen);
+  ::memcpy(buf, getAppVersion(), ::strlen(getAppVersion()) + 1);
+  buf = (void*)((char*)buf + VersionLen);
   send(MsgEnter, sizeof(msg), msg);
 }
 
 bool ServerLink::readEnter (std::string& reason,
-                            uint16_t& code, uint16_t& rejcode)
+			    uint16_t& code, uint16_t& rejcode)
 {
   // wait for response
   uint16_t len;
   char msg[MaxPacketLen];
 
-  if (this->read(code, len, msg, -1) < 0) {
-    reason = "Communication error joining game [No immediate respose].";
-    return false;
-  }
-  
-  if (code == MsgSuperKill) {
-    reason = "Server forced disconnection.";
-    return false;
-  }
-  else if (code == MsgReject) {
-    void *buf;
-    char buffer[MessageLen];
-    buf = nboUnpackUShort (msg, rejcode); // filler for now
-    buf = nboUnpackString (buf, buffer, MessageLen);
-    buffer[MessageLen - 1] = '\0';
-    reason = buffer;
-    return false;
-  }
-  else if (code != MsgAccept) {
-    char buf[10];
-    sprintf(buf, "%04x", code);
-    reason = "Communication error joining game [Wrong Code ";
-    reason += buf;
-    reason += "].";
-    return false;
+  while (true) {
+    if (this->read(code, len, msg, -1) < 0) {
+      reason = "Communication error joining game [No immediate respose].";
+      return false;
+    }
+
+    if (code == MsgAccept) {
+      return true;
+    }
+    else if (code == MsgSuperKill) {
+      reason = "Server forced disconnection.";
+      return false;
+    }
+    else if (code == MsgReject) {
+      void *buf;
+      char buffer[MessageLen];
+      buf = nboUnpackUShort (msg, rejcode); // filler for now
+      buf = nboUnpackString (buf, buffer, MessageLen);
+      buffer[MessageLen - 1] = '\0';
+      reason = buffer;
+      return false;
+    }
+    // ignore other codes so that bzadmin doesn't choke
+    // on the MsgMessage's that the server can send before
+    // the MsgAccept (authorization holdoff, etc...)
   }
 
   return true;
@@ -582,33 +613,45 @@ void			ServerLink::sendDropFlag(const float* position)
   send(MsgDropFlag, sizeof(msg), msg);
 }
 
-void			ServerLink::sendKilled(const PlayerId& killer, int reason,
-								int shotId)
+void			ServerLink::sendKilled(const PlayerId& killer,
+					       int reason, int shotId,
+					       const FlagType* flagType,
+					       int phydrv)
 {
-  char msg[PlayerIdPLen + 4];
+  char msg[PlayerIdPLen + 2 + 2 + FlagPackSize + 4];
   void* buf = msg;
+
   buf = nboPackUByte(buf, killer);
   buf = nboPackUShort(buf, int16_t(reason));
   buf = nboPackShort(buf, int16_t(shotId));
-  send(MsgKilled, sizeof(msg), msg);
+  buf = flagType->pack(buf);
+
+  if (reason == PhysicsDriverDeath) {
+    buf = nboPackInt(buf, phydrv);
+  }
+
+  send(MsgKilled, (char*)buf - (char*)msg, msg);
 }
 
 
 #ifndef BUILDING_BZADMIN
 void			ServerLink::sendPlayerUpdate(Player* player)
 {
-  char msg[PlayerUpdatePLen];
-  const float timeStamp = TimeKeeper::getCurrent() - TimeKeeper::getNullTime();
+  char msg[PlayerUpdatePLenMax];
+  // Send the time frozen at each start of scene iteration, as all
+  // dead reckoning use that
+  const float timeStamp = float(TimeKeeper::getTick() - TimeKeeper::getNullTime());
   void* buf = msg;
   uint16_t code;
   buf = nboPackFloat(buf, timeStamp);
   buf = nboPackUByte(buf, player->getId());
+
   // code will be MsgPlayerUpdate or MsgPlayerUpdateSmall
-  int len = PlayerUpdatePLen;
   buf = player->pack(buf, code);
-  if (code == MsgPlayerUpdateSmall) {
-    len = PlayerUpdateSmallPLen;
-  }
+
+  // variable length
+  const int len = (char*)buf - (char*)msg;
+
   send(code, len, msg);
 }
 #endif
@@ -666,10 +709,16 @@ void			ServerLink::sendPaused(bool paused)
   send(MsgPause, 1, &p);
 }
 
+void			ServerLink::sendAutoPilot(bool autopilot)
+{
+  uint8_t p = autopilot;
+  send(MsgAutoPilot, 1, &p);
+}
+
 void			ServerLink::sendUDPlinkRequest()
 {
   if ((server_abilities & CanDoUDP) != CanDoUDP)
-    return; // server does not support udp (future bzfls test)
+    return; // server does not support udp (future list server test)
 
   char msg[1];
   unsigned short localPort;
@@ -706,11 +755,13 @@ void			ServerLink::sendUDPlinkRequest()
   localPort = ntohs(serv_addr.sin_port);
   memcpy((char *)&urecvaddr,(char *)&serv_addr, sizeof(serv_addr));
 
-  std::vector<std::string> args;
-  char lps[10];
-  sprintf(lps, "%d", localPort);
-  args.push_back(lps);
-  printError("Network: Created local UDP downlink port {1}", &args);
+  if (debugLevel >= 1) {
+    std::vector<std::string> args;
+    char lps[10];
+    sprintf(lps, "%d", localPort);
+    args.push_back(lps);
+    printError("Network: Created local UDP downlink port {1}", &args);
+  }
 
   buf = nboPackUByte(buf, id);
 
@@ -725,7 +776,8 @@ void			ServerLink::sendUDPlinkRequest()
 void			ServerLink::enableOutboundUDP()
 {
   ulinkup = true;
-  printError("Server got our UDP, using UDP to server");
+  if (debugLevel >= 1)
+    printError("Server got our UDP, using UDP to server");
 }
 // confirm that server can send us UDP
 void			ServerLink::confirmIncomingUDP()
@@ -735,15 +787,20 @@ void			ServerLink::confirmIncomingUDP()
   // well start with udp as soon as we can
   ulinkup = true;
 
-  printError("Got server's UDP packet back, server using UDP");
+  if (debugLevel >= 1)
+    printError("Got server's UDP packet back, server using UDP");
   send(MsgUDPLinkEstablished, 0, NULL);
 }
 
-void			ServerLink::sendVersionString()
+#ifdef HAVE_KRB5
+void ServerLink::sendKerberosTicket(const char      *principal,
+				    const krb5_data *ticket)
 {
-  DEBUG3("Sent client version string to server: %s\n", getAppVersion());
-  send(MsgVersion, strlen(getAppVersion()) + 1, getAppVersion());
+  DEBUG3("Sent authentication ticket to server : \n");
+  send(MsgKrbPrincipal, strlen(principal), principal);
+  send(MsgKrbTicket, ticket->length, ticket->data);
 }
+#endif
 
 // Local Variables: ***
 // mode:C++ ***

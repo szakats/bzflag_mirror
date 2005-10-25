@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -22,53 +22,66 @@
 
 #include "common.h"
 
+/* system headers */
+#include <string>
+
 /* common interface headers */
 #include "bzfgl.h"
 #include "OpenGLGState.h"
-#include "OpenGLDisplayList.h"
 #include "SceneRenderer.h"
-
+#include "WeatherRenderer.h"
 
 class BackgroundRenderer {
   public:
 			BackgroundRenderer(const SceneRenderer&);
 			~BackgroundRenderer();
 
-    void		renderSkyAndGround(SceneRenderer&, bool fullWindow);
-    void		render(SceneRenderer&);
+    void		setupGroundMaterials();
 
-    void                resize();
+    void		renderSky(SceneRenderer&, bool fullWindow, bool mirror);
+    void		renderGround(SceneRenderer&, bool fullWindow);
+    void		renderGroundEffects(SceneRenderer&, bool drawingMirror);
+    void		renderEnvironment(SceneRenderer&, bool update);
+
+    void		resize();
 
     bool		getBlank() const;
     bool		getInvert() const;
     bool		getSimpleGround() const;
+    const GLfloat*	getSunDirection() const;
     void		setBlank(bool blank = true);
     void		setInvert(bool invert = true);
     void		setSimpleGround(bool simple = true);
     void		setCelestial(const SceneRenderer&,
-					const float sunDirection[3],
-					const float moonDirection[3]);
+				     const float sunDirection[3],
+				     const float moonDirection[3]);
     void		addCloudDrift(GLfloat uDrift, GLfloat vDrift);
+    void		notifyStyleChange();
 
     std::string		userTextures[2];
   protected:
-    void		drawSky(SceneRenderer&);
+    void		drawSky(SceneRenderer&, bool mirror);
     void		drawGround(void);
+    void		drawGroundCentered(void);
     void		drawGroundGrid(SceneRenderer&);
-    void		drawTeamBases(void);
     void		drawGroundShadows(SceneRenderer&);
     void		drawGroundReceivers(SceneRenderer&);
     void		drawMountains(void);
 
-    void		notifyStyleChange(SceneRenderer&);
 
   private:
 			BackgroundRenderer(const BackgroundRenderer&);
     BackgroundRenderer&	operator=(const BackgroundRenderer&);
 
-    void                resizeSky();
+    void		resizeSky();
+
+    void		doFreeDisplayLists();
     void		doInitDisplayLists();
-    static void		initDisplayLists(void*);
+    void		setSkyColors();
+    void		makeCelestialLists(const SceneRenderer&);
+    static void		freeContext(void*);
+    static void		initContext(void*);
+    static void		bzdbCallback(const std::string&, void*);
 
   private:
     // rendering state
@@ -81,17 +94,12 @@ class BackgroundRenderer {
     // stuff for ground
     OpenGLGState	groundGState[4];
     OpenGLGState	invGroundGState[4];
-    OpenGLDisplayList	simpleGroundList[4];
+    GLuint		simpleGroundList[4];
 
     // stuff for grid
     GLfloat		gridSpacing;
     GLfloat		gridCount;
     OpenGLGState	gridGState;
-
-    // stuff for team bases
-    bool		doTeamBases;
-    OpenGLGState	teamBasesGState;
-    OpenGLDisplayList	teamBasesList;
 
     // stuff for ground receivers
     OpenGLGState	receiverGState;
@@ -102,14 +110,17 @@ class BackgroundRenderer {
     int			numMountainTextures;
     int			mountainsMinWidth;
     OpenGLGState*	mountainsGState;
-    OpenGLDisplayList*	mountainsList;
+    GLuint*		mountainsList;
 
     // stuff for clouds
     GLfloat		cloudDriftU, cloudDriftV;
     bool		cloudsAvailable;
     bool		cloudsVisible;
     OpenGLGState	cloudsGState;
-    OpenGLDisplayList	cloudsList;
+    GLuint		cloudsList;
+
+    // weather
+    WeatherRenderer	weather;
 
     // stuff for sun shadows
     bool		doShadows;
@@ -132,17 +143,19 @@ class BackgroundRenderer {
     OpenGLGState	sunGState;
     OpenGLGState	moonGState[2];
     OpenGLGState	starGState[2];
-    OpenGLDisplayList	sunList;
-    OpenGLDisplayList	sunXFormList;
-    OpenGLDisplayList	moonList;
-    OpenGLDisplayList	starList;
-    OpenGLDisplayList	starXFormList;
+    GLuint		sunList;
+    GLuint		sunXFormList;
+    GLuint		moonList;
+    GLuint		starList;
+    GLuint		starXFormList;
 
     static GLfloat		skyPyramid[5][3];
     static const GLfloat	cloudRepeats;
 
-    static const GLfloat	groundColor[4][3];
-    static const GLfloat	groundColorInv[4][3];
+    static GLfloat		groundColor[4][4];
+    static GLfloat		groundColorInv[4][4];
+    static const GLfloat	defaultGroundColor[4][4];
+    static const GLfloat	defaultGroundColorInv[4][4];
     static const GLfloat	receiverColor[3];
     static const GLfloat	receiverColorInv[3];
 };
@@ -180,6 +193,7 @@ inline void		BackgroundRenderer::setSimpleGround(bool _simple)
 {
   simpleGround = _simple;
 }
+
 
 #endif // BZF_BACKGROUND_RENDERER_H
 

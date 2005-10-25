@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,43 +7,29 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "DisplayMenu.h"
 
-/* system implementation headers */
-#include <string>
-#include <vector>
-#include <math.h>
-
 /* common implementation headers */
-#include "BzfDisplay.h"
-#include "SceneRenderer.h"
-#include "BZDBCache.h"
 #include "FontManager.h"
-#include "OpenGLTexture.h"
+#include "BZDBCache.h"
+#include "TextureManager.h"
 
 /* local implementation headers */
 #include "MainMenu.h"
 #include "HUDDialogStack.h"
-#include "HUDuiControl.h"
 #include "HUDuiList.h"
-#include "HUDuiLabel.h"
-#include "MainWindow.h"
-
-/* FIXME - from playing.h */
-BzfDisplay* getDisplay();
-MainWindow* getMainWindow();
-SceneRenderer* getSceneRenderer();
-void setSceneDatabase();
+#include "playing.h"
+#include "HUDui.h"
 
 DisplayMenu::DisplayMenu() : formatMenu(NULL)
 {
   // add controls
   std::vector<std::string>* options;
-  std::vector<HUDuiControl*>& list  = getControls();
+  std::vector<HUDuiControl*>& listHUD  = getControls();
   HUDuiList* option;
 
   // cache font face id
@@ -52,7 +38,7 @@ DisplayMenu::DisplayMenu() : formatMenu(NULL)
   HUDuiLabel* label = new HUDuiLabel;
   label->setFontFace(fontFace);
   label->setString("Display Settings");
-  list.push_back(label);
+  listHUD.push_back(label);
 
   option = new HUDuiList;
   option->setFontFace(fontFace);
@@ -62,7 +48,7 @@ DisplayMenu::DisplayMenu() : formatMenu(NULL)
   options->push_back(std::string("Off"));
   options->push_back(std::string("On"));
   option->update();
-  list.push_back(option);
+  listHUD.push_back(option);
 
   option = new HUDuiList;
   option->setFontFace(fontFace);
@@ -72,7 +58,7 @@ DisplayMenu::DisplayMenu() : formatMenu(NULL)
   options->push_back(std::string("Off"));
   options->push_back(std::string("On"));
   option->update();
-  list.push_back(option);
+  listHUD.push_back(option);
 
   option = new HUDuiList;
   option->setFontFace(fontFace);
@@ -82,17 +68,18 @@ DisplayMenu::DisplayMenu() : formatMenu(NULL)
   options->push_back(std::string("Off"));
   options->push_back(std::string("On"));
   option->update();
-  list.push_back(option);
+  listHUD.push_back(option);
 
   option = new HUDuiList;
   option->setFontFace(fontFace);
   option->setLabel("Lighting:");
   option->setCallback(callback, (void*)"4");
   options = &option->getList();
-  options->push_back(std::string("Off"));
-  options->push_back(std::string("On"));
+  options->push_back(std::string("None"));
+  options->push_back(std::string("Fast"));
+  options->push_back(std::string("Best"));
   option->update();
-  list.push_back(option);
+  listHUD.push_back(option);
 
   option = new HUDuiList;
   option->setFontFace(fontFace);
@@ -107,7 +94,7 @@ DisplayMenu::DisplayMenu() : formatMenu(NULL)
   options->push_back(std::string("Nearest Mipmap Linear"));
   options->push_back(std::string("Linear Mipmap Linear"));
   option->update();
-  list.push_back(option);
+  listHUD.push_back(option);
 
   option = new HUDuiList;
   option->setFontFace(fontFace);
@@ -119,7 +106,7 @@ DisplayMenu::DisplayMenu() : formatMenu(NULL)
   options->push_back(std::string("High"));
   options->push_back(std::string("Experimental"));
   option->update();
-  list.push_back(option);
+  listHUD.push_back(option);
 
   option = new HUDuiList;
   option->setFontFace(fontFace);
@@ -127,56 +114,65 @@ DisplayMenu::DisplayMenu() : formatMenu(NULL)
   option->setCallback(callback, (void*)"7");
   options = &option->getList();
   options->push_back(std::string("Off"));
-  options->push_back(std::string("On"));
+  options->push_back(std::string("Stipple"));
+  options->push_back(std::string("Stencil"));
   option->update();
-  list.push_back(option);
+  listHUD.push_back(option);
 
-  option = new HUDuiList;
-  option->setFontFace(fontFace);
-  option->setLabel("Depth Buffer:");
-  option->setCallback(callback, (void*)"8");
-  options = &option->getList();
-  GLint value;
-  glGetIntegerv(GL_DEPTH_BITS, &value);
-  if (value == 0) {
-    options->push_back(std::string("Not available"));
-  } else {
+#if !defined(DEBUG_RENDERING)
+  if (debugLevel > 0) {
+#endif
+    option = new HUDuiList;
+    option->setFontFace(fontFace);
+    option->setLabel("Hidden Line:");
+    option->setCallback(callback, (void*)"a");
+    options = &option->getList();
     options->push_back(std::string("Off"));
     options->push_back(std::string("On"));
+    option->update();
+    listHUD.push_back(option);
+
+    option = new HUDuiList;
+    option->setFontFace(fontFace);
+    option->setLabel("Wireframe:");
+    option->setCallback(callback, (void*)"b");
+    options = &option->getList();
+    options->push_back(std::string("Off"));
+    options->push_back(std::string("On"));
+    option->update();
+    listHUD.push_back(option);
+
+    option = new HUDuiList;
+    option->setFontFace(fontFace);
+    option->setLabel("Depth Complexity:");
+    option->setCallback(callback, (void*)"c");
+    options = &option->getList();
+    options->push_back(std::string("Off"));
+    options->push_back(std::string("On"));
+    option->update();
+    listHUD.push_back(option);
+
+    option = new HUDuiList;
+    option->setFontFace(fontFace);
+    option->setLabel("Culling Tree:");
+    option->setCallback(callback, (void*)"d");
+    options = &option->getList();
+    options->push_back(std::string("Off"));
+    options->push_back(std::string("On"));
+    option->update();
+    listHUD.push_back(option);
+
+    option = new HUDuiList;
+    option->setFontFace(fontFace);
+    option->setLabel("Collision Tree:");
+    option->setCallback(callback, (void*)"e");
+    options = &option->getList();
+    options->push_back(std::string("Off"));
+    options->push_back(std::string("On"));
+    option->update();
+    listHUD.push_back(option);
+#if !defined(DEBUG_RENDERING)
   }
-  option->update();
-  list.push_back(option);
-
-#if defined(DEBUG_RENDERING)
-  option = new HUDuiList;
-  option->setFontFace(fontFace);
-  option->setLabel("Hidden Line:");
-  option->setCallback(callback, (void*)"a");
-  options = &option->getList();
-  options->push_back(std::string("Off"));
-  options->push_back(std::string("On"));
-  option->update();
-  list.push_back(option);
-
-  option = new HUDuiList;
-  option->setFontFace(fontFace);
-  option->setLabel("Wireframe:");
-  option->setCallback(callback, (void*)"b");
-  options = &option->getList();
-  options->push_back(std::string("Off"));
-  options->push_back(std::string("On"));
-  option->update();
-  list.push_back(option);
-
-  option = new HUDuiList;
-  option->setFontFace(fontFace);
-  option->setLabel("Depth Complexity:");
-  option->setCallback(callback, (void*)"c");
-  options = &option->getList();
-  options->push_back(std::string("Off"));
-  options->push_back(std::string("On"));
-  option->update();
-  list.push_back(option);
 #endif
 
   BzfWindow* window = getMainWindow()->getWindow();
@@ -191,7 +187,17 @@ DisplayMenu::DisplayMenu() : formatMenu(NULL)
     options->push_back(std::string("Unavailable"));
   }
   option->update();
-  list.push_back(option);
+  listHUD.push_back(option);
+
+  option = new HUDuiList;
+  option->setFontFace(fontFace);
+  option->setLabel("Energy Saver:");
+  option->setCallback(callback, (void*)"s");
+  options = &option->getList();
+  options->push_back(std::string("Off"));
+  options->push_back(std::string("On"));
+  option->update();
+  listHUD.push_back(option);
 
   BzfDisplay* display = getDisplay();
   int numFormats = display->getNumResolutions();
@@ -201,10 +207,10 @@ DisplayMenu::DisplayMenu() : formatMenu(NULL)
     videoFormat = label = new HUDuiLabel;
     label->setFontFace(fontFace);
     label->setLabel("Change Video Format");
-    list.push_back(label);
+    listHUD.push_back(label);
   }
 
-  initNavigation(list, 1,list.size()-1);
+  initNavigation(listHUD, 1,listHUD.size()-1);
 }
 
 DisplayMenu::~DisplayMenu()
@@ -214,43 +220,43 @@ DisplayMenu::~DisplayMenu()
 
 void			DisplayMenu::execute()
 {
-  HUDuiControl* focus = HUDui::getFocus();
-  if (focus == videoFormat) {
+  HUDuiControl* _focus = HUDui::getFocus();
+  if (_focus == videoFormat) {
     if (!formatMenu)
       formatMenu = new FormatMenu;
     HUDDialogStack::get()->push(formatMenu);
   }
 }
 
-void			DisplayMenu::resize(int width, int height)
+void			DisplayMenu::resize(int _width, int _height)
 {
-  HUDDialog::resize(width, height);
+  HUDDialog::resize(_width, _height);
   int i;
 
   // use a big font for title, smaller font for the rest
-  const float titleFontSize = (float)height / 15.0f;
-  const float fontSize = (float)height / 45.0f;
+  const float titleFontSize = (float)_height / 15.0f;
+  const float fontSize = (float)_height / 45.0f;
   FontManager &fm = FontManager::instance();
   int fontFace = MainMenu::getFontFace();
 
   // reposition title
-  std::vector<HUDuiControl*>& list = getControls();
-  HUDuiLabel* title = (HUDuiLabel*)list[0];
+  std::vector<HUDuiControl*>& listHUD = getControls();
+  HUDuiLabel* title = (HUDuiLabel*)listHUD[0];
   title->setFontSize(titleFontSize);
   const float titleWidth = fm.getStrLength(fontFace, titleFontSize, title->getString());
   const float titleHeight = fm.getStrHeight(fontFace, titleFontSize, " ");
-  float x = 0.5f * ((float)width - titleWidth);
-  float y = (float)height - titleHeight;
+  float x = 0.5f * ((float)_width - titleWidth);
+  float y = (float)_height - titleHeight;
   title->setPosition(x, y);
 
   // reposition options
-  x = 0.5f * ((float)width);
+  x = 0.5f * ((float)_width);
   y -= 0.6f * titleHeight;
   const float h = fm.getStrHeight(fontFace, fontSize, " ");
-  const int count = list.size();
+  const int count = listHUD.size();
   for (i = 1; i < count; i++) {
-    list[i]->setFontSize(fontSize);
-    list[i]->setPosition(x, y);
+    listHUD[i]->setFontSize(fontSize);
+    listHUD[i]->setPosition(x, y);
     y -= 1.0f * h;
   }
 
@@ -258,33 +264,52 @@ void			DisplayMenu::resize(int width, int height)
   // load current settings
   SceneRenderer* renderer = getSceneRenderer();
   if (renderer) {
-    HUDuiList* tex;
-    ((HUDuiList*)list[i++])->setIndex(BZDB.isTrue("dither"));
-    ((HUDuiList*)list[i++])->setIndex(BZDBCache::blend);
-    ((HUDuiList*)list[i++])->setIndex(BZDB.isTrue("smooth"));
-    ((HUDuiList*)list[i++])->setIndex(BZDB.isTrue("lighting"));
-    tex = (HUDuiList*)list[i++];
-    ((HUDuiList*)list[i++])->setIndex(renderer->useQuality());
-    ((HUDuiList*)list[i++])->setIndex(BZDB.isTrue("shadows"));
-    ((HUDuiList*)list[i++])->setIndex(BZDB.isTrue("zbuffer"));
-#if defined(DEBUG_RENDERING)
-    ((HUDuiList*)list[i++])->setIndex(renderer->useHiddenLine() ? 1 : 0);
-    ((HUDuiList*)list[i++])->setIndex(renderer->useWireframe() ? 1 : 0);
-    ((HUDuiList*)list[i++])->setIndex(renderer->useDepthComplexity() ? 1 : 0);
+    TextureManager& tm = TextureManager::instance();
+    ((HUDuiList*)listHUD[i++])->setIndex(BZDB.isTrue("dither"));
+    ((HUDuiList*)listHUD[i++])->setIndex(BZDB.isTrue("blend"));
+    ((HUDuiList*)listHUD[i++])->setIndex(BZDB.isTrue("smooth"));
+    if (BZDBCache::lighting) {
+      if (BZDB.isTrue("tesselation")) {
+	((HUDuiList*)listHUD[i++])->setIndex(2);
+      } else {
+	((HUDuiList*)listHUD[i++])->setIndex(1);
+      }
+    } else {
+      ((HUDuiList*)listHUD[i++])->setIndex(0);
+    }
+    ((HUDuiList*)listHUD[i++])->setIndex(tm.getMaxFilter());
+    ((HUDuiList*)listHUD[i++])->setIndex(renderer->useQuality());
+    int shadowVal = 0;
+    if (BZDBCache::shadows) {
+      shadowVal++;
+      if (BZDBCache::stencilShadows) {
+        shadowVal++;
+      }
+    }
+    ((HUDuiList*)listHUD[i++])->setIndex(shadowVal);
+#if !defined(DEBUG_RENDERING)
+    if (debugLevel > 0) {
 #endif
-
-    if (!BZDBCache::texture)
-      tex->setIndex(0);
-    else
-      tex->setIndex(OpenGLTexture::getFilter());
+      ((HUDuiList*)listHUD[i++])->setIndex(renderer->useHiddenLine() ? 1 : 0);
+      ((HUDuiList*)listHUD[i++])->setIndex(renderer->useWireframe() ? 1 : 0);
+      ((HUDuiList*)listHUD[i++])->setIndex(renderer->useDepthComplexity() ? 1
+					   : 0);
+      ((HUDuiList*)listHUD[i++])->setIndex(BZDBCache::showCullingGrid ? 1 : 0);
+      ((HUDuiList*)listHUD[i++])->setIndex(BZDBCache::showCollisionGrid ? 1
+					   : 0);
+#if !defined(DEBUG_RENDERING)
+    }
+#endif
   }
 
   // brightness
   BzfWindow* window = getMainWindow()->getWindow();
   if (window->hasGammaControl())
-    ((HUDuiList*)list[i])->setIndex(gammaToIndex(window->getGamma()));
+    ((HUDuiList*)listHUD[i])->setIndex(gammaToIndex(window->getGamma()));
   i++;
 
+  // energy saver
+  ((HUDuiList*)listHUD[i])->setIndex((int)BZDB.eval("saveEnergy"));
 }
 
 int DisplayMenu::gammaToIndex(float gamma)
@@ -314,42 +339,43 @@ void			DisplayMenu::callback(HUDuiControl* w, void* data) {
     BZDB.set("smooth", list->getIndex() ? "1" : "0");
     sceneRenderer->notifyStyleChange();
     break;
-  case '4':
-    BZDB.set("lighting", list->getIndex() ? "1" : "0");
-    BZDB.set("_texturereplace", (!BZDB.isTrue("lighting") &&
-				 sceneRenderer->useQuality() < 2) ? "1" : "0");
-    BZDB.setPersistent("_texturereplace", false);
+  case '4': {
+    bool oldLighting = BZDBCache::lighting;
+    BZDB.set("lighting", list->getIndex() == 0 ? "0" : "1");
+    BZDB.set("tesselation", list->getIndex() == 2 ? "1" : "0");
+    if (oldLighting != BZDBCache::lighting) {
+      BZDB.set("texturereplace", (!BZDBCache::lighting &&
+				   sceneRenderer->useQuality() < 2) ? "1" : "0");
+      BZDB.setPersistent("texturereplace", false);
+      sceneRenderer->notifyStyleChange();
+    }
+    break;
+  }
+  case '5': {
+    TextureManager& tm = TextureManager::instance();
+    tm.setMaxFilter((OpenGLTexture::Filter)list->getIndex());
+    BZDB.set("texture", tm.getMaxFilterName());
     sceneRenderer->notifyStyleChange();
     break;
-  case '5':
-#ifdef _MSC_VER
-    // Suppose Pat want to remind himself
-    { int somebody_get_tm_to_set_texture; }
-#endif
-    /*
-      OpenGLTexture::setFilter((OpenGLTexture::Filter)list->getIndex());
-      BZDB.set("texture", OpenGLTexture::getFilterName());
-      sceneRenderer->notifyStyleChange();
-    */
-    break;
+  }
   case '6':
     sceneRenderer->setQuality(list->getIndex());
-    BZDB.set("_texturereplace", (!BZDB.isTrue("lighting") &&
+    if (list->getIndex() > 3) {
+      BZDB.set("zbuffer","1");
+      setSceneDatabase();
+    }
+    BZDB.set("texturereplace", (!BZDBCache::lighting &&
 				 sceneRenderer->useQuality() < 2) ? "1" : "0");
-    BZDB.setPersistent("_texturereplace", false);
+    BZDB.setPersistent("texturereplace", false);
     sceneRenderer->notifyStyleChange();
     break;
-  case '7':
-    BZDB.set("shadows", list->getIndex() ? "1" : "0");
+  case '7': {
+    const int shadowVal = list->getIndex();
+    BZDB.set("shadows", shadowVal > 0 ? "1" : "0");
+    BZDB.set("stencilShadows", shadowVal > 1 ? "1" : "0");
     sceneRenderer->notifyStyleChange();
     break;
-  case '8':
-    BZDB.set("zbuffer", list->getIndex() ? "1" : "0");
-    // FIXME - test for whether the z buffer will work
-    setSceneDatabase();
-    sceneRenderer->notifyStyleChange();
-    break;
-#if defined(DEBUG_RENDERING)
+  }
   case 'a':
     sceneRenderer->setHiddenLine(list->getIndex() != 0);
     break;
@@ -359,7 +385,15 @@ void			DisplayMenu::callback(HUDuiControl* w, void* data) {
   case 'c':
     sceneRenderer->setDepthComplexity(list->getIndex() != 0);
     break;
-#endif
+  case 'd':
+    BZDB.setBool("showCullingGrid", list->getIndex() != 0);
+    break;
+  case 'e':
+    BZDB.setBool("showCollisionGrid", list->getIndex() != 0);
+    break;
+  case 's':
+    BZDB.setBool("saveEnergy", list->getIndex() != 0);
+    break;
   case 'g':
     BzfWindow* window = getMainWindow()->getWindow();
     if (window->hasGammaControl())

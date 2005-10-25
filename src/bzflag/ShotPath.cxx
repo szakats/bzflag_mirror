@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,20 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
+// interface header
+#include "ShotPath.h"
 
-/* common implementation headers */
-#include "Protocol.h"
-#include "Flag.h"
+/* system headers */
+#include <assert.h>
 
 /* local implementation headers */
-#include "playing.h"
-#include "ShotPath.h"
-#include "ShotStrategy.h"
-#include "LocalPlayer.h"
 #include "SegmentedShotStrategy.h"
 #include "GuidedMissleStrategy.h"
 #include "ShockWaveStrategy.h"

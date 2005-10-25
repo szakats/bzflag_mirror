@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,15 +7,15 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-// interface header 
+// interface header
 #include "RejoinList.h"
 
 // common headers
 #include "TimeKeeper.h"
-#include "PlayerInfo.h"    
+#include "PlayerInfo.h"
 #include "StateDatabase.h"  // for StateDatabase::BZDB_REJOINTIME
 
 // bzfs specific headers
@@ -70,7 +70,7 @@ float RejoinList::waitTime (int playerIndex)
   std::list<struct RejoinNode*>::iterator it;
   TimeKeeper thenTime = TimeKeeper::getCurrent();
   thenTime += -BZDB.eval(StateDatabase::BZDB_REJOINTIME);
-  
+
   // remove old entries
   it = queue.begin();
   while (it != queue.end()) {
@@ -89,11 +89,11 @@ float RejoinList::waitTime (int playerIndex)
   while (it != queue.end()) {
     RejoinNode *rn = *it;
     if (strcasecmp (rn->callsign, callsign) == 0) {
-      value = rn->joinTime - thenTime;
+      value = float(rn->joinTime - thenTime);
     }
     it++;
   }
-  
+
   return value;
 }
 

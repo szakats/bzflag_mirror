@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __SCORE_H__
@@ -21,7 +21,7 @@ class Score {
   Score();
   void  dump();
   /** Take into account the quality of player wins/(wins+loss)
-      Try to penalize winning casuality 
+      Try to penalize winning casuality
   */
   float ranking();
   bool  isTK();
@@ -30,6 +30,14 @@ class Score {
   void  kill();
   void *pack(void *buf);
   bool  reached();
+  int	getWins(){return wins;}
+  int	getLosses(){return losses;}
+  int	getTKs(){return tks;}
+
+  void	setWins(int v){wins = v;}
+  void	setLosses(int v){losses = v;}
+  void	setTKs(int v){tks = v;}
+
 
   static void setTeamKillRatio(int _tkKickRatio);
   static void setWinLimit(int _score);

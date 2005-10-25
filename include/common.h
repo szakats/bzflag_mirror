@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -18,32 +18,32 @@
 #define	BZF_COMMON_H
 
 // this should always be the very FIRST header
-#include "config.h"
-
-#ifdef _WIN32
-#include "win32.h"
-#define _FD_SET(fd, set) FD_SET((unsigned int)fd, set)
+#ifdef _DEVCPP //the Dev-C++ build is acting very stubborn; this is (hopefully) -temporary-
+# include_next "config.h"
 #else
-#define _FD_SET(fd, set) FD_SET(fd, set)
+# include "config.h"
 #endif
 
-#include <string>
-#include <sstream>
-#include <vector>
-#include <stdarg.h>
+#ifdef _WIN32
+#  undef NOMINMAX
+#  define NOMINMAX 1
+#  include "win32.h"
+#endif
+
+// FIXME - is this really still needed?
+//#define BZ_FD_SET(fd, set) FD_SET((unsigned int)fd, set)
+
 #include <stdio.h>
 #include <stdlib.h> //needed for bzfrand
+#include <math.h>
 
 extern int debugLevel;
-// Like verbose debug messages?
+// Like verbose debug messages? level 0 for development only
+#define DEBUG0 formatDebug
 #define DEBUG1 if (debugLevel >= 1) formatDebug
 #define DEBUG2 if (debugLevel >= 2) formatDebug
 #define DEBUG3 if (debugLevel >= 3) formatDebug
 #define DEBUG4 if (debugLevel >= 4) formatDebug
-
-#ifdef __MINGW32__
-inline void W32_DEBUG_TRACE (const char*) {return;}
-#endif
 
 /* near zero by some epsilon convenience define since relying on
 * the floating point unit for proper equivalence is not safe
@@ -52,62 +52,100 @@ inline void W32_DEBUG_TRACE (const char*) {return;}
 
 // seven places of precision is pretty safe, so something less precise
 #if defined(FLT_EPSILON)
-#	define ZERO_TOLERANCE FLT_EPSILON
+#  define ZERO_TOLERANCE FLT_EPSILON
 #else
-#	define ZERO_TOLERANCE 1.0e-06f
+#  define ZERO_TOLERANCE 1.0e-06f
 #endif
 
 // Might we be BSDish? sys/param.h has BSD defined if so
-#if (defined(__unix__) || defined(unix) || defined(__APPLE__)) && !defined(USG)
-#include <sys/param.h>
+#ifdef HAVE_SYS_PARAM_H
+#  include <sys/param.h>
 #endif
 
-#if defined HAVE_STRICMP
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#define vsnprintf _vsnprintf
+#ifdef HAVE__STRICMP
+#  define strcasecmp _stricmp
+#endif
+#ifdef HAVE__STRNICMP
+#  define strncasecmp _strnicmp
+#endif
+#if !defined(HAVE_VSNPRINTF)
+#  ifdef HAVE__VSNPRINTF
+#    define vsnprintf _vsnprintf
+#  else
+#    define vsnprintf(buf, size, fmt, list) vsprintf(buf, fmt, list)
+#  endif
 #endif
 
 // some platforms don't have float versions of the math library
-#if defined(_old_linux_) || defined(__APPLE__) || defined(sun)
-#define	asinf		(float)asin
-#define	atanf		(float)atan
-#define	atan2f		(float)atan2
-#define	cosf		(float)cos
-#define	expf		(float)exp
-#if !defined(__APPLE__)
-#define	fabsf		(float)fabs
-#define	floorf		(float)floor
-#define	fmodf		(float)fmod
+#ifndef HAVE_ASINF
+#  define	asinf		(float)asin
 #endif
-#define	hypotf		(float)hypot
-#define	logf		(float)log
-#define	powf		(float)pow
-#define	sinf		(float)sin
-#define	sqrtf		(float)sqrt
-#define	tanf		(float)tan
+#ifndef HAVE_ATAN2F
+#  define	atan2f		(float)atan2
+#endif
+#ifndef HAVE_ATANF
+#  define	atanf		(float)atan
+#endif
+#ifndef HAVE_COSF
+#  define	cosf		(float)cos
+#endif
+#ifndef HAVE_EXPF
+#  define	expf		(float)exp
+#endif
+#ifndef HAVE_FABSF
+#  define	fabsf		(float)fabs
+#endif
+#ifndef HAVE_FLOORF
+#  define	floorf		(float)floor
+#endif
+#ifndef HAVE_FMODF
+#  define	fmodf		(float)fmod
+#endif
+#ifndef HAVE_HYPOTF
+#  define	hypotf		(float)hypot
+#endif
+#ifndef HAVE_LOGF
+#  define	logf		(float)log
+#endif
+#ifndef HAVE_LOG10F
+#  define	log10f		(float)log10
+#endif
+#ifndef HAVE_POWF
+#  define	powf		(float)pow
+#endif
+#ifndef HAVE_SINF
+#  define	sinf		(float)sin
+#endif
+#ifndef HAVE_SQRTF
+#  define	sqrtf		(float)sqrt
+#endif
+#ifndef HAVE_TANF
+#  define	tanf		(float)tan
 #endif
 
 // random number stuff
 #define bzfrand()	((double)rand() / ((double)RAND_MAX + 1.0))
 #define bzfsrand(_s)	srand(_s)
 
+#if !defined(_WIN32)
 
-#if !defined(_WIN32) && !defined(__APPLE__)
-
-#ifndef BSD
-#  ifndef __BEOS__
+#ifndef __BEOS__
+#  ifdef HAVE_VALUES_H
 #    include <values.h>
-#  else
-#    include <limits.h>
+#  endif
+#else
+#  include <limits.h>
 /* BeOS: FIXME */
-#    define MAXSHORT SHORT_MAX
-#    define MAXINT INT_MAX
-#    define MAXLONG LONG_MAX
-#  endif /* __BEOS__ */
-#endif /* BSD */
+#  define MAXSHORT SHORT_MAX
+#  define MAXINT INT_MAX
+#  define MAXLONG LONG_MAX
+#endif /* __BEOS__ */
 
 #include <sys/types.h>
+
+#ifdef HAVE_STDINT_H
+#  include <stdint.h>
+#endif
 
 #if defined(__linux) || (defined(__sgi) && !defined(__INTTYPES_MAJOR))
 typedef u_int16_t	uint16_t;
@@ -125,7 +163,7 @@ typedef uint_t		uint32_t;
 
 typedef unsigned char	uint8_t;
 
-#if defined( macintosh ) || defined( __BEOS__ )
+#if defined( __BEOS__ )
 
 // missing constants
 
@@ -144,11 +182,6 @@ typedef unsigned char	uint8_t;
 // need some integer types
 #  include <inttypes.h>
 
-// my own strcasecmp, missing in MSL
-#  ifdef __MWERKS__
-#    include "strcasecmp.h"
-#  endif
-
 #  ifndef setenv
 #    define setenv(a,b,c)
 #  endif
@@ -156,13 +189,48 @@ typedef unsigned char	uint8_t;
 #  ifndef putenv
 #    define putenv(a)
 #  endif
-#endif /* defined( macintosh ) || defined( __BEOS__ ) */
+#endif /* defined( __BEOS__ ) */
 
 #ifdef countof
 #  undef countof
 #endif
 #define countof(__x)   (sizeof(__x) / sizeof(__x[0]))
 
+#ifndef HAVE_STD__MAX
+#  ifdef max
+#    undef max
+#  endif
+namespace std
+{
+  template<typename comparable>
+  inline const comparable& max(const comparable& a, const comparable& b)
+  {
+    return  a < b ? b : a;
+  }
+}
+#endif
+
+#ifndef HAVE_STD__MIN
+#  ifdef min
+#    undef min
+#  endif
+namespace std
+{
+  template<typename comparable>
+  inline const comparable& min(const comparable& a, const comparable& b)
+  {
+    return b < a ? b : a;
+  }
+}
+#endif
+
+#ifdef BUILD_REGEX
+#  include "bzregex.h"
+#elif defined(HAVE_REGEX_H)
+#  include <regex.h>
+#else
+#  define regex_t void
+#endif
 
 #endif // BZF_COMMON_H
 
@@ -174,4 +242,3 @@ typedef unsigned char	uint8_t;
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

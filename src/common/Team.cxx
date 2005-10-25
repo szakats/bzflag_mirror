@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "common.h"
@@ -20,18 +20,20 @@ float			Team::tankColor[NumTeams][3] = {
 				{ 0.0f, 1.0f, 0.0f },   // green
 				{ 0.2f, 0.2f, 1.0f },   // blue
 				{ 1.0f, 0.0f, 1.0f },   // purple
-				{ 0.0f, 0.0f, 0.0f },   // observer
+				{ 0.0f, 1.0f, 1.0f },   // observer
 				{ 1.0f, 1.0f, 1.0f }    // rabbit
 			};
 float			Team::radarColor[NumTeams][3] = {
 				{ 1.0f, 1.0f, 0.0f },	// rogue
 				{ 1.0f, 0.15f, 0.15f }, // red
 				{ 0.2f, 0.9f, 0.2f },	// green
-				{ 0.08f, 0.25, 1.0f },	// blue
+				{ 0.08f, 0.25, 1.0f},	// blue
 				{ 1.0f, 0.4f, 1.0f },	// purple
-				{ 0.0f, 0.0f, 0.0f },	// observer
+				{ 0.0f, 1.0f, 1.0f },	// observer
 				{ 1.0f, 1.0f, 1.0f }    // rabbit
 			};
+
+float			Team::hunterRadarColor[3] =  { 1.0f, 0.5f, 0.0f };	// hunter orange
 
 Team::Team()
 {
@@ -68,6 +70,7 @@ const std::string  Team::getImagePrefix(TeamColor team)
   case BlueTeam: return BZDB.get("blueTeamPrefix");
   case PurpleTeam: return BZDB.get("purpleTeamPrefix");
   case RabbitTeam: return BZDB.get("rabbitTeamPrefix");
+  case ObserverTeam: return BZDB.get("observerTeamPrefix");
   default: return BZDB.get("rogueTeamPrefix");
   }
 }
@@ -88,6 +91,19 @@ const char*		Team::getName(TeamColor team) // const
   }
 }
 
+const TeamColor	Team::getTeam(const std::string name) // const
+{
+  if (name == Team::getName(AutomaticTeam)) {
+    return AutomaticTeam;
+  }
+  for (int i = 0; i < NumTeams; i++) {
+    if (name == Team::getName((TeamColor)i)) {
+      return (TeamColor)i;
+    }
+  }
+  return NoTeam;
+}
+
 const float*		Team::getTankColor(TeamColor team) // const
 {
   if (int(team) < 0) {
@@ -96,8 +112,11 @@ const float*		Team::getTankColor(TeamColor team) // const
   return tankColor[int(team)];
 }
 
-const float*		Team::getRadarColor(TeamColor team) // const
+const float*		Team::getRadarColor(TeamColor team, bool rabbitMode) // const
 {
+  if (rabbitMode && team == RogueTeam) {
+    return hunterRadarColor;
+  }
   if (int(team) < 0) {
     return radarColor[0];
   }

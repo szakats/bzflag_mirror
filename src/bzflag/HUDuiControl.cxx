@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // interface header
@@ -15,15 +15,8 @@
 
 // system headers
 #include <iostream>
-#include <math.h>
-#include <assert.h>
-#include <string>
 
 // common implementation headers
-#include "common.h"
-#include "bzfgl.h"
-#include "OpenGLGState.h"
-#include "TimeKeeper.h"
 #include "BundleMgr.h"
 #include "Bundle.h"
 #include "TextureManager.h"
@@ -42,7 +35,7 @@ const GLfloat		HUDuiControl::dimTextColor[3] = { 0.7f, 0.7f, 0.7f };
 const GLfloat		HUDuiControl::moreDimTextColor[3] = { 0.4f, 0.4f, 0.4f };
 const GLfloat		HUDuiControl::textColor[3] = { 1.0f, 1.0f, 1.0f };
 OpenGLGState*		HUDuiControl::gstate = NULL;
-int       		HUDuiControl::arrow = -1;
+int		HUDuiControl::arrow = -1;
 int			HUDuiControl::arrowFrame = 0;
 TimeKeeper		HUDuiControl::lastTime;
 int			HUDuiControl::totalCount = 0;
@@ -150,7 +143,7 @@ void			HUDuiControl::setLabel(const std::string& _label)
   label = _label;
   if (fontFace >= 0) {
     FontManager &fm = FontManager::instance();
-    trueLabelWidth = fm.getStrLength(fontFace, fontSize, getLabel());
+    trueLabelWidth = fm.getStrLength(fontFace, fontSize, getLabel() + "99");
   }
 }
 
@@ -187,9 +180,9 @@ void			HUDuiControl::setCallback(HUDuiCallback _cb, void* _ud)
 void			HUDuiControl::onSetFont()
 {
   if (fontFace >= 0) {
-    fontHeight = fontSize;
     FontManager &fm = FontManager::instance();
-    trueLabelWidth = fm.getStrLength(fontFace, fontSize, label);
+    fontHeight = fm.getStrHeight(fontFace, fontSize, getLabel());
+    trueLabelWidth = fm.getStrLength(fontFace, fontSize, getLabel() + "99");
   } else {
     fontHeight = 11.0f;
     trueLabelWidth = 0.0f;
@@ -218,7 +211,7 @@ void			HUDuiControl::doCallback()
 
 void			HUDuiControl::renderFocus()
 {
-  float fh2 = 0;// = floorf(0.5f * fontHeight);
+  float fh2;
 
   TextureManager &tm = TextureManager::instance();
   const ImageInfo &info = tm.getInfo(arrow);
@@ -234,10 +227,10 @@ void			HUDuiControl::renderFocus()
 
     float u = (float)(arrowFrame % uFrames) / (float)uFrames;
     float v = (float)(arrowFrame / uFrames) / (float)vFrames;
-    fh2 = floorf(1.5f * fontHeight); // this really should not scale the image based on the font,
-    gstate->setState();	       	     // best would be to load an image for each size
+    fh2 = floorf(1.5f * fontHeight) - 1.0f; // this really should not scale the image based on the font,
+    gstate->setState();			    // best would be to load an image for each size
     glColor3f(1.0f, 1.0f, 1.0f);
-    float imageXShift = 0.0f;
+    float imageXShift = 0.5f;
     float imageYShift = -fh2 * 0.2f;
     float outputSize = fh2;
     glBegin(GL_QUADS);
@@ -256,8 +249,7 @@ void			HUDuiControl::renderFocus()
       lastTime = nowTime;
       if (++arrowFrame == uFrames * vFrames) arrowFrame = 0;
     }
-  }
-  else {
+  } else {
     fh2 = floorf(0.5f * fontHeight);
     gstate->setState();
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -281,8 +273,6 @@ void			HUDuiControl::renderLabel()
   std::string theLabel = getLabel();
   if (theLabel.length() > 0 && fontFace >= 0) {
     FontManager &fm = FontManager::instance();
-    trueLabelWidth = fm.getStrLength(fontFace, fontSize, theLabel) + 
-		     fm.getStrLength(fontFace, fontSize, "99");
     const float dx = (desiredLabelWidth > trueLabelWidth)
       ? desiredLabelWidth : trueLabelWidth;
     fm.drawString(x - dx, y, 0, fontFace, fontSize, theLabel);

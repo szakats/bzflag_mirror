@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __LOCALPLAYER_H__
@@ -18,17 +18,17 @@
 
 /* system interface headers */
 #include <string>
+#include <vector>
 
 /* common interface headers */
 #include "Obstacle.h"
 #include "TimeKeeper.h"
-#include "FlagSceneNode.h"
-#include "BzfEvent.h"
 
 /* local interface headers */
 #include "Player.h"
 #include "ServerLink.h"
 
+class FlagSceneNode;
 
 class LocalPlayer : public BaseLocalPlayer {
 public:
@@ -65,16 +65,20 @@ public:
   const float*	getAntidoteLocation() const;
   ShotPath*	getShot(int index) const;
   const Player*	getTarget() const;
-  const Obstacle*	getContainingBuilding() const;
+  int		getDeathPhysicsDriver() const;
+  const std::vector<const Obstacle*>& getInsideBuildings() const;
 
   void		setTeam(TeamColor);
   void		setDesiredSpeed(float fracOfMaxSpeed);
   void		setDesiredAngVel(float fracOfMaxAngVel);
   void		setPause(bool = true);
+  void		activateAutoPilot(bool = true);
   bool		fireShot();
   void		forceReload(float time = 0.0f);
   void		explodeTank();
-  void		jump();
+  void		doJump();
+  void		setJump();
+  void		setJumpPressed(bool value);
   void		setTarget(const Player*);
 
   void		setNemesis(const Player*);
@@ -88,7 +92,6 @@ public:
 			 float& minTime) const;
   void		setFlag(FlagType*);
   void		changeScore(short deltaWins, short deltaLosses, short deltaTeamKills);
-  float		updateHandicap();
 
   void		addAntidote(SceneDatabase*);
 
@@ -98,10 +101,11 @@ public:
   static std::string	getInputMethodName(InputMethod whatInput);
   bool		queryInputChange();
   void		setKey(int button, bool pressed);
-  int           getRotation();
-  int           getSpeed();
+  int		getRotation();
+  int		getSpeed();
   bool		isSpawning();
   void		setSpawning( bool spawn );
+
 
   static LocalPlayer*	getMyTank();
   static void		setMyTank(LocalPlayer*);
@@ -110,12 +114,11 @@ public:
 				       bool phased, bool& expel) const;
   const Obstacle*	getHitBuilding(const float* oldPos, float oldAngle,
 				       const float* pos, float angle,
-				       bool phased, bool& expel) const;
+				       bool phased, bool& expel);
   bool		getHitNormal(const Obstacle* o,
 			     const float* pos1, float azimuth1,
 			     const float* pos2, float azimuth2,
 			     float* normal) const;
-
 
 protected:
   bool		doEndShot(int index, bool isHit, float* pos);
@@ -124,15 +127,23 @@ protected:
   void		doMomentum(float dt, float& speed, float& angVel);
   void		doFriction(float dt, const float *oldVelocity, float *newVelocity);
   void		doForces(float dt, float* velocity, float& angVel);
+  float		updateHandicap();
+  virtual int   getHandicapScoreBase() const;
   LocalShotPath**	shots;
-  bool          gettingSound;
+  bool	  gettingSound;
   ServerLink*	server;
+
+private:
+  void		doSlideMotion(float dt, float slideTime,
+			      float newAngVel, float* newVelocity);
+  float		getNewAngVel(float old, float desired);
+  void		collectInsideBuildings();
 
 private:
   Location	location;
   FiringStatus	firingStatus;
   TimeKeeper	jamTime;
-  TimeKeeper    bounceTime;
+  TimeKeeper	bounceTime;
   TimeKeeper	agilityTime;
   float		flagShakingTime;
   int		flagShakingWins;
@@ -141,7 +152,6 @@ private:
   float		desiredSpeed;
   float		desiredAngVel;
   float		lastSpeed;
-  const Obstacle*	insideBuilding;
   float		crossingPlane[4];
   bool		anyShotActive;
   const Player*	target;
@@ -150,14 +160,19 @@ private:
   static LocalPlayer*	mainPlayer;
   InputMethod	inputMethod;
   bool		inputChanged;
-  int           stuckingFrameCount;
+  int		stuckFrameCount;
   bool		spawning;
   int		wingsFlapCount;
   float		handicap;
-  bool          left;
-  bool          right;
-  bool          up;
-  bool          down;
+  bool		left;
+  bool		right;
+  bool		up;
+  bool		down;
+  bool		entryDrop; // first drop since entering
+  bool		wantJump;
+  bool		jumpPressed;
+  int		deathPhyDrv;	// physics driver that caused death
+  std::vector<const Obstacle*> insideBuildings;
 };
 
 
@@ -186,9 +201,14 @@ inline const Player* LocalPlayer::getRecipient() const
   return recipient;
 }
 
-inline const Obstacle* LocalPlayer::getContainingBuilding() const
+inline int		LocalPlayer::getDeathPhysicsDriver() const
 {
-  return insideBuilding;
+  return deathPhyDrv;
+}
+
+inline const std::vector<const Obstacle*>& LocalPlayer::getInsideBuildings() const
+{
+  return insideBuildings;
 }
 
 inline LocalPlayer::InputMethod LocalPlayer::getInputMethod() const
@@ -244,6 +264,11 @@ inline int LocalPlayer::getSpeed() {
     return -1;
   else
     return 0;
+}
+
+inline LocalPlayer* LocalPlayer::getMyTank()
+{
+  return mainPlayer;
 }
 
 #endif /* __LOCALPLAYER_H__ */

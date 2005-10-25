@@ -6,8 +6,8 @@
 ; It will install notepad.exe into a directory that the user selects,
 ;
 
-!define VER_MAJOR 1.11
-!define VER_MINOR .6
+!define VER_MAJOR 2.0
+!define VER_MINOR .5
 
 ; Main Installer Options
 Name "BZFlag"
@@ -47,6 +47,7 @@ Section "BZFlag (required)"
 	File ..\..\..\src\bzflag\bzflag.exe
 	File ..\..\..\src\bzadmin\bzadmin.exe
 	File ..\..\..\src\bzfs\bzfs.exe
+	File ..\..\..\libcurl.dll
 
 	; add in sdl dll
 	File ..\..\..\SDL.dll
@@ -63,6 +64,9 @@ Section "BZFlag (required)"
 	; make the l10n dir
 	SetOutPath $INSTDIR\data\l10n
 	File ..\..\..\data\l10n\*.*
+
+	SetOutPath $INSTDIR\data\fonts
+	File ..\..\..\data\fonts\*.*
 
 	; make the doc dir
 	SetOutPath $INSTDIR\doc
@@ -135,6 +139,7 @@ Section "Uninstall"
 	Delete $INSTDIR\doc\*.*
 	Delete $INSTDIR\data\*.*
 	Delete $INSTDIR\data\l10n\*.*
+	Delete $INSTDIR\data\fonts\*.*
 
 	; MUST REMOVE UNINSTALLER, too
 	Delete $INSTDIR\uninstall.exe
@@ -150,6 +155,7 @@ Section "Uninstall"
 	RMDir "$SMPROGRAMS\BZFlag${VER_MAJOR}${VER_MINOR}\Doc"
 	RMDir "$SMPROGRAMS\BZFlag${VER_MAJOR}${VER_MINOR}"
 	RMDir "$INSTDIR\data\l10n"
+	RMDir "$INSTDIR\data\fonts"
 	RMDir "$INSTDIR\data"
 	RMDir "$INSTDIR\doc"
 	RMDir "$INSTDIR"

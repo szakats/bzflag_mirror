@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,16 +7,25 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #if defined(_MSC_VER)
 #pragma warning(4:4503)
 #endif
 
+// interface header
 #include "KeyManager.h"
+
+// system headers
 #include <assert.h>
 #include <ctype.h>
+#include <string.h> // strstr, etc
+#include <string>   // std::string
+#include <vector>
+
+// local implementation headers
+#include "BzfEvent.h"
 
 // initialize the singleton
 template <>
@@ -154,6 +163,34 @@ void			KeyManager::unbind(const BzfKeyEvent& key,
   notify(key, press, "");
 }
 
+void			KeyManager::unbindCommand(const char* command)
+{
+  EventToCommandMap::iterator index;
+  EventToCommandMap::iterator deleteme;
+
+  index = pressEventToCommand.begin();
+  while (index != pressEventToCommand.end()) {
+    if (index->second == command) {
+      deleteme = index;
+      index++;
+      unbind(deleteme->first, true);
+    } else {
+      index++;
+    }
+  }
+
+  index = releaseEventToCommand.begin();
+  while (index != releaseEventToCommand.end()) {
+    if (index->second == command) {
+      deleteme = index;
+      index++;
+      unbind(deleteme->first, false);
+    } else {
+      index++;
+    }
+  }
+}
+
 std::string		KeyManager::get(const BzfKeyEvent& key,
 					bool press) const
 {
@@ -210,7 +247,7 @@ std::string		KeyManager::keyEventToString(
     case ' ':
       return name + "Space";
     default:
-      if (!isspace(key.ascii))
+      if (!isspace((unsigned char)key.ascii))
 	return name + std::string(&key.ascii, 1);
       return name + "???";
   }
@@ -295,7 +332,7 @@ bool			KeyManager::onCallback(
 				void* userData,
 				void* vinfo)
 {
-  CallbackInfo* info = reinterpret_cast<CallbackInfo*>(vinfo);
+  CallbackInfo* info = static_cast<CallbackInfo*>(vinfo);
   callback(info->name, info->press, info->cmd, userData);
   return true;
 }

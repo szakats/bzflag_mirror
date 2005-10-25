@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	__HUDDIALOG_H__
@@ -24,9 +24,8 @@
 #include <vector>
 
 /* local interface headers */
-#include "HUDui.h"
-#include "HUDuiControl.h"
-
+class HUDuiControl;
+class HUDuiDefaultKey;
 
 /**
  * HUDDialog:
@@ -44,6 +43,7 @@ class HUDDialog {
     virtual void		execute() = 0;
     virtual void		dismiss() { }
     virtual void		resize(int _width, int _height);
+    virtual void		setFailedMessage(const char *) {;};
 
     HUDuiControl*		getFocus() const;
     void			setFocus(HUDuiControl*);

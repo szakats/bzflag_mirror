@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifdef _MSC_VER
@@ -18,9 +18,9 @@
 #include "BZAdminUI.h"
 
 
-void BZAdminUI::handleNewPacket(uint16_t) { 
+void BZAdminUI::handleNewPacket(uint16_t) {
   if (client.getLastMessage().first.size() > 0)
-    outputMessage(client.getLastMessage().first, 
+    outputMessage(client.getLastMessage().first,
 		  client.getLastMessage().second);
 }
 

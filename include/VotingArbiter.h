@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __VOTINGARBITER_H__
@@ -16,6 +16,7 @@
 #include "common.h"
 #include <iostream>
 #include <deque>
+#include <string>
 
 #include "VotingBooth.h"
 #include "TimeKeeper.h"
@@ -137,6 +138,11 @@ public:
   /** convenience method to attempt to start a kick poll
    */
   bool pollToKick(const std::string &player, const std::string &playerRequesting, const std::string &playerIP);
+
+  /** convenience method to attempt to start a kill poll
+   */
+  bool pollToKill(const std::string &player, const std::string &playerRequesting, const std::string &playerIP);
+
   /** convenience method to attempt to start a ban poll
    */
   bool pollToBan(const std::string &player, const std::string &playerRequesting, const std::string &playerIP);
@@ -165,6 +171,11 @@ public:
    * to vote; a player should check their right to vote before voting.
    */
   bool hasSuffrage(const std::string &player) const;
+
+  /**
+   * returns whether or not a user has voted
+   */
+  bool hasVoted(const std::string &player) const;
 
   /** apply a yes vote; returns true if the vote could be made
    */

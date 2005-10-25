@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -17,20 +17,32 @@
 #ifndef __WIN32_H__
 #define	__WIN32_H__
 
-#ifdef __MINGW32__
+#define _WINSOCKAPI_
+
+//#ifdef __MINGW32__
 #include <windows.h>
-#endif
+#//endif
+
 
 // missing constants
 #ifndef MAXFLOAT
 #define	MAXFLOAT	3.402823466e+38f
 #endif
-#ifndef M_PI
-#define	M_PI		3.14159265358979323846f
+
+#if (_MSC_VER > 1200) // VC7 or higher
+	#define _USE_MATH_DEFINES
+#else	// vc6 and lower needs em
+	#ifndef M_PI
+	#define	M_PI		3.14159265358979323846f
+	#endif
+	#ifndef M_SQRT1_2
+	#define	M_SQRT1_2	0.70710678118654752440f
+	#endif
+	#ifndef  M_SQRT2
+	#define	 M_SQRT2	 1.41421356237309504880f
+	#endif
 #endif
-#ifndef M_SQRT1_2
-#define	M_SQRT1_2	0.70710678118654752440f
-#endif
+
 
 // missing types
 
@@ -58,7 +70,6 @@ typedef unsigned int	uint32_t;
 #  pragma warning(disable: 4355)
 
 // missing functions
-#  define hypotf	(float)hypot
 #  define snprintf	_snprintf
 
 #  define PATH_MAX	MAX_PATH

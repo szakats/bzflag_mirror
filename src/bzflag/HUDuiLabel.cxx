@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,19 +7,13 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // interface headers
-#include "HUDuiControl.h"
 #include "HUDuiLabel.h"
 
-// system headers
-#include <string>
-#include <vector>
-
 // common implementation headers
-#include "common.h"
 #include "BundleMgr.h"
 #include "Bundle.h"
 #include "FontManager.h"
@@ -35,17 +29,15 @@ HUDuiLabel::HUDuiLabel() : HUDuiControl()
 {
   darker = false;
   params = NULL;
+  color[0] = textColor[0];
+  color[1] = textColor[1];
+  color[2] = textColor[2];
 }
 
 HUDuiLabel::~HUDuiLabel()
 {
-  if (params) {
-    while (params->size()) {
-      params->erase(params->begin());
-    }
+  if (params)
     delete params;
-    params = NULL;
-  }
 }
 
 std::string		HUDuiLabel::getString() const
@@ -64,17 +56,10 @@ void			HUDuiLabel::setString(const std::string& _string, const std::vector<std::
 {
   string = _string;
   if (_params) {
-    if (params != NULL) {
-      while (params->size() > 0)
-	params->erase(params->begin());
+    if (params != NULL)
       delete params;
-    }
-    params = new std::vector<std::string>;
-    if (params) {
-      for (int i = 0; i < (int)_params->size(); i++) {
-	params->push_back((*_params)[i]);
-      }
-    }
+
+    params = new std::vector<std::string>(*_params);
   }
   onSetFont();
 }
@@ -122,14 +107,33 @@ void			HUDuiLabel::setDarker(bool d)
   darker = d;
 }
 
+void			HUDuiLabel::setColor(GLfloat r, GLfloat g, GLfloat b)
+{
+  color[0] = r;
+  color[1] = g;
+  color[2] = b;
+}
+
 void			HUDuiLabel::doRender()
 {
-  if (getFontFace() < 0) return;
+  if (getFontFace() < 0) {
+    return;
+  }
   // render string
-  glColor3fv(hasFocus() ? textColor : dimTextColor);
-  if (!hasFocus() && darker) glColor3fv(moreDimTextColor);
   FontManager &fm = FontManager::instance();
-  fm.drawString(getX(), getY(), 0, getFontFace(), getFontSize(), getString());
+  float darkness;
+  if (hasFocus()) {
+    darkness = 1.0f;
+  } else if (!darker) {
+    darkness = 0.7f;
+  } else {
+    darkness = 0.4f;
+  }
+  fm.setDarkness(darkness);
+  fm.drawString(getX(), getY(), 0,
+		getFontFace(), getFontSize(),
+		getString(), color);
+  fm.setDarkness(1.0f);
 }
 
 // Local Variables: ***

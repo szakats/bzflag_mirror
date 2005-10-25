@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,15 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // this classes interface
 #include "WordFilter.h"
+
+// system headers
+#include <ctype.h>
+#include <string>
 
 // implementation-specific headers
 #ifdef DEBUG
@@ -103,10 +107,10 @@ bool WordFilter::aggressiveFilter(char *input) const
   for (int counter = 0; counter < inputLength; counter++) {
     char c = tolower(sInput[counter]);
 
-    if (!isalpha(previousChar) && isVisible(c)) {
+    if (!isalpha(previousChar) && TextUtils::isVisible(c)) {
 
       // expand punctuation to potential alphabetic characters
-      if (isPunctuation(c)) {
+      if (TextUtils::isPunctuation(c)) {
 
 	std::string puncChars = alphabeticSetFromCharacter(c);
 	for (unsigned int cnt = 0; cnt < puncChars.size(); cnt++) {
@@ -176,18 +180,18 @@ bool WordFilter::aggressiveFilter(char *input) const
 
 	    /* we are in the middle of a word.. see if we can match a prefix before this */
 	    bool foundit =  false;
-	    for (ExpCompareSet::const_iterator j = prefixes.begin();
-		 j != prefixes.end(); ++j) {
-	      if (regexec(j->compiled, sInput.c_str(), 1, match, 0) == 0) {
+	    for (ExpCompareSet::const_iterator k = prefixes.begin();
+		 k != prefixes.end(); ++k) {
+	      if (regexec(k->compiled, sInput.c_str(), 1, match, 0) == 0) {
 
-//std::cout << "checking prefix: " << j->word << std::endl;
+//std::cout << "checking prefix: " << k->word << std::endl;
 
 		if ( (match[0].rm_so > 1) && (isalpha(sInput[match[0].rm_so - 1])) ) {
 		  /* we matched, but we are still in the middle of a word */
 		  continue;
 		}
 
-//std::cout << "matched a prefix! " << j->word << std::endl;
+//std::cout << "matched a prefix! " << k->word << std::endl;
 		if (match[0].rm_eo == startOffset) {
 		  /* perfect prefix match */
 		  startOffset = match[0].rm_so;
@@ -211,11 +215,11 @@ bool WordFilter::aggressiveFilter(char *input) const
 
 	    /* we are at the start of a word, but not at the end, try to get to the end */
 	    bool foundit = false;
-	    for (ExpCompareSet::const_iterator j = suffixes.begin();
-		 j != suffixes.end(); ++j) {
-//std::cout << "checking " << j->word << " against [" << input + endOffset << "]" << std::endl;
+	    for (ExpCompareSet::const_iterator k = suffixes.begin();
+		 k != suffixes.end(); ++k) {
+//std::cout << "checking " << k->word << " against [" << input + endOffset << "]" << std::endl;
 
-	      if (regexec(j->compiled, sInput.c_str() + endOffset, 1, match, 0) == 0) {
+	      if (regexec(k->compiled, sInput.c_str() + endOffset, 1, match, 0) == 0) {
 
 //std::cout << "is " << match[0].rm_eo << " less than " << inputLength - endOffset << std::endl;
 //std::cout << "is alpha =?= " << input[endOffset + match[0].rm_eo + 1] << std::endl;
@@ -227,7 +231,7 @@ bool WordFilter::aggressiveFilter(char *input) const
 		  continue;
 		}
 
-//std::cout << "matched a suffix! " << j->word << std::endl;
+//std::cout << "matched a suffix! " << k->word << std::endl;
 		if (match[0].rm_so == 0) {
 		  /* push the end forward a little since we matched */
 		  endOffset += match[0].rm_eo;
@@ -243,21 +247,37 @@ bool WordFilter::aggressiveFilter(char *input) const
 	    }
 	  }
 
+	  int matchLength = endOffset - startOffset;
+
+	  // make sure that longer matches actually include at least 1 alphabetic
+	  if (matchLength > 3) {
+	    bool foundAlpha = false;
+	    for (std::string::const_iterator position = sInput.begin(); position != sInput.end(); position++) {
+	      if (isalpha(*position)) {
+		foundAlpha = true;
+		break;
+	      }
+	    }
+	    if (!foundAlpha) {
+	      continue;
+	    }
+	  }
+
 	  // add a few more slots if necessary (this should be rare/never)
 	  if (matchCount * 2 + 1 >= matchPair.size()) {
 	    matchPair.resize(matchCount * 2 + 201);
 	  }
 
 	  matchPair[matchCount * 2] = startOffset; /* position */
-	  matchPair[(matchCount * 2) + 1] = endOffset - startOffset; /* length */
+	  matchPair[(matchCount * 2) + 1] = matchLength; /* length */
 	  matchCount++;
 	  filtered = true;
 	  matched = true;
 	  // zappo! .. erase stuff that has been filtered to speed up future checks
 	  // fill with some non-whitespace alpha that is not the start/end of a suffix to prevent rematch
 	  std::string filler;
-	  filler.assign(endOffset - startOffset, 'W');
-	  sInput.replace(startOffset, endOffset - startOffset, filler);
+	  filler.assign(matchLength, 'W');
+	  sInput.replace(startOffset, matchLength, filler);
 
 	} else if ( regCode == REG_NOMATCH ) {
 	  // do nothing
@@ -606,14 +626,14 @@ WordFilter::WordFilter()
 }
 
 /** default copy constructor */
-WordFilter::WordFilter(const WordFilter& filter)
-  : alphabet(filter.alphabet),
-    filterChars(filter.filterChars),
-    suffixes(filter.suffixes),
-    prefixes(filter.prefixes)
+WordFilter::WordFilter(const WordFilter& _filter)
+  : alphabet(_filter.alphabet),
+    filterChars(_filter.filterChars),
+    suffixes(_filter.suffixes),
+    prefixes(_filter.prefixes)
 {
   for (int i=0; i < MAX_FILTER_SETS; i++) {
-    filters[i] = filter.filters[i];
+    filters[i] = _filter.filters[i];
   }
 }
 
@@ -789,6 +809,30 @@ bool WordFilter::filter(char *input, bool simple) const
   TimeKeeper after = TimeKeeper::getCurrent();
   std::cout << "Time elapsed: " << after - before << " seconds" << std::endl;
 #endif
+  return filtered;
+}
+
+bool WordFilter::filter(std::string &input, bool simple) const
+{
+  char input2[512] = {0};
+  bool filtered = false;
+  std::string resultString = "";
+
+  /* filter in 512 chunks.  ugly means to support large input strings,
+   * but it works.  just means words that span the boundary might be
+   * wrong.
+   */
+  for (unsigned int i = 0; i < input.size(); i+=512) {
+    strncpy(input2, input.c_str() + i, 512);
+    bool filteredChunk = filter(input2, simple);
+    if (filteredChunk) {
+      filtered = true;
+    }
+    resultString += input2;
+  }
+  if (filtered) {
+    input = resultString;
+  }
   return filtered;
 }
 

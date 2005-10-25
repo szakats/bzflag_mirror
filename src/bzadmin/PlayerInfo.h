@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef PLAYERINFO_H
@@ -19,7 +19,7 @@
 #include "global.h"
 
 
-/** This struct stores information about a player that is relevant to 
+/** This struct stores information about a player that is relevant to
     bzadmin. */
 struct PlayerInfo {
   PlayerInfo() {}
@@ -30,6 +30,9 @@ struct PlayerInfo {
   int wins;
   int losses;
   int tks;
+  bool isRegistered;
+  bool isVerified;
+  bool isAdmin;
 };
 
 
@@ -37,3 +40,12 @@ typedef std::map<PlayerId, PlayerInfo> PlayerIdMap;
 
 
 #endif
+
+// Local Variables: ***
+// mode:C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8
+

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef BZF_PNG_IMAGE_FILE_H
@@ -25,10 +25,10 @@ class PNGImageFile : public ImageFile {
 public:
   PNGImageFile(std::istream*);
   virtual ~PNGImageFile();
-  
+
   /** This function returns the default extension of PNG image files. */
   static std::string	getExtension();
-  
+
   /** Read image data from a PNG file. */
   virtual bool		read(void* buffer);
 private:
@@ -37,7 +37,7 @@ private:
   void switchLineBuffers();
   bool filter();
   bool expand();
-  
+
   static unsigned char			PNGHEADER[8];
   static const unsigned char		MAX_COMPONENTS;
   static const unsigned char		FILTER_NONE;
@@ -45,7 +45,7 @@ private:
   static const unsigned char		FILTER_UP;
   static const unsigned char		FILTER_AVERAGE;
   static const unsigned char		FILTER_PAETH;
-  
+
   PNGPalette*						palette;
   unsigned char					bitDepth;
   unsigned char					colorDepth;
@@ -93,7 +93,7 @@ class PNGChunk
   int getLength();
   int getType();
   unsigned char* getData();
-  
+
   static int		IHDR;
   static int		PLTE;
   static int		IDAT;
@@ -104,7 +104,7 @@ class PNGChunk
   int			type;
   unsigned char		*data;
   int			crc;
-  
+
 };
 
 #endif

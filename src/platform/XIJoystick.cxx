@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,10 +7,10 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/* XXX: FIXME: XIJoystick class as it stands is what happens when all the 
+/* XXX: FIXME: XIJoystick class as it stands is what happens when all the
  * XIJoystick stuff is moved from XWindow/XDisplay to here and cleaned up a bit.
  * It won't work until we can get a pointer to the current X display and window
  * as some functions seem to need them.
@@ -31,8 +31,12 @@
 /* interface header */
 #include "XIJoystick.h"
 
-/* implementation headers */
+/* system headers */
 #include <stdlib.h>
+#include <vector>
+#include <string>
+
+/* implementation headers */
 #include "ErrorHandler.h"
 
 static int	ioErrorHandler(Display*)
@@ -44,7 +48,7 @@ static int	ioErrorHandler(Display*)
 
 
 XIJoystick::XIJoystick() : device(NULL),
- 			   devices(NULL),
+			   devices(NULL),
 			   buttonPressType(0),
 			   buttonReleaseType(0)
 {
@@ -126,7 +130,7 @@ bool	      XIJoystick::joystick() const
   return (device != NULL);
 }
 
-void	      XIJoystick::getJoy(int& x, int& y) const
+void	      XIJoystick::getJoy(int& x, int& y)
 {
   x = y = 0;
 
@@ -159,7 +163,7 @@ void	      XIJoystick::getJoy(int& x, int& y) const
   y = (y * abs(y)) / 1000;
 }
 
-unsigned long XIJoystick::getJoyButtons() const
+unsigned long XIJoystick::getJoyButtons()
 {
   /* XXX: FIXME: return joystick buttons.
    * These are reported to XDisplay as events, we'll

@@ -1,33 +1,64 @@
-if CLIENT_INCLUDED
-noinst_LIBRARIES = libObstacle.a
-endif
 
-MAINTAINERCLEANFILES = \
+noinst_LTLIBRARIES = libObstacle.la
+
+MAINTAINERCLEANFILES =	\
 	Makefile.in
 
-libObstacle_a_SOURCES =			\
-	BaseBuilding.cxx		\
+AM_CPPFLAGS = -I$(top_srcdir)/include
+
+libObstacle_la_LDFLAGS = -static
+
+if CLIENT_INCLUDED
+libObstacle_la_SOURCES =		\
 	BaseSceneNodeGenerator.cxx	\
-	BaseSceneNodeGenerator.h	\
-	BoxBuilding.cxx			\
 	BoxSceneNodeGenerator.cxx	\
-	BoxSceneNodeGenerator.h		\
 	EmptySceneNodeGenerator.cxx	\
-	EmptySceneNodeGenerator.h	\
-	Intersect.cxx			\
-	Obstacle.cxx			\
-	ObstacleSceneNodeGenerator.cxx  \
+	ObstacleSceneNodeGenerator.cxx	\
 	PyramidSceneNodeGenerator.cxx	\
-	PyramidSceneNodeGenerator.h	\
+	TeleporterSceneNodeGenerator.cxx\
+	WallSceneNodeGenerator.cxx	\
+	MeshSceneNodeGenerator.cxx	\
+	ArcObstacle.cxx			\
+	ConeObstacle.cxx		\
+	SphereObstacle.cxx		\
+	BaseBuilding.cxx		\
+	BoxBuilding.cxx			\
+	MeshFace.cxx			\
+	MeshObstacle.cxx		\
+	MeshUtils.h			\
+	Triangulate.h			\
+	Triangulate.cxx			\
+	MeshDrawInfo.cxx		\
 	PyramidBuilding.cxx		\
 	Teleporter.cxx			\
-	TeleporterSceneNodeGenerator.cxx\
-	TeleporterSceneNodeGenerator.h	\
+	TetraBuilding.cxx		\
 	WallObstacle.cxx		\
-	WallSceneNodeGenerator.cxx \
-	WallSceneNodeGenerator.h
-	
-	
+	Obstacle.cxx			\
+	ObstacleModifier.cxx		\
+	ObstacleList.cxx		\
+	ObstacleMgr.cxx
+else
+libObstacle_la_SOURCES =		\
+	ArcObstacle.cxx			\
+	ConeObstacle.cxx		\
+	SphereObstacle.cxx		\
+	BaseBuilding.cxx		\
+	BoxBuilding.cxx			\
+	MeshFace.cxx			\
+	MeshObstacle.cxx		\
+	MeshUtils.h			\
+	Triangulate.h			\
+	Triangulate.cxx			\
+	MeshDrawInfo.cxx		\
+	PyramidBuilding.cxx		\
+	Teleporter.cxx			\
+	TetraBuilding.cxx		\
+	WallObstacle.cxx		\
+	Obstacle.cxx			\
+	ObstacleModifier.cxx		\
+	ObstacleList.cxx		\
+	ObstacleMgr.cxx
+endif
 
-EXTRA_DIST = \
+EXTRA_DIST =	\
 	README

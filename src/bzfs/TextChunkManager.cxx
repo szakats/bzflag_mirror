@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,14 +7,22 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifdef _MSC_VER
 #pragma warning( 4: 4786)
 #endif
 
+/* interface header */
 #include "TextChunkManager.h"
+
+/* system implementation headers */
+#include <fstream>
+
+/* common implementation headers */
+#include "global.h"
+
 
 bool TextChunkManager::parseFile(const std::string &fileName, const std::string &chunkName)
 {
@@ -37,7 +45,7 @@ bool TextChunkManager::parseFile(const std::string &fileName, const std::string 
   return true;
 }
 
-const std::vector<std::string>* TextChunkManager::getTextChunk(const std::string chunkName)
+const std::vector<std::string>* TextChunkManager::getTextChunk(const std::string &chunkName) const
 {
   StringChunkMap::const_iterator it;
   it =theChunks.find(chunkName);

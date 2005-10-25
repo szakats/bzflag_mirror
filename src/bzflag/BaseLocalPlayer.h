@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,20 +7,21 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __BASELOCALPLAYER_H__
 #define __BASELOCALPLAYER_H__
 
-/* interface header */
-#include "Player.h"
+// common - 1st one
+#include "common.h"
 
 /* common interface headers */
 #include "Ray.h"
 #include "TimeKeeper.h"
 
 /* local interface headers */
+#include "Player.h"
 #include "ShotPath.h"
 
 

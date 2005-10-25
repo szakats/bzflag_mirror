@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,16 +7,14 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
-#include "common.h"
 #include "Roster.h"
 
 /* local implementation headers */
 #include "World.h"
-#include "WorldPlayer.h"
 
 
 NameList silencePlayers;
@@ -31,11 +29,16 @@ Player* lookupPlayer(PlayerId id)
   // check my tank first
 
   LocalPlayer *myTank = LocalPlayer::getMyTank();
-  if (myTank->getId() == id)
+  if (myTank && myTank->getId() == id)
     return myTank;
 
-  if (id == ServerPlayer)
-    return World::getWorld()->getWorldWeapons();
+  if (id == ServerPlayer) {
+    World* world = World::getWorld();
+    if (world)
+      return world->getWorldWeapons();
+    else
+      return NULL;
+  }
 
   if (id < curMaxPlayers && player[id] && player[id]->getId() == id)
     return player[id];
@@ -47,7 +50,7 @@ Player* lookupPlayer(PlayerId id)
 int lookupPlayerIndex(PlayerId id)
 {
   // check my tank first
-  
+
   if (LocalPlayer::getMyTank()->getId() == id)
     return -2;
 
@@ -77,7 +80,10 @@ Player* getPlayerByName(const char* name)
   for (int i = 0; i < curMaxPlayers; i++)
     if (player[i] && strcmp( player[i]->getCallSign(), name ) == 0)
       return player[i];
-  WorldPlayer *worldWeapons = World::getWorld()->getWorldWeapons();
+  World *world = World::getWorld();
+  if (!world)
+    return NULL;
+  WorldPlayer *worldWeapons = world->getWorldWeapons();
   if (strcmp(worldWeapons->getCallSign(), name) == 0)
     return worldWeapons;
   return NULL;
@@ -89,7 +95,7 @@ BaseLocalPlayer* getLocalPlayer(PlayerId id)
   if (myTank->getId() == id) return myTank;
 #ifdef ROBOT
   for (int i = 0; i < numRobots; i++)
-    if (robots[i]->getId() == id)
+    if (robots[i] && robots[i]->getId() == id)
       return robots[i];
 #endif
   return NULL;

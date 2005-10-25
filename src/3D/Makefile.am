@@ -1,17 +1,22 @@
 if CLIENT_INCLUDED
-noinst_LIBRARIES = lib3D.a
+noinst_LTLIBRARIES = lib3D.la
 endif
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
-lib3D_a_SOURCES =		\
-	3DOptionsManager.cxx	\
-	DisplayListManager.cxx	\
-	DrawablesManager.cxx	\
+AM_CPPFLAGS = -I$(top_srcdir)/include
+
+lib3D_la_LDFLAGS = -static
+lib3D_la_SOURCES =		\
+	BitmapFont.cxx		\
 	FontManager.cxx		\
+	ImageFont.cxx		\
 	TextureFont.cxx		\
-	TextureManager.cxx
+	TextureManager.cxx	\
+	BitmapFont.h		\
+	ImageFont.h		\
+	TextureFont.h
 
 EXTRA_DIST = \
 	README

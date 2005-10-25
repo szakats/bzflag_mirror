@@ -22,10 +22,12 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
-				PreprocessorDefinitions="_CONSOLE;WIN32;NDEBUG"
+				PreprocessorDefinitions="_CONSOLE;WIN32;NDEBUG;INSIDE_BZ"
 				StringPooling="TRUE"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\Release/bzfs.pch"
 				AssemblerListingLocation=".\Release/"
@@ -38,10 +40,12 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="ws2_32.lib winmm.lib odbc32.lib odbccp32.lib libcurl.lib "
 				OutputFile=".\..\..\src\bzfs\bzfs.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="libcurl.lib"
+				IgnoreDefaultLibraryNames="LIBCMT"
 				ProgramDatabaseFile="../src/bzfs/bzfs.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -83,7 +87,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
-				PreprocessorDefinitions="_CONSOLE;WIN32;_DEBUG"
+				PreprocessorDefinitions="_CONSOLE;WIN32;_DEBUG;INSIDE_BZ"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				PrecompiledHeaderFile=".\..\..\src\bzfs\debug/bzfs.pch"
@@ -91,6 +95,7 @@
 				ObjectFile=".\..\..\src\bzfs\debug/"
 				ProgramDataBaseFileName=".\..\..\src\bzfs\debug/"
 				WarningLevel="3"
+				WarnAsError="FALSE"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
 				CompileAs="0"/>
@@ -98,10 +103,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="ws2_32.lib winmm.lib odbc32.lib odbccp32.lib libcurl.lib "
 				OutputFile=".\..\..\src\bzfs\debug\bzfs.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="libcurl.lib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\..\..\src\bzfs\debug/bzfs.pdb"
 				SubSystem="1"
@@ -122,6 +128,299 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="KRB5 Debug|Win32"
+			OutputDirectory=".\..\..\src\bzfs\krb5_debug"
+			IntermediateDirectory=".\..\..\src\bzfs\krb5_debug"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="_CONSOLE;WIN32;_DEBUG;HAVE_KRB5"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				PrecompiledHeaderFile=".\..\..\src\bzfs\debug/bzfs.pch"
+				AssemblerListingLocation=".\..\..\src\bzfs\debug/"
+				ObjectFile=".\..\..\src\bzfs\debug/"
+				ProgramDataBaseFileName=".\..\..\src\bzfs\debug/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib winmm.lib odbc32.lib odbccp32.lib libcurl.lib krb5_32.lib comerr32.lib"
+				OutputFile=".\..\..\src\bzfs\debug\bzfs.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="libcurl.lib"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile=".\..\..\src\bzfs\debug/bzfs.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\..\..\src\bzfs\debug/bzfs.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\..\src\bzfs\debug\*.pdb ..\..\*.pdb
+copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
+"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="KRB5 Release|Win32"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1">
+			<Tool
+				Name="VCCLCompilerTool"
+				PreprocessorDefinitions="_CONSOLE;WIN32;HAVE_KRB5;NDEBUG"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib winmm.lib odbc32.lib odbccp32.lib libcurl.lib krb5_32.lib comerr32.lib"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="release_modern|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
+				OptimizeForProcessor="3"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="_CONSOLE;WIN32;NDEBUG;INSIDE_BZ"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
+				EnableEnhancedInstructionSet="1"
+				PrecompiledHeaderFile=".\Release/bzfs.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib winmm.lib odbc32.lib odbccp32.lib libcurl.lib "
+				OutputFile=".\..\..\src\bzfs\bzfs.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="libcurl.lib"
+				ProgramDatabaseFile="../src/bzfs/bzfs.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\..\bin/bzfs.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\..\src\bzfs\*.exe ..\..\*.exe"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="release_modern_p3|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="_CONSOLE;WIN32;NDEBUG;INSIDE_BZ"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
+				EnableEnhancedInstructionSet="1"
+				PrecompiledHeaderFile=".\Release/bzfs.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib winmm.lib odbc32.lib odbccp32.lib libcurl.lib "
+				OutputFile=".\..\..\src\bzfs\bzfs.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="libcurl.lib"
+				ProgramDatabaseFile="../src/bzfs/bzfs.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\..\bin/bzfs.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\..\src\bzfs\*.exe ..\..\*.exe"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Release_pdcurses|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				PreprocessorDefinitions="_CONSOLE;WIN32;NDEBUG;INSIDE_BZ"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="TRUE"
+				PrecompiledHeaderFile=".\Release/bzfs.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib winmm.lib odbc32.lib odbccp32.lib libcurl.lib "
+				OutputFile=".\..\..\src\bzfs\bzfs.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="libcurl.lib"
+				ProgramDatabaseFile="../src/bzfs/bzfs.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\..\bin/bzfs.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\..\src\bzfs\*.exe ..\..\*.exe"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
@@ -160,6 +459,45 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\Authentication.cxx">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\BanCommands.cxx">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\bzfs.cxx">
@@ -180,14 +518,17 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\bzfs\BZWError.cxx">
-			</File>
-			<File
-				RelativePath="..\..\src\bzfs\BZWReader.cxx">
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="2"
@@ -195,13 +536,20 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="release_modern_p3|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
-						Optimization="0"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"/>
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -223,6 +571,39 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\commands.cxx">
@@ -243,19 +624,8 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\bzfs\CustomBase.cxx">
 				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32">
+					Name="KRB5 Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -263,11 +633,8 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\bzfs\CustomBox.cxx">
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="release_modern|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="2"
@@ -275,19 +642,7 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\bzfs\CustomGate.cxx">
-				<FileConfiguration
-					Name="Release|Win32">
+					Name="release_modern_p3|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="2"
@@ -295,117 +650,16 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\bzfs\CustomLink.cxx">
-				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release_pdcurses|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\src\bzfs\CustomPyramid.cxx">
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\bzfs\CustomWeapon.cxx">
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\bzfs\CustomWorld.cxx">
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\bzfs\CustomZone.cxx">
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\game\DelayQueue.cxx">
+				RelativePath="..\..\src\bzfs\DropGeometry.cxx">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\EntryZones.cxx">
@@ -426,6 +680,42 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\Filter.cxx">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\FlagHistory.cxx">
@@ -449,12 +739,51 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\GameKeeper.cxx">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\ListServerConnection.cxx">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\MasterBanList.cxx">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\ParseMaterial.cxx">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\Permissions.cxx">
@@ -475,9 +804,39 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\game\PlayerInfo.cxx">
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\RecordReplay.cxx">
@@ -487,6 +846,9 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\Score.cxx">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\ServerCommand.cxx">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\SpawnPosition.cxx">
@@ -513,10 +875,565 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="KRB5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="release_modern_p3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_pdcurses|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<Filter
 				Name="world"
 				Filter="">
+				<File
+					RelativePath="..\..\src\bzfs\BZWError.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\BZWReader.cxx">
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomArc.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomBase.cxx">
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomBox.cxx">
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomCone.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomDynamicColor.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomGate.cxx">
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomGroup.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomLink.cxx">
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomMaterial.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomMesh.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomMeshFace.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomMeshTransform.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomPhysicsDriver.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomPyramid.cxx">
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomSphere.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomTetra.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomTextureMatrix.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomWaterLevel.cxx">
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomWeapon.cxx">
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomWorld.cxx">
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\CustomZone.cxx">
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\WorldEventManager.cxx">
+				</File>
 				<File
 					RelativePath="..\..\src\bzfs\WorldFileLocation.cxx">
 				</File>
@@ -539,6 +1456,39 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 							PreprocessorDefinitions=""
 							BasicRuntimeChecks="3"/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\src\bzfs\WorldFileObstacle.cxx">
@@ -559,6 +1509,42 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 							PreprocessorDefinitions=""
 							BasicRuntimeChecks="3"/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\bzfs\WorldGenerators.cxx">
 				</File>
 				<File
 					RelativePath="..\..\src\bzfs\WorldInfo.cxx">
@@ -578,6 +1564,39 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 							AdditionalIncludeDirectories=""
 							PreprocessorDefinitions=""
 							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
 					</FileConfiguration>
 				</File>
 				<File
@@ -599,6 +1618,39 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 							PreprocessorDefinitions=""
 							BasicRuntimeChecks="3"/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="KRB5 Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="release_modern_p3|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_pdcurses|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
 				</File>
 			</Filter>
 		</Filter>
@@ -609,16 +1661,10 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 				RelativePath="..\..\src\bzfs\AccessControlList.h">
 			</File>
 			<File
-				RelativePath="..\include\Address.h">
-			</File>
-			<File
-				RelativePath="..\include\bzfio.h">
+				RelativePath="..\..\src\bzfs\Authentication.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\bzfs.h">
-			</File>
-			<File
-				RelativePath="..\include\BzfString.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\BZWError.h">
@@ -627,16 +1673,13 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 				RelativePath="..\..\src\bzfs\BZWReader.h">
 			</File>
 			<File
-				RelativePath="..\include\CallbackList.h">
-			</File>
-			<File
 				RelativePath="..\..\src\bzfs\CmdLineOptions.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\commands.h">
 			</File>
 			<File
-				RelativePath="..\include\common.h">
+				RelativePath="..\..\src\bzfs\CustomArc.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\CustomBase.h">
@@ -645,13 +1688,46 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 				RelativePath="..\..\src\bzfs\CustomBox.h">
 			</File>
 			<File
+				RelativePath="..\..\src\bzfs\CustomCone.h">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\CustomDynamicColor.h">
+			</File>
+			<File
 				RelativePath="..\..\src\bzfs\CustomGate.h">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\CustomGroup.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\CustomLink.h">
 			</File>
 			<File
+				RelativePath="..\..\src\bzfs\CustomMaterial.h">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\CustomMesh.h">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\CustomMeshFace.h">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\CustomPhysicsDriver.h">
+			</File>
+			<File
 				RelativePath="..\..\src\bzfs\CustomPyramid.h">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\CustomSphere.h">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\CustomTetra.h">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\CustomTextureMatrix.h">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\CustomWaterLevel.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\CustomWeapon.h">
@@ -663,13 +1739,13 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 				RelativePath="..\..\src\bzfs\CustomZone.h">
 			</File>
 			<File
-				RelativePath="..\..\include\DelayQueue.h">
+				RelativePath="..\..\src\bzfs\DropGeometry.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\EntryZones.h">
 			</File>
 			<File
-				RelativePath="..\include\Flag.h">
+				RelativePath="..\..\src\bzfs\Filter.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\FlagHistory.h">
@@ -681,37 +1757,22 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 				RelativePath="..\..\src\bzfs\GameKeeper.h">
 			</File>
 			<File
-				RelativePath="..\include\global.h">
-			</File>
-			<File
 				RelativePath="..\..\src\bzfs\ListServerConnection.h">
 			</File>
 			<File
-				RelativePath="..\include\md5.h">
-			</File>
-			<File
-				RelativePath="..\include\multicast.h">
-			</File>
-			<File
-				RelativePath="..\include\Pack.h">
+				RelativePath="..\..\src\bzfs\MasterBanList.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\PackVars.h">
 			</File>
 			<File
+				RelativePath="..\..\src\bzfs\ParseMaterial.h">
+			</File>
+			<File
 				RelativePath="..\..\src\bzfs\Permissions.h">
 			</File>
 			<File
-				RelativePath="..\include\Ping.h">
-			</File>
-			<File
 				RelativePath="..\..\include\PlayerInfo.h">
-			</File>
-			<File
-				RelativePath="..\include\PlayerState.h">
-			</File>
-			<File
-				RelativePath="..\include\Protocol.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\RecordReplay.h">
@@ -723,16 +1784,10 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 				RelativePath="..\..\src\bzfs\Score.h">
 			</File>
 			<File
-				RelativePath="..\include\ShotUpdate.h">
+				RelativePath="..\..\src\bzfs\ServerCommand.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\SpawnPosition.h">
-			</File>
-			<File
-				RelativePath="..\include\StateDatabase.h">
-			</File>
-			<File
-				RelativePath="..\include\Team.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\TeamBases.h">
@@ -741,16 +1796,7 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 				RelativePath="..\..\src\bzfs\TextChunkManager.h">
 			</File>
 			<File
-				RelativePath="..\include\TimeBomb.h">
-			</File>
-			<File
-				RelativePath="..\include\TimeKeeper.h">
-			</File>
-			<File
-				RelativePath="..\include\version.h">
-			</File>
-			<File
-				RelativePath="..\include\WordFilter.h">
+				RelativePath="..\..\include\WorldEventManager.h">
 			</File>
 			<File
 				RelativePath="..\..\src\bzfs\WorldFileLocation.h">
@@ -762,6 +1808,9 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 				RelativePath="..\..\src\bzfs\WorldFileObstacle.h">
 			</File>
 			<File
+				RelativePath="..\..\src\bzfs\WorldGenerators.h">
+			</File>
+			<File
 				RelativePath="..\..\src\bzfs\WorldInfo.h">
 			</File>
 			<File
@@ -771,6 +1820,22 @@ copy ..\..\src\bzfs\debug\*.exe ..\..\*.exe
 		<Filter
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+		</Filter>
+		<Filter
+			Name="API"
+			Filter="">
+			<File
+				RelativePath="..\..\src\bzfs\bzfsAPI.cxx">
+			</File>
+			<File
+				RelativePath="..\..\include\bzfsAPI.h">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\bzfsPlugins.cxx">
+			</File>
+			<File
+				RelativePath="..\..\src\bzfs\bzfsPlugins.h">
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

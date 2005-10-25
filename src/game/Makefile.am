@@ -1,16 +1,35 @@
-noinst_LIBRARIES = libGame.a
+noinst_LTLIBRARIES = libGame.la
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
-libGame_a_SOURCES = \
+AM_CPPFLAGS = -I$(top_srcdir)/include @CURL_CFLAGS@
+
+libGame_la_LDFLAGS = -static
+libGame_la_SOURCES =			\
+	BzMaterial.cxx			\
+	CacheManager.cxx		\
+	CollisionManager.cxx		\
 	CommandsStandard.cxx		\
-	DelayQueue.cxx			\
+	DirectoryNames.cxx		\
+	DynamicColor.cxx		\
+	Frustum.cxx			\
+	Intersect.cxx			\
 	LagInfo.cxx			\
+	LinkManager.cxx			\
+	MsgStrings.cxx			\
+	MeshTransform.cxx		\
 	NetHandler.cxx			\
+	PhysicsDriver.cxx		\
 	PlayerInfo.cxx			\
-	VotingArbiter.cxx		\
-	DirectoryNames.cxx
+	Ray.cxx				\
+	ServerItem.cxx			\
+	ServerList.cxx			\
+	ServerListCache.cxx		\
+	StartupInfo.cxx			\
+	TextureMatrix.cxx		\
+	VotingArbiter.cxx
+
 
 EXTRA_DIST = \
 	README

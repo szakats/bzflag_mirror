@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // Jeff Myers 10/8/97 added hooks to display setings dialog
@@ -21,12 +21,13 @@
 WinWindow*		WinWindow::first = NULL;
 HPALETTE		WinWindow::colormap = NULL;
 
+HWND WinWindow::hwnd = NULL;
+
 WinWindow::WinWindow(const WinDisplay* _display, WinVisual* _visual) :
 				BzfWindow(_display),
 				display(_display),
 				visual(*_visual),
 				inDestroy(false),
-				hwnd(NULL),
 				hwndChild(NULL),
 				hRC(NULL),
 				hDC(NULL),
@@ -426,7 +427,7 @@ void			WinWindow::reactivateAll()
     OpenGLGState::initContext();
 }
 
-HWND			WinWindow::getHandle() const
+HWND			WinWindow::getHandle()
 {
   return hwnd;
 }

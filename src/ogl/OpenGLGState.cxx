@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,24 +7,33 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "common.h"
+
+/* interface header */
+#include "OpenGLGState.h"
+
+/* system headers */
+#include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "common.h"
+
+/* common implementation headers */
+#include "bzfio.h" // for DEBUG3()
 #include "OpenGLGState.h"
 #include "TextureManager.h"
+#include "TextureMatrix.h"
 #include "OpenGLMaterial.h"
 #include "RenderNode.h"
-
-static GLenum		MY_GL_REPLACE = GL_MODULATE;
 
 
 // for tracking glBegin/End pairs; see include/bzfgl.h
 #ifdef DEBUG
 int __beginendCount;
 #endif
+
 
 //
 // OpenGLGStateState
@@ -38,8 +47,11 @@ class OpenGLGStateState {
     void		reset();
     void		enableTexture(bool);
     void		enableTextureReplace(bool);
+    void		enableTextureMatrix(bool);
+    void		enableSphereMap(bool);
     void		enableMaterial(bool);
     void		setTexture(const int tex);
+    void		setTextureMatrix(const GLfloat* matrix);
     void		setMaterial(const OpenGLMaterial&);
     void		setBlending(GLenum sFactor, GLenum dFactor);
     void		setStipple(float alpha);
@@ -47,13 +59,20 @@ class OpenGLGStateState {
     void		setCulling(GLenum culling);
     void		setShading(GLenum);
     void		setAlphaFunc(GLenum func, GLclampf ref);
+    void		setNeedsSorting(bool value);
 
+    bool		getNeedsSorting() const
+				{ return unsorted.needsSorting; }
     bool		isBlended() const
 				{ return unsorted.hasBlending; }
     bool		isTextured() const
 				{ return sorted.texture >= 0; }
     bool		isTextureReplace() const
 				{ return sorted.hasTextureReplace; }
+    bool		isTextureMatrix() const
+				{ return sorted.hasTextureMatrix; }
+    bool		isSphereMap() const
+				{ return sorted.hasSphereMap; }
     bool		isLighted() const
 				{ return sorted.material.isValid(); }
 
@@ -73,8 +92,11 @@ class OpenGLGStateState {
       public:
 	bool		hasTexture;
 	bool		hasTextureReplace;
+	bool	hasTextureMatrix;
+	bool	hasSphereMap;
 	bool		hasMaterial;
-	int       	texture;
+	int		texture;
+	const GLfloat*	textureMatrix;
 	OpenGLMaterial	material;
     };
 
@@ -86,6 +108,7 @@ class OpenGLGStateState {
 	void		reset();
 
       public:
+	bool		needsSorting;
 	bool		hasBlending;
 	bool		hasStipple;
 	bool		hasSmoothing;
@@ -109,15 +132,21 @@ class OpenGLGStateState {
 // OpenGLGStateRep
 //
 
+// forward-declare to make friend
+class SortedGState;
+
 class OpenGLGStateRep {
   public:
 			OpenGLGStateRep();
 			OpenGLGStateRep(const OpenGLGStateState&);
 			~OpenGLGStateRep();
 
+    bool		getNeedsSorting() { return state.getNeedsSorting(); }
     bool		isBlended() { return state.isBlended(); }
     bool		isTextured() { return state.isTextured(); }
     bool		isTextureReplace() { return state.isTextureReplace(); }
+    bool		isTextureMatrix() { return state.isTextureMatrix(); }
+    bool		isSphereMap() { return state.isSphereMap(); }
     bool		isLighted() { return state.isLighted(); }
     void		setState();
     static void		resetState();
@@ -150,8 +179,11 @@ class OpenGLGStateRep {
 OpenGLGStateState::Sorted::Sorted() :
 				hasTexture(false),
 				hasTextureReplace(false),
+				hasTextureMatrix(false),
+				hasSphereMap(false),
 				hasMaterial(false),
 				texture(-1),
+				textureMatrix(NULL),
 				material(OpenGLMaterial())
 {
   // do nothing
@@ -166,8 +198,11 @@ void			OpenGLGStateState::Sorted::reset()
 {
   hasTexture = false;
   hasTextureReplace = false;
+  hasTextureMatrix = false;
+  hasSphereMap = false;
   hasMaterial = false;
   texture = -1;
+  textureMatrix = NULL;
   material = OpenGLMaterial();
 }
 
@@ -177,6 +212,11 @@ bool			OpenGLGStateState::Sorted::operator==(
   if (hasTexture != s.hasTexture || texture != s.texture)
     return false;
   if (hasTextureReplace != s.hasTextureReplace)
+    return false;
+  if ((hasTextureMatrix != s.hasTextureMatrix) ||
+      (textureMatrix != s.textureMatrix))
+    return false;
+  if (hasSphereMap != s.hasSphereMap)
     return false;
   if (hasMaterial != s.hasMaterial || material != s.material)
     return false;
@@ -193,6 +233,12 @@ bool			OpenGLGStateState::Sorted::operator<(
     if (hasTextureReplace != s.hasTextureReplace) return s.hasTextureReplace;
     return texture < s.texture;
   }
+  if (hasTextureMatrix != s.hasTextureMatrix) {
+    return textureMatrix < s.textureMatrix;
+  }
+  if (hasSphereMap != s.hasSphereMap) {
+    return !hasSphereMap;
+  }
 
   // this < s if this has no material and s does or material < s.material
   if (hasMaterial != s.hasMaterial) return s.hasMaterial;
@@ -203,6 +249,7 @@ bool			OpenGLGStateState::Sorted::operator<(
 }
 
 OpenGLGStateState::Unsorted::Unsorted() :
+				needsSorting(false),
 				hasBlending(false),
 				hasStipple(false),
 				hasSmoothing(false),
@@ -226,11 +273,13 @@ OpenGLGStateState::Unsorted::~Unsorted()
 
 void			OpenGLGStateState::Unsorted::reset()
 {
+  needsSorting = false;
   hasBlending = false;
   hasStipple = false;
   hasSmoothing = false;
-  hasCulling = true;
   hasShading = false;
+  hasAlphaFunc = false;
+  hasCulling = true;
   culling = GL_BACK;
 }
 
@@ -267,6 +316,19 @@ void			OpenGLGStateState::enableTextureReplace(bool)
   sorted.hasTextureReplace = false;
 }
 
+void			OpenGLGStateState::enableTextureMatrix(bool on)
+{
+  if (on)
+    sorted.hasTextureMatrix = (sorted.textureMatrix != NULL);
+  else
+    sorted.hasTexture = false;
+}
+
+void			OpenGLGStateState::enableSphereMap(bool on)
+{
+  sorted.hasSphereMap = on;
+}
+
 void			OpenGLGStateState::enableMaterial(bool on)
 {
   if (on) sorted.hasMaterial = sorted.material.isValid();
@@ -280,6 +342,13 @@ void			OpenGLGStateState::setTexture(
   sorted.texture = _texture;
 }
 
+void			OpenGLGStateState::setTextureMatrix(
+					const GLfloat* _textureMatrix)
+{
+  sorted.hasTextureMatrix = (_textureMatrix != NULL);
+  sorted.textureMatrix = _textureMatrix;
+}
+
 void			OpenGLGStateState::setMaterial(
 					const OpenGLMaterial& _material)
 {
@@ -291,6 +360,7 @@ void			OpenGLGStateState::setBlending(
 					GLenum sFactor, GLenum dFactor)
 {
   unsorted.hasBlending = (sFactor != GL_ONE || dFactor != GL_ZERO);
+  unsorted.needsSorting = unsorted.hasBlending;
   unsorted.blendSFactor = sFactor;
   unsorted.blendDFactor = dFactor;
 }
@@ -326,6 +396,11 @@ void			OpenGLGStateState::setAlphaFunc(
   unsorted.alphaRef = ref;
 }
 
+void			OpenGLGStateState::setNeedsSorting(bool value)
+{
+  unsorted.needsSorting = value;
+}
+
 void			OpenGLGStateState::resetOpenGLState() const
 {
   if (sorted.hasTexture) {
@@ -333,6 +408,15 @@ void			OpenGLGStateState::resetOpenGLState() const
   }
   if (sorted.hasTextureReplace) {
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  }
+  if (sorted.hasTextureMatrix) {
+    glMatrixMode(GL_TEXTURE);
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+  }
+  if (sorted.hasSphereMap) {
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
   }
   if (sorted.hasMaterial) {
     glDisable(GL_LIGHTING);
@@ -372,20 +456,54 @@ void			OpenGLGStateState::setOpenGLState(
     if (sorted.hasTexture) {
       if (oldState->sorted.hasTexture) {
 	if (sorted.texture != oldState->sorted.texture)
-          tm.bind(sorted.texture);
+	  tm.bind(sorted.texture);
       }
       else {
 	tm.bind(sorted.texture);
 	glEnable(GL_TEXTURE_2D);
       }
-      if (!oldState->sorted.hasTextureReplace && sorted.hasTextureReplace)
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, MY_GL_REPLACE);
+      if (!oldState->sorted.hasTextureReplace && sorted.hasTextureReplace) {
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+      }
     }
     else {
       if (oldState->sorted.hasTexture) {
 	glDisable(GL_TEXTURE_2D);
-	if (oldState->sorted.hasTextureReplace)
+	if (oldState->sorted.hasTextureReplace) {
 	  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	}
+      }
+    }
+
+    // texture transformation matrix
+    if (sorted.hasTextureMatrix) {
+      if (sorted.textureMatrix != oldState->sorted.textureMatrix) {
+	glMatrixMode(GL_TEXTURE);
+	glLoadMatrixf(sorted.textureMatrix);
+	glMatrixMode(GL_MODELVIEW);
+      }
+    }
+    else {
+      if (oldState->sorted.hasTextureMatrix) {
+	glMatrixMode(GL_TEXTURE);
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+      }
+    }
+
+    // spherical texture mapping
+    if (sorted.hasSphereMap) {
+      if (!oldState->sorted.hasSphereMap) {
+	glTexGenf(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+	glTexGenf(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+	glEnable(GL_TEXTURE_GEN_S);
+	glEnable(GL_TEXTURE_GEN_T);
+      }
+    }
+    else {
+      if (oldState->sorted.hasSphereMap) {
+	glDisable(GL_TEXTURE_GEN_S);
+	glDisable(GL_TEXTURE_GEN_T);
       }
     }
 
@@ -507,11 +625,35 @@ void			OpenGLGStateState::setOpenGLState(
       tm.bind(sorted.texture);
       glEnable(GL_TEXTURE_2D);
       if (sorted.hasTextureReplace)
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, MY_GL_REPLACE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     }
     else {
       glDisable(GL_TEXTURE_2D);
       glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    }
+
+    // texture transformation matrix
+    if (sorted.hasTextureMatrix) {
+      glMatrixMode(GL_TEXTURE);
+      glLoadMatrixf(sorted.textureMatrix);
+      glMatrixMode(GL_MODELVIEW);
+    }
+    else {
+      glMatrixMode(GL_TEXTURE);
+      glLoadIdentity();
+      glMatrixMode(GL_MODELVIEW);
+    }
+
+    // spherical texture mapping
+    if (sorted.hasSphereMap) {
+      glTexGenf(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+      glTexGenf(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+      glEnable(GL_TEXTURE_GEN_S);
+      glEnable(GL_TEXTURE_GEN_T);
+    }
+    else {
+      glDisable(GL_TEXTURE_GEN_S);
+      glDisable(GL_TEXTURE_GEN_T);
     }
 
     // lighting and material
@@ -771,11 +913,15 @@ OpenGLGState::ContextInitializer*
 			OpenGLGState::ContextInitializer::head = NULL;
 OpenGLGState::ContextInitializer*
 			OpenGLGState::ContextInitializer::tail = NULL;
+bool OpenGLGState::executingFreeFuncs = false;
+bool OpenGLGState::executingInitFuncs = false;
 
 OpenGLGState::ContextInitializer::ContextInitializer(
-				OpenGLContextInitializer _callback,
+				OpenGLContextFunction _freeCallback,
+				OpenGLContextFunction _initCallback,
 				void* _userData) :
-				callback(_callback),
+				freeCallback(_freeCallback),
+				initCallback(_initCallback),
 				userData(_userData)
 {
   prev = NULL;
@@ -794,23 +940,42 @@ OpenGLGState::ContextInitializer::~ContextInitializer()
   else head = next;
 }
 
-void			OpenGLGState::ContextInitializer::execute()
+void OpenGLGState::ContextInitializer::executeFreeFuncs()
 {
+  executingFreeFuncs = true;
   ContextInitializer* scan = tail;
   while (scan) {
-    (scan->callback)(scan->userData);
+    (scan->freeCallback)(scan->userData);
     scan = scan->prev;
   }
+  executingFreeFuncs = false;
+  return;
 }
 
+void OpenGLGState::ContextInitializer::executeInitFuncs()
+{
+  executingInitFuncs = true;
+  ContextInitializer* scan = tail;
+  while (scan) {
+    (scan->initCallback)(scan->userData);
+    scan = scan->prev;
+  }
+  executingInitFuncs = false;
+  return;
+}
+
+
 OpenGLGState::ContextInitializer*
-			OpenGLGState::ContextInitializer::find(
-				OpenGLContextInitializer _callback,
-				void* _userData)
+  OpenGLGState::ContextInitializer::find(
+			      OpenGLContextFunction _freeCallback,
+			      OpenGLContextFunction _initCallback,
+			      void* _userData)
 {
   ContextInitializer* scan = head;
   while (scan) {
-    if (scan->callback == _callback && scan->userData == _userData)
+    if ((scan->freeCallback == _freeCallback) &&
+	(scan->initCallback == _initCallback) &&
+	(scan->userData == _userData))
       return scan;
     scan = scan->next;
   }
@@ -833,7 +998,7 @@ static const GLubyte	stipplePattern[NumStipples][4] = {
 				{ 0xff, 0xdd, 0xff, 0x77 },
 				{ 0xff, 0xff, 0xff, 0xff },
 			};
-GLuint			OpenGLGState::stipples = 0u;
+GLuint			OpenGLGState::stipples = INVALID_GL_LIST_ID;
 
 OpenGLGState::OpenGLGState()
 {
@@ -872,6 +1037,11 @@ void			OpenGLGState::setState() const
 bool			OpenGLGState::isBlended() const
 {
   return rep->isBlended();
+}
+
+bool			OpenGLGState::getNeedsSorting() const
+{
+  return rep->getNeedsSorting();
 }
 
 bool			OpenGLGState::isTextured() const
@@ -914,22 +1084,25 @@ void			OpenGLGState::setStipple(GLfloat alpha)
   setStippleIndex(getStippleIndex(alpha));
 }
 
-void			OpenGLGState::setStippleIndex(int index)
+void OpenGLGState::setStippleIndex(int index)
 {
   glCallList(stipples + index);
 }
 
-int			OpenGLGState::getStippleIndex(float alpha)
+
+int OpenGLGState::getStippleIndex(float alpha)
 {
   return (int)((float)(NumStipples - 1) * alpha + 0.5f);
 }
 
-int			OpenGLGState::getOpaqueStippleIndex()
+
+int OpenGLGState::getOpaqueStippleIndex()
 {
   return NumStipples - 1;
 }
 
-void			OpenGLGState::initStipple(void*)
+
+void OpenGLGState::initStipple(void*)
 {
   stipples = glGenLists(NumStipples);
   for (int i = 0; i < NumStipples; i++) {
@@ -963,51 +1136,75 @@ void			OpenGLGState::initStipple(void*)
   }
 }
 
-void			OpenGLGState::init()
+
+void OpenGLGState::freeStipple(void*)
 {
-  // choose texture replace enum
-#if defined(GL_EXT_texture)
-  // IMPACT, RE, RE2, and VTX known not to support GL_REPLACE_EXT.
-  // doesn't matter... they wouldn't go any faster.
-  const char* renderer = (const char*)glGetString(GL_RENDERER);
-  if (strncmp(renderer, "IMPACT", 6) != 0 &&
-      strncmp(renderer, "REC/", 4) != 0 &&
-      strncmp(renderer, "RE/", 3) != 0 &&
-      strncmp(renderer, "REV/", 2) != 0 &&
-      strstr((const char*)glGetString(GL_EXTENSIONS), "GL_EXT_texture"))
-    MY_GL_REPLACE = GL_REPLACE_EXT;
-#elif defined(GL_VERSION_1_1)
-  MY_GL_REPLACE = GL_REPLACE;
-#endif
+  if (stipples != INVALID_GL_LIST_ID) {
+    glDeleteLists(stipples, NumStipples);
+    stipples = INVALID_GL_LIST_ID;
+  }
+
+  return;
+}
+
+
+void OpenGLGState::init()
+{
+  if (!haveGLContext()) {
+    printf("OpenGLGState::init(), no context\n");
+    return;
+  }
 
   // initialize GL state to what we expect
   initGLState();
 
   // other initialization
-  initStipple();
+  initStipple(NULL);
 
   // redo stipple init if context is recreated
-  registerContextInitializer(initStipple);
+  registerContextInitializer(freeStipple, initStipple, NULL);
 }
 
-void			OpenGLGState::registerContextInitializer(
-				OpenGLContextInitializer callback,
-				void* userData)
+
+void OpenGLGState::registerContextInitializer(
+		     OpenGLContextFunction freeCallback,
+		     OpenGLContextFunction initCallback,
+		     void* userData)
 {
-  if (callback == NULL)
+  if ((freeCallback == NULL) || (initCallback == NULL)) {
+    DEBUG3("registerContextInitializer() error\n");
     return;
-  new ContextInitializer(callback, userData);
+  }
+  new ContextInitializer(freeCallback, initCallback, userData);
 }
 
-void			OpenGLGState::unregisterContextInitializer(
-				OpenGLContextInitializer callback,
-				void* userData)
+
+void OpenGLGState::unregisterContextInitializer(
+		     OpenGLContextFunction freeCallback,
+		     OpenGLContextFunction initCallback,
+		     void* userData)
 {
-  delete ContextInitializer::find(callback, userData);
+  ContextInitializer* ci =
+    ContextInitializer::find(freeCallback, initCallback, userData);
+  if (ci == NULL) {
+    DEBUG3("unregisterContextInitializer() error\n");
+  }
+  delete ci;
 }
 
-void			OpenGLGState::initContext()
+
+void OpenGLGState::initContext()
 {
+  if (!haveGLContext()) {
+    DEBUG3("OpenGLGState::initContext(), no context\n");
+    return;
+  }
+
+  // call all of the freeing functions first
+  DEBUG3("ContextInitializer::executeFreeFuncs() start\n");
+  ContextInitializer::executeFreeFuncs();
+  DEBUG3("ContextInitializer::executeFreeFuncs() end\n");
+
   // initialize GL state
   initGLState();
 
@@ -1015,7 +1212,9 @@ void			OpenGLGState::initContext()
   resetState();
 
   // call all initializers
-  ContextInitializer::execute();
+  DEBUG3("ContextInitializer::executeInitFuncs() start\n");
+  ContextInitializer::executeInitFuncs();
+  DEBUG3("ContextInitializer::executeInitFuncs() end\n");
 
   // initialize the GL state again in case one of the initializers
   // messed it up.
@@ -1031,9 +1230,11 @@ void			OpenGLGState::initContext()
   glLoadIdentity();
   glEnable(GL_SCISSOR_TEST);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
 }
 
-void			OpenGLGState::initGLState()
+
+void OpenGLGState::initGLState()
 {
   // initialize GL state to what we expect
   glDisable(GL_TEXTURE_2D);
@@ -1046,11 +1247,16 @@ void			OpenGLGState::initGLState()
   glDisable(GL_POINT_SMOOTH);
   glDisable(GL_LINE_STIPPLE);
   glDisable(GL_POLYGON_STIPPLE);
-  glCullFace(GL_BACK);
   glEnable(GL_CULL_FACE);
   glShadeModel(GL_FLAT);
   glDisable(GL_ALPHA_TEST);
+  glCullFace(GL_BACK);
+  // all arrays are enabled by default
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 }
+
 
 //
 // OpenGLGStateBuilder
@@ -1099,6 +1305,16 @@ void			OpenGLGStateBuilder::enableTextureReplace(bool on)
   state->enableTextureReplace(on);
 }
 
+void			OpenGLGStateBuilder::enableTextureMatrix(bool on)
+{
+  state->enableTextureMatrix(on);
+}
+
+void			OpenGLGStateBuilder::enableSphereMap(bool on)
+{
+  state->enableSphereMap(on);
+}
+
 void			OpenGLGStateBuilder::enableMaterial(bool on)
 {
   state->enableMaterial(on);
@@ -1123,6 +1339,12 @@ void			OpenGLGStateBuilder::setTexture(
 					const int texture)
 {
   state->setTexture(texture);
+}
+
+void			OpenGLGStateBuilder::setTextureMatrix(
+					const GLfloat* textureMatrix)
+{
+  state->setTextureMatrix(textureMatrix);
 }
 
 void			OpenGLGStateBuilder::setMaterial(
@@ -1163,16 +1385,199 @@ void			OpenGLGStateBuilder::setAlphaFunc(
   state->setAlphaFunc(func, ref);
 }
 
+void			OpenGLGStateBuilder::setNeedsSorting(bool value)
+{
+  state->setNeedsSorting(value);
+}
+
 OpenGLGState		OpenGLGStateBuilder::getState() const
 {
   return OpenGLGState(*state);
 }
 
+
+//
+// TODO: Move the rest of this junk into it's own file,
+//       bring the context switch stuff along for the ride
+//
+
+
+// for hooking debuggers
+static void contextFreeError(const char* message)
+{
+  printf ("contextFreeError(): %s\n", message);
+}
+static void contextInitError(const char* message)
+{
+  printf ("contextInitError(): %s\n", message);
+}
+
+
+#undef glNewList
+void bzNewList(GLuint list, GLenum mode)
+{
+  glNewList(list, mode);
+  return;
+}
+
+#undef glGenLists
+GLuint bzGenLists(GLsizei count)
+{
+  if (OpenGLGState::getExecutingFreeFuncs()) {
+    contextFreeError ("bzGenLists() is having issues");
+  }
+  GLuint base = glGenLists(count);
+  //DEBUG4("genList = %i (%i)\n", (int)base, (int)count);
+  return base;
+}
+
+#undef glDeleteLists
+void bzDeleteLists(GLuint base, GLsizei count)
+{
+  if (OpenGLGState::getExecutingInitFuncs()) {
+    contextInitError ("bzDeleteLists() is having issues");
+  }
+  if (OpenGLGState::haveGLContext()) {
+    glDeleteLists(base, count);
+  } else {
+    DEBUG4 ("bzDeleteLists(), no context\n");
+  }
+  return;
+}
+
+#undef glGenTextures
+void bzGenTextures(GLsizei count, GLuint *textures)
+{
+  if (OpenGLGState::getExecutingFreeFuncs()) {
+    contextFreeError ("bzGenTextures() is having issues");
+  }
+  glGenTextures(count, textures);
+  return;
+}
+
+#undef glDeleteTextures
+void bzDeleteTextures(GLsizei count, const GLuint *textures)
+{
+  if (OpenGLGState::getExecutingInitFuncs()) {
+    contextInitError ("bzDeleteTextures() is having issues");
+  }
+  if (OpenGLGState::haveGLContext()) {
+    glDeleteTextures(count, textures);
+  } else {
+    DEBUG4 ("bzDeleteTextures(), no context\n");
+  }
+  return;
+}
+
+
+//
+// Test for matrix underflows (overflows are not yet tested)
+//
+#ifdef DEBUG_GL_MATRIX_STACKS
+
+static GLenum matrixMode = GL_MODELVIEW;
+static int matrixDepth[3] = {0, 0, 0};
+static const int maxMatrixDepth[3] = {32, 2, 2}; // guaranteed
+
+static inline int getMatrixSlot(GLenum mode)
+{
+  if (mode == GL_MODELVIEW) {
+    return 0;
+  } else if (mode == GL_PROJECTION) {
+    return 1;
+  } else if (mode == GL_TEXTURE) {
+    return 2;
+  } else {
+    return -1;
+  }
+}
+
+#undef glPushMatrix
+void bzPushMatrix()
+{
+  int slot = getMatrixSlot(matrixMode);
+  if (slot < 0) {
+    printf ("bzPushMatrix(): bad matrix mode: %i\n", matrixMode);
+    return;
+  }
+  matrixDepth[slot]++;
+  if (matrixDepth[slot] > maxMatrixDepth[slot]) {
+    printf ("bzPushMatrix(): overflow (mode %i, depth %i)\n",
+            matrixMode, matrixDepth[slot]);
+    return;
+  }
+  glPushMatrix();
+}
+
+#undef glPopMatrix
+void bzPopMatrix()
+{
+  int slot = getMatrixSlot(matrixMode);
+  if (slot < 0) {
+    printf ("bzPopMatrix(): bad matrix mode: %i\n", matrixMode);
+    return;
+  }
+  matrixDepth[slot]--;
+  if (matrixDepth[slot] < 0) {
+    printf ("bzPopMatrix(): underflow (mode %i, depth %i)\n",
+            matrixMode, matrixDepth[slot]);
+    return;
+  }
+  glPopMatrix();
+}
+
+#undef glMatrixMode
+void bzMatrixMode(GLenum mode)
+{
+  int slot = getMatrixSlot(matrixMode);
+  if (slot < 0) {
+    printf ("bzMatrixMode(): bad matrix mode: %i\n", mode);
+    return;
+  }
+  matrixMode = mode;
+  glMatrixMode(mode);
+  DEBUG3 ("MatrixMode: %i %i %i\n", matrixDepth[0], matrixDepth[1], matrixDepth[2]);
+}
+
+#endif // DEBUG_GL_MATRIX_STACKS
+
+
+#ifdef _WIN32
+#  define GET_CURRENT_CONTEXT wglGetCurrentContext
+#else
+#  ifdef HAVE_CGLGETCURRENTCONTEXT
+#    define GET_CURRENT_CONTEXT CGLGetCurrentContext
+#  elif defined(__BEOS__)
+// no way to do that, and you shouldn't have to anyway!
+#    define GET_CURRENT_CONTEXT() 1
+#  else
+#    include <GL/glx.h>
+#    define GET_CURRENT_CONTEXT glXGetCurrentContext
+#  endif
+#endif
+
+// NOTE: if you're compiler croaks here, then you might want
+//       to find an alternative method for OpenGL context
+//       detection on your system.
+
+#ifndef GET_CURRENT_CONTEXT
+#  error ERROR: Do not know how to get the current OpenGL context on this system
+#endif
+
+bool OpenGLGState::haveGLContext()
+{
+  if (GET_CURRENT_CONTEXT() != NULL) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

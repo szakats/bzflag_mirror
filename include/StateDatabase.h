@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,15 +7,22 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef BZF_STATE_DATABASE_H
 #define BZF_STATE_DATABASE_H
 
+// common header first
 #include "common.h"
-#include <string>
+
+// system headers
 #include <vector>
+#include <map>
+#include <iostream>
+#include <string>
+
+// implementation headers
 #include "CallbackList.h"
 #include "bzfio.h"
 #include "Singleton.h"
@@ -65,16 +72,16 @@ public:
 				    Permission access = Client);
 
   void			     setInt(const std::string& name,
-                                    const int& value,
-                                    Permission access = Client);
+				    const int& value,
+				    Permission access = Client);
 
   void			    setBool(const std::string& name,
-                                    const bool& value,
-                                    Permission access = Client);
+				    const bool& value,
+				    Permission access = Client);
 
   void			   setFloat(const std::string& name,
-                                    const float& value,
-                                    Permission access = Client);
+				    const float& value,
+				    Permission access = Client);
   /** allow setting name/pointer pairs.  this allows simple object
    * pointer storage into the bzdb via pointer address serialization.
    */
@@ -136,6 +143,11 @@ public:
    */
   std::string			get(const std::string& name) const;
 
+  /** get the INT value associated with a name. Clamp value within range.
+   *  Returns 0 (or min) if value is not set.
+   */
+  int	getIntClamped(const std::string& name, const int min, const int max) const;
+
   /** returns the pointer stored with a name.  returns NULL if the
    * name isn't set.
    */
@@ -146,6 +158,8 @@ public:
    */
   float				eval(const std::string& name);
   int				evalInt(const std::string& name);
+  bool				evalTriplet(const std::string& name, float data[3]);
+  bool				evalPair(const std::string& name, float data[2]);
 
   /** return true if the value associated with a name indicates
    * logical true, which is when the value is not empty and not
@@ -176,12 +190,12 @@ public:
   /** tell the state database whether it should print debug info to stdout
    * now and then.
    */
-  void                          setDebug(bool print);
-  
-  /** do we want debug output? 
+  void			  setDebug(bool print);
+
+  /** do we want debug output?
    */
-  bool                          getDebug() const;
-  
+  bool			  getDebug() const;
+
 
   static const std::string	BZDB_AGILITYADVEL;
   static const std::string	BZDB_AGILITYTIMEWINDOW;
@@ -195,29 +209,47 @@ public:
   static const std::string	BZDB_BURROWDEPTH;
   static const std::string	BZDB_BURROWSPEEDAD;
   static const std::string	BZDB_BURROWANGULARAD;
-  static const std::string	BZDB_DEADUNDER;
+  static const std::string	BZDB_COLDETDEPTH;
+  static const std::string	BZDB_COLDETELEMENTS;
+  static const std::string	BZDB_CULLDEPTH;
+  static const std::string	BZDB_CULLELEMENTS;
+  static const std::string	BZDB_CULLOCCLUDERS;
   static const std::string	BZDB_DISABLEBOTS;
+  static const std::string	BZDB_ENDSHOTDETECTION;
   static const std::string	BZDB_EXPLODETIME;
-  static const std::string	BZDB_FAKELAG;
   static const std::string	BZDB_FLAGALTITUDE;
+  static const std::string	BZDB_FLAGEFFECTTIME;
   static const std::string	BZDB_FLAGHEIGHT;
-  static const std::string	BZDB_FLAGPOLEWIDTH; 
+  static const std::string	BZDB_FLAGPOLEWIDTH;
   static const std::string	BZDB_FLAGPOLESIZE;
   static const std::string	BZDB_FLAGRADIUS;
-  static const std::string	BZDB_GMISSILEANG;
-  static const std::string	BZDB_GMISSILEADLIFE;
+  static const std::string	BZDB_FOGMODE;
+  static const std::string	BZDB_FOGDENSITY;
+  static const std::string	BZDB_FOGSTART;
+  static const std::string	BZDB_FOGEND;
+  static const std::string	BZDB_FOGCOLOR;
+  static const std::string	BZDB_GMACTIVATIONTIME;
+  static const std::string	BZDB_GMADLIFE;
+  static const std::string	BZDB_GMTURNANGLE;
   static const std::string	BZDB_GRAVITY;
   static const std::string	BZDB_FRICTION;
+  static const std::string	BZDB_HANDICAPSCOREDIFF;
+  static const std::string	BZDB_HANDICAPVELAD;
+  static const std::string	BZDB_HANDICAPANGAD;
+  static const std::string	BZDB_HANDICAPSHOTAD;
   static const std::string	BZDB_IDENTIFYRANGE;
   static const std::string	BZDB_JUMPVELOCITY;
   static const std::string	BZDB_LASERADVEL;
   static const std::string	BZDB_LASERADRATE;
   static const std::string	BZDB_LASERADLIFE;
+  static const std::string	BZDB_LATITUDE;
   static const std::string	BZDB_LOCKONANGLE;
+  static const std::string	BZDB_LONGITUDE;
   static const std::string	BZDB_LRADRATE;
   static const std::string	BZDB_MAXBUMPHEIGHT;
   static const std::string	BZDB_MAXFLAGGRABS;
   static const std::string	BZDB_MAXLOD;
+  static const std::string	BZDB_MIRROR;
   static const std::string	BZDB_MOMENTUMLINACC;
   static const std::string	BZDB_MOMENTUMANGACC;
   static const std::string	BZDB_MOMENTUMFRICTION;
@@ -226,13 +258,16 @@ public:
   static const std::string	BZDB_MGUNADLIFE;
   static const std::string	BZDB_MUZZLEFRONT;
   static const std::string	BZDB_MUZZLEHEIGHT;
+  static const std::string	BZDB_NOCLIMB;
+  static const std::string	BZDB_NOSHADOWS;
   static const std::string	BZDB_NOSMALLPACKETS;
   static const std::string	BZDB_NOTRESPONDINGTIME;
   static const std::string	BZDB_OBESEFACTOR;
   static const std::string	BZDB_PAUSEDROPTIME;
   static const std::string	BZDB_POSITIONTOLERANCE;
-  static const std::string      BZDB_PYRBASE;
-  static const std::string      BZDB_PYRHEIGHT;
+  static const std::string	BZDB_PYRBASE;
+  static const std::string	BZDB_PYRHEIGHT;
+  static const std::string	BZDB_RADARLIMIT;
   static const std::string	BZDB_REJOINTIME;
   static const std::string	BZDB_RELOADTIME;
   static const std::string	BZDB_RFIREADVEL;
@@ -247,7 +282,10 @@ public:
   static const std::string	BZDB_SHOTRANGE;
   static const std::string	BZDB_SHOTTAILLENGTH;
   static const std::string	BZDB_SHOTSKEEPVERTICALV;
+  static const std::string	BZDB_SQUISHFACTOR;
+  static const std::string	BZDB_SQUISHTIME;
   static const std::string	BZDB_SRRADIUSMULT;
+  static const std::string	BZDB_SYNCLOCATION;
   static const std::string	BZDB_SYNCTIME;
   static const std::string	BZDB_TANKANGVEL;
   static const std::string	BZDB_TANKEXPLOSIONSIZE;
@@ -268,13 +306,16 @@ public:
   static const std::string	BZDB_THIEFADLIFE;
   static const std::string	BZDB_THIEFDROPTIME;
   static const std::string	BZDB_TINYFACTOR;
+  static const std::string	BZDB_TRACKFADE;
   static const std::string	BZDB_UPDATETHROTTLERATE;
   static const std::string	BZDB_VELOCITYAD;
   static const std::string	BZDB_WALLHEIGHT;
+  static const std::string	BZDB_WEAPONS;
   static const std::string	BZDB_WIDEANGLEANG;
   static const std::string	BZDB_WINGSGRAVITY;
   static const std::string	BZDB_WINGSJUMPCOUNT;
   static const std::string	BZDB_WINGSJUMPVELOCITY;
+  static const std::string	BZDB_WINGSSLIDETIME;
   static const std::string	BZDB_WORLDSIZE;
 
 
@@ -352,8 +393,13 @@ private:
   float				evaluate(Expression e) const;
   typedef std::map<std::string,float> EvalMap;
   EvalMap			evalCache;
-  bool                          debug;
+  bool			  debug;
 };
+
+inline bool StateDatabase::getDebug() const
+{
+  return debug;
+}
 
 std::istream& operator >> (std::istream& src, StateDatabase::Expression& dst);
 std::string& operator >> (std::string& src, StateDatabase::Expression& dst);

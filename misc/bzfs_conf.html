@@ -15,7 +15,7 @@
 			a:link.build { display: block; color:#0000FF; background-color:#9FB5E0; }
 			a:visit.build { display: block; color:#0000FF; background-color:#7090D0; }
 			a:hover.build { display: block; color:#000000; background-color: #BED0EA; }
-			legend { font-size: 110%; line-height: 1.5; }			
+			legend { font-size: 110%; line-height: 1.5; }
 		</style>
 		<script language="JavaScript">
 			var flags = new Array(	"V", "QT", "OO", "F", "MG", "GM", "L", "R", "SB",
@@ -28,7 +28,7 @@
 			{
 				var mainform = document.forms["main"];
 				var ctf = (mainform.game_style.value == "ctf") || (mainform.game_style.value == 'bc');
-				var freeForAll = (mainform.game_style.value == "ffa");	
+				var freeForAll = (mainform.game_style.value == "ffa");
 
 				var rabbit = (mainform.game_style.value == "rc");
 				mainform.world_type.disabled = mainform.game_style.value == "bc";
@@ -237,27 +237,27 @@
 
 					if (mainform.votepercent.value != 50.1) {
 						d.writeln("#Percentage of players required to affirm a poll<br/>");
-						d.writeln("-votePercentage " + mainform.votepercent.value + "<br/><br/>");
+						d.writeln("-poll votePercentage=" + mainform.votepercent.value + "<br/><br/>");
 					}
 
 					if (mainform.votesrequired.value != 3) {
 						d.writeln("#Minimum count of votes required to make a vote valid<br/>");
-						d.writeln("-votesRequired " + mainform.votesrequired.value + "<br/><br/>");
+						d.writeln("-poll votesRequired=" + mainform.votesrequired.value + "<br/><br/>");
 					}
 
 					if (mainform.votetime.value != 60) {
 						d.writeln("#maximum amount of time a player has to vote on a poll in seconds<br/>");
-						d.writeln("-voteTime " + mainform.votetime.value + "<br/><br/>");
+						d.writeln("-poll voteTime=" + mainform.votetime.value + "<br/><br/>");
 					}
 
 					if (mainform.vetotime.value != 20) {
 						d.writeln("#Maximum seconds an authorized user has to cancel a poll<br/>");
-						d.writeln("-vetoTime " + mainform.vetotime.value + "<br/><br/>");
+						d.writeln("-poll vetoTime=" + mainform.vetotime.value + "<br/><br/>");
 					}
 
 					if (mainform.voterepeattime.value != 300) {
 						d.writeln("#Minimum seconds required before a player may request another vote<br/>");
-						d.writeln("-voteRepeatTime " + mainform.voterepeattime.value + "<br/><br/>");
+						d.writeln("-poll voteRepeatTime=" + mainform.voterepeattime.value + "<br/><br/>");
 					}
 
 					if (mainform.game_style.value == "ctf") {
@@ -947,7 +947,7 @@
 							<tr>
 								<td align="right">(CB)</td><td><input type="text" name="cb_mand_flag" value="0" size="3" title="Colorblind"/></td>
 								<td align="right">(&lt;-)</td><td><input type="text" name="lt_mand_flag" value="0" size="3" title="Left turn only"/></td>
-								<td align="right">(-&gt;)</td><td><input type="text" name="gt_mand_flag" value="0" size="3" title="Right turn only"/></td>
+								<td align="right">(-&gt;)</td><td><input type="text" name="rt_mand_flag" value="0" size="3" title="Right turn only"/></td>
 								<td align="right">(FO)</td><td><input type="text" name="fo_mand_flag" value="0" size="3" title="Forward only"/></td>
 								<td align="right">(RO)</td><td><input type="text" name="ro_mand_flag" value="0" size="3" title="Reverse only"/></td>
 								<td align="right">(M)</td><td><input type="text" name="m_mand_flag" value="0" size="3" title="Momentum"/></td>
@@ -1014,7 +1014,7 @@
 							<tr>
 								<td align="right">(CB)</td><td><input type="checkbox" name="cb_forbid_flag" title="Colorblind"/></td>
 								<td align="right">(&lt;-)</td><td><input type="checkbox" name="lt_forbid_flag" title="Left turn only"/></td>
-								<td align="right">(-&gt;)</td><td><input type="checkbox" name="gt_forbid_flag" title="Right turn only"/></td>
+								<td align="right">(-&gt;)</td><td><input type="checkbox" name="rt_forbid_flag" title="Right turn only"/></td>
 								<td align="right">(FO)</td><td><input type="checkbox" name="fo_forbid_flag" title="Forward only"/></td>
 								<td align="right">(RO)</td><td><input type="checkbox" name="ro_forbid_flag" title="Reverse only"/></td>
 								<td align="right">(M)</td><td><input type="checkbox" name="m_forbid_flag" title="Momentum"/></td>
@@ -1077,7 +1077,7 @@
 							<tr>
 								<td align="right">(CB)</td><td><input type="text" size="5" name="cb_limit_flag" title="Colorblind"/></td>
 								<td align="right">(&lt;-)</td><td><input type="text" size="5" name="lt_limit_flag" title="Left turn only"/></td>
-								<td align="right">(-&gt;)</td><td><input type="text" size="5" name="gt_limit_flag" title="Right turn only"/></td>
+								<td align="right">(-&gt;)</td><td><input type="text" size="5" name="rt_limit_flag" title="Right turn only"/></td>
 								<td align="right">(FO)</td><td><input type="text" size="5" name="fo_limit_flag" title="Forward only"/></td>
 								<td align="right">(RO)</td><td><input type="text" size="5" name="ro_limit_flag" title="Reverse only"/></td>
 								<td align="right">(M)</td><td><input type="text" size="5" name="m_limit_flag" title="Momentum"/></td>

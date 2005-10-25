@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,18 +7,28 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// bzflag common header
+#include "common.h"
+
+// interface header
+#include "BoltSceneNode.h"
+
+// system headers
 #include <stdlib.h>
 #include <math.h>
-#include "common.h"
-#include "BoltSceneNode.h"
-#include "ViewFrustum.h"
-#include "SceneRenderer.h"
-#include "OpenGLTexture.h"
+
+// common implementation headers
 #include "StateDatabase.h"
 #include "BZDBCache.h"
+
+// local implementation headers
+#include "ViewFrustum.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
+#include "SceneRenderer.h"
 
 BoltSceneNode::BoltSceneNode(const GLfloat pos[3]) :
 				drawFlares(false),
@@ -100,7 +110,6 @@ void			BoltSceneNode::setTexture(const int texture)
   builder.setTexture(texture);
   builder.enableTexture(texture>=0);
   gstate = builder.getState();
-  forceNotifyStyleChange();
 }
 
 void			BoltSceneNode::setTextureAnimation(int cu, int cv)
@@ -121,8 +130,7 @@ void			BoltSceneNode::addLight(
   renderer.addLight(light);
 }
 
-void			BoltSceneNode::notifyStyleChange(
-				const SceneRenderer&)
+void			BoltSceneNode::notifyStyleChange()
 {
   texturing = BZDBCache::texture && BZDBCache::blend;
   OpenGLGStateBuilder builder(gstate);
@@ -160,13 +168,13 @@ GLfloat			BoltSceneNode::BoltRenderNode::core[9][2];
 GLfloat			BoltSceneNode::BoltRenderNode::corona[8][2];
 const GLfloat		BoltSceneNode::BoltRenderNode::ring[8][2] = {
 				{ 1.0f, 0.0f },
-				{ M_SQRT1_2, M_SQRT1_2 },
+				{ (float)M_SQRT1_2, (float)M_SQRT1_2 },
 				{ 0.0f, 1.0f },
-				{ -M_SQRT1_2, M_SQRT1_2 },
+				{ (float)-M_SQRT1_2, (float)M_SQRT1_2 },
 				{ -1.0f, 0.0f },
-				{ -M_SQRT1_2, -M_SQRT1_2 },
+				{ (float)-M_SQRT1_2, (float)-M_SQRT1_2 },
 				{ 0.0f, -1.0f },
-				{ M_SQRT1_2, -M_SQRT1_2 }
+				{ (float)M_SQRT1_2, (float)-M_SQRT1_2 }
 			};
 
 BoltSceneNode::BoltRenderNode::BoltRenderNode(
@@ -187,7 +195,7 @@ BoltSceneNode::BoltRenderNode::BoltRenderNode(
       corona[i][1] = ring[i][1];
     }
   }
-  
+
   textureColor[0] = 1.0f;
   textureColor[1] = 1.0f;
   textureColor[2] = 1.0f;
@@ -261,17 +269,17 @@ void			BoltSceneNode::BoltRenderNode::render()
   const GLfloat* sphere = sceneNode->getSphere();
   glPushMatrix();
     glTranslatef(sphere[0], sphere[1], sphere[2]);
-    SceneRenderer::getInstance()->getViewFrustum().executeBillboard();
+    RENDERER.getViewFrustum().executeBillboard();
     glScalef(sceneNode->size, sceneNode->size, sceneNode->size);
 
     // draw some flares
     if (sceneNode->drawFlares) {
-      if (!SceneRenderer::getInstance()->isSameFrame()) {
+      if (!RENDERER.isSameFrame()) {
 	numFlares = 3 + int(3.0f * (float)bzfrand());
 	for (int i = 0; i < numFlares; i++) {
-	  theta[i] = 2.0f * M_PI * (float)bzfrand();
+	  theta[i] = (float)(2.0 * M_PI * bzfrand());
 	  phi[i] = (float)bzfrand() - 0.5f;
-	  phi[i] *= 2.0f * M_PI * fabsf(phi[i]);
+	  phi[i] *= (float)(2.0 * M_PI * fabsf(phi[i]));
 	}
       }
 
@@ -295,6 +303,8 @@ void			BoltSceneNode::BoltRenderNode::render()
       }
       glEnd();
       if (sceneNode->texturing) glEnable(GL_TEXTURE_2D);
+
+      addTriangleCount(numFlares * 2);
     }
 
     if (sceneNode->texturing) {
@@ -310,6 +320,7 @@ void			BoltSceneNode::BoltRenderNode::render()
       glTexCoord2f(   u0, dv+v0);
       glVertex2f  (-1.0f,  1.0f);
       glEnd();
+      addTriangleCount(2);
     }
 
     else if (BZDBCache::blend) {
@@ -351,7 +362,7 @@ void			BoltSceneNode::BoltRenderNode::render()
       glVertex2fv(core[1]);
       myColor4fv(outerColor);
       glVertex2fv(corona[0]);
-      glEnd();
+      glEnd(); // 18 verts -> 16 tris
 
       // draw core
       glBegin(GL_TRIANGLE_FAN);
@@ -367,7 +378,9 @@ void			BoltSceneNode::BoltRenderNode::render()
       glVertex2fv(core[7]);
       glVertex2fv(core[8]);
       glVertex2fv(core[1]);
-      glEnd();
+      glEnd(); // 10 verts -> 8 tris
+
+      addTriangleCount(24);
     }
 
     else {
@@ -393,7 +406,7 @@ void			BoltSceneNode::BoltRenderNode::render()
       glVertex2fv(corona[7]);
       glVertex2fv(core[1]);
       glVertex2fv(corona[0]);
-      glEnd();
+      glEnd(); // 18 verts -> 16 tris
 
       // draw core
       myStipple(1.0f);
@@ -410,14 +423,16 @@ void			BoltSceneNode::BoltRenderNode::render()
       glVertex2fv(core[7]);
       glVertex2fv(core[8]);
       glVertex2fv(core[1]);
-      glEnd();
+      glEnd(); // 10 verts -> 8 tris
 
       myStipple(0.5f);
+
+      addTriangleCount(24);
     }
 
   glPopMatrix();
 
-  if (SceneRenderer::getInstance()->isLastFrame()) {
+  if (RENDERER.isLastFrame()) {
     if (++u == cu) {
       u = 0;
       if (++v == cv) v = 0;

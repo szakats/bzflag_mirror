@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,14 +7,18 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef STDINUI_H
 #define STDINUI_H
 
+#include "common.h"
+
+/* system interface headers */
 #include <string>
 
+/* common interface headers */
 #include "Address.h"
 #include "BZAdminUI.h"
 #include "global.h"
@@ -24,9 +28,9 @@
 /** This class is an interface for bzadmin that reads commands from stdin. */
 class StdInUI : public BZAdminUI {
 public:
-  
+
   StdInUI(BZAdminClient& c);
-  
+
   bool checkCommand(std::string& str);
 
   /** This function returns a pointer to a dynamically allocated

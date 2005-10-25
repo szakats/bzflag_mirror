@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2005 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __LAGINFO_H__
@@ -20,23 +20,32 @@
 class LagInfo {
 public:
   /** A default constructor.
-      It needs a pointer to the Player basic Info,     
+      It needs a pointer to the Player basic Info,
    */
   LagInfo(PlayerInfo *_info);
 
+  /** Resetting lag value
+  */
+  void	reset();
+  /** Getting lag value (in milliseconds)
+  */
+  int	getLag() const;
+  /** Get the floating point value of the lag (in seconds)
+  */
+  float	getLagAvg() const;
   /** Get a printable version of lag statistics
   */
-  void        getLagStats(char* msg);
+  void	getLagStats(char* msg, bool isAdmin) const;
   /** functions to be called whenever a playerUpdate or ping message arrives
    */
-  int         updatePingLag(void *buf, bool &warn, bool &kick);
-  void        updateLag(float timestamp, bool ooo);
+  int	updatePingLag(void *buf, bool &warn, bool &kick);
+  void	updateLag(float timestamp, bool ooo);
   /** get the ping seqno, if need to send one now!
    */
-  int         getNextPingSeqno(bool &warn, bool &kick);
+  int	getNextPingSeqno(bool &warn, bool &kick);
   /** update the latency
    */
-  void        updateLatency(float &waitTime);
+  void	updateLatency(float &waitTime);
   /** set the threshold for warning/kicking
    */
   static void setThreshold(float _threshold, float _max);
@@ -49,15 +58,15 @@ private:
   float       lagalpha;
   float       jitteralpha;
   float       lostalpha;
-  int         lagcount;
-  int         laglastwarn;
-  int         lagwarncount;
-  bool        pingpending;
+  int	 lagcount;
+  int	 laglastwarn;
+  int	 lagwarncount;
+  bool	pingpending;
   TimeKeeper  nextping;
   TimeKeeper  lastping;
   TimeKeeper  lastupdate;
-  int         pingseqno;
-  int         pingssent;
+  int	 pingseqno;
+  int	 pingssent;
   // jitter measurement
   float       lasttimestamp;
 
