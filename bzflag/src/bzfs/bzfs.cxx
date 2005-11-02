@@ -1417,6 +1417,27 @@ static void addPlayer(int playerIndex, GameKeeper::Player *playerData)
     }
   }
 
+  // clients must be better then 2.0.4 for 'advanced' graphics servers
+  if ((clOptions->gameStyle & RequireGraphics) != 0) {
+    const int minMajor = 2;
+    const int minMinor = 0;
+    const int minRevision = 5;
+    int major, minor, rev;
+    playerData->player.getClientVersionNumbers(major, minor, rev);
+    if ((major < minMajor) ||
+        ((major == minMajor) &&
+         ((minor < minMinor) ||
+          ((minor == minMinor) &&
+           (rev < minRevision))))) {
+      char buffer[256];
+      snprintf(buffer, 256,
+               "This server requires a client version %i.%i.%i or higher.",
+               minMajor, minMinor, minRevision);
+      rejectPlayer(playerIndex, RejectBadRequest, buffer);
+      return;
+    }
+  }
+
   // check against ban lists
   playerData->setNeedThisHostbanChecked(true);
   bool playerIsAntiBanned = playerData->accessInfo.hasPerm(PlayerAccessInfo::antiban);
