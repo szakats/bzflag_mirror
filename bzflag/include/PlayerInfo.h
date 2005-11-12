@@ -59,7 +59,7 @@ class PlayerInfo {
 public:
   PlayerInfo(int _playerIndex);
 
-  int   getPlayerIndex( void ) {return playerIndex;}
+  int   getPlayerIndex( void ) const { return playerIndex; } 
   void	setLastMsg(std::string msg);
   const std::string& getLastMsg() const;
   TimeKeeper  getLastMsgTime() const;
@@ -87,7 +87,7 @@ public:
   void       *packVirtualFlagCapture(void *buf);
   bool	isTeam(TeamColor team) const;
   bool	isObserver() const;
-  TeamColor   getTeam();
+  TeamColor   getTeam() const;
   void	setTeam(TeamColor team);
   void	wasARabbit();
   void	wasNotARabbit();
@@ -98,6 +98,7 @@ public:
   void	setFlag(int flag);
   bool	isFlagTransitSafe();
   const char *getClientVersion();
+  void getClientVersionNumbers(int& major, int& minor, int& revision);
   std::string getIdleStat();
   bool	canBeRabbit(bool relaxing = false);
   void	setPaused(bool paused);
@@ -144,6 +145,9 @@ private:
   char email[EmailLen];
   // version information from client
   char clientVersion[VersionLen];
+  int clientVersionMajor;
+  int clientVersionMinor;
+  int clientVersionRevision;
 
   // player's team
   TeamColor team;
