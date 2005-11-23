@@ -739,7 +739,7 @@ void			LocalPlayer::doUpdateMotion(float dt)
 
   if (justLanded) {
     setLandingSpeed(oldVelocity[2]);
-		EffectsRenderer::instance().addLandEffect(getTeam(),newPos,getAngle());
+    EFFECTS.addLandEffect(getTeam(),newPos,getAngle());
   }
   if (gettingSound) {
     const PhysicsDriver* phydriver = PHYDRVMGR.getDriver(getPhysicsDriver());
@@ -970,16 +970,23 @@ void LocalPlayer::collectInsideBuildings()
 
 float			LocalPlayer::getReloadTime() const
 {
-  float time = float(jamTime - TimeKeeper::getCurrent());
-  if (time > 0.0f)
-    return time;
-
-    // look for an empty slot
   const int numShots = World::getWorld()->getMaxShots();
+  if (numShots <= 0) {
+    return 0.0f;
+  }
+  
+  float time = float(jamTime - TimeKeeper::getCurrent());
+  if (time > 0.0f) {
+    return time;
+  }
+
+  // look for an empty slot
   int i;
-  for (i = 0; i < numShots; i++)
-    if (!shots[i])
+  for (i = 0; i < numShots; i++) {
+    if (!shots[i]) {
       return 0.0f;
+    }
+  }
 
   // look for the shot fired least recently
   float minTime = float(shots[0]->getReloadTime() -
@@ -987,10 +994,15 @@ float			LocalPlayer::getReloadTime() const
   for (i = 1; i < numShots; i++) {
     const float t = float(shots[i]->getReloadTime() -
       (shots[i]->getCurrentTime() - shots[i]->getStartTime()));
-    if (t < minTime) minTime = t;
+    if (t < minTime) {
+      minTime = t;
+    }
   }
 
-  if (minTime < 0.0f) minTime = 0.0f;
+  if (minTime < 0.0f) {
+    minTime = 0.0f;
+  }
+  
   return minTime;
 }
 
@@ -1242,7 +1254,7 @@ bool			LocalPlayer::fireShot()
   server->sendBeginShot(firingInfo);
 
   if (BZDB.isTrue("enableLocalShotEffect") && SceneRenderer::instance().useQuality() >= 2)
-    EffectsRenderer::instance().addShotEffect(getTeam(), firingInfo.shot.pos, getAngle(), getVelocity());
+    EFFECTS.addShotEffect(getTeam(), firingInfo.shot.pos, getAngle(), getVelocity());
 
   if (gettingSound) {
     if (firingInfo.flagType == Flags::ShockWave) {
