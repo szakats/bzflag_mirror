@@ -277,9 +277,9 @@ BZAdminClient::ServerCode BZAdminClient::checkMessage() {
 	  vbuf = nboUnpackUByte(vbuf, p);
 	  vbuf = a.unpack(vbuf);
 	  players[p].ip = a.getDotNotation();
-	  if (messageMask[MsgAdminInfo]){
-	    ui->outputMessage("*** IPINFO: " + players[p].name + " from "  +
-	      players[p].ip, Default);
+	  if ((ui != NULL) && messageMask[MsgAdminInfo]){
+            ui->outputMessage("*** IPINFO: " + players[p].name + " from "  +
+              players[p].ip, Default);
 	  }
 	}
       }
@@ -291,7 +291,7 @@ BZAdminClient::ServerCode BZAdminClient::checkMessage() {
 	players[p].ip = a.getDotNotation();
 	Team temp;
 	if (messageMask[MsgAdminInfo]){
-	  std::string joinMsg = std::string("*** \'") + callsign + "\' joined the game as " +
+	  std::string joinMsg = std::string("*** \'") + players[p].name + "\' joined the game as " +
 	    temp.getName(players[p].team) + " from " + players[p].ip + ".";
 	  lastMessage.first = joinMsg;
 	}
