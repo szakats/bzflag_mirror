@@ -42,11 +42,6 @@
 #endif
 #include "TimeKeeper.h"
 
-#ifndef BUILDING_BZADMIN
-// bzflag local implementation headers
-#include "playing.h"
-#endif
-
 #define UDEBUG if (UDEBUGMSG) printf
 #define UDEBUGMSG false
 
@@ -94,9 +89,7 @@ ServerLink*		ServerLink::server = NULL;
 ServerLink::ServerLink(const Address& serverAddress, int port) :
 				state(SocketError),	// assume failure
 				fd(-1),			// assume failure
-				udpLength(0),
-				oldNeedForSpeed(false),
-				previousFill(0)
+				udpLength(0)
 {
   int i;
 
@@ -334,43 +327,16 @@ void			ServerLink::setServer(ServerLink* _server)
   server = _server;
 }
 
-void ServerLink::flush()
-{
-  if (!previousFill)
-    return;
-  if (oldNeedForSpeed) {
-#ifdef TESTLINK
-    if ((random()%TESTQUALTIY) != 0)
-#endif
-      sendto(urecvfd, (const char *)txbuf, previousFill, 0,
-	     &usendaddr, sizeof(usendaddr));
-    // we don't care about errors yet
-  } else {
-    int r = ::send(fd, (const char *)txbuf, previousFill, 0);
-    (void)r; // silence g++
-#if defined(_WIN32)
-    if (r == SOCKET_ERROR) {
-      const int e = WSAGetLastError();
-      if (e == WSAENETRESET || e == WSAECONNABORTED ||
-	  e == WSAECONNRESET || e == WSAETIMEDOUT)
-	state = Hungup;
-      r = 0;
-    }
-#endif
-  
-#if defined(NETWORK_STATS)
-    bytesSent += r;
-    packetsSent++;
-#endif
-  }
-  previousFill = 0;
-}
-
 void			ServerLink::send(uint16_t code, uint16_t len,
 							const void* msg)
 {
   bool needForSpeed=false;
   if (state != Okay) return;
+  char msgbuf[MaxPacketLen];
+  void* buf = msgbuf;
+  buf = nboPackUShort(buf, len);
+  buf = nboPackUShort(buf, code);
+  if (msg && len != 0) buf = nboPackString(buf, msg, len);
 
   if ((urecvfd>=0) && ulinkup ) {
     switch (code) {
@@ -389,17 +355,31 @@ void			ServerLink::send(uint16_t code, uint16_t len,
   if (code == MsgUDPLinkRequest)
     needForSpeed=true;
 
-  if ((needForSpeed != oldNeedForSpeed)
-      || (previousFill + len + 4 > MaxPacketLen))
-    flush();
-  oldNeedForSpeed = needForSpeed;
+  if (needForSpeed) {
+#ifdef TESTLINK
+    if ((random()%TESTQUALTIY) != 0)
+#endif
+    sendto(urecvfd, (const char *)msgbuf, (char*)buf - msgbuf, 0, &usendaddr, sizeof(usendaddr));
+    // we don't care about errors yet
+    return;
+  }
 
-  void* buf = txbuf + previousFill;
-  buf       = nboPackUShort(buf, len);
-  buf       = nboPackUShort(buf, code);
-  if (msg && len != 0)
-    buf = nboPackString(buf, msg, len);
-  previousFill += len + 4;
+  int r = ::send(fd, (const char*)msgbuf, len + 4, 0);
+  (void)r; // silence g++
+#if defined(_WIN32)
+  if (r == SOCKET_ERROR) {
+    const int e = WSAGetLastError();
+    if (e == WSAENETRESET || e == WSAECONNABORTED ||
+	e == WSAECONNRESET || e == WSAETIMEDOUT)
+      state = Hungup;
+    r = 0;
+  }
+#endif
+
+#if defined(NETWORK_STATS)
+  bytesSent += r;
+  packetsSent++;
+#endif
 }
 
 #ifdef WIN32
@@ -611,7 +591,6 @@ bool ServerLink::readEnter (std::string& reason,
   return true;
 }
 
-#ifndef BUILDING_BZADMIN
 void			ServerLink::sendCaptureFlag(TeamColor team)
 {
   char msg[2];
@@ -654,6 +633,8 @@ void			ServerLink::sendKilled(const PlayerId& killer,
   send(MsgKilled, (char*)buf - (char*)msg, msg);
 }
 
+
+#ifndef BUILDING_BZADMIN
 void			ServerLink::sendPlayerUpdate(Player* player)
 {
   char msg[PlayerUpdatePLenMax];
@@ -673,6 +654,7 @@ void			ServerLink::sendPlayerUpdate(Player* player)
 
   send(code, len, msg);
 }
+#endif
 
 void			ServerLink::sendBeginShot(const FiringInfo& info)
 {
@@ -680,7 +662,6 @@ void			ServerLink::sendBeginShot(const FiringInfo& info)
   void* buf = msg;
   buf = info.pack(buf);
   send(MsgShotBegin, sizeof(msg), msg);
-  injectMessages(MsgShotBegin, sizeof(msg), msg);
 }
 
 void			ServerLink::sendEndShot(const PlayerId& source,
@@ -692,9 +673,7 @@ void			ServerLink::sendEndShot(const PlayerId& source,
   buf = nboPackShort(buf, int16_t(shotId));
   buf = nboPackUShort(buf, uint16_t(reason));
   send(MsgShotEnd, sizeof(msg), msg);
-  injectMessages(MsgShotEnd, sizeof(msg), msg);
 }
-#endif
 
 void			ServerLink::sendAlive()
 {

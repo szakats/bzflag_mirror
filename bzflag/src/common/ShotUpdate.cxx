@@ -73,15 +73,6 @@ void*			FiringInfo::unpack(void* buf)
  return buf;
 }
 
-void*			FiringInfo::unpackW(void* buf)
-{
-  buf = nboUnpackFloat(buf, timeSent);
-  buf = shot.unpack(buf);
-  buf = FlagType::unpack(buf, flagType);
-  buf = nboUnpackFloat(buf, lifetime);
- return buf;
-}
-
 // Local Variables: ***
 // mode:C++ ***
 // tab-width: 8 ***

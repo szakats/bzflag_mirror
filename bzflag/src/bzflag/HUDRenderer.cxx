@@ -633,8 +633,9 @@ void			HUDRenderer::render(SceneRenderer& renderer)
   else {
     const bool showTimes = (fps > 0.0f) || (drawTime > 0.0f) ||
                            (triangleCount > 0) || (radarTriangleCount > 0);
+    const bool showTankLabels = BZDB.isTrue("displayLabels");                           
 
-    if (showCompose || showTimes) {
+    if (showCompose || showTimes || showTankLabels) {
       // get view metrics
       const int width = window.getWidth();
       const int height = window.getHeight();
@@ -655,6 +656,9 @@ void			HUDRenderer::render(SceneRenderer& renderer)
       }
       if (showTimes) {
         renderTimes();
+      }
+      if (showTankLabels) {
+        renderTankLabels(renderer);
       }
 
       glPopMatrix();
@@ -707,7 +711,7 @@ void			HUDRenderer::renderStatus(void)
   // print player name and score in upper left corner in team (radar) color
   if (!roaming && (!playerHasHighScore || scoreClock.isOn())) {
     sprintf(buffer, "%s: %d", myTank->getCallSign(), myTank->getScore());
-    hudColor3fv(Team::getRadarColor(teamIndex));
+    hudColor3fv(Team::getRadarColor(teamIndex, World::getWorld()->allowRabbit()));
     fm.drawString(x, y, 0, majorFontFace, majorFontSize, buffer);
   }
 
@@ -864,7 +868,7 @@ void			HUDRenderer::renderTankLabels(SceneRenderer& renderer)
     if (pl && pl->isAlive()) {
       const char *name = pl->getCallSign();
       double x, y, z;
-      hudSColor3fv(Team::getRadarColor(pl->getTeam()));
+      hudSColor3fv(Team::getRadarColor(pl->getTeam(), World::getWorld()->allowRabbit()));
       gluProject(pl->getPosition()[0], pl->getPosition()[1],
 		 pl->getPosition()[2], model, proj, view, &x, &y, &z);
       if (z >= 0.0 && z <= 1.0) {

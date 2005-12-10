@@ -46,7 +46,6 @@ int		Player::tankTexture = -1;
 Player::Player(const PlayerId& _id, TeamColor _team,
 	       const char* name, const char* _email, const PlayerType _type) :
   lastObstacle(NULL),
-  handicap(0.0f),
   notResponding(false),
   hunted(false),
   id(_id),
@@ -133,12 +132,6 @@ Player::Player(const PlayerId& _id, TeamColor _team,
 
 Player::~Player()
 {
-  // free shots
-  const int numShots = getMaxShots();
-  for (int i = 0; i < numShots; i++)
-    if (shots[i])
-      delete shots[i];
-
   if (id != ServerPlayer) {
     delete tankIDLNode;
     delete tankNode;
@@ -622,13 +615,11 @@ void Player::updateTreads(float dt)
 }
 
 
-void Player::changeScore(short deltaWins,
-			 short deltaLosses,
-			 short deltaTeamKills)
+void Player::changeScore(short deltaWins, short deltaLosses, short deltaTeamKills)
 {
-  wins   = deltaWins;
-  losses = deltaLosses;
-  tks    = deltaTeamKills;
+  wins += deltaWins;
+  losses += deltaLosses;
+  tks += deltaTeamKills;
 }
 
 
@@ -737,9 +728,15 @@ void Player::setVisualTeam (TeamColor visualTeam)
     shininess = tankShininess;
   }
 
+  // get the texture each time, since it's just a refrence
+  const bool hunter = World::getWorld()->allowRabbit() && visualTeam != RabbitTeam;
+
   TextureManager &tm = TextureManager::instance();
   std::string texName;
-  texName = Team::getImagePrefix(visualTeam);
+  if (hunter)
+    texName = BZDB.get("hunterTeamPrefix");
+  else
+    texName = Team::getImagePrefix(visualTeam);
 
   texName += BZDB.get("tankTexture");
 
@@ -752,10 +749,18 @@ void Player::setVisualTeam (TeamColor visualTeam)
   if (tankTexture < 0)
     tankTexture = tm.getTextureID(texName.c_str(),false);
 
-  const float* _color = Team::getTankColor(visualTeam);
-  color[0] = _color[0];
-  color[1] = _color[1];
-  color[2] = _color[2];
+  // we are the hunter, we are orange..
+  // TODO this is cheap, just untill a "hunter" team is made
+  if (hunter) {
+    color[0] = 1.0f;
+    color[1] = 0.5f;
+    color[2] = 0.0f;
+  } else {
+    const float* _color = Team::getTankColor(visualTeam);
+    color[0] = _color[0];
+    color[1] = _color[1];
+    color[2] = _color[2];
+  }
   tankNode->setMaterial(OpenGLMaterial(tankSpecular, emissive, shininess));
   tankNode->setTexture(tankTexture);
 
@@ -977,6 +982,12 @@ void Player::spawnEffect()
   }
   spawnTime = TimeKeeper::getCurrent();
   return;
+}
+
+
+int Player::getMaxShots() const
+{
+  return World::getWorld()->getMaxShots();
 }
 
 
@@ -1374,82 +1385,6 @@ void Player::setIpAddress(const Address& addr)
   haveIpAddr = true;
 }
 
-ShotPath* Player::getShot(int index) const
-{
-  index &= 0x00FF;
-  if (index >= (int)shots.size())
-    return NULL;
-  return shots[index];
-}
-
-void Player::prepareShotInfo(FiringInfo &firingInfo)
-{
-  firingInfo.shot.dt = 0.0f;
-  firingInfo.lifetime = BZDB.eval(StateDatabase::BZDB_RELOADTIME);
-
-  firingInfo.flagType = getFlag();
-  // wee bit o hack -- if phantom flag but not phantomized
-  // the shot flag is normal -- otherwise FiringInfo will have
-  // to be changed to add a real bitwise status variable
-  if (getFlag() == Flags::PhantomZone && !isFlagActive())
-    firingInfo.flagType = Flags::Null;
-
-  // FIXME team coloring of shot is never used; it was meant to be used
-  // for rabbit mode to correctly calculate team kills when rabbit changes
-  firingInfo.shot.team = getTeam();
-
-  if (firingInfo.flagType == Flags::ShockWave) {
-    // move shot origin under tank and make it stationary
-    const float* pos = getPosition();
-    firingInfo.shot.pos[0] = pos[0];
-    firingInfo.shot.pos[1] = pos[1];
-    firingInfo.shot.pos[2] = pos[2];
-    firingInfo.shot.vel[0] = 0.0f;
-    firingInfo.shot.vel[1] = 0.0f;
-    firingInfo.shot.vel[2] = 0.0f;
-  } else {
-    getMuzzle(firingInfo.shot.pos);
-
-    const float* dir     = getForward();
-    const float* tankVel = getVelocity();
-    float shotSpeed      = BZDB.eval(StateDatabase::BZDB_SHOTSPEED);
-
-    if (handicap > 0.0f) {
-      // apply any handicap advantage to shot speed
-      const float speedAd = 1.0f
-	+ (handicap * (BZDB.eval(StateDatabase::BZDB_HANDICAPSHOTAD) - 1.0f));
-      shotSpeed *= speedAd;
-    }
-
-    firingInfo.shot.vel[0] = tankVel[0] + shotSpeed * dir[0];
-    firingInfo.shot.vel[1] = tankVel[1] + shotSpeed * dir[1];
-    firingInfo.shot.vel[2] = tankVel[2] + shotSpeed * dir[2];
-
-    // Set _shotsKeepVerticalVelocity on the server if you want shots
-    // to have the same vertical velocity as the tank when fired.
-    // keeping shots moving horizontally makes the game more playable.
-    if (!BZDB.isTrue(StateDatabase::BZDB_SHOTSKEEPVERTICALV))
-      firingInfo.shot.vel[2] = 0.0f;
-  }
-}
-
-void Player::addShot(ShotPath *shot, const FiringInfo &info)
-{
-  int shotNum = int(shot->getShotId() & 255);
-
-  if (shotNum >= (int)shots.size())
-    shots.resize(shotNum+1);
-  else if (shots[shotNum] != NULL)
-    delete shots[shotNum];
-
-  shots[shotNum] = shot;
-  shotStatistics.recordFire(info.flagType);
-}
-
-void Player::setHandicap(float _handicap)
-{
-    handicap = _handicap;
-}
 
 // Local Variables: ***
 // mode:C++ ***

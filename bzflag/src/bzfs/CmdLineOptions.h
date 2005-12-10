@@ -30,6 +30,9 @@
 #include "AccessControlList.h"
 #include "TextChunkManager.h"
 
+// avoid dependencies
+class EntryZones;
+
 /* constants provided for general consumption */
 const int MaxPlayers = 200;
 const int MaxShots = 20;
@@ -65,7 +68,7 @@ struct CmdLineOptions
     numAllowedFlags(0), shakeWins(0), shakeTimeout(0),
     teamFlagTimeout(30), maxlagwarn(10000), lagwarnthresh(-1.0),
     idlekickthresh(-1.0), timeLimit(0.0f), timeElapsed(0.0f),
-    useGivenPort(false),
+    linearAcceleration(_DEFAULT_LIN_ACCEL), angularAcceleration(_DEFAULT_ANGLE_ACCELL), useGivenPort(false),
     useFallbackPort(false), requireUDP(false), randomBoxes(false),
     randomCTF(false), flagsOnBuildings(false), respawnOnBuildings(false),
     oneGameOnly(false), timeManualStart(false), randomHeights(false),
@@ -133,6 +136,8 @@ struct CmdLineOptions
   float			idlekickthresh;
   float			timeLimit;
   float			timeElapsed;
+  float			linearAcceleration;
+  float			angularAcceleration;
 
   bool			useGivenPort;
   bool			useFallbackPort;
@@ -152,7 +157,7 @@ struct CmdLineOptions
   bool			startRecording;
   bool			timestampLog;
   bool			timestampMicros;
-  bool			countdownPaused;
+	bool			countdownPaused;
 
   uint16_t		maxTeam[NumTeams];
   FlagNumberMap		flagCount;
@@ -204,7 +209,7 @@ struct CmdLineOptions
 
 
 void parse(int argc, char **argv, CmdLineOptions &options, bool fromWorldFile = false);
-void finalizeParsing(int argc, char **argv, CmdLineOptions &options);
+void finalizeParsing(int argc, char **argv, CmdLineOptions &options, EntryZones& ez);
 bool checkCommaList (const char *list, int maxlen);
 
 #else

@@ -61,8 +61,7 @@ extern void sendPlayerMessage(GameKeeper::Player *playerData,
 			      PlayerId dstPlayer,
 			      const char *message);
 extern char *getDirectMessageBuffer();
-extern void  broadcastMessage(uint16_t code, int len, const void *msg,
-			      bool alsoTty = true);
+extern void  broadcastMessage(uint16_t code, int len, const void *msg);
 extern void  sendTeamUpdate(int playerIndex = -1,
 			    int teamIndex1 = -1,
 			    int teamIndex2 = -1);
@@ -77,6 +76,7 @@ extern bool  areFoes(TeamColor team1, TeamColor team2);
 extern PingPacket getTeamCounts();
 extern void       zapFlagByPlayer(int playerIndex);
 extern void       resetFlag(FlagInfo &flag);
+extern void       dropFlag(FlagInfo& flag, const float dropPos[3]);
 extern void       publicize();
 extern TeamColor  whoseBase(float x, float y, float z);
 

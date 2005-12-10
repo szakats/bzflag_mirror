@@ -30,8 +30,8 @@ WordFilter *PlayerInfo::filterData	= NULL;
 bool	PlayerInfo::simpleFiltering   = true;
 
 PlayerInfo::PlayerInfo(int _playerIndex) :
-  playerIndex(_playerIndex), state(PlayerInLimbo), hasDoneEntering(false),
-  flag(-1), spamWarns(0), lastMsgTime(now), paused(false),
+  playerIndex(_playerIndex), state(PlayerInLimbo), flag(-1),
+  spamWarns(0), lastMsgTime(now), paused(false),
   pausedSince(TimeKeeper::getNullTime()), autopilot(false), tracker(0)
 {
   notResponding = false;
@@ -39,6 +39,9 @@ PlayerInfo::PlayerInfo(int _playerIndex) :
   memset(callSign, 0, CallSignLen);
   memset(token, 0, TokenLen);
   memset(clientVersion, 0, VersionLen);
+  clientVersionMajor = -1;
+  clientVersionMinor = -1;
+  clientVersionRevision = -1;
 }
 
 void PlayerInfo::setFilterParameters(bool	_callSignFiltering,
@@ -120,6 +123,15 @@ bool PlayerInfo::unpackEnter(void *buf, uint16_t &rejectCode, char *rejectMsg)
   
   DEBUG2("Player %s [%d] sent version string: %s\n",
 	 callSign, playerIndex, clientVersion);
+  int major, minor, rev;
+  if (sscanf(clientVersion, "%d.%d.%d", &major, &minor, &rev) == 3) {
+    clientVersionMajor = major;
+    clientVersionMinor = minor;
+    clientVersionRevision = rev;
+  }
+  DEBUG4("Player %s version code parsed as:  %i.%i.%i\n", callSign,
+         clientVersionMajor, clientVersionMinor, clientVersionRevision);
+
   // spoof filter holds "SERVER" for robust name comparisons
   if (serverSpoofingFilter.wordCount() == 0) {
     serverSpoofingFilter.addToFilter("SERVER", "");
@@ -173,7 +185,7 @@ bool PlayerInfo::unpackEnter(void *buf, uint16_t &rejectCode, char *rejectMsg)
   if (token[0] == 0) {
     strcpy(token, "NONE");
   }
-  hasDoneEntering = true;
+
   return true;
 }
 
@@ -186,9 +198,9 @@ bool PlayerInfo::isCallSignReadable() {
   // keep a count of alpha-numerics
 
   int callsignlen = (int)strlen(callSign);
-  // reject less than 3 characters
-  if (callsignlen < 3) {
-    errorString = "Callsigns must be at least 3 characters.";
+  // reject less than 2 characters
+  if (callsignlen < 2) {
+    errorString = "Callsigns must be at least 2 characters.";
     return false;
   }
 
@@ -302,7 +314,7 @@ bool PlayerInfo::isObserver() const {
   return team == ObserverTeam;
 }
 
-TeamColor PlayerInfo::getTeam() {
+TeamColor PlayerInfo::getTeam() const {
   return team;
 }
 
@@ -311,7 +323,7 @@ void PlayerInfo::setTeam(TeamColor _team) {
 }
 
 void PlayerInfo::wasARabbit() {
-  team = HunterTeam;
+  team = RogueTeam;
   wasRabbit = true;
 }
 
@@ -334,6 +346,14 @@ bool PlayerInfo::isFlagTransitSafe() {
 
 const char *PlayerInfo::getClientVersion() {
   return clientVersion;
+}
+
+void PlayerInfo::getClientVersionNumbers(int& major, int& minor, int& rev)
+{
+  major = clientVersionMajor;
+  minor = clientVersionMinor;
+  rev = clientVersionRevision;
+  return;
 }
 
 std::string PlayerInfo::getIdleStat() {

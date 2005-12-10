@@ -58,8 +58,8 @@ SDLDisplay::SDLDisplay() : fullScreen(false), base_width(640),
     defaultResolutionIndex = 0;
 #ifdef WIN32
     HDC hDC = GetDC(GetDesktopWindow());
-    defaultWidth = GetDeviceCaps(hDC, HORZRES);
-    defaultHeight = GetDeviceCaps(hDC, VERTRES);
+    int defaultWidth = GetDeviceCaps(hDC, HORZRES);
+    int defaultHeight = GetDeviceCaps(hDC, VERTRES);
     ReleaseDC(GetDesktopWindow(), hDC);
 #endif
     for (int i = 0; modeList[i]; i++) {
@@ -80,8 +80,6 @@ SDLDisplay::SDLDisplay() : fullScreen(false), base_width(640),
   } else {
     // if no modes then make default
     _resolutions[0] = new ResInfo ("default", 640, 480, 0);
-    defaultWidth = 640;
-    defaultHeight = 480;
   }
 
   // limit us to the main display
@@ -559,18 +557,6 @@ void SDLDisplay::getWindowSize(int& width, int& height) {
   } else {
     width  = base_width;
     height = base_height;
-  }
-  
-  /* sanity checks */
-  if (width <= 0) {
-    modeIndex = -1;
-    width = defaultWidth;
-    printf("ERROR: Non-positive window width encountered (%d)\n", width);
-  }
-  if (height <= 0) {
-    modeIndex = -1;
-    height = defaultHeight;
-    printf("ERROR: Non-positive window height encountered (%d)\n", height);
   }
 }
 

@@ -52,6 +52,7 @@ LocalPlayer::LocalPlayer(const PlayerId& _id,
   stuckFrameCount(0),
   spawning(false),
   wingsFlapCount(0),
+  handicap(0.0f),
   left(false),
   right(false),
   up(false),
@@ -63,7 +64,7 @@ LocalPlayer::LocalPlayer(const PlayerId& _id,
 {
   // initialize shots array to no shots fired
   const int numShots = World::getWorld()->getMaxShots();
-  shots.resize(numShots);
+  shots = new LocalShotPath*[numShots];
   for (int i = 0; i < numShots; i++)
     shots[i] = NULL;
   // set input method
@@ -76,6 +77,13 @@ LocalPlayer::LocalPlayer(const PlayerId& _id,
 
 LocalPlayer::~LocalPlayer()
 {
+  // free shots
+  const int numShots = World::getWorld()->getMaxShots();
+  for (int i = 0; i < numShots; i++)
+    if (shots[i])
+      delete shots[i];
+  delete[] shots;
+
   // free antidote flag
   delete antidoteFlag;
 }
@@ -88,7 +96,7 @@ void			LocalPlayer::setMyTank(LocalPlayer* player)
 void			LocalPlayer::doUpdate(float dt)
 {
   const bool hadShotActive = anyShotActive;
-  const int numShots = getMaxShots();
+  const int numShots = World::getWorld()->getMaxShots();
   static TimeKeeper pauseTime = TimeKeeper::getNullTime();
   static bool wasPaused = false;
 
@@ -1013,6 +1021,14 @@ const GLfloat*		LocalPlayer::getAntidoteLocation() const
   return (const GLfloat*)(antidoteFlag ? antidoteFlag->getSphere() : NULL);
 }
 
+ShotPath*		LocalPlayer::getShot(int index) const
+{
+  index &= 0x00FF;
+  if ((index < 0) || (index >= World::getWorld()->getMaxShots()))
+    return NULL;
+  return shots[index];
+}
+
 void			LocalPlayer::restart(const float* pos, float _azimuth)
 {
   // put me in limbo
@@ -1022,7 +1038,7 @@ void			LocalPlayer::restart(const float* pos, float _azimuth)
   setFlag(Flags::Null);
 
   // get rid of existing shots
-  const int numShots = getMaxShots();
+  const int numShots = World::getWorld()->getMaxShots();
   // get rid of existing shots
   for (int i = 0; i < numShots; i++)
     if (shots[i]) {
@@ -1053,6 +1069,7 @@ void			LocalPlayer::restart(const float* pos, float _azimuth)
   down  = false;
   wantJump = false;
   doUpdateMotion(0.0f);
+  updateHandicap();
   entryDrop = true;
 
   // make me alive now
@@ -1182,7 +1199,7 @@ bool			LocalPlayer::fireShot()
     return false;
 
   // find an empty slot
-  const int numShots = getMaxShots();
+  const int numShots = World::getWorld()->getMaxShots();
   int i;
   for (i = 0; i < numShots; i++)
     if (!shots[i])
@@ -1196,21 +1213,44 @@ bool			LocalPlayer::fireShot()
   }
 
   // prepare shot
-  FiringInfo firingInfo;
-  firingInfo.shot.player = getId();
-  firingInfo.shot.id     = uint16_t(i + getSalt());
-  prepareShotInfo(firingInfo);
+  FiringInfo firingInfo(*this, i + getSalt());
+  // FIXME team coloring of shot is never used; it was meant to be used
+  // for rabbit mode to correctly calculate team kills when rabbit changes
+  firingInfo.shot.team = getTeam();
+  if (firingInfo.flagType == Flags::ShockWave) {
+    // move shot origin under tank and make it stationary
+    const float* pos = getPosition();
+    firingInfo.shot.pos[0] = pos[0];
+    firingInfo.shot.pos[1] = pos[1];
+    firingInfo.shot.pos[2] = pos[2];
+    firingInfo.shot.vel[0] = 0.0f;
+    firingInfo.shot.vel[1] = 0.0f;
+    firingInfo.shot.vel[2] = 0.0f;
+  }
+  else {
+    // apply any handicap advantage to shot speed
+    if (handicap > 0.0f) {
+      const float speedAd = 1.0f + (handicap * (BZDB.eval(StateDatabase::BZDB_HANDICAPSHOTAD) - 1.0f));
+      const float* dir = getForward();
+      const float* tankVel = getVelocity();
+      const float shotSpeed = speedAd * BZDB.eval(StateDatabase::BZDB_SHOTSPEED);
+      firingInfo.shot.vel[0] = tankVel[0] + shotSpeed * dir[0];
+      firingInfo.shot.vel[1] = tankVel[1] + shotSpeed * dir[1];
+      firingInfo.shot.vel[2] = tankVel[2] + shotSpeed * dir[2];
+    }
+    // Set _shotsKeepVerticalVelocity on the server if you want shots
+    // to have the same vertical velocity as the tank when fired.
+    // keeping shots moving horizontally makes the game more playable.
+    if (!BZDB.isTrue(StateDatabase::BZDB_SHOTSKEEPVERTICALV)) firingInfo.shot.vel[2] = 0.0f;
+  }
+
   // make shot and put it in the table
-  addShot(new LocalShotPath(firingInfo), firingInfo);
+  shots[i] = new LocalShotPath(firingInfo);
 
   // Insert timestamp, useful for dead reckoning jitter fixing
   const float timeStamp = float(TimeKeeper::getCurrent() - TimeKeeper::getNullTime());
   firingInfo.timeSent = timeStamp;
 
-  // always send a player-update message. To synchronize movement and
-  // shot start. They should generally travel on the same frame, when
-  // flushing the output queues.
-  server->sendPlayerUpdate(this);
   server->sendBeginShot(firingInfo);
 
   if (BZDB.isTrue("enableLocalShotEffect") && SceneRenderer::instance().useQuality() >= 2)
@@ -1239,6 +1279,8 @@ bool			LocalPlayer::fireShot()
     }
   }
 
+  shotStatistics.recordFire(firingInfo.flagType);
+
   if (getFlag() == Flags::TriggerHappy) {
     // make sure all the shots don't go off at once
     forceReload(BZDB.eval(StateDatabase::BZDB_RELOADTIME) / numShots);
@@ -1264,7 +1306,7 @@ bool LocalPlayer::doEndShot(int ident, bool isHit, float* pos)
     return false;
 
   // ignore bogus shots (those with a bad index or for shots that don't exist)
-  if (index < 0 || index >= getMaxShots() || !shots[index])
+  if (index < 0 || index >= World::getWorld()->getMaxShots() || !shots[index])
     return false;
 
   // ignore shots that already ending
@@ -1417,12 +1459,10 @@ void			LocalPlayer::doMomentum(float dt,
 						float& speed, float& angVel)
 {
   // get maximum linear and angular accelerations
-  float linearAcc = (getFlag() == Flags::Momentum)
-    ? BZDB.eval(StateDatabase::BZDB_MOMENTUMLINACC)
-    : BZDB.eval(StateDatabase::BZDB_INERTIALINEAR);
-  float angularAcc = (getFlag() == Flags::Momentum)
-    ? BZDB.eval(StateDatabase::BZDB_MOMENTUMANGACC)
-    : BZDB.eval(StateDatabase::BZDB_INERTIAANGULAR);
+  float linearAcc = (getFlag() == Flags::Momentum) ? BZDB.eval(StateDatabase::BZDB_MOMENTUMLINACC) :
+    World::getWorld()->getLinearAcceleration();
+  float angularAcc = (getFlag() == Flags::Momentum) ? BZDB.eval(StateDatabase::BZDB_MOMENTUMANGACC) :
+    World::getWorld()->getAngularAcceleration();
 
   // limit linear acceleration
   if (linearAcc > 0.0f) {
@@ -1576,6 +1616,51 @@ void			LocalPlayer::changeScore(short deltaWins,
       server->sendDropFlag(getPosition());
     }
   }
+}
+
+// calculate overall relative score to other players
+int			 LocalPlayer::getHandicapScoreBase() const
+{
+  int winners = 0;
+  int loosers = 0;
+  const int maxplayers = World::getWorld()->getMaxPlayers();
+
+  // compute overall wins and losses in relation to other players
+  for (int i = 0; i < maxplayers; i++) {
+    RemotePlayer *player = World::getWorld()->getPlayer(i);
+    if ((player == NULL) || (player->getId() == LocalPlayer::getMyTank()->getId())) {
+      continue;
+    }
+    winners += player->getLocalWins();
+    loosers += player->getLocalLosses();
+  }
+  return loosers - winners;
+}
+
+float			LocalPlayer::updateHandicap()
+{
+  /* compute and return the handicap */
+
+  if (World::getWorld()->allowHandicap()) {
+    // a relative score of -50 points will provide maximum handicap
+    handicap = float(getHandicapScoreBase()) / BZDB.eval(StateDatabase::BZDB_HANDICAPSCOREDIFF);
+
+    /* limit how much of a handicap is afforded, and only provide
+     * handicap advantages instead of disadvantages.
+     */
+    if (handicap > 1.0f) {
+      // advantage
+      handicap = 1.0f;
+    } else if (handicap < 0.0f) {
+      // disadvantage
+      handicap = 0.0f;
+    }
+
+    return handicap;
+  }
+
+  // no handicap gameplay
+  return 0.0f;
 }
 
 void			LocalPlayer::addAntidote(SceneDatabase* scene)

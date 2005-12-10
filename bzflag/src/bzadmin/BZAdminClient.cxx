@@ -72,8 +72,7 @@ BZAdminClient::BZAdminClient(BZAdminUI* bzInterface)
     // won't really output anything, just gets token
     outputServerList();
   }
-  sLink.sendEnter(ChatPlayer, myTeam, startupInfo.callsign, "bzadmin",
-		  startupInfo.token);
+  sLink.sendEnter(TankPlayer, myTeam, startupInfo.callsign, "bzadmin", startupInfo.token);
   if (sLink.getState() != ServerLink::Okay) {
     std::cerr << "Rejected." << std::endl;
     return;
@@ -292,7 +291,7 @@ BZAdminClient::ServerCode BZAdminClient::checkMessage() {
 	players[p].ip = a.getDotNotation();
 	Team temp;
 	if (messageMask[MsgAdminInfo]){
-	  std::string joinMsg = std::string("*** \'") + callsign + "\' joined the game as " +
+	  std::string joinMsg = std::string("*** \'") + players[p].name + "\' joined the game as " +
 	    temp.getName(players[p].team) + " from " + players[p].ip + ".";
 	  lastMessage.first = joinMsg;
 	}

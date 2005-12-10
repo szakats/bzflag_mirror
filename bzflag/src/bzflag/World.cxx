@@ -47,6 +47,8 @@ int			World::flagTexture(-1);
 
 World::World() :
   gameStyle(PlainGameStyle),
+  linearAcceleration(0.0f),
+  angularAcceleration(0.0f),
   maxPlayers(0),
   curMaxPlayers(0),
   maxShots(1),
@@ -1043,6 +1045,11 @@ bool World::writeWorld(const std::string& filename, std::string& fullname)
       out << indent << "  -sa" << std::endl;
       out << indent << "  -st " << getFlagShakeTimeout() << std::endl;
       out << indent << "  -sw " << getFlagShakeWins() << std::endl;
+    }
+    if ((getLinearAcceleration() != 0.0f) ||
+	(getAngularAcceleration() != 0.0f)) {
+      out << indent << "  -a " << getLinearAcceleration() << " "
+		     << getAngularAcceleration() << std::endl;
     }
 
     out << indent << "  -ms " << getMaxShots() << std::endl;

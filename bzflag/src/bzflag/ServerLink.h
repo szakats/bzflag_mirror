@@ -86,8 +86,8 @@ class ServerLink {
   //	  It should be changed to something cleaner.
 #ifndef BUILDING_BZADMIN
     void		sendPlayerUpdate(Player*);
-    void		sendBeginShot(const FiringInfo&);
 #endif
+    void		sendBeginShot(const FiringInfo&);
     void		sendEndShot(const PlayerId&, int shotId, int reason);
     void		sendAlive();
     void		sendTeleport(int from, int to);
@@ -101,8 +101,6 @@ class ServerLink {
     static void		setServer(ServerLink*);
     void		enableOutboundUDP();
     void		confirmIncomingUDP();
-
-  void flush();
 
   private:
     State		state;
@@ -123,11 +121,6 @@ class ServerLink {
     int		 udpLength;
     char	       *udpBufferPtr;
     char		ubuf[MaxPacketLen];
-
-  bool oldNeedForSpeed;
-  int  previousFill;
-  char txbuf[MaxPacketLen];
-  
 };
 
 #define SEND 1

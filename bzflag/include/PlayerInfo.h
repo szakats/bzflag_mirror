@@ -59,7 +59,7 @@ class PlayerInfo {
 public:
   PlayerInfo(int _playerIndex);
 
-  int   getPlayerIndex( void ) {return playerIndex;}
+  int   getPlayerIndex( void ) const { return playerIndex; } 
   void	setLastMsg(std::string msg);
   const std::string& getLastMsg() const;
   TimeKeeper  getLastMsgTime() const;
@@ -77,7 +77,6 @@ public:
   bool	isAutoPilot() const;
   bool	isBot() const;
   bool	isHuman() const;
-  bool  isChat() const;
   void  *packUpdate(void *buf);
   void  *packId(void *buf);
   bool	unpackEnter(void *buf, uint16_t &rejectCode, char *rejectMsg);
@@ -88,7 +87,7 @@ public:
   void       *packVirtualFlagCapture(void *buf);
   bool	isTeam(TeamColor team) const;
   bool	isObserver() const;
-  TeamColor   getTeam();
+  TeamColor   getTeam() const;
   void	setTeam(TeamColor team);
   void	wasARabbit();
   void	wasNotARabbit();
@@ -99,6 +98,7 @@ public:
   void	setFlag(int flag);
   bool	isFlagTransitSafe();
   const char *getClientVersion();
+  void getClientVersionNumbers(int& major, int& minor, int& revision);
   std::string getIdleStat();
   bool	canBeRabbit(bool relaxing = false);
   void	setPaused(bool paused);
@@ -135,8 +135,6 @@ private:
 
   // current state of player
   ClientState state;
-  // Need to know if entered is already done
-  bool       hasDoneEntering;
   // type of player
   PlayerType type;
   // player's pseudonym
@@ -147,6 +145,9 @@ private:
   char email[EmailLen];
   // version information from client
   char clientVersion[VersionLen];
+  int clientVersionMajor;
+  int clientVersionMinor;
+  int clientVersionRevision;
 
   // player's team
   TeamColor team;
@@ -199,7 +200,7 @@ inline bool PlayerInfo::isPlaying() const {
 }
 
 inline bool PlayerInfo::isHuman() const {
-  return (type == TankPlayer) && hasDoneEntering;
+  return type == TankPlayer;
 }
 
 inline bool PlayerInfo::haveFlag() const {
@@ -245,10 +246,6 @@ inline bool PlayerInfo::isAutoPilot() const {
 
 inline bool PlayerInfo::isBot() const {
   return type == ComputerPlayer;
-}
-
-inline bool PlayerInfo::isChat() const {
-  return type == ChatPlayer;
 }
 
 inline bool PlayerInfo::isARabbitKill(PlayerInfo &victim) const {

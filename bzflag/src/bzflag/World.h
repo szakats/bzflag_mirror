@@ -56,6 +56,8 @@ class World {
     float		getWaterLevel() const;
     const BzMaterial*	getWaterMaterial() const;
     const BzMaterial*	getLinkMaterial() const;
+    float		getLinearAcceleration() const;
+    float		getAngularAcceleration() const;
     float		getFlagShakeTimeout() const;
     int			getFlagShakeWins() const;
     int			getMaxPlayers() const;
@@ -150,6 +152,8 @@ class World {
 
   private:
     short		gameStyle;
+    float		linearAcceleration;
+    float		angularAcceleration;
     int			maxPlayers;
     int			curMaxPlayers;
     int			maxShots;
@@ -254,6 +258,16 @@ inline const BzMaterial*	World::getWaterMaterial() const
 inline const BzMaterial*	World::getLinkMaterial() const
 {
   return linkMaterial;
+}
+
+inline float		World::getLinearAcceleration() const
+{
+  return linearAcceleration;
+}
+
+inline float		World::getAngularAcceleration() const
+{
+  return angularAcceleration;
 }
 
 inline float		World::getFlagShakeTimeout() const

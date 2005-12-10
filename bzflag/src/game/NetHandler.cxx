@@ -94,50 +94,28 @@ int NetHandler::getUdpSocket() {
   return udpSocket;
 }
 
-char NetHandler::udpmsg[MaxPacketLen];
-int  NetHandler::udpLen  = 0;
-int  NetHandler::udpRead = 0;
-
-struct sockaddr_in NetHandler::lastUDPRxaddr;
-
 int NetHandler::udpReceive(char *buffer, struct sockaddr_in *uaddr,
 			   bool &udpLinkRequest) {
   AddrLen recvlen = sizeof(*uaddr);
+  int n;
   int id;
   uint16_t len;
   uint16_t code;
-  if (udpLen == udpRead) {
-    udpRead = 0;
-    udpLen  = recvfrom(udpSocket, udpmsg, MaxPacketLen, 0,
-		       (struct sockaddr *) &lastUDPRxaddr, &recvlen);
-    // Error receiving data (or no data)
-    if (udpLen < 0)
-      return -1;
+  while (true) {
+    n = recvfrom(udpSocket, buffer, MaxPacketLen, 0, (struct sockaddr *) uaddr,
+		 &recvlen);
+    if ((n < 0) || (n >= 4))
+      break;
   }
-  if ((udpLen - udpRead) < 4) {
-    // No space for header :-( 
-    udpLen  = 0;
-    udpRead = 0;
+  // Error receiving data (or no data)
+  if (n < 0)
     return -1;
-  }
 
   // read head
-  void *buf = udpmsg + udpRead;
+  void *buf = buffer;
   buf = nboUnpackUShort(buf, len);
   buf = nboUnpackUShort(buf, code);
-  if ((udpLen - udpRead) < len + 4) {
-    // No space for data :-( 
-    udpLen  = 0;
-    udpRead = 0;
-    return -1;
-  }
-  // copy the whole bunch of data
-  memcpy(buffer, udpmsg + udpRead, len + 4);
-  udpRead += len + 4;
-  // copy the source identification
-  memcpy(uaddr, &lastUDPRxaddr, recvlen);
-
-  if (len == 2 && code == MsgPingCodeRequest)
+  if (n == 6 && len == 2 && code == MsgPingCodeRequest)
     // Ping code request
     return -2;
 
@@ -195,7 +173,7 @@ than %s:%d\n",
     DEBUG4("Player %s [%d] uread() %s:%d len %d from %s:%d on %i\n",
 	   netPlayer[id]->info->getCallSign(), id,
 	   inet_ntoa(netPlayer[id]->uaddr.sin_addr),
-	   ntohs(netPlayer[id]->uaddr.sin_port), len + 4,
+	   ntohs(netPlayer[id]->uaddr.sin_port), n,
 	   inet_ntoa(uaddr->sin_addr), ntohs(uaddr->sin_port),
 	   udpSocket);
 #ifdef NETWORK_STATS

@@ -32,8 +32,9 @@
 // bzfs specific headers
 #include "bzfs.h"
 
-extern bz_eTeamType convertTeam ( TeamColor team );
-extern TeamColor convertTeam( bz_eTeamType team );
+char *getDirectMessageBuffer();
+void broadcastMessage(uint16_t code, int len, const void *msg);
+
 
 static int fireWorldWepReal(FlagType* type, float lifetime, PlayerId player,
                             TeamColor teamColor, float *pos, float tilt, float dir,
@@ -60,7 +61,7 @@ static int fireWorldWepReal(FlagType* type, float lifetime, PlayerId player,
   buf = firingInfo.pack(bufStart);
 
   if (BZDB.isTrue(StateDatabase::BZDB_WEAPONS)) {
-    broadcastMessage(MsgWShotBegin, (char *)buf - (char *)bufStart, bufStart);
+    broadcastMessage(MsgShotBegin, (char *)buf - (char *)bufStart, bufStart);
   }
   return shotID;
 }
@@ -243,7 +244,7 @@ void WorldWeaponGlobalEventHandler::process (bz_EventData *eventData)
 
   fireWorldWepReal(type, BZDB.eval(StateDatabase::BZDB_RELOADTIME),
                    ServerPlayer, RogueTeam, origin, tilt, direction,
-                   world->worldWeapons.getNewWorldShotID(),0);
+                   world->getWorldWeapons().getNewWorldShotID(),0);
 }
 
 

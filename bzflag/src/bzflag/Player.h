@@ -36,7 +36,6 @@ class TankSceneNode;
 class TankIDLSceneNode;
 class SphereSceneNode;
 class Obstacle;
-struct FiringInfo;
 
 // 54 bytes
 const int PlayerUpdatePLenMax =
@@ -99,8 +98,8 @@ public:
   short		getFromTeleporter() const;
   short		getToTeleporter() const;
   float		getTeleporterProximity() const;
-  int		getMaxShots() const;
-  ShotPath*	getShot(int index) const;
+  virtual int		getMaxShots() const;
+  virtual ShotPath*	getShot(int index) const = 0;
 
   const ShotStatistics*	getShotStatistics() const;
 
@@ -160,7 +159,6 @@ public:
   virtual void	setFlag(FlagType*);
   virtual void	changeScore(short deltaWins, short deltaLosses, short deltaTeamKills);
   void		changeLocalScore(short deltaWins, short deltaLosses, short deltaTeamKills);
-  void          setHandicap(float handicap);
   void		setStatus(short);
   void		setExplode(const TimeKeeper&);
   void		setTeleport(const TimeKeeper&, short from, short to);
@@ -182,16 +180,11 @@ public:
 protected:
   void	  clearRemoteSounds();
   void	  addRemoteSound(int sound);
-  void    prepareShotInfo(FiringInfo &info);
-  void    addShot(ShotPath *shot, const FiringInfo &info);
 
 protected:
   // shot statistics
   ShotStatistics	shotStatistics;
   const Obstacle* lastObstacle; // last obstacle touched
-
-  std::vector<ShotPath*> shots;
-  float                  handicap;
 
 private:
   // return true if the shot had to be terminated or false if it
@@ -584,11 +577,6 @@ inline void*		Player::pack(void* buf, uint16_t& code)
 inline void Player::setZpos (float z)
 {
   state.pos[2] = z;
-}
-
-inline int Player::getMaxShots() const
-{
-  return shots.size();
 }
 
 #endif /* __PLAYER_H__ */

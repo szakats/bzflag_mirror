@@ -32,6 +32,7 @@
 
 #include "Permissions.h"
 
+// common-interface headers
 #include "global.h"
 
 TimeKeeper synct = TimeKeeper::getCurrent();
@@ -72,6 +73,8 @@ bz_eTeamType convertTeam ( TeamColor _team )
 	default:
 		return eNoTeam;
 	case RogueTeam:
+		if (clOptions->gameStyle == RabbitChaseGameStyle)
+			return eHunterTeam;
 		return eRogueTeam;
 	case RedTeam:
 		return eRedTeam;
@@ -85,8 +88,6 @@ bz_eTeamType convertTeam ( TeamColor _team )
 		return eObservers;
 	case RabbitTeam:
 		return eRabbitTeam;
-        case HunterTeam:
-                return eHunterTeam;
 	}
 }
 
@@ -100,6 +101,7 @@ TeamColor convertTeam( bz_eTeamType _team )
 	default:
 		return NoTeam;
 	case eRogueTeam:
+	case eHunterTeam:
 		return RogueTeam;
 	case eRedTeam:
 		return RedTeam;
@@ -113,8 +115,6 @@ TeamColor convertTeam( bz_eTeamType _team )
 		return ObserverTeam;
 	case eRabbitTeam:
 		return RabbitTeam;
-	case eHunterTeam:
-                return HunterTeam;
 	}
 	return (TeamColor)_team;
 }
@@ -999,7 +999,7 @@ BZF_API bool bz_fireWorldWep ( const char* flagType, float lifetime, int fromPla
 
 	int realShotID = shotID;
 	if ( realShotID == 0)
-		realShotID = world->worldWeapons.getNewWorldShotID();
+		realShotID = world->getWorldWeapons().getNewWorldShotID();
 
 	return fireWorldWep(flag,lifetime,player,pos,tilt,direction,realShotID,dt) == realShotID;
 }

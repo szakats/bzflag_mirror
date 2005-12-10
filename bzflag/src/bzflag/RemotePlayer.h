@@ -33,7 +33,8 @@ public:
 	       const PlayerType);
   ~RemotePlayer();
 
-  void addShot(FiringInfo&);
+  void addShot(const FiringInfo&);
+  ShotPath* getShot(int index) const;
   void updateShots(float dt);
 
 private:
@@ -41,6 +42,7 @@ private:
 
 private:
   int numShots;
+  RemoteShotPath** shots;
 };
 
 

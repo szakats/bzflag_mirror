@@ -112,10 +112,8 @@ void Roaming::changeTarget(Roaming::RoamingTarget target, int explicitIndex) {
 	} else if (target == previous) {
 	  j = (targetManual - i + world->getCurMaxPlayers() + 1) % (world->getCurMaxPlayers() + 1) - 1;
 	}
-	if ((j == -1)
-	    || (world->getPlayer(j)
-		&& (world->getPlayer(j)->getTeam() != ObserverTeam)
-		&& world->getPlayer(j)->isAlive())) {
+	if ((j == -1) ||
+	    (world->getPlayer(j) && (world->getPlayer(j)->getTeam() != ObserverTeam))) {
 	  targetManual = targetWinner = j;
 	  found = true;
 	  break;
@@ -169,7 +167,10 @@ void Roaming::buildRoamingLabel(void) {
   if (world && tracked) {
     if (BZDBCache::colorful) {
       int color = tracked->getTeam();
-      if (color == RabbitTeam || color < 0 || color > LastColor) {
+      if (world->allowRabbit() && (color == RogueTeam)) {
+	// hunters are orange (hack)
+	color = OrangeColor;
+      } else if (color < 0 || color > 4) {
 	// non-teamed, rabbit are white (same as observer)
 	color = WhiteColor;
       }

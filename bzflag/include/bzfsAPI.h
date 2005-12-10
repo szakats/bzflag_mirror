@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+
 #ifdef _WIN32
 	#ifdef INSIDE_BZ
 		#define BZF_API __declspec( dllexport )
@@ -68,6 +69,9 @@ typedef enum
 	bz_eMessagFilteredEvent,
 	bz_eGameStartEvent,
 	bz_eGameEndEvent,
+	bz_eSlashCommandEvent,
+	bz_ePlayerAuthEvent,
+	bz_eServerMsgEvent,
 	bz_eLastEvent    //this is never used as an event, just show it's the last one
 }bz_eEventType;
 
@@ -720,6 +724,61 @@ public:
 	double duration;
 };
 
+class bz_SlashCommandEventData : public bz_EventData
+{
+public:
+	bz_SlashCommandEventData()
+	{
+		eventType = bz_eSlashCommandEvent;
+		from = -1;
+		time = 0;
+	}
+
+	virtual ~bz_SlashCommandEventData(){};
+
+	int from;
+
+	bzApiString message;
+
+	double time;
+};
+
+
+class bz_PlayerAuthEventData : public bz_EventData
+{
+public:
+	bz_PlayerAuthEventData()
+	{
+		eventType = bz_ePlayerAuthEvent;
+		playerID = -1;
+	}
+
+	virtual ~bz_PlayerAuthEventData(){};
+
+	int playerID;
+};
+
+class bz_ServerMsgEventData : public bz_EventData
+{
+public:
+	bz_ServerMsgEventData()
+	{
+		eventType = bz_eServerMsgEvent;
+
+		to = -1;
+		time = 0.0;
+		team = eNoTeam;
+	}
+
+	virtual ~bz_ServerMsgEventData(){};
+
+	int to;
+	bz_eTeamType team;
+	bzApiString message;
+
+	double time;
+};
+
 
 // event handler callback
 class bz_EventHandler
@@ -801,13 +860,6 @@ public:
 };
 
 BZF_API bool bz_setPlayerOperator (int playerId);
-
-// player score
-BZF_API bool bz_setPlayerWins (int playerId, int wins);
-BZF_API bool bz_setPlayerLosses (int playerId, int losses);
-BZF_API bool bz_setPlayerTKs (int playerId, int tks);
-
-BZF_API bool bz_resetPlayerScore(int playerId);
 
 // groups API
 BZF_API bzAPIStringList* bz_getGroupList ( void );
