@@ -3,15 +3,10 @@
 // constructor
 // The buttons and fields are initialized and placed here.
 WorldOptionsDialog::WorldOptionsDialog() :
-	Fl_Dialog("World Options", WorldOptionsDialog::WIDTH, WorldOptionsDialog::HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
+	Fl_Dialog("World Options", this->WIDTH, this->HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
 	
 	// initialize the variables
-	this->worldName = NULL;
-	this->optionString = NULL;
-	this->flagHeight = 1.0;
-	this->waterLevel = -1.0;
-	
-	this->updateData();
+	this->data = new WorldOptionsData();
 	
 	// initialize widgets
 	worldNameLabel = new QuickLabel("Name:", 5, 5);
@@ -51,18 +46,44 @@ WorldOptionsDialog::~WorldOptionsDialog() { }
 void WorldOptionsDialog::OKButtonCallback_real(Fl_Widget* w) {
 	unsigned char hasWater = waterCheckButton->value();
 	
+	float waterLevel;
 	if(hasWater == 0)
-		this->waterLevel = -1.0f;
+		waterLevel = -1.0f;
 	else
-		this->waterLevel = (float)waterLevelField->value();
+		waterLevel = waterLevelField->value();
 		
-	this->flagHeight = (float)this->flagHeightField->value();
+	float flagHeight = this->flagHeightField->value();
 	
-	this->worldName = (char*)this->worldNameField->value();
+	char* worldName = (char*)this->worldNameField->value();
 	
-	this->optionString = (char*)this->worldOptionsField->value();
+	char* optionsString = (char*)this->worldOptionsField->value();
 	
-	this->updateData();
+	char* waterMaterialName = NULL;
+	
+	float size = 400.0f;
+	
+	bool noWalls = false;
+	
+	string sizeString = string(ftoa(size));
+	
+	string data = string("world\n") +
+						 "  name " + worldName + "\n" +
+						 "  size " + sizeString + "\n";/* +
+						 "  flagHeight" + ftoa(flagHeight) + "\n" +
+							(noWalls == true ? "noWalls\n" : "# noWalls\n") +
+						 "end\n\n" +
+						  
+						 "options\n" +
+						 "  " + optionsString + "\n" +
+						 "end\n\n" +
+						  
+						 "waterLevel\n" +
+						 "  name defaultWaterLevel\n" +
+						 "  height " + ftoa(waterLevel) + "\n" +
+						 "  materials " + waterMaterialName + "\n" +
+						 "end\n";*/
+						 
+	printf("%s\n", data.c_str());
 	
 	Fl::delete_widget(this);
 }	
