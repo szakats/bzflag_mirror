@@ -78,7 +78,7 @@ private:
 	Fl_Check_Button* waterCheckButton;
 	
 	// world options data reference from the model
-	Model::WorldOptionsData* data;
+	WorldOptionsData* data;
 	
 	// get the data from the model
 	void getData(void) {
