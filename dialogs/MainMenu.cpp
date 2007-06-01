@@ -194,8 +194,7 @@ void MainMenu::saveSelectionCallback_real(Fl_Widget* w) {
 
 // handle configure world
 void MainMenu::configureWorldCallback_real(Fl_Widget* w) {
-	
-	// MainWindow::openDialog(MainWindow::doWorldOptionsDialog);
+		
 	printf("configured world\n");
 	this->value(0);
 }

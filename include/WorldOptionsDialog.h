@@ -9,6 +9,8 @@
 #include "QuickLabel.h"
 #include "Model.h"
 
+#include <string>
+
 /** This is the world options dialog box.  It controls:
  *		* The name of the world
  * 		* The options string passed to the game
@@ -41,17 +43,6 @@ public:
 	}
 	
 private:
-	// the title of the world
-	char* worldName;
-	
-	// the string of world options that can be passed to the game
-	char* optionString;
-	
-	// the height of the flags in this world
-	float flagHeight;
-	
-	// the height of the water in this world (-1 of no water is desired)
-	float waterLevel;
 	
 	// the text field for the world name
 	Fl_Input* worldNameField;
@@ -79,16 +70,6 @@ private:
 	
 	// world options data reference from the model
 	WorldOptionsData* data;
-	
-	// get the data from the model
-	void getData(void) {
-		this->data->get(this->worldName, this->optionString, this->waterLevel, this->flagHeight);
-	}
-	
-	// update the data
-	void updateData(void) {
-		this->data->update(this->worldName, this->optionString, this->waterLevel, this->flagHeight);	
-	}
 	
 	// callbacks (see WorldOptionsDialog.cpp for specifics)
 	void OKButtonCallback_real(Fl_Widget* w);
