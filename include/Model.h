@@ -61,6 +61,4 @@ private:
 	
 };
 
-#include "WorldOptionsData.h"
-
 #endif /*MODEL_H_*/

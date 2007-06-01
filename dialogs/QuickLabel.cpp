@@ -1,4 +1,4 @@
-#include "QuickLabel.h"
+#include "../include/QuickLabel.h"
 
 // initializes the text
 QuickLabel::QuickLabel(const char* labelText, int x, int y) : 
