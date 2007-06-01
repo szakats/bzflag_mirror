@@ -10,11 +10,15 @@ public:
 	// every class the model stores must be derived from this:
 	class DataEntry {
 	public:
-		virtual void getData(Model* m);
-		virtual void updateData(Model* m);
+		virtual void getData(Model* m) = 0;
+		virtual void updateData(Model* m) = 0;
 		
-		DataEntry() { }
-		virtual ~DataEntry() { }
+		DataEntry() { 
+		
+		}
+		virtual ~DataEntry() { 
+		
+		}
 	};
 
 	class WorldOptionsData : public Model::DataEntry {

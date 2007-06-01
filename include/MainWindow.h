@@ -4,10 +4,10 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 
-#include "../dialogs/MainMenu/MainMenu.h"
-#include "../model/Model.h"
+#include "MainMenu.h"
+#include "Model.h"
 
-#include "../dialogs/WorldOptionsDialog/WorldOptionsDialog.h"
+#include "WorldOptionsDialog.h"
 
 
 class MainWindow : public Fl_Window
