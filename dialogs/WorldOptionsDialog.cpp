@@ -3,7 +3,7 @@
 // constructor
 // The buttons and fields are initialized and placed here.
 WorldOptionsDialog::WorldOptionsDialog() :
-	Fl_Dialog("World Options", this->WIDTH, this->HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
+	Fl_Dialog("World Options", WorldOptionsDialog::WIDTH, WorldOptionsDialog::HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
 	
 	// initialize the variables
 	this->worldName = NULL;
@@ -54,9 +54,9 @@ void WorldOptionsDialog::OKButtonCallback_real(Fl_Widget* w) {
 	if(hasWater == 0)
 		this->waterLevel = -1.0f;
 	else
-		this->waterLevel = waterLevelField->value();
+		this->waterLevel = (float)waterLevelField->value();
 		
-	this->flagHeight = this->flagHeightField->value();
+	this->flagHeight = (float)this->flagHeightField->value();
 	
 	this->worldName = (char*)this->worldNameField->value();
 	
