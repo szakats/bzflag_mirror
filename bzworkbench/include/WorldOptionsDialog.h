@@ -69,7 +69,9 @@ private:
 	Fl_Check_Button* waterCheckButton;
 	
 	// world options data reference from the model
-	WorldOptionsData* data;
+	world* worldData;
+	options* optionsData;
+	waterLevel* waterLevelData;
 	
 	// callbacks (see WorldOptionsDialog.cpp for specifics)
 	void OKButtonCallback_real(Fl_Widget* w);

@@ -4,8 +4,11 @@
 class Model;
 
 #include "DataEntry.h"
-#include "WorldOptionsData.h"
+#include "objects/world.h"
+#include "objects/waterLevel.h"
+#include "objects/options.h"
 
+#include <string>
 #include <map>
 
 class Model
@@ -14,18 +17,25 @@ public:
 	Model();
 	virtual ~Model();
 	
-	// query pointers to private members
-	DataEntry* query(unsigned int dataKey);
+	static DataEntry* query(char* data);
+	
+	// the real query method
+	DataEntry* _query(char* data) { return dataMap[string(data)]; }
+	
 	
 private:
+
 // world options
-	WorldOptionsData* worldOptionsData;
-
-// mapping of int keys to void pointers (which point do data)
-	std::map<unsigned int, DataEntry*> data;
-
-// build the worldData
-	void buildDatabase();
+	world* worldData;
+	options* optionsData;
+	waterLevel* waterLevelData;
+	
+// maps keys to values
+	void buildDatabase(void);
+	
+// the data map
+	map<string, DataEntry*> dataMap;
+	
 };
 
 

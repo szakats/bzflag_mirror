@@ -3,10 +3,12 @@
 // constructor
 // The buttons and fields are initialized and placed here.
 WorldOptionsDialog::WorldOptionsDialog() :
-	Fl_Dialog("World Options", this->WIDTH, this->HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
+	Fl_Dialog("World Options (incomplete)", this->WIDTH, this->HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
 	
 	// initialize the variables
-	this->data = new WorldOptionsData();
+	this->worldData 		= (world*)Model::query("world");
+	this->optionsData 		= (options*)Model::query("options");
+	this->waterLevelData 	= (waterLevel*)Model::query("waterLevel");
 	
 	// initialize widgets
 	worldNameLabel = new QuickLabel("Name:", 5, 5);
@@ -40,7 +42,9 @@ WorldOptionsDialog::WorldOptionsDialog() :
 	this->setCancelEventHandler(CancelButtonCallback, this);
 }
 
-WorldOptionsDialog::~WorldOptionsDialog() { }
+WorldOptionsDialog::~WorldOptionsDialog() { 
+	
+}
 
 // set all variables from the widget values when the OK button is pressed
 void WorldOptionsDialog::OKButtonCallback_real(Fl_Widget* w) {
@@ -54,9 +58,9 @@ void WorldOptionsDialog::OKButtonCallback_real(Fl_Widget* w) {
 		
 	float flagHeight = this->flagHeightField->value();
 	
-	char* worldName = (char*)this->worldNameField->value();
+	string worldName = string(this->worldNameField->value());
 	
-	char* optionsString = (char*)this->worldOptionsField->value();
+	string optionsString = string(this->worldOptionsField->value());
 	
 	char* waterMaterialName = NULL;
 	
@@ -66,24 +70,35 @@ void WorldOptionsDialog::OKButtonCallback_real(Fl_Widget* w) {
 	
 	string sizeString = string(ftoa(size));
 	
-	string data = string("world\n") +
+	string flagHeightString = string(ftoa(flagHeight));
+	
+	string waterLevelString = string(ftoa(waterLevel));
+	
+	string worldStr = string("world\n") +
 						 "  name " + worldName + "\n" +
-						 "  size " + sizeString + "\n";/* +
-						 "  flagHeight" + ftoa(flagHeight) + "\n" +
-							(noWalls == true ? "noWalls\n" : "# noWalls\n") +
-						 "end\n\n" +
+						 "  size " + sizeString + "\n" +
+						 "  flagHeight " + flagHeightString + "\n" +
+							(noWalls == true ? "  noWalls\n" : "# noWalls\n") +
+						 "end\n";
 						  
-						 "options\n" +
+	string optionsStr = string("options\n") +
 						 "  " + optionsString + "\n" +
-						 "end\n\n" +
+						 "end\n";
 						  
-						 "waterLevel\n" +
+	string waterLevelStr = string("waterLevel\n") +
 						 "  name defaultWaterLevel\n" +
-						 "  height " + ftoa(waterLevel) + "\n" +
-						 "  materials " + waterMaterialName + "\n" +
-						 "end\n";*/
-						 
-	printf("%s\n", data.c_str());
+						 "  height " + waterLevelString + "\n" +
+						 (waterMaterialName == NULL ? "# materials " : "  materials ") + (waterMaterialName == NULL ? " " : waterMaterialName) + "\n" +
+						 "end\n";
+				
+	// printf("%s\n", data.c_str());
+	this->worldData->update(worldStr);
+	this->optionsData->update(optionsStr);
+	this->waterLevelData->update(waterLevelStr);
+	
+	printf(this->worldData->toString().c_str());
+	printf(this->optionsData->toString().c_str());
+	printf(this->waterLevelData->toString().c_str());
 	
 	Fl::delete_widget(this);
 }	
