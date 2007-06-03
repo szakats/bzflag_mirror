@@ -1,34 +1,39 @@
 #include "../include/Model.h"
 
-/**
- * This method builds the Model's built-in database of world-related data.
- * 
- */
+// global reference to the model so the static call will worlk
+Model* modelRef;
+
 void Model::buildDatabase() {
 	
+	this->dataMap["world"] 			= this->worldData;
+	this->dataMap["waterLevel"] 	= this->waterLevelData;
+	this->dataMap["options"]		= this->optionsData;
 }
 
 Model::Model()
 {
-	this->worldOptionsData = new WorldOptionsData();
+	this->worldData = new world();
+	this->optionsData = new options();
+	this->waterLevelData = new waterLevel();
 	
-	this->data = std::map<unsigned int, DataEntry*>();
+	this->dataMap = map<string, DataEntry*>();
 	
 	buildDatabase();
+	
+	modelRef = this;
 }
 
 Model::~Model()
 {
-	if(this->worldOptionsData)
-		delete worldOptionsData;
+	if(this->worldData)
+		delete worldData;
+	
+	if(this->optionsData)
+		delete optionsData;
+		
+	if(this->waterLevelData)
+		delete waterLevelData;
 }
 
-/**
- * This method allows other classes to query the Model class for world-specific data by passing in an integer key.
- * This method returns a void pointer to the data.
- * It is the responsibility of the caller to know in advance what they want.
- */
-DataEntry* Model::query(unsigned int dataKey) {
-	return this->data.at(dataKey);
-}
-
+// the query method
+DataEntry* Model::query(char* data) { return modelRef->_query(data); }
