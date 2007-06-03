@@ -4,13 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../model/Model.cpp 
+../model/Model.cpp \
+../model/BZWParser.cpp
 
 OBJS += \
-./model/Model.o 
+./model/Model.o \
+./model/BZWParser.o
 
 CPP_DEPS += \
-./model/Model.d 
+./model/Model.d \
+./model/BZWParser.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
