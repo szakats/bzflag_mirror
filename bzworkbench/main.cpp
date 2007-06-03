@@ -25,9 +25,6 @@ int main(int argc, char** argv) {
 	MainWindow* win = new MainWindow(new Model());
 	win->show(argc, argv);
 	
-	WorldOptionsDialog* d = new WorldOptionsDialog();
-	d->show(argc, argv);
-	
 	return Fl::run();
 	
 	

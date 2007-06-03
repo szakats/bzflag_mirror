@@ -28,11 +28,11 @@ MainWindow::~MainWindow() {
 		delete model;
 }
 
-void MainWindow::openDialog(unsigned int dialog) {
-	switch (dialog) {
-		case doWorldOptionsDialog:
-			new WorldOptionsDialog();
-			break;
-		
+void MainWindow::openDialog(const char* _dialog) {
+	string dialog = string(_dialog);
+	
+	if(dialog.compare("WorldOptionsDialog") == 0) {
+		WorldOptionsDialog* wod = new WorldOptionsDialog();
+		wod->show();	
 	}
 }

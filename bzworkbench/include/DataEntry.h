@@ -13,12 +13,14 @@ using namespace std;
 class DataEntry {
 public:
 	
-	virtual void get(string&) = 0;
+	virtual string get(void) = 0;
 	virtual void update(string&) = 0;
 	
 	virtual string toString() {
 		return string("# unknown DataEntry");
 	}
+	
+	virtual int render(void) = 0;
 	
 	// initialize the header and keys
 	DataEntry(const char* header, const char* keys) {

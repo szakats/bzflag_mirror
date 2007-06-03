@@ -3,7 +3,7 @@
 /**
  * Helper method:  eliminate the whitespace on the ends of the line
  */
-string cutWhiteSpace(string& line) {
+string cutWhiteSpace(string line) {
 	const char* text = line.c_str();
 	unsigned long len = line.length();
 	unsigned int startIndex = 0, endIndex = len - 1;
@@ -23,7 +23,7 @@ string cutWhiteSpace(string& line) {
 /**
  * Helper method:  return a substring from the beginning of the string to the next occurence of '\n'
  */
-string cutLine(string& text) {
+string cutLine(string text) {
 	string::size_type index = text.find("\n", 0);
 	return text.substr(0, index);	
 }
@@ -31,7 +31,7 @@ string cutLine(string& text) {
 /**
  * Helper method:  determines whether or not the passed key is the key of the passed line
  */
- bool isKey(string& key, string& line) {
+ bool isKey(string key, string line) {
  	line = cutWhiteSpace(line);
  	string::size_type index = line.find(key, 0);
  	if(index == 0)
@@ -42,8 +42,9 @@ string cutLine(string& text) {
 /**
  * Get the value text from a line
  */
-string BZWParser::value(string& key, string& text) {
-	string line = cutWhiteSpace(text);
+string BZWParser::value(const char* _key, const char* _text) {
+	string line = cutWhiteSpace(string(_text));
+	string key = string(_key);
 	
 	unsigned int startIndex = line.find(key, 0);
 	
@@ -68,7 +69,10 @@ string BZWParser::value(string& key, string& text) {
 /**
  * This method will extract the key-value lines from a section, given the object name of the section and its text
  */
-vector<string> BZWParser::getLines(string& start, string& text) {
+vector<string> BZWParser::getLines(const char* _start, const char* _text) {
+	string start = string(_start);
+	string text = string(_text);
+	
 	string header = cutWhiteSpace(start);
 	string section = cutWhiteSpace(text);
 	
@@ -117,13 +121,14 @@ vector<string> BZWParser::getLines(string& start, string& text) {
 /**
  * This method gets all the lines in a section starting with a given key
  */
-vector<string> BZWParser::getLinesByKey(string& key, string& header, string& text) {
-	key = cutWhiteSpace(key);
-	header = cutWhiteSpace(header);
-	text = cutWhiteSpace(text);
+vector<string> BZWParser::getLinesByKey(const char* _key, const char* _header, const char* _text) {
+	
+	string key = cutWhiteSpace(string(_key));
+	string header = cutWhiteSpace(string(_header));
+	string text = cutWhiteSpace(string(_text));
 	
 	// get all lines from the section
-	vector<string> lines = BZWParser::getLines(header, text);
+	vector<string> lines = BZWParser::getLines(_header, _text);
 	
 	// the lines starting with key
 	vector<string> ret = vector<string>();
@@ -141,9 +146,9 @@ vector<string> BZWParser::getLinesByKey(string& key, string& header, string& tex
 /*
  * This method reads a section that starts with header from a chunk of text 
  */
-string BZWParser::getSection(string& header, string& text) {
-	header = cutWhiteSpace(header);
-	text = cutWhiteSpace(text);
+string BZWParser::getSection(const char* _header, const char* _text) {
+	string header = cutWhiteSpace(string(_header));
+	string text = cutWhiteSpace(string(_text));
 	
 	// find header occurence
 	string::size_type index = text.find(header, 0);
@@ -165,9 +170,9 @@ string BZWParser::getSection(string& header, string& text) {
 /**
  * This method finds all occurences of a section (by looking for its header) in a chunk of text
  */
-vector<string> BZWParser::getSectionsByHeader(string& header, string& text) {
-	header = cutWhiteSpace(header);
-	text = cutWhiteSpace(text);
+vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text) {
+	string header = cutWhiteSpace(string(_header));
+	string text = cutWhiteSpace(string(_text));
 	
 	vector<string> sections = vector<string>();
 	
@@ -205,19 +210,20 @@ vector<string> BZWParser::getSectionsByHeader(string& header, string& text) {
 /**
  * This method gets the list of all values referenced by a key in a segment of text (usually a section)
  */
-vector<string> BZWParser::getValuesByKey(string& key, string& header, string& text) {
-	key = cutWhiteSpace(key);
-	text = cutWhiteSpace(text);
+vector<string> BZWParser::getValuesByKey(const char* _key, const char* _header, const char* _text) {
+	string key = cutWhiteSpace(string(_key));
+	string header = cutWhiteSpace(string(_header));
+	string text = cutWhiteSpace(string(_text));
 	
 	// get all lines with the key
-	vector<string> lines = BZWParser::getLinesByKey(key, header, text);
+	vector<string> lines = BZWParser::getLinesByKey(_key, _header, _text);
 	
 	// return value
 	vector<string> ret = vector<string>();
 	
 	// get the values and load up ret
 	for(vector<string>::iterator i = lines.begin(); i != lines.end(); i++) {
-		string value = BZWParser::value(key, *i);
+		string value = BZWParser::value(_key, (char*)i->c_str());
 		ret.push_back( value );
 	}
 	

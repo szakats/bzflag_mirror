@@ -4,18 +4,15 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 
-#include "MainMenu.h"
 #include "Model.h"
 
+#include "MainMenu.h"
 #include "WorldOptionsDialog.h"
 
 
 class MainWindow : public Fl_Window
 {
 public:
-
-	static const unsigned int doWorldOptionsDialog = 0x1;
-	
 
 	static const int DEFAULT_WIDTH = 800;
 	static const int DEFAULT_HEIGHT = 600;
@@ -24,7 +21,7 @@ public:
 	MainWindow(Model* model);
 	virtual ~MainWindow();
 	
-	static void openDialog(unsigned int dialog);
+	static void openDialog(const char* dialog);
 	
 private:
 	

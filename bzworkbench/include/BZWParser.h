@@ -14,25 +14,22 @@ public:
 	virtual ~BZWParser() { }
 	
 	// simplest method:  get a value from a non-repeatable key in a line
-	static string value(string& key, string& text);
+	static string value(const char* key, const char* text);
 	
 	// get the individual lines out of a section
-	static vector<string> getLines(string& header, string& section);
+	static vector<string> getLines(const char* header, const char* section);
 	
 	// get all lines in a section that begin with the given key
-	static vector<string> getLinesByKey(string& key, string& header, string& section);
+	static vector<string> getLinesByKey(const char* key, const char* header, const char* section);
 	
 	// get the first occurrence of a section from a chunk of text that start with header
-	static string getSection(string& header, string& text);
+	static string getSection(const char* header, const char* text);
 	
 	// get all sections from a chunk of text that start with header
-	static vector<string> getSectionsByHeader(string& header, string& text);
-	
-	// get the last occurrence of a section
-	static string getLastSection(string& header, string& text) { return *getSectionsByHeader(header, text).rbegin(); }
+	static vector<string> getSectionsByHeader(const char* header, const char* text);
 	
 	// get all values from a key in a section
-	static vector<string> getValuesByKey(string& key, string& header, string& section);
+	static vector<string> getValuesByKey(const char* key, const char* header, const char* section);
 	
 private:
 	
