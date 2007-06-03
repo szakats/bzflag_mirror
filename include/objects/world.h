@@ -21,16 +21,16 @@ class world : public DataEntry {
 		}
 		
 		// send the data
-		void get(string& data) {
-			data.assign(this->toString());
+		string get(void) {
+			return this->toString();
 		}
 		
 		// receive the data
 		void update(string& data) {
-			string header = this->getHeader();
+			const char* header = this->getHeader().c_str();
 			
 			// get the world data objects
-			vector<string> worldDatas = BZWParser::getSectionsByHeader(header, data);
+			vector<string> worldDatas = BZWParser::getSectionsByHeader(header, data.c_str());
 			if(worldDatas.size() < 1) {
 				printf("world::update():  Warning! no world object defined!\n");
 				return;	
@@ -38,11 +38,10 @@ class world : public DataEntry {
 			else if(worldDatas.size() > 1) {
 				printf("world::update():  Warning! multiple (%d) world objects; selecting the first\n", worldDatas.size());	
 			}
-			string worldData = worldDatas[0];
+			const char* worldData = worldDatas[0].c_str();
 			
 			// get the names, but only choose one
-			string nameKey = string("name");
-			vector<string> names = BZWParser::getValuesByKey(nameKey, header, worldData);
+			vector<string> names = BZWParser::getValuesByKey("name", header, worldData);
 			if(names.size() == 1)
 				this->worldName = names[0];
 			else if(names.size() > 1) {
@@ -51,8 +50,7 @@ class world : public DataEntry {
 			}
 			
 			// get the sizes, but only choose one
-			string sizeKey = string("size");
-			vector<string> sizes = BZWParser::getValuesByKey(sizeKey, header, worldData);
+			vector<string> sizes = BZWParser::getValuesByKey("size", header, worldData);
 			if(sizes.size() == 1)
 				this->size = atof( sizes[0].c_str() );
 			else if(sizes.size() > 1) {
@@ -61,8 +59,7 @@ class world : public DataEntry {
 			}
 			
 			// get the flagHeights, but only choose one
-			string flagHeightKey = string("flagHeight");
-			vector<string> flagHeights = BZWParser::getValuesByKey(flagHeightKey, header, worldData);
+			vector<string> flagHeights = BZWParser::getValuesByKey("flagHeight", header, worldData);
 			if(flagHeights.size() == 1)
 				this->flagHeight = atof( flagHeights[0].c_str() );
 			else if(flagHeights.size() > 1) {
@@ -71,8 +68,7 @@ class world : public DataEntry {
 			}
 			
 			// get the noWalls value, but only choose one
-			string noWallsKey = string("noWalls");
-			vector<string> noWallses = BZWParser::getValuesByKey(noWallsKey, header, worldData);
+			vector<string> noWallses = BZWParser::getValuesByKey("noWalls", header, worldData);
 			if(noWallses.size() == 1)
 				this->noWalls = (noWallses[0].compare("noWalls") == 0 ? true : false);
 			else if(noWallses.size() > 1) {
@@ -81,6 +77,7 @@ class world : public DataEntry {
 			}
 		}
 		
+		// toString method
 		string toString(void) {
 			string sizeString = string(ftoa(size));
 			string flagHeightString = string(ftoa(flagHeight));
@@ -92,6 +89,9 @@ class world : public DataEntry {
 								 "end\n");
 						  
 		}
+		
+		// render method
+		int render(void) { return 0; } 
 		
 	private:
 		string worldName;

@@ -16,15 +16,15 @@ public:
 	options(string& data) : DataEntry("options", "") { this->update(data); }
 	
 	// get method
-	void get(string& data) {
-		data.assign(this->toString());	
+	string get(void) {
+		return this->toString();
 	}
 	
 	// update method
 	void update(string& data) {
-		string header = this->getHeader();
+		const char* header = this->getHeader().c_str();
 		// get options objects
-		vector<string> optionses = BZWParser::getSectionsByHeader(header, data);
+		vector<string> optionses = BZWParser::getSectionsByHeader(header, data.c_str());
 		if(optionses.size() > 1) {
 			printf("options::update():  Warning! multiple (%d) options objects; choosing the first one...\n", optionses.size());	
 		}
@@ -33,7 +33,7 @@ public:
 			return;	
 		}
 		
-		string opts = optionses[0];
+		const char* opts = optionses[0].c_str();
 		
 		// get the lines
 		vector<string> options = BZWParser::getLines(header, opts);
@@ -52,6 +52,9 @@ public:
 							"  " + optionsString + "\n" + 
 							"end\n");
 	}
+	
+	// render method
+	int render(void) { return 0; }
 private:
 	string optionsString;
 };

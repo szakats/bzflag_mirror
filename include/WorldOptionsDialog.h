@@ -22,7 +22,7 @@ class WorldOptionsDialog : public Fl_Dialog
 public:
 	
 	static const int WIDTH = 305;
-	static const int HEIGHT = 160;
+	static const int HEIGHT = 205;
 	
 	// constructor
 	WorldOptionsDialog();
@@ -50,6 +50,12 @@ private:
 	// label for the world name field
 	QuickLabel* worldNameLabel;
 	
+	// label for world size
+	QuickLabel* worldSizeLabel;
+	
+	// counter field for world size
+	Fl_Counter* worldSizeField;
+	
 	// the text field for the world options
 	Fl_Input* worldOptionsField;
 	
@@ -67,6 +73,15 @@ private:
 	
 	// the checkbox for water
 	Fl_Check_Button* waterCheckButton;
+	
+	// the water material
+	Fl_Input* waterTextureField;
+	
+	// the water material name
+	QuickLabel* waterTextureLabel;
+	
+	// the checkbox for walls
+	Fl_Check_Button* noWallsCheckButton;
 	
 	// world options data reference from the model
 	world* worldData;

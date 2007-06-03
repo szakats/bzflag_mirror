@@ -1,4 +1,5 @@
 #include "../include/MainMenu.h"
+#include "../include/MainWindow.h"
 
 // builds the menu widgets
 void MainMenu::buildMenu(void) {
@@ -194,7 +195,7 @@ void MainMenu::saveSelectionCallback_real(Fl_Widget* w) {
 
 // handle configure world
 void MainMenu::configureWorldCallback_real(Fl_Widget* w) {
-		
+	MainWindow::openDialog("WorldOptionsDialog");
 	printf("configured world\n");
 	this->value(0);
 }
