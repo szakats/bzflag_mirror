@@ -16,6 +16,9 @@ public:
 	// simplest method:  get a value from a non-repeatable key in a line
 	static string value(const char* key, const char* text);
 	
+	// simpler method:  get the key from a line
+	static string key(const char* text);
+	
 	// get the individual lines out of a section
 	static vector<string> getLines(const char* header, const char* section);
 	
@@ -30,6 +33,12 @@ public:
 	
 	// get all values from a key in a section
 	static vector<string> getValuesByKey(const char* key, const char* header, const char* section);
+	
+	// get lines starting with a key from a set of keys keys in a section, preserving the order
+	static vector<string> getLinesByKeys(vector<string> keys, const char* header, const char* section);
+	
+	// get all values from a line
+	static vector<string> getLineElements(const char* line);
 	
 private:
 	

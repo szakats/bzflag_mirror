@@ -13,6 +13,11 @@
 
 #include "include/BZWParser.h"
 
+#include "include/objects/box.h"
+#include "include/MasterConfigurationDialog.h"
+
+#include "include/render/Point3D.h"
+
 #include <string>
 #include <vector>
 
@@ -24,6 +29,12 @@ int main(int argc, char** argv) {
 	
 	MainWindow* win = new MainWindow(new Model());
 	win->show(argc, argv);
+	
+	
+	box theBox = box();
+	
+	MasterConfigurationDialog* mcd = new MasterConfigurationDialog(&theBox);
+	mcd->show();
 	
 	return Fl::run();
 	

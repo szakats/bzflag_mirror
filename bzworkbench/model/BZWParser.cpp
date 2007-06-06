@@ -67,6 +67,15 @@ string BZWParser::value(const char* _key, const char* _text) {
 }
 
 /**
+ * Get the key of a line
+ */
+string BZWParser::key(const char* _text) {
+	string text = cutWhiteSpace(_text);
+	string::size_type index = text.find(" ", 0);
+	return text.substr(0, index);
+}
+
+/**
  * This method will extract the key-value lines from a section, given the object name of the section and its text
  */
 vector<string> BZWParser::getLines(const char* _start, const char* _text) {
@@ -225,6 +234,56 @@ vector<string> BZWParser::getValuesByKey(const char* _key, const char* _header, 
 	for(vector<string>::iterator i = lines.begin(); i != lines.end(); i++) {
 		string value = BZWParser::value(_key, (char*)i->c_str());
 		ret.push_back( value );
+	}
+	
+	return ret;
+}
+
+/**
+ * This method gets all values to a set of keys and preserves the order in which the occur
+ */
+ 
+vector<string> BZWParser::getLinesByKeys(vector<string> keys, const char* _header, const char* _section) {
+	string header = cutWhiteSpace(_header);
+	string section = cutWhiteSpace(_section);
+	
+	vector<string> lines = BZWParser::getLines(_header, _section);
+	
+	vector<string> ret = vector<string>();
+	
+	for(vector<string>::iterator i = lines.begin(); i != lines.end(); i++) {
+		for(vector<string>::iterator j = keys.begin(); j != keys.end(); j++) {
+			if(isKey(*j, *i)) {
+				ret.push_back(*i);
+				break;	
+			}	
+		}	
+	}
+	
+	return ret;
+}
+
+/**
+ * This method gets all the elements in a line separated by one or more spaces
+ */
+vector<string> BZWParser::getLineElements(const char* data) {
+	vector<string> ret = vector<string>();
+	string line = cutWhiteSpace(string(data)) + " ";
+	
+	// separate all elements by finding the " "s
+	while(true) {
+		if(line.length() < 1)
+			break;
+			
+		string::size_type spaceIndex = line.find(" ", 0);
+		if(spaceIndex == string::npos)
+			break;
+			
+		string element = line.substr(0, spaceIndex);
+		
+		ret.push_back(element);
+		
+		line = line.substr(spaceIndex + 1);
 	}
 	
 	return ret;
