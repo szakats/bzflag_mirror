@@ -38,6 +38,7 @@ public:
 			return true;
 		return false;
 	}
+	bool isKey(const char* key) { string k = string(key); return isKey(k); }
 	
 	// get the supported keys
 	string getKeys(void) { return keys; }

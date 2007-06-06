@@ -31,6 +31,16 @@ public:
 		m->addPyramidCallback_real(w);
 	}
 	
+	static void addMeshboxCallback(Fl_Widget* w, void* data) { 
+		MainMenu* m = (MainMenu*)data;
+		m->addMeshboxCallback_real(w);
+	}
+	
+	static void addMeshpyrCallback(Fl_Widget* w, void* data) {
+		MainMenu* m = (MainMenu*)data;
+		m->addMeshpyrCallback_real(w);
+	}
+	
 	static void addTeleporterCallback(Fl_Widget* w, void* data) {
 		MainMenu* m = (MainMenu*)data;
 		m->addTeleporterCallback_real(w);
@@ -165,6 +175,8 @@ private:
 	// real callbacks
 	void addBoxCallback_real(Fl_Widget* w);
 	void addPyramidCallback_real(Fl_Widget* w);
+	void addMeshboxCallback_real(Fl_Widget* w);
+	void addMeshpyrCallback_real(Fl_Widget* w);
 	void addTeleporterCallback_real(Fl_Widget* w);
 	void addSphereCallback_real(Fl_Widget* w);
 	void addArcCallback_real(Fl_Widget* w);

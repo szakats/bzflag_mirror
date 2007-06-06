@@ -7,6 +7,8 @@ void MainMenu::buildMenu(void) {
 	this->add("Add Object", 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
 		this->add("Add Object/Add box", FL_CTRL+'b', this->addBoxCallback, this);
 		this->add("Add Object/Add pyramid", FL_CTRL+'p', this->addPyramidCallback, this);
+		this->add("Add Object/Add mesh Box", FL_CTRL+FL_ALT+'b', this->addMeshboxCallback, this);
+		this->add("Add Object/Add mesh pyramid", FL_CTRL+FL_ALT+'p', this->addMeshpyrCallback, this);
 		this->add("Add Object/Add teleporter", FL_CTRL+'t', this->addTeleporterCallback, this);
 		this->add("Add Object/Add sphere", 0, this->addSphereCallback, this);
 		this->add("Add Object/Add arc", 0, this->addArcCallback, this);
@@ -64,6 +66,18 @@ void MainMenu::addBoxCallback_real(Fl_Widget* w) {
 // add a pyramid
 void MainMenu::addPyramidCallback_real(Fl_Widget* w) {
 	printf("added a pyramid\n");
+	this->value(0);
+}
+
+// add a meshbox
+void MainMenu::addMeshboxCallback_real(Fl_Widget* w) {
+	printf("added a meshbox\n");
+	this->value(0);
+}
+
+// add a mesh pyramid
+void MainMenu::addMeshpyrCallback_real(Fl_Widget* w) {
+	printf("added a mesh pyramid\n");
 	this->value(0);
 }
 
