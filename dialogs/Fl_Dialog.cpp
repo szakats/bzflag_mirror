@@ -78,7 +78,7 @@ void Fl_Dialog::setUpButtons(unsigned long flags) {
 		// only an OK button
 		else if((flags & Fl_OK) && !(flags & Fl_CANCEL)) {
 			
-			int OK_X = x + (width >> 2) - (OK_DEFAULT_WIDTH >> 1);
+			int OK_X = x + (width >> 1) - (OK_DEFAULT_WIDTH >> 1);
 			int OK_Y = y + (height >> 1) - (OK_DEFAULT_HEIGHT >> 1);
 			
 			OK_button = new Fl_Button(OK_X, OK_Y, OK_DEFAULT_WIDTH, OK_DEFAULT_HEIGHT, "OK");
@@ -90,7 +90,7 @@ void Fl_Dialog::setUpButtons(unsigned long flags) {
 		// only a CANCEL button
 		else if(!(flags & Fl_OK) && (flags & Fl_CANCEL)) {
 			
-			int CANCEL_X = x + 3 * (width >> 2) - (CANCEL_DEFAULT_WIDTH >> 1);
+			int CANCEL_X = x + (width >> 1) - (CANCEL_DEFAULT_WIDTH >> 1);
 			int CANCEL_Y = y + (height >> 1) - (CANCEL_DEFAULT_HEIGHT >> 1);
 			
 			CANCEL_button = new Fl_Button(CANCEL_X, CANCEL_Y, CANCEL_DEFAULT_WIDTH, CANCEL_DEFAULT_HEIGHT, "Cancel");
