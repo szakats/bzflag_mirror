@@ -15,6 +15,7 @@
 
 #include "include/objects/box.h"
 #include "include/MasterConfigurationDialog.h"
+#include "include/Fl_Error.h"
 
 #include "include/render/Point3D.h"
 
@@ -30,11 +31,15 @@ int main(int argc, char** argv) {
 	MainWindow* win = new MainWindow(new Model());
 	win->show(argc, argv);
 	
-	
+	/*
 	box theBox = box();
 	
 	MasterConfigurationDialog* mcd = new MasterConfigurationDialog(&theBox);
 	mcd->show();
+	*/
+	
+	Fl_Error* error = new Fl_Error("You opened an error box!!!");
+	error->show();
 	
 	return Fl::run();
 	

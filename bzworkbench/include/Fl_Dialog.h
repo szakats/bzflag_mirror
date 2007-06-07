@@ -32,12 +32,13 @@ public:
 	// methods (see Fl_Dialog.cpp for details)
 	bool setOKEventHandler(void (*handler)(Fl_Widget* w, void* data), void* data);
 	bool setCancelEventHandler(void (*handler)(Fl_Widget* w, void* data), void* data);
-	
-private:
-	
+
+protected:
 	// default window dimensions
 	static const int DEFAULT_WIDTH = 400;
 	static const int DEFAULT_HEIGHT = 300;
+	
+private:
 	
 	// default dimensions of the OK button
 	static const int OK_DEFAULT_WIDTH = 75;
