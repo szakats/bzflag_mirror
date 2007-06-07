@@ -17,7 +17,7 @@ Fl_Error::Fl_Error(const char* message) :
 	
 	this->setOKEventHandler(Fl_ErrorCallback, this);
 	
-	this->redraw();
+	this->show();
 }
 
 Fl_Error::~Fl_Error() {
