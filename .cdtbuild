@@ -14,7 +14,7 @@
 </option>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.43096925" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
-<macros/>
+<macros expandEnvironmentMacros="true"/>
 </toolChain>
 </configuration>
 <configuration artifactName="BZWorkbench" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.release.1752839575" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
@@ -26,5 +26,6 @@
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.466058134" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release"/>
 </toolChain>
 </configuration>
+<macros/>
 </project>
 </ManagedProjectBuildInfo>

@@ -12,9 +12,9 @@
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Scroll.H>
 #include "QuickLabel.h"
-#include "Transformation.h"
 #include "defines.h"
 #include "ftoa.h"
+#include "Transform.h"
 
 #include <string>
 #include <vector>
@@ -23,15 +23,15 @@
 using namespace std;
 
 // transformation widget for MasterconfigurationDialog
-class Transformation : public Fl_Group {
+class TransformWidget : public Fl_Group {
 public:
 
 	// unused; prevents the build from breaking
 	// (Fl_Group's copy constructor is private)
-	Transformation(const Transformation& t) : Fl_Group(0, 0, 0, 0) { this->end(); }
+	TransformWidget(const TransformWidget& t) : Fl_Group(0, 0, 0, 0) { this->end(); }
 	
 	// the format for fields is "<type1:|field1|field2|field3|" ... "|fieldN|>"
-	Transformation(int x, int y, int WIDTH, int HEIGHT, const char* fields, bool active) : 
+	TransformWidget(int x, int y, int WIDTH, int HEIGHT, const char* fields, bool active) : 
 		Fl_Group(x, y, WIDTH, 2*(DEFAULT_TEXTSIZE) + 1) {
 		
 		this->end();
@@ -92,11 +92,11 @@ public:
 		changeFields(transformTypes[0].c_str());
 	}
 	
-	virtual ~Transformation() { }
+	virtual ~TransformWidget() { }
 	
 	// read the transformation type from the menu
 	static void getTransformationCallback(Fl_Widget* w, void* data) {
-		Transformation* t = (Transformation*)(data);
+		TransformWidget* t = (TransformWidget*)(data);
 		Fl_Menu_Button* mb = (Fl_Menu_Button*)(w);
 		t->getTransformationCallback_real(t, mb);
 	}
@@ -117,6 +117,7 @@ public:
 		setTransformationType(str);	
 	}
 	
+	// set the fields with string represented values
 	void setFields(vector<string> fieldValues) {
 		int index = 0;
 		for(vector<Fl_Float_Input*>::iterator i = fields.begin(); i != fields.end(); i++) {
@@ -125,13 +126,22 @@ public:
 		}	
 	}
 	
+	// set the fields with float values
+	void setFields(vector<float> fieldValues) {
+		int index = 0;
+		for(vector<Fl_Float_Input*>::iterator i = fields.begin(); i != fields.end(); i++) {
+			(*i)->value(ftoa(fieldValues[index]));
+			index++;
+		}	
+	}
+	
+	
 	// return string representation in BZW format
 	string toString() {
 		string ret = string(typeMenu->label()) + " ";
 		
 		// if this is a rotation, we need to make sure that the vector is normalized
 		if(strcmp(typeMenu->label(), "spin") == 0) {
-			printf("normalizing...");
 			
 			float dx = atof( fields[1]->value() );
 			float dy = atof( fields[2]->value() );
@@ -152,7 +162,11 @@ public:
 		
 		// commit the values to the return string
 		for(vector<Fl_Float_Input*>::iterator i = fields.begin(); i != fields.end(); i++) {
-			ret += string((*i)->value()) + " ";	
+			string value = string((*i)->value());
+			if(value.length() == 0)
+				ret += string( "0.0 " );
+			else
+				ret += string((*i)->value()) + " ";	
 		}
 		
 		return ret + "\n";
@@ -161,7 +175,7 @@ public:
 private:
 
 	// label the menu button with the selection
-	void getTransformationCallback_real(Transformation* t, Fl_Menu_Button* mb) {
+	void getTransformationCallback_real(TransformWidget* t, Fl_Menu_Button* mb) {
 		const Fl_Menu_Item* menu = mb->menu();
 		mb->label(menu[mb->value()].label());
 		changeFields(mb->label());
@@ -209,6 +223,7 @@ private:
 			
 			fields.push_back(newfield);
 			this->add(newfield);
+			newfield->value("0.000000");
 			
 			// advance fieldList
 			fieldList = fieldList.substr(end);	
