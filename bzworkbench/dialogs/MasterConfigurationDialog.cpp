@@ -1,7 +1,7 @@
 #include "../include/MasterConfigurationDialog.h"
 #include <iostream>
 
-MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
+MasterConfigurationDialog::MasterConfigurationDialog(bz2object* obj) :
 	Fl_Dialog("Master Configuration Dialog", WIDTH, HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
 	
 	// initialize the object
@@ -11,37 +11,17 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	string objectStr = object->get();
 	
 	// read position
-	Point3D position = Point3D(0.0f, 0.0f, 0.0f);
-	if(object->isKey("position"))
-		position = Point3D( BZWParser::getValuesByKey("position", object->getHeader().c_str(), objectStr.c_str())[0].c_str() );
+	Point3D position = object->getPosition();
 	
 	// read rotation
-	float rotation = 0.0f;
-	if(object->isKey("rotation"))
-		rotation = atof( BZWParser::getValuesByKey("rotation", object->getHeader().c_str(), objectStr.c_str())[0].c_str() );
-		
+	float rotation = object->getRotation();
+	
 	// read size
-	Point3D size = Point3D(10.0f, 10.0f, 10.0f);
-	if(object->isKey("size"))
-		size = Point3D( BZWParser::getValuesByKey("size", object->getHeader().c_str(), objectStr.c_str())[0].c_str() );
-
+	Point3D size = object->getSize();
+	
 	// read transformations
-	vector<string> transforms = vector<string>();
-	vector<string> transformKeys = vector<string>();
-	this->transformations = vector<Transformation*>();
-	if(object->isKey("shear"))
-		transformKeys.push_back(string("shear"));
-	if(object->isKey("shift"))
-		transformKeys.push_back(string("shift"));
-	if(object->isKey("scale"))
-		transformKeys.push_back(string("scale"));
-	if(object->isKey("spin"))
-		transformKeys.push_back(string("spin"));
-		
-	if(transformKeys.size() > 0)
-		transforms = BZWParser::getLinesByKeys(transformKeys, object->getHeader().c_str(), objectStr.c_str());
-		
-		
+	vector<Transform> transforms = object->getTransformations();
+	
 	// find out the supported transformations and determine their field format
 	supportedTransformations = string("");
 	transformationFormat = string("");
@@ -119,11 +99,10 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	transformationScrollArea->type(Fl_Scroll::VERTICAL_ALWAYS);
 	// add the transformations if they exist and are supported
 	if(transformationFormat.length() > 0 && transforms.size() > 0) {
-		for(vector<string>::iterator i = transforms.begin(); i != transforms.end(); i++) {
+		for(vector<Transform>::iterator i = transforms.begin(); i != transforms.end(); i++) {
 			this->addTransformCallback_real(transformationScrollArea);
-			string key = BZWParser::key(i->c_str());
-			transformations[transformations.size() - 1]->setTransformationType(key);
-			transformations[transformations.size() - 1]->setFields( BZWParser::getLineElements( BZWParser::value(key.c_str(), i->c_str()).c_str() ) );
+			transformations[transformations.size() - 1]->setTransformationType(i->getName().c_str());
+			transformations[transformations.size() - 1]->setFields( i->getData() );
 		}	
 	}
 	
@@ -193,21 +172,16 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 void MasterConfigurationDialog::OKButtonCallback_real(Fl_Widget* w) {
 	
 	// get the position, rotation, and size fields and string-ify them
-	string positionString(""), rotationString(""), sizeString("");
-	
-	if(object->isKey("position"))
-		positionString = string("position ") + positionXField->value() + " " + positionYField->value() + " " + positionZField->value() + "\n";
-	if(object->isKey("rotation"))
-		rotationString = string("rotation ") + rotationField->value() + "\n";
-	if(object->isKey("size"))
-		sizeString = string("size ") + sizeXField->value() + " " + sizeYField->value() + " " + sizeZField->value() + "\n";
+	string positionString = string("position ") + positionXField->value() + " " + positionYField->value() + " " + positionZField->value() + "\n";
+	string rotationString = string("rotation ") + rotationField->value() + "\n";
+	string sizeString = string("size ") + sizeXField->value() + " " + sizeYField->value() + " " + sizeZField->value() + "\n";
 	
 	// get the transformations and string-ify them
 	string transformationString("");
 	
 	if(transformations.size() != 0) {
-		for(vector<Transformation*>::iterator i = transformations.begin(); i != transformations.end(); i++) {
-			transformationString += (*i)->toString() + "  ";	
+		for(vector<TransformWidget*>::iterator i = transformations.begin(); i != transformations.end(); i++) {
+			transformationString += (*i)->toString() + "  ";
 		}
 	}
 	
@@ -220,8 +194,6 @@ void MasterConfigurationDialog::OKButtonCallback_real(Fl_Widget* w) {
 						  "end\n";
 						  
 	object->update(objectString);
-	
-	cout << objectString;
 	
 	Fl::delete_widget(this);	
 }
@@ -243,7 +215,7 @@ void MasterConfigurationDialog::addTransformCallback_real(Fl_Widget* w) {
 			transformations[transformations.size()-1]->y() + 3*DEFAULT_TEXTSIZE);
 	int width = transformationScrollArea->w();
 	int height = 3*DEFAULT_TEXTSIZE;
-	Transformation* t = new Transformation(x, y, width, height, this->transformationFormat.c_str(), false);
+	TransformWidget* t = new TransformWidget(x, y, width, height, this->transformationFormat.c_str(), false);
 	transformationScrollArea->add(t);
 	transformationScrollArea->redraw();
 	t->redraw();
@@ -259,7 +231,7 @@ void MasterConfigurationDialog::removeTransformCallback_real(Fl_Widget* w) {
 		return;
 		
 	// new list of transformations
-	vector<Transformation*> newTransformList = vector<Transformation*>();
+	vector<TransformWidget*> newTransformList = vector<TransformWidget*>();
 	
 	// remove the marked transformations, and add the unmarked to newTransformList
 	for(unsigned int i = 0; i < transformations.size(); i++) {
@@ -277,7 +249,7 @@ void MasterConfigurationDialog::removeTransformCallback_real(Fl_Widget* w) {
 	
 	// shift everything up
 	int y = transformationScrollArea->y() + 2*DEFAULT_TEXTSIZE;
-	for(vector<Transformation*>::iterator i = transformations.begin(); i != transformations.end(); i++) {
+	for(vector<TransformWidget*>::iterator i = transformations.begin(); i != transformations.end(); i++) {
 		(*i)->position((*i)->x(), y);
 		y += 3*DEFAULT_TEXTSIZE;
 	}

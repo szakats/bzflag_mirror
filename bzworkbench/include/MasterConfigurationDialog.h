@@ -14,9 +14,10 @@
 #include <FL/Fl_Scroll.H>
 #include "Fl_Dialog.h"
 #include "QuickLabel.h"
-#include "Transformation.h"
+#include "TransformWidget.h"
 #include "DataEntry.h"
 #include "render/Point3D.h"
+#include "objects/bz2object.h"
 
 #include <string>
 #include <vector>
@@ -24,7 +25,7 @@
 using namespace std;
 
 /**
- * This dialog configures objects that have positions, rotations, etc. (i.e. visible objects)
+ * This dialog configures bz2object's general data
  */
  
 class MasterConfigurationDialog : public Fl_Dialog {
@@ -35,7 +36,7 @@ public:
 	static const int HEIGHT = 385;
 	
 	// constructor
-	MasterConfigurationDialog(DataEntry* obj);
+	MasterConfigurationDialog(bz2object* obj);
 	
 	// destructor
 	~MasterConfigurationDialog() { 
@@ -123,10 +124,10 @@ private:
 	string supportedTransformations;
 	
 	// transforms
-	vector<Transformation*> transformations;
+	vector<TransformWidget*> transformations;
 	
 	// the object we're dealing with
-	DataEntry* object;
+	bz2object* object;
 	
 	// the object's transformation string
 	string transformationFormat;

@@ -5,22 +5,21 @@
 #include "../render/Point3D.h"
 #include "../ftoa.h"
 #include "../BZWParser.h"
+#include "bz2object.h"
 
 /**
- * Box data (1.x box, not meshBox)
+ * Box data
  */
-class box : public DataEntry {
+class box : public bz2object {
 
 public:
 
 	// constructors
-	box() : DataEntry("box", "<position><rotation><size>") {
-		this->position = Point3D(0.0, 0.0, 0.0);
-		this->size = Point3D(10.0, 10.0, 10.0);
-		this->rotation = 0.0f;
+	box() : bz2object("box", "<position><rotation><size><shear><shift><scale><spin>") {
+		
 	}
 	
-	box(string& data) : DataEntry("box", "<position><rotation><size>") {
+	box(string& data) : bz2object("box", "<position><rotation><size>") {
 		this->update(data);	
 	}
 	
@@ -34,49 +33,13 @@ public:
 	
 	// setter
 	void update(string& data) {
-		const char* header = this->getHeader().c_str();
-		
-		// get the lines
-		vector<string> boxSections = BZWParser::getSectionsByHeader(header, data.c_str());
-		
-		// just go with the first box definition we find (only one should be passed anyway)
-		const char* boxData = boxSections[0].c_str();
-		
-		// get the position
-		vector<string> positions = BZWParser::getValuesByKey("position", header, boxData);
-		
-		// just go with the first position (only one should be defined)
-		if(positions.size() > 1)
-			printf("box::update():  Warning! Multiple positions defined; choosing the first one...\n");
-		
-		this->position = Point3D(positions[0].c_str());
-		
-		// get the size
-		vector<string> sizes = BZWParser::getValuesByKey("size", header, boxData);
-		
-		// just go with the first size (only one should be defined)
-		if(sizes.size() > 1)
-			printf("box::update():  Warning! Multiple sizes defined; choosing the first one...\n");
-			
-		this->size = Point3D(sizes[0].c_str());
-		
-		// get the rotation
-		vector<string> rotations = BZWParser::getValuesByKey("rotation", header, boxData);
-		
-		// just go with the first rotation
-		if(rotations.size() > 1)
-			printf("rotations::update():  Warning! Multiple rotations defined; choosing the first one...\n");
-			
-		this->rotation = atof( rotations[0].c_str() );
-		
+		bz2object::update(data);		
 	}
 	
 	// toString
 	string toString(void) {
 		return string("box\n") +
-					  "  position " + position.toString() +
-					  "  rotation " + string(ftoa(rotation)) + "\n" +
-					  "  size " + size.toString() +
+					  this->BZWLines() +
 					  "end\n";
 	}
 	
@@ -86,9 +49,7 @@ public:
 	}
 	
 private:
-	Point3D position;
 	Point3D size;
-	float rotation;
 };
 
 #endif /*BOX_H_*/

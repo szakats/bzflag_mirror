@@ -13,6 +13,10 @@
 
 #include "include/BZWParser.h"
 
+#include "include/Transform.h"
+
+#include "include/objects/bz2object.h"
+
 #include "include/objects/box.h"
 #include "include/MasterConfigurationDialog.h"
 #include "include/Fl_Error.h"
@@ -27,22 +31,33 @@ using namespace std;
 
 
 int main(int argc, char** argv) {
-	
+	/*
 	MainWindow* win = new MainWindow(new Model());
 	win->show(argc, argv);
-	
-	/*
-	box theBox = box();
-	
-	MasterConfigurationDialog* mcd = new MasterConfigurationDialog(&theBox);
-	mcd->show();
-	*/
 	
 	Fl_Error* error = new Fl_Error("You opened an error box!!!");
 	error->show();
 	
 	return Fl::run();
+	*/
 	
+	box theBox = box();
+	string boxData = string("box\n") + 
+							"  position 1 2 3\n" +
+							"  rotation 45\n" +
+							"  size 51 52 53\n" +
+							"  spin 45 1 0 0\n" +
+							"  shear 45 55 65\n" +
+							"  scale 10 11 12\n" +
+							"  shift 100 101 102\n" +
+							"end\n";
+	
+	theBox.update(boxData);
+	
+	MasterConfigurationDialog* mcd = new MasterConfigurationDialog(&theBox);
+	mcd->show();
+	
+	return Fl::run();
 	
 	/*
 	world worldObj = world();
