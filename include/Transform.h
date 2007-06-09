@@ -45,6 +45,8 @@ class Transform : public DataEntry {
 			for(vector<string>::iterator i = elements.begin() + 1; i != elements.end(); i++) {
 				data.push_back( atof( i->c_str() ) );
 			}
+			
+			this->setHeader(name.c_str());
 		}
 		
 		// toString

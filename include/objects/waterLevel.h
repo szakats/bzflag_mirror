@@ -10,12 +10,18 @@ class waterLevel : public DataEntry {
 public:
 
 	waterLevel() : DataEntry("waterLevel", "<name><height><material>") {
-		this->name = string("default_name");
+		this->name = string("");
 		this->materialName = string("");
 		height = -1.0f;
 	}
 	
-	waterLevel(string& data) : DataEntry("waterLevel", "<name><height><material>") { this->update(data); }
+	waterLevel(string& data) : DataEntry("waterLevel", "<name><height><material>") {
+		this->name = string("");
+		this->materialName = string("");
+		height = -1.0f;
+		
+		this->update(data);
+	}
 	
 	// get method
 	string get(void) {
@@ -27,12 +33,12 @@ public:
 		const char* header = this->getHeader().c_str();
 		// make sure there's only one of these
 		vector<string> waterLevelObjs = BZWParser::getSectionsByHeader(header, data.c_str());
-		if(waterLevelObjs.size() > 1) {
+		
+		if(waterLevelObjs[0] == BZW_NOT_FOUND)
+			return;
+			
+		if(waterLevelObjs.size() > 2) {
 			printf("waterLevel::update():  Warning! Multiple (%d) waterLevel objects; choosing the first one.\n", waterLevelObjs.size());
-		}
-		else if(waterLevelObjs.size() < 1) {
-			printf("waterLevel::update():  Warning! No waterLevel object declared!\n");
-			return;	
 		}
 		
 		const char* waterData = waterLevelObjs[0].c_str();

@@ -29,12 +29,24 @@ string cutLine(string text) {
 }
 
 /**
+ * Helper method:  does a text chunk have another line in it?
+ */
+
+bool hasLine(string text) {
+	string::size_type index = text.find("\n", 0);
+	if(index == string::npos)
+		return false;
+		
+	return true;
+}
+
+/**
  * Helper method:  determines whether or not the passed key is the key of the passed line
  */
  bool isKey(string key, string line) {
  	line = cutWhiteSpace(line);
  	string::size_type index = line.find(key, 0);
- 	if(index == 0)
+ 	if(index == 0) 
  		return true;
  	return false;
  }
@@ -89,18 +101,17 @@ vector<string> BZWParser::getLines(const char* _start, const char* _text) {
 	
 	// find the start of the section
 	while(true) {
-		// get the next line
+		// make sure we have line enough to cut
+		if(section.length() < header.length())
+			break;
+			
+		// get a line
 		string currLine = cutLine(section);
 		
-		// prevent an exception:  check to see if we can even get the next line (if we can't, then there is no section in this text)
-		if(section.length() < currLine.length() + 1)
-			return lines;
-			
-		// advance the section
-		section = section.substr(currLine.length() + 1);
+		// try to find the header in it
+		string::size_type index = currLine.find(header, 0);
 		
-		// if we found the header then break
-		if(currLine.compare(header) == 0)
+		if(index == 0)
 			break;
 	}
 	
@@ -179,40 +190,91 @@ string BZWParser::getSection(const char* _header, const char* _text) {
 /**
  * This method finds all occurences of a section (by looking for its header) in a chunk of text
  */
-vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text) {
+const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text) {
 	string header = cutWhiteSpace(string(_header));
-	string text = cutWhiteSpace(string(_text));
+	string text = cutWhiteSpace(string(_text)) + " ";
 	
 	vector<string> sections = vector<string>();
-	
-	string::size_type index = 0, end = 0;
+	int cnt = 0;		// how many sections
 	
 	while(true) {
-		// find the first occurence of the header
-		index = text.find(header, index);
+		string section = string("");
 		
-		// if we're at the end, then break
-		if(index == string::npos)
-			break;
+		string currLine, line;
+		
+		bool found = false;
+		
+		// find the header 
+		while(true) {
 			
-		// find the end of the section
-		end = text.find("end\n", index);
-		
-		// if there's no end, it's probably a syntax error so skip it
-		if(end == string::npos) {
-			printf("BZWParser:  WARNING! No \"end\" tag found for \"%s\" at char# %d; skipping...\n", header.c_str(), index);
-			sections.push_back( text.substr(index) );
-			break;
+			// ensure we have space to cut
+			if(!hasLine(text)) {
+				break;
+			}
+				
+			// cut a line
+			currLine = cutLine(text);
+			line = cutWhiteSpace(currLine);
+			
+			// chunk up the line
+			vector<string> lineElements = getLineElements(line.c_str());
+			
+			if(lineElements.size() == 0)
+				lineElements.push_back(" ");
+				
+			// see if it has the header
+			if(lineElements[0].compare(header) == 0) {
+				section += line + "\n";
+				text = text.substr(currLine.length() + 1);
+				found = true;
+				break;
+			}
+			
+			text = text.substr(currLine.length() + 1);
 		}
 		
-		string section = text.substr( index, (end + 4) - index );
-		// add the section
-		sections.push_back(section);
+		found = false;
+		// find the footer
+		while(true) {
+			// ensure we have space to cut
+			if(!hasLine(text)) {
+				break;
+			}
+				
+			// cut a line
+			currLine = cutLine(text);
+			line = cutWhiteSpace(currLine);
+			
+			// chunk up the line
+			vector<string> lineElements = getLineElements(line.c_str());
+			
+			if(lineElements.size() == 0)
+				lineElements.push_back(" ");
+			
+			// add it to the section
+			section += line + "\n";
+			
+			// see if it has the end
+			if(lineElements[0].compare("end") == 0) {
+				found = true;
+				break;
+			}
+				
+			
+			text = text.substr(currLine.length() + 1);
+		}
 		
-		// advance the text
-		text = text.substr(end + 1);
+		if(!found)
+			break;	
+		else {
+			sections.push_back(section);
+			cnt++;
+		}
 	}
-	
+	// add SOMETHING if we found nothing
+	if(cnt == 0)
+		sections.push_back(BZW_NOT_FOUND);
+		
 	return sections;
 }
 
@@ -232,7 +294,7 @@ vector<string> BZWParser::getValuesByKey(const char* _key, const char* _header, 
 	
 	// get the values and load up ret
 	for(vector<string>::iterator i = lines.begin(); i != lines.end(); i++) {
-		string value = BZWParser::value(_key, (char*)i->c_str());
+		string value = BZWParser::value(_key, i->c_str());
 		ret.push_back( value );
 	}
 	

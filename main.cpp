@@ -15,13 +15,16 @@
 
 #include "include/Transform.h"
 
-#include "include/objects/bz2object.h"
-
-#include "include/objects/box.h"
 #include "include/MasterConfigurationDialog.h"
 #include "include/Fl_Error.h"
 
 #include "include/render/Point3D.h"
+#include "include/render/RGBA.h"
+
+#include "include/objects/bz2object.h"
+#include "include/objects/box.h"
+#include "include/objects/material.h"
+#include "include/objects/group.h"
 
 #include <string>
 #include <vector>
@@ -31,7 +34,7 @@ using namespace std;
 
 
 int main(int argc, char** argv) {
-	/*
+	
 	MainWindow* win = new MainWindow(new Model());
 	win->show(argc, argv);
 	
@@ -39,9 +42,69 @@ int main(int argc, char** argv) {
 	error->show();
 	
 	return Fl::run();
+	
+	/*
+	group obj = group();
+	
+	printf("|%s|\n", obj.toString().c_str());
+	
+	string data = string("group theCoolgroup\n") +
+						 "  shift 1 2 3 \n" +
+						 "  shear 4 5 6 \n" +
+						 "  spin 7 0 1 0 \n" +
+						 "  scale 10 20 30 \n" +
+						 "  tint 0.5 0.5 0.5 1.0 \n" +
+						 "  team 3 \n" +
+						 "  phydrv myPhysicsDriver\n" +
+						 "  matref myUberCoolMaterial\n" +
+						 "  drivethrough\n" +
+						 "  shootthrough\n" +
+						 "end\n";
+						 
+	obj.update(data);
+	
+	printf("|%s|\n", obj.toString().c_str());
+	
 	*/
 	
+	/*
+	material obj = material();
+	
+	printf("|%s|\n", obj.toString().c_str());
+	
+	string objData = string("material\n") +
+							"  name sniffMat\n" +
+							"  texture myCoolTex\n" +
+							"  addtexture coolTex1\n" +
+							"  addtexture coolTex2\n" +
+							"  notextures\n" +
+							"  notexcolor\n" +
+							"  notexalpha\n" +
+							"  spheremap\n" +
+							"  occluder\n" +
+							"  nosort\n" +
+							"  alphathresh 0.5\n" +
+							"  texmat myTexMat\n" +
+							"  dyncol myDynCol\n" +
+							"  ambient 0.5 0.5 0.5 0.5\n" +
+							"  color 0.1 0.1 0.1 0.1\n" +
+							"  specular 0.9 0.9 0.9 0.9\n" +
+							"  emission 0.6 0.6 0.6 0.6\n" +
+							"  noradar\n" +
+							"  nolighting\n" +
+							"  noculling\n" +
+							"  noshadow\n" +
+							"  shininess 64\n" +
+							"end\n";
+							 
+	obj.update(objData);
+	
+	printf("|%s|\n", obj.toString().c_str());
+	
+	*/
+	/*
 	box theBox = box();
+	printf("|%s|\n", theBox.toString().c_str());
 	string boxData = string("box\n") + 
 							"  position 1 2 3\n" +
 							"  rotation 45\n" +
@@ -54,10 +117,8 @@ int main(int argc, char** argv) {
 	
 	theBox.update(boxData);
 	
-	MasterConfigurationDialog* mcd = new MasterConfigurationDialog(&theBox);
-	mcd->show();
-	
-	return Fl::run();
+	printf("|%s|\n", theBox.toString().c_str());
+	*/
 	
 	/*
 	world worldObj = world();
