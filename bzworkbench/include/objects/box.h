@@ -15,11 +15,11 @@ class box : public bz2object {
 public:
 
 	// constructors
-	box() : bz2object("box", "<position><rotation><size><shear><shift><scale><spin>") {
+	box() : bz2object("box", "<position><rotation><size>") {
 		
 	}
 	
-	box(string& data) : bz2object("box", "<position><rotation><size>") {
+	box(string& data) : bz2object("box", "<position><rotation><size>", data) {
 		this->update(data);	
 	}
 	

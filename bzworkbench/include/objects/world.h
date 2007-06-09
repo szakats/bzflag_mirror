@@ -10,13 +10,18 @@
 class world : public DataEntry {
 	public:
 		world() : DataEntry("world", "<name><size><flagHeight><noWalls>") {
-			this->worldName = string("Brave_New_World");
+			this->worldName = string("");
 			this->size = 400.0;
 			this->noWalls = false;
 			this->flagHeight = 10.0f;
 		}
 		
 		world(string& data) : DataEntry("world", "<name><size><flagHeight><noWalls>") {
+			this->worldName = string("");
+			this->size = 400.0;
+			this->noWalls = false;
+			this->flagHeight = 10.0f;
+			
 			update(data);	
 		}
 		

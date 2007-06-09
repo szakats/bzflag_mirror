@@ -46,6 +46,20 @@ public:
 	// get the header
 	string getHeader(void) { return header; }
 	
+	// helper method:  ensures that a key occurs only once (useful for calling from update())
+	bool hasOnlyOne(vector<string> lines, const char* key) {
+		if( lines.size() != 1) {
+			printf("%s::update():  Error!  Defined \"%s\" %d times!\n", header.c_str(), key, lines.size());
+			return false;	
+		}
+		return true;
+	}
+	
+	// set the header
+	void setHeader(const char* c) { this->header = string(c); }
+	
+	// set the keys
+	void setKeys(const char* c) { this->keys = string(c); }
 	
 private:
 	string header;

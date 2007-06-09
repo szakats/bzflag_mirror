@@ -7,9 +7,13 @@ class Model;
 #include "objects/world.h"
 #include "objects/waterLevel.h"
 #include "objects/options.h"
+#include "objects/physics.h"
+#include "objects/material.h"
 
 #include <string>
 #include <map>
+
+using namespace std;
 
 class Model
 {
@@ -35,6 +39,10 @@ private:
 	
 // the data map
 	map<string, DataEntry*> dataMap;
+	
+// the physics drivers and materials
+	map<string, physics> physicsDrivers;
+	map<string, material> materials;
 	
 };
 

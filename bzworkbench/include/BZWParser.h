@@ -6,6 +6,8 @@
 
 using namespace std;
 
+#define BZW_NOT_FOUND "NOT FOUND"
+
 class BZWParser {
 public:
 	
@@ -29,7 +31,7 @@ public:
 	static string getSection(const char* header, const char* text);
 	
 	// get all sections from a chunk of text that start with header
-	static vector<string> getSectionsByHeader(const char* header, const char* text);
+	static const vector<string> getSectionsByHeader(const char* header, const char* text);
 	
 	// get all values from a key in a section
 	static vector<string> getValuesByKey(const char* key, const char* header, const char* section);

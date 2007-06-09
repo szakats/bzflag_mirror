@@ -45,36 +45,45 @@ class bz2object : public DataEntry {
 			// get the lines
 			vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
 			
+			if(lines[0] == BZW_NOT_FOUND)
+				return;
+			
 			// just go with the first box definition we find (only one should be passed anyway)
 			const char* objData = lines[0].c_str();
 			
+			// data
+			vector<string> positions, rotations, sizes;
+			
 			// get the position
-			vector<string> positions = BZWParser::getValuesByKey("position", header, objData);
-			
-			// just go with the first position (only one should be defined)
-			if(positions.size() > 1)
-				printf("%s::update():  Warning! Multiple positions defined; choosing the first one...\n", header);
-			
-			this->position = Point3D(positions[0].c_str());
+			if(this->isKey("position")) {
+				positions = BZWParser::getValuesByKey("position", header, objData);
+				
+				// just go with the first position (only one should be defined)
+				if(!hasOnlyOne(positions, "position"))
+					return;
+					
+			}
 			
 			// get the rotation
-			vector<string> rotations = BZWParser::getValuesByKey("rotation", header, objData);
-			
-			// just go with the first rotation
-			if(rotations.size() > 1)
-				printf("%s::update():  Warning! Multiple rotations defined; choosing the first one...\n", header);
+			if(this->isKey("rotation")) {
+				rotations = BZWParser::getValuesByKey("rotation", header, objData);
 				
-			this->rotation = atof( rotations[0].c_str() );
+				// just go with the first rotation
+				if(!hasOnlyOne(rotations, "rotation"))
+					return;
+					
+			}
 			
-			// get the size
-			vector<string> sizes = BZWParser::getValuesByKey("size", header, objData);
-			
-			// just go with the first size (only one should be defined)
-			if(sizes.size() > 1)
-				printf("%s::update():  Warning! Multiple sizes defined; choosing the first one...\n", header);
+			if(this->isKey("size")) {
+				// get the size
+				sizes = BZWParser::getValuesByKey("size", header, objData);
 				
-			this->size = Point3D(sizes[0].c_str());
-			
+				// just go with the first size (only one should be defined)
+				if(!hasOnlyOne(sizes, "size"))
+					return;
+					
+				
+			}
 			// read in the transformations
 			transformations.clear();
 			
@@ -97,6 +106,12 @@ class bz2object : public DataEntry {
 				}
 			}
 			
+			if(this->isKey("position"))
+				this->position = Point3D( positions[0].c_str() );
+			if(this->isKey("rotation"))
+				this->rotation = atof( rotations[0].c_str() );
+			if(this->isKey("size"))
+				this->size = Point3D( sizes[0].c_str() );
 		}
 		
 		// toString
@@ -108,12 +123,18 @@ class bz2object : public DataEntry {
 		string BZWLines(void) {
 			string ret = string("");
 			
-			ret += "  position " + position.toString();
-			ret += "  size " + size.toString();
-			ret += "  rotation " + string( ftoa(rotation) ) + "\n";
+			if(this->isKey("position"))
+				ret += "  position " + position.toString();
+				
+			if(this->isKey("size"))
+				ret += "  size " + size.toString();
+			
+			if(this->isKey("rotation"))
+				ret += "  rotation " + string( ftoa(rotation) ) + "\n";
 			
 			for(vector<Transform>::iterator i = transformations.begin(); i != transformations.end(); i++) {
-				ret += "  " + i->toString();
+				if(this->isKey(i->getHeader().c_str()))
+					ret += "  " + i->toString();
 			}
 			
 			return ret;
@@ -124,16 +145,17 @@ class bz2object : public DataEntry {
 		Point3D getSize() { return size; }
 		float getRotation() { return rotation; }
 		vector<Transform> getTransformations() { return transformations; }
+		string getOriginalData() { return originalData; }
 		
 		// data setters (makes MasterConfigurationDialog code easier)
 		
-	
+	protected:
+		string originalData;
 	
 	private:
 		Point3D position;
 		Point3D size;
 		float rotation;
-		string originalData;
 		
 		vector<Transform> transformations;
 };
