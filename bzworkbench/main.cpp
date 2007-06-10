@@ -25,6 +25,10 @@
 #include "include/objects/box.h"
 #include "include/objects/material.h"
 #include "include/objects/group.h"
+#include "include/objects/arc.h"
+#include "include/objects/pyramid.h"
+#include "include/objects/teleporter.h"
+#include "include/objects/base.h"
 
 #include <string>
 #include <vector>
@@ -34,7 +38,7 @@ using namespace std;
 
 
 int main(int argc, char** argv) {
-	
+	/*
 	MainWindow* win = new MainWindow(new Model());
 	win->show(argc, argv);
 	
@@ -42,37 +46,118 @@ int main(int argc, char** argv) {
 	error->show();
 	
 	return Fl::run();
+	*/
 	
-	/*
-	group obj = group();
+	base bobj = base();
 	
-	printf("|%s|\n", obj.toString().c_str());
+	printf("|%s|\n", bobj.toString().c_str());
 	
-	string data = string("group theCoolgroup\n") +
+	string bdata = string("base\n") +
+						  "  position 1 2 3\n" +
+						  "  size 4 5 6\n" +
+						  "  rotation 7\n" +
+						  "  color 1\n" +
+						  "  oncap HM\n" +
+						  "end\n";
+	
+	bobj.update(bdata);
+	
+	printf("|%s|\n", bobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+	
+	teleporter tobj = teleporter();
+	printf("|%s|\n", tobj.toString().c_str());
+	
+	string tdata = string("teleporter\n") +
+						  "  position 1 2 3\n" +
+						  "  size 4 5 6\n" +
+						  "  rotation 7\n" +
+						  "  name theTeleporter\n" +
+						  "  border 3.14\n" +
+						  "end\n";
+						  
+	tobj.update(tdata);
+	
+	printf("|%s|\n", tobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+	pyramid thePyramid = pyramid();
+	printf("|%s|\n", thePyramid.toString().c_str());
+	string pyramidData = string("pyramid\n") + 
+								"  position 1 2 3\n" +
+								"  rotation 45\n" +
+								"  size 10 20 30\n" +
+								"end\n";
+	
+	thePyramid.update(pyramidData);
+	
+	printf("|%s|\n", thePyramid.toString().c_str());
+	
+	printf("========================================\n");
+	
+	arc aobj = arc();
+	
+	printf("|%s|\n", aobj.toString().c_str());
+	
+	string adata = string("arc\n") +
+						  "  name sniffedArc\n" +
+						  "  divisions 22\n" +
+						  "  flatshading\n" +
+						  "  angle 120\n" +
+						  "  ratio 0.5\n" +
+						  "  position 100 200 300\n" +
+						  "  rotation 45\n" +
+						  "  size 20 30 40\n" +
+						  "  scale 4 5 6\n" +
+						  "  shear 7 8 9\n" +
+						  "  shift 10 11 12\n" +
+						  "  spin 56 0 1 0\n" +
+						  "  phydrv my_physics_driver\n" +
+						  "  smoothbounce\n" +
+						  "  matref coolMaterial1\n" +
+						  "  matref coolmaterial2\n" +
+						  "end\n";
+						  
+	aobj.update(adata);
+	
+	printf("|%s|\n", aobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+	group gobj = group();
+	
+	printf("|%s|\n", gobj.toString().c_str());
+	
+	string gdata = string("group theCoolgroup\n") +
 						 "  shift 1 2 3 \n" +
 						 "  shear 4 5 6 \n" +
 						 "  spin 7 0 1 0 \n" +
 						 "  scale 10 20 30 \n" +
 						 "  tint 0.5 0.5 0.5 1.0 \n" +
 						 "  team 3 \n" +
+						 "  matref my1stmaterial\n" +
 						 "  phydrv myPhysicsDriver\n" +
 						 "  matref myUberCoolMaterial\n" +
 						 "  drivethrough\n" +
-						 "  shootthrough\n" +
+						 //"  shootthrough\n" +
 						 "end\n";
 						 
-	obj.update(data);
+	gobj.update(gdata);
 	
-	printf("|%s|\n", obj.toString().c_str());
+	printf("|%s|\n", gobj.toString().c_str());
 	
-	*/
 	
-	/*
-	material obj = material();
+	printf("========================================\n");
 	
-	printf("|%s|\n", obj.toString().c_str());
 	
-	string objData = string("material\n") +
+	material mobj = material();
+	
+	printf("|%s|\n", mobj.toString().c_str());
+	
+	string mobjData = string("material\n") +
 							"  name sniffMat\n" +
 							"  texture myCoolTex\n" +
 							"  addtexture coolTex1\n" +
@@ -95,32 +180,32 @@ int main(int argc, char** argv) {
 							"  noculling\n" +
 							"  noshadow\n" +
 							"  shininess 64\n" +
+							"  matref nextMaterial1\n" +
+							"  matref sniff\n" +
+							"  resetmat\n" +
 							"end\n";
 							 
-	obj.update(objData);
+	mobj.update(mobjData);
 	
-	printf("|%s|\n", obj.toString().c_str());
+	printf("|%s|\n", mobj.toString().c_str());
 	
-	*/
-	/*
+	printf("========================================\n");
+	
 	box theBox = box();
 	printf("|%s|\n", theBox.toString().c_str());
 	string boxData = string("box\n") + 
 							"  position 1 2 3\n" +
 							"  rotation 45\n" +
 							"  size 51 52 53\n" +
-							"  spin 45 1 0 0\n" +
-							"  shear 45 55 65\n" +
-							"  scale 10 11 12\n" +
-							"  shift 100 101 102\n" +
 							"end\n";
 	
 	theBox.update(boxData);
 	
 	printf("|%s|\n", theBox.toString().c_str());
-	*/
 	
-	/*
+	
+	printf("========================================\n");
+	
 	world worldObj = world();
 	options optionsObj = options();
 	waterLevel waterLevelObj = waterLevel();
@@ -132,8 +217,6 @@ int main(int argc, char** argv) {
 	
 	string worldStr = string("world\n") +
 						 "  name " + worldName + "\n" +
-						 "  name sniff\n" +
-						 "  name yoink\n" +
 						 "  size " + sizeString + "\n" +
 						 "  flagHeight " + flagHeightString + "\n" +
 							(noWalls == true ? "  noWalls\n" : "# noWalls\n") +
@@ -169,5 +252,5 @@ int main(int argc, char** argv) {
 	printf("%s\n", waterLevelObj.toString().c_str());
 	return 0;
 	
-	*/
+	
 }

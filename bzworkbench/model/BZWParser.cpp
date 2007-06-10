@@ -62,7 +62,7 @@ string BZWParser::value(const char* _key, const char* _text) {
 	
 	// stop if we didn't find the key
 	if(startIndex == string::npos)
-		return string("not found");
+		return string(BZW_NOT_FOUND);
 		
 	// advance to the start of the value
 	startIndex += key.length() + 1;

@@ -25,13 +25,8 @@ public:
 		const char* header = this->getHeader().c_str();
 		// get options objects
 		vector<string> optionses = BZWParser::getSectionsByHeader(header, data.c_str());
-		if(optionses.size() > 1) {
-			printf("options::update():  Warning! multiple (%d) options objects; choosing the first one...\n", optionses.size());	
-		}
-		else if(optionses.size() < 1) {
-			printf("options::update():  Warning! no options objects found!\n");
-			return;	
-		}
+		if(!hasOnlyOne(optionses, "options"))
+			return;
 		
 		const char* opts = optionses[0].c_str();
 		

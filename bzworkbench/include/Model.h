@@ -9,6 +9,7 @@ class Model;
 #include "objects/options.h"
 #include "objects/physics.h"
 #include "objects/material.h"
+#include "objects/bz2object.h"
 
 #include <string>
 #include <map>
@@ -34,15 +35,20 @@ private:
 	options* optionsData;
 	waterLevel* waterLevelData;
 	
+// physics
+	physics* phys;
+	
+// materials
+	material* materials;
+	
+// objects
+	bz2object* objects;
+	
 // maps keys to values
 	void buildDatabase(void);
 	
 // the data map
 	map<string, DataEntry*> dataMap;
-	
-// the physics drivers and materials
-	map<string, physics> physicsDrivers;
-	map<string, material> materials;
 	
 };
 
