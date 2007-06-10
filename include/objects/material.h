@@ -14,14 +14,14 @@ class material : public DataEntry {
 
 public:
 	material() : 
-		DataEntry("material", "<name><texture><addtexture><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosorting><noradar><groupalpha><occluder><alphathresh>") {
+		DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosorting><noradar><groupalpha><occluder><alphathresh>") {
 		name = string("");
 		dynamicColor = string("");
 		textureMatrix = string("");
 		color = string("");
 		textures = vector<string>();
 		noTextures = noTexColor = noTexAlpha = true;
-		noRadar = spheremap = noShadow = noCulling = noSorting = groupAlpha = occluder = false;
+		noRadar = spheremap = noShadow = noCulling = noSorting = groupAlpha = occluder = resetmat = false;
 		alphaThreshold = 1.0f;
 		ambient = RGBA(0, 0, 0, 0);
 		diffuse = RGBA(0, 0, 0, 0);
@@ -31,14 +31,14 @@ public:
 	}
 	
 	material(string& data) :
-		DataEntry("material", "<name><texture><addtexture><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosorting><noradar><groupalpha><occluder><alphathresh>") {
+		DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosorting><noradar><groupalpha><occluder><alphathresh>") {
 		name = string("");
 		dynamicColor = string("");
 		textureMatrix = string("");
 		color = string("");
 		textures = vector<string>();
 		noTextures = noTexColor = noTexAlpha = true;
-		noRadar = spheremap = noShadow = noCulling = noSorting = groupAlpha = occluder = false;
+		noRadar = spheremap = noShadow = noCulling = noSorting = groupAlpha = occluder = resetmat = false;
 		alphaThreshold = 1.0f;
 		ambient = RGBA(0, 0, 0, 0);
 		diffuse = RGBA(0, 0, 0, 0);
@@ -82,8 +82,8 @@ public:
 		// get the diffuse colors
 		vector<string> colors = BZWParser::getValuesByKey("color", header, materialData);
 		vector<string> diffs = BZWParser::getValuesByKey("diffuse", header, materialData);
-		if((hasOnlyOne(colors, "color") && hasOnlyOne(diffs, "diffuse")) || 
-		   (!hasOnlyOne(colors, "color") && !hasOnlyOne(diffs, "diffuse"))) {
+		if((colors.size() > 1 && diffs.size() == 0) || 
+		   (colors.size() == 0 && diffs.size() > 1)) {
 		   	printf("material::update():  Error! Could not parse \"color\" or \"diffuse\" properly!\n");
 		   return;
 		}
@@ -109,37 +109,42 @@ public:
 		vector<string> texs = BZWParser::getValuesByKey("addtexture", header, materialData);
 		
 		// get notextures
-		vector<string> notextures = BZWParser::getLinesByKey("notexture", header, materialData);
+		vector<string> notextures = BZWParser::getValuesByKey("notexture", header, materialData);
 		
 		// get notexcolor
-		vector<string> notexcolors = BZWParser::getLinesByKey("notexcolor", header, materialData);
+		vector<string> notexcolors = BZWParser::getValuesByKey("notexcolor", header, materialData);
 		
 		// get spheremap
-		vector<string> spheremaps = BZWParser::getLinesByKey("spheremap", header, materialData);
+		vector<string> spheremaps = BZWParser::getValuesByKey("spheremap", header, materialData);
 		
 		// get noshadow
-		vector<string> noshadows = BZWParser::getLinesByKey("noshadows", header, materialData);
+		vector<string> noshadows = BZWParser::getValuesByKey("noshadow", header, materialData);
 		
 		// get noculling
-		vector<string> nocullings = BZWParser::getLinesByKey("noculling", header, materialData);
+		vector<string> nocullings = BZWParser::getValuesByKey("noculling", header, materialData);
+		
+		// get nolighting
+		vector<string> nolightings = BZWParser::getValuesByKey("nolighting", header, materialData);
 		
 		// get nosorting
-		vector<string> nosortings = BZWParser::getLinesByKey("nosorting", header, materialData);
+		vector<string> nosortings = BZWParser::getValuesByKey("nosort", header, materialData);
 		
 		// get noradar
-		vector<string> noradars = BZWParser::getLinesByKey("noradar", header, materialData);
+		vector<string> noradars = BZWParser::getValuesByKey("noradar", header, materialData);
 		
 		// get notexalpha
-		vector<string> notexalphas = BZWParser::getLinesByKey("notexalpha", header, materialData);
+		vector<string> notexalphas = BZWParser::getValuesByKey("notexalpha", header, materialData);
 		
 		// get groupalpha
-		vector<string> groupalphas = BZWParser::getLinesByKey("groupalphs", header, materialData);
+		vector<string> groupalphas = BZWParser::getValuesByKey("groupalpha", header, materialData);
 		
 		// get occluder
-		vector<string> occluders = BZWParser::getLinesByKey("occluder", header, materialData);
+		vector<string> occluders = BZWParser::getValuesByKey("occluder", header, materialData);
 		
 		// get resetmat
-		// vector<string> resetmat = BZWParser::getLinesByKey("resetmat", header, materialData);
+		vector<string> resetmats = BZWParser::getValuesByKey("resetmat", header, materialData);
+		if(resetmats.size() > 1)
+			printf("material::update(): Warning!  Multiple \"resetmat\" declared!\n");
 		
 		// get shininess
 		vector<string> shininesses = BZWParser::getValuesByKey("shininess", header, materialData);
@@ -151,6 +156,9 @@ public:
 		if(!hasOnlyOne(alphathresholds, "alphathresh"))
 			return;
 			
+		// get other material refrences
+		vector<string> matrefs = BZWParser::getValuesByKey("matref", header, materialData);
+			
 		// load the retrieved data into the class
 		this->name = names[0];
 		this->dynamicColor = dyncols[0];
@@ -160,6 +168,7 @@ public:
 		this->ambient = RGBA( ambients[0].c_str() );
 		this->diffuse = RGBA( diffuses[0].c_str() );
 		this->textures = texs;
+		this->materials = matrefs;
 		this->noTextures = (notextures.size() == 0 ? false : true);
 		this->noTexColor = (notexcolors.size() == 0 ? false : true);
 		this->spheremap = (spheremaps.size() == 0 ? false : true);
@@ -170,6 +179,8 @@ public:
 		this->noTexAlpha = (notexalphas.size() == 0 ? false : true);
 		this->groupAlpha = (groupalphas.size() == 0 ? false : true);
 		this->occluder = (occluders.size() == 0 ? false : true);
+		this->resetmat = (resetmats.size() == 0 ? false : true);
+		this->noLighting = (nolightings.size() == 0 ? false : true);
 		this->shiny = atof( shininesses[0].c_str() );
 		this->alphaThreshold = atof( alphathresholds[0].c_str() );
 	}
@@ -179,6 +190,11 @@ public:
 		string texString = string("");
 		for(vector<string>::iterator i = textures.begin(); i != textures.end(); i++) {
 			texString += "  addtexture " + (*i) + "\n";	
+		}
+		
+		string matString = string("");
+		for(vector<string>::iterator i = materials.begin(); i != materials.end(); i++) {
+			matString += "  matref " + (*i) + "\n";	
 		}
 		
 		return string("material\n") +
@@ -192,11 +208,12 @@ public:
 					  (spheremap == true ? "  spheremap\n" : "") +
 					  (noShadow == true ? "  noshadow\n" : "") +
 					  (noCulling == true ? "  noculling\n" : "") +
-					  (noSorting == true ? "  nosorting\n" : "") +
+					  (noSorting == true ? "  nosort\n" : "") +
 					  (noLighting == true ? "  nolighting\n" : "") +
 					  (noRadar == true ? "  noradar\n" : "") +
 					  (groupAlpha == true ? "  groupalpha\n" : "") +
 					  (occluder == true ? "  occluder\n" : "") +
+					  (resetmat == true ? "  resetmat\n" : "") +
 					  "  ambient " + ambient.toString() +
 					  (color.length() == 0 ? "  diffuse " + diffuse.toString() : "") +
 					  "  specular " + specular.toString() +
@@ -204,6 +221,7 @@ public:
 					  "  shininess " + string(ftoa(shiny)) + "\n" +
 					  "  alphathresh " + string(ftoa(alphaThreshold)) + "\n" +
 					  texString +
+					  matString +
 					  "end\n";
 	}
 	
@@ -214,8 +232,8 @@ public:
 	
 private:
 	string name, dynamicColor, textureMatrix, color;
-	vector<string> textures;
-	bool noTextures, noTexColor, noTexAlpha, spheremap, noShadow, noCulling, noSorting, noRadar, noLighting, groupAlpha, occluder;
+	vector<string> textures, materials;
+	bool noTextures, noTexColor, noTexAlpha, spheremap, noShadow, noCulling, noSorting, noRadar, noLighting, groupAlpha, occluder, resetmat;
 	RGBA ambient, diffuse, specular, emissive;
 	float shiny, alphaThreshold;
 	

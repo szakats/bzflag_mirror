@@ -11,13 +11,13 @@ public:
 
 	waterLevel() : DataEntry("waterLevel", "<name><height><material>") {
 		this->name = string("");
-		this->materialName = string("");
+		this->materials = vector<string>();
 		height = -1.0f;
 	}
 	
 	waterLevel(string& data) : DataEntry("waterLevel", "<name><height><material>") {
 		this->name = string("");
-		this->materialName = string("");
+		this->materials = vector<string>();
 		height = -1.0f;
 		
 		this->update(data);
@@ -37,42 +37,48 @@ public:
 		if(waterLevelObjs[0] == BZW_NOT_FOUND)
 			return;
 			
-		if(waterLevelObjs.size() > 2) {
-			printf("waterLevel::update():  Warning! Multiple (%d) waterLevel objects; choosing the first one.\n", waterLevelObjs.size());
+		if(waterLevelObjs.size() >= 2) {
+			printf("waterLevel::update():  Error! waterLevel defined %d times!\n", waterLevelObjs.size());
+			return;
 		}
 		
 		const char* waterData = waterLevelObjs[0].c_str();
 		
 		// get the names, but only choose the first
 		vector<string> names = BZWParser::getValuesByKey("name", header, waterData);
-		if(names.size() >= 1) {
-			if(names.size() > 1) printf("waterLevel::update():  Warning! Multiple (%d) names; choosing the first one.\n", names.size());	
-			this->name = names[0];
-		}
+		if(!hasOnlyOne(names, "name"))
+			return;
 		
 		// get the material names, but only choose the last
-		vector<string> matNames = BZWParser::getValuesByKey("material", header, waterData);
-		if(matNames.size() >= 1) {
-			if(matNames.size() > 1) printf("waterLevel::update():  Warning! Multiple (%d) materials; choosing the first one.\n", matNames.size());
-			this->materialName = matNames[0];	
-		}
+		vector<string> matNames = BZWParser::getValuesByKey("matref", header, waterData);
 		
 		// get the water heights, but only choose the last
 		vector<string> heights = BZWParser::getValuesByKey("height", header, waterData);
-		if(heights.size() >= 1) {
-			if(heights.size() > 1) printf("waterLevel::update:  Warning! Multiple (%d) heights; choosing the first one.\n", heights.size());
-			this->height = atof( heights[0].c_str() );
-		}
+		if(!hasOnlyOne(heights, "height"))
+			return;
+			
+		// load the data
+		this->name = names[0];
+		this->materials = matNames;
+		this->height = atof( heights[0].c_str() );
 		
 	}
 	
 	// toString method
 	string toString(void) {
 		string waterLevelStr = string(ftoa(height));
+		string materialString = string("");
+		if(materials.size() >= 1)
+			for(vector<string>::iterator i = materials.begin(); i != materials.end(); i++) {
+				materialString += "  matref " + (*i) + "\n";
+			}
+		else
+			materialString = string("# matref\n");
+			
 		return string(string("waterLevel\n") +
 							 "  name " + name + "\n" +
 							 "  height " + waterLevelStr + "\n" +
-							 (materialName.length() == 0 ? "#" : " ") + " material " + materialName + "\n" +
+							 materialString +
 							 "end\n");
 	}
 	
@@ -83,7 +89,7 @@ public:
 	
 private:
 	string name;
-	string materialName;
+	vector<string> materials;
 	float height;
 };
 

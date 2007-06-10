@@ -20,8 +20,6 @@ class group : public bz2object {
 			this->tintColor = RGBA(1, 1, 1, 1);
 			this->driveThrough = false;
 			this->shootThrough = false;
-			this->physicsDriver = string("");
-			this->material = string("");		
 			this->name = string("");
 		}
 		
@@ -30,8 +28,6 @@ class group : public bz2object {
 			this->tintColor = RGBA(1, 1, 1, 1);
 			this->driveThrough = false;
 			this->shootThrough = false;
-			this->physicsDriver = string("");
-			this->material = string("");
 			this->name = string("");
 			
 			this->update(data);	
@@ -44,8 +40,6 @@ class group : public bz2object {
 		
 		// setter
 		void update(string& data) {
-			bz2object::update(data);
-			
 			const char* header = this->getHeader().c_str();
 			
 			// get the section from the data
@@ -72,27 +66,12 @@ class group : public bz2object {
 				
 			// get drivethrough
 			vector<string> driveThroughs = BZWParser::getValuesByKey("drivethrough", header, groupData);
-			if(!hasOnlyOne(driveThroughs, "drivethrough"))
-				return;
 				
 			// get shootthrough
 			vector<string> shootThroughs = BZWParser::getValuesByKey("shootthrough", header, groupData);
-			if(!hasOnlyOne(shootThroughs, "shootthrough"))
-				return;
 				
-			// get physics driver if it exists
-			vector<string> physicsDrivers = BZWParser::getValuesByKey("phydrv", header, groupData);
-			if(physicsDrivers.size() > 1) {
-				printf("material::update():  Error! Defined \"phydrv\" %d times!\n", physicsDrivers.size());
-				return;	
-			}
-			
-			// get material if it exists
-			vector<string> materials = BZWParser::getValuesByKey("matref", header, groupData);
-			if(materials.size() > 1) {
-				printf("material::update():  Error! Defined \"matref\" %d times!\n", materials.size());
-				return;	
-			}
+			// do base class update
+			bz2object::update(data);
 			
 			// assign data
 			this->name = headers[0];
@@ -100,8 +79,7 @@ class group : public bz2object {
 			this->team = (int)(atof( teams[0].c_str() ));
 			this->driveThrough = (driveThroughs.size() == 0 ? false : true);
 			this->shootThrough = (shootThroughs.size() == 0 ? false : true);
-			this->physicsDriver = physicsDrivers[0];
-			this->material = materials[0];
+			
 		}
 		
 		// toString
@@ -122,7 +100,6 @@ class group : public bz2object {
 		// member data
 		RGBA tintColor;
 		bool driveThrough, shootThrough;
-		string physicsDriver, material, name;
 		int team;
 		
 };

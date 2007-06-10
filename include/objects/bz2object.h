@@ -11,7 +11,7 @@
 using namespace std;
 
 /**
- * This is the base class of a BZW renderable object.  All of these support position, rotation, size,
+ * This is the base class of a BZW renderable object.  All of these support name, position, rotation, size, matref, phydrv
  * and sets of shear, shift, scale, and spin key/value pairs.  box and pyramid are derived classes of this, 
  * but simply do not support transformations
  */
@@ -52,7 +52,16 @@ class bz2object : public DataEntry {
 			const char* objData = lines[0].c_str();
 			
 			// data
-			vector<string> positions, rotations, sizes;
+			vector<string> names, positions, rotations, sizes, physicsDrivers, matrefs;
+			
+			// get the name (break if there are more than one)
+			if(this->isKey("name")) {
+				names = BZWParser::getValuesByKey("name", header, objData);
+				if(names.size() > 1) {
+					printf("%s::update():  Error! Defined \"name\" %d times!\n", header, names.size());
+					return;	
+				}
+			}
 			
 			// get the position
 			if(this->isKey("position")) {
@@ -106,12 +115,30 @@ class bz2object : public DataEntry {
 				}
 			}
 			
+			// get the physics driver
+			if(this->isKey("phydrv")) {
+				physicsDrivers = BZWParser::getValuesByKey("phydrv", header, objData);
+				if(!hasOnlyOne(physicsDrivers, "phydrv"))
+					return;
+			}
+			
+			// get materials
+			if(this->isKey("matref")) {
+				matrefs = BZWParser::getValuesByKey("matref", header, objData);
+			}
+			
+			if(this->isKey("name") && names.size() > 0)
+				this->name = names[0];
 			if(this->isKey("position"))
 				this->position = Point3D( positions[0].c_str() );
 			if(this->isKey("rotation"))
 				this->rotation = atof( rotations[0].c_str() );
 			if(this->isKey("size"))
 				this->size = Point3D( sizes[0].c_str() );
+			if(this->isKey("phydrv"))
+				this->physicsDriver = physicsDrivers[0];
+			if(this->isKey("matref"))
+				this->materials = matrefs;
 		}
 		
 		// toString
@@ -123,19 +150,39 @@ class bz2object : public DataEntry {
 		string BZWLines(void) {
 			string ret = string("");
 			
+			// add name key/value to the string if supported
+			if(this->isKey("name") && name.length() > 0)
+				ret += "  name " + name + "\n";
+			
+			// add position key/value to the string if supported
 			if(this->isKey("position"))
 				ret += "  position " + position.toString();
 				
+			// add size key/value to the string if supported
 			if(this->isKey("size"))
 				ret += "  size " + size.toString();
 			
+			// add rotation key/value to the string if supported
 			if(this->isKey("rotation"))
 				ret += "  rotation " + string( ftoa(rotation) ) + "\n";
 			
+			// add all transformations to the string if they are supported
 			for(vector<Transform>::iterator i = transformations.begin(); i != transformations.end(); i++) {
 				if(this->isKey(i->getHeader().c_str()))
 					ret += "  " + i->toString();
 			}
+			
+			// add phydrv key/value to the string if supported and if defined
+			if(this->isKey("phydrv") && physicsDriver.length() != 0)
+				ret += "  phydrv " + physicsDriver + "\n";
+			
+			// add all matref key/value pairs to the string if supported and defined
+			if(this->isKey("matref") && materials.size() != 0) {
+				for(vector<string>::iterator i = materials.begin(); i != materials.end(); i++) {
+					ret += "  matref " + (*i) + "\n";
+				}	
+			}
+			
 			
 			return ret;
 		}
@@ -144,20 +191,26 @@ class bz2object : public DataEntry {
 		Point3D getPosition() { return position; }
 		Point3D getSize() { return size; }
 		float getRotation() { return rotation; }
+		
 		vector<Transform> getTransformations() { return transformations; }
+		vector<string> getMaterials() { return materials; }
+		
+		string getPhysicsDriver() { return physicsDriver; }
+		
 		string getOriginalData() { return originalData; }
+		
 		
 		// data setters (makes MasterConfigurationDialog code easier)
 		
 	protected:
 		string originalData;
-	
-	private:
 		Point3D position;
 		Point3D size;
 		float rotation;
-		
+		string name, physicsDriver;
+		vector<string> materials;
 		vector<Transform> transformations;
+		
 };
 
 

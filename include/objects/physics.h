@@ -50,27 +50,21 @@ public:
 		
 		// get linear velocity
 		vector<string> linearVelocities = BZWParser::getValuesByKey("linear", header, physicsData);
-		if(!hasOnlyOne(linearVelocities, "linear"))
-			return;
 		
 		// get angular velocity
 		vector<string> angularVelocities = BZWParser::getValuesByKey("angular", header, physicsData);
-		if(!hasOnlyOne(angularVelocities, "angular"))
-			return;
 		
 		// get slide
 		vector<string> slides = BZWParser::getValuesByKey("slide", header, physicsData);
-		if(!hasOnlyOne(slides, "slide"))
-			return;
 		
 		// get death message
 		vector<string> deathMessages = BZWParser::getValuesByKey("death", header, physicsData);
 		
 		// load the data in
 		this->name = names[0];
-		this->linear = Point3D( linearVelocities[0].c_str() );
-		this->angular = Point3D( angularVelocities[0].c_str() );
-		this->slide = atof( slides[0].c_str() );
+		this->linear = (linearVelocities.size() != 0 ? Point3D( linearVelocities[0].c_str() ) : Point3D( 0.0f, 0.0f, 0.0f ));
+		this->angular = (angularVelocities.size() != 0 ? Point3D( angularVelocities[0].c_str() ): Point3D( 0.0f, 0.0f, 0.0f));
+		this->slide = (slides.size() != 0 ? atof( slides[0].c_str() ) : 0.0f);
 		
 		if(deathMessages.size() >= 1)
 			this->deathMessage = deathMessages[0];
