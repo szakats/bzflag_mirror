@@ -23,7 +23,7 @@ class group : public bz2object {
 			this->name = string("");
 		}
 		
-		group(string& data) : bz2object("group", "<shift><shear><scale><spin><team><tint><drivethrough><shootthrough><phydrv><matref>") {
+		group(string& data) : bz2object("group", "<shift><shear><scale><spin><team><tint><drivethrough><shootthrough><phydrv><matref>", data.c_str()) {
 			this->team = 0;
 			this->tintColor = RGBA(1, 1, 1, 1);
 			this->driveThrough = false;
@@ -39,14 +39,17 @@ class group : public bz2object {
 		}
 		
 		// setter
-		void update(string& data) {
+		int update(string& data) {
 			const char* header = this->getHeader().c_str();
 			
 			// get the section from the data
 			const vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
 			
 			if(lines[0] == BZW_NOT_FOUND)
-				return;
+				return 0;
+				
+			if(!hasOnlyOne(lines, "group"))
+				return 0;
 			
 			const char* groupData = lines[0].c_str();
 			
@@ -56,13 +59,13 @@ class group : public bz2object {
 			// get tint
 			vector<string> tints = BZWParser::getValuesByKey("tint", header, groupData);
 			if(!hasOnlyOne(tints, "tint")) {
-				return;
+				return 0;
 			}
 				
 			// get team
 			vector<string> teams = BZWParser::getValuesByKey("team", header, groupData);
 			if(!hasOnlyOne(teams, "team"))
-				return;
+				return 0;
 				
 			// get drivethrough
 			vector<string> driveThroughs = BZWParser::getValuesByKey("drivethrough", header, groupData);
@@ -71,7 +74,8 @@ class group : public bz2object {
 			vector<string> shootThroughs = BZWParser::getValuesByKey("shootthrough", header, groupData);
 				
 			// do base class update
-			bz2object::update(data);
+			if(!bz2object::update(data))
+				return 0;
 			
 			// assign data
 			this->name = headers[0];
@@ -80,13 +84,15 @@ class group : public bz2object {
 			this->driveThrough = (driveThroughs.size() == 0 ? false : true);
 			this->shootThrough = (shootThroughs.size() == 0 ? false : true);
 			
+			return 1;
+			
 		}
 		
 		// toString
 		string toString(void) {
 			return string("group ") + name + "\n" +
 						  "  tint " + tintColor.toString() +
-						  "  team " + string(ftoa(team)) + "\n" +
+						  "  team " + string(itoa(team)) + "\n" +
 						  (driveThrough == true ? "  drivethrough\n" : "") +
 						  (shootThrough == true ? "  shootThrough\n" : "") +
 						  this->BZWLines() +

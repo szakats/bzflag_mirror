@@ -23,9 +23,10 @@ public:
 	
 	// constructor with data
 	base(string& data) :
-		bz2object("base", "<position><rotation><size><color><oncap>", data) {
+		bz2object("base", "<position><rotation><size><color><oncap>", data.c_str()) {
 			
 		weapon = string("SW");
+		this->team = 0;
 		
 		this->update(data);
 	}
@@ -34,7 +35,7 @@ public:
 	string get(void) { return this->toString(); }
 	
 	// setter
-	void update(string& data) {
+	int update(string& data) {
 		// get the header
 		const char* header = this->getHeader().c_str();
 		
@@ -42,7 +43,10 @@ public:
 		vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
 		
 		if(lines[0] == BZW_NOT_FOUND)
-			return;
+			return 0;
+		
+		if(!hasOnlyOne(lines, "base"))
+			return 0;
 			
 		// get the section data
 		const char* baseData = lines[0].c_str();
@@ -50,13 +54,13 @@ public:
 		// get the team
 		vector<string> teams = BZWParser::getValuesByKey("color", header, baseData);
 		if(!hasOnlyOne(teams, "color"))
-			return;
+			return 0;
 			
 		// get the weapon
 		vector<string> weapons = BZWParser::getValuesByKey("oncap", header, baseData);
 		if(weapons.size() > 1) {
 			printf("base::update():  Error! Defined \"oncap\" %d times!\n", weapons.size());
-			return;
+			return 0;
 		}
 			
 		// make sure that the team value is sane
@@ -66,18 +70,21 @@ public:
 		}
 		
 		// do superclass update
-		bz2object::update(data);
+		if(!bz2object::update(data))
+			return 0;
 		
 		// load in the data
 		this->team = t;
 		this->weapon = (weapons.size() > 0 ? weapons[0] : string(""));
+		
+		return 1;
 	}
 	
 	// tostring
 	string toString() {
 		return string("base\n") +
 					  this->BZWLines() +
-					  "  color " + string(ftoa(team)) + "\n" +
+					  "  color " + string(itoa(team)) + "\n" +
 					  (weapon.length() != 0 ? "  oncap " + weapon + "\n" : "") +
 					  "end\n";	
 	}

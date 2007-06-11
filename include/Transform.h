@@ -31,7 +31,7 @@ class Transform : public DataEntry {
 		}
 		
 		// setter
-		void update(string& newData) {
+		int update(string& newData) {
 			// expect just one line
 			this->name = BZWParser::key(newData.c_str());
 			
@@ -47,6 +47,8 @@ class Transform : public DataEntry {
 			}
 			
 			this->setHeader(name.c_str());
+			
+			return 1;
 		}
 		
 		// toString

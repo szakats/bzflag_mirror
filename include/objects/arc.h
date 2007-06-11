@@ -20,7 +20,6 @@ public:
 		this->divisions = 16;
 		this->angle = 180.0f;
 		this->name = string("default_arc");
-		this->materials = vector<string>();
 		this->physicsDriver = string("");
 		flatShading = false;
 		smoothbounce = true;
@@ -28,14 +27,13 @@ public:
 	}
 	
 	arc(string& data) :
-		bz2object("arc", "<position><rotation><size><flatshading><angle><ratio><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
+		bz2object("arc", "<position><rotation><size><flatshading><angle><ratio><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>", data.c_str()) {
 		
 		// define some basic values
 		this->ratio = 1.0f;
 		this->divisions = 16;
 		this->angle = 180.0f;
 		this->name = string("default_arc");
-		this->materials = vector<string>();
 		this->physicsDriver = string("");
 		flatShading = false;
 		smoothbounce = true;
@@ -47,7 +45,7 @@ public:
 	string get(void) { return this->toString(); }
 	
 	// setter
-	void update(string& data) {
+	int update(string& data) {
 		const char* header = this->getHeader().c_str();
 		// get the chunk we need
 		
@@ -55,29 +53,32 @@ public:
 		
 		// check and see if the proper data segment was found
 		if(lines[0] == BZW_NOT_FOUND)
-			return;
+			return 0;
+			
+		if(!hasOnlyOne(lines, "arc"))
+			return 0;
 			
 		const char* arcData = lines[0].c_str();
 			
 		// get the name
 		vector<string> names = BZWParser::getValuesByKey("name", header, arcData);
 		if(!hasOnlyOne(names, "name"))
-			return;
+			return 0;
 			
 		// get the angle
 		vector<string> angles = BZWParser::getValuesByKey("angle", header, arcData);
 		if(!hasOnlyOne(angles, "angle"))
-			return;
+			return 0;
 		
 		// get the divisions
 		vector<string> vDivisions = BZWParser::getValuesByKey("divisions", header, arcData);
 		if(!hasOnlyOne(vDivisions, "divisions"))
-			return;
+			return 0;
 			
 		// get the ratio
 		vector<string> ratios = BZWParser::getValuesByKey("ratio", header, arcData);
 		if(!hasOnlyOne(ratios, "ratio"))
-			return;
+			return 0;
 				
 		// get flatshading
 		vector<string> flatShadings = BZWParser::getValuesByKey("flatshading", header, arcData);
@@ -86,7 +87,8 @@ public:
 		vector<string> smoothBounces =  BZWParser::getValuesByKey("smoothbounce", header, arcData);
 		
 		// do base class update
-		bz2object::update(data);
+		if(!bz2object::update(data))
+			return 0;
 		
 		// set the data
 		this->name = names[0];
@@ -95,6 +97,8 @@ public:
 		this->ratio = atof( ratios[0].c_str() );
 		this->flatShading = (flatShadings.size() == 0 ? false : true);
 		this->smoothbounce = (smoothBounces.size() == 0 ? false : true);
+		
+		return 1;
 	}
 	
 	// toString
@@ -103,7 +107,7 @@ public:
 					  this->BZWLines() +
 					  "  angle " + string(ftoa(angle)) + "\n" +
 					  "  ratio " + string(ftoa(ratio)) + "\n" +
-					  "  divisions " + string(ftoa((float)(divisions))) + "\n" +
+					  "  divisions " + string(itoa(divisions)) + "\n" +
 					  (flatShading == true ? "  flatshading\n" : "") +
 					  (smoothbounce == true ? "  smoothbounce\n" : "") + 
 					  "end\n";
