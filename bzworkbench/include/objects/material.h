@@ -14,7 +14,7 @@ class material : public DataEntry {
 
 public:
 	material() : 
-		DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosorting><noradar><groupalpha><occluder><alphathresh>") {
+		DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosort><noradar><nolighting><groupalpha><occluder><alphathresh>") {
 		name = string("");
 		dynamicColor = string("");
 		textureMatrix = string("");
@@ -31,7 +31,7 @@ public:
 	}
 	
 	material(string& data) :
-		DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosorting><noradar><groupalpha><occluder><alphathresh>") {
+		DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosort><noradar><nolighting><groupalpha><occluder><alphathresh>", data.c_str()) {
 		name = string("");
 		dynamicColor = string("");
 		textureMatrix = string("");
@@ -53,31 +53,35 @@ public:
 	string get(void) { return this->toString(); }
 	
 	// setter
-	void update(string& data) {
+	int update(string& data) {
+		
 		const char* header = this->getHeader().c_str();
 		
 		// get the section
 		vector<string> chunks = BZWParser::getSectionsByHeader(header, data.c_str());
 		
 		if(chunks[0] == BZW_NOT_FOUND)
-			return;
+			return 0;
+			
+		if(!hasOnlyOne(chunks, "material"))
+			return 0;
 		
 		const char* materialData = chunks[0].c_str();
 		
 		// get the name
 		vector<string> names = BZWParser::getValuesByKey("name", header, materialData);
 		if(!hasOnlyOne(names, "name"))
-			return;
+			return 0;
 		
 		// get the dynamic color
 		vector<string> dyncols = BZWParser::getValuesByKey("dyncol", header, materialData);
 		if(!hasOnlyOne(dyncols, "dyncol"))
-			return;
+			return 0;
 			
 		// get the texture matrix
 		vector<string> texmats = BZWParser::getValuesByKey("texmat", header, materialData);
 		if(!hasOnlyOne(texmats, "texmat"))
-			return;
+			return 0;
 			
 		// get the diffuse colors
 		vector<string> colors = BZWParser::getValuesByKey("color", header, materialData);
@@ -85,7 +89,7 @@ public:
 		if((colors.size() > 1 && diffs.size() == 0) || 
 		   (colors.size() == 0 && diffs.size() > 1)) {
 		   	printf("material::update():  Error! Could not parse \"color\" or \"diffuse\" properly!\n");
-		   return;
+		   return 0;
 		}
 		   
 		vector<string> diffuses = (colors.size() == 0 ? diffs : colors);
@@ -93,17 +97,17 @@ public:
 		// get the ambient colors
 		vector<string> ambients = BZWParser::getValuesByKey("ambient", header, materialData);
 		if(!hasOnlyOne(ambients, "ambient"))
-			return;
+			return 0;
 			
 		// get the emissive colors
 		vector<string> emissives = BZWParser::getValuesByKey("emission", header, materialData);
 		if(!hasOnlyOne(emissives, "emissive"))
-			return;
+			return 0;
 			
 		// get the specular colors
 		vector<string> speculars = BZWParser::getValuesByKey("specular", header, materialData);
 		if(!hasOnlyOne(speculars, "specular"))
-			return;	
+			return 0;	
 		
 		// get the textures
 		vector<string> texs = BZWParser::getValuesByKey("addtexture", header, materialData);
@@ -149,17 +153,19 @@ public:
 		// get shininess
 		vector<string> shininesses = BZWParser::getValuesByKey("shininess", header, materialData);
 		if(!hasOnlyOne(shininesses, "shininess"))
-			return;
+			return 0;
 			
 		// get alpha threshold
 		vector<string> alphathresholds = BZWParser::getValuesByKey("alphathresh", header, materialData);
 		if(!hasOnlyOne(alphathresholds, "alphathresh"))
-			return;
+			return 0;
 			
 		// get other material refrences
 		vector<string> matrefs = BZWParser::getValuesByKey("matref", header, materialData);
 			
 		// load the retrieved data into the class
+		if(!DataEntry::update(data))
+			return 0;
 		this->name = names[0];
 		this->dynamicColor = dyncols[0];
 		this->textureMatrix = texmats[0];
@@ -183,6 +189,8 @@ public:
 		this->noLighting = (nolightings.size() == 0 ? false : true);
 		this->shiny = atof( shininesses[0].c_str() );
 		this->alphaThreshold = atof( alphathresholds[0].c_str() );
+		
+		return 1;
 	}
 	
 	// tostring
@@ -222,6 +230,7 @@ public:
 					  "  alphathresh " + string(ftoa(alphaThreshold)) + "\n" +
 					  texString +
 					  matString +
+					  this->getUnusedText() + 
 					  "end\n";
 	}
 	

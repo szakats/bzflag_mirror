@@ -19,14 +19,14 @@ public:
 		bz2object("pyramid", "<position><rotation><size>") { }
 		
 	pyramid(string& data) :
-		bz2object("pyramid", "<position><rotation><size>", data) { }
+		bz2object("pyramid", "<position><rotation><size>", data.c_str()) { }
 		
 	// getter
 	string get() { return this->toString(); }
 	
 	// setter
-	void update(string& data) {
-		bz2object::update(data);	
+	int update(string& data) {
+		return bz2object::update(data);	
 	}
 	
 	// toString

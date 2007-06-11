@@ -19,7 +19,7 @@ public:
 		
 	}
 	
-	box(string& data) : bz2object("box", "<position><rotation><size>", data) {
+	box(string& data) : bz2object("box", "<position><rotation><size>", data.c_str()) {
 		this->update(data);	
 	}
 	
@@ -32,8 +32,8 @@ public:
 	}
 	
 	// setter
-	void update(string& data) {
-		bz2object::update(data);		
+	int update(string& data) {
+		return bz2object::update(data);		
 	}
 	
 	// toString

@@ -29,12 +29,16 @@
 #include "include/objects/pyramid.h"
 #include "include/objects/teleporter.h"
 #include "include/objects/base.h"
+#include "include/objects/meshbox.h"
+#include "include/objects/meshpyr.h"
+#include "include/objects/cone.h"
+#include "include/objects/sphere.h"
+#include "include/objects/tetra.h"
+#include "include/objects/link.h"
+#include "include/objects/zone.h"
 
 #include <string>
 #include <vector>
-
-using namespace std;
-
 
 
 int main(int argc, char** argv) {
@@ -48,6 +52,166 @@ int main(int argc, char** argv) {
 	return Fl::run();
 	*/
 	
+	zone zobj = zone();
+	
+	printf("|%s|\n", zobj.toString().c_str());
+	
+	string zdata = string("zone\n") +
+						  "  name poot\n" +
+						  "  position 1 2 3\n" +
+						  "  rotation 45\n" +
+						  "  size 4 5 6\n" +
+						  "  safety 1 2 3\n" +
+						  "  team 1 2 3\n" +
+						  "  flag GM MG good\n" +
+						  "  zoneflag GM 3\n" +
+						  "  zoneflag V 5\n" +
+						  "end\n";
+						  
+	zobj.update(zdata);
+	printf("|%s|\n", zobj.toString().c_str());
+
+	printf("========================================\n");
+	
+	
+	Tlink lobj = Tlink();
+	
+	printf("|%s|\n", lobj.toString().c_str());
+	
+	string ldata = string("link\n") +
+					 	  "  name sniff\n" +
+					 	  "  from tele1:f\n" +
+					 	  "  to tele2:b\n" +
+					 	  "end\n";
+	
+	lobj.update(ldata);
+	
+	printf("|%s|\n", lobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+	
+	tetra ttobj = tetra();
+	
+	printf("|%s|\n", ttobj.toString().c_str());
+	
+	string ttdata = string("tetra\n") +
+						   "  matref sniff1\n" +
+						   "  matref sniff2\n" +
+						   "  matref sniff3\n" +
+						   "  shift 1 2 3\n" +
+						   "  shear 4 5 6\n" +
+						   "  spin 45 0 1 0\n" +
+						   "  scale 10 20 30\n" +
+						   "  vertex 0 0 0\n" +
+						   "  vertex 10 5 0\n" +
+						   "  vertex 0 10 0\n" +
+						   "  vertex 5 5 5\n" +
+						  // "  vertex 100 100 100\n" +
+						   "end\n";
+	ttobj.update(ttdata);
+	
+	printf("|%s|\n", ttobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+	
+	sphere sobj = sphere();
+	
+	printf("|%s|\n", sobj.toString().c_str());
+	
+	string sdata = string("sphere\n") +
+						  "  name sniffedsphere\n" +
+						  "  divisions 22\n" +
+						  "  flatshading\n" +
+						  "  position 100 200 300\n" +
+						  "  rotation 45\n" +
+						  "  radius 10\n" +
+						  // "  size 20 30 40\n" +
+						  "  scale 4 5 6\n" +
+						  "  shear 7 8 9\n" +
+						  "  shift 10 11 12\n" +
+						  "  spin 56 0 1 0\n" +
+						  "  phydrv my_physics_driver\n" +
+						  "  smoothbounce\n" +
+						  "  matref coolMaterial1\n" +
+						  "  matref coolmaterial2\n" +
+						  "end\n";
+						  
+	sobj.update(sdata);
+	
+	printf("|%s|\n", sobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+	cone cobj = cone();
+	
+	printf("|%s|\n", cobj.toString().c_str());
+	
+	string cdata = string("cone\n") +
+						  "  name sniffedCone\n" +
+						  "  divisions 22\n" +
+						  "  flatshading\n" +
+						  "  position 100 200 300\n" +
+						  "  rotation 45\n" +
+						  "  size 20 30 40\n" +
+						  "  scale 4 5 6\n" +
+						  "  shear 7 8 9\n" +
+						  "  shift 10 11 12\n" +
+						  "  spin 56 0 1 0\n" +
+						  "  phydrv my_physics_driver\n" +
+						  "  smoothbounce\n" +
+						  "  matref coolMaterial1\n" +
+						  "  matref coolmaterial2\n" +
+						  "end\n";
+						  
+	cobj.update(cdata);
+	
+	printf("|%s|\n", cobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+	meshpyr mpobj = meshpyr();
+	
+	printf("|%s|\n", mpobj.toString().c_str());
+	
+	string mpdata = string("meshpyr\n") +
+						   "  position 1 2 3\n" +
+						   "  rotation 45\n" +
+						   "  size 5 6 7\n" +
+						   "  matref sniff\n" +
+						   "  matref yoink\n" +
+						   "  phydrv poke\n" +
+						   "end\n";
+						   
+	mpobj.update(mpdata);
+	
+	printf("|%s|\n", mpobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+	
+	meshbox mbobj = meshbox();
+	
+	printf("|%s|\n", mbobj.toString().c_str());
+	
+	string mbdata = string("meshbox\n") +
+						   "  position 1 2 3\n" +
+						   "  rotation 5\n" +
+						   "  size 4 5 6\n" +
+						   "  top matref sniff\n" +
+						   "  outside matref yoink\n" +
+						   "  matref narf\n" +
+						   "  phydrv poop\n" +
+						   "end\n";
+						   
+	mbobj.update(mbdata);
+	
+	printf("|%s|\n", mbobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+	
 	base bobj = base();
 	
 	printf("|%s|\n", bobj.toString().c_str());
@@ -58,6 +222,8 @@ int main(int argc, char** argv) {
 						  "  rotation 7\n" +
 						  "  color 1\n" +
 						  "  oncap HM\n" +
+						  "  sniff yoink\n" +
+						  "  narf\n" +
 						  "end\n";
 	
 	bobj.update(bdata);

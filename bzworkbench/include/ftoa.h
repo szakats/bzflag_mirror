@@ -11,4 +11,10 @@ inline const char* ftoa(float f) {
 	return (string(buff).c_str());
 }
 
+inline const char* itoa(int i) {
+	char buff[30];
+	sprintf(buff, "%d", i);
+	return (string(buff).c_str());	
+}
+
 #endif /*FTOA_H_*/

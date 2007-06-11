@@ -20,7 +20,7 @@ public:
 	
 	// constructor with data
 	teleporter(string& data) :
-		bz2object("teleporter", "<position><size><rotation><name><border>", data) {
+		bz2object("teleporter", "<position><size><rotation><name><border>", data.c_str()) {
 		
 		this->update(data);
 	}
@@ -29,7 +29,7 @@ public:
 	string get(void) {  return this->toString(); }
 	
 	// setter
-	void update(string& data) {
+	int update(string& data) {
 		// get header
 		const char* header = this->getHeader().c_str();
 		
@@ -37,7 +37,10 @@ public:
 		vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
 		
 		if(lines[0] == BZW_NOT_FOUND)
-			return;
+			return 0;
+			
+		if(!hasOnlyOne(lines, "teleporter"))
+			return 0;
 			
 		// get the data
 		const char* teleporterData = lines[0].c_str();
@@ -45,13 +48,16 @@ public:
 		// get the border
 		vector<string> borders = BZWParser::getValuesByKey("border", header, teleporterData);
 		if(!hasOnlyOne(borders, "border")) {
-			return;
+			return 0;
 		}
 		
-		bz2object::update(data);
+		if(!bz2object::update(data))
+			return 0;
 		
 		// set the data
 		this->border = atof( borders[0].c_str() );
+		
+		return 1;
 	}
 	
 	// tostring

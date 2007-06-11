@@ -16,7 +16,7 @@ class world : public DataEntry {
 			this->flagHeight = 10.0f;
 		}
 		
-		world(string& data) : DataEntry("world", "<name><size><flagHeight><noWalls>") {
+		world(string& data) : DataEntry("world", "<name><size><flagHeight><noWalls>", data.c_str()) {
 			this->worldName = string("");
 			this->size = 400.0;
 			this->noWalls = false;
@@ -31,39 +31,46 @@ class world : public DataEntry {
 		}
 		
 		// receive the data
-		void update(string& data) {
+		int update(string& data) {
 			const char* header = this->getHeader().c_str();
 			
 			// get the world data objects
 			vector<string> worldDatas = BZWParser::getSectionsByHeader(header, data.c_str());
 			if(worldDatas[0] == BZW_NOT_FOUND)
-				return;
+				return 0;
+				
+			if(!hasOnlyOne(worldDatas, "world"))
+				return 0;
 			
 			const char* worldData = worldDatas[0].c_str();
 			
 			// get the names, but only choose one
 			vector<string> names = BZWParser::getValuesByKey("name", header, worldData);
 			if(!hasOnlyOne(names, "name"))
-				return;
+				return 0;
 			
 			// get the sizes, but only choose one
 			vector<string> sizes = BZWParser::getValuesByKey("size", header, worldData);
 			if(!hasOnlyOne(sizes, "size"))
-				return;
+				return 0;
 			
 			// get the flagHeights, but only choose one
 			vector<string> flagHeights = BZWParser::getValuesByKey("flagHeight", header, worldData);
 			if(!hasOnlyOne(flagHeights, "flagHeight"))
-				return;
+				return 0;
 			
 			// get the noWalls value, but only choose one
 			vector<string> noWallses = BZWParser::getValuesByKey("noWalls", header, worldData);
 			
 			// fill in the data
+			if(!DataEntry::update(data))
+				return 0;
 			this->worldName = names[0];
 			this->size = atof( sizes[0].c_str() );
 			this->flagHeight = atof( flagHeights[0].c_str() );
 	 		this->noWalls = (noWallses.size() == 0 ? false : true);
+	 		
+	 		return 1;
 		}
 		
 		// toString method
@@ -75,6 +82,7 @@ class world : public DataEntry {
 								 "  size " + sizeString + "\n" +
 								 "  flagHeight " + flagHeightString + "\n" +
 									(noWalls == true ? "  noWalls\n" : "# noWalls\n") +
+									this->getUnusedText() +
 								 "end\n");
 						  
 		}

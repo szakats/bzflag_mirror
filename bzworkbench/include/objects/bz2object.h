@@ -24,21 +24,22 @@ class bz2object : public DataEntry {
 			this->position = Point3D(0.0f, 0.0f, 0.0f);
 			this->rotation = 0.0f;
 			this->transformations = vector<Transform>();
-			this->originalData = string("");
 		};
 		
-		bz2object(const char* name, const char* keys, string& data) : DataEntry(name, keys) {
+		bz2object(const char* name, const char* keys, const char* data) : DataEntry(name, keys, data) {
 			this->position = Point3D(0.0f, 0.0f, 0.0f);
 			this->rotation = 0.0f;
 			this->transformations = vector<Transform>();
-			this->originalData = data;
+			string d = string(data);
+			this->update(d);
 		}
 		
 		// getter
 		string get(void) { return this->toString(); }
 		
 		// setter
-		virtual void update(string& data) {
+		virtual int update(string& data) {
+			
 			// find the first occurence of the section in the data
 			const char* header = this->getHeader().c_str();
 		
@@ -46,7 +47,10 @@ class bz2object : public DataEntry {
 			vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
 			
 			if(lines[0] == BZW_NOT_FOUND)
-				return;
+				return 0;
+				
+			if(!hasOnlyOne(lines, header))
+				return 0;
 			
 			// just go with the first box definition we find (only one should be passed anyway)
 			const char* objData = lines[0].c_str();
@@ -59,7 +63,7 @@ class bz2object : public DataEntry {
 				names = BZWParser::getValuesByKey("name", header, objData);
 				if(names.size() > 1) {
 					printf("%s::update():  Error! Defined \"name\" %d times!\n", header, names.size());
-					return;	
+					return 0;	
 				}
 			}
 			
@@ -69,7 +73,7 @@ class bz2object : public DataEntry {
 				
 				// just go with the first position (only one should be defined)
 				if(!hasOnlyOne(positions, "position"))
-					return;
+					return 0;
 					
 			}
 			
@@ -79,7 +83,7 @@ class bz2object : public DataEntry {
 				
 				// just go with the first rotation
 				if(!hasOnlyOne(rotations, "rotation"))
-					return;
+					return 0;
 					
 			}
 			
@@ -89,7 +93,7 @@ class bz2object : public DataEntry {
 				
 				// just go with the first size (only one should be defined)
 				if(!hasOnlyOne(sizes, "size"))
-					return;
+					return 0;
 					
 				
 			}
@@ -119,7 +123,7 @@ class bz2object : public DataEntry {
 			if(this->isKey("phydrv")) {
 				physicsDrivers = BZWParser::getValuesByKey("phydrv", header, objData);
 				if(!hasOnlyOne(physicsDrivers, "phydrv"))
-					return;
+					return 0;
 			}
 			
 			// get materials
@@ -127,6 +131,7 @@ class bz2object : public DataEntry {
 				matrefs = BZWParser::getValuesByKey("matref", header, objData);
 			}
 			
+			// load in the data
 			if(this->isKey("name") && names.size() > 0)
 				this->name = names[0];
 			if(this->isKey("position"))
@@ -139,6 +144,8 @@ class bz2object : public DataEntry {
 				this->physicsDriver = physicsDrivers[0];
 			if(this->isKey("matref"))
 				this->materials = matrefs;
+				
+			return DataEntry::update(data);
 		}
 		
 		// toString
@@ -183,6 +190,8 @@ class bz2object : public DataEntry {
 				}	
 			}
 			
+			// add unused text
+			ret += this->getUnusedText();
 			
 			return ret;
 		}
@@ -197,13 +206,9 @@ class bz2object : public DataEntry {
 		
 		string getPhysicsDriver() { return physicsDriver; }
 		
-		string getOriginalData() { return originalData; }
-		
-		
 		// data setters (makes MasterConfigurationDialog code easier)
 		
 	protected:
-		string originalData;
 		Point3D position;
 		Point3D size;
 		float rotation;
