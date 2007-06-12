@@ -12,7 +12,7 @@ string concat(vector<string> strings) {
 // constructor
 // The buttons and fields are initialized and placed here.
 WorldOptionsDialog::WorldOptionsDialog() :
-	Fl_Dialog("World Options", this->WIDTH, this->HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
+	Fl_Dialog("World Options", WIDTH, HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
 	
 	// initialize the variables
 	this->worldData 		= (world*)Model::query("world");
