@@ -190,7 +190,15 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\dialogs\Fl_Error.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\dialogs\MainMenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\dialogs\MasterConfigurationDialog.cpp"
 					>
 				</File>
 				<File
@@ -205,6 +213,10 @@
 			<Filter
 				Name="Model"
 				>
+				<File
+					RelativePath="..\..\model\BZWParser.cpp"
+					>
+				</File>
 				<File
 					RelativePath="..\..\model\Model.cpp"
 					>
@@ -225,6 +237,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\include\BZWParser.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\DataEntry.h"
 				>
 			</File>
@@ -237,11 +253,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Fl_Error.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\ftoa.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\MainMenu.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\include\MainWindow.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\MasterConfigurationDialog.h"
 				>
 			</File>
 			<File
@@ -253,13 +281,121 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\WorldOptionsData.h"
+				RelativePath="..\..\include\Transform.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\TransformWidget.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\include\WorldOptionsDialog.h"
 				>
 			</File>
+			<Filter
+				Name="Objects"
+				>
+				<File
+					RelativePath="..\..\include\objects\arc.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\base.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\box.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\bz2object.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\cone.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\group.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\link.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\material.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\meshbox.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\meshpyr.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\options.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\physics.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\pyramid.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\sphere.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\teleporter.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\tetra.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\waterLevel.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\world.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\objects\zone.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Render"
+				>
+				<File
+					RelativePath="..\..\include\render\Index3D.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\render\Point3D.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\render\RGBA.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\render\TexCoord2D.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\render\Vector3D.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
