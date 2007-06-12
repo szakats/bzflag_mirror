@@ -1,4 +1,4 @@
-#include "../include/WorldOptionsDialog.h"
+#include "../include/dialogs/WorldOptionsDialog.h"
 
 // helper method--concat strings from a vector of strings
 string concat(vector<string> strings) {

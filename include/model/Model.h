@@ -3,13 +3,13 @@
 
 class Model;
 
-#include "DataEntry.h"
-#include "objects/world.h"
-#include "objects/waterLevel.h"
-#include "objects/options.h"
-#include "objects/physics.h"
-#include "objects/material.h"
-#include "objects/bz2object.h"
+#include "../DataEntry.h"
+#include "../objects/world.h"
+#include "../objects/waterLevel.h"
+#include "../objects/options.h"
+#include "../objects/physics.h"
+#include "../objects/material.h"
+#include "../objects/bz2object.h"
 
 #include <string>
 #include <map>

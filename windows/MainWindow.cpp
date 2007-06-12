@@ -1,4 +1,4 @@
-#include "../include/MainWindow.h"
+#include "../include/windows/MainWindow.h"
 
 MainWindow::MainWindow() :
 	Fl_Window(DEFAULT_WIDTH, DEFAULT_HEIGHT, "BZWorkbench") {

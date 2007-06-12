@@ -2,21 +2,21 @@
 #include <stdlib.h>
 
 #include "include/defines.h"
-#include "include/Fl_Dialog.h"
+#include "include/dialogs/Fl_Dialog.h"
 #include "include/QuickLabel.h"
-#include "include/WorldOptionsDialog.h"
-#include "include/MainMenu.h"
+#include "include/dialogs/WorldOptionsDialog.h"
+#include "include/dialogs/MainMenu.h"
 
-#include "include/Model.h"
+#include "include/model/Model.h"
 
-#include "include/MainWindow.h"
+#include "include/windows/MainWindow.h"
 
-#include "include/BZWParser.h"
+#include "include/model/BZWParser.h"
 
 #include "include/Transform.h"
 
-#include "include/MasterConfigurationDialog.h"
-#include "include/Fl_Error.h"
+#include "include/dialogs/MasterConfigurationDialog.h"
+#include "include/dialogs/Fl_Error.h"
 
 #include "include/render/Point3D.h"
 #include "include/render/RGBA.h"
@@ -36,6 +36,10 @@
 #include "include/objects/tetra.h"
 #include "include/objects/link.h"
 #include "include/objects/zone.h"
+#include "include/objects/weapon.h"
+#include "include/objects/world.h"
+#include "include/objects/options.h"
+#include "include/objects/waterLevel.h"
 
 #include <string>
 #include <vector>
@@ -51,6 +55,30 @@ int main(int argc, char** argv) {
 	
 	return Fl::run();
 	*/
+	
+	weapon wobj = weapon();
+	
+	printf("|%s|\n", wobj.toString().c_str());
+	
+	string wdata = string("weapon\n") +
+						  "  position 1 2 3\n" +
+						  "  rotation 45\n" +
+						  "  name sniff\n" +
+						  "  color 1\n" +
+						  "  tilt 90\n" +
+						  "  initdelay 10\n" +
+						  "  delay\n" +
+						  "  type SW\n" +
+						  "  trigger flagcap\n" +
+						  "  eventteam G\n" +
+						  "end\n";
+						  
+	wobj.update(wdata);
+	
+	printf("|%s|\n", wobj.toString().c_str());
+	
+	printf("========================================\n");
+	 
 	
 	zone zobj = zone();
 	

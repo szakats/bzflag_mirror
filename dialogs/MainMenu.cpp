@@ -1,5 +1,5 @@
-#include "../include/MainMenu.h"
-#include "../include/MainWindow.h"
+#include "../include/dialogs/MainMenu.h"
+#include "../include/windows/MainWindow.h"
 
 // builds the menu widgets
 void MainMenu::buildMenu(void) {

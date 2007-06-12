@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "../BZWParser.h"
+#include "../model/BZWParser.h"
 #include "../ftoa.h"
 
 class Point3D
