@@ -105,7 +105,7 @@ public:
 		vector<string> zoneFlagVals = BZWParser::getValuesByKey("zoneflag", header, zoneData);
 			
 		// read in the given teams
-		vector<string> teamElements = BZWParser::getLineElements( BZWParser::value("team", teams[0].c_str()).c_str() );
+		vector<string> teamElements = BZWParser::getLineElements( teams[0].c_str() );
 		
 		// read in the flags
 		vector<string> flagElements = BZWParser::getLineElements(flagVals[0].c_str());
