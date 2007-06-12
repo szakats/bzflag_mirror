@@ -6,7 +6,7 @@
 #include <FL/Fl_XPM_Image.H>
 
 #include "Fl_Dialog.h"
-#include "QuickLabel.h"
+#include "../widgets/QuickLabel.h"
 
 class Fl_Error : public Fl_Dialog {
 

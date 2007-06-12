@@ -4,7 +4,7 @@
 #include "../DataEntry.h"
 #include "../render/Point3D.h"
 #include "../ftoa.h"
-#include "../BZWParser.h"
+#include "../model/BZWParser.h"
 #include "bz2object.h"
 
 /**
@@ -14,39 +14,26 @@ class box : public bz2object {
 
 public:
 
-	// constructors
-	box() : bz2object("box", "<position><rotation><size>") {
-		
-	}
+	// constructor
+	box();
 	
-	box(string& data) : bz2object("box", "<position><rotation><size>", data.c_str()) {
-		this->update(data);	
-	}
+	// constructor with data
+	box(string& data);
 	
 	// nothing to destroy...
-	~box() { }
+	~box();
 	
 	// getter
-	string get(void) {
-		return this->toString();
-	}
+	string get(void);
 	
 	// setter
-	int update(string& data) {
-		return bz2object::update(data);		
-	}
+	int update(string& data);
 	
 	// toString
-	string toString(void) {
-		return string("box\n") +
-					  this->BZWLines() +
-					  "end\n";
-	}
+	string toString(void);
 	
 	// render
-	int render(void) {
-		return 0;
-	}
+	int render(void);
 	
 private:
 	Point3D size;

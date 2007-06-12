@@ -6,28 +6,20 @@
 class meshpyr : public bz2object {
 public:
 	
-	meshpyr() : bz2object("meshpyr", "<position><rotation><size><matref><phydrv>") { }
-	meshpyr(string& data) : bz2object("meshpyr", "<position><rotation><size><matref><phydrv>", data.c_str()) { this->update(data); }
+	meshpyr();
+	meshpyr(string& data);
 	
 	// getter
-	string get(void) { return this->toString(); }
+	string get(void);
 	
 	// setter
-	int update(string& data) {
-		return bz2object::update(data);	
-	}
+	int update(string& data);
 	
 	// tostring
-	string toString(void) {
-		return string("meshpyr\n") +
-					  this->BZWLines() +
-					  "end\n";
-	}
+	string toString(void);
 	
 	// render
-	int render(void) {
-		return 0;	
-	}
+	int render(void);
 	
 };
 

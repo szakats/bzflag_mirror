@@ -1,4 +1,4 @@
-#include "../include/MasterConfigurationDialog.h"
+#include "../include/dialogs/MasterConfigurationDialog.h"
 #include <iostream>
 
 MasterConfigurationDialog::MasterConfigurationDialog(bz2object* obj) :

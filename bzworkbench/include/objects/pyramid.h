@@ -2,7 +2,6 @@
 #define PYRAMID_H_
 
 #include "bz2object.h"
-#include "../BZWParser.h"
 #include <string>
 #include <vector>
 
@@ -15,31 +14,23 @@ using namespace std;
 class pyramid : public bz2object {
 public:
 	
-	pyramid() :
-		bz2object("pyramid", "<position><rotation><size>") { }
+	// default constructor
+	pyramid();
 		
-	pyramid(string& data) :
-		bz2object("pyramid", "<position><rotation><size>", data.c_str()) { }
+	// constructor with data
+	pyramid(string& data);
 		
 	// getter
-	string get() { return this->toString(); }
+	string get();
 	
 	// setter
-	int update(string& data) {
-		return bz2object::update(data);	
-	}
+	int update(string& data);
 	
 	// toString
-	string toString(void) {
-		return string("pyramid\n") +
-					  this->BZWLines() +
-					  "end\n";	
-	}
+	string toString(void);
 	
 	// render
-	int render(void) {
-		return 0;
-	}
+	int render(void);
 };
 
 #endif /*PYRAMID_H_*/

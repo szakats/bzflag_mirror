@@ -1,4 +1,4 @@
-#include "../include/BZWParser.h"
+#include "../include/model/BZWParser.h"
 
 /**
  * Helper method:  eliminate the whitespace on the ends of the line

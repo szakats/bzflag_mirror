@@ -10,7 +10,7 @@
 #include <FL/Fl_Menu_.H>
 #include <FL/Fl_Menu_Button.H>
 
-#include "defines.h"
+#include "../defines.h"
 
 class MainMenu : public Fl_Menu_Button
 {

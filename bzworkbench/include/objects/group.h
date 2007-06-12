@@ -3,7 +3,7 @@
 
 #include "bz2object.h"
 #include "../render/RGBA.h"
-#include "../BZWParser.h"
+#include "../model/BZWParser.h"
 
 #include <string>
 #include <vector>
@@ -15,92 +15,22 @@ class group : public bz2object {
 	public:
 	
 		// constructor
-		group() : bz2object("group", "<shift><shear><scale><spin><team><tint><drivethrough><shootthrough><phydrv><matref>") {
-			this->team = 0;
-			this->tintColor = RGBA(1, 1, 1, 1);
-			this->driveThrough = false;
-			this->shootThrough = false;
-			this->name = string("");
-		}
+		group();
 		
-		group(string& data) : bz2object("group", "<shift><shear><scale><spin><team><tint><drivethrough><shootthrough><phydrv><matref>", data.c_str()) {
-			this->team = 0;
-			this->tintColor = RGBA(1, 1, 1, 1);
-			this->driveThrough = false;
-			this->shootThrough = false;
-			this->name = string("");
-			
-			this->update(data);	
-		}
+		// constructor with data
+		group(string& data);
 		
 		// getter
-		string get(void) {
-			return this->toString(); 
-		}
+		string get(void);
 		
 		// setter
-		int update(string& data) {
-			const char* header = this->getHeader().c_str();
-			
-			// get the section from the data
-			const vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
-			
-			if(lines[0] == BZW_NOT_FOUND)
-				return 0;
-				
-			if(!hasOnlyOne(lines, "group"))
-				return 0;
-			
-			const char* groupData = lines[0].c_str();
-			
-			// get name (from the first line)
-			vector<string> headers = BZWParser::getValuesByKey("group", header, groupData);
-			
-			// get tint
-			vector<string> tints = BZWParser::getValuesByKey("tint", header, groupData);
-			if(!hasOnlyOne(tints, "tint")) {
-				return 0;
-			}
-				
-			// get team
-			vector<string> teams = BZWParser::getValuesByKey("team", header, groupData);
-			if(!hasOnlyOne(teams, "team"))
-				return 0;
-				
-			// get drivethrough
-			vector<string> driveThroughs = BZWParser::getValuesByKey("drivethrough", header, groupData);
-				
-			// get shootthrough
-			vector<string> shootThroughs = BZWParser::getValuesByKey("shootthrough", header, groupData);
-				
-			// do base class update
-			if(!bz2object::update(data))
-				return 0;
-			
-			// assign data
-			this->name = headers[0];
-			this->tintColor = RGBA( tints[0].c_str() );
-			this->team = (int)(atof( teams[0].c_str() ));
-			this->driveThrough = (driveThroughs.size() == 0 ? false : true);
-			this->shootThrough = (shootThroughs.size() == 0 ? false : true);
-			
-			return 1;
-			
-		}
+		int update(string& data);
 		
 		// toString
-		string toString(void) {
-			return string("group ") + name + "\n" +
-						  "  tint " + tintColor.toString() +
-						  "  team " + string(itoa(team)) + "\n" +
-						  (driveThrough == true ? "  drivethrough\n" : "") +
-						  (shootThrough == true ? "  shootThrough\n" : "") +
-						  this->BZWLines() +
-						  "end\n";
-		}
+		string toString(void);
 		
 		// render
-		int render(void) { return 0; }
+		int render(void);
 		
 	private:
 		// member data

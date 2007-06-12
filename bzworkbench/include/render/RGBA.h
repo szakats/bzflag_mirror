@@ -1,7 +1,7 @@
 #ifndef RGBA_H_
 #define RGBA_H_
 
-#include "../BZWParser.h"
+#include "../model/BZWParser.h"
 #include "../ftoa.h"
 
 #include <string>

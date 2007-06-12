@@ -1,4 +1,4 @@
-#include "../include/Model.h"
+#include "../include/model/Model.h"
 
 // global reference to the model so the static call will worlk
 Model* modelRef;

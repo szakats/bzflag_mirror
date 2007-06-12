@@ -8,7 +8,7 @@
 using namespace std;
 
 #include "ftoa.h"
-#include "BZWParser.h"
+#include "model/BZWParser.h"
 
 // the generic map object class
 class DataEntry {

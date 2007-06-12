@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "DataEntry.h"
-#include "BZWParser.h"
+#include "model/BZWParser.h"
 
 using namespace std;
 

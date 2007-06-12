@@ -13,11 +13,11 @@
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Scroll.H>
 #include "Fl_Dialog.h"
-#include "QuickLabel.h"
-#include "TransformWidget.h"
-#include "DataEntry.h"
-#include "render/Point3D.h"
-#include "objects/bz2object.h"
+#include "../widgets/QuickLabel.h"
+#include "../widgets/TransformWidget.h"
+#include "../DataEntry.h"
+#include "../render/Point3D.h"
+#include "../objects/bz2object.h"
 
 #include <string>
 #include <vector>
