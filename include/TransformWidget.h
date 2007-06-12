@@ -104,7 +104,7 @@ public:
 	// getters
 	string getTransformationType(void) { return string( typeMenu->label() ); }
 	vector<string> getSupportedTransformations(void) { return transformTypes; }
-	bool isActive(void) { return activeButton->value(); }
+	bool isActive(void) { return (activeButton->value() == 1 ? true : false); }
 	
 	// setters
 	// changes the type of transformation and changes the fields
