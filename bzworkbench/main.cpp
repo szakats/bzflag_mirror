@@ -3,7 +3,7 @@
 
 #include "include/defines.h"
 #include "include/dialogs/Fl_Dialog.h"
-#include "include/QuickLabel.h"
+#include "include/widgets/QuickLabel.h"
 #include "include/dialogs/WorldOptionsDialog.h"
 #include "include/dialogs/MainMenu.h"
 
@@ -40,6 +40,8 @@
 #include "include/objects/world.h"
 #include "include/objects/options.h"
 #include "include/objects/waterLevel.h"
+#include "include/objects/texturematrix.h"
+#include "include/objects/dynamicColor.h"
 
 #include <string>
 #include <vector>
@@ -56,6 +58,48 @@ int main(int argc, char** argv) {
 	return Fl::run();
 	*/
 	
+	dynamicColor dcobj = dynamicColor();
+	
+	printf("|%s|\n", dcobj.toString().c_str());
+	
+	string dcdata = string("dynamicColor\n") +
+						  "  name sniff\n" +
+						  "  red sinusoid 0.1 0.0 0.5\n" +
+						  "  red clampUp 0.1 0.0 0.71\n" +
+						  "  green clampDown 0.0 0.0 1.0\n" +
+						  "  blue sequence 0.0 0.0 2 0 1 0 2 1 1 0\n" +
+						  "  red limit 0.0 1.0\n" +
+						  "end\n";
+						  
+	dcobj.update(dcdata);
+	
+	printf("|%s|\n", dcobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+	
+	texturematrix tmobj = texturematrix();
+	
+	printf("|%s|\n", tmobj.toString().c_str());
+	
+	string tmdata = string("texturematrix\n") +
+						   "  name foobar\n" +
+						   "  scale 1.0 2.0 21.0 22.0\n" +
+						   "  spin 3.0\n" +
+						   "  shift 4.0 5.0\n" +
+						   "  center 6.0 7.0\n" +
+						   "  fixedscale 8.0 9.0\n" +
+						   "  fixedspin 10.0\n" +
+						   "  fixedshift 11.0 12.0\n" +
+						   "end\n";
+						   
+	tmobj.update(tmdata);
+	
+	printf("|%s|\n", tmobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+	
 	weapon wobj = weapon();
 	
 	printf("|%s|\n", wobj.toString().c_str());
@@ -67,7 +111,7 @@ int main(int argc, char** argv) {
 						  "  color 1\n" +
 						  "  tilt 90\n" +
 						  "  initdelay 10\n" +
-						  "  delay\n" +
+						  "  delay 1 2 3 5\n" +
 						  "  type SW\n" +
 						  "  trigger flagcap\n" +
 						  "  eventteam G\n" +
@@ -87,10 +131,10 @@ int main(int argc, char** argv) {
 	string zdata = string("zone\n") +
 						  "  name poot\n" +
 						  "  position 1 2 3\n" +
-						  "  rotation 45\n" +
+						 // "  rotation 45\n" +
 						  "  size 4 5 6\n" +
-						  "  safety 1 2 3\n" +
-						  "  team 1 2 3\n" +
+						 // "  safety 1 2 3\n" +
+						 // "  team 1 2 3\n" +
 						  "  flag GM MG good\n" +
 						  "  zoneflag GM 3\n" +
 						  "  zoneflag V 5\n" +

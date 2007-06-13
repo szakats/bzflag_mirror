@@ -39,18 +39,25 @@ int teleporter::update(string& data) {
 		return 0;
 	}
 	
+	// get the linkage name
+	vector<string> linkageNames = BZWParser::getValuesByKey("teleporter", header, teleporterData);
+	if(linkageNames[0] == "teleporter")	{	// name not found, so "teleporter" is returned instead
+		printf("teleporter::update(): Warning! no linkage name defined!\n");
+	}
+	
 	if(!bz2object::update(data))
 		return 0;
 	
 	// set the data
 	this->border = atof( borders[0].c_str() );
+	this->lname = linkageNames[0];
 	
 	return 1;
 }
 
 // tostring
 string teleporter::toString(void) {
-	return string("teleporter\n") +
+	return string("teleporter ") + lname + "\n" +
 				  this->BZWLines() +
 				  "  border " + string(ftoa(border)) + "\n" +
 				  "end\n";	
