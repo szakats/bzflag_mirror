@@ -76,6 +76,16 @@ public:
 		return true;
 	}
 	
+	// helper method:  ensures that a line has the proper number of elements
+	bool hasNumElements(string& data, unsigned int numElements) {
+		if(BZWParser::getLineElements(data.c_str()).size() != numElements) {
+			printf("Error!  Indecipherable line \"%s\"\n", data.c_str());
+			return false;
+		}
+		return true;
+	}
+	bool hasNumElements(const char* data, unsigned int numElements) { string tmp = data; return hasNumElements(tmp, numElements); }
+	
 	// helper method:  prints out unused key/value pairs
 	string getUnusedText() {
 		string ret = string("");

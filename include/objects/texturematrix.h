@@ -1,0 +1,39 @@
+#ifndef TEXTUREMATRIX_H_
+#define TEXTUREMATRIX_H_
+
+#include "../DataEntry.h"
+#include "../model/BZWParser.h"
+#include "../render/TexCoord2D.h"
+
+class texturematrix : public DataEntry {
+
+public:
+	
+	// default constructor
+	texturematrix();
+	
+	// constructor with data
+	texturematrix(string& data);
+	
+	// getter
+	string get(void);
+	
+	// setter
+	int update(string& data);
+	
+	// toString
+	string toString(void);
+	
+	// render
+	int render(void);
+	
+private:
+
+	string name;
+	TexCoord2D texFreq, texScale, texShift, texCenter, texFixedScale, texFixedShift;
+	float spin, fixedSpin;
+	
+};
+
+
+#endif /*TEXTUREMATRIX_H_*/

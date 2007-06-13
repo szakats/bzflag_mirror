@@ -37,39 +37,40 @@ int zone::update(string& data) {
 	
 	// get the team values
 	vector<string> teams = BZWParser::getValuesByKey("team", header, zoneData);
-	if(!hasOnlyOne(teams, "team"))
-		return 0;
 		
 	// get the safety values
 	vector<string> safties = BZWParser::getValuesByKey("safety", header, zoneData);
-	if(!hasOnlyOne(safties, "safety"))
-		return 0;
 		
 	// get the flag values
 	vector<string> flagVals = BZWParser::getValuesByKey("flag", header, zoneData);
-	if(!hasOnlyOne(flagVals, "flag"))
-		return 0;
 	
 	// get the zoneflag values (multiple values possible)
 	vector<string> zoneFlagVals = BZWParser::getValuesByKey("zoneflag", header, zoneData);
 		
+	// data
+	vector<string> teamElements = vector<string>(), flagElements = vector<string>(), safetyElements = vector<string>();
+	
 	// read in the given teams
-	vector<string> teamElements = BZWParser::getLineElements( teams[0].c_str() );
+	if(teams.size() > 0)
+		teamElements = BZWParser::getLineElements( teams[0].c_str() );
 	
 	// read in the flags
-	vector<string> flagElements = BZWParser::getLineElements(flagVals[0].c_str());
+	if(flagVals.size() > 0)
+		flagElements = BZWParser::getLineElements(flagVals[0].c_str());
 	
 	// read the safeties
-	vector<string> safetyElements = BZWParser::getLineElements(safties[0].c_str());
+	if(safties.size() > 0)
+		safetyElements = BZWParser::getLineElements(safties[0].c_str());
 	
 	// determine whether or not the given flags are valid (throw a warning if its invalid)
-	for(vector<string>::iterator i = flagElements.begin(); i != flagElements.end(); i++) {
-		if(	! (Flag::isFlag( i->c_str() )  || (*i) == "good" || (*i) == "bad") ) {
-			printf("zone::update(): Error! Unrecognized flag type \"%s\"\n", i->c_str());
-			return 0;
+	if(flagElements.size() > 0) {
+		for(vector<string>::iterator i = flagElements.begin(); i != flagElements.end(); i++) {
+			if(	! (Flag::isFlag( i->c_str() )  || (*i) == "good" || (*i) == "bad") ) {
+				printf("zone::update(): Error! Unrecognized flag type \"%s\"\n", i->c_str());
+				return 0;
+			}
 		}
 	}
-	
 	// candidate teams
 	vector<int> teamCandidates = vector<int>();
 	
@@ -87,44 +88,48 @@ int zone::update(string& data) {
 	vector<int> safetyCandidates = vector<int>();
 	
 	// determine whether or not the given safety values are valid (throw a warning if not)
-	for(vector<string>::iterator i = safetyElements.begin(); i != safetyElements.end(); i++) {
-		int teamNumber = atoi( i->c_str() );
-		if(teamNumber < 0 || teamNumber > 4) {
-			printf("zone::update(): Error! Undefined team \"%d\" in \"safety\"\n", teamNumber);	
-			return 0;
+	if(safetyElements.size() > 0) {
+		for(vector<string>::iterator i = safetyElements.begin(); i != safetyElements.end(); i++) {
+			int teamNumber = atoi( i->c_str() );
+			if(teamNumber < 0 || teamNumber > 4) {
+				printf("zone::update(): Error! Undefined team \"%d\" in \"safety\"\n", teamNumber);	
+				return 0;
+			}
+			safetyCandidates.push_back(teamNumber);
 		}
-		safetyCandidates.push_back(teamNumber);
 	}
 	
 	// candidate flag/quantity pairs
 	vector<FlagElement> zoneflagCandidates = vector<FlagElement>();
 	
 	// parse the zoneflag values, and make sure they're valid
-	for(vector<string>::iterator i = zoneFlagVals.begin(); i != zoneFlagVals.end(); i++) {
-		// read the flag
-		string flag = BZWParser::key(i->c_str());
-		// see if its valid
-		if(!Flag::isFlag(flag.c_str())) {
-			printf("zone::update(): Error! Unrecognized flag type \"%s\"\n", flag.c_str());
-			return 0;
+	if(zoneFlagVals.size() > 0) {
+		for(vector<string>::iterator i = zoneFlagVals.begin(); i != zoneFlagVals.end(); i++) {
+			// read the flag
+			string flag = BZWParser::key(i->c_str());
+			// see if its valid
+			if(!Flag::isFlag(flag.c_str())) {
+				printf("zone::update(): Error! Unrecognized flag type \"%s\"\n", flag.c_str());
+				return 0;
+			}
+			// try to read the quantity
+			string value = BZWParser::value(flag.c_str(), i->c_str());
+			// try to atoi() the value
+			int num = atoi( value.c_str() );
+			// num will be zero if atoi() failed...
+			if(num == 0) {
+				printf("zone::update(): Error! Unrecognized flag quantity \"%s\"\n", value.c_str());	
+				return 0;
+			}
+			
+			zoneflagCandidates.push_back(FlagElement(flag, num));
 		}
-		// try to read the quantity
-		string value = BZWParser::value(flag.c_str(), i->c_str());
-		// try to atoi() the value
-		int num = atoi( value.c_str() );
-		// num will be zero if atoi() failed...
-		if(num == 0) {
-			printf("zone::update(): Error! Unrecognized flag quantity \"%s\"\n", value.c_str());	
-			return 0;
-		}
-		
-		zoneflagCandidates.push_back(FlagElement(flag, num));
 	}
 	
 	// fill in the data
 	if(!bz2object::update(data))
 		return 0;
-	
+	 
 	this->teams = teamCandidates;
 	this->safety = safetyCandidates;
 	this->zoneflags = zoneflagCandidates;

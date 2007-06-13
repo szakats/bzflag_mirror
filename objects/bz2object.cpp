@@ -4,12 +4,14 @@
 bz2object::bz2object(const char* name, const char* keys) : DataEntry(name, keys) {
 	this->position = Point3D(0.0f, 0.0f, 0.0f);
 	this->rotation = 0.0f;
+	this->size = Point3D(-1.0f, -1.0f, -1.0f);
 	this->transformations = vector<Transform>();
 };
 
 // constructor with data
 bz2object::bz2object(const char* name, const char* keys, const char* data) : DataEntry(name, keys, data) {
 	this->position = Point3D(0.0f, 0.0f, 0.0f);
+	this->size = Point3D(-1.0f, -1.0f, -1.0f);
 	this->rotation = 0.0f;
 	this->transformations = vector<Transform>();
 	string d = string(data);
@@ -54,8 +56,13 @@ int bz2object::update(string& data) {
 		positions = BZWParser::getValuesByKey("position", header, objData);
 		
 		// just go with the first position (only one should be defined)
-		if(!hasOnlyOne(positions, "position"))
+		if(positions.size() > 1) {
+			printf("%s::update(): Error! Defined \"position\" %d times!\n", header, positions.size());
 			return 0;
+		}
+		if(positions.size() == 0) {
+			positions.push_back(Point3D(0.0f, 0.0f, 0.0f).toString());
+		}
 			
 	}
 	
@@ -64,8 +71,14 @@ int bz2object::update(string& data) {
 		rotations = BZWParser::getValuesByKey("rotation", header, objData);
 		
 		// just go with the first rotation
-		if(!hasOnlyOne(rotations, "rotation"))
+		if(rotations.size() > 1) {
+			printf("%s::update(): Error! Defined \"rotation\" %d times!\n", header, rotations.size());
 			return 0;
+		}
+		if(rotations.size() == 0) {
+			string rot = "0.0";
+			rotations.push_back(rot);	
+		}
 			
 	}
 	
@@ -74,9 +87,13 @@ int bz2object::update(string& data) {
 		sizes = BZWParser::getValuesByKey("size", header, objData);
 		
 		// just go with the first size (only one should be defined)
-		if(!hasOnlyOne(sizes, "size"))
+		if(sizes.size() > 1) {
+			printf("%s::update(): Error! Defined \"size\" %d times!\n", header, sizes.size());
 			return 0;
-			
+		}
+		if(sizes.size() == 0) {
+			sizes.push_back(Point3D(-1.0f, -1.0f, -1.0f).toString());	
+		}
 		
 	}
 	// read in the transformations
@@ -104,8 +121,10 @@ int bz2object::update(string& data) {
 	// get the physics driver
 	if(this->isKey("phydrv")) {
 		physicsDrivers = BZWParser::getValuesByKey("phydrv", header, objData);
-		if(!hasOnlyOne(physicsDrivers, "phydrv"))
+		if(physicsDrivers.size() > 1) {
+			printf("%s::update(): Error! Defined \"phydrv\" %d times!\n", header, physicsDrivers.size());
 			return 0;
+		}
 	}
 	
 	// get materials
@@ -113,18 +132,18 @@ int bz2object::update(string& data) {
 		matrefs = BZWParser::getValuesByKey("matref", header, objData);
 	}
 	
-	// load in the data
+	// load in the data	
 	if(this->isKey("name") && names.size() > 0)
 		this->name = names[0];
-	if(this->isKey("position"))
+	if(this->isKey("position") && positions.size() > 0)
 		this->position = Point3D( positions[0].c_str() );
-	if(this->isKey("rotation"))
+	if(this->isKey("rotation") && rotations.size() > 0)
 		this->rotation = atof( rotations[0].c_str() );
-	if(this->isKey("size"))
+	if(this->isKey("size") && sizes.size() > 0)
 		this->size = Point3D( sizes[0].c_str() );
-	if(this->isKey("phydrv"))
+	if(this->isKey("phydrv") && physicsDrivers.size() > 0)
 		this->physicsDriver = physicsDrivers[0];
-	if(this->isKey("matref"))
+	if(this->isKey("matref") && matrefs.size() > 0)
 		this->materials = matrefs;
 		
 	return DataEntry::update(data);
@@ -148,7 +167,7 @@ string bz2object::BZWLines(void) {
 		ret += "  position " + position.toString();
 		
 	// add size key/value to the string if supported
-	if(this->isKey("size"))
+	if(this->isKey("size") && size.x > 0 && size.y > 0 && size.z > 0)
 		ret += "  size " + size.toString();
 	
 	// add rotation key/value to the string if supported

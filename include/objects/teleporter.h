@@ -32,6 +32,7 @@ public:
 private:
 	
 	float border;
+	string lname;	// used for linkage; not the official name
 };
 
 #endif /*TELEPORTER_H_*/
