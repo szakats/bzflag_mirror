@@ -2,28 +2,32 @@
 <?fileVersion 3.1.0?>
 
 <ManagedProjectBuildInfo>
-<project id="bzworkbench.cdt.managedbuild.target.gnu.exe.44727659" name="Executable (Gnu)" projectType="cdt.managedbuild.target.gnu.exe">
-<configuration artifactName="bzworkbench" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.debug.1204959373" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
-<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.529819632" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1748046580" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.941274780" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.980978114" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1960489364" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
-<option id="gnu.cpp.link.option.libs.1681446239" superClass="gnu.cpp.link.option.libs" valueType="libs">
+<project id="bzworkbench.cdt.managedbuild.target.gnu.exe.278320978" name="Executable (Gnu)" projectType="cdt.managedbuild.target.gnu.exe">
+<configuration artifactName="bzworkbench" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.debug.1804345690" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
+<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.243330532" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.904830375" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
+<option id="gnu.cpp.compiler.option.include.paths.1216513372" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="/usr/include/"/>
+</option>
+</tool>
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1602135080" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.525207557" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.139185542" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
+<option id="gnu.cpp.link.option.libs.1034235326" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="fltk"/>
 </option>
 </tool>
-<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.444907183" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1908781899" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
 <macros/>
 </toolChain>
 </configuration>
-<configuration artifactName="bzworkbench" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.release.1392870357" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
-<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.795652761" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1361707002" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release"/>
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.843836880" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release"/>
-<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.2110302009" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1306057033" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release"/>
-<tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.1410840568" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release"/>
+<configuration artifactName="bzworkbench" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.release.594904520" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
+<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.714888812" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.2081818492" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release"/>
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1817890140" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release"/>
+<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.138495730" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1343555764" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release"/>
+<tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.1740231064" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release"/>
 </toolChain>
 </configuration>
 </project>
