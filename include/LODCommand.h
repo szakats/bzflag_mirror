@@ -12,6 +12,7 @@ public:
 		name = string("");
 		args = vector<int>();
 		rad = 0;
+		x = y = z = 0;
 	}
 	
 	// constructor with data
@@ -19,6 +20,7 @@ public:
 		name = string("");
 		args = vector<int>();
 		rad = 0;
+		x = y = z = 0;
 		
 		this->update(data);	
 	}
@@ -82,7 +84,6 @@ public:
 			
 		// get the name and values
 		string commandName = BZWParser::key( command.c_str() );
-		vector<string> values = BZWParser::getLineElements( BZWParser::value( commandName.c_str(), command.c_str() ).c_str() );
 		
 		// make sure its a valid command
 		// (can't call isKey here--isKey isn't and can't be static)
@@ -100,8 +101,13 @@ public:
 			  commandName == "polygon") )
 			  		return false;
 		
+		// get the command values
+		string val = BZWParser::value( commandName.c_str(), command.c_str() );
+			  		
+		vector<string> values = BZWParser::getLineElements( val.c_str() );
+		
 		// dlist gets 0 args (values[0] will be the same as the key in that case)
-		if(commandName == "dlist" && values[0] != "dlist")
+		if(commandName == "dlist" && values[0] != commandName)
 			return false;
 		
 		// sphere gets four args
@@ -109,7 +115,7 @@ public:
 			return false;
 			
 		// points gets at least one arg
-		if(commandName == "point" && values[0] == "dlist")
+		if(commandName == "point" && values[0] != commandName)
 			return false;
 			
 		// lines gets at least 2 args

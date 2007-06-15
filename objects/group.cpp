@@ -47,15 +47,18 @@ int group::update(string& data) {
 	
 	// get tint
 	vector<string> tints = BZWParser::getValuesByKey("tint", header, groupData);
-	if(!hasOnlyOne(tints, "tint")) {
-		return 0;
+	if(tints.size() > 1) {
+		printf("group::update(): Error! Defined \"tint\" %d times\n", tints.size());
+		return 0;	
 	}
-		
+	
 	// get team
 	vector<string> teams = BZWParser::getValuesByKey("team", header, groupData);
-	if(!hasOnlyOne(teams, "team"))
-		return 0;
-		
+	if(teams.size() > 1) {
+		printf("group::update(): Error! Defined \"team\" %d times\n", tints.size());
+		return 0;	
+	}
+	
 	// get drivethrough
 	vector<string> driveThroughs = BZWParser::getValuesByKey("drivethrough", header, groupData);
 		
@@ -68,8 +71,8 @@ int group::update(string& data) {
 	
 	// assign data
 	this->name = headers[0];
-	this->tintColor = RGBA( tints[0].c_str() );
-	this->team = (int)(atof( teams[0].c_str() ));
+	this->tintColor = (tints.size() > 0 ? RGBA( tints[0].c_str() ) : RGBA(-1, -1, -1, -1));
+	this->team = (teams.size() > 0 ? (int)(atof( teams[0].c_str() )) : -1);
 	this->driveThrough = (driveThroughs.size() == 0 ? false : true);
 	this->shootThrough = (shootThroughs.size() == 0 ? false : true);
 	
@@ -79,9 +82,15 @@ int group::update(string& data) {
 
 // toString
 string group::toString(void) {
+	string tintString = string(""), teamString = string("");
+	if(tintColor.r > 0 && tintColor.g > 0 && tintColor.b > 0 && tintColor.a > 0)
+		tintString = "  tint " + tintColor.toString();
+	if(team > 0)
+		teamString = "  team " + string(itoa(team)) + "\n";
+	
 	return string("group ") + name + "\n" +
-				  "  tint " + tintColor.toString() +
-				  "  team " + string(itoa(team)) + "\n" +
+				  tintString + 
+				  teamString +
 				  (driveThrough == true ? "  drivethrough\n" : "") +
 				  (shootThrough == true ? "  shootThrough\n" : "") +
 				  this->BZWLines() +

@@ -32,6 +32,8 @@ public:
 	
 	// get all sections from a chunk of text that start with header
 	static const vector<string> getSectionsByHeader(const char* header, const char* text);
+	static const vector<string> getSectionsByHeader(const char* header, const char* text, const char* footer);
+	static const vector<string> getSectionsByHeader(const char* header, const char* text, const char* footer, const char* internalSectionKeys);
 	
 	// get all values from a key in a section
 	static vector<string> getValuesByKey(const char* key, const char* header, const char* section);

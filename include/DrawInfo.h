@@ -102,7 +102,7 @@ public:
 			printf("mesh::DrawInfo::update(): Error! Defined \"angvel\" %d times!\n", angvelVals.size());
 			return 0;	
 		}
-		if(!hasNumElements(angvelVals[0], 1))
+		if(angvelVals.size() > 0 && !hasNumElements(angvelVals[0], 1))
 			return 0;
 		
 		// get corners
@@ -114,7 +114,7 @@ public:
 			printf("mesh::DrawInfo::update(): Error! Defined \"sphere\" %d times!\n", sphereVals.size());
 			return 0;	
 		}
-		if(!hasNumElements(sphereVals[0], 4))
+		if(sphereVals.size() > 0 && !hasNumElements(sphereVals[0], 4))
 			return 0;
 		
 		// get extends
@@ -123,14 +123,9 @@ public:
 			printf("mesh::DrawInfo::update(): Error! Defined \"extends\" %d times!\n", sphereVals.size());
 			return 0;	
 		}
-		if(!hasNumElements(extendsVals[0], 6))
+		if(extendsVals.size() > 0 && !hasNumElements(extendsVals[0], 6))
 			return 0;
-			
-			
-		// do base-class update
-		if(!DataEntry::update(data))
-			return 0;
-			
+				
 		// need same amount of corners as vertexes
 		if(cornerVals.size() != vertexVals.size()) {
 			printf("mesh::DrawInfo::update(): Error! Unequal numbers of corners and vertexes\n");
@@ -156,9 +151,9 @@ public:
 				tmp = BZWParser::getLineElements( i->c_str() );
 				if(tmp.size() != 3) {
 					printf("mesh::DrawInfo::update(): Error! \"vertex\" in \"vertex %s\" needs 3 values!\n", i->c_str());
+					return 0;
 				}
 				vertexData.push_back( Point3D( i->c_str() ) );
-					return 0;
 			}
 		}
 		
@@ -181,7 +176,7 @@ public:
 			for(vector<string>::iterator i = normalVals.begin(); i != normalVals.end(); i++) {
 				tmp = BZWParser::getLineElements( i->c_str() );
 				if(tmp.size() != 3) {
-					printf("mesh::update(): Error! \"normal\" in \"normal %s\" needs 3 values!\n", i->c_str());
+					printf("mesh::DrawInfo::update(): Error! \"normal\" in \"normal %s\" needs 3 values!\n", i->c_str());
 					return 0;
 				}
 				vectorData.push_back( Vector3D( i->c_str() ) );
@@ -194,7 +189,7 @@ public:
 			for(vector<string>::iterator i = texCoordVals.begin(); i != texCoordVals.end(); i++) {
 				tmp = BZWParser::getLineElements( i->c_str() );
 				if(tmp.size() != 2) {
-					printf("mesh::update(): Error! \"texcoord\" in \"texcoord %s\" needs 2 values!\n", i->c_str());
+					printf("mesh::DrawInfo::update(): Error! \"texcoord\" in \"texcoord %s\" needs 2 values!\n", i->c_str());
 					return 0;
 				}
 				texCoordData.push_back( TexCoord2D( i->c_str() ) );
@@ -213,13 +208,25 @@ public:
 		
 		// get the "sphere" if it exists
 		Point3D spherePoint(0.0f, 0.0f, 0.0f);
-		float sphereRad;
+		float sphereRad = 0;
 		if(sphereVals.size() > 0) {
 			vector<string> sphereParams = BZWParser::getLineElements( sphereVals[0].c_str() );
 			string pString = sphereParams[0] + " " + sphereParams[1] + " " + sphereParams[2];
 			sphereRad = atof( sphereParams[3].c_str() );
 			spherePoint = Point3D(pString.c_str());
 		}
+		// get LOD blocks
+		vector<string> lodBlocks = BZWParser::getSectionsByHeader( "lod", drawInfoData);
+		vector<LOD> lodElements = vector<LOD>();
+		if(lodBlocks.size() > 0) {
+			for(vector<string>::iterator i = lodBlocks.begin(); i != lodBlocks.end(); i++) {
+				lodElements.push_back( LOD( *i ) );
+			}
+		}
+		
+		// do base-class update
+		if(!DataEntry::update(data))
+			return 0;
 		
 		// finally, set the data
 		this->vertices = vertexData;
@@ -230,27 +237,28 @@ public:
 		this->maxExtends = eHigh;
 		this->sphereRadius = sphereRad;
 		this->spherePosition = spherePoint;
-		this->angvel = atof( angvelVals[0].c_str() );
+		this->angvel = (angvelVals.size() > 0 ? atof( angvelVals[0].c_str() ) : 0.0f);
 		this->dlist = (dlistVals.size() > 0 ? true : false);
 		this->decorative = (decorativeVals.size() > 0 ? true : false);
+		this->lods = lodElements;
 		
 		return 1;
 	}
 	
 	// toString
 	string toString(void) {
-		// string-ify the vertices, normals, and texcoords
+		// string-ify the vertices, normals, corners, LODs, and texcoords
 		string vertexString(""), normalString(""), texcoordString(""), cornerString(""), lodString("");
 		
 		if(vertices.size() > 0) {
 			for(vector<Point3D>::iterator i = vertices.begin(); i != vertices.end(); i++) {
-				vertexString += "    vertex " + i->toString() + "\n";
+				vertexString += "    vertex " + i->toString();
 			}		
 		}
 		
 		if(normals.size() > 0) {
 			for(vector<Vector3D>::iterator i = normals.begin(); i != normals.end(); i++) {
-				normalString += "    normal " + i->toString() + "\n";
+				normalString += "    normal " + i->toString();
 			}		
 		}
 		
@@ -262,25 +270,34 @@ public:
 		
 		if(corners.size() > 0) {
 			for(vector<Index3D>::iterator i = corners.begin(); i != corners.end(); i++) {
-				cornerString += "    corner " + i->toString() + "\n";	
+				cornerString += "    corner " + i->toString();	
 			}	
+		}
+		
+		if(lods.size() > 0) {
+			for(vector<LOD>::iterator i = lods.begin(); i != lods.end(); i++) {	
+				lodString += "    " + i->toString();
+			}
 		}
 		
 		return string("drawinfo\n") +
 					  (dlist == true ? "    dlist\n" : "") +
 					  (decorative == true ? "    decorative\n" : "") +
-					  vertexString + "\n" +
-					  normalString + "\n" +
-					  cornerString + "\n" +
-					  texcoordString + "\n" +
-					  lodString + "\n" +
-					  "end\n";
+					  vertexString +
+					  normalString +
+					  cornerString +
+					  texcoordString +
+					  lodString +
+					  "  end\n";
 	}
 	
 	// render
 	int render(void) {
 		return 0;	
 	}
+	
+	// binary getters
+	vector<Point3D>& getVertices() { return vertices; }
 	
 private:
 

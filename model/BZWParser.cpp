@@ -25,7 +25,7 @@ string cutWhiteSpace(string line) {
  */
 string cutLine(string text) {
 	string::size_type index = text.find("\n", 0);
-	return text.substr(0, index);	
+	return text.substr(0, index);
 }
 
 /**
@@ -45,7 +45,7 @@ bool hasLine(string text) {
  */
  bool isKey(string key, string line) {
  	line = cutWhiteSpace(line);
- 	string::size_type index = line.find(key, 0);
+ 	string::size_type index = line.find(key + " ", 0);
  	if(index == 0) 
  		return true;
  	return false;
@@ -85,7 +85,7 @@ string BZWParser::key(const char* _text) {
 	string text = cutWhiteSpace(_text);
 	string::size_type index = text.find(" ", 0);
 	if(index == string::npos)
-		return string(BZW_NOT_FOUND);
+		return text;
 	return text.substr(0, index);
 }
 
@@ -115,6 +115,9 @@ vector<string> BZWParser::getLines(const char* _start, const char* _text) {
 		
 		if(index == 0)
 			break;
+		
+		// advance the line
+		section = section.substr(currLine.length() + 1);
 	}
 	
 	// read in lines
@@ -192,9 +195,10 @@ string BZWParser::getSection(const char* _header, const char* _text) {
 /**
  * This method finds all occurences of a section (by looking for its header) in a chunk of text
  */
-const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text) {
+const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text, const char* _footer) {
 	string header = cutWhiteSpace(string(_header));
 	string text = cutWhiteSpace(string(_text)) + " ";
+	string footer = cutWhiteSpace(string(_footer));
 	
 	vector<string> sections = vector<string>();
 	int cnt = 0;		// how many sections
@@ -257,7 +261,7 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
 			section += line + "\n";
 			
 			// see if it has the end
-			if(lineElements[0].compare("end") == 0) {
+			if(lineElements[0].compare(footer) == 0) {
 				found = true;
 				break;
 			}
@@ -279,6 +283,117 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
 		
 	return sections;
 }
+
+const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text) {
+	return BZWParser::getSectionsByHeader(_header, _text, "end");	
+}
+
+/**
+ * General case of getSectionsByHeader.
+ * This method, unlike the others, anticipates subobjects listed in internalSectionKeys, and won't be 
+ * fooled by internal "end" statements.
+ * Format of internalSectionKeys is "<key1><key2>...<keyN>" for N keys
+ */
+ 
+const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text, const char* _footer, const char* internalSectionKeys) {
+	string header = cutWhiteSpace(string(_header));
+	string text = cutWhiteSpace(string(_text)) + " ";
+	string footer = cutWhiteSpace(string(_footer));
+	string keyList = cutWhiteSpace(string(internalSectionKeys));
+	int sectionDepth = 0;	// determines the section depth (will be positive if inside a subobject)
+	
+	vector<string> sections = vector<string>();
+	int cnt = 0;		// how many sections
+	
+	while(true) {
+		string section = string("");
+		
+		string currLine, line;
+		
+		bool found = false;
+		
+		// find the header 
+		while(true) {
+			
+			// ensure we have space to cut
+			if(!hasLine(text)) {
+				break;
+			}
+				
+			// cut a line
+			currLine = cutLine(text);
+			line = cutWhiteSpace(currLine);
+			
+			// chunk up the line
+			vector<string> lineElements = getLineElements(line.c_str());
+			
+			if(lineElements.size() == 0)
+				lineElements.push_back(" ");
+			
+			// see if it has the header
+			if(lineElements[0].compare(header) == 0) {
+				section += line + "\n";
+				text = text.substr(currLine.length() + 1);
+				found = true;
+				break;
+			}
+			
+			text = text.substr(currLine.length() + 1);
+		}
+		
+		found = false;
+		// find the footer
+		while(true) {
+			// ensure we have space to cut
+			if(!hasLine(text)) {
+				break;
+			}
+				
+			// cut a line
+			currLine = cutLine(text);
+			line = cutWhiteSpace(currLine);
+			
+			// chunk up the line
+			vector<string> lineElements = getLineElements(line.c_str());
+			
+			if(lineElements.size() == 0)
+				lineElements.push_back(" ");
+			
+			// see if this is a key
+			if(keyList.find("<" + lineElements[0] + ">") != string::npos)	
+				sectionDepth++;
+			
+			// add it to the section if its relevant
+			if(sectionDepth == 0)
+				section += line + "\n";
+			
+			// see if it has the end
+			if(lineElements[0].compare(footer) == 0) {
+				sectionDepth--;
+				if(sectionDepth == 0) {
+					found = true;
+					break;	
+				}
+			}
+				
+			
+			text = text.substr(currLine.length() + 1);
+		}
+		
+		if(!found)
+			break;	
+		else {
+			sections.push_back(section);
+			cnt++;
+		}
+	}
+	// add SOMETHING if we found nothing
+	if(cnt == 0)
+		sections.push_back(BZW_NOT_FOUND);
+		
+	return sections;
+}
+
 
 /**
  * This method gets the list of all values referenced by a key in a segment of text (usually a section)

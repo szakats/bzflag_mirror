@@ -47,7 +47,7 @@ public:
 		const char* header = this->getHeader().c_str();
 		
 		// get the chunk
-		vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
+		vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str(), "endface");
 		
 		// break if there are none
 		if(lines[0] == BZW_NOT_FOUND)
@@ -64,19 +64,30 @@ public:
 		vector<string> vertexVals = BZWParser::getValuesByKey("vertices", header, faceData);
 		if(!hasOnlyOne(vertexVals, "vertices"))
 			return 0;
+		if(vertexVals.size() > 0 && BZWParser::getLineElements( vertexVals[0].c_str() ).size() < 3) {
+			printf("mesh::face::update(): Error! Not enough vertex elements in \"%s\"\n", vertexVals[0].c_str());
+			return 0;	
+		}
 			
 		// get the texcoords
 		vector<string> texCoordVals = BZWParser::getValuesByKey("texcoords", header, faceData);
-		if(!hasOnlyOne(texCoordVals, "texcoords"))
-			return 0;
-			
+		if(texCoordVals.size() > 1) {
+			printf("mesh::face::update(): Error! Defined \"texcoord\" %d times!\n", texCoordVals.size());
+			return 0;	
+		}
+		
 		// get the normals
 		vector<string> normalVals = BZWParser::getValuesByKey("normals", header, faceData);
-		if(!hasOnlyOne(normalVals, "normals"))
-			return 0;
-			
+		if(normalVals.size() > 1) {
+			printf("mesh::face::update(): Error! Defined \"normal\" %d times!\n", normalVals.size());
+			return 0;	
+		}
+		
 		// get the physics driver
 		vector<string> physicsDriverVals = BZWParser::getValuesByKey("phydrv", header, faceData);
+		if(physicsDriverVals.size() > 1) {
+			printf("mesh::face::update(): Error! Defined \"phydrv\" %d times!\n", physicsDriverVals.size());
+		}
 		
 		// get the materials
 		vector<string> matrefVals = BZWParser::getValuesByKey("matref", header, faceData);
@@ -96,24 +107,28 @@ public:
 			
 		// vertices, texcoords, and normals should have the same number of parameters...
 		vector<string> vertexParams = BZWParser::getLineElements( vertexVals[0].c_str() );
-		vector<string> texCoordParams = BZWParser::getLineElements( texCoordVals[0].c_str() );
-		vector<string> normalParams = BZWParser::getLineElements( normalVals[0].c_str() );
+		vector<string> texCoordParams, normalParams;
+		
+		if(texCoordVals.size() > 0)
+			texCoordParams = BZWParser::getLineElements( texCoordVals[0].c_str() );
+		
+		if(normalVals.size() > 0)
+			normalParams = BZWParser::getLineElements( normalVals[0].c_str() );
 		
 		// check the lengths of the parameters of "vertices", "texcoords", and "normals"...should be the same
 		// (of not, then break)
 		if( vertexParams.size() != texCoordParams.size() ||
 			vertexParams.size() != normalParams.size() ||
 			normalParams.size() != texCoordParams.size()) {
-				printf("mesh::update(): Error! unequal numbers of referenced vertices, normals, and texture coordinates in face!\n");
-				printf("  vertices %s\n  texcoords %s\n  normals%s\n", vertexVals[0].c_str(), texCoordVals[0].c_str(), normalVals[0].c_str() );
+				printf("mesh::update(): Error! unequal numbers of referenced vertices, normals, and texture coordinates in face! {\n");
+				printf("  vertices %s # %d\n", vertexVals[0].c_str(), vertexParams.size());
+				if(texCoordVals.size() > 0)
+					printf("  texcoords %s # %d\n", texCoordVals[0].c_str(), texCoordParams.size());
+				if(normalVals.size() > 0)
+					printf("  normals %s # %d\n", normalVals[0].c_str() , normalParams.size());
+				printf("}\n");
+				
 				return 0;
-		}
-		
-		// there must be at least three vertices
-		if( vertexParams.size() < 3) {
-			printf("mesh::update(): Error! Faces must have at least 3 vertices!\n");
-			printf("  vertices %s\n  texcoords %s\n  normals%s\n", vertexVals[0].c_str(), texCoordVals[0].c_str(), normalVals[0].c_str() );
-			return 0;
 		}
 		
 		// load in the data
@@ -140,15 +155,15 @@ public:
 		}
 		
 		return string("face\n") +
-					  "    vertices " + stringify(vertices) + "\n" +
-					  "    texcoords " + stringify(texcoords) + "\n" +
-					  "    normals " + stringify(normals) + "\n" +
+					  (vertices.size() > 0 ? "    vertices " + stringify(vertices) + "\n" : "") +
+					  (texcoords.size() > 0 ? "    texcoords " + stringify(texcoords) + "\n" : "") +
+					  (normals.size() > 0 ? "    normals " + stringify(normals) + "\n" : "") +
 					  matstring +
-					  (physicsDriver.length() != 0 ? "    " + physicsDriver + "\n" : "") +
+					  (physicsDriver.length() != 0 ? "    phydrv " + physicsDriver + "\n" : "") +
 					  (passable == true ? "    passable\n" : "") +
 					  (shootThrough == true ? "    shootthrough\n" : "") +
 					  (driveThrough == true ? "    drivethrough\n" : "") +
-					  "end\n";
+					  "  endface\n";
 					  
 	}
 	

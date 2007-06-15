@@ -38,9 +38,6 @@ private:
 	// vertices
 	vector<Point3D> vertices;
 	
-	// indexes
-	vector<Index3D> indexes;
-	
 	// texture coordinates
 	vector<TexCoord2D> texCoords;
 	
@@ -56,11 +53,12 @@ private:
 	// boolean options
 	bool noClusters, smoothBounce;
 	
-	// global materials
-	vector<string> materials;
-	
 	// faces
 	vector<MeshFace> faces;
+	
+	// draw info
+	DrawInfo drawInfo;
+	bool useDrawInfo;
 };
 
 #endif /*MESH_H_*/
