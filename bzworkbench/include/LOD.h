@@ -49,32 +49,53 @@ public:
 		
 		// get the lengthPerPixel values
 		vector<string> lppVals = BZWParser::getValuesByKey("lengthPerPixel", header, lodData);
-		if(!hasOnlyOne(lppVals, "lengthPerPixel"))
-			return 0;
 			
 		// get the sections beginning with matref and create LODCommand lists from them
 		vector<string> matrefSections = BZWParser::getSectionsByHeader("matref", lodData);
-		if(!hasOnlyOne(matrefSections, "matref"))
-			return 0;
+		if(matrefSections.size() > 1) {
+			printf("mesh::LOD::update(): Error! Defined \"matref\" %d times!\n", matrefSections.size());
+			return 0;	
+		}
 		
 		// parse each LOD command
 		vector<string> lodLines = BZWParser::getLines("matref", matrefSections[0].c_str());
 		vector<LODCommand> cmds = vector<LODCommand>();
-		for(vector<string>::iterator i = lodLines.begin(); i != lodLines.end(); i++) {
-			if(LODCommand::isValidCommand( *i )) {
-				printf("|%s|\n", i->c_str());
-				LODCommand lc = LODCommand(*i);
-				printf("<%s>\n", lc.toString().c_str());
-				cmds.push_back(lc);
-			}	
+		if(lodLines.size() > 1) {
+			for(vector<string>::iterator i = lodLines.begin() + 1; i != lodLines.end(); i++) {
+				if(LODCommand::isValidCommand( *i )) {
+					cmds.push_back( LODCommand(*i) );
+				}
+				else {
+					printf("mesh::LOD::update(): Error! Unsupported LOD entry \"%s\"\n", i->c_str());
+					return 0;
+				}
+			}
 		}
+		
+		// do base class update
+		if(!DataEntry::update(data))
+			return 0;
+			
+		// set data
+		this->pixelLength = (lppVals.size() != 0 ? atoi( lppVals[0].c_str() ) : 0);
+		this->matref = (lodLines.size() > 0 ? BZWParser::value( "matref", lodLines[0].c_str() ) : string(""));
+		this->commands = cmds;
 		
 		return 1;
 	}
 	
 	// toString
 	string toString(void) {
-		return string("lod");
+		string lods = string("");
+		if(commands.size() > 0) {
+			for( vector<LODCommand>::iterator i = commands.begin(); i != commands.end(); i++) {
+				lods += string("        ") + i->toString().c_str() + "\n";	
+			}
+		}
+		return string("lod\n") +
+					  "      lengthPerPixel " + string(itoa(pixelLength)) + "\n" +
+					  (matref.length() > 0 ? string("      matref ") + matref + "\n" + lods + "      end\n" : string("")) + "\n" +
+					  "    end\n";
 	}
 	
 	// render

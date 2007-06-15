@@ -59,27 +59,124 @@ int main(int argc, char** argv) {
 	return Fl::run();
 	*/
 	
-	LOD lodobj = LOD();
+	mesh meshobj = mesh();
+	
+	printf("|%s|\n", meshobj.toString().c_str());
+	
+	string meshData = string("mesh\n") +
+							 "  inside 0 1 2\n" +
+							 "  inside 2 3 4\n" +
+							 "  inside 1 2 3\n" +
+							 
+							 "  outside 0 0 1\n" +
+							 "  outside 6 6 6\n" +
+							 
+							 "  vertex 50 50 50\n" +
+							 "  vertex 100 100 100\n" +
+							 "  vertex 60 60 60\n" +
+							 
+							 "  texcoord 0.5 0.1\n" +
+							 "  texcoord 1 0\n" +
+							 "  texcoord 6 7\n" +
+							 
+							 "  normal 1 2 3\n" +
+							 "  normal 6 7 8\n" +
+							 "  normal 7 8 9\n" +
+							 "  normal 10 10 10\n" +
+							 
+							 "  noclusters\n" +
+							 "  smoothbounce\n" +
+							 
+							 "  matref sniff\n" +
+							 
+							 "  face\n" +
+							 "    vertices 0 1 2\n" +
+							 "    texcoords 0 1 2\n" +
+							 "    normals 0 1 2\n" +
+							 "    phydrv myPhysics\n" +
+							 "    passable\n" +
+							 "  endface\n" +
+							 
+							"  drawinfo\n" +
+							"    dlist\n" +
+							"    angvel 0.5\n" +
+							"    vertex 0 0 0\n" +
+							"    vertex 1 1 1\n" +
+							"    vertex 2 2 2\n" +
+							"    texcoord 4 5\n" +
+							"    texcoord 6 7\n" +
+							"    texcoord 8 9\n" +
+							"    normal 1 2 3\n" +
+							"    normal 4 5 6\n" +
+							"    normal 7 8 9\n" + 
+							"    corner 0 0 0\n" +
+							"    corner 1 1 1\n" +
+							"    corner 2 2 2\n" +
+							"    lod\n" +
+					        "      lengthPerPixel 0\n" +
+					        "      matref -1 \n" +
+					        "        dlist\n" +
+					        "        sphere 0 0 0.5 2.25\n" +
+					        "        quads 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15\n" +
+					        "      end\n" +
+					      	"    end\n" +
+					      	"  end\n" +
+					      	"end\n";
+					      	
+	meshobj.update(meshData);
+	
+	printf("|%s|\n", meshobj.toString().c_str());
+	
+	printf("========================================\n");
+	
+							 
+	
+	MeshFace face = MeshFace();
+	
+	printf("|%s|\n", face.toString().c_str());
+	
+	string faceData = string("face\n") +
+							 "  vertices 1 2 3 4\n" +
+							 "  texcoords 5 6 7 8\n" +
+							 "  normals 8 9 10 11\n" +
+							 "  phydrv sniff\n" +
+							 "endface\n";
+							 
+	face.update(faceData);
+	
+	printf("|%s|\n", face.toString().c_str());
+	
+	printf("========================================\n");
+	
+	
+	DrawInfo lodobj = DrawInfo();
 	
 	printf("|%s|\n", lodobj.toString().c_str());
 	
-	string lodData = string("lod\n") +
-					        "  lengthPerPixel 0\n" +
-					        "  matref -1 \n" +
-					        "    dlist\n" +
-					        "    sphere 0 0 0.5 2.25\n" +
-					        "    quads 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15\n" +
-					        "  end\n" +
+	string lodData = string("drawinfo\n") +
+							"  dlist\n" +
+							"  angvel 0.5\n" +
+							"  vertex 0 0 0\n" +
+							"  vertex 1 1 1\n" +
+							"  vertex 2 2 2\n" +
+							"  texcoord 4 5\n" +
+							"  texcoord 6 7\n" +
+							"  texcoord 8 9\n" +
+							"  normal 1 2 3\n" +
+							"  normal 4 5 6\n" +
+							"  normal 7 8 9\n" + 
+							"  corner 0 0 0\n" +
+							"  corner 1 1 1\n" +
+							"  corner 2 2 2\n" +
+							"  lod\n" +
+					        "    lengthPerPixel 0\n" +
+					        "    matref -1 \n" +
+					        "      dlist\n" +
+					        "      sphere 0 0 0.5 2.25\n" +
+					        "      quads 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15\n" +
+					        "    end\n" +
+					      	"  end\n" +
 					      	"end\n";
-					    
-					    /*  lod  # 1
-					        lengthPerPixel 0.04
-					        matref -1
-					          dlist
-					          sphere 0 0 0.5 2.25
-					          quads 0 1 2 3 4 5 6 7
-					        end  # material -1
-					      end  # lod 1"*/
 					      
 	lodobj.update(lodData);
 	
@@ -338,7 +435,7 @@ int main(int argc, char** argv) {
 	teleporter tobj = teleporter();
 	printf("|%s|\n", tobj.toString().c_str());
 	
-	string tdata = string("teleporter\n") +
+	string tdata = string("teleporter Linkage\n") +
 						  "  position 1 2 3\n" +
 						  "  size 4 5 6\n" +
 						  "  rotation 7\n" +

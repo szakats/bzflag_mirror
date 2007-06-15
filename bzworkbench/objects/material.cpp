@@ -9,7 +9,7 @@ material::material() :
 	color = string("");
 	textures = vector<string>();
 	noTextures = noTexColor = noTexAlpha = true;
-	noRadar = spheremap = noShadow = noCulling = noSorting = groupAlpha = occluder = resetmat = false;
+	noRadar = spheremap = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = resetmat = false;
 	alphaThreshold = 1.0f;
 	ambient = RGBA(0, 0, 0, 0);
 	diffuse = RGBA(0, 0, 0, 0);
@@ -27,7 +27,7 @@ material::material(string& data) :
 	color = string("");
 	textures = vector<string>();
 	noTextures = noTexColor = noTexAlpha = true;
-	noRadar = spheremap = noShadow = noCulling = noSorting = groupAlpha = occluder = resetmat = false;
+	noRadar = spheremap = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = resetmat = false;
 	alphaThreshold = 1.0f;
 	ambient = RGBA(0, 0, 0, 0);
 	diffuse = RGBA(0, 0, 0, 0);

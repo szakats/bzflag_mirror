@@ -40,17 +40,14 @@ int teleporter::update(string& data) {
 	}
 	
 	// get the linkage name
-	vector<string> linkageNames = BZWParser::getValuesByKey("teleporter", header, teleporterData);
-	if(linkageNames[0] == "teleporter")	{	// name not found, so "teleporter" is returned instead
-		printf("teleporter::update(): Warning! no linkage name defined!\n");
-	}
+	vector<string> lnames = BZWParser::getValuesByKey("teleporter", header, data.c_str());
 	
 	if(!bz2object::update(data))
 		return 0;
 	
 	// set the data
 	this->border = atof( borders[0].c_str() );
-	this->lname = linkageNames[0];
+	this->lname = (lnames.size() != 0 ? lnames[0] : "defaultLinkageName");
 	
 	return 1;
 }
