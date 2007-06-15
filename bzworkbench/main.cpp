@@ -42,6 +42,7 @@
 #include "include/objects/waterLevel.h"
 #include "include/objects/texturematrix.h"
 #include "include/objects/dynamicColor.h"
+#include "include/objects/mesh.h"
 
 #include <string>
 #include <vector>
@@ -57,6 +58,35 @@ int main(int argc, char** argv) {
 	
 	return Fl::run();
 	*/
+	
+	LOD lodobj = LOD();
+	
+	printf("|%s|\n", lodobj.toString().c_str());
+	
+	string lodData = string("lod\n") +
+					        "  lengthPerPixel 0\n" +
+					        "  matref -1 \n" +
+					        "    dlist\n" +
+					        "    sphere 0 0 0.5 2.25\n" +
+					        "    quads 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15\n" +
+					        "  end\n" +
+					      	"end\n";
+					    
+					    /*  lod  # 1
+					        lengthPerPixel 0.04
+					        matref -1
+					          dlist
+					          sphere 0 0 0.5 2.25
+					          quads 0 1 2 3 4 5 6 7
+					        end  # material -1
+					      end  # lod 1"*/
+					      
+	lodobj.update(lodData);
+	
+	printf("|%s|\n", lodobj.toString().c_str());
+	
+	printf("========================================\n");
+	
 	
 	dynamicColor dcobj = dynamicColor();
 	

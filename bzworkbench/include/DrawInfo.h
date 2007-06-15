@@ -11,6 +11,8 @@
 #include "render/Index3D.h"
 #include "render/TexCoord2D.h"
 #include "render/Vector3D.h"
+#include "LOD.h"
+#include "LODCommand.h"
 
 class DrawInfo : public DataEntry {
 
@@ -21,9 +23,9 @@ public:
 		DataEntry("drawinfo", "<dlist><decorative><angvel><extends><sphere><corner><vertex><normal><texcoord><lod>") {
 	
 		vertices = vector<Point3D>();
-		normals = vector<Point3D>();
+		normals = vector<Vector3D>();
 		texcoords = vector<TexCoord2D>();
-		corners = vector<Point3D>();
+		corners = vector<Index3D>();
 		
 		minExtends = Point3D(0.0f, 0.0f, 0.0f);
 		maxExtends = Point3D(0.0f, 0.0f, 0.0f);
@@ -41,9 +43,9 @@ public:
 		DataEntry("drawinfo", "<dlist><decorative><angvel><extends><sphere><corner><vertex><normal><texcoord><lod>", data.c_str()) {
 	
 		vertices = vector<Point3D>();
-		normals = vector<Point3D>();
+		normals = vector<Vector3D>();
 		texcoords = vector<TexCoord2D>();
-		corners = vector<Point3D>();
+		corners = vector<Index3D>();
 		
 		minExtends = Point3D(0.0f, 0.0f, 0.0f);
 		maxExtends = Point3D(0.0f, 0.0f, 0.0f);
@@ -63,7 +65,7 @@ public:
 		
 	// setter
 	int update(string& data) {
-		const char* header = this->getHeader();
+		const char* header = this->getHeader().c_str();
 		
 		// get the section
 		vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -95,9 +97,9 @@ public:
 		vector<string> decorativeVals = BZWParser::getValuesByKey("decorative", header, drawInfoData);
 		
 		// get angvel
-		vector<string> angvelVAls = BZWParser::getValuesByKey("angvel", header, drawInfoData);
-		if(anvelVals.size() > 1) {
-			printf("mesh::DrawInfo::update(): Error! Defined \"angvel\" %d times!\n", angvelVals.size())
+		vector<string> angvelVals = BZWParser::getValuesByKey("angvel", header, drawInfoData);
+		if(angvelVals.size() > 1) {
+			printf("mesh::DrawInfo::update(): Error! Defined \"angvel\" %d times!\n", angvelVals.size());
 			return 0;	
 		}
 		if(!hasNumElements(angvelVals[0], 1))
@@ -131,13 +133,13 @@ public:
 			
 		// need same amount of corners as vertexes
 		if(cornerVals.size() != vertexVals.size()) {
-			printf("mesh::DrawInfo::update(): Error! Unequal numbers of corners and vertexes\n")
+			printf("mesh::DrawInfo::update(): Error! Unequal numbers of corners and vertexes\n");
 			return 0;
 		}
 		
 		// need same amount of corners as normals
 		if(cornerVals.size() != normalVals.size()) {
-			printf("mesh::DrawInfo::update(): Error! Unequal numbers of corners and normals\n")
+			printf("mesh::DrawInfo::update(): Error! Unequal numbers of corners and normals\n");
 			return 0;
 		}
 			
@@ -182,7 +184,7 @@ public:
 					printf("mesh::update(): Error! \"normal\" in \"normal %s\" needs 3 values!\n", i->c_str());
 					return 0;
 				}
-				normalVals.push_back( Vector3D( i->c_str() ) );
+				vectorData.push_back( Vector3D( i->c_str() ) );
 			}
 		}
 		
@@ -202,11 +204,11 @@ public:
 		// get the "extends" if it exists
 		Point3D eLow = Point3D(0.0f, 0.0f, 0.0f), eHigh = Point3D(0.0f, 0.0f, 0.0f);
 		if(extendsVals.size() > 0) {
-			vector<string> extendsParams = BZWParser::getLineElements( extendVals[0].c_str() );
+			vector<string> extendsParams = BZWParser::getLineElements( extendsVals[0].c_str() );
 			string eLowString = extendsParams[0] + " " + extendsParams[1] + " " + extendsParams[2];
 			string eHighString = extendsParams[3] + " " + extendsParams[4] + " " + extendsParams[5];
-			eLow = Point3D(eLowString);
-			eHigh = Point3D(eHighString);
+			eLow = Point3D(eLowString.c_str());
+			eHigh = Point3D(eHighString.c_str());
 		}
 		
 		// get the "sphere" if it exists
@@ -216,19 +218,19 @@ public:
 			vector<string> sphereParams = BZWParser::getLineElements( sphereVals[0].c_str() );
 			string pString = sphereParams[0] + " " + sphereParams[1] + " " + sphereParams[2];
 			sphereRad = atof( sphereParams[3].c_str() );
-			spherePoint = Point3D(pString);
+			spherePoint = Point3D(pString.c_str());
 		}
 		
 		// finally, set the data
 		this->vertices = vertexData;
 		this->texcoords = texCoordData;
 		this->corners = cornerData;
-		this->normals = normalData;
+		this->normals = vectorData;
 		this->minExtends = eLow;
 		this->maxExtends = eHigh;
 		this->sphereRadius = sphereRad;
 		this->spherePosition = spherePoint;
-		this->angVel = atof( angValVels[0].c_str() );
+		this->angvel = atof( angvelVals[0].c_str() );
 		this->dlist = (dlistVals.size() > 0 ? true : false);
 		this->decorative = (decorativeVals.size() > 0 ? true : false);
 		
@@ -238,7 +240,7 @@ public:
 	// toString
 	string toString(void) {
 		// string-ify the vertices, normals, and texcoords
-		string vertexString(""), normalString(""), texcoordString(""), cornerString("");
+		string vertexString(""), normalString(""), texcoordString(""), cornerString(""), lodString("");
 		
 		if(vertices.size() > 0) {
 			for(vector<Point3D>::iterator i = vertices.begin(); i != vertices.end(); i++) {
@@ -248,7 +250,7 @@ public:
 		
 		if(normals.size() > 0) {
 			for(vector<Vector3D>::iterator i = normals.begin(); i != normals.end(); i++) {
-				nomralString += "    normal " + i->toString() + "\n";
+				normalString += "    normal " + i->toString() + "\n";
 			}		
 		}
 		
@@ -271,9 +273,8 @@ public:
 					  normalString + "\n" +
 					  cornerString + "\n" +
 					  texcoordString + "\n" +
-					  
-					  
-					  
+					  lodString + "\n" +
+					  "end\n";
 	}
 	
 	// render
@@ -306,7 +307,7 @@ private:
 		string ret = string("");
 		
 		if(values.size() > 0) {
-			for(vector<int>::iterator i = values.begin(); i != values.end(); i++) {
+			for(vector<float>::iterator i = values.begin(); i != values.end(); i++) {
 				ret += string(ftoa(*i)) + " ";	
 			}	
 		}
