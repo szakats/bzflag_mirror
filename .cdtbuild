@@ -16,6 +16,9 @@
 <option id="gnu.cpp.link.option.libs.1034235326" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="fltk"/>
 </option>
+<option id="gnu.cpp.link.option.paths.748979718" superClass="gnu.cpp.link.option.paths" valueType="stringList">
+<listOptionValue builtIn="false" value="/usr/lib"/>
+</option>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1908781899" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
 <macros/>

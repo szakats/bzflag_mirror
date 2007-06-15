@@ -7,6 +7,9 @@
 #include "../render/TexCoord2D.h"
 #include "../render/Vector3D.h"
 #include "../MeshFace.h"
+#include "../LOD.h"
+#include "../LODCommand.h"
+#include "../DrawInfo.h"
 
 class mesh : public bz2object {
 	

@@ -9,16 +9,19 @@ class Vector3D : public Point3D
 	public:
 	
 	// constructors
-	Vector3D() {
-		Point3D(); //(0.0f, 0.0f, 0.0f);
+	Vector3D() : Point3D() {
 	}
 	
-	Vector3D(float x, float y, float z) {
-		Point3D(x, y, z);
+	Vector3D(float x, float y, float z) : Point3D(x, y, z) {
+		
 	}
 	
-	Vector3D(double x, double y, double z) {
-		Point3D((float)x, (float)y, (float)z);
+	Vector3D(double x, double y, double z) : Point3D((float)x, (float)y, (float)z) {
+		
+	}
+	
+	Vector3D(const char* data) : Point3D(data) {
+		
 	}
 	
 	virtual ~Vector3D() { }

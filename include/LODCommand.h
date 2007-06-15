@@ -10,14 +10,14 @@ public:
 	// constructor
 	LODCommand() : DataEntry("", "<dlist><sphere><points><lines><lineloop><linestrip><tris><tristrip><trifan><quads><quadstrip><polygon>") {
 		name = string("");
-		commands = vector<int>();
+		args = vector<int>();
 		rad = 0;
 	}
 	
 	// constructor with data
 	LODCommand(string& data) : DataEntry("", "<dlist><sphere><points><lines><lineloop><linestrip><tris><tristrip><trifan><quads><quadstrip><polygon>", data.c_str()) {
 		name = string("");
-		commands = vector<int>();
+		args = vector<int>();
 		rad = 0;
 		
 		this->update(data);	
@@ -54,10 +54,10 @@ public:
 		this->name = newName;
 		
 		// exception: sphere's last arg has to be a float
-		if(newName == sphere) {
-			args.push_back( atoi( values[0].c_str() ) );
-			args.push_back( atoi( values[1].c_str() ) );
-			args.push_back( atoi( values[2].c_str() ) );
+		if(newName == "sphere") {
+			x = atof( values[0].c_str() );
+			y = atof( values[1].c_str() );
+			z = atof( values[2].c_str() );
 			rad = atof( values[3].c_str() );
 		}
 		else if(values.size() > 0) {
@@ -82,7 +82,7 @@ public:
 			
 		// get the name and values
 		string commandName = BZWParser::key( command.c_str() );
-		vector<string> values = BZWParser::getLineElements( BZWParser::value( commandName.c_str(), command.c_str() ) );
+		vector<string> values = BZWParser::getLineElements( BZWParser::value( commandName.c_str(), command.c_str() ).c_str() );
 		
 		// make sure its a valid command
 		// (can't call isKey here--isKey isn't and can't be static)
@@ -155,7 +155,7 @@ public:
 	// toString
 	string toString(void) {
 		if(name == "sphere")
-			return name + " " + stringify(args) + " " + string(ftoa(rad));
+			return name + " " + string(ftoa(x)) + " " + string(ftoa(y)) + " " + string(ftoa(z)) + " " + string(ftoa(rad));
 		else
 			return name + " " + stringify(args);
 	}
@@ -182,7 +182,7 @@ private:
 
 	string name;
 	vector<int> args;
-	float rad;		// only used in sphere
+	float x, y, z, rad;		// only used in sphere
 };
 
 #endif /*LODCOMMAND_H_*/

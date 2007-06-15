@@ -11,7 +11,8 @@ class Index3D {
 	    t1, t2, t3;	// texture coordinate indices
 	
 	Index3D() {
-		a = b = c = t1 = t2 = t3 = 0;	
+		a = b = c = 0;
+		t1 = t2 = t3 = -1;	
 	}
 	
 	Index3D(int a, int b, int c) {
@@ -50,8 +51,17 @@ class Index3D {
 			this->t3 = atoi( points[5].c_str() );
 		}
 		else {
-			a = b = c = t1 = t2 = t3 = 0;	
+			a = b = c = 0;
+			t1 = t2 = t3 = -1;	
 		}
+	}
+	
+	string toString() {
+		string tIndices("");
+		if(t1 >= 0 && t2 >= 0 && t3 >= 0)
+			tIndices += string(itoa(t1)) + " " + string(itoa(t2)) + " " + string(itoa(t3));
+			
+		return string("") + string(itoa(a)) + " " + string(itoa(b)) + " " + string(itoa(c)) + " " + tIndices + "\n";
 	}
 	
 	virtual ~Index3D() {}
