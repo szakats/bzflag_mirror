@@ -21,6 +21,9 @@ public:
 	// constructor with data
 	mesh(string& data);
 	
+	static DataEntry* init() { return new mesh(); }
+	static DataEntry* init(string& data) { return new mesh(data); }
+	
 	// getter
 	string get(void);
 	

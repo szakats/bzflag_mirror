@@ -12,6 +12,9 @@ public:
 	// data constructor
 	tetra(string& data);
 	
+	static DataEntry* init() { return new tetra(); }
+	static DataEntry* init(string& data) { return new tetra(data); }
+	
 	// getter
 	string get(void);
 	

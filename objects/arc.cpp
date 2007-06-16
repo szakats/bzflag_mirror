@@ -31,6 +31,7 @@ arc::arc(string& data) :
 	this->update(data);	
 }
 
+
 // getter
 string arc::get(void) { return this->toString(); }
 

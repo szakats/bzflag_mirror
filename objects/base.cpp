@@ -18,6 +18,7 @@ base::base(string& data) :
 	this->update(data);
 }
 
+
 // getter
 string base::get(void) { return this->toString(); }
 

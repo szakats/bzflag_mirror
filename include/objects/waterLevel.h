@@ -15,6 +15,9 @@ public:
 	// constructor with data
 	waterLevel(string& data);
 	
+	static DataEntry* init() { return new waterLevel(); }
+	static DataEntry* init(string& data) { return new waterLevel(data); }
+	
 	// get method
 	string get(void);
 	

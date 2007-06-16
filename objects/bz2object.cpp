@@ -17,7 +17,7 @@ bz2object::bz2object(const char* name, const char* keys, const char* data) : Dat
 	string d = string(data);
 	this->update(d);
 }
-		
+	
 // getter
 string bz2object::get(void) { return this->toString(); }
 

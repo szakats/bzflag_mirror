@@ -15,6 +15,9 @@ public:
 	// constructor with data
 	texturematrix(string& data);
 	
+	static DataEntry* init() { return new texturematrix(); }
+	static DataEntry* init(string& data) { return new texturematrix(data); }
+	
 	// getter
 	string get(void);
 	

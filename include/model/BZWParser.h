@@ -21,7 +21,7 @@ using namespace std;
 // <objKey:<subobject1><subobject2>...<subobjectN>> for N subobjects
 // Note: this is meant only to map objects to direct subobjects (i.e. mesh only maps to face and drawinfo, but drawinfo
 // in a separate declaration maps to lod, and lod in a separate declaration maps to matref).
-#define BZW_SUBOBJECTS "<define:<box><pyramid><base><mesh><meshbox><meshpyr><arc><sphere><tetrahedron><teleporter>>\
+#define BZW_SUBOBJECTS "<define:<box><pyramid><base><mesh><meshbox><meshpyr><arc><sphere><tetra><teleporter>>\
 					   <mesh:<face><drawinfo>>\
 					   <drawinfo:<lod>>\
 					   <lod:<matref>>"
@@ -45,6 +45,9 @@ public:
 	// get the terminator token of a key
 	static string terminatorOf(const char* key);
 	
+	// get the header of a chunk of BZW text
+	static string headerOf(const char* text);
+	
 	// get the individual lines out of a section
 	static vector<string> getLines(const char* header, const char* section);
 	
@@ -67,6 +70,7 @@ public:
 	
 	// get all values from a line
 	static vector<string> getLineElements(const char* line);
+	static vector<string> getLineElements(const char* line, int count);
 	
 	// the big tamale: the top-level file loader
 	static vector<string> loadFile(const char* filename);

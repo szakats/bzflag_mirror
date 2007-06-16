@@ -17,6 +17,9 @@ public:
 	// construct a box from data
 	meshbox(string& data);
 	
+	static DataEntry* init() { return new meshbox(); }
+	static DataEntry* init(string& data) { return new meshbox(data); }
+	
 	// getter
 	string get(void);
 	

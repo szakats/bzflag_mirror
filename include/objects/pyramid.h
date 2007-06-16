@@ -20,6 +20,8 @@ public:
 	// constructor with data
 	pyramid(string& data);
 		
+	static DataEntry* init() { return new pyramid(); }
+	static DataEntry* init(string& data) { return new pyramid(data); }
 	// getter
 	string get();
 	

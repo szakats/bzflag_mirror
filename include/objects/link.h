@@ -19,6 +19,9 @@ public:
 	// constructor with data
 	Tlink(string& data);
 	
+	static DataEntry* init() { return new Tlink(); }
+	static DataEntry* init(string& data) { return new Tlink(data); }
+	
 	// getter
 	string get(void);
 	

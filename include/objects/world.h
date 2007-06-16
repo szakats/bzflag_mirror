@@ -15,6 +15,9 @@ class world : public DataEntry {
 		// constructor with data
 		world(string& data);
 		
+		static DataEntry* init() { return new world(); }
+		static DataEntry* init(string& data) { return new world(data); }
+		
 		// send the data
 		string get(void);
 		

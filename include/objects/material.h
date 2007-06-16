@@ -19,6 +19,9 @@ public:
 	// constructor with data
 	material(string& data);
 	
+	static DataEntry* init() { return new material(); }
+	static DataEntry* init(string& data) { return new material(data); }
+	
 	// getter
 	string get(void);
 	
