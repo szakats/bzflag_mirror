@@ -1,12 +1,12 @@
 #include "../include/objects/waterLevel.h"
 
-waterLevel::waterLevel() : DataEntry("waterLevel", "<name><height><material>") {
+waterLevel::waterLevel() : DataEntry("waterLevel", "<name><height><matref>") {
 	this->name = string("");
 	this->materials = vector<string>();
 	height = -1.0f;
 }
 
-waterLevel::waterLevel(string& data) : DataEntry("waterLevel", "<name><height><material>", data.c_str()) {
+waterLevel::waterLevel(string& data) : DataEntry("waterLevel", "<name><height><matref>", data.c_str()) {
 	this->name = string("");
 	this->materials = vector<string>();
 	height = -1.0f;

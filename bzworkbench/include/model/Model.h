@@ -36,13 +36,13 @@ private:
 	waterLevel* waterLevelData;
 	
 // physics
-	physics* phys;
+	vector<physics> phys;
 	
 // materials
-	material* materials;
+	vector<material> materials;
 	
 // objects
-	bz2object* objects;
+	vector<bz2object> objects;
 	
 // maps keys to values
 	void buildDatabase(void);

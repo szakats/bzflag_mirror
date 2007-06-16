@@ -8,9 +8,15 @@ string cutWhiteSpace(string line) {
 	unsigned long len = line.length();
 	unsigned int startIndex = 0, endIndex = len - 1;
 	
+	// cut any comments
+	string::size_type commentIndex = line.find("#", 0);
+	if(commentIndex != string::npos) {
+		line = line.substr(0, commentIndex);	
+	}
+	
 	// move the indexes into the string by skipping outside spacess
-	while(startIndex < len && text[startIndex] == ' ') { startIndex++; }
-	while(endIndex > startIndex && text[endIndex] == ' ') { endIndex--; }
+	while(startIndex < len && (text[startIndex] == ' ' || text[startIndex] == 9 || text[startIndex] == '\r')) { startIndex++; }
+	while(endIndex > startIndex && (text[endIndex] == ' ' || text[endIndex] == 9 || text[endIndex] == '\n' || text[endIndex] == '\r')) { endIndex--; }
 	
 	// return the line if there was no white space to cut
 	if(startIndex == len)
@@ -90,6 +96,25 @@ string BZWParser::key(const char* _text) {
 }
 
 /**
+ * This method returns the terminator token of a key.  Usually, it's "end"
+ */
+ 
+string BZWParser::terminatorOf(const char* _text) {
+	string key = string(_text);
+	string terms = string(BZW_TERMINATORS);
+	
+	// see of there's an unusual terminator
+	string::size_type start = terms.find("<" + key + "|", 0);
+	if(start != string::npos) {
+		start += 2 + key.length();
+		string::size_type end = terms.find(">", start);
+		return terms.substr(start, end - (start));
+	}
+	
+	return string("end");
+}
+
+/**
  * This method will extract the key-value lines from a section, given the object name of the section and its text
  */
 vector<string> BZWParser::getLines(const char* _start, const char* _text) {
@@ -98,6 +123,7 @@ vector<string> BZWParser::getLines(const char* _start, const char* _text) {
 	
 	string header = cutWhiteSpace(start);
 	string section = cutWhiteSpace(text);
+	string terminator = BZWParser::terminatorOf(header.c_str());
 	
 	vector<string> lines = vector<string>();
 	
@@ -126,7 +152,7 @@ vector<string> BZWParser::getLines(const char* _start, const char* _text) {
 		string currLine = cutLine(section);
 		
 		// break if we get to "end"
-		if(currLine.compare("end") == 0)
+		if(currLine.compare(terminator) == 0)
 			break;
 		
 		// add the line (remove whitespace)
@@ -174,6 +200,7 @@ vector<string> BZWParser::getLinesByKey(const char* _key, const char* _header, c
 string BZWParser::getSection(const char* _header, const char* _text) {
 	string header = cutWhiteSpace(string(_header));
 	string text = cutWhiteSpace(string(_text));
+	string terminator = BZWParser::terminatorOf(header.c_str());
 	
 	// find header occurence
 	string::size_type index = text.find(header, 0);
@@ -183,7 +210,7 @@ string BZWParser::getSection(const char* _header, const char* _text) {
 		return string("");
 	
 	// find the end of the section
-	string::size_type end = text.find("end\n", index);
+	string::size_type end = text.find(terminator + "\n", index);
 	
 	// if we didn't find anything then return the rest of the section
 	if(end == string::npos)
@@ -285,7 +312,7 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
 }
 
 const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text) {
-	return BZWParser::getSectionsByHeader(_header, _text, "end");	
+	return BZWParser::getSectionsByHeader(_header, _text, BZWParser::terminatorOf(_header).c_str());	
 }
 
 /**
@@ -464,6 +491,134 @@ vector<string> BZWParser::getLineElements(const char* data) {
 		
 		line = line.substr(spaceIndex + 1);
 	}
+	
+	return ret;
+}
+
+/**
+ * The big tamale: the top-level file loader.
+ * Loads a .bzw file and returns a vector of strings, where each string contains an object's chunk of BZW text
+ */
+
+vector<string> BZWParser::loadFile(const char* filename) {
+	ifstream fileInput(filename);
+	
+	vector<string> ret = vector<string>();
+	
+	// if its not open, its not there
+	if(!fileInput.is_open()) {
+		printf("BZWParser::loadFile(): Error! Could not open input stream\n");
+		return ret;
+	}
+	
+	// start reading the stuff in
+	string buff, key, objstr, line, supportedKeys = string(BZW_SUPPORTED_KEYS), hierarchy = string(BZW_SUBOBJECTS);
+	vector<string> lineElements = vector<string>();
+	
+	while(!fileInput.eof()) {
+		// read in lines until we find a key
+		getline( fileInput, buff );
+		
+		buff = cutWhiteSpace(buff);
+		
+		// get the line elements
+		lineElements = BZWParser::getLineElements(buff.c_str());
+		
+		// if there are no line elements, continue
+		if(lineElements.size() == 0)
+			continue;
+		
+		// get the key	
+		key = BZWParser::key( lineElements[0].c_str() );
+		
+		// is it a valid key?
+		if( supportedKeys.find( "<" + key + ">", 0 ) != string::npos) {
+			// if so, read in the object
+			objstr = buff + "\n";
+			
+			// depth count--determines how deep the parser is in an object hierarchy
+			// initialized to 1 now that we are in an object
+			int depthCount = 1;
+			
+			// get any sub-object keys
+			vector<string> subobjects = vector<string>();
+			string::size_type index = hierarchy.find("<" + key + ":", 0);
+			
+			// load them in if we found any
+			if( index != string::npos ) {
+				subobjects.clear();
+				
+				// get the subobject string
+				string::size_type subObjectStart = index + key.length() + 2;
+				string::size_type subObjectEnd = hierarchy.find(">>", subObjectStart);
+				string subobjectString = hierarchy.substr(subObjectStart, subObjectEnd);
+				
+				// read in the sub-object keys
+				while(true) {
+					string::size_type start = subobjectString.find("<", 0);
+					string::size_type end = subobjectString.find(">", 0);
+					
+					// read in the key (and terminate it with a space)
+					string subKey = subobjectString.substr(start+1, end - (start+1)) + " ";
+					subobjects.push_back(subKey);
+					
+					// see if there are any more keys left
+					if(subobjectString.find("<", end) == string::npos)
+						break;
+					
+					// advance the line
+					subobjectString = subobjectString.substr(end + 1);
+				}
+			}
+			
+			// get number of subobjects
+			int numSubobjects = subobjects.size();
+			
+			// terminator stack
+			vector<string> terminatorStack = vector<string>();
+			
+			// add the terminator token of the base object
+			terminatorStack.push_back( BZWParser::terminatorOf(key.c_str()) );
+			
+			// loop through the text until we have depth 0 (i.e. we exit the object) or we run out of file
+			while(!fileInput.eof() && depthCount > 0) {
+				// get a line
+				getline( fileInput, buff );
+				
+				// trim the whitespace
+				line = cutWhiteSpace(buff);
+				
+				// don't continue of there was nothing to begin with
+				if(line.length() == 0)
+					continue;
+				
+				// add a space to line (so we can tell the difference between, say, "foo" and "foob"
+				line += " ";
+				
+				// see if it's a subobject (if so, increase depthcount)
+				for(int i = 0; i < numSubobjects; i++) {
+					if( line.find( subobjects[i], 0 ) == 0 ) {
+						depthCount++;
+						terminatorStack.push_back( BZWParser::terminatorOf(subobjects[i].c_str()) );
+						break;	
+					}
+				}
+				
+				// see if we're at an "end" (if so, decrease depthcount)
+				if(line.find(terminatorStack[ terminatorStack.size() - 1 ] + " ", 0) != string::npos) {
+					depthCount--;
+					terminatorStack.pop_back();
+				}
+				
+				objstr += line + "\n";
+			}
+			
+			// add the object to ret
+			ret.push_back(objstr);
+		}
+	}
+	
+	fileInput.close();
 	
 	return ret;
 }

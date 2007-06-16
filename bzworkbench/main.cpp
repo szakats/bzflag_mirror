@@ -59,9 +59,15 @@ int main(int argc, char** argv) {
 	return Fl::run();
 	*/
 	
-	mesh meshobj = mesh();
 	
-	printf("|%s|\n", meshobj.toString().c_str());
+	vector<string> objects = BZWParser::loadFile("share/H2O-R1.bzw");
+	for(vector<string>::iterator i = objects.begin(); i != objects.end(); i++) {
+		printf("==============================================\n");
+		printf("%s", i->c_str());	
+	}
+	
+	/*
+	mesh meshobj = mesh();
 	
 	string meshData = string("mesh\n") +
 							 "  inside 0 1 2\n" +
@@ -615,6 +621,8 @@ int main(int argc, char** argv) {
 	waterLevelObj.update(waterLevelStr);
 	
 	printf("%s\n", waterLevelObj.toString().c_str());
+	*/
+	
 	return 0;
 	
 	

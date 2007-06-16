@@ -3,10 +3,31 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
+// generic "not found" return value
 #define BZW_NOT_FOUND "NOT FOUND"
+
+// a list of all the top-level objects
+#define BZW_SUPPORTED_KEYS "<world><waterLevel><options><dynamicColor><texturematrix><material><physics><define>\
+						    <group><box><pyramid><teleporter><base><link><mesh><meshbox><meshpyr><arc><cone><sphere>\
+						    <tetra><weapon><zone>"
+
+// hierarchy of direct sub-objects (if extant)
+// format is:
+// <objKey:<subobject1><subobject2>...<subobjectN>> for N subobjects
+// Note: this is meant only to map objects to direct subobjects (i.e. mesh only maps to face and drawinfo, but drawinfo
+// in a separate declaration maps to lod, and lod in a separate declaration maps to matref).
+#define BZW_SUBOBJECTS "<define:<box><pyramid><base><mesh><meshbox><meshpyr><arc><sphere><tetrahedron><teleporter>>\
+					   <mesh:<face><drawinfo>>\
+					   <drawinfo:<lod>>\
+					   <lod:<matref>>"
+					   
+// unusual terminators (i.e. objects that don't end with "end")
+#define BZW_TERMINATORS "<define|enddef><face|endface>"
 
 class BZWParser {
 public:
@@ -20,6 +41,9 @@ public:
 	
 	// simpler method:  get the key from a line
 	static string key(const char* text);
+	
+	// get the terminator token of a key
+	static string terminatorOf(const char* key);
 	
 	// get the individual lines out of a section
 	static vector<string> getLines(const char* header, const char* section);
@@ -44,8 +68,11 @@ public:
 	// get all values from a line
 	static vector<string> getLineElements(const char* line);
 	
-private:
+	// the big tamale: the top-level file loader
+	static vector<string> loadFile(const char* filename);
 	
+private:
+
 };
 
 #endif /*BZWPARSER_H_*/
