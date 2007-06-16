@@ -1,0 +1,39 @@
+world
+	name poop
+	flagHeight 1
+	size 400
+end
+
+waterLevel
+	name sniff
+	matref lava
+	height 1.0
+end
+
+# this will be ignored
+
+box
+	position 20 30 40
+	size 10 10 10	# this too
+	rotation 40
+end
+
+define theTestGroup
+	box
+		position 20 30 40
+		size 10 10 10
+		rotation 40
+	end
+
+	pyramid
+		position 0 0 0
+		size 10 10 10
+		rotation 45
+	end
+enddef
+
+pyramid
+	position 30 40 60
+	size 40 40 40
+	rotation 40
+end
