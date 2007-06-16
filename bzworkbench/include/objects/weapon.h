@@ -15,6 +15,9 @@ public:
 	// constructor with data
 	weapon(string& data);
 	
+	static DataEntry* init() { return new weapon(); }
+	static DataEntry* init(string& data) { return new weapon(data); }
+	
 	// getter
 	string get(void);
 	

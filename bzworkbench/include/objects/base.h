@@ -19,6 +19,9 @@ public:
 	// constructor with data
 	base(string& data);
 	
+	static DataEntry* init() { return new base(); }
+	static DataEntry* init(string& data) { return new base(data); }
+	
 	// getter
 	string get(void);
 	

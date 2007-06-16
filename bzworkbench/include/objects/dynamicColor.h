@@ -14,6 +14,9 @@ public:
 	// constructor with data
 	dynamicColor(string& data);
 	
+	static DataEntry* init() { return new dynamicColor(); }
+	static DataEntry* init(string& data) { return new dynamicColor(data); }
+	
 	// getter
 	string get(void);
 	

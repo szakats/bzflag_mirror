@@ -16,6 +16,9 @@ public:
 	
 	arc(string& data);
 	
+	static DataEntry* init() { return new arc(); }
+	static DataEntry* init(string& data) { return new arc(data); }
+	
 	// getter
 	string get(void);
 	

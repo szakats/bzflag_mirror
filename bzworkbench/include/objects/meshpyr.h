@@ -9,6 +9,9 @@ public:
 	meshpyr();
 	meshpyr(string& data);
 	
+	static DataEntry* init() { return new meshpyr(); }
+	static DataEntry* init(string& data) { return new meshpyr(data); }
+	
 	// getter
 	string get(void);
 	

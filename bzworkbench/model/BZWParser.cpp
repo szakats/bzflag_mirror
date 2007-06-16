@@ -115,6 +115,17 @@ string BZWParser::terminatorOf(const char* _text) {
 }
 
 /**
+ * This method returns the header of a chunk of text
+ */
+ 
+string BZWParser::headerOf(const char* _text) {
+	vector<string> elements = BZWParser::getLineElements(_text, 1);
+	if(elements.size() > 0) 
+		return elements[0];
+	else
+		return string(BZW_NOT_FOUND);
+}
+/**
  * This method will extract the key-value lines from a section, given the object name of the section and its text
  */
 vector<string> BZWParser::getLines(const char* _start, const char* _text) {
@@ -471,13 +482,14 @@ vector<string> BZWParser::getLinesByKeys(vector<string> keys, const char* _heade
 
 /**
  * This method gets all the elements in a line separated by one or more spaces
+ * Pass -1 to count to get all elements
  */
-vector<string> BZWParser::getLineElements(const char* data) {
+vector<string> BZWParser::getLineElements(const char* data, int count) {
 	vector<string> ret = vector<string>();
 	string line = cutWhiteSpace(string(data)) + " ";
 	
 	// separate all elements by finding the " "s
-	while(true) {
+	while(count != 0) {
 		if(line.length() < 1)
 			break;
 			
@@ -490,10 +502,13 @@ vector<string> BZWParser::getLineElements(const char* data) {
 		ret.push_back(element);
 		
 		line = line.substr(spaceIndex + 1);
+		
+		count--;
 	}
 	
 	return ret;
 }
+vector<string> BZWParser::getLineElements(const char* text) { return BZWParser::getLineElements(text, -1); }
 
 /**
  * The big tamale: the top-level file loader.

@@ -17,6 +17,9 @@ public:
 	// constructor with data
 	teleporter(string& data);
 	
+	static DataEntry* init() { return new teleporter(); }
+	static DataEntry* init(string& data) { return new teleporter(data); }
+	
 	// getter
 	string get(void);
 	

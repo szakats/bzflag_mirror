@@ -20,6 +20,9 @@ class group : public bz2object {
 		// constructor with data
 		group(string& data);
 		
+		static DataEntry* init() { return new group(); }
+		static DataEntry* init(string& data) { return new group(data); }
+		
 		// getter
 		string get(void);
 		

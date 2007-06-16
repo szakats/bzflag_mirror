@@ -16,6 +16,9 @@ public:
 	// constructor with data
 	physics(string& data);
 	
+	static DataEntry* init() { return new physics(); }
+	static DataEntry* init(string& data) { return new physics(data); }
+	
 	// getter
 	string get(void);
 	

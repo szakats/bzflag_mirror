@@ -58,6 +58,9 @@ public:
 	// constructor with data
 	zone(string& data);
 	
+	static DataEntry* init() { return new zone(); }
+	static DataEntry* init(string& data) { return new zone(data); }
+	
 	// getter
 	string get(void);
 	

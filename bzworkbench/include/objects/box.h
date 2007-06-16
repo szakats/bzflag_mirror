@@ -20,6 +20,9 @@ public:
 	// constructor with data
 	box(string& data);
 	
+	static DataEntry* init() { return new box(); }
+	static DataEntry* init(string& data) { return new box(data); }
+	
 	// nothing to destroy...
 	~box();
 	

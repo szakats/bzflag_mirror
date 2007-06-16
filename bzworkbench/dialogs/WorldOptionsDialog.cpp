@@ -15,9 +15,9 @@ WorldOptionsDialog::WorldOptionsDialog() :
 	Fl_Dialog("World Options", WIDTH, HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
 	
 	// initialize the variables
-	this->worldData 		= (world*)Model::query("world");
-	this->optionsData 		= (options*)Model::query("options");
-	this->waterLevelData 	= (waterLevel*)Model::query("waterLevel");
+	this->worldData 		= Model::getWorldData();
+	this->optionsData 		= Model::getOptionsData();
+	this->waterLevelData 	= Model::getWaterLevelData();
 	
 	// get the values
 	string worldString = worldData->get();

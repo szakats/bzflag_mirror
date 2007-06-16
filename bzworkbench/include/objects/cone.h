@@ -11,6 +11,9 @@ public:
 	// constructor with data
 	cone(string& data);
 	
+	static DataEntry* init() { return new cone(); }
+	static DataEntry* init(string& data) { return new cone(data); }
+	
 	// getter
 	string get(void);
 	

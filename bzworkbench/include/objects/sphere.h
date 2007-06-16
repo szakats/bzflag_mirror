@@ -11,6 +11,9 @@ public:
 	// constructor with data
 	sphere(string& data);
 	
+	static DataEntry* init() { return new sphere(); }
+	static DataEntry* init(string& data) { return new sphere(data); }
+	
 	// getter
 	string get(void);
 	
