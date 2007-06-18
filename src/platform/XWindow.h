@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* XWindow:
@@ -40,7 +40,7 @@ class XWindow : public BzfWindow {
     void		setPosition(int x, int y);
     void		setSize(int width, int height);
     void		setMinSize(int width, int height);
-    void		setFullscreen();
+    void		setFullscreen(bool on);
 
     void		warpMouse(int x, int y);
     void		getMouse(int& x, int& y) const;
@@ -81,7 +81,7 @@ class XWindow : public BzfWindow {
     XWindow*		next;
     XVisualInfo		visual;
     unsigned long*	colormapPixels;
-    XSizeHints*         xsh;
+    XSizeHints*	 xsh;
     float		gammaVal;
     static XWindow*	first;
 };
@@ -95,4 +95,3 @@ class XWindow : public BzfWindow {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

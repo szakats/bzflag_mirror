@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,15 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// BZFlag common header
+#include "common.h"
 
 // interface header
 #include "ShotUpdate.h"
 
 // implementation headers
-#include "common.h"
 #include "Pack.h"
 
 //
@@ -61,6 +62,7 @@ void*			FiringInfo::pack(void* buf) const
   buf = shot.pack(buf);
   buf = flagType->pack(buf);
   buf = nboPackFloat(buf, lifetime);
+  buf = nboPackUByte(buf, shotType);
   return buf;
 }
 
@@ -70,7 +72,22 @@ void*			FiringInfo::unpack(void* buf)
   buf = shot.unpack(buf);
   buf = FlagType::unpack(buf, flagType);
   buf = nboUnpackFloat(buf, lifetime);
- return buf;
+  unsigned char t = 0 ;
+  buf = nboUnpackUByte(buf, t);
+  shotType = (ShotType)t;
+  return buf;
+}
+
+void*			FiringInfo::unpackW(void* buf)
+{
+  buf = nboUnpackFloat(buf, timeSent);
+  buf = shot.unpack(buf);
+  buf = FlagType::unpack(buf, flagType);
+  buf = nboUnpackFloat(buf, lifetime);
+  unsigned char t = 0;
+  buf = nboUnpackUByte(buf, t);
+  shotType = (ShotType)t;
+  return buf;
 }
 
 // Local Variables: ***

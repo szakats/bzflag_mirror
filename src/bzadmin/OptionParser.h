@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,18 +7,22 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef OPTIONPARSER_H
 #define OPTIONPARSER_H
 
+#include "common.h"
+
+/* system interface headers */
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
 
+/* common interface headers */
 #include "TextUtils.h"
 
 /** This is an abstract base class for all different option parsers.
@@ -122,7 +126,7 @@ public:
 		 const std::string& helpText)
     : Parser(usageText, helpText), var(variable) { }
   virtual int parse(char** argv) {
-    std::vector<std::string> tmpVector = string_util::tokenize(argv[0], ",");
+    std::vector<std::string> tmpVector = TextUtils::tokenize(argv[0], ",");
     T t;
     for (unsigned i = 0; i < tmpVector.size(); ++i) {
       std::istringstream iss(tmpVector[i]);

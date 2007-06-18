@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* XXX: FIXME: XIJoystick class as it stands is what happens when all the
@@ -44,7 +44,6 @@ static int	ioErrorHandler(Display*)
   abort();
   return 0;
 }
-
 
 
 XIJoystick::XIJoystick() : device(NULL),
@@ -130,7 +129,7 @@ bool	      XIJoystick::joystick() const
   return (device != NULL);
 }
 
-void	      XIJoystick::getJoy(int& x, int& y) const
+void	      XIJoystick::getJoy(int& x, int& y)
 {
   x = y = 0;
 
@@ -163,7 +162,7 @@ void	      XIJoystick::getJoy(int& x, int& y) const
   y = (y * abs(y)) / 1000;
 }
 
-unsigned long XIJoystick::getJoyButtons() const
+unsigned long XIJoystick::getJoyButtons()
 {
   /* XXX: FIXME: return joystick buttons.
    * These are reported to XDisplay as events, we'll

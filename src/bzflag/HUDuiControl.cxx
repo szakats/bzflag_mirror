@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,30 +7,18 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-// interface header
+// interface headers
 #include "HUDuiControl.h"
 
-// system headers
-#include <iostream>
-#include <math.h>
-#include <assert.h>
-#include <string>
-
 // common implementation headers
-#include "common.h"
-#include "bzfgl.h"
-#include "OpenGLGState.h"
-#include "TimeKeeper.h"
-#include "BundleMgr.h"
-#include "Bundle.h"
 #include "TextureManager.h"
-#include "FontManager.h"
 
 // local implementation headers
 #include "HUDui.h"
+#include "HUDNavigationQueue.h"
 
 
 //
@@ -38,23 +26,13 @@
 //
 
 // init static members
-const GLfloat		HUDuiControl::dimTextColor[3] = { 0.7f, 0.7f, 0.7f };
-const GLfloat		HUDuiControl::moreDimTextColor[3] = { 0.4f, 0.4f, 0.4f };
-const GLfloat		HUDuiControl::textColor[3] = { 1.0f, 1.0f, 1.0f };
 OpenGLGState*		HUDuiControl::gstate = NULL;
-int   		HUDuiControl::arrow = -1;
+int			HUDuiControl::arrow = -1;
 int			HUDuiControl::arrowFrame = 0;
 TimeKeeper		HUDuiControl::lastTime;
 int			HUDuiControl::totalCount = 0;
 
 HUDuiControl::HUDuiControl() : showingFocus(true),
-				fontFace(-1), fontSize(11),
-				x(0.0f), y(0.0f),
-				width(1.0f), height(1.0f),
-				fontHeight(11.0f),
-				desiredLabelWidth(0.0f),
-				trueLabelWidth(0.0f),
-				prev(this), next(this),
 				cb(NULL), userData(NULL)
 {
   if (totalCount == 0) {
@@ -68,7 +46,7 @@ HUDuiControl::HUDuiControl() : showingFocus(true),
     builder.setTexture(arrow);
     builder.setBlending();
 //    builder.setSmoothing();
-    builder.enableTextureReplace();
+    //builder.setTextureEnvMode(GL_REPLACE);
     *gstate = builder.getState();
 
     // get start time for animation
@@ -87,36 +65,6 @@ HUDuiControl::~HUDuiControl()
   }
 }
 
-float			HUDuiControl::getLabelWidth() const
-{
-  return desiredLabelWidth;
-}
-
-std::string		HUDuiControl::getLabel() const
-{
-  return BundleMgr::getCurrentBundle()->getLocalString(label);
-}
-
-int			HUDuiControl::getFontFace() const
-{
-  return fontFace;
-}
-
-float			HUDuiControl::getFontSize() const
-{
-  return fontSize;
-}
-
-HUDuiControl*		HUDuiControl::getPrev() const
-{
-  return prev;
-}
-
-HUDuiControl*		HUDuiControl::getNext() const
-{
-  return next;
-}
-
 HUDuiCallback		HUDuiControl::getCallback() const
 {
   return cb;
@@ -127,83 +75,15 @@ void*			HUDuiControl::getUserData() const
   return userData;
 }
 
-void			HUDuiControl::setPosition(float _x, float _y)
-{
-  x = _x;
-  y = _y;
-}
-
-void			HUDuiControl::setSize(float _width, float _height)
-{
-  width = _width;
-  height = _height;
-}
-
-void			HUDuiControl::setLabelWidth(float labelWidth)
-{
-  desiredLabelWidth = labelWidth;
-}
-
-void			HUDuiControl::setLabel(const std::string& _label)
-{
-
-  label = _label;
-  if (fontFace >= 0) {
-    FontManager &fm = FontManager::instance();
-    trueLabelWidth = fm.getStrLength(fontFace, fontSize, getLabel());
-  }
-}
-
-void			HUDuiControl::setFontFace(int _fontFace)
-{
-  fontFace = _fontFace;
-  onSetFont();
-}
-
-void			HUDuiControl::setFontSize(float size)
-{
-  fontSize = size;
-  onSetFont();
-}
-
-void			HUDuiControl::setPrev(HUDuiControl* _prev)
-{
-  if (!_prev) prev = this;
-  else prev = _prev;
-}
-
-void			HUDuiControl::setNext(HUDuiControl* _next)
-{
-  if (!_next) next = this;
-  else next = _next;
-}
-
 void			HUDuiControl::setCallback(HUDuiCallback _cb, void* _ud)
 {
   cb = _cb;
   userData = _ud;
 }
 
-void			HUDuiControl::onSetFont()
-{
-  if (fontFace >= 0) {
-    FontManager &fm = FontManager::instance();
-    fontHeight = fm.getStrHeight(fontFace, fontSize, label);
-    trueLabelWidth = fm.getStrLength(fontFace, fontSize, label);
-  } else {
-    fontHeight = 11.0f;
-    trueLabelWidth = 0.0f;
-  }
-}
-
 bool			HUDuiControl::hasFocus() const
 {
   return this == HUDui::getFocus();
-}
-
-void			HUDuiControl::setFocus()
-{
-  HUDui::setFocus(this);
 }
 
 void			HUDuiControl::showFocus(bool _showingFocus)
@@ -223,6 +103,9 @@ void			HUDuiControl::renderFocus()
   TextureManager &tm = TextureManager::instance();
   const ImageInfo &info = tm.getInfo(arrow);
 
+  const float x = getX();
+  const float y = getY();
+
   if (gstate->isTextured()) { // assumes there are w/h frames of animation h x h in each image
     float imageSize = (float)info.y;
     int uFrames = 1;
@@ -234,10 +117,10 @@ void			HUDuiControl::renderFocus()
 
     float u = (float)(arrowFrame % uFrames) / (float)uFrames;
     float v = (float)(arrowFrame / uFrames) / (float)vFrames;
-    fh2 = floorf(1.5f * fontHeight); // this really should not scale the image based on the font,
-    gstate->setState();	   	     // best would be to load an image for each size
+    fh2 = floorf(1.5f * fontHeight) - 1.0f; // this really should not scale the image based on the font,
+    gstate->setState();			    // best would be to load an image for each size
     glColor3f(1.0f, 1.0f, 1.0f);
-    float imageXShift = 0.0f;
+    float imageXShift = 0.5f;
     float imageYShift = -fh2 * 0.2f;
     float outputSize = fh2;
     glBegin(GL_QUADS);
@@ -275,27 +158,45 @@ void			HUDuiControl::renderFocus()
   }
 }
 
-void			HUDuiControl::renderLabel()
-{
-  std::string theLabel = getLabel();
-  if (theLabel.length() > 0 && fontFace >= 0) {
-    FontManager &fm = FontManager::instance();
-    trueLabelWidth = fm.getStrLength(fontFace, fontSize, theLabel) +
-		     fm.getStrLength(fontFace, fontSize, "99");
-    const float dx = (desiredLabelWidth > trueLabelWidth)
-      ? desiredLabelWidth : trueLabelWidth;
-    fm.drawString(x - dx, y, 0, fontFace, fontSize, theLabel);
-  }
-}
-
 void			HUDuiControl::render()
 {
   if (hasFocus() && showingFocus) renderFocus();
   glColor3fv(hasFocus() ? textColor : dimTextColor);
-  renderLabel();
-  doRender();
+  HUDuiElement::render();
 }
 
+void			HUDuiControl::setNavQueue(HUDNavigationQueue* _navList)
+{
+  navList = _navList;
+}
+
+bool			HUDuiControl::doKeyPress(const BzfKeyEvent& key)
+{
+  if (key.ascii == 0) switch (key.button) {
+    case BzfKeyEvent::Up:
+      navList->prev();
+      break;
+
+    case BzfKeyEvent::Down:
+      navList->next();
+      break;
+
+    default:
+      return false;
+  }
+
+  if (key.ascii == '\t') {
+    navList->next();
+    return true;
+  }
+
+  return false;
+}
+
+bool			HUDuiControl::doKeyRelease(const BzfKeyEvent&)
+{
+  return false;
+}
 
 // Local Variables: ***
 // mode:C++ ***
@@ -304,4 +205,3 @@ void			HUDuiControl::render()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

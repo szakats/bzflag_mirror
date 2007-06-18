@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /** @file
@@ -94,15 +94,28 @@ enum FlagQuality {
 /** This enum says if the flag type gives the carrier a special shooting
     ability. */
 enum ShotType {
-  NormalShot = 0,
-  SpecialShot = 1
+	NoShot = 0,
+	StandardShot,
+	GMShot,
+	LaserShot,
+	ThiefShot,
+	SuperShot,
+	PhantomShot,
+	ShockWaveShot,
+	RicoShot,
+	MachineGunShot,
+	InvisibleShot,
+	RapidFireShot
 };
+
 
 const int		FlagPLen = 6 + PlayerIdPLen + 48;
 
 class FlagType;
 typedef std::map<std::string, FlagType*> FlagTypeMap;
 typedef std::set<FlagType*> FlagSet;
+
+#define FlagPackSize 2
 
 /** This class represents a flagtype, like "GM" or "CL". */
 class FlagType {
@@ -121,7 +134,7 @@ public:
      * std::set compiler bug of making flagSets a fixed array.
      */
     if (flagSets == NULL) {
-      flagSets = new FlagSet[2];
+      flagSets = new FlagSet[NumQualities];
     }
 
     flagSets[flagQuality].insert(this);
@@ -145,6 +158,7 @@ public:
 
   /** network serialization */
   void* pack(void* buf) const;
+  void* fakePack(void* buf) const;
 
   /** network deserialization */
   static void* unpack(void* buf, FlagType* &desc);
@@ -164,7 +178,7 @@ public:
 
   static int flagCount;
   static FlagSet *flagSets;
-  static int packSize;
+  static const int packSize;
 };
 
 
@@ -176,8 +190,11 @@ public:
   /** This function serializes this object into a @c void* buffer for network
       transfer. */
   void* pack(void*) const;
+  /** This function serializes this object into a @c void* buffer for network
+      transfer. */
+  void* fakePack(void*) const;
   /** This function uses the given serialization to set the member variables
-      of this object. */
+      of this object. This really hide the type of flag */
   void* unpack(void*);
 
   /** This function returns a set of all good flagtypes that are available in
@@ -220,20 +237,60 @@ public:
 */
 namespace Flags {
   extern FlagType
-  *Null,
-    *RedTeam, *GreenTeam, *BlueTeam, *PurpleTeam, *Velocity, *QuickTurn,
-    *OscillationOverthruster, *RapidFire, *MachineGun, *GuidedMissile, *Laser,
-    *Ricochet, *SuperBullet, *InvisibleBullet, *Stealth, *Tiny, *Narrow,
-    *Shield, *Steamroller, *ShockWave, *PhantomZone, *Genocide, *Jumping,
-    *Identify, *Cloaking, *Useless, *Masquerade, *Seer, *Thief, *Burrow,
-    *Wings, *ReverseControls, *Agility,
-    *Colorblindness, *Obesity, *LeftTurnOnly, *RightTurnOnly, *Momentum,
-    *Blindness, *Jamming, *WideAngle, *NoJumping, *TriggerHappy,
-    *ReverseOnly, *ForwardOnly, *Bouncy, *Lag;
+    /* alphabetical order */
+    *Agility,
+    *Blindness,
+    *BlueTeam,
+    *Bouncy,
+    *Burrow,
+    *Cloaking,
+    *Colorblindness,
+    *ForwardOnly,
+    *Genocide,
+    *GreenTeam,
+    *GuidedMissile,
+    *Identify,
+    *InvisibleBullet,
+    *Jamming,
+    *Jumping,
+    *Laser,
+    *LeftTurnOnly,
+    *LowGravity,
+    *MachineGun,
+    *Masquerade,
+    *Momentum,
+    *Narrow,
+    *NoJumping,
+    *Obesity,
+    *OscillationOverthruster,
+    *PhantomZone,
+    *PurpleTeam,
+    *QuickTurn,
+    *RapidFire,
+    *RedTeam,
+    *ReverseControls,
+    *ReverseOnly,
+    *Ricochet,
+    *RightTurnOnly,
+    *Seer,
+    *Shield,
+    *ShockWave,
+    *Stealth,
+    *Steamroller,
+    *SuperBullet,
+    *Thief,
+    *Tiny,
+    *TriggerHappy,
+    *Useless,
+    *Velocity,
+    *WideAngle,
+    *Wings,
+    *Null; // leave Null at end
 
   /** This function initializes all the FlagType objects in the Flags
       namespace. */
   void init();
+  void kill();
 }
 
 #endif // BZF_FLAG_H
@@ -245,4 +302,3 @@ namespace Flags {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

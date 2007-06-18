@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,26 +7,30 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/*
- * PingPacket:
- *	Encapsulates server `ping' info.
- */
+#ifndef	__PING_H__
+#define	__PING_H__
 
-#ifndef	BZF_PING_H
-#define	BZF_PING_H
-
-#include <fstream>
 #include "common.h"
+
+/* system headers */
+#include <fstream>
+
+/* common interface headers */
 #include "Address.h"
 #include "Pack.h"
 #include "multicast.h"
 
-// 4 uint16's and 13 uint8's hex encoded
-static const int	PingPacketHexPackedSize = 4 * 7 + 2 * 13;
 
+// 8 uint16's and 13 uint8's hex encoded
+static const int	PingPacketHexPackedSize = 4 * 8 + 2 * 13;
+
+
+/** PingPacket:
+ *	Encapsulates server `ping' info.
+ */
 class PingPacket {
   public:
 			PingPacket();
@@ -52,8 +56,9 @@ class PingPacket {
 
   public:
     ServerId		serverId;
-    Address		sourceAddr;
-    uint16_t		gameStyle;
+    Address			sourceAddr;
+	uint16_t		gameType;
+    uint16_t		gameOptions;
     uint16_t		maxShots;
     uint16_t		shakeWins;
     uint16_t		shakeTimeout;		// 1/10ths of second
@@ -86,10 +91,11 @@ class PingPacket {
     static const int	PacketSize;
 };
 
-#endif // BZF_PING_H
+
+#endif  /* __PING_H__ */
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

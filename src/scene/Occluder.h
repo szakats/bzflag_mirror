@@ -1,30 +1,42 @@
+/* bzflag
+ * Copyright (c) 1993 - 2007 Tim Riker
+ *
+ * This package is free software;  you can redistribute it and/or
+ * modify it under the terms of the license found in the file
+ * named COPYING that should have accompanied this file.
+ *
+ * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
 
 #include "SceneNode.h"
 #include "Frustum.h"
 #include "Intersect.h"
+#include "Extents.h"
 
 class Occluder {
   public:
-    Occluder(SceneNode *node);
+    Occluder(const SceneNode *node);
     ~Occluder();
     bool makePlanes(const Frustum* frustum);
-    IntersectLevel doCullAxisBox(const float* mins, const float* maxs);
+    IntersectLevel doCullAxisBox(const Extents& exts);
     bool doCullSceneNode(SceneNode* node);
     void addScore(unsigned int score);
     void divScore();
     int getScore() const;
     int getVertexCount() const;
-    SceneNode* getSceneNode() const;
+    const SceneNode* getSceneNode() const;
     void draw() const;
     void print(const char* string) const; // for debugging
 
   private:
-    SceneNode* sceneNode;
+    const SceneNode* sceneNode;
     unsigned int cullScore;
-    int planeCount;  // 4 or 5 planes
-    int vertexCount; // 3 or 4 vertices
-    float planes[5][4];
-    float vertices[4][3];
+    int planeCount;  // one more then the vertex count
+    int vertexCount; // vertex count of the occluding plane
+    float (*planes)[4];
+    float (*vertices)[3];
     static const bool DrawEdges;
     static const bool DrawNormals;
     static const bool DrawVertices;
@@ -40,13 +52,12 @@ class OccluderManager {
 
     void clear();
     void update(const Frustum* frustum);
-    void select(SceneNode** list, int listCount);
+    void select(const SceneNode* const* list, int listCount);
 
-    IntersectLevel occlude(const float* mins, const float* maxs,
-                           unsigned int score);
-    bool occludePeek(const float* mins, const float* maxs);
+    IntersectLevel occlude(const Extents& exts, unsigned int score);
+    bool occludePeek(const Extents& exts);
 
-    int getOccluderCount () const;
+    int getOccluderCount() const;
 
     void draw() const;
 
@@ -79,7 +90,7 @@ inline int Occluder::getScore() const
   return cullScore;
 }
 
-inline SceneNode* Occluder::getSceneNode()const
+inline const SceneNode* Occluder::getSceneNode()const
 {
   return sceneNode;
 }
@@ -94,3 +105,10 @@ inline int OccluderManager::getOccluderCount () const
   return activeOccluders;
 }
 
+// Local Variables: ***
+// mode:C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 #
 # BZFlag
-# Copyright (c) 1993 - 2004 Tim Riker
+# Copyright (c) 1993 - 2007 Tim Riker
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
@@ -9,7 +9,7 @@
 #
 # THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
 # IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
-# WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 use strict;
 
@@ -57,7 +57,7 @@ if (-d $cacheFile && time() - stat($cacheFile)->mtime < 60) {
 } else {
   my $ua = new LWP::UserAgent;
   $ua->timeout(5);
-  my $req = HTTP::Request->new('GET', 'http://db.bzflag.org/db/?action=LIST');
+  my $req = HTTP::Request->new('GET', 'http://my.BZFlag.org/db/?action=LIST');
   my $res = $ua->request($req);
   @lines = split("\n",$res->content);
   open(CACHEFILE, ">$cacheFile") or die;
@@ -78,7 +78,7 @@ for my $line (@lines) {
       + hex($blueSize) + hex($purpleSize) + hex($observerSize);
   if (($#ARGV == 0) && ($serverport eq $ARGV[0])) {
     my $playerMax = hex($rogueMax) + hex($redMax) + hex($greenMax)
-        + hex($blueMax) + hex($purpleMax) + hex($observerMax);
+	+ hex($blueMax) + hex($purpleMax) + hex($observerMax);
     $playerMax = hex($maxPlayers) if (hex($maxPlayers) < $playerMax);
     print("$playerSize\n$playerMax\nunknown uptime\nplayers on $ARGV[0]\n");
     exit(0);

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,19 +7,29 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <math.h>
+// bzflag common header
 #include "common.h"
-#include "TracerSceneNode.h"
-#include "ShellSceneNode.h"
-#include "ViewFrustum.h"
-#include "SceneRenderer.h"
-#include "StateDatabase.h"
-#include "BZDBCache.h"
 
-#define	ShellRadius1_2	(M_SQRT1_2 * ShellRadius)
+// interface header
+#include "TracerSceneNode.h"
+
+// system headers
+#include <math.h>
+
+// common implementation headers
+#include "StateDatabase.h"
+
+// local implemenation headers
+#include "ViewFrustum.h"
+#include "ShellSceneNode.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
+#include "SceneRenderer.h"
+
+#define	ShellRadius1_2	((float)(M_SQRT1_2 * ShellRadius))
 
 const GLfloat		TracerSceneNode::TailLength = 10.0f;
 const GLfloat		TracerSceneNode::tailVertex[9][3] = {
@@ -60,8 +70,8 @@ void			TracerSceneNode::move(const GLfloat pos[3],
   const GLfloat d = 1.0f / sqrtf(forward[0] * forward[0] +
 				forward[1] * forward[1] +
 				forward[2] * forward[2]);
-  azimuth = 180.0f / M_PI * atan2f(forward[1], forward[0]);
-  elevation = -180.0f / M_PI * atan2f(forward[2], hypotf(forward[0],forward[1]));
+  azimuth = (GLfloat)(180.0 / M_PI * atan2f(forward[1], forward[0]));
+  elevation = (GLfloat)(-180.0 / M_PI * atan2f(forward[2], hypotf(forward[0],forward[1])));
   setCenter(pos[0] - 0.5f * TailLength * d * forward[0],
 	    pos[1] - 0.5f * TailLength * d * forward[1],
 	    pos[2] - 0.5f * TailLength * d * forward[2]);
@@ -73,11 +83,10 @@ void			TracerSceneNode::addLight(SceneRenderer& renderer)
   renderer.addLight(light);
 }
 
-void			TracerSceneNode::notifyStyleChange(
-				const SceneRenderer&)
+void			TracerSceneNode::notifyStyleChange()
 {
   OpenGLGStateBuilder builder(gstate);
-  if (BZDBCache::blend) {
+  if (BZDB.isTrue("blend")) {
     // add tail contribution instead of regular blend
     builder.setBlending(GL_SRC_ALPHA, GL_ONE);
     builder.setShading(GL_SMOOTH);
@@ -163,4 +172,3 @@ void			TracerSceneNode::TracerRenderNode::render()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

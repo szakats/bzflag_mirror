@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "SGIMedia.h"
@@ -18,7 +18,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <bstring.h>
+#ifdef HAVE_BSTRING_H
+#  include <bstring.h>
+#endif
 #include <sys/prctl.h>
 #include <sys/wait.h>
 #include "bzsignal.h"
@@ -79,14 +81,6 @@ double			SGIMedia::stopwatch(bool start)
   else {
     return (double)(*iotimer_addr - stopwatchTime) * secondsPerTick;
   }
-}
-
-void			SGIMedia::sleep(float timeInSeconds)
-{
-  struct timeval tv;
-  tv.tv_sec = (long)timeInSeconds;
-  tv.tv_usec = (long)(1.0e6 * (timeInSeconds - floor(timeInSeconds)));
-  select(0, NULL, NULL, NULL, &tv);
 }
 
 bool			SGIMedia::openAudio()
@@ -322,10 +316,10 @@ void			SGIMedia::audioSleep(
   fd_set audioSelectSet;
   fd_set commandSelectSet;
   FD_ZERO(&commandSelectSet);
-  FD_SET(queueOut, &commandSelectSet);
+  FD_SET((unsigned int)queueOut, &commandSelectSet);
   if (checkLowWater) {
     FD_ZERO(&audioSelectSet);
-    FD_SET(audioPortFd, &audioSelectSet);
+    FD_SET((unsigned int)audioPortFd, &audioSelectSet);
   }
 
   // prepare timeout
@@ -347,4 +341,3 @@ void			SGIMedia::audioSleep(
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

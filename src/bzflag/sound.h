@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -18,6 +18,8 @@
 #define BZF_SOUND_H
 
 #include "common.h"
+
+#include <string>
 
 #define SFX_FIRE	0		/* shell fired */
 #define SFX_EXPLOSION	1		/* something other than me blew up */
@@ -43,12 +45,14 @@
 #define SFX_TEAMGRAB	21		/* grabbed an opponents team flag */
 #define	SFX_HUNT	22		/* hunting sound */
 #define SFX_HUNT_SELECT	23		/* hunt target selected */
-#define SFX_RUNOVER     24              /* steamroller sound */
+#define SFX_RUNOVER     24	      /* steamroller sound */
 #define SFX_THIEF       25		/* thief sound */
 #define SFX_BURROW	26		/* burrow sound */
 #define SFX_MESSAGE_PRIVATE	27	/* private message received */
 #define SFX_MESSAGE_TEAM	28	/* team message received */
 #define SFX_MESSAGE_ADMIN	29	/* admin message received */
+#define SFX_FLAP	30		/* wings flapping sound  */
+#define SFX_BOUNCE	31		/* bouncing sound */
 
 /* prepare sound effects generator and shut it down */
 void			openSound(const char* pname);
@@ -60,13 +64,17 @@ void			moveSoundReceiver(float x, float y, float z, float t,
 							int discontinuity);
 void			speedSoundReceiver(float vx, float vy, float vz);
 
+/* sound effect event at given position in world, or possible locally */
+void			playSound(int soundCode, const float pos[3],
+				  bool important, bool localSound);
+
 /* sound effect event at given position in world */
-void			playWorldSound(int soundCode,
-				float x, float y, float z,
-				bool important = false);
+void			playWorldSound(int soundCode, const float pos[3],
+				       bool important = false);
 
 /* sound effect positioned at receiver */
 void			playLocalSound(int soundCode);
+void			playLocalSound(std::string sound);
 
 /* start playing a sound effect repeatedly at world position */
 void			playFixedSound(int soundCode,
@@ -90,4 +98,3 @@ void			updateSound();
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

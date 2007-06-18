@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* WinJoystick:
@@ -28,18 +28,30 @@ class WinJoystick : public BzfJoystick {
 
     void	initJoystick(const char* joystickName);
     bool	joystick() const;
-    void	getJoy(int& x, int& y) const;
-    unsigned long getJoyButtons() const;
-    void        getJoyDevices(std::vector<std::string> &list) const;
+    void	getJoy(int& x, int& y);
+    unsigned long getJoyButtons();
+    void	getJoyDevices(std::vector<std::string> &list) const;
+    void	getJoyDeviceAxes(std::vector<std::string> &list) const;
+    void	setXAxis(const std::string axis);
+    void	setYAxis(const std::string axis);
 
   private:
     unsigned int JoystickID;
     bool	inited;
 
-    float	xMin;
-    float       xMax;
-    float       yMin;
-    float       yMax;
+    struct AxisInfo {
+      std::string name;
+      bool exists;
+      DWORD requestFlag;
+      float min;
+      float max;
+    };
+
+    std::vector<AxisInfo> axes;
+
+    int xIndex;
+    int yIndex;
+
 };
 
 #endif // BZF_WINJOY_H

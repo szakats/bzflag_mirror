@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,16 +7,24 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <math.h>
+// bzflag common header
 #include "common.h"
+
+// interface header
 #include "LaserSceneNode.h"
-#include "SceneRenderer.h"
-#include "OpenGLTexture.h"
+
+// system headers
+#include <math.h>
+
+// common implementation headers
 #include "StateDatabase.h"
 #include "BZDBCache.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
+#include "SceneRenderer.h"
 
 const GLfloat		LaserRadius = 0.1f;
 
@@ -25,8 +33,8 @@ LaserSceneNode::LaserSceneNode(const GLfloat pos[3], const GLfloat forward[3]) :
 				renderNode(this)
 {
   // prepare rendering info
-  azimuth = 180.0f / M_PI*atan2f(forward[1], forward[0]);
-  elevation = -180.0f / M_PI*atan2f(forward[2], hypotf(forward[0],forward[1]));
+  azimuth = (float)(180.0 / M_PI*atan2f(forward[1], forward[0]));
+  elevation = (float)(-180.0 / M_PI*atan2f(forward[2], hypotf(forward[0],forward[1])));
   length = hypotf(forward[0], hypotf(forward[1], forward[2]));
 
   // setup sphere
@@ -36,11 +44,29 @@ LaserSceneNode::LaserSceneNode(const GLfloat pos[3], const GLfloat forward[3]) :
   OpenGLGStateBuilder builder(gstate);
   builder.setCulling(GL_NONE);
   gstate = builder.getState();
+
+  first = false;
+  setColor(1,1,1);
+  setCenterColor(1,1,1);
 }
 
 LaserSceneNode::~LaserSceneNode()
 {
   // do nothing
+}
+
+void	LaserSceneNode::setColor ( GLfloat r, GLfloat g, GLfloat b )
+{
+	color[0] = r;
+	color[1] = g;
+	color[2] = b;
+}
+
+void		LaserSceneNode::setCenterColor ( GLfloat r, GLfloat g, GLfloat b )
+{
+	centerColor[0] = r;
+	centerColor[1] = g;
+	centerColor[2] = b;
 }
 
 void			LaserSceneNode::setTexture(const int texture)
@@ -49,7 +75,6 @@ void			LaserSceneNode::setTexture(const int texture)
   builder.setTexture(texture);
   builder.enableTexture(texture>=0);
   gstate = builder.getState();
-  forceNotifyStyleChange();
 }
 
 bool			LaserSceneNode::cull(const ViewFrustum&) const
@@ -58,8 +83,7 @@ bool			LaserSceneNode::cull(const ViewFrustum&) const
   return false;
 }
 
-void			LaserSceneNode::notifyStyleChange(
-				const SceneRenderer&)
+void			LaserSceneNode::notifyStyleChange()
 {
   texturing = BZDBCache::texture && BZDBCache::blend;
   OpenGLGStateBuilder builder(gstate);
@@ -97,8 +121,8 @@ LaserSceneNode::LaserRenderNode::LaserRenderNode(
   if (!init) {
     init = true;
     for (int i = 0; i < 6; i++) {
-      geom[i][0] = -LaserRadius * cosf(2.0f * M_PI * float(i) / 6.0f);
-      geom[i][1] =  LaserRadius * sinf(2.0f * M_PI * float(i) / 6.0f);
+      geom[i][0] = -LaserRadius * cosf((float)(2.0 * M_PI * double(i) / 6.0));
+      geom[i][1] =  LaserRadius * sinf((float)(2.0 * M_PI * double(i) / 6.0));
     }
   }
 }
@@ -109,6 +133,60 @@ LaserSceneNode::LaserRenderNode::~LaserRenderNode()
 }
 
 void			LaserSceneNode::LaserRenderNode::render()
+{
+	if (RENDERER.useQuality() >= _EXPERIMENTAL_QUALITY)
+		renderGeoLaser();
+	else
+		renderFlatLaser();
+}
+
+
+void LaserSceneNode::LaserRenderNode::renderGeoLaser ( void )
+{
+	const GLfloat length = sceneNode->length;
+	const GLfloat* sphere = sceneNode->getSphere();
+	glPushMatrix();
+	glTranslatef(sphere[0], sphere[1], sphere[2]);
+	glRotatef(sceneNode->azimuth, 0.0f, 0.0f, 1.0f);
+	glRotatef(sceneNode->elevation, 0.0f, 1.0f, 0.0f);
+	glRotatef(90, 0.0f, 1.0f, 0.0f);
+
+	glDisable(GL_TEXTURE_2D);
+
+	//myColor4f(sceneNode->color[0], sceneNode->color[1], sceneNode->color[2], 0.85f);
+	myColor4f(sceneNode->centerColor[0], sceneNode->centerColor[1], sceneNode->centerColor[2], 0.85f);
+	gluCylinder(gluNewQuadric(),0.0625f,0.0625f,length,10,1);
+	addTriangleCount(20);
+
+	myColor4f(sceneNode->color[0], sceneNode->color[1], sceneNode->color[2], 0.125f);
+	gluCylinder(gluNewQuadric(),0.1f,0.1f,length,16,1);
+	addTriangleCount(32);
+
+	myColor4f(sceneNode->color[0], sceneNode->color[1], sceneNode->color[2], 0.125f);
+	gluCylinder(gluNewQuadric(),0.2f,0.2f,length,24,1);
+	addTriangleCount(48);
+
+	myColor4f(sceneNode->color[0], sceneNode->color[1], sceneNode->color[2], 0.125f);
+	gluCylinder(gluNewQuadric(),0.4f,0.4f,length,32,1);
+	addTriangleCount(64);
+
+	myColor4f(sceneNode->color[0], sceneNode->color[1], sceneNode->color[2], 0.125f);
+	if (sceneNode->first)
+	{
+		gluSphere(gluNewQuadric(),0.5f,32,32);
+		addTriangleCount(32*32*2);
+	}
+	else
+	{
+		gluSphere(gluNewQuadric(),0.5f,12,12);
+		addTriangleCount(12*12*2);
+	}
+
+	glEnable(GL_TEXTURE_2D);
+	glPopMatrix();
+}
+
+void			LaserSceneNode::LaserRenderNode::renderFlatLaser()
 {
   const GLfloat length = sceneNode->length;
   const GLfloat* sphere = sceneNode->getSphere();
@@ -128,7 +206,7 @@ void			LaserSceneNode::LaserRenderNode::render()
 	glVertex3f(  0.0f,  0.0f, -1.0f);
 	glVertex3f(  0.0f, -1.0f,  0.0f);
 	glVertex3f(  0.0f,  0.0f,  1.0f);
-      glEnd();
+      glEnd(); // 6 verts -> 4 tris
 
       glBegin(GL_QUADS);
 	glTexCoord2f(0.0f,  0.0f);
@@ -148,13 +226,16 @@ void			LaserSceneNode::LaserRenderNode::render()
 	glVertex3f(length, -1.0f,  0.0f);
 	glTexCoord2f(1.0f,  0.0f);
 	glVertex3f(  0.0f, -1.0f,  0.0f);
-      glEnd();
+      glEnd(); // 8 verts -> 4 tris
+
+      addTriangleCount(8);
     }
 
     else {
       // draw beam
       myColor4f(1.0f, 0.25f, 0.0f, 0.85f);
       glBegin(GL_QUAD_STRIP);
+      {
 	glVertex3f(  0.0f, geom[0][0], geom[0][1]);
 	glVertex3f(length, geom[0][0], geom[0][1]);
 	glVertex3f(  0.0f, geom[1][0], geom[1][1]);
@@ -169,15 +250,20 @@ void			LaserSceneNode::LaserRenderNode::render()
 	glVertex3f(length, geom[5][0], geom[5][1]);
 	glVertex3f(  0.0f, geom[0][0], geom[0][1]);
 	glVertex3f(length, geom[0][0], geom[0][1]);
-      glEnd();
+      }
+      glEnd(); // 14 verts -> 12 tris
 
       // also draw a line down the middle (so the beam is visible even
       // if very far away).  this will also give the beam an extra bright
       // center.
       glBegin(GL_LINES);
+      {
 	glVertex3f(  0.0f, 0.0f, 0.0f);
 	glVertex3f(length, 0.0f, 0.0f);
-      glEnd();
+      }
+      glEnd(); // count 1 line as 1 tri
+
+      addTriangleCount(13);
     }
 
   glPopMatrix();
@@ -190,4 +276,3 @@ void			LaserSceneNode::LaserRenderNode::render()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

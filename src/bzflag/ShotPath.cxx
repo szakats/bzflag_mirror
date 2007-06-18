@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,91 +7,74 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
+// interface header
+#include "ShotPath.h"
 
-/* common implementation headers */
-#include "Protocol.h"
-#include "Flag.h"
+/* system headers */
+#include <assert.h>
 
 /* local implementation headers */
-#include "playing.h"
-#include "ShotPath.h"
-#include "ShotStrategy.h"
-#include "LocalPlayer.h"
 #include "SegmentedShotStrategy.h"
 #include "GuidedMissleStrategy.h"
 #include "ShockWaveStrategy.h"
-
-
-//
-// FiringInfo (with BaseLocalPlayer)
-//
-
-FiringInfo::FiringInfo(const BaseLocalPlayer& tank, int id)
-{
-  shot.player = tank.getId();
-  shot.id = uint16_t(id);
-  tank.getMuzzle(shot.pos);
-  const float* dir = tank.getForward();
-  const float* tankVel = tank.getVelocity();
-  float shotSpeed = BZDB.eval(StateDatabase::BZDB_SHOTSPEED);
-  shot.vel[0] = tankVel[0] + shotSpeed * dir[0];
-  shot.vel[1] = tankVel[1] + shotSpeed * dir[1];
-  shot.vel[2] = tankVel[2] + shotSpeed * dir[2];
-  shot.dt = 0.0f;
-
-  flagType = tank.getFlag();
-  // wee bit o hack -- if phantom flag but not phantomized
-  // the shot flag is normal -- otherwise FiringInfo will have
-  // to be changed to add a real bitwise status variable
-  if (tank.getFlag() == Flags::PhantomZone && !tank.isFlagActive()){
-    flagType = Flags::Null;
-  }
-  lifetime = BZDB.eval(StateDatabase::BZDB_RELOADTIME);
-}
 
 //
 // ShotPath
 //
 
-ShotPath::ShotPath(const FiringInfo& info) :
+ShotPath::ShotPath(const FiringInfo& info, double now) :
 				firingInfo(info),
 				reloadTime(BZDB.eval(StateDatabase::BZDB_RELOADTIME)),
-				startTime(TimeKeeper::getTick()),
-				currentTime(TimeKeeper::getTick()),
 				expiring(false),
 				expired(false)
 {
-  // eek!  a giant switch statement, how un-object-oriented!
-  // each flag should be a flyweight object derived from a
-  // base Flag class with a virtual makeShotStrategy() member.
-  // just remember -- it's only a game.
-  if (firingInfo.flagType->flagShot == NormalShot)
-    strategy = new NormalShotStrategy(this);
-  else {
-    if (firingInfo.flagType == Flags::RapidFire)
-      strategy = new RapidFireStrategy(this);
-    else if (firingInfo.flagType == Flags::MachineGun)
-      strategy = new MachineGunStrategy(this);
-    else if (firingInfo.flagType == Flags::GuidedMissile)
+  startTime = info.timeSent;
+  currentTime = now;
+
+  switch(info.shotType)
+  {
+    default:
+      strategy = new NormalShotStrategy(this);
+    break;
+
+    case GMShot:
       strategy = new GuidedMissileStrategy(this);
-    else if (firingInfo.flagType == Flags::Laser)
+      break;
+
+    case LaserShot:
       strategy = new LaserStrategy(this);
-    else if (firingInfo.flagType == Flags::Ricochet)
-      strategy = new RicochetStrategy(this);
-    else if (firingInfo.flagType == Flags::SuperBullet)
-      strategy = new SuperBulletStrategy(this);
-    else if (firingInfo.flagType == Flags::ShockWave)
-      strategy = new ShockWaveStrategy(this);
-    else if (firingInfo.flagType == Flags::Thief)
+      break;
+
+    case ThiefShot:
       strategy = new ThiefStrategy(this);
-    else if (firingInfo.flagType == Flags::PhantomZone)
+      break;
+
+    case SuperShot:
+      strategy = new SuperBulletStrategy(this);
+      break;
+
+    case PhantomShot:
       strategy = new PhantomBulletStrategy(this);
-    else
-      assert(0);    // shouldn't happen
+      break;
+
+    case ShockWaveShot:
+      strategy = new ShockWaveStrategy(this);
+      break;
+
+    case RicoShot:
+      strategy = new RicochetStrategy(this);
+      break;
+
+    case MachineGunShot:
+      strategy = new MachineGunStrategy(this);
+      break;
+
+    case RapidFireShot:
+      strategy = new RapidFireStrategy(this);
+      break;
   }
 }
 
@@ -100,10 +83,10 @@ ShotPath::~ShotPath()
   delete strategy;
 }
 
-float			ShotPath::checkHit(const BaseLocalPlayer* player,
+float			ShotPath::checkHit(const ShotCollider& tank,
 							float position[3]) const
 {
-  return strategy->checkHit(player, position);
+  return strategy->checkHit(tank, position);
 }
 
 bool			ShotPath::isStoppedByHit() const
@@ -119,7 +102,8 @@ void			ShotPath::addShot(SceneDatabase* scene,
 
 void			ShotPath::radarRender() const
 {
-  if (!isExpired()) strategy->radarRender();
+  if (!isExpired())
+    strategy->radarRender();
 }
 
 void			ShotPath::updateShot(float dt)
@@ -128,9 +112,12 @@ void			ShotPath::updateShot(float dt)
   currentTime += dt;
 
   // update shot
-  if (!expired) {
-    if (expiring) setExpired();
-    else getStrategy()->update(dt);
+  if (!expired)
+  {
+    if (expiring)
+      setExpired();
+    else
+      getStrategy()->update(dt);
   }
 }
 
@@ -174,8 +161,8 @@ void			ShotPath::boostReloadTime(float dt)
 // LocalShotPath
 //
 
-LocalShotPath::LocalShotPath(const FiringInfo& info) :
-				ShotPath(info)
+LocalShotPath::LocalShotPath(const FiringInfo& info, double now) :
+				ShotPath(info,now)
 {
   // do nothing
 }
@@ -198,8 +185,8 @@ void			LocalShotPath::update(float dt)
 // RemoteShotPath
 //
 
-RemoteShotPath::RemoteShotPath(const FiringInfo& info) :
-				ShotPath(info)
+RemoteShotPath::RemoteShotPath(const FiringInfo& info,double now) :
+				ShotPath(info,now)
 {
   // do nothing
 }
@@ -232,4 +219,3 @@ void			RemoteShotPath::update(const ShotUpdate& shot,
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

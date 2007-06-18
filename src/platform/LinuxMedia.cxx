@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "LinuxMedia.h"
@@ -70,14 +70,6 @@ double			LinuxMedia::stopwatch(bool start)
     return 0.0;
   }
   return getTime() - stopwatchTime;
-}
-
-void			LinuxMedia::sleep(float timeInSeconds)
-{
-  struct timeval tv;
-  tv.tv_sec = (long)timeInSeconds;
-  tv.tv_usec = (long)(1.0e6 * (timeInSeconds - tv.tv_sec));
-  select(0, NULL, NULL, NULL, &tv);
 }
 
 bool			LinuxMedia::openAudio()
@@ -452,7 +444,7 @@ void			LinuxMedia::audioSleep(
       // break if buffer has drained enough
       if (isAudioTooEmpty()) break;
       FD_ZERO(&commandSelectSet);
-      FD_SET(queueOut, &commandSelectSet);
+      FD_SET((unsigned int)queueOut, &commandSelectSet);
       tv.tv_sec=0;
       tv.tv_usec=50000;
       if (select(maxFd, &commandSelectSet, 0, 0, &tv)) break;
@@ -460,7 +452,7 @@ void			LinuxMedia::audioSleep(
     } while (endTime<0.0 || (TimeKeeper::getCurrent()-start)<endTime);
   } else {
     FD_ZERO(&commandSelectSet);
-    FD_SET(queueOut, &commandSelectSet);
+    FD_SET((unsigned int)queueOut, &commandSelectSet);
     tv.tv_sec=int(endTime);
     tv.tv_usec=int(1.0e6*(endTime-floor(endTime)));
 
@@ -475,4 +467,3 @@ void			LinuxMedia::audioSleep(
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

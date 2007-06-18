@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,15 +7,26 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <math.h>
+// bzflag common header
 #include "common.h"
+
+// interface header
 #include "QuadWallSceneNode.h"
-#include "ViewFrustum.h"
-#include "SceneRenderer.h"
+
+// system headers
+#include <math.h>
+
+// common implementation headers
 #include "Intersect.h"
+
+// local implementation headers
+#include "ViewFrustum.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
+#include "SceneRenderer.h"
 
 //
 // QuadWallSceneNode::Geometry
@@ -50,6 +61,7 @@ QuadWallSceneNode::Geometry::Geometry(QuadWallSceneNode* _wall,
       uv[n][1] = vOffset + t * vRepeats;
     }
   }
+  triangles = 2 * (uCount * vCount);
 }
 
 QuadWallSceneNode::Geometry::~Geometry()
@@ -101,8 +113,25 @@ void			QuadWallSceneNode::Geometry::render()
 {
   wall->setColor();
   glNormal3fv(normal);
-  if (style >= 2) drawVT();
-  else drawV();
+  if (style >= 2) {
+    drawVT();
+  } else {
+    drawV();
+  }
+  addTriangleCount(triangles);
+  return;
+}
+
+void			QuadWallSceneNode::Geometry::renderShadow()
+{
+  int last = (ds + 1) * dt;
+  glBegin(GL_TRIANGLE_STRIP);
+  glVertex3fv(vertex[last]);
+  glVertex3fv(vertex[0]);
+  glVertex3fv(vertex[last + ds]);
+  glVertex3fv(vertex[ds]);
+  glEnd();
+  addTriangleCount(2);
 }
 
 void			QuadWallSceneNode::Geometry::drawV() const
@@ -156,20 +185,22 @@ void			QuadWallSceneNode::init(const GLfloat base[3],
 				bool makeLODs)
 {
   // record plane and bounding sphere info
-  GLfloat plane[4], sphere[4];
-  plane[0] = uEdge[1] * vEdge[2] - uEdge[2] * vEdge[1];
-  plane[1] = uEdge[2] * vEdge[0] - uEdge[0] * vEdge[2];
-  plane[2] = uEdge[0] * vEdge[1] - uEdge[1] * vEdge[0];
-  plane[3] = -(plane[0] * base[0] + plane[1] * base[1] + plane[2] * base[2]);
-  setPlane(plane);
-  sphere[0] = 0.5f * (uEdge[0] + vEdge[0]);
-  sphere[1] = 0.5f * (uEdge[1] + vEdge[1]);
-  sphere[2] = 0.5f * (uEdge[2] + vEdge[2]);
-  sphere[3] = sphere[0]*sphere[0] + sphere[1]*sphere[1] + sphere[2]*sphere[2];
-  sphere[0] += base[0];
-  sphere[1] += base[1];
-  sphere[2] += base[2];
-  setSphere(sphere);
+  GLfloat myPlane[4], mySphere[4];
+  myPlane[0] = uEdge[1] * vEdge[2] - uEdge[2] * vEdge[1];
+  myPlane[1] = uEdge[2] * vEdge[0] - uEdge[0] * vEdge[2];
+  myPlane[2] = uEdge[0] * vEdge[1] - uEdge[1] * vEdge[0];
+  myPlane[3] = -(myPlane[0] * base[0] + myPlane[1] * base[1]
+		 + myPlane[2] * base[2]);
+  setPlane(myPlane);
+  mySphere[0] = 0.5f * (uEdge[0] + vEdge[0]);
+  mySphere[1] = 0.5f * (uEdge[1] + vEdge[1]);
+  mySphere[2] = 0.5f * (uEdge[2] + vEdge[2]);
+  mySphere[3] = mySphere[0]*mySphere[0] + mySphere[1]*mySphere[1]
+    + mySphere[2]*mySphere[2];
+  mySphere[0] += base[0];
+  mySphere[1] += base[1];
+  mySphere[2] += base[2];
+  setSphere(mySphere);
 
   // get length of sides
   const float uLength = sqrtf(float(uEdge[0] * uEdge[0] +
@@ -282,21 +313,9 @@ void			QuadWallSceneNode::init(const GLfloat base[3],
   }
 
   // record extents info
-  int i, j;
-  for (i = 0; i < 3; i++) {
-    mins[i] = +MAXFLOAT;
-    maxs[i] = -MAXFLOAT;
-  }
-  for (i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++) {
     const float* point = getVertex(i);
-    for (j = 0; j < 3; j++) {
-      if (point[j] < mins[j]) {
-        mins[j] = point[j];
-      }
-      if (point[j] > maxs[j]) {
-        maxs[j] = point[j];
-      }
-    }
+    extents.expandToPoint(point);
   }
 
   // record LOD info
@@ -313,7 +332,7 @@ QuadWallSceneNode::~QuadWallSceneNode()
   delete shadowNode;
 }
 
-int			QuadWallSceneNode::split(const float* plane,
+int			QuadWallSceneNode::split(const float *_plane,
 				SceneNode*& front, SceneNode*& back) const
 {
   // need to reorder vertices into counterclockwise order
@@ -328,7 +347,7 @@ int			QuadWallSceneNode::split(const float* plane,
     uv[i][0] = nodes[0]->uv[j][0];
     uv[i][1] = nodes[0]->uv[j][1];
   }
-  return WallSceneNode::splitWall(plane, vertex, uv, front, back);
+  return WallSceneNode::splitWall(_plane, vertex, uv, front, back);
 }
 
 void			QuadWallSceneNode::addRenderNodes(
@@ -336,7 +355,7 @@ void			QuadWallSceneNode::addRenderNodes(
 {
   const int lod = pickLevelOfDetail(renderer);
   nodes[lod]->setStyle(getStyle());
-  renderer.addRenderNode(nodes[lod], &getGState());
+  renderer.addRenderNode(nodes[lod], getWallGState());
 }
 
 void			QuadWallSceneNode::addShadowNodes(
@@ -345,40 +364,49 @@ void			QuadWallSceneNode::addShadowNodes(
   renderer.addShadowNode(shadowNode);
 }
 
-void                    QuadWallSceneNode::getExtents(float* _mins, float* _maxs) const
+bool		    QuadWallSceneNode::inAxisBox(const Extents& exts) const
 {
-  memcpy (_mins, mins, 3 * sizeof(float));
-  memcpy (_maxs, maxs, 3 * sizeof(float));
-  return;
-}
-
-bool                    QuadWallSceneNode::inAxisBox(const float* boxMins,
-                                                     const float* boxMaxs) const
-{
-  if ((mins[0] > boxMaxs[0]) || (maxs[0] < boxMins[0]) ||
-      (mins[1] > boxMaxs[1]) || (maxs[1] < boxMins[1]) ||
-      (mins[2] > boxMaxs[2]) || (maxs[2] < boxMins[2])) {
+  if (!extents.touches(exts)) {
     return false;
   }
-  
+
   // NOTE: inefficient
   float vertices[4][3];
   memcpy (vertices[0], nodes[0]->getVertex(0), sizeof(float[3]));
   memcpy (vertices[1], nodes[0]->getVertex(1), sizeof(float[3]));
   memcpy (vertices[2], nodes[0]->getVertex(2), sizeof(float[3]));
   memcpy (vertices[3], nodes[0]->getVertex(3), sizeof(float[3]));
-  
-  return testPolygonInAxisBox (4, vertices, getPlane(), boxMins, boxMaxs);
+
+  return testPolygonInAxisBox (4, vertices, getPlane(), exts);
 }
 
-int                     QuadWallSceneNode::getVertexCount () const
+int		     QuadWallSceneNode::getVertexCount () const
 {
   return 4;
 }
 
-const GLfloat*          QuadWallSceneNode::getVertex (int vertex) const
+const GLfloat*	  QuadWallSceneNode::getVertex (int vertex) const
 {
-  return nodes[0]->getVertex(vertex);
+  // re-map these to a counter-clockwise order
+  const int order[4] = {0, 1, 3, 2};
+  return nodes[0]->getVertex(order[vertex]);
+}
+
+
+void QuadWallSceneNode::getRenderNodes(std::vector<RenderSet>& rnodes)
+{
+  RenderSet rs = { nodes[0], getWallGState() };
+  rnodes.push_back(rs);
+  return;
+}
+
+
+void QuadWallSceneNode::renderRadar()
+{
+  if (plane[2] > 0.0f) {
+    nodes[0]->renderRadar();
+  }
+  return;
 }
 
 
@@ -389,4 +417,3 @@ const GLfloat*          QuadWallSceneNode::getVertex (int vertex) const
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

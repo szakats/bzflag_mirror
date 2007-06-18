@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,45 +7,52 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 #if defined(_MSC_VER)
   #pragma warning(disable: 4786)
 #endif
 
-#include <string.h>
-#include <sys/types.h>
-#include <ctype.h>
-#include <time.h>
-#include <vector>
-
-#include "network.h"
+// interface header
 #include "ServerLink.h"
-#include "Pack.h"
-#include "LocalPlayer.h"
-#include "ErrorHandler.h"
-#include "common.h"
-
-// invoke persistent rebuilding for current version dates
-#include "version.h"
-
-#if !defined(_WIN32)
-#include <unistd.h>
-#include <errno.h>
-#endif
-
-#include "bzsignal.h"
-
-#define UDEBUG if (UDEBUGMSG) printf
-#define UDEBUGMSG false
 
 #if defined(DEBUG)
 #define NETWORK_STATS
 #endif
 
+// system headers
+#include <string.h>
+#include <sys/types.h>
+#include <ctype.h>
+#include <time.h>
+#include <vector>
+#if !defined(_WIN32)
+#include <unistd.h>
+#include <errno.h>
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+
+// common implementation headers
+#include "ErrorHandler.h"
+// invoke persistent rebuilding for current version dates
+#include "version.h"
 #if defined(NETWORK_STATS)
 #include "bzfio.h"
+#endif
 #include "TimeKeeper.h"
+
+#include "SyncClock.h"
+
+#ifndef BUILDING_BZADMIN
+// bzflag local implementation headers
+#include "playing.h"
+#endif
+
+#define UDEBUG if (UDEBUGMSG) printf
+#define UDEBUGMSG false
+
+#if defined(NETWORK_STATS)
 static TimeKeeper	startTime;
 static uint32_t		bytesSent;
 static uint32_t		bytesReceived;
@@ -79,9 +86,6 @@ DWORD WINAPI ThreadConnect(LPVOID params)
 #endif // !defined(_WIN32)
 
 // FIXME -- packet recording
-#include <stdio.h>
-#include <stdlib.h>
-#include "TimeKeeper.h"
 FILE* packetStream = NULL;
 TimeKeeper packetStartTime;
 static const unsigned long serverPacket = 1;
@@ -89,12 +93,14 @@ static const unsigned long endPacket = 0;
 
 ServerLink*		ServerLink::server = NULL;
 
-ServerLink::ServerLink(const Address& serverAddress, int port, int) :
+ServerLink::ServerLink(const Address& serverAddress, int port) :
 				state(SocketError),	// assume failure
-				fd(-1)			// assume failure
+				fd(-1),			// assume failure
+				udpLength(0),
+				oldNeedForSpeed(false),
+				previousFill(0)
 {
   int i;
-  char cServerVersion[128];
 
   struct protoent* p;
 #if defined(_WIN32)
@@ -117,7 +123,7 @@ ServerLink::ServerLink(const Address& serverAddress, int port, int) :
 
   // open connection to server.  first connect to given port.
   // don't wait too long.
-  int query = socket(AF_INET, SOCK_STREAM, 0);
+  int query = (int)socket(AF_INET, SOCK_STREAM, 0);
   if (query < 0) return;
 
   struct sockaddr_in addr;
@@ -130,45 +136,71 @@ ServerLink::ServerLink(const Address& serverAddress, int port, int) :
   // for UDP, used later
   memcpy((unsigned char *)&usendaddr,(unsigned char *)&addr, sizeof(addr));
 
-#if !defined(_WIN32)
-  const bool okay = true;
+  bool okay = true;
   int fdMax = query;
-  if (BzfNetwork::setNonBlocking(query) < 0) {
-    close(query);
-    return;
-  }
   struct timeval timeout;
   fd_set write_set;
   fd_set read_set;
   int nfound;
-  if (connect(query, (CNCTType*)&addr, sizeof(addr)) < 0) {
-    if (getErrno() != EINPROGRESS) {
-      close(query);
-      return;
-    }
-    FD_ZERO(&write_set);
-    FD_SET(query, &write_set);
-    timeout.tv_sec = long(5);
-    timeout.tv_usec = 0;
-    nfound = select(fdMax + 1, NULL, (fd_set*)&write_set, NULL, &timeout);
-    if (nfound <= 0) {
-      close(query);
-      return;
-    }
-    int       connectError;
-    socklen_t errorLen = sizeof(int);
-    if (getsockopt(query, SOL_SOCKET, SO_ERROR, &connectError, &errorLen)
-	< 0) {
-      close(query);
-      return;
-    }
-    if (connectError != 0) {
+
+#if !defined(_WIN32)
+  // for standard BSD sockets
+
+  // Open a connection.
+  // we are blocking at this point so we will wait till we connect, or error
+  int connectReturn = connect(query, (CNCTType*)&addr, sizeof(addr));
+
+  logDebugMessage(2,"CONNECT:non windows inital connect returned %d\n",connectReturn);
+
+  // check for a real error
+  // in progress is a holdover from when we did this as non blocking.
+  // we swaped to blockin because we changed from having
+  // the server send the first data, to having the client send it.
+  int error = 0;
+  if (connectReturn != 0)
+  {
+    error = getErrno();
+    if (error != EINPROGRESS)
+    {
+      // if it was a real error, log and bail
+      logDebugMessage(1,"CONNECT:error in connect, error returned %d\n",error);
+
       close(query);
       return;
     }
   }
+
+  // call a select to make sure the socket is good and ready.
+  FD_ZERO(&write_set);
+  FD_SET((unsigned int)query, &write_set);
+  timeout.tv_sec = long(5);
+  timeout.tv_usec = 0;
+  nfound = select(fdMax + 1, NULL, (fd_set*)&write_set, NULL, &timeout);
+  error = getErrno();
+  logDebugMessage(2,"CONNECT:non windows inital select nfound = %d error = %d\n",nfound,error);
+
+  // if no sockets are active then we are done.
+  if (nfound <= 0) {
+    close(query);
+    return;
+  }
+
+  // if there are any connection errors, check them and we are done
+  int       connectError;
+  socklen_t errorLen = sizeof(int);
+  if (getsockopt(query, SOL_SOCKET, SO_ERROR, &connectError, &errorLen)
+      < 0) {
+    close(query);
+    return;
+  }
+  if (connectError != 0) {
+    logDebugMessage(2,"CONNECT:non getsockopt connectError = %d\n",connectError);
+    close(query);
+    return;
+  }
 #else // Connection timeout for Windows
 
+  // winsock connection
   // Initialize structure
   conn.query = query;
   conn.addr = (CNCTType*)&addr;
@@ -178,7 +210,7 @@ ServerLink::ServerLink(const Address& serverAddress, int port, int) :
   hConnected = CreateEvent(NULL, FALSE, FALSE, "Connected Event");
 
   hThread = CreateThread(NULL, 0, ThreadConnect, &conn, 0, &ThreadID);
-  const bool okay = (WaitForSingleObject(hConnected, 5000) == WAIT_OBJECT_0);
+  okay = (WaitForSingleObject(hConnected, 5000) == WAIT_OBJECT_0);
   if(!okay)
     TerminateThread(hThread ,1);
 
@@ -187,39 +219,133 @@ ServerLink::ServerLink(const Address& serverAddress, int port, int) :
   CloseHandle(hThread);
 
 #endif // !defined(_WIN32)
-  if (!okay)
-    goto done;
 
-  // get server version and verify
-#if !defined(_WIN32)
-  FD_ZERO(&read_set);
-  FD_SET(query, &read_set);
-  timeout.tv_sec = long(5);
-  timeout.tv_usec = 0;
-  nfound = select(fdMax + 1, (fd_set*)&read_set, NULL, NULL, &timeout);
-  if (nfound <= 0) {
+  // if the connection failed for any reason, we can not continue
+  if (!okay)
+  {
     close(query);
     return;
   }
-#endif // !defined(_WIN32)
-  i = recv(query, (char*)version, 8, 0);
-  if (i < 8)
-    goto done;
 
-  sprintf(cServerVersion,"Server version: '%8s'",version);
-  printError(cServerVersion);
+  // send out the connect header
+  // this will let the server know we are BZFS protocol.
+  // after the server gets this it will send back a version for us to check
+  int sendRepply = ::send(query,BZ_CONNECT_HEADER,(int)strlen(BZ_CONNECT_HEADER),0);
+
+  logDebugMessage(2,"CONNECT:send in connect returned %d\n",sendRepply);
+
+  // wait to get data back. we are still blocking so these
+  // calls should be sync.
+
+  FD_ZERO(&read_set);
+  FD_ZERO(&write_set);
+  FD_SET((unsigned int)query, &read_set);
+  FD_SET((unsigned int)query, &write_set);
+
+  timeout.tv_sec = long(10);
+  timeout.tv_usec = 0;
+
+  // pick some limit to time out on ( in seconds )
+  double thisStartTime = TimeKeeper::getCurrent().getSeconds();
+  double connectTimeout = 30.0;
+  if (BZDB.isSet("connectionTimeout"))
+    connectTimeout = BZDB.eval("connectionTimeout")  ;
+
+  bool gotNetData = false;
+
+  // loop calling select untill we read some data back.
+  // its only 8 bytes so it better come back in one packet.
+  int loopCount = 0;
+  while(!gotNetData)
+  {
+    loopCount++;
+    nfound = select(fdMax + 1, (fd_set*)&read_set, (fd_set*)&write_set, NULL, &timeout);
+
+    // there has to be at least one socket active, or we are screwed
+    if (nfound <= 0)
+    {
+      logDebugMessage(1,"CONNECT:select in connect failed, nfound = %d\n",nfound);
+      close(query);
+      return;
+    }
+
+    // try and get data back from the server
+    i = recv(query, (char*)version, 8, 0);
+
+    // if we got some, then we are done
+    if ( i > 0)
+    {
+      logDebugMessage(2,"CONNECT:got net data in connect, bytes read = %d\n",i);
+      logDebugMessage(2,"CONNECT:Time To Connect = %f\n",(TimeKeeper::getCurrent().getSeconds() - thisStartTime));
+     gotNetData = true;
+    }
+    else
+    {
+      // if we have waited too long, then bail
+      if ( (TimeKeeper::getCurrent().getSeconds() - thisStartTime) > connectTimeout)
+      {
+	logDebugMessage(1,"CONNECT:connect time out failed\n");
+	logDebugMessage(2,"CONNECT:connect loop count = %d\n",loopCount);
+	close(query);
+	return;
+      }
+
+      TimeKeeper::sleep(0.25f);
+    }
+ }
+
+  logDebugMessage(2,"CONNECT:connect loop count = %d\n",loopCount);
+
+  // if we got back less then the expected connect responce (BZFSXXXX)
+  // then something went bad, and we are done.
+  if (i < 8)
+  {
+    close(query);
+    return;
+  }
+
+  // since we are connected, we can go non blocking
+  // on BSD sockets systems
+  // all other messages after this are handled via the normal
+  // message system
+#if !defined(_WIN32)
+  if (BzfNetwork::setNonBlocking(query) < 0) {
+    close(query);
+    return;
+  }
+#endif
+
+  if (debugLevel >= 1) {
+    char cServerVersion[128];
+    sprintf(cServerVersion,"Server version: '%8s'",version);
+    printError(cServerVersion);
+  }
 
   // FIXME is it ok to try UDP always?
   server_abilities |= CanDoUDP;
   if (strcmp(version, getServerVersion()) != 0) {
     state = BadVersion;
-    goto done;
+
+    if (strcmp(version, BanRefusalString) == 0) {
+      state = Refused;
+      char message[512];
+      int len = recv(query, (char*)message, 512, 0);
+      if (len > 0) {
+	message[len - 1] = 0;
+      } else {
+	message[0] = 0;
+      }
+      rejectionMessage = message;
+    }
+
+    close(query);
+    return;
   }
 
   // read local player's id
 #if !defined(_WIN32)
   FD_ZERO(&read_set);
-  FD_SET(query, &read_set);
+  FD_SET((unsigned int)query, &read_set);
   timeout.tv_sec = long(5);
   timeout.tv_usec = 0;
   nfound = select(fdMax + 1, (fd_set*)&read_set, NULL, NULL, &timeout);
@@ -233,7 +359,8 @@ ServerLink::ServerLink(const Address& serverAddress, int port, int) :
     return;
   if (id == 0xff) {
     state = Rejected;
-    goto done;
+    close(query);
+    return;
   }
 
 #if !defined(_WIN32)
@@ -263,10 +390,8 @@ ServerLink::ServerLink(const Address& serverAddress, int port, int) :
     packetStream = fopen(getenv("BZFLAGSAVE"), "w");
     packetStartTime = TimeKeeper::getCurrent();
   }
-  return;
 
-done:
-  close(query);
+  return;
 }
 
 ServerLink::~ServerLink()
@@ -290,17 +415,17 @@ if (packetStream) {
 }
 
 #if defined(NETWORK_STATS)
-  const float dt = TimeKeeper::getCurrent() - startTime;
-  DEBUG1("Server network statistics:\n");
-  DEBUG1("  elapsed time    : %f\n", dt);
-  DEBUG1("  bytes sent      : %d (%f/sec)\n", bytesSent, (float)bytesSent / dt);
-  DEBUG1("  packets sent    : %d (%f/sec)\n", packetsSent, (float)packetsSent / dt);
+  const float dt = float(TimeKeeper::getCurrent() - startTime);
+  logDebugMessage(1,"Server network statistics:\n");
+  logDebugMessage(1,"  elapsed time    : %f\n", dt);
+  logDebugMessage(1,"  bytes sent      : %d (%f/sec)\n", bytesSent, (float)bytesSent / dt);
+  logDebugMessage(1,"  packets sent    : %d (%f/sec)\n", packetsSent, (float)packetsSent / dt);
   if (packetsSent != 0)
-    DEBUG1("  bytes/packet    : %f\n", (float)bytesSent / (float)packetsSent);
-  DEBUG1("  bytes recieved  : %d (%f/sec)\n", bytesReceived, (float)bytesReceived / dt);
-  DEBUG1("  packets received: %d (%f/sec)\n", packetsReceived, (float)packetsReceived / dt);
+    logDebugMessage(1,"  bytes/packet    : %f\n", (float)bytesSent / (float)packetsSent);
+  logDebugMessage(1,"  bytes recieved  : %d (%f/sec)\n", bytesReceived, (float)bytesReceived / dt);
+  logDebugMessage(1,"  packets received: %d (%f/sec)\n", packetsReceived, (float)packetsReceived / dt);
   if (packetsReceived != 0)
-    DEBUG1("  bytes/packet    : %f\n", (float)bytesReceived / (float)packetsReceived);
+    logDebugMessage(1,"  bytes/packet    : %f\n", (float)bytesReceived / (float)packetsReceived);
 #endif
 }
 
@@ -314,28 +439,55 @@ void			ServerLink::setServer(ServerLink* _server)
   server = _server;
 }
 
+void ServerLink::flush()
+{
+  if (!previousFill)
+    return;
+  if (oldNeedForSpeed) {
+#ifdef TESTLINK
+    if ((random()%TESTQUALTIY) != 0)
+#endif
+      sendto(urecvfd, (const char *)txbuf, previousFill, 0,
+	     &usendaddr, sizeof(usendaddr));
+    // we don't care about errors yet
+  } else {
+    int r = ::send(fd, (const char *)txbuf, previousFill, 0);
+    (void)r; // silence g++
+#if defined(_WIN32)
+    if (r == SOCKET_ERROR) {
+      const int e = WSAGetLastError();
+      if (e == WSAENETRESET || e == WSAECONNABORTED ||
+	  e == WSAECONNRESET || e == WSAETIMEDOUT)
+	state = Hungup;
+      r = 0;
+    }
+#endif
+
+#if defined(NETWORK_STATS)
+    bytesSent += r;
+    packetsSent++;
+#endif
+  }
+  previousFill = 0;
+}
+
 void			ServerLink::send(uint16_t code, uint16_t len,
 							const void* msg)
 {
   bool needForSpeed=false;
   if (state != Okay) return;
-  char msgbuf[MaxPacketLen];
-  void* buf = msgbuf;
-  buf = nboPackUShort(buf, len);
-  buf = nboPackUShort(buf, code);
-  if (msg && len != 0) buf = nboPackString(buf, msg, len);
 
   if ((urecvfd>=0) && ulinkup ) {
     switch (code) {
       case MsgShotBegin:
       case MsgShotEnd:
+      case MsgHit:
       case MsgPlayerUpdate:
       case MsgPlayerUpdateSmall:
       case MsgGMUpdate:
-      case MsgAudio:
-      case MsgVideo:
       case MsgUDPLinkRequest:
       case MsgUDPLinkEstablished:
+	  case MsgWhatTimeIsIt:
 	needForSpeed=true;
 	break;
     }
@@ -344,31 +496,17 @@ void			ServerLink::send(uint16_t code, uint16_t len,
   if (code == MsgUDPLinkRequest)
     needForSpeed=true;
 
-  if (needForSpeed) {
-#ifdef TESTLINK
-    if ((random()%TESTQUALTIY) != 0)
-#endif
-    sendto(urecvfd, (const char *)msgbuf, (char*)buf - msgbuf, 0, &usendaddr, sizeof(usendaddr));
-    // we don't care about errors yet
-    return;
-  }
+  if ((needForSpeed != oldNeedForSpeed)
+      || (previousFill + len + 4 > MaxPacketLen))
+    flush();
+  oldNeedForSpeed = needForSpeed;
 
-  int r = ::send(fd, (const char*)msgbuf, len + 4, 0);
-  (void)r; // silence g++
-#if defined(_WIN32)
-  if (r == SOCKET_ERROR) {
-    const int e = WSAGetLastError();
-    if (e == WSAENETRESET || e == WSAECONNABORTED ||
-	e == WSAECONNRESET || e == WSAETIMEDOUT)
-      state = Hungup;
-    r = 0;
-  }
-#endif
-
-#if defined(NETWORK_STATS)
-  bytesSent += r;
-  packetsSent++;
-#endif
+  void* buf = txbuf + previousFill;
+  buf       = nboPackUShort(buf, len);
+  buf       = nboPackUShort(buf, code);
+  if (msg && len != 0)
+    buf = nboPackString(buf, msg, len);
+  previousFill += len + 4;
 }
 
 #ifdef WIN32
@@ -396,18 +534,32 @@ int			ServerLink::read(uint16_t& code, uint16_t& len,
   if ((urecvfd >= 0) /* && ulinkup */) {
     int n;
 
-    AddrLen recvlen = sizeof(urecvaddr);
-    unsigned char ubuf[MaxPacketLen];
-    n = recvfrom(urecvfd, (char *)ubuf, MaxPacketLen, 0, &urecvaddr, (socklen_t*) &recvlen);
-    if (n>0) {
+    if (!udpLength) {
+      AddrLen recvlen = sizeof(urecvaddr);
+      n = recvfrom(urecvfd, ubuf, MaxPacketLen, 0, &urecvaddr,
+		   (socklen_t*) &recvlen);
+      if (n > 0) {
+	udpLength    = n;
+	udpBufferPtr = ubuf;
+      }
+    }
+    if (udpLength) {
       // unpack header and get message
-      void* buf = ubuf;
-      buf = nboUnpackUShort(buf, len);
-      buf = nboUnpackUShort(buf, code);
-      UDEBUG("<** UDP Packet Code %x Len %x\n",code, len);
-      if (len > MaxPacketLen)
+      udpLength -= 4;
+      if (udpLength < 0) {
+	udpLength = 0;
 	return -1;
-      memcpy((char *)msg,(char *)buf, len);
+      }
+      udpBufferPtr = (char *)nboUnpackUShort(udpBufferPtr, len);
+      udpBufferPtr = (char *)nboUnpackUShort(udpBufferPtr, code);
+      UDEBUG("<** UDP Packet Code %x Len %x\n",code, len);
+      if (len > udpLength) {
+	udpLength = 0;
+	return -1;
+      }
+      memcpy((char *)msg, udpBufferPtr, len);
+      udpBufferPtr += len;
+      udpLength    -= len;
       return 1;
     }
     if (UDEBUGMSG) printError("Fallback to normal TCP receive");
@@ -425,7 +577,7 @@ int			ServerLink::read(uint16_t& code, uint16_t& len,
   // only check server
   fd_set read_set;
   FD_ZERO(&read_set);
-  _FD_SET(fd, &read_set);
+  FD_SET((unsigned int)fd, &read_set);
   int nfound = select(fd+1, (fd_set*)&read_set, NULL, NULL,
 			(struct timeval*)(blockTime >= 0 ? &timeout : NULL));
   if (nfound == 0) return 0;
@@ -443,19 +595,28 @@ int			ServerLink::read(uint16_t& code, uint16_t& len,
 
   int rlen = 0;
   rlen = recv(fd, (char*)headerBuffer, 4, 0);
+  if (!rlen)
+    // Socket shutdown Server side
+    return -2;
 
   int tlen = rlen;
   while (rlen >= 1 && tlen < 4) {
     printError("ServerLink::read() loop");
     FD_ZERO(&read_set);
-    _FD_SET(fd, &read_set);
+    FD_SET((unsigned int)fd, &read_set);
     nfound = select(fd+1, (fd_set*)&read_set, NULL, NULL, NULL);
     if (nfound == 0) continue;
     if (nfound < 0) return -1;
     rlen = recv(fd, (char*)headerBuffer + tlen, 4 - tlen, 0);
-    if (rlen >= 0) tlen += rlen;
+    if (rlen > 0)
+      tlen += rlen;
+    else if (rlen == 0)
+      // Socket shutdown Server side
+      return -2;
   }
-  if (tlen < 4) return -1;
+  if (tlen < 4) {
+    return -1;
+  }
 #if defined(NETWORK_STATS)
   bytesReceived += 4;
   packetsReceived++;
@@ -469,10 +630,14 @@ int			ServerLink::read(uint16_t& code, uint16_t& len,
   //printError("Code is %02x",code);
   if (len > MaxPacketLen)
     return -1;
-  if (len > 0)
+  if (len > 0) {
     rlen = recv(fd, (char*)msg, int(len), 0);
-  else
+    if (!rlen)
+      // Socket shutdown Server side
+      return -2;
+  } else {
     rlen = 0;
+  }
 #if defined(NETWORK_STATS)
   if (rlen >= 0) bytesReceived += rlen;
 #endif
@@ -482,12 +647,16 @@ int			ServerLink::read(uint16_t& code, uint16_t& len,
   tlen = rlen;
   while (rlen >= 1 && tlen < int(len)) {
     FD_ZERO(&read_set);
-    _FD_SET(fd, &read_set);
+    FD_SET((unsigned int)fd, &read_set);
     nfound = select(fd+1, (fd_set*)&read_set, 0, 0, NULL);
     if (nfound == 0) continue;
     if (nfound < 0) return -1;
     rlen = recv(fd, (char*)msg + tlen, int(len) - tlen, 0);
-    if (rlen >= 0) tlen += rlen;
+    if (rlen > 0)
+      tlen += rlen;
+    else if (rlen == 0)
+      // Socket shutdown Server side
+      return -2;
 #if defined(NETWORK_STATS)
   if (rlen >= 0) bytesReceived += rlen;
 #endif
@@ -505,120 +674,158 @@ if (packetStream) {
 }
   return 1;
 }
+void ServerLink::sendCaps(PlayerId _id,bool downloads, bool sounds )
+{
+  if (state != Okay)
+    return;
+  char msg[3] = {0};
+  void* buf = msg;
 
-void			ServerLink::sendEnter(PlayerType type,
-						TeamColor team,
-						const char* name,
-						const char* email)
+  buf = nboPackUByte(buf, uint8_t(_id));
+  buf = nboPackUByte(buf, downloads ? 1 : 0);
+  buf = nboPackUByte(buf, sounds ? 1 : 0);
+
+  send(MsgCapBits, (uint16_t)((char*)buf - msg), msg);
+}
+
+void ServerLink::sendEnter(PlayerId _id, PlayerType type, TeamColor team,
+			   const char* name, const char* email,
+			   const char* token)
 {
   if (state != Okay) return;
-  char msg[PlayerIdPLen + 4 + CallSignLen + EmailLen];
-  ::memset(msg, 0, sizeof(msg));
+  char msg[MaxPacketLen] = {0};
   void* buf = msg;
+
+  buf = nboPackUByte(buf, uint8_t(_id));
+
   buf = nboPackUShort(buf, uint16_t(type));
   buf = nboPackUShort(buf, uint16_t(team));
-  ::memcpy(buf, name, ::strlen(name));
+  ::strncpy((char*)buf, name, CallSignLen - 1);
   buf = (void*)((char*)buf + CallSignLen);
-  ::memcpy(buf, email, ::strlen(email));
+  ::strncpy((char*)buf, email, EmailLen - 1);
   buf = (void*)((char*)buf + EmailLen);
-  send(MsgEnter, sizeof(msg), msg);
+  ::strncpy((char*)buf, token, TokenLen - 1);
+  buf = (void*)((char*)buf + TokenLen);
+  ::strncpy((char*)buf, getAppVersion(), VersionLen - 1);
+  buf = (void*)((char*)buf + VersionLen);
+  send(MsgEnter, (uint16_t)((char*)buf - msg), msg);
 }
 
 bool ServerLink::readEnter (std::string& reason,
-                            uint16_t& code, uint16_t& rejcode)
+			    uint16_t& code, uint16_t& rejcode)
 {
   // wait for response
   uint16_t len;
   char msg[MaxPacketLen];
 
-  if (this->read(code, len, msg, -1) < 0) {
-    reason = "Communication error joining game [No immediate respose].";
-    return false;
-  }
+  while (true) {
+    if (this->read(code, len, msg, -1) < 0) {
+      reason = "Communication error joining game [No immediate respose].";
+      return false;
+    }
 
-  if (code == MsgSuperKill) {
-    reason = "Server forced disconnection.";
-    return false;
-  }
-  else if (code == MsgReject) {
-    void *buf;
-    char buffer[MessageLen];
-    buf = nboUnpackUShort (msg, rejcode); // filler for now
-    buf = nboUnpackString (buf, buffer, MessageLen);
-    buffer[MessageLen - 1] = '\0';
-    reason = buffer;
-    return false;
-  }
-  else if (code != MsgAccept) {
-    char buf[10];
-    sprintf(buf, "%04x", code);
-    reason = "Communication error joining game [Wrong Code ";
-    reason += buf;
-    reason += "].";
-    return false;
+    if (code == MsgAccept) {
+      return true;
+    }
+    else if (code == MsgSuperKill) {
+      reason = "Server forced disconnection.";
+      return false;
+    }
+    else if (code == MsgReject) {
+      void *buf;
+      char buffer[MessageLen];
+      buf = nboUnpackUShort (msg, rejcode); // filler for now
+      buf = nboUnpackString (buf, buffer, MessageLen);
+      buffer[MessageLen - 1] = '\0';
+      reason = buffer;
+      return false;
+    }
+    // ignore other codes so that bzadmin doesn't choke
+    // on the MsgMessage's that the server can send before
+    // the MsgAccept (authorization holdoff, etc...)
   }
 
   return true;
 }
 
+#ifndef BUILDING_BZADMIN
 void			ServerLink::sendCaptureFlag(TeamColor team)
 {
-  char msg[2];
-  nboPackUShort(msg, uint16_t(team));
+  char msg[3];
+  void* buf = msg;
+  buf = nboPackUByte(buf, uint8_t(getId()));
+  nboPackUShort(buf, uint16_t(team));
   send(MsgCaptureFlag, sizeof(msg), msg);
 }
 
 void			ServerLink::sendGrabFlag(int flagIndex)
 {
-  char msg[2];
-  nboPackUShort(msg, uint16_t(flagIndex));
+  char msg[3];
+  void* buf = msg;
+  buf = nboPackUByte(buf, uint8_t(getId()));
+  nboPackUShort(buf, uint16_t(flagIndex));
   send(MsgGrabFlag, sizeof(msg), msg);
 }
 
 void			ServerLink::sendDropFlag(const float* position)
 {
-  char msg[12];
+  char msg[13];
   void* buf = msg;
+  buf = nboPackUByte(buf, uint8_t(getId()));
   buf = nboPackVector(buf, position);
   send(MsgDropFlag, sizeof(msg), msg);
 }
 
-void			ServerLink::sendKilled(const PlayerId& killer, int reason,
-								int shotId)
+void			ServerLink::sendKilled(const PlayerId victim,
+					       const PlayerId killer,
+					       int reason, int shotId,
+					       const FlagType* flagType,
+					       int phydrv)
 {
-  char msg[PlayerIdPLen + 4];
+  char msg[6 + FlagPackSize + 4];
   void* buf = msg;
+
+  buf = nboPackUByte(buf, uint8_t(victim));
   buf = nboPackUByte(buf, killer);
   buf = nboPackUShort(buf, int16_t(reason));
   buf = nboPackShort(buf, int16_t(shotId));
-  send(MsgKilled, sizeof(msg), msg);
+  buf = flagType->pack(buf);
+
+  if (reason == PhysicsDriverDeath) {
+    buf = nboPackInt(buf, phydrv);
+  }
+
+  send(MsgKilled, (uint16_t)((char*)buf - (char*)msg), msg);
 }
 
-
-#ifndef BUILDING_BZADMIN
-void			ServerLink::sendPlayerUpdate(Player* player)
+void			ServerLink::sendPlayerUpdate(Player* player )
 {
-  char msg[PlayerUpdatePLen];
-  const float timeStamp = TimeKeeper::getCurrent() - TimeKeeper::getNullTime();
+  char msg[PlayerUpdatePLenMax];
+  // Send the time frozen at each start of scene iteration, as all
+  // dead reckoning use that
+  const float timeStamp = (float)syncedClock.GetServerSeconds();
   void* buf = msg;
   uint16_t code;
-  buf = nboPackFloat(buf, timeStamp);
   buf = nboPackUByte(buf, player->getId());
+  buf = nboPackFloat(buf, timeStamp);
+
   // code will be MsgPlayerUpdate or MsgPlayerUpdateSmall
-  int len = PlayerUpdatePLen;
   buf = player->pack(buf, code);
-  if (code == MsgPlayerUpdateSmall) {
-    len = PlayerUpdateSmallPLen;
-  }
+
+  // variable length
+  const int len = (const int)((char*)buf - (char*)msg);
+
   send(code, len, msg);
 }
-#endif
 
 void			ServerLink::sendBeginShot(const FiringInfo& info)
 {
-  char msg[FiringInfoPLen];
+  char msg[3];
   void* buf = msg;
-  buf = info.pack(buf);
+
+  buf = nboPackUByte(buf, info.shot.player);
+  buf = nboPackUShort(buf, info.shot.id);
+
   send(MsgShotBegin, sizeof(msg), msg);
 }
 
@@ -633,15 +840,38 @@ void			ServerLink::sendEndShot(const PlayerId& source,
   send(MsgShotEnd, sizeof(msg), msg);
 }
 
-void			ServerLink::sendAlive()
+void ServerLink::sendHit(const PlayerId &source, const PlayerId &shooter,
+			 int shotId)
 {
-  send(MsgAlive, 0, NULL);
+  char msg[80];
+  void* buf = msg;
+  buf = nboPackUByte(buf, source);
+  buf = nboPackUByte(buf, shooter);
+  buf = nboPackShort(buf, int16_t(shotId));
+  send(MsgHit, sizeof(msg), msg);
+}
+#endif
+
+void ServerLink::sendVarRequest()
+{
+  send(MsgSetVar, 0, NULL);
+}
+
+void			ServerLink::sendAlive(const PlayerId playerId)
+{
+  char msg[1];
+
+  void* buf = msg;
+  buf = nboPackUByte(buf, uint8_t(playerId));
+
+  send(MsgAlive, sizeof(msg), msg);
 }
 
 void			ServerLink::sendTeleport(int from, int to)
 {
-  char msg[4];
+  char msg[5];
   void* buf = msg;
+  buf = nboPackUByte(buf, uint8_t(getId()));
   buf = nboPackUShort(buf, uint16_t(from));
   buf = nboPackUShort(buf, uint16_t(to));
   send(MsgTeleport, sizeof(msg), msg);
@@ -658,19 +888,92 @@ void			ServerLink::sendTransferFlag(const PlayerId& from, const PlayerId& to)
 
 void			ServerLink::sendNewRabbit()
 {
-  send(MsgNewRabbit, 0, NULL);
+  char msg[1];
+  void* buf = msg;
+  buf = nboPackUByte(buf, uint8_t(getId()));
+  send(MsgNewRabbit, sizeof(msg), msg);
 }
 
 void			ServerLink::sendPaused(bool paused)
 {
-  uint8_t p = paused;
-  send(MsgPause, 1, &p);
+  char msg[2];
+  void* buf = msg;
+  buf = nboPackUByte(buf, uint8_t(getId()));
+  buf = nboPackUByte(buf, uint8_t(paused));
+  send(MsgPause, sizeof(msg), msg);
+}
+
+void ServerLink::sendWhatTimeIsIt ( unsigned char tag )
+{
+	char msg[2];
+	void* buf = msg;
+	buf = nboPackUByte(buf, tag);
+	send(MsgWhatTimeIsIt, 1, msg);
+}
+
+void ServerLink::sendNewPlayer()
+{
+  send(MsgNewPlayer, 0, NULL);
+}
+
+void ServerLink::sendExit()
+{
+  char msg[1];
+
+  msg[0] = getId();
+
+  send(MsgExit, sizeof(msg), msg);
+}
+
+void ServerLink::sendCollide(const PlayerId playerId, const PlayerId otherId,
+			      const float *pos)
+{
+  char msg[14];
+
+  void* buf = msg;
+  buf = nboPackUByte(buf, uint8_t(playerId));
+  buf = nboPackUByte(buf, uint8_t(otherId));
+  buf = nboPackVector(buf, pos);
+
+  send(MsgCollide, sizeof(msg), msg);
+}
+
+void			ServerLink::sendAutoPilot(bool autopilot)
+{
+  char msg[2];
+  void* buf = msg;
+  buf = nboPackUByte(buf, uint8_t(getId()));
+  buf = nboPackUByte(buf, uint8_t(autopilot));
+  send(MsgAutoPilot, sizeof(msg), msg);
+}
+
+void ServerLink::sendMessage(const PlayerId& to, char message[MessageLen])
+{
+  char msg[MaxPacketLen];
+  void* buf = msg;
+
+  buf = nboPackUByte(buf, uint8_t(getId()));
+  buf = nboPackUByte(buf, uint8_t(to));
+  buf = nboPackString(buf, message, MessageLen);
+
+  send(MsgMessage, (uint16_t)((char *)buf - msg), msg);
+}
+
+void ServerLink::sendLagPing(char pingRequest[2])
+{
+  char msg[3];
+  void* buf = msg;
+
+  buf = nboPackUByte(buf, uint8_t(getId()));
+  buf = nboPackString(buf, pingRequest, 2);
+
+  send(MsgLagPing, sizeof(msg), msg);
 }
 
 void			ServerLink::sendUDPlinkRequest()
 {
   if ((server_abilities & CanDoUDP) != CanDoUDP)
-    return; // server does not support udp (future bzfls test)
+    return; // server does not support udp (future list server test)
 
   char msg[1];
   unsigned short localPort;
@@ -678,7 +981,7 @@ void			ServerLink::sendUDPlinkRequest()
 
   struct sockaddr_in serv_addr;
 
-  if ((urecvfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+  if ((urecvfd = (int)socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     return; // we cannot comply
   }
 #if 1
@@ -707,11 +1010,13 @@ void			ServerLink::sendUDPlinkRequest()
   localPort = ntohs(serv_addr.sin_port);
   memcpy((char *)&urecvaddr,(char *)&serv_addr, sizeof(serv_addr));
 
-  std::vector<std::string> args;
-  char lps[10];
-  sprintf(lps, "%d", localPort);
-  args.push_back(lps);
-  printError("Network: Created local UDP downlink port {1}", &args);
+  if (debugLevel >= 1) {
+    std::vector<std::string> args;
+    char lps[10];
+    sprintf(lps, "%d", localPort);
+    args.push_back(lps);
+    printError("Network: Created local UDP downlink port {1}", &args);
+  }
 
   buf = nboPackUByte(buf, id);
 
@@ -726,7 +1031,8 @@ void			ServerLink::sendUDPlinkRequest()
 void			ServerLink::enableOutboundUDP()
 {
   ulinkup = true;
-  printError("Server got our UDP, using UDP to server");
+  if (debugLevel >= 1)
+    printError("Server got our UDP, using UDP to server");
 }
 // confirm that server can send us UDP
 void			ServerLink::confirmIncomingUDP()
@@ -736,15 +1042,11 @@ void			ServerLink::confirmIncomingUDP()
   // well start with udp as soon as we can
   ulinkup = true;
 
-  printError("Got server's UDP packet back, server using UDP");
+  if (debugLevel >= 1)
+    printError("Got server's UDP packet back, server using UDP");
   send(MsgUDPLinkEstablished, 0, NULL);
 }
 
-void			ServerLink::sendVersionString()
-{
-  DEBUG3("Sent client version string to server: %s\n", getAppVersion());
-  send(MsgVersion, strlen(getAppVersion()) + 1, getAppVersion());
-}
 
 // Local Variables: ***
 // mode:C++ ***

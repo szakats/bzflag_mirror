@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __SERVERSTARTMENU_H__
 #define __SERVERSTARTMENU_H__
+
+#include "common.h"
+
+/* interface header */
+#include "HUDDialog.h"
 
 /* system interface headers */
 #include <vector>
@@ -19,7 +24,6 @@
 #include <map>
 
 /* local interface headers */
-#include "HUDDialog.h"
 #include "HUDuiDefaultKey.h"
 #include "HUDuiList.h"
 #include "HUDuiLabel.h"
@@ -44,7 +48,7 @@ private:
   void setStatus(const char*, const std::vector<std::string> *parms = NULL);
   void loadSettings();
   void scanWorldFiles (const std::string& searchDir,
-                       std::vector<std::string>* items);
+		       std::vector<std::string>* items);
 
 private:
   float center;

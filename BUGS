@@ -1,17 +1,88 @@
 recent bugs
 ------------
 
-- tank begins driving backwards on spawn (perhaps only with keyboard,
-  perhaps only with mac)
+- jitter on windows servers is reported as very high, but play
+  is unaffected.
 
-- player counts do not seem to get updated on list server
+- client side bots don't even show as tanks.
 
-- tabbed msg area does not properly fill in corners and bottom outline
+- bullets do no longer bounce off the walls in replays
+  even when ricochets have been enabled
 
-- player score doesn't seem to match the server's score when relaying to
-  other players.  i.e. the local client see's their own player score that
-  is different from what others see (due to differences in tk).  seems like
-  tk is not included in score locally, but is in the server.
+- if there is a network connection (e.g. a lan) yet no external
+  access, the client hangs hard in cURLManager.cxx:291 and later in
+  some odd corrupted stack space elsewhere.  this was with CURL 7.13.1
+  (default Mac libcurl).  simple workaround is to invoke client with
+  -list http://localhost (even if no local server is running) to avoid
+  the hang on resolving.
+
+- client side bots make the client get disconnected (read error)
+
+- idbans do not respect the antiban permission
+
+- idbans report the wrong time remaining on a idbanlist
+
+- a banned registered player that gets added to both the banList and
+  idBanList is not listed in the latter on a idbanlist yet prevented
+  from joining even after the ban is removed from the banList.
+
+- someone broke the key-driving rotational acceleration dampening,
+  feels like 1.7 driving again.
+
+- bzfs sometimes gets into a mode where CTF team flags spawn at random places,
+  not on bases.  Also, players spawn at random spots after flag cap.
+
+- Zbuffer flickering with Narrow and Covered animated treads
+
+- ANSI codes can be used in the server -public messages
+  The best solution is probably to strip the codes at the listserver
+
+- at high frame rates (approx. > 500), isDeadReckoningWrong() often returns true
+  when tank is moving at constant speed. This leads to many unnecessary
+  MsgPlayerUpdate packets to be sent. Maybe floating point inaccuracies?
+
+- some ATI cards get font rendering to have variable alpha values
+  on each letter. The gl restate was removed from the font manager.
+  It should be put in and tied to a config option that defaults to
+  off.
+
+- teleporting is blocking when going from a ground teleporter to
+  a teleporter sitting on a mesh object. fix during next protocol
+  breakage  (workaround by dropping the ground teleporter by a
+  small amount... causing the burrow sound)
+
+- the last shot fired with a shot-limited flag doesn't carry the flag
+  type (or is dropped by the server?)...e.g. if I have G, limited to
+  5 shots, and kill someone with the fifth shot, only that player dies
+  because the flag was dropped by the time the kill was scored...
+  even though the shot was fired while I still had the flag.
+
+- spin inversion bug, fix in MeshTransform.cxx (around line 300)
+  during the next protocol breakage
+
+- do all Riva128 systems require "noMeshClusers"? Is there a 
+  workaround to make vertex array work on those cards?
+
+- Too many flags caused "drop, unresponsive with 16687 bytes queued"
+  (+f good{40} was the breaking point, linux, local bzfs server)
+  admittedly, an unreasonable number of flags
+
+- Bad BZDB: some BZDB variables are not range checked:
+  "/set _syncTime -" goes boom on the client side.
+  (StateDatabase::ExpressionToken::operator=, StateDatabase.cxx:890)
+
+- Material properties for mesh containers are not adjusted by
+  ObstacleModifier, and will not save correctly if using saveFlatFile.
+
+- Observer movement controls seems to get locked-up in Hunt mode.
+
+- Burrowed tank shadows should be ground clipped
+  (the shadow perspective matrix messes with the clip plane?)
+
+- if you start the client windowed on a multidisplay system, and then
+  move the window to a secondary monitor, you cannot control the
+  brightness of the (SDL) window since it presently modifying the
+  gamma of the display that started it.
 
 - dropping a team flag, when the related team is empty, start a timeout.
   The related code does not take into account that we can have now
@@ -21,10 +92,6 @@ recent bugs
   black screen.  need to prevent this by either detecting if there is an
   available mode that is possible, lowering memory usage, or reporting
   an error and aborting.
-
-- server has been reported to segfault (gethostname fails?) when chrooted
-  and run as a private server (ask tegan for more details if needed)
-  Tim Riker says this one is fixed. Please re-test.
 
 - XIJoystick does not compile
 
@@ -37,34 +104,15 @@ recent bugs
 - bullets now travel through the top of a block instead of reflecting off.
   The bullets appear to be half(or more) submerged into the block.
 
-- Can be kicked with WINGS for going to high when adjusting wings gravity,
-  jump count or jump velocity.
-
-- texture method doesn't seem to be settable from the gui, sometimes -
-  switching to the experimental quality mode dropped textures (looked just
-  like lowest quality without the stippling) and they couldn't be set back.
-
 - world weapons seem to lag the server when there are many players joined.
   might be related to a rapidly repeating world weapon as well (like once
-  a second).
-
-- sending bzfs a single byte udp packet sends bzfs into lala land. (trepan)
-
-- bzfrelay is broken for current net protocol. Should be just forwarding TCP
-  and UDP packets on a single port.  Could likely just be removed as there are
-  other apps that do bare forwarding and that is all that is needed now.
+  a second, use _weapons BZDB var to test...)
 
 - reached assertion on either World::getTeleportTarget() or
   World::getTeleporter() after getting killed while jumping towards a
   teleporter (and landing in front of the teleporter, albeit dead).  i
   didn't respawn, waited a couple sec (was chatting), then the assertion was
   raised.
-
-- Change any documentation/help that says rabbit hunters are black (s/b orange)
-  If that change is going to stick.
-
-- the "default" keyword in the email line can get into the HUD, it shouldn't.
-  must have missed something.
 
 - list server includes counts for players running on non-public/mis-configured
   servers on the same machine on different ports.  if server runs on port 5156
@@ -77,59 +125,11 @@ recent bugs
 - client crashes upon receipt of a corrupted MsgFlagUpdate message.
   (See http://bzflag.secretplace.us/packet.txt for an example)
 
-- GL Bugs: Looks like the handling of gl contexts is severely messed up in
-  bzflag, and there is no very easy cure for this. Someone obviously had
-  noticed this before and commented out a glDelete statement in the
-  lighting code. Details:
-
-  bzflag uses several classes like OpenGLDisplayList to wrap gl objects.
-  These classes use rep subobjects which store the actual state and
-  use reference counting. The state can be as simple as an integer
-  (for display lists). This integer refereces some object which is
-  handled by gl internally and must be created and deleted by calling gl
-  functions (like glGenLists() and glDeleteLists()). The bzflag
-  classes resp. their rep classes call these functions to create and delete
-  the gl objects automatically when necessary, i.e. creation happens when
-  a new object is created from nothing (not a copy) and destruction happens
-  when the ref coun tof the rep object falls to 0.
-
-  The problem happens when the gl context changes, for example when the
-  video resolution is changes on Linux or (I suppose) one switches on
-  Windows with alt tab. It is my understanding now (I myself am clueless
-  about OpenGL), that the above mentioned ids (referring to a gl display list
-  object for example) are related to a gl context. So when the old gl
-  context is destroyed and a new one is created and bzflag creates to
-  gl objects, it might well receive an id which is still bound to a rep
-  object. When that rep object's ref count falls to zero, it will call
-  the gl delete function on that id, but this will now delete the new gl
-  object for the new context -> oops.
-
-  When freeing the gl context, bzflag should probably first delete all
-  gl objects or at least invalidate them, so they won't be deleted when
-  the other context is in place.
-
-  I have tried to simply get rid of all the gldelete calls and then it works
-  more or less, except for a strange effect where the sky/ground is messed
-  up for a fraction of a second after switching resolutions.
-
-  Another note: how is it with contexts and several window like in
-  -view three/stacked? Not that I can test it because these views simply
-  coredump on me.
-
-- Mac OS X client outputs an Info.plist file with the permissions set
-  incorrectly if building an application bundle via XCode.
-
-- Spawn code sometimes spawns you mid-air
-
 - doc/guide/NetworkProtocol.xml is not up to date
 
 - Shift+Tab seems to be bound to jump without being bound to jump
   It doesn't happen on Linux. Shift+Tab action is untranslated by XLookupString
   (xfree86 4.3), so need custom code to go into bzflag.
-
-- menu does not display modified values after quitting and returning, although
-  the bindings appear to remain in effect.
-  I cannot reproduce this. Can someone give more details, maybe an example?
 
 - Flaghelp falls into the radar area when radar is 'bigger'
 
@@ -138,19 +138,10 @@ recent bugs
   0xbfffd7ed) Could we be running off the end of the packet (ie count is
   fubar'ed?) Perhaps add sanity check for not overruning end of buffer.
 
-- On a FFA game, where no purple was allowed a Team size of 65535 was displayed
-  for Purple.
-
 - bzadmin seems to be less responsive over the network than bzflag - a
   bzadmin client can get kicked from a very active game by the server
   for causing it to queue too many packages (there's a limit at 20kB, when I
   removed it the queue went up to at least 64kB)
-
-- os x client audio is very choppy when the user has a sound card installed
-
-- make distcheck does not work unless bzflag is configured the same day you
-  do make distcheck. Cause is the different version of the two, for the date
-  things
 
 - make maintainer-clean does not enter DIST_SUBDIRS
   so all Makefile.in and Makefile files are not removed correctly
@@ -158,9 +149,6 @@ recent bugs
 
 older bugs in BZFlag
 ---------------------
-
-see the bug tracker on SourceForge for more
-http://SourceForge.net/tracker/?group_id=3248&atid=103248
 
 * exploding tank parts sometimes move along the ground instead of
    flying up into the air.
@@ -190,3 +178,7 @@ http://SourceForge.net/tracker/?group_id=3248&atid=103248
 
 * error dialogs on win32 may appear off screen
    only when display resolution was changed
+
+---
+see the bug tracker on SourceForge for more
+http://SourceForge.net/tracker/?group_id=3248&atid=103248

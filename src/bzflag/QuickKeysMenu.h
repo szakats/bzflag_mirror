@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,14 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	__QUICKKEYSMENU_H__
 #define __QUICKKEYSMENU_H__
+
+// common - 1st one
+#include "common.h"
 
 /* system interface headers */
 #include <string>
@@ -37,8 +40,6 @@ public:
 private:
   HUDuiLabel* createLabel(const std::string &);
   HUDuiTypeIn* createInput(const std::string &);
-private:
-  int firstKeyControl;
 };
 
 

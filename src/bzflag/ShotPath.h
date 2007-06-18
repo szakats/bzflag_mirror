@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -28,20 +28,17 @@
 #include "common.h"
 
 /* common interface headers */
-#include "global.h"
 #include "TimeKeeper.h"
-#include "Pack.h"
-#include "Address.h"
 #include "Flag.h"
 #include "ShotUpdate.h"
 
 /* local interface headers */
 #include "BaseLocalPlayer.h"
-#include "Player.h"
 #include "ShotStrategy.h"
 #include "SceneDatabase.h"
 
 class ShotStrategy;
+class ShotCollider;
 
 class ShotPath {
   public:
@@ -52,15 +49,16 @@ class ShotPath {
     bool		isReloaded() const;
     const PlayerId&	getPlayer() const;
     uint16_t		getShotId() const;
-    FlagType*		getFlag() const;
+	ShotType		getShotType() const;
+	FlagType*		getFlag() const;
     float		getLifetime() const;
     float		getReloadTime() const;
-    const TimeKeeper&	getStartTime() const;
-    const TimeKeeper&	getCurrentTime() const;
+    const double	getStartTime() const;
+    const double	getCurrentTime() const;
     const float*	getPosition() const;
     const float*	getVelocity() const;
 
-    float		checkHit(const BaseLocalPlayer*, float position[3]) const;
+    float		checkHit(const ShotCollider&, float[3]) const;
     void		setExpiring();
     void		setExpired();
     bool		isStoppedByHit() const;
@@ -71,8 +69,11 @@ class ShotPath {
     void		radarRender() const;
     FiringInfo&		getFiringInfo();
     TeamColor		getTeam() const;
+
+  virtual void	  update(float) {};
+
   protected:
-			ShotPath(const FiringInfo&);
+			ShotPath(const FiringInfo&, double);
     void		updateShot(float dt);
     const ShotStrategy*	getStrategy() const;
     ShotStrategy*	getStrategy();
@@ -86,15 +87,15 @@ class ShotPath {
     ShotStrategy*	strategy;		// strategy for moving shell
     FiringInfo		firingInfo;		// shell information
     float		reloadTime;		// time to reload
-    TimeKeeper		startTime;		// time of firing
-    TimeKeeper		currentTime;		// current time
+    double		startTime;		// time of firing
+    double		currentTime;		// current time
     bool		expiring;		// shot has almost terminated
     bool		expired;		// shot has terminated
 };
 
 class LocalShotPath : public ShotPath {
   public:
-			LocalShotPath(const FiringInfo&);
+			LocalShotPath(const FiringInfo&,double);
 			~LocalShotPath();
 
     void		update(float dt);
@@ -102,7 +103,7 @@ class LocalShotPath : public ShotPath {
 
 class RemoteShotPath : public ShotPath {
   public:
-			RemoteShotPath(const FiringInfo&);
+			RemoteShotPath(const FiringInfo&,double);
 			~RemoteShotPath();
 
     void		update(float dt);
@@ -139,6 +140,11 @@ inline uint16_t		ShotPath::getShotId() const
   return firingInfo.shot.id;
 }
 
+inline ShotType		ShotPath::getShotType() const
+{
+	return firingInfo.shotType;
+}
+
 inline FlagType*	ShotPath::getFlag() const
 {
   return firingInfo.flagType;
@@ -154,12 +160,12 @@ inline float		ShotPath::getReloadTime() const
   return reloadTime;
 }
 
-inline const TimeKeeper	&ShotPath::getStartTime() const
+inline const double ShotPath::getStartTime() const
 {
   return startTime;
 }
 
-inline const TimeKeeper	&ShotPath::getCurrentTime() const
+inline const double ShotPath::getCurrentTime() const
 {
   return currentTime;
 }

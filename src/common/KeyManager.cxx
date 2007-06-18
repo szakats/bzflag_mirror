@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #if defined(_MSC_VER)
@@ -102,6 +102,36 @@ const char*		KeyManager::buttonNames[] = {
   "Joystick Button 8",
   "Joystick Button 9",
   "Joystick Button 10",
+  "Joystick Button 11",
+  "Joystick Button 12",
+  "Joystick Button 13",
+  "Joystick Button 14",
+  "Joystick Button 15",
+  "Joystick Button 16",
+  "Joystick Button 17",
+  "Joystick Button 18",
+  "Joystick Button 19",
+  "Joystick Button 20",
+  "Joystick Button 21",
+  "Joystick Button 22",
+  "Joystick Button 23",
+  "Joystick Button 24",
+  "Joystick Button 25",
+  "Joystick Button 26",
+  "Joystick Button 27",
+  "Joystick Button 28",
+  "Joystick Button 29",
+  "Joystick Button 30",
+  "Joystick Button 31",
+  "Joystick Button 32",
+  "Hatswitch 1 up",
+  "Hatswitch 1 right",
+  "Hatswitch 1 down",
+  "Hatswitch 1 left",
+  "Hatswitch 2 up",
+  "Hatswitch 2 right",
+  "Hatswitch 2 down",
+  "Hatswitch 2 left",
   "LastButton"  // should always be last item listed
 };
 const char*		KeyManager::asciiNames[][2] = {
@@ -184,7 +214,7 @@ void			KeyManager::unbindCommand(const char* command)
     if (index->second == command) {
       deleteme = index;
       index++;
-      unbind(deleteme->first, true);
+      unbind(deleteme->first, false);
     } else {
       index++;
     }
@@ -332,7 +362,7 @@ bool			KeyManager::onCallback(
 				void* userData,
 				void* vinfo)
 {
-  CallbackInfo* info = reinterpret_cast<CallbackInfo*>(vinfo);
+  CallbackInfo* info = static_cast<CallbackInfo*>(vinfo);
   callback(info->name, info->press, info->cmd, userData);
   return true;
 }
@@ -375,4 +405,3 @@ bool			KeyManager::KeyEventLess::operator()(
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

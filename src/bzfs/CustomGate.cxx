@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
@@ -17,32 +17,46 @@
 #include <math.h>
 
 /* common interface headers */
+#include "Teleporter.h"
 #include "StateDatabase.h"
+#include "ObstacleMgr.h"
 
 
-CustomGate::CustomGate()
+CustomGate::CustomGate(const char* _telename)
 {
+  telename = _telename;
   size[0] = 0.5f * BZDB.eval(StateDatabase::BZDB_TELEWIDTH);
   size[1] = BZDB.eval(StateDatabase::BZDB_TELEBREADTH);
   size[2] = 2.0f * BZDB.eval(StateDatabase::BZDB_TELEHEIGHT);
   border = size[0] * 2.0f;
+  horizontal = false;
 }
 
 
 bool CustomGate::read(const char *cmd, std::istream& input)
 {
-  if (strcmp(cmd, "border") == 0)
+  if (strcasecmp(cmd, "border") == 0)
     input >> border;
+  else if (strcasecmp(cmd, "horizontal") == 0)
+    horizontal = true;
   else
     return WorldFileObstacle::read(cmd, input);
   return true;
 }
 
 
-void CustomGate::write(WorldInfo *world) const
+void CustomGate::writeToGroupDef(GroupDefinition *groupdef) const
 {
-  world->addTeleporter(pos[0], pos[1], pos[2], rotation, fabs(size[0]), fabs(size[1]), fabs(size[2]), border,driveThrough,shootThrough);
+  Teleporter* tele =
+    new Teleporter(pos, rotation,
+		   fabsf(size[0]), fabsf(size[1]), fabsf(size[2]),
+		   border, horizontal, driveThrough, shootThrough);
+
+  tele->setName(telename);
+
+  groupdef->addObstacle(tele);
 }
+
 
 // Local variables: ***
 // mode:C++ ***

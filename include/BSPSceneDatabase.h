@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* BSPSceneDatabase:
@@ -27,28 +27,33 @@
 #include "bzfgl.h"
 #include "SceneDatabase.h"
 
+
 class BSPSceneDatabase : public SceneDatabase {
   public:
 			BSPSceneDatabase();
 			~BSPSceneDatabase();
 
-    void		addStaticNode(SceneNode*);
+    // returns true if the node would have been deleted
+    bool		addStaticNode(SceneNode*, bool dontFree);
     void		addDynamicNode(SceneNode*);
     void		addDynamicSphere(SphereSceneNode*);
-    void		addShadowNodes(SceneRenderer &renderer);
+    void		finalizeStatics();
     void		removeDynamicNodes();
     void		removeAllNodes();
     bool		isOrdered();
 
-    SceneIterator*	getRenderIterator();
+    void		updateNodeStyles();
+    void		addLights(SceneRenderer& renderer);
+    void		addShadowNodes(SceneRenderer &renderer);
+    void		addRenderNodes(SceneRenderer& renderer);
+    void		renderRadarNodes(const ViewFrustum&);
+
+    void		drawCuller();
 
   private:
-    friend class BSPSceneIterator;
-    friend class BSPSceneIteratorItem;
     class Node {
       public:
 			Node(bool dynamic, SceneNode* node);
-			void addShadowNodes(SceneRenderer& renderer);
       public:
 	bool		dynamic;
 	int		count;
@@ -57,8 +62,16 @@ class BSPSceneDatabase : public SceneDatabase {
 	Node*		back;
     };
 
-    void		insertStatic(int, Node*, SceneNode*);
+    void		setNodeStyle(Node*);
+    void		nodeAddLights(Node*);
+    void		nodeAddShadowNodes(Node*);
+    void		nodeAddRenderNodes(Node*);
+
+    // returns true if the node would have been deleted
+    bool		insertStatic(int, Node*, SceneNode*, bool dontFree);
     void		insertDynamic(int, Node*, SceneNode*);
+    void		insertNoPlane(int, Node*, SceneNode*);
+    void		insertNoPlaneNodes();
     void		removeDynamic(Node*);
     void		free(Node*);
     void		release(Node*);
@@ -67,36 +80,15 @@ class BSPSceneDatabase : public SceneDatabase {
   private:
     Node*		root;
     int			depth;
+    // the following members avoid passing parameters around
     GLfloat		eye[3];
+    SceneRenderer*	renderer;
+    const ViewFrustum*	frustum;
+
+    bool needNoPlaneNodes;
+    std::vector<SceneNode*> noPlaneNodes;
 };
 
-class BSPSceneIteratorItem {
-  public:
-    enum Side { None = 0, Back = 1, Front = 2, Center = 4 };
-			BSPSceneIteratorItem(BSPSceneDatabase::Node* _node) :
-				node(_node), side(None) { }
-  public:
-    BSPSceneDatabase::Node*	node;
-    int				side;
-};
-
-typedef std::vector<BSPSceneIteratorItem> BSPSceneIteratorStack;
-
-class BSPSceneIterator : public SceneIterator {
-  public:
-			BSPSceneIterator(const BSPSceneDatabase*);
-    virtual		~BSPSceneIterator();
-
-    void	        resetFrustum(const ViewFrustum*);
-    void	        reset();
-    SceneNode*	        getNext();
-    void		drawCuller();
-
-  private:
-    const BSPSceneDatabase*	db;
-    GLfloat			eye[3];
-    BSPSceneIteratorStack	stack;
-};
 
 #endif // BZF_BSP_SCENE_DATABASE_H
 
@@ -107,4 +99,3 @@ class BSPSceneIterator : public SceneIterator {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,145 +7,191 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "WorldInfo.h"
 
+/* system headers */
+#include <ctype.h>
+
 /* common implementation headers */
 #include "global.h"
 #include "Pack.h"
 #include "Protocol.h"
+#include "Extents.h"
 #include "Intersect.h"
+#include "CollisionManager.h"
+#include "DynamicColor.h"
+#include "TextureMatrix.h"
+#include "BzMaterial.h"
+#include "PhysicsDriver.h"
+#include "MeshTransform.h"
+#include "MeshDrawInfo.h"
+#include "TimeKeeper.h"
+
+/* obstacle implementation headers */
+#include "ObstacleMgr.h"
+#include "Obstacle.h"
+#include "BoxBuilding.h"
+#include "PyramidBuilding.h"
+#include "BaseBuilding.h"
+#include "TetraBuilding.h"
+#include "Teleporter.h"
+#include "WallObstacle.h"
+#include "MeshObstacle.h"
+#include "ArcObstacle.h"
+#include "ConeObstacle.h"
+#include "SphereObstacle.h"
+
+/* local implementation headers */
+#include "FlagInfo.h"
+#include "PlayerInfo.h"
+#include "CustomZone.h"
 
 /* compression library header */
-#include "../zlib/zlib.h"
+#include "zlib.h"
 
 
 WorldInfo::WorldInfo() :
-  maxHeight(0),
+  maxHeight(0.0f),
   database(NULL)
 {
   size[0] = 400.0f;
   size[1] = 400.0f;
   gravity = -9.81f;
+  waterLevel = -1.0f;
+  waterMatRef = NULL;
+	finished = false;
 }
 
 WorldInfo::~WorldInfo()
 {
   delete[] database;
+  database = NULL;
+  databaseSize = 0;
+  uncompressedSize = 0;
+  links.clear();
+  OBSTACLEMGR.clear();
+	finished = false;
 }
+
 
 void WorldInfo::addWall(float x, float y, float z, float r, float w, float h)
 {
-  if ((z + h) > maxHeight)
-    maxHeight = z+h;
-
   const float pos[3] = {x, y, z};
-  WallObstacle wall (pos, r, w, h);
-  walls.push_back (wall);
+  WallObstacle* wall = new WallObstacle(pos, r, w, h);
+  OBSTACLEMGR.addWorldObstacle(wall);
 }
 
-void WorldInfo::addBox(float x, float y, float z, float r, float w, float d, float h, bool drive, bool shoot)
+
+void WorldInfo::addLink(int src, int dst)
 {
-  if ((z + h) > maxHeight)
-    maxHeight = z+h;
-
-  const float pos[3] = {x, y, z};
-  BoxBuilding box (pos, r, w, d, h, drive, shoot, false);
-  boxes.push_back (box);
+  links.addLink(src, dst);
+  return;
 }
 
-void WorldInfo::addPyramid(float x, float y, float z, float r, float w, float d, float h, bool drive, bool shoot, bool flipZ)
+void WorldInfo::addLink(const std::string& src, const std::string& dst)
 {
-  if ((z + h) > maxHeight)
-    maxHeight = z+h;
-
-  const float pos[3] = {x, y, z};
-  PyramidBuilding pyr (pos, r, w, d, h, drive, shoot);
-  if (flipZ) {
-    pyr.setZFlip();
-  }
-  pyramids.push_back (pyr);
+  links.addLink(src, dst);
+  return;
 }
 
-void WorldInfo::addTetra(const float (*vertices)[3], const bool *visible,
-                         const bool *colored, const float (*colors)[4],
-                         bool drive, bool shoot)
-{
-  TetraBuilding tetra (vertices, visible, colored, colors, drive, shoot);
-  tetras.push_back (tetra);
-
-  float tetraHeight = tetra.getPosition()[2] + tetra.getHeight();
-  if (tetraHeight > maxHeight) {
-    maxHeight = tetraHeight;
-  }
-}
-
-void WorldInfo::addTeleporter(float x, float y, float z, float r, float w, float d, float h, float b, bool drive, bool shoot)
-{
-  if ((z + h) > maxHeight)
-    maxHeight = z+h;
-
-  const float pos[3] = {x, y, z};
-  Teleporter tele (pos, r, w, d, h, b, drive, shoot);
-  teleporters.push_back (tele);
-
-  // default to passthru linkage
-  int index = teleporters.size() - 1;
-  setTeleporterTarget ((index * 2) + 1, (index * 2));
-  setTeleporterTarget ((index * 2), (index * 2) + 1);
-}
-
-void WorldInfo::addBase(float x, float y, float z, float r,
-                        float w, float d, float h, int color,
-                        bool /* drive */, bool /* shoot */)
-{
-  if ((z + h) > maxHeight)
-    maxHeight = z+h;
-
-  const float pos[3] = {x, y, z};
-  const float size[3] = {w, d, h};
-  BaseBuilding base (pos, r, size, color);
-  bases.push_back (base);
-}
-
-void WorldInfo::addLink(int from, int to)
-{
-  // discard links to/from teleporters that don't exist
-  // note that -1 "to" means the client picks one at random
-  if ((unsigned(from) > teleporters.size() * 2 + 1) ||
-     ((unsigned(to) > teleporters.size() * 2 + 1) && (to != -1))) {
-    DEBUG1("Warning: bad teleporter link dropped from=%d to=%d\n", from, to);
-  } else {
-    setTeleporterTarget (from, to);
-  }
-}
 
 void WorldInfo::addZone(const CustomZone *zone)
 {
   entryZones.addZone( zone );
 }
 
-void WorldInfo::addWeapon(const FlagType *type, const float *origin, float direction,
-                          float initdelay, const std::vector<float> &delay, TimeKeeper &sync)
+void WorldInfo::addWeapon(const FlagType *type, const float *origin,
+			  float direction, float tilt, TeamColor teamColor,
+			  float initdelay, const std::vector<float> &delay,
+			  TimeKeeper &sync)
 {
-  worldWeapons.add(type, origin, direction, initdelay, delay, sync);
+  worldWeapons.add(type, origin, direction, tilt,
+		   teamColor, initdelay, delay, sync);
 }
 
-float WorldInfo::getMaxWorldHeight()
+void WorldInfo::addWaterLevel (float level, const BzMaterial* matref)
+{
+  waterLevel = level;
+  waterMatRef = matref;
+}
+
+void WorldInfo::addBox(float x, float y, float z, float r,
+		       float w, float d, float h, bool drive, bool shoot)
+{
+  const float pos[3] = {x, y, z};
+  BoxBuilding* box = new BoxBuilding(pos, r, w, d, h, drive, shoot, false);
+  OBSTACLEMGR.addWorldObstacle(box);
+}
+
+void WorldInfo::addPyramid(float x, float y, float z, float r,
+			   float w, float d, float h,
+			   bool drive, bool shoot, bool flipZ)
+{
+  const float pos[3] = {x, y, z};
+  PyramidBuilding* pyr = new PyramidBuilding(pos, r, w, d, h, drive, shoot);
+  if (flipZ) {
+    pyr->setZFlip();
+  }
+  OBSTACLEMGR.addWorldObstacle(pyr);
+}
+
+void WorldInfo::addTeleporter(float x, float y, float z, float r,
+			      float w, float d, float h, float b,
+			      bool horizontal, bool drive, bool shoot)
+{
+  const float pos[3] = {x, y, z};
+  Teleporter* tele = new Teleporter(pos, r, w, d, h, b, horizontal, drive, shoot);
+  OBSTACLEMGR.addWorldObstacle(tele);
+}
+
+void WorldInfo::addBase(const float pos[3], float r,
+			const float _size[3], int color,
+			bool /* drive */, bool /* shoot */)
+{
+  BaseBuilding* base = new BaseBuilding(pos, r, _size, color);
+  OBSTACLEMGR.addWorldObstacle(base);
+}
+
+
+void WorldInfo::makeWaterMaterial()
+{
+  // the texture matrix
+  TextureMatrix* texmat = new TextureMatrix;
+  texmat->setName("WaterMaterial");
+  texmat->setDynamicShift(0.05f, 0.0f);
+  texmat->finalize();
+  int texmatIndex = TEXMATRIXMGR.addMatrix(texmat);
+
+  // the material
+  BzMaterial material;
+  const float diffuse[4] = {0.65f, 1.0f, 0.5f, 0.9f};
+  material.reset();
+  material.setName("WaterMaterial");
+  material.setTexture("water");
+  material.setTextureMatrix(texmatIndex); // generate a default later
+  material.setDiffuse(diffuse);
+  material.setUseTextureAlpha(true); // make sure that alpha is enabled
+  material.setUseColorOnTexture(false); // only use the color as a backup
+  material.setUseSphereMap(false);
+  material.setNoRadar(true);
+  material.setNoShadow(true);
+  waterMatRef = MATERIALMGR.addMaterial(&material);
+
+  return;
+}
+
+float WorldInfo::getWaterLevel() const
+{
+  return waterLevel;
+}
+
+float WorldInfo::getMaxWorldHeight() const
 {
   return maxHeight;
-}
-
-void WorldInfo::setTeleporterTarget(int src, int tgt)
-{
-  if ((int)teleportTargets.size() < src+1)
-    teleportTargets.resize(((src/2)+1)*2);
-
-  // record target in source entry
-  teleportTargets[src] = tgt;
 }
 
 WorldWeapons& WorldInfo::getWorldWeapons()
@@ -153,17 +199,23 @@ WorldWeapons& WorldInfo::getWorldWeapons()
   return worldWeapons;
 }
 
-void                    WorldInfo::loadCollisionManager()
+EntryZones& WorldInfo::getEntryZones()
 {
-  collisionManager.load(boxes, bases, pyramids, tetras, teleporters);
+  return entryZones;
+}
+
+
+void		    WorldInfo::loadCollisionManager()
+{
+  COLLISIONMGR.load();
   return;
 }
 
-void                    WorldInfo::checkCollisionManager()
+void		    WorldInfo::checkCollisionManager()
 {
-  if (collisionManager.needReload()) {
+  if (COLLISIONMGR.needReload()) {
     // reload the collision grid
-    collisionManager.load(boxes, bases, pyramids, tetras, teleporters);
+    COLLISIONMGR.load();
   }
   return;
 }
@@ -198,7 +250,8 @@ bool WorldInfo::rectHitCirc(float dx, float dy, const float *p, float r) const
   return true;
 }
 
-bool WorldInfo::inRect(const float *p1, float angle, const float *size, float x, float y, float r) const
+bool WorldInfo::inRect(const float *p1, float angle, const float *_size,
+		       float x, float y, float r) const
 {
   // translate origin
   float pa[2];
@@ -212,13 +265,13 @@ bool WorldInfo::inRect(const float *p1, float angle, const float *size, float x,
   pb[1] = c * pa[1] + s * pa[0];
 
   // do test
-  return rectHitCirc(size[0], size[1], pb, r);
+  return rectHitCirc(_size[0], _size[1], pb, r);
 }
 
 
 InBuildingType WorldInfo::inCylinderNoOctree(Obstacle **location,
-                                             float x, float y, float z, float radius,
-                                             float height)
+					     float x, float y, float z,
+					     float radius, float height) const
 {
   if (height < Epsilon) {
     height = Epsilon;
@@ -226,59 +279,16 @@ InBuildingType WorldInfo::inCylinderNoOctree(Obstacle **location,
 
   float pos[3] = {x, y, z};
 
-  for (std::vector<BaseBuilding>::iterator base_it = bases.begin();
-       base_it != bases.end(); ++base_it) {
-    BaseBuilding &base = *base_it;
-    if (base.inCylinder(pos, radius, height)) {
-      if (location != NULL) {
-        *location = &base;
+  for (int type = 0; type < GroupDefinition::ObstacleTypeCount; type++) {
+    const ObstacleList& list = OBSTACLEMGR.getWorld()->getList(type);
+    for (unsigned int i = 0; i < list.size(); i++) {
+      Obstacle* obs = list[i];
+      if (obs->inCylinder(pos, radius, height)) {
+	if (location != NULL) {
+	  *location = obs;
+	}
+	return classifyHit(obs);
       }
-      return IN_BASE;
-    }
-  }
-  for (std::vector<BoxBuilding>::iterator box_it = boxes.begin();
-       box_it != boxes.end(); ++box_it) {
-    BoxBuilding &box = *box_it;
-    if (box.inCylinder(pos, radius, height)) {
-      if (location != NULL) {
-        *location = &box;
-      }
-      if (box.isDriveThrough()) {
-        return IN_BOX_DRIVETHROUGH;
-      }
-      else {
-        return IN_BOX_NOTDRIVETHROUGH;
-      }
-    }
-  }
-  for (std::vector<PyramidBuilding>::iterator pyr_it = pyramids.begin();
-       pyr_it != pyramids.end(); ++pyr_it) {
-    PyramidBuilding &pyr = *pyr_it;
-    if (pyr.inCylinder(pos, radius, height)) {
-      if (location != NULL) {
-        *location = &pyr;
-      }
-      return IN_PYRAMID;
-    }
-  }
-  for (std::vector<TetraBuilding>::iterator tetra_it = tetras.begin();
-       tetra_it != tetras.end(); ++tetra_it) {
-    TetraBuilding &tetra = *tetra_it;
-    if (tetra.inCylinder(pos, radius, height)) {
-      if (location != NULL) {
-        *location = &tetra;
-      }
-      return IN_TETRA;
-    }
-  }
-  for (std::vector<Teleporter>::iterator tele_it = teleporters.begin();
-       tele_it != teleporters.end(); ++tele_it) {
-    Teleporter &tele = *tele_it;
-    if (tele.inCylinder(pos, radius, height)) {
-      if (location != NULL) {
-        *location = &tele;
-      }
-      return IN_TELEPORTER;
     }
   }
 
@@ -291,8 +301,8 @@ InBuildingType WorldInfo::inCylinderNoOctree(Obstacle **location,
 
 
 InBuildingType WorldInfo::cylinderInBuilding(const Obstacle **location,
-				             const float* pos, float radius,
-                                             float height)
+					     const float* pos, float radius,
+					     float height) const
 {
   if (height < Epsilon) {
     height = Epsilon;
@@ -301,7 +311,7 @@ InBuildingType WorldInfo::cylinderInBuilding(const Obstacle **location,
   *location = NULL;
 
   // check everything but walls
-  const ObsList* olist = collisionManager.cylinderTest (pos, radius, height);
+  const ObsList* olist = COLLISIONMGR.cylinderTest (pos, radius, height);
   for (int i = 0; i < olist->count; i++) {
     const Obstacle* obs = olist->list[i];
     if (obs->inCylinder(pos, radius, height)) {
@@ -313,17 +323,19 @@ InBuildingType WorldInfo::cylinderInBuilding(const Obstacle **location,
   return classifyHit (*location);
 }
 
+
 InBuildingType WorldInfo::cylinderInBuilding(const Obstacle **location,
-				             float x, float y, float z, float radius,
-                                             float height)
+					     float x, float y, float z, float radius,
+					     float height) const
 {
   const float pos[3] = {x, y, z};
   return cylinderInBuilding (location, pos, radius, height);
 }
 
+
 InBuildingType WorldInfo::boxInBuilding(const Obstacle **location,
-				        const float* pos, float angle,
-				        float width, float breadth, float height)
+					const float* pos, float angle,
+					float width, float breadth, float height) const
 {
   if (height < Epsilon) {
     height = Epsilon;
@@ -333,7 +345,7 @@ InBuildingType WorldInfo::boxInBuilding(const Obstacle **location,
 
   // check everything but walls
   const ObsList* olist =
-    collisionManager.boxTest (pos, angle, width, breadth, height);
+    COLLISIONMGR.boxTest (pos, angle, width, breadth, height);
   for (int i = 0; i < olist->count; i++) {
     const Obstacle* obs = olist->list[i];
     if (obs->inBox(pos, angle, width, breadth, height)) {
@@ -345,7 +357,8 @@ InBuildingType WorldInfo::boxInBuilding(const Obstacle **location,
   return classifyHit (*location);
 }
 
-InBuildingType WorldInfo::classifyHit (const Obstacle* obstacle)
+
+InBuildingType WorldInfo::classifyHit (const Obstacle* obstacle) const
 {
   if (obstacle == NULL) {
     return NOT_IN_BUILDING;
@@ -364,6 +377,12 @@ InBuildingType WorldInfo::classifyHit (const Obstacle* obstacle)
   else if (obstacle->getType() == TetraBuilding::getClassName()) {
     return IN_TETRA;
   }
+  else if (obstacle->getType() == MeshObstacle::getClassName()) {
+    return IN_MESH;
+  }
+  else if (obstacle->getType() == MeshFace::getClassName()) {
+    return IN_MESHFACE;
+  }
   else if (obstacle->getType() == BaseBuilding::getClassName()) {
     return IN_BASE;
   }
@@ -372,217 +391,189 @@ InBuildingType WorldInfo::classifyHit (const Obstacle* obstacle)
   }
   else {
     // FIXME - choke here?
-    printf ("*** Unknown obstacle type in WorldInfo::boxInBuilding()\n");
+    printf ("*** Unknown obstacle type in WorldInfo::classifyHit()\n");
     return IN_BASE;
   }
 }
 
-bool WorldInfo::getZonePoint(const std::string &qualifier, float *pt)
+
+bool WorldInfo::getFlagDropPoint(const FlagInfo* fi, const float* pos,
+				float* pt) const
 {
-  const Obstacle* loc;
-  InBuildingType type;
+  FlagType* flagType = fi->flag.type;
+  const int team = (int)flagType->flagTeam;
+  const bool teamFlag = (team != NoTeam);
 
-  if (!entryZones.getZonePoint(qualifier, pt))
-    return false;
-
-  type = cylinderInBuilding(&loc, pt[0], pt[1], 0.0f, 1.0f, pt[2]);
-  if (type == NOT_IN_BUILDING)
-    pt[2] = 0.0f;
-  else
-    pt[2] = loc->getPosition()[2] + loc->getSize()[2];
-  return true;
+  if (teamFlag) {
+    const std::string& safetyQual =
+      CustomZone::getFlagSafetyQualifier(team);
+    if (entryZones.getClosePoint(safetyQual, pos, pt)) {
+      return true;
+    }
+  } else {
+    const std::string& idQual =
+      CustomZone::getFlagIdQualifier(fi->getIndex());
+    if (entryZones.getClosePoint(idQual, pos, pt)) {
+      return true;
+    }
+    const std::string& typeQual =
+      CustomZone::getFlagTypeQualifier(flagType);
+    if (entryZones.getClosePoint(typeQual, pos, pt)) {
+      return true;
+    }
+  }
+  return false;
 }
 
-bool WorldInfo::getSafetyPoint(const std::string &qualifier, const float *pos, float *pt)
+
+bool WorldInfo::getFlagSpawnPoint(const FlagInfo* fi, float* pt) const
 {
-  const Obstacle *loc;
-  InBuildingType type;
+  FlagType* flagType = fi->flag.type;
+  const int team = (int)flagType->flagTeam;
+  const bool teamFlag = (team != NoTeam);
 
-  if (!entryZones.getSafetyPoint(qualifier, pos, pt))
-    return false;
+  const std::string& idQual =
+    CustomZone::getFlagIdQualifier(fi->getIndex());
+  if (entryZones.getRandomPoint(idQual, pt)) {
+    return true;
+  }
 
-  type = cylinderInBuilding(&loc, pt[0], pt[1], 0.0f, 1.0f, pt[2]);
-  if (type == NOT_IN_BUILDING)
-    pt[2] = 0.0f;
-  else
-    pt[2] = loc->getPosition()[2] + loc->getSize()[2];
-  return true;
+  if (!teamFlag) {
+    const std::string& typeQual =
+      CustomZone::getFlagTypeQualifier(flagType);
+    if (entryZones.getRandomPoint(typeQual, pt)) {
+      return true;
+    }
+  }
+  return false;
 }
+
+
+bool WorldInfo::getPlayerSpawnPoint(const PlayerInfo* pi, float* pt) const
+{
+  const std::string& teamQual =
+    CustomZone::getPlayerTeamQualifier((int)pi->getTeam());
+  if (entryZones.getRandomPoint(teamQual, pt)) {
+    return true;
+  }
+  return false;
+}
+
 
 void WorldInfo::finishWorld()
 {
   entryZones.calculateQualifierLists();
-  loadCollisionManager ();
-}
 
-int WorldInfo::packDatabase(const BasesList* baseList)
-{
-  int numBases = 0;
-  BasesList::const_iterator base_it;
-  if (baseList != NULL) {
-    for (base_it = baseList->begin(); base_it != baseList->end(); ++base_it) {
-      numBases += base_it->second.size();
-    }
+  loadCollisionManager();
+
+  links.doLinking();
+
+  maxHeight = COLLISIONMGR.getWorldExtents().maxs[2];
+  const float wallHeight = BZDB.eval(StateDatabase::BZDB_WALLHEIGHT);
+  if (maxHeight < wallHeight) {
+    maxHeight = wallHeight;
+  }
+  if (maxHeight < 0.0f) {
+    maxHeight = 0.0f;
   }
 
-  databaseSize =
-    (2 + 2 + WorldCodeBaseSize) * numBases +
-    (2 + 2 + WorldCodeWallSize) * walls.size() +
-    (2 + 2 + WorldCodeBoxSize) * boxes.size() +
-    (2 + 2 + WorldCodePyramidSize) * pyramids.size() +
-    (2 + 2 + WorldCodeTetraSize) * tetras.size() +
-    (2 + 2 + WorldCodeTeleporterSize) * teleporters.size() +
-    (2 + 2 + WorldCodeLinkSize) * 2 * teleporters.size() +
-    worldWeapons.packSize() + entryZones.packSize();
+  finished = true;
 
+  return;
+}
+
+
+int WorldInfo::packDatabase()
+{
+  // deallocate any prior database
+  if (database) {
+    delete[] database;
+    databaseSize = 0;
+    uncompressedSize = 0;
+  }
+
+  // make default water material. we wait to make the default material
+  // to avoid messing up any user indexing. this has to be done before
+  // the texture matrices and materials are packed.
+  if ((waterLevel >= 0.0f) && (waterMatRef == NULL)) {
+    makeWaterMaterial();
+  }
+
+  // compute the database size
+  databaseSize =
+    DYNCOLORMGR.packSize() + TEXMATRIXMGR.packSize() +
+    MATERIALMGR.packSize() + PHYDRVMGR.packSize() +
+    TRANSFORMMGR.packSize() + OBSTACLEMGR.packSize() + links.packSize() +
+    worldWeapons.packSize() + entryZones.packSize();
+  // add water level size
+  databaseSize += sizeof(float);
+  if (waterLevel >= 0.0f) {
+    databaseSize += sizeof(int32_t);
+  }
+
+  // allocate the buffer
   database = new char[databaseSize];
   void *databasePtr = database;
 
-  unsigned char	bitMask;
+  // pack dynamic colors
+  databasePtr = DYNCOLORMGR.pack(databasePtr);
 
-  // add bases
-  if (baseList != NULL) {
-    for (base_it = baseList->begin(); base_it != baseList->end(); ++base_it) {
-      databasePtr = base_it->second.pack(databasePtr);
-    }
+  // pack texture matrices
+  databasePtr = TEXMATRIXMGR.pack(databasePtr);
+
+  // pack materials
+  databasePtr = MATERIALMGR.pack(databasePtr);
+
+  // pack physics drivers
+  databasePtr = PHYDRVMGR.pack(databasePtr);
+
+  // pack obstacle transforms
+  databasePtr = TRANSFORMMGR.pack(databasePtr);
+
+  // pack obstacles
+  databasePtr = OBSTACLEMGR.pack(databasePtr);
+
+  // pack teleporter links
+  databasePtr = links.pack(databasePtr);
+
+  // pack water level
+  databasePtr = nboPackFloat(databasePtr, waterLevel);
+  if (waterLevel >= 0.0f) {
+    int matindex = MATERIALMGR.getIndex(waterMatRef);
+    databasePtr = nboPackInt(databasePtr, matindex);
   }
 
-  // add walls
-  for (std::vector<WallObstacle>::iterator wall_it = walls.begin();
-       wall_it != walls.end(); ++wall_it) {
-    WallObstacle &wall = *wall_it;
-    databasePtr = nboPackUShort(databasePtr, WorldCodeWallSize);
-    databasePtr = nboPackUShort(databasePtr, WorldCodeWall);
-    databasePtr = nboPackVector(databasePtr, wall.getPosition());
-    databasePtr = nboPackFloat(databasePtr, wall.getRotation());
-    databasePtr = nboPackFloat(databasePtr, wall.getSize()[1]);
-    // walls have no depth
-    databasePtr = nboPackFloat(databasePtr, wall.getSize()[2]);
-  }
+  // pack weapons
+  databasePtr = worldWeapons.pack(databasePtr);
 
-  // add boxes
-  for (std::vector<BoxBuilding>::iterator box_it = boxes.begin();
-       box_it != boxes.end(); ++box_it) {
-    BoxBuilding &box = *box_it;
-    databasePtr = nboPackUShort(databasePtr, WorldCodeBoxSize);
-    databasePtr = nboPackUShort(databasePtr, WorldCodeBox);
-    databasePtr = nboPackVector(databasePtr, box.getPosition());
-    databasePtr = nboPackFloat(databasePtr, box.getRotation());
-    databasePtr = nboPackVector(databasePtr, box.getSize());
-    bitMask = 0;
-    if (box.isDriveThrough())
-      bitMask |= _DRIVE_THRU;
-    if (box.isShootThrough())
-      bitMask |= _SHOOT_THRU;
-    databasePtr = nboPackUByte(databasePtr, bitMask);
-  }
+  // pack entry zones
+  databasePtr = entryZones.pack(databasePtr);
 
-  // add pyramids
-  for (std::vector<PyramidBuilding>::iterator pyr_it = pyramids.begin();
-       pyr_it != pyramids.end(); ++pyr_it) {
-    PyramidBuilding &pyr = *pyr_it;
-    databasePtr = nboPackUShort(databasePtr, WorldCodePyramidSize);
-    databasePtr = nboPackUShort(databasePtr, WorldCodePyramid);
-    databasePtr = nboPackVector(databasePtr, pyr.getPosition());
-    databasePtr = nboPackFloat(databasePtr, pyr.getRotation());
-    databasePtr = nboPackVector(databasePtr, pyr.getSize());
-    bitMask = 0;
-    if (pyr.isDriveThrough())
-      bitMask |= _DRIVE_THRU;
-    if (pyr.isShootThrough())
-      bitMask |= _SHOOT_THRU;
-    if (pyr.getZFlip())
-      bitMask |= _FLIP_Z;
-    databasePtr = nboPackUByte(databasePtr, bitMask);
-  }
-
-  // add tetras
-  for (std::vector<TetraBuilding>::iterator tetra_it = tetras.begin();
-       tetra_it != tetras.end(); ++tetra_it) {
-    TetraBuilding &tetra = *tetra_it;
-    unsigned char planeflags = 0;   // 0-3 are visibility, 4-7 are colored
-    unsigned char bytecolors[4][4]; // pack the colors into a 32bit format
-    int v, c;
-    for (v = 0; v < 4; v++) {
-      if (tetra.isVisiblePlane(v)) {
-        planeflags = planeflags | (1 << v);
-      }
-      if (tetra.isColoredPlane(v)) {
-        planeflags = planeflags | (1 << (v + 4));
-      }
-      for (c = 0; c < 4; c++) {
-        bytecolors[v][c] = (unsigned char) tetra.getPlaneColor(v)[c];
-      }
-    }
-    databasePtr = nboPackUShort(databasePtr, WorldCodeTetraSize);
-    databasePtr = nboPackUShort(databasePtr, WorldCodeTetra);
-    for (v = 0; v < 4; v++) {
-      databasePtr = nboPackVector(databasePtr, tetra.getVertex(v));
-    }
-    for (v = 0; v < 4; v++) {
-      for (c = 0; c < 4; c++) {
-        databasePtr = nboPackUByte(databasePtr, bytecolors[v][c]);
-      }
-    }
-    databasePtr = nboPackUByte(databasePtr, planeflags);
-    bitMask = 0;
-    if (tetra.isDriveThrough())
-      bitMask |= _DRIVE_THRU;
-    if (tetra.isShootThrough())
-      bitMask |= _SHOOT_THRU;
-    databasePtr = nboPackUByte(databasePtr, bitMask);
-  }
-
-  // add teleporters
-  int i = 0;
-  for (std::vector<Teleporter>::iterator tele_it = teleporters.begin();
-       tele_it != teleporters.end(); ++tele_it, i++) {
-    Teleporter &tele = *tele_it;
-    databasePtr = nboPackUShort(databasePtr, WorldCodeTeleporterSize);
-    databasePtr = nboPackUShort(databasePtr, WorldCodeTeleporter);
-    databasePtr = nboPackVector(databasePtr, tele.getPosition());
-    databasePtr = nboPackFloat(databasePtr, tele.getRotation());
-    databasePtr = nboPackVector(databasePtr, tele.getSize());
-    databasePtr = nboPackFloat(databasePtr, tele.getBorder());
-    bitMask = 0;
-    if (tele.isDriveThrough())
-      bitMask |= _DRIVE_THRU;
-    if (tele.isShootThrough())
-      bitMask |= _SHOOT_THRU;
-    databasePtr = nboPackUByte(databasePtr, bitMask);
-    // and each link
-    databasePtr = nboPackUShort(databasePtr, WorldCodeLinkSize);
-    databasePtr = nboPackUShort(databasePtr, WorldCodeLink);
-    databasePtr = nboPackUShort(databasePtr, uint16_t(i * 2));
-    databasePtr = nboPackUShort(databasePtr, uint16_t(teleportTargets[i * 2]));
-    databasePtr = nboPackUShort(databasePtr, WorldCodeLinkSize);
-    databasePtr = nboPackUShort(databasePtr, WorldCodeLink);
-    databasePtr = nboPackUShort(databasePtr, uint16_t(i * 2 + 1));
-    databasePtr = nboPackUShort(databasePtr, uint16_t(teleportTargets[i * 2 + 1]));
-  }
-
-  databasePtr = worldWeapons.pack (databasePtr);
-  databasePtr = entryZones.pack (databasePtr);
 
   // compress the map database
+  TimeKeeper startTime = TimeKeeper::getCurrent();
   uLongf gzDBlen = databaseSize + (databaseSize/512) + 12;
+
   char* gzDB = new char[gzDBlen];
-  int code = compress2 ((Bytef*)gzDB, &gzDBlen,
-                        (Bytef*)database, databaseSize, 9);
+  int code = compress2 ((Bytef*)gzDB, &gzDBlen, (Bytef*)database, databaseSize, 9);
   if (code != Z_OK) {
     printf ("Could not create compressed world database: %i\n", code);
+    delete[] gzDB;
+    delete[] database;
     exit (1);
   }
+  TimeKeeper endTime = TimeKeeper::getCurrent();
 
   // switch to the compressed map database
   uncompressedSize = databaseSize;
   databaseSize = gzDBlen;
-  char *oldDB = database;
+  delete[] database;
   database = gzDB;
-  delete[] oldDB;
 
-  DEBUG1 ("Map size: uncompressed = %i, compressed = %i\n",
-           uncompressedSize, databaseSize);
+  logDebugMessage(1,"Map size: uncompressed = %i, compressed = %i\n",
+	   uncompressedSize, databaseSize);
+
+  logDebugMessage(3,"Compression: %.3f seconds\n", endTime - startTime);
 
   return 1;
 }
@@ -601,6 +592,7 @@ int WorldInfo::getUncompressedSize() const
 {
   return uncompressedSize;
 }
+
 
 // Local Variables: ***
 // mode: C++ ***

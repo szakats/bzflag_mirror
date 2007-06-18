@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __SINGLETON_H__
@@ -64,7 +64,7 @@ protected:
 
   // protection from instantiating a non-singleton Singleton
   Singleton() { }
-  Singleton(T* pInstance) { _instance = pInstance; }
+  Singleton(T* instancePointer) { _instance = instancePointer; }
   Singleton(const Singleton &) { } // do not use
   Singleton& operator=(const Singleton&) { return *this; } // do not use
   ~Singleton() { _instance = 0; } // do not delete
@@ -96,10 +96,8 @@ public:
   inline static T* pInstance() {
     if (_instance == 0) {
       _instance = new T;
-#ifdef _WIN32
+#ifdef HAVE_ATEXIT
       atexit(Singleton::destroy);
-#else
-      std::atexit(Singleton::destroy);
 #endif
     }
     return Singleton::_instance;

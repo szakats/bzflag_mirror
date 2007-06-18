@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,20 +7,29 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "common.h"
 
-#ifdef HAVE_SDL
-#include <stdio.h>
+/* interface header */
 #include "SDLDisplay.h"
-#include "OpenGLGState.h"
+
+/* system implementation headers */
+#include <stdio.h>
 #include <iostream>
 #include <math.h>
 
-static int mx = 0;
-static int my = 0;
+/* common implementation headers */
+#include "StateDatabase.h"
+
+/* local implementation headers */
+#include "SDLVisual.h"
+#include "SDLWindow.h"
+
+
+int mx = 0;
+int my = 0;
 
 SDLDisplay::SDLDisplay() : fullScreen(false), base_width(640),
 			   base_height(480), canGrabMouse(true),
@@ -38,16 +47,16 @@ SDLDisplay::SDLDisplay() : fullScreen(false), base_width(640),
     printf("Could not Get available video modes: %s.\n", SDL_GetError());
 
   int defaultResolutionIndex = 0;
-  ResInfo** resolutions;
-  int numResolutions = 1;
+  ResInfo** _resolutions;
+  int _numResolutions = 1;
   // No modes available or All resolutions available
   if ((modeList != (SDL_Rect **) 0) && (modeList != (SDL_Rect **) -1)) {
       for (int i = 1; modeList[i]; i++)
 	if ((modeList[i - 1]->w != modeList[i]->w)
 	    || (modeList[i - 1]->h != modeList[i]->h))
-	  numResolutions++;
+	  _numResolutions++;
   };
-  resolutions = new ResInfo*[numResolutions];
+  _resolutions = new ResInfo*[_numResolutions];
 
   if ((modeList != (SDL_Rect **) 0) && (modeList != (SDL_Rect **) -1)) {
     char name[80];
@@ -58,8 +67,8 @@ SDLDisplay::SDLDisplay() : fullScreen(false), base_width(640),
     defaultResolutionIndex = 0;
 #ifdef WIN32
     HDC hDC = GetDC(GetDesktopWindow());
-    int defaultWidth = GetDeviceCaps(hDC, HORZRES);
-    int defaultHeight = GetDeviceCaps(hDC, VERTRES);
+    defaultWidth = GetDeviceCaps(hDC, HORZRES);
+    defaultHeight = GetDeviceCaps(hDC, VERTRES);
     ReleaseDC(GetDesktopWindow(), hDC);
 #endif
     for (int i = 0; modeList[i]; i++) {
@@ -69,7 +78,7 @@ SDLDisplay::SDLDisplay() : fullScreen(false), base_width(640),
 	if ((modeList[i - 1]->w == w) && (modeList[i - 1]->h == h))
 	  continue;
       sprintf(name, "%dx%d    ", w, h);
-      resolutions[j] = new ResInfo(name, w, h, 0);
+      _resolutions[j] = new ResInfo(name, w, h, 0);
 #ifdef WIN32
       // use a safe default resolution because there are so many screwy drivers out there
       if ((w == defaultWidth) && (h == defaultHeight))
@@ -79,14 +88,16 @@ SDLDisplay::SDLDisplay() : fullScreen(false), base_width(640),
     }
   } else {
     // if no modes then make default
-    resolutions[0] = new ResInfo ("default", 640, 480, 0);
+    _resolutions[0] = new ResInfo ("default", 640, 480, 0);
+    defaultWidth = 640;
+    defaultHeight = 480;
   }
 
   // limit us to the main display
   putenv("SDL_SINGLEDISPLAY=1");
 
   // register modes
-  initResolutions(resolutions, numResolutions, defaultResolutionIndex);
+  initResolutions(_resolutions, _numResolutions, defaultResolutionIndex);
 
   SDL_EnableUNICODE(1);
 
@@ -100,13 +111,14 @@ SDLDisplay::SDLDisplay() : fullScreen(false), base_width(640),
 SDLDisplay::~SDLDisplay()
 {
   SDL_QuitSubSystem(SDL_INIT_VIDEO);
-};
+}
 
 
 bool SDLDisplay::isEventPending() const
 {
-  return SDL_PollEvent(NULL) == 1;
-};
+  return (SDL_PollEvent(NULL) == 1);
+}
+
 
 bool SDLDisplay::getEvent(BzfEvent& _event) const
 {
@@ -114,31 +126,64 @@ bool SDLDisplay::getEvent(BzfEvent& _event) const
   if (SDL_PollEvent(&event) == 0)
     return false;
 
+  return setupEvent(_event, event);
+}
+
+
+bool SDLDisplay::peekEvent(BzfEvent& _event) const
+{
+  SDL_Event event;
+  if (SDL_PeepEvents(&event, 1, SDL_PEEKEVENT, SDL_ALLEVENTS) <= 0) {
+    return false;
+  }
+
+  return setupEvent(_event, event);
+}
+
+
+bool SDLDisplay::setupEvent(BzfEvent& _event, const SDL_Event& event) const
+{
+  SDLMod mode = SDL_GetModState();
+  bool shift  = ((mode & KMOD_SHIFT) != 0);
+  bool ctrl   = ((mode & KMOD_CTRL) != 0);
+  bool alt    = ((mode & KMOD_ALT) != 0);
+
   switch (event.type) {
 
   case SDL_MOUSEMOTION:
-    _event.type        = BzfEvent::MouseMove;
-    mx                 = event.motion.x;
+    _event.type	= BzfEvent::MouseMove;
+    mx		 = event.motion.x;
 #ifdef __APPLE__
+    static const SDL_version *sdlver = SDL_Linked_Version();
     /* deal with a SDL bug when in windowed mode related to
      * Cocoa coordinate system of (0,0) in bottom-left corner.
      */
-    if (fullScreen) {
+    if ( (fullScreen) ||
+	 (sdlver->major > 1) ||
+	 (sdlver->minor > 2) ||
+	 (sdlver->patch > 6) ) {
       my = event.motion.y;
     } else {
       my = base_height - 1 - event.motion.y;
     }
 #else
-    my                 = event.motion.y;
+    my		 = event.motion.y;
 #endif
     _event.mouseMove.x = mx;
     _event.mouseMove.y = my;
     break;
 
   case SDL_MOUSEBUTTONDOWN:
-    _event.type          = BzfEvent::KeyDown;
+    _event.type	  = BzfEvent::KeyDown;
     _event.keyDown.ascii = 0;
     _event.keyDown.shift = 0;
+    if (shift)
+      _event.keyDown.shift |= BzfKeyEvent::ShiftKey;
+    if (ctrl)
+      _event.keyDown.shift |= BzfKeyEvent::ControlKey;
+    if (alt)
+      _event.keyDown.shift |= BzfKeyEvent::AltKey;
+
     switch (event.button.button) {
     case SDL_BUTTON_LEFT:
       _event.keyDown.button = BzfKeyEvent::LeftMouse;
@@ -179,6 +224,13 @@ bool SDLDisplay::getEvent(BzfEvent& _event) const
     _event.type = BzfEvent::KeyUp;
     _event.keyUp.ascii = 0;
     _event.keyUp.shift = 0;
+    if (shift)
+      _event.keyUp.shift |= BzfKeyEvent::ShiftKey;
+    if (ctrl)
+      _event.keyUp.shift |= BzfKeyEvent::ControlKey;
+    if (alt)
+      _event.keyUp.shift |= BzfKeyEvent::AltKey;
+
     switch (event.button.button) {
     case SDL_BUTTON_LEFT:
       _event.keyDown.button = BzfKeyEvent::LeftMouse;
@@ -232,9 +284,13 @@ bool SDLDisplay::getEvent(BzfEvent& _event) const
     break;
 
   case SDL_VIDEORESIZE:
-    _event.type          = BzfEvent::Resize;
+    _event.type = BzfEvent::Resize;
     _event.resize.width  = event.resize.w;
     _event.resize.height = event.resize.h;
+    break;
+
+  case SDL_VIDEOEXPOSE:
+    _event.type = BzfEvent::Redraw;
     break;
 
   case SDL_ACTIVEEVENT:
@@ -244,20 +300,25 @@ bool SDLDisplay::getEvent(BzfEvent& _event) const
       } else {
 	_event.type = BzfEvent::Map;
       }
+    else
+      return false;
     break;
 
   default:
     return false;
   }
   return true;
-};
+}
 
-void SDLDisplay::getModState(bool &shift, bool &ctrl, bool &alt) {
+
+void SDLDisplay::getModState(bool &shift, bool &ctrl, bool &alt)
+{
   SDLMod mode = SDL_GetModState();
   shift       = ((mode & KMOD_SHIFT) != 0);
-  ctrl        = ((mode & KMOD_CTRL) != 0);
-  alt         = ((mode & KMOD_ALT) != 0);
+  ctrl	= ((mode & KMOD_CTRL) != 0);
+  alt	 = ((mode & KMOD_ALT) != 0);
 }
+
 
 bool SDLDisplay::getKey(const SDL_Event& sdlEvent, BzfKeyEvent& key) const
 {
@@ -452,10 +513,20 @@ bool SDLDisplay::getKey(const SDL_Event& sdlEvent, BzfKeyEvent& key) const
   return true;
 }
 
-void SDLDisplay::createWindow() {
+bool SDLDisplay::createWindow() {
   int    width;
   int    height;
   Uint32 flags = SDL_OPENGL;
+
+  /* anti-aliasing */
+  if (BZDB.isSet("multisamples")) {
+    int ms = BZDB.evalInt("multisamples");
+    if (ms == 2 || ms == 4) {
+      SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1);
+      SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, ms);
+    }
+  }
+
   // getting width, height & flags for SetVideoMode
   getWindowSize(width, height);
   if (fullScreen) {
@@ -463,18 +534,25 @@ void SDLDisplay::createWindow() {
   } else {
     flags |= SDL_RESIZABLE;
   }
+
   // if they are the same, don't bother building a new window
   if ((width == oldWidth) && (height == oldHeight)
       && (fullScreen == oldFullScreen))
-    return;
+    return true;
+
   // save the values for the next
   oldWidth      = width;
   oldHeight     = height;
   oldFullScreen = fullScreen;
+
   // Set the video mode and hope for no errors
-  if (!SDL_SetVideoMode(width, height, 0, flags))
+  if (!SDL_SetVideoMode(width, height, 0, flags)) {
     printf("Could not set Video Mode: %s.\n", SDL_GetError());
-};
+    return false;
+  } else {
+    return true;
+  }
+}
 
 void SDLDisplay::setFullscreen(bool on) {
   fullScreen = on;
@@ -502,7 +580,19 @@ void SDLDisplay::getWindowSize(int& width, int& height) {
     width  = base_width;
     height = base_height;
   }
-};
+
+  /* sanity checks */
+  if (width <= 0) {
+    modeIndex = -1;
+    width = defaultWidth;
+    printf("ERROR: Non-positive window width encountered (%d)\n", width);
+  }
+  if (height <= 0) {
+    modeIndex = -1;
+    height = defaultHeight;
+    printf("ERROR: Non-positive window height encountered (%d)\n", height);
+  }
+}
 
 void SDLDisplay::enableGrabMouse(bool on) {
   canGrabMouse = on;
@@ -512,136 +602,6 @@ void SDLDisplay::enableGrabMouse(bool on) {
     SDL_WM_GrabInput(SDL_GRAB_OFF);
 }
 
-void SDLVisual::setDoubleBuffer(bool on) {
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, on ? 1 : 0);
-};
-
-void SDLVisual::setRGBA(int minRed, int minGreen,
-			int minBlue, int minAlpha) {
-  SDL_GL_SetAttribute(SDL_GL_RED_SIZE,   minRed);
-  SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, minGreen);
-  SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,  minBlue);
-  SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, minAlpha);
-};
-
-void SDLVisual::setDepth(int minDepth) {
-  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, minDepth);
-};
-
-void SDLVisual::setStencil(int minDepth) {
-  SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, minDepth);
-};
-
-void SDLVisual::setStereo(bool on) {
-  SDL_GL_SetAttribute(SDL_GL_STEREO, on ? 1 : 0);
-};
-
-SDLWindow::SDLWindow(const SDLDisplay* _display, SDLVisual*)
-  : BzfWindow(_display), x(-1), y(-1), hasGamma(true), GLContextInited(false)
-{
-};
-
-void SDLWindow::setTitle(const char * title) {
-  SDL_WM_SetCaption(title, title);
-};
-
-void SDLWindow::setFullscreen(bool on) {
-  ((SDLDisplay *)getDisplay())->setFullscreen(on);
-};
-
-void SDLWindow::iconify(void) {
-  SDL_WM_IconifyWindow();
-};
-
-void SDLWindow::warpMouse(int x, int y) {
-  SDL_WarpMouse(x, y);
-};
-
-void SDLWindow::getMouse(int& x, int& y) const {
-  x = mx;
-  y = my;
-};
-
-void SDLWindow::setSize(int width, int height) {
-  ((SDLDisplay *)getDisplay())->setWindowSize(width, height);
-};
-
-void SDLWindow::getSize(int& width, int& height) const {
-  ((SDLDisplay *)getDisplay())->getWindowSize(width, height);
-};
-
-void SDLWindow::setGamma(float gamma) {
-  int result = SDL_SetGamma(gamma, gamma, gamma);
-  if (result == -1) {
-    printf("Could not set Gamma: %s.\n", SDL_GetError());
-    hasGamma = false;
-  }
-};
-
-// Code taken from SDL (not available through the headers)
-static float CalculateGammaFromRamp(Uint16 ramp[256]) {
-  /* The following is adapted from a post by Garrett Bass on OpenGL
-     Gamedev list, March 4, 2000.
-  */
-  float sum = 0.0;
-  int i, count = 0;
-
-  float gamma = 1.0;
-  for (i = 1; i < 256; ++i) {
-    if ((ramp[i] != 0) && (ramp[i] != 65535)) {
-      double B = (double)i / 256.0;
-      double A = ramp[i] / 65535.0;
-      sum += (float) (log(A) / log(B));
-      count++;
-    }
-  }
-  if ( count && sum ) {
-    gamma = 1.0f / (sum / count);
-  }
-  return gamma;
-}
-
-float SDLWindow::getGamma() const {
-  Uint16 redRamp[256];
-  Uint16 greenRamp[256];
-  Uint16 blueRamp[256];
-  float red;
-  float green;
-  float blue;
-  float gamma = 1.0;
-  int result = SDL_GetGammaRamp(redRamp, greenRamp, blueRamp);
-  if (result == -1) {
-    printf("Could not get Gamma: %s.\n", SDL_GetError());
-  } else {
-    red   = CalculateGammaFromRamp(redRamp);
-    green = CalculateGammaFromRamp(greenRamp);
-    blue  = CalculateGammaFromRamp(blueRamp);
-    gamma = (red + green + blue) / 3.0;
-  }
-  return gamma;
-};
-
-bool SDLWindow::hasGammaControl() const {
-  return hasGamma;
-};
-
-void SDLWindow::swapBuffers() {
-  SDL_GL_SwapBuffers();
-};
-
-void SDLWindow::create(void) {
-  ((SDLDisplay *)getDisplay())->createWindow();
-  // reload context data
-  if (!GLContextInited)
-    OpenGLGState::initContext();
-  GLContextInited = true;
-};
-
-void SDLWindow::enableGrabMouse(bool on) {
-  ((SDLDisplay *)getDisplay())->enableGrabMouse(on);
-};
-
-#endif
 
 // Local Variables: ***
 // mode:C++ ***

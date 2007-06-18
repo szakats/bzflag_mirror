@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,102 +7,19 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include <math.h>
+#include <assert.h>
 #include "common.h"
 #include "global.h"
-#include "TetraBuilding.h"
-#include "Intersect.h"
 #include "Pack.h"
+#include "vectors.h"
 
-
-
-// FIXME - some these should go into a common file
-// Some handy geometry functions
-
-static inline void vec3sub (float *result, const float* v1, const float* v2)
-{
-  result[0] = v1[0] - v2[0];
-  result[1] = v1[1] - v2[1];
-  result[2] = v1[2] - v2[2];
-  return;
-}
-static inline float vec3dot (const float* v1, const float* v2)
-{
-  return (v1[0] * v2[0]) + (v1[1] * v2[1]) + (v1[2] * v2[2]);
-}
-static inline void vec3cross (float* result, const float* v1, const float* v2)
-{
-  result[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
-  result[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
-  result[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
-  return;
-}
-static inline void projectTetra (float *dists, const float* normal,
-                                 const float (*vertices)[3])
-{
-  dists[0] = vec3dot(normal, vertices[0]);
-  dists[1] = vec3dot(normal, vertices[1]);
-  dists[2] = vec3dot(normal, vertices[2]);
-  dists[3] = vec3dot(normal, vertices[3]);
-  return;
-}
-// NOTE: unlike the rest of bzflag code, this OrigBox is centered
-//       at the origin, with 'sizes' extents radiating out from it
-static inline void projectOrigBox (float* dist, const float* normal,
-                                   const float* sizes)
-{
-  // setup the test corner
-  // this can be determined easily based
-  // on the normal vector for the plane
-  float corner[3];
-  for (int a = 0; a < 3; a++) {
-    if (normal[a] > 0.0f) {
-      corner[a] = +sizes[a];
-    } else {
-      corner[a] = -sizes[a];
-    }
-  }
-  *dist = fabsf(vec3dot(normal, corner));
-  return;
-}
-static inline void makeNormal (const float* p1, const float* p2,
-                               const float* pc, float* r)
-{
-  // make vectors from points
-  float x[3], y[3];
-  // make some vectors
-  vec3sub (x, p1, pc);
-  vec3sub (y, p2, pc);
-  // cross product to get the normal
-  vec3cross (r, x, y);
-  return;
-}
-inline bool TetraBuilding::checkTest (int testNumber) const
-{ 
-  int i;
-  const planeTest* pt = &axisTests[testNumber];
-  const float* td = pt->tetraDists;
-
-  float minT = +MAXFLOAT;
-  float maxT = -MAXFLOAT;
-  for (i = 0; i < 4; i++) {
-    if (td[i] < minT) minT = td[i];
-    if (td[i] > maxT) maxT = td[i];
-  }
-  
-  if ((minT > pt->boxDist) || (maxT < -pt->boxDist)) {
-    return true;
-  } else {
-    return false;
-  }  
-}
-
-static bool makePlane (const float* p1, const float* p2,
-                       const float* pc, float* r);
-
+#include "TetraBuilding.h"
+#include "MeshUtils.h"
+#include "MeshTransform.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,19 +29,129 @@ static bool makePlane (const float* p1, const float* p2,
 
 
 const char* TetraBuilding::typeName = "TetraBuilding";
-TetraBuilding::planeTest TetraBuilding::axisTests[25];
 
 
-TetraBuilding::TetraBuilding(const float (*_vertices)[3], const bool *_visible,
-                             const bool *_colored, const float (*_colors)[4],
+TetraBuilding::TetraBuilding()
+{
+  return;
+}
+
+
+TetraBuilding::TetraBuilding(const MeshTransform& xform,
+			     const float _vertices[4][3],
+			     const float _normals[4][3][3],
+			     const float _texcoords[4][3][2],
+			     const bool _useNormals[4],
+			     const bool _useTexcoords[4],
+			     const BzMaterial* _materials[4],
 			     bool drive, bool shoot)
 {
-  int v, a;
+  // tetra specific parameters
+  memcpy (vertices, _vertices, sizeof(vertices));
+  memcpy (normals, _normals, sizeof(normals));
+  memcpy (texcoords, _texcoords, sizeof(texcoords));
+  memcpy (useNormals, _useNormals, sizeof(useNormals));
+  memcpy (useTexcoords, _useTexcoords, sizeof(useTexcoords));
+  memcpy (materials, _materials, sizeof(materials));
+  transform = xform;
 
-  memcpy (vertices, _vertices, 4 * sizeof (float[3]));
-  memcpy (visible, _visible, 4 * sizeof (bool));
-  memcpy (colored, _colored, 4 * sizeof (bool));
-  memcpy (colors, _colors, 4 * sizeof (float[4]));
+  // common obstace parameters
+  driveThrough = drive;
+  shootThrough = shoot;
+
+  finalize();
+
+  return;
+}
+
+
+TetraBuilding::~TetraBuilding()
+{
+  return;
+}
+
+
+Obstacle* TetraBuilding::copyWithTransform(const MeshTransform& xform) const
+{
+  MeshTransform tmpXform = transform;
+  tmpXform.append(xform);
+
+  TetraBuilding* copy =
+    new TetraBuilding(tmpXform, vertices, normals, texcoords,
+		      useNormals, useTexcoords, (const BzMaterial**)materials,
+		      driveThrough, shootThrough);
+  return copy;
+}
+
+
+void TetraBuilding::finalize()
+{
+  return;
+}
+
+
+MeshObstacle* TetraBuilding::makeMesh()
+{
+  MeshObstacle* mesh;
+  checkVertexOrder();
+
+  // setup the coordinates
+  int i;
+  std::vector<char> checkTypes;
+  std::vector<cfvec3> checkPoints;
+  std::vector<cfvec3> verts;
+  std::vector<cfvec3> norms;
+  std::vector<cfvec2> texcds;
+
+  // setup the inside check point
+  float center[3] = {0.0f, 0.0f, 0.0f};
+  for (i = 0; i < 4; i++) {
+    center[0] += vertices[i][0];
+    center[1] += vertices[i][1];
+    center[2] += vertices[i][2];
+  }
+  center[0] *= 0.25f;
+  center[1] *= 0.25f;
+  center[2] *= 0.25f;
+  checkPoints.push_back(center);
+  checkTypes.push_back(MeshObstacle::CheckInside);
+
+  for (i = 0; i < 4; i++) {
+    verts.push_back(vertices[i]);
+  }
+
+  mesh = new MeshObstacle(transform,
+			  checkTypes, checkPoints, verts, norms, texcds,
+			  4, false, false, driveThrough, shootThrough);
+
+  // add the faces to the mesh
+  std::vector<int> vlist;
+  std::vector<int> nlist;
+  std::vector<int> tlist;
+
+  push3Ints(vlist, 0, 2, 1);
+  addFace(mesh, vlist, nlist, tlist, materials[0], -1);
+  push3Ints(vlist, 0, 1, 3);
+  addFace(mesh, vlist, nlist, tlist, materials[1], -1);
+  push3Ints(vlist, 1, 2, 3);
+  addFace(mesh, vlist, nlist, tlist, materials[2], -1);
+  push3Ints(vlist, 2, 0, 3);
+  addFace(mesh, vlist, nlist, tlist, materials[3], -1);
+
+  // wrap it up
+  mesh->finalize();
+
+  if (!mesh->isValid()) {
+    delete mesh;
+    mesh = NULL;
+  }
+  return mesh;
+}
+
+
+void TetraBuilding::checkVertexOrder()
+{
+  int v, a;
 
   // make sure the the planes are facing outwards
   float edge[3][3]; // edges from vertex 0
@@ -135,68 +162,39 @@ TetraBuilding::TetraBuilding(const float (*_vertices)[3], const bool *_visible,
   }
   float cross[3];
   vec3cross(cross, edge[0], edge[1]);
-  
+
   const float dot = vec3dot (cross, edge[2]);
 
   // swap vertices 1 & 2 if we are out of order
   if (dot < 0.0f) {
-    memcpy (vertices[1], _vertices[2], sizeof(float[3]));
-    memcpy (vertices[2], _vertices[1], sizeof(float[3]));
-    memcpy (colors[1], _colors[2], sizeof (float[4]));
-    memcpy (colors[2], _colors[1], sizeof (float[4]));
-    visible[1] = _visible[2];
-    visible[2] = _visible[1];
-    colored[1] = _colored[2];
-    colored[2] = _colored[1];
+    float tmpVertex[3];
+    memcpy (tmpVertex, vertices[1], sizeof(tmpVertex));
+    memcpy (vertices[1], vertices[2], sizeof(vertices[1]));
+    memcpy (vertices[2], tmpVertex, sizeof(vertices[2]));
+
+    float tmpNormals[4][3];
+    memcpy (tmpNormals, normals[1], sizeof(tmpNormals));
+    memcpy (normals[1], normals[2], sizeof(normals[1]));
+    memcpy (normals[2], tmpNormals, sizeof(normals[2]));
+
+    float tmpTexcoords[3][2];
+    memcpy (tmpTexcoords, texcoords[1], sizeof(tmpTexcoords));
+    memcpy (texcoords[1], texcoords[2], sizeof(texcoords[1]));
+    memcpy (texcoords[2], tmpTexcoords, sizeof(texcoords[2]));
+
+    bool tmpBool = useNormals[1];
+    useNormals[1] = useNormals[2];
+    useNormals[2] = tmpBool;
+
+    tmpBool = useTexcoords[1];
+    useTexcoords[1] = useTexcoords[2];
+    useTexcoords[2] = tmpBool;
+
+    const BzMaterial* tmpMat = materials[1];
+    materials[1] = materials[2];
+    materials[2] = tmpMat;
   }
 
-  // make outward facing normals to the planes
-  if (!makePlane (vertices[1], vertices[2], vertices[3], planes[0]) ||
-      !makePlane (vertices[0], vertices[3], vertices[2], planes[1]) ||
-      !makePlane (vertices[0], vertices[1], vertices[3], planes[2]) ||
-      !makePlane (vertices[0], vertices[2], vertices[1], planes[3])) {
-    // trigger isValid() to return false;
-    for (v = 0; v < 4; v++) {
-      for (a = 0; a < 3; a++) {
-        vertices[v][a] = 0.0f;
-      }
-    }
-  }
-
-  // setup the extents
-  mins[0] = mins[1] = mins[2] = +Infinity;
-  maxs[0] = maxs[1] = maxs[2] = -Infinity;
-  for (v = 0; v < 4; v++) {
-    const float* vertex = vertices[v];
-    for (a = 0; a < 3; a++) {
-      if (vertex[a] < mins[a]) {
-        mins[a] = vertex[a];
-      }
-      if (vertex[a] > maxs[a]) {
-        maxs[a] = vertex[a];
-      }
-    }
-  }
-
-  // setup the basic obstacle parameters
-  pos[0] = 0.5f * (maxs[0] + mins[0]);
-  pos[1] = 0.5f * (maxs[1] + mins[1]);
-  pos[2] = mins[2];
-  size[0] = 0.5f * (maxs[0] - mins[0]);
-  size[1] = 0.5f * (maxs[1] - mins[1]);
-  size[2] = maxs[2] - mins[2];
-  angle = 0.0f;
-  driveThrough = drive;
-  shootThrough = shoot;
-  ZFlip = false;
-
-  return;
-}
-
-
-TetraBuilding::~TetraBuilding()
-{
-  // do nothing
   return;
 }
 
@@ -215,484 +213,284 @@ const char* TetraBuilding::getClassName() // const
 
 bool TetraBuilding::isValid() const
 {
-  int v, a;
-
-  float edge[3][3]; // edges from vertex 0
-  for (v = 0; v < 3; v++) {
-    for (a = 0; a < 3; a++) {
-      edge[v][a] = vertices[v+1][a] - vertices[0][a];
-    }
-  }
-  float cross[3];
-  vec3cross(cross, edge[0], edge[1]);
-  float dot = vec3dot (cross, edge[2]);
-
-  if (fabsf(dot) < 0.000001) {
-    return false; // tetrahedrons require a volume, at least for now
-  }
-
-  // now check the vertices
-  for (v = 0; v < 4; v++) {
-    for (a = 0; a < 3; a++) {
-      if (fabsf(vertices[v][a]) > maxExtent) {
-        return false;
-      }
-    }
-  }
-
   return true;
 }
 
 
-void TetraBuilding::getExtents(float* _mins, float* _maxs) const
+float TetraBuilding::intersect(const Ray&) const
 {
-  memcpy (_mins, mins, sizeof(float[3]));
-  memcpy (_maxs, maxs, sizeof(float[3]));
-  return;
-}
-
-
-void TetraBuilding::getCorner(int index, float* pos) const
-{
-  memcpy (pos, vertices[index], 3 * sizeof(float));
-  return;
-}
-
-
-static bool makePlane (const float* p1, const float* p2, const float* pc,
-                       float* r)
-{
-  // make vectors from points
-  float x[3], y[3], n[3];
-
-  vec3sub (x, p1, pc);
-  vec3sub (y, p2, pc);
-
-  // cross product to get the normal
-  vec3cross (n, x, y);
-
-  // normalize
-  float len = vec3dot (n, n);
-  if (len < +0.000001f) {
-    return false;
-  } else {
-    len = 1.0f / sqrtf (len);
-  }
-  r[0] = n[0] * len;
-  r[1] = n[1] * len;
-  r[2] = n[2] * len;
-
-  // finish the plane equation: {rx*px + ry*py + rz+pz + rd = 0}
-  r[3] = -vec3dot(pc, r);
-
-  return true;
-}
-
-
-float TetraBuilding::intersect(const Ray& ray) const
-{
-  // NOTE: i'd use a quick test here first, but the
-  //       plan is to use an octree for the collision
-  //       manager which should get us close enough
-  //       that a quick test might actually eat up time.
-  //
-  // find where the ray crosses each plane, and then
-  // check the dot-product of the three bounding planes
-  // to see if the intersection point is contained within
-  // the face.
-  //
-  //  L - line unit vector          Lo - line origin
-  //  N - plane normal unit vector  d  - plane offset
-  //  P - point in question         t - time
-  //
-  //  (N dot P) + d = 0                      { plane equation }
-  //  P = (t * L) + Lo                       { line equation }
-  //  t (N dot L) + (N dot Lo) + d = 0
-  //
-  //  t = - (d + (N dot Lo)) / (N dot L)     { time of impact }
-  //
-  int p;
-  const float* dir = ray.getDirection();
-  const float* origin = ray.getOrigin();
-  float times[4];
-
-  // get the time until the shot would hit each plane
-  for (p = 0; p < 4; p++) {
-    const float linedot = vec3dot(planes[p], dir);
-    if (linedot >= -0.001f) {
-      // shot is either parallel, or going through backwards
-      times[p] = Infinity;
-      continue;
-    }
-    const float origindot = vec3dot(planes[p], origin);
-    // linedot should be safe to divide with now
-    times[p] = - (planes[p][3] + origindot) / linedot;
-    if (times[p] < 0.0f) {
-      times[p] = Infinity;
-    }
-  }
-
-  // sort, smallest time first - FIXME (ick, bubble sort)
-  int order[4] = { 0, 1, 2, 3 };
-  for (int i = 3; i > 0; i--) {
-    for (int j = 3; j > (3 - i); j--)
-      if (times[order[j]] < times[order[j - 1]]) {
-        int tmp = order[j];
-        order[j] = order[j - 1];
-        order[j - 1] = tmp;
-    }
-  }
-
-  // see if the point is within the face
-  for (p = 0; p < 4; p++) {
-    int target = order[p];
-    float targetTime = times[target];
-    if (targetTime == Infinity) {
-      continue;
-    }
-    // get the contact location
-    float point[3];
-    point[0] = (dir[0] * targetTime) + origin[0];
-    point[1] = (dir[1] * targetTime) + origin[1];
-    point[2] = (dir[2] * targetTime) + origin[2];
-    bool gotFirstHit = true;
-    // now test against the planes
-    for (int q = 0; q < 4; q++) {
-      if (q == target) {
-        continue;
-      }
-      float d = vec3dot (planes[q], point) + planes[q][3];
-      if (d > 0.001f) {
-        gotFirstHit = false;
-        break;
-      }
-    }
-    if (gotFirstHit) {
-      lastPlaneShot = target;
-      return targetTime;
-    }
-  }
-
+  assert(false);
   return -1.0f;
 }
 
 
-void TetraBuilding::get3DNormal(const float* /*p*/, float* n) const
+void TetraBuilding::get3DNormal(const float*, float*) const
 {
-  // intersect() must be called on this obstacle
-  // before this function can be used.
-  memcpy (n, planes[lastPlaneShot], sizeof(float[3]));
+  assert(false);
   return;
 }
 
 
-bool TetraBuilding::inCylinder(const float* p,
-                               float radius, float height) const
+void TetraBuilding::getNormal(const float*, float*) const
 {
-  // This is obviously not a real cylinder test, but this
-  // particular collision test is used when we need speed.
-  if (((p[0] + radius) < mins[0]) || ((p[0] - radius) > maxs[0]) ||
-      ((p[1] + radius) < mins[1]) || ((p[1] - radius) > maxs[1]) ||
-      ((p[2] + height) < mins[2]) || (p[2] > maxs[2])) {
-    return false;
-  }
-  return true;
+  assert(false);
+  return;
 }
 
 
-bool TetraBuilding::inBox(const float* p, float angle,
-                          float dx, float dy, float height) const
+bool TetraBuilding::getHitNormal(const float*, float, const float*, float,
+			       float, float, float, float*) const
 {
-//  angle = sqrtf ((dx * dx) + (dy * dy));
-//  return inCylinder (p, angle, height);
-  
-  static const float axisNormals[3][3] = {
-    { 1.0f, 0.0f, 0.0f },
-    { 0.0f, 1.0f, 0.0f },
-    { 0.0f, 0.0f, 1.0f }
-  };
-  int v, a, tn = 0; // tn is "test number"
-
-  // first, do a simple Z axis separation test  (one down, 24 to go)
-  if (((p[2] + height) < mins[2]) || (p[2] > maxs[2])) {
-    return false;
-  }
-  tn++;
-  
-  // translate both objects so that the
-  // box is axis aligned and at the origin
-  float newVerts[4][3];
-  const float halfHeight = height / 2.0f;
-  const float boxSizes[3] = { dx, dy, halfHeight };
-  float cosVal = cos(-angle); // note the negative,
-  float sinVal = sin(-angle); // we're reverse transforming
-  for (v = 0; v < 4; v++) {
-    const float sx = vertices[v][0] - p[0];
-    const float sy = vertices[v][1] - p[1];
-    newVerts[v][0] = (cosVal * sx) - (sinVal * sy);
-    newVerts[v][1] = (cosVal * sy) + (sinVal * sx);
-    newVerts[v][2] = vertices[v][2] - (p[2] + halfHeight);
-  }
-  
-  // check the remaining 2 box plane tests (X & Y axis)
-  projectTetra (axisTests[tn].tetraDists, axisNormals[0], newVerts);
-  axisTests[tn].boxDist = boxSizes[0];
-  if (checkTest(tn)) return false;
-  tn++;
-
-  projectTetra (axisTests[tn].tetraDists, axisNormals[1], newVerts);
-  axisTests[tn].boxDist = boxSizes[1];
-  if (checkTest(tn)) return false;
-  tn++;
-
-  // FIXME - could use the cosVal and sinVal values to
-  //         rotate the current planes and save some time
-  //         could also get these distances before rotating
-  //         if the distances are adjusted for the box position.
-  // remake the tetrahedron planes in their new positions
-  float newNorms[4][3];
-  makeNormal (newVerts[1], newVerts[2], newVerts[3], newNorms[0]);
-  makeNormal (newVerts[0], newVerts[3], newVerts[2], newNorms[1]);
-  makeNormal (newVerts[0], newVerts[1], newVerts[3], newNorms[2]);
-  makeNormal (newVerts[0], newVerts[2], newVerts[1], newNorms[3]);
-  
-  // check the 4 tetrahedron plane tests
-  projectOrigBox (&axisTests[tn].boxDist, newNorms[0], boxSizes);
-  projectTetra (axisTests[tn].tetraDists, newNorms[0], newVerts);
-  if (checkTest(tn)) return false;
-  tn++;
-
-  projectOrigBox (&axisTests[tn].boxDist, newNorms[1], boxSizes);
-  projectTetra (axisTests[tn].tetraDists, newNorms[1], newVerts);
-  if (checkTest(tn)) return false;
-  tn++;
-
-  projectOrigBox (&axisTests[tn].boxDist, newNorms[2], boxSizes);
-  projectTetra (axisTests[tn].tetraDists, newNorms[2], newVerts);
-  if (checkTest(tn)) return false;
-  tn++;
-
-  projectOrigBox (&axisTests[tn].boxDist, newNorms[3], boxSizes);
-  projectTetra (axisTests[tn].tetraDists, newNorms[3], newVerts);
-  if (checkTest(tn)) return false;
-  tn++;
-
-  // check for edge collisions  (3E * 6E = 18 expensive tests)
-  float testNorm[3];
-  for (a = 0; a < 3; a++) {
-    
-    vec3sub(testNorm, newVerts[0], newVerts[1]);
-    vec3cross(axisTests[tn].normal, axisNormals[a], testNorm);
-    projectOrigBox (&axisTests[tn].boxDist, axisTests[tn].normal, boxSizes);
-    projectTetra (axisTests[tn].tetraDists, axisTests[tn].normal, newVerts);
-    if (checkTest(tn)) return false;
-    tn++;
-
-    vec3sub(testNorm, newVerts[0], newVerts[2]);
-    vec3cross(axisTests[tn].normal, axisNormals[a], testNorm);
-    projectOrigBox (&axisTests[tn].boxDist, axisTests[tn].normal, boxSizes);
-    projectTetra (axisTests[tn].tetraDists, axisTests[tn].normal, newVerts);
-    if (checkTest(tn)) return false;
-    tn++;
-        
-    vec3sub(testNorm, newVerts[0], newVerts[3]);
-    vec3cross(axisTests[tn].normal, axisNormals[a], testNorm);
-    projectOrigBox (&axisTests[tn].boxDist, axisTests[tn].normal, boxSizes);
-    projectTetra (axisTests[tn].tetraDists, axisTests[tn].normal, newVerts);
-    if (checkTest(tn)) return false;
-    tn++;
-        
-    vec3sub(testNorm, newVerts[1], newVerts[2]);
-    vec3cross(axisTests[tn].normal, axisNormals[a], testNorm);
-    projectOrigBox (&axisTests[tn].boxDist, axisTests[tn].normal, boxSizes);
-    projectTetra (axisTests[tn].tetraDists, axisTests[tn].normal, newVerts);
-    if (checkTest(tn)) return false;
-    tn++;
-
-    vec3sub(testNorm, newVerts[2], newVerts[3]);
-    vec3cross(axisTests[tn].normal, axisNormals[a], testNorm);
-    projectOrigBox (&axisTests[tn].boxDist, axisTests[tn].normal, boxSizes);
-    projectTetra (axisTests[tn].tetraDists, axisTests[tn].normal, newVerts);
-    if (checkTest(tn)) return false;
-    tn++;
-        
-    vec3sub(testNorm, newVerts[3], newVerts[1]);
-    vec3cross(axisTests[tn].normal, axisNormals[a], testNorm);
-    projectOrigBox (&axisTests[tn].boxDist, axisTests[tn].normal, boxSizes);
-    projectTetra (axisTests[tn].tetraDists, axisTests[tn].normal, newVerts);
-    if (checkTest(tn)) return false;
-    tn++;
-  }
-      
-  return true;  
-}
-
-
-bool TetraBuilding::inMovingBox(const float* oldP, float /*oldAngle*/,
-                                const float* p, float angle,
-                                float dx, float dy, float height) const
-{
-  float fakeHeight;
-  float fakePos[3];
-  if (p[2] < oldP[2]) {
-    fakePos[2] = p[2];
-    fakeHeight = height + (oldP[2] - p[2]);
-  } else {
-    fakePos[2] = oldP[2];
-    fakeHeight = height + (p[2] - oldP[2]);
-  }
-  fakePos[1] = p[1];
-  fakePos[2] = p[2];
-  return inBox (fakePos, angle, dx, dy, fakeHeight);
-}
-
-
-/////////////////////////////////////////////////////////////
-//  FIXME - everything after this point is currently JUNK! //
-/////////////////////////////////////////////////////////////
-
-
-void TetraBuilding::getNormal(const float* p, float* n) const
-{
-  p = p;
-  n[0] = 0.0f;
-  n[1] = 0.0f;
-  n[2] = +1.0f;
-}
-
-
-bool TetraBuilding::getHitNormal(const float* pos1, float,
-				 const float* pos2, float,
-				 float, float, float height,
-				 float* normal) const
-{
-  pos1 = pos1;
-  pos2 = pos2;
-  height = height;
-  normal[0] = 0.0f;
-  normal[1] = 0.0f;
-  normal[2] = +1.0f;
+  assert(false);
   return false;
 }
 
 
-// This is only used when the player has an Oscillation Overthruster
-// flag, and only after we already know that the tank is interfering
-// with this tetrahedron, so it doesn't have to be particularly fast.
-// As a note, some of the info from the original collision test might
-// be handy here.
-bool TetraBuilding::isCrossing(const float* p, float angle,
-                               float dx, float dy, float height,
-                               float* plane) const
+bool TetraBuilding::inCylinder(const float*,float, float) const
 {
-  float corner[8][3]; // the box corners
-  const float cosval = cos(angle);
-  const float sinval = sin(angle);
-  int bv, tp; // box vertices, tetra planes
-
-  // make the box vertices
-  corner[0][0] = (cosval * dx) - (sinval * dy);
-  corner[1][0] = (cosval * dx) + (sinval * dy);
-  corner[0][1] = (cosval * dy) + (sinval * dx);
-  corner[1][1] = (cosval * dy) - (sinval * dx);
-  for (bv = 0; bv < 2; bv++) {
-    corner[bv + 2][0] = -corner[bv][0];
-    corner[bv + 2][1] = -corner[bv][1];
-  }
-  for (bv = 0; bv < 4; bv++) {
-    corner[bv][0] = p[0] + corner[bv][0];
-    corner[bv][1] = p[1] + corner[bv][1];
-    corner[bv][2] = p[2];
-    corner[bv + 4][0] = corner[bv][0];
-    corner[bv + 4][1] = corner[bv][1];
-    corner[bv + 4][2] = corner[bv][2] + height;
-  }
-
-  // see if any tetra planes separate the box vertices
-  bool done = false;
-  for (tp = 0; tp < 4; tp++) {
-    int splitdir = 0;
-    for (bv = 0; bv < 8; bv++) {
-      const float d = vec3dot(corner[bv], planes[tp]) + planes[tp][3];
-      int newdir = (d > 0.0f) ? +1 : -1;
-
-      if (bv == 0) {
-        splitdir = newdir;
-      }
-      else if (splitdir != newdir) {
-        done = true;
-        break;
-      }
-    }
-    if (done) {
-      break;
-    }
-  }
-
-  // copy the plane information if requested
-  if (tp < 4) {
-    if (plane != NULL) {
-      memcpy (plane, planes[tp], sizeof(float[4]));
-    }
-    return true;
-  }
-
+  assert(false);
   return false;
 }
 
 
-void *TetraBuilding::pack(void* buf)
+bool TetraBuilding::inBox(const float*, float, float, float, float) const
 {
-  unsigned char planeflags = 0;   // 0-3 are visibility, 4-7 are colored
-  unsigned char bytecolors[4][4]; // pack the colors into a 32bit format
-  int v, c;
-  
-  // setup the planeflags and bytecolors bytes
-  for (v = 0; v < 4; v++) {
-    if (isVisiblePlane(v)) {
-      planeflags = planeflags | (1 << v);
-    }
-    if (isColoredPlane(v)) {
-      planeflags = planeflags | (1 << (v + 4));
-    }
-    for (c = 0; c < 4; c++) {
-      bytecolors[v][c] = (unsigned char) colors[v][c];
+  assert(false);
+  return false;
+}
+
+
+bool TetraBuilding::inMovingBox(const float*, float, const float*, float,
+			      float, float, float) const
+{
+  assert(false);
+  return false;
+}
+
+
+bool TetraBuilding::isCrossing(const float* /*p*/, float /*angle*/,
+			  float /*dx*/, float /*dy*/, float /*height*/,
+			  float* /*_plane*/) const
+{
+  assert(false);
+  return false;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Packing stuff
+//
+
+static void pack4Bools (unsigned char* byte, const bool bools[4])
+{
+  *byte = 0;
+  for (int i = 0; i < 4; i++) {
+    if (bools[i]) {
+      *byte = *byte | (1 << i);
     }
   }
-  
+  return;
+}
+
+static void unpack4Bools (unsigned char byte, bool bools[4])
+{
+  for (int i = 0; i < 4; i++) {
+    if (byte & (1 << i)) {
+      bools[i] = true;
+    } else {
+      bools[i] = false;
+    }
+  }
+  return;
+}
+
+
+void *TetraBuilding::pack(void* buf) const
+{
+  int v;
+
+  // pack the state byte
+  unsigned char stateByte = 0;
+  stateByte |= isDriveThrough() ? (1 << 0) : 0;
+  stateByte |= isShootThrough() ? (1 << 1) : 0;
+  buf = nboPackUByte(buf, stateByte);
+
+  // pack the transform
+  buf = transform.pack(buf);
+
+  // pack the vertices
   for (v = 0; v < 4; v++) {
     buf = nboPackVector(buf, vertices[v]);
   }
+
+  // pack the normals
+  unsigned char useNormalsByte;
+  pack4Bools (&useNormalsByte, useNormals);
+  buf = nboPackUByte(buf, useNormalsByte);
   for (v = 0; v < 4; v++) {
-    for (c = 0; c < 4; c++) {
-      buf = nboPackUByte(buf, bytecolors[v][c]);
+    if (useNormals[v]) {
+      for (int i = 0; i < 3; i++) {
+	buf = nboPackVector(buf, normals[v][i]);
+      }
     }
   }
 
-  buf = nboPackUByte(buf, planeflags);
-  
-  unsigned char bitMask = 0;
-  if (isDriveThrough())
-    bitMask |= _DRIVE_THRU;
-  if (isShootThrough())
-    bitMask |= _SHOOT_THRU;
-    
-  buf = nboPackUByte(buf, bitMask);
-  
+  // pack the texcoords
+  unsigned char useTexcoordsByte;
+  pack4Bools (&useTexcoordsByte, useTexcoords);
+  buf = nboPackUByte(buf, useTexcoordsByte);
+  for (v = 0; v < 4; v++) {
+    if (useTexcoords[v]) {
+      for (int i = 0; i < 3; i++) {
+	buf = nboPackFloat(buf, texcoords[v][i][0]);
+	buf = nboPackFloat(buf, texcoords[v][i][1]);
+      }
+    }
+  }
+
+  // pack the materials
+  for (v = 0; v < 4; v++) {
+    int matindex = MATERIALMGR.getIndex(materials[v]);
+    buf = nboPackInt(buf, matindex);
+  }
+
   return buf;
 }
 
 
 void *TetraBuilding::unpack(void* buf)
 {
-  buf = buf;
+  int v;
+
+  // unpack the state byte
+  unsigned char stateByte;
+  buf = nboUnpackUByte(buf, stateByte);
+  driveThrough = (stateByte & (1 << 0)) != 0;
+  shootThrough = (stateByte & (1 << 1)) != 0;
+
+  // unpack the transform
+  buf = transform.unpack(buf);
+
+  // unpack the vertices
+  for (v = 0; v < 4; v++) {
+    buf = nboUnpackVector(buf, vertices[v]);
+  }
+
+  // unpack the normals
+  unsigned char useNormalsByte;
+  buf = nboUnpackUByte(buf, useNormalsByte);
+  unpack4Bools (useNormalsByte, useNormals);
+  for (v = 0; v < 4; v++) {
+    if (useNormals[v]) {
+      for (int i = 0; i < 3; i++) {
+	buf = nboUnpackVector(buf, normals[v][i]);
+      }
+    }
+  }
+
+  // unpack the texcoords
+  unsigned char useTexcoordsByte;
+  buf = nboUnpackUByte(buf, useTexcoordsByte);
+  unpack4Bools (useTexcoordsByte, useTexcoords);
+  for (v = 0; v < 4; v++) {
+    if (useTexcoords[v]) {
+      for (int i = 0; i < 3; i++) {
+	buf = nboUnpackFloat(buf, texcoords[v][i][0]);
+	buf = nboUnpackFloat(buf, texcoords[v][i][1]);
+      }
+    }
+  }
+
+  // unpack the materials
+  for (v = 0; v < 4; v++) {
+    int32_t matindex;
+    buf = nboUnpackInt(buf, matindex);
+    materials[v] = MATERIALMGR.getMaterial(matindex);
+  }
+
+  finalize();
+
   return buf;
 }
 
 
-int TetraBuilding::packSize()
+int TetraBuilding::packSize() const
 {
-  return 0;
+  int v;
+  int fullSize = transform.packSize();
+  // state byte
+  fullSize = fullSize + sizeof(unsigned char);
+  // vectors
+  fullSize = fullSize + (4 * sizeof(float[3]));
+  // normals
+  fullSize = fullSize + sizeof(unsigned char);
+  for (v = 0; v < 4; v++) {
+    if (useNormals[v]) {
+      fullSize = fullSize + sizeof(float[3][3]);
+    }
+  }
+  // texcoords
+  fullSize = fullSize + sizeof(unsigned char);
+  for (v = 0; v < 4; v++) {
+    if (useTexcoords[v]) {
+      fullSize = fullSize + sizeof(float[3][2]);
+    }
+  }
+  // materials
+  fullSize = fullSize + sizeof(int32_t[4]);
+
+  return fullSize;
+}
+
+
+void TetraBuilding::print(std::ostream& out, const std::string& indent) const
+{
+  int i;
+
+  out << indent << "tetra" << std::endl;
+
+  transform.printTransforms(out, "");
+
+  // write the vertex information
+  for (i = 0; i < 4; i++) {
+    const float* vertex = vertices[i];
+    out << indent << "\tvertex " << vertex[0] << " " << vertex[1] << " "
+				 << vertex[2] << std::endl;
+    if (useNormals[i]) {
+      for (int j = 0; j < 3; j++) {
+	const float* normal = normals[i][j];
+	out << indent << "\tnormal " << normal[0] << " " << normal[1] << " "
+				     << normal[2] << std::endl;
+      }
+    }
+    if (useTexcoords[i]) {
+      for (int j = 0; j < 3; j++) {
+	const float* texcoord = texcoords[i][j];
+	out << indent << "\tnormal " << texcoord[0] << " "
+				     << texcoord[1] << " "
+				     << texcoord[2] << std::endl;
+      }
+    }
+    out << "\tmatref ";
+    MATERIALMGR.printReference(out, materials[i]);
+    out << std::endl;
+  }
+
+  // write the regular stuff
+  if (isPassable()) {
+    out << indent << "\tpassable" << std::endl;
+  } else {
+    if (isDriveThrough()) {
+      out << indent << "\tdrivethrough" << std::endl;
+    }
+    if (isShootThrough()) {
+      out << indent << "\tshootthrough" << std::endl;
+    }
+  }
+  out << indent << "end" << std::endl;
+
+  return;
 }
 
 
@@ -703,4 +501,3 @@ int TetraBuilding::packSize()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

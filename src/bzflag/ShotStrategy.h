@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -32,6 +32,23 @@
 #include "BaseLocalPlayer.h"
 #include "ShotPath.h"
 
+class ShotCollider
+{
+public:
+  float	  position[3];
+  Ray	  motion;
+  float	  radius;
+  float	  size[3];
+
+  bool	  test2D;
+  float	  angle;
+  float	  length;
+
+  float	  bbox[2][3];
+
+  bool	  testLastSegment;
+};
+
 class ShotPath;
 
 class ShotStrategy {
@@ -40,7 +57,7 @@ class ShotStrategy {
     virtual		~ShotStrategy();
 
     virtual void	update(float dt) = 0;
-    virtual float	checkHit(const BaseLocalPlayer*, float pos[3]) const = 0;
+    virtual float	checkHit(const ShotCollider&, float[3])const = 0;
     virtual bool	isStoppedByHit() const;
     virtual void	addShot(SceneDatabase*, bool colorblind) = 0;
     virtual void	expire();

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* OpenGLLight:
@@ -25,11 +25,10 @@
 
 // common headers
 #include "bzfgl.h"
+#include "ViewFrustum.h"
 
-typedef std::vector<GLuint> OpenGLLightDLStack;
 
 class OpenGLLight {
-  friend class OpenGLLightCleanup;
   public:
 			OpenGLLight();
 			OpenGLLight(const OpenGLLight&);
@@ -39,6 +38,7 @@ class OpenGLLight {
     const GLfloat*	getPosition() const;
     const GLfloat*	getColor() const;
     const GLfloat*	getAttenuation() const;
+    GLfloat		getMaxDist() const;
 
     void		setDirection(const GLfloat* xyz);
     void		setPosition(const GLfloat* xyz);
@@ -47,31 +47,38 @@ class OpenGLLight {
     void		setAttenuation(const GLfloat* clq);
     void		setAttenuation(int index, GLfloat value);
 
-    GLfloat		getImportance(const GLfloat* pos) const;
+    void		calculateImportance(const ViewFrustum& frustum);
+    GLfloat		getImportance() const;
 
-    void		execute(int index) const;
+    void		setOnlyReal(bool value);
+    bool		getOnlyReal() const;
+    void		setOnlyGround(bool value);
+    bool		getOnlyGround() const;
+
+    void		execute(int index, bool useList) const;
 
     static GLint	getMaxLights();
-    static void		enableLight(int index, bool = true); // const
+    static void		enableLight(int index, bool on); // const
 
   protected:
     void		makeLists();
     void		freeLists();
     void		genLight(GLenum light) const;
-    static void		cleanup();
 
   private:
+    static void		freeContext(void*);
     static void		initContext(void*);
 
   private:
     GLfloat		pos[4];
     GLfloat		color[4];
     GLfloat		atten[3];
-    GLuint		listBase;
-    GLuint*		list;
-    GLuint		mailbox;
+    GLfloat		maxDist;
+    GLfloat		importance;
+    bool		onlyReal;
+    bool		onlyGround;
+    GLuint*		lists;
     static GLint	maxLights;
-    static OpenGLLightDLStack oldLists;
 };
 
 //
@@ -93,6 +100,27 @@ inline const GLfloat*	OpenGLLight::getAttenuation() const
   return atten;
 }
 
+inline GLfloat		OpenGLLight::getMaxDist() const
+{
+  return maxDist;
+}
+
+inline GLfloat		 OpenGLLight::getImportance() const
+{
+  return importance;
+}
+
+inline bool		 OpenGLLight::getOnlyReal() const
+{
+  return onlyReal;
+}
+
+inline bool		 OpenGLLight::getOnlyGround() const
+{
+  return onlyGround;
+}
+
+
 #endif // BZF_OPENGL_LIGHT_H
 
 // Local Variables: ***
@@ -102,4 +130,3 @@ inline const GLfloat*	OpenGLLight::getAttenuation() const
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

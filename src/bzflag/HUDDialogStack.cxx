@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,25 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "HUDDialogStack.h"
 
-/* system implementation headers */
-#include <vector>
-
-/* common implementation headers */
-#include "BzfWindow.h"
-
 /* local implementation headers */
+#include "playing.h"
 #include "HUDui.h"
-#include "MainWindow.h"
-
-/* from playing.cxx */
-MainWindow*		getMainWindow();
-
+#include "HUDDialog.h"
 
 HUDDialogStack HUDDialogStack::globalStack;
 
@@ -52,7 +43,7 @@ bool HUDDialogStack::isActive() const
 
 HUDDialog* HUDDialogStack::top() const
 {
-  const int index = stack.size();
+  const int index = (const int)stack.size();
   if (index == 0) return NULL;
   return stack[index - 1];
 }
@@ -61,11 +52,9 @@ void HUDDialogStack::push(HUDDialog* dialog)
 {
   if (!dialog) return;
   if (isActive()) {
-    const int index = stack.size() - 1;
-    stack[index]->setFocus(HUDui::getFocus());
+    const int index = (int)stack.size() - 1;
     stack[index]->dismiss();
-  }
-  else {
+  } else {
     getMainWindow()->getWindow()->addResizeCallback(resize, this);
   }
   stack.push_back(dialog);
@@ -78,8 +67,7 @@ void HUDDialogStack::push(HUDDialog* dialog)
 void HUDDialogStack::pop()
 {
   if (isActive()) {
-    const int index = stack.size() - 1;
-    stack[index]->setFocus(HUDui::getFocus());
+    const int index = (int)stack.size() - 1;
     stack[index]->dismiss();
     std::vector<HUDDialog*>::iterator it = stack.begin();
     for(int i = 0; i < index; i++) it++;
@@ -114,6 +102,11 @@ void HUDDialogStack::resize(void* _self)
 			getMainWindow()->getHeight());
 }
 
+void HUDDialogStack::setFailedMessage(const char *msg)
+{
+  if (isActive())
+    stack[stack.size() - 1]->setFailedMessage(msg);
+}
 
 // Local Variables: ***
 // mode: C++ ***

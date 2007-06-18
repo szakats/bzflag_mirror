@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* BeOS GUI backend by François Revol
@@ -27,7 +27,6 @@
 #include "BeOSWindow.h"
 #include "BeOSVisual.h"
 #include "BzfEvent.h"
-#include "OpenGLGState.h"
 
 //#define MSGDBG(a) printf a
 #define MSGDBG(a)
@@ -419,7 +418,7 @@ void					BeOSWindow::setMinSize(int width, int height)
   bWindow->Unlock();
 }
 
-void					BeOSWindow::setFullscreen()
+void					BeOSWindow::setFullscreen(bool on)
 {
   bWindow->Lock();
   // FIXME
@@ -563,15 +562,12 @@ void					BeOSWindow::makeContext()
   oglContextInitialized = true;
   //showWindow(true);
   makeCurrent();
-  //	OpenGLGState::init();
-  OpenGLGState::initContext();
 }
 
 void					BeOSWindow::freeContext()
 {
   MSGDBG(("BeOSWindow::freeContext()\n"));
   // release context data
-  //	OpenGLGState::freeContext();
   //bWindow->ReleaseCurrent();
   releaseCurrent();
 }
@@ -584,4 +580,3 @@ void					BeOSWindow::freeContext()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

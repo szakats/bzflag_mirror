@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	__JOINMENU_H__
@@ -20,8 +20,7 @@
 #include <string>
 
 /* common interface headers */
-#include "ErrorHandler.h"
-#include "Team.h"
+#include "global.h"
 
 /* local interface headers */
 #include "HUDDialog.h"
@@ -30,6 +29,7 @@
 #include "HUDuiLabel.h"
 #include "HUDuiList.h"
 #include "HUDuiTypeIn.h"
+#include "HUDuiImage.h"
 
 class ServerStartMenu;
 class ServerMenu;
@@ -45,12 +45,10 @@ class JoinMenu : public HUDDialog {
     void		execute();
     void		dismiss();
     void		resize(int width, int height);
+    void		updateTeamTexture();
 
   private:
     static void		teamCallback(HUDuiControl*, void*);
-    static void		joinGameCallback(bool, void*);
-    static void		connectStatusCallback(std::string& str);
-    static void		joinErrorCallback(const char* msg);
     TeamColor		getTeam() const;
     void		setTeam(TeamColor);
     void		setStatus(const char*, const std::vector<std::string> *parms = NULL);
@@ -60,8 +58,10 @@ class JoinMenu : public HUDDialog {
   private:
     float		center;
     HUDuiTypeIn*	callsign;
+    HUDuiTypeIn*	password;
     HUDuiTypeIn*	email;
     HUDuiList*		team;
+    HUDuiImage*		teamIcon;
     HUDuiTypeIn*	server;
     HUDuiTypeIn*	port;
     HUDuiLabel*		status;
@@ -69,7 +69,6 @@ class JoinMenu : public HUDDialog {
     HUDuiLabel*		findServer;
     HUDuiLabel*		connectLabel;
     HUDuiLabel*		failedMessage;
-    ErrorCallback	oldErrorCallback;
     ServerStartMenu*	serverStartMenu;
     ServerMenu*		serverMenu;
     static JoinMenu*	activeMenu;

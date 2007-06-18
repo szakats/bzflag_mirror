@@ -1,10 +1,18 @@
-noinst_LIBRARIES = libCommon.a
+noinst_LTLIBRARIES = libCommon.la
 
-AM_CFLAGS = -D_XOPEN_SOURCE
+AM_CFLAGS = -D_XOPEN_SOURCE @CONF_CFLAGS@
 
-AM_CPPFLAGS = -I$(top_srcdir)/include
+AM_CPPFLAGS = \
+	-I$(top_srcdir)/include \
+	$(LIBCURL_CPPFLAGS) \
+	@CONF_CPPFLAGS@
+AM_CXXFLAGS = @CONF_CXXFLAGS@
 
-libCommon_a_SOURCES  =			\
+libCommon_la_LDFLAGS = -static
+libCommon_la_LIBADD =
+libCommon_la_SOURCES  =			\
+	AccessList.cxx			\
+	AutoCompleter.cxx		\
 	BZDBCache.cxx			\
 	Bundle.cxx			\
 	BundleMgr.cxx			\
@@ -14,28 +22,30 @@ libCommon_a_SOURCES  =			\
 	ErrorHandler.cxx		\
 	FileManager.cxx			\
 	Flag.cxx			\
+	GameTime.cxx			\
 	KeyManager.cxx			\
 	Language.cxx			\
 	OSFile.cxx			\
+	ParseColor.cxx			\
 	PlayerState.cxx			\
 	PositionTracker.cxx		\
 	ShotUpdate.cxx			\
 	StateDatabase.cxx		\
 	Team.cxx			\
+	TextChunkManager.cxx		\
+	TextUtils.cxx			\
 	TimeBomb.cxx			\
 	TimeKeeper.cxx			\
 	VotingBooth.cxx			\
 	WordFilter.cxx			\
 	bz_Locale.cxx			\
 	bzfio.cxx			\
+	bzglob.cxx			\
 	bzsignal.c			\
+	cURLManager.cxx			\
 	global.cxx			\
-	md5.cxx
-
-if BUILD_REGEX
-libCommon_a_LIBADD = \
-	../regex/libregex.a
-endif
+	md5.cxx				\
+	messages.cxx
 
 MAINTAINERCLEANFILES = \
 	Makefile.in

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,17 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "BZAdminClient.h"
+/* interface header */
 #include "CursesMenu.h"
+
+/* system implementation headers */
+#include <sstream>
+
+/* common implementation headers */
+#include "BZAdminClient.h"
 #include "StateDatabase.h"
 #include "TextUtils.h"
 
@@ -149,15 +155,15 @@ void FilterCMItem::showItem(WINDOW* menuWin, int line, int col, int width,
 			    bool selected) {
   /* print the name of the message type to the left of the center and the
      status to the right, use reverse video if it is selected */
-  std::string text = "Show message type '";
-  text += messageType;
-  text += "':";
+  std::string txt = "Show message type '";
+  txt += messageType;
+  txt += "':";
   wmove(menuWin, line, col);
   if (selected)
     wattron(menuWin, A_REVERSE);
-  for (unsigned int i = 0; i < width / 2 - text.size() - 1; ++i)
+  for (unsigned int i = 0; i < width / 2 - txt.size() - 1; ++i)
     waddstr(menuWin, " ");
-  waddstr(menuWin, text.c_str());
+  waddstr(menuWin, txt.c_str());
   wmove(menuWin, line, col + width / 2 + 1);
   std::string value = (client.getFilterStatus(numMsgType) ? "yes" : "no");
   waddstr(menuWin, value.c_str());
@@ -273,8 +279,9 @@ void PlayerCMItem::showItem(WINDOW* menuWin, int line, int col, int width,
   // score (wins-losses)[tks] callsign IP, reverse video if selected
   std::string name, ip;
   int wins, losses, tks;
-  int scorePad = 17;
-  int callsignPad = CallSignLen;
+  unsigned int scorePad = 17;
+  unsigned int callsignPad = CallSignLen;
+  unsigned int attrPad = std::string("(Reg/Ident/Admin)").length();
   PlayerIdMap::const_iterator iter = playerMap.find(id);
   if (iter != playerMap.end()) {
     name = iter->second.name;
@@ -282,13 +289,29 @@ void PlayerCMItem::showItem(WINDOW* menuWin, int line, int col, int width,
     wins = iter->second.wins;
     losses = iter->second.losses;
     tks = iter->second.tks;
+
+    std::string attrstr = "(";
+    if (iter->second.isRegistered)
+      attrstr += "Reg/";
+    if (iter->second.isVerified)
+      attrstr += "Ver/";
+    if (iter->second.isAdmin)
+      attrstr += "Adm/";
+    if (attrstr == "(")
+      attrstr += "Anon)";
+    else
+      attrstr[attrstr.length()-1] = ')';
+
     std::ostringstream oss;
     oss<<(wins - losses)<<" ("<<wins<<"-"<<losses<<")["<<tks<<"]";
     unsigned int streamLength = oss.str().size();
-    for (unsigned int i = 0; i < scorePad - streamLength; ++i)
+    for (unsigned int i = 0; i + streamLength < scorePad; ++i)
       oss<<' ';
     oss<<' '<<name;
-    for (unsigned int i = 0; i < callsignPad - name.size(); ++i)
+    for (unsigned int i = 0; i + name.size() < callsignPad; ++i)
+      oss<<' ';
+    oss<<' '<<attrstr;
+    for (unsigned int i = 0; i + attrstr.size() < attrPad; ++i)
       oss<<' ';
     streamLength = oss.str().size();
     if (selected)

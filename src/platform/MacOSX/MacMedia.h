@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,17 +7,17 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef BZF_MACMEDIA_H
 #define  BZF_MACMEDIA_H
 
-#include <Carbon/Carbon.h>
-#include <queue>
 #include "BzfMedia.h"
 
-using std::queue;
+#include <Carbon/Carbon.h>
+#include <queue>
+
 
 class MacMedia : public BzfMedia {
   public:
@@ -25,7 +25,6 @@ class MacMedia : public BzfMedia {
     ~MacMedia();
 
     double stopwatch(bool);
-    void sleep(float );
 
     bool openAudio();
     void closeAudio();
@@ -67,7 +66,7 @@ class MacMedia : public BzfMedia {
 
     int num_samples;
 
-    queue<char*> command_queue;
+    std::queue<char*> command_queue;
 };
 
 #endif // BZF_MACMEDIA_H
@@ -79,4 +78,3 @@ class MacMedia : public BzfMedia {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,27 +7,61 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <math.h>
 #include "common.h"
+#include <math.h>
 #include "global.h"
+#include "Pack.h"
 #include "PyramidBuilding.h"
 #include "Intersect.h"
+#include "MeshTransform.h"
 
 const char*		PyramidBuilding::typeName = "PyramidBuilding";
+
+PyramidBuilding::PyramidBuilding()
+{
+  // do nothing
+}
 
 PyramidBuilding::PyramidBuilding(const float* p, float a,
 				float w, float b, float h, bool drive, bool shoot) :
 				Obstacle(p, a, w, b, h,drive,shoot)
 {
-  // do nothing
+  finalize();
+  return;
 }
 
 PyramidBuilding::~PyramidBuilding()
 {
   // do nothing
+}
+
+void PyramidBuilding::finalize()
+{
+  Obstacle::setExtents();
+  return;
+}
+
+Obstacle* PyramidBuilding::copyWithTransform(const MeshTransform& xform) const
+{
+  float newPos[3], newSize[3], newAngle;
+  memcpy(newPos, pos, sizeof(float[3]));
+  memcpy(newSize, size, sizeof(float[3]));
+  newAngle = angle;
+
+  MeshTransform::Tool tool(xform);
+  bool flipped;
+  tool.modifyOldStyle(newPos, newSize, newAngle, flipped);
+
+  PyramidBuilding* copy =
+    new PyramidBuilding(newPos, newAngle, newSize[0], newSize[1], newSize[2],
+			driveThrough, shootThrough);
+
+  copy->ZFlip = !(getZFlip() == flipped);
+
+  return copy;
 }
 
 const char*		PyramidBuilding::getType() const
@@ -57,23 +91,23 @@ void			PyramidBuilding::getNormal(const float* p,
 
   // make sure we are not way above or way below it
   // above is good so we can drive on it when it's fliped
-  float top =  getPosition()[2]+getHeight();
+  float top =  getPosition()[2] + getHeight();
   float bottom = getPosition()[2];
 
-  if (s ==0){
-	  if (this->getZFlip()){
-		  if (p[2] >= top){
-			  n[0] = n[1] = 0;
-			  n[2] = 1;
-			  return;
-		  }
-	  }else{
-		  if (p[2] <= bottom){
-			  n[0] = n[1] = 0;
-			  n[2] = -1;
-			  return;
-		  }
-	  }
+  if (s ==0) {
+    if (this->getZFlip()) {
+      if (p[2] >= top) {
+	n[0] = n[1] = 0;
+	n[2] = 1;
+	return;
+      }
+    } else {
+      if (p[2] <= bottom) {
+	n[0] = n[1] = 0;
+	n[2] = -1;
+	return;
+      }
+    }
   }
 
   // now angle it due to slope of wall
@@ -84,7 +118,7 @@ void			PyramidBuilding::getNormal(const float* p,
   n[2] = h * getWidth();
 
   if (this->getZFlip())
-	  n[2] *= -1;
+    n[2] *= -1;
 }
 
 void			PyramidBuilding::get3DNormal(const float* p,
@@ -134,7 +168,7 @@ void			PyramidBuilding::get3DNormal(const float* p,
   // FIXME -- fugly beyond belief
   float baseLength = getWidth();
   const float normalAngle = atan2f(n[1], n[0]);
-  const float rightAngle = fabsf(fmodf(normalAngle - getRotation() + M_PI/2.0f, M_PI));
+  const float rightAngle = fabsf(fmodf(normalAngle - getRotation() + (float)(M_PI/2.0), (float)M_PI));
   if ((rightAngle < 0.1) || (rightAngle > (M_PI - 0.1))) {
     baseLength = getBreadth();
   }
@@ -173,11 +207,11 @@ bool			PyramidBuilding::inBox(const float* p, float a,
 		      s * getWidth(), s * getBreadth(), p, a, dx, dy);
 }
 
-bool			PyramidBuilding::inMovingBox(const float*, float,
-                                             const float* p, float angle,
-                                             float dx, float dy, float dz) const
+bool PyramidBuilding::inMovingBox(const float*, float,
+				  const float* p, float _angle,
+				  float dx, float dy, float dz) const
 {
-  return inBox (p, angle, dx, dy, dz);
+  return inBox (p, _angle, dx, dy, dz);
 }
 
 bool			PyramidBuilding::isCrossing(const float* p, float a,
@@ -186,7 +220,7 @@ bool			PyramidBuilding::isCrossing(const float* p, float a,
   // if not inside or contained then not crossing
   if (!inBox(p, a, dx, dy, height) ||
       testRectInRect(getPosition(), getRotation(),
-                     getWidth(), getBreadth(), p, a, dx, dy))
+		     getWidth(), getBreadth(), p, a, dx, dy))
     return false;
   if (!plane) return true;
 
@@ -204,8 +238,7 @@ bool			PyramidBuilding::isCrossing(const float* p, float a,
     plane[1] = ((x < 0.0) ? -sinf(a2) : sinf(a2));
     pw[0] = p2[0] + getWidth() * plane[0];
     pw[1] = p2[1] + getWidth() * plane[1];
-  }
-  else {
+  } else {
     plane[0] = ((y < 0.0) ? sinf(a2) : -sinf(a2));
     plane[1] = ((y < 0.0) ? -cosf(a2) : cosf(a2));
     pw[0] = p2[0] + getBreadth() * plane[0];
@@ -279,7 +312,7 @@ bool			PyramidBuilding::getHitNormal(
 }
 
 void			PyramidBuilding::getCorner(int index,
-						float* pos) const
+						   float* _pos) const
 {
   const float* base = getPosition();
   const float c = cosf(getRotation());
@@ -289,44 +322,44 @@ void			PyramidBuilding::getCorner(int index,
   const float top  = getHeight() + base[2];
   switch (index) {
     case 0:
-      pos[0] = base[0] + c * w - s * h;
-      pos[1] = base[1] + s * w + c * h;
-	  if (getZFlip())
-		 pos[2] = top;
-	  else
-		 pos[2] = base[2];
+      _pos[0] = base[0] + c * w - s * h;
+      _pos[1] = base[1] + s * w + c * h;
+      if (getZFlip())
+	_pos[2] = top;
+      else
+	_pos[2] = base[2];
       break;
     case 1:
-      pos[0] = base[0] - c * w - s * h;
-      pos[1] = base[1] - s * w + c * h;
-	  if (getZFlip())
-		 pos[2] = top;
-	  else
-		 pos[2] = base[2];
+      _pos[0] = base[0] - c * w - s * h;
+      _pos[1] = base[1] - s * w + c * h;
+      if (getZFlip())
+	_pos[2] = top;
+      else
+	_pos[2] = base[2];
       break;
     case 2:
-      pos[0] = base[0] - c * w + s * h;
-      pos[1] = base[1] - s * w - c * h;
-	  if (getZFlip())
-		 pos[2] = top;
-	  else
-		 pos[2] = base[2];
+      _pos[0] = base[0] - c * w + s * h;
+      _pos[1] = base[1] - s * w - c * h;
+      if (getZFlip())
+	_pos[2] = top;
+      else
+	_pos[2] = base[2];
       break;
     case 3:
-      pos[0] = base[0] + c * w + s * h;
-      pos[1] = base[1] + s * w - c * h;
-	  if (getZFlip())
-		 pos[2] = top;
-	  else
-		 pos[2] = base[2];
+      _pos[0] = base[0] + c * w + s * h;
+      _pos[1] = base[1] + s * w - c * h;
+      if (getZFlip())
+	_pos[2] = top;
+      else
+	_pos[2] = base[2];
       break;
     case 4:
-      pos[0] = base[0];
-      pos[1] = base[1];
-	  if (getZFlip())
-		 pos[2] = base[2];
-	  else
-		 pos[2] = top;
+      _pos[0] = base[0];
+      _pos[1] = base[1];
+      if (getZFlip())
+	_pos[2] = base[2];
+      else
+	_pos[2] = top;
       break;
   }
 }
@@ -345,8 +378,8 @@ float			PyramidBuilding::shrinkFactor(float z,
   }
 
  // Remove heights bias
-  const float *pos = getPosition();
-  z -= pos[2];
+  const float *_pos = getPosition();
+  z -= _pos[2];
   if (oHeight <= ZERO_TOLERANCE) {
     shrink = 1.0f;
   } else {
@@ -376,6 +409,175 @@ float			PyramidBuilding::shrinkFactor(float z,
   return shrink;
 }
 
+bool			PyramidBuilding::isFlatTop() const
+{
+  return getZFlip();
+}
+
+
+void* PyramidBuilding::pack(void* buf) const
+{
+  buf = nboPackVector(buf, pos);
+  buf = nboPackFloat(buf, angle);
+  buf = nboPackVector(buf, size);
+
+  unsigned char stateByte = 0;
+  stateByte |= isDriveThrough() ? _DRIVE_THRU : 0;
+  stateByte |= isShootThrough() ? _SHOOT_THRU : 0;
+  stateByte |= getZFlip() ? _FLIP_Z : 0;
+  buf = nboPackUByte(buf, stateByte);
+
+  return buf;
+}
+
+
+void* PyramidBuilding::unpack(void* buf)
+{
+  buf = nboUnpackVector(buf, pos);
+  buf = nboUnpackFloat(buf, angle);
+  buf = nboUnpackVector(buf, size);
+
+  unsigned char stateByte;
+  buf = nboUnpackUByte(buf, stateByte);
+  driveThrough = (stateByte & _DRIVE_THRU) != 0;
+  shootThrough = (stateByte & _SHOOT_THRU) != 0;
+  ZFlip = (stateByte & _FLIP_Z) != 0;
+
+  finalize();
+
+  return buf;
+}
+
+
+int PyramidBuilding::packSize() const
+{
+  int fullSize = 0;
+  fullSize += sizeof(float[3]); // pos
+  fullSize += sizeof(float[3]); // size
+  fullSize += sizeof(float);    // rotation
+  fullSize += sizeof(uint8_t);  // state bits
+  return fullSize;
+}
+
+
+void PyramidBuilding::print(std::ostream& out, const std::string& indent) const
+{
+  out << indent << "pyramid" << std::endl;
+  const float *_pos = getPosition();
+  out << indent << "  position " << _pos[0] << " " << _pos[1] << " "
+				 << _pos[2] << std::endl;
+  out << indent << "  size " << getWidth() << " " << getBreadth()
+			     << " " << getHeight() << std::endl;
+  out << indent << "  rotation " << ((getRotation() * 180.0) / M_PI)
+				 << std::endl;
+  if (getZFlip()) {
+    out << indent << "  flipz" << std::endl;
+  }
+
+  if (isPassable()) {
+    out << indent << "  passable" << std::endl;
+  } else {
+    if (isDriveThrough()) {
+      out << indent << "  drivethrough" << std::endl;
+    }
+    if (isShootThrough()) {
+      out << indent << "  shootthrough" << std::endl;
+    }
+  }
+  out << indent << "end" << std::endl;
+  return;
+}
+
+
+static void outputFloat(std::ostream& out, float value)
+{
+  char buffer[32];
+  snprintf(buffer, 30, " %.8f", value);
+  out << buffer;
+  return;
+}
+
+void PyramidBuilding::printOBJ(std::ostream& out, const std::string& /*indent*/) const
+{
+  int i;
+  float verts[5][3] = {
+    {-1.0f, -1.0f, 0.0f},
+    {+1.0f, -1.0f, 0.0f},
+    {+1.0f, +1.0f, 0.0f},
+    {-1.0f, +1.0f, 0.0f},
+    { 0.0f,  0.0f, 1.0f}
+  };
+  const float sqrt1_2 = (float)M_SQRT1_2;
+  float norms[5][3] = {
+    {0.0f, -sqrt1_2, +sqrt1_2}, {+sqrt1_2, 0.0f, +sqrt1_2},
+    {0.0f, +sqrt1_2, +sqrt1_2}, {-sqrt1_2, 0.0f, +sqrt1_2},
+    {0.0f, 0.0f, -1.0f}
+  };
+  const float* s = getSize();
+  const float k = 1.0f / 8.0f;
+  float txcds[7][2] = {
+    {0.0f, 0.0f}, {k*s[0], 0.0f}, {k*s[0], k*s[1]}, {0.0f, k*s[1]},
+    {0.5f*k*s[0], k*sqrtf(s[0]*s[0]+s[2]*s[2])},
+    {k*s[1], 0.0f}, {0.5f*k*s[1], k*sqrtf(s[1]*s[1]+s[2]*s[2])}
+  };
+  MeshTransform xform;
+  const float degrees = getRotation() * (float)(180.0 / M_PI);
+  const float zAxis[3] = {0.0f, 0.0f, +1.0f};
+  if (getZFlip()) {
+    const float xAxis[3] = {1.0f, 0.0f, 0.0f};
+    xform.addSpin(180.0f, xAxis);
+    xform.addShift(zAxis);
+  }
+  xform.addScale(getSize());
+  xform.addSpin(degrees, zAxis);
+  xform.addShift(getPosition());
+  xform.finalize();
+  MeshTransform::Tool xtool(xform);
+  for (i = 0; i < 5; i++) {
+    xtool.modifyVertex(verts[i]);
+  }
+  for (i = 0; i < 5; i++) {
+    xtool.modifyNormal(norms[i]);
+  }
+
+  out << "# OBJ - start pyramid" << std::endl;
+  out << "o bzpyr_" << getObjCounter() << std::endl;
+
+  for (i = 0; i < 5; i++) {
+    out << "v";
+    outputFloat(out, verts[i][0]);
+    outputFloat(out, verts[i][1]);
+    outputFloat(out, verts[i][2]);
+    out << std::endl;
+  }
+  for (i = 0; i < 7; i++) {
+    out << "vt";
+    outputFloat(out, txcds[i][0]);
+    outputFloat(out, txcds[i][1]);
+    out << std::endl;
+  }
+  for (i = 0; i < 5; i++) {
+    out << "vn";
+    outputFloat(out, norms[i][0]);
+    outputFloat(out, norms[i][1]);
+    outputFloat(out, norms[i][2]);
+    out << std::endl;
+  }
+  out << "usemtl pyrwall" << std::endl;
+  out << "f -1/-1/-5 -5/-7/-5 -4/-6/-5" << std::endl;
+  out << "f -1/-3/-4 -4/-7/-4 -3/-2/-4" << std::endl;
+  out << "f -1/-1/-3 -3/-7/-3 -2/-6/-3" << std::endl;
+  out << "f -1/-3/-2 -2/-7/-2 -5/-2/-2" << std::endl;
+  out << "f -2/-7/-1 -3/-6/-1 -4/-5/-1 -5/-4/-1" << std::endl;
+
+  out << std::endl;
+
+  incObjCounter();
+
+  return;
+}
+
+
 // Local Variables: ***
 // mode:C++ ***
 // tab-width: 8 ***
@@ -383,4 +585,3 @@ float			PyramidBuilding::shrinkFactor(float z,
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

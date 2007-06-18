@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,14 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __SERVERCOMMANDKEY_H__
 #define __SERVERCOMMANDKEY_H__
 
+// Ancestor class
+#include "HUDuiDefaultKey.h"
+
 #include <string>
-#include "HUDui.h"
 #include "Address.h"
 
 class ServerCommandKey : public HUDuiDefaultKey {
@@ -32,15 +34,16 @@ private:
 private:
   enum Mode {
     Kick,
+    Kill,
     BanIp,
     Ban1,
     Ban2,
     Ban3,
-    Unban,
     Showgroup,
     Setgroup,
     Removegroup,
     Ghost,
+    Unban,
     Banlist,
     Playerlist,
     FlagReset,
@@ -53,6 +56,7 @@ private:
     LagStats,
     Report,
     LagWarn,
+    LagDrop,
     GameOver,
     CountDown,
     SuperKill,
@@ -78,3 +82,11 @@ private:
 };
 
 #endif
+
+// Local Variables: ***
+// mode:C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

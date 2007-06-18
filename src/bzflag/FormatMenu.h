@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __FORMATMENU_H__
@@ -21,6 +21,7 @@
 #include "HUDuiLabel.h"
 #include "HUDuiDefaultKey.h"
 #include "MenuDefaultKey.h"
+#include "HUDNavigationQueue.h"
 
 
 class FormatMenu;
@@ -39,34 +40,32 @@ private:
 };
 
 class FormatMenu : public HUDDialog {
+  friend class FormatMenuDefaultKey;
 public:
   FormatMenu();
   ~FormatMenu();
 
   HUDuiDefaultKey*	getDefaultKey() { return &defaultKey; }
-  int			getSelected() const;
-  void			setSelected(int);
   void			show();
   void			execute();
   void			resize(int width, int height);
 
+private:
+  void			addLabel(const char* msg, const char* _label, bool navigable = false);
+  void			setPage(int page);
   void			setFormat(bool test);
 
-public:
+private:
   static const int	NumItems;
-
-private:
-  void			addLabel(const char* msg, const char* _label);
-
-private:
   FormatMenuDefaultKey	defaultKey;
   int			numFormats;
   float			center;
 
   HUDuiLabel*		currentLabel;
   HUDuiLabel*		pageLabel;
-  int			selectedIndex;
+  int			page;
   bool*			badFormats;
+  static size_t		navCallback(size_t oldFocus, size_t proposedFocus, HUDNavChangeMethod changeMethod, void*);
 
   static const int	NumColumns;
   static const int	NumReadouts;

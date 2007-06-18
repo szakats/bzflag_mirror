@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,13 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __PERMISSIONS_H__
 #define __PERMISSIONS_H__
+
+#include "common.h"
 
 /* system interface headers */
 // work around an ugly STL bug in BeOS
@@ -41,89 +43,141 @@ public:
   enum AccessPerm
     {
       actionMessage = 0,
-      adminMessages,
+      adminMessageReceive,
+      adminMessageSend,
       antiban,
-      antideregister,
       antikick,
+      antikill,
       antipoll,
       antipollban,
       antipollkick,
+      antipollkill,
       ban,
       banlist,
       countdown,
+      date,
       endGame,
       flagHistory,
+      flagMaster,
       flagMod,
+      hideAdmin,
       idleStats,
       info,
+      jitterwarn,
       kick,
+      kill,
       lagStats,
       lagwarn,
+      listPlugins,
       listPerms,
+      masterBan,
+      modCount,
+      mute,
+      packetlosswarn,
       playerList,
       poll,
+      pollBan,
+      pollKick,
+      pollKill,
+      pollSet,
+      pollFlagReset,
       privateMessage,
       record,
+      rejoin,
       removePerms,
       replay,
       requireIdentify,
+      say,
+      sendHelp,
       setAll,
       setPassword,
       setPerms,
       setVar,
+      shortBan,
       showOthers,
       shutdownServer,
+      spawn,
       superKill,
+      talk,
       unban,
+      unmute,
       veto,
       viewReports,
       vote,
-      lastPerm	// just so we know how many rights there
-		// are this dosn't do anything really, just
-		// make sure it's the last real right
+      // just so we know how many rights there
+      // are this dosn't do anything really, just
+      // make sure it's the last real right
+      lastPerm
     };
 
-  void        setName(const char* callSign);
+  enum GroupStates
+    {
+      isGroup,  // we can check if this is a group or a player
+      isDefault,   // mark default groups
+      isReferenced, // do not allow to alter group perms once it's referenced
+      lastState
+    };
+
+  void	setName(const char* callSign);
 
   std::string getName();
 
-  bool        isAccessVerified() const;
-  bool        gotAccessFailure();
-  void        setLoginFail();
-  bool        passwordAttemptsMax();
-  bool        isPasswordMatching(const char* pwd);
-  void        setPasswd(const std::string& pwd);
-  void        setAdmin();
-  bool        isAdmin() const;
+  bool	gotAccessFailure();
+  void	setLoginFail();
+  bool	passwordAttemptsMax();
+  bool	isPasswordMatching(const char* pwd);
+  bool	hasRealPassword();
+  void	setPasswd(const std::string& pwd);
 
-  void        setPermissionRights();
-  void        reloadInfo();
+  /** have successfully provided server password */
+  void  setOperator();
+  bool	isOperator() const;
 
-  bool        hasGroup(const std::string& group);
-  bool        addGroup(const std::string &group);
-  bool        removeGroup(const std::string& group);
-  bool        canSet(const std::string& group);
+  /** have ability to ban */
+  bool	isAdmin() const;
 
-  bool        hasPerm(AccessPerm right);
-  bool        isRegistered() const;
-  bool        isIdentifyRequired();
-  bool        isAllowedToEnter();
+  /** are not marked as hidden admins */
+  bool	showAsAdmin() const;
+
+  void	setPermissionRights();
+  void	reloadInfo();
+
+  bool	hasGroup(const std::string& group);
+  bool	addGroup(const std::string &group);
+  bool	removeGroup(const std::string& group);
+  bool	canSet(const std::string& group);
+
+  bool	hasPerm(AccessPerm right) const;
+  void	grantPerm(AccessPerm right);
+  void	revokePerm(AccessPerm right);
+
+  bool	hasCustomPerm(const char* right) const;
+
+  bool	isRegistered() const;
+  bool	isIdentifyRequired();
+  bool	isAllowedToEnter();
+  bool	isVerified() const;
   uint8_t     getPlayerProperties();
-  void        storeInfo(const char* pwd);
-  bool        exists();
+  void	storeInfo(const char* pwd);
+  bool	exists();
   static PlayerAccessInfo &getUserInfo(const std::string &nick);
   static bool readGroupsFile(const std::string &filename);
   static bool readPermsFile(const std::string &filename);
   static bool writePermsFile(const std::string &filename);
   static void updateDatabases();
   std::bitset<lastPerm>		explicitAllows;
-  std::vector<std::string>	groups;
-private:
   std::bitset<lastPerm>		explicitDenys;
+  std::bitset<lastState>	groupState;
+  std::vector<std::string>	groups;
+  std::vector<std::string>	customPerms;
+
+private:
   bool				verified;
   TimeKeeper			loginTime;
   int				loginAttempts;
-  bool                          Admin;
+
+  /** server operator that has provided the server password */
+  bool				serverop;
 
   // number of times they have tried to /password
   int passwordAttempts;
@@ -139,7 +193,6 @@ extern PlayerAccessMap	userDatabase;
 extern PasswordMap	passwordDatabase;
 
 extern std::string		groupsFile;
-extern std::string		passFile;
 extern std::string		userDatabaseFile;
 
 inline void makeupper(std::string& str)
@@ -148,12 +201,14 @@ inline void makeupper(std::string& str)
 }
 
 bool userExists(const std::string &nick);
+bool checkPasswordExistence(const std::string &nick);
 bool verifyUserPassword(const std::string &nick, const std::string &pass);
 std::string nameFromPerm(PlayerAccessInfo::AccessPerm perm);
 PlayerAccessInfo::AccessPerm permFromName(const std::string &name);
 void parsePermissionString(const std::string &permissionString, std::bitset<PlayerAccessInfo::lastPerm> &perms);
-bool readPassFile(const std::string &filename);
-bool writePassFile(const std::string &filename);
+bool groupHasPermission(std::string group, PlayerAccessInfo::AccessPerm perm);
+
+uint8_t GetPlayerProperties( bool registered, bool verified, bool admin );
 
 #endif
 

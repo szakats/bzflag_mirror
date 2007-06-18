@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // Provide BZFS with a list server connection
@@ -20,53 +20,50 @@
 #include <string>
 #include <math.h>
 #include <errno.h>
+#include <set>
 
 /* common implementation headers */
 #include "bzfio.h"
 #include "version.h"
 #include "TextUtils.h"
 #include "Protocol.h"
+#include "bzfsAPI.h"
+#include "WorldEventManager.h"
 
-extern Address serverAddress;
-extern PingPacket getTeamCounts();
+/* local implementation headers */
+#include "bzfs.h"
 
-ListServerLink::ListServerLink(std::string listServerURL, std::string publicizedAddress, std::string publicizedTitle)
+const int ListServerLink::NotConnected = -1;
+
+extern bz_eTeamType convertTeam ( TeamColor team );
+extern TeamColor convertTeam( bz_eTeamType team );
+
+ListServerLink::ListServerLink(std::string listServerURL,
+			       std::string publicizedAddress,
+			       std::string publicizedTitle,
+			       std::string _advertiseGroups)
 {
-  // parse url
-  std::string protocol, hostname, pathname;
-  int port = 80;
-  bool useDefault = false;
 
-  // use default if it can't be parsed
-  if (!BzfNetwork::parseURL(listServerURL, protocol, hostname, port, pathname))
-    useDefault = true;
+  std::string bzfsUserAgent = "bzfs ";
+  bzfsUserAgent	    += getAppVersion();
 
-  // use default if wrong protocol or invalid port
-  if ((protocol != "http") || (port < 1) || (port > 65535))
-    useDefault = true;
+  setURL(listServerURL);
+  setUserAgent(bzfsUserAgent);
+  setDNSCachingTime(-1);
+  setTimeout(10);
 
-  // use default if bad address
-  Address address = Address::getHostAddress(hostname);
-  if (address.isAny())
-    useDefault = true;
+  publiclyDisconnected = false;
 
-  // parse default list server URL if we need to; assume default works
-  if (useDefault) {
-    BzfNetwork::parseURL(DefaultListServerURL, protocol, hostname, port, pathname);
-    DEBUG1("Provided list server URL (%s) is invalid.  Using default of %s.\n", listServerURL.c_str(), DefaultListServerURL);
-  }
+  if (clOptions->pingInterface != "")
+    setInterface(clOptions->pingInterface);
 
-  // add to list
-  this->address	   = address;
-  this->port	   = port;
-  this->pathname   = pathname;
-  this->hostname   = hostname;
-  this->linkSocket = NotConnected;
+  publicizeAddress     = publicizedAddress;
+  publicizeDescription = publicizedTitle;
+  advertiseGroups      = _advertiseGroups;
 
-  this->publicizeAddress     = publicizedAddress;
-  this->publicizeDescription = publicizedTitle;
-  this->publicizeServer	     = true;  //if this c'tor is called, it's safe to publicize
-
+  //if this c'tor is called, it's safe to publicize
+  publicizeServer      = true;
+  queuedRequest	= false;
   // schedule initial ADD message
   queueMessage(ListServerLink::ADD);
 }
@@ -76,8 +73,7 @@ ListServerLink::ListServerLink()
   // does not create a usable link, so checks should be placed
   // in  all public member functions to ensure that nothing tries
   // to happen if publicizeServer is false
-  this->linkSocket = NotConnected;
-  this->publicizeServer = false;
+  publicizeServer = false;
 }
 
 ListServerLink::~ListServerLink()
@@ -93,120 +89,171 @@ ListServerLink::~ListServerLink()
     return;
 
   queueMessage(ListServerLink::REMOVE);
-  TimeKeeper start = TimeKeeper::getCurrent();
-  do {
-    // compute timeout
-    float waitTime = 3.0f - (TimeKeeper::getCurrent() - start);
-    if (waitTime <= 0.0f)
+  for (int i = 0; i < 12; i++) {
+    cURLManager::perform();
+    if (!queuedRequest)
       break;
-    if (!isConnected()) //queueMessage should have connected us
-      break;
-    // check for list server socket connection
-    int fdMax = -1;
-    fd_set write_set;
-    fd_set read_set;
-    FD_ZERO(&write_set);
-    FD_ZERO(&read_set);
-    if (phase == ListServerLink::CONNECTING)
-      _FD_SET(linkSocket, &write_set);
-    else
-      _FD_SET(linkSocket, &read_set);
-    fdMax = linkSocket;
-
-    // wait for socket to connect or timeout
-    struct timeval timeout;
-    timeout.tv_sec = long(floorf(waitTime));
-    timeout.tv_usec = long(1.0e+6f * (waitTime - floorf(waitTime)));
-    int nfound = select(fdMax + 1, (fd_set*)&read_set, (fd_set*)&write_set,
-			0, &timeout);
-    if (nfound == 0)
-      // Time has gone, close and go
-      break;
-    // check for connection to list server
-    if (FD_ISSET(linkSocket, &write_set))
-      sendQueuedMessages();
-    else if (FD_ISSET(linkSocket, &read_set))
-      read();
-  } while (true);
-
-  // stop list server communication
-  closeLink();
-}
-
-void ListServerLink::closeLink()
-{
-  if (isConnected()) {
-    close(linkSocket);
-    DEBUG4("Closing List Server\n");
-    linkSocket = NotConnected;
+    TimeKeeper::sleep(0.25f);
   }
 }
 
-void ListServerLink::read()
+void ListServerLink::finalization(char *data, unsigned int length, bool good)
 {
-  if (isConnected()) {
-    char    buf[256];
-    recv(linkSocket, buf, sizeof(buf), 0);
-    closeLink();
-    if (nextMessageType != ListServerLink::NONE)
-      // There was a pending request arrived after we write:
-      // we should redo all the stuff
-      openLink();
-  }
-}
+  publiclyDisconnected = !good;
 
-void ListServerLink::openLink()
-{
-  // start opening connection if not already doing so
-  if (!isConnected()) {
-    linkSocket = socket(AF_INET, SOCK_STREAM, 0);
-    DEBUG4("Opening List Server\n");
-    if (!isConnected()) {
-      return;
-    }
+  queuedRequest = false;
+  if (good && (length < 2048)) {
+    char buf[2048];
+    memcpy(buf, data, length);
+    int bytes = length;
+    buf[bytes]=0;
+    char* base = buf;
+    static char *tokGoodIdentifier = "TOKGOOD: ";
+    static char *tokBadIdentifier = "TOKBAD: ";
+    static char *unknownPlayer = "UNK: ";
+    static char *bzIdentifier = "BZID: ";
+    // walks entire reply including HTTP headers
+    while (*base) {
+      // find next newline
+      char* scan = base;
+      while (*scan && *scan != '\r' && *scan != '\n') scan++;
+      // if no newline then no more complete replies
+      if (*scan != '\r' && *scan != '\n') break;
+      while (*scan && (*scan == '\r' || *scan == '\n')) *scan++ = '\0';
+      logDebugMessage(4,"Got line: \"%s\"\n", base);
+      // TODO don't do this if we don't want central logins
 
-    // set to non-blocking for connect
-    if (BzfNetwork::setNonBlocking(linkSocket) < 0) {
-      closeLink();
-      return;
-    }
+      // is player globally registered ?
+      bool  registered = false;
+      // is player authenticated ?
+      bool  verified   = false;
+      // this is a reply to an authentication request ?
+      bool  authReply  = false;
 
-    // Make our connection come from our serverAddress in case we have
-    // multiple/masked IPs so the list server can verify us.
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr = serverAddress;
-
-    // assign the address to the socket
-    if (bind(linkSocket, (CNCTType*)&addr, sizeof(addr)) < 0) {
-      closeLink();
-      return;
-    }
-
-    // connect.  this should fail with EINPROGRESS but check for
-    // success just in case.
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_port   = htons(port);
-    addr.sin_addr   = address;
-    if (connect(linkSocket, (CNCTType*)&addr, sizeof(addr)) < 0) {
-#if defined(_WIN32)
-#undef EINPROGRESS
-#define EINPROGRESS EWOULDBLOCK
-#endif
-      if (getErrno() != EINPROGRESS) {
-	nerror("connecting to list server");
-	// try to lookup dns name again in case it moved
-	this->address = Address::getHostAddress(this->hostname);
-	closeLink();
-      } else {
-	phase = CONNECTING;
+      char *callsign = (char *)NULL;
+      if (strncmp(base, tokGoodIdentifier, strlen(tokGoodIdentifier)) == 0) {
+	callsign = base + strlen(tokGoodIdentifier);
+	registered = true;
+	verified   = true;
+	authReply  = true;
+      } else if (!strncmp(base, tokBadIdentifier, strlen(tokBadIdentifier))) {
+	callsign = base + strlen(tokBadIdentifier);
+	registered = true;
+	authReply  = true;
+      } else if (!strncmp(base, unknownPlayer, strlen(unknownPlayer))) {
+	callsign = base + strlen(unknownPlayer);
+	authReply  = true;
+      } else if (!strncmp(base, bzIdentifier, strlen(bzIdentifier))) {
+	std::string line = base;
+	std::vector<std::string> args = TextUtils::tokenize(line, " \t", 3, true);
+	if (args.size() < 3) {
+	  logDebugMessage(3,"Bad BZID string: %s\n", line.c_str());
+	} else {
+	  const std::string& bzId = args[1];
+	  const std::string& nick = args[2];
+	  logDebugMessage(4,"Got BZID: \"%s\" || \"%s\"\n", bzId.c_str(), nick.c_str());
+	  for (int i = 0; i < curMaxPlayers; i++) {
+	    GameKeeper::Player* gkp = GameKeeper::Player::getPlayerByIndex(i);
+	    if ((gkp != NULL) &&
+		(TextUtils::compare_nocase(gkp->player.getCallSign(), nick.c_str()) == 0)) {
+	      gkp->setBzIdentifier(bzId);
+	      logDebugMessage(3,"Set player (%s [%i]) bzId to (%s)\n",
+		     nick.c_str(), i, bzId.c_str());
+	      break;
+	    }
+	  }
+	}
       }
-    } else {
-      // shouldn't arrive here. Just in case, clean
-      closeLink();
+
+      if (authReply) {
+	logDebugMessage(3,"Got: %s", base);
+	char *group = (char *)NULL;
+
+	// Isolate callsign from groups
+	if (verified) {
+	  group = callsign;
+	  if (group) {
+	    while (*group && (*group != ':')) group++;
+	    while (*group && (*group == ':')) *group++ = 0;
+	  }
+	}
+	GameKeeper::Player *playerData = NULL;
+	int playerIndex;
+	for (playerIndex = 0; playerIndex < curMaxPlayers; playerIndex++) {
+	  playerData = GameKeeper::Player::getPlayerByIndex(playerIndex);
+	  if (!playerData)
+	    continue;
+	  if (playerData->_LSAState != GameKeeper::Player::checking)
+	    continue;
+	  if (!TextUtils::compare_nocase(playerData->player.getCallSign(),
+					 callsign))
+	    break;
+	}
+	logDebugMessage(3,"[%d]\n", playerIndex);
+
+	if (playerIndex < curMaxPlayers) {
+	  if (registered) {
+	    // don't accept the global auth if there's a local account
+	    // of the same name and the local account is not marked as
+	    // being the same as the global account
+	    if (!playerData->accessInfo.hasRealPassword()
+		|| playerData->accessInfo.getUserInfo(callsign).hasGroup("LOCAL.GLOBAL")) {
+	      if (!playerData->accessInfo.isRegistered())
+		// Create an entry on the user database even if
+		// authentication wenk ko. Make the "isRegistered"
+		// things work
+		playerData->accessInfo.storeInfo(NULL);
+	      if (verified) {
+		playerData->_LSAState = GameKeeper::Player::verified;
+		playerData->accessInfo.setPermissionRights();
+		while (group && *group) {
+		  char *nextgroup = group;
+		  if (nextgroup) {
+		    while (*nextgroup && (*nextgroup != ':')) nextgroup++;
+		    while (*nextgroup && (*nextgroup == ':')) *nextgroup++ = 0;
+		  }
+		  playerData->accessInfo.addGroup(group);
+		  group = nextgroup;
+		}
+		playerData->authentication.global(true);
+		sendMessage(ServerPlayer, playerIndex, "Global login approved!");
+	      } else {
+		playerData->_LSAState = GameKeeper::Player::failed;
+		sendMessage(ServerPlayer, playerIndex, "Global login rejected, bad token.");
+	      }
+	    } else {
+	      playerData->_LSAState = GameKeeper::Player::failed;
+	      sendMessage(ServerPlayer, playerIndex, "Global login rejected. This callsign is registered locally on this server.");
+	      sendMessage(ServerPlayer, playerIndex, "If the local account is yours, /identify, /deregister and reconnnect, or ask an admin for the LOCAL.GLOBAL group.");
+	      sendMessage(ServerPlayer, playerIndex, "If it is not yours, please ask an admin to deregister it so that you may use your global callsign.");
+	    }
+	  } else {
+	    playerData->_LSAState = GameKeeper::Player::notRequired;
+	    if (!playerData->player.isBot()) {
+	      sendMessage(ServerPlayer, playerIndex, "This callsign is not registered.");
+	      sendMessage(ServerPlayer, playerIndex, "You can register it at http://my.bzflag.org/bb/");
+	    }
+	  }
+	  playerData->player.clearToken();
+	}
+      }
+
+      // next reply
+      base = scan;
     }
+  }
+  for (int i = 0; i < curMaxPlayers; i++) {
+    GameKeeper::Player *playerData = GameKeeper::Player::getPlayerByIndex(i);
+    if (!playerData)
+      continue;
+    if (playerData->_LSAState != GameKeeper::Player::checking)
+      continue;
+    playerData->_LSAState = GameKeeper::Player::timedOut;
+  }
+  if (nextMessageType != ListServerLink::NONE) {
+    // There was a pending request arrived after we write:
+    // we should redo all the stuff
+    sendQueuedMessages();
   }
 }
 
@@ -215,80 +262,176 @@ void ListServerLink::queueMessage(MessageType type)
   // ignore if the server is not public
   if (!publicizeServer) return;
 
-  // Open network connection only if closed
-  if (!isConnected()) openLink();
-
   // record next message to send.
   nextMessageType = type;
+
+  if (!queuedRequest)
+    sendQueuedMessages();
+  else
+    logDebugMessage(3,"There is a message already queued to the list server: not sending this one yet.\n");
 }
 
 void ListServerLink::sendQueuedMessages()
 {
-  if (!isConnected())
-    return;
-
+  queuedRequest = true;
   if (nextMessageType == ListServerLink::ADD) {
-    DEBUG3("Queuing ADD message to list server\n");
-    addMe(getTeamCounts(), publicizeAddress, url_encode(publicizeDescription));
+    logDebugMessage(3,"Queuing ADD message to list server\n");
+
+    bz_ListServerUpdateEvent_V1	updateEvent;
+    updateEvent.address = publicizeAddress;
+    updateEvent.description = publicizeDescription;
+    updateEvent.groups = verifyGroupPermissions(advertiseGroups);
+
+    worldEventManager.callEvents(bz_eListServerUpdateEvent,&updateEvent);
+
+    addMe(getTeamCounts(), std::string(updateEvent.address.c_str()), std::string(updateEvent.description.c_str()), std::string(updateEvent.groups.c_str()));
     lastAddTime = TimeKeeper::getCurrent();
   } else if (nextMessageType == ListServerLink::REMOVE) {
-    DEBUG3("Queuing REMOVE message to list server\n");
+    logDebugMessage(3,"Queuing REMOVE message to list server\n");
     removeMe(publicizeAddress);
   }
+  nextMessageType = ListServerLink::NONE;
+}
+
+std::string ListServerLink::verifyGroupPermissions(const std::string& groups)
+{
+  // replay servers can have any crazy permissions they want
+  if (Replay::enabled())
+    return groups;
+
+  // check to make sure these groups are actually good
+  std::vector<std::string> vgroups = TextUtils::tokenize(groups, ",");
+  std::vector<std::string>::iterator delitr = vgroups.end();
+  // case-insensitive comparisons the cheap way
+  for (std::vector<std::string>::iterator itr = vgroups.begin(); itr != vgroups.end(); ++itr) {
+    (*itr) = TextUtils::toupper(*itr);
+  }
+
+  // if EVERYONE is included, delist it if EVERYONE can neither spawn nor talk
+  delitr = std::find(vgroups.begin(), vgroups.end(), "EVERYONE");
+  if (delitr != vgroups.end()) {
+    if (!groupHasPermission("EVERYONE", PlayerAccessInfo::spawn) &&
+	!groupHasPermission("EVERYONE", PlayerAccessInfo::talk))
+      vgroups.erase(delitr);
+  }
+
+  // if nothing is left, add VERIFIED
+  if (vgroups.size() < 1) {
+    vgroups.push_back("VERIFIED");
+  }
+
+  // if VERIFIED is included, delist it if VERIFIED can neither spawn nor talk
+  delitr = std::find(vgroups.begin(), vgroups.end(), "VERIFIED");
+  if (delitr != vgroups.end()) {
+    if (!groupHasPermission("VERIFIED", PlayerAccessInfo::spawn) &&
+	!groupHasPermission("VERIFIED", PlayerAccessInfo::talk))
+      vgroups.erase(delitr);
+  }
+
+  // if there's nothing left, add any non-local groups who CAN either spawn or talk
+  if (vgroups.size() < 1) {
+    for (PlayerAccessMap::iterator itr = groupAccess.begin(); itr != groupAccess.end(); ++itr) {
+      if ((*itr).first.compare(0, 6, "LOCAL.") == 0)
+	continue;
+      if ((*itr).second.hasPerm(PlayerAccessInfo::spawn) ||
+	  (*itr).second.hasPerm(PlayerAccessInfo::talk)) {
+	vgroups.push_back((*itr).first);
+      }
+    }
+  }
+
+  // if there's still nothing left, this is one screwed up configuration, so just bail with an error
+  if (vgroups.size() < 1) {
+    std::cout << "No groups found who can spawn or talk." << std::endl << std::flush;
+    exit(2);
+  }
+
+  // shove it all back into a string
+  std::string retgroups = "";
+  for (std::vector<std::string>::iterator itr = vgroups.begin(); itr != vgroups.end(); ++itr) {
+    retgroups += (*itr) + ",";
+  }
+  retgroups.erase(retgroups.length() - 1, 1); // last comma
+
+  return retgroups;
 }
 
 void ListServerLink::addMe(PingPacket pingInfo,
 			   std::string publicizedAddress,
-			   std::string publicizedTitle)
+			   std::string publicizedTitle,
+			   std::string _advertiseGroups)
 {
   std::string msg;
+  std::string hdr;
 
   // encode ping reply as ascii hex digits plus NULL
   char gameInfo[PingPacketHexPackedSize + 1];
   pingInfo.packHex(gameInfo);
 
   // send ADD message (must send blank line)
-  msg = string_util::format("GET %s?action=ADD&nameport=%s&version=%s&gameinfo=%s&build=%s&title=%s HTTP/1.1\r\n"
-    "Host: %s\r\nCache-Control: no-cache\r\n\r\n",
-    pathname.c_str(), publicizedAddress.c_str(),
-    getServerVersion(), gameInfo,
-    getAppVersion(),
-    publicizedTitle.c_str(),
-    hostname.c_str());
-  sendMessage(msg);
+  msg  = "action=ADD&nameport=";
+  msg += publicizedAddress;
+  msg += "&version=";
+  msg += getServerVersion();
+  msg += "&gameinfo=";
+  msg += gameInfo;
+  msg += "&build=";
+  msg += getAppVersion();
+  msg += "&checktokens=";
+
+  std::set<std::string> callSigns;
+  // callsign1@ip1=token1%0D%0Acallsign2@ip2=token2%0D%0A
+  for (int i = 0; i < curMaxPlayers; i++) {
+    GameKeeper::Player *playerData = GameKeeper::Player::getPlayerByIndex(i);
+    if (!playerData)
+      continue;
+    if ((playerData->_LSAState != GameKeeper::Player::required)
+	&& (playerData->_LSAState != GameKeeper::Player::requesting))
+      continue;
+    if (callSigns.count(playerData->player.getCallSign()))
+      continue;
+    callSigns.insert(playerData->player.getCallSign());
+    playerData->_LSAState = GameKeeper::Player::checking;
+    NetHandler *handler = playerData->netHandler;
+    msg += TextUtils::url_encode(playerData->player.getCallSign());
+    Address addr = handler->getIPAddress();
+    if (!addr.isPrivate()) {
+	msg += "@";
+	msg += handler->getTargetIP();
+    }
+    msg += "=";
+    msg += playerData->player.getToken();
+    msg += "%0D%0A";
+  }
+
+  msg += "&groups=";
+  // *groups=GROUP0%0D%0AGROUP1%0D%0A
+  PlayerAccessMap::iterator itr = groupAccess.begin();
+  for ( ; itr != groupAccess.end(); itr++) {
+    if (itr->first.substr(0, 6) != "LOCAL.") {
+      msg += itr->first.c_str();
+      msg += "%0D%0A";
+    }
+  }
+
+  msg += "&advertgroups=";
+  msg += TextUtils::url_encode(_advertiseGroups);
+  msg += "&title=";
+  msg += TextUtils::url_encode(publicizedTitle);
+
+  setPostMode(msg);
+  addHandle();
 }
 
 void ListServerLink::removeMe(std::string publicizedAddress)
 {
   std::string msg;
-  // send REMOVE (must send blank line)
-  msg = string_util::format("GET %s?action=REMOVE&nameport=%s HTTP/1.1\r\n"
-    "Host: %s\r\nCache-Control: no-cache\r\n\r\n",
-    pathname.c_str(),
-    publicizedAddress.c_str(),
-    hostname.c_str());
-  sendMessage(msg);
-}
 
-void ListServerLink::sendMessage(std::string message)
-{
-  const int bufsize = 4096;
-  char msg[bufsize];
-  strncpy(msg, message.c_str(), bufsize);
-  msg[bufsize - 1] = 0;
-  if (strlen(msg) > 0) {
-    DEBUG3("%s\n", msg);
-    if (send(linkSocket, msg, strlen(msg), 0) == -1) {
-      perror("List server send failed");
-      DEBUG3("Unable to send to the list server!\n");
-      closeLink();
-    } else {
-      nextMessageType = ListServerLink::NONE;
-      phase           = ListServerLink::WRITTEN;
-    }
-  } else {
-    closeLink();
-  }
+  msg  = "action=REMOVE&nameport=";
+  msg += publicizedAddress;
+
+  setPostMode(msg);
+  addHandle();
 }
 
 // Local Variables: ***

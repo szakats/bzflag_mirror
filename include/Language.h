@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,15 +7,18 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __LANGUAGE_H__
 #define __LANGUAGE_H__
 
+#include "common.h"
+
 // system interface headers
 #include <string>
 #include <vector>
+
 
 /** ISO 639 language representation */
 class Language
@@ -31,7 +34,7 @@ class Language
 
  protected:
 
-  Language(int number, std::string iso2, std::string iso3="", std::string english="", std::string french="");
+  Language(int numberCode, std::string iso2Code, std::string iso3Code="", std::string english="", std::string french="");
   ~Language();
 
   static bool addLanguage(Language& language);
@@ -95,4 +98,3 @@ class Language;
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __CAPTURE_REPLAY_H__
@@ -30,6 +30,7 @@ namespace Record {
   extern bool kill ();
 
   extern bool setDirectory (const char *dirname);
+  extern const char* getDirectory ();
 
   extern bool start (int playerIndex);
   extern bool stop (int playerIndex);
@@ -41,20 +42,25 @@ namespace Record {
 
   extern bool enabled ();
 
+  extern bool getAllowFileRecs();
+  extern void setAllowFileRecs(bool value);
+
   extern bool addPacket (uint16_t code, int len, const void * data,
-                         uint16_t mode = RealPacket);
+			 uint16_t mode = RealPacket);
 
   extern void sendHelp (int playerIndex);
-};
+}
 
 namespace Replay {
   extern bool init (); // must be done before any players join
   extern bool kill ();
 
-  extern bool sendFileList (int playerIndex);
+  extern bool sendFileList (int playerIndex, const char* options);
   extern bool loadFile (int playerIndex, const char *filename);
   extern bool unloadFile (int playerIndex);
   extern bool play (int playerIndex);
+  extern bool loop (int playerIndex);
+  extern bool sendStats (int playerIndex);
   extern bool skip (int playerIndex, int seconds); // 0 secs jumps to next packet
   extern bool pause (int playerIndex);
 
@@ -65,7 +71,13 @@ namespace Replay {
   extern bool sendPackets ();
 
   extern void sendHelp (int playerIndex);
-};
+
+  enum ReplayListSort {
+    SortNone = 0,
+    SortByName = 1,
+    SortByTime = 2
+  };
+}
 
 // Some notes:
 //

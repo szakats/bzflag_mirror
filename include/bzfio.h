@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,32 +7,32 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/*
- * Include c++ iostream.
- */
+#ifndef __BZFIO_H__
+#define __BZFIO_H__
 
-#ifndef BZF_MYIO
-#define BZF_MYIO
+#include "common.h"
 
-void formatDebug(const char* fmt, ...);
+void setDebugTimestamp (bool enable, bool doMicros);
+void logDebugMessage(int level, const char* fmt, ...);
 
-/* egcs headers on linux define NULL as (void*)0.  that's a no no in C++. */
-#if defined(NULL)
-#undef NULL
-#endif
-#define NULL 0
-
-/* insert any other broken OS conditionals here */
-#if !defined(_WIN32)
-#endif
-#include <iostream>
-
-#endif
+/** global debug level used by libraries and applications, provided in bzfio.cxx */
+extern int debugLevel;
 
 
+class LoggingCallback
+{
+public:
+	virtual ~LoggingCallback(){};
+
+	virtual void log ( int level, const char* message ) = 0;
+};
+
+extern LoggingCallback	*loggingCallback;
+
+#endif /* __BZFIO_H__ */
 
 /*
  * Local Variables: ***
@@ -43,4 +43,3 @@ void formatDebug(const char* fmt, ...);
  * End: ***
  * ex: shiftwidth=2 tabstop=8
  */
-

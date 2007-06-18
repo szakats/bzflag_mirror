@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* TetraBuilding:
@@ -20,32 +20,44 @@
 #include "common.h"
 #include <string>
 #include "Obstacle.h"
+#include "MeshObstacle.h"
+#include "MeshTransform.h"
+#include "BzMaterial.h"
 
 class TetraBuilding : public Obstacle {
   public:
-			TetraBuilding(const float (*vertices)[3], const bool *visible,
-			              const bool *colored, const float (*colors)[4],
-			              bool drive = false, bool shoot = false);
-			~TetraBuilding();
+
+    TetraBuilding();
+    TetraBuilding(const MeshTransform& transform,
+		  const float vertices[4][3], const float normals[4][3][3],
+		  const float texCoords[4][3][2], const bool useNormals[4],
+		  const bool useTexCoords[4], const BzMaterial* materials[4],
+		  bool drive = false, bool shoot = false);
+    ~TetraBuilding();
+
+    Obstacle* copyWithTransform(const MeshTransform&) const;
+
+    MeshObstacle* makeMesh();
+
+    void		finalize();
 
     const char*		getType() const;
     static const char*	getClassName(); // const
-    bool                isValid() const;
-    void                getExtents(float* mins, float* maxs) const;
+    bool		isValid() const;
 
     float		intersect(const Ray&) const;
     void		getNormal(const float* p, float* n) const;
     void		get3DNormal(const float* p, float* n) const;
 
-    bool                inCylinder(const float* p, float radius, float height) const;
-    bool                inBox(const float* p, float angle,
-                              float halfWidth, float halfBreadth, float height) const;
-    bool                inMovingBox(const float* oldP, float oldAngle,
-                                    const float *newP, float newAngle,
-                                    float halfWidth, float halfBreadth, float height) const;
-    bool                isCrossing(const float* p, float angle,
-                                   float halfWidth, float halfBreadth, float height,
-                                   float* plane) const;
+    bool		inCylinder(const float* p, float radius, float height) const;
+    bool		inBox(const float* p, float angle,
+			      float halfWidth, float halfBreadth, float height) const;
+    bool		inMovingBox(const float* oldP, float oldAngle,
+				    const float *newP, float newAngle,
+				    float halfWidth, float halfBreadth, float height) const;
+    bool		isCrossing(const float* p, float angle,
+				   float halfWidth, float halfBreadth, float height,
+				   float* plane) const;
 
     bool		getHitNormal(
 				const float* pos1, float azimuth1,
@@ -56,79 +68,26 @@ class TetraBuilding : public Obstacle {
 
     void		getCorner(int index, float* pos) const;
 
-    const float*   getPlane(int plane) const;
-    const float*   getVertex(int vertex) const;
-    const float  (*getPlanes() const)[4];
-    const float  (*getVertices() const)[3];
-    bool           isVisiblePlane(int plane) const;
-    bool           isColoredPlane(int plane) const;
-    const float*   getPlaneColor(int plane) const;
-    
-    void *pack(void*);
+    int packSize() const;
+    void *pack(void*) const;
     void *unpack(void*);
-    int packSize();
 
-    std::string	        userTextures[1];
+    void print(std::ostream& out, const std::string& indent) const;
+
+  private:
+    void checkVertexOrder();
 
   private:
     static const char*	typeName;
+
+    MeshTransform transform;
     float vertices[4][3];
-    float planes[4][4];   // planes are numbered to the opposite vertex
-    float mins[3];        // minimum extents
-    float maxs[3];        // maximum extents
-    bool visible[4];      // is this plane visible?
-    bool colored[4];      // is this plane colored?
-    float colors[4][4];   // RGBA color specifications per plane
-
-    mutable unsigned char lastPlaneShot;
-
-    /** return true if test[testNumber] was a separation axis */
-    bool checkTest(int testNumber) const;
-    
-    // static data for tank collision tests
-    typedef struct {
-      float normal[3];
-      float boxDist;
-      float tetraDists[4];
-    } planeTest;
-    static planeTest axisTests[25];
+    float normals[4][3][3];
+    float texcoords[4][3][2];
+    bool useNormals[4];
+    bool useTexcoords[4];
+    const BzMaterial* materials[4];
 };
-
-
-inline const float *TetraBuilding::getPlane(int plane) const
-{
-  return planes[plane];
-}
-
-inline const float *TetraBuilding::getVertex(int vertex) const
-{
-  return vertices[vertex];
-}
-
-inline bool TetraBuilding::isVisiblePlane(int plane) const
-{
-  return visible[plane];
-}
-
-inline bool TetraBuilding::isColoredPlane(int plane) const
-{
-  return colored[plane];
-}
-
-inline const float *TetraBuilding::getPlaneColor(int plane) const
-{
-  return colors[plane];
-}
-
-inline const float (*TetraBuilding::getPlanes() const)[4]
-{
-  return planes;
-}
-
-inline const float (*TetraBuilding::getVertices() const)[3]
-{
-  return vertices;
-}
 
 
 #endif // BZF_TETRA_BUILDING_H
@@ -140,4 +99,3 @@ inline const float (*TetraBuilding::getVertices() const)[3]
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

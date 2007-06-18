@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __CUSTOMWEAPON_H__
@@ -26,19 +26,31 @@
 /* local interface headers */
 #include "WorldFileLocation.h"
 #include "WorldInfo.h"
+#include "WorldEventManager.h"
 
 
 class CustomWeapon : public WorldFileLocation {
   public:
     CustomWeapon();
     virtual bool read(const char *cmd, std::istream&);
-    virtual void write(WorldInfo*) const;
+    virtual void writeToWorld(WorldInfo*) const;
+    virtual bool usesGroupDef() { return false; }
+
     static const float minWeaponDelay;
 
   protected:
+
+    FlagType *type;
+
     float initdelay;
     std::vector<float> delay;
-    FlagType *type;
+
+    float tilt;
+    TeamColor teamColor;
+
+    int eventTeam;
+    bz_eEventType triggerType;
+
     static TimeKeeper sync;
 };
 

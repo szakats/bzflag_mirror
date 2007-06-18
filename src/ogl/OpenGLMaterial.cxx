@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "common.h"
@@ -49,12 +49,12 @@ OpenGLMaterial::Rep*	OpenGLMaterial::Rep::getRep(
 }
 
 OpenGLMaterial::Rep::Rep(const GLfloat* _specular,
-				const GLfloat* _emissive,
-				GLfloat _shininess) :
-				init(false),
-				refCount(1),
-				shininess(_shininess)
+			 const GLfloat* _emissive,
+			 GLfloat _shininess)
+			 : refCount(1), shininess(_shininess)
 {
+  list = INVALID_GL_LIST_ID;
+
   prev = NULL;
   next = head;
   head = this;
@@ -69,16 +69,20 @@ OpenGLMaterial::Rep::Rep(const GLfloat* _specular,
   emissive[2] = _emissive[2];
   emissive[3] = 1.0f;
 
-  list = glGenLists(1);
-  OpenGLGState::registerContextInitializer(initContext, (void*)this);
+  OpenGLGState::registerContextInitializer(freeContext,
+					   initContext, (void*)this);
 }
 
 OpenGLMaterial::Rep::~Rep()
 {
-  OpenGLGState::unregisterContextInitializer(initContext, (void*)this);
+  OpenGLGState::unregisterContextInitializer(freeContext,
+					     initContext, (void*)this);
 
   // free OpenGL display list
-  if (list) glDeleteLists(list, 1);
+  if (list != INVALID_GL_LIST_ID) {
+    glDeleteLists(list, 1);
+    list = INVALID_GL_LIST_ID;
+  }
 
   // remove me from material list
   if (next != NULL) next->prev = prev;
@@ -98,21 +102,51 @@ void			OpenGLMaterial::Rep::unref()
 
 void			OpenGLMaterial::Rep::execute()
 {
-  if (!init) {
-    glNewList(list, GL_COMPILE);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, emissive);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
-    glEndList();
-    init = true;
+  if (list != INVALID_GL_LIST_ID) {
+    glCallList(list);
   }
-  glCallList(list);
+  else {
+    list = glGenLists(1);
+    glNewList(list, GL_COMPILE_AND_EXECUTE);
+    {
+      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, emissive);
+      glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+      if (highQuality) {
+	if  ((specular[0] > 0.0f) ||
+	     (specular[1] > 0.0f) ||
+	     (specular[2] > 0.0f)) {
+	  // accurate specular highlighting  (more GPU intensive)
+	  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+	} else {
+	  // speed up the lighting calcs by simplifying
+	  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_FALSE);
+	}
+      }
+    }
+    glEndList();
+  }
+  return;
 }
 
-void			OpenGLMaterial::Rep::initContext(void* self)
+
+void OpenGLMaterial::Rep::freeContext(void* self)
 {
-  ((Rep*)self)->init = false;
+  GLuint& list = ((Rep*)self)->list;
+  if (list != INVALID_GL_LIST_ID) {
+    glDeleteLists(list, 1);
+    list = INVALID_GL_LIST_ID;
+  }
+  return;
 }
+
+
+void OpenGLMaterial::Rep::initContext(void* /*self*/)
+{
+  // the next execute() call will rebuild the list
+  return;
+}
+
 
 //
 // OpenGLMaterial
@@ -133,7 +167,11 @@ OpenGLMaterial::OpenGLMaterial(const GLfloat* specular,
 OpenGLMaterial::OpenGLMaterial(const OpenGLMaterial& m)
 {
   rep = m.rep;
-  if (rep) rep->ref();
+  if (rep) {
+    rep->highQuality = false;
+    rep->ref();
+  }
+  
 }
 
 OpenGLMaterial::~OpenGLMaterial()
@@ -174,11 +212,6 @@ bool			OpenGLMaterial::isValid() const
   return (rep != NULL);
 }
 
-GLuint			OpenGLMaterial::getList() const
-{
-  return (!rep ? 0 : rep->list);
-}
-
 void			OpenGLMaterial::execute() const
 {
   if (rep) rep->execute();
@@ -191,4 +224,3 @@ void			OpenGLMaterial::execute() const
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

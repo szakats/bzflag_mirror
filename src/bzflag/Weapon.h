@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,24 +7,24 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __WEAPON_H__
 #define __WEAPON_H__
+
+// BZFlag common header
+#include "common.h"
 
 #include <vector>
 #include "Flag.h"
 
 class Weapon {
   public:
-    Weapon() {
-      type = Flags::Null;
-      pos[0] = pos[1] = pos[2] = 0.0f;
-      dir = 0.0f;
-      initDelay = 0.0f;
-      delay.clear();
-    }
+    Weapon();
+    void* unpack(void*);
+
+  public:
     FlagType *type;
     float pos[3];
     float dir;

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* BzfEvent:
@@ -126,6 +126,36 @@ class BzfKeyEvent {
 			BZ_Button_8,
 			BZ_Button_9,
 			BZ_Button_10,
+			BZ_Button_11,
+			BZ_Button_12,
+			BZ_Button_13,
+			BZ_Button_14,
+			BZ_Button_15,
+			BZ_Button_16,
+			BZ_Button_17,
+			BZ_Button_18,
+			BZ_Button_19,
+			BZ_Button_20,
+			BZ_Button_21,
+			BZ_Button_22,
+			BZ_Button_23,
+			BZ_Button_24,
+			BZ_Button_25,
+			BZ_Button_26,
+			BZ_Button_27,
+			BZ_Button_28,
+			BZ_Button_29,
+			BZ_Button_30,
+			BZ_Button_31,
+			BZ_Button_32,
+			BZ_Hatswitch_1_up,
+			BZ_Hatswitch_1_right,
+			BZ_Hatswitch_1_down,
+			BZ_Hatswitch_1_left,
+			BZ_Hatswitch_2_up,
+			BZ_Hatswitch_2_right,
+			BZ_Hatswitch_2_down,
+			BZ_Hatswitch_2_left,
 			LastButton  // special marker that must be last
     };
     enum {
@@ -166,10 +196,10 @@ class BzfEvent {
 	BzfKeyEvent	keyDown;
     };
     BzfEvent() :
-        type(Unset),
-        window((BzfWindow*)NULL)
+	type(Unset),
+	window((BzfWindow*)NULL)
     {
-        mouseMove.x=mouseMove.y=resize.width=resize.height=keyUp.ascii=keyUp.button=keyUp.shift=0;
+	mouseMove.x=mouseMove.y=resize.width=resize.height=keyUp.ascii=keyUp.button=keyUp.shift=0;
     }
 };
 
@@ -182,4 +212,3 @@ class BzfEvent {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

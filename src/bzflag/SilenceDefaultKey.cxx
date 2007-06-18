@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,17 +7,23 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// interface header
+#include "SilenceDefaultKey.h"
+
+// system headers
 #include <string>
 
-#include "SilenceDefaultKey.h"
+// common implementation headers
 #include "KeyManager.h"
+
+// local implementation headers
 #include "LocalPlayer.h"
 #include "HUDRenderer.h"
+#include "HUDui.h"
 #include "Roster.h"
-
 #include "playing.h" // THIS IS TEMPORARY..TO BE REMOVED..BABY STEPS
 
 //
@@ -31,12 +37,12 @@ bool			SilenceDefaultKey::keyPress(const BzfKeyEvent& key)
 {
   bool sendIt;
   LocalPlayer *myTank = LocalPlayer::getMyTank();
-  if (KEYMGR.get(key, true) == "jump") {
+  if (myTank && KEYMGR.get(key, true) == "jump") {
     // jump while typing
-    myTank->jump();
+    myTank->setJump();
   }
 
-  if (myTank->getInputMethod() != LocalPlayer::Keyboard) {
+  if (myTank && myTank->getInputMethod() != LocalPlayer::Keyboard) {
     if ((key.button == BzfKeyEvent::Up) ||
 	(key.button == BzfKeyEvent::Down) ||
 	(key.button == BzfKeyEvent::Left) ||
@@ -68,14 +74,13 @@ bool			SilenceDefaultKey::keyPress(const BzfKeyEvent& key)
     // either by picking through arrow keys or by compose
     const char* name = NULL;
 
-    if (message.size() == 0) {
+    if (myTank && message.size() == 0) {
       // silence just by picking arrowkeys
       const Player * silenceMe = myTank->getRecipient();
       if (silenceMe) {
 	name = silenceMe->getCallSign();
       }
-    }
-    else if (message.size() > 0) {
+    } else if (message.size() > 0) {
       // typed in name
       name = message.c_str();
     }
@@ -98,40 +103,40 @@ bool			SilenceDefaultKey::keyPress(const BzfKeyEvent& key)
 	if (!isInList) {
 	  // exists and not in silence list
 	  silencePlayers.push_back(name);
-	  std::string message = "Silenced ";
-	  message += (name);
-	  addMessage(NULL, message);
+	  std::string silenceMessage = "Silenced ";
+	  silenceMessage += (name);
+	  addMessage(NULL, silenceMessage);
 	} else {
 	  // exists and in list --> remove from list
 	  silencePlayers.erase(silencePlayers.begin() + inListPos);
-	  std::string message = "Unsilenced ";
-	  message += (name);
-	  addMessage(NULL, message);
+	  std::string silenceMessage = "Unsilenced ";
+	  silenceMessage += (name);
+	  addMessage(NULL, silenceMessage);
 	}
       } else {
 	// person does not exist, but may be in silence list
 	if (isInList) {
 	  // does not exist but is in list --> remove
 	  silencePlayers.erase(silencePlayers.begin() + inListPos);
-	  std::string message = "Unsilenced ";
-	  message += (name);
+	  std::string silenceMessage = "Unsilenced ";
+	  silenceMessage += (name);
 	  if (strcmp (name, "*") == 0) {
 	    // to make msg fancier
-	    message = "Unblocked Msgs";
+	    silenceMessage = "Unblocked Msgs";
 	  }
-	  addMessage(NULL, message);
+	  addMessage(NULL, silenceMessage);
 	} else {
 	  // does not exist and not in list -- duh
 	  if (name != NULL) {
 	    if (strcmp (name,"*") == 0) {
 	      // check for * case
 	      silencePlayers.push_back(name);
-	      std::string message = "Silenced All Msgs";
-	      addMessage(NULL, message);
+	      std::string silenceMessage = "Silenced All Msgs";
+	      addMessage(NULL, silenceMessage);
 	    } else {
-	      std::string message = name;
-	      message += (" Does not exist");
-	      addMessage(NULL, message);
+	      std::string silenceMessage = name;
+	      silenceMessage += (" Does not exist");
+	      addMessage(NULL, silenceMessage);
 	    }
 	  }
 	}
@@ -148,6 +153,8 @@ bool			SilenceDefaultKey::keyPress(const BzfKeyEvent& key)
 bool			SilenceDefaultKey::keyRelease(const BzfKeyEvent& key)
 {
   LocalPlayer *myTank = LocalPlayer::getMyTank();
+  if (!myTank)
+    return false;
   if (myTank->getInputMethod() != LocalPlayer::Keyboard) {
 
     if (key.button == BzfKeyEvent::Up || key.button==BzfKeyEvent::Down

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifdef _MSC_VER
@@ -67,59 +67,6 @@ CursesUI::CursesUI(BZAdminClient& c) :
   // add additional chat targets
   additionalTargets[PlayerId(250 - ObserverTeam)] = PlayerInfo("teammates");
   additionalTargets[AdminPlayers] = PlayerInfo("admins");
-
-  // register commands for tab completion
-  comp.registerWord("/ban ");
-  comp.registerWord("/banlist");
-  comp.registerWord("/countdown");
-  comp.registerWord("/clientquery");
-  comp.registerWord("/deregister");
-  comp.registerWord("/flag ");
-  comp.registerWord("reset");
-  comp.registerWord("up");
-  comp.registerWord("show");
-  comp.registerWord("/flaghistory");
-  comp.registerWord("/gameover");
-  comp.registerWord("/ghost ");
-  comp.registerWord("/groupperms");
-  comp.registerWord("/help");
-  comp.registerWord("/identify ");
-  comp.registerWord("/idlestats");
-  comp.registerWord("/kick ");
-  comp.registerWord("/lagstats");
-  comp.registerWord("/lagwarn ");
-  comp.registerWord("/password ");
-  comp.registerWord("/playerlist");
-  comp.registerWord("/poll ");
-  comp.registerWord("ban");
-  comp.registerWord("kick");
-  comp.registerWord("/quit");
-  comp.registerWord("/record");
-  comp.registerWord("start");
-  comp.registerWord("stop");
-  comp.registerWord("size");
-  comp.registerWord("rate");
-  comp.registerWord("stats");
-  comp.registerWord("file");
-  comp.registerWord("save");
-  comp.registerWord("/register ");
-  comp.registerWord("/reload");
-  comp.registerWord("/removegroup ");
-  comp.registerWord("/replay ");
-  comp.registerWord("list");
-  comp.registerWord("load");
-  comp.registerWord("play");
-  comp.registerWord("skip");
-  comp.registerWord("/report ");
-  comp.registerWord("/reset");
-  comp.registerWord("/set");
-  comp.registerWord("/setgroup ");
-  comp.registerWord("/setpass ");
-  comp.registerWord("/shutdownserver");
-  comp.registerWord("/superkill");
-  comp.registerWord("/unban ");
-  comp.registerWord("/veto");
-  comp.registerWord("/vote");
 }
 
 
@@ -154,7 +101,6 @@ void CursesUI::handleNewPacket(uint16_t code) {
 bool CursesUI::checkCommand(std::string& str) {
   wrefresh(cmdWin);
   str = "";
-  int i;
 
   // get a character and do checks that are always needed
   int c = wgetch(cmdWin);
@@ -186,6 +132,7 @@ bool CursesUI::checkCommand(std::string& str) {
     // delete last character
   case KEY_BACKSPACE:
   case KEY_DC:
+  case 8:
   case 127:
     cmd = cmd.substr(0, cmd.size() - 1);
     updateCmdWin();
@@ -233,12 +180,12 @@ bool CursesUI::checkCommand(std::string& str) {
   case KEY_LEFT:
     if (targetIter == additionalTargets.begin()) {
       targetIter = players.begin();
-      for (unsigned int i = 0; i < players.size() - 1; i++)
+      for (unsigned int j = 0; j < players.size() - 1; j++)
 	++targetIter;
     }
     else if (targetIter == players.begin()) {
       targetIter = additionalTargets.begin();
-      for (unsigned int i = 0; i < additionalTargets.size() - 1; i++)
+      for (unsigned int j = 0; j < additionalTargets.size() - 1; j++)
 	++targetIter;
     }
     else
@@ -276,6 +223,10 @@ bool CursesUI::checkCommand(std::string& str) {
   case KEY_F(5):
     if (targetIter != players.end() && targetIter->first != me &&
 	targetIter->first <= LastRealPlayer) {
+      if (targetIter->second.isAdmin) {
+	outputMessage("Warning: Kicking Administrator ("
+	  + targetIter->second.name + ")!", Red);
+      }
       cmd = "/kick \"";
       cmd += targetIter->second.name;
       cmd += "\"";
@@ -290,6 +241,10 @@ bool CursesUI::checkCommand(std::string& str) {
     if (targetIter != players.end() && targetIter->first != me &&
 	targetIter->first <= LastRealPlayer) {
       if (targetIter->second.ip != "") {
+	if (targetIter->second.isAdmin) {
+	  outputMessage("Warning: Banning Administrator ("
+	    + targetIter->second.name + ")!", Red);
+	}
 	cmd = "/ban ";
 	cmd += targetIter->second.ip;
 	targetIter = players.find(me);
@@ -304,12 +259,16 @@ bool CursesUI::checkCommand(std::string& str) {
     return false;
 
     // tab - autocomplete
-  case '\t':
-    i = cmd.find_last_of(" \t");
-    cmd = cmd.substr(0, i+1) + comp.complete(cmd.substr(i+1));
+  case '\t': {
+    std::string matches;
+    cmd = comp.complete(cmd, &matches);
     updateCmdWin();
+    if (matches.size() > 0) {
+      outputMessage(matches, White);
+      updateTargetWin();
+    }
     return false;
-
+  }
   default:
     if (c < 32 || c > 127 || cmd.size() >= CMDLENGTH)
       return false;
@@ -322,7 +281,7 @@ bool CursesUI::checkCommand(std::string& str) {
 
 void CursesUI::addedPlayer(PlayerId p) {
   PlayerIdMap::const_iterator iter = players.find(p);
-  comp.registerWord(iter->second.name);
+  comp.registerWord(iter->second.name, true /* quote spaces */);
   if (p == me)
     targetIter = iter;
 }

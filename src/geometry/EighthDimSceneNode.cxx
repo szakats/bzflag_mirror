@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,17 +7,25 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// bzflag common header
+#include "common.h"
+
+// interface header
+#include "EighthDimSceneNode.h"
+
+// system headers
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "common.h"
-#include "EighthDimSceneNode.h"
-#include "SceneRenderer.h"
+
+// common implementation header
 #include "StateDatabase.h"
-#include "BZDBCache.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
+#include "SceneRenderer.h"
 
 EighthDimSceneNode::EighthDimSceneNode(int numPolygons) :
 				renderNode(this, numPolygons)
@@ -36,15 +44,13 @@ bool			EighthDimSceneNode::cull(const ViewFrustum&) const
   return false;
 }
 
-void			EighthDimSceneNode::notifyStyleChange(
-				const SceneRenderer&)
+void			EighthDimSceneNode::notifyStyleChange()
 {
   OpenGLGStateBuilder builder(gstate);
   builder.setCulling(GL_NONE);
-  if (BZDBCache::blend) {
+  if (BZDB.isTrue("blend")) {
     builder.setBlending(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  }
-  else {
+  } else {
     builder.setStipple(0.75f);
   }
   gstate = builder.getState();
@@ -116,4 +122,3 @@ void			EighthDimSceneNode::EighthDimRenderNode::setPolygon(
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

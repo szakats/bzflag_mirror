@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,23 +7,29 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef BZADMINCLIENT_H
 #define BZADMINCLIENT_H
 
+/* global interface headers */
+#include "common.h"
+
+/* system interface headers */
 #include <map>
 #include <string>
 
-#include "colors.h"
 #include "PlayerInfo.h"
+#include "colors.h"
 #include "ServerLink.h"
 #include "UIMap.h"
+#include "StartupInfo.h"
 
 
 class BZAdminUI;
 
+extern StartupInfo startupInfo;
 
 /** This class is a client that connects to a BZFlag server and has
     functions for sending and receiving messages. If you give it
@@ -43,8 +49,7 @@ public:
 
   /** A default constructor. It tries to connect to the server at host:port.
       If it doesn't succeed, calls to isValid() will return false. */
-  BZAdminClient(std::string callsign, std::string host, int port,
-		BZAdminUI* bzInterface = NULL);
+  BZAdminClient(BZAdminUI* bzInterface = NULL);
 
   /** Formats an incoming message. */
   std::string formatMessage(const std::string& msg, PlayerId src, PlayerId dst,
@@ -137,6 +142,11 @@ protected:
       if @c ui is NULL this function could crash the program. It has to be
       static because it is used as a callback for StateDatabase::iterate(). */
   static void listSetVars(const std::string& name, void* thisObject);
+
+  /** Connects to the list server and gets a list of available servers
+   */
+  void outputServerList() const;
+
 
   PlayerIdMap players;
   TeamColor myTeam;

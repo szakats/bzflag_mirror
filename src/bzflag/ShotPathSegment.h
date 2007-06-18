@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	__SHOTPATHSEGMENT_H__
@@ -20,11 +20,11 @@
 
 class ShotPathSegment {
   public:
-    enum Reason		{ Initial, Through, Ricochet, Teleport };
+    enum Reason		{ Initial, Through, Ricochet, Teleport, Boundary };
 
 			ShotPathSegment();
-			ShotPathSegment(const TimeKeeper& start,
-					const TimeKeeper& end,
+			ShotPathSegment(const double start,
+					const double end,
 					const Ray& r,
 					Reason = Initial);
 			ShotPathSegment(const ShotPathSegment&);
@@ -32,8 +32,8 @@ class ShotPathSegment {
     ShotPathSegment&	operator=(const ShotPathSegment&);
 
   public:
-    TimeKeeper		start;
-    TimeKeeper		end;
+    double		start;
+    double		end;
     Ray			ray;
     Reason		reason;
     float		bbox[2][3];

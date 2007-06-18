@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "common.h"
@@ -20,17 +20,19 @@ float			Team::tankColor[NumTeams][3] = {
 				{ 0.0f, 1.0f, 0.0f },   // green
 				{ 0.2f, 0.2f, 1.0f },   // blue
 				{ 1.0f, 0.0f, 1.0f },   // purple
-				{ 0.0f, 0.0f, 0.0f },   // observer
-				{ 1.0f, 1.0f, 1.0f }    // rabbit
+				{ 0.0f, 1.0f, 1.0f },   // observer
+				{ 1.0f, 1.0f, 1.0f },   // rabbit
+				{ 1.0f, 0.5f, 0.0f }	// hunter orange
 			};
 float			Team::radarColor[NumTeams][3] = {
 				{ 1.0f, 1.0f, 0.0f },	// rogue
 				{ 1.0f, 0.15f, 0.15f }, // red
 				{ 0.2f, 0.9f, 0.2f },	// green
-				{ 0.08f, 0.25, 1.0f },	// blue
+				{ 0.08f, 0.25, 1.0f},	// blue
 				{ 1.0f, 0.4f, 1.0f },	// purple
-				{ 0.0f, 0.0f, 0.0f },	// observer
-				{ 1.0f, 1.0f, 1.0f }    // rabbit
+				{ 0.0f, 1.0f, 1.0f },	// observer
+				{ 1.0f, 1.0f, 1.0f },   // rabbit
+				{ 1.0f, 0.5f, 0.0f }	// hunter orange
 			};
 
 Team::Team()
@@ -68,6 +70,8 @@ const std::string  Team::getImagePrefix(TeamColor team)
   case BlueTeam: return BZDB.get("blueTeamPrefix");
   case PurpleTeam: return BZDB.get("purpleTeamPrefix");
   case RabbitTeam: return BZDB.get("rabbitTeamPrefix");
+  case HunterTeam: return BZDB.get("hunterTeamPrefix");
+  case ObserverTeam: return BZDB.get("observerTeamPrefix");
   default: return BZDB.get("rogueTeamPrefix");
   }
 }
@@ -83,9 +87,38 @@ const char*		Team::getName(TeamColor team) // const
   case PurpleTeam: return "Purple Team";
   case ObserverTeam: return "Observer";
   case RabbitTeam: return "Rabbit";
+  case HunterTeam: return "Hunter";
   case NoTeam: return "No Team??";
   default: return "Invalid team";
   }
+}
+
+const char*		Team::getShortName(TeamColor team)
+{
+  switch (team) {
+  case RogueTeam: return "rogue";
+  case RedTeam: return "red";
+  case GreenTeam: return "green";
+  case BlueTeam: return "blue";
+  case PurpleTeam: return "purple";
+  case ObserverTeam: return "observer";
+  case RabbitTeam: return "rabbit";
+  case HunterTeam: return "hunter";
+  default: return "none";
+  }
+}
+
+TeamColor	Team::getTeam(const std::string name) // const
+{
+  if (name == Team::getName(AutomaticTeam)) {
+    return AutomaticTeam;
+  }
+  for (int i = 0; i < NumTeams; i++) {
+    if (name == Team::getName((TeamColor)i)) {
+      return (TeamColor)i;
+    }
+  }
+  return NoTeam;
 }
 
 const float*		Team::getTankColor(TeamColor team) // const
@@ -133,4 +166,3 @@ void			Team::setColors(TeamColor team,
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

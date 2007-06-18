@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "bz_Locale.h"
@@ -24,10 +24,10 @@
 
 /* public: */
 
-Locale::Locale(std::string language, std::string country)
+Locale::Locale(std::string _language_, std::string _country_)
 {
-  setLanguage(language);
-  setCountry(country);
+  setLanguage(_language_);
+  setCountry(_country_);
   return;
 }
 
@@ -36,14 +36,14 @@ Locale::~Locale(void)
   return;
 }
 
-void Locale::setLanguage(std::string language)
+void Locale::setLanguage(std::string _language_)
 {
-  _language = Language::number(language);
+  _language = Language::number(_language_);
 }
 
-void Locale::setCountry(std::string country)
+void Locale::setCountry(std::string _country_)
 {
-  _country = Country::number(country);
+  _country = Country::number(_country_);
 }
 
 std::string Locale::language() const
@@ -85,4 +85,3 @@ std::string Locale::countryName() const
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -17,21 +17,23 @@
 #ifndef	BZF_PLAYING_H
 #define	BZF_PLAYING_H
 
-#if defined(_MSC_VER)
-#pragma warning(disable: 4786)
-#pragma warning(disable: 4100)
-#pragma warning(disable: 4511)
-#endif
+#include "common.h"
 
 // system includes
 #include <string>
 #include <vector>
 
-#include "BzfDisplay.h"
-#include "MainWindow.h"
-#include "SceneRenderer.h"
-#include "Player.h"
+/* common headers */
 #include "StartupInfo.h"
+#include "AutoCompleter.h"
+#include "Address.h"
+
+/* local headers */
+#include "MainWindow.h"
+#include "ControlPanel.h"
+
+#define MAX_DT_LIMIT 0.1f
+#define MIN_DT_LIMIT 0.001f
 
 #define MAX_MESSAGE_HISTORY (20)
 
@@ -49,7 +51,10 @@ class MainWindow;
 class SceneRenderer;
 class Player;
 class ServerLink;
+class HUDRenderer;
+class WordFilter;
 
+void			initPlaying();
 BzfDisplay*		getDisplay();
 MainWindow*		getMainWindow();
 SceneRenderer*		getSceneRenderer();
@@ -59,20 +64,22 @@ void			notifyBzfKeyMapChanged();
 bool			setVideoFormat(int, bool test = false);
 Player*			lookupPlayer(PlayerId id);
 void			startPlaying(BzfDisplay* display,
-				SceneRenderer&,
-				StartupInfo*);
+				     SceneRenderer&);
 
 bool			addExplosion(const float* pos,
 				float size, float duration);
 void			addTankExplosion(const float* pos);
 void			addShotExplosion(const float* pos);
-void			addShotPuff(const float* pos);
+void			addShotPuff(const float* pos, float azimuth, float elevation);
 void			warnAboutMainFlags();
 void			warnAboutRadarFlags();
+void		    warnAboutRadar();
+void		    warnAboutConsole();
 void			addPlayingCallback(PlayingCallback, void* data);
 void			removePlayingCallback(PlayingCallback, void* data);
 
 void			joinGame(JoinGameCallback, void* userData);
+void		    leaveGame();
 std::vector<std::string>& getSilenceList();
 void			updateEvents();
 void			addMessage(const Player* player,
@@ -81,18 +88,60 @@ void			addMessage(const Player* player,
 				   bool highlight = false,
 				   const char* oldColor = NULL);
 
+int			curlProgressFunc(void* clientp,
+					 double dltotal, double dlnow,
+					 double ultotal, double ulnow);
+
 void selectNextRecipient (bool forward, bool robotIn);
 void handleFlagDropped(Player* tank);
 void setTarget();
 bool shouldGrabMouse();
-void setRoamingLabel(bool force);
+void setRoamingLabel();
+void drawFrame(const float dt);
+void injectMessages(uint16_t code, uint16_t len, void *msg);
+
+extern void joinGame();
 
 extern HUDRenderer	*hud;
-extern char		messageMessage[PlayerIdPLen + MessageLen];
+extern PlayerId	 msgDestination;
 extern ServerLink*	serverLink;
-extern bool		admin; // am I an admin?
 extern int		numFlags;
+extern StartupInfo	startupInfo;
+extern DefaultCompleter completer;
+extern bool	     gameOver;
+extern ControlPanel    *controlPanel;
+extern bool	     fireButton;
+extern float	    destructCountdown;
+extern bool	     pausedByUnmap;
+extern int	      savedVolume;
+extern MainWindow      *mainWindow;
+extern float	    pauseCountdown;
+extern float	    clockAdjust;
+extern float	    roamDZoom;
+extern bool	     roamButton;
+extern WordFilter *wordFilter;
 
+/* Any code surrounded by "if (!headless)" is unsafely assuming that it's
+ * operating in a context where graphics and sound are available.
+ */
+extern bool		headless;
+
+typedef struct
+{
+	bool b3rdPerson;
+	float cameraOffsetXY;
+	float cameraOffsetOffsetZ;
+	float targetMultiplyer;
+	float nearTargetDistance;
+	float nearTargetSize;
+	float farTargetDistance;
+	float farTargetSize;
+
+	void load ( void );
+	void clear ( void );
+}ThirdPersonVars;
+
+extern ThirdPersonVars thirdPersonVars;
 
 #endif // BZF_PLAYING_H
 
@@ -103,4 +152,3 @@ extern int		numFlags;
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

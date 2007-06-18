@@ -20,9 +20,9 @@
 		<script language="JavaScript">
 			var flags = new Array(	"V", "QT", "OO", "F", "MG", "GM", "L", "R", "SB",
 						"IB", "ST", "T", "N", "SH", "SR", "SW", "PZ", "G",
-						"JP", "ID", "CL", "US", "MQ", "SE", "TH", "BU", "WG",
-                                                "CB", "LT", "RT", "FO", "RO", "M", "B", "JM", "WA", "NJ",
-                                                "TR", "BY", "RC", "A" );
+						"JP", "ID", "CL", "US", "MQ", "SE", "TH", "BU", "WG", "LG",
+						"CB", "LT", "RT", "FO", "RO", "M", "B", "JM", "WA", "NJ",
+						"TR", "BY", "RC", "A" );
 
 			function ableControls()
 			{
@@ -114,6 +114,26 @@
 					if (mainform.lag_drop_time.value != 0) {
 						d.writeln("#Drop player after this many lag warnings<br/>");
 						d.writeln("-lagdrop " + mainform.lag_drop_time.value + "<br/><br/>");
+					}
+
+					if (mainform.jitter_warn_time.value != 0) {
+						d.writeln("#Jitter Warning threshold time [ms]<br/>");
+						d.writeln("-jitterwarn " + mainform.jitter_warn_time.value + "<br/><br/>");
+					}
+
+					if (mainform.jitter_drop_time.value != 0) {
+						d.writeln("#Drop player after this many jitter warnings<br/>");
+						d.writeln("-jitterdrop " + mainform.jitter_drop_time.value + "<br/><br/>");
+					}
+
+					if (mainform.packetloss_warn_time.value != 0) {
+						d.writeln("#Packetloss Warning threshold percent [%]<br/>");
+						d.writeln("-packetlosswarn " + mainform.packetloss_warn_time.value + "<br/><br/>");
+					}
+
+					if (mainform.packetloss_drop_time.value != 0) {
+						d.writeln("#Drop player after this many packetloss warnings<br/>");
+						d.writeln("-packetlossdrop " + mainform.packetloss_drop_time.value + "<br/><br/>");
 					}
 
 					if (mainform.ban_list.value.length > 0) {
@@ -237,27 +257,27 @@
 
 					if (mainform.votepercent.value != 50.1) {
 						d.writeln("#Percentage of players required to affirm a poll<br/>");
-						d.writeln("-votePercentage " + mainform.votepercent.value + "<br/><br/>");
+						d.writeln("-poll votePercentage=" + mainform.votepercent.value + "<br/><br/>");
 					}
 
 					if (mainform.votesrequired.value != 3) {
 						d.writeln("#Minimum count of votes required to make a vote valid<br/>");
-						d.writeln("-votesRequired " + mainform.votesrequired.value + "<br/><br/>");
+						d.writeln("-poll votesRequired=" + mainform.votesrequired.value + "<br/><br/>");
 					}
 
 					if (mainform.votetime.value != 60) {
 						d.writeln("#maximum amount of time a player has to vote on a poll in seconds<br/>");
-						d.writeln("-voteTime " + mainform.votetime.value + "<br/><br/>");
+						d.writeln("-poll voteTime=" + mainform.votetime.value + "<br/><br/>");
 					}
 
 					if (mainform.vetotime.value != 20) {
 						d.writeln("#Maximum seconds an authorized user has to cancel a poll<br/>");
-						d.writeln("-vetoTime " + mainform.vetotime.value + "<br/><br/>");
+						d.writeln("-poll vetoTime=" + mainform.vetotime.value + "<br/><br/>");
 					}
 
 					if (mainform.voterepeattime.value != 300) {
 						d.writeln("#Minimum seconds required before a player may request another vote<br/>");
-						d.writeln("-voteRepeatTime " + mainform.voterepeattime.value + "<br/><br/>");
+						d.writeln("-poll voteRepeatTime=" + mainform.voterepeattime.value + "<br/><br/>");
 					}
 
 					if (mainform.game_style.value == "ctf") {
@@ -633,6 +653,18 @@
 							<td><input type="text" name="lag_drop_time" value="0" size="30" title="Drop player after this many lag warnings"/></td>
 						</tr>
 						<tr span="2">
+							<td>Jitter Warn Time</td>
+							<td><input type="text" name="jitter_warn_time" value="0" size="30" title="Jitter Warning threshold time [ms]"/></td>
+							<td>Jitter Warn Drop Count</td>
+							<td><input type="text" name="jitter_drop_time" value="0" size="30" title="Drop player after this many jitter warnings"/></td>
+						</tr>
+						<tr span="2">
+							<td>Packetloss Warn Time</td>
+							<td><input type="text" name="packetloss_warn_time" value="0" size="30" title="Packetloss Warning threshold [%]"/></td>
+							<td>Packetloss Warn Drop Count</td>
+							<td><input type="text" name="packetloss_drop_time" value="0" size="30" title="Drop player after this many packetloss warnings"/></td>
+						</tr>
+						<tr span="2">
 							<td>Ban List</td>
 							<td colspan="3"><input type="text" name="ban_list" size="100" title="Ban players based on ip addresses"/></td>
 						</tr>
@@ -943,11 +975,12 @@
 								<td align="right">(BU)</td><td><input type="text" name="bu_mand_flag" value="0" size="3" title="Burrow"/></td>
 								<td align="right">(WG)</td><td><input type="text" name="wg_mand_flag" value="0" size="3" title="Wings"/></td>
 								<td align="right">(A)</td><td><input type="text" name="a_mand_flag" value="0" size="3" title="Agility"/></td>
+								<td align="right">(LG)</td><td><input type="text" name="lg_mand_flag" value="0" size="3" title="Low Gravity"/></td>
 							</tr>
 							<tr>
 								<td align="right">(CB)</td><td><input type="text" name="cb_mand_flag" value="0" size="3" title="Colorblind"/></td>
 								<td align="right">(&lt;-)</td><td><input type="text" name="lt_mand_flag" value="0" size="3" title="Left turn only"/></td>
-								<td align="right">(-&gt;)</td><td><input type="text" name="gt_mand_flag" value="0" size="3" title="Right turn only"/></td>
+								<td align="right">(-&gt;)</td><td><input type="text" name="rt_mand_flag" value="0" size="3" title="Right turn only"/></td>
 								<td align="right">(FO)</td><td><input type="text" name="fo_mand_flag" value="0" size="3" title="Forward only"/></td>
 								<td align="right">(RO)</td><td><input type="text" name="ro_mand_flag" value="0" size="3" title="Reverse only"/></td>
 								<td align="right">(M)</td><td><input type="text" name="m_mand_flag" value="0" size="3" title="Momentum"/></td>
@@ -1009,12 +1042,12 @@
 								<td align="right">(BU)</td><td><input type="checkbox" name="bu_forbid_flag" title="Burrow"/></td>
 								<td align="right">(WG)</td><td><input type="checkbox" name="wg_forbid_flag" title="Wings"/></td>
 								<td align="right">(A)</td><td><input type="checkbox" name="a_forbid_flag" title="Agility"/></td>
+								<td align="right">(LG)</td><td><input type="checkbox" name="lg_forbid_flag" title="Low Gravity"/></td>
 							</tr>
-							<tr>
 							<tr>
 								<td align="right">(CB)</td><td><input type="checkbox" name="cb_forbid_flag" title="Colorblind"/></td>
 								<td align="right">(&lt;-)</td><td><input type="checkbox" name="lt_forbid_flag" title="Left turn only"/></td>
-								<td align="right">(-&gt;)</td><td><input type="checkbox" name="gt_forbid_flag" title="Right turn only"/></td>
+								<td align="right">(-&gt;)</td><td><input type="checkbox" name="rt_forbid_flag" title="Right turn only"/></td>
 								<td align="right">(FO)</td><td><input type="checkbox" name="fo_forbid_flag" title="Forward only"/></td>
 								<td align="right">(RO)</td><td><input type="checkbox" name="ro_forbid_flag" title="Reverse only"/></td>
 								<td align="right">(M)</td><td><input type="checkbox" name="m_forbid_flag" title="Momentum"/></td>
@@ -1072,12 +1105,12 @@
 								<td align="right">(BU)</td><td><input type="text" size="5" name="bu_limit_flag" title="Burrow"/></td>
 								<td align="right">(WG)</td><td><input type="text" size="5" name="wg_limit_flag" title="Wings"/></td>
 								<td align="right">(A)</td><td><input type="text" size="5" name="a_limit_flag" title="Agility"/></td>
+								<td align="right">(LG)</td><td><input type="text" size="5" name="lg_limit_flag" title="Low Gravity"/></td>
 							</tr>
-							<tr>
 							<tr>
 								<td align="right">(CB)</td><td><input type="text" size="5" name="cb_limit_flag" title="Colorblind"/></td>
 								<td align="right">(&lt;-)</td><td><input type="text" size="5" name="lt_limit_flag" title="Left turn only"/></td>
-								<td align="right">(-&gt;)</td><td><input type="text" size="5" name="gt_limit_flag" title="Right turn only"/></td>
+								<td align="right">(-&gt;)</td><td><input type="text" size="5" name="rt_limit_flag" title="Right turn only"/></td>
 								<td align="right">(FO)</td><td><input type="text" size="5" name="fo_limit_flag" title="Forward only"/></td>
 								<td align="right">(RO)</td><td><input type="text" size="5" name="ro_limit_flag" title="Reverse only"/></td>
 								<td align="right">(M)</td><td><input type="text" size="5" name="m_limit_flag" title="Momentum"/></td>

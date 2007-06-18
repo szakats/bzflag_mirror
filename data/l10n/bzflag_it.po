@@ -1,18 +1,3 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Free Software Foundation, Inc.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
-msgid ""
-msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"PO-Revision-Date: 2003-10-31 21:39+0100\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
-"Content-Transfer-Encoding: 8bit\n"
-
 # This is generic Italian
 # translator Silvio Romagnoli
 
@@ -574,20 +559,8 @@ msgstr "Pag {1} di {2}"
 #msgid "openBroadcast: No udp service {1}"
 #msgstr ""
 
-#msgid "openMulticast: No udp service {1}"
-#msgstr ""
-
-msgid "openMulticast: Invalid port {1}"
-msgstr "openMulticast: Porta invalida {1}"
-
-#msgid "openMulticast: Can't get address of {1}"
-#msgstr ""
-
 msgid "joystick '{1}' not supported..."
 msgstr "joystick '{1}' non supportato..."
-
-#msgid "Using multicast relay"
-#msgstr ""
 
 msgid "Server did send endpoint information, UDP connection up"
 msgstr "Il server ha attivato la connessione UDP"
@@ -800,7 +773,7 @@ msgstr "Mitragliatrice (MG):  Si ricarica molto velocemente, ma ha un raggio cor
 msgid "Guided Missile (GM):  Shots track a target.  Lock on with right button.  Can lock on or retarget after firing."
 msgstr "Missile Guidato (GM):  Il colpo segue il bersaglio, che scegli con il pulsante destro.  Puoi agganciarlo anche dopo aver sparato."
 
-msgid "Laser (L):  Shoots a laser.  Infinite speed and range but long reload time."
+msgid "Laser (L):  Shoots a laser.  Infinite speed, long range, but long reload time."
 msgstr "Laser (L):  Spara un laser.  Velocita' e distanza infinita ma si ricarica con lentezza."
 
 msgid "Ricochet (R):  Shots bounce off walls.  Don't shoot yourself!"
@@ -866,7 +839,7 @@ msgstr "Machine Gun (Mitragliatrice) (+MG):  Ricarica molto veloce e gittata mol
 msgid "Guided Missile (+GM):  Shots track a target.  Lock on with right button.  Can lock on or retarget after firing."
 msgstr "Missile Guidato (+GM): I colpi seguono l'obiettivo. Fai il lock con il tasto destro. Puoi fare il lock o cambiare obiettivo anche dopo aver sparato."
 
-msgid "Laser (+L):  Shoots a laser.  Infinite speed and range but long reload time."
+msgid "Laser (+L):  Shoots a laser.  Infinite speed, long range, but long reload time."
 msgstr "Raggio Laser (+L): Spara un raggio Laser. Ha velocita infinita ma lunghi tempi di ricarica."
 
 msgid "Ricochet (+R):  Shots bounce off walls.  Don't shoot yourself!"
@@ -1704,7 +1677,7 @@ msgid "at the edge of the large box.  Moving the mouse above or below the small"
 msgstr "La direzione si imposta muovendo il puntatore verso sinistra, destra, alto o basso."
 
 msgid "box moves forward or backward, respectively.  Similarly for left and right."
-msgstr "La distanza dal riquadro piccolo determinera' la velocit‡."
+msgstr "La distanza dal riquadro piccolo determinera' la velocit√†."
 
 msgid "The distance away from the small box determines the speed."
 msgstr ""

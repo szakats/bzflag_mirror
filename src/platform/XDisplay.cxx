@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "XDisplay.h"
@@ -105,11 +105,25 @@ bool			XDisplay::isEventPending() const
   return (XPending(rep->getDisplay()) != 0);
 }
 
-bool			XDisplay::getEvent(BzfEvent& event) const
+
+bool XDisplay::getEvent(BzfEvent& event) const
 {
   XEvent xevent;
   XNextEvent(rep->getDisplay(), &xevent);
+  return setupEvent(event, xevent);
+}
 
+
+bool XDisplay::peekEvent(BzfEvent& event) const
+{
+  XEvent xevent;
+  XPeekEvent(rep->getDisplay(), &xevent);
+  return setupEvent(event, xevent);
+}
+
+
+bool XDisplay::setupEvent(BzfEvent& event, const XEvent& xevent) const
+{
   switch (xevent.type) {
     case Expose:
     case ConfigureNotify:
@@ -214,6 +228,7 @@ bool			XDisplay::getEvent(BzfEvent& event) const
   return true;
 }
 
+
 bool			XDisplay::getKey(const XEvent& xevent,
 						BzfKeyEvent& key) const
 {
@@ -313,4 +328,3 @@ bool			XDisplayMode::setDefault(int mode)
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

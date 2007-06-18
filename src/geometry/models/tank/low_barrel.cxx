@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,42 +7,43 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "TankSceneNode.h"
+#include "TankGeometryMgr.h"
+using namespace TankGeometryUtils;
 
-#define	doVertex3f	doVertex3f
-#define	doNormal3f	doNormal3f
-
-void buildLowBarrel ( void )
+int TankGeometryUtils::buildLowBarrel ( void )
 {
   glShadeModel(GL_SMOOTH);
-      glBegin(GL_TRIANGLE_STRIP);
-	doNormal3f(0.0f, -1.0f, 0.0f);
-	doVertex3f(1.570f, -0.18f, 1.530f);
-	doVertex3f(4.940f, -0.126f, 1.530f);
-	doNormal3f(0.0f, 0.0f, 1.0f);
-	doVertex3f(1.570f, 0.0f, 1.710f);
-	doVertex3f(4.940f, 0.0f, 1.660f);
-	doNormal3f(0.0f, 1.0f, 0.0f);
-	doVertex3f(1.570f, 0.18f, 1.530f);
-	doVertex3f(4.940f, 0.126f, 1.530f);
-	doNormal3f(0.0f, 0.0f, -1.0f);
-	doVertex3f(1.570f, 0.0f, 1.350f);
-	doVertex3f(4.940f, 0.0f, 1.410f);
-	doNormal3f(0.0f, -1.0f, 0.0f);
-	doVertex3f(1.570f, -0.18f, 1.530f);
-	doVertex3f(4.940f, -0.126f, 1.530f);
-      glEnd();
-      glShadeModel(GL_FLAT);
-      glBegin(GL_TRIANGLE_FAN);
-	doNormal3f(1.000000f, 0.000000f, 0.000000f);
-	doVertex3f(4.940f, 0.0f, 1.410f);
-	doVertex3f(4.940f, 0.126f, 1.530f);
-	doVertex3f(4.940f, 0.0f, 1.660f);
-	doVertex3f(4.940f, -0.126f, 1.530f);
-      glEnd();
+  glBegin(GL_TRIANGLE_STRIP);
+    doNormal3f(0.0f, -1.0f, 0.0f);
+    doVertex3f(1.570f, -0.18f, 1.530f);
+    doVertex3f(4.940f, -0.126f, 1.530f);
+    doNormal3f(0.0f, 0.0f, 1.0f);
+    doVertex3f(1.570f, 0.0f, 1.710f);
+    doVertex3f(4.940f, 0.0f, 1.660f);
+    doNormal3f(0.0f, 1.0f, 0.0f);
+    doVertex3f(1.570f, 0.18f, 1.530f);
+    doVertex3f(4.940f, 0.126f, 1.530f);
+    doNormal3f(0.0f, 0.0f, -1.0f);
+    doVertex3f(1.570f, 0.0f, 1.350f);
+    doVertex3f(4.940f, 0.0f, 1.410f);
+    doNormal3f(0.0f, -1.0f, 0.0f);
+    doVertex3f(1.570f, -0.18f, 1.530f);
+    doVertex3f(4.940f, -0.126f, 1.530f);
+  glEnd(); // 10 verts -> 8 tris
+
+  glShadeModel(GL_FLAT);
+  glBegin(GL_TRIANGLE_FAN);
+    doNormal3f(1.000000f, 0.000000f, 0.000000f);
+    doVertex3f(4.940f, 0.0f, 1.410f);
+    doVertex3f(4.940f, 0.126f, 1.530f);
+    doVertex3f(4.940f, 0.0f, 1.660f);
+    doVertex3f(4.940f, -0.126f, 1.530f);
+  glEnd(); // 4 verts -> 2 tris
+
+  return 10;
 }
 /*
  * Local Variables: ***

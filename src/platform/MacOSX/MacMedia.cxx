@@ -1,12 +1,12 @@
-#include <QuickTime/QuickTime.h>
 #include "MacMedia.h"
+
+#include <QuickTime/QuickTime.h>
 
 static SndCallBackUPP gCarbonSndCallBackUPP = nil;
 static int queued_chunks = 0;
 
-static pascal void callbackProc (SndChannelPtr theChannel, SndCommand * theCallBackCmd)
+static pascal void callbackProc(SndChannelPtr, SndCommand *)
 {
- //   dprintf("!");
   queued_chunks--;
 }
 
@@ -16,9 +16,7 @@ MacMedia::MacMedia() {
 
 MacMedia::~MacMedia() {}
 
-double MacMedia::stopwatch(bool start) { return 0; }
-
-void   MacMedia::sleep(float   secs ) {}
+double MacMedia::stopwatch(bool) { return 0; }
 
 // Audio
 
@@ -47,7 +45,7 @@ bool MacMedia::openAudio() {
 
   header.numChannels   = 2;
   header.sampleRate    = rate22050hz;
-  header.encode        = extSH;
+  header.encode	= extSH;
   header.sampleSize    = 16;
   header.numFrames     = CHUNK_SIZE;
 
@@ -69,7 +67,8 @@ bool MacMedia::isAudioBrainDead() const {
   return false;
 }
 
-bool MacMedia::startAudioThread(void (*proc)(void*), void* data) {
+bool MacMedia::startAudioThread(void (*proc)(void*), void*)
+{
   audio_proc = proc;
 
   audio_proc(NULL);
@@ -89,17 +88,17 @@ bool MacMedia::isAudioTooEmpty () const {
 
 void MacMedia::writeAudio(void) {
   OSErr iErr = noErr;
-  SndCommand                        playCmd;
-  SndCommand                        callBack;
+  SndCommand			playCmd;
+  SndCommand			callBack;
 
   header.samplePtr = (char*)buffer;
 
   playCmd.cmd = bufferCmd;
-  playCmd.param1 = 0;          // unused
+  playCmd.param1 = 0;	  // unused
   playCmd.param2 = (long)&header;
 
   callBack.cmd = callBackCmd;
-  callBack.param1 = 0;          // which buffer to fill, 0 buffer, 1, 0, ...
+  callBack.param1 = 0;	  // which buffer to fill, 0 buffer, 1, 0, ...
 
 
   channel->callBack = gCarbonSndCallBackUPP;
@@ -172,8 +171,8 @@ int     MacMedia::getAudioBufferChunkSize() const {
   return CHUNK_SIZE;
 }
 
-void    MacMedia::audioSleep(bool checkLowWater, double maxTime) {
-
+void MacMedia::audioSleep(bool, double)
+{
 }
 
 // Local Variables: ***
@@ -183,4 +182,3 @@ void    MacMedia::audioSleep(bool checkLowWater, double maxTime) {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

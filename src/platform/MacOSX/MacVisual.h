@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* WinVisual:
@@ -19,11 +19,9 @@
 
 #include "bzfgl.h"
 #include "BzfVisual.h"
-#include "MacVisual.h"
 #include "MacDisplay.h"
 
 #include <vector>
-using std::vector;
 
 #include <Carbon/Carbon.h>
 #include <AGL/agl.h>
@@ -45,7 +43,7 @@ class MacVisual : public BzfVisual {
     void setMultisample(int minSamples);
 
     bool build();
-    AGLPixelFormat get() const { return pixel_format; }
+  //    AGLPixelFormat get() const { return pixel_format; }
 
     void reset() { attributes.clear(); }
     void addAttribute1(GLint attribute);
@@ -60,7 +58,7 @@ class MacVisual : public BzfVisual {
     const MacDisplay *display;
     // attributes we would like for our pixel format
     // last attribute must be AGL_NONE
-    vector<GLint>       attributes;
+    std::vector<GLint>       attributes;
     AGLPixelFormat      pixel_format;
 };
 
@@ -73,4 +71,3 @@ class MacVisual : public BzfVisual {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

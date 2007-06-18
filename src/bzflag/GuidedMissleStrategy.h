@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __GUIDEDMISSLESTRATEGY_H__
@@ -23,7 +23,6 @@
 #include "SceneDatabase.h"
 #include "TimeKeeper.h"
 #include "BoltSceneNode.h"
-#include "Address.h"
 
 /* local interface headers */
 #include "BaseLocalPlayer.h"
@@ -36,7 +35,7 @@ class GuidedMissileStrategy : public ShotStrategy {
 			~GuidedMissileStrategy();
 
     void		update(float dt);
-    float		checkHit(const BaseLocalPlayer*, float[3]) const;
+    float		checkHit(const ShotCollider&, float[3]) const;
     void		sendUpdate(const FiringInfo&) const;
     void		readUpdate(uint16_t, void*);
     void		addShot(SceneDatabase*, bool colorblind);
@@ -47,8 +46,8 @@ class GuidedMissileStrategy : public ShotStrategy {
     float		checkBuildings(const Ray& ray);
 
   private:
-    TimeKeeper		prevTime;
-    TimeKeeper		currentTime;
+    double		prevTime;
+    double		currentTime;
     std::vector<ShotPathSegment>	segments;
     int			renderTimes;
     float		azimuth;
@@ -56,6 +55,8 @@ class GuidedMissileStrategy : public ShotStrategy {
     float		nextPos[3];
     BoltSceneNode*	ptSceneNode;
 
+		float	puffTime;
+		double	lastPuff;
     bool		needUpdate;
     PlayerId		lastTarget;
 };

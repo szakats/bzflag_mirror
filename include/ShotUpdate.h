@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -53,14 +53,15 @@ struct ShotUpdate {
 struct FiringInfo {
   public:
 			FiringInfo();
-			FiringInfo(const BaseLocalPlayer&, int id);
 
     void*		pack(void*) const;
     void*		unpack(void*);
+    void*		unpackW(void*);
 
   public:
-    float               timeSent;
+    float		timeSent;
     ShotUpdate		shot;
+    ShotType		shotType;
     FlagType*		flagType;			// flag when fired
     float		lifetime;		// lifetime of shot (s)
 };
@@ -74,4 +75,3 @@ struct FiringInfo {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

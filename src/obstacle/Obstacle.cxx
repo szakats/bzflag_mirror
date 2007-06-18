@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,12 +7,13 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "common.h"
 #include <math.h>
 #include <string.h>
-#include "common.h"
+#include <iostream>
 #include "Obstacle.h"
 #include "Intersect.h"
 #include "StateDatabase.h"
@@ -20,6 +21,9 @@
 
 // limits the maximum extent of any obstacle
 const float Obstacle::maxExtent = 1.0e30f;
+
+// for counting OBJ file objects
+int Obstacle::objCounter = 0;
 
 
 Obstacle::Obstacle()
@@ -29,15 +33,21 @@ Obstacle::Obstacle()
   angle = 0;
   driveThrough = false;
   shootThrough = false;
+  ZFlip = false;
+  source = WorldSource;
+
+  insideNodeCount = 0;
+  insideNodes = NULL;
 }
 
 Obstacle::Obstacle(const float* _pos, float _angle,
-				float _width, float _breadth, float _height, bool drive, bool shoot) :
-				angle(_angle)
+		   float _width, float _breadth, float _height,
+		   bool drive, bool shoot)
 {
   pos[0] = _pos[0];
   pos[1] = _pos[1];
   pos[2] = _pos[2];
+  angle = _angle;
   size[0] = _width;
   size[1] = _breadth;
   size[2] = _height;
@@ -45,56 +55,54 @@ Obstacle::Obstacle(const float* _pos, float _angle,
   driveThrough = drive;
   shootThrough = shoot;
   ZFlip = false;
+  source = WorldSource;
+
+  insideNodeCount = 0;
+  insideNodes = NULL;
 }
 
 Obstacle::~Obstacle()
 {
-  // do nothing
+  delete[] insideNodes;
+  return;
 }
 
 bool			Obstacle::isValid() const
 {
-  float mins[3], maxs[3];
-  getExtents (mins, maxs);
   for (int a = 0; a < 3; a++) {
-    if ((mins[a] < -maxExtent) || (maxs[a] > maxExtent)) {
+    if ((extents.mins[a] < -maxExtent) || (extents.maxs[a] > maxExtent)) {
       return false;
     }
   }
   return true;
 }
 
-void			Obstacle::getExtents(float* mins, float* maxs) const
+void			Obstacle::setExtents()
 {
-  float xspan = (fabsf(cos(angle)) * size[0]) + (fabsf(sin(angle)) * size[1]);
-  float yspan = (fabsf(cos(angle)) * size[1]) + (fabsf(sin(angle)) * size[0]);
-  mins[0] = pos[0] - xspan;
-  maxs[0] = pos[0] + xspan;
-  mins[1] = pos[1] - yspan;
-  maxs[1] = pos[1] + yspan;
-  mins[2] = pos[2];
-  maxs[2] = pos[2] + size[2];
+  float xspan = (fabsf(cosf(angle)) * size[0]) + (fabsf(sinf(angle)) * size[1]);
+  float yspan = (fabsf(cosf(angle)) * size[1]) + (fabsf(sinf(angle)) * size[0]);
+  extents.mins[0] = pos[0] - xspan;
+  extents.maxs[0] = pos[0] + xspan;
+  extents.mins[1] = pos[1] - yspan;
+  extents.maxs[1] = pos[1] + yspan;
+  extents.mins[2] = pos[2];
+  extents.maxs[2] = pos[2] + size[2];
   return;
 }
 
-bool			Obstacle::isDriveThrough() const
+bool			Obstacle::isFlatTop ( void ) const
 {
-	return driveThrough;
-}
-
-bool			Obstacle::isShootThrough() const
-{
-	return shootThrough;
+  return false;
 }
 
 void			Obstacle::setZFlip ( void )
 {
-	ZFlip = true;
+  ZFlip = true;
 }
 
 bool			Obstacle::getZFlip ( void ) const
 {
-	return ZFlip;
+  return ZFlip;
 }
 
 
@@ -194,21 +202,60 @@ float			Obstacle::getHitNormal(
     normal[2] = 1.0f;
   }
   else if (!isObstacle) {
-    const float angle = 0.5f * M_PI * (float)bestSide + oAzimuth;
-    normal[0] = cosf(angle);
-    normal[1] = sinf(angle);
+    const float _angle = (float)(0.5 * M_PI * (float)bestSide + oAzimuth);
+    normal[0] = cosf(_angle);
+    normal[1] = sinf(_angle);
     normal[2] = 0.0f;
   }
   else {
-    const float angle = 0.5f * M_PI * (float)bestSide +
-			minTime * (azimuth2 - azimuth1) + azimuth1;
-    normal[0] = -cosf(angle);
-    normal[1] = -sinf(angle);
+    const float _angle = (float)(0.5 * M_PI * (float)bestSide +
+			minTime * (azimuth2 - azimuth1) + azimuth1);
+    normal[0] = -cosf(_angle);
+    normal[1] = -sinf(_angle);
     normal[2] = 0.0f;
   }
   return minTime;
 }
 
+
+void Obstacle::addInsideSceneNode(SceneNode* node)
+{
+  insideNodeCount++;
+  SceneNode** tmp = new SceneNode*[insideNodeCount];
+  memcpy(tmp, insideNodes, (insideNodeCount - 1) * sizeof(SceneNode*));
+  delete[] insideNodes;
+  insideNodes = tmp;
+  insideNodes[insideNodeCount - 1] = node;
+}
+
+
+void Obstacle::freeInsideSceneNodeList()
+{
+  insideNodeCount = 0;
+  delete[] insideNodes;
+  insideNodes = NULL;
+  return;
+}
+
+
+int Obstacle::getInsideSceneNodeCount() const
+{
+  return insideNodeCount;
+}
+
+
+SceneNode** Obstacle::getInsideSceneNodeList() const
+{
+  return insideNodes;
+}
+
+Obstacle* Obstacle::copyWithTransform(MeshTransform const&) const
+{
+  std::cout << "ERROR: Obstacle::copyWithTransform()" << std::endl;
+  exit(1);
+  // umm, yeah...make the compiler happy...
+  return NULL;
+}
 
 
 // Local Variables: ***
@@ -218,6 +265,3 @@ float			Obstacle::getHitNormal(
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-
-
-

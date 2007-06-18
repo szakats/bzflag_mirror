@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,15 +7,20 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef BZF_MEDIA_FILE_H
 #define BZF_MEDIA_FILE_H
 
 #include "common.h"
+
+/* system interface headers */
 #include <string>
+
+/* common interface headers */
 #include "bzfio.h"
+
 
 // if HALF_RATE_AUDIO defined then use half the normal audio sample
 // rate (and downsample the audio files to match).  this reduces the
@@ -33,7 +38,7 @@ public:
   /** Read an image file.  Use delete[] to release the returned
       image.  Returns NULL on failure.  Images are stored RGBA,
       left to right, bottom to top. */
-  static unsigned char* readImage(const std::string& filename,
+  static unsigned char* readImage(std::string filename,
 				  int* width, int* height);
 
   // read a sound file.  use delete[] to release the returned
@@ -99,4 +104,3 @@ private:
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

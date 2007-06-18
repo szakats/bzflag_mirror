@@ -35,8 +35,8 @@ echo " okay"
 
 
 echo -n "... getting list of servers ..."
-servers=`curl http://db.bzflag.org/db/ 2>/dev/null`
-[ $? != 0 ] && echo " NOT okay" && echo "ERROR: unable to curl http://db.bzflag.org/db" && exit 1
+servers=`curl http://my.BZFlag.org/db/?action=LIST 2>/dev/null`
+[ $? != 0 ] && echo " NOT okay" && echo "ERROR: unable to curl http://my.BZFlag.org/db/?action=LIST" && exit 1
 echo " okay"
 
 
@@ -92,7 +92,7 @@ for server in $servers ; do
 
 	sleep $sleeptime
 	server_version="`tail -1 $tempfile | grep "BZFlag server" | awk '{print $4}'`"
- 	if [ ! "x$server_version" = "x" ] ; then
+	if [ ! "x$server_version" = "x" ] ; then
 	    break
 	fi
     done

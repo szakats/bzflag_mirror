@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,28 +7,29 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __SERVERMENU_H__
 #define __SERVERMENU_H__
 
+// ancestor classes
+#include "MenuDefaultKey.h"
+#include "HUDDialog.h"
+
 /* system interface headers */
-#include <vector>
 #include <string>
+#include <vector>
 
 /* common interface headers */
-#include "ListServer.h"
 #include "BzfEvent.h"
-#include "HUDDialog.h"
 #include "ServerItem.h"
 #include "ServerList.h"
-#include "ServerListCache.h"
 
 /* local interface headers */
-#include "MenuDefaultKey.h"
 #include "HUDuiDefaultKey.h"
 #include "HUDuiLabel.h"
+#include "HUDuiTypeIn.h"
 
 class ServerMenu;
 
@@ -52,7 +53,7 @@ public:
 
   HUDuiDefaultKey* getDefaultKey() { return &defaultKey; }
   int getSelected() const;
-  void setSelected(int);
+  void setSelected(int, bool forcerefresh=false);
   void show();
   void execute();
   void dismiss();
@@ -60,22 +61,38 @@ public:
   static void playingCB(void*);
   void updateStatus();
 
+  bool getFind() const;
+  void setFind(bool mode);
+
+  void toggleFavView();
+  void setFav(bool);
+
   static const int NumItems;
 
 private:
-  void addLabel(const char* str, const char* label);
+  void addLabel(const char* str, const char* label, bool navigable = false);
   void setStatus(const char*, const std::vector<std::string> *parms = NULL);
   void pick();
+
   ServerItem& serversAt(int index);
 
 private:
+  ServerList realServerList;
   ServerList serverList;
   ServerMenuDefaultKey	defaultKey;
   HUDuiLabel* status;
+  HUDuiLabel* help;
 
   HUDuiLabel* pageLabel;
   int selectedIndex;
   unsigned int serversFound;
+  unsigned int realServersFound;
+
+  HUDuiTypeIn* search;
+  bool findMode;
+  std::string filter;
+  bool favView;
+  bool newfilter;
 
   static const int NumReadouts;
 };

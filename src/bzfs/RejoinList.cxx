@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // interface header
@@ -89,7 +89,7 @@ float RejoinList::waitTime (int playerIndex)
   while (it != queue.end()) {
     RejoinNode *rn = *it;
     if (strcasecmp (rn->callsign, callsign) == 0) {
-      value = rn->joinTime - thenTime;
+      value = float(rn->joinTime - thenTime);
     }
     it++;
   }

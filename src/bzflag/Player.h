@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	__PLAYER_H__
@@ -20,9 +20,11 @@
 
 /* common interface headers */
 #include "global.h"
+#ifndef BUILDING_BZADMIN
+#include "bzfgl.h"
+#endif
 #include "TimeKeeper.h"
 #include "Address.h"
-#include "OpenGLTexture.h"
 #include "Flag.h"
 #include "PlayerState.h"
 #include "ShotStatistics.h"
@@ -33,9 +35,8 @@ class SceneDatabase;
 class TankSceneNode;
 class TankIDLSceneNode;
 class SphereSceneNode;
-
-const int PlayerUpdatePLen = PlayerIdPLen + 42;
-const int PlayerUpdateSmallPLen = PlayerUpdatePLen - 16;
+class Obstacle;
+struct FiringInfo;
 
 class Player {
 public:
@@ -47,6 +48,7 @@ public:
   PlayerId	getId() const;
   TeamColor	getTeam() const;
   void		setTeam(TeamColor);
+  void		updateTank(float dt, bool local);
   const char*	getCallSign() const;
   const char*	getEmailAddress() const;
   PlayerType	getPlayerType() const;
@@ -58,12 +60,31 @@ public:
   const float*	getForward() const;
   const float*	getVelocity() const;
   float		getAngularVelocity() const;
+  int		getPhysicsDriver() const;
+  int		getDeathPhysicsDriver() const;
   float		getRadius() const;
   void		getMuzzle(float*) const;
+  float		getMuzzleHeight() const;
   short		getWins() const;
   short		getLosses() const;
   short		getTeamKills() const;
+  float		getTKRatio() const;
+  float		getNormalizedScore() const;
+  float		getLocalNormalizedScore() const;
   short		getScore() const;
+  const float*	getDimensions() const;
+
+  float		getReloadTime() const;
+
+  const float*	getAperantVelocity() const;
+  const float	getLastUpdateTime() const;
+
+#ifndef BUILDING_BZADMIN
+  inline const float*	getColor() const
+  {
+	  return color;
+  }
+#endif
   short		getRabbitScore() const;
   short		getLocalWins() const;
   short		getLocalLosses() const;
@@ -73,28 +94,55 @@ public:
   short		getFromTeleporter() const;
   short		getToTeleporter() const;
   float		getTeleporterProximity() const;
-  virtual int		getMaxShots() const;
-  virtual ShotPath*	getShot(int index) const = 0;
+
+  // shots
+  int		getMaxShots() const;
+  ShotPath*	getShot(int index) const;
+  ShotType	getShotType ( void ) const {return shotType;}
+  void		setShotType ( ShotType _shotType ) {shotType = _shotType;}
 
   const ShotStatistics*	getShotStatistics() const;
 
-  void		addToScene(SceneDatabase*, TeamColor efectiveTeam, bool showIDL);
+  void		addToScene(SceneDatabase*, TeamColor effectiveTeam,
+			   bool inCockpit, bool seerView,
+			   bool showTreads, bool showIDL);
+
+  bool		getIpAddress(Address&);
+  void		setIpAddress(const Address& addr);
+
   virtual void	addShots(SceneDatabase*, bool colorblind) const;
-  void		setHidden(bool hidden = true);
-  void		setInvisible(bool invisible = true);
+  void		setLandingSpeed(float velocity);
+  void		spawnEffect();
+  void		fireJumpJets();
+
+  void		forceReload(float time = 0.0f);
 
   bool		isAlive() const;
   bool		isPaused() const;
+  bool		isFalling() const;
   bool		isFlagActive() const;
   bool		isTeleporting() const;
   bool		isExploding() const;
+  bool		isPhantomZoned() const;
   bool		isCrossingWall() const;
+  bool		canMove() const;
+  bool		canShoot() const;
   bool		isNotResponding() const;
   void		resetNotResponding();
   bool		isHunted() const;
   void		setHunted(bool _hunted);
+  int		getAutoHuntLevel() const;
+  void		setAutoHuntLevel(int level);
   bool		isAutoPilot() const;
   void		setAutoPilot(bool = true);
+  bool		isAdmin() const;
+  void		setAdmin(bool = true);
+  bool		isRegistered() const;
+  void		setRegistered(bool = true);
+  bool		isVerified() const;
+  void		setVerified(bool = true);
+  bool		hasPlayerList() const;
+  void		setPlayerList(bool = true);
 
   bool		validTeamTarget(const Player *possibleTarget) const;
 
@@ -109,30 +157,49 @@ public:
   void		move(const float* pos, float azimuth);
   void		setVelocity(const float* velocity);
   void		setAngularVelocity(float);
+  void		setPhysicsDriver(int);
+  void		setRelativeMotion();
+  void		setUserSpeed(float speed);
+  void		setUserAngVel(float angvel);
   void		changeTeam(TeamColor);
   virtual void	setFlag(FlagType*);
   virtual void	changeScore(short deltaWins, short deltaLosses, short deltaTeamKills);
   void		changeLocalScore(short deltaWins, short deltaLosses, short deltaTeamKills);
+  void	  setHandicap(float handicap);
   void		setStatus(short);
   void		setExplode(const TimeKeeper&);
+  void		setAllowMovement(bool allow);
+  void		setAllowShooting(bool allow);
   void		setTeleport(const TimeKeeper&, short from, short to);
-  void		updateSparks(float dt);
   void		endShot(int index, bool isHit = false,
 			bool showExplosion = false);
 
   void*		pack(void*, uint16_t& code);
   void*		unpack(void*, uint16_t code);
 
-  void		setDeadReckoning();
   void		setDeadReckoning(float timestamp);
 
   void		setUserTexture ( const char *tex ) { if(tex) userTexture = tex;}
 
-  void setZpos (float z);
+  void		renderRadar() const;
+
+  void		setZpos (float z);
+  float		getMaxSpeed ( void ) const;
+
+protected:
+  void	  clearRemoteSounds();
+  void	  addRemoteSound(int sound);
+  void    prepareShotInfo(FiringInfo &info);
+  void    addShot(ShotPath *shot, const FiringInfo &info);
 
 protected:
   // shot statistics
-  ShotStatistics	shotStatistics;
+  ShotStatistics	  shotStatistics;
+  const Obstacle*	  lastObstacle; // last obstacle touched
+
+  std::vector<ShotPath*>  shots;
+  float			  handicap;
+  TimeKeeper		  jamTime;
 
 private:
   // return true if the shot had to be terminated or false if it
@@ -140,36 +207,66 @@ private:
   // position if you return true (it's okay to return false if
   // there's no meaningful shot position).
   virtual bool	doEndShot(int index, bool isHit, float* position) = 0;
-  bool		getDeadReckoning(float* predictedPos,
-				 float* predictedAzimuth,
-				 float* predictedVel) const;
+  void getDeadReckoning(float* predictedPos, float* predictedAzimuth,
+			float* predictedVel, float time) const;
+  void calcRelativeMotion(float vel[2], float& speed, float& angvel);
   void setVisualTeam (TeamColor team );
+  void updateFlagEffect(FlagType* flag);
+  void updateTranslucency(float dt);
+  void updateDimensions(float dt, bool local);
+  void updateTreads(float dt);
+  void updateJumpJets(float dt);
+  void updateTrackMarks();
+  bool hitObstacleResizing();
+
 private:
   // data not communicated with other players
   bool			notResponding;
-  bool			autoPilot;
   bool			hunted;
-  PlayerId		id;			// my credentials
+  int			autoHuntLevel;
+
+  // credentials
+  PlayerId		id;
+  bool			admin;
+  bool			registered;
+  bool			verified;
+  bool			playerList;
+  Address		ipAddr;
+  bool			haveIpAddr;
 
   // data use for drawing
   TankSceneNode*	tankNode;
   TankIDLSceneNode*	tankIDLNode;
   SphereSceneNode*	pausedSphere;
+#ifndef BUILDING_BZADMIN
   GLfloat		color[4];
-  TeamColor		drawTeam;		// the team I actualy use to draw
+  GLfloat		teleAlpha;
+#endif
   std::string		userTexture;
-  static int            tankTexture;
-  static int            tankOverideTexture;
+  static int		tankTexture;
+  static int		tankOverideTexture;
+  TeamColor		lastVisualTeam;
+  TimeKeeper		lastTrackDraw;
 
   // permanent data
   TeamColor		team;			// my team
 
   char			callSign[CallSignLen];	// my pseudonym
   char			email[EmailLen];	// my email address
-  PlayerType		type;                   // Human/Computer
+  PlayerType		type;			// Human/Computer
 
   // relatively stable data
   FlagType*		flagType;		// flag type I'm holding
+  ShotType		shotType;		// the shots I fire
+  float			dimensions[3];		// current tank dimensions
+  float			dimensionsScale[3];	// use to scale the dimensions
+  float			dimensionsRate[3];	 // relative to scale
+  float			dimensionsTarget[3];	// relative to scale
+  bool			useDimensions;		// use the varying dimensions for gfx
+  float			alpha;			// current tank translucency
+  float			alphaRate;		// current tank translucency
+  float			alphaTarget;		// current tank translucency
+  TimeKeeper		spawnTime;		// time I started spawning
   TimeKeeper		explodeTime;		// time I started exploding
   TimeKeeper		teleportTime;		// time I started teleporting
   short			fromTeleporter;		// teleporter I entered
@@ -178,6 +275,8 @@ private:
   short			wins;			// number of kills
   short			losses;			// number of deaths
   short			tks;			// number of teamkills
+  bool			allowMovement;		// frozen motion
+  bool			allowShooting;		// frozen shooting
 
   // score of local player against this player
   short			localWins;		// local player won this many
@@ -187,27 +286,44 @@ private:
   // highly dynamic data
   PlayerState		state;
 
+  // additional state
+  bool			autoPilot;
+
   // computable highly dynamic data
   float			forward[3];		// forward unit vector
 
+  // relative motion information
+  float			relativeSpeed;		// relative speed
+  float			relativeAngVel;		// relative angular velocity
+
   // dead reckoning stuff
-  TimeKeeper		inputTime;		// time of input
-  mutable TimeKeeper	inputPrevTime;		// time of last dead reckoning
-  int			inputStatus;		// tank status
-  mutable float		inputPos[3];		// tank position
-  float			inputSpeed;		// tank horizontal speed
-  mutable float  	inputZSpeed;		// tank vertical speed
-  float			inputAzimuth;		// direction tank is pointing
-  float			inputSpeedAzimuth;	// direction of speed
-  float			inputAngVel;		// tank turn rate
-  float                 deltaTime;              // average difference between
-						// time source and
-						// time destination
-  float                 offset;                 // time offset on last
-						// measurement
-  int                   deadReckoningState;     // 0 -> not received any sample
-                                                // 1 -> 1 sample rx
-                                                // 2 -> 2 or more sample rx
+  TimeKeeper inputTime;		// time of input
+  int	inputStatus;		// tank status
+  float	inputPos[3];		// tank position
+  float	inputVel[3];		// tank velocity
+  float	inputAzimuth;		// direction tank is pointing
+  float	inputAngVel;		// tank turn rate
+  bool	inputTurning;		// tank is turning
+  float inputRelVel[2];		// relative velocity
+  float	inputRelSpeed;		// relative speed
+  float	inputRelAngVel;		// relative angular velocity
+  float	inputTurnCenter[2];	// tank turn center
+  float	inputTurnVector[2];	// tank turn vector
+  int	inputPhyDrv;		// physics driver
+
+  // average difference between time source and time destination
+  float			deltaTime;
+
+  // time offset on last measurement
+  float			offset;
+
+  // 0 -> not received any sample
+  // 1 -> 1 sample rx
+  // 2 -> 2 or more sample rx
+  int			deadReckoningState;
+
+  int			oldStatus;		// old tank status bits
+  float			oldZSpeed;		// old tank vertical speed
 };
 
 // shot data goes in LocalPlayer or RemotePlayer so shot type isn't lost.
@@ -271,6 +387,11 @@ inline float		Player::getAngle() const
   return state.azimuth;
 }
 
+inline const float*	Player::getDimensions() const
+{
+  return dimensions;
+}
+
 inline const float*	Player::getForward() const
 {
   return forward;
@@ -284,6 +405,21 @@ inline const float*	Player::getVelocity() const
 inline float		Player::getAngularVelocity() const
 {
   return state.angVel;
+}
+
+inline const float	Player::getLastUpdateTime() const
+{
+	return state.lastUpdateTime;
+}
+
+inline const float*	Player::getAperantVelocity() const
+{
+	return state.aperantVelocity;
+}
+
+inline int		Player::getPhysicsDriver() const
+{
+  return state.phydrv;
 }
 
 inline short		Player::getWins() const
@@ -361,6 +497,21 @@ inline bool		Player::isPaused() const
   return (state.status & short(PlayerState::Paused)) != 0;
 }
 
+inline bool		Player::isAutoPilot() const
+{
+  return autoPilot;
+}
+
+inline void		Player::setAutoPilot(bool autopilot)
+{
+  autoPilot = autopilot;
+}
+
+inline bool		Player::isFalling() const
+{
+  return (state.status & short(PlayerState::Falling)) != 0;
+}
+
 inline bool		Player::isFlagActive() const
 {
   return (state.status & short(PlayerState::FlagActive)) != 0;
@@ -376,9 +527,26 @@ inline bool		Player::isExploding() const
   return (state.status & short(PlayerState::Exploding)) != 0;
 }
 
+inline bool		Player::isPhantomZoned() const
+{
+  return (isFlagActive() && (getFlag() == Flags::PhantomZone));
+}
+
 inline bool		Player::isCrossingWall() const
 {
   return (state.status & short(PlayerState::CrossingWall)) != 0;
+}
+
+inline bool		Player::canMove() const
+{
+  //return (state.status & short(PlayerState::AllowMovement)) != 0;
+  return allowMovement;
+}
+
+inline bool		Player::canShoot() const
+{
+  //return (state.status & short(PlayerState::AllowShooting)) != 0;
+  return allowShooting && getShotType() != NoShot;
 }
 
 inline bool		Player::isNotResponding() const
@@ -401,25 +569,80 @@ inline void		Player::setHunted(bool _hunted)
   hunted = _hunted;
 }
 
-inline bool		Player::isAutoPilot() const
+inline int		Player::getAutoHuntLevel() const
 {
-  return autoPilot;
+  return autoHuntLevel;
 }
 
-inline void		Player::setAutoPilot(bool _autoPilot)
+inline void		Player::setAutoHuntLevel(int level)
 {
-  autoPilot = _autoPilot;
+  autoHuntLevel = level;
+}
+
+inline bool		Player::isAdmin() const
+{
+  return admin;
+}
+
+inline void		Player::setAdmin(bool _admin)
+{
+  admin = _admin;
+}
+
+inline bool		Player::isRegistered() const
+{
+  return registered;
+}
+
+inline void		Player::setRegistered(bool _registered)
+{
+  registered = _registered;
+}
+
+inline bool		Player::isVerified() const
+{
+  return verified;
+}
+
+inline void		Player::setVerified(bool _verified)
+{
+  verified = _verified;
+}
+
+inline bool		Player::hasPlayerList() const
+{
+  return playerList;
+}
+
+inline void		Player::setPlayerList(bool _playerList)
+{
+  playerList = _playerList;
+}
+
+inline void		Player::setAllowMovement(bool allow)
+{
+  allowMovement = allow;
+}
+
+inline void		Player::setAllowShooting(bool allow)
+{
+  allowShooting = allow;
 }
 
 inline void*		Player::pack(void* buf, uint16_t& code)
 {
-  setDeadReckoning();
+  setDeadReckoning(-1);
   return state.pack(buf, code);
 }
 
 inline void Player::setZpos (float z)
 {
   state.pos[2] = z;
+}
+
+inline int Player::getMaxShots() const
+{
+  return (int)shots.size();
 }
 
 #endif /* __PLAYER_H__ */

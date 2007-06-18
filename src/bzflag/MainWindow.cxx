@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,25 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 
-/* BZFlag common header */
-#include "common.h"
-
 /* interface headers */
 #include "MainWindow.h"
-#include "BzfWindow.h"
-
-/* system headers */
-#include <string>
 
 /* common implementation headers */
 #include "global.h"
 #include "SceneRenderer.h"
-#include "bzfgl.h"
-#include "BzfJoystick.h"
 
 //
 // MainWindow
@@ -43,9 +34,11 @@ MainWindow::MainWindow(BzfWindow* _window, BzfJoystick* _joystick) :
 				zoomFactor(1),
 				width(0),
 				minWidth(MinX),
-				minHeight(MinY)
+				minHeight(MinY),
+				faulting(false)
 {
   window->addResizeCallback(resizeCB, this);
+  window->addExposeCallback(exposeCB, this);
   resize();
 }
 
@@ -72,9 +65,9 @@ void			MainWindow::setPosition(int x, int y)
   window->setPosition(x, y);
 }
 
-void			MainWindow::setSize(int width, int height)
+void			MainWindow::setSize(int _width, int _height)
 {
-  window->setSize(width, height);
+  window->setSize(_width, _height);
   resize();
 }
 
@@ -233,7 +226,10 @@ void			MainWindow::resize()
 {
   window->getSize(trueWidth, trueHeight);
   window->makeCurrent();
-  window->create();
+  if (!window->create()) {
+    faulting = true;
+  }
+  OpenGLGState::initContext();
   setQuadrant(quadrant);
 }
 
@@ -241,6 +237,11 @@ void			MainWindow::resizeCB(void* _self)
 {
   MainWindow* self = (MainWindow*)_self;
   self->resize();
+}
+
+void			MainWindow::exposeCB(void* /*_self*/)
+{
+  OpenGLGState::initContext();
 }
 
 void			MainWindow::iconify()
@@ -254,27 +255,51 @@ bool			MainWindow::haveJoystick() const
   return joystick->joystick();
 }
 
-void			MainWindow::getJoyPosition(int& mx, int& my) const
+void			MainWindow::getJoyPosition(int& jx, int& jy) const
 {
-  joystick->getJoy(mx, my);
-  mx = ((width >> 1) * mx) / (900);
-  my = ((height >> 1) * my) / (900);
+  joystick->getJoy(jx, jy);
 }
 
-unsigned long                  MainWindow::getJoyButtonSet() const
+unsigned long		  MainWindow::getJoyButtonSet() const
 {
   return joystick->getJoyButtons();
 }
 
-void                    MainWindow::getJoyDevices(std::vector<std::string>
+unsigned int		  MainWindow::getJoyHatswitch(int switchno) const
+{
+  return joystick->getHatswitch(switchno);
+}
+
+unsigned int		  MainWindow::getJoyDeviceNumHats() const
+{
+  return joystick->getJoyDeviceNumHats();
+}
+
+void		    MainWindow::getJoyDevices(std::vector<std::string>
 						  &list) const
 {
   joystick->getJoyDevices(list);
 }
 
-void	                MainWindow::initJoystick(std::string &joystickName) {
+void		    MainWindow::getJoyDeviceAxes(std::vector<std::string>
+						 &list) const
+{
+  joystick->getJoyDeviceAxes(list);
+}
+
+void		    MainWindow::setJoyXAxis(const std::string axis)
+{
+  joystick->setXAxis(axis);
+}
+
+void		    MainWindow::setJoyYAxis(const std::string axis)
+{
+  joystick->setYAxis(axis);
+}
+
+void			MainWindow::initJoystick(std::string &joystickName) {
   joystick->initJoystick(joystickName.c_str());
-};
+}
 
 // Local Variables: ***
 // mode:C++ ***
@@ -283,4 +308,3 @@ void	                MainWindow::initJoystick(std::string &joystickName) {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,31 +7,22 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "FormatMenu.h"
 
-/* system implementation headers */
-#include <vector>
-#include <string>
-
 /* common implementation headers */
-#include "BzfWindow.h"
 #include "BzfDisplay.h"
-#include "BzfEvent.h"
 #include "ErrorHandler.h"
 #include "FontManager.h"
 
 /* local implementation headers */
 #include "MainMenu.h"
-#include "HUDuiLabel.h"
-
-/* from playing.h */
-BzfDisplay*		getDisplay();
-bool			setVideoFormat(int, bool test);
-
+#include "playing.h"
+#include "HUDui.h"
+#include "HUDNavigationQueue.h"
 
 const int		FormatMenu::NumReadouts = 4;
 const int		FormatMenu::NumItems = 30;
@@ -40,39 +31,19 @@ const int		FormatMenu::NumColumns = 3;
 bool FormatMenuDefaultKey::keyPress(const BzfKeyEvent& key)
 {
   if (key.ascii == 0) switch (key.button) {
-    case BzfKeyEvent::Up:
-      if (HUDui::getFocus()) {
-	menu->setSelected(menu->getSelected() - 1);
-      }
-      return true;
-
-    case BzfKeyEvent::Down:
-      if (HUDui::getFocus()) {
-	menu->setSelected(menu->getSelected() + 1);
-      }
-      return true;
-
     case BzfKeyEvent::PageUp:
       if (HUDui::getFocus()) {
-	menu->setSelected(menu->getSelected() - FormatMenu::NumItems);
+	menu->setPage(menu->page + 1);
       }
       return true;
 
     case BzfKeyEvent::PageDown:
       if (HUDui::getFocus()) {
-	menu->setSelected(menu->getSelected() + FormatMenu::NumItems);
+	menu->setPage(menu->page - 1);
       }
       return true;
-  }
 
-  else if (key.ascii == '\t') {
-    if (HUDui::getFocus()) {
-      menu->setSelected(menu->getSelected() + 1);
-    }
-    return true;
-  }
-
-  else if (key.ascii == 'T' || key.ascii == 't') {
+  } else if (key.ascii == 'T' || key.ascii == 't') {
     menu->setFormat(true);
     return true;
   }
@@ -82,8 +53,6 @@ bool FormatMenuDefaultKey::keyPress(const BzfKeyEvent& key)
 bool FormatMenuDefaultKey::keyRelease(const BzfKeyEvent& key)
 {
   switch (key.button) {
-    case BzfKeyEvent::Up:
-    case BzfKeyEvent::Down:
     case BzfKeyEvent::PageUp:
     case BzfKeyEvent::PageDown:
       return true;
@@ -96,6 +65,32 @@ bool FormatMenuDefaultKey::keyRelease(const BzfKeyEvent& key)
       return true;
   }
   return MenuDefaultKey::keyRelease(key);
+}
+
+size_t FormatMenu::navCallback(size_t oldFocus, size_t proposedFocus, HUDNavChangeMethod changeMethod, void* obj)
+{
+  FormatMenu* fm = (FormatMenu*)obj;
+  // sync the menu's selected page with the focus item.
+  if (changeMethod == hnNext) {
+    if (oldFocus + 1 != proposedFocus) {
+      // we have wrapped
+      fm->setPage(fm->page + 1);
+    } else if (((HUDuiLabel*)(fm->getNav()[proposedFocus]))->getString() == "") {
+      // there was an odd number of items on the last page, and 
+      // we have run off the end of the list...wrap early
+      fm->setPage(0);
+      proposedFocus = 0;
+    }
+  } else if (changeMethod == hnPrev) {
+    if (oldFocus - 1 != proposedFocus) {
+      // we have wrapped backwards
+      fm->setPage(fm->page - 1);
+      // find the last non-empty entry (i.e. if we wrapped from first to last page)
+      while (((HUDuiLabel*)(fm->getNav()[proposedFocus]))->getString() == "")
+	--proposedFocus;
+    }
+  }
+  return proposedFocus;
 }
 
 FormatMenu::FormatMenu() : defaultKey(this), badFormats(NULL)
@@ -113,21 +108,22 @@ FormatMenu::FormatMenu() : defaultKey(this), badFormats(NULL)
   addLabel("", "");			// instructions
   addLabel("", "Current Format:");	// current format readout
   addLabel("", "");			// page readout
-  currentLabel = (HUDuiLabel*)(getControls()[NumReadouts - 2]);
-  pageLabel = (HUDuiLabel*)(getControls()[NumReadouts - 1]);
+  currentLabel = (HUDuiLabel*)(getElements()[NumReadouts - 2]);
+  pageLabel = (HUDuiLabel*)(getElements()[NumReadouts - 1]);
 
   // add resolution list items
   for (i = 0; i < NumItems; ++i)
-    addLabel("", "");
+    addLabel("", "", true);
 
   // fill in static labels
   if (numFormats < 2) {
     currentLabel->setString("<switching not available>");
-    setFocus(NULL);
+    HUDui::setFocus(NULL);
   } else {
-    HUDuiLabel* label = (HUDuiLabel*)(getControls()[NumReadouts - 3]);
+    HUDuiLabel* label = (HUDuiLabel*)(getElements()[NumReadouts - 3]);
     label->setString("Press Enter to select and T to test a format. Esc to exit.");
-    setFocus(pageLabel);
+    initNavigation();
+    getNav().setCallback(&navCallback, this);
   }
 }
 
@@ -136,84 +132,68 @@ FormatMenu::~FormatMenu()
   delete[] badFormats;
 }
 
-void FormatMenu::addLabel(const char* msg, const char* _label)
+void FormatMenu::addLabel(const char* msg, const char* _label, bool navigable)
 {
   HUDuiLabel* label = new HUDuiLabel;
   label->setFontFace(MainMenu::getFontFace());
   label->setString(msg);
   label->setLabel(_label);
-  getControls().push_back(label);
+  addControl(label, navigable);
 }
 
-int FormatMenu::getSelected() const
+void FormatMenu::setPage(int _page)
 {
-  return selectedIndex;
-}
-
-void FormatMenu::setSelected(int index)
-{
-  BzfDisplay* display = getDisplay();
-  std::vector<HUDuiControl*>& list = getControls();
-
-  // clamp index
-  if (index < 0)
-    index = numFormats - 1;
-  else if (index != 0 && index >= numFormats)
-    index = 0;
-
-  // ignore if no change
-  if (selectedIndex == index)
+  if (_page == page) // no change
     return;
 
-  // update current format
-  currentLabel->setString(display->getResolution(display->getResolution())->name);
+  // switch pages
+  page = _page;
 
-  // update selected index and get old and new page numbers
-  const int oldPage = (selectedIndex < 0) ? -1 : (selectedIndex / NumItems);
-  selectedIndex = index;
-  const int newPage = (selectedIndex / NumItems);
+  // wrap from last page to first
+  if (page > (int)(numFormats / NumItems))
+    page = 1;
+  // wrap from first page back to last
+  if (page < 0)
+    page = (int)(numFormats / NumItems);
 
-  // if page changed then load items for this page
-  if (oldPage != newPage) {
-    // fill items
-    const int base = newPage * NumItems;
-    for (int i = 0; i < NumItems; ++i) {
-      HUDuiLabel* label = (HUDuiLabel*)list[i + NumReadouts];
-      if (base + i < numFormats)
-	if (badFormats[base + i])
-	  label->setString("<unloadable>");
-	else
-	  label->setString(display->getResolution(base + i)->name);
+  // fill items
+  const int base = page * NumItems;
+  std::vector<HUDuiElement*>& listHUD = getElements();
+  BzfDisplay* display = getDisplay();
+  for (int i = 0; i < NumItems; ++i) {
+    HUDuiLabel* label = (HUDuiLabel*)listHUD[i + NumReadouts];
+    if (base + i < numFormats)
+      if (badFormats[base + i])
+        label->setString("<unloadable>");
       else
-	label->setString("");
-    }
-
-    // change page label
-    if (numFormats > NumItems) {
-      char msg[50];
-      std::vector<std::string> args;
-      sprintf(msg, "%d", newPage + 1);
-      args.push_back(msg);
-      sprintf(msg, "%d", (numFormats + NumItems - 1) / NumItems);
-      args.push_back(msg);
-      pageLabel->setString("Page {1} of {2}", &args);
-    }
+        label->setString(display->getResolution(base + i)->name);
+    else
+      label->setString("");
   }
 
-  // set focus to selected item
-  if (numFormats > 0) {
-    const int indexOnPage = selectedIndex % NumItems;
-    getControls()[NumReadouts + indexOnPage]->setFocus();
-  } else {
-    setFocus(NULL);
+  // change page label
+  if (numFormats > NumItems) {
+    char msg[50];
+    std::vector<std::string> args;
+    sprintf(msg, "%d", page + 1);
+    args.push_back(msg);
+    sprintf(msg, "%d", (numFormats + NumItems - 1) / NumItems);
+    args.push_back(msg);
+    pageLabel->setString("Page {1} of {2}", &args);
   }
 }
 
 void FormatMenu::show()
 {
   pageLabel->setString("");
-  selectedIndex = -1;
-  setSelected(getDisplay()->getResolution());
+  int selectedIndex = getDisplay()->getResolution();
+  // sync focus and selection
+  int _page = (selectedIndex / NumItems);
+  setPage(_page);
+  getNav().set(selectedIndex - (_page * NumItems));
+  // set current format
+  BzfDisplay* display = getDisplay();
+  currentLabel->setString(display->getResolution(display->getResolution())->name);
 }
 
 void FormatMenu::execute()
@@ -223,6 +203,7 @@ void FormatMenu::execute()
 
 void FormatMenu::setFormat(bool test)
 {
+  int selectedIndex = (page * NumItems) + (int)getNav().getIndex();
   if (selectedIndex >= numFormats || badFormats[selectedIndex])
     return;
 
@@ -234,41 +215,39 @@ void FormatMenu::setFormat(bool test)
     printError((const char*)glGetString(GL_RENDERER));
   }
 
-  // update readouts
-  const int oldSelectedIndex = selectedIndex;
-  selectedIndex = -1;
-  setSelected(oldSelectedIndex);
+  BzfDisplay* display = getDisplay();
+  currentLabel->setString(display->getResolution(display->getResolution())->name);
 }
 
-void FormatMenu::resize(int width, int height)
+void FormatMenu::resize(int _width, int _height)
 {
-  HUDDialog::resize(width, height);
+  HUDDialog::resize(_width, _height);
 
   // use a big font for title, smaller font for the rest
-  const float titleFontSize = (float)height / 15.0f;
+  const float titleFontSize = (float)_height / 15.0f;
   FontManager &fm = FontManager::instance();
   int fontFace = MainMenu::getFontFace();
 
   // reposition title
   float x, y;
-  std::vector<HUDuiControl*>& list = getControls();
+  std::vector<HUDuiElement*>& listHUD = getElements();
   {
-    HUDuiLabel* title = (HUDuiLabel*)list[0];
+    HUDuiLabel* title = (HUDuiLabel*)listHUD[0];
     title->setFontSize(titleFontSize);
     const float titleWidth = fm.getStrLength(fontFace, titleFontSize, title->getString());
     const float titleHeight = fm.getStrHeight(fontFace, titleFontSize, " ");
-    x = 0.5f * ((float)width - titleWidth);
-    y = (float)height - titleHeight;
+    x = 0.5f * ((float)_width - titleWidth);
+    y = (float)_height - titleHeight;
     title->setPosition(x, y);
   }
 
   // reposition test and current format messages
-  float fontSize = (float)height / 54.0f;
+  float fontSize = (float)_height / 54.0f;
   {
-    HUDuiLabel* label = (HUDuiLabel*)list[1];
+    HUDuiLabel* label = (HUDuiLabel*)listHUD[1];
     label->setFontSize(fontSize);
     const float stringWidth = fm.getStrLength(fontFace, fontSize, label->getString());
-    x = 0.5f * ((float)width - stringWidth);
+    x = 0.5f * ((float)_width - stringWidth);
     y -= 1.5f * fm.getStrHeight(fontFace, fontSize, " ");
     label->setPosition(x, y);
   }
@@ -276,16 +255,16 @@ void FormatMenu::resize(int width, int height)
     HUDuiLabel* label = currentLabel;
     label->setFontSize(fontSize);
     y -= 1.0f * fm.getStrHeight(fontFace, fontSize, " ");
-    label->setPosition(0.5f * (float)width, y);
+    label->setPosition(0.5f * (float)_width, y);
   }
 
   // position page readout
-  fontSize = (float)height / 54.0f;
+  fontSize = (float)_height / 54.0f;
   {
     HUDuiLabel* label = pageLabel;
     label->setFontSize(fontSize);
     const float stringWidth = fm.getStrLength(fontFace, fontSize, label->getString());
-    x = 0.5f * ((float)width - stringWidth);
+    x = 0.5f * ((float)_width - stringWidth);
     y -= 2.0f * fm.getStrHeight(fontFace, fontSize, " ");
     label->setPosition(x, y);
   }
@@ -297,11 +276,11 @@ void FormatMenu::resize(int width, int height)
     const int column = i * NumColumns / NumItems;
     if (column != lastColumn) {
       lastColumn = column;
-      x = (float)width * ((0.5f + (float)column) / (float)(NumColumns + 1));
+      x = (float)_width * ((0.5f + (float)column) / (float)(NumColumns + 1));
       y = yBase;
     }
 
-    HUDuiLabel* label = (HUDuiLabel*)list[i + NumReadouts];
+    HUDuiLabel* label = (HUDuiLabel*)listHUD[i + NumReadouts];
     label->setFontSize(fontSize);
     y -= 1.0f * fm.getStrHeight(fontFace, fontSize, " ");
     label->setPosition(x, y);

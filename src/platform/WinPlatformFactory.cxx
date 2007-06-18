@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "WinPlatformFactory.h"
@@ -15,13 +15,16 @@
 #include "SDLMedia.h"
 #include "SDLDisplay.h"
 #include "SDLJoystick.h"
-#else
+#endif
+#include "DXJoystick.h"
+#ifdef HAVE_DSOUND_H
 #include "WinMedia.h"
+#endif
 #include "WinDisplay.h"
 #include "WinVisual.h"
 #include "WinWindow.h"
 #include "WinJoystick.h"
-#endif
+#include "StateDatabase.h"
 
 PlatformFactory*	PlatformFactory::getInstance()
 {
@@ -30,10 +33,9 @@ PlatformFactory*	PlatformFactory::getInstance()
 }
 
 #ifdef HAVE_SDL
-SDLWindow*		WinPlatformFactory::window = NULL;
-#else
-WinWindow*		WinPlatformFactory::window = NULL;
+SDLWindow*		WinPlatformFactory::sdlWindow = NULL;
 #endif
+WinWindow*		WinPlatformFactory::winWindow = NULL;
 
 WinPlatformFactory::WinPlatformFactory()
 {
@@ -45,76 +47,121 @@ WinPlatformFactory::~WinPlatformFactory()
   // do nothing
 }
 
-#ifdef HAVE_SDL
-BzfDisplay*		WinPlatformFactory::createDisplay(
-				const char*, const char*)
+BzfDisplay *WinPlatformFactory::createDisplay(const char* name,
+					      const char* videoFormat)
 {
-  SDLDisplay* display = new SDLDisplay();
+  bool useNative = true;
+#ifdef HAVE_SDL
+  if (BZDB.isSet("SDLVideo") && BZDB.isTrue("SDLVideo"))
+    useNative = false;
+#endif
+
+  BzfDisplay *display;
+  if (useNative) {
+    WinDisplay* winDisplay = new WinDisplay(name, videoFormat);
+    display		= winDisplay;
+  } else {
+#ifdef HAVE_SDL
+    SDLDisplay* sdlDisplay = new SDLDisplay();
+    display		= sdlDisplay;
+#else
+    display		= NULL;
+#endif
+  }
   if (!display || !display->isValid()) {
     delete display;
-    return NULL;
+    display = NULL;
   }
   return display;
 }
-#else
-BzfDisplay*		WinPlatformFactory::createDisplay(
-				const char* name, const char* videoFormat)
+
+BzfVisual*		WinPlatformFactory::createVisual(
+				const BzfDisplay* display)
 {
-  WinDisplay* display = new WinDisplay(name, videoFormat);
-  if (!display || !display->isValid()) {
-    delete display;
+  bool useNative = true;
+#ifdef HAVE_SDL
+  if (BZDB.isSet("SDLVideo") && BZDB.isTrue("SDLVideo"))
+    useNative = false;
+#endif
+
+  if (useNative)
+    return new WinVisual((const WinDisplay*)display);
+  else
+#ifdef HAVE_SDL
+    return new SDLVisual((const SDLDisplay*)display);
+#else
     return NULL;
+#endif
+}
+
+BzfWindow*		WinPlatformFactory::createWindow(
+				const BzfDisplay* display, BzfVisual* visual)
+{
+  bool useNative = true;
+#ifdef HAVE_SDL
+  if (BZDB.isSet("SDLVideo") && BZDB.isTrue("SDLVideo"))
+    useNative = false;
+#endif
+
+  if (useNative) {
+    winWindow = new WinWindow((const WinDisplay*)display, (WinVisual*)visual);
+    return winWindow;
+  } else {
+#ifdef HAVE_SDL
+    sdlWindow = new SDLWindow((const SDLDisplay*)display, (SDLVisual*)visual);
+    return sdlWindow;
+#else
+    return NULL;
+#endif
   }
-  return display;
 }
-#endif
-
-#ifdef HAVE_SDL
-BzfVisual*		WinPlatformFactory::createVisual(
-				const BzfDisplay* display)
-{
-  return new SDLVisual((const SDLDisplay*)display);
-}
-#else
-BzfVisual*		WinPlatformFactory::createVisual(
-				const BzfDisplay* display)
-{
-  return new WinVisual((const WinDisplay*)display);
-}
-#endif
-
-#ifdef HAVE_SDL
-BzfWindow*		WinPlatformFactory::createWindow(
-				const BzfDisplay* display, BzfVisual* visual)
-{
-  window = new SDLWindow((const SDLDisplay*)display, (SDLVisual*)visual);
-  return window;
-}
-#else
-BzfWindow*		WinPlatformFactory::createWindow(
-				const BzfDisplay* display, BzfVisual* visual)
-{
-  window = new WinWindow((const WinDisplay*)display, (WinVisual*)visual);
-  return window;
-}
-#endif
 
 BzfMedia*		WinPlatformFactory::createMedia()
 {
-#ifdef HAVE_SDL
-  return new SDLMedia();
-#else
-  return new WinMedia(window);
+  bool useNative = true;
+#ifndef HAVE_DSOUND_H
+  useNative = false;
 #endif
+#ifdef HAVE_SDL
+  if (BZDB.isSet("SDLAudio") && BZDB.isTrue("SDLAudio"))
+    useNative = false;
+#endif
+
+  if (useNative) {
+#ifdef HAVE_DSOUND_H
+    return new WinMedia(winWindow);
+#else
+    return NULL;
+#endif
+  } else {
+#ifdef HAVE_SDL
+    return new SDLMedia();
+#else
+    return NULL;
+#endif
+  }
 }
 
 BzfJoystick*		WinPlatformFactory::createJoystick()
 {
+  bool useNative = true;
 #ifdef HAVE_SDL
-  return new SDLJoystick();
-#else
-  return new WinJoystick();
+  if (BZDB.isSet("SDLJoystick") && BZDB.isTrue("SDLJoystick"))
+    useNative = false;
 #endif
+  if (useNative) {
+#if defined(USE_DINPUT)
+    return new DXJoystick();
+#else
+    return new WinJoystick();
+#endif
+  } else {
+#if defined(HAVE_SDL)
+    return new SDLJoystick();
+#else
+    return NULL;
+#endif
+  }
 }
 
 // Local Variables: ***
@@ -124,4 +171,3 @@ BzfJoystick*		WinPlatformFactory::createJoystick()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

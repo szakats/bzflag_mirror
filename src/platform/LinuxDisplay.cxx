@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "LinuxDisplay.h"
@@ -97,7 +97,7 @@ XDisplayMode::ResInfo**	LinuxDisplayMode::init(XDisplay* _display,
   int current;
   for (current = 0; current < numResolutions; current++) {
     const XF86VidModeModeInfo* r = resolutions[current];
-    if (dotclock        == (int)r->dotclock &&
+    if (dotclock	== (int)r->dotclock &&
 	mode.hdisplay   == r->hdisplay &&
 	mode.hsyncstart == r->hsyncstart &&
 	mode.hsyncend   == r->hsyncend &&
@@ -219,4 +219,3 @@ bool			LinuxDisplayMode::doSet(int index, bool position)
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

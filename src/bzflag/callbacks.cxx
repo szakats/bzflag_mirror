@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,28 +7,24 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
+// interface header
+#include "callbacks.h"
 
-#include <string>
-
+/* local headers */
 #include "LocalPlayer.h"
 #include "HUDRenderer.h"
-
-
-
-extern LocalPlayer*	myTank;
-extern HUDRenderer*	hud;
+#include "playing.h"
 
 void setFlagHelp(const std::string& name, void*)
 {
-  if (myTank == NULL)
+  if (LocalPlayer::getMyTank() == NULL)
     return;
   static const float FlagHelpDuration = 60.0f;
   if (BZDB.isTrue(name))
-    hud->setFlagHelp(myTank->getFlag(), FlagHelpDuration);
+    hud->setFlagHelp(LocalPlayer::getMyTank()->getFlag(), FlagHelpDuration);
   else
     hud->setFlagHelp(Flags::Null, 0.0);
 }
@@ -56,4 +52,3 @@ void setDepthBuffer(const std::string& name, void*)
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

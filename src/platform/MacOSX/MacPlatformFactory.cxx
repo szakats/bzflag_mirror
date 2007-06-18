@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,19 +7,24 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/* interface header */
 #include "MacPlatformFactory.h"
+
+/* implementation headers */
 #ifdef HAVE_SDL
-#include "SDLMedia.h"
-#include "SDLDisplay.h"
-#include "SDLJoystick.h"
+#  include "SDLMedia.h"
+#  include "SDLVisual.h"
+#  include "SDLWindow.h"
+#  include "SDLDisplay.h"
+#  include "SDLJoystick.h"
 #else
-#include "MacDisplay.h"
-#include "MacVisual.h"
-#include "MacWindow.h"
-#include "MacMedia.h"
+#  include "MacDisplay.h"
+#  include "MacVisual.h"
+#  include "MacWindow.h"
+#  include "MacMedia.h"
 #endif
 
 PlatformFactory* PlatformFactory::getInstance()
@@ -104,4 +109,3 @@ MacPlatformFactory::~MacPlatformFactory() {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

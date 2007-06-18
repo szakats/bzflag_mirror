@@ -1,31 +1,25 @@
-AM_CXXFLAGS = -DBUILDING_BZADMIN
-INCLUDES = -I@top_srcdir@/src/bzflag
+#
+# Build BZAdmin
+#
 
-MAINTAINERCLEANFILES = \
-	ServerLink.cxx \
-	Makefile.in
-
-if BZADMIN_INCLUDED
 bin_PROGRAMS = bzadmin
-endif
+
+AM_CPPFLAGS = \
+	-DBUILDING_BZADMIN \
+	-I$(top_srcdir)/include \
+	-I$(top_srcdir)/src/bzflag \
+	$(LIBCURL_CPPFLAGS) \
+	@CONF_CPPFLAGS@
+AM_CXXFLAGS = @CONF_CXXFLAGS@
 
 if HAVE_CURSES
 CURSES_SRC = CursesUI.h CursesUI.cxx CursesMenu.h CursesMenu.cxx
 else
 CURSES_SRC =
-
-EXTRA_bzadmin_SOURCES = \
-	CursesMenu.h \
-	CursesMenu.cxx \
-	CursesUI.h \
-	CursesUI.cxx
 endif
 
-AM_CPPFLAGS = -I$(top_srcdir)/include
-
+bzadmin_LDFLAGS = -static
 bzadmin_SOURCES = \
-	AutoCompleter.h \
-	AutoCompleter.cxx \
 	BZAdminClient.h \
 	BZAdminClient.cxx \
 	BZAdminUI.h \
@@ -47,12 +41,25 @@ bzadmin_SOURCES = \
 	bzadmin.cxx \
 	curses_wrapper.h
 
+EXTRA_bzadmin_SOURCES = \
+	CursesMenu.h \
+	CursesMenu.cxx \
+	CursesUI.h \
+	CursesUI.cxx
+
 ServerLink.cxx: @top_srcdir@/src/bzflag/ServerLink.cxx
 	cp -pR @top_srcdir@/src/bzflag/ServerLink.cxx .
 
 LDADD = \
-	@CURSES_LIB@ \
-	../net/libNet.a			\
-	../common/libCommon.a
+	../date/libDate.la	\
+	../game/libGame.la	\
+	../net/libNet.la	\
+	../common/libCommon.la	\
+	$(CURSES_LIB)		\
+	$(LIBCURL)		\
+	$(LIBCARES)		\
+	$(LIBREGEX)
 
-bzadmin_LDFLAGS = ../date/buildDate.o
+MAINTAINERCLEANFILES = \
+	ServerLink.cxx \
+	Makefile.in

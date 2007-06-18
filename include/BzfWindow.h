@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,22 +7,17 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/* BzfWindow:
- *	Abstract, platform independent base for OpenGL windows.
- */
-
-#ifndef BZF_WINDOW_H
-#define	BZF_WINDOW_H
-
-#if defined(_MSC_VER)
-	#pragma warning(disable: 4786)
-#endif
+#ifndef __BZFWINDOW_H__
+#define	__BZFWINDOW_H__
 
 #include "common.h"
+
+/* system headers */
 #include <vector>
+
 
 class BzfDisplay;
 
@@ -32,6 +27,9 @@ class BzfWindowCB {
     void*		data;
 };
 
+/** BzfWindow:
+ *	Abstract, platform independent base for OpenGL windows.
+ */
 class BzfWindow {
   public:
 			BzfWindow(const BzfDisplay*);
@@ -49,10 +47,9 @@ class BzfWindow {
     virtual void	setPosition(int x, int y) = 0;
     virtual void	setSize(int width, int height) = 0;
     virtual void	setMinSize(int width, int height) = 0;
-    virtual void	setFullscreen() {;};
-    virtual void	setFullscreen(bool);
+    virtual void	setFullscreen(bool) = 0;
     virtual void	iconify(void) {;};
-    virtual void	create(void) {;};
+    virtual bool	create(void) {return true;};
 
     virtual void	warpMouse(int x, int y) = 0;
     virtual void	getMouse(int& x, int& y) const = 0;
@@ -87,13 +84,13 @@ class BzfWindow {
     std::vector<BzfWindowCB>	resizeCallbacks;
 };
 
-#endif // BZF_WINDOW_H
+
+#endif  /* __BZFWINDOW_H__ */
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

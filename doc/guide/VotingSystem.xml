@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
 "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
 <!--
- Copyright (c) 1993 - 2004 Tim Riker
+ Copyright (c) 1993 - 2007 Tim Riker
 
  This package is free software; you can redistribute it and/or modify
  it under the terms of the license found in the file named COPYING
@@ -10,7 +10,7 @@
 
  THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
  WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
- MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 -->
 ]>
 
@@ -286,11 +286,11 @@
 
       <para>Each of the voting system commands have a corresponding
       bzflag permission identifier.  They are POLL, VOTE, and VETO.
-      By default, POLL and VOTE are in the REGISTERED group and VETO
+      By default, POLL and VOTE are in the VERIFIED group and VETO
       is in the ADMIN group.  Some servers may choose to <quote>open
       up</quote> the voting system to unregistered players; this may
       be done by placing the POLL and VOTE permissions into the
-      DEFAULT group.  Likewise, it may be useful to place VETO into a
+      EVERYONE group.  Likewise, it may be useful to place VETO into a
       COPS group if one has been defined for <quote>power
       users</quote>.</para>
 

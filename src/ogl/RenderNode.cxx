@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,47 +7,68 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include <stdlib.h>
 #include <string.h>
 #include "common.h"
 #include "RenderNode.h"
+
+
+//
+// RenderNode
+//
+
+int RenderNode::triangleCount = 0;
+
+
+int RenderNode::getTriangleCount()
+{
+  return triangleCount;
+}
+
+
+void RenderNode::resetTriangleCount()
+{
+  triangleCount = 0;
+  return;
+}
+
 
 //
 // RenderNodeList
 //
 
-static const int	initialSize = 31;
+static const int initialSize = 31;
 
 RenderNodeList::RenderNodeList() : count(0), size(0), list(NULL)
 {
   // do nothing
 }
 
+
 RenderNodeList::~RenderNodeList()
 {
   delete[] list;
 }
 
-void			RenderNodeList::clear()
+
+void RenderNodeList::clear()
 {
   count = 0;
 }
 
-void			RenderNodeList::append(RenderNode* node)
+
+void RenderNodeList::render() const
 {
-  if (count == size) grow();
-  list[count++] = node;
+  for (int i = 0; i < count; i++) {
+    list[i]->renderShadow();
+  }
 }
 
-void			RenderNodeList::render() const
-{
-  for (int i = 0; i < count; i++)
-    list[i]->render();
-}
 
-void			RenderNodeList::grow()
+void RenderNodeList::grow()
 {
   const int newSize = (size == 0) ? initialSize : (size << 1) + 1;
   RenderNode** newList = new RenderNode*[newSize];
@@ -56,6 +77,7 @@ void			RenderNodeList::grow()
   list = newList;
   size = newSize;
 }
+
 
 //
 // RenderNodeGStateList
@@ -67,27 +89,20 @@ RenderNodeGStateList::RenderNodeGStateList() :
   // do nothing
 }
 
+
 RenderNodeGStateList::~RenderNodeGStateList()
 {
   delete[] list;
 }
 
-void			RenderNodeGStateList::clear()
+
+void RenderNodeGStateList::clear()
 {
   count = 0;
 }
 
-void			RenderNodeGStateList::append(RenderNode* node,
-						const OpenGLGState* gstate)
-{
-  if (count == size) grow();
-  list[count].node = node;
-  list[count].gstate = gstate;
-  list[count].depth = 0.0f;
-  count++;
-}
 
-void			RenderNodeGStateList::render() const
+void RenderNodeGStateList::render() const
 {
   for (int i = 0; i < count; i++) {
     list[i].gstate->setState();
@@ -95,7 +110,8 @@ void			RenderNodeGStateList::render() const
   }
 }
 
-void			RenderNodeGStateList::grow()
+
+void RenderNodeGStateList::grow()
 {
   const int newSize = (size == 0) ? initialSize : (size << 1) + 1;
   Item* newList = new Item[newSize];
@@ -105,38 +121,43 @@ void			RenderNodeGStateList::grow()
   size = newSize;
 }
 
-void			RenderNodeGStateList::sort(const GLfloat* e)
+
+static int nodeCompare(const void *a, const void* b)
 {
-  int i, j, k;
+  const RenderNodeGStateList::Item* itemA =
+    (const RenderNodeGStateList::Item*) a;
+  const RenderNodeGStateList::Item* itemB =
+    (const RenderNodeGStateList::Item*) b;
 
-  // get depths
-  for (i = 0; i < count; i++) {
-    const GLfloat* p = list[i].node->getPosition();
-    list[i].depth = (p[0] - e[0]) * (p[0] - e[0]) +
-		    (p[1] - e[1]) * (p[1] - e[1]) +
-		    (p[2] - e[2]) * (p[2] - e[2]);
-  }
-
-  // sort
-  for (i = 0; i < count - 1; i++) {
-    // find largest in unsorted list
-    k = i;
-    float z = list[k].depth;
-    for (j = k + 1; j < count; j++) {
-      if (list[j].depth > z) {
-	k = j;
-	z = list[k].depth;
-      }
-    }
-
-    // swap into correct position
-    if (k != i) {
-      const Item item = list[i];
-      list[i] = list[k];
-      list[k] = item;
-    }
+  // draw from back to front
+  if (itemA->depth > itemB->depth) {
+    return -1;
+  } else {
+    return +1;
   }
 }
+
+void RenderNodeGStateList::sort(const GLfloat* e)
+{
+  // calculate distances from the eye (squared)
+  for (int i = 0; i < count; i++) {
+    const GLfloat* p = list[i].node->getPosition();
+    const float dx = (p[0] - e[0]);
+    const float dy = (p[1] - e[1]);
+    const float dz = (p[2] - e[2]);
+    list[i].depth = ((dx * dx) + (dy * dy) + (dz * dz));
+    // FIXME - dirty hack (they are all really getSphere())
+    //if (list[i].depth < p[3]) {
+    //  list[i].depth = -1.0f;
+    //}
+  }
+
+  // sort from farthest to closest
+  qsort (list, count, sizeof(Item), nodeCompare);
+
+  return;
+}
+
 
 // Local Variables: ***
 // mode:C++ ***
@@ -145,4 +166,3 @@ void			RenderNodeGStateList::sort(const GLfloat* e)
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

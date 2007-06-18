@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,26 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // interface headers
-#include "HUDuiControl.h"
 #include "HUDuiList.h"
 
-// system headers
-#include <string>
-#include <vector>
-
 // common implementation headers
-#include "common.h"
-#include "bzfgl.h"
 #include "BundleMgr.h"
 #include "Bundle.h"
 #include "FontManager.h"
-
-// local implementation headers
-#include "HUDui.h"
 
 //
 // HUDuiList
@@ -49,9 +39,12 @@ int			HUDuiList::getIndex() const
 
 void			HUDuiList::setIndex(int _index)
 {
-  if (_index < 0) index = 0;
-  else if (_index >= (int)list.size()) index = list.size() - 1;
-  else index = _index;
+  if (_index < 0)
+    index = 0;
+  else if (_index >= (int)list.size())
+    index = (int)list.size() - 1;
+  else
+    index = _index;
 }
 
 std::vector<std::string>&		HUDuiList::getList()
@@ -88,24 +81,14 @@ void			HUDuiList::createSlider(const int numValues)
 
 bool			HUDuiList::doKeyPress(const BzfKeyEvent& key)
 {
-  if (key.ascii == '\t') {
-    HUDui::setFocus(getNext());
+  if (HUDuiControl::doKeyPress(key))
     return true;
-  }
 
   if (key.ascii == 0)
     switch (key.button) {
-      case BzfKeyEvent::Up:
-	HUDui::setFocus(getPrev());
-	break;
-
-      case BzfKeyEvent::Down:
-	HUDui::setFocus(getNext());
-	break;
-
       case BzfKeyEvent::Left:
 	if (index != -1) {
-	  if (--index < 0) index = list.size() - 1;
+	  if (--index < 0) index = (int)list.size() - 1;
 	  doCallback();
 	}
 	break;
@@ -126,7 +109,7 @@ bool			HUDuiList::doKeyPress(const BzfKeyEvent& key)
 
       case BzfKeyEvent::End:
 	if (index != -1) {
-	  index = list.size() - 1;
+	  index = (int)list.size() - 1;
 	  doCallback();
 	}
 	break;
@@ -167,4 +150,3 @@ void			HUDuiList::doRender()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

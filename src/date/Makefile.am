@@ -1,13 +1,13 @@
-noinst_HEADERS =	\
-	buildDate.cxx
-
-DISTCLEANFILES = buildDate.o
+noinst_LTLIBRARIES = libDate.la
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
-EXTRA_DIST = \
-	README
+AM_CPPFLAGS = -I$(top_srcdir)/include @CONF_CPPFLAGS@
+AM_CXXFLAGS = @CONF_CXXFLAGS@
 
-all-local:
-	$(CXX) -c -o buildDate.o $(srcdir)/buildDate.cxx
+EXTRA_DIST = README
+
+libDate_la_LDFLAGS = -static
+libDate_la_SOURCES = \
+	buildDate.cxx

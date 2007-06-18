@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,14 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __POSITIONTRACKER_H__
 #define __POSTIIONTRACKER_H__
+
+// common header first
+#include "common.h"
 
 /* system interface headers */
 #include <string>
@@ -31,12 +34,14 @@
  */
 class PositionTracker
 {
+public:
+  typedef enum idtype { UNSET_ID, INT_ID, STR_ID } idtype_t;
+
 private:
 
   /** something that we are tracking (uniquely identified by either an
    * integer or a string)
    */
-  typedef enum idtype { UNSET_ID, INT_ID, STR_ID } idtype_t;
   typedef struct item {
     idtype_t id;
     long int intID;

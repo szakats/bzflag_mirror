@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __GAMEKEEPER_H__
@@ -17,13 +17,18 @@
 #include "common.h"
 
 // system headers
+#include <iostream>
 #include <vector>
 #include <string>
+#if defined(USE_THREADS)
+#  include <pthread.h>
+#endif
 
 // common interface headers
-#include "DelayQueue.h"
 #include "PlayerInfo.h"
 #include "PlayerState.h"
+#include "TimeKeeper.h"
+#include "bzfsAPI.h"
 
 // implementation-specific bzfs-specific headers
 #include "CmdLineOptions.h"
@@ -33,8 +38,39 @@
 #include "Score.h"
 #include "RecordReplay.h"
 #include "NetHandler.h"
+#include "Authentication.h"
+#include "messages.h"
+#include "ShotUpdate.h"
+
+
+struct FiringInfo;
+class ShotInfo {
+public:
+  ShotInfo() : present(false) {};
+
+  FiringInfo firingInfo;
+  int	salt;
+  float      expireTime;
+  bool       present;
+  bool       running;
+};
+
+class PlayerCaps
+{
+public:
+	bool	canDownloadResources;
+	bool	canPlayRemoteSounds;
+
+	PlayerCaps ( void )
+	{
+		canPlayRemoteSounds = false;
+		canDownloadResources = false;
+	}
+};
 
 const int PlayerSlot = MaxPlayers + ReplayObservers;
+
+typedef void (*tcpCallback)(NetHandler &netPlayer, int i, const RxStatus e);
 
 /** This class is meant to be the container of all the global entity that lives
     into the game and methods to act globally on those.
@@ -44,11 +80,14 @@ class GameKeeper {
 public:
   class Player {
   public:
-    Player(int _playerIndex, const struct sockaddr_in &clientAddr, int fd);
+    Player(int _playerIndex, NetHandler *_netHandler, tcpCallback _clientCallback);
+    Player(int _playerIndex, bz_ServerSidePlayerHandler *handler);
     ~Player();
 
-    int            getIndex();
+    int	    getIndex();
+    static int     getFreeIndex(int min, int max);
     static Player *getPlayerByIndex(int _playerIndex);
+    static Player *getFirstPlayer(NetHandler *_netHandler);
     static int     count();
     static void    updateLatency(float &waitTime);
     static void    dumpScore();
@@ -58,33 +97,131 @@ public:
     static int     getPlayerIDByName(const std::string &name);
     static void    reloadAccessDatabase();
 
-    bool           loadEnterData(void *buf,
-				 uint16_t &rejectCode,
+    bool	   loadEnterData(uint16_t &rejectCode,
 				 char *rejectMsg);
-    void          *packAdminInfo(void *buf);
-    void          *packPlayerUpdate(void *buf);
-    void           signingOn(bool ctf);
+    void	  *packAdminInfo(void *buf);
+    void	  *packPlayerInfo(void *buf);
+    void	  *packPlayerUpdate(void *buf);
+
+    void		setPlayerAddMessage ( PlayerAddMessage &msg );
+
+    void	   signingOn(bool ctf);
+    void	   close();
+    static bool    clean();
+    void	   handleTcpPacket(fd_set *set);
+#if defined(USE_THREADS)
+    void	   handleTcpPacketT();
+#endif
+    static void    passTCPMutex();
+    static void    freeTCPMutex();
+
+    // For hostban checking, to avoid check and check again
+    static void    setAllNeedHostbanChecked(bool set);
+    void	   setNeedThisHostbanChecked(bool set);
+    bool	   needsHostbanChecked();
+
+    // To handle player State
+    void	   setPlayerState(float pos[3], float azimuth);
+    void	   getPlayerState(float pos[3], float &azimuth);
+    void	   setPlayerState(PlayerState state, float timestamp);
+
+	void	   getPlayerCurrentPosRot(float pos[3], float &rot);
+
+    void	   setBzIdentifier(const std::string& id);
+    const std::string& getBzIdentifier() const;
+
+	// to handle updating current postions;
+
+    // When is the player's next GameTime?
+    const TimeKeeper&	getNextGameTime() const;
+    void		updateNextGameTime();
+
+    // To handle shot
+    static void    setMaxShots(int _maxShots);
+    bool	   addShot(int id, int salt, FiringInfo &firingInfo);
+    bool	   removeShot(int id, int salt, FiringInfo &firingInfo);
+    bool	   updateShot(int id, int salt);
+
+    // To handle Identify
+    void	   setLastIdFlag(int _idFlag);
+    int	    getLastIdFlag();
+
+	// to handle movement
+	float getRealSpeed ( float input );
+
+    enum LSAState
+      {
+	start,
+	notRequired,
+	required,
+	requesting,
+	checking,
+	timedOut,
+	failed,
+	verified,
+	done
+      } _LSAState;
 
     // players
-    PlayerInfo        player;
+    PlayerInfo	      player;
     // Net Handler
     NetHandler       *netHandler;
     // player lag info
-    LagInfo           lagInfo;
+    LagInfo	      lagInfo;
     // player access
     PlayerAccessInfo  accessInfo;
     // Last known position, vel, etc
-    PlayerState      *lastState;
-    // DelayQueue for "Lag Flag"
-    DelayQueue        delayq;
+    PlayerState       lastState;
+    float				stateTimeStamp;
+
+	ShotType			efectiveShotType;
+
+	void doPlayerDR ( float time = (float)TimeKeeper::getCurrent().getSeconds() );
+	float				currentPos[3];
+	float				curentVel[3];
+	float				currentRot;
+	float				currentAngVel;
+
+	PlayerState			getCurrentStateAsState ( void );
+
+	void*	packCurrentState (void* buf, uint16_t& code, bool increment);
+
+    // GameTime update
+    float	      gameTimeRate;
+    TimeKeeper	      gameTimeNext;
     // FlagHistory
     FlagHistory       flagHistory;
     // Score
-    Score             score;
+    Score	      score;
+    // Authentication
+    Authentication    authentication;
+    // Capabilities
+    PlayerCaps			caps;
+
+    // logic class for server side players
+    bz_ServerSidePlayerHandler	*playerHandler;
+
   private:
-    static Player *playerList[PlayerSlot];
-    int    playerIndex;
+    static Player    *playerList[PlayerSlot];
+    int		      playerIndex;
+    bool	      closed;
+    tcpCallback       clientCallback;
+    std::string	      bzIdentifier;
+#if defined(USE_THREADS)
+    pthread_t		   thread;
+    static pthread_mutex_t mutex;
+    int			   refCount;
+#endif
+    bool	      needThisHostbanChecked;
+    // In case you want recheck all condition on all players
+    static bool       allNeedHostbanChecked;
+    static int	     maxShots;
+    std::vector<ShotInfo> shotsInfo;
+
+    int						idFlag;
+	TimeKeeper				agilityTime;
   };
+
   class Flag {
   };
 };
@@ -99,8 +236,73 @@ inline GameKeeper::Player *GameKeeper::Player::getPlayerByIndex(int
 {
   if (_playerIndex < 0 || _playerIndex >= PlayerSlot)
     return NULL;
+  if (!playerList[_playerIndex])
+    return NULL;
+  if (playerList[_playerIndex]->closed)
+    return NULL;
   return playerList[_playerIndex];
 }
+
+void *PackPlayerInfo(void *buf, int playerIndex, uint8_t properties );
+
+#if defined(USE_THREADS)
+inline void GameKeeper::Player::handleTcpPacket(fd_set *)
+{
+return;
+}
+#endif
+
+inline void GameKeeper::Player::passTCPMutex()
+{
+#if defined(USE_THREADS)
+  int result = pthread_mutex_lock(&mutex);
+  if (result)
+    std::cerr << "Could not lock mutex" << std::endl;
+#endif
+}
+
+inline void GameKeeper::Player::freeTCPMutex()
+{
+#if defined(USE_THREADS)
+  int result = pthread_mutex_unlock(&mutex);
+  if (result)
+    std::cerr << "Could not unlock mutex" << std::endl;
+#endif
+}
+
+// For hostban checking, to avoid check and check again
+inline void GameKeeper::Player::setAllNeedHostbanChecked(bool set)
+{
+  allNeedHostbanChecked = set;
+}
+
+inline void GameKeeper::Player::setNeedThisHostbanChecked(bool set)
+{
+  needThisHostbanChecked = set;
+}
+
+inline bool GameKeeper::Player::needsHostbanChecked()
+{
+  return (allNeedHostbanChecked || needThisHostbanChecked);
+}
+
+
+inline void GameKeeper::Player::setBzIdentifier(const std::string& id)
+{
+  bzIdentifier = id;
+}
+
+inline const std::string& GameKeeper::Player::getBzIdentifier() const
+{
+  return bzIdentifier;
+}
+
+
+inline const TimeKeeper& GameKeeper::Player::getNextGameTime() const
+{
+  return gameTimeNext;
+}
+
 
 #endif
 

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,14 +7,13 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "GuidedMissleStrategy.h"
 
 /* common implementation headers */
-#include "StateDatabase.h"
 #include "BZDBCache.h"
 #include "TextureManager.h"
 #include "Intersect.h"
@@ -22,17 +21,13 @@
 /* local implementation headers */
 #include "LocalPlayer.h"
 #include "World.h"
-
-/* FIXME - from player.h */
-void addShotExplosion(const float* pos);
-Player* lookupPlayer(PlayerId id);
-void addShotPuff(const float* pos);
+#include "playing.h"
 
 
 static float limitAngle(float a)
 {
-  if (a < -M_PI) a += 2.0f * M_PI;
-  else if (a >= M_PI) a -= 2.0f * M_PI;
+  if (a < -M_PI) a += (float)(2.0 * M_PI);
+  else if (a >= M_PI) a -= (float)(2.0 * M_PI);
   return a;
 }
 
@@ -41,7 +36,7 @@ GuidedMissileStrategy::GuidedMissileStrategy(ShotPath* _path) :
   renderTimes(0),
   needUpdate(true)
 {
-  ptSceneNode = new BoltSceneNode(_path->getPosition());
+  ptSceneNode = new BoltSceneNode(_path->getPosition(),_path->getVelocity());
   TextureManager &tm = TextureManager::instance();
   int texture = tm.getTextureID("missile");
 
@@ -54,7 +49,7 @@ GuidedMissileStrategy::GuidedMissileStrategy(ShotPath* _path) :
 
   // get initial shot info
   FiringInfo& f = getFiringInfo(_path);
-  f.lifetime *= BZDB.eval(StateDatabase::BZDB_GMISSILEADLIFE);
+  f.lifetime *= BZDB.eval(StateDatabase::BZDB_GMADLIFE);
   const float* vel = getPath().getVelocity();
   const float d = 1.0f / hypotf(vel[0], hypotf(vel[1], vel[2]));
   float dir[3];
@@ -98,6 +93,9 @@ GuidedMissileStrategy::GuidedMissileStrategy(ShotPath* _path) :
 
   // no last target
   lastTarget = NoPlayer;
+
+  lastPuff = currentTime;
+  puffTime = BZDB.eval("gmPuffTime");
 }
 
 GuidedMissileStrategy::~GuidedMissileStrategy()
@@ -122,8 +120,8 @@ void GuidedMissileStrategy::update(float dt)
 
   // if shot life ran out then send notification and expire shot.
   // only local shots are expired.
-  if (!isRemote &&
-      currentTime - getPath().getStartTime() >= getPath().getLifetime()) {
+  if (!isRemote && currentTime - getPath().getStartTime() >= getPath().getLifetime())
+  {
     /* NOTE -- comment out to not explode when shot expires */
     addShotExplosion(nextPos);
     setExpiring();
@@ -132,36 +130,46 @@ void GuidedMissileStrategy::update(float dt)
 
   // get target
   const Player* target = NULL;
-  if (isRemote) {
+  if (isRemote)
+  {
     if (lastTarget != NoPlayer)
       target = lookupPlayer(lastTarget);
-  } else {
+  }
+  else
+  {
     LocalPlayer* myTank = LocalPlayer::getMyTank();
     if (myTank)
       target = myTank->getTarget();
 
     // see if the target changed
-    if (target) {
-      if (lastTarget != target->getId()) {
+    if (target)
+    {
+      if (lastTarget != target->getId())
+      {
 	needUpdate = true;
 	lastTarget = target->getId();
       }
-    } else {
-      if (lastTarget != NoPlayer) {
+    }
+    else
+    {
+      if (lastTarget != NoPlayer)
+      {
 	needUpdate = true;
 	lastTarget = NoPlayer;
       }
     }
   }
 
-  if ((target != NULL) && ((target->getFlag() == Flags::Stealth) || ((target->getStatus() & short(PlayerState::Alive)) == 0))) {
+  if ((target != NULL) && ((target->getFlag() == Flags::Stealth) || ((target->getStatus() & short(PlayerState::Alive)) == 0)))
+  {
     target = NULL;
     lastTarget = NoPlayer;
     needUpdate = true;
   }
 
   // compute next segment's ray
-  if (target) {
+  if (target)
+  {
     // turn towards target
     // find desired direction
     const float* targetPos = target->getPosition();
@@ -169,14 +177,13 @@ void GuidedMissileStrategy::update(float dt)
     desiredDir[0] = targetPos[0] - nextPos[0];
     desiredDir[1] = targetPos[1] - nextPos[1];
     desiredDir[2] = targetPos[2] - nextPos[2];
-    desiredDir[2] += BZDB.eval(StateDatabase::BZDB_MUZZLEHEIGHT);	// aim for turret
+    desiredDir[2] += target->getMuzzleHeight(); // right between the eyes
 
     // compute desired angles
     float newAzimuth = atan2f(desiredDir[1], desiredDir[0]);
-    float newElevation = atan2f(desiredDir[2],
-				hypotf(desiredDir[1], desiredDir[0]));
+    float newElevation = atan2f(desiredDir[2], hypotf(desiredDir[1], desiredDir[0]));
 
-    float gmissileAng = BZDB.eval(StateDatabase::BZDB_GMISSILEANG);
+    float gmissileAng = BZDB.eval(StateDatabase::BZDB_GMTURNANGLE);
 
     // compute new azimuth
     float deltaAzimuth = limitAngle(newAzimuth - azimuth);
@@ -196,43 +203,50 @@ void GuidedMissileStrategy::update(float dt)
     else
       elevation = limitAngle(elevation - dt * gmissileAng);
   }
+
   float newDirection[3];
   newDirection[0] = cosf(azimuth) * cosf(elevation);
   newDirection[1] = sinf(azimuth) * cosf(elevation);
   newDirection[2] = sinf(elevation);
   Ray ray = Ray(nextPos, newDirection);
 
-	// Changed: GM leave smoke trail, call add puff every 3 updates
-	if (!BZDB.isTrue("SupressGMSmoke"))
-	{
-		if ((++renderTimes % 3) == 0)
-			addShotPuff(nextPos);
-	}
+  renderTimes++;
+
+  // Changed: GM smoke trail, leave it every seconds, none of this per frame crap
+  if (currentTime - lastPuff > puffTime )
+  {
+    lastPuff = currentTime;
+    addShotPuff(nextPos,azimuth,elevation);
+  }
 
   // get next position
   float shotSpeed = BZDB.eval(StateDatabase::BZDB_SHOTSPEED);
   ray.getPoint(dt * shotSpeed, nextPos);
 
   // see if we hit something
-  TimeKeeper segmentEndTime(currentTime);
-  /* if (!isRemote) */ {
-    if (nextPos[2] <= 0.0f) {
-      // hit ground -- expire it and shorten life of segment to time of impact
-      setExpiring();
-      float t = ray.getOrigin()[2] / (ray.getOrigin()[2] - nextPos[2]);
+  double segmentEndTime = currentTime;
+
+  if (nextPos[2] <= 0.0f)
+  {
+    // hit ground -- expire it and shorten life of segment to time of impact
+    setExpiring();
+    float t = ray.getOrigin()[2] / (ray.getOrigin()[2] - nextPos[2]);
+    segmentEndTime = prevTime;
+    segmentEndTime += t * (currentTime - prevTime);
+    ray.getPoint(t / shotSpeed, nextPos);
+    addShotExplosion(nextPos);
+  }
+  else
+  {
+    // see if we hit a building
+    const float t = checkBuildings(ray);
+    if (t >= 0.0f)
+    {
       segmentEndTime = prevTime;
-      segmentEndTime += t * (currentTime - prevTime);
-      ray.getPoint(t / shotSpeed, nextPos);
-      addShotExplosion(nextPos);
-    } else {
-      // see if we hit a building
-      const float t = checkBuildings(ray);
-      if (t >= 0.0f) {
-	segmentEndTime = prevTime;
-	segmentEndTime += t;
-      }
+      segmentEndTime += t;
     }
   }
+
 
   // throw out old segment and add new one
   ShotPathSegment nextSegment(prevTime, segmentEndTime, ray);
@@ -250,28 +264,26 @@ void GuidedMissileStrategy::update(float dt)
 float GuidedMissileStrategy::checkBuildings(const Ray& ray)
 {
   float shotSpeed = BZDB.eval(StateDatabase::BZDB_SHOTSPEED);
-  float t = (currentTime - prevTime) * shotSpeed;
+  float t = float((currentTime - prevTime) * shotSpeed);
   int face;
   const Obstacle* building = getFirstBuilding(ray, Epsilon, t);
   const Teleporter* teleporter = getFirstTeleporter(ray, Epsilon, t, face);
 
+  World *world = World::getWorld();
+  if (!world) {
+    return -1.0f;
+  }
+
   // check in reverse order to see what we hit first
   if (teleporter) {
     // entered teleporter -- teleport it
-    int source = World::getWorld()->getTeleporter(teleporter, face);
-    int target = World::getWorld()->getTeleportTarget(source);
-    if (target == randomTeleporter) {
-      unsigned int tmp = getPath().getShotId();
-      tmp = (tmp * 1103515245 + 12345) >> 8; // from POSIX rand() example
-      tmp = tmp % (2 * World::getWorld()->getTeleporters().size());
-      target = tmp;
-    }
+    unsigned int seed = getPath().getShotId();
+    int source = world->getTeleporter(teleporter, face);
+    int target = world->getTeleportTarget(source, seed);
 
     int outFace;
-    const Teleporter* outTeleporter =
-      World::getWorld()->getTeleporter(target, outFace);
-    teleporter->getPointWRT(*outTeleporter, face, outFace,
-			    nextPos, NULL, azimuth, nextPos, NULL, &azimuth);
+    const Teleporter* outTeleporter = world->getTeleporter(target, outFace);
+    teleporter->getPointWRT(*outTeleporter, face, outFace, nextPos, NULL, azimuth, nextPos, NULL, &azimuth);
     return t / shotSpeed;
   } else if (building) {
     // expire on next update
@@ -284,39 +296,39 @@ float GuidedMissileStrategy::checkBuildings(const Ray& ray)
   return -1.0f;
 }
 
-float GuidedMissileStrategy::checkHit(const BaseLocalPlayer* tank, float position[3]) const
+float GuidedMissileStrategy::checkHit(const ShotCollider& tank, float position[3]) const
 {
   float minTime = Infinity;
-  if (getPath().isExpired()) return minTime;
+  if (getPath().isExpired())
+    return minTime;
 
-  // can't shoot myself for first 1/2 second (kludge!)
-  if (((TimeKeeper::getCurrent() - getPath().getStartTime()) < 0.5) &&
-      (tank->getId() == getPath().getPlayer()))
+  // GM is not active until activation time passes (for any tank)
+  const float activationTime = BZDB.eval(StateDatabase::BZDB_GMACTIVATIONTIME);
+
+  if ((getPath().getCurrentTime() - getPath().getStartTime()) < activationTime)
     return minTime;
 
   // get tank radius
-  float radius = BZDBCache::tankRadius;
-  if (tank->getFlag() == Flags::Obesity)   radius *= BZDB.eval(StateDatabase::BZDB_OBESEFACTOR);
-  else if (tank->getFlag() == Flags::Tiny) radius *= BZDB.eval(StateDatabase::BZDB_TINYFACTOR);
-  else if (tank->getFlag() == Flags::Thief) radius *= BZDB.eval(StateDatabase::BZDB_THIEFTINYFACTOR);
-  const float radius2 = radius * radius;
+  const float radius2 = tank.radius * tank.radius;
 
   float shotRadius = BZDB.eval(StateDatabase::BZDB_SHOTRADIUS);
 
   // tank is positioned from it's bottom so shift position up by
   // half a tank height.
-  Ray tankLastMotionRaw = tank->getLastMotion();
+  const float tankHeight = tank.size[2];
+
   float lastTankPositionRaw[3];
-  lastTankPositionRaw[0] = tankLastMotionRaw.getOrigin()[0];
-  lastTankPositionRaw[1] = tankLastMotionRaw.getOrigin()[1];
-  lastTankPositionRaw[2] = tankLastMotionRaw.getOrigin()[2] + 0.5f * BZDBCache::tankHeight;
-  Ray tankLastMotion(lastTankPositionRaw, tankLastMotionRaw.getDirection());
+  lastTankPositionRaw[0] = tank.motion.getOrigin()[0];
+  lastTankPositionRaw[1] = tank.motion.getOrigin()[1];
+  lastTankPositionRaw[2] = tank.motion.getOrigin()[2] + 0.5f * tankHeight;
+
+  Ray tankLastMotion(lastTankPositionRaw, tank.motion.getDirection());
 
   // check each segment
-  const int numSegments = segments.size();
-  int i = 0;
+  const size_t numSegments = segments.size();
+  size_t i = 0;
   // only test most recent segment if shot is from my tank
-  if (numSegments > 1 && tank->getId() == getPath().getPlayer())
+  if (numSegments > 1 && tank.testLastSegment )
     i = numSegments - 1;
   for (; i < numSegments; i++) {
     const Ray& ray = segments[i].ray;
@@ -336,19 +348,21 @@ float GuidedMissileStrategy::checkHit(const BaseLocalPlayer* tank, float positio
 
     // get closest approach time
     float t;
-    if (tank->getFlag() == Flags::Narrow) {
+    if (tank.test2D)
+    {
       // find closest approach to narrow box around tank.  width of box
       // is shell radius so you can actually hit narrow tank head on.
-      static float origin[3] = { 0.0f, 0.0f, 0.0f };
-      t = timeRayHitsBlock(relativeRay, origin, tank->getAngle(),
-			   0.5f * BZDB.eval(StateDatabase::BZDB_TANKLENGTH),
-			   shotRadius,
-			   BZDBCache::tankHeight);
-    } else {
-      // find time when shot hits sphere around tank
-      t = rayAtDistanceFromOrigin(relativeRay, 0.99f * radius);
+      static float tankBase[3] = { 0.0f, 0.0f, -0.5f * tankHeight };
+      t = timeRayHitsBlock(relativeRay, tankBase, tank.angle, 0.5f * tank.length, shotRadius, tankHeight);
     }
-    if (t > minTime) continue;
+    else
+    {
+      // find time when shot hits sphere around tank
+      t = rayAtDistanceFromOrigin(relativeRay, 0.99f * tank.radius);
+    }
+
+    if (t > minTime)
+      continue;
 
     // if not in shot segment times then no hit
     if (t < 0.0f || t > segments[i].end - segments[i].start)
@@ -365,7 +379,7 @@ float GuidedMissileStrategy::checkHit(const BaseLocalPlayer* tank, float positio
 
       // compute location of tank at time of hit
       float tankPos[3];
-      tank->getLastMotion().getPoint(t, tankPos);
+      tank.motion.getPoint(t, tankPos);
 
       // compute position of intersection
       position[0] = tankPos[0] + closestPos[0];
@@ -455,7 +469,11 @@ void GuidedMissileStrategy::radarRender() const
     dir[2] = vel[2] * d * shotTailLength * length;
     glBegin(GL_LINES);
     glVertex2fv(orig);
-    glVertex2f(orig[0] - dir[0], orig[1] - dir[1]);
+    if (BZDBCache::leadingShotLine) {
+      glVertex2f(orig[0] + dir[0], orig[1] + dir[1]);
+    } else {
+      glVertex2f(orig[0] - dir[0], orig[1] - dir[1]);
+    }
     glEnd();
 
     // draw a "bright reddish" missle tip

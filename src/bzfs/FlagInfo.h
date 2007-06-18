@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,14 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __FLAGINFO_H__
 #define __FLAGINFO_H__
+
+/* bzflag common header */
+#include "common.h"
 
 /* system headers */
 #include <stdlib.h>
@@ -19,6 +22,7 @@
 /* bzflag common headers */
 #include "Flag.h"
 #include "TimeKeeper.h"
+
 
 /** FlagInfo describes a flag as it pertains to the world.
  */
@@ -29,12 +33,12 @@ public:
 
   void setRequiredFlag(FlagType *desc);
   void addFlag();
-  void *pack(void *buf);
+  void *pack(void *buf, bool hide = false);
   void dropFlag(float pos[3], float landingPos[3], bool vanish);
   void resetFlag(float position[3], bool teamIsEmpty);
   void grab(int playerIndex);
-  int  teamIndex();
-  int  getIndex();
+  int  teamIndex() const;
+  int  getIndex() const;
   bool landing(const TimeKeeper &tm);
   void getTextualInfo(char *message);
   bool exist();
@@ -61,13 +65,13 @@ public:
 private:
   int flagIndex;
   static std::vector<FlagType*> allowedFlags;
-  static int                    numExtraFlags;
-  static int                    numFlags;
-  static int                    numFlagsInAir;
-  static FlagInfo              *flagList;
+  static int		    numExtraFlags;
+  static int		    numFlags;
+  static int		    numFlagsInAir;
+  static FlagInfo	      *flagList;
 
   // time flag will land
-  TimeKeeper                    dropDone;
+  TimeKeeper		    dropDone;
 };
 #else
 class FlagInfo;
@@ -80,4 +84,3 @@ class FlagInfo;
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

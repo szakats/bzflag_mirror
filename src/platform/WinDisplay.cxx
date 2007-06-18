@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,8 +7,9 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+#define _WIN32_WINDOWS 0x0500
 
 #include "WinDisplay.h"
 #include "WinWindow.h"
@@ -16,6 +17,7 @@
 #include "BzfEvent.h"
 #include <stdio.h>
 #include <string.h>
+#include "StateDatabase.h"
 
 class Resolution {
   public:
@@ -115,6 +117,8 @@ LONG WINAPI		WinDisplay::Rep::windowProc(HWND hwnd, UINT msg,
       return 0;
 
     case WM_ACTIVATE: {
+      if (BZDB.isTrue("Win32NoMin"))
+	break;
       WinWindow* window = WinWindow::lookupWindow(hwnd);
       if (window) {
 	if (LOWORD(wparam) == WA_INACTIVE) {
@@ -159,7 +163,6 @@ LONG WINAPI		WinDisplay::Rep::windowProc(HWND hwnd, UINT msg,
 WinDisplay::WinDisplay(const char* displayName, const char*) :
 				rep(NULL),
 				hwnd(NULL),
-				using3Dfx(false),
 				fullWidth(0),
 				fullHeight(0),
 				resolutions(NULL),
@@ -167,14 +170,6 @@ WinDisplay::WinDisplay(const char* displayName, const char*) :
 				charCode(0)
 {
   rep = new Rep(displayName);
-
-  // see if we're using a 3Dfx card.  if so we'll skip the resolution
-  // picking later.
-  using3Dfx = (GetModuleHandle("glide2x.dll") != NULL);
-  if (using3Dfx) {
-    fullWidth = getPassthroughWidth();
-    fullHeight = getPassthroughHeight();
-  }
 
   // get resolutions
   if (isValid() && !isFullScreenOnly()) {
@@ -207,7 +202,7 @@ WinDisplay::~WinDisplay()
 
 bool			WinDisplay::isFullScreenOnly() const
 {
-  return using3Dfx;
+  return false;
 }
 
 int			WinDisplay::getFullWidth() const
@@ -231,100 +226,132 @@ bool			WinDisplay::isEventPending() const
   return (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) != 0);
 }
 
-bool			WinDisplay::getEvent(BzfEvent& event) const
+bool WinDisplay::windowsEventToBZFEvent ( MSG &msg, BzfEvent& event ) const
 {
-  MSG msg;
-  if (GetMessage(&msg, NULL, 0, 0) == -1) return false;
-  event.window = WinWindow::lookupWindow(msg.hwnd);
-  switch (msg.message) {
-    case WM_CLOSE:
-    case WM_QUIT:
-    case WM_SYSCOMMAND:
-      if (msg.wParam != SC_CLOSE)
-          break;
-      event.type = BzfEvent::Quit;
-      break;
+	event.window = WinWindow::lookupWindow(msg.hwnd);
+	switch (msg.message) {
+	case WM_CLOSE:
+	case WM_QUIT:
+	case WM_SYSCOMMAND:
+		if (msg.wParam != SC_CLOSE)
+			break;
+		event.type = BzfEvent::Quit;
+		break;
 
-    case WM_PAINT:
-      event.type = BzfEvent::Redraw;
-      ValidateRect(msg.hwnd, NULL);		// no more WM_PAINTs, please!
-      break;
+	case WM_PAINT:
+		event.type = BzfEvent::Redraw;
+		ValidateRect(msg.hwnd, NULL);		// no more WM_PAINTs, please!
+		break;
 
-    case WM_SIZE:
-      event.type = BzfEvent::Resize;
-      event.resize.width = LOWORD(msg.lParam);
-      event.resize.height = HIWORD(msg.lParam);
-      break;
+	case WM_SIZE:
+		event.type = BzfEvent::Resize;
+		event.resize.width = LOWORD(msg.lParam);
+		event.resize.height = HIWORD(msg.lParam);
+		break;
 
-    case WM_MOUSEMOVE:
-      event.type = BzfEvent::MouseMove;
-      event.mouseMove.x = LOWORD(msg.lParam);
-      event.mouseMove.y = HIWORD(msg.lParam);
-      break;
+	case WM_MOUSEMOVE:
+		event.type = BzfEvent::MouseMove;
+		event.mouseMove.x = LOWORD(msg.lParam);
+		event.mouseMove.y = HIWORD(msg.lParam);
+		break;
 
-    case WM_APP + 0:
-      event.type = BzfEvent::Map;
-      break;
+	case WM_APP + 0:
+		event.type = BzfEvent::Map;
+		break;
 
-    case WM_APP + 1:
-      event.type = BzfEvent::Unmap;
-      break;
+	case WM_APP + 1:
+		event.type = BzfEvent::Unmap;
+		break;
 
-    case WM_LBUTTONDOWN:
-    case WM_MBUTTONDOWN:
-    case WM_RBUTTONDOWN:
-      event.type = BzfEvent::KeyDown;
-      event.keyDown.ascii = 0;
-      event.keyDown.shift = 0;
-      switch (msg.message) {
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		event.type = BzfEvent::KeyDown;
+		event.keyDown.ascii = 0;
+		event.keyDown.shift = 0;
+		switch (msg.message) {
 	case WM_LBUTTONDOWN:	event.keyDown.button = BzfKeyEvent::LeftMouse; break;
 	case WM_MBUTTONDOWN:	event.keyDown.button = BzfKeyEvent::MiddleMouse; break;
 	case WM_RBUTTONDOWN:	event.keyDown.button = BzfKeyEvent::RightMouse; break;
 	default:		return false;
-      }
-      break;
+		}
+		break;
 
-    case WM_LBUTTONUP:
-    case WM_MBUTTONUP:
-    case WM_RBUTTONUP:
-      event.type = BzfEvent::KeyUp;
-      event.keyUp.ascii = 0;
-      event.keyUp.shift = 0;
-      switch (msg.message) {
+	case WM_LBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_RBUTTONUP:
+		event.type = BzfEvent::KeyUp;
+		event.keyUp.ascii = 0;
+		event.keyUp.shift = 0;
+		switch (msg.message) {
 	case WM_LBUTTONUP:	event.keyUp.button = BzfKeyEvent::LeftMouse; break;
 	case WM_MBUTTONUP:	event.keyUp.button = BzfKeyEvent::MiddleMouse; break;
 	case WM_RBUTTONUP:	event.keyUp.button = BzfKeyEvent::RightMouse; break;
 	default:		return false;
-      }
-      break;
+		}
+		break;
 
-    case WM_KEYDOWN:
-    case WM_SYSKEYDOWN:
-      ((WinDisplay*)this)->translated = (bool)(TranslateMessage(&msg) != 0);
-      if (!translated) ((WinDisplay*)this)->charCode = 0;
-      if (isNastyKey(msg)) return false;
-      DispatchMessage(&msg);
-      event.type = BzfEvent::KeyDown;
-      if (!getKey(msg, event.keyDown)) return false;
-      break;
+	case WM_MOUSEWHEEL:{
 
-    case WM_KEYUP:
-    case WM_SYSKEYUP: {
-      ((WinDisplay*)this)->translated = (bool)(TranslateMessage(&msg) != 0);
-      if (isNastyKey(msg)) return false;
-      DispatchMessage(&msg);
-      event.type = BzfEvent::KeyUp;
-      if (!getKey(msg, event.keyUp)) return false;
-      break;
-    }
+		event.type = BzfEvent::KeyDown;
+		event.keyDown.ascii = 0;
+		event.keyDown.shift = 0;
 
-    default:
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
-      return false;
-  }
+		if (LOWORD(msg.wParam) == MK_SHIFT)
+			event.keyDown.shift |= BzfKeyEvent::ShiftKey;
+		if (LOWORD(msg.wParam) == MK_CONTROL)
+			event.keyDown.shift |= BzfKeyEvent::ControlKey;
+		if (LOWORD(msg.wParam) == MK_ALT)
+			event.keyDown.shift |= BzfKeyEvent::AltKey;
 
-  return true;
+		short field = HIWORD(msg.wParam);
+		if (field > 0)
+			event.keyDown.button  = BzfKeyEvent::WheelUp;
+		else
+			event.keyDown.button  = BzfKeyEvent::WheelDown;
+		 }
+		break;
+
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+		((WinDisplay*)this)->translated = (bool)(TranslateMessage(&msg) != 0);
+		if (!translated) ((WinDisplay*)this)->charCode = 0;
+		if (isNastyKey(msg)) return false;
+		DispatchMessage(&msg);
+		event.type = BzfEvent::KeyDown;
+		if (!getKey(msg, event.keyDown)) return false;
+		break;
+
+	case WM_KEYUP:
+	case WM_SYSKEYUP: {
+		((WinDisplay*)this)->translated = (bool)(TranslateMessage(&msg) != 0);
+		if (isNastyKey(msg)) return false;
+		DispatchMessage(&msg);
+		event.type = BzfEvent::KeyUp;
+		if (!getKey(msg, event.keyUp)) return false;
+		break;
+					  }
+
+	default:
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+		return false;
+	}
+	return true;
+}
+
+bool			WinDisplay::peekEvent(BzfEvent& event) const
+{
+	MSG msg;
+	if (PeekMessage(&msg, NULL, 0, 0,0) == -1) return false;
+	return windowsEventToBZFEvent(msg,event);
+}
+
+bool			WinDisplay::getEvent(BzfEvent& event) const
+{
+  MSG msg;
+  if (GetMessage(&msg, NULL, 0, 0) == -1) return false;
+  return windowsEventToBZFEvent(msg,event);
 }
 
 void			WinDisplay::getModState(bool &shift, bool &ctrl, bool &alt) {
@@ -381,7 +408,7 @@ bool			WinDisplay::isNastyKey(const MSG& msg) const
   return false;
 }
 
-bool			WinDisplay::setDefaultResolution()
+bool			WinDisplay::setDefaultResolution() const
 {
   ChangeDisplaySettings(0, 0);
   return true;
@@ -393,12 +420,12 @@ bool			WinDisplay::doSetResolution(int index)
   Resolution& format = resolutions[index];
   DEVMODE dm;
   memset(&dm, 0, sizeof(dm));
-  dm.dmSize             = sizeof(dm);
-  dm.dmPelsWidth        = format.width;
+  dm.dmSize	     = sizeof(dm);
+  dm.dmPelsWidth	= format.width;
   dm.dmPelsHeight       = format.height;
   dm.dmBitsPerPel       = format.depth;
   dm.dmDisplayFrequency = format.refresh;
-  dm.dmFields           = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
+  dm.dmFields	   = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
   if (dm.dmDisplayFrequency != 0)
     dm.dmFields |= DM_DISPLAYFREQUENCY;
 
@@ -1333,4 +1360,3 @@ const int		WinDisplay::buttonMap[] = {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "EntryZones.h"
@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 
-#include "common.h"
 #include "global.h"
 #include "Protocol.h"
 #include "Flag.h"
@@ -29,21 +28,49 @@ EntryZones::EntryZones()
 {
 }
 
+
+const ZoneList& EntryZones::getZoneList() const
+{
+  return zones;
+}
+
+
 void EntryZones::addZone(const CustomZone *zone)
 {
-  //We're purposely slicing off part of the zone structure
-  zones.push_back( *((WorldFileLocation *)zone) );
-
-  QualifierList qualifiers = zone->getQualifiers();
-  for (QualifierList::iterator it = qualifiers.begin(); it != qualifiers.end(); ++it) {
-    std::string qualifier = *it;
-    QPairList &qPairList = qmap[qualifier];
-    qPairList.push_back(std::pair<int,float>( zones.size()-1, 0.0f));
-  }
+  zones.push_back(*zone);
 }
+
+
+void EntryZones::addZoneFlag(int zone, int flagId)
+{
+  if (zone >= (int)zones.size()) {
+    printf ("Internal error: EntryZones::addZoneFlag() unknown zone\n");
+    exit(1);
+  }
+  const std::string& qualifier = CustomZone::getFlagIdQualifier(flagId);
+  QPairList &qPairList = qmap[qualifier];
+  if (qPairList.size() > 0) {
+    printf ("Internal error: EntryZones::addZoneFlag() duplicate\n");
+    exit(1);
+  }
+  qPairList.push_back(std::pair<int,float>(zone, 1.0f));
+  return;
+}
+
 
 void EntryZones::calculateQualifierLists()
 {
+  // generate the qualifier lists
+  for (unsigned int i = 0; i < zones.size(); i++) {
+    QualifierList qualifiers = zones[i].getQualifiers();
+    for (QualifierList::iterator it = qualifiers.begin(); it != qualifiers.end(); ++it) {
+      std::string qualifier = *it;
+      QPairList &qPairList = qmap[qualifier];
+      qPairList.push_back(std::pair<int,float>(i, 0.0f));
+    }
+  }
+
+  // calculate the qualifier weights
   for (QualifierMap::iterator mit = qmap.begin(); mit != qmap.end(); ++mit) {
     QPairList &qPairList = mit->second;
     float total = 0.0f;
@@ -51,7 +78,7 @@ void EntryZones::calculateQualifierLists()
     for (vit = qPairList.begin(); vit != qPairList.end(); ++vit) {
       std::pair<int,float> &p = *vit;
       int zoneIndex = p.first;
-      p.second = ((CustomZone *) &zones[zoneIndex])->getArea();
+      p.second = zones[zoneIndex].getArea();
       total += p.second;
     }
     for (vit = qPairList.begin(); vit != qPairList.end(); ++vit) {
@@ -60,6 +87,65 @@ void EntryZones::calculateQualifierLists()
     }
   }
 }
+
+
+bool EntryZones::getRandomPoint(const std::string &qual, float *pt) const
+{
+  QualifierMap::const_iterator mit = qmap.find(qual);
+  if (mit == qmap.end())
+    return false;
+
+  const QPairList &qPairList = mit->second;
+
+  float rnd = (float)bzfrand();
+  float total = 0.0f;
+  QPairList::const_iterator vit;
+  for (vit = qPairList.begin(); vit != qPairList.end(); ++vit) {
+    total += vit->second;
+    if (total > rnd)
+      break;
+  }
+
+  if (vit == qPairList.end()) {
+    return false; // ??
+  }
+
+  zones[vit->first].getRandomPoint(pt);
+
+  return true;
+}
+
+
+bool EntryZones::getClosePoint(const std::string &qual, const float pos[3],
+			       float *pt) const
+{
+  QualifierMap::const_iterator mit = qmap.find(qual);
+  if (mit == qmap.end())
+    return false;
+
+  const QPairList &qPairList = mit->second;
+
+  int closest = -1;
+  float minDist = +Infinity;
+  QPairList::const_iterator vit;
+  for (vit = qPairList.begin(); vit != qPairList.end(); ++vit) {
+    const int index = vit->first;
+    float dist = zones[index].getDistToPoint(pos);
+    if (dist < minDist) {
+      closest = index;
+      minDist = dist;
+    }
+  }
+
+  if (closest == -1) {
+    return false;
+  }
+
+  zones[closest].getRandomPoint(pt);
+
+  return true;
+}
+
 
 bool EntryZones::getZonePoint(const std::string &qualifier, float *pt) const
 {
@@ -82,16 +168,16 @@ bool EntryZones::getZonePoint(const std::string &qualifier, float *pt) const
     return false; // ??
   }
 
-  int zoneIndex = vit->first;
-  CustomZone *zone = ((CustomZone *) &zones[zoneIndex]);
-  zone->getRandomPoint(pt);
+  zones[vit->first].getRandomPoint(pt);
+
   return true;
 }
 
+
 bool EntryZones::getSafetyPoint( const std::string &qualifier,
-                                 const float *pos, float *pt ) const
+				 const float *pos, float *pt ) const
 {
-  std::string safetyString = EntryZones::getSafetyPrefix() + qualifier;
+  std::string safetyString = /*EntryZones::getSafetyPrefix() + */ qualifier;
 
   QualifierMap::const_iterator mit = qmap.find(safetyString);
   if (mit == qmap.end())
@@ -103,9 +189,8 @@ bool EntryZones::getSafetyPoint( const std::string &qualifier,
   float minDist = +Infinity;
   QPairList::const_iterator vit;
   for (vit = qPairList.begin(); vit != qPairList.end(); ++vit) {
-    int index = vit->first;
-    CustomZone *zone = ((CustomZone *) &zones[index]);
-    float dist = zone->getDistToPoint (pos);
+    const int index = vit->first;
+    float dist = zones[index].getDistToPoint(pos);
     if (dist < minDist) {
       closest = index;
       minDist = dist;
@@ -122,26 +207,11 @@ bool EntryZones::getSafetyPoint( const std::string &qualifier,
   return true;
 }
 
-const char * EntryZones::getSafetyPrefix ()
-{
-  return "$";
-}
-
-
-static int matchTeamColor(const char *teamText)
-{
-  for (int i = 0; i < CtfTeams; i++) {
-    if (strcmp (teamText, Team::getName((TeamColor)i)) == 0) {
-      return i;
-    }
-  }
-  return -1;
-}
 
 void EntryZones::makeSplitLists (int zone,
-                                 std::vector<FlagType*> &flags,
-                                 std::vector<TeamColor> &teams,
-                                 std::vector<TeamColor> &safety) const
+				 std::vector<FlagType*> &flags,
+				 std::vector<TeamColor> &teams,
+				 std::vector<TeamColor> &safety) const
 {
   flags.clear();
   teams.clear();
@@ -155,21 +225,21 @@ void EntryZones::makeSplitLists (int zone,
       const std::pair<int,float> &p = *vit;
       int zoneIndex = p.first;
       if (zoneIndex == zone) {
-        int team;
-        FlagType *type = Flag::getDescFromAbbreviation(mit->first.c_str());
-        if (type != Flags::Null) {
-          flags.push_back (type);
-        }
-        else if ((team = matchTeamColor(mit->first.c_str())) != -1) {
-          teams.push_back ((TeamColor)team);
-        }
-        else if ((mit->first.c_str()[0] == getSafetyPrefix()[0]) &&
-                 ((team = matchTeamColor(mit->first.c_str()+1)) != -1)) {
-          safety.push_back ((TeamColor)team);
-        }
-        else {
-          printf ("EntryZones::makeSplitLists() ERROR on (%s)\n", mit->first.c_str());
-        }
+	const std::string& qual = mit->first;
+	int team;
+	FlagType *type;
+	if ((type = CustomZone::getFlagTypeFromQualifier(qual)) != Flags::Null) {
+	  flags.push_back(type);
+	}
+	else if ((team = CustomZone::getPlayerTeamFromQualifier(qual)) >= 0) {
+	  teams.push_back((TeamColor)team);
+	}
+	else if ((team = CustomZone::getFlagSafetyFromQualifier(qual)) >= 0) {
+	  safety.push_back((TeamColor)team);
+	}
+	else {
+	  printf ("EntryZones::makeSplitLists() ERROR on (%s)\n", mit->first.c_str());
+	}
       }
     }
   }
@@ -177,38 +247,22 @@ void EntryZones::makeSplitLists (int zone,
   return;
 }
 
-int EntryZones::packSize() const
-{
-  int size = 0;
-  for (unsigned int i=0; i < zones.size(); i++) {
-    std::vector<FlagType*> flags;
-    std::vector<TeamColor> teams;
-    std::vector<TeamColor> safety;
-    makeSplitLists (i, flags, teams, safety);
-    size += 2 + 2 + WorldCodeZoneSize;
-    size += FlagType::packSize * flags.size();
-    size += 2 * teams.size();
-    size += 2 * safety.size();
-  }
-  return size;
-}
 
 void * EntryZones::pack(void *buf) const
 {
-  for (unsigned int i=0 ; i < zones.size(); i++) {
-    unsigned int j;
+  buf = nboPackUInt(buf, zones.size());
+
+  for (unsigned int i = 0; i < zones.size(); i++) {
     const WorldFileLocation& z = (const WorldFileLocation) zones[i];
     std::vector<FlagType*> flags;
     std::vector<TeamColor> teams;
     std::vector<TeamColor> safety;
     makeSplitLists (i, flags, teams, safety);
-    void *bufStart = buf;
-    buf = nboPackUShort(buf, 0); // place-holder
-    buf = nboPackUShort(buf, WorldCodeZone);
-    buf = z.pack (buf);                         // 12 + 12 + 4
-    buf = nboPackUShort(buf, flags.size());     // 30
-    buf = nboPackUShort(buf, teams.size());     // 32
-    buf = nboPackUShort(buf, safety.size());    // 34
+    buf = z.pack (buf);
+    buf = nboPackUShort(buf, flags.size());
+    buf = nboPackUShort(buf, teams.size());
+    buf = nboPackUShort(buf, safety.size());
+    unsigned int j;
     for (j = 0; j < flags.size(); j++) {
       buf = flags[j]->pack(buf);
     }
@@ -218,9 +272,48 @@ void * EntryZones::pack(void *buf) const
     for (j = 0; j < safety.size(); j++) {
       buf = nboPackUShort(buf, safety[j]);
     }
-    uint16_t len = (char*)buf - (char*)bufStart;
-    nboPackUShort (bufStart, len - (2 * sizeof(uint16_t)));
   }
   return buf;
 }
 
+
+int EntryZones::packSize() const
+{
+  int fullSize = 0;
+
+  fullSize += sizeof(uint32_t); // zone count
+
+  for (unsigned int i = 0; i < zones.size(); i++) {
+    std::vector<FlagType*> flags;
+    std::vector<TeamColor> teams;
+    std::vector<TeamColor> safety;
+    makeSplitLists (i, flags, teams, safety);
+    fullSize += sizeof(float[3]); // pos
+    fullSize += sizeof(float[3]); // size
+    fullSize += sizeof(float);    // angle
+    fullSize += sizeof(uint16_t); // flag count
+    fullSize += sizeof(uint16_t); // team count
+    fullSize += sizeof(uint16_t); // safety count
+    unsigned int j;
+    for (j = 0; j < flags.size(); j++) {
+      fullSize += FlagType::packSize;
+    }
+    for (j = 0; j < teams.size(); j++) {
+      fullSize += sizeof(uint16_t);
+    }
+    for (j = 0; j < safety.size(); j++) {
+      fullSize += sizeof(uint16_t);
+    }
+  }
+
+  return fullSize;
+}
+
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

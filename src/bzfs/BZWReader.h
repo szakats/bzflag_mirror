@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,24 +7,30 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __BZWREADER_H__
 #define __BZWREADER_H__
+
+// bzflag common header
+#include "common.h"
+
+#include "network.h"
 
 // system headers
 #include <iostream>
 #include <string>
 #include <vector>
 
-// implementation headers
+/* bzflag common headers */
 #include "BZWError.h"
+#include "cURLManager.h"
 
 class WorldFileObject;
 class WorldInfo;
 
-class BZWReader {
+class BZWReader : private cURLManager {
 public:
   BZWReader(std::string filename);
   ~BZWReader();
@@ -35,7 +41,9 @@ public:
 private:
   // functions for internal use
   void readToken(char *buffer, int n);
-  bool readWorldStream(std::vector<WorldFileObject*>& wlist);
+  bool readWorldStream(std::vector<WorldFileObject*>& wlist,
+		       class GroupDefinition* groupDef);
+  void finalization(char *data, unsigned int length, bool good);
 
   // stream to open
   std::string location;
@@ -46,6 +54,8 @@ private:
 
   // no default constructor
   BZWReader();
+
+  std::string httpData;
 };
 
 #endif

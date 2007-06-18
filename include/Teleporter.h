@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* Teleporter:
@@ -20,32 +20,41 @@
 #include "common.h"
 #include <string>
 #include "Obstacle.h"
+#include "MeshFace.h"
 
 class Teleporter : public Obstacle {
   public:
+			Teleporter();
 			Teleporter(const float* pos, float rotation,
 				float width, float breadth, float height,
-				float borderSize = 1.0f, bool drive = false, bool shoot = false);
+				float borderSize = 1.0f, bool horizontal = false,
+				bool drive = false, bool shoot = false);
 			~Teleporter();
 
-    const char*		getType() const;
+    Obstacle*	copyWithTransform(const MeshTransform&) const;
+
+    void		setName(const std::string& name);
+    const std::string&	getName() const;
+
+    const char*	getType() const;
     static const char*	getClassName(); // const
-    void                getExtents(float* mins, float* maxs) const;
 
     float		getBorder() const;
+    bool		isHorizontal() const;
+    bool		isValid() const;
 
     float		intersect(const Ray&) const;
     void		getNormal(const float* p, float* n) const;
 
-    bool                inCylinder(const float* p, float radius, float height) const;
-    bool                inBox(const float* p, float angle,
-                              float halfWidth, float halfBreadth, float height) const;
-    bool                inMovingBox(const float* oldP, float oldAngle,
-                                    const float *newP, float newAngle,
-                                    float halfWidth, float halfBreadth, float height) const;
-    bool                isCrossing(const float* p, float angle,
-                                   float halfWidth, float halfBreadth, float height,
-                                   float* plane) const;
+    bool		inCylinder(const float* p, float radius, float height) const;
+    bool		inBox(const float* p, float angle,
+			      float halfWidth, float halfBreadth, float height) const;
+    bool		inMovingBox(const float* oldP, float oldAngle,
+				    const float *newP, float newAngle,
+				    float halfWidth, float halfBreadth, float height) const;
+    bool		isCrossing(const float* p, float angle,
+				   float halfWidth, float halfBreadth, float height,
+				   float* plane) const;
 
     bool		getHitNormal(
 				const float* pos1, float azimuth1,
@@ -62,22 +71,73 @@ class Teleporter : public Obstacle {
 				const float* pIn, const float* dIn, float aIn,
 				float* pOut, float* dOut, float* aOut) const;
 
-    std::string	        userTextures[1];
-  private:
-    float		border;
-    static const char*	typeName;
-};
+    void makeLinks();
+    const MeshFace* getBackLink() const;
+    const MeshFace* getFrontLink() const;
 
-const int randomTeleporter = (unsigned short)(-1);
+    int packSize() const;
+    void *pack(void*) const;
+    void *unpack(void*);
+
+    void print(std::ostream& out, const std::string& indent) const;
+    void printOBJ(std::ostream& out, const std::string& indent) const;
+
+    std::string		userTextures[1];
+
+  private:
+    void finalize();
+
+  private:
+    static const char*	typeName;
+
+    std::string name;
+
+    float border;
+    bool horizontal;
+    float origSize[3];
+
+    MeshFace* backLink;
+    MeshFace* frontLink;
+    float fvertices[4][3]; // front vertices
+    float bvertices[4][3]; // back vertices
+    float texcoords[4][2]; // shared texture coordinates
+};
 
 //
 // Teleporter
 //
 
-inline float		Teleporter::getBorder() const
+inline float Teleporter::getBorder() const
 {
   return border;
 }
+
+inline bool Teleporter::isHorizontal() const
+{
+  return horizontal;
+}
+
+inline const MeshFace* Teleporter::getBackLink() const
+{
+  return backLink;
+}
+
+inline const MeshFace* Teleporter::getFrontLink() const
+{
+  return frontLink;
+}
+
+inline const std::string& Teleporter::getName() const
+{
+  return name;
+}
+
+inline void Teleporter::setName(const std::string& _name)
+{
+  name = _name;
+  return;
+}
+
 
 #endif // BZF_TELEPORTER_H
 
@@ -88,4 +148,3 @@ inline float		Teleporter::getBorder() const
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

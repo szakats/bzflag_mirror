@@ -1,41 +1,66 @@
-if CLIENT_INCLUDED
+#
+# Build BZFlag
+#
+
 bin_PROGRAMS = bzflag
-endif
 
-MAINTAINERCLEANFILES = \
-	Makefile.in
+AM_CPPFLAGS = \
+	-I$(top_srcdir)/include \
+	$(SDL_CFLAGS) \
+	$(LIBCURL_CPPFLAGS) \
+	@X_CFLAGS@ \
+	@CONF_CPPFLAGS@
+AM_CXXFLAGS = @CONF_CXXFLAGS@
 
+bzflag_LDFLAGS = -static
 bzflag_SOURCES =			\
 	ActionBinding.cxx		\
 	ActionBinding.h			\
 	AudioMenu.cxx			\
 	AudioMenu.h			\
+	AutoHunt.cxx			\
+	AutoHunt.h			\
 	AutoPilot.cxx			\
+	AutoPilot.h			\
 	BackgroundRenderer.cxx		\
 	BackgroundRenderer.h		\
 	BaseLocalPlayer.cxx		\
 	BaseLocalPlayer.h		\
+	CacheMenu.cxx			\
+	CacheMenu.h			\
+	CommandsImplementation.cxx	\
 	ComposeDefaultKey.cxx		\
 	ComposeDefaultKey.h		\
 	ControlPanel.cxx		\
 	ControlPanel.h			\
+	CrackedGlass.cxx		\
+	CrackedGlass.h			\
 	DisplayMenu.cxx			\
 	DisplayMenu.h			\
+	Downloads.cxx			\
+	Downloads.h			\
+	EffectsMenu.cxx			\
+	EffectsMenu.h			\
+	EntryZone.cxx			\
 	EntryZone.h			\
+	ExportInformation.cxx		\
+	ExportInformation.h		\
 	FlashClock.cxx			\
 	FlashClock.h			\
+	ForceFeedback.cxx		\
+	ForceFeedback.h			\
 	FormatMenu.cxx			\
 	FormatMenu.h			\
-	GuidedMissleStrategy.cxx	\
-	GuidedMissleStrategy.h		\
 	GUIOptionsMenu.cxx		\
 	GUIOptionsMenu.h		\
-	HelpMenu.cxx			\
-	HelpMenu.h			\
+	GuidedMissleStrategy.cxx	\
+	GuidedMissleStrategy.h		\
 	HUDDialog.cxx			\
 	HUDDialog.h			\
 	HUDDialogStack.cxx		\
 	HUDDialogStack.h		\
+	HUDNavigationQueue.cxx		\
+	HUDNavigationQueue.h		\
 	HUDRenderer.cxx			\
 	HUDRenderer.h			\
 	HUDui.cxx			\
@@ -44,31 +69,50 @@ bzflag_SOURCES =			\
 	HUDuiControl.h			\
 	HUDuiDefaultKey.cxx		\
 	HUDuiDefaultKey.h		\
+	HUDuiElement.cxx		\
+	HUDuiElement.h			\
+	HUDuiFrame.cxx			\
+	HUDuiFrame.h			\
+	HUDuiImage.cxx			\
+	HUDuiImage.h			\
 	HUDuiLabel.cxx			\
 	HUDuiLabel.h			\
 	HUDuiList.cxx			\
 	HUDuiList.h			\
-	HUDuiTextureLabel.cxx		\
-	HUDuiTextureLabel.h		\
 	HUDuiTypeIn.cxx			\
 	HUDuiTypeIn.h			\
-	JoinMenu.cxx			\
-	JoinMenu.h			\
+	HelpCreditsMenu.cxx		\
+	HelpCreditsMenu.h		\
+	HelpFlagsMenu.cxx		\
+	HelpFlagsMenu.h			\
+	HelpInstructionsMenu.cxx	\
+	HelpInstructionsMenu.h		\
+	HelpKeymapMenu.cxx		\
+	HelpKeymapMenu.h		\
+	HelpMenu.cxx			\
+	HelpMenu.h			\
 	InputMenu.cxx			\
 	InputMenu.h			\
+	JoinMenu.cxx			\
+	JoinMenu.h			\
 	KeyboardMapMenu.cxx		\
 	KeyboardMapMenu.h		\
-	ListServer.h			\
+	LocalCommand.cxx		\
+	LocalCommand.h			\
 	LocalPlayer.cxx			\
 	LocalPlayer.h			\
 	MainMenu.cxx			\
 	MainMenu.h			\
 	MainWindow.cxx			\
 	MainWindow.h			\
-	MenuDefaultKey.h		\
 	MenuDefaultKey.cxx		\
+	MenuDefaultKey.h		\
+	NewVersionMenu.cxx		\
+	NewVersionMenu.h		\
 	OptionsMenu.cxx			\
 	OptionsMenu.h			\
+	Plan.cxx			\
+	Plan.h				\
 	Player.cxx			\
 	Player.h			\
 	QuickKeysMenu.cxx		\
@@ -83,8 +127,12 @@ bzflag_SOURCES =			\
 	RegionPriorityQueue.h		\
 	RemotePlayer.cxx		\
 	RemotePlayer.h			\
+	Roaming.cxx			\
+	Roaming.h			\
 	RobotPlayer.cxx			\
 	RobotPlayer.h			\
+	RoofTops.cxx			\
+	RoofTops.h			\
 	Roster.cxx			\
 	Roster.h			\
 	SaveWorldMenu.cxx		\
@@ -92,16 +140,12 @@ bzflag_SOURCES =			\
 	SceneBuilder.cxx		\
 	SceneBuilder.h			\
 	SceneRenderer.cxx		\
+	ScoreboardRenderer.cxx		\
+	ScoreboardRenderer.h		\
 	SegmentedShotStrategy.cxx	\
 	SegmentedShotStrategy.h		\
 	ServerCommandKey.cxx		\
 	ServerCommandKey.h		\
-	ServerItem.cxx			\
-	ServerItem.h			\
-	ServerList.cxx			\
-	ServerList.h			\
-	ServerListCache.cxx		\
-	ServerListCache.h		\
 	ServerLink.cxx			\
 	ServerLink.h			\
 	ServerMenu.cxx			\
@@ -114,33 +158,52 @@ bzflag_SOURCES =			\
 	ShotPath.h			\
 	ShotPathSegment.cxx		\
 	ShotPathSegment.h		\
+	ShotStatistics.cxx		\
+	ShotStatistics.h		\
 	ShotStats.cxx			\
 	ShotStats.h			\
 	ShotStatsDefaultKey.cxx		\
 	ShotStatsDefaultKey.h		\
-	ShotStatistics.h		\
-	ShotStatistics.cxx		\
 	ShotStrategy.cxx		\
 	ShotStrategy.h			\
 	SilenceDefaultKey.cxx		\
 	SilenceDefaultKey.h		\
-	StartupInfo.h			\
+	SyncClock.cxx		\
+	SyncClock.h		\
 	TargetingUtils.cxx		\
 	TargetingUtils.h		\
+	TrackMarks.cxx			\
+	TrackMarks.h			\
+	Weapon.cxx			\
 	Weapon.h			\
+	WeatherRenderer.cxx		\
+	WeatherRenderer.h		\
 	World.cxx			\
 	World.h				\
 	WorldBuilder.cxx		\
 	WorldBuilder.h			\
 	WorldPlayer.cxx			\
 	WorldPlayer.h			\
+	XfireGameClient.cpp		\
+	XfireGameClient.h		\
 	bzflag.cxx			\
+	bzflag.h			\
 	callbacks.cxx			\
 	callbacks.h			\
 	clientCommands.cxx		\
+	clientConfig.cxx		\
+	clientConfig.h			\
 	commands.h			\
 	daylight.cxx			\
 	daylight.h			\
+	defaultBZDB.cxx			\
+	defaultBZDB.h			\
+	effectsRenderer.cxx		\
+	effectsRenderer.h		\
+	motd.cxx			\
+	motd.h				\
+	playerAvatarManager.cxx		\
+	playerAvatarManager.h		\
 	playing.cxx			\
 	playing.h			\
 	sound.cxx			\
@@ -148,6 +211,11 @@ bzflag_SOURCES =			\
 	stars.cxx			\
 	stars.h
 
+EXTRA_bzflag_SOURCES = \
+	ClientAuthentication.cxx	\
+	ClientAuthentication.h		\
+	LoginMenu.cxx			\
+	LoginMenu.h
 
 if WIN32
 RESOURCE = bzflag.res
@@ -155,47 +223,38 @@ else
 RESOURCE =
 endif
 
-if BUILDZLIB
-ZLIB = ../zlib/libz.a
-else
-ZLIB = -lz
-endif
-
 if MACOS
-NACLIB =	\
-	../platform/MacOSX/libMac.a
-endif
-
-if BUILD_REGEX
-REGEX = \
-	../regex/libregex.a
+NACLIB = ../platform/MacOSX/libMac.la
 endif
 
 LDADD =	\
-	../3D/lib3D.a			\
-	../net/libNet.a			\
-	../common/libCommon.a		\
-	../game/libGame.a		\
-	../obstacle/libObstacle.a	\
+	../3D/lib3D.la			\
+	../game/libGame.la		\
+	../net/libNet.la		\
+	../obstacle/libObstacle.la	\
 	$(NACLIB)			\
-	../platform/libPlatform.a	\
-	../ogl/libGLKit.a		\
-	../scene/libSceneDB.a		\
-	../geometry/libGeometry.a	\
-	../mediafile/libMediaFile.a	\
-	$(REGEX)			\
-	$(ZLIB)				\
+	../platform/libPlatform.la	\
+	../ogl/libGLKit.la		\
+	../scene/libSceneDB.la		\
+	../geometry/libGeometry.la	\
+	../mediafile/libMediaFile.la	\
+	../common/libCommon.la		\
+	$(LIBCURL)			\
+	$(LIBCARES)			\
+	$(LIBREGEX)			\
+	$(LIBZ)				\
 	$(RESOURCE)			\
 	$(SDL_LIBS)			\
-	$(GLIBS)
+	$(SDL_IMAGE_LIBS)		\
+	$(GLIBS)			\
+	$(GLEW_LIBS)			\
+	../date/libDate.la
 # This is required to hook in ogg/vorbis libraries
 #	$(ALIBS)
 
-AM_CPPFLAGS = -I$(top_srcdir)/include $(X_CFLAGS) $(SDL_CFLAGS)
-
-
-bzflag_LDFLAGS = ../date/buildDate.o
-
 bzflag.res: $(top_srcdir)/win32/bzflag.rc $(top_srcdir)/win32/bzflag.ico
-	windres --include-dir=$(top_srcdir)/win32/ -i $(top_srcdir)/win32/bzflag.rc -o bzflag.res \
+	$(WINDRES) --include-dir=$(top_srcdir)/win32/ -i $(top_srcdir)/win32/bzflag.rc -o bzflag.res \
 	-O coff
+
+MAINTAINERCLEANFILES = \
+	Makefile.in

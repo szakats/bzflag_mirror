@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,34 +7,36 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "HUDDialog.h"
 
-/* system headers */
-#include <vector>
+// local interface headers
+#include "HUDuiElement.h"
+#include "HUDuiControl.h"
+#include "HUDNavigationQueue.h"
 
-
-HUDDialog::HUDDialog() : focus(NULL)
+HUDDialog::HUDDialog()
 {
   height = width = 0;
 }
 
 HUDDialog::~HUDDialog()
 {
-  // delete all controls left on list
-  const int count = list.size();
-  for (int i = 0; i < count; i++)
-    delete list[i];
+  // delete all elements left on render list
+  size_t count = renderList.size();
+  for (size_t i = 0; i < count; i++)
+    delete renderList[i];
 }
 
 void			HUDDialog::render()
 {
-  const int count = list.size();
-  for (int i = 0; i < count; i++)
-    list[i]->render();
+  // render all elements on the render list
+  size_t count = renderList.size();
+  for (size_t i = 0; i < count; i++)
+    renderList[i]->render();
 }
 
 void			HUDDialog::resize(int _width, int _height)
@@ -43,45 +45,24 @@ void			HUDDialog::resize(int _width, int _height)
   height	= _height;
 }
 
-HUDuiControl*		HUDDialog::getFocus() const
+void			HUDDialog::addControl(HUDuiElement *element)
 {
-  return focus;
+  renderList.push_back(element);
 }
 
-void			HUDDialog::setFocus(HUDuiControl* _focus)
+void			HUDDialog::addControl(HUDuiControl *control, bool navigable)
 {
-  focus = _focus;
+  addControl((HUDuiElement*)control);
+  if (navigable)
+    navList.push_back(control);
 }
 
-void			HUDDialog::initNavigation(std::vector<HUDuiControl*> &list, int start, int end)
+void			HUDDialog::initNavigation()
 {
-  int i;
-  const int count = list.size();
-
-  for (i = 0; i < start; i++) {
-    list[i]->setNext(list[i]);
-    list[i]->setPrev(list[i]);
-  }
-
-  if (start < end) {
-    list[start]->setNext(list[start+1]);
-    list[start]->setPrev(list[end]);
-    for (i = start+1; i < end; i++) {
-	list[i]->setNext(list[i+1]);
-	list[i]->setPrev(list[i-1]);
-    }
-    list[end]->setNext(list[start]);
-    list[end]->setPrev(list[end-1]);
-  }
-
-  for (i = end+1; i < count; i++) {
-    list[i]->setNext(list[i]);
-    list[i]->setPrev(list[i]);
-  }
-
-  setFocus(list[start]);
+  for (HUDNavigationQueue::iterator itr = navList.begin(); itr != navList.end(); ++itr)
+    (*itr)->setNavQueue(&navList);
+  navList.set((size_t)0);
 }
-
 
 // Local Variables: ***
 // mode: C++ ***

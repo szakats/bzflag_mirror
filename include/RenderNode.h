@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* RenderNode:
@@ -24,14 +24,34 @@
 #include "common.h"
 #include "OpenGLGState.h"
 
+
 class RenderNode {
   public:
 			RenderNode() { }
     virtual		~RenderNode() { }
 
     virtual void	render() = 0;
-    virtual const GLfloat* getPosition() = 0;
+    virtual void	renderShadow() { render(); }
+    virtual void	renderRadar() { renderShadow(); }
+    virtual const GLfloat* getPosition() const = 0;
+
+    static int		getTriangleCount();
+    static void		resetTriangleCount();
+
+  protected:
+    static void		addTriangleCount(int triCount);
+
+  private:
+    static int		triangleCount;
 };
+
+
+inline void RenderNode::addTriangleCount(int count)
+{
+  triangleCount += count;
+  return;
+}
+
 
 class RenderNodeList {
   public:
@@ -55,6 +75,15 @@ class RenderNodeList {
     RenderNode**	list;
 };
 
+inline void RenderNodeList::append(RenderNode* node)
+{
+  if (count == size) {
+    grow();
+  }
+  list[count++] = node;
+}
+
+
 class RenderNodeGStateList {
   public:
 			RenderNodeGStateList();
@@ -67,13 +96,7 @@ class RenderNodeGStateList {
 
     void		sort(const GLfloat* eye);
 
-  private:
-    // no copying (cos that'd be slow)
-			RenderNodeGStateList(const RenderNodeGStateList&);
-    RenderNodeGStateList& operator=(const RenderNodeGStateList&);
-
-    void		grow();
-
+    // public for the qsort() comparison function
     struct Item {
       public:
 	typedef const OpenGLGState* GStatePtr;
@@ -83,10 +106,29 @@ class RenderNodeGStateList {
     };
 
   private:
+    // no copying (cos that'd be slow)
+			RenderNodeGStateList(const RenderNodeGStateList&);
+    RenderNodeGStateList& operator=(const RenderNodeGStateList&);
+
+    void		grow();
+
+  private:
     int			count;
     int			size;
     Item*		list;
 };
+
+inline void RenderNodeGStateList::append(RenderNode* node,
+					 const OpenGLGState* gstate)
+{
+  if (count == size) {
+    grow();
+  }
+  list[count].node = node;
+  list[count].gstate = gstate;
+  list[count].depth = 0.0f;
+  count++;
+}
 
 #endif // BZF_RENDER_NODE_H
 
@@ -97,4 +139,3 @@ class RenderNodeGStateList {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef CURSESUI_H
@@ -79,7 +79,7 @@ protected:
       It is useful to do this when the window has been resized (because
       the terminal has been resized, or because the menu has been toggled).
       @param numberOfMessages The last @c numberOfMessages messages from the
-                              buffer will be written to the window.
+			      buffer will be written to the window.
   */
   void updateMainWinFromBuffer(unsigned int numberOfMessages);
 
@@ -130,7 +130,7 @@ protected:
   PlayerIdMap additionalTargets;
   PlayerIdMap::const_iterator targetIter;
   PlayerId me;
-  AutoCompleter comp;
+  DefaultCompleter comp;
   std::vector<std::string> history;
   unsigned int maxHistory;
   unsigned int currentHistory;

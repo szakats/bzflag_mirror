@@ -1,5 +1,5 @@
 SUBDIRS =
-DIST_SUBDIRS = linux rpm irix mac win32
+DIST_SUBDIRS = linux rpm irix win32
 TARGETDIR  = $(top_srcdir)/bin
 PACKAGEDIR = $(top_srcdir)/dist
 
@@ -9,11 +9,6 @@ MAINTAINERCLEANFILES = \
 #
 # tools
 #
-if MACOS
-ECHO	= /bin/echo
-else
-ECHO	= echo
-endif
 if WIN32
 MKDIR	= mkdir.exe
 RM	= del.exe /F /Q
@@ -46,7 +41,7 @@ ARCH  = `uname -m | sed -e 's/i.86/i386/'`
 endif
 endif
 
-RPM        = rpm
+RPM	= rpm
 RPMBASEDIR = tmp
 RPMDIR     = $(RPM)/$(RPMBASEDIR)
 RPMRC      = rpmrc
@@ -75,7 +70,6 @@ targets: binprep rpmprep
 #
 binprep:
 	strip ../src/bzflag/bzflag
-	strip ../src/bzfrelay/bzfrelay
 	strip ../src/bzfs/bzfs
 
 #

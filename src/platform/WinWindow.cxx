@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,26 +7,27 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // Jeff Myers 10/8/97 added hooks to display setings dialog
 // crs 10/26/1997 modified JM's changes
 
 #include "WinWindow.h"
-#include "OpenGLGState.h"
 #include <stdio.h>
 #include <math.h>
+#include "StateDatabase.h"
 
 WinWindow*		WinWindow::first = NULL;
 HPALETTE		WinWindow::colormap = NULL;
+
+HWND WinWindow::hwnd = NULL;
 
 WinWindow::WinWindow(const WinDisplay* _display, WinVisual* _visual) :
 				BzfWindow(_display),
 				display(_display),
 				visual(*_visual),
 				inDestroy(false),
-				hwnd(NULL),
 				hwndChild(NULL),
 				hRC(NULL),
 				hDC(NULL),
@@ -35,10 +36,10 @@ WinWindow::WinWindow(const WinDisplay* _display, WinVisual* _visual) :
 				inactiveDueToDeactivateAll(false),
 				useColormap(false),
 				hasGamma(false),
-				has3DFXGamma(false),
 				gammaVal(1.0f),
 				prev(NULL),
-				next(NULL)
+				next(NULL),
+				mouseGrab(false)
 {
   // make window
   hwnd = CreateWindow("BZFLAG", "bzflag",
@@ -151,24 +152,69 @@ void			WinWindow::setMinSize(int, int)
   // FIXME
 }
 
-void			WinWindow::setFullscreen()
+void			WinWindow::setFullscreen(bool on)
 {
-  DWORD style = GetWindowLong(hwnd, GWL_STYLE);
-  style &= ~(WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_THICKFRAME);
-  SetWindowLong(hwnd, GWL_STYLE, style);
-  if (display->isFullScreenOnly())
-    MoveWindow(hwnd, 0, 0,
-		display->getFullWidth(),
-		display->getFullHeight(), FALSE);
-  else
-    MoveWindow(hwnd, 0, 0,
-		GetDeviceCaps(hDC, HORZRES),
-		GetDeviceCaps(hDC, VERTRES), FALSE);
+  if (on) {
+    // no window decorations
+    DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+    style &= ~(WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_THICKFRAME);
+    SetWindowLong(hwnd, GWL_STYLE, style);
+
+    // take up the whole screen
+    if (display->isFullScreenOnly())
+      MoveWindow(hwnd, 0, 0,
+		  display->getFullWidth(),
+		  display->getFullHeight(), FALSE);
+    else
+      MoveWindow(hwnd, 0, 0,
+		  GetDeviceCaps(hDC, HORZRES),
+		  GetDeviceCaps(hDC, VERTRES), FALSE);
+
+  } else if (!display->isFullScreenOnly()) {
+    // reset the resolution if we changed it before
+    display->setDefaultResolution();
+
+    // window stuff
+    DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+    style |= (WS_BORDER | WS_CAPTION);
+    SetWindowLong(hwnd, GWL_STYLE, style);
+
+    // size it
+    if (BZDB.isSet("geometry")) {
+      int w, h, x, y, count;
+      char xs, ys;
+      count = sscanf(BZDB.get("geometry").c_str(),
+    		 "%dx%d%c%d%c%d", &w, &h, &xs, &x, &ys, &y);
+      if (w < 256) w = 256;
+      if (h < 192) h = 192;
+      if (count == 6) {
+        if (xs == '-') x = display->getWidth() - x - w;
+        if (ys == '-') y = display->getHeight() - y - h;
+        setPosition(x, y);
+      }
+      setSize(w, h);
+    } else {
+      // uh.... right
+      setPosition(0,0);
+      setSize(640,480);
+    }
+
+    // force windows to repaint the whole desktop
+    RECT rect;
+    GetWindowRect(NULL, &rect);
+    InvalidateRect(NULL, &rect, TRUE);
+  }
 
   // resize child
   int width, height;
   getSize(width, height);
   MoveWindow(hwndChild, 0, 0, width, height, FALSE);
+
+  // reset mouse grab
+  if (mouseGrab) {
+    ungrabMouse();
+    grabMouse();
+  }
 }
 
 void			WinWindow::iconify()
@@ -192,12 +238,41 @@ void			WinWindow::getMouse(int& x, int& y) const
 
 void			WinWindow::grabMouse()
 {
-  // FIXME
+  RECT wrect;
+  GetWindowRect(hwnd, &wrect);
+
+  int xborder = GetSystemMetrics(SM_CXDLGFRAME);
+  int yborder = GetSystemMetrics(SM_CYDLGFRAME);
+  int titlebar = GetSystemMetrics(SM_CYCAPTION);
+
+  DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+  // don't compensate for window trimmings if they're turned off
+  if (!((style & (WS_BORDER | WS_CAPTION | WS_DLGFRAME))
+        == (WS_BORDER | WS_CAPTION | WS_DLGFRAME)))
+    xborder = yborder = titlebar = 0;
+
+  RECT rect;
+  rect.top = wrect.top + titlebar + yborder;
+  rect.left = wrect.left + xborder;
+  rect.bottom = wrect.bottom - yborder;
+  rect.right = wrect.right - xborder;
+  ClipCursor(&rect);
 }
 
 void			WinWindow::ungrabMouse()
 {
-  // FIXME
+  ClipCursor(NULL);
+}
+
+void			WinWindow::enableGrabMouse(bool on)
+{
+  if (on) {
+    mouseGrab = true;
+    grabMouse();
+  } else {
+    mouseGrab = false;
+    ungrabMouse();
+  }
 }
 
 void			WinWindow::showMouse()
@@ -212,7 +287,7 @@ void			WinWindow::hideMouse()
 
 void			WinWindow::setGamma(float newGamma)
 {
-  if (!useColormap && !hasGamma && !has3DFXGamma)
+  if (!useColormap && !hasGamma)
     return;
 
   // save gamma
@@ -241,7 +316,7 @@ float			WinWindow::getGamma() const
 
 bool			WinWindow::hasGammaControl() const
 {
-  return useColormap || hasGamma || has3DFXGamma;
+  return useColormap || hasGamma;
 }
 
 void			WinWindow::makeCurrent()
@@ -285,7 +360,7 @@ void			WinWindow::createChild()
   if (hwndChild == NULL) return;
 
   if (display->isFullScreenOnly())
-    setFullscreen();
+    setFullscreen(true);
 
   // get DC
   hDCChild = GetDC(hwndChild);
@@ -356,19 +431,10 @@ void			WinWindow::destroyChild()
   }
 }
 
-typedef BOOL		(*GammaRamp3DFX)(HDC, LPVOID);
-
 void			WinWindow::getGammaRamps(WORD* ramps)
 {
   if (hDCChild == NULL)
     return;
-
-  // see if we've got the 3Dfx gamma ramp extension
-  PROC proc = wglGetProcAddress("wglGetDeviceGammaRamp3DFX");
-  if (proc != NULL) {
-    GammaRamp3DFX wglGetDeviceGammaRamp3DFX = (GammaRamp3DFX)proc;
-    has3DFXGamma = wglGetDeviceGammaRamp3DFX(hDCChild, ramps + 3 * 256) != FALSE;
-  }
 
   // get device gamma ramps
   hasGamma = GetDeviceGammaRamp(hDCChild, ramps) != FALSE;
@@ -378,14 +444,6 @@ void			WinWindow::setGammaRamps(const WORD* ramps)
 {
   if (hDCChild == NULL)
     return;
-
-  if (has3DFXGamma) {
-    PROC proc = wglGetProcAddress("wglSetDeviceGammaRamp3DFX");
-    if (proc != NULL) {
-      GammaRamp3DFX wglSetDeviceGammaRamp3DFX = (GammaRamp3DFX)proc;
-      wglSetDeviceGammaRamp3DFX(hDCChild, (LPVOID)(ramps + 3 * 256));
-    }
-  }
 
   if (hasGamma)
     SetDeviceGammaRamp(hDCChild, (LPVOID)ramps);
@@ -412,21 +470,15 @@ void			WinWindow::deactivateAll()
 
 void			WinWindow::reactivateAll()
 {
-  bool anyNewChildren = false;
   for (WinWindow* scan = first; scan; scan = scan->next) {
     const bool hadChild = (scan->hDCChild != NULL);
     scan->inactiveDueToDeactivateAll = false;
     scan->makeContext();
-    if (!hadChild && scan->hDCChild != NULL)
-      anyNewChildren = true;
+    scan->callExposeCallbacks();
   }
-
-  // reload context data
-  if (anyNewChildren)
-    OpenGLGState::initContext();
 }
 
-HWND			WinWindow::getHandle() const
+HWND			WinWindow::getHandle()
 {
   return hwnd;
 }
@@ -476,10 +528,10 @@ bool			WinWindow::activate()
   const bool hadChild = (hDCChild != NULL);
   makeContext();
 
-  if (!hadChild && hDCChild != NULL) {
-    // reload context data
-    OpenGLGState::initContext();
+  if (mouseGrab)
+    grabMouse();
 
+  if (!hadChild && hDCChild != NULL) {
     // force a redraw
     callExposeCallbacks();
 
@@ -498,6 +550,9 @@ bool			WinWindow::deactivate()
   // destroy OpenGL context
   const bool hadChild = (hDCChild != NULL);
   freeContext();
+
+  if (mouseGrab)
+    ungrabMouse();
 
   inactiveDueToDeactivate = true;
   return hadChild;
@@ -642,4 +697,3 @@ void			WinWindow::makeColormap(
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

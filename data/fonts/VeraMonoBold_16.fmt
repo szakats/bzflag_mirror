@@ -1,14 +1,14 @@
-NumChars: 93
+NumChars: 95
 TextureWidth: 512
 TextureHeight: 128
 TextZStep: 24
 
 Char: " "
 InitialDist: 0
-Width: 0
-Whitespace: 13
+Width: 1
+Whitespace: 12
 StartX: 0
-EndX: 0
+EndX: 1
 StartY: 0
 EndY: 24
 
@@ -392,10 +392,10 @@ EndY: 72
 
 Char: "K"
 InitialDist: 1
-Width: 11
-Whitespace: 1
+Width: 12
+Whitespace: 0
 StartX: 24
-EndX: 35
+EndX: 36
 StartY: 48
 EndY: 72
 
@@ -536,10 +536,10 @@ EndY: 72
 
 Char: "["
 InitialDist: 4
-Width: 5
-Whitespace: 4
+Width: 6
+Whitespace: 3
 StartX: 408
-EndX: 413
+EndX: 414
 StartY: 48
 EndY: 72
 
@@ -849,3 +849,11 @@ EndX: 225
 StartY: 96
 EndY: 120
 
+Char: "~"
+InitialDist: 1
+Width: 11
+Whitespace: 1
+StartX: 240
+EndX: 251
+StartY: 96
+EndY: 120

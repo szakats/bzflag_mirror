@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,10 +7,10 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/*
+/**
  * TimeKeeper:
  *	Standard way to keep track of time in game.
  *
@@ -25,6 +25,10 @@
 
 #include "common.h"
 
+/* system interface headers */
+#include <string>
+
+
 /** TimeKeeper keeps time.  It's useful to determine how much time has
  * elapsed from some other point in time.  Use getCurrent() to return a
  * timekeeper object set to the current time.  You can then use subsequent
@@ -32,42 +36,76 @@
  * elapsed float time value.
  */
 class TimeKeeper {
-  public:
-			TimeKeeper();
-			TimeKeeper(const TimeKeeper&);
-			~TimeKeeper();
-    TimeKeeper&		operator=(const TimeKeeper&);
+public:
+  TimeKeeper();
+  TimeKeeper(const TimeKeeper&);
+  ~TimeKeeper();
+  TimeKeeper&		operator=(const TimeKeeper&);
 
-    float		operator-(const TimeKeeper&) const;
-    bool		operator<=(const TimeKeeper&) const;
-    TimeKeeper&		operator+=(float);
-    TimeKeeper&		operator+=(const TimeKeeper&) ;
+  double		operator-(const TimeKeeper&) const;
+  bool			operator<=(const TimeKeeper&) const;
+  TimeKeeper&		operator+=(double);
+  TimeKeeper&		operator+=(const TimeKeeper&);
 
-    /** returns how many seconds have elapsed since epoch, Jan 1, 1970 */
-    float               getSeconds(void) const;
+  // make a TimeKeeper with seconds = NULL act like unset
+  // Fixme: must this be defined here? didn't work for me outside the class
+  inline operator void*()
+  {
+    if (seconds > 0.0)
+      return this;
+    else
+      return NULL;
+   }
 
-    /** returns a timekeeper representing the current time */
-    static const TimeKeeper&	getCurrent(void);
+  /** Returns how many seconds have elapsed since epoch, Jan 1, 1970.
+    * On windows this will actually be how many seconds have elapsed
+    * since bootup, so don't rely on the value for anything but
+    * deltas.  If real times are needed use TimeKeeper::localTime */
+  double       getSeconds(void) const;
 
-    /** sets the time to the current time (recalculates) */
-    static void			setTick(void);
-    /** returns a timekeeper that is updated periodically via setTick */
-    static const TimeKeeper&	getTick(void); // const
+  /** returns a timekeeper representing the current time */
+  static const TimeKeeper&	getCurrent(void);
 
-    /** returns a timekeeper representing +Inf */
-    static const TimeKeeper&	getSunExplodeTime(void);
-    /** returns a timekeeper representing -Inf */
-    static const TimeKeeper&	getSunGenesisTime(void);
-    /** returns a timekeeper representing an unset timekeeper */
-    static const TimeKeeper&	getNullTime(void);
+  /** returns a timekeeper representing the time of program execution */
+  static const TimeKeeper&	getStartTime(void);
+
+  /** sets the time to the current time (recalculates) */
+  static void			setTick(void);
+  /** returns a timekeeper that is updated periodically via setTick */
+  static const TimeKeeper&	getTick(void); // const
+
+  /** returns a timekeeper representing +Inf */
+  static const TimeKeeper&	getSunExplodeTime(void);
+  /** returns a timekeeper representing -Inf */
+  static const TimeKeeper&	getSunGenesisTime(void);
+  /** returns a timekeeper representing an unset timekeeper */
+  static const TimeKeeper&	getNullTime(void);
+
+
+  /** returns the local time */
+  static void localTime(int *year = NULL, int *month = NULL, int* day = NULL, int* hour = NULL, int* min = NULL, int* sec = NULL, bool* dst = NULL);
+
+  /** returns a string of the local time */
+  static const char		*timestamp(void);
+
+  /** returns a short string of the local time */
+  static std::string    shortTimeStamp(void);
+
+  static void localTime( int &day);
+
+  /** converts a time difference into an array of integers
+      representing days, hours, minutes, seconds */
+  static void			convertTime(double raw, long int convertedTimes[]);
+  /** prints an integer-array time difference in human-readable form */
+  static const std::string	printTime(long int timeValue[]);
+  /** prints an float time difference in human-readable form */
+  static const std::string	printTime(double diff);
+
+  /** sleep for a given number of floating point seconds */
+  static void			sleep(double secs); //const
 
 private:
-    double		seconds;
-    static TimeKeeper	currentTime;
-    static TimeKeeper	tickTime;
-    static TimeKeeper	sunExplodeTime;
-    static TimeKeeper	sunGenesisTime;
-    static TimeKeeper	nullTime;
+  double		seconds;
 };
 
 //
@@ -80,7 +118,7 @@ inline TimeKeeper::TimeKeeper() : seconds(0.0)
 }
 
 inline TimeKeeper::TimeKeeper(const TimeKeeper& t) :
-				seconds(t.seconds)
+  seconds(t.seconds)
 {
   // do nothing
 }
@@ -96,19 +134,19 @@ inline TimeKeeper&	TimeKeeper::operator=(const TimeKeeper& t)
   return *this;
 }
 
-inline float		TimeKeeper::operator-(const TimeKeeper& t) const
+inline double		TimeKeeper::operator-(const TimeKeeper& t) const
 {
-  return (float)(seconds - t.seconds);
+  return seconds - t.seconds;
 }
 
-inline TimeKeeper&	TimeKeeper::operator+=(float dt)
+inline TimeKeeper&	TimeKeeper::operator+=(double dt)
 {
-  seconds += double(dt);
+  seconds += dt;
   return *this;
 }
 inline TimeKeeper&	TimeKeeper::operator+=(const TimeKeeper& t)
 {
-  seconds += double(t.seconds);
+  seconds += t.seconds;
   return *this;
 }
 
@@ -117,18 +155,18 @@ inline bool		TimeKeeper::operator<=(const TimeKeeper& t) const
   return seconds <= t.seconds;
 }
 
-inline float		TimeKeeper::getSeconds(void) const
+inline double		TimeKeeper::getSeconds(void) const
 {
-  return (float)seconds;
+  return seconds;
 }
+
 
 #endif // BZF_TIME_KEEPER_H
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

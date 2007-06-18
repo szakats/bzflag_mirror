@@ -22,6 +22,7 @@ class MacDisplay : public BzfDisplay {
     bool isEventPending() const;
 
     bool getEvent(BzfEvent&) const;
+    bool peekEvent(BzfEvent&) const;
     //void    setPending (bool val) const { pending = val; }
 
     int getWidth() const;
@@ -70,4 +71,3 @@ class MacDisplay : public BzfDisplay {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

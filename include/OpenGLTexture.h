@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* OpenGLTexture:
@@ -55,7 +55,8 @@ class OpenGLTexture {
 			LinearMipmapNearest,
 			NearestMipmapLinear,
 			LinearMipmapLinear,
-			Max = LinearMipmapLinear
+			Max = LinearMipmapLinear,
+			Default = Max
     };
 
 			OpenGLTexture(int width, int height,
@@ -65,19 +66,29 @@ class OpenGLTexture {
 					int internalFormat = 0);
 			~OpenGLTexture();
     bool		hasAlpha() const;
-    GLuint		getList() const;
 
     void		execute();
 
     float		getAspectRatio() const;
-    int                 getWidth() const;
-    int                 getHeight() const;
+    int			getWidth() const;
+    int			getHeight() const;
 
-    static Filter	getFilter();
-    static std::string	getFilterName();
-    void		setFilter(std::string name);
+    Filter		getFilter();
     void		setFilter(Filter);
+
+    bool		getColorAverages(float rgbaRaw[4],
+					 bool factorAlpha) const;
+
+    void		freeContext();
     void		initContext();
+
+
+    static int		getFilterCount();
+    static const char*	getFilterName(Filter id);
+    static const char**	getFilterNames();
+
+    static Filter	getMaxFilter();
+    static void		setMaxFilter(Filter);
 
   private:
 			OpenGLTexture(const OpenGLTexture&);
@@ -89,28 +100,35 @@ class OpenGLTexture {
     int			getBestFormat( int width, int height,
 					const GLvoid* pixels);
     void		bind();
-    static void		static_initContext(void *that);
+    bool		setupImage(const GLubyte* pixels);
 
-    static Filter	filter;
-    static const char*	configFilterValues[];
+    void* operator new(size_t s) { return ::operator new(s);}
+    void  operator delete(void *p) {::operator delete(p);}
 
     bool	alpha;
     const int	width;
     const int	height;
+    GLint	scaledWidth;
+    GLint	scaledHeight;
     GLubyte*	image;
+    GLubyte*	imageMemory;
     bool	repeat;
     int		internalFormat;
     GLuint	list;
+    Filter	filter;
 
-    int		maxFilter;
+    static Filter	maxFilter;
+
+    static const int	filterCount;
+    static const char*	configFilterNames[];
+
     static const GLenum	minifyFilter[];
     static const GLenum	magnifyFilter[];
 
+    static void		static_freeContext(void *that);
+    static void		static_initContext(void *that);
 
-    void* operator new(size_t s) { return ::operator new(s);}
-    void  operator delete(void *p) {::operator delete(p);}
     friend class TextureManager;
-
 };
 
 //
@@ -140,4 +158,3 @@ inline int		OpenGLTexture::getHeight() const
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

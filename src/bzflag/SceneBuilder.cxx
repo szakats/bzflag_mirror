@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,35 +7,44 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-// bzflag common header
-#include "common.h"
-
-// system headers
-#include <stdio.h>
-#include <string>
-#include <vector>
+// interface header
+#include "SceneBuilder.h"
 
 // local implemenation headers
-#include "SceneBuilder.h"
-#include "SceneRenderer.h"
-#include "SceneDatabase.h"
 #include "ZSceneDatabase.h"
 #include "BSPSceneDatabase.h"
 #include "World.h"
-#include "WallSceneNode.h"
+
+// scene node implemenation headers
+#include "MeshPolySceneNode.h"
 #include "TankSceneNode.h"
-#include "StateDatabase.h"
-#include "TextureManager.h"
-#include "ObstacleSceneNodeGenerator.h"
 #include "BoxSceneNodeGenerator.h"
-#include "PyramidSceneNodeGenerator.h"
-#include "BaseSceneNodeGenerator.h"
-#include "TetraSceneNodeGenerator.h"
-#include "TeleporterSceneNodeGenerator.h"
 #include "WallSceneNodeGenerator.h"
+#include "MeshSceneNodeGenerator.h"
+#include "BaseSceneNodeGenerator.h"
+#include "PyramidSceneNodeGenerator.h"
+#include "ObstacleSceneNodeGenerator.h"
+#include "TeleporterSceneNodeGenerator.h"
+#include "EighthDimShellNode.h"
+#include "EighthDBoxSceneNode.h"
+#include "EighthDPyrSceneNode.h"
+#include "EighthDBaseSceneNode.h"
+
+// common implementation headers
+#include "StateDatabase.h"
+#include "SceneRenderer.h"
+#include "BZDBCache.h"
+#include "TextureManager.h"
+#include "ObstacleList.h"
+#include "ObstacleMgr.h"
+
+
+// uncomment for cheaper eighth dimension scene nodes
+//#define SHELL_INSIDE_NODES
+
 
 //
 // SceneDatabaseBuilder
@@ -125,31 +134,6 @@ const GLfloat		SceneDatabaseBuilder::pyramidLightedModulateColors[5][4] = {
 				{ 0.25f, 0.25f, 0.63f, 1.0f }
 			};
 
-const GLfloat		SceneDatabaseBuilder::tetraColors[4][4] = {
-				{ 0.25f, 0.25f, 0.63f, 1.0f },
-				{ 0.13f, 0.13f, 0.51f, 1.0f },
-				{ 0.25f, 0.25f, 0.63f, 1.0f },
-				{ 0.375f, 0.375f, 0.75f, 1.0f }
-			};
-const GLfloat		SceneDatabaseBuilder::tetraModulateColors[4][4] = {
-				{ 0.25f, 0.25f, 0.63f, 1.0f },
-				{ 0.13f, 0.13f, 0.51f, 1.0f },
-				{ 0.25f, 0.25f, 0.63f, 1.0f },
-				{ 0.375f, 0.375f, 0.75f, 1.0f }
-			};
-const GLfloat		SceneDatabaseBuilder::tetraLightedColors[4][4] = {
-				{ 0.25f, 0.25f, 0.63f, 1.0f },
-				{ 0.25f, 0.25f, 0.63f, 1.0f },
-				{ 0.25f, 0.25f, 0.63f, 1.0f },
-				{ 0.25f, 0.25f, 0.63f, 1.0f }
-			};
-const GLfloat		SceneDatabaseBuilder::tetraLightedModulateColors[4][4] = {
-				{ 0.25f, 0.25f, 0.63f, 1.0f },
-				{ 0.25f, 0.25f, 0.63f, 1.0f },
-				{ 0.25f, 0.25f, 0.63f, 1.0f },
-				{ 0.25f, 0.25f, 0.63f, 1.0f }
-			};
-
 const GLfloat		SceneDatabaseBuilder::teleporterColors[3][4] = {
 				{ 1.0f, 0.875f, 0.0f, 1.0f },
 				{ 0.9f, 0.8f, 0.0f, 1.0f },
@@ -171,12 +155,12 @@ const GLfloat		SceneDatabaseBuilder::teleporterLightedModulateColors[3][4] = {
 				{ 0.0f, 0.0f, 0.0f, 0.5f }
 			};
 
+
 SceneDatabaseBuilder::SceneDatabaseBuilder(const SceneRenderer* _renderer) :
 				renderer(_renderer),
 				wallMaterial(black, black, 0.0f),
 				boxMaterial(black, black, 0.0f),
 				pyramidMaterial(black, black, 0.0f),
-				tetraMaterial(black, black, 0.0f),
 				teleporterMaterial(black, black, 0.0f)
 {
   // FIXME -- should get texture heights from resources
@@ -199,79 +183,127 @@ SceneDatabaseBuilder::SceneDatabaseBuilder(const SceneRenderer* _renderer) :
 
 
   // lower maximum tank lod if lowdetail is true
-  if (renderer->useQuality() == 0)
+  if (renderer->useQuality() == _LOW_QUALITY)
     TankSceneNode::setMaxLOD(2);
 }
+
 
 SceneDatabaseBuilder::~SceneDatabaseBuilder()
 {
   // do nothing
 }
 
-SceneDatabase*		SceneDatabaseBuilder::make(const World* world)
+
+SceneDatabase* SceneDatabaseBuilder::make(const World* world)
 {
   // set LOD flags
-  wallLOD = BZDB.isTrue("lighting") && BZDB.isTrue("zbuffer");
-  baseLOD = BZDB.isTrue("lighting") && BZDB.isTrue("zbuffer");
-  boxLOD = BZDB.isTrue("lighting") && BZDB.isTrue("zbuffer");
-  pyramidLOD = BZDB.isTrue("lighting") && BZDB.isTrue("zbuffer");
-  tetraLOD = BZDB.isTrue("lighting") && BZDB.isTrue("zbuffer");
-  teleporterLOD = BZDB.isTrue("lighting") && BZDB.isTrue("zbuffer");
+  const bool doLODs = BZDBCache::lighting && BZDBCache::zbuffer;
+  wallLOD = baseLOD = boxLOD = pyramidLOD = teleporterLOD = doLODs;
 
   // pick type of database
   SceneDatabase* db;
-  if (BZDB.isTrue("zbuffer"))
+  if (BZDBCache::zbuffer)
     db = new ZSceneDatabase;
   else
     db = new BSPSceneDatabase;
   // FIXME -- when making BSP tree, try several shuffles for best tree
 
-  if (!world) return db;
+  if (!world) {
+    return db;
+  }
+
+  // free any prior inside nodes
+  world->freeInsideNodes();
+
 
   // add nodes to database
-  const std::vector<WallObstacle> &walls = world->getWalls();
-  std::vector<WallObstacle>::const_iterator wallScan = walls.begin();
-  while (wallScan != walls.end()) {
-    addWall(db, *wallScan);
-    ++wallScan;
+  unsigned int i;
+
+  const ObstacleList& walls = OBSTACLEMGR.getWalls();
+  for (i = 0; i < walls.size(); i++) {
+    addWall(db, *((WallObstacle*) walls[i]));
   }
-  const std::vector<BoxBuilding> &boxes = world->getBoxes();
-  std::vector<BoxBuilding>::const_iterator boxScan = boxes.begin();
-  while (boxScan != boxes.end()) {
-    addBox(db, *boxScan);
-    ++boxScan;
+
+  const ObstacleList& boxes = OBSTACLEMGR.getBoxes();
+  for (i = 0; i < boxes.size(); i++) {
+    addBox (db, *((BoxBuilding*) boxes[i]));
   }
-  const std::vector<Teleporter> &teleporters = world->getTeleporters();
-  std::vector<Teleporter>::const_iterator teleporterScan = teleporters.begin();
-  while (teleporterScan != teleporters.end()) {
-    addTeleporter(db, *teleporterScan);
-    ++teleporterScan;
+
+  const ObstacleList& bases = OBSTACLEMGR.getBases();
+  for (i = 0; i < bases.size(); i++) {
+    addBase (db, *((BaseBuilding*) bases[i]));
   }
-  const std::vector<PyramidBuilding> &pyramids = world->getPyramids();
-  std::vector<PyramidBuilding>::const_iterator pyramidScan = pyramids.begin();
-  while (pyramidScan != pyramids.end()) {
-    addPyramid(db, *pyramidScan);
-    ++pyramidScan;
+
+  const ObstacleList& pyramids = OBSTACLEMGR.getPyrs();
+  for (i = 0; i < pyramids.size(); i++) {
+    addPyramid (db, *((PyramidBuilding*) pyramids[i]));
   }
-  const std::vector<TetraBuilding> &tetras = world->getTetras();
-  std::vector<TetraBuilding>::const_iterator tetraScan = tetras.begin();
-  while (tetraScan != tetras.end()) {
-    addTetra(db, *tetraScan);
-    ++tetraScan;
+
+  const ObstacleList& teles = OBSTACLEMGR.getTeles();
+  for (i = 0; i < teles.size(); i++) {
+    addTeleporter (db, *((Teleporter*) teles[i]), world);
   }
-  const std::vector<BaseBuilding> &baseBuildings = world->getBases();
-  std::vector<BaseBuilding>::const_iterator baseScan = baseBuildings.begin();
-  while (baseScan != baseBuildings.end()) {
-    addBase(db, *baseScan);
-    ++baseScan;
+
+  const ObstacleList& meshes = OBSTACLEMGR.getMeshes();
+  for (i = 0; i < meshes.size(); i++) {
+    addMesh (db, (MeshObstacle*) meshes[i]);
   }
+
+  // add the water level node
+  addWaterLevel(db, world);
+
+  db->finalizeStatics();
 
   return db;
 }
 
-void			SceneDatabaseBuilder::addWall(SceneDatabase* db,
-						const WallObstacle& o)
+
+void SceneDatabaseBuilder::addWaterLevel(SceneDatabase* db,
+					 const World* world)
 {
+  float plane[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
+  const float level = world->getWaterLevel();
+  plane[3] = -level;
+
+  // don't draw it if it isn't active
+  if (level < 0.0f) {
+    return;
+  }
+
+  // setup the vertex and texture coordinates
+  float size = BZDBCache::worldSize;
+  GLfloat3Array v(4);
+  GLfloat3Array n(0);
+  GLfloat2Array t(4);
+  v[0][0] = v[0][1] = v[1][1] = v[3][0] = -size/2.0f;
+  v[1][0] = v[2][0] = v[2][1] = v[3][1] = +size/2.0f;
+  v[0][2] = v[1][2] = v[2][2] = v[3][2] = level;
+  t[0][0] = t[0][1] = t[1][1] = t[3][0] = 0.0f;
+  t[1][0] = t[2][0] = t[2][1] = t[3][1] = 2.0f;
+
+  // get the material
+  const BzMaterial* mat = world->getWaterMaterial();
+  const bool noRadar = mat->getNoRadar();
+  const bool noShadow = mat->getNoShadow();
+
+  MeshPolySceneNode* node =
+    new MeshPolySceneNode(plane, noRadar, noShadow, v, n, t);
+
+  // setup the material
+  MeshSceneNodeGenerator::setupNodeMaterial(node, mat);
+
+  db->addStaticNode(node, false);
+
+  return;
+}
+
+
+void SceneDatabaseBuilder::addWall(SceneDatabase* db, const WallObstacle& o)
+{
+  if (o.getHeight() <= 0.0f) {
+    return;
+  }
+
   int part = 0;
   WallSceneNode* node;
   ObstacleSceneNodeGenerator* nodeGen = new WallSceneNodeGenerator (&o);
@@ -299,14 +331,33 @@ void			SceneDatabaseBuilder::addWall(SceneDatabase* db,
     node->setTexture(wallTexture);
     node->setUseColorTexture(useColorTexture);
 
-    db->addStaticNode(node);
+    db->addStaticNode(node, false);
     part = (part + 1) % 5;
   }
   delete nodeGen;
 }
 
-void			SceneDatabaseBuilder::addBox(SceneDatabase* db,
-						const BoxBuilding& o)
+
+void SceneDatabaseBuilder::addMesh(SceneDatabase* db, MeshObstacle* mesh)
+{
+  WallSceneNode* node;
+  MeshSceneNodeGenerator* nodeGen = new MeshSceneNodeGenerator (mesh);
+
+  while ((node = nodeGen->getNextNode(wallLOD))) {
+    // make the inside node
+    const bool ownTheNode = db->addStaticNode(node, true);
+    // The BSP can split a MeshPolySceneNode and then delete it, which is
+    // not good for the EighthDimShellNode's referencing scheme. If the
+    // BSP would have split and then deleted this node, ownTheNode will
+    // return true, and the EighthDimShellNode will then own the node.
+    EighthDimShellNode* inode = new EighthDimShellNode(node, ownTheNode);
+    mesh->addInsideSceneNode(inode);
+  }
+  delete nodeGen;
+}
+
+
+void SceneDatabaseBuilder::addBox(SceneDatabase* db, BoxBuilding& o)
 {
   // this assumes boxes have six parts:  four sides, a roof, and a bottom.
   int part = 0;
@@ -333,13 +384,13 @@ void			SceneDatabaseBuilder::addBox(SceneDatabase* db,
 
   useColorTexture[1] = boxTopTexture >= 0;
 
-  float texutureFactor = BZDB.eval("boxWallTexRepeat");
-  if (BZDB.eval("useQuality") >= 3)
-    texutureFactor = BZDB.eval("boxWallHighResTexRepeat");
+  float textureFactor = BZDB.eval("boxWallTexRepeat");
+  if (renderer->useQuality() >= _HIGH_QUALITY)
+    textureFactor = BZDB.eval("boxWallHighResTexRepeat");
 
   while ((node = ((part < 4) ? nodeGen->getNextNode(
-				-texutureFactor*boxTexWidth,
-				-texutureFactor*boxTexWidth, boxLOD) :
+				-textureFactor*boxTexWidth,
+				-textureFactor*boxTexWidth, boxLOD) :
     // I'm using boxTexHeight for roof since textures are same
     // size and this number is available
 				nodeGen->getNextNode(
@@ -359,14 +410,33 @@ void			SceneDatabaseBuilder::addBox(SceneDatabase* db,
       node->setUseColorTexture(useColorTexture[1]);
     }
 
-    db->addStaticNode(node);
+#ifdef SHELL_INSIDE_NODES
+    const bool ownTheNode = db->addStaticNode(node, true);
+    EighthDimShellNode* inode = new EighthDimShellNode(node, ownTheNode);
+    o.addInsideSceneNode(inode);
+#else
+    db->addStaticNode(node, false);
+#endif // SHELL_INSIDE_NODES
+
     part = (part + 1) % 6;
   }
+
+#ifndef SHELL_INSIDE_NODES
+  // add the inside node
+  GLfloat obstacleSize[3];
+  obstacleSize[0] = o.getWidth();
+  obstacleSize[1] = o.getBreadth();
+  obstacleSize[2] = o.getHeight();
+  SceneNode* inode =
+    new EighthDBoxSceneNode(o.getPosition(), obstacleSize, o.getRotation());
+  o.addInsideSceneNode(inode);
+#endif // SHELL_INSIDE_NODES
+
   delete nodeGen;
 }
 
-void			SceneDatabaseBuilder::addPyramid(SceneDatabase* db,
-						const PyramidBuilding& o)
+
+void SceneDatabaseBuilder::addPyramid(SceneDatabase* db, PyramidBuilding& o)
 {
   // this assumes pyramids have four parts:  four sides
   int part = 0;
@@ -387,7 +457,7 @@ void			SceneDatabaseBuilder::addPyramid(SceneDatabase* db,
 
   // Using boxTexHeight since it's (currently) the same and it's already available
   float textureFactor = BZDB.eval("pyrWallTexRepeat");
-  if (BZDB.eval("useQuality") >= 3)
+  if (renderer->useQuality() >= _HIGH_QUALITY)
     textureFactor = BZDB.eval("pyrWallHighResTexRepeat");
 
   while ((node = nodeGen->getNextNode(-textureFactor * boxTexHeight,
@@ -401,75 +471,35 @@ void			SceneDatabaseBuilder::addPyramid(SceneDatabase* db,
     node->setTexture(pyramidTexture);
     node->setUseColorTexture(useColorTexture);
 
-    db->addStaticNode(node);
+#ifdef SHELL_INSIDE_NODES
+    const bool ownTheNode = db->addStaticNode(node, true);
+    EighthDimShellNode* inode = new EighthDimShellNode(node, ownTheNode);
+    o.addInsideSceneNode(inode);
+#else
+    db->addStaticNode(node, false);
+#endif // SHELL_INSIDE_NODES
+
     part = (part + 1) % 5;
   }
+
+#ifndef SHELL_INSIDE_NODES
+  // add the inside node
+  GLfloat obstacleSize[3];
+  obstacleSize[0] = o.getWidth();
+  obstacleSize[1] = o.getBreadth();
+  obstacleSize[2] = o.getHeight();
+  SceneNode* inode =
+    new EighthDPyrSceneNode(o.getPosition(), obstacleSize, o.getRotation());
+  o.addInsideSceneNode(inode);
+#endif // SHELL_INSIDE_NODES
+
   delete nodeGen;
 }
 
-void			SceneDatabaseBuilder::addTetra(SceneDatabase* db,
-						const TetraBuilding& o)
+
+void SceneDatabaseBuilder::addBase(SceneDatabase *db, BaseBuilding &o)
 {
-  // this assumes tetras have four parts:  four sides
   WallSceneNode* node;
-  ObstacleSceneNodeGenerator* nodeGen = new TetraSceneNodeGenerator(&o);
-
-  TextureManager &tm = TextureManager::instance();
-  int tetraTexture = -1;
-
-  bool useColorTexture = false;
-  // try object, standard, then default
-  if (o.userTextures[0].size())
-    tetraTexture = tm.getTextureID(o.userTextures[0].c_str(),false);
-  if (tetraTexture < 0)
-    tetraTexture = tm.getTextureID(BZDB.get("tetraWallTexture").c_str(),false);
-
-  useColorTexture = tetraTexture >= 0;
-
-  // Using boxTexHeight since it's (currently) the same and it's already available
-  float textureFactor = BZDB.eval("tetraWallTexRepeat");
-  if (BZDB.eval("useQuality") >= 3)
-    textureFactor = BZDB.eval("tetraWallHighResTexRepeat");
-
-  int part = 0;
-  int realPart = 0;
-  while ((node = nodeGen->getNextNode(-textureFactor * boxTexHeight,
-				      -textureFactor * boxTexHeight,
-                                      tetraLOD))) {
-
-    while (!o.isVisiblePlane(realPart)) {
-      realPart = (realPart + 1) % 4;
-    }
-
-    if (!o.isColoredPlane(realPart)) {
-      node->setColor(tetraColors[part]);
-      node->setModulateColor(tetraModulateColors[part]);
-      node->setLightedColor(tetraLightedColors[part]);
-      node->setLightedModulateColor(tetraLightedModulateColors[part]);
-      node->setUseColorTexture(useColorTexture);
-    }
-    else {
-      const float* color = o.getPlaneColor(realPart);
-      node->setColor(color);
-      node->setModulateColor(color);
-      node->setLightedColor(color);
-      node->setLightedModulateColor(color);
-      node->setUseColorTexture(false);
-    }
-    node->setMaterial(tetraMaterial);
-    node->setTexture(tetraTexture);
-
-    db->addStaticNode(node);
-    part = (part + 1) % 4;
-    realPart = (realPart + 1) % 4;
-  }
-  delete nodeGen;
-}
-
-void			SceneDatabaseBuilder::addBase(SceneDatabase *db,
-						const BaseBuilding &o)
-{
-  WallSceneNode *node;
   ObstacleSceneNodeGenerator* nodeGen = new BaseSceneNodeGenerator(&o);
 
   TextureManager &tm = TextureManager::instance();
@@ -480,10 +510,9 @@ void			SceneDatabaseBuilder::addBase(SceneDatabase *db,
   // try object, standard, then default
   if (o.userTextures[0].size())
     boxTexture = tm.getTextureID(o.userTextures[0].c_str(),false);
-  if (boxTexture < 0)
-  {
+  if (boxTexture < 0) {
     std::string teamBase = Team::getImagePrefix((TeamColor)o.getTeam());
-    teamBase+=BZDB.get("baseWallTexture");
+    teamBase += BZDB.get("baseWallTexture");
     boxTexture = tm.getTextureID(teamBase.c_str(),false);
   }
   if (boxTexture < 0)
@@ -495,9 +524,9 @@ void			SceneDatabaseBuilder::addBase(SceneDatabase *db,
 
   if (o.userTextures[1].size())
     baseTopTexture = tm.getTextureID(o.userTextures[1].c_str(),false);
-  if (baseTopTexture < 0){
+  if (baseTopTexture < 0) {
     std::string teamBase = Team::getImagePrefix((TeamColor)o.getTeam());
-    teamBase+=BZDB.get("baseTopTexture").c_str();
+    teamBase += BZDB.get("baseTopTexture").c_str();
     baseTopTexture = tm.getTextureID(teamBase.c_str(),false);
   }
   if (baseTopTexture < 0)
@@ -513,9 +542,9 @@ void			SceneDatabaseBuilder::addBase(SceneDatabase *db,
   // 2. getNextNode() returns the top texture(0), and the 4 sides(1-4)
   // 3. getNextNode() returns the top texture(0), and the 4 sides(1-4), and the bottom(5)
   while ((node = ( ((part % 5) == 0) ? nodeGen->getNextNode(1,1, boxLOD) :
-                                      nodeGen->getNextNode(o.getBreadth(),
-                                                           o.getHeight(),
-                                                           boxLOD)))) {
+				      nodeGen->getNextNode(o.getBreadth(),
+							   o.getHeight(),
+							   boxLOD)))) {
     if ((part % 5) != 0) {
       node->setColor(boxColors[part - 2]);
       node->setModulateColor(boxModulateColors[part - 2]);
@@ -527,18 +556,38 @@ void			SceneDatabaseBuilder::addBase(SceneDatabase *db,
     }
     else{
       if (useColorTexture[1]) {  // only set the texture if we have one and are using it
-        node->setTexture(baseTopTexture);
-        node->setUseColorTexture(useColorTexture[1]);
+	node->setTexture(baseTopTexture);
+	node->setUseColorTexture(useColorTexture[1]);
       }
     }
     part++;
-    db->addStaticNode(node);
+
+#ifdef SHELL_INSIDE_NODES
+    const bool ownTheNode = db->addStaticNode(node, true);
+    EighthDimShellNode* inode = new EighthDimShellNode(node, ownTheNode);
+    o.addInsideSceneNode(inode);
+#else
+    db->addStaticNode(node, false);
+#endif // SHELL_INSIDE_NODES
   }
+
+#ifndef SHELL_INSIDE_NODES
+  // add the inside node
+  GLfloat obstacleSize[3];
+  obstacleSize[0] = o.getWidth();
+  obstacleSize[1] = o.getBreadth();
+  obstacleSize[2] = o.getHeight();
+  SceneNode* inode = new
+    EighthDBaseSceneNode(o.getPosition(), obstacleSize, o.getRotation());
+  o.addInsideSceneNode(inode);
+#endif // SHELL_INSIDE_NODES
+
   delete nodeGen;
 }
 
-void			SceneDatabaseBuilder::addTeleporter(SceneDatabase* db,
-						const Teleporter& o)
+void SceneDatabaseBuilder::addTeleporter(SceneDatabase* db,
+					 const Teleporter& o,
+					 const World* world)
 {
   // this assumes teleporters have fourteen parts:  12 border sides, 2 faces
   int part = 0;
@@ -546,7 +595,7 @@ void			SceneDatabaseBuilder::addTeleporter(SceneDatabase* db,
   ObstacleSceneNodeGenerator* nodeGen = new TeleporterSceneNodeGenerator(&o);
 
   TextureManager &tm = TextureManager::instance();
-  int             teleporterTexture = -1;
+  int	     teleporterTexture = -1;
 
   bool  useColorTexture = false;
 
@@ -558,33 +607,57 @@ void			SceneDatabaseBuilder::addTeleporter(SceneDatabase* db,
 
   useColorTexture = teleporterTexture >= 0;
 
+  int numParts = o.isHorizontal() ? 18 : 14;
+
   while ((node = nodeGen->getNextNode(1.0, o.getHeight() / o.getBreadth(),
 							teleporterLOD))) {
-    if (part >= 0 && part <= 1) {
-      node->setColor(teleporterColors[0]);
-      node->setModulateColor(teleporterModulateColors[0]);
-      node->setLightedColor(teleporterLightedColors[0]);
-      node->setLightedModulateColor(teleporterLightedModulateColors[0]);
-      node->setMaterial(teleporterMaterial);
-      node->setTexture(teleporterTexture);
-      node->setUseColorTexture(useColorTexture);
-    } else if (part >= 2 && part <= 11) {
-      node->setColor(teleporterColors[1]);
-      node->setModulateColor(teleporterModulateColors[1]);
-      node->setLightedColor(teleporterLightedColors[1]);
-      node->setLightedModulateColor(teleporterLightedModulateColors[1]);
-      node->setMaterial(teleporterMaterial);
-      node->setTexture(teleporterTexture);
-      node->setUseColorTexture(useColorTexture);
-    } else {
-      node->setColor(teleporterColors[2]);
-      node->setLightedColor(teleporterLightedColors[2]);
-      node->setTexture(-1); // disable texturing
+    if (o.isHorizontal ()) {
+      if (part >= 0 && part <= 15) {
+	node->setColor (teleporterColors[0]);
+	node->setModulateColor (teleporterModulateColors[0]);
+	node->setLightedColor (teleporterLightedColors[0]);
+	node->setLightedModulateColor (teleporterLightedModulateColors[0]);
+	node->setMaterial (teleporterMaterial);
+	node->setTexture (teleporterTexture);
+	node->setUseColorTexture (useColorTexture);
+      }
+    }
+    else {
+      if (part >= 0 && part <= 1) {
+	node->setColor (teleporterColors[0]);
+	node->setModulateColor (teleporterModulateColors[0]);
+	node->setLightedColor (teleporterLightedColors[0]);
+	node->setLightedModulateColor (teleporterLightedModulateColors[0]);
+	node->setMaterial (teleporterMaterial);
+	node->setTexture (teleporterTexture);
+	node->setUseColorTexture (useColorTexture);
+      }
+      else if (part >= 2 && part <= 11) {
+	node->setColor (teleporterColors[1]);
+	node->setModulateColor (teleporterModulateColors[1]);
+	node->setLightedColor (teleporterLightedColors[1]);
+	node->setLightedModulateColor (teleporterLightedModulateColors[1]);
+	node->setMaterial (teleporterMaterial);
+	node->setTexture (teleporterTexture);
+	node->setUseColorTexture (useColorTexture);
+      }
     }
 
-    db->addStaticNode(node);
-    part = (part + 1) % 14;
+    db->addStaticNode(node, false);
+    part = (part + 1) % numParts;
   }
+
+  MeshPolySceneNode* linkNode;
+  const BzMaterial* mat = world->getLinkMaterial();
+
+  linkNode = MeshSceneNodeGenerator::getMeshPolySceneNode(o.getBackLink());
+  MeshSceneNodeGenerator::setupNodeMaterial(linkNode, mat);
+  db->addStaticNode(linkNode, false);
+
+  linkNode = MeshSceneNodeGenerator::getMeshPolySceneNode(o.getFrontLink());
+  MeshSceneNodeGenerator::setupNodeMaterial(linkNode, mat);
+  db->addStaticNode(linkNode, false);
+
   delete nodeGen;
 }
 
@@ -595,4 +668,3 @@ void			SceneDatabaseBuilder::addTeleporter(SceneDatabase* db,
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

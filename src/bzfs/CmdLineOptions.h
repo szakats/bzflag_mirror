@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __CMDLINEOPTIONS_H__
@@ -19,19 +19,23 @@
 /* system headers */
 #include <string>
 #include <map>
+#include <vector>
 
 /* bzflag common headers */
 #include "Protocol.h"
 #include "Flag.h"
 #include "WordFilter.h"
+#include "TextChunkManager.h"
 
 /* bzfs-specific headers */
 #include "AccessControlList.h"
-#include "TextChunkManager.h"
+
+// avoid dependencies
+class EntryZones;
 
 /* constants provided for general consumption */
 const int MaxPlayers = 200;
-const int MaxShots = 10;
+const int MaxShots = 20;
 
 // rabbit selection algorithms
 enum RabbitSelection {
@@ -43,34 +47,39 @@ enum RabbitSelection {
 typedef std::map<FlagType*, int> FlagNumberMap;
 typedef std::map<FlagType*,bool> FlagOptionMap;
 
+#define _DEFAULT_LIN_ACCEL 0.0f
+#define _DEFAULT_ANGLE_ACCELL 0.0f
+
 /** CmdLineOptions is a container for any of the bzfs options that may
  * be provided via the command line.
  */
 struct CmdLineOptions
 {
   CmdLineOptions()
-  : wksPort(ServerPort), gameStyle(PlainGameStyle),
-    rabbitSelection(ScoreRabbitSelection), msgTimer(0), spamWarnMax(0),
-    servermsg(""),
-    advertisemsg(""), worldFile(""), pingInterface(""),
-    listServerURL(DefaultListServerURL), password(""),
-    publicizedTitle(""), publicizedAddress(""),
+  : wksPort(ServerPort), gameType(eTeamFFA), gameOptions(0),
+    rabbitSelection(ScoreRabbitSelection), msgTimer(0), spamWarnMax(5),
+    servermsg(""), advertisemsg(""), worldFile(""),
+    pingInterface(""), password(""),
+    listServerOverridden(false), publicizedTitle(""), publicizedAddress(""),
+    advertiseGroups("EVERYONE"),
+    suppressMasterBanList(false), masterBanListOverridden(false),
     maxShots(1), maxTeamScore(0), maxPlayerScore(0),
     numExtraFlags(0), teamKillerKickRatio(0),
     numAllowedFlags(0), shakeWins(0), shakeTimeout(0),
-    teamFlagTimeout(30), maxlagwarn(10000), lagwarnthresh(-1.0),
-    idlekickthresh(-1.0), timeLimit(0.0f), timeElapsed(0.0f),
-    linearAcceleration(0.0f), angularAcceleration(0.0f), useGivenPort(false),
+    teamFlagTimeout(30), maxlagwarn(10000), maxjitterwarn(10000), maxpacketlosswarn(10000),
+    lagwarnthresh(-1.0f), jitterwarnthresh(-1.0f), packetlosswarnthresh(-1.0f),
+    idlekickthresh(-1.0f), timeLimit(0.0f), timeElapsed(0.0f), addedTime(0.0f),
+    useGivenPort(false),
     useFallbackPort(false), requireUDP(false), randomBoxes(false),
     randomCTF(false), flagsOnBuildings(false), respawnOnBuildings(false),
     oneGameOnly(false), timeManualStart(false), randomHeights(false),
     useTeleporters(false), teamKillerDies(true), printScore(false),
     publicizeServer(false), replayServer(false), startRecording(false),
-    filterFilename(""), filterCallsigns(false), filterChat(false), filterSimple(false),
+    timestampLog(false), timestampMicros(false), tkAnnounce(false),
+    filterFilename(""), filterAnnounce(false), filterCallsigns(false), filterChat(false), filterSimple(false),
     banTime(300), voteTime(60), vetoTime(2), votesRequired(2),
-    votePercentage(50.1f), voteRepeatTime(300), disableSet(false),
-    disableFlagReset(false), disableBan(false), disableKick(false),
-    autoTeam(false), citySize(5)
+    votePercentage(50.1f), voteRepeatTime(300),
+    autoTeam(false), citySize(5), cacheURL(""), cacheOut(""), botsPerIP(2)
   {
     int i;
     for (FlagTypeMap::iterator it = FlagType::getFlagMap().begin();
@@ -84,10 +93,14 @@ struct CmdLineOptions
       maxTeam[i] = MaxPlayers;
       numTeamFlags[i] = 0;
     }
+
+    listServerURL.push_back(DefaultListServerURL);
+    masterBanListURL.push_back(DefaultMasterBanURL);
   }
 
   int			wksPort;
-  int			gameStyle;
+  GameType		gameType;
+  int			gameOptions;
   int			rabbitSelection;
   int			msgTimer;
   int			spamWarnMax;
@@ -96,11 +109,18 @@ struct CmdLineOptions
   std::string   advertisemsg;
   std::string   worldFile;
   std::string   pingInterface;
-  std::string   listServerURL;
   std::string   password;
+
+  bool listServerOverridden;
+  std::vector<std::string>   listServerURL;
 
   std::string	publicizedTitle;
   std::string	publicizedAddress;
+  std::string	advertiseGroups;
+
+  bool			suppressMasterBanList;
+  bool			masterBanListOverridden;
+  std::vector<std::string>		masterBanListURL;
 
   uint16_t		maxShots;
   int			maxTeamScore;
@@ -112,17 +132,21 @@ struct CmdLineOptions
   uint16_t		shakeTimeout;
   int			teamFlagTimeout;
   int			maxlagwarn;
+  int		   maxjitterwarn;
+  int		   maxpacketlosswarn;
+
 
   float			lagwarnthresh;
+  float		 jitterwarnthresh;
+  float		 packetlosswarnthresh;
   float			idlekickthresh;
   float			timeLimit;
   float			timeElapsed;
-  float			linearAcceleration;
-  float			angularAcceleration;
+  float			addedTime;
 
   bool			useGivenPort;
   bool			useFallbackPort;
-  bool			requireUDP; // true if only new clients allowed
+  bool			requireUDP;
   bool			randomBoxes;
   bool			randomCTF;
   bool			flagsOnBuildings;
@@ -136,6 +160,10 @@ struct CmdLineOptions
   bool			publicizeServer;
   bool			replayServer;
   bool			startRecording;
+  bool			timestampLog;
+  bool			timestampMicros;
+  bool			countdownPaused;
+  bool			tkAnnounce;
 
   uint16_t		maxTeam[NumTeams];
   FlagNumberMap		flagCount;
@@ -147,6 +175,7 @@ struct CmdLineOptions
 
   /* inappropriate language filter */
   std::string		filterFilename;
+  bool			filterAnnounce;
   bool			filterCallsigns;
   bool			filterChat;
   bool			filterSimple;
@@ -160,11 +189,6 @@ struct CmdLineOptions
   float votePercentage;
   unsigned short int voteRepeatTime;
 
-  bool disableSet;
-  bool disableFlagReset;
-  bool disableBan;
-  bool disableKick;
-
   std::string		reportFile;
   std::string		reportPipe;
 
@@ -176,11 +200,30 @@ struct CmdLineOptions
   /* city options */
   int			citySize;
   int			numTeamFlags[NumTeams];
+
+  std::string	   cacheURL;
+  std::string	   cacheOut;
+
+  /* freezetag options */
+  bool			freezeTag;
+
+  /** how many client-side bots are allowed per IP address */
+  int			botsPerIP;
+
+  // plugins
+  typedef struct
+  {
+	  std::string plugin;
+	  std::string command;
+  }pluginDef;
+
+  std::vector<pluginDef>	pluginList;
 };
 
 
 void parse(int argc, char **argv, CmdLineOptions &options, bool fromWorldFile = false);
-
+void finalizeParsing(int argc, char **argv, CmdLineOptions &options, EntryZones& ez);
+bool checkCommaList (const char *list, int maxlen);
 
 #else
 struct CmdLineOptions;
@@ -193,4 +236,3 @@ struct CmdLineOptions;
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

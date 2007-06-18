@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "SGIImageFile.h"
@@ -18,7 +18,7 @@
 // SGIImageFile
 //
 
-SGIImageFile::SGIImageFile(std::istream* stream) : ImageFile(stream)
+SGIImageFile::SGIImageFile(std::istream* input) : ImageFile(input)
 {
   unsigned char header[512];
   readRaw(header, sizeof(header));
@@ -43,12 +43,12 @@ SGIImageFile::SGIImageFile(std::istream* stream) : ImageFile(stream)
   }
 
   // get dimensions
-  uint16_t width, height, depth;
-  width = swap16BE(reinterpret_cast<uint16_t*>(header + 6));
+  uint16_t myWidth, myHeight, depth;
+  myWidth = swap16BE(reinterpret_cast<uint16_t*>(header + 6));
   if (dimensions < 2)
-    height = 1;
+    myHeight = 1;
   else
-    height = swap16BE(reinterpret_cast<uint16_t*>(header + 8));
+    myHeight = swap16BE(reinterpret_cast<uint16_t*>(header + 8));
   if (dimensions < 3)
     depth = 1;
   else
@@ -58,8 +58,8 @@ SGIImageFile::SGIImageFile(std::istream* stream) : ImageFile(stream)
 
   // save info
   isVerbatim = (header[2] == 0);
-  init(static_cast<int>(depth), static_cast<int>(width),
-       static_cast<int>(height));
+  init(static_cast<int>(depth), static_cast<int>(myWidth),
+       static_cast<int>(myHeight));
 }
 
 SGIImageFile::~SGIImageFile()
@@ -212,4 +212,3 @@ bool					SGIImageFile::readRLE(void* buffer)
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

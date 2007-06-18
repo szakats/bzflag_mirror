@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	BZF_WORLD_PLAYER_H
@@ -24,22 +24,12 @@ class WorldPlayer : public Player {
 			~WorldPlayer();
 
     void		addShot(const FiringInfo&);
-    ShotPath*		getShot(int index) const;
     void		updateShots(float dt);
-    int			getMaxShots() const;
     void		addShots(SceneDatabase* scene, bool colorblind) const;
 
   private:
     bool		doEndShot(int index, bool isHit, float* pos);
-
-  private:
-    std::vector<RemoteShotPath*> shots;
 };
-
-inline int WorldPlayer::getMaxShots() const
-{
-  return shots.size();
-}
 
 #endif // BZF_WORLD_PLAYER_H
 
@@ -50,4 +40,3 @@ inline int WorldPlayer::getMaxShots() const
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

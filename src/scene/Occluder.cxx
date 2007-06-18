@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 
@@ -79,20 +79,19 @@ void OccluderManager::setMaxOccluders(int size)
 }
 
 
-IntersectLevel OccluderManager::occlude(const float* mins,
-                                        const float* maxs,
-                                        unsigned int score)
+IntersectLevel OccluderManager::occlude(const Extents& exts,
+					unsigned int score)
 {
   IntersectLevel level = Outside;
 
   for (int i = 0; i < activeOccluders; i++) {
     Occluder* oc = occluders[i];
-    IntersectLevel tmp = oc->doCullAxisBox (mins, maxs);
+    IntersectLevel tmp = oc->doCullAxisBox (exts);
     if (tmp == Contained) {
       oc->addScore (score);
       return Contained;
       // FIXME - this only makes sense for randomly selected
-      //         occluders where there can be overlap
+      //	 occluders where there can be overlap
     }
     else if (tmp == Partial) {
       level = Partial;
@@ -103,7 +102,7 @@ IntersectLevel OccluderManager::occlude(const float* mins,
 }
 
 
-bool OccluderManager::occludePeek(const float* mins, const float* maxs)
+bool OccluderManager::occludePeek(const Extents& exts)
 {
   int i;
   bool result = false;
@@ -111,7 +110,7 @@ bool OccluderManager::occludePeek(const float* mins, const float* maxs)
   // doesn't adjust occluder scores
   for (i = 0; i < activeOccluders; i++) {
     Occluder* oc = occluders[i];
-    if (oc->doCullAxisBox (mins, maxs) == Contained) {
+    if (oc->doCullAxisBox (exts) == Contained) {
       result = true;
     }
   }
@@ -148,8 +147,8 @@ static void print_scores (Occluder** olist, int count, const char* str)
     int score = olist[i]->getScore();
     if (score > 0) {
       if (first) {
-        printf ("%s(%i):", str, count);
-        first = false;
+	printf ("%s(%i):", str, count);
+	first = false;
       }
       printf (" %i", score);
     }
@@ -160,7 +159,7 @@ static void print_scores (Occluder** olist, int count, const char* str)
 }
 
 
-void OccluderManager::select(SceneNode** list, int listCount)
+void OccluderManager::select(const SceneNode* const* list, int listCount)
 {
   int oc;
 
@@ -182,7 +181,7 @@ void OccluderManager::select(SceneNode** list, int listCount)
   // remove the useless occluders
   for (oc = 0; oc < activeOccluders; oc++) {
     if ((occluders[oc]->getScore() <= 0) ||
-        (oc == (allowedOccluders - 1))) { // always have a spare
+	(oc == (allowedOccluders - 1))) { // always have a spare
       delete occluders[oc];
       activeOccluders--;
       occluders[oc] = occluders[activeOccluders];
@@ -205,10 +204,14 @@ void OccluderManager::select(SceneNode** list, int listCount)
     target = listCount;
   }
   while (activeOccluders < target) {
-    occluders[activeOccluders] = new Occluder(list[rand() % listCount]);
+    const SceneNode* sceneNode = list[rand() % listCount];
+    occluders[activeOccluders] = new Occluder(sceneNode);
     if (occluders[activeOccluders]->getVertexCount() == 0) {
       delete occluders[activeOccluders];
       occluders[activeOccluders] = NULL;
+      target--; // protect against a list full of nonvalid occluders.
+		// could also tally the valid occluder sceneNodes, but
+		// that would eat up CPU time in a large list
     }
     else {
       activeOccluders++;
@@ -270,40 +273,29 @@ const bool Occluder::DrawEdges = true;
 const bool Occluder::DrawNormals = false;
 const bool Occluder::DrawVertices = true;
 
-Occluder::Occluder(SceneNode* node)
+Occluder::Occluder(const SceneNode* node)
 {
   sceneNode = node;
+  planes = NULL;
+  vertices = NULL;
   cullScore = 0;
-  vertexCount = 0;
 
   vertexCount = node->getVertexCount();
-  if ((vertexCount < 3) || (vertexCount > 4)) {
+  if (!node->isOccluder()) {
+    vertexCount = 0; // used to flag a bad occluder
     return;
   }
+  vertices = new float[vertexCount][3];
+
   planeCount = vertexCount + 1; // the occluder's plane normal
+  planes = new float[planeCount][4];
 
   // counter-clockwise order as viewed from the front face
-  if (planeCount == 4) {
-    for (int i = 0; i < vertexCount; i++) {
-      const float* vertex = node->getVertex(i);
-      vertices[i][0] = vertex[0];
-      vertices[i][1] = vertex[1];
-      vertices[i][2] = vertex[2];
-    }
-  }
-  else if (planeCount == 5) {
-    // QuadWallSceneNode vertices need to be mapped
-    const int order[4] = { 0, 1, 3, 2};
-    for (int i = 0; i < vertexCount; i++) {
-      const float* vertex = node->getVertex(order[i]);
-      vertices[i][0] = vertex[0];
-      vertices[i][1] = vertex[1];
-      vertices[i][2] = vertex[2];
-    }
-  }
-  else {
-    printf ("Program error in Occluder::Occluder()\n");
-    exit (1);
+  for (int i = 0; i < vertexCount; i++) {
+    const float* vertex = node->getVertex(i);
+    vertices[i][0] = vertex[0];
+    vertices[i][1] = vertex[1];
+    vertices[i][2] = vertex[2];
   }
 
   return;
@@ -313,12 +305,14 @@ Occluder::Occluder(SceneNode* node)
 Occluder::~Occluder()
 {
   // do nothing
+  delete[] planes;
+  delete[] vertices;
 }
 
 
-IntersectLevel Occluder::doCullAxisBox(const float* mins, const float* maxs)
+IntersectLevel Occluder::doCullAxisBox(const Extents& exts)
 {
-  return testAxisBoxOcclusion (mins, maxs, planes, planeCount);
+  return testAxisBoxOcclusion (exts, planes, planeCount);
 }
 
 
@@ -331,7 +325,7 @@ bool Occluder::doCullSceneNode(SceneNode* node)
 
 
 static bool makePlane (const float* p1, const float* p2, const float* pc,
-                       float* r)
+		       float* r)
 {
   // make vectors from points
   float x[3] = {p1[0] - pc[0], p1[1] - pc[1], p1[2] - pc[2]};
@@ -362,11 +356,6 @@ static bool makePlane (const float* p1, const float* p2, const float* pc,
 
 bool Occluder::makePlanes(const Frustum* frustum)
 {
-  // you can see through glass
-  if (sceneNode->isTransparent()) {
-    return false;
-  }
-
   // occluders can't have their back towards the camera
   const float* eye = frustum->getEye();
   const float* p = sceneNode->getPlane();
@@ -384,18 +373,9 @@ bool Occluder::makePlanes(const Frustum* frustum)
   planes[0][3] = -plane[3];
 
   // make the edges planes
-  if (vertexCount == 3) {
-    if (!makePlane (vertices[0], vertices[2], eye, planes[1]) ||
-        !makePlane (vertices[1], vertices[0], eye, planes[2]) ||
-        !makePlane (vertices[2], vertices[1], eye, planes[3])) {
-      return false;
-    }
-  }
-  else if (vertexCount == 4) {
-    if (!makePlane (vertices[0], vertices[3], eye, planes[1]) ||
-        !makePlane (vertices[1], vertices[0], eye, planes[2]) ||
-        !makePlane (vertices[2], vertices[1], eye, planes[3]) ||
-        !makePlane (vertices[3], vertices[2], eye, planes[4])) {
+  for (int i = 0; i < vertexCount; i++) {
+    int second = (i + vertexCount - 1) % vertexCount;
+    if (!makePlane (vertices[i], vertices[second], eye, planes[i + 1])) {
       return false;
     }
   }
@@ -426,7 +406,7 @@ void Occluder::draw() const
     for (int a = 0; a < 3; a++) {
       center[a] = 0.0f;
       for (v = 0; v < vertexCount; v++) {
-        center[a] += vertices[v][a];
+	center[a] += vertices[v][a];
       }
       center[a] = center[a] / (float) vertexCount;
     }
@@ -451,18 +431,18 @@ void Occluder::draw() const
       float outwards[3];
       int vn = (v + 1) % vertexCount;
       for (int a = 0; a < 3; a++) {
-        midpoint[a] = 0.5f * (vertices[v][a] + vertices[vn][a]);
-        outwards[a] = midpoint[a] - (length * planes[vn + 1][a]);
+	midpoint[a] = 0.5f * (vertices[v][a] + vertices[vn][a]);
+	outwards[a] = midpoint[a] - (length * planes[vn + 1][a]);
       }
       glBegin (GL_LINES);
-      glColor4fv (colors[v + 1]);
+      glColor4fv (colors[(v % 4) + 1]);
       if (DrawEdges) {
-        glVertex3fv (vertices[v]);
-        glVertex3fv (vertices[vn]);
+	glVertex3fv (vertices[v]);
+	glVertex3fv (vertices[vn]);
       }
       if (DrawNormals) {
-        glVertex3fv (midpoint);
-        glVertex3fv (outwards);
+	glVertex3fv (midpoint);
+	glVertex3fv (outwards);
       }
       glEnd();
     }
@@ -472,7 +452,7 @@ void Occluder::draw() const
   if (DrawVertices) {
     for (v = 0; v < vertexCount; v++) {
       glBegin (GL_POINTS);
-      glColor4fv (colors[v + 1]);
+      glColor4fv (colors[(v % 4) + 1]);
       glVertex3fv (vertices[v]);
       glEnd();
     }
@@ -491,7 +471,7 @@ void Occluder::draw() const
 void Occluder::print(const char* string) const
 {
   // FIXME - debugging
-  printf ("%s: %p, V = %i, P = %i\n", string, sceneNode, vertexCount, planeCount);
+  printf ("%s: %p, V = %i, P = %i\n", string, (void*)sceneNode, vertexCount, planeCount);
   for (int v = 0; v < vertexCount; v++) {
     printf ("  v%i: %f, %f, %f\n", v, vertices[v][0], vertices[v][1],vertices[v][2]);
   }

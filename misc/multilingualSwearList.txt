@@ -313,6 +313,7 @@ arsephuk
 arsepiece
 arsestab
 arsewipe
+ashole
 asphinct
 ass
 assbandit
@@ -343,7 +344,6 @@ asshead
 assho
 asshoe
 asshol
-asshole
 asshorisin
 assinahole
 assjuice
@@ -407,6 +407,7 @@ basterd
 bastid
 biach
 biatch
+biotch
 bicht
 bigass
 bigassball
@@ -450,7 +451,6 @@ bitemyass
 bitemyprick
 biyotch
 blowjob
-bltch
 boner
 bulshit
 bumfuck
@@ -667,6 +667,7 @@ fuckyoucock
 fuckyoucunt
 fuckyougm
 fuckyouii
+fuckyu
 fucoff
 fucq
 fucqdat
@@ -675,13 +676,20 @@ fuct
 fuctup
 fucxyou
 fucya
+fucyoo
 fucyou
 fucyoubich
+fucyu
 fudgehole
 fudgepack
 fudpuck
 fugm
 fugmpuke
+fuhk
+fuhku
+fuhkyoo
+fuhkyou
+fuhkyu
 fuhq
 fuk
 fukad
@@ -760,6 +768,7 @@ fukyallmofo
 fukyermom
 fukyew
 fukyoass
+fukyoo
 fukyou
 fukyouanddie
 fukyouus
@@ -819,6 +828,7 @@ jewboy
 jewboynigger
 jewishnazi
 jewishwhore
+jigaboo
 jiz
 killaniga
 kunt
@@ -854,28 +864,24 @@ mydick
 nazijewraper
 naziskinhead
 niga
-nigahbytch
+nigaboo
+nigafag
+nigah
 nigaretto
 nigatrash
 nigazbiotch
 nigbeater
 nigerbeater
 nigerman
-nigga
-niggaboo
-niggafag
-niggah
 nigge
-nigghaz
-niggher
-niggkilla
 niggor
 niggr
 niggrian
-nigguh
-niggurs
 niggy
+nighaz
+nigher
 nigiro
+nigkilla
 niglet
 nigletbard
 nigletmaster
@@ -883,11 +889,14 @@ nigofger
 nigore
 nigrkill
 nigromance
+niguh
+nigurs
 nigz
 nipalicious
 nipplelicker
 penis
 pinktaco
+poontang
 pootang
 prick
 punkass
@@ -932,7 +941,6 @@ suckme
 suckmydick
 sucmybawl
 supabiatch
-tit
 twat
 vageyenuh
 vagina
@@ -1041,7 +1049,6 @@ pinjor                  # cs - cock
 prsa                    # cs - tits
 jebat										# cs - fuck
 pojeb sa								# cs - fuck off
-
 
 
 # Chinese (Cantonese, Mandarin, and Hokkien - phonetic, more or less)
@@ -1203,9 +1210,14 @@ pogue mahone            # gd - kiss my ass
 
 
 # German
+# arch                  # de - ass
+akrampe                 # de - asshole
 arsch                   # de - ass
+arschficker             # de - assfucker
 arschgesicht            # de - "assface" (butthead)
-asch      		# de - ass
+arschkrampe             # de - asshole
+arschlock               # de - asshole
+asch                    # de - ass
 auf wiedersehen fickakopf 	 # de - goodbye fuckhead
 blode fotze             # de - stupid cunt
 blodes arschloch        # de - stupid asshole
@@ -1214,33 +1226,45 @@ depp                    # de - idiot
 drecksau                # de - dirty pig
 du verdammter arschficker 	 # de - you damn assfucker
 dummcopf                # de - (lit. stupid head)
+dummkopf                # de - (lit. stupid head)
 dummes huhn             # de - stupid chicken
-fick dich               # de - fuck you
-fick mich               # de - fuck me
+fick                    # de - fuck
 fotze                   # de - cunt
 himmeldonnerwetter      # de - *no translation--very strong curse*  (lit. heaven thunder weather)
 hosenschlange           # de - lit. - lick my trouser snake
 hure                    # de - whore
 hurensohn               # de - sonuvabitch
 ich moechte mit dir schlafen 	 # de - i want to sleep with (fuck) you
-lleck mich am arsch     # de - lick my ass
+kacke                   # de - shit
+kanacke                 # de - ? (insinuating something bad about the roots of a person (lit. human))
+kot                     # de - shit
+kotklumpen              # de - piece of shit
+leck mich am arsch      # de - lick my ass
 lesbe                   # de - lesbian
 mach es dir selber      # de - go fuck yourself
 mutterficker            # de - motherfucker
-schies                  # de - shit
+neger                   # de - nigger
+nutte                   # de - whore
+penner                  # de - homeless person (vulgar)
+pimmel                  # de - penis
+poppen                  # de - fuck
+rammel                  # de - fuck
+rammeln                 # de - fuck
 scheis                  # de - shit
-schiese                 # de - shit
 scheise                 # de - shit
+scheissdreck            # de - fucking business (lit: shit)
 scheissekopf            # de - shithead
+schiese                 # de - shit
 schlampe                # de - tramp or slut
 schnoodle noodle        # de - dick snot
 schweinhund             # de - (dumb) pigdog (archaic)
+schwuchtel              # de - faggot (noun)
 schwuchtl               # de - faggot (noun)
-shiess                  # de - shit
 sheiss                  # de - shit
+shiess                  # de - shit
 shiesse                 # de - shit
 sheisse                 # de - shit
-vig dischen swaenen     # de - you fucking bastard
+wichser                 # de - motherfucker
 
 
 # Greek
@@ -1570,20 +1594,55 @@ pedar sag               # fa - (lit.) your father is a dog
 
 
 # Polish
+chuj                    # pl - dick
 coorva                  # pl - fuck
 dupek                   # pl - asshole
+dzifka                  # pl - whore (light)
+dzivka                  # pl - whore (light)
 dziwka                  # pl - whore (light)
+fiucie                  # pl - dick
+fiut                    # pl - dick
 gowno                   # pl - shit
 huj                     # pl - dick
+jeba                    # pl - fuck
+jebac                   # pl - to fuck
+jebak                   # pl - to fuck
+jeban                   # pl - to fuck
+jebniet                 # pl - fucked, fucked up
+jebniety                # pl - fucked, fucked up
+kurva                   # pl - whore (hard)
 kurwa                   # pl - whore (hard), fig. "oh shit!"
+kurwiszon               # pl - son of a bitch
+kutas                   # pl - dick
+ochujales               # pl - fucking crazy
+peezda                  # pl - pussy
 pierdol	      	      	# pl - fuck
 pierdolec               # pl - fucker
+pizda                   # pl - pussy
+pizde                   # pl - pussy
+pizdo                   # pl - pussy
+pizdy                   # pl - pussy
+pojeb                   # pl - fucker
+pojeban                 # pl - fucked up
 pojebany                # pl - fucked up
+qrva                    # pl - whore
+qrwa                    # pl - whore
+skurwysysn              # pl - son of a bitch
 spieprzaj               # pl - piss off
+spierdala               # pl - fuck off
 spierdalaj              # pl - fuck off
+ssij mi pale            # pl - suck my dick
+swiniojebca             # pl - pigfucker
+wpierdal                # pl - kick their ass
+wpierdala		# pl - eat something vulgar
+wpierdalac		# pl - eat something vulgar
+wypierdala              # pl - fuck off
+wypierdala              # pl - fuck off
+wypierdalaj             # pl - fuck off
+zajebicie               # pl - "fucking awesome"
 zajebiste               # pl - "fucking awesome"
 zapierdol	      	# pl - fuck
-zapierdole	      	# pl - fuck
+zapierdole	      	# pl - fuck (going to fuck something up)
 
 
 # Portuguese
@@ -1643,41 +1702,34 @@ zhopa                   # ru - an asshole or an ass
 
 
 # Serbian
-bog te jebo!            # sr - may god fuck you!
-bog te yebo             # sr - may god fuck you!
-crko dabogda stoko seljacka! 	# sr - may you drop dead, you redneck ox!
-crko dubogda stocko selyachka 	# sr - may you drop dead, you redneck ox!
-govedo!                 # sr - jerk.
+govedo                  # sr - jerk
 govno yedno             # sr - you piece of shit.
 isisas mi kurcu seme    # sr - you are sucking out my sperm readily.
-jebem te u oko.         # sr - i am fucking you in the eye. you say this when somebody can't see something, or if somebody can see too much.
-jebem te usta.          # sr - i am fuckung you in the mouth. very nice expresion.
-jebem ti dete musavo.   # sr - i fuck your dirty child, with meaning you are that one.
-jebem ti mater u picku! # sr - i fuck your mother in her pussy!
-jebem ti sunce          # sr - i fuck your sunshine.
-jebo te papa.           # sr - the pope fucks you.
-jebo te sveti ilija.    # sr - the saint ilija fucks you.
-jebo ti pas mater!      # sr - may a dog fuck your mother!
-moi te kara is ormara.  # sr - my dick is fucking you from an closet.
-peechka                 # sr - pussy.
-peecko smrdlyeeva       # sr - you smelly pussy.
-picka ti se ogadila.    # sr - i beg the god that pussy will not exist for you anymore. very important to say to somebody who can't live without pussy.
-popoosheesh me quratz krusnee 		# sr - suck my lovely dick!
-popusis mi kurac krasni # sr - suck my lovely dick!
-sisadzijo.              # sr - cock sucker.
-some!                   # sr - you stupid ass.
-sranje!                 # sr - ohhh, shit!
-yebachu te!             # sr - i'll fuck you. (have two meanings. 1. if you want to fight with someone. 2. when you are about to fuck a chick.
-yebem tee mutter oo peetchqu # sr - i fuck your mother in her pussy!
-yebo tee puss mutter    # sr - may a dog fuck your mother!
+jebem                   # sr - fucking
+jebo                    # sr - fuck
+krasni                  # sr - dick
+krusnee                 # sr - dick
+peechka                 # sr - pussy
+peecko                  # sr - pussy
+peetchqu                # sr - pussy
+seljacka                # sr - redneck
+selyacka                # sr - redneck
+sisadzijo               # sr - cock sucker
+# some                    # sr - stupid ass
+sranje                  # sr - shit
+yebachu                 # sr - fuck
+yebem                   # sr - fuck (phonetic)
+yebo                    # sr - fuck (phonetic)
+
 
 # Slovenian
 drek                    # sl - shit
 kurac                   # sl -  penis
 peder                   # sl - faggot
-pejt u pizdu mater!     # sl - go to (in) your mothers vagina
+pejt u pizdu            # sl - your mothers vagina
 #pizda                   # sl - vagina
-preklet vosu!           # sl - cursed donkey (literally "bloody fool")
+#pizdu                   # sl - vagina
+preklet vosu            # sl - cursed donkey (literally "bloody fool")
 
 
 # Spanish
@@ -1757,7 +1809,7 @@ murrda			# es - shit (slang)
 nema			# es - cock/penis (n~ema)
 nido			# es - cunt (mexican slang)
 ojete                   # es - asshole
-orto			# es - ass (argentinian and uruguayan)
+# orto			# es - ass (argentinian and uruguayan)
 panocha                 # es - pussy (extremely vulgar, mex)
 peha                    # es - dick
 pelotuda		# es - dumbass
@@ -1783,7 +1835,7 @@ rejuego			# es - prostitute (mexican/guatemalan slang)
 remame			# es - cunt (mexican slang)
 rene			# es - nigger (mexican slang)
 riata			# es - dick (mexican slang)
-rul			# es - asshole (mexican slang)
+# rul			# es - asshole (mexican slang)
 sacale la leche         # es - make her cum (lit. take the milk out of her)
 taconera  		# es - prostitute (lit. high-heeler)
 trastero		# es - asshole (lit. anus)
@@ -1884,7 +1936,7 @@ chraa
 ayir
 atouche
 futkretzn
-pimmel
+
 
 # Local Variables: ***
 # mode:Text ***

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // object that creates and contains a spawn position
@@ -15,59 +15,66 @@
 #ifndef __SPAWNPOSITION_H__
 #define __SPAWNPOSITION_H__
 
-#include "PlayerInfo.h"
+#include "common.h"
 
+/* local interface headers */
+#include "SpawnPolicy.h"
+
+
+/** SpawnPosition represents a single spawn position and encapsulates
+ *  the logic for selecting that new position based on the map, world
+ *  configuration settings, and current game activity.
+ */
 class SpawnPosition {
 
 public:
   SpawnPosition(int playerId, bool onGroundOnly, bool notNearEdges);
   ~SpawnPosition();
 
-  const float getX() const;
-  const float getY() const;
-  const float getZ() const;
-  const float getAzimuth() const;
+  /** used to override the default spawn policy.  call this before
+   *  creating SpawnPosition objects.
+   */
+  static void SetSpawnPolicy(SpawnPolicy* policy);
+
+  float getX() const;
+  float getY() const;
+  float getZ() const;
+  float getAzimuth() const;
 
 private:
-  const float enemyProximityCheck(float &enemyAngle) const;
-  const float distanceFrom(const float* farPos) const;
-  const bool  isImminentlyDangerous() const;
-  const bool  isFacing(const float *enemyPos, const float enemyAzimuth,
-		       const float deviation) const;
-
   float	      azimuth;
   float       pos[3];
 
-  TeamColor   team;
-  float       testPos[3];
-  int	      curMaxPlayers;
-
-  float	      safeSWRadius;
-  float	      safeDistance;
-
+  /* class data - determines how the pos and azimuth are determined */
+  static SpawnPolicy *policy;
 };
 
-inline const float SpawnPosition::getX() const
+inline float SpawnPosition::getX() const
 {
   return pos[0];
 }
 
-inline const float SpawnPosition::getY() const
+inline float SpawnPosition::getY() const
 {
   return pos[1];
 }
 
-inline const float SpawnPosition::getZ() const
+inline float SpawnPosition::getZ() const
 {
   return pos[2];
 }
 
-inline const float SpawnPosition::getAzimuth() const
+/** returns the rotational orientation of this spawn position, from
+ *  facing 'North' in radians.
+ */
+inline float SpawnPosition::getAzimuth() const
 {
   return azimuth;
 }
 
-#endif  //__SPAWNPOSITION_H__
+#else
+class SpawnPosition;
+#endif  /* __SPAWNPOSITION_H__ */
 
 // Local Variables: ***
 // mode:C++ ***

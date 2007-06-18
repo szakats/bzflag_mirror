@@ -1,13 +1,15 @@
 if CLIENT_INCLUDED
-noinst_LIBRARIES = libGLKit.a
+noinst_LTLIBRARIES = libGLKit.la
 endif
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
-AM_CPPFLAGS = -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include @CONF_CPPFLAGS@
+AM_CXXFLAGS = @CONF_CXXFLAGS@
 
-libGLKit_a_SOURCES =			\
+libGLKit_la_LDFLAGS = -static
+libGLKit_la_SOURCES =			\
 	OpenGLGState.cxx		\
 	OpenGLLight.cxx			\
 	OpenGLMaterial.cxx		\

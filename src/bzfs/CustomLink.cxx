@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
@@ -20,25 +20,19 @@
 
 CustomLink::CustomLink()
 {
-  from = 0;
-  to = 0;
+  from = "";
+  to = "";
 }
 
 
 bool CustomLink::read(const char *cmd, std::istream& input)
 {
   std::string to_string;
-  if (strcmp(cmd, "from") == 0) {
+  if (strcasecmp(cmd, "from") == 0) {
     input >> from;
   }
-  else if (strcmp(cmd, "to") == 0) {
-    input >> to_string;
-    if (strcmp (to_string.c_str(), "random") == 0) {
-      to = -1;
-    }
-    else {
-      to = atoi (to_string.c_str());
-    }
+  else if (strcasecmp(cmd, "to") == 0) {
+    input >> to;
   }
   else {
     return WorldFileObject::read(cmd, input);
@@ -47,7 +41,7 @@ bool CustomLink::read(const char *cmd, std::istream& input)
 }
 
 
-void CustomLink::write(WorldInfo *world) const
+void CustomLink::writeToWorld(WorldInfo *world) const
 {
   world->addLink(from, to);
 }

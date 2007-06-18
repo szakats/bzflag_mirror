@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,20 +7,24 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __NETHANDLER_H__
 #define __NETHANDLER_H__
 
+/* common header */
+#include "common.h"
+
 /* system headers */
 #include <string>
 #include <map>
+#include <list>
 
 /* common interface headers */
 #include "PlayerInfo.h"
 #include "Address.h"
-#include "AdnsHandler.h"
+#include "AresHandler.h"
 
 enum RxStatus {
   ReadAll,
@@ -43,47 +47,40 @@ struct MessageCount {
 };
 #endif
 
+void setNoDelay(int fd);
+
 /** This class is a client that connects to a BZFlag client and has
     functions for sending and receiving messages.
 */
 class NetHandler {
 public:
   /** A default constructor.
-      It needs a pointer to the Player basic Info,
+      It needs:
       a socket address to address subsequent message at user,
-      a player Index, a unique pointer to a player
       the file descriptor for the TCP connection with the user.
   */
-  NetHandler(PlayerInfo *_info, const struct sockaddr_in &_clientAddr,
-	     int _playerIndex, int _fd);
+  NetHandler(const struct sockaddr_in &_clientAddr, int _fd);
   /** The default destructor
       free all internal resources, and close the tcp connection
   */
   ~NetHandler();
 
-  /** General purpose function to get the Handler given the index, or
-      test its existence
-  */
-  static bool exists(int _playerIndex);
-  static NetHandler *getHandler(int _playerIndex);
-
-  /** Class-Wide initialization and destruction
+  /** Class-Wide initialization
       Should be called before any other operation on any clas instance
       InitHandlers needs the addr structure filled to point to the local port
       needed for udp communications
   */
   static bool initHandlers(struct sockaddr_in addr);
-  static void destroyHandlers();
 
-  /** General function to support the select statement
-   */
+  /// General function to support the select statement
   static void setFd(fd_set *read_set, fd_set *write_set, int &maxFile);
   static bool isUdpFdSet(fd_set *read_set);
-  bool        isFdSet(fd_set *set);
+  bool	isFdSet(fd_set *set);
 
-  /**
-     return the opened socket, usable from all other network internal client
-  */
+  /// Supporting DNS Asynchronous resolver
+  static void checkDNS(fd_set *read_set, fd_set *write_set);
+
+  /// return the opened socket, usable from all other network internal client
   static int  getUdpSocket();
 
   /**
@@ -95,11 +92,9 @@ public:
       buffer is the received message
 
       uaddr is the identifier of the remote address
-
-      udpLinkRequest report if the received message is a valid udpLinkRequest
   */
   static int  udpReceive(char *buffer, struct sockaddr_in *uaddr,
-			 bool &udpLinkRequest);
+			 NetHandler **netHandler);
 
   /**
      tcpReceive try to get a message from the tcp connection
@@ -112,78 +107,126 @@ public:
      ReadError  : Error detected on the tcp connection
      ReadDiscon : Peer has closed the connection
   */
-  RxStatus    tcpReceive();
+  RxStatus    tcpReceive(bool doCodes = true);
   void       *getTcpBuffer();
+  unsigned int getTcpReadSize ( void  );
 
-  int         pwrite(const void *b, int l);
-  int         pflush(fd_set *set);
-  std::string reasonToKick();
-  void        getPlayerList(char *list);
-  const char *getTargetIP();
-  int         sizeOfIP();
-  void       *packAdminInfo(void *buf);
-  static int  whoIsAtIP(const std::string& IP);
-  in_addr     getIPAddress();
-  const char *getHostname();
-  /**
-     Notify that the channel is going to be close.
-     In the meantime any pwrite call will do nothing.
-     Cannot be undone.
-  */
-  void        closing();
+  /// Request if there is any buffered udp messages waiting to be sent
+  static bool	anyUDPPending() {return pendingUDP;};
+
+  /// Send all buffered UDP messages, if any
+  void		flushUDP();
+  static void	flushAllUDP();
+
+  int		pwrite(const void *b, int l);
+  int		pflush(fd_set *set);
+  std::string	reasonToKick();
+  void		getPlayerList(char *list);
+  const char*	getTargetIP();
+  int		sizeOfIP();
+  void*		packAdminInfo(void *buf);
+  static NetHandler *whoIsAtIP(const std::string& IP);
+  in_addr	getIPAddress();
+  const char*	getHostname();
+  bool	  reverseDNSDone();
+
+  static const int     clientNone    = 0;
+  static const int     clientBZAdmin = 1;
+  static const int     clientBZFlag  = 2;
+  void	  setClientKind(int kind);
+  int	   getClientKind();
+
+  /// Notify that the channel is going to be close.
+  /// In the meantime any pwrite call will do nothing.
+  /// Cannot be undone.
+  void		closing();
+
+  void	  setUDPin(struct sockaddr_in *uaddr);
+
+  static void setCurrentTime(TimeKeeper tm);
+
+  bool isMyUdpAddrPort(struct sockaddr_in uaddr, bool checkPort);
+
+  static std::list<NetHandler*> netConnections;
+
+  int  send(const void *buffer, size_t length);
+ /// Send data for transmission on the tcp channel.
+  ///   in case channel is not ready to accept other data, it just buffer it
+  /// Return 0 if all went ok
+  ///       -1 if got an error
+  ///       -2 if tcp buffer is going to be too much big
+  int  bufferedSend(const void *buffer, size_t length);
+
+  RxStatus    receive(size_t length);
+
+  void flushData ( void ){tcplen = 0;}
+
+  int getFD ( void ) {return fd;}
 
 private:
-  int  send(const void *buffer, size_t length);
   void udpSend(const void *b, size_t l);
-  int  bufferedSend(const void *buffer, size_t length);
-  bool isMyUdpAddrPort(struct sockaddr_in uaddr);
-  RxStatus    receive(size_t length);
+
 #ifdef NETWORK_STATS
-  void        countMessage(uint16_t code, int len, int direction);
-  void        dumpMessageStats();
+  void	countMessage(uint16_t code, int len, int direction);
+  void	dumpMessageStats();
 #endif
-#ifdef HAVE_ADNS_H
-  AdnsHandler *adns;
-#endif
+  AresHandler	   ares;
 
-//On win32, a socket is typedef UINT_PTR SOCKET;
-//Hopefully int will be ok
-  static int                udpSocket;
-  static NetHandler        *netPlayer[maxHandlers];
-  PlayerInfo               *info;
-  struct sockaddr_in        uaddr;
-  int                       playerIndex;
-  // socket file descriptor
-  int                       fd;
+  /// On win32, a socket is typedef UINT_PTR SOCKET;
+  /// Hopefully int will be ok
+  static int		udpSocket;
+  struct sockaddr_in	uaddr;
+  /// socket file descriptor
+  int			fd;
 
-  // peer's network address
-  Address                   peer;
+  int clientType;
 
-  // input buffers
-  // bytes read in current msg
-  int tcplen;
-  // current TCP msg
+  /// peer's network address
+  Address peer;
+  /* peer->getDotNotation returns a temp variable that is not safe
+   * to pass around.  This variable lets us keep a copy in allocated
+   * memory for as long as we need to */
+  std::string dotNotation;
+
+  /// input buffers
+  /// current TCP msg
   char tcpmsg[MaxPacketLen];
+  /// bytes read in current msg
+  int tcplen;
+  /// current UDP msg
+  static char	       udpmsg[MaxPacketLen];
+  static int		udpLen;
+  /// bytes read in current msg
+  static int		udpRead;
+  static struct sockaddr_in lastUDPRxaddr;
 
-  // Closing flag
+  /// Closing flag
   bool closed;
 
-  // output buffer
+  /// output buffer
   int outmsgOffset;
   int outmsgSize;
   int outmsgCapacity;
-  char *outmsg;
+  char* outmsg;
 
-  // UDP connection
+  char udpOutputBuffer[MaxPacketLen];
+  int udpOutputLen;
+  static bool pendingUDP;
+
+  /// UDP connection
   bool udpin; // udp inbound up, player is sending us udp
   bool udpout; // udp outbound up, we can send udp
 
-  bool                      toBeKicked;
-  std::string               toBeKickedReason;
+  bool toBeKicked;
+  std::string toBeKickedReason;
 
   // time accepted
   TimeKeeper time;
+  static TimeKeeper now;
+
 #ifdef NETWORK_STATS
+
+  bool     messageExchanged;
   // message stats bloat
   TimeKeeper perSecondTime[2];
   uint32_t perSecondCurrentBytes[2];
@@ -197,13 +240,59 @@ private:
 #endif
 };
 
-inline NetHandler *NetHandler::getHandler(int _playerIndex) {
-  if (_playerIndex < 0)
-    return NULL;
-  if (_playerIndex >= maxHandlers)
-    return NULL;
-  return netPlayer[_playerIndex];
-}
+class NewNetworkConnectionCallback
+{
+public:
+  virtual ~NewNetworkConnectionCallback(){};
+
+  virtual bool accept ( NetHandler *handler, int connectionID ) = 0;
+};
+
+
+class NetworkDataPendingCallback
+{
+public:
+    virtual ~NetworkDataPendingCallback(){};
+    virtual bool pending ( NetHandler *handler, int connectionID, bool tcp ) = 0;
+};
+
+class NetListener
+{
+public:
+  NetListener();
+  ~NetListener();
+
+  bool listen ( unsigned short port );
+
+  bool close ( NetHandler *handler );
+  bool close ( int connectionID );
+
+  int update ( float waitTime );
+
+  void processConnections ( void );
+
+  void addNewConnectionCallback ( NewNetworkConnectionCallback *handler );
+  void removeNewConnectionCallback  ( NewNetworkConnectionCallback *handler );
+
+  void addDataPendingCallback( NetworkDataPendingCallback *handler );
+  void removeDataPendingCallback( NetworkDataPendingCallback *handler );
+
+protected:
+  int	  listenSocket;
+
+  int	  toRead;
+
+  int	  maxFileDescriptors;
+  fd_set  read_set;
+  fd_set  write_set;
+
+  std::map<int,NetHandler*> handlers;
+
+  std::vector<NewNetworkConnectionCallback*>	newConnectionCallbacks;
+  std::vector<NetworkDataPendingCallback*>	dataPendingCallbacks;
+
+  void accept ( void );
+};
 
 #endif
 

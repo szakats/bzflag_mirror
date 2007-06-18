@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* BoltSceneNode:
@@ -21,11 +21,9 @@
 #include "ShotSceneNode.h"
 #include "OpenGLLight.h"
 
-class OpenGLTexture;
-
 class BoltSceneNode : public ShotSceneNode {
   public:
-			BoltSceneNode(const GLfloat pos[3]);
+			BoltSceneNode(const GLfloat pos[3], const GLfloat vel[3]);
 			~BoltSceneNode();
 
     void		setFlares(bool);
@@ -34,7 +32,6 @@ class BoltSceneNode : public ShotSceneNode {
     void		setTextureColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a = 1.0f);
     void		setColor(const GLfloat* rgb);
     void		setTexture(const int);
-    void		setColorblindTexture(const OpenGLTexture&);
     void		setTextureAnimation(int cu, int cv);
 
     bool		getColorblind() const;
@@ -43,8 +40,10 @@ class BoltSceneNode : public ShotSceneNode {
     void		move(const GLfloat pos[3], const GLfloat forward[3]);
     void		addLight(SceneRenderer&);
 
-    void		notifyStyleChange(const SceneRenderer&);
+    void		notifyStyleChange();
     void		addRenderNodes(SceneRenderer&);
+
+	bool phasingShot;
 
   protected:
     class BoltRenderNode : public RenderNode {
@@ -52,9 +51,13 @@ class BoltSceneNode : public ShotSceneNode {
 			BoltRenderNode(const BoltSceneNode*);
 			~BoltRenderNode();
 	void		setColor(const GLfloat* rgba);
-  void    setTextureColor(const GLfloat* rgba);
+	void		setTextureColor(const GLfloat* rgba);
 	void		render();
-	const GLfloat*	getPosition() { return sceneNode->getSphere(); }
+	void		renderGeoBolt();
+	void		renderGeoGMBolt();
+	void		renderGeoPill( float radius, float length, int segments, float endRad = -1);
+
+	const GLfloat*	getPosition() const { return sceneNode->getSphere(); }
 	void		setAnimation(int cu, int cv);
       private:
 	const BoltSceneNode* sceneNode;
@@ -89,6 +92,9 @@ class BoltSceneNode : public ShotSceneNode {
     OpenGLGState	gstate;
     OpenGLGState	colorblindGState;
     BoltRenderNode	renderNode;
+
+	GLfloat		azimuth, elevation,length;
+
 };
 
 #endif // BZF_BOLT_SCENE_NODE_H
@@ -100,4 +106,3 @@ class BoltSceneNode : public ShotSceneNode {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

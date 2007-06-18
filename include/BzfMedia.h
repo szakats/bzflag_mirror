@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __BZFMEDIA_H__
@@ -63,9 +63,6 @@ class BzfMedia {
     // sleep for given number of seconds
     virtual double	stopwatch(bool start);
 
-    // sleep for given number of seconds
-    virtual void	sleep(float timeInSeconds) = 0;
-
     // initialize the audio subsystem.  return true iff successful.
     virtual bool	openAudio() = 0;
 
@@ -85,7 +82,7 @@ class BzfMedia {
 
     // register a callback for audio processing. The passed procedure will be
     // called whenever audio needs to be filled
-    virtual void        startAudioCallback(bool (*)(void)) {};
+    virtual void	startAudioCallback(bool (*)(void)) {};
 
     // returns true if audio is running via callback
     virtual bool	hasAudioCallback() const {return false;};
@@ -122,8 +119,9 @@ class BzfMedia {
     virtual void	audioSleep(bool checkLowWater,
 				double maxTime = -1.0) = 0;
 
-    virtual void        setDriver(std::string driverName);
-    virtual void        setDevice(std::string deviceName);
+    virtual void	setDriver(std::string driverName);
+    virtual void	setDevice(std::string deviceName);
+    virtual void	audioDriver(std::string& driverName);
 
   protected:
     // return default extensions for image and sound files
@@ -172,4 +170,3 @@ class BzfMedia {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

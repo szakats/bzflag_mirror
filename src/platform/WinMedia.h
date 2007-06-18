@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* WinMedia:
@@ -18,7 +18,9 @@
 #define	BZF_WINMEDIA_H
 
 #include "BzfMedia.h"
+#ifdef HAVE_DSOUND_H
 #include <dsound.h>
+#endif
 
 class WinWindow;
 
@@ -27,7 +29,6 @@ class WinMedia : public BzfMedia {
 			WinMedia(WinWindow*);
 			~WinMedia();
 
-    void		sleep(float);
     bool		openAudio();
     void		closeAudio();
     bool		startAudioThread(void (*)(void*), void*);
@@ -49,9 +50,11 @@ class WinMedia : public BzfMedia {
     HWND		window;
     bool		audioReady;
     bool		audioPlaying;
+#ifdef HAVE_DSOUND_H
     IDirectSound*	audioInterface;
     IDirectSoundBuffer*	audioPrimaryPort;
     IDirectSoundBuffer*	audioPort;
+#endif
     int			audioNumChannels;
     int			audioOutputRate;
     int			audioBufferSize;
@@ -68,7 +71,6 @@ class WinMedia : public BzfMedia {
     HANDLE		audioCommandEvent;
     HANDLE		audioCommandMutex;
     HANDLE		audioThread;
-    HANDLE		dummyEvent;
     static void		(*threadProc)(void*);
     static void*	threadData;
 };
@@ -82,4 +84,3 @@ class WinMedia : public BzfMedia {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

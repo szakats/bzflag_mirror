@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // bzflag common header
@@ -40,10 +40,6 @@
 //
 // Address
 //
-
-#if !defined( GUSI_20 ) && !defined( WIN32 )
-  Address			Address::localAddress("");
-#endif
 
 Address::Address()
 {
@@ -107,26 +103,31 @@ bool			Address::isAny() const
   return addr[0].s_addr == htonl(INADDR_ANY);
 }
 
+bool			Address::isPrivate() const
+{
+  // 127.0.0.0/8
+  if ((addr[0].s_addr & htonl(0xff000000u)) == htonl(0x7f000000u))
+    return(true);
+  // 10.0.0.0/8
+  if ((addr[0].s_addr & htonl(0xff000000u)) == htonl(0x0a000000u))
+    return(true);
+  // 172.16.0.0/12
+  if ((addr[0].s_addr & htonl(0xfff00000u)) == htonl(0xac100000u))
+    return(true);
+  // 192.168.0.0/16
+  if ((addr[0].s_addr & htonl(0xffff0000u)) == htonl(0xc0a80000u))
+    return(true);
+  return(false);
+}
+
 std::string		Address::getDotNotation() const
 {
   return std::string(inet_ntoa(addr[0]));
 }
 
-uint8_t		        Address::getIPVersion() const {
+uint8_t			Address::getIPVersion() const {
   return 4;
 }
-
-#if !defined(_WIN32)
-static jmp_buf alarmEnv;
-static void		onAlarm(int)
-{
-  // jump back to setjmp.  this handles the race condition where we
-  // set the alarm but gethostbyname() wouldn't have been called
-  // until after the alarm goes off (resulting in an indeterminate
-  // wait).
-  longjmp(alarmEnv, 1);
-}
-#endif
 
 Address			Address::getHostAddress(const std::string hname)
 {
@@ -141,37 +142,12 @@ Address			Address::getHostAddress(const std::string hname)
       hent = gethostbyname(hostname);
     else
       return a;
-  }
-  else if (inet_aton(hname.c_str(), &tempAddr) != 0) {
+  } else if (inet_aton(hname.c_str(), &tempAddr) != 0) {
     a.addr.clear();
     a.addr.push_back(tempAddr);
     return a;
-  }
-  else {				// non-local address
-#if !defined(_WIN32)
-    // set alarm to avoid waiting too long
-    SIG_PF oldAlarm = bzSignal(SIGALRM, SIG_PF(onAlarm));
-    if (oldAlarm != SIG_ERR) {
-      if (setjmp(alarmEnv) != 0) {
-	// alarm went off
-	hent = NULL;
-	printError("Looking up host name: timeout");
-	return a;
-      }
-
-      // wait up to this many seconds
-      alarm(8);
-    }
-#endif
-
+  } else {				// non-local address
     hent = gethostbyname(hname.c_str());
-
-#if !defined(_WIN32)
-    if (oldAlarm != SIG_ERR) {
-      alarm(0);
-      bzSignal(SIGALRM, oldAlarm);
-    }
-#endif
   }
 
   if (!hent) {
@@ -189,29 +165,8 @@ Address			Address::getHostAddress(const std::string hname)
 
 std::string		Address::getHostByAddress(InAddr addr)
 {
-#if !defined(_WIN32)
-  // set alarm to avoid waiting too long
-  SIG_PF oldAlarm = bzSignal(SIGALRM, SIG_PF(onAlarm));
-  if (oldAlarm != SIG_ERR) {
-    if (setjmp(alarmEnv) != 0) {
-      // alarm went off
-      return std::string(inet_ntoa(addr));
-    }
-
-    // wait up to this many seconds
-    alarm(8);
-  }
-#endif
-
   int addrLen = sizeof(addr);
   struct hostent* hent = gethostbyaddr((char*)&addr, addrLen, AF_INET);
-
-#if !defined(_WIN32)
-  if (oldAlarm != SIG_ERR) {
-    alarm(0);
-    bzSignal(SIGALRM, oldAlarm);
-  }
-#endif
 
   if (!hent) {
     // can't lookup name -- return in standard dot notation
@@ -229,11 +184,11 @@ const std::string Address::getHostName(const std::string hostname) // const
       name = std::string(myname);
   }
   if (name.length() <= 0) {
-    return std::string("");
+    return std::string();
   }
   struct hostent* hent = gethostbyname(name.c_str());
   if (!hent) {
-    return std::string("");
+    return std::string();
   }
   return std::string(hent->h_name);
 }
@@ -270,7 +225,7 @@ void*			Address::unpack(void* _buf)
 
 void*			ServerId::pack(void* _buf) const
 {
-  // everything in PlayerId is already in network byte order
+  // everything in ServerId is already in network byte order
   unsigned char* buf = (unsigned char*)_buf;
   int32_t hostaddr = int32_t(serverHost.s_addr);
   ::memcpy(buf, &hostaddr, sizeof(int32_t));	buf += sizeof(int32_t);
@@ -310,4 +265,3 @@ bool			ServerId::operator!=(const ServerId& id) const
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

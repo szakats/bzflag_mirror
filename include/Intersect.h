@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -20,6 +20,8 @@
 #include "common.h"
 #include "Ray.h"
 #include "Frustum.h"
+
+class Extents;
 
 enum IntersectLevel {
   Outside,
@@ -44,7 +46,7 @@ Ray			rayMinusRay(const Ray& r1, float t1,
 // return t at which ray passes through sphere at origin of given radius
 float			rayAtDistanceFromOrigin(const Ray& r, float radius);
 
-// return t at which ray intersects box (size 2dx x 2dy x 2dz)
+// return t at which ray intersects box (size 2dx x 2dy x dz)
 // (-1 if never, 0 if starts inside).
 float			timeRayHitsBlock(const Ray& r, const float* boxPos,
 					float boxAngle, float dx,
@@ -89,36 +91,39 @@ float			timeAndSideRayHitsRect(const Ray& r,
 					float dx, float dy, int& side);
 
 // return true if polygon touches the axis aligned box
-bool			testPolygonInAxisBox(int pointCount,
-                                             const float (*points)[3],
-                                             const float* plane,
-                                             const float* boxMins,
-                                             const float* boxMaxs);
+bool testPolygonInAxisBox(int pointCount, const float (*points)[3],
+			  const float* plane, const Extents& extents);
 
 // return level of axis box intersection with Frumstum
 // possible values are Outside, Partial, and Contained.
 // the frustum plane normals point inwards
-IntersectLevel          testAxisBoxInFrustum(const float* boxMins,
-					     const float* boxMaxs,
-					     const Frustum* frustum);
+IntersectLevel testAxisBoxInFrustum(const Extents& extents,
+				    const Frustum* frustum);
 
 // return true if the axis aligned bounding box
 // is contained within all of the planes.
 // the occluder plane normals point inwards
-IntersectLevel          testAxisBoxOcclusion(const float* boxMins,
-					     const float* boxMaxs,
-					     const float (*planes)[4],
-					     int planeCount);
+IntersectLevel testAxisBoxOcclusion(const Extents& extents,
+				    const float (*planes)[4],
+				    int planeCount);
 
 // return true if the ray will intersect with the
 // axis aligned bounding box defined by the mins
 // and maxs. it will also fill in enterTime and
 // leaveTime if there is an intersection.
-bool                   textRayInAxisBox(const Ray& ray,
-                                        const float* boxMins,
-                                        const float* boxMaxs,
-                                        float& enterTime, float& leaveTime);
+bool textRayInAxisBox(const Ray& ray, const Extents& extents,
+		      float& enterTime, float& leaveTime);
 
+
+// return true if the ray hits the box
+// if it does hit, set the inTime value
+bool testRayHitsAxisBox(const Ray* ray, const Extents& extents,
+			float* inTime);
+
+// return true if the ray hits the box
+// if it does hit, set the inTime and outTime values
+bool testRayHitsAxisBox(const Ray* ray, const Extents& extents,
+			float* inTime, float* outTime);
 
 
 #endif // BZF_INTERSECT_H
@@ -130,4 +135,3 @@ bool                   textRayInAxisBox(const Ray& ray,
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

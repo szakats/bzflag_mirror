@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	__SHOTSTATISTICS_H__
@@ -27,29 +27,32 @@ public:
   ~ShotStatistics();
 
   // raw stats returns
-  int         getNormalFired() const;
-  int         getNormalHit() const;
-  int         getGMFired() const;
-  int         getGMHit() const;
-  int         getLFired() const;
-  int         getLHit() const;
-  int         getSBFired() const;
-  int         getSBHit() const;
-  int         getSWFired() const;
-  int         getSWHit() const;
-  int         getTHFired() const;
-  int         getTHHit() const;
+  int	 getNormalFired() const;
+  int	 getNormalHit() const;
+  int	 getGMFired() const;
+  int	 getGMHit() const;
+  int	 getLFired() const;
+  int	 getLHit() const;
+  int	 getSBFired() const;
+  int	 getSBHit() const;
+  int	 getSWFired() const;
+  int	 getSWHit() const;
+  int	 getTHFired() const;
+  int	 getTHHit() const;
 
   // stats processing
-  int         getTotalFired() const;
-  int         getTotalHit() const;
-  int         getTotalPerc() const;
+  int	 getTotalFired() const;
+  int	 getTotalHit() const;
+  int	 getTotalPerc() const;
   FlagType*   getFavoriteFlag() const;
   FlagType*   getBestFlag() const;
 
   // tally functions
-  void	      recordFire(FlagType* flag);
+  void	      recordFire(FlagType* flag, const float *pVec, const float *shotVec);
   void	      recordHit(FlagType* flag);
+
+  double getLastShotTimeDelta ( void ) const {return lastShotTimeDelta;}
+  double getLastShotDeviation ( void ) const {return lastShotDeviation;}
 
 private:
   int	      normalFired;
@@ -64,6 +67,11 @@ private:
   int	      shockWaveHit;
   int	      thiefFired;
   int	      thiefHit;
+
+  double	  lastShotTimeDelta;
+  double	  lastShotTime;
+
+  float		  lastShotDeviation;
 };
 
 
@@ -117,12 +125,12 @@ inline int ShotStatistics::getTHHit() const {
 
 inline int ShotStatistics::getTotalFired() const {
   return normalFired + guidedMissileFired + laserFired + superBulletFired +
-         shockWaveFired + thiefFired;
+	 shockWaveFired + thiefFired;
 }
 
 inline int ShotStatistics::getTotalHit() const {
   return normalHit + guidedMissileHit + laserHit + superBulletHit +
-         shockWaveHit + thiefHit;
+	 shockWaveHit + thiefHit;
 }
 
 #endif // __SHOTSTATISTICS_H__

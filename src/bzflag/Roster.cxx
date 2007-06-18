@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,35 +7,48 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
-#include "common.h"
 #include "Roster.h"
 
 /* local implementation headers */
 #include "World.h"
-#include "WorldPlayer.h"
 
 
 NameList silencePlayers;
 int curMaxPlayers = 0;
 RemotePlayer** player = NULL;
+int	    playerSize = 0;
+#ifdef ROBOT
 RobotPlayer* robots[MAX_ROBOTS];
 int numRobots = 0;
-
+#endif
 
 Player* lookupPlayer(PlayerId id)
 {
   // check my tank first
 
   LocalPlayer *myTank = LocalPlayer::getMyTank();
-  if (myTank->getId() == id)
+  if (myTank && myTank->getId() == id)
     return myTank;
 
-  if (id == ServerPlayer)
-    return World::getWorld()->getWorldWeapons();
+  if (id == ServerPlayer) {
+    World* world = World::getWorld();
+    if (world)
+      return world->getWorldWeapons();
+    else
+      return NULL;
+  }
+
+#ifdef ROBOT
+  for (int i = 0; i < numRobots; i++) {
+    if (robots[i]->getId() == id) {
+      return robots[i];
+    }
+  }
+#endif
 
   if (id < curMaxPlayers && player[id] && player[id]->getId() == id)
     return player[id];
@@ -54,6 +67,14 @@ int lookupPlayerIndex(PlayerId id)
   if (id == ServerPlayer)
     return ServerPlayer;
 
+#ifdef ROBOT
+  for (int i = 0; i < numRobots; i++) {
+    if (robots[i]->getId() == id) {
+      return id;
+    }
+  }
+#endif
+
   if (id < curMaxPlayers && player[id] && player[id]->getId() == id)
     return id;
 
@@ -63,23 +84,51 @@ int lookupPlayerIndex(PlayerId id)
 
 Player* getPlayerByIndex(int index)
 {
-  if (index == -2)
+  if (index == -2) {
     return LocalPlayer::getMyTank();
-  if (index == ServerPlayer)
-    return World::getWorld()->getWorldWeapons();
-  if (index == -1 || index >= curMaxPlayers)
+  }
+  if (index == ServerPlayer) {
+    World *world = World::getWorld();
+    if (!world) {
+      return NULL;
+    }
+    return world->getWorldWeapons();
+  }
+  if (index == -1 || index >= curMaxPlayers) {
     return NULL;
+  }
+#ifdef ROBOT
+  for (int i = 0; i < numRobots; i++) {
+    if (robots[i]->getId() == index) {
+      return robots[i];
+    }
+  }
+#endif
   return player[index];
 }
 
 Player* getPlayerByName(const char* name)
 {
-  for (int i = 0; i < curMaxPlayers; i++)
-    if (player[i] && strcmp( player[i]->getCallSign(), name ) == 0)
+  for (int i = 0; i < curMaxPlayers; i++) {
+    if (player[i] && strcmp( player[i]->getCallSign(), name ) == 0) {
       return player[i];
-  WorldPlayer *worldWeapons = World::getWorld()->getWorldWeapons();
-  if (strcmp(worldWeapons->getCallSign(), name) == 0)
+    }
+  }
+#ifdef ROBOT
+  for (int i = 0; i < numRobots; i++) {
+    if (strcmp( robots[i]->getCallSign(), name ) == 0) {
+      return robots[i];
+    }
+  }
+#endif
+  World *world = World::getWorld();
+  if (!world) {
+    return NULL;
+  }
+  WorldPlayer *worldWeapons = world->getWorldWeapons();
+  if (strcmp(worldWeapons->getCallSign(), name) == 0) {
     return worldWeapons;
+  }
   return NULL;
 }
 
@@ -89,7 +138,7 @@ BaseLocalPlayer* getLocalPlayer(PlayerId id)
   if (myTank->getId() == id) return myTank;
 #ifdef ROBOT
   for (int i = 0; i < numRobots; i++)
-    if (robots[i]->getId() == id)
+    if (robots[i] && robots[i]->getId() == id)
       return robots[i];
 #endif
   return NULL;

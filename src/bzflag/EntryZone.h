@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,26 +7,28 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __ENTRYZONE_H__
 #define __ENTRYZONE_H__
 
+// common should be the 1st one
+#include "common.h"
+
+// system headers
 #include <vector>
+
+// common headers
 #include "Flag.h"
-#include "Team.h"
+#include "global.h"
 
 class EntryZone {
   public:
-    EntryZone() {
-      pos[0] = pos[1] = pos[2] = 0.0f;
-      size[0] = size[1] = size[2] = 1.0f;
-      rot = 0.0f;
-      flags.clear();
-      teams.clear();
-      safety.clear();
-    }
+    EntryZone();
+    void* unpack(void*);
+
+  public:
     float pos[3];
     float size[3];
     float rot;

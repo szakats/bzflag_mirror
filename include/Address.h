@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* Address:
@@ -47,6 +47,7 @@ class Address {
     bool		operator==(const Address&) const;
     bool		operator!=(const Address&) const;
     bool		isAny() const;
+    bool		isPrivate() const;
     std::string		getDotNotation() const;
     uint8_t		getIPVersion() const;
 
@@ -55,11 +56,10 @@ class Address {
 
     static Address	getHostAddress(const std::string hostname = std::string(""));
     static std::string	getHostByAddress(InAddr);
-    static const std::string	getHostName(const std::string hostname = std::string(""));
+    static const std::string getHostName(const std::string hostname = std::string(""));
 
   private:
-    std::vector <InAddr>      addr;
-    static Address	localAddress;
+    std::vector <InAddr> addr;
 };
 
 typedef uint8_t		PlayerId;
@@ -70,8 +70,8 @@ const int		ServerIdPLen = 8;
 const PlayerId		NoPlayer = 255;
 const PlayerId		AllPlayers = 254;
 const PlayerId		ServerPlayer = 253;
-const PlayerId		AdminPlayers = 252; // These two ids are unused at present
-const PlayerId		UnusedSpecialPlayer2 = 251; // Available for special needs in the future
+const PlayerId		AdminPlayers = 252;
+const PlayerId		UnusedSpecialPlayer2 = 251; // This id is unused at present and vailable for special needs in the future
 const PlayerId		LastRealPlayer = 243;
 
 class ServerId {
@@ -98,4 +98,3 @@ class ServerId {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

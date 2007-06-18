@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,20 +7,21 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
-#include "common.h"
 #include "BaseLocalPlayer.h"
 
 /* common implementation headers */
 #include "BZDBCache.h"
 
+#include "playing.h"
 
-BaseLocalPlayer::BaseLocalPlayer(const PlayerId& id,
-				 const char* name, const char* email) :
-  Player(id, RogueTeam, name, email, TankPlayer),
+BaseLocalPlayer::BaseLocalPlayer(const PlayerId& _id,
+				 const char* name, const char* _email,
+				 const PlayerType _type) :
+  Player(_id, RogueTeam, name, _email, _type),
   lastTime(TimeKeeper::getTick()),
   salt(0)
 {
@@ -43,7 +44,7 @@ int BaseLocalPlayer::getSalt()
   return salt << 8;
 }
 
-void BaseLocalPlayer::update()
+void BaseLocalPlayer::update( float inputDT )
 {
   // save last position
   const float* oldPosition = getPosition();
@@ -52,42 +53,70 @@ void BaseLocalPlayer::update()
   lastPosition[2] = oldPosition[2];
 
   // update by time step
-  float dt = TimeKeeper::getTick() - lastTime;
+  float dt = float(TimeKeeper::getTick() - lastTime);
   lastTime = TimeKeeper::getTick();
-  if (dt < 0.001f) dt = 0.001f;
-  doUpdateMotion(dt);
 
-  // compute motion's bounding box around center of tank
-  const float* newVelocity = getVelocity();
-  bbox[0][0] = bbox[1][0] = oldPosition[0];
-  bbox[0][1] = bbox[1][1] = oldPosition[1];
-  bbox[0][2] = bbox[1][2] = oldPosition[2];
-  if (newVelocity[0] > 0.0f)
-    bbox[1][0] += dt * newVelocity[0];
-  else
-    bbox[0][0] += dt * newVelocity[0];
-  if (newVelocity[1] > 0.0f)
-    bbox[1][1] += dt * newVelocity[1];
-  else
-    bbox[0][1] += dt * newVelocity[1];
-  if (newVelocity[2] > 0.0f)
-    bbox[1][2] += dt * newVelocity[2];
-  else
-    bbox[0][2] += dt * newVelocity[2];
+  if (inputDT > 0)
+    dt = inputDT;
 
-  // expand bounding box to include entire tank
-  float size = BZDBCache::tankRadius;
-  if (getFlag() == Flags::Obesity) size *= BZDB.eval(StateDatabase::BZDB_OBESEFACTOR);
-  else if (getFlag() == Flags::Tiny) size *= BZDB.eval(StateDatabase::BZDB_TINYFACTOR);
-  else if (getFlag() == Flags::Thief) size *= BZDB.eval(StateDatabase::BZDB_THIEFTINYFACTOR);
-  bbox[0][0] -= size;
-  bbox[1][0] += size;
-  bbox[0][1] -= size;
-  bbox[1][1] += size;
-  bbox[1][2] += BZDBCache::tankHeight;
+  if (dt < MIN_DT_LIMIT)
+    dt = MIN_DT_LIMIT;
 
-  // do remaining update stuff
-  doUpdate(dt);
+  float dtLimit = MAX_DT_LIMIT;
+  float doneDT = dt;
+  if (dt > dtLimit) {
+    dt = dtLimit;
+    doneDT -= dtLimit;
+  }
+
+  while (doneDT > 0) {
+    doUpdateMotion(dt);
+
+    // compute motion's bounding box around center of tank
+    const float* newVelocity = getVelocity();
+    bbox[0][0] = bbox[1][0] = oldPosition[0];
+    bbox[0][1] = bbox[1][1] = oldPosition[1];
+    bbox[0][2] = bbox[1][2] = oldPosition[2];
+    if (newVelocity[0] > 0.0f)
+      bbox[1][0] += dt * newVelocity[0];
+    else
+      bbox[0][0] += dt * newVelocity[0];
+
+    if (newVelocity[1] > 0.0f)
+      bbox[1][1] += dt * newVelocity[1];
+    else
+      bbox[0][1] += dt * newVelocity[1];
+
+    if (newVelocity[2] > 0.0f)
+      bbox[1][2] += dt * newVelocity[2];
+    else
+      bbox[0][2] += dt * newVelocity[2];
+
+    // expand bounding box to include entire tank
+    float size = BZDBCache::tankRadius;
+    if (getFlag() == Flags::Obesity)
+      size *= BZDB.eval(StateDatabase::BZDB_OBESEFACTOR);
+    else if (getFlag() == Flags::Tiny)
+      size *= BZDB.eval(StateDatabase::BZDB_TINYFACTOR);
+    else if (getFlag() == Flags::Thief)
+      size *= BZDB.eval(StateDatabase::BZDB_THIEFTINYFACTOR);
+
+    bbox[0][0] -= size;
+    bbox[1][0] += size;
+    bbox[0][1] -= size;
+    bbox[1][1] += size;
+    bbox[1][2] += BZDBCache::tankHeight;
+
+    // do remaining update stuff
+    doUpdate(dt);
+
+    // subtract another chunk
+    doneDT -= dtLimit;
+
+    // if we only have a nubby left, don't do a full dt.
+    if (doneDT < dtLimit)
+      dt = doneDT;
+  }
 }
 
 Ray BaseLocalPlayer::getLastMotion() const
@@ -99,39 +128,6 @@ const float (*BaseLocalPlayer::getLastMotionBBox() const)[3]
 {
   return bbox;
 }
-
-#if 0
-// BEGIN MASSIVE_NASTY_COMMENT_BLOCK
-
-// This massive nasty comment block is for client-side spawning!
-//
-// local update utility functions
-//
-
-static float minSafeRange(float angleCosOffBoresight)
-{
-  // anything farther than this much from dead-center is okay to
-  // place at MinRange
-  static const float	SafeAngle = 0.5f;	// cos(angle)
-
-  const float shotSpeed = BZDB.eval(StateDatabase::BZDB_SHOTSPEED);
-  // don't ever place within this range
-  const float	MinRange = 2.0f * shotSpeed;	// meters
-
-  // anything beyond this range is okay at any angle
-  const float	MaxRange = 4.0f * shotSpeed;	// meters
-
-  // if more than SafeAngle off boresight then MinRange is okay
-  if (angleCosOffBoresight < SafeAngle) return MinRange;
-
-  // ramp up to MaxRange as target comes to dead center
-  const float f = (angleCosOffBoresight - SafeAngle) / (1.0f - SafeAngle);
-  return (float)(MinRange + f * (MaxRange - MinRange));
-}
-
-
-//END MASSIVE_NASTY_COMMENT_BLOCK
-#endif
 
 
 // Local Variables: ***

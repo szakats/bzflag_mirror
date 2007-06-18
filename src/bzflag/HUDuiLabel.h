@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -18,10 +18,12 @@
 #ifndef	__HUDUILABEL_H__
 #define	__HUDUILABEL_H__
 
+// ancestor class
+#include "HUDuiControl.h"
+
 #include <string>
 #include <vector>
 
-#include "HUDuiControl.h"
 #include "BzfEvent.h"
 
 class HUDuiLabel : public HUDuiControl {
@@ -32,6 +34,7 @@ class HUDuiLabel : public HUDuiControl {
     std::string		getString() const;
     void		setString(const std::string&, const std::vector<std::string> *_params = NULL);
     void		setDarker(bool d); // render darker than usual when not in focus
+    void		setColor(GLfloat r, GLfloat g, GLfloat b);
 
   protected:
     void		onSetFont();
@@ -42,7 +45,8 @@ class HUDuiLabel : public HUDuiControl {
   private:
     std::string		string;
     std::vector<std::string> *params;
-    bool			darker;
+    bool		darker;
+    GLfloat		color[3];
 };
 
 #endif // __HUDUILABEL_H__

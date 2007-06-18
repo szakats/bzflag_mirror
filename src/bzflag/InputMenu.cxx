@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,50 +7,38 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "InputMenu.h"
 
-/* system implementation headers */
-#include <string>
-#include <vector>
-
 /* common implementation headers */
-#include "BzfWindow.h"
 #include "StateDatabase.h"
 #include "FontManager.h"
 
 /* local implementation headers */
-#include "MainWindow.h"
 #include "MainMenu.h"
 #include "HUDDialogStack.h"
 #include "LocalPlayer.h"
-#include "HUDuiControl.h"
-#include "HUDuiLabel.h"
-#include "HUDuiList.h"
-
-/* FIXME - from playing.h */
-MainWindow*    getMainWindow();
+#include "playing.h"
 
 InputMenu::InputMenu() : keyboardMapMenu(NULL)
 {
   std::string currentJoystickDevice = BZDB.get("joystickname");
   // cache font face ID
   int fontFace = MainMenu::getFontFace();
-  // add controls
-  std::vector<HUDuiControl*>& list = getControls();
 
+  // add controls
   HUDuiLabel* label = new HUDuiLabel;
   label->setFontFace(fontFace);
   label->setString("Input Settings");
-  list.push_back(label);
+  addControl(label, false);
 
   keyMapping = new HUDuiLabel;
   keyMapping->setFontFace(fontFace);
   keyMapping->setLabel("Change Key Mapping");
-  list.push_back(keyMapping);
+  addControl(keyMapping);
 
   HUDuiList* option = new HUDuiList;
 
@@ -61,7 +49,7 @@ InputMenu::InputMenu() : keyboardMapMenu(NULL)
   option->setLabel("Joystick device:");
   option->setCallback(callback, (void*)"J");
   options = &option->getList();
-  options->push_back(std::string("off"));
+  options->push_back(std::string("Off"));
   std::vector<std::string> joystickDevices;
   getMainWindow()->getJoyDevices(joystickDevices);
   int i;
@@ -76,36 +64,89 @@ InputMenu::InputMenu() : keyboardMapMenu(NULL)
     }
   }
   option->update();
-  list.push_back(option);
+  addControl(option);
 
-  forceInput = new HUDuiList;
-  forceInput->setFontFace(fontFace);
-  forceInput->setLabel("Force input device:");
-  forceInput->setCallback(callback, (void*)"F");
-  options = &forceInput->getList();
-  options->push_back("Do not force");
+  activeInput = new HUDuiList;
+  activeInput->setFontFace(fontFace);
+  activeInput->setLabel("Active input device:");
+  activeInput->setCallback(callback, (void*)"A");
+  options = &activeInput->getList();
+  options->push_back("Auto");
   options->push_back(LocalPlayer::getInputMethodName(LocalPlayer::Keyboard));
   options->push_back(LocalPlayer::getInputMethodName(LocalPlayer::Mouse));
   options->push_back(LocalPlayer::getInputMethodName(LocalPlayer::Joystick));
-  forceInput->update();
-  list.push_back(forceInput);
+  activeInput->update();
+  addControl(activeInput);
 
   option = new HUDuiList;
-  // set joystick Device
+  // force feedback
+  option->setFontFace(fontFace);
+  option->setLabel("Force feedback:");
+  option->setCallback(callback, (void*)"F");
+  options = &option->getList();
+  options->push_back(std::string("None"));
+  options->push_back(std::string("Rumble"));
+  options->push_back(std::string("Directional"));
+  for (i = 0; i < (int)options->size(); i++) {
+    std::string currentOption = (*options)[i];
+    if (BZDB.get("forceFeedback") == currentOption)
+      option->setIndex(i);
+  }
+  option->update();
+  addControl(option);
+
+  option = new HUDuiList;
+  // axis settings
+  jsx = option;
+  option->setFontFace(fontFace);
+  option->setLabel("Joystick X Axis:");
+  option->setCallback(callback, (void*)"X");
+  addControl(option);
+  option = new HUDuiList;
+  jsy = option;
+  option->setFontFace(fontFace);
+  option->setLabel("Joystick Y Axis:");
+  option->setCallback(callback, (void*)"Y");
+  addControl(option);
+  fillJSOptions();
+
+  option = new HUDuiList;
+  // confine mouse on/off
   option->setFontFace(fontFace);
   option->setLabel("Confine mouse:");
   option->setCallback(callback, (void*)"G");
   options = &option->getList();
-  options->push_back(std::string("yes"));
-  options->push_back(std::string("no"));
-  if (getMainWindow()->isGrabEnabled())
-    option->setIndex(0);
-  else
-    option->setIndex(1);
+  options->push_back(std::string("No"));
+  options->push_back(std::string("Yes"));
+  option->setIndex(getMainWindow()->isGrabEnabled() ? 1 : 0);
   option->update();
-  list.push_back(option);
+  addControl(option);
 
-  initNavigation(list, 1,list.size()-1);
+  option = new HUDuiList;
+  // jump while typing on/off
+  option->setFontFace(fontFace);
+  option->setLabel("Jump while typing:");
+  option->setCallback(callback, (void*)"H");
+  options = &option->getList();
+  options->push_back(std::string("No"));
+  options->push_back(std::string("Yes"));
+  option->setIndex(BZDB.isTrue("jumpTyping") ? 1 : 0);
+  option->update();
+  addControl(option);
+
+  option = new HUDuiList;
+  // tie the FOV into turning rate
+  option->setFontFace(fontFace);
+  option->setLabel("Slow turning with binoculars:");
+  option->setCallback(callback, (void*)"B");
+  options = &option->getList();
+  options->push_back(std::string("No"));
+  options->push_back(std::string("Yes"));
+  option->setIndex(BZDB.isTrue("slowBinoculars") ? 1 : 0);
+  option->update();
+  addControl(option);
+
+  initNavigation();
 }
 
 InputMenu::~InputMenu()
@@ -113,91 +154,173 @@ InputMenu::~InputMenu()
   delete keyboardMapMenu;
 }
 
+void InputMenu::fillJSOptions()
+{
+  std::vector<std::string>* xoptions = &jsx->getList();
+  std::vector<std::string>* yoptions = &jsy->getList();
+  std::vector<std::string> joystickAxes;
+  getMainWindow()->getJoyDeviceAxes(joystickAxes);
+  if (joystickAxes.size() == 0)
+    joystickAxes.push_back("N/A");
+  int i;
+  for (i = 0; i < (int)joystickAxes.size(); i++) {
+    xoptions->push_back(joystickAxes[i]);
+    yoptions->push_back(joystickAxes[i]);
+  }
+  bool found = false;
+  for (i = 0; i < (int)xoptions->size(); i++) {
+    std::string currentOption = (*xoptions)[i];
+    if (BZDB.get("jsXAxis") == currentOption) {
+      jsx->setIndex(i);
+      found = true;
+    }
+  }
+  if (!found)
+    jsx->setIndex(0);
+  jsx->update();
+  found = false;
+  for (i = 0; i < (int)yoptions->size(); i++) {
+    std::string currentOption = (*yoptions)[i];
+    if (BZDB.get("jsYAxis") == currentOption) {
+      jsy->setIndex(i);
+      found = true;
+    }
+  }
+  if (!found) {
+    if (yoptions->size() > 1)
+      jsy->setIndex(1);
+    else
+      jsy->setIndex(0);
+  }
+  jsy->update();
+}
+
 void			InputMenu::execute()
 {
-  HUDuiControl* focus = HUDui::getFocus();
-  if (focus == keyMapping) {
+  HUDuiControl* _focus = getNav().get();
+  if (_focus == keyMapping) {
     if (!keyboardMapMenu) keyboardMapMenu = new KeyboardMapMenu;
     HUDDialogStack::get()->push(keyboardMapMenu);
   }
 }
 
 void			InputMenu::callback(HUDuiControl* w, void* data) {
-  HUDuiList* list = (HUDuiList*)w;
-  std::vector<std::string> *options = &list->getList();
-  std::string selectedOption = (*options)[list->getIndex()];
+  HUDuiList* listHUD = (HUDuiList*)w;
+  std::vector<std::string> *options = &listHUD->getList();
+  std::string selectedOption = (*options)[listHUD->getIndex()];
   switch (((const char*)data)[0]) {
+
+    /* Joystick name */
     case 'J':
       BZDB.set("joystickname", selectedOption);
       getMainWindow()->initJoystick(selectedOption);
+      // re-fill all of the joystick-specific options lists
+      // fillJSOptions();
       break;
-    case 'F':
+
+    /* Joystick x-axis */
+    case 'X':
+      BZDB.set("jsXAxis", selectedOption);
+      getMainWindow()->setJoyXAxis(selectedOption);
+      break;
+
+    /* Joystick y-axis */
+    case 'Y':
+      BZDB.set("jsYAxis", selectedOption);
+      getMainWindow()->setJoyYAxis(selectedOption);
+      break;
+
+    /* Active input device */
+    case 'A':
       {
 	LocalPlayer*   myTank = LocalPlayer::getMyTank();
-	// Do we force or not?
-	if (selectedOption == "Do not force") {
+	// Are we forced to use one input device, or do we allow it to change automatically?
+	if (selectedOption == "Auto") {
 	  BZDB.set("allowInputChange", "1");
 	} else {
 	  BZDB.set("allowInputChange", "0");
-	  BZDB.set("forceInputDevice", selectedOption);
+	  BZDB.set("activeInputDevice", selectedOption);
 	  // Set the current input device to whatever we're forced to
 	  if (myTank) {
-	    myTank->setInputMethod(BZDB.get("forceInputDevice"));
+	    myTank->setInputMethod(BZDB.get("activeInputDevice"));
 	  }
 	}
       }
       break;
+
+    /* Grab mouse */
     case 'G':
-      bool grabbing = (selectedOption == "yes");
-      if (grabbing)
-	BZDB.set("mousegrab", "true");
-      else
-	BZDB.set("mousegrab", "false");
-      getMainWindow()->enableGrabMouse(grabbing);
+      {
+	bool grabbing = (selectedOption == "Yes");
+	BZDB.set("mousegrab", grabbing ? "true" : "false");
+	getMainWindow()->enableGrabMouse(grabbing);
+      }
       break;
+
+    /* Jump while typing */
+    case 'H':
+      {
+	bool jump = (selectedOption == "Yes");
+	BZDB.setBool("jumpTyping", jump ? true : false);
+      }
+      break;
+
+    /* Reduce turning rate with FOV */
+    case 'B':
+      {
+	bool fov = (selectedOption == "Yes");
+	BZDB.setBool("slowBinoculars", fov ? true : false);
+      }
+      break;
+
+    /* Force feedback */
+    case 'F':
+      BZDB.set("forceFeedback", selectedOption);
+      break;
+
   }
 }
 
-void			InputMenu::resize(int width, int height)
+void			InputMenu::resize(int _width, int _height)
 {
-  HUDDialog::resize(width, height);
+  HUDDialog::resize(_width, _height);
   int i;
 
   // use a big font for title, smaller font for the rest
-  const float titleFontSize = (float)height / 15.0f;
-  const float fontSize = (float)height / 45.0f;
+  const float titleFontSize = (float)_height / 15.0f;
+  const float fontSize = (float)_height / 45.0f;
   FontManager &fm = FontManager::instance();
 
   // reposition title
-  std::vector<HUDuiControl*>& list = getControls();
-  HUDuiLabel* title = (HUDuiLabel*)list[0];
+  std::vector<HUDuiElement*>& listHUD = getElements();
+  HUDuiLabel* title = (HUDuiLabel*)listHUD[0];
   title->setFontSize(titleFontSize);
   const float titleWidth = fm.getStrLength(MainMenu::getFontFace(), titleFontSize, title->getString());
   const float titleHeight = fm.getStrHeight(MainMenu::getFontFace(), titleFontSize, " ");
-  float x = 0.5f * ((float)width - titleWidth);
-  float y = (float)height - titleHeight;
+  float x = 0.5f * ((float)_width - titleWidth);
+  float y = (float)_height - titleHeight;
   title->setPosition(x, y);
 
   // reposition options
-  x = 0.5f * ((float)width + 0.5f * titleWidth);
+  x = 0.5f * ((float)_width + 0.5f * titleWidth);
   y -= 0.6f * titleHeight;
   const float h = fm.getStrHeight(MainMenu::getFontFace(), fontSize, " ");
-  const int count = list.size();
+  const int count = (int)listHUD.size();
   for (i = 1; i < count; i++) {
-    list[i]->setFontSize(fontSize);
-    list[i]->setPosition(x, y);
+    listHUD[i]->setFontSize(fontSize);
+    listHUD[i]->setPosition(x, y);
     y -= 1.0f * h;
   }
 
   // load current settings
-  std::vector<std::string> *options = &forceInput->getList();
+  std::vector<std::string> *options = &activeInput->getList();
   for (i = 0; i < (int)options->size(); i++) {
     std::string currentOption = (*options)[i];
-    if (BZDB.get("forceInputDevice") == currentOption)
-      forceInput->setIndex(i);
+    if (BZDB.get("activeInputDevice") == currentOption)
+      activeInput->setIndex(i);
   }
   if (BZDB.isTrue("allowInputChange"))
-    forceInput->setIndex(0);
+    activeInput->setIndex(0);
 }
 
 

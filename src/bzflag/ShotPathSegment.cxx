@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
@@ -19,8 +19,8 @@ ShotPathSegment::ShotPathSegment()
   // do nothing
 }
 
-ShotPathSegment::ShotPathSegment(const TimeKeeper& _start,
-				const TimeKeeper& _end, const Ray& _ray,
+ShotPathSegment::ShotPathSegment(const double _start,
+				const double _end, const Ray& _ray,
 				Reason _reason) :
 				start(_start),
 				end(_end),
@@ -29,7 +29,7 @@ ShotPathSegment::ShotPathSegment(const TimeKeeper& _start,
 {
   // compute bounding box
   ray.getPoint(0.0f, bbox[0]);
-  ray.getPoint(end - start, bbox[1]);
+  ray.getPoint(float(end - start), bbox[1]);
   if (bbox[0][0] > bbox[1][0]) {
     const float tmp = bbox[0][0];
     bbox[0][0] = bbox[1][0];

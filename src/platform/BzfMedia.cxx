@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,21 +7,30 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/* interface header */
 #include "BzfMedia.h"
-#include "TimeKeeper.h"
-#ifndef HAVE_SDL
-#include "wave.h"
-#endif
-#include "MediaFile.h"
+
+/* system implementation headers */
+#include <iostream>
 #include <string.h>
 #include <string>
 #include <stdio.h>
 
-BzfMedia::BzfMedia() : mediaDir(DEFAULT_MEDIA_DIR) { }
-BzfMedia::~BzfMedia() { }
+/* common implementation headers */
+#include "TimeKeeper.h"
+#ifndef HAVE_SDL
+#  include "wave.h"
+#endif
+#include "MediaFile.h"
+
+
+BzfMedia::BzfMedia() : mediaDir(DEFAULT_MEDIA_DIR) {
+}
+BzfMedia::~BzfMedia() {
+}
 
 double			BzfMedia::stopwatch(bool start)
 {
@@ -57,9 +66,9 @@ unsigned char*		BzfMedia::readImage(const std::string& filename,
   image = doReadImage(filename, width, height, depth);
   if (image) return image;
 
-#if defined(INSTALL_DATA_DIR)
+#if defined(BZFLAG_DATA)
   // try standard-mediaDir/filename
-  name = makePath(INSTALL_DATA_DIR, filename);
+  name = makePath(BZFLAG_DATA, filename);
   image = doReadImage(name, width, height, depth);
   if (image) return image;
 #endif
@@ -74,9 +83,9 @@ unsigned char*		BzfMedia::readImage(const std::string& filename,
   image = doReadImage(name, width, height, depth);
   if (image) return image;
 
-#if defined(INSTALL_DATA_DIR)
+#if defined(BZFLAG_DATA)
   // try standard-mediaDir/filename with replaced extension
-  name = makePath(INSTALL_DATA_DIR, filename);
+  name = makePath(BZFLAG_DATA, filename);
   name = replaceExtension(name, getImageExtension());
   image = doReadImage(name, width, height, depth);
   if (image) return image;
@@ -139,9 +148,9 @@ float*			BzfMedia::readSound(const std::string& filename,
   sound = doReadSound(filename, numFrames, rate);
   if (sound) return sound;
 
-#if defined(INSTALL_DATA_DIR)
+#if defined(BZFLAG_DATA)
   // try standard-mediaDir/filename
-  name = makePath(INSTALL_DATA_DIR, filename);
+  name = makePath(BZFLAG_DATA, filename);
   sound = doReadSound(name, numFrames, rate);
   if (sound) return sound;
 #endif
@@ -156,9 +165,9 @@ float*			BzfMedia::readSound(const std::string& filename,
   sound = doReadSound(name, numFrames, rate);
   if (sound) return sound;
 
-#if defined(INSTALL_DATA_DIR)
+#if defined(BZFLAG_DATA)
   // try mediaDir/filename with replaced extension
-  name = makePath(INSTALL_DATA_DIR, filename);
+  name = makePath(BZFLAG_DATA, filename);
   name = replaceExtension(name, getSoundExtension());
   sound = doReadSound(name, numFrames, rate);
   if (sound) return sound;
@@ -399,7 +408,7 @@ bool			BzfMedia::doReadRLE(FILE* file,
 float*			BzfMedia::doReadSound(const std::string&, int&, int&) const
 {
   return NULL;
-};
+}
 #else
 float*			BzfMedia::doReadSound(const std::string& filename,
 				int& numFrames, int& rate) const
@@ -471,12 +480,17 @@ float*			BzfMedia::doReadSound(const std::string& filename,
 #endif
 
 // Setting Audio Driver
-void        BzfMedia::setDriver(std::string) {
-};
+void	BzfMedia::setDriver(std::string) {
+}
 
 // Setting Audio Device
-void        BzfMedia::setDevice(std::string) {
-};
+void	BzfMedia::setDevice(std::string) {
+}
+
+void BzfMedia::audioDriver(std::string& driverName)
+{
+  driverName = "";
+}
 
 // Local Variables: ***
 // mode:C++ ***
@@ -485,4 +499,3 @@ void        BzfMedia::setDevice(std::string) {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

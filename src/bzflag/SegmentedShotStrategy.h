@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __SEGMENTEDSHOTSTRATEGY_H__
@@ -36,7 +36,7 @@ class SegmentedShotStrategy : public ShotStrategy {
 			~SegmentedShotStrategy();
 
     void		update(float dt);
-    float		checkHit(const BaseLocalPlayer*, float[3]) const;
+    float		checkHit(const ShotCollider&, float[3]) const;
     void		addShot(SceneDatabase*, bool colorblind);
     void		radarRender() const;
     TeamColor	team;
@@ -50,8 +50,8 @@ class SegmentedShotStrategy : public ShotStrategy {
     void		makeSegments(ObstacleEffect = Stop);
     const std::vector<ShotPathSegment>&	getSegments() const;
 
-    void		setCurrentTime(const TimeKeeper&);
-    const TimeKeeper&	getLastTime() const;
+    void		setCurrentTime(const double);
+    const double	getLastTime() const;
 
     bool		isOverlapping(const float (*bbox1)[3],
 				const float (*bbox2)[3]) const;
@@ -59,9 +59,9 @@ class SegmentedShotStrategy : public ShotStrategy {
     void		setCurrentSegment(int segment);
 
   private:
-    TimeKeeper		prevTime;
-    TimeKeeper		currentTime;
-    TimeKeeper		lastTime;
+    double		prevTime;
+    double		currentTime;
+    double		lastTime;
     int			segment, lastSegment;
     std::vector<ShotPathSegment>	segments;
     BoltSceneNode*	boltSceneNode;

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,17 +7,26 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <math.h>
+// bzflag common header
 #include "common.h"
+
+// interface header
 #include "ShellSceneNode.h"
-#include "SceneRenderer.h"
+
+// system headers
+#include <math.h>
+
+// common implementation headers
 #include "OpenGLMaterial.h"
 #include "StateDatabase.h"
 
-#define	ShellRadius1_2	(M_SQRT1_2 * ShellRadius)
+// FIXME (SceneRenderer.cxx is in src/bzflag)
+#include "SceneRenderer.h"
+
+#define	ShellRadius1_2	((GLfloat)(M_SQRT1_2 * ShellRadius))
 
 const GLfloat		ShellSceneNode::shellVertex[9][3] = {
 				{ 3.0f * ShellRadius, 0.0f, 0.0f },
@@ -33,13 +42,13 @@ const GLfloat		ShellSceneNode::shellVertex[9][3] = {
 const GLfloat		ShellSceneNode::shellNormal[10][3] = {
 				{ 1.0f, 0.0f, 0.0f },
 				{ 0.0f, -1.0f, 0.0f },
-				{ 0.0f, -M_SQRT1_2, -M_SQRT1_2 },
+				{ 0.0f, (float)-M_SQRT1_2, (float)-M_SQRT1_2 },
 				{ 0.0f, 0.0f, -1.0f },
-				{ 0.0f, M_SQRT1_2, -M_SQRT1_2 },
+				{ 0.0f, (float)M_SQRT1_2, (float)-M_SQRT1_2 },
 				{ 0.0f, 1.0f, 0.0f },
-				{ 0.0f, M_SQRT1_2, M_SQRT1_2 },
+				{ 0.0f, (float)M_SQRT1_2, (float)M_SQRT1_2 },
 				{ 0.0f, 0.0f, 1.0f },
-				{ 0.0f, -M_SQRT1_2, M_SQRT1_2 },
+				{ 0.0f, (float)-M_SQRT1_2, (float)M_SQRT1_2 },
 				{-1.0f, 0.0f, 0.0f }
 			};
 
@@ -54,7 +63,7 @@ ShellSceneNode::ShellSceneNode(const GLfloat pos[3],
   setRadius(9.0f * ShellRadius * ShellRadius);
 
   OpenGLGStateBuilder builder(gstate);
-  builder.setMaterial(OpenGLMaterial(specular, emissive, 20.0f));
+  builder.setMaterial(OpenGLMaterial(specular, emissive, 20.0f), RENDERER.useQuality() > _LOW_QUALITY);
   gstate = builder.getState();
 }
 
@@ -67,12 +76,11 @@ void			ShellSceneNode::move(const GLfloat pos[3],
 						const GLfloat forward[3])
 {
   setCenter(pos);
-  azimuth = 180.0f / M_PI*atan2f(forward[1], forward[0]);
-  elevation = -180.0f / M_PI*atan2f(forward[2], hypotf(forward[0],forward[1]));
+  azimuth = (float)(180.0 / M_PI*atan2f(forward[1], forward[0]));
+  elevation = (float)(-180.0 / M_PI*atan2f(forward[2], hypotf(forward[0],forward[1])));
 }
 
-void			ShellSceneNode::notifyStyleChange(
-				const SceneRenderer&)
+void			ShellSceneNode::notifyStyleChange()
 {
   OpenGLGStateBuilder builder(gstate);
   const bool lighting = BZDB.isTrue("lighting");
@@ -171,4 +179,3 @@ void			ShellSceneNode::ShellRenderNode::render()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

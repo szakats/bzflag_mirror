@@ -1,9 +1,13 @@
+all-local:
+	@date > datestamp
 
 noinst_HEADERS =			\
-	3DOptionsManager.h		\
+	AccessList.h			\
 	Address.h			\
-	AdnsHandler.h			\
+	AresHandler.h			\
 	AnsiCodes.h			\
+	ArcObstacle.h			\
+	AutoCompleter.h			\
 	BaseSceneNodeGenerator.h	\
 	BoxSceneNodeGenerator.h		\
 	BSPSceneDatabase.h		\
@@ -15,45 +19,67 @@ noinst_HEADERS =			\
 	BoxBuilding.h			\
 	Bundle.h			\
 	BundleMgr.h			\
+	BzMaterial.h			\
 	BzfDisplay.h			\
 	BzfEvent.h			\
 	BzfJoystick.h			\
 	BzfMedia.h			\
 	BzfVisual.h			\
 	BzfWindow.h			\
+	bzfsAPI.h			\
+	CacheManager.h			\
 	CallbackList.h			\
 	CollisionManager.h		\
 	CommandManager.h		\
 	CommandsStandard.h		\
+	ConeObstacle.h			\
 	ConfigFileManager.h		\
 	Country.h			\
-	DelayQueue.h			\
 	DirectoryNames.h		\
-	DisplayListManager.h		\
-	DrawablesManager.h		\
+	DynamicColor.h			\
 	EighthDBaseSceneNode.h		\
 	EighthDBoxSceneNode.h		\
 	EighthDPyrSceneNode.h		\
-	EighthDTetraSceneNode.h		\
 	EighthDimSceneNode.h		\
+	EighthDimShellNode.h		\
 	EmptySceneNodeGenerator.h	\
 	ErrorHandler.h			\
+	Extents.h			\
+	Factory.h			\
 	FileManager.h			\
 	FontManager.h			\
 	Flag.h				\
 	FlagSceneNode.h			\
 	FlagWarpSceneNode.h		\
+	Frustum.h			\
+	GameTime.h			\
 	GLCollect.h			\
 	Intersect.h			\
 	KeyManager.h			\
 	LagInfo.h			\
 	Language.h			\
 	LaserSceneNode.h		\
+	LinkManager.h			\
+	ListServer.h			\
 	MathUtils.h			\
 	MediaFile.h			\
+	MeshFace.h			\
+	MeshFragSceneNode.h		\
+	MeshDrawInfo.h			\
+	MeshDrawMgr.h			\
+	MeshObstacle.h			\
+	MeshPolySceneNode.h		\
+	MeshSceneNodeGenerator.h	\
+	MeshSceneNode.h			\
+	MeshTransform.h			\
+	MsgStrings.h			\
 	NetHandler.h			\
 	Obstacle.h			\
+	ObstacleList.h			\
+	ObstacleMgr.h			\
+	ObstacleModifier.h		\
 	ObstacleSceneNodeGenerator.h	\
+	OccluderSceneNode.h		\
 	OpenGLDisplayList.h		\
 	OpenGLGState.h			\
 	OpenGLLight.h			\
@@ -62,6 +88,8 @@ noinst_HEADERS =			\
 	OSFile.h			\
 	PTSceneNode.h			\
 	Pack.h				\
+	ParseColor.h			\
+	PhysicsDriver.h			\
 	Ping.h				\
 	PlatformFactory.h		\
 	PlayerInfo.h			\
@@ -77,21 +105,27 @@ noinst_HEADERS =			\
 	SceneDatabase.h			\
 	SceneNode.h			\
 	SceneRenderer.h			\
+	ServerItem.h			\
+	ServerList.h			\
+	ServerListCache.h		\
 	ShellSceneNode.h		\
 	ShotSceneNode.h			\
 	ShotUpdate.h			\
 	Singleton.h			\
+	SphereObstacle.h		\
 	SphereSceneNode.h		\
+	StartupInfo.h			\
 	StateDatabase.h			\
+	TankGeometryMgr.h		\
 	TankSceneNode.h			\
 	Team.h				\
 	Teleporter.h			\
 	TeleporterSceneNodeGenerator.h	\
 	TetraBuilding.h			\
-	TetraSceneNodeGenerator.h	\
+	TextChunkManager.h		\
 	TextUtils.h			\
 	TextureManager.h		\
-	TextureFont.h			\
+	TextureMatrix.h			\
 	TimeBomb.h			\
 	TimeKeeper.h			\
 	TracerSceneNode.h		\
@@ -103,27 +137,34 @@ noinst_HEADERS =			\
 	WallSceneNode.h			\
 	WallSceneNodeGenerator.h	\
 	WordFilter.h			\
+	WorldEventManager.h			\
 	ZSceneDatabase.h		\
+	ares.h				\
 	bz_Locale.h			\
 	bzfSDL.h			\
 	bzfgl.h				\
 	bzfio.h				\
+	bzglob.h			\
 	bzsignal.h			\
 	common.h			\
+	cURLManager.h			\
 	global.h			\
 	md5.h				\
+	messages.h			\
 	multicast.h			\
 	network.h			\
-	regex.h				\
+	bzregex.h			\
 	resource.h			\
-	udpnetwork.h			\
+	vectors.h			\
 	version.h			\
 	win32.h
 
-MAINTAINERCLEANFILES = \
-	config.h.in \
-	stamp-h.in \
+CLEANFILES = datestamp
+
+MAINTAINERCLEANFILES =	\
+	config.h.in	\
+	stamp-h.in	\
 	Makefile.in
 
-EXTRA_DIST = \
+EXTRA_DIST =	\
 	README

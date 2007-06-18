@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,44 +7,63 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "ShockWaveStrategy.h"
 
 /* common implementation headers */
-#include "StateDatabase.h"
-#include "Team.h"
+#include "SceneRenderer.h"
 
 /* local implementation headers */
 #include "LocalPlayer.h"
+#include "playing.h"
+#include "World.h"
 
-/* FIXME - from playing.h */
-Player* lookupPlayer(PlayerId id);
 
-
-ShockWaveStrategy::ShockWaveStrategy(ShotPath* path) :
-  ShotStrategy(path),
+ShockWaveStrategy::ShockWaveStrategy(ShotPath *_path) :
+  ShotStrategy(_path),
   radius(BZDB.eval(StateDatabase::BZDB_SHOCKINRADIUS)),
   radius2(radius * radius)
 {
   // setup shot
-  FiringInfo& f = getFiringInfo(path);
+  FiringInfo& f = getFiringInfo(_path);
   f.lifetime *= BZDB.eval(StateDatabase::BZDB_SHOCKADLIFE);
 
   // make scene node
-  shockNode = new SphereSceneNode(path->getPosition(), radius);
-  Player* p = lookupPlayer(path->getPlayer());
-  TeamColor team = p ? p->getTeam() : RogueTeam;
+  const float* pos = _path->getPosition();
+  if (RENDERER.useQuality() >= _HIGH_QUALITY) {
+    shockNode = new SphereLodSceneNode(pos, radius);
+    shockNode->setShockWave(true);
+  } else {
+    shockNode = new SphereBspSceneNode(pos, radius);
+  }
+
+  // get team
+  if (_path->getPlayer() == ServerPlayer) {
+    TeamColor tmpTeam = _path->getFiringInfo().shot.team;
+    team = (tmpTeam < RogueTeam) ? RogueTeam :
+	   (tmpTeam > HunterTeam) ? RogueTeam : tmpTeam;
+  } else {
+    Player* p = lookupPlayer(_path->getPlayer());
+    team = p ? p->getTeam() : RogueTeam;
+  }
+
   const float* c = Team::getRadarColor(team);
-  shockNode->setColor(c[0], c[1], c[2], 0.75f);
+  if (RENDERER.useQuality() >= _HIGH_QUALITY) {
+    shockNode->setColor(c[0], c[1], c[2], 0.5f);
+  } else {
+    shockNode->setColor(c[0], c[1], c[2], 0.75f);
+  }
 }
+
 
 ShockWaveStrategy::~ShockWaveStrategy()
 {
   delete shockNode;
 }
+
 
 void ShockWaveStrategy::update(float dt)
 {
@@ -52,37 +71,54 @@ void ShockWaveStrategy::update(float dt)
   radius2 = radius * radius;
 
   // update shock wave scene node
-  const GLfloat frac = (radius - BZDB.eval(StateDatabase::BZDB_SHOCKINRADIUS)) /
-    (BZDB.eval(StateDatabase::BZDB_SHOCKOUTRADIUS) - BZDB.eval(StateDatabase::BZDB_SHOCKINRADIUS));
   shockNode->move(getPath().getPosition(), radius);
-  Player* p = lookupPlayer(getPath().getPlayer());
+
+  // team color
   const LocalPlayer* myTank = LocalPlayer::getMyTank();
-  TeamColor team = p && !(myTank->getFlag() == Flags::Colorblindness) ? p->getTeam() : RogueTeam;
-  const float* c = Team::getRadarColor(team);
-  shockNode->setColor(c[0], c[1], c[2], 0.75f - 0.5f * frac);
+  TeamColor currentTeam;
+  if ((myTank->getFlag() == Flags::Colorblindness) &&
+      (getPath().getPlayer() != ServerPlayer)) {
+    currentTeam = RogueTeam;
+  } else {
+    currentTeam = team;
+  }
+
+  const float* c = Team::getRadarColor(currentTeam);
+
+  // fade old-style shockwaves
+  if (RENDERER.useQuality() >= _HIGH_QUALITY) {
+    shockNode->setColor(c[0], c[1], c[2], 0.5f);
+  } else {
+    const float shockIn = BZDB.eval(StateDatabase::BZDB_SHOCKINRADIUS);
+    const float shockOut = BZDB.eval(StateDatabase::BZDB_SHOCKOUTRADIUS);
+    const GLfloat frac = (radius - shockIn) / (shockOut - shockIn);
+    shockNode->setColor(c[0], c[1], c[2], 0.75f - (0.5f * frac));
+  }
 
   // expire when full size
   if (radius >= BZDB.eval(StateDatabase::BZDB_SHOCKOUTRADIUS)) setExpired();
 }
 
-float ShockWaveStrategy::checkHit(const BaseLocalPlayer* tank, float position[3]) const
+
+float ShockWaveStrategy::checkHit(const ShotCollider& tank, float position[3]) const
 {
   // return if player is inside radius of destruction -- note that a
   // shock wave can kill anything inside the radius, be it behind or
   // in a building or even zoned.
-  const float* playerPos = tank->getPosition();
+  const float* playerPos = tank.position;
   const float* shotPos = getPath().getPosition();
   const float dx = playerPos[0] - shotPos[0];
   const float dy = playerPos[1] - shotPos[1];
   const float dz = playerPos[2] - shotPos[2];
-  if (dx * dx + dy * dy + dz * dz <= radius2) {
+  if (dx * dx + dy * dy + dz * dz <= radius2)
+  {
     position[0] = playerPos[0];
     position[1] = playerPos[1];
     position[2] = playerPos[2];
     return 0.5f;
-  } else {
-    return Infinity;
   }
+  else
+    return Infinity;
 }
 
 bool ShockWaveStrategy::isStoppedByHit() const
@@ -102,7 +138,7 @@ void ShockWaveStrategy::radarRender() const
   const float* shotPos = getPath().getPosition();
   glBegin(GL_LINE_LOOP);
   for (int i = 0; i < sides; i++) {
-    const float angle = 2.0f * M_PI * float(i) / float(sides);
+    const float angle = (float)(2.0 * M_PI * double(i) / double(sides));
     glVertex2f(shotPos[0] + radius * cosf(angle),
 	       shotPos[1] + radius * sinf(angle));
   }

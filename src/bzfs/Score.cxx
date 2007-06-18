@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,14 +7,18 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* interface header */
 #include "Score.h"
 
-// bzflag library headers
+/* system implementation headers */
+#include <iostream>
+
+/* common implementation headers */
 #include "Pack.h"
+
 
 float Score::tkKickRatio = 3.0;
 int   Score::score       = 999;
@@ -23,11 +27,11 @@ bool  Score::randomRanking = false;
 Score::Score(): wins(0), losses(0), tks(0) {
 }
 
-void Score::dump() {
+void Score::dump() const {
   std::cout << wins << '-' << losses;
 }
 
-float Score::ranking() {
+float Score::ranking() const {
   if (randomRanking)
     return (float)bzfrand();
 
@@ -41,7 +45,7 @@ float Score::ranking() {
   return average * penalty;
 }
 
-bool Score::isTK() {
+bool Score::isTK() const {
   // arbitrary 3
   return (tks >= 3) && (tkKickRatio > 0)
     && ((wins == 0) || (tks * 100 / wins > tkKickRatio));
@@ -59,15 +63,11 @@ void Score::kill() {
   wins++;
 }
 
-void *Score::pack(void *buf) {
+void *Score::pack(void *buf) const {
   buf = nboPackUShort(buf, wins);
   buf = nboPackUShort(buf, losses);
   buf = nboPackUShort(buf, tks);
   return buf;
-}
-
-bool Score::reached() {
-  return wins - losses >= score;
 }
 
 void Score::setTeamKillRatio(int _tkKickRatio) {

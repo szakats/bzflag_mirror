@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,13 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	__OPTIONSMENU_H__
 #define	__OPTIONSMENU_H__
+
+#include "common.h"
 
 /* local interface headers */
 #include "HUDDialog.h"
@@ -19,6 +21,8 @@
 #include "HUDuiDefaultKey.h"
 #include "HUDuiControl.h"
 #include "GUIOptionsMenu.h"
+#include "EffectsMenu.h"
+#include "CacheMenu.h"
 #include "SaveWorldMenu.h"
 #include "InputMenu.h"
 #include "AudioMenu.h"
@@ -40,16 +44,20 @@ public:
 
 private:
   HUDuiControl*	guiOptions;
-  HUDuiControl*	clearCache;
+  HUDuiControl*	effectsOptions;
+  HUDuiControl*	cacheOptions;
   HUDuiControl*	saveWorld;
+  HUDuiControl* saveSettings;
   HUDuiControl*	inputSetting;
   HUDuiControl*	audioSetting;
   HUDuiControl*	displaySetting;
   GUIOptionsMenu*	guiOptionsMenu;
+  EffectsMenu*		effectsMenu;
+  CacheMenu*		cacheMenu;
   SaveWorldMenu*	saveWorldMenu;
-  InputMenu*            inputMenu;
-  AudioMenu*            audioMenu;
-  DisplayMenu*          displayMenu;
+  InputMenu*		inputMenu;
+  AudioMenu*		audioMenu;
+  DisplayMenu*		displayMenu;
 };
 
 

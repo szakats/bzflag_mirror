@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,13 +7,14 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifdef _MSC_VER
 #pragma warning( 4: 4786)
 #endif
 
+/* interface header */
 #include "OptionParser.h"
 
 
@@ -49,9 +50,11 @@ bool OptionParser::parse(int argc, char** argv) {
       printHelp(std::cout, argv[0]);
       return false;
     }
-    if (argv[i][0] != '-')
+    if (argv[i][0] != '-') {
       parameters.push_back(argv[i]);
-    else {
+      // should just blank out the password, but we don't really parse it here
+      memset(argv[i], ' ', strlen(argv[i]));
+    } else {
       iter = parsers.find(&argv[i][1]);
       if (iter == parsers.end()) {
 	error = error + "Unknown option \"" + argv[i] + "\"";

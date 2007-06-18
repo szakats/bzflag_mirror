@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __OCTREE_H__
@@ -15,6 +15,7 @@
 
 #include "SceneNode.h"
 #include "Frustum.h"
+#include "Extents.h"
 
 
 class OctreeNode;
@@ -27,44 +28,57 @@ class Octree {
     Octree();
     ~Octree();
 
-    void addNodes (SceneNode** list, int listSize, int depth, int elements);
-    int getFrustumList (SceneNode** list, int listSize,
-                        const Frustum* frustum) const;
     void clear ();
+
+    void addNodes (SceneNode** list, int listSize, int depth, int elements);
+
+    int getFrustumList (SceneNode** list, int listSize,
+			const Frustum* frustum) const;
+    int getShadowList (SceneNode** list, int listSize,
+		       int planeCount, const float (*planes)[4]) const;
+    int getRadarList (SceneNode** list, int listSize,
+		      const Frustum* frustum) const;
+
+    void setOccluderManager(int);
+
     void draw () const;
+
+    const Extents* getVisualExtents() const;
 
 
   private: // methods
-
-    void getExtents(float* mins, float* maxs,
-                    SceneNode** list, int listSize);
+    void getExtents(SceneNode** list, int listSize);
 
   private: // data
-
     OctreeNode* root;
+    Extents extents;
+    Extents visualExtents;
 };
-
 
 
 class OctreeNode {
 
   public:
 
-    OctreeNode(unsigned char depth,
-               const float* mins, const float* maxs,
-               SceneNode** list, int listSize);
+    OctreeNode(unsigned char depth, const Extents& exts,
+	       SceneNode** list, int listSize);
     ~OctreeNode();
 
     void getFrustumList () const;
+    void getShadowList () const;
+    void getRadarList () const;
     void getFullyVisible () const;
+    void getFullyVisibleOcclude () const;
+    void getFullyShadow () const;
     OctreeNode* getChild (int child);
 
     int getCount() const;    // number of nodes in this and subnodes
     int getChildren() const; // number of children
     int getListSize() const; // number of nodes in this node
     SceneNode** getList() const;     // list of nodes
-    void getExtents(float* mins, float* maxs) const;
+    const Extents& getExtents() const;
 
+    void tallyStats();
     void draw ();
 
   private:
@@ -79,10 +93,10 @@ class OctreeNode {
     };
 
     unsigned char depth;
-    float mins[3];
-    float maxs[3];
+    Extents extents;
     unsigned char childCount;
     OctreeNode* children[8];
+    OctreeNode* squeezed[8];
     int count;  // number of nodes in this and subnodes
     int listSize;
     SceneNode** list;
@@ -112,6 +126,11 @@ inline int OctreeNode::getChildren() const
 inline OctreeNode* OctreeNode::getChild (int child)
 {
   return children[child];
+}
+
+inline const Extents* Octree::getVisualExtents() const
+{
+  return &visualExtents;
 }
 
 

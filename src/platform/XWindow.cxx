@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,12 +7,11 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "XWindow.h"
 #include "XVisual.h"
-#include "OpenGLGState.h"
 #if defined(XF86VIDMODE_EXT)
 #  define USE_XF86VIDMODE_EXT
 #  define private c_private
@@ -256,8 +255,11 @@ void			XWindow::setMinSize(int width, int height)
   XSetWMNormalHints(display->getDisplay(), window, xsh);
 }
 
-void			XWindow::setFullscreen()
+void			XWindow::setFullscreen(bool on)
 {
+  // FIXME: support toggle back to windowed mode
+  if (!on) return;
+
   // see if a motif based window manager is running.  do this by
   // getting the _MOTIF_WM_INFO property on the root window.  if
   // it exists then make sure the window it refers to also exists.
@@ -596,7 +598,7 @@ unsigned short		XWindow::getIntensityValue(float i) const
 {
   if (i <= 0.0f) return 0;
   if (i >= 1.0f) return 65535;
-  i = powf(i, 1.0 / gammaVal);
+  i = powf(i, 1.0f / gammaVal);
   return (unsigned short)(0.5f + 65535.0f * i);
 }
 
@@ -643,12 +645,10 @@ void			XWindow::deactivateAll()
 
 void			XWindow::reactivateAll()
 {
-  for (XWindow* scan = first; scan; scan = scan->next)
+  for (XWindow* scan = first; scan; scan = scan->next) {
     scan->makeContext();
-
-  // reload context data
-  if (first)
-    OpenGLGState::initContext();
+    scan->callExposeCallbacks();
+  }
 }
 
 // Local Variables: ***
@@ -658,4 +658,3 @@ void			XWindow::reactivateAll()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

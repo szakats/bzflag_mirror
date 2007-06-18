@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,28 +7,17 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // interface headers
 #include "HUDuiTypeIn.h"
-#include "HUDuiControl.h"
 
-// system headers
-#include <math.h>
+// system implementation headers
 #include <ctype.h>
-#include <string>
 
 // common implementation headers
-#include "common.h"
-#include "bzfgl.h"
-#include "BzfEvent.h"
-#include "BundleMgr.h"
-#include "Bundle.h"
 #include "FontManager.h"
-
-// local implementation headers
-#include "HUDui.h"
 
 //
 // HUDuiTypeIn
@@ -37,11 +26,17 @@
 HUDuiTypeIn::HUDuiTypeIn()
 : HUDuiControl(), maxLength(0), cursorPos(0)
 {
-  allowEdit = true; //by default allow editing
+  allowEdit = true; // allow editing by default
+  obfuscate = false;
 }
 
 HUDuiTypeIn::~HUDuiTypeIn()
 {
+}
+
+void		HUDuiTypeIn::setObfuscation(bool on)
+{
+  obfuscate = on;
 }
 
 int			HUDuiTypeIn::getMaxLength() const
@@ -66,7 +61,7 @@ void			HUDuiTypeIn::setMaxLength(int _maxLength)
 void			HUDuiTypeIn::setString(const std::string& _string)
 {
   string = _string;
-  cursorPos = string.length();
+  cursorPos = (int)string.length();
   onSetFont();
 }
 
@@ -81,17 +76,12 @@ bool			HUDuiTypeIn::doKeyPress(const BzfKeyEvent& key)
   static const char backspace = '\b';	// ^H
   static const char whitespace = ' ';
 
+  if (HUDuiControl::doKeyPress(key))
+    return true;
+
   if (!allowEdit) return false; //or return true ??
   char c = key.ascii;
   if (c == 0) switch (key.button) {
-    case BzfKeyEvent::Up:
-      HUDui::setFocus(getPrev());
-      return true;
-
-    case BzfKeyEvent::Down:
-      HUDui::setFocus(getNext());
-      return true;
-
     case BzfKeyEvent::Left:
       if (cursorPos > 0)
 	cursorPos--;
@@ -107,7 +97,7 @@ bool			HUDuiTypeIn::doKeyPress(const BzfKeyEvent& key)
       return true;
 
     case BzfKeyEvent::End:
-      cursorPos = string.length();
+      cursorPos = (int)string.length();
       return true;
 
     case BzfKeyEvent::Backspace:
@@ -118,19 +108,15 @@ bool			HUDuiTypeIn::doKeyPress(const BzfKeyEvent& key)
       if (cursorPos < (int)string.length()) {
 	cursorPos++;
 	c = backspace;
-      }
-      else
+      } else {
 	return true;
+      }
       break;
 
     default:
       return false;
   }
 
-  if (c == '\t') {
-    HUDui::setFocus(getNext());
-    return true;
-  }
   if (!isprint(c) && c != backspace)
     return false;
 
@@ -172,13 +158,18 @@ void			HUDuiTypeIn::doRender()
   glColor3fv(hasFocus() ? textColor : dimTextColor);
 
   FontManager &fm = FontManager::instance();
-
-  fm.drawString(getX(), getY(), 0, getFontFace(), getFontSize(), string);
+  std::string renderStr;
+  if (obfuscate) {
+    renderStr.append(string.size(), '*');
+  } else {
+    renderStr = string;
+  }
+  fm.drawString(getX(), getY(), 0, getFontFace(), getFontSize(), renderStr);
 
   // find the position of where to draw the input cursor
-  float start = fm.getStrLength(getFontFace(), getFontSize(), string.substr(0, cursorPos));
+  float start = fm.getStrLength(getFontFace(), getFontSize(), renderStr.substr(0, cursorPos));
 
-  if (HUDui::getFocus() == this && allowEdit) {
+  if (hasFocus() && allowEdit) {
     fm.drawString(getX() + start, getY(), 0, getFontFace(), getFontSize(), "_");
   }
 }
@@ -190,4 +181,3 @@ void			HUDuiTypeIn::doRender()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

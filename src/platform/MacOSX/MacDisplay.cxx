@@ -41,6 +41,11 @@ bool MacDisplay::isEventPending() const
   return (status == ::noErr) ? true : false;
 }
 
+bool MacDisplay::peekEvent (BzfEvent &) const
+{
+  return false;
+}
+
 bool MacDisplay::getEvent (BzfEvent &bzf_event) const {
   ::EventRef		eventRef	= 0;
   ::OSStatus		status		= ::noErr;
@@ -239,7 +244,7 @@ void MacDisplay::getKey (BzfKeyEvent &bzf_key, char char_code, ::UInt32 keycode)
     kF12KeyCode	 = 0x6F,
     kF13KeyCode	 = 0x69,	// Print Screen
     kF14KeyCode	 = 0x6B,	// Scroll Lock
-    kF15KeyCode	 = 0x71,	// Pause
+    kF15KeyCode	 = 0x71	// Pause
   };
   bzf_key.ascii = 0;
   bzf_key.button = BzfKeyEvent::NoButton;
@@ -299,7 +304,9 @@ char *GetMacOSXDataPath(void)
     string = basePath;
   }
   ::CFRelease(resourceURL);
+#ifdef DEBUG
   fprintf(stderr, "data path is \"%s\"\n", string);
+#endif
   return string;
 }
 

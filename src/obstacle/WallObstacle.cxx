@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,24 +7,39 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include <math.h>
 #include "common.h"
+#include "Pack.h"
 #include "WallObstacle.h"
 #include "Intersect.h"
 
 const char*		WallObstacle::typeName = "WallObstacle";
 
+WallObstacle::WallObstacle()
+{
+  // do nothing
+}
+
 WallObstacle::WallObstacle(const float* p, float a, float b, float h) :
 				Obstacle(p, a, 0.0, b, h)
 {
+  finalize();
+}
+
+void WallObstacle::finalize()
+{
   // compute normal
+  const float* p = getPosition();
+  const float a = getRotation();
   plane[0] = cosf(a);
   plane[1] = sinf(a);
   plane[2] = 0.0;
   plane[3] = -(p[0] * plane[0] + p[1] * plane[1] + p[2] * plane[2]);
+
+  return;
 }
 
 WallObstacle::~WallObstacle()
@@ -65,12 +80,12 @@ bool			WallObstacle::inCylinder(const float* p, float r, float /* height */) con
   return p[0] * plane[0] + p[1] * plane[1] + p[2] * plane[2] + plane[3] < r;
 }
 
-bool			WallObstacle::inBox(const float* p, float angle,
-				            float halfWidth, float halfBreadth,
-				            float /* height */) const
+bool			WallObstacle::inBox(const float* p, float _angle,
+					    float halfWidth, float halfBreadth,
+					    float /* height */) const
 {
-  const float xWidth = cosf(angle);
-  const float yWidth = sinf(angle);
+  const float xWidth = cosf(_angle);
+  const float yWidth = sinf(_angle);
   const float xBreadth = -yWidth;
   const float yBreadth = xWidth;
   float corner[3];
@@ -94,11 +109,11 @@ bool			WallObstacle::inBox(const float* p, float angle,
 }
 
 bool			WallObstacle::inMovingBox(const float* /* oldP */, float /* oldAngle */,
-                                       const float* p, float angle,
-                                       float halfWidth, float halfBreadth, float height) const
+				       const float* p, float _angle,
+				       float halfWidth, float halfBreadth, float height) const
 
 {
-  return inBox (p, angle, halfWidth, halfBreadth, height);
+  return inBox (p, _angle, halfWidth, halfBreadth, height);
 }
 
 bool			WallObstacle::getHitNormal(
@@ -111,6 +126,49 @@ bool			WallObstacle::getHitNormal(
   return true;
 }
 
+
+void* WallObstacle::pack(void* buf) const
+{
+  buf = nboPackVector(buf, pos);
+  buf = nboPackFloat(buf, angle);
+  buf = nboPackFloat(buf, size[1]);
+  buf = nboPackFloat(buf, size[2]);
+
+  return buf;
+}
+
+
+void* WallObstacle::unpack(void* buf)
+{
+  buf = nboUnpackVector(buf, pos);
+  buf = nboUnpackFloat(buf, angle);
+  buf = nboUnpackFloat(buf, size[1]);
+  buf = nboUnpackFloat(buf, size[2]);
+
+  finalize();
+
+  return buf;
+}
+
+
+int WallObstacle::packSize() const
+{
+  int fullSize = 0;
+  fullSize += sizeof(float[3]); // pos
+  fullSize += sizeof(float);    // rotation
+  fullSize += sizeof(float);	// breadth
+  fullSize += sizeof(float);	// height
+  return fullSize;
+}
+
+
+void WallObstacle::print(std::ostream& /*out*/,
+			 const std::string& /*indent*/) const
+{
+  return;
+}
+
+
 // Local Variables: ***
 // mode:C++ ***
 // tab-width: 8 ***
@@ -118,4 +176,3 @@ bool			WallObstacle::getHitNormal(
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

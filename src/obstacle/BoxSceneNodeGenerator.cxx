@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "BoxSceneNodeGenerator.h"
@@ -65,9 +65,9 @@ WallSceneNode*		BoxSceneNodeGenerator::getNextNode(
     case 6:							//This is the bottom polygon
       //Don't generate the bottom polygon if on the ground (or lower)
       if (box->getPosition()[2] > 0.0f) {
-        box->getCorner(0, base);
-        box->getCorner(3, sCorner);
-        box->getCorner(1, tCorner);
+	box->getCorner(0, base);
+	box->getCorner(3, sCorner);
+	box->getCorner(1, tCorner);
       }
       else
 	return NULL;

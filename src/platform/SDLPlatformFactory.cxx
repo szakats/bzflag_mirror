@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,13 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "SDLPlatformFactory.h"
 #include "SDLMedia.h"
 #include "SDLDisplay.h"
 #include "SDLJoystick.h"
+#include "SDLVisual.h"
+#include "SDLWindow.h"
+#include "EvdevJoystick.h"
 
 PlatformFactory* PlatformFactory::getInstance()
 {
@@ -60,6 +63,16 @@ BzfMedia* SdlPlatformFactory::createMedia()
 
 BzfJoystick* SdlPlatformFactory::createJoystick()
 {
+  /* Use EvdevJoystick instead of SDLJoystick if we can.
+   * It has minor improvements in axis mapping and joystick
+   * enumeration, but the big selling point so far is that it
+   * supports force feedback.
+   */
+#ifdef HAVE_LINUX_INPUT_H
+  if (EvdevJoystick::isEvdevAvailable())
+    return new EvdevJoystick;
+#endif
+
   return new SDLJoystick;
 }
 // Local Variables: ***
@@ -69,4 +82,3 @@ BzfJoystick* SdlPlatformFactory::createJoystick()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

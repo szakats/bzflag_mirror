@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* BillboardSceneNode:
@@ -20,8 +20,6 @@
 #include "common.h"
 #include "SceneNode.h"
 #include "OpenGLLight.h"
-
-class OpenGLTexture;
 
 class BillboardSceneNode : public SceneNode {
   public:
@@ -42,6 +40,7 @@ class BillboardSceneNode : public SceneNode {
     void		setLightAttenuation(GLfloat c, GLfloat l, GLfloat q);
     void		setLightScaling(GLfloat intensityScaleFactor);
     void		setLightFadeStartTime(float t);
+    void		setGroundLight(bool value);
 
     void		setSize(float side);
     void		setSize(float width, float height);
@@ -55,7 +54,7 @@ class BillboardSceneNode : public SceneNode {
     void		setAngle(GLfloat);
     void		addLight(SceneRenderer&);
 
-    void		notifyStyleChange(const SceneRenderer&);
+    void		notifyStyleChange();
     void		addRenderNodes(SceneRenderer&);
 
   protected:
@@ -65,7 +64,7 @@ class BillboardSceneNode : public SceneNode {
 			~BillboardRenderNode();
 	void		setColor(const GLfloat* rgba);
 	void		render();
-	const GLfloat*	getPosition() { return sceneNode->getSphere(); }
+	const GLfloat*	getPosition() const { return sceneNode->getSphere(); }
 	void		setFrame(float u, float v);
 	void		setFrameSize(float du, float dv);
       private:
@@ -85,6 +84,7 @@ class BillboardSceneNode : public SceneNode {
     bool		hasTextureAlpha;
     bool		looping;
     bool		lightSource;
+    bool		groundLight;
     float		width, height;
     GLfloat		color[4];
     GLfloat		angle;
@@ -107,4 +107,3 @@ class BillboardSceneNode : public SceneNode {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

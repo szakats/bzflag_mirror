@@ -1,30 +1,38 @@
-SUBDIRS = English.lproj BZFlag.pbproj BZFlag.xcode
+if MACOS
+if CLIENT_INCLUDED
+noinst_LTLIBRARIES = libMac.la
+endif
+endif
 
-libMac_a_SOURCES =			\
-	MacPlatformFactory.cxx		\
-	MacPlatformFactory.h		\
+libMac_la_LDFLAGS = -static
+libMac_la_SOURCES =			\
 	MacDisplay.cxx			\
 	MacDisplay.h			\
+	MacMedia.cxx			\
+	MacMedia.h			\
+	MacPlatformFactory.cxx		\
+	MacPlatformFactory.h		\
 	MacVisual.cxx			\
 	MacVisual.h			\
 	MacWindow.cxx			\
 	MacWindow.h			\
-	MacMedia.cxx			\
-	MacMedia.h
+	SDLMain.h
 
-if MACOS
-if CLIENT_INCLUDED
-noinst_LIBRARIES = libMac.a
+if HAVE_SDL
+libMac_la_LIBADD = SDLMain.lo
+all: SDLMain.lo
 endif
-endif
+
+SDLMain.lo:
+	$(LTCOMPILE) -c -o $@ `test -f 'SDLMain.m' || echo '$(srcdir)/'`SDLMain.m
+
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src/platform $(SDL_CFLAGS) @CONF_CPPFLAGS@
+AM_CXXFLAGS = @CONF_CXXFLAGS@
 
 MAINTAINERCLEANFILES = Makefile.in
 
-AM_CPPFLAGS = $(SDL_CFLAGS) -I$(top_srcdir)/src/platform
-
 EXTRA_DIST =				\
 	BZFlag-Info.plist		\
-	BZFlag_Prefix.h			\
 	MacBZFlag.icns			\
-	main.m				\
+	SDLMain.m			\
 	mkplist.cxx

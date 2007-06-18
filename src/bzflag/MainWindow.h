@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,14 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	__MAINWINDOW_H__
 #define	__MAINWINDOW_H__
+
+/* BZFlag common header */
+#include "common.h"
 
 /* system interface headers */
 #include <vector>
@@ -78,10 +81,17 @@ class MainWindow {
     // events instead because it means no round trip to the server
     // for these values that we need every frame.
     void		getMousePosition(int& mx, int& my) const;
-    void		getJoyPosition(int& mx, int& my) const;
+    void		getJoyPosition(int& jx, int& jy) const;
     unsigned long	getJoyButtonSet() const;
-    void                getJoyDevices(std::vector<std::string> &list) const;
-    void	        initJoystick(std::string &joystickName);
+    unsigned int	getJoyHatswitch(int switchno) const;
+    void		getJoyDevices(std::vector<std::string> &list) const;
+    void		getJoyDeviceAxes(std::vector<std::string> &list) const;
+    unsigned int	getJoyDeviceNumHats() const;
+    void		setJoyXAxis(const std::string axis);
+    void		setJoyYAxis(const std::string axis);
+    void		initJoystick(std::string &joystickName);
+
+    bool		isInFault() { return faulting; };
 
   private:
     // no copying
@@ -89,6 +99,7 @@ class MainWindow {
     MainWindow&		operator=(const MainWindow&);
 
     static void		resizeCB(void*);
+    static void		exposeCB(void*);
 
   private:
     BzfWindow*		window;
@@ -98,7 +109,7 @@ class MainWindow {
     bool		isFullscreen;
     bool		isFullView;
     bool		allowMouseGrab;
-    bool                grabEnabled;
+    bool		grabEnabled;
     int			zoomFactor;
     int			trueWidth, trueHeight;
     int			xOrigin, yOrigin;
@@ -107,6 +118,7 @@ class MainWindow {
     int			viewHeight;
     int			minWidth;
     int			minHeight;
+    bool		faulting;
 };
 
 //

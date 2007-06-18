@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,11 +7,13 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef _ANSI_CODES_H_
 #define _ANSI_CODES_H_
+
+#include "common.h"
 
 #include <string>
 
@@ -25,8 +27,11 @@
 #define ANSI_STR_BRIGHT		"\033[1m"
 #define ANSI_STR_DIM		"\033[2m"
 #define ANSI_STR_UNDERLINE	"\033[4m"
+#define ANSI_STR_NO_UNDERLINE	"\033[24m"
 #define ANSI_STR_PULSATING	"\033[5m"
+#define ANSI_STR_NO_PULSATE	"\033[25m"
 #define ANSI_STR_REVERSE	"\033[7m"	// unimplemented
+#define ANSI_STR_NO_REVERSE	"\033[27m"	// unimplemented
 
 #define ANSI_STR_FG_BLACK	"\033[30m"	// grey
 #define ANSI_STR_FG_RED		"\033[31m"
@@ -37,32 +42,41 @@
 #define ANSI_STR_FG_CYAN	"\033[36m"
 #define ANSI_STR_FG_WHITE	"\033[37m"
 
+#define ANSI_STR_FG_ORANGE	"\033[130m"	// orange (custom; not defined in ISO 6429)
+
 // Color definitions
 typedef enum {
-  // the first 5 codes line up with the TeamColor enum from global.h
+  // the first 8 codes line up with the TeamColor enum from global.h
   RogueColor		= 0,	// team (yellow)
   RedColor		= 1,	// team
   GreenColor		= 2,	// team
   BlueColor		= 3,	// team
   PurpleColor		= 4,	// team
+  WhiteColor		= 5,	// observer
+  GreyColor		= 6,	// rabbit
+  OrangeColor		= 7,    // hunter
+  CyanColor		= 8,
 
-  WhiteColor		= 5,
-  GreyColor		= 6,
-  CyanColor		= 7,
+  LastColor		= 8,	// last of the actual colors, the rest are modifiers
 
-  ResetColor		= 8,
-  FinalResetColor       = 11,
-  BrightColor		= 12,
-  DimColor		= 13,
-  PulsatingColor	= 9,
-  UnderlineColor	= 10,
+  ResetColor		= 9,
+  FinalResetColor       = 12,
+  BrightColor		= 13,
+  DimColor		= 14,
+  PulsatingColor	= 10,
+  NonPulsatingColor	= 15,
+  UnderlineColor	= 11,
+  NonUnderlineColor	= 16,
 
-  YellowColor		= 0,
+  LastCode		= 16,	// last of the codes
+
+  // aliases
+  YellowColor		= 0,	// aka RogueColor
   DefaultColor		= 6	// default to grey
 } ColorCodes;
 
 // These enum values have to line up with those above
-static std::string ColorStrings[14] = {
+static const std::string ColorStrings[17] = {
   ANSI_STR_FG_YELLOW,   // 0  Rogue     (yellow)
   ANSI_STR_FG_RED,      // 1  Red
   ANSI_STR_FG_GREEN,    // 2  Green
@@ -70,17 +84,20 @@ static std::string ColorStrings[14] = {
   ANSI_STR_FG_MAGENTA,  // 4  Purple
   ANSI_STR_FG_WHITE,    // 5  White
   ANSI_STR_FG_BLACK,    // 6  Grey      (bright black is grey)
-  ANSI_STR_FG_CYAN,     // 7  Cyan
-  ANSI_STR_RESET,       // 8  Reset
-  ANSI_STR_PULSATING,   // 9  Pulsating
-  ANSI_STR_UNDERLINE,   // 10 Underline
-  ANSI_STR_RESET_FINAL, // 11 Really reset (no brightness added)
-  ANSI_STR_BRIGHT,	// 12 Bright mode
-  ANSI_STR_DIM		// 13 Dim mode
+  ANSI_STR_FG_ORANGE,	// 7  Orange	(nonstandard)
+  ANSI_STR_FG_CYAN,     // 8  Cyan
+  ANSI_STR_RESET,       // 9  Reset
+  ANSI_STR_PULSATING,   // 10 Pulsating
+  ANSI_STR_UNDERLINE,   // 11 Underline
+  ANSI_STR_RESET_FINAL, // 12 Really reset (no brightness added)
+  ANSI_STR_BRIGHT,	// 13 Bright mode
+  ANSI_STR_DIM,		// 14 Dim mode
+  ANSI_STR_NO_PULSATE,  // 15 No Pulsating
+  ANSI_STR_NO_UNDERLINE // 16 No Underlining
 };
 
 // strip ANSI codes from a string
-inline std::string stripAnsiCodes(const std::string text)
+inline std::string stripAnsiCodes(const std::string &text)
 {
   std::string str = "";
 
@@ -112,4 +129,3 @@ inline std::string stripAnsiCodes(const std::string text)
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

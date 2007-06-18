@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,18 +7,29 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// bzflag common header
+#include "common.h"
+
+// interface header
+#include "BillboardSceneNode.h"
+
+// system headers
 #include <stdlib.h>
 #include <math.h>
-#include "common.h"
-#include "BillboardSceneNode.h"
-#include "ViewFrustum.h"
-#include "SceneRenderer.h"
-#include "StateDatabase.h"
+
+// common implementation headers
 #include "BZDBCache.h"
 #include "TextureManager.h"
+
+// local implementation headers
+#include "ViewFrustum.h"
+#include "StateDatabase.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
+#include "SceneRenderer.h"
 
 BillboardSceneNode::BillboardSceneNode(const GLfloat pos[3]) :
 				show(false),
@@ -35,7 +46,7 @@ BillboardSceneNode::BillboardSceneNode(const GLfloat pos[3]) :
   OpenGLGStateBuilder builder(gstate);
   builder.setBlending();
   builder.setAlphaFunc();
-  builder.enableTextureReplace();
+  //builder.setTextureEnvMode(GL_DECAL);
   gstate = builder.getState();
 
   // prepare light
@@ -43,6 +54,7 @@ BillboardSceneNode::BillboardSceneNode(const GLfloat pos[3]) :
   setLightColor(1.0f, 1.0f, 1.0f);
   setLightAttenuation(0.05f, 0.0f, 0.03f);
   setLightFadeStartTime(duration);
+  setGroundLight(false);
 
   // prepare geometry
   move(pos);
@@ -127,8 +139,9 @@ void			BillboardSceneNode::updateTime(float dt)
   setFrame();
 
   // update light intensity if it changed
-  if (t > lightCutoffTime || ot > lightCutoffTime)
+  if (t > lightCutoffTime || ot > lightCutoffTime) {
     prepLight();
+  }
 }
 
 bool			BillboardSceneNode::isAtEnd() const
@@ -185,10 +198,16 @@ void			BillboardSceneNode::setLightScaling(GLfloat s)
   prepLight();
 }
 
-void			BillboardSceneNode::setLightFadeStartTime(float t)
+void			BillboardSceneNode::setLightFadeStartTime(float _t)
 {
-  lightCutoffTime = t;
+  lightCutoffTime = _t;
   prepLight();
+}
+
+void			BillboardSceneNode::setGroundLight(bool value)
+{
+  groundLight = value;
+  light.setOnlyGround(value);
 }
 
 void			BillboardSceneNode::prepLight()
@@ -240,7 +259,6 @@ void			BillboardSceneNode::setTexture(
   builder.setTexture(texture);
   builder.enableTexture(hasTexture);
   gstate = builder.getState();
-  forceNotifyStyleChange();
 }
 
 void			BillboardSceneNode::
@@ -260,28 +278,30 @@ void			BillboardSceneNode::move(const GLfloat pos[3])
 
 void			BillboardSceneNode::setAngle(GLfloat _angle)
 {
-  angle = 180.0f / M_PI * _angle;
+  angle = (float)(180.0 / M_PI * _angle);
 }
 
 void			BillboardSceneNode::addLight(
 				SceneRenderer& renderer)
 {
-  if (show)
+  if (show && lightSource) {
     renderer.addLight(light);
+  }
 }
 
-void			BillboardSceneNode::notifyStyleChange(
-				const SceneRenderer&)
+void			BillboardSceneNode::notifyStyleChange()
 {
   show = hasTexture && BZDBCache::texture &&
 	(!hasAlpha || BZDBCache::blend);
   if (show) {
     OpenGLGStateBuilder builder(gstate);
     if (hasAlpha) {
-      builder.setBlending(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      if (RENDERER.useQuality() >= _EXPERIMENTAL_QUALITY)
+	builder.setBlending(GL_SRC_ALPHA, GL_ONE);
+      else
+	builder.setBlending(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       builder.setAlphaFunc();
-    }
-    else {
+    } else {
       builder.resetBlending();
       builder.resetAlphaFunc();
     }
@@ -348,6 +368,7 @@ void			BillboardSceneNode::BillboardRenderNode::render()
   d = sceneNode->width / hypotf(dir[0], hypotf(dir[1], dir[2]));
 
   glPushMatrix();
+  {
     glTranslatef(sphere[0] + d * dir[0],
 		 sphere[1] + d * dir[1],
 		 sphere[2] + d * dir[2]);
@@ -366,8 +387,10 @@ void			BillboardSceneNode::BillboardRenderNode::render()
     glTexCoord2f(   u, dv+v);
     glVertex2f  (-sceneNode->width,  sceneNode->height);
     glEnd();
-
+  }
   glPopMatrix();
+
+  addTriangleCount(2);
 
   glDisable(GL_CLIP_PLANE0);
 }
@@ -379,4 +402,3 @@ void			BillboardSceneNode::BillboardRenderNode::render()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

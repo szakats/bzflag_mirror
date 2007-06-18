@@ -1,14 +1,14 @@
-NumChars: 93
+NumChars: 95
 TextureWidth: 512
 TextureHeight: 128
 TextZStep: 19
 
 Char: " "
 InitialDist: 0
-Width: 0
-Whitespace: 10
+Width: 1
+Whitespace: 9
 StartX: 0
-EndX: 0
+EndX: 1
 StartY: 0
 EndY: 19
 
@@ -810,7 +810,7 @@ Width: 8
 Whitespace: 1
 StartX: 209
 EndX: 217
-StartY: 57
+StartY: 58
 EndY: 76
 
 Char: "z"
@@ -849,3 +849,11 @@ EndX: 291
 StartY: 57
 EndY: 76
 
+Char: "~"
+InitialDist: 1
+Width: 8
+Whitespace: 1
+StartX: 304
+EndX: 312
+StartY: 57
+EndY: 76

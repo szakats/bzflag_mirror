@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -20,15 +20,14 @@
 
 #include "common.h"
 #include "OpenGLMaterial.h"
-#include "OpenGLTexture.h"
 
 class SceneRenderer;
 class SceneDatabase;
 class WallObstacle;
+class MeshObstacle;
 class BoxBuilding;
 class PyramidBuilding;
 class BaseBuilding;
-class TetraBuilding;
 class Teleporter;
 class World;
 
@@ -41,11 +40,12 @@ class SceneDatabaseBuilder {
 
   protected:
     void		addWall(SceneDatabase*, const WallObstacle&);
-    void		addBox(SceneDatabase*, const BoxBuilding&);
-    void		addPyramid(SceneDatabase*, const PyramidBuilding&);
-    void		addBase(SceneDatabase*, const BaseBuilding&);
-    void		addTetra(SceneDatabase*, const TetraBuilding&);
-    void		addTeleporter(SceneDatabase*, const Teleporter&);
+    void		addMesh(SceneDatabase*, MeshObstacle*);
+    void		addBox(SceneDatabase*, BoxBuilding&);
+    void		addPyramid(SceneDatabase*, PyramidBuilding&);
+    void		addBase(SceneDatabase*, BaseBuilding&);
+    void		addTeleporter(SceneDatabase*, const Teleporter&, const World*);
+    void		addWaterLevel(SceneDatabase*, const World*);
 
   private:
     // disallow duplication
@@ -66,9 +66,6 @@ class SceneDatabaseBuilder {
     OpenGLMaterial	pyramidMaterial;
     bool		pyramidLOD;
 
-    OpenGLMaterial	tetraMaterial;
-    bool		tetraLOD;
-
     bool		baseLOD;
 
     OpenGLMaterial	teleporterMaterial;
@@ -86,10 +83,6 @@ class SceneDatabaseBuilder {
     static const GLfloat pyramidModulateColors[5][4];
     static const GLfloat pyramidLightedColors[5][4];
     static const GLfloat pyramidLightedModulateColors[5][4];
-    static const GLfloat tetraColors[4][4];
-    static const GLfloat tetraModulateColors[4][4];
-    static const GLfloat tetraLightedColors[4][4];
-    static const GLfloat tetraLightedModulateColors[4][4];
     static const GLfloat teleporterColors[3][4];
     static const GLfloat teleporterModulateColors[3][4];
     static const GLfloat teleporterLightedColors[3][4];
@@ -105,4 +98,3 @@ class SceneDatabaseBuilder {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

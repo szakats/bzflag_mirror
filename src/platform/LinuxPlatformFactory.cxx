@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "LinuxPlatformFactory.h"
@@ -20,7 +20,7 @@
 #elif defined(XIJOYSTICK)
   #include "XIJoystick.h"
 #else
-  #include "BzfJoystick.h"
+  #include "EvdevJoystick.h"
 #endif
 
 PlatformFactory*	PlatformFactory::getInstance()
@@ -70,8 +70,10 @@ BzfJoystick*		LinuxPlatformFactory::createJoystick()
 #elif defined(XIJOYSTICK)
   // XInput Joystick
   return new XIJoystick;
+#elif defined(HAVE_LINUX_INPUT_H)
+  // Event device joystick
+  return new EvdevJoystick;
 #else
-  // no joystick
   return new BzfJoystick;
 #endif
 }
@@ -88,4 +90,3 @@ BzfMedia*		LinuxPlatformFactory::createMedia()
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

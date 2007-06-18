@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* LaserSceneNode:
@@ -30,20 +30,28 @@ class LaserSceneNode : public SceneNode {
 
     bool		cull(const ViewFrustum&) const;
 
-    void		notifyStyleChange(const SceneRenderer&);
+    void		notifyStyleChange();
     void		addRenderNodes(SceneRenderer&);
 
+	void		setColor ( GLfloat r, GLfloat g, GLfloat b );
+	void		setCenterColor ( GLfloat r, GLfloat g, GLfloat b );
+	void		setFirst ( void ) {first = true;}
   protected:
     class LaserRenderNode : public RenderNode {
       public:
 			LaserRenderNode(const LaserSceneNode*);
 			~LaserRenderNode();
 	void		render();
-	const GLfloat*	getPosition() { return sceneNode->getSphere(); }
+	const GLfloat*	getPosition() const { return sceneNode->getSphere(); }
       private:
+	void renderFlatLaser ( void );
+	void renderGeoLaser ( void );
 	const LaserSceneNode* sceneNode;
 	static GLfloat	geom[6][2];
     };
+	float color[3];
+	float centerColor[3];
+	bool first;
     friend class LaserRenderNode;
 
   private:
@@ -52,6 +60,7 @@ class LaserSceneNode : public SceneNode {
     bool		texturing;
     OpenGLGState	gstate;
     LaserRenderNode	renderNode;
+
 };
 
 #endif // BZF_LASER_SCENE_NODE_H
@@ -63,4 +72,3 @@ class LaserSceneNode : public SceneNode {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

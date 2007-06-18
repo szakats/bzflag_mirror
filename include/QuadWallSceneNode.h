@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* QuadWallSceneNode:
@@ -42,12 +42,15 @@ class QuadWallSceneNode : public WallSceneNode {
 
     void		addRenderNodes(SceneRenderer&);
     void		addShadowNodes(SceneRenderer&);
+    void		renderRadar();
 
-    void                getExtents(float* mins, float* maxs) const;
-    bool                inAxisBox (const float* mins,
-                                   const float* maxs) const;
-    int                 getVertexCount () const;
-    const               GLfloat* getVertex (int vertex) const;
+
+    bool		inAxisBox (const Extents& exts) const;
+
+    int			getVertexCount () const;
+    const		GLfloat* getVertex (int vertex) const;
+
+    virtual void	getRenderNodes(std::vector<RenderSet>& rnodes);
 
   private:
     void		init(const GLfloat base[3],
@@ -73,8 +76,9 @@ class QuadWallSceneNode : public WallSceneNode {
 			~Geometry();
 	void		setStyle(int _style) { style = _style; }
 	void		render();
+	void		renderShadow();
 	const GLfloat*  getVertex(int i) const;
-	const GLfloat*	getPosition() { return wall->getSphere(); }
+	const GLfloat*	getPosition() const { return wall->getSphere(); }
       private:
 	void		drawV() const;
 	void		drawVT() const;
@@ -87,6 +91,7 @@ class QuadWallSceneNode : public WallSceneNode {
       public:
 	GLfloat3Array	vertex;
 	GLfloat2Array	uv;
+	int	     triangles;
     };
 
   private:
@@ -103,4 +108,3 @@ class QuadWallSceneNode : public WallSceneNode {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

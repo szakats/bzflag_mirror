@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* OpenGLMaterial:
@@ -51,8 +51,9 @@ class OpenGLMaterial {
     const GLfloat*	getEmissiveColor() const;
     GLfloat		getShininess() const;
 
+    void		setQuality(bool highQuality);
+
     bool		isValid() const;
-    GLuint		getList() const;
     void		execute() const;
 
   private:
@@ -69,9 +70,9 @@ class OpenGLMaterial {
 			Rep(const GLfloat* specular,
 				const GLfloat* emissive,
 				GLfloat shininess);
+	static void	freeContext(void*);
 	static void	initContext(void*);
       public:
-	bool		init;
 	int		refCount;
 	Rep*		prev;
 	Rep*		next;
@@ -80,6 +81,7 @@ class OpenGLMaterial {
 	GLfloat		emissive[4];
 	GLfloat		shininess;
 	static Rep*	head;
+        bool		highQuality;
     };
     Rep*		rep;
 };
@@ -103,6 +105,12 @@ inline GLfloat		OpenGLMaterial::getShininess() const
   return rep->shininess;
 }
 
+inline void		OpenGLMaterial::setQuality(bool highQuality)
+{
+  rep->highQuality = highQuality;
+}
+
+
 #endif // BZF_OPENGL_MATERIAL_H
 
 // Local Variables: ***
@@ -112,4 +120,3 @@ inline GLfloat		OpenGLMaterial::getShininess() const
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

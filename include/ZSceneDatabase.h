@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* ZSceneDatabase:
@@ -26,15 +26,29 @@ class ZSceneDatabase : public SceneDatabase {
 			ZSceneDatabase();
 			~ZSceneDatabase();
 
-    void		addStaticNode(SceneNode*);
+    // returns true if the node would have been deleted
+    bool		addStaticNode(SceneNode*, bool dontFree);
     void		addDynamicNode(SceneNode*);
     void		addDynamicSphere(SphereSceneNode*);
-    void		addShadowNodes(SceneRenderer &renderer);
+    void		finalizeStatics();
     void		removeDynamicNodes();
     void		removeAllNodes();
     bool		isOrdered();
 
-    SceneIterator*	getRenderIterator();
+    void		updateNodeStyles();
+    void		addLights(SceneRenderer& renderer);
+    void		addShadowNodes(SceneRenderer &renderer);
+    void		addRenderNodes(SceneRenderer& renderer);
+    void		renderRadarNodes(const ViewFrustum&);
+
+    void		drawCuller();
+    void		setOccluderManager(int);
+
+    const Extents*	getVisualExtents() const;
+
+  private:
+    void		setupCullList();
+    void		makeCuller();
 
   private:
     int			staticCount;
@@ -45,31 +59,15 @@ class ZSceneDatabase : public SceneDatabase {
     int			dynamicSize;
     SceneNode**		dynamicList;
 
-};
-
-class ZSceneIterator : public SceneIterator {
-  public:
-			ZSceneIterator(const ZSceneDatabase*);
-    virtual		~ZSceneIterator();
-
-    void	resetFrustum(const ViewFrustum*);
-    void	reset();
-    SceneNode*	getNext();
-    void		drawCuller();
-
-  private:
-    const ZSceneDatabase* db;
-    bool		culledDone, dynamicDone;
-    int			culledIndex, dynamicIndex;
+    int			culledCount;
+    SceneNode**	 culledList;
 
     class Octree*       octree;
-    SceneNode**         culledList;
-    int			culledCount;
     int			cullDepth;
     int			cullElements;
 
-    void                makeCuller();
 };
+
 
 #endif // BZF_Z_SCENE_DATABASE_H
 
@@ -80,4 +78,3 @@ class ZSceneIterator : public SceneIterator {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __WORDFILTER_H__
@@ -17,7 +17,6 @@
 
 /* system interface headers */
 #include <string>
-#include <vector>
 #include <set>
 #include <algorithm>
 #include <string.h>
@@ -28,16 +27,15 @@
 #include <ctype.h>
 #include <sys/types.h>
 
-#ifdef BUILD_REGEX
-#  include "regex.h"
+#if defined(BUILD_REGEX)
+#  include "bzregex.h"
 #elif defined(HAVE_REGEX_H)
 #  include <regex.h>
-#else
-#  define regex_t void
 #endif
 
 /* common interface headers */
 #include "TextUtils.h"
+
 
 
 /* words are stored by the index of their first letter of
@@ -97,6 +95,15 @@
  */
 class WordFilter
 {
+ public:
+
+  /** structure for a single filter word, and a compiled regular expression
+   */
+  typedef struct filterStruct {
+    std::string word;
+    regex_t *compiled;
+  } filter_t;
+
 
  private:
 
@@ -105,13 +112,6 @@ class WordFilter
 
   /** set of characters used to replace filtered content */
   std::string filterChars;
-
-  /** structure for a single filter word, and a compiled regular expression
-   */
-  typedef struct filterStruct {
-    std::string word;
-    regex_t *compiled;
-  } filter_t;
 
   /** word expressions to be filtered including compiled regexp versions */
   struct expressionCompare {
@@ -231,7 +231,6 @@ class WordFilter
 };
 
 
-
 /** utility method performs an actual replacement of
  * characters in an input character ray within a specified
  * range.
@@ -267,7 +266,7 @@ inline int WordFilter::filterCharacters(char *input, unsigned int start, size_t 
     if (filterSpaces) {
       input[start + j] = filterChars[randomCharPos];
       count++;
-    } else if (isAlphanumeric(c)) {
+    } else if (TextUtils::isAlphanumeric(c)) {
       input[start + j] = filterChars[randomCharPos];
       count++;
     } /* else it is non-letters so we can ignore */
@@ -279,9 +278,19 @@ inline int WordFilter::filterCharacters(char *input, unsigned int start, size_t 
 
 inline void WordFilter::appendUniqueChar(std::string& string, char c) const
 {
+#ifdef HAVE_STD__COUNT
+// ISO standard std::count
   if (std::count(string.begin(), string.end(), c) == 0) {
     string += c;
   }
+#else
+// old HP-style std::count (SunPRO for instance)
+  int n = 0;
+  std::count(string.begin(), string.end(), c, n);
+  if (n == 0) {
+    string += c;
+  }
+#endif
 }
 
 

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,20 +7,20 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* Frustum
- *	Encapsulates a camera.
+ * Encapsulates a camera.
  */
 
-#ifndef	BZF_FRUSTUM_H
-#define	BZF_FRUSTUM_H
+#ifndef BZF_FRUSTUM_H
+#define BZF_FRUSTUM_H
 
 #include "common.h"
 
 // FIXME -- will need a means for off center projections for
-//	looking through teleporters
+// looking through teleporters
 
 class Frustum {
   public:
@@ -32,7 +32,10 @@ class Frustum {
     const float*	getUp() const;
     const float*	getRight() const;
     const float*	getSide(int index) const;
+    int			getPlaneCount() const;
     const float*	getFarCorner(int index) const;
+    float		getTilt() const; // degrees
+    float		getRotation() const; // degrees
     float		getNear() const;
     float		getFar() const;
     const float*	getViewMatrix() const;
@@ -43,18 +46,30 @@ class Frustum {
     float		getAreaFactor() const;
 
     void		setView(const float* eye, const float* target);
-    void		setProjection(float fov, float m_near, float m_far,
+    void		setProjection(float fov,
+				      float m_near, float m_far, float m_deep_far,
 				      int width, int height, int viewHeight);
     void		setOffset(float eyeOffset, float focalPlane);
+    void		setFarPlaneCull(bool useCulling);
+    void		flipVertical();
+    void		flipHorizontal();
+
+    // used for radar culling
+    void		setOrthoPlanes(const Frustum& view,
+				       float width, float breadth);
 
   protected:
     void		makePlane(const float* v1, const float* v2, int);
 
   protected:
     float		eye[3];
+    float		target[3];
     float		right[3], up[3];
-    float		plane[5][4];		// pointing in
+    float		plane[6][4];		// pointing in
+    int			planeCount;
     float		farCorner[4][3];
+    float		tilt;
+    float		rotation;
     float		viewMatrix[16];
     float		billboardMatrix[16];
     float		m_near, m_far;
@@ -83,9 +98,24 @@ inline const float*	Frustum::getSide(int index) const
   return plane[index];
 }
 
+inline int		Frustum::getPlaneCount() const
+{
+  return planeCount;
+}
+
 inline const float*	Frustum::getFarCorner(int index) const
 {
   return farCorner[index];
+}
+
+inline float		Frustum::getTilt() const
+{
+  return tilt;
+}
+
+inline float		Frustum::getRotation() const
+{
+  return rotation;
 }
 
 inline const float*	Frustum::getUp() const
@@ -142,4 +172,3 @@ inline float		Frustum::getAreaFactor() const
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-
