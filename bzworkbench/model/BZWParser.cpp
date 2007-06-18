@@ -27,6 +27,104 @@ string cutWhiteSpace(string line) {
 }
 
 /**
+ * Helper method: make every character lowercase.
+ * Makes no assumption of the values for the characters (i.e. ASCII vs UTF isn't a problem here)
+ */
+ /*
+string lowerCase(string line) {
+	const char* data = line.c_str();
+	const char* ret = new char[ line.length() ];
+	
+	for(int i = 0; i < line.length(); i++) {
+		switch( data[i] ) {
+			case 'A':
+				ret[i] = 'a';
+				break;
+			case 'B':
+				ret[i] = 'b';
+				break;
+			case 'C':
+				ret[i] = 'c';
+				break;
+			case 'D':
+				ret[i] = 'd';
+				break;
+			case 'E':
+				ret[i] = 'e';
+				break;
+			case 'F':
+				ret[i] = 'f';
+				break;
+			case 'G':
+				ret[i] = 'g';
+				break;
+			case 'H':
+				ret[i] = 'h';
+				break;
+			case 'I':
+				ret[i] = 'i';
+				break;
+			case 'J':
+				ret[i] = 'j';
+				break;
+			case 'K':
+				ret[i] = 'k';
+				break;
+			case 'L':
+				ret[i] = 'l';
+				break;
+			case 'M':
+				ret[i] = 'm';
+				break;
+			case 'N':
+				ret[i] = 'n';
+				break;
+			case 'O':
+				ret[i] = 'o';
+				break;
+			case 'P':
+				ret[i] = 'p';
+				break;
+			case 'Q':
+				ret[i] = 'q';
+				break;
+			case 'R':
+				ret[i] = 'r';
+				break;
+			case 'S':
+				ret[i] = 's';
+				break;
+			case 'T':
+				ret += 't';
+				break;
+			case 'U':
+				ret[i] = 'u';
+				break;
+			case 'V':
+				ret[i] = 'v';
+				break;
+			case 'W':
+				ret[i] = 'w';
+				break;
+			case 'X':
+				ret[i] = 'x';
+				break;
+			case 'Y':
+				ret[i] = 'y';
+				break;
+			case 'Z':
+				ret[i] = 'z';
+				break;
+			default:
+				ret[i] = data[i];
+				break;
+		}
+	}
+	
+	return string(ret);
+}
+*/
+/**
  * Helper method:  return a substring from the beginning of the string to the next occurence of '\n'
  */
 string cutLine(string text) {
@@ -108,10 +206,32 @@ string BZWParser::terminatorOf(const char* _text) {
 	if(start != string::npos) {
 		start += 2 + key.length();
 		string::size_type end = terms.find(">", start);
-		return terms.substr(start, end - (start));
+		if(end != string::npos)
+			return terms.substr(start, end - (start));
+		else
+			return terms.substr(start);
 	}
 	
 	return string("end");
+}
+
+/**
+ * This method gets the hierarchy of an object (usually its "");
+ */
+string BZWParser::hierarchyOf(const char* _text) {
+	string key = string(_text);
+	string terms = string(BZW_SUBOBJECTS);
+	
+	// find the hierarchy
+	string::size_type start = terms.find("<" + key + ":", 0);
+	if(start != string::npos) {
+		string::size_type end = terms.find(">>", start+1);
+		if(end != string::npos)
+			return terms.substr(start, end+2 - start);
+		else
+			return terms.substr(start);
+	}
+	return string("");
 }
 
 /**
@@ -235,8 +355,10 @@ string BZWParser::getSection(const char* _header, const char* _text) {
  */
 const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text, const char* _footer) {
 	string header = cutWhiteSpace(string(_header));
-	string text = cutWhiteSpace(string(_text)) + " ";
+	string text = cutWhiteSpace(string(_text)) + " \n";
 	string footer = cutWhiteSpace(string(_footer));
+	
+	// printf("BZWParser: <%s|%s>\n", header.c_str(), footer.c_str());
 	
 	vector<string> sections = vector<string>();
 	int cnt = 0;		// how many sections
@@ -261,16 +383,19 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
 			line = cutWhiteSpace(currLine);
 			
 			// chunk up the line
-			vector<string> lineElements = getLineElements(line.c_str());
+			vector<string> lineElements = BZWParser::getLineElements(line.c_str());
 			
 			if(lineElements.size() == 0)
 				lineElements.push_back(" ");
+				
+			// printf("BZWParser: first element is |%s|\n", lineElements[0].c_str());
 				
 			// see if it has the header
 			if(lineElements[0].compare(header) == 0) {
 				section += line + "\n";
 				text = text.substr(currLine.length() + 1);
 				found = true;
+				// printf("BZWParser: found header |%s|\n", line.c_str());
 				break;
 			}
 			
@@ -289,11 +414,14 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
 			currLine = cutLine(text);
 			line = cutWhiteSpace(currLine);
 			
+			// printf("BZWParser: line--> |%s|\n", line.c_str());
 			// chunk up the line
-			vector<string> lineElements = getLineElements(line.c_str());
+			vector<string> lineElements = BZWParser::getLineElements(line.c_str());
 			
 			if(lineElements.size() == 0)
 				lineElements.push_back(" ");
+				
+			// printf("BZWParser: first element is |%s|\n", lineElements[0].c_str());
 			
 			// add it to the section
 			section += line + "\n";
@@ -301,6 +429,7 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
 			// see if it has the end
 			if(lineElements[0].compare(footer) == 0) {
 				found = true;
+				// printf("BZWParser: found footer; breaking...\n");
 				break;
 			}
 				
@@ -335,7 +464,7 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
  
 const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text, const char* _footer, const char* internalSectionKeys) {
 	string header = cutWhiteSpace(string(_header));
-	string text = cutWhiteSpace(string(_text)) + " ";
+	string text = cutWhiteSpace(string(_text)) + " \n";
 	string footer = cutWhiteSpace(string(_footer));
 	string keyList = cutWhiteSpace(string(internalSectionKeys));
 	int sectionDepth = 0;	// determines the section depth (will be positive if inside a subobject)
@@ -494,10 +623,12 @@ vector<string> BZWParser::getLineElements(const char* data, int count) {
 			break;
 			
 		string::size_type spaceIndex = line.find(" ", 0);
-		if(spaceIndex == string::npos)
+		string::size_type retIndex = line.find("\n", 0);
+		if(spaceIndex == string::npos &&
+		   retIndex == string::npos)
 			break;
 			
-		string element = line.substr(0, spaceIndex);
+		string element = line.substr(0, min(spaceIndex, retIndex));
 		
 		ret.push_back(element);
 		

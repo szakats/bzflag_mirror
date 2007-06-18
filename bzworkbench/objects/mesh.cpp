@@ -71,13 +71,13 @@ int mesh::update(string& data) {
 	vector<string> normalVals = BZWParser::getValuesByKey("normal", header, meshDataNoDrawInfo);
 		
 	// get inside points
-	vector<string> insidePointVals = BZWParser::getValuesByKey("inside", header, meshData);
+	vector<string> insidePointVals = BZWParser::getValuesByKey("inside", header, meshDataNoDrawInfo);
 	
 	// get outside points
-	vector<string> outsidePointVals = BZWParser::getValuesByKey("outside", header, meshData);
+	vector<string> outsidePointVals = BZWParser::getValuesByKey("outside", header, meshDataNoDrawInfo);
 	
 	// get faces
-	vector<string> faceVals = BZWParser::getSectionsByHeader("face", meshData, "endface");
+	vector<string> faceVals = BZWParser::getSectionsByHeader("face", meshDataNoDrawInfo, "endface");
 	
 	// get drawinfo
 	vector<string> drawInfoVals = BZWParser::getSectionsByHeader("drawinfo", meshData);

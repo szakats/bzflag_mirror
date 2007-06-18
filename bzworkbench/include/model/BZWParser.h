@@ -48,6 +48,9 @@ public:
 	// get the header of a chunk of BZW text
 	static string headerOf(const char* text);
 	
+	// get the hierarchy of an object
+	static string hierarchyOf(const char* text);
+	
 	// get the individual lines out of a section
 	static vector<string> getLines(const char* header, const char* section);
 	

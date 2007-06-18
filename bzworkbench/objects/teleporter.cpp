@@ -35,9 +35,9 @@ int teleporter::update(string& data) {
 	
 	// get the border
 	vector<string> borders = BZWParser::getValuesByKey("border", header, teleporterData);
-	if(!hasOnlyOne(borders, "border")) {
-		return 0;
-	}
+	if(borders.size() > 1) {
+		printf("teleporter::update(): Error! Defined \"border\" %d times!\n", borders.size());
+	}	
 	
 	// get the linkage name
 	vector<string> lnames = BZWParser::getValuesByKey("teleporter", header, data.c_str());
@@ -46,7 +46,7 @@ int teleporter::update(string& data) {
 		return 0;
 	
 	// set the data
-	this->border = atof( borders[0].c_str() );
+	this->border = (borders.size() != 0 ? atof( borders[0].c_str() ) : 0.0f);
 	this->lname = (lnames.size() != 0 ? lnames[0] : "defaultLinkageName");
 	
 	return 1;

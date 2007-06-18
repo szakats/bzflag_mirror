@@ -1,7 +1,7 @@
 world
 	name poop
 	flagHeight 1
-	size 400
+	size 800
 end
 
 waterLevel

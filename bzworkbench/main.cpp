@@ -47,6 +47,32 @@
 #include <string>
 #include <vector>
 
+// register the built-in objects
+void buildDatabase() {
+	Model::registerObject("arc", NULL, "end", arc::init);
+	Model::registerObject("base", NULL, "end", base::init);
+	Model::registerObject("box", NULL, "end", box::init);
+	Model::registerObject("cone", NULL, "end", cone::init);
+	Model::registerObject("dynamicColor", NULL, "end", dynamicColor::init);
+	Model::registerObject("group", NULL, "end", group::init);
+	Model::registerObject("link", NULL, "end", Tlink::init);
+	Model::registerObject("material", NULL, "end", material::init);
+	Model::registerObject("mesh", "mesh:<face><drawinfo>", "end", mesh::init);
+	Model::registerObject("meshbox", NULL, "end", meshbox::init);
+	Model::registerObject("meshpyr", NULL, "end", meshpyr::init);
+	Model::registerObject("options", NULL, "end", options::init);
+	Model::registerObject("physics", NULL, "end", physics::init);
+	Model::registerObject("pyramid", NULL, "end", pyramid::init);
+	Model::registerObject("sphere", NULL, "end", sphere::init);
+	Model::registerObject("teleporter", NULL, "end", teleporter::init);
+	Model::registerObject("tetra", NULL, "end", tetra::init);
+	Model::registerObject("texturematrix", NULL, "end", texturematrix::init);
+	Model::registerObject("waterLevel", NULL, "end", waterLevel::init);
+	Model::registerObject("weapon", NULL, "end", weapon::init);
+	Model::registerObject("world", NULL, "end", world::init);
+	Model::registerObject("zone", NULL, "end", zone::init);
+}
+
 
 int main(int argc, char** argv) {
 	/*
@@ -60,11 +86,28 @@ int main(int argc, char** argv) {
 	*/
 	
 	
+	Model* model = new Model();
+	
+	buildDatabase();
+	
+	vector<string> objects = BZWParser::loadFile("share/H2O-R1.bzw");
+	
+	Model::build( objects );
+	
+	printf("\n==============================================================\n");
+	printf("\n     Model.toString() output\n");
+	printf("\n==============================================================\n");
+	printf("%s\n", Model::toString().c_str());
+	
+	
+	delete model;
+	
+	/*
 	vector<string> objects = BZWParser::loadFile("share/H2O-R1.bzw");
 	for(vector<string>::iterator i = objects.begin(); i != objects.end(); i++) {
 		printf("==============================================\n");
 		printf("%s", i->c_str());	
-	}
+	}*/
 	
 	/*
 	mesh meshobj = mesh();
