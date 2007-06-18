@@ -61,11 +61,17 @@ int weapon::update(string& data) {
 		
 	// break up the delay values into individual chunks
 	vector<string> delayElements = BZWParser::getLineElements(delayVals[0].c_str());
+	if(delayElements.size() == 0) {
+		printf("weapon::update(): Error! Defined \"delay\" but gave no values!\n");
+		return 0;	
+	}
 		
 	// get tilt
 	vector<string> tiltVals = BZWParser::getValuesByKey("tilt", header, weaponData);
-	if(!hasOnlyOne(tiltVals, "tilt"))
+	if(tiltVals.size() > 1) {
+		printf("weapon::update(): Error! Defined \"tilt\" %d times\n", tiltVals.size());
 		return 0;
+	}
 		
 	// get type
 	vector<string> typeVals = BZWParser::getValuesByKey("type", header, weaponData);
@@ -78,30 +84,44 @@ int weapon::update(string& data) {
 		
 	// get trigger
 	vector<string> triggerVals = BZWParser::getValuesByKey("trigger", header, weaponData);
-	if(!hasOnlyOne(triggerVals, "trigger"))
+	if(triggerVals.size() > 1) {
+		printf("weapon::update(): Error! Defined \"trigger\" %d times\n", tiltVals.size());
 		return 0;
-	// only flagcap is supported...
-	if( triggerVals[0] != "flagcap" ) {
-		printf("weapon::update(): Error: unknown trigger value \"%s\"\n", triggerVals[0].c_str() );
-		return 0;	
 	}
-		
+	
+	if(triggerVals.size() > 0) {
+		// only flagcap is supported...
+		if( triggerVals[0] != "flagcap" ) {
+			printf("weapon::update(): Error: unknown trigger value \"%s\"\n", triggerVals[0].c_str() );
+			return 0;	
+		}
+	}
+	
 	// get event team
 	vector<string> eventTeamVals = BZWParser::getValuesByKey("eventteam", header, weaponData);
-	if(!hasOnlyOne(eventTeamVals, "eventteam"))
+	if(eventTeamVals.size() > 1) {
+		printf("weapon::update(): Error: Defined \"eventteam\" %d times!\n", eventTeamVals.size());
 		return 0;
-	if(! (eventTeamVals[0] == "R" || eventTeamVals[0] == "G" || eventTeamVals[0] == "B" || eventTeamVals[0] == "P") ) {
-		printf("weapon::update(): Error: Unknown team %s\n", eventTeamVals[0].c_str());
-		return 0;	
 	}
-		
+	if(eventTeamVals.size() > 0) {
+		if(! (eventTeamVals[0] == "R" || eventTeamVals[0] == "G" || eventTeamVals[0] == "B" || eventTeamVals[0] == "P") ) {
+			printf("weapon::update(): Error: Unknown team %s\n", eventTeamVals[0].c_str());
+			return 0;	
+		}
+	}
+	
 	// get the color
 	vector<string> colorVals = BZWParser::getValuesByKey("color", header, weaponData);
-	if(!hasOnlyOne(colorVals, "color"))
+	if(colorVals.size() > 1) {
+		printf("weapon::update(): Error! Defined \"color\" %d times!\n", colorVals.size());	
 		return 0;
-	if(atoi( colorVals[0].c_str() ) < 0 || atoi( colorVals[0].c_str() ) > 4) {
-		printf("weapon::update(): Error: unkown team %d\n", atoi( colorVals[0].c_str() ));
-		return 0;	
+	}
+	
+	if(colorVals.size() > 0) {
+		if(atoi( colorVals[0].c_str() ) < 0 || atoi( colorVals[0].c_str() ) > 4) {
+			printf("weapon::update(): Error: unkown team %d\n", atoi( colorVals[0].c_str() ));
+			return 0;	
+		}
 	}
 		
 	// do base-class update
@@ -121,11 +141,11 @@ int weapon::update(string& data) {
 	}
 	
 	this->type = typeVals[0];
-	this->trigger = triggerVals[0];
-	this->eventTeam = eventTeamVals[0];
+	this->trigger = (triggerVals.size() != 0 ? triggerVals[0] : string(""));
+	this->eventTeam = (eventTeamVals.size() > 0 ? eventTeamVals[0] : "");
 	this->initdelay = atof( initDelayVals[0].c_str() );
-	this->tilt = atof( tiltVals[0].c_str() );
-	this->team = atoi( colorVals[0].c_str() );
+	this->tilt = (tiltVals.size() != 0 ? atof( tiltVals[0].c_str() ) : 0.0f);
+	this->team = (colorVals.size() > 0 ? atoi( colorVals[0].c_str() ) : 0);
 	
 	return 1;
 }
@@ -148,6 +168,7 @@ string weapon::toString(void) {
 				  (this->eventTeam.length() == 0 ? "# eventteam\n" : "  eventteam " + this->eventTeam + "\n") +
 				  "  initdelay " + string(ftoa(this->initdelay)) + "\n" +
 				  "  tilt " + string(ftoa(this->tilt)) + "\n" +
+				  "  color " + string(ftoa(this->team)) + "\n" +
 				  (delayString.length() == 0 ? "# delay\n" : "  delay " + delayString) +
 				  "end\n";
 }

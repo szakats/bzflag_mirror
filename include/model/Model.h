@@ -43,6 +43,8 @@ class Model
 {
 public:
 	Model();
+	Model(const char* supportedObjects, const char* objectHierarchy, const char* terminators);
+	
 	virtual ~Model();
 	
 	// query method; data is a command
@@ -61,19 +63,35 @@ public:
 	// returns false if it fails
 	bool _build(vector<string>& bzworld);
 	
+	// universal getter
+	static string& toString(void);
+	
+	// the "real" universal getter
+	string& _toString(void);
+	
 	// BZWB-specific API for built-in objects
 	static world* getWorldData();
 	static waterLevel* getWaterLevelData();
 	static options* getOptionsData();
 	
-	// instantiated BZWB-specific API
+	// instantiated BZWB-specific API 
 	world* _getWorldData() { return worldData; }
 	options* _getOptionsData() { return optionsData; }
 	waterLevel* _getWaterLevelData() { return waterLevelData; }
 	
 	// plugin-specific API
-	static bool registerObject(string name, DataEntry* (*init)(string&));
-	bool _registerObject(string name, DataEntry* (*init)(string&));
+	static bool registerObject(string& name, DataEntry* (*init)(string&));
+	static bool registerObject(const char* name, const char* hierarchy, const char* terminator, DataEntry* (*init)(string&));
+	static bool isSupportedObject(const char* name);
+	static bool isSupportedTerminator(const char* name, const char* end);
+	static bool isSupportedHierarchy(const char* name);
+	
+	// instantiated plug-in API
+	bool _registerObject(string& name, DataEntry* (*init)(string&));
+	bool _registerObject(const char* name, const char* hierarchy, const char* terminator, DataEntry* (*init)(string&));
+	bool _isSupportedObject(const char* name);
+	bool _isSupportedTerminator(const char* name, const char* end);
+	bool _isSupportedHierarchy(const char* name);
 	
 private:
 
@@ -109,6 +127,27 @@ private:
 // build the default bzw objects in
 	void buildDatabase();
 	
+// list of registered object keys
+	string supportedObjects;
+	
+// list of object/terminator pairs (exceptions to object..end)
+	string objectTerminators;
+	
+// hierarchy of objects and subobjects
+	string objectHierarchy;
+	
+	// methods to manipulate the aforementioned strings
+	bool addObjectSupport(const char* name);
+	bool removeObjectSupport(const char* name);
+	
+	bool addTerminatorSupport(const char* name, const char* end);
+	bool removeTerminatorSupport(const char* name, const char* end);
+	
+	bool addSupportedHierarchy(const char* name);
+	bool removeSupportedHierarchy(const char* name);
+	
+// save unused data chunks
+	vector<string> unusedData;
 };
 
 

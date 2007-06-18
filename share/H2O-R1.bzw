@@ -422,8 +422,8 @@ dynamicColor
   name Gem
   red limits 1 .5
   red sinusoid .75 0 1
-  blue ClampDown .75 0 1
-  green ClampDown .75 0 1
+  blue clampDown .75 0 1
+  green clampDown .75 0 1
   alpha limits .75 .751
   alpha sinusoid .75 0 1
 end

@@ -39,7 +39,8 @@ private:
 	vector<string> textures, materials;
 	bool noTextures, noTexColor, noTexAlpha, spheremap, noShadow, noCulling, noSorting, noRadar, noLighting, groupAlpha, occluder, resetmat;
 	RGBA ambient, diffuse, specular, emissive;
-	float shiny, alphaThreshold;
+	int shiny;
+	float alphaThreshold;
 	
 };
 

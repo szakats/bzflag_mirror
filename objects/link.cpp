@@ -37,8 +37,10 @@ int Tlink::update(string& data) {
 	
 	// get the name
 	vector<string> names = BZWParser::getValuesByKey("name", header, linkData);
-	if(!hasOnlyOne(names, "name"))
+	if(names.size() > 1) {
+		printf("link::update(): Error! Defined \"name\" %d times!\n", names.size());
 		return 0;
+	}
 		
 	// get the from
 	vector<string> froms = BZWParser::getValuesByKey("from", header, linkData);
@@ -55,7 +57,7 @@ int Tlink::update(string& data) {
 		return 0;
 	
 	// load in the data
-	this->name = names[0];
+	this->name = (names.size() != 0 ? names[0] : "");
 	this->from = froms[0];
 	this->to = tos[0];
 	
@@ -65,7 +67,7 @@ int Tlink::update(string& data) {
 // toString
 string Tlink::toString(void) {
 	return string("link\n") +
-				  "  name " + name + "\n" +
+				  (name.length() != 0 ? "  name " + name : "# name") + "\n" +
 				  "  from " + from + "\n" +
 				  "  to " + to + "\n" +
 				  "end\n";

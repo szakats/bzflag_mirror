@@ -59,7 +59,7 @@ public:
 		string cmdName = BZWParser::key( data.c_str() );
 		
 		// compare the name against supported commands (break if unrecognized)
-		if(! (cmdName == "limit" ||
+		if(! (cmdName == "limits" ||
 			  cmdName == "clampUp" ||
 			  cmdName == "clampDown" ||
 			  cmdName == "sinusoid" ||
@@ -76,7 +76,7 @@ public:
 		
 		// check the number against the command name
 		// "limit" should be followed by 2 commands
-		if(cmdName == "limit" && numCommands != 2)
+		if(cmdName == "limits" && numCommands != 2)
 			return false;
 		
 		// "sinusoid", "clampUp", and "clampDown" should be followed by 3 commands

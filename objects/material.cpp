@@ -15,7 +15,7 @@ material::material() :
 	diffuse = RGBA(0, 0, 0, 0);
 	emissive = RGBA(0, 0, 0, 0);
 	specular = RGBA(0, 0, 0, 0);
-	shiny = 0.0f;
+	shiny = 0;
 }
 
 // constructor with data
@@ -33,7 +33,7 @@ material::material(string& data) :
 	diffuse = RGBA(0, 0, 0, 0);
 	emissive = RGBA(0, 0, 0, 0);
 	specular = RGBA(0, 0, 0, 0);
-	shiny = 0.0f;
+	shiny = 0;
 	
 	this->update(data);
 }
@@ -64,13 +64,17 @@ int material::update(string& data) {
 	
 	// get the dynamic color
 	vector<string> dyncols = BZWParser::getValuesByKey("dyncol", header, materialData);
-	if(!hasOnlyOne(dyncols, "dyncol"))
+	if(dyncols.size() > 1) {
+		printf("material::update(): Error! Defined \"dyncol\" %d times!\n", dyncols.size());
 		return 0;
+	}
 		
 	// get the texture matrix
 	vector<string> texmats = BZWParser::getValuesByKey("texmat", header, materialData);
-	if(!hasOnlyOne(texmats, "texmat"))
+	if(texmats.size() > 1) {
+		printf("material::update(): Error! Defined \"texmat\" %d times!\n", texmats.size());
 		return 0;
+	}
 		
 	// get the diffuse colors
 	vector<string> colors = BZWParser::getValuesByKey("color", header, materialData);
@@ -85,18 +89,24 @@ int material::update(string& data) {
 	
 	// get the ambient colors
 	vector<string> ambients = BZWParser::getValuesByKey("ambient", header, materialData);
-	if(!hasOnlyOne(ambients, "ambient"))
+	if(ambients.size() > 1) {
+		printf("material::update(): Error! Defined \"ambient\" %d times!\n", ambients.size());
 		return 0;
+	}
 		
 	// get the emissive colors
 	vector<string> emissives = BZWParser::getValuesByKey("emission", header, materialData);
-	if(!hasOnlyOne(emissives, "emissive"))
+	if(emissives.size() > 1) {
+		printf("material::update(): Error! Defined \"emissive\" %d times!\n", emissives.size());
 		return 0;
-		
+	}
+	
 	// get the specular colors
 	vector<string> speculars = BZWParser::getValuesByKey("specular", header, materialData);
-	if(!hasOnlyOne(speculars, "specular"))
-		return 0;	
+	if(speculars.size() > 1) {
+		printf("material::update(): Error! Defined \"specular\" %d times!\n", speculars.size());
+		return 0;
+	}
 	
 	// get the textures
 	vector<string> texs = BZWParser::getValuesByKey("addtexture", header, materialData);
@@ -141,13 +151,17 @@ int material::update(string& data) {
 	
 	// get shininess
 	vector<string> shininesses = BZWParser::getValuesByKey("shininess", header, materialData);
-	if(!hasOnlyOne(shininesses, "shininess"))
+	if(shininesses.size() > 1) {
+		printf("material::update(): Error! Defined \"shininess\" %d times!\n", shininesses.size());
 		return 0;
+	}
 		
 	// get alpha threshold
 	vector<string> alphathresholds = BZWParser::getValuesByKey("alphathresh", header, materialData);
-	if(!hasOnlyOne(alphathresholds, "alphathresh"))
+	if(alphathresholds.size() > 1) {
+		printf("material::update(): Error! Defined \"alphathresh\" %d times!\n", alphathresholds.size());
 		return 0;
+	}
 		
 	// get other material refrences
 	vector<string> matrefs = BZWParser::getValuesByKey("matref", header, materialData);
@@ -156,12 +170,12 @@ int material::update(string& data) {
 	if(!DataEntry::update(data))
 		return 0;
 	this->name = names[0];
-	this->dynamicColor = dyncols[0];
-	this->textureMatrix = texmats[0];
-	this->emissive = RGBA( emissives[0].c_str() );
-	this->specular = RGBA( speculars[0].c_str() );
-	this->ambient = RGBA( ambients[0].c_str() );
-	this->diffuse = RGBA( diffuses[0].c_str() );
+	this->dynamicColor = (dyncols.size() != 0 ? dyncols[0] : "");
+	this->textureMatrix = (texmats.size() != 0 ? texmats[0] : "");
+	this->emissive = (emissives.size() != 0 ? RGBA( emissives[0].c_str() ) : RGBA(0, 0, 0, 0));
+	this->specular = (speculars.size() != 0 ? RGBA( speculars[0].c_str() ) : RGBA(0, 0, 0, 0));
+	this->ambient = (ambients.size() != 0 ? RGBA( ambients[0].c_str() ) : RGBA(1, 1, 1, 1));
+	this->diffuse = (diffuses.size() != 0 ? RGBA( diffuses[0].c_str() ) : RGBA(1, 1, 1, 1));
 	this->textures = texs;
 	this->materials = matrefs;
 	this->noTextures = (notextures.size() == 0 ? false : true);
@@ -176,8 +190,8 @@ int material::update(string& data) {
 	this->occluder = (occluders.size() == 0 ? false : true);
 	this->resetmat = (resetmats.size() == 0 ? false : true);
 	this->noLighting = (nolightings.size() == 0 ? false : true);
-	this->shiny = atof( shininesses[0].c_str() );
-	this->alphaThreshold = atof( alphathresholds[0].c_str() );
+	this->shiny = (shininesses.size() > 0 ? atoi( shininesses[0].c_str() ) : 0);
+	this->alphaThreshold = (alphathresholds.size() > 0 ? atof( alphathresholds[0].c_str() ) : 1.0f);
 	
 	return 1;
 }
@@ -195,7 +209,7 @@ string material::toString(void) {
 	}
 	
 	return string("material\n") +
-				  "  name " + name + "\n" +
+				  (name.length() == 0 ? string("# name") : "  name " + name) + "\n" +
 				  (dynamicColor.length() != 0 ? string("  dyncol ") + dynamicColor : string("  dyncol -1")) + "\n" +
 				  (textureMatrix.length() != 0 ? string("  texmat ") + textureMatrix : string("  texmat -1")) + "\n" +
 				  (color.length() != 0 ? string("  color ") + color + "\n" : "") +
@@ -215,7 +229,7 @@ string material::toString(void) {
 				  (color.length() == 0 ? "  diffuse " + diffuse.toString() : "") +
 				  "  specular " + specular.toString() +
 				  "  emission " + emissive.toString() +
-				  "  shininess " + string(ftoa(shiny)) + "\n" +
+				  "  shininess " + string(itoa(shiny)) + "\n" +
 				  "  alphathresh " + string(ftoa(alphaThreshold)) + "\n" +
 				  texString +
 				  matString +
