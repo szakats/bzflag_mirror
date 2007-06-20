@@ -594,14 +594,17 @@ vector<string> subobjectsOf(const char* obj) {
  */
  
 const vector<string> BZWParser::getSections(const char* _text) {
-	string text = cutWhiteSpace(_text);
+	
+	string text = string(_text);
+	
 	vector<string> ret = vector<string>();
 	
 	// start reading the stuff in
 	string buff, key, objstr, line, supportedKeys = string(BZW_SUPPORTED_KEYS), hierarchy = string(BZW_SUBOBJECTS);
 	vector<string> lineElements = vector<string>();
-	
+		
 	while(true) {
+		
 		// read in lines until we find a key
 		buff = cutWhiteSpace( cutLine( text ) );
 		
@@ -658,7 +661,6 @@ const vector<string> BZWParser::getSections(const char* _text) {
 			while(depthCount > 0) {
 				// get a line
 				buff = cutWhiteSpace(cutLine( text ));
-								
 				// advance the line
 				string::size_type eol = text.find("\n", 0);
 				if(eol == string::npos)
@@ -743,11 +745,15 @@ const vector<string> BZWParser::findSections(const char* _header, vector<string>
 	return ret;
 }
 
-/**
- * The big tamale: the top-level file loader.
- * Loads a .bzw file and returns a vector of strings, where each string contains an object's chunk of BZW text
- */
 
+/**
+ * The top-level file loader.
+ * Loads a .bzw file and returns a vector of strings, where each string contains an object's chunk of BZW text.
+ * This is almost identical to BZWParser::getSections(); the only differences are file I/O-related.
+ * The excuse for code duplication here is that this code executes MUCH faster than code that just loads 
+ * the entire file into RAM and calls BZWParser::getSections() to parse it.
+ */
+ 
 vector<string> BZWParser::loadFile(const char* filename) {
 	ifstream fileInput(filename);
 	
@@ -757,19 +763,113 @@ vector<string> BZWParser::loadFile(const char* filename) {
 		return vector<string>();
 	}
 	
-	// read in the file to a string
-	string* data = new string("");
-	if(!data)
-		return vector<string>();
+	vector<string> ret = vector<string>();
+	
+	// start reading the stuff in
+	string buff, key, objstr, line, supportedKeys = string(BZW_SUPPORTED_KEYS), hierarchy = string(BZW_SUBOBJECTS);
+	vector<string> lineElements = vector<string>();
 		
-	string buff = string("");
 	while(!fileInput.eof()) {
+		
+		// read in lines until we find a key
 		getline( fileInput, buff );
-		data->append(buff);
-		data->append("\n");
+		
+		// get the line elements
+		lineElements = BZWParser::getLineElements(buff.c_str());
+		
+		// if there are no line elements, continue
+		if(lineElements.size() == 0)
+			continue;
+		
+		// get the key	
+		key = BZWParser::key( lineElements[0].c_str() );
+		
+		// is it a valid key?
+		if( supportedKeys.find( "<" + key + ">", 0 ) != string::npos) {
+			// if so, read in the object
+			objstr = buff + "\n";
+			
+			// depth count--determines how deep the parser is in an object hierarchy
+			// initialized to 1 now that we are in an object
+			int depthCount = 1;
+			
+			// get any sub-object keys
+			vector<string> subobjects = vector<string>();
+			string::size_type index = hierarchy.find("<" + key + ":", 0);
+			
+			// load them in if we found any
+			if( index != string::npos ) {
+				subobjects.clear();
+				
+				subobjects = subobjectsOf(key.c_str());
+			}
+			
+			// get number of subobjects
+			int numSubobjects = subobjects.size();
+			
+			// terminator stack
+			vector<string> terminatorStack = vector<string>();
+			
+			// subobject stack
+			vector< vector<string> > subobjectStack = vector< vector<string> >();
+			
+			// add the terminator token of the base object
+			terminatorStack.push_back( BZWParser::terminatorOf(key.c_str()) );
+				
+			// loop through the text until we have depth 0 (i.e. we exit the object) or we run out of text
+			while(!fileInput.eof() && depthCount > 0) {
+				// get a line
+				getline( fileInput, buff );
+				
+				// trim buff
+				line = cutWhiteSpace(buff);
+				
+				// don't continue of there was nothing to begin with
+				if(line.length() == 0)
+					continue;
+				
+				line += " ";
+				
+				// see if it's a subobject (if so, increase depthcount, save current sub-objects, and load in new ones)
+				for(int i = 0; i < numSubobjects; i++) {
+					if( line.find( subobjects[i] + " ", 0 ) == 0 ) {
+						depthCount++;
+						terminatorStack.push_back( BZWParser::terminatorOf(subobjects[i].c_str()) );
+						subobjectStack.push_back(subobjects);
+						subobjects = subobjectsOf(subobjects[i].c_str());
+						numSubobjects = subobjects.size();
+						break;	
+					}
+				}
+				
+				// add a space to line (so we can tell the difference between, say, "foo" and "foob"
+				line += " ";
+				
+				// see if we're at an "end" (if so, decrease depthcount)
+				if(line.find(terminatorStack[ terminatorStack.size() - 1 ] + " ", 0) != string::npos) {
+					depthCount--;
+					terminatorStack.pop_back();
+					
+					if(subobjectStack.size() > 0) {
+						subobjects = subobjectStack[ subobjectStack.size() - 1 ];
+						subobjectStack.pop_back();
+					}
+					else
+						subobjects.clear();
+						
+					numSubobjects = subobjects.size();
+				}
+				
+				objstr += line + "\n";
+				
+			}
+			
+			// add the object to ret
+			ret.push_back(objstr);
+			
+		}
 	}
 	
-	vector<string> ret = BZWParser::getSections( data->c_str() );
-	delete data;
 	return ret;
 }
+

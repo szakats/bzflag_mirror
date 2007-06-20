@@ -9,6 +9,7 @@ class Model;
 #include "../objects/base.h"
 #include "../objects/box.h"
 #include "../objects/cone.h"
+#include "../objects/define.h"
 #include "../objects/dynamicColor.h"
 #include "../objects/group.h"
 #include "../objects/link.h"
@@ -105,6 +106,9 @@ private:
 	
 // materials
 	vector<material*> materials;
+	
+// group definitions
+	vector<define*> groups;
 	
 // dynamic colors
 	vector<dynamicColor*> dynamicColors;

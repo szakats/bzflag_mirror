@@ -57,6 +57,7 @@ void buildDatabase() {
 	Model::registerObject("base", NULL, "end", base::init);
 	Model::registerObject("box", NULL, "end", box::init);
 	Model::registerObject("cone", NULL, "end", cone::init);
+	Model::registerObject("define", "define:<arc><base><box><cone><group><mesh><meshbox><meshpyr><pyramid><sphere><teleporter><tetra>", "enddef", define::init);
 	Model::registerObject("dynamicColor", NULL, "end", dynamicColor::init);
 	Model::registerObject("group", NULL, "end", group::init);
 	Model::registerObject("link", NULL, "end", Tlink::init);
@@ -111,16 +112,17 @@ int main(int argc, char** argv) {
 	printf("\n     Model.toString() output\n");
 	printf("\n==============================================================\n");
 	printf("%s\n", Model::toString().c_str());
+	
+	return 0;
 	*/
 	
 	
-	/*
 	vector<string> objects = BZWParser::loadFile("share/H2O-R1.bzw");
 	for(vector<string>::iterator i = objects.begin(); i != objects.end(); i++) {
 		printf("==============================================\n");
 		printf("%s", i->c_str());	
-	}*/
-	
+	}
+	/*
 	mesh meshobj = mesh();
 	
 	printf("|%s|\n", meshobj.toString().c_str());
@@ -715,5 +717,5 @@ int main(int argc, char** argv) {
 	
 	printf("|%s|\n", defobj.toString().c_str());
 	
-	return 0;
+	return 0;*/
 }
