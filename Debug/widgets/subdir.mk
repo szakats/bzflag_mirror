@@ -4,14 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../widgets/Console.cpp \
 ../widgets/QuickLabel.cpp \
 ../widgets/TransformWidget.cpp 
 
 OBJS += \
+./widgets/Console.o \
 ./widgets/QuickLabel.o \
 ./widgets/TransformWidget.o 
 
 CPP_DEPS += \
+./widgets/Console.d \
 ./widgets/QuickLabel.d \
 ./widgets/TransformWidget.d 
 

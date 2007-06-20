@@ -11,6 +11,8 @@
 #include "../LODCommand.h"
 #include "../DrawInfo.h"
 
+#include <map>
+
 class mesh : public bz2object {
 	
 public:
@@ -52,6 +54,9 @@ private:
 	
 	// outside points
 	vector<Point3D> outsidePoints;
+	
+	// materials (faces map to materials)
+	map<string, string> materialMap;
 	
 	// boolean options
 	bool noClusters, smoothBounce;

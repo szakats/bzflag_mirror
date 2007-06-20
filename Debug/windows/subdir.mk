@@ -4,13 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../windows/MainWindow.cpp 
+../windows/ConsoleWindow.cpp \
+../windows/MainWindow.cpp \
+../windows/RenderWindow.cpp 
 
 OBJS += \
-./windows/MainWindow.o 
+./windows/ConsoleWindow.o \
+./windows/MainWindow.o \
+./windows/RenderWindow.o 
 
 CPP_DEPS += \
-./windows/MainWindow.d 
+./windows/ConsoleWindow.d \
+./windows/MainWindow.d \
+./windows/RenderWindow.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

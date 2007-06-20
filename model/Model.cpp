@@ -104,7 +104,6 @@ bool Model::build(vector<string>& bzworld) { return modelRef->_build(bzworld); }
 
 // the real build method
 bool Model::_build(vector<string>& bzworld) {
-	printf("Model::build() called...\n");
 	
 	// don't bother for empty vectors
 	if(bzworld.size() == 0)
@@ -117,7 +116,6 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse world
 		if(header == "world") {
 			if(cmap[header] != NULL) {
-				printf("Found \"world\" object, parsing...\n");
 				this->worldData->update(*i);
 				foundWorld = true;		// there must be a world 
 				continue;
@@ -131,7 +129,6 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse waterLevel
 		else if(header == "waterLevel") {
 			if(cmap[header] != NULL) {
-				printf("Found \"waterLevel\" object, parsing...\n");
 				this->waterLevelData->update(*i);	
 				continue;
 			}
@@ -144,7 +141,6 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse options
 		else if(header == "options") {
 			if(cmap[header] != NULL) {
-				printf("Found \"options\" object, parsing...\n");
 				this->optionsData->update(*i);	
 				continue;
 			}
@@ -157,7 +153,6 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse materials
 		else if(header == "material") {
 			if(cmap[header] != NULL) {
-				printf("Found \"material\" object, parsing...\n");
 				materials.push_back((material*)cmap[header](*i));
 			}
 			else {
@@ -169,7 +164,6 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse physics
 		else if(header == "physics") {
 			if(cmap[header] != NULL) {
-				printf("Found \"physics\" object, parsing...\n");
 				phys.push_back((physics*)cmap[header](*i));
 			}
 			else {
@@ -181,7 +175,6 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse dynamicColors
 		else if(header == "dynamicColor") {
 			if(cmap[header] != NULL) {
-				printf("Found \"dynamicColor\" object, parsing...\n");
 				dynamicColors.push_back((dynamicColor*)cmap[header](*i));	
 			}
 			else {
@@ -193,7 +186,6 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse links
 		else if(header == "link") {
 			if(cmap[header] != NULL) {
-				printf("Found \"link\" object, parsing...\n");
 				links.push_back((Tlink*)cmap[header](*i));	
 			}
 			else {
@@ -205,7 +197,6 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse texturematrices
 		else if(header == "texturematrix") {
 			if(cmap[header] != NULL) {
-				printf("Found \"texturematrix\" object, parsing...\n");
 				textureMatrices.push_back((texturematrix*)cmap[header](*i));
 				continue;	
 			}	
@@ -218,7 +209,6 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse all other objects
 		else {
 			if(cmap[header] != NULL) {
-				printf("Found \"%s\" object, parsing...\n", header.c_str());
 				objects.push_back((bz2object*)cmap[header](*i));
 			}
 			else {
@@ -265,8 +255,6 @@ bool Model::_registerObject(const char* _name, const char* _hierarchy, const cha
 	string hierarchy = (_hierarchy != NULL ? _hierarchy : "");
 	string terminator = _terminator;
 	
-	printf("Registering \"%s\" with hierarchy \"%s\" and terminator \"%s\" in the model...\n", name.c_str(), hierarchy.c_str(), terminator.c_str());
-	
 	// add support for this object
 	if(!this->addObjectSupport( _name ))
 		return false;
@@ -280,11 +268,6 @@ bool Model::_registerObject(const char* _name, const char* _hierarchy, const cha
 	
 	// add the initializer for this object
 	this->cmap[ name ] = init;
-	
-	printf("supportedObjects:  %s\n", supportedObjects.c_str());
-	printf("objectHierarchy:   %s\n", objectHierarchy.c_str());
-	printf("objectTerminators: %s\n", objectTerminators.c_str());
-	printf("======================================================================\n");
 	
 	return true;
 		

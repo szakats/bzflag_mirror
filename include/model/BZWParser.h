@@ -57,13 +57,18 @@ public:
 	// get all lines in a section that begin with the given key
 	static vector<string> getLinesByKey(const char* key, const char* header, const char* section);
 	
-	// get the first occurrence of a section from a chunk of text that start with header
-	static string getSection(const char* header, const char* text);
+	// chunk of a long string of text into an array of sections
+	static const vector<string> getSections(const char* text);
+	
+	// find sections starting with a particular header from a vector of sections
+	// (meant to be used in conjunction with getSections()
+	static const vector<string> findSections(const char* header, vector<string>& sections);
 	
 	// get all sections from a chunk of text that start with header
 	static const vector<string> getSectionsByHeader(const char* header, const char* text);
 	static const vector<string> getSectionsByHeader(const char* header, const char* text, const char* footer);
-	static const vector<string> getSectionsByHeader(const char* header, const char* text, const char* footer, const char* internalSectionKeys);
+	// use this for sections with subobjects
+	static const vector<string> getSectionsByHeader(const char* header, const char* text, const char* footer, const char* internalSectionKeys, const char* sectionsToIgnore);
 	
 	// get all values from a key in a section
 	static vector<string> getValuesByKey(const char* key, const char* header, const char* section);

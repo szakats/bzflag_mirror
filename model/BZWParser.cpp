@@ -27,104 +27,6 @@ string cutWhiteSpace(string line) {
 }
 
 /**
- * Helper method: make every character lowercase.
- * Makes no assumption of the values for the characters (i.e. ASCII vs UTF isn't a problem here)
- */
- /*
-string lowerCase(string line) {
-	const char* data = line.c_str();
-	const char* ret = new char[ line.length() ];
-	
-	for(int i = 0; i < line.length(); i++) {
-		switch( data[i] ) {
-			case 'A':
-				ret[i] = 'a';
-				break;
-			case 'B':
-				ret[i] = 'b';
-				break;
-			case 'C':
-				ret[i] = 'c';
-				break;
-			case 'D':
-				ret[i] = 'd';
-				break;
-			case 'E':
-				ret[i] = 'e';
-				break;
-			case 'F':
-				ret[i] = 'f';
-				break;
-			case 'G':
-				ret[i] = 'g';
-				break;
-			case 'H':
-				ret[i] = 'h';
-				break;
-			case 'I':
-				ret[i] = 'i';
-				break;
-			case 'J':
-				ret[i] = 'j';
-				break;
-			case 'K':
-				ret[i] = 'k';
-				break;
-			case 'L':
-				ret[i] = 'l';
-				break;
-			case 'M':
-				ret[i] = 'm';
-				break;
-			case 'N':
-				ret[i] = 'n';
-				break;
-			case 'O':
-				ret[i] = 'o';
-				break;
-			case 'P':
-				ret[i] = 'p';
-				break;
-			case 'Q':
-				ret[i] = 'q';
-				break;
-			case 'R':
-				ret[i] = 'r';
-				break;
-			case 'S':
-				ret[i] = 's';
-				break;
-			case 'T':
-				ret += 't';
-				break;
-			case 'U':
-				ret[i] = 'u';
-				break;
-			case 'V':
-				ret[i] = 'v';
-				break;
-			case 'W':
-				ret[i] = 'w';
-				break;
-			case 'X':
-				ret[i] = 'x';
-				break;
-			case 'Y':
-				ret[i] = 'y';
-				break;
-			case 'Z':
-				ret[i] = 'z';
-				break;
-			default:
-				ret[i] = data[i];
-				break;
-		}
-	}
-	
-	return string(ret);
-}
-*/
-/**
  * Helper method:  return a substring from the beginning of the string to the next occurence of '\n'
  */
 string cutLine(string text) {
@@ -325,30 +227,6 @@ vector<string> BZWParser::getLinesByKey(const char* _key, const char* _header, c
 	return ret;
 }
 
-/*
- * This method reads a section that starts with header from a chunk of text 
- */
-string BZWParser::getSection(const char* _header, const char* _text) {
-	string header = cutWhiteSpace(string(_header));
-	string text = cutWhiteSpace(string(_text));
-	string terminator = BZWParser::terminatorOf(header.c_str());
-	
-	// find header occurence
-	string::size_type index = text.find(header, 0);
-	
-	// if we didn't find anything then return an empty string
-	if(index == string::npos)
-		return string("");
-	
-	// find the end of the section
-	string::size_type end = text.find(terminator + "\n", index);
-	
-	// if we didn't find anything then return the rest of the section
-	if(end == string::npos)
-		return text.substr(index);
-	
-	return text.substr(index, end - index);
-}
 
 /**
  * This method finds all occurences of a section (by looking for its header) in a chunk of text
@@ -462,11 +340,12 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
  * Format of internalSectionKeys is "<key1><key2>...<keyN>" for N keys
  */
  
-const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text, const char* _footer, const char* internalSectionKeys) {
+const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text, const char* _footer, const char* internalSectionKeys, const char* sectionsToIgnore) {
 	string header = cutWhiteSpace(string(_header));
 	string text = cutWhiteSpace(string(_text)) + " \n";
 	string footer = cutWhiteSpace(string(_footer));
 	string keyList = cutWhiteSpace(string(internalSectionKeys));
+	string ignoreList = cutWhiteSpace(string(sectionsToIgnore));
 	int sectionDepth = 0;	// determines the section depth (will be positive if inside a subobject)
 	
 	vector<string> sections = vector<string>();
@@ -509,6 +388,20 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
 		}
 		
 		found = false;
+		
+		// footer stack
+		vector<string> footerStack = vector<string>();
+		vector<string> headerStack = vector<string>();
+		vector<string> allowedHeaderStack = vector<string>();
+		
+		footerStack.push_back(footer);
+		headerStack.push_back(header);
+		allowedHeaderStack.push_back(header);
+		
+		string subobjects = BZWParser::hierarchyOf( header.c_str() );
+		
+		bool listening = true;
+		
 		// find the footer
 		while(true) {
 			// ensure we have space to cut
@@ -525,24 +418,47 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
 			
 			if(lineElements.size() == 0)
 				lineElements.push_back(" ");
-			
+				
 			// see if this is a key
-			if(keyList.find("<" + lineElements[0] + ">") != string::npos)	
+			if(keyList.find("<" + lineElements[0] + ">") != string::npos || subobjects.find("<" + lineElements[0] + ">") != string::npos) {
 				sectionDepth++;
+				footerStack.push_back( BZWParser::terminatorOf(lineElements[0].c_str()) );
+				headerStack.push_back(lineElements[0]);
+				
+				// see if we should listen to lines within this subobject
+				if(ignoreList.find("<" + lineElements[0] + ">") == string::npos) {
+					allowedHeaderStack.push_back(lineElements[0]);
+				}
+				else {
+					listening = false;	
+				}
+				
+				subobjects = BZWParser::hierarchyOf(lineElements[0].c_str());
+			}
 			
 			// add it to the section if its relevant
-			if(sectionDepth == 0)
+			if(listening) {
 				section += line + "\n";
-			
-			// see if it has the end
-			if(lineElements[0].compare(footer) == 0) {
-				sectionDepth--;
-				if(sectionDepth == 0) {
-					found = true;
-					break;	
-				}
 			}
+			
+			// see if this is the end of a subobject
+			if(footerStack[ footerStack.size() - 1 ] == lineElements[0]) {
+				sectionDepth--;	
+				footerStack.pop_back();
+				headerStack.pop_back();
+				if(headerStack.size() < allowedHeaderStack.size()) {
+					allowedHeaderStack.pop_back();
+					listening = true;	
+				}
 				
+				if(sectionDepth < 0) {
+					found = true;
+					break;
+				}
+				
+				subobjects = BZWParser::hierarchyOf(headerStack[headerStack.size()-1].c_str());
+				
+			}
 			
 			text = text.substr(currLine.length() + 1);
 		}
@@ -599,7 +515,7 @@ vector<string> BZWParser::getLinesByKeys(vector<string> keys, const char* _heade
 	
 	for(vector<string>::iterator i = lines.begin(); i != lines.end(); i++) {
 		for(vector<string>::iterator j = keys.begin(); j != keys.end(); j++) {
-			if(isKey(*j, *i)) {
+			if(isKey(*j, *i) || *j == *i) {
 				ret.push_back(*i);
 				break;	
 			}	
@@ -642,30 +558,59 @@ vector<string> BZWParser::getLineElements(const char* data, int count) {
 vector<string> BZWParser::getLineElements(const char* text) { return BZWParser::getLineElements(text, -1); }
 
 /**
- * The big tamale: the top-level file loader.
- * Loads a .bzw file and returns a vector of strings, where each string contains an object's chunk of BZW text
+ * Helper method:
+ * get a vector of subobjects from an object (modified hierarchyOf())
  */
 
-vector<string> BZWParser::loadFile(const char* filename) {
-	ifstream fileInput(filename);
-	
+vector<string> subobjectsOf(const char* obj) {
+	string subobjects = BZWParser::hierarchyOf(obj);
 	vector<string> ret = vector<string>();
 	
-	// if its not open, its not there
-	if(!fileInput.is_open()) {
-		printf("BZWParser::loadFile(): Error! Could not open input stream\n");
-		return ret;
+	if(subobjects.length() == 0) {
+		return ret;	
 	}
+		
+	// find all sub-objects
+	string::size_type start = 0;
+	string::size_type end = 1;
+	
+	while(true) {
+		start = subobjects.find("<", end);
+		end = subobjects.find(">", start+1);
+		
+		if(start == string::npos)
+			break;
+		
+		string subobj = subobjects.substr(start+1, end - (start+1));
+		
+		ret.push_back( subobj );
+	}
+	
+	return ret;
+}
+
+/**
+ * Get all sections from a chunk of text
+ */
+ 
+const vector<string> BZWParser::getSections(const char* _text) {
+	string text = cutWhiteSpace(_text);
+	vector<string> ret = vector<string>();
 	
 	// start reading the stuff in
 	string buff, key, objstr, line, supportedKeys = string(BZW_SUPPORTED_KEYS), hierarchy = string(BZW_SUBOBJECTS);
 	vector<string> lineElements = vector<string>();
 	
-	while(!fileInput.eof()) {
+	while(true) {
 		// read in lines until we find a key
-		getline( fileInput, buff );
+		buff = cutWhiteSpace( cutLine( text ) );
 		
-		buff = cutWhiteSpace(buff);
+		// advance the line
+		string::size_type eol = text.find("\n", 0);
+		if(eol == string::npos)
+			break;
+		
+		text = text.substr(eol+1);
 		
 		// get the line elements
 		lineElements = BZWParser::getLineElements(buff.c_str());
@@ -694,27 +639,7 @@ vector<string> BZWParser::loadFile(const char* filename) {
 			if( index != string::npos ) {
 				subobjects.clear();
 				
-				// get the subobject string
-				string::size_type subObjectStart = index + key.length() + 2;
-				string::size_type subObjectEnd = hierarchy.find(">>", subObjectStart);
-				string subobjectString = hierarchy.substr(subObjectStart, subObjectEnd);
-				
-				// read in the sub-object keys
-				while(true) {
-					string::size_type start = subobjectString.find("<", 0);
-					string::size_type end = subobjectString.find(">", 0);
-					
-					// read in the key (and terminate it with a space)
-					string subKey = subobjectString.substr(start+1, end - (start+1)) + " ";
-					subobjects.push_back(subKey);
-					
-					// see if there are any more keys left
-					if(subobjectString.find("<", end) == string::npos)
-						break;
-					
-					// advance the line
-					subobjectString = subobjectString.substr(end + 1);
-				}
+				subobjects = subobjectsOf(key.c_str());
 			}
 			
 			// get number of subobjects
@@ -723,48 +648,128 @@ vector<string> BZWParser::loadFile(const char* filename) {
 			// terminator stack
 			vector<string> terminatorStack = vector<string>();
 			
+			// subobject stack
+			vector< vector<string> > subobjectStack = vector< vector<string> >();
+			
 			// add the terminator token of the base object
 			terminatorStack.push_back( BZWParser::terminatorOf(key.c_str()) );
-			
-			// loop through the text until we have depth 0 (i.e. we exit the object) or we run out of file
-			while(!fileInput.eof() && depthCount > 0) {
-				// get a line
-				getline( fileInput, buff );
 				
-				// trim the whitespace
-				line = cutWhiteSpace(buff);
+			// loop through the text until we have depth 0 (i.e. we exit the object) or we run out of text
+			while(depthCount > 0) {
+				// get a line
+				buff = cutWhiteSpace(cutLine( text ));
+								
+				// advance the line
+				string::size_type eol = text.find("\n", 0);
+				if(eol == string::npos)
+					break;
+				
+				text = text.substr(eol+1);
+				
+				// trim buff
+				line = buff;
 				
 				// don't continue of there was nothing to begin with
 				if(line.length() == 0)
 					continue;
 				
-				// add a space to line (so we can tell the difference between, say, "foo" and "foob"
 				line += " ";
 				
-				// see if it's a subobject (if so, increase depthcount)
+				// see if it's a subobject (if so, increase depthcount, save current sub-objects, and load in new ones)
 				for(int i = 0; i < numSubobjects; i++) {
-					if( line.find( subobjects[i], 0 ) == 0 ) {
+					if( line.find( subobjects[i] + " ", 0 ) == 0 ) {
 						depthCount++;
 						terminatorStack.push_back( BZWParser::terminatorOf(subobjects[i].c_str()) );
+						subobjectStack.push_back(subobjects);
+						subobjects = subobjectsOf(subobjects[i].c_str());
+						numSubobjects = subobjects.size();
 						break;	
 					}
 				}
+				
+				// add a space to line (so we can tell the difference between, say, "foo" and "foob"
+				line += " ";
 				
 				// see if we're at an "end" (if so, decrease depthcount)
 				if(line.find(terminatorStack[ terminatorStack.size() - 1 ] + " ", 0) != string::npos) {
 					depthCount--;
 					terminatorStack.pop_back();
+					
+					if(subobjectStack.size() > 0) {
+						subobjects = subobjectStack[ subobjectStack.size() - 1 ];
+						subobjectStack.pop_back();
+					}
+					else
+						subobjects.clear();
+						
+					numSubobjects = subobjects.size();
 				}
 				
 				objstr += line + "\n";
+				
 			}
 			
 			// add the object to ret
 			ret.push_back(objstr);
+			
 		}
 	}
 	
-	fileInput.close();
+	return ret;
+}
+
+/**
+ * Find sections in a vector of sections by header
+ */
+
+const vector<string> BZWParser::findSections(const char* _header, vector<string>& sections) {
+	vector<string> ret = vector<string>();
 	
+	// iterate over the passed sections
+	if(sections.size() > 0) {
+		for(vector<string>::iterator i = sections.begin(); i != sections.end(); i++) {
+			vector<string> lineElements = BZWParser::getLineElements(i->c_str(), 1);
+			if(lineElements.size() > 0) {
+				if(lineElements[0] == _header) {
+					ret.push_back(*i);	
+				}
+			}
+		}	
+	}
+	
+	if(ret.size() == 0)
+		ret.push_back(BZW_NOT_FOUND);
+		
+	return ret;
+}
+
+/**
+ * The big tamale: the top-level file loader.
+ * Loads a .bzw file and returns a vector of strings, where each string contains an object's chunk of BZW text
+ */
+
+vector<string> BZWParser::loadFile(const char* filename) {
+	ifstream fileInput(filename);
+	
+	// if its not open, its not there
+	if(!fileInput.is_open()) {
+		printf("BZWParser::loadFile(): Error! Could not open input stream\n");
+		return vector<string>();
+	}
+	
+	// read in the file to a string
+	string* data = new string("");
+	if(!data)
+		return vector<string>();
+		
+	string buff = string("");
+	while(!fileInput.eof()) {
+		getline( fileInput, buff );
+		data->append(buff);
+		data->append("\n");
+	}
+	
+	vector<string> ret = BZWParser::getSections( data->c_str() );
+	delete data;
 	return ret;
 }
