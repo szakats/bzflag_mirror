@@ -13,6 +13,7 @@ Model::Model()
 	materials = vector<material*>();
 	links = vector<Tlink*>();
 	textureMatrices = vector<texturematrix*>();
+	groups = vector<define*>();
 	
 	objects = vector<bz2object*>();
 	modelRef = this;
@@ -37,6 +38,7 @@ Model::Model(const char* supportedObjects, const char* objectHierarchy, const ch
 	materials = vector<material*>();
 	links = vector<Tlink*>();
 	textureMatrices = vector<texturematrix*>();
+	groups = vector<define*>();
 	
 	objects = vector<bz2object*>();
 	modelRef = this;
@@ -78,6 +80,13 @@ Model::~Model()
 			
 	if(objects.size() > 0)
 		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++)
+			if((*i)) {
+				delete *i;
+				*i = NULL;	
+			}
+	
+	if(groups.size() > 0)
+		for(vector<define*>::iterator i = groups.begin(); i != groups.end(); i++)
 			if((*i)) {
 				delete *i;
 				*i = NULL;	
@@ -176,6 +185,17 @@ bool Model::_build(vector<string>& bzworld) {
 		else if(header == "dynamicColor") {
 			if(cmap[header] != NULL) {
 				dynamicColors.push_back((dynamicColor*)cmap[header](*i));	
+			}
+			else {
+				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
+				unusedData.push_back(*i);
+			}
+		}
+		
+		// parse group definitions
+		else if(header == "define") {
+			if(cmap[header] != NULL) {
+				groups.push_back((define*)cmap[header](*i));	
 			}
 			else {
 				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
@@ -415,6 +435,14 @@ string& Model::_toString() {
 		for(vector<texturematrix*>::iterator i = textureMatrices.begin(); i != textureMatrices.end(); i++) {
 			ret += (*i)->toString() + "\n";	
 		}
+	}
+	
+	// group defintions
+	ret += "\n#--Group Definitions-----------------------------\n\n";
+	if(groups.size() > 0) {
+		for(vector<define*>::iterator i = groups.begin(); i != groups.end(); i++) {
+			ret += (*i)->toString() + "\n";	
+		}	
 	}
 	
 	// all other objects

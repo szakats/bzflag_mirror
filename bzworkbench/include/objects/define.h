@@ -29,6 +29,10 @@ public:
 	// constructor with data
 	define(string& data);
 	
+	// static constructor
+	static DataEntry* init() { return new define(); }
+	static DataEntry* init(string& data) { return new define(data); }
+	
 	// destructor
 	~define();
 	
