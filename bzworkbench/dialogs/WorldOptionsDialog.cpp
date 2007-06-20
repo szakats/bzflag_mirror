@@ -30,12 +30,7 @@ WorldOptionsDialog::WorldOptionsDialog() :
 	float flagHeight = atof( BZWParser::getValuesByKey("flagHeight", "world", worldString.c_str())[0].c_str() );
 	bool noWalls = ( BZWParser::getValuesByKey("noWalls", "world", worldString.c_str()).size() == 0 ? false : true);
 	
-	string options = concat(
-						BZWParser::getLines(
-								"options", 
-								BZWParser::getSection("options", optionsString.c_str()).c_str()
-						)
-					);
+	string options = concat( BZWParser::getLines("options", BZWParser::getSectionsByHeader("options", optionsString.c_str())[0].c_str() ) );
 	
 	float waterHeight = atof( BZWParser::getValuesByKey("height", "waterLevel", waterLevelString.c_str())[0].c_str() );
 	vector<string> _materials = BZWParser::getValuesByKey("material", "waterLevel", waterLevelString.c_str());

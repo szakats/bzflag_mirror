@@ -45,13 +45,17 @@ int sphere::update(string& data) {
 		
 	// get the name
 	vector<string> names = BZWParser::getValuesByKey("name", header, sphereData);
-	if(!hasOnlyOne(names, "name"))
-		return 0;
+	if(names.size() > 1) {
+		printf("sphere::update(): Error! Defined \"name\" %d times!\n", names.size());
+		return 0;	
+	}
 		
 	// get the divisions
 	vector<string> vDivisions = BZWParser::getValuesByKey("divisions", header, sphereData);
-	if(!hasOnlyOne(vDivisions, "divisions"))
+	if(vDivisions.size() > 1) {
+		printf("sphere::update(): Error! Defined \"divisions\" %d times!\n", names.size());
 		return 0;
+	}
 		
 	// get the radius
 	vector<string> radii = BZWParser::getValuesByKey("radius", header, sphereData);
@@ -92,8 +96,8 @@ int sphere::update(string& data) {
 		return 0;
 	
 	// set the data
-	this->name = names[0];
-	this->divisions = atoi( vDivisions[0].c_str() );
+	this->name = (names.size() > 0 ? names[0] : "");
+	this->divisions = (vDivisions.size() > 0 ? atoi( vDivisions[0].c_str() ) : 16);
 	this->flatShading = (flatShadings.size() == 0 ? false : true);
 	this->smoothbounce = (smoothBounces.size() == 0 ? false : true);
 	

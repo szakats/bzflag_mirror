@@ -10,6 +10,7 @@
 #include "include/model/Model.h"
 
 #include "include/windows/MainWindow.h"
+#include "include/windows/ConsoleWindow.h"
 
 #include "include/model/BZWParser.h"
 
@@ -43,6 +44,9 @@
 #include "include/objects/texturematrix.h"
 #include "include/objects/dynamicColor.h"
 #include "include/objects/mesh.h"
+#include "include/objects/define.h"
+
+#include "include/TextUtils.h"
 
 #include <string>
 #include <vector>
@@ -85,11 +89,20 @@ int main(int argc, char** argv) {
 	return Fl::run();
 	*/
 	
-	
+	/*
 	Model* model = new Model();
 	
 	buildDatabase();
 	
+	MainWindow* mw = new MainWindow(model);
+	// ConsoleWindow* cw = new ConsoleWindow(10);
+	
+	// cw->show();
+	mw->show();
+	
+	return Fl::run();
+	*/
+	/*
 	vector<string> objects = BZWParser::loadFile("share/H2O-R1.bzw");
 	
 	Model::build( objects );
@@ -98,9 +111,8 @@ int main(int argc, char** argv) {
 	printf("\n     Model.toString() output\n");
 	printf("\n==============================================================\n");
 	printf("%s\n", Model::toString().c_str());
+	*/
 	
-	
-	delete model;
 	
 	/*
 	vector<string> objects = BZWParser::loadFile("share/H2O-R1.bzw");
@@ -109,8 +121,9 @@ int main(int argc, char** argv) {
 		printf("%s", i->c_str());	
 	}*/
 	
-	/*
 	mesh meshobj = mesh();
+	
+	printf("|%s|\n", meshobj.toString().c_str());
 	
 	string meshData = string("mesh\n") +
 							 "  inside 0 1 2\n" +
@@ -136,12 +149,39 @@ int main(int argc, char** argv) {
 							 "  noclusters\n" +
 							 "  smoothbounce\n" +
 							 
+							 "  phydrv sniffphydrv\n" +
+							 
+							 "  face\n" +
+							 "    vertices 10 1 2\n" +
+							 "    texcoords 10 1 2\n" +
+							 "    normals 10 1 2\n" +
+							 "    phydrv myPhysics\n" +
+							 "    passable\n" +
+							 "  endface\n" +
+							 
 							 "  matref sniff\n" +
 							 
 							 "  face\n" +
 							 "    vertices 0 1 2\n" +
 							 "    texcoords 0 1 2\n" +
 							 "    normals 0 1 2\n" +
+							 "    phydrv myPhysics\n" +
+							 "    passable\n" +
+							 "  endface\n" +
+							 
+							 "  matref yoink\n" +
+							 
+							 "  face\n" +
+							 "    vertices 4 1 2\n" +
+							 "    texcoords 4 1 2\n" +
+							 "    normals 4 1 2\n" +
+							 "    phydrv myPhysics\n" +
+							 "  endface\n" +
+							 
+							 "  face\n" +
+							 "    vertices 5 1 2\n" +
+							 "    texcoords 5 1 2\n" +
+							 "    normals 5 1 2\n" +
 							 "    phydrv myPhysics\n" +
 							 "    passable\n" +
 							 "  endface\n" +
@@ -177,8 +217,6 @@ int main(int argc, char** argv) {
 	printf("|%s|\n", meshobj.toString().c_str());
 	
 	printf("========================================\n");
-	
-							 
 	
 	MeshFace face = MeshFace();
 	
@@ -244,7 +282,7 @@ int main(int argc, char** argv) {
 						  "  red clampUp 0.1 0.0 0.71\n" +
 						  "  green clampDown 0.0 0.0 1.0\n" +
 						  "  blue sequence 0.0 0.0 2 0 1 0 2 1 1 0\n" +
-						  "  red limit 0.0 1.0\n" +
+						  "  red limits 0.0 1.0\n" +
 						  "end\n";
 						  
 	dcobj.update(dcdata);
@@ -664,9 +702,18 @@ int main(int argc, char** argv) {
 	waterLevelObj.update(waterLevelStr);
 	
 	printf("%s\n", waterLevelObj.toString().c_str());
-	*/
+	
+	printf("==================================================\n");
+	
+	define defobj = define();
+	
+	printf("|%s|\n", defobj.toString().c_str());
+	
+	string defdata = string("define sniff\n") + meshData + "\n" + adata + "\n" + bdata + "\n" + gdata + "\n" + tdata + "\n" + pyramidData + "\n" + mbdata + "\n" + mpdata + "\n" + "enddef\n";
+	
+	defobj.update(defdata);
+	
+	printf("|%s|\n", defobj.toString().c_str());
 	
 	return 0;
-	
-	
 }

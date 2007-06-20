@@ -13,6 +13,7 @@ mesh::mesh(void) :
 	materials = vector<string>();
 	faces = vector<MeshFace>();
 	drawInfo = DrawInfo();
+	materialMap = map<string, string>();
 }
 
 // constructor with data
@@ -28,6 +29,7 @@ mesh::mesh(string& data) :
 	materials = vector<string>();
 	faces = vector<MeshFace>();
 	drawInfo = DrawInfo();
+	materialMap = map<string, string>();
 	
 	this->update(data);
 }
@@ -40,14 +42,19 @@ int mesh::update(string& data) {
 	const char* header = this->getHeader().c_str();
 	
 	// get lines
-	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
+	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str(), "end", "<drawinfo><face>", "");
 	
 	// get the lines without the drawinfo (so we don't mistake drawinfo's data with the global data)
-	vector<string> linesNoDrawInfo = BZWParser::getSectionsByHeader(header, data.c_str(), "end", "<drawinfo>");
+	vector<string> linesNoDrawInfo = BZWParser::getSectionsByHeader(header, data.c_str(), "end", "<drawinfo><face>", "<drawinfo>");
+	
+	// get lines without faces and without drawinfo (so bz2object doesn't think there are multiple physics drivers)
+	vector<string> linesNoSubobjects = BZWParser::getSectionsByHeader(header, data.c_str(), "end", "<drawinfo><face>", "<drawinfo><face>");
 	
 	// break if there are none
-	if(lines[0] == BZW_NOT_FOUND)
+	if(lines[0] == BZW_NOT_FOUND) {
+		printf("mesh not found\n");
 		return 0;
+	}
 		
 	// break if too many
 	if(!hasOnlyOne(lines, header))
@@ -60,6 +67,11 @@ int mesh::update(string& data) {
 	const char* meshDataNoDrawInfo = meshData;
 	if(linesNoDrawInfo.size() > 0)
 		meshDataNoDrawInfo = linesNoDrawInfo[0].c_str();
+		
+	// get no-subobject data
+	const char* meshDataNoSubobjects = meshData;
+	if(linesNoSubobjects.size() > 0)
+		meshDataNoSubobjects = linesNoSubobjects[0].c_str();
 	
 	// get the vertices
 	vector<string> vertexVals = BZWParser::getValuesByKey("vertex", header, meshDataNoDrawInfo);
@@ -78,6 +90,17 @@ int mesh::update(string& data) {
 	
 	// get faces
 	vector<string> faceVals = BZWParser::getSectionsByHeader("face", meshDataNoDrawInfo, "endface");
+	
+	// get materials in the order they come in relation to faces.
+	// since we know how many faces there are in faceVals, we can
+	// deduce which materials refer to which faces by counting the number
+	// of faces between matrefs and later mapping those faces in faceVals
+	// to those materials since in both matrefs and faceVals the faces
+	// come in the same order.
+	vector<string> matFaceKeys = vector<string>();
+	matFaceKeys.push_back("face");
+	matFaceKeys.push_back("matref");
+	vector<string> matrefs = BZWParser::getLinesByKeys(matFaceKeys, header, meshDataNoDrawInfo);
 	
 	// get drawinfo
 	vector<string> drawInfoVals = BZWParser::getSectionsByHeader("drawinfo", meshData);
@@ -98,6 +121,42 @@ int mesh::update(string& data) {
 		for(vector<string>::iterator i = faceVals.begin(); i != faceVals.end(); i++) {
 			faceParams.push_back( MeshFace(*i) );	
 		}	
+	}
+	
+	// parse material map.
+	// deduce which faces map to which materials by counting the number of faces between
+	// matrefs and mapping faces from faceParams to materials
+	map<string, string> matmap = map<string, string>();
+	if(matrefs.size() > 0 && faceParams.size() > 0) {
+		string activeMaterial = "";		// the current material that faces will be mapped to
+		vector<string> lineElements;	// temporary container for elements of each matrefs line
+		unsigned int faceParamsIndex = 0;		// used to index faceParams to map its elements to materials
+		for(vector<string>::iterator i = matrefs.begin(); i != matrefs.end(); i++) {
+			// get the line elements
+			lineElements = BZWParser::getLineElements(i->c_str());
+			if(lineElements.size() == 0)
+				continue;
+			
+			// see if we came across a face
+			if(lineElements[0] == "face") {
+				// if so, then map the face to activeMaterial
+				matmap[ faceParams[faceParamsIndex].toString() ] = string(activeMaterial);
+				faceParamsIndex++;
+			}
+			// see if we came across a valid matref
+			else if(lineElements[0] == "matref") {
+				// if so, then reset the active material
+				if(lineElements.size() > 1)
+					activeMaterial = lineElements[1];
+				else
+					activeMaterial = "-1";
+				
+			}
+			
+			// break if there are no more faces to map
+			if(faceParamsIndex >= faceParams.size())
+				break;
+		}
 	}
 	
 	// parse drawinfo
@@ -181,8 +240,11 @@ int mesh::update(string& data) {
 	}
 	
 	// do base-class update
-	if(!bz2object::update(data))
+	string bz2object_data = string(meshDataNoSubobjects);
+	if(!bz2object::update(bz2object_data)) {
+		printf("mesh::update(): Error! could not do bz2object update!\n");
 		return 0;
+	}
 		
 	// load data in
 	vertices = vertexData;
@@ -195,6 +257,7 @@ int mesh::update(string& data) {
 	faces = faceParams;
 	noClusters = (noClusterVals.size() == 0 ? false : true);
 	smoothBounce = (smoothBounceVals.size() == 0 ? false : true);
+	materialMap = matmap;
 	
 	return 1;
 }
@@ -222,8 +285,17 @@ string mesh::toString(void) {
 		}
 	}
 	
+	// special instance:
+	// make sure to keep the order of faces and materials constant
 	if(faces.size() > 0) {
+		string currMaterial = "";
 		for(vector<MeshFace>::iterator i = faces.begin(); i != faces.end(); i++) {
+			// see if we came across a new material
+			if(currMaterial != materialMap[ i->toString() ]) {
+				// if so, set the current material and append the matref to the faceString
+				currMaterial = materialMap[ i->toString() ];
+				faceString += "  matref " + currMaterial + "\n";
+			}
 			faceString += "  " + i->toString();	
 		}	
 	}

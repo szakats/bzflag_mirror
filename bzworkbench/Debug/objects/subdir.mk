@@ -9,6 +9,7 @@ CPP_SRCS += \
 ../objects/box.cpp \
 ../objects/bz2object.cpp \
 ../objects/cone.cpp \
+../objects/define.cpp \
 ../objects/dynamicColor.cpp \
 ../objects/group.cpp \
 ../objects/link.cpp \
@@ -34,6 +35,7 @@ OBJS += \
 ./objects/box.o \
 ./objects/bz2object.o \
 ./objects/cone.o \
+./objects/define.o \
 ./objects/dynamicColor.o \
 ./objects/group.o \
 ./objects/link.o \
@@ -59,6 +61,7 @@ CPP_DEPS += \
 ./objects/box.d \
 ./objects/bz2object.d \
 ./objects/cone.d \
+./objects/define.d \
 ./objects/dynamicColor.d \
 ./objects/group.d \
 ./objects/link.d \
