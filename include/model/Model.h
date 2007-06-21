@@ -1,42 +1,25 @@
 #ifndef MODEL_H_
 #define MODEL_H_
 
-class Model;
-
-#include "../DataEntry.h"
-
-#include "../objects/arc.h"
-#include "../objects/base.h"
-#include "../objects/box.h"
-#include "../objects/cone.h"
-#include "../objects/define.h"
-#include "../objects/dynamicColor.h"
-#include "../objects/group.h"
-#include "../objects/link.h"
-#include "../objects/material.h"
-#include "../objects/mesh.h"
-#include "../objects/meshbox.h"
-#include "../objects/meshpyr.h"
-#include "../objects/options.h"
-#include "../objects/physics.h"
-#include "../objects/pyramid.h"
-#include "../objects/sphere.h"
-#include "../objects/teleporter.h"
-#include "../objects/tetra.h"
-#include "../objects/texturematrix.h"
-#include "../objects/waterLevel.h"
-#include "../objects/weapon.h"
-#include "../objects/world.h"
-#include "../objects/zone.h"
-
-#include "../objects/bz2object.h"
-
 #include <string>
+#include <vector>
 #include <map>
+
+// forward declarations of some objects
+class bz2object;
+class world;
+class waterLevel;
+class options;
+class texturematrix;
+class dynamicColor;
+class physics;
+class Tlink;
+class define;
+class DataEntry;
+class material;
 
 // supported query commands.
 #define MODEL_QUERY_COMMANDS "<get><set>"
-
 
 using namespace std;
 
@@ -87,12 +70,41 @@ public:
 	static bool isSupportedTerminator(const char* name, const char* end);
 	static bool isSupportedHierarchy(const char* name);
 	
+	// model-specific API
+	static const string getSupportedObjects();
+	static const string getSupportedHierarchies();
+	static const string getSupportedTerminators();
+	
+	// methods to manipulate the aforementioned strings
+	static bool addObjectSupport(const char* name);
+	bool _addObjectSupport(const char* name);
+	
+	static bool removeObjectSupport(const char* name);
+	bool _removeObjectSupport(const char* name);
+	
+	static bool addTerminatorSupport(const char* name, const char* end);
+	bool _addTerminatorSupport(const char* name, const char* end);
+	
+	static bool removeTerminatorSupport(const char* name, const char* end);
+	bool _removeTerminatorSupport(const char* name, const char* end);
+	
+	static bool addSupportedHierarchy(const char* name);
+	bool _addSupportedHierarchy(const char* name);
+	
+	static bool removeSupportedHierarchy(const char* name);
+	bool _removeSupportedHierarchy(const char* name);
+	
 	// instantiated plug-in API
 	bool _registerObject(string& name, DataEntry* (*init)(string&));
 	bool _registerObject(const char* name, const char* hierarchy, const char* terminator, DataEntry* (*init)(string&));
 	bool _isSupportedObject(const char* name);
 	bool _isSupportedTerminator(const char* name, const char* end);
 	bool _isSupportedHierarchy(const char* name);
+	
+	// model-specific API
+	const string _getSupportedObjects();
+	const string _getSupportedHierarchies();
+	const string _getSupportedTerminators();
 	
 private:
 
@@ -140,19 +152,39 @@ private:
 // hierarchy of objects and subobjects
 	string objectHierarchy;
 	
-	// methods to manipulate the aforementioned strings
-	bool addObjectSupport(const char* name);
-	bool removeObjectSupport(const char* name);
-	
-	bool addTerminatorSupport(const char* name, const char* end);
-	bool removeTerminatorSupport(const char* name, const char* end);
-	
-	bool addSupportedHierarchy(const char* name);
-	bool removeSupportedHierarchy(const char* name);
-	
 // save unused data chunks
 	vector<string> unusedData;
 };
+
+#include "BZWParser.h"
+
+#include "../DataEntry.h"
+
+#include "../objects/arc.h"
+#include "../objects/base.h"
+#include "../objects/box.h"
+#include "../objects/cone.h"
+#include "../objects/define.h"
+#include "../objects/dynamicColor.h"
+#include "../objects/group.h"
+#include "../objects/link.h"
+#include "../objects/material.h"
+#include "../objects/mesh.h"
+#include "../objects/meshbox.h"
+#include "../objects/meshpyr.h"
+#include "../objects/options.h"
+#include "../objects/physics.h"
+#include "../objects/pyramid.h"
+#include "../objects/sphere.h"
+#include "../objects/teleporter.h"
+#include "../objects/tetra.h"
+#include "../objects/texturematrix.h"
+#include "../objects/waterLevel.h"
+#include "../objects/weapon.h"
+#include "../objects/world.h"
+#include "../objects/zone.h"
+
+#include "../objects/bz2object.h"
 
 
 #endif /*MODEL_H_*/

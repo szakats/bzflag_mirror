@@ -162,7 +162,7 @@ int mesh::update(string& data) {
 	// parse drawinfo
 	DrawInfo drawInfoParam = DrawInfo();
 	bool doDrawInfo = false;
-	if(drawInfoVals.size() > 0) {
+	if(drawInfoVals[0] != BZW_NOT_FOUND) {
 		drawInfoParam = DrawInfo(drawInfoVals[0]);
 		doDrawInfo = true;
 	}

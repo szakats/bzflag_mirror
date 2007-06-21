@@ -9,20 +9,13 @@ class Vector3D : public Point3D
 	public:
 	
 	// constructors
-	Vector3D() : Point3D() {
-	}
+	Vector3D() : Point3D() { }
 	
-	Vector3D(float x, float y, float z) : Point3D(x, y, z) {
-		
-	}
+	Vector3D(float x, float y, float z) : Point3D(x, y, z) { }
 	
-	Vector3D(double x, double y, double z) : Point3D((float)x, (float)y, (float)z) {
-		
-	}
+	Vector3D(double x, double y, double z) : Point3D((float)x, (float)y, (float)z) { }
 	
-	Vector3D(const char* data) : Point3D(data) {
-		
-	}
+	Vector3D(const char* data) : Point3D(data) { }
 	
 	virtual ~Vector3D() { }
 	
@@ -55,6 +48,23 @@ class Vector3D : public Point3D
 		x *= scaleFactor;
 		y *= scaleFactor;
 		z *= scaleFactor;
+	}
+	
+	// * scales the vector
+	Vector3D operator * (float scaleFactor) {
+		return Vector3D( x*scaleFactor, y*scaleFactor, z*scaleFactor );
+	}
+	
+	// add vectors
+	Vector3D operator +(Vector3D& v2) {
+		return Vector3D(x + v2.x,
+						y + v2.y,
+						z + v2.z);	
+	}
+	
+	// negate vectors
+	Vector3D operator -() {
+		return Vector3D(-x, -y, -z);
 	}
 };
 

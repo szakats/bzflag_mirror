@@ -117,10 +117,11 @@ public:
 		
 		// check the lengths of the parameters of "vertices", "texcoords", and "normals"...should be the same
 		// (of not, then break)
-		if( vertexParams.size() != texCoordParams.size() ||
+		if( (vertexParams.size() > 0 && texCoordParams.size() > 0 && normalParams.size() > 0) &&
+		   (vertexParams.size() != texCoordParams.size() ||
 			vertexParams.size() != normalParams.size() ||
-			normalParams.size() != texCoordParams.size()) {
-				printf("mesh::update(): Error! unequal numbers of referenced vertices, normals, and texture coordinates in face! {\n");
+			normalParams.size() != texCoordParams.size())) {
+				printf("mesh::face::update(): Error! unequal numbers of referenced vertices, normals, and texture coordinates in face! {\n");
 				printf("  vertices %s # %d\n", vertexVals[0].c_str(), vertexParams.size());
 				if(texCoordVals.size() > 0)
 					printf("  texcoords %s # %d\n", texCoordVals[0].c_str(), texCoordParams.size());
