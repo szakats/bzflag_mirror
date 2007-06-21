@@ -94,6 +94,16 @@ Model::~Model()
 			
 }
 
+// getters specific to the model
+const string Model::getSupportedObjects() { return modelRef->_getSupportedObjects(); }
+const string Model::_getSupportedObjects() { return this->supportedObjects; }
+
+const string Model::getSupportedHierarchies() { return modelRef->_getSupportedHierarchies(); }
+const string Model::_getSupportedHierarchies() { return this->objectHierarchy; }
+
+const string Model::getSupportedTerminators() { return modelRef->_getSupportedTerminators(); }
+const string Model::_getSupportedTerminators() { return this->objectTerminators; }
+
 // the query method
 string& Model::query(const char* command) { 
 	return modelRef->_query(command);
@@ -122,7 +132,7 @@ bool Model::_build(vector<string>& bzworld) {
 	bool foundWorld = false;
 	for(vector<string>::iterator i = bzworld.begin(); i != bzworld.end(); i++) {
 		string header = BZWParser::headerOf(i->c_str());
-		// parse world
+		
 		if(header == "world") {
 			if(cmap[header] != NULL) {
 				this->worldData->update(*i);
@@ -195,7 +205,7 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse group definitions
 		else if(header == "define") {
 			if(cmap[header] != NULL) {
-				groups.push_back((define*)cmap[header](*i));	
+				groups.push_back((define*)cmap[header](*i));
 			}
 			else {
 				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
@@ -322,12 +332,13 @@ bool Model::_isSupportedHierarchy( const char* name ) {
 
 /**************************
  * 
- * Private methods to manipulate Model::supportedObjects, Model::objectTerminators, and Model::objectHierarchy
+ * methods to manipulate Model::supportedObjects, Model::objectTerminators, and Model::objectHierarchy
  * 
  **************************/
  
 // add the name of an object to the list of supported objects; return false if it's already there
-bool Model::addObjectSupport(const char* name) {
+bool Model::addObjectSupport(const char* name) { return modelRef->_addObjectSupport(name); }
+bool Model::_addObjectSupport(const char* name) {
 	if(name == NULL || this->_isSupportedObject( name ))
 		return false;
 		
@@ -336,7 +347,8 @@ bool Model::addObjectSupport(const char* name) {
 }
 
 // remove the name of an object from the list of supported objects; return false if not found
-bool Model::removeObjectSupport(const char* name) {
+bool Model::removeObjectSupport(const char* name) { return modelRef->_removeObjectSupport(name); }
+bool Model::_removeObjectSupport(const char* name) {
 	if(!this->_isSupportedObject( name ))
 		return false;
 		
@@ -363,21 +375,79 @@ bool Model::removeObjectSupport(const char* name) {
 }
 
 // add support for an object hierarchy
-bool Model::addSupportedHierarchy(const char* name) {
+bool Model::addSupportedHierarchy(const char* name) { return modelRef->_addSupportedHierarchy(name); }
+bool Model::_addSupportedHierarchy(const char* name) {
 	if(name == NULL || this->_isSupportedHierarchy( name ))
 		return false;
 	
-	this->objectHierarchy += string("<") + name + ">";
+	this->objectHierarchy += name;
+	return true;
+}
+
+// remove support for an object hierarchy
+bool Model::removeSupportedHierarchy(const char* name) { return modelRef->_removeSupportedHierarchy(name); }
+bool Model::_removeSupportedHierarchy(const char* name) {
+	if(!this->_isSupportedHierarchy( name ))
+		return false;
+		
+	// get the start of the hierarchy
+	string::size_type index = objectHierarchy.find( name, 0 );
+	
+	// get the end of the hierarchy
+	string::size_type end = objectHierarchy.find( "<", index + strlen(name) );
+	
+	// cut out the element
+	string frontChunk = "", endChunk = "";
+	
+	if(index > 0)
+		frontChunk = objectHierarchy.substr(0, index);
+	
+	if(end < objectHierarchy.size() - 1)
+		endChunk = objectHierarchy.substr(end + 1);
+		
+	// regroup the string
+	objectHierarchy = frontChunk + endChunk;
+	
 	return true;
 }
 
 
 // add support for an object terminator
-bool Model::addTerminatorSupport(const char* name, const char* end) {
+bool Model::addTerminatorSupport(const char* name, const char* end) { return modelRef->_addTerminatorSupport(name, end); }
+bool Model::_addTerminatorSupport(const char* name, const char* end) {
 	if(name == NULL || this->_isSupportedTerminator( name, end ))
 		return false;
 		
 	this->objectTerminators += string("<") + name + "|" + end + ">";
+	return true;
+}
+
+// remove support for an object terminator
+bool Model::removeTerminatorSupport(const char* name, const char* end) { return modelRef->_removeTerminatorSupport(name, end); }
+bool Model::_removeTerminatorSupport(const char* name, const char* end) {
+	if(!this->_isSupportedTerminator(name, end))
+		return false;
+		
+	string term = string(name) + "|" + string(end);
+	
+	// get the start of the object
+	string::size_type index = objectTerminators.find( string("<") + term + ">", 0 );
+	
+	// get the end of the object
+	string::size_type endIndex = objectTerminators.find( ">", index+1 );
+	
+	// cut out the element
+	string frontChunk = "", endChunk = "";
+	
+	if(index > 0)
+		frontChunk = objectTerminators.substr(0, index);
+	
+	if(endIndex < objectTerminators.size() - 1)
+		endChunk = objectTerminators.substr(endIndex + 1);
+		
+	// regroup the string
+	objectTerminators = frontChunk + endChunk;
+	
 	return true;
 }
 
@@ -421,14 +491,6 @@ string& Model::_toString() {
 		}
 	}
 	
-	// links
-	ret += "\n#--Teleporter Links------------------------------\n\n";
-	if(links.size() > 0) {
-		for(vector<Tlink*>::iterator i = links.begin(); i != links.end(); i++) {
-			ret += (*i)->toString() + "\n";	
-		}	
-	}
-	
 	// texture matrices
 	ret += "\n#--Texture Matrices------------------------------\n\n";
 	if(textureMatrices.size() > 0) {
@@ -449,6 +511,14 @@ string& Model::_toString() {
 	ret += "\n#--Objects---------------------------------------\n\n";
 	if(objects.size() > 0) {
 		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
+			ret += (*i)->toString() + "\n";	
+		}	
+	}
+	
+	// links
+	ret += "\n#--Teleporter Links------------------------------\n\n";
+	if(links.size() > 0) {
+		for(vector<Tlink*>::iterator i = links.begin(); i != links.end(); i++) {
 			ret += (*i)->toString() + "\n";	
 		}	
 	}

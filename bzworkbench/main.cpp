@@ -57,12 +57,14 @@ void buildDatabase() {
 	Model::registerObject("base", NULL, "end", base::init);
 	Model::registerObject("box", NULL, "end", box::init);
 	Model::registerObject("cone", NULL, "end", cone::init);
-	Model::registerObject("define", "define:<arc><base><box><cone><group><mesh><meshbox><meshpyr><pyramid><sphere><teleporter><tetra>", "enddef", define::init);
 	Model::registerObject("dynamicColor", NULL, "end", dynamicColor::init);
 	Model::registerObject("group", NULL, "end", group::init);
 	Model::registerObject("link", NULL, "end", Tlink::init);
 	Model::registerObject("material", NULL, "end", material::init);
-	Model::registerObject("mesh", "mesh:<face><drawinfo>", "end", mesh::init);
+	Model::registerObject("mesh", "<mesh:<face><drawinfo>><drawinfo:<lod>><lod:<matref>>", "end", mesh::init);
+	// need to do this for faces
+	Model::addTerminatorSupport("face", "endface");
+	
 	Model::registerObject("meshbox", NULL, "end", meshbox::init);
 	Model::registerObject("meshpyr", NULL, "end", meshpyr::init);
 	Model::registerObject("options", NULL, "end", options::init);
@@ -76,6 +78,9 @@ void buildDatabase() {
 	Model::registerObject("weapon", NULL, "end", weapon::init);
 	Model::registerObject("world", NULL, "end", world::init);
 	Model::registerObject("zone", NULL, "end", zone::init);
+	
+	Model::registerObject("define", "<define:<arc><base><box><cone><group><mesh><meshbox><meshpyr><pyramid><sphere><teleporter><tetra>>", "enddef", define::init);
+	
 }
 
 
@@ -90,7 +95,7 @@ int main(int argc, char** argv) {
 	return Fl::run();
 	*/
 	
-	/*
+	
 	Model* model = new Model();
 	
 	buildDatabase();
@@ -102,9 +107,20 @@ int main(int argc, char** argv) {
 	mw->show();
 	
 	return Fl::run();
-	*/
+	
+	
 	/*
+	Model* model = new Model();
+	
+	buildDatabase();
+	
 	vector<string> objects = BZWParser::loadFile("share/H2O-R1.bzw");
+	
+	for(vector<string>::iterator i = objects.begin(); i != objects.end(); i++) {
+		printf("==============================================\n");
+		printf("%s", i->c_str());	
+		printf("______________________________________________\n");
+	}
 	
 	Model::build( objects );
 	
@@ -112,16 +128,25 @@ int main(int argc, char** argv) {
 	printf("\n     Model.toString() output\n");
 	printf("\n==============================================================\n");
 	printf("%s\n", Model::toString().c_str());
-	
-	return 0;
 	*/
 	
+	delete model;
 	
-	vector<string> objects = BZWParser::loadFile("share/H2O-R1.bzw");
+	return 0;
+	
+	/*
+	Model *model = new Model();
+	buildDatabase();
+	
+	vector<string> objects = BZWParser::loadFile("share/test.bzw");
 	for(vector<string>::iterator i = objects.begin(); i != objects.end(); i++) {
 		printf("==============================================\n");
 		printf("%s", i->c_str());	
+		printf("______________________________________________\n");
 	}
+	
+	delete model;
+	*/
 	/*
 	mesh meshobj = mesh();
 	

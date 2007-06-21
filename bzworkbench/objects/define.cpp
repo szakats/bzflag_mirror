@@ -2,12 +2,14 @@
 
 // constructor
 define::define() : DataEntry("define", "<arc><base><box><cone><group><mesh><meshbox><meshpyr><pyramid><sphere><teleporter><tetra>") {
-	this->objects = vector<bz2object*>();	
+	this->objects = vector<bz2object*>();
+	this->name = "";	
 }
 
 // constructor with data
 define::define(string& data) : DataEntry("define", "<arc><base><box><cone><group><mesh><meshbox><meshpyr><pyramid><sphere><teleporter><tetra>", data.c_str()) {
-	this->objects = vector<bz2object*>();	
+	this->objects = vector<bz2object*>();
+	this->name = "";	
 	this->update(data);
 }
 
@@ -40,15 +42,19 @@ int define::update(string& data) {
 	if(lines.size() > 1) {
 		printf("define::update(): Error! Defined \"define\" %d times!\n", lines.size());
 		return 0;	
-	}	
+	}
 	
 	// get the name
 	vector<string> names = BZWParser::getValuesByKey("define", header, lines[0].c_str());
 	if(!hasOnlyOne(names, header))
 		return 0;
-		
-	// get the data (first, remove the "define" line)
-	lines[0] = lines[0].substr( lines[0].find("\n", 0) + 1 );
+			
+	// get the data
+	string::size_type sectionStart = lines[0].find("\n") + 1;
+	string::size_type sectionEnd = lines[0].find( "enddef", sectionStart );
+	
+	lines[0] = lines[0].substr( sectionStart, sectionEnd );
+	
 	const char* defineData = lines[0].c_str();
 	
 	// get the chunks
@@ -83,7 +89,7 @@ int define::update(string& data) {
 	}
 	
 	// box
-	vector<string> boxes = BZWParser::findSections("boxes", chunks);
+	vector<string> boxes = BZWParser::findSections("box", chunks);
 	vector<box> boxData;
 	if(boxes[0] != BZW_NOT_FOUND) {
 		box tmp;

@@ -19,21 +19,44 @@ box
 end
 
 define theTestGroup
-	box
-		position 20 30 40
-		size 10 10 10
-		rotation 40
-	end
 
-	pyramid
-		position 0 0 0
-		size 10 10 10
-		rotation 45
-	end
+        box
+          position 20 30 40
+          size 10 10 10
+          rotation 40
+        end
+
+       pyramid
+          position 0 0 0
+          size 10 10 10
+          rotation 45
+       end
 enddef
 
 pyramid
 	position 30 40 60
 	size 40 40 40
 	rotation 40
+end
+
+mesh
+	vertex 0 0 0
+	vertex 1 1 1
+	vertex 0 0 0
+
+	face
+		vertices 0 1 2
+	endface
+end
+
+box
+	position 1 2 3
+	size 4 5 6
+	rotation 7
+end
+
+pyramid
+	position 8 9 10
+	size 11 12 13
+	rotation 14
 end
