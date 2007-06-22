@@ -9,7 +9,7 @@
 
 #include "../dialogs/MainMenu.h"
 #include "../dialogs/WorldOptionsDialog.h"
-#include "RenderWindow.h"
+#include "View.h"
 
 
 class MainWindow : public Fl_Window
@@ -42,6 +42,8 @@ public:
 	// static methods
 	static void openDialog(const char* dialog);
 	
+	// get the view
+	View* getView() { return view; }
 	
 private:
 	
@@ -54,8 +56,8 @@ private:
 	// set initialized (checked by static methods)
 	static bool initialized;
 	
-	// reference to the internal OGL render window
-	RenderWindow* renderWindow;
+	// reference to the internal OSG view
+	View* view;
 	
 };
 

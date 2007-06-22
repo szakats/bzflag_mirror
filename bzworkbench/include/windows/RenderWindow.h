@@ -4,6 +4,13 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Gl_Window.H>
 
+// OpenSceneGraph stuff
+#include <osgViewer/Viewer>
+#include <osgViewer/CompositeViewer>
+#include <osgViewer/ViewerEventHandlers>
+#include <osgGA/TrackballManipulator>
+#include <osgDB/ReadFile>
+
 #include "../model/Model.h"
 
 class RenderWindow : public Fl_Gl_Window {
@@ -15,17 +22,21 @@ public:
 	
 	// constructors
 	// (needs a reference to the Model so it can render stuff)
-	RenderWindow(Model* m);
-	RenderWindow(int x, int y, int width, int height, Model* m);
+	RenderWindow();
+	RenderWindow(int x, int y, int width, int height);
 	
-	// FLTK-specific stuff
+	// OSG-specific methods
+	osgViewer::GraphicsWindow* getGraphicsWindow() { return _gw.get(); }
+    const osgViewer::GraphicsWindow* getGraphicsWindow() const { return _gw.get(); }
+	
+	// FLTK-specific methods
 	int handle(int);
-	void draw(void);
+	void resize(int x, int y, int w, int h);
 	
 private:
 
-	// model reference
-	Model* model;
+	// reference to an embedded OSG render window
+	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> _gw;
 };
 
 #endif /*RENDERWINDOW_H_*/

@@ -52,7 +52,7 @@
 #include <vector>
 
 // register the built-in objects
-void buildDatabase() {
+void buildModelDatabase() {
 	Model::registerObject("arc", NULL, "end", arc::init);
 	Model::registerObject("base", NULL, "end", base::init);
 	Model::registerObject("box", NULL, "end", box::init);
@@ -98,12 +98,32 @@ int main(int argc, char** argv) {
 	
 	Model* model = new Model();
 	
-	buildDatabase();
+	buildModelDatabase();
 	
 	MainWindow* mw = new MainWindow(model);
-	// ConsoleWindow* cw = new ConsoleWindow(10);
+	mw->resizable(mw);
 	
-	// cw->show();
+	// load the scene.
+	// assign a default file
+	
+	// root scene node
+	osg::Group* root = new osg::Group();
+	
+	// load the cow model
+	osg::Node* loadedModel = osgDB::readNodeFile("share/cow.osg");
+	
+	// add the cow model as a leaf to root
+	root->addChild( loadedModel );
+	
+   	// load the data into the view
+	mw->getView()->setSceneData(root);
+	
+	// set up a trackball (mouse) manipulator for OSG
+    mw->getView()->setCameraManipulator(new osgGA::TrackballManipulator);
+    
+    // add the default event handler for OSG
+    mw->getView()->addEventHandler(new osgViewer::StatsHandler);
+	
 	mw->show();
 	
 	return Fl::run();
