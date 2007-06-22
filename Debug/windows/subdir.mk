@@ -6,17 +6,20 @@
 CPP_SRCS += \
 ../windows/ConsoleWindow.cpp \
 ../windows/MainWindow.cpp \
-../windows/RenderWindow.cpp 
+../windows/RenderWindow.cpp \
+../windows/View.cpp 
 
 OBJS += \
 ./windows/ConsoleWindow.o \
 ./windows/MainWindow.o \
-./windows/RenderWindow.o 
+./windows/RenderWindow.o \
+./windows/View.o 
 
 CPP_DEPS += \
 ./windows/ConsoleWindow.d \
 ./windows/MainWindow.d \
-./windows/RenderWindow.d 
+./windows/RenderWindow.d \
+./windows/View.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

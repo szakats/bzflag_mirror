@@ -10,10 +10,10 @@ MainWindow::MainWindow() :
 	
 	this->model = new Model();
 	
-	this->renderWindow = new RenderWindow(RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT, this->model);
-	renderWindow->end();
+	this->view = new View(model, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	view->end();
 	
-	this->add(renderWindow);
+	this->add(view);
 	
 	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
 	this->add(mainMenu);
@@ -31,12 +31,12 @@ MainWindow::MainWindow(Model* model) :
 	
 	this->model = model;
 	
-	this->renderWindow = new RenderWindow(RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT, this->model);
-	renderWindow->end();
-	this->add(renderWindow);
+	this->view = new View(model, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	view->end();
+	this->add(view);
 	
 	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
-	renderWindow->add(mainMenu);
+	view->add(mainMenu);
 	
 	
 	initialized = true;

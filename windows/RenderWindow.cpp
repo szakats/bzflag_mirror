@@ -1,61 +1,69 @@
 #include "../include/windows/RenderWindow.h"
 
 // constructor with model
-RenderWindow::RenderWindow(Model* m) :
+RenderWindow::RenderWindow() :
 	Fl_Gl_Window(DEFAULT_WIDTH, DEFAULT_HEIGHT) {
 	
-	this->model = m;
+	this->end();
+	
+	// initialize the OSG embedded graphics window
+	this->_gw = new osgViewer::GraphicsWindowEmbedded(this->x(), this->y(), DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	
+	// make this resizable
+	this->resizable(this);
 }
 
-RenderWindow::RenderWindow(int x, int y, int width, int height, Model* m) :
+RenderWindow::RenderWindow(int x, int y, int width, int height) :
 	Fl_Gl_Window(x, y, width, height) {
 	
-	this->model = m;
+	this->end();
+	
+	// initialize the OSG embedded graphics window
+	this->_gw = new osgViewer::GraphicsWindowEmbedded(x,y,width,height);
+	
+	// make this resizable
+	this->resizable(this);
+	
 }
 
-// draw the scene
-void RenderWindow::draw(void) {
+// resize method
+void RenderWindow::resize(int x, int y, int w, int h) {
+	// resize the OSG render window
+	_gw->getEventQueue()->windowResize(x, y, w, h );
+    _gw->resized(x,y,w,h);
 	
-	if(!valid()) {
-		//... set up projection, viewport, etc ...
-    	//  ... window size is in w() and h().
-   	    //  ... valid() is turned on by FLTK after draw() returns	
-	}	
-	// ... draw ...
+	// resize the FLTK window
+    Fl_Gl_Window::resize(x,y,w,h);	
 }
 
 // event handler
 int RenderWindow::handle(int event) {
 	
-	switch(event) {
-	  case FL_PUSH:
-	  
-	  //  ... mouse down event ...
-	  //  ... position in Fl::event_x() and Fl::event_y()
-	    return 1;
-	  case FL_DRAG:
-	  
-	  //  ... mouse moved while down event ...
-	    return 1;
-	  case FL_RELEASE:   
-	  		
-	    return 1;
-	  case FL_FOCUS :
-	  case FL_UNFOCUS :
-	  //  ... Return 1 if you want keyboard events, 0 otherwise
-	    return 1;
-	  case FL_KEYBOARD:
-	   
-	//    ... keypress, key is in Fl::event_key(), ascii in Fl::event_text()
-	//    ... Return 1 if you understand/use the keyboard event, 0 otherwise..
-	    return 1;
-	  case FL_SHORTCUT:
-	 	
-	 //   ... shortcut, key is in Fl::event_key(), ascii in Fl::event_text()
-	 //   ... Return 1 if you understand/use the shortcut event, 0 otherwise...
-	    return 1;
-	  default:
-	    // pass other events to the base class...
-	    return Fl_Gl_Window::handle(event);
-	  }
+	// forward FLTK events to OSG
+	switch(event){
+        case FL_PUSH:
+            _gw->getEventQueue()->mouseButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button());
+			this->redraw();
+            return 1;
+          
+        case FL_DRAG:
+            _gw->getEventQueue()->mouseMotion(Fl::event_x(), Fl::event_y());
+        	this->redraw();
+			return 1;
+        case FL_RELEASE:
+            _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), Fl::event_button());
+        	this->redraw();    
+			return 1;
+        case FL_KEYDOWN:
+            _gw->getEventQueue()->keyPress((osgGA::GUIEventAdapter::KeySymbol)Fl::event_key());
+            this->redraw();
+            return 1;
+        case FL_KEYUP:
+            _gw->getEventQueue()->keyRelease((osgGA::GUIEventAdapter::KeySymbol)Fl::event_key());
+            this->redraw();
+            return 1;
+        default:
+            // pass other events to the base class
+            return Fl_Gl_Window::handle(event);
+    }
 }
