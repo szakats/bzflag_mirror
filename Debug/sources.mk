@@ -25,6 +25,7 @@ C_UPPER_DEPS :=
 SUBDIRS := \
 windows \
 widgets \
+render \
 objects \
 model \
 . \

@@ -6,7 +6,6 @@
 
 // OpenSceneGraph stuff
 #include <osgViewer/Viewer>
-#include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/TrackballManipulator>
 #include <osgDB/ReadFile>
@@ -30,7 +29,7 @@ public:
     const osgViewer::GraphicsWindow* getGraphicsWindow() const { return _gw.get(); }
 	
 	// FLTK-specific methods
-	int handle(int);
+	virtual int handle(int);
 	void resize(int x, int y, int w, int h);
 	
 private:
