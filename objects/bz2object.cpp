@@ -198,13 +198,3 @@ string bz2object::BZWLines(void) {
 	
 	return ret;
 }
-
-// data getters (makes MasterConfigurationDialog code easier)
-Point3D bz2object::getPosition() { return position; }
-Point3D bz2object::getSize() { return size; }
-float bz2object::getRotation() { return rotation; }
-
-vector<Transform> bz2object::getTransformations() { return transformations; }
-vector<string> bz2object::getMaterials() { return materials; }
-
-string bz2object::getPhysicsDriver() { return physicsDriver; }
