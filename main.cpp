@@ -99,47 +99,22 @@ int main(int argc, char** argv) {
 	*/
 	
 	
+	// init the model
 	Model* model = new Model();
-	
+	// add supported objects
 	buildModelDatabase();
 	
+	// init the SceneBuilder
+	SceneBuilder::init();
+	
+	// load the main window
 	MainWindow* mw = new MainWindow(model);
 	mw->resizable(mw);
 	
-	// load the scene.
-	// assign a default file
-	
-	// root scene node
-	osg::ref_ptr<osg::Group> root = new osg::Group();
-	
-	// load the cow model
-	osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile("share/cow.osg");
-	osg::ref_ptr<osg::Node> loadedModel2 = osgDB::readNodeFile("share/cow.osg");
-	
-	// make a transformer
-	osg::ref_ptr<osg::PositionAttitudeTransform> cowTransform = new osg::PositionAttitudeTransform();
-	
-	// add the cow model as a leaf to root
-	root->addChild( cowTransform.get() );
-	root->addChild( loadedModel2.get() );
-	
-	cowTransform->addChild( loadedModel.get() );
-	
-	cowTransform->setPosition( osg::Vec3( 0.0, 0.0, 20.0 ) );
-	
-   	// load the data into the view
-	// mw->getView()->setSceneData(root.get());
-	
-	// set up a trackball manipulator for OSG
-    mw->getView()->setCameraManipulator(new osgGA::TrackballManipulator());
-    
-    // mw->getView()->getCamera()->setViewMatrixAsLookAt( osg::Vec3f( 0.0, -20.0, 0.0 ), osg::Vec3f( 0.0, -19.0, 0.0 ), osg::Vec3f( 0.0, 0.0, 1.0 ));
-    
-    // add the default event handler for OSG
-    mw->getView()->addEventHandler(new osgViewer::StatsHandler);
-	
+	// show the main window
 	mw->show();
 	
+	// run the program
 	return Fl::run();
 	
 	
