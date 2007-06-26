@@ -11,6 +11,7 @@ RM := rm -rf
 -include subdir.mk
 -include windows/subdir.mk
 -include widgets/subdir.mk
+-include share/box/subdir.mk
 -include objects/subdir.mk
 -include model/subdir.mk
 -include dialogs/subdir.mk
@@ -48,7 +49,7 @@ all: bzworkbench
 bzworkbench: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L/usr/lib -L/usr/X11R6/lib -L/usr/local/lib/ -o"bzworkbench" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L/usr/lib -L/usr/local/lib/ -o "bzworkbench" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

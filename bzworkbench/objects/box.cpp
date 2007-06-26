@@ -29,7 +29,13 @@ string box::toString(void) {
 				  "end\n";
 }
 
-// render
-int box::render(void) {
-	return 0;
+// get renderable
+osg::ref_ptr< osg::Node > box::getRenderable() {
+	osg::PositionAttitudeTransform* boxTransform = SceneBuilder::transformable( SceneBuilder::buildNode( "share/box/box.obj" ).get() ).get();
+	
+	boxTransform->setPosition( osg::Vec3(this->position.x, this->position.y, this->position.z + this->size.z / 2.0) );
+	boxTransform->setScale( osg::Vec3(this->size.x, this->size.y, this->size.z / 2.0) );
+	boxTransform->setAttitude( osg::Quat( osg::DegreesToRadians( this->rotation ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
+	
+	return osg::ref_ptr<osg::Node> (boxTransform);
 }

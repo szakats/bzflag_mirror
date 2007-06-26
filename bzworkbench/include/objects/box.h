@@ -7,6 +7,8 @@
 #include "../model/BZWParser.h"
 #include "bz2object.h"
 
+#include "../model/SceneBuilder.h"
+
 /**
  * Box data
  */
@@ -35,8 +37,8 @@ public:
 	// toString
 	string toString(void);
 	
-	// render
-	int render(void);
+	// return renderable OSG node
+	osg::ref_ptr< osg::Node > getRenderable();
 	
 private:
 	Point3D size;
