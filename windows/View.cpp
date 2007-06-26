@@ -28,16 +28,19 @@ View::View(Model* m, int x, int y, int w, int h, const char *label) :
     osg::ref_ptr<osg::PositionAttitudeTransform> cow1 = SceneBuilder::transformable( SceneBuilder::buildNode( "share/cow.osg" ).get() );
 	osg::ref_ptr<osg::PositionAttitudeTransform> cow2 = SceneBuilder::transformable( SceneBuilder::buildNode( "share/cow.osg" ).get() );
 	osg::ref_ptr<osg::PositionAttitudeTransform> cow3 = SceneBuilder::transformable( SceneBuilder::buildNode( "share/cow.osg" ).get() );
+	osg::ref_ptr<osg::PositionAttitudeTransform> box = SceneBuilder::transformable( SceneBuilder::buildNode( "share/box/box.obj" ).get() );
 	
 	// move the cow up a bit
 	cow1->setPosition( osg::Vec3(0, 0, 3) );
 	cow2->setPosition( osg::Vec3(10, 10, 3) );
 	cow3->setPosition( osg::Vec3(-10, 10, 3) );
+	box->setPosition( osg::Vec3(10, -10, 1) );
 	
 	// add the cow model as a leaf to root
 	this->root->addChild( cow1.get() );
 	this->root->addChild( cow2.get() );
 	this->root->addChild( cow3.get() );
+	this->root->addChild(box.get());
 	
    // add the root node to the scene
    this->setSceneData( this->root.get() );
@@ -46,7 +49,7 @@ View::View(Model* m, int x, int y, int w, int h, const char *label) :
    this->setCameraManipulator(new osgGA::TrackballManipulator());
    
    // add the stats event handler
-   this->addEventHandler(new osgViewer::StatsHandler);
+   this->addEventHandler(new osgViewer::StatsHandler());
 	
 }
 
