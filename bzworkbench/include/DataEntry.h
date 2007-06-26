@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <osg/Node>
+
 using namespace std;
 
 #include "ftoa.h"
@@ -24,7 +26,8 @@ public:
 		return string("# unknown DataEntry");
 	}
 	
-	virtual int render(void) = 0;
+	// get the object in the form of something we can render
+	virtual osg::ref_ptr< osg::Node > getRenderable(void) { return NULL; }
 	
 	// initialize the header and keys
 	DataEntry(const char* header, const char* keys) {

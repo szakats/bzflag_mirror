@@ -11,16 +11,16 @@ MasterConfigurationDialog::MasterConfigurationDialog(bz2object* obj) :
 	string objectStr = object->get();
 	
 	// read position
-	Point3D position = object->getPosition();
+	Point3D position = *(object->getPosition());
 	
 	// read rotation
-	float rotation = object->getRotation();
+	float rotation = *(object->getRotation());
 	
 	// read size
-	Point3D size = object->getSize();
+	Point3D size = *(object->getSize());
 	
 	// read transformations
-	vector<Transform> transforms = object->getTransformations();
+	vector<Transform> transforms = *(object->getTransformations());
 	
 	// find out the supported transformations and determine their field format
 	supportedTransformations = string("");

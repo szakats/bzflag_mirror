@@ -1,0 +1,20 @@
+BZWorkbench Installation Notes
+------------------------------
+
+To compile BZWorkbench, just cd into Debug and run "make all".
+Aside from usual dependency on a GNU build environment, BZWorkbench has 
+the following library and source dependencies:
+
+	(*)	FLTK 1.1.7
+	(*)	OpenSceneGraph 2.0
+	(*)	OpenGL 1.4
+
+Currently, BZWorkbench only runs on UNIX platforms (including Mac OS X), 
+and has only been tested by the developer on Debian GNU/Linux 4.0.  It 
+might run on Cygwin; but you're on your own there.
+
+To run BZWorkbench, you should either copy, move, or symlink the 
+bzworkbench binary to the root of the source tree.  Otherwise, it will 
+crash (i.e. it expects to find certain files relative to the root of the 
+source tree, rather than relative to the Debug directory).  Given that 
+this project is still in its infancy, there is no "make install" command.

@@ -3,7 +3,7 @@
 
 #include "RenderWindow.h"
 #include "../model/Model.h"
-// #include "../render/OSGCamera.h"
+#include "../model/SceneBuilder.h"
 
 #include <osg/Geode>
 #include <osg/Group>

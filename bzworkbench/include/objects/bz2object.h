@@ -40,16 +40,22 @@ class bz2object : public DataEntry {
 		string BZWLines(void);
 		
 		// data getters (makes MasterConfigurationDialog code easier)
-		Point3D getPosition();
-		Point3D getSize();
-		float getRotation();
-		
-		vector<Transform> getTransformations();
-		vector<string> getMaterials();
-		
-		string getPhysicsDriver();
+		Point3D* getPosition() { return &this->position; }
+		Point3D* getSize() { return &this->size; }
+		string* getName() { return &this->name; }
+		float* getRotation() { return &this->rotation; }
+		string* getPhyDrv() { return &this->physicsDriver; }
+		vector<Transform>* getTransformations() { return &this->transformations; }
+		vector<string>* getMaterials() { return &this->materials; }
 		
 		// data setters (makes MasterConfigurationDialog code easier)
+		void setPosition( Point3D* position ) { this->position = *position; }
+		void setSize( Point3D* size ) { this->position = *size; }
+		void setName( const char* name ) { this->name = name; }
+		void setRotation( float rotation ) { this->rotation = rotation; }
+		void setPhyDrv( const char* phydrv ) { this->physicsDriver = phydrv; }
+		void setTransforms( vector<Transform>* transformations ) { this->transformations = *transformations; }
+		void setMaterials( vector<string>* materials ) { this->materials = *materials; }
 		
 	protected:
 		Point3D position;
