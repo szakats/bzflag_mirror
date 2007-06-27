@@ -2,7 +2,8 @@
 
 // constructors
 box::box() : bz2object("box", "<position><rotation><size>") {
-	
+	this->position = Point3D( 0.0, 0.0, 0.0 );
+	this->size = Point3D( 10.0, 10.0, 10.0 );
 }
 
 box::box(string& data) : bz2object("box", "<position><rotation><size>", data.c_str()) {
@@ -29,13 +30,13 @@ string box::toString(void) {
 				  "end\n";
 }
 
-// get renderable
-osg::ref_ptr< osg::Node > box::getRenderable() {
-	osg::PositionAttitudeTransform* boxTransform = SceneBuilder::transformable( SceneBuilder::buildNode( "share/box/box.obj" ).get() ).get();
+// get renderable instance (will be invalid upon changing anything)
+osg::ref_ptr< osg::PositionAttitudeTransform > box::getRenderable(void) {
+	osg::ref_ptr<osg::PositionAttitudeTransform> boxTransform = SceneBuilder::transformable( SceneBuilder::buildNode( "share/box/box.obj" ).get() );
 	
-	boxTransform->setPosition( osg::Vec3(this->position.x, this->position.y, this->position.z + this->size.z / 2.0) );
-	boxTransform->setScale( osg::Vec3(this->size.x, this->size.y, this->size.z / 2.0) );
+	boxTransform->setPosition( osg::Vec3( this->getPosition()->x(), this->getPosition()->y(), this->getPosition()->z() + this->getSize()->z() / 2.0 ) );
+	boxTransform->setScale( osg::Vec3( this->getSize()->x(), this->getSize()->y(), this->getSize()->z() / 2.0 ) );
 	boxTransform->setAttitude( osg::Quat( osg::DegreesToRadians( this->rotation ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
 	
-	return osg::ref_ptr<osg::Node> (boxTransform);
+	return boxTransform;
 }

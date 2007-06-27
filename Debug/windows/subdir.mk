@@ -6,18 +6,21 @@
 CPP_SRCS += \
 ../windows/ConsoleWindow.cpp \
 ../windows/MainWindow.cpp \
+../windows/Picker.cpp \
 ../windows/RenderWindow.cpp \
 ../windows/View.cpp 
 
 OBJS += \
 ./windows/ConsoleWindow.o \
 ./windows/MainWindow.o \
+./windows/Picker.o \
 ./windows/RenderWindow.o \
 ./windows/View.o 
 
 CPP_DEPS += \
 ./windows/ConsoleWindow.d \
 ./windows/MainWindow.d \
+./windows/Picker.d \
 ./windows/RenderWindow.d \
 ./windows/View.d 
 

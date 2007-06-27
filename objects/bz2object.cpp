@@ -169,7 +169,7 @@ string bz2object::BZWLines(void) {
 		ret += "  position " + position.toString();
 		
 	// add size key/value to the string if supported
-	if(this->isKey("size") && size.x > 0 && size.y > 0 && size.z > 0)
+	if(this->isKey("size") && size.x() > 0 && size.y() > 0 && size.z() > 0)
 		ret += "  size " + size.toString();
 	
 	// add rotation key/value to the string if supported

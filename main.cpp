@@ -52,7 +52,12 @@
 #include <vector>
 
 #include <osg/PositionAttitudeTransform>
-#include <osgGA/UFOManipulator>
+#include <osg/Geode>
+#include <osg/Geometry>
+#include <osg/StateAttribute>
+#include <osg/TexEnv>
+#include <osg/Group>
+
 
 // register the built-in objects
 void buildModelDatabase() {
@@ -111,7 +116,30 @@ int main(int argc, char** argv) {
 	MainWindow* mw = new MainWindow(model);
 	mw->resizable(mw);
 	
-	// show the main window
+	box sceneBox = box();
+	Point3D position = Point3D( 10.0, 10.0, 0.0 );
+	Point3D size = Point3D( 10.0, 30.0, 30.0 );
+	float rotation = 30;
+	sceneBox.setPosition( &position );
+	sceneBox.setSize( &size );
+	sceneBox.setRotation( &rotation );
+	
+    osg::ref_ptr<osg::PositionAttitudeTransform> theRenderableBox = sceneBox.getRenderable();
+    osg::ref_ptr<osg::PositionAttitudeTransform> theRenderableBox2 = sceneBox.getRenderable();
+    theRenderableBox2->setPosition( osg::Vec3( -10, -10, 15 ) );
+    
+    osg::ref_ptr< osg::Group > theRenderableGroup = new osg::Group();
+    theRenderableGroup->addChild( theRenderableBox.get() );
+    theRenderableGroup->addChild( theRenderableBox2.get() );
+    
+    osg::ref_ptr< osg::PositionAttitudeTransform > theRenderableTransformedGroup = new osg::PositionAttitudeTransform();
+    
+    theRenderableTransformedGroup->addChild( theRenderableGroup.get() );
+    mw->getView()->setSelected( theRenderableTransformedGroup.get() );
+    
+    mw->getView()->getRootNode()->addChild( theRenderableTransformedGroup.get() );
+   
+    // show the main window
 	mw->show();
 	
 	// run the program
@@ -138,11 +166,6 @@ int main(int argc, char** argv) {
 	printf("\n==============================================================\n");
 	printf("%s\n", Model::toString().c_str());
 	*/
-	
-	delete model;
-	
-	return 0;
-	
 	/*
 	Model *model = new Model();
 	buildDatabase();

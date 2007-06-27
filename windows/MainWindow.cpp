@@ -55,11 +55,5 @@ MainWindow::~MainWindow() {
 void MainWindow::openDialog(const char* _dialog) {
 	if(!initialized)
 		return;
-		
-	string dialog = string(_dialog);
 	
-	if(dialog.compare("WorldOptionsDialog") == 0) {
-		WorldOptionsDialog* wod = new WorldOptionsDialog();
-		wod->show();	
-	}
 }

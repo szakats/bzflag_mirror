@@ -49,13 +49,13 @@ class bz2object : public DataEntry {
 		vector<string>* getMaterials() { return &this->materials; }
 		
 		// data setters (makes MasterConfigurationDialog code easier)
-		void setPosition( Point3D* position ) { this->position = *position; }
-		void setSize( Point3D* size ) { this->position = *size; }
-		void setName( const char* name ) { this->name = name; }
-		void setRotation( float rotation ) { this->rotation = rotation; }
-		void setPhyDrv( const char* phydrv ) { this->physicsDriver = phydrv; }
-		void setTransforms( vector<Transform>* transformations ) { this->transformations = *transformations; }
-		void setMaterials( vector<string>* materials ) { this->materials = *materials; }
+		void setPosition( Point3D* position ) { this->position = *position; this->setChanged(); }
+		void setSize( Point3D* s ) { this->size = *s; this->setChanged(); }
+		void setName( const char* name ) { this->name = name; this->setChanged(); }
+		void setRotation( float* rotation ) { this->rotation = *rotation; this->setChanged(); }
+		void setPhyDrv( const char* phydrv ) { this->physicsDriver = phydrv; this->setChanged(); }
+		void setTransforms( vector<Transform>* transformations ) { this->transformations = *transformations; this->setChanged(); }
+		void setMaterials( vector<string>* materials ) { this->materials = *materials; this->setChanged();}
 		
 	protected:
 		Point3D position;

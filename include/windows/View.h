@@ -14,15 +14,32 @@
 #include <osg/Image>
 #include <osg/PositionAttitudeTransform>
 
-// an extension of RenderWindow and osgViewer (this will be added to the main window)
-class View : public osgViewer::Viewer, public RenderWindow
+#include "../objects/box.h"
+
+#include "../Observer.h"
+#include "Picker.h"
+
+// an extension of RenderWindow and osgViewer (this will be added to the main window), and Observer
+class View : public osgViewer::Viewer, public RenderWindow, public Observer
 {
     public:
     	// constructor
         View(Model* m, int x, int y, int w, int h, const char *label=0);
         
+        // get the root node
+        osg::Group* getRootNode() { return root.get(); }
+        
         // FLTK event handler
         virtual int handle(int);
+        
+        // Observer update() method
+        void update( Observable* obs, void* data );
+        
+        // set a node as selected
+        void setSelected( osg::PositionAttitudeTransform* node );
+        
+        // unselect the selected node(s)
+        void setUnselected( osg::PositionAttitudeTransform* node );
         
         // destructor
         virtual ~View();
@@ -40,6 +57,9 @@ class View : public osgViewer::Viewer, public RenderWindow
 		
 		// ground (always present)
 		osg::ref_ptr< osg::Geode > ground;
+		
+		// array of selected nodes
+		vector< osg::ref_ptr< osg::Node > > selectedNodes;
 	
 	private:
 	

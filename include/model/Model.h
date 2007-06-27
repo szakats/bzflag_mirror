@@ -21,9 +21,11 @@ class material;
 // supported query commands.
 #define MODEL_QUERY_COMMANDS "<get><set>"
 
+#include "../Observable.h"
+
 using namespace std;
 
-class Model
+class Model : public Observable
 {
 public:
 	Model();
@@ -57,11 +59,24 @@ public:
 	static world* getWorldData();
 	static waterLevel* getWaterLevelData();
 	static options* getOptionsData();
+	static vector<bz2object*>& getObjects();
+	static vector<material*>& getMaterials();
+	static vector<texturematrix*>& getTextureMatrices();
+	static vector<physics*>& getPhysicsDrivers();
+	static vector<Tlink*>& getTeleporterLinks();
+	static vector<define*>& getGroups();
 	
 	// instantiated BZWB-specific API 
 	world* _getWorldData() { return worldData; }
 	options* _getOptionsData() { return optionsData; }
 	waterLevel* _getWaterLevelData() { return waterLevelData; }
+	vector<bz2object*>& _getObjects() { return this->objects; }
+	vector<material*>& _getMaterials() { return this->materials; }
+	vector<texturematrix*>& _getTextureMatrices() { return this->textureMatrices; }
+	vector<dynamicColor*>& _getDynamicColors() { return this->dynamicColors; }
+	vector<physics*>& _getPhysicsDrivers() { return this->phys; }
+	vector<Tlink*>& _getTeleporterLinks() { return this->links; }
+	vector<define*>& _getGroups() { return this->groups; }
 	
 	// plugin-specific API
 	static bool registerObject(string& name, DataEntry* (*init)(string&));

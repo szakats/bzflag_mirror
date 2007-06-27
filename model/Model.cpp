@@ -3,7 +3,7 @@
 // global reference to the model so the static call will work
 Model* modelRef;
 
-Model::Model()
+Model::Model() : Observable()
 {
 	worldData = new world();
 	optionsData = new options();
@@ -29,7 +29,7 @@ Model::Model()
 }
 
 // constructor that takes information about which objects to support
-Model::Model(const char* supportedObjects, const char* objectHierarchy, const char* objectTerminators) {
+Model::Model(const char* supportedObjects, const char* objectHierarchy, const char* objectTerminators) : Observable() {
 	worldData = new world();
 	optionsData = new options();
 	waterLevelData = new waterLevel();
@@ -533,3 +533,11 @@ string& Model::_toString() {
 	
 	return ret;
 }
+
+// BZWB-specific API
+vector<bz2object*>& 	Model::getObjects() 		{ return modelRef->_getObjects(); }
+vector<material*>& 		Model::getMaterials() 		{ return modelRef->_getMaterials(); }
+vector<texturematrix*>&	Model::getTextureMatrices() { return modelRef->_getTextureMatrices(); }
+vector<physics*>& 		Model::getPhysicsDrivers() 	{ return modelRef->_getPhysicsDrivers(); }
+vector<Tlink*>&		 	Model::getTeleporterLinks() { return modelRef->_getTeleporterLinks(); }
+vector<define*>& 		Model::getGroups() 			{ return modelRef->_getGroups(); }

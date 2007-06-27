@@ -3,6 +3,7 @@
 
 #include <osg/Geode>
 #include <osg/Group>
+#include <osg/Drawable>
 #include <osg/ShapeDrawable>
 #include <osg/Geometry>
 #include <osg/Texture2D>
@@ -45,7 +46,10 @@ public:
 	static osg::ref_ptr< osg::PositionAttitudeTransform > transformable( osg::Node* node );
 	
 	// get the geometry data from a node
-	static const vector< osg::ref_ptr<osg::Drawable> >* getNodeGeometry( osg::Node* node );
+	static const vector< osg::ref_ptr<osg::Drawable> >* getNodeGeometry( osg::PositionAttitudeTransform* node );
+	
+	// get all children from a group
+	static vector< osg::ref_ptr<osg::Node> >* extractChildren( osg::Group* group );
 	
 private:
 
