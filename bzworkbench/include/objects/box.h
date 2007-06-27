@@ -38,7 +38,7 @@ public:
 	string toString(void);
 	
 	// return renderable OSG node
-	osg::ref_ptr< osg::Node > getRenderable();
+	osg::ref_ptr< osg::PositionAttitudeTransform > getRenderable();
 	
 private:
 	Point3D size;

@@ -136,10 +136,15 @@ osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* nodeName, osg::
  * Gets the geometry data from a node (returns NULL if it has no geometry).
  * It does NOT look at children nodes.
  */
-const vector< osg::ref_ptr<osg::Drawable> >* SceneBuilder::getNodeGeometry( osg::Node* node ) {
-	const osg::Geode* geode = dynamic_cast< osg::Geode* > (node);
-	if(!geode) {		// return NULL if the dynamic_cast failed
+const vector< osg::ref_ptr<osg::Drawable> >* SceneBuilder::getNodeGeometry( osg::PositionAttitudeTransform* node ) {
+	const osg::Group* group = dynamic_cast< osg::Group* > (node);
+	if(!group) {		// return NULL if the dynamic_cast failed
 		return NULL;
+	}
+	
+	const osg::Geode* geode = dynamic_cast< osg::Geode* > (node);
+	if(!geode) {
+		return NULL;	
 	}
 	
 	return &geode->getDrawableList();
@@ -160,4 +165,41 @@ osg::ref_ptr< osg::PositionAttitudeTransform > SceneBuilder::transformable( osg:
 	
 	// return the node
 	return transformNode;
+}
+
+/**
+ * Recursively iterate through a group and return an array of all its children
+ */
+vector< osg::ref_ptr< osg::Node > >* SceneBuilder::extractChildren( osg::Group* group ) {
+	// declare an array of children
+	vector< osg::ref_ptr< osg::Node > >* children = new vector< osg::ref_ptr< osg::Node > >();
+	
+	// see if we have any children to iterate through
+	int numChildren = group->getNumChildren();
+	if(numChildren <= 0)
+		return children;		// return an empty array
+	
+	// go through the children
+	for(int i = 0; i < numChildren; i++) {
+		// try to dynamic_cast this to a group
+		osg::Group* childGroup = dynamic_cast< osg::Group* > (group->getChild( i ) );
+		// if this is a group, recursively get its children
+		if(childGroup) {
+			vector< osg::ref_ptr< osg::Node > >* childGroupChildren = SceneBuilder::extractChildren( childGroup );	
+			// copy over the children (if any exist)
+			if( childGroupChildren->size() > 0 ) {
+				for(vector< osg::ref_ptr< osg::Node > >::iterator i = childGroupChildren->begin(); i != childGroupChildren->end(); i++) {
+					children->push_back( *i );	
+				}	
+			}
+			delete childGroupChildren;
+		}
+		// this wasn't a group; add it to the return
+		else {
+			children->push_back( group->getChild( i ) );	
+		}
+	}
+	
+	// return the children
+	return children;
 }

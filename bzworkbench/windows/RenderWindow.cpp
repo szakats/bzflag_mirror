@@ -42,7 +42,13 @@ int RenderWindow::handle(int event) {
 	// forward FLTK events to OSG
 	switch(event){
         case FL_PUSH:
-            _gw->getEventQueue()->mouseButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button());
+        	if(Fl::event_clicks() == 0) {
+            	_gw->getEventQueue()->mouseButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button());
+        	}
+            else {
+            	_gw->getEventQueue()->mouseDoubleButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button());
+            	Fl::event_is_click(0);
+            }
 			this->redraw();
             return 1;
           

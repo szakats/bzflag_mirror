@@ -49,7 +49,11 @@ all: bzworkbench
 bzworkbench: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
+<<<<<<< .mine
+	g++ -L/usr/lib -L/usr/local/lib/ -o"bzworkbench" $(OBJS) $(USER_OBJS) $(LIBS)
+=======
 	g++ -L/usr/lib -L/usr/local/lib/ -o "bzworkbench" $(OBJS) $(USER_OBJS) $(LIBS)
+>>>>>>> .r14402
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -20,27 +20,11 @@ View::View(Model* m, int x, int y, int w, int h, const char *label) :
    this->root = new osg::Group();
    
    // initialize the ground
-   this->initGround( 100.0f );
+   this->initGround( 400.0f );
    
    // add the ground to the root node
    this->root->addChild( this->ground.get() );
-
-    osg::ref_ptr<osg::PositionAttitudeTransform> cow1 = SceneBuilder::transformable( SceneBuilder::buildNode( "share/cow.osg" ).get() );
-	osg::ref_ptr<osg::PositionAttitudeTransform> cow2 = SceneBuilder::transformable( SceneBuilder::buildNode( "share/cow.osg" ).get() );
-	osg::ref_ptr<osg::PositionAttitudeTransform> cow3 = SceneBuilder::transformable( SceneBuilder::buildNode( "share/cow.osg" ).get() );
-	osg::ref_ptr<osg::PositionAttitudeTransform> box = SceneBuilder::transformable( SceneBuilder::buildNode( "share/box/box.obj" ).get() );
 	
-	// move the cow up a bit
-	cow1->setPosition( osg::Vec3(0, 0, 3) );
-	cow2->setPosition( osg::Vec3(10, 10, 3) );
-	cow3->setPosition( osg::Vec3(-10, 10, 3) );
-	box->setPosition( osg::Vec3(10, -10, 1) );
-	
-	// add the cow model as a leaf to root
-	this->root->addChild( cow1.get() );
-	this->root->addChild( cow2.get() );
-	this->root->addChild( cow3.get() );
-	this->root->addChild(box.get());
 	
    // add the root node to the scene
    this->setSceneData( this->root.get() );
@@ -50,6 +34,9 @@ View::View(Model* m, int x, int y, int w, int h, const char *label) :
    
    // add the stats event handler
    this->addEventHandler(new osgViewer::StatsHandler());
+   
+   // add our scene picker event handler
+   this->addEventHandler(new Picker());
 	
 }
 
@@ -81,17 +68,11 @@ void View::initGround( float size ) {
    // make the member ground geode
    this->ground = SceneBuilder::buildGeode( "ground", groundPoints, groundIndexes, groundTexCoords, "share/world/std_ground.png" );
    
-   osg::ref_ptr<osg::PositionAttitudeTransform> pat = SceneBuilder::transformable( SceneBuilder::buildGeode( "ground", groundPoints, groundIndexes, groundTexCoords, "share/world/std_ground.png" ).get() );
-   
-	pat->setPosition( osg::Vec3( 0, 0, -30 ) );
-	
-	this->root->addChild(pat.get());
 }
 
 // destructor
 View::~View() { }
 
-float cnt = 0;
 
 // draw method (really simple)
 void View::draw(void) {
@@ -102,4 +83,97 @@ void View::draw(void) {
 int View::handle(int event) {
     // pass other events to the base class
 	return RenderWindow::handle(event);
+}
+
+// update method (inherited from Observer)
+void View::update( Observable* obs, void* data ) {
+	
+}
+
+/**
+ * Set an object as selected (i.e. tints it green)
+ * Assume it's passed the output of bz2object.getRenderable(), meaning
+ * it gets a PositionAttitudeTransform node containing a Group node containing
+ * the node itself or other group nodes.
+ */
+void View::setSelected( osg::PositionAttitudeTransform* transformedNode ) {
+	
+	// get the child node (there should only be one)
+	osg::Node* theNode = transformedNode->getChild( 0 );
+	
+	// try dynamic_cast-ing the node to a group
+    osg::Group* theGroup = dynamic_cast< osg::Group* > (theNode);
+    
+    // the Geodes
+    vector<osg::Geode*> theGeodes = vector<osg::Geode*>();
+    
+    // if the group dynamic_cast succeeded, then try dynamic_cast-ing its children into the geode array
+    if(theGroup != NULL) {
+    	// get the children of the group
+    	vector< osg::ref_ptr< osg::Node > >* children = SceneBuilder::extractChildren( theGroup );
+    	// see if any are geodes (if so, then add them to theGeodes)
+    	if( children->size() > 0 ) {
+    		for(vector< osg::ref_ptr< osg::Node > >::iterator i = children->begin(); i != children->end(); i++) {
+    			// try to dynamic_cast the node to a geode
+    			osg::Geode* geode = dynamic_cast< osg::Geode* > (i->get());
+    			if(geode)
+    				theGeodes.push_back( geode );	
+    		}
+    	}
+    	// free the children memory
+    	delete children;
+    }
+    else {
+    	// if that didn't work, then try making the node a geode
+    	osg::Geode* geode = dynamic_cast< osg::Geode* > (theNode);
+    	if(geode)
+    		theGeodes.push_back( geode );
+    }
+    
+    // break if there are no geodes to select
+    if( theGeodes.size() == 0) {
+    	return;
+    }
+    
+	// assign all geodes a different color
+	for(vector< osg::Geode* >::iterator i = theGeodes.begin(); i != theGeodes.end(); i++) {
+		osg::Vec4 color(0.0, 1.0, 0.0, 1.0);
+		osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
+		
+		colors->push_back( color );
+		
+		vector< osg::ref_ptr< osg::Drawable > > drawables = (*i)->getDrawableList();
+		if(drawables.size() > 0) {
+			osg::Geometry* geo;
+			for( vector< osg::ref_ptr< osg::Drawable > >::iterator i = drawables.begin(); i != drawables.end(); i++ ) {
+				geo = (*i)->asGeometry();
+				if( geo ) {
+					geo->setColorArray( colors.get() );
+					geo->setColorBinding( osg::Geometry::BIND_OVERALL );
+				}
+			}	
+		}
+		
+		osg::StateSet* states = (*i)->getOrCreateStateSet();
+		
+		osg::TexEnv* tec = new osg::TexEnv();
+		tec->setMode( osg::TexEnv::BLEND );
+		states->setTextureAttribute(0, tec, osg::StateAttribute::ON );
+		
+		(*i)->setStateSet( states );
+	}
+	
+	// finally, push the selection to the selection array
+	this->selectedNodes.clear();
+	for(vector< osg::Geode* >::iterator i = theGeodes.begin(); i != theGeodes.end(); i++) {
+		selectedNodes.push_back( osg::ref_ptr<osg::Node>( *i ) );	
+	}
+	
+}
+
+/**
+ * This method does the same as setSelected, but instead of doing the selection, it undoes it.
+ */
+void View::setUnselected( osg::PositionAttitudeTransform* node ) {
+	
 }

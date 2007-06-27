@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <osg/Node>
+#include <osg/PositionAttitudeTransform>
 
 using namespace std;
 
@@ -19,6 +20,7 @@ public:
 	virtual string get(void) = 0;
 	virtual int update(string& data) {
 		this->text = data;
+		this->setChanged();
 		return 1;
 	}
 	
@@ -26,14 +28,15 @@ public:
 		return string("# unknown DataEntry");
 	}
 	
-	// get the object in the form of something we can render
-	virtual osg::ref_ptr< osg::Node > getRenderable(void) { return NULL; }
+	// get the object in the form of something we can render (i.e. a PositionAttitudeTransform node containing the scenegraph node)
+	virtual osg::ref_ptr< osg::PositionAttitudeTransform > getRenderable(void) { return NULL; }
 	
 	// initialize the header and keys
 	DataEntry(const char* header, const char* keys) {
 		this->header = string(header);
 		this->keys = string(keys);
 		this->text = string("");
+		this->setChanged();
 	}
 	
 	// initialize the header and keys and data
@@ -41,6 +44,7 @@ public:
 		this->header = string(header);
 		this->keys = string(keys);
 		this->text = string(data);	
+		this->setChanged();
 	}
 	
 	
@@ -176,10 +180,15 @@ public:
 	// set the keys
 	void setKeys(const char* c) { this->keys = string(c); }
 	
+	// set changed
+	void setChanged() { this->changed = true; }
+	void setChanged(bool value) { this->changed = value; }
+	
 private:
 	string header;
 	string keys;
 	string text;
+	bool changed;
 };
 
 #endif /*DATAENTRY_H_*/
