@@ -128,16 +128,10 @@ int main(int argc, char** argv) {
     osg::ref_ptr<osg::PositionAttitudeTransform> theRenderableBox2 = sceneBox.getRenderable();
     theRenderableBox2->setPosition( osg::Vec3( -10, -10, 15 ) );
     
-    osg::ref_ptr< osg::Group > theRenderableGroup = new osg::Group();
-    theRenderableGroup->addChild( theRenderableBox.get() );
-    theRenderableGroup->addChild( theRenderableBox2.get() );
+    View::markSelected( theRenderableBox2.get() );
     
-    osg::ref_ptr< osg::PositionAttitudeTransform > theRenderableTransformedGroup = new osg::PositionAttitudeTransform();
-    
-    theRenderableTransformedGroup->addChild( theRenderableGroup.get() );
-    mw->getView()->setSelected( theRenderableTransformedGroup.get() );
-    
-    mw->getView()->getRootNode()->addChild( theRenderableTransformedGroup.get() );
+    mw->getView()->getRootNode()->addChild( theRenderableBox.get() );
+	mw->getView()->getRootNode()->addChild( theRenderableBox2.get() );
    
     // show the main window
 	mw->show();

@@ -32,7 +32,7 @@ string box::toString(void) {
 
 // get renderable instance (will be invalid upon changing anything)
 osg::ref_ptr< osg::PositionAttitudeTransform > box::getRenderable(void) {
-	osg::ref_ptr<osg::PositionAttitudeTransform> boxTransform = SceneBuilder::transformable( SceneBuilder::buildNode( "share/box/box.obj" ).get() );
+	osg::ref_ptr<osg::PositionAttitudeTransform> boxTransform = SceneBuilder::transformable( SceneBuilder::buildNode( "share/box/box.obj", true ).get() );
 	
 	boxTransform->setPosition( osg::Vec3( this->getPosition()->x(), this->getPosition()->y(), this->getPosition()->z() + this->getSize()->z() / 2.0 ) );
 	boxTransform->setScale( osg::Vec3( this->getSize()->x(), this->getSize()->y(), this->getSize()->z() / 2.0 ) );

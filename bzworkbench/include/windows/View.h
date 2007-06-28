@@ -35,11 +35,17 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         // Observer update() method
         void update( Observable* obs, void* data );
         
-        // set a node as selected
-        void setSelected( osg::PositionAttitudeTransform* node );
+        // set an object as selected
+        void setSelected( bz2object& object );
+        
+        // set an object as unselected
+        void setUnselected( bz2object& object );
+        
+        // mark a node as selected
+        static void markSelected( osg::PositionAttitudeTransform* node );
         
         // unselect the selected node(s)
-        void setUnselected( osg::PositionAttitudeTransform* node );
+        static void markUnselected( osg::PositionAttitudeTransform* node );
         
         // destructor
         virtual ~View();
@@ -58,8 +64,8 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		// ground (always present)
 		osg::ref_ptr< osg::Geode > ground;
 		
-		// array of selected nodes
-		vector< osg::ref_ptr< osg::Node > > selectedNodes;
+		// array of selected objects
+		vector< bz2object > selectedObjects;
 	
 	private:
 	
