@@ -1,4 +1,5 @@
 #include "../include/model/SceneBuilder.h"
+#include "../include/windows/View.h"
 
 // static members of SceneBuilder
 map< string, osg::ref_ptr<osg::Node> > SceneBuilder::nodeData;
@@ -20,19 +21,32 @@ bool SceneBuilder::shutdown() {
 
 /**
  * Object builder.
- * This method builds and returns a node loaded from nodeFile
+ * This method builds and returns a node loaded from nodeFile, and will load the same node as if it were selected
+ * (i.e. as if it had a different color)
  */
-osg::ref_ptr< osg::Node > SceneBuilder::buildNode( const char* nodeFile ) {
+osg::ref_ptr< osg::Node > SceneBuilder::buildNode( const char* nodeFile, bool loadSelectedToo ) {
 	// string-ify the nodeFile and add the corresponsing tail
 	string nodeName = string( nodeFile ) + SCENEBUILDER_TAIL_NODE;
-	
+	string selectedNodeName = nodeName + SCENEBUILDER_TAIL_SELECTED;
+
 	// see if this node was already loaded
-	if( nodeData[ nodeName ] != NULL ) {
+	if( loadSelectedToo == false && nodeData[ nodeName ] != NULL) {
 		return nodeData[ nodeName ];
+	}
+	if( loadSelectedToo == true && nodeData[ selectedNodeName ] != NULL) {
+		return nodeData[ selectedNodeName ];	
 	}
 	
 	// otherwise, load it in
 	nodeData[ nodeName ] = osgDB::readNodeFile( nodeFile );
+	
+	// load in the selected version if applicable
+	if( loadSelectedToo ) {
+		nodeData[ selectedNodeName ] = osgDB::readNodeFile( nodeFile );
+		osg::ref_ptr<osg::PositionAttitudeTransform> pat = new osg::PositionAttitudeTransform();
+		pat->addChild( nodeData[ selectedNodeName ].get() );
+		View::markSelected( pat.get() );
+	}
 	
 	return nodeData[nodeName];
 }
@@ -42,7 +56,7 @@ osg::ref_ptr< osg::Node > SceneBuilder::buildNode( const char* nodeFile ) {
  * This method builds and returns a geometry node (a geode) from arrays of vertexes, indexes, texture coordinates, and
  * a texture filename
  */
-osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* _nodeName, osg::Geometry* geometry, const char* textureFile ) {
+osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* _nodeName, osg::Geometry* geometry, const char* textureFile, bool loadSelectedToo ) {
 	// make the node name
 	string nodeName = string(_nodeName) + SCENEBUILDER_TAIL_NODE;
 	
@@ -112,7 +126,7 @@ osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* _nodeName, osg:
 }
 
 // build a geometry and call the other buildGeode method
-osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureName ) {
+osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureName, bool loadSelectedToo ) {
 	// don't bother if the data is NULL
 	if(vertexes == NULL || indexes == NULL || texCoords == NULL)
 		return NULL;
@@ -129,7 +143,7 @@ osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* nodeName, osg::
 	// assign the texture coordinates
 	geometry->setTexCoordArray( 0, texCoords );
 	
-	return SceneBuilder::buildGeode( nodeName, geometry, textureName );
+	return SceneBuilder::buildGeode( nodeName, geometry, textureName, loadSelectedToo );
 }
 
 /**

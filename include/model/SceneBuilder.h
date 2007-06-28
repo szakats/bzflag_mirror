@@ -16,6 +16,7 @@
 #define SCENEBUILDER_TAIL_NODE			"|node"
 #define SCENEBUILDER_TAIL_GEOMETRY		"|geometry"
 #define SCENEBUILDER_TAIL_TEXTURE2D		"|texture2d"
+#define SCENEBUILDER_TAIL_SELECTED		"|selected"
 
 #include <map>
 
@@ -36,11 +37,11 @@ public:
 	static bool shutdown();
 	
 	// build an object and return a node containing the object
-	static osg::ref_ptr< osg::Node > buildNode( const char* nodeFile );
+	static osg::ref_ptr< osg::Node > buildNode( const char* nodeFile, bool loadSelectedToo = false );
 	
 	// build an object and return a geode containing the object
-	static osg::ref_ptr< osg::Geode > buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureFile );
-	static osg::ref_ptr< osg::Geode > buildGeode( const char* nodeName, osg::Geometry*, const char* textureName );
+	static osg::ref_ptr< osg::Geode > buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureFile, bool loadSelectedToo = false );
+	static osg::ref_ptr< osg::Geode > buildGeode( const char* nodeName, osg::Geometry*, const char* textureName, bool loadSelectedToo = false );
 	
 	// return a PositionAttitudeTransform node encapsulating the node
 	static osg::ref_ptr< osg::PositionAttitudeTransform > transformable( osg::Node* node );

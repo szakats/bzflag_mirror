@@ -96,7 +96,23 @@ void View::update( Observable* obs, void* data ) {
  * it gets a PositionAttitudeTransform node containing a Group node containing
  * the node itself or other group nodes.
  */
-void View::setSelected( osg::PositionAttitudeTransform* transformedNode ) {
+void View::setSelected( bz2object& object ) {
+	
+	// get the renderable node of the object
+	osg::PositionAttitudeTransform* transformedNode = object.getRenderable().get();
+	
+	// mark the node as selected
+	View::markSelected( transformedNode );
+	
+	// push the selection to the selection array
+	this->selectedObjects.push_back( object );
+}
+
+/**
+ * Mark an OSG node as selected (i.e. color it green)
+ */
+
+void View::markSelected( osg::PositionAttitudeTransform* transformedNode ) {
 	
 	// get the child node (there should only be one)
 	osg::Node* theNode = transformedNode->getChild( 0 );
@@ -162,18 +178,15 @@ void View::setSelected( osg::PositionAttitudeTransform* transformedNode ) {
 		
 		(*i)->setStateSet( states );
 	}
-	
-	// finally, push the selection to the selection array
-	this->selectedNodes.clear();
-	for(vector< osg::Geode* >::iterator i = theGeodes.begin(); i != theGeodes.end(); i++) {
-		selectedNodes.push_back( osg::ref_ptr<osg::Node>( *i ) );	
-	}
-	
 }
 
 /**
  * This method does the same as setSelected, but instead of doing the selection, it undoes it.
  */
-void View::setUnselected( osg::PositionAttitudeTransform* node ) {
+void View::setUnselected( bz2object& object ) {
+	
+}
+
+void View::markUnselected( osg::PositionAttitudeTransform* node ) {
 	
 }
