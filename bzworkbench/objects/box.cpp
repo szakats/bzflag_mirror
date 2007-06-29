@@ -31,12 +31,17 @@ string box::toString(void) {
 }
 
 // get renderable instance (will be invalid upon changing anything)
+// the transform node stores the output of this->toString() as its name
 osg::ref_ptr< osg::PositionAttitudeTransform > box::getRenderable(void) {
-	osg::ref_ptr<osg::PositionAttitudeTransform> boxTransform = SceneBuilder::transformable( SceneBuilder::buildNode( "share/box/box.obj", true ).get() );
+	osg::ref_ptr< osg::Node > boxNode = SceneBuilder::buildNode( "share/box/box.obj", true );
+	
+	osg::ref_ptr<osg::PositionAttitudeTransform> boxTransform = SceneBuilder::transformable( boxNode.get() );
 	
 	boxTransform->setPosition( osg::Vec3( this->getPosition()->x(), this->getPosition()->y(), this->getPosition()->z() + this->getSize()->z() / 2.0 ) );
 	boxTransform->setScale( osg::Vec3( this->getSize()->x(), this->getSize()->y(), this->getSize()->z() / 2.0 ) );
 	boxTransform->setAttitude( osg::Quat( osg::DegreesToRadians( this->rotation ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
+	
+	boxTransform->setName( this->toString() );
 	
 	return boxTransform;
 }

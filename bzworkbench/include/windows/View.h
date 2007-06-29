@@ -17,7 +17,9 @@
 #include "../objects/box.h"
 
 #include "../Observer.h"
-#include "Picker.h"
+
+// forward declare the Picker class
+class Picker;
 
 // an extension of RenderWindow and osgViewer (this will be added to the main window), and Observer
 class View : public osgViewer::Viewer, public RenderWindow, public Observer
@@ -35,11 +37,16 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         // Observer update() method
         void update( Observable* obs, void* data );
         
+        // OSG Picker event handler
+        void handlePicker( Picker* picker, void* data );
+        
         // set an object as selected
         void setSelected( bz2object& object );
+        void setSelected( osg::PositionAttitudeTransform* node );
         
         // set an object as unselected
         void setUnselected( bz2object& object );
+        void setUnselected( osg::PositionAttitudeTransform* node );
         
         // mark a node as selected
         static void markSelected( osg::PositionAttitudeTransform* node );
@@ -49,6 +56,9 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         
         // destructor
         virtual ~View();
+        
+        // is an object selected?
+        bool isSelected( osg::PositionAttitudeTransform* node );
         
     protected:
     
@@ -62,10 +72,10 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		osg::ref_ptr< osg::Group > root;
 		
 		// ground (always present)
-		osg::ref_ptr< osg::Geode > ground;
+		osg::ref_ptr< osg::PositionAttitudeTransform > ground;
 		
-		// array of selected objects
-		vector< bz2object > selectedObjects;
+		// map of selected objects
+		map< string, osg::ref_ptr< osg::PositionAttitudeTransform > > selectedObjects;
 	
 	private:
 	
