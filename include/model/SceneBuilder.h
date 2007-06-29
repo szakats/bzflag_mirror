@@ -18,6 +18,10 @@
 #define SCENEBUILDER_TAIL_TEXTURE2D		"|texture2d"
 #define SCENEBUILDER_TAIL_SELECTED		"|selected"
 
+#define SCENEBUILDER_ABSOLUTE_NODE_NAME(s) ( s + SCENEBUILER_TAIL_NODE )
+#define SCENEBUILDER_ABSULTE_SELECTED_NODE_NAME(s) ( SCENEBUILDER_NODE_NAME(s) + SCENEBUILDER_TAIL_SELECTED )
+#define SCENEBUILDER_SELECTED_NODE_NAME(s) ( s + SCENEBUILDER_TAIL_SELECTED )
+
 #include <map>
 
 using namespace std;
@@ -51,6 +55,41 @@ public:
 	
 	// get all children from a group
 	static vector< osg::ref_ptr<osg::Node> >* extractChildren( osg::Group* group );
+	
+	// see if a particular name is already mapped to a node
+	static bool alreadyLoaded( const char* _name ) {
+		string name = string( _name );
+		if( nodeData[ name ].get() != NULL )
+			return true;
+		else
+			return false;
+	}
+	
+	// get a node by name
+	static osg::Node* getNode( const char* _name ) {
+		string name	= string( _name );
+		return nodeData[ name ].get();
+	}
+	
+	// give the string the "select" attribute
+	static string setSelected( const char* str ) {
+		return setUnselected( str ) + SCENEBUILDER_TAIL_SELECTED;
+	}
+	
+	// remove the "select" attribute from a string
+	static string setUnselected( const char* str ) {
+		string text = string(str);
+		
+		string::size_type start = text.find(SCENEBUILDER_TAIL_SELECTED, 0);
+		string::size_type end = text.find("|", start+1);
+		
+		string ret = text.substr(0, start);
+		
+		if(end != string::npos)
+			ret += text.substr(end);
+			
+		return ret;	
+	}
 	
 private:
 

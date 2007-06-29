@@ -40,12 +40,16 @@ osg::ref_ptr< osg::Node > SceneBuilder::buildNode( const char* nodeFile, bool lo
 	// otherwise, load it in
 	nodeData[ nodeName ] = osgDB::readNodeFile( nodeFile );
 	
+	// each node stores nodeName (i.e. the string it's mapped to) as its name
+	nodeData[ nodeName ]->setName( nodeName );
+	
 	// load in the selected version if applicable
 	if( loadSelectedToo ) {
 		nodeData[ selectedNodeName ] = osgDB::readNodeFile( nodeFile );
 		osg::ref_ptr<osg::PositionAttitudeTransform> pat = new osg::PositionAttitudeTransform();
 		pat->addChild( nodeData[ selectedNodeName ].get() );
 		View::markSelected( pat.get() );
+		nodeData[ selectedNodeName ]->setName( selectedNodeName );
 	}
 	
 	return nodeData[nodeName];
@@ -176,6 +180,9 @@ osg::ref_ptr< osg::PositionAttitudeTransform > SceneBuilder::transformable( osg:
 	
 	// assign the node
 	transformNode->addChild( node );
+	
+	// assign the transformation the same name as the node
+	transformNode->setName( node->getName());
 	
 	// return the node
 	return transformNode;

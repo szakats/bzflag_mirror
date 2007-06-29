@@ -20,6 +20,14 @@ MainWindow::MainWindow() :
 	
 	initialized = true;
 	
+	// give the View a trackball manipulator
+   this->view->setCameraManipulator(new osgGA::TrackballManipulator());
+   
+   // add the stats event handler to the View
+   this->view->addEventHandler(new osgViewer::StatsHandler());
+   
+   // add the scene picker event handler
+   this->view->addEventHandler(new Picker(view));
 }
 
 // construct from a model
@@ -40,6 +48,15 @@ MainWindow::MainWindow(Model* model) :
 	
 	
 	initialized = true;
+	
+	// give the View a trackball manipulator
+   this->view->setCameraManipulator(new osgGA::TrackballManipulator());
+   
+   // add the stats event handler to the View
+   this->view->addEventHandler(new osgViewer::StatsHandler());
+   
+   // add the scene picker event handler
+   this->view->addEventHandler(new Picker(view));
 	
 }
 

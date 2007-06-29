@@ -10,6 +10,7 @@
 #include "../dialogs/MainMenu.h"
 #include "../dialogs/WorldOptionsDialog.h"
 #include "View.h"
+#include "Picker.h"
 
 
 class MainWindow : public Fl_Window

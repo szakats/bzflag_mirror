@@ -118,6 +118,7 @@ int main(int argc, char** argv) {
 	
 	box sceneBox = box();
 	Point3D position = Point3D( 10.0, 10.0, 0.0 );
+	Point3D position2 = Point3D( -10.0, -10.0, 0.0);
 	Point3D size = Point3D( 10.0, 30.0, 30.0 );
 	float rotation = 30;
 	sceneBox.setPosition( &position );
@@ -125,14 +126,15 @@ int main(int argc, char** argv) {
 	sceneBox.setRotation( &rotation );
 	
     osg::ref_ptr<osg::PositionAttitudeTransform> theRenderableBox = sceneBox.getRenderable();
-    osg::ref_ptr<osg::PositionAttitudeTransform> theRenderableBox2 = sceneBox.getRenderable();
-    theRenderableBox2->setPosition( osg::Vec3( -10, -10, 15 ) );
     
-    View::markSelected( theRenderableBox2.get() );
+    sceneBox.setPosition(&position2);
+    osg::ref_ptr<osg::PositionAttitudeTransform> theRenderableBox2 = sceneBox.getRenderable();
     
     mw->getView()->getRootNode()->addChild( theRenderableBox.get() );
 	mw->getView()->getRootNode()->addChild( theRenderableBox2.get() );
    
+    mw->getView()->setSelected( theRenderableBox2.get() );
+    
     // show the main window
 	mw->show();
 	
