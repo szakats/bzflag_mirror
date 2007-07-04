@@ -47,15 +47,17 @@ class bz2object : public DataEntry {
 		string* getPhyDrv() { return &this->physicsDriver; }
 		vector<Transform>* getTransformations() { return &this->transformations; }
 		vector<string>* getMaterials() { return &this->materials; }
+		bool isSelected() { return this->selected; }
 		
 		// data setters (makes MasterConfigurationDialog code easier)
-		void setPosition( Point3D* position ) { this->position = *position; this->setChanged(); }
-		void setSize( Point3D* s ) { this->size = *s; this->setChanged(); }
-		void setName( const char* name ) { this->name = name; this->setChanged(); }
-		void setRotation( float* rotation ) { this->rotation = *rotation; this->setChanged(); }
-		void setPhyDrv( const char* phydrv ) { this->physicsDriver = phydrv; this->setChanged(); }
-		void setTransforms( vector<Transform>* transformations ) { this->transformations = *transformations; this->setChanged(); }
-		void setMaterials( vector<string>* materials ) { this->materials = *materials; this->setChanged();}
+		void setPosition( Point3D* position ) { this->position = *position; }
+		void setSize( Point3D* s ) { this->size = *s; }
+		void setName( const char* name ) { this->name = name; }
+		void setRotation( float* rotation ) { this->rotation = *rotation; }
+		void setPhyDrv( const char* phydrv ) { this->physicsDriver = phydrv; }
+		void setTransforms( vector<Transform>* transformations ) { this->transformations = *transformations; }
+		void setMaterials( vector<string>* materials ) { this->materials = *materials; }
+		void setSelected( bool value ) { this->selected = value; }
 		
 	protected:
 		Point3D position;
@@ -64,6 +66,8 @@ class bz2object : public DataEntry {
 		string name, physicsDriver;
 		vector<string> materials;
 		vector<Transform> transformations;
+		// set true if selected in the 3D scene
+		bool selected;
 		
 };
 

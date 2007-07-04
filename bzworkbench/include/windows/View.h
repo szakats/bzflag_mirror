@@ -1,10 +1,6 @@
 #ifndef VIEW_H_
 #define VIEW_H_
 
-#include "RenderWindow.h"
-#include "../model/Model.h"
-#include "../model/SceneBuilder.h"
-
 #include <osg/Geode>
 #include <osg/Group>
 #include <osg/ShapeDrawable>
@@ -14,12 +10,21 @@
 #include <osg/Image>
 #include <osg/PositionAttitudeTransform>
 
+#include "RenderWindow.h"
+#include "../model/Model.h"
+#include "../model/SceneBuilder.h"
+
+#include "../objects/bz2object.h"
 #include "../objects/box.h"
 
 #include "../Observer.h"
+#include "../render/Renderable.h"
+
+#include "EventHandlerCollection.h"
+#include "eventHandlers/selectHandler.h"
 
 // forward declare the Picker class
-class Picker;
+class BZEventHandler;
 
 // an extension of RenderWindow and osgViewer (this will be added to the main window), and Observer
 class View : public osgViewer::Viewer, public RenderWindow, public Observer
@@ -38,27 +43,27 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         void update( Observable* obs, void* data );
         
         // OSG Picker event handler
-        void handlePicker( Picker* picker, void* data );
+        void handlePicker( BZEventHandler* picker, void* data );
         
         // set an object as selected
-        void setSelected( bz2object& object );
-        void setSelected( osg::PositionAttitudeTransform* node );
+        void setSelected( bz2object* object );
+        void setSelected( Renderable* node );
         
         // set an object as unselected
-        void setUnselected( bz2object& object );
-        void setUnselected( osg::PositionAttitudeTransform* node );
+        void setUnselected( bz2object* object );
+        void setUnselected( Renderable* node );
         
-        // mark a node as selected
-        static void markSelected( osg::PositionAttitudeTransform* node );
+        // select all objects
+        // void selectAll();
         
-        // unselect the selected node(s)
-        static void markUnselected( osg::PositionAttitudeTransform* node );
+        // unselect all objects
+        void unselectAll();
         
         // destructor
         virtual ~View();
         
         // is an object selected?
-        bool isSelected( osg::PositionAttitudeTransform* node );
+        bool isSelected( Renderable* node );
         
     protected:
     
@@ -71,16 +76,24 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		// root node
 		osg::ref_ptr< osg::Group > root;
 		
-		// ground (always present)
-		osg::ref_ptr< osg::PositionAttitudeTransform > ground;
+		// ground node
+		osg::ref_ptr< Renderable > ground;
 		
-		// map of selected objects
-		map< string, osg::ref_ptr< osg::PositionAttitudeTransform > > selectedObjects;
+		// modifier key map.
+		// maps FLTK key values to bools
+		map< int, bool > modifiers;
+		
+		// map bz2object pointers to renderables, so we can know
+		// which objects are being rendered
+		map< bz2object* , osg::ref_ptr< Renderable > > objectMap;
 	
 	private:
 	
 		// helper method: initialize the ground method from a given radius
 		void initGround( float size );
+		
+		// the collection of evnet handlers
+		osg::ref_ptr< EventHandlerCollection > eventHandlers;
 };
 
 #endif /*VIEW_H_*/

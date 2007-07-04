@@ -15,19 +15,13 @@ MainWindow::MainWindow() :
 	
 	this->add(view);
 	
-	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
-	this->add(mainMenu);
+//	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
+//	this->add(mainMenu);
 	
 	initialized = true;
-	
-	// give the View a trackball manipulator
-   this->view->setCameraManipulator(new osgGA::TrackballManipulator());
    
-   // add the stats event handler to the View
-   this->view->addEventHandler(new osgViewer::StatsHandler());
-   
-   // add the scene picker event handler
-   this->view->addEventHandler(new Picker(view));
+   // add the View as an observer to the Model
+   model->addObserver( view );
 }
 
 // construct from a model
@@ -43,20 +37,14 @@ MainWindow::MainWindow(Model* model) :
 	view->end();
 	this->add(view);
 	
-	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
-	view->add(mainMenu);
+//	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
+//	this->add(mainMenu);
 	
 	
 	initialized = true;
-	
-	// give the View a trackball manipulator
-   this->view->setCameraManipulator(new osgGA::TrackballManipulator());
    
-   // add the stats event handler to the View
-   this->view->addEventHandler(new osgViewer::StatsHandler());
-   
-   // add the scene picker event handler
-   this->view->addEventHandler(new Picker(view));
+   // add the View as an observer to the Model
+   model->addObserver( view );
 	
 }
 

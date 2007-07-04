@@ -112,29 +112,26 @@ int main(int argc, char** argv) {
 	// init the SceneBuilder
 	SceneBuilder::init();
 	
-	// load the main window
-	MainWindow* mw = new MainWindow(model);
-	mw->resizable(mw);
-	
-	box sceneBox = box();
+	box sceneBox1 = box();
+	box sceneBox2 = box();
 	Point3D position = Point3D( 10.0, 10.0, 0.0 );
 	Point3D position2 = Point3D( -10.0, -10.0, 0.0);
 	Point3D size = Point3D( 10.0, 30.0, 30.0 );
 	float rotation = 30;
-	sceneBox.setPosition( &position );
-	sceneBox.setSize( &size );
-	sceneBox.setRotation( &rotation );
+	sceneBox1.setPosition( &position );
+	sceneBox2.setPosition( &position2 );
+	sceneBox1.setSize( &size );
+	sceneBox2.setSize( &size );
+	sceneBox1.setRotation( &rotation );
+	sceneBox2.setRotation( &rotation );
 	
-    osg::ref_ptr<osg::PositionAttitudeTransform> theRenderableBox = sceneBox.getRenderable();
-    
-    sceneBox.setPosition(&position2);
-    osg::ref_ptr<osg::PositionAttitudeTransform> theRenderableBox2 = sceneBox.getRenderable();
-    
-    mw->getView()->getRootNode()->addChild( theRenderableBox.get() );
-	mw->getView()->getRootNode()->addChild( theRenderableBox2.get() );
-   
-    mw->getView()->setSelected( theRenderableBox2.get() );
-    
+	model->addObject( &sceneBox1 );
+	model->addObject( &sceneBox2 );
+	
+	// load the main window
+	MainWindow* mw = new MainWindow(model);
+	mw->resizable(mw);
+	
     // show the main window
 	mw->show();
 	

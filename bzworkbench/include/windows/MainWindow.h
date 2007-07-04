@@ -10,7 +10,6 @@
 #include "../dialogs/MainMenu.h"
 #include "../dialogs/WorldOptionsDialog.h"
 #include "View.h"
-#include "Picker.h"
 
 
 class MainWindow : public Fl_Window
@@ -22,10 +21,10 @@ public:
 	static const int DEFAULT_HEIGHT = 700;
 	
 	// render window position and dimensions
-	static const int RENDER_WINDOW_X = 200;
-	static const int RENDER_WINDOW_Y = 20;
+	static const int RENDER_WINDOW_X = 20;
+	static const int RENDER_WINDOW_Y = 30;
 	static const int RENDER_WINDOW_WIDTH = DEFAULT_WIDTH - RENDER_WINDOW_X - 20;
-	static const int RENDER_WINDOW_HEIGHT = DEFAULT_HEIGHT - RENDER_WINDOW_Y - 10;
+	static const int RENDER_WINDOW_HEIGHT = DEFAULT_HEIGHT - RENDER_WINDOW_Y - 30;
 	
 	// menu widget position and dimensions
 	static const int MENU_X = RENDER_WINDOW_X;

@@ -13,14 +13,13 @@
 #include <osg/CopyOp>
 #include <osgDB/ReadFile>
 
+#include "../objects/bz2object.h"
+#include "../render/Renderable.h"
+
 #define SCENEBUILDER_TAIL_NODE			"|node"
 #define SCENEBUILDER_TAIL_GEOMETRY		"|geometry"
 #define SCENEBUILDER_TAIL_TEXTURE2D		"|texture2d"
 #define SCENEBUILDER_TAIL_SELECTED		"|selected"
-
-#define SCENEBUILDER_ABSOLUTE_NODE_NAME(s) ( s + SCENEBUILER_TAIL_NODE )
-#define SCENEBUILDER_ABSULTE_SELECTED_NODE_NAME(s) ( SCENEBUILDER_NODE_NAME(s) + SCENEBUILDER_TAIL_SELECTED )
-#define SCENEBUILDER_SELECTED_NODE_NAME(s) ( s + SCENEBUILDER_TAIL_SELECTED )
 
 #include <map>
 
@@ -40,15 +39,24 @@ public:
 	// shut down
 	static bool shutdown();
 	
-	// build an object and return a node containing the object
+	// build an object and return a node containing the object.  If loadSelectedToo is true, this will also call loadSelectedNode
 	static osg::ref_ptr< osg::Node > buildNode( const char* nodeFile, bool loadSelectedToo = false );
+	
+	// build a selected node
+	static osg::ref_ptr< osg::Node > buildSelectedNode( const char* nodeFile );
+	
+	// mark a node as selected
+	static void markSelected( osg::Node* node );
+	
+	// get a normal node; return NULL if it hasn't been loaded
+	static osg::ref_ptr< osg::Node > getNode( const char* nodeFile );
 	
 	// build an object and return a geode containing the object
 	static osg::ref_ptr< osg::Geode > buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureFile, bool loadSelectedToo = false );
 	static osg::ref_ptr< osg::Geode > buildGeode( const char* nodeName, osg::Geometry*, const char* textureName, bool loadSelectedToo = false );
 	
-	// return a PositionAttitudeTransform node encapsulating the node
-	static osg::ref_ptr< osg::PositionAttitudeTransform > transformable( osg::Node* node );
+	// return a Renderable node encapsulating the node
+	static osg::ref_ptr< Renderable > renderable( osg::Node* node, bz2object* obj = NULL );
 	
 	// get the geometry data from a node
 	static const vector< osg::ref_ptr<osg::Drawable> >* getNodeGeometry( osg::PositionAttitudeTransform* node );
@@ -57,27 +65,21 @@ public:
 	static vector< osg::ref_ptr<osg::Node> >* extractChildren( osg::Group* group );
 	
 	// see if a particular name is already mapped to a node
-	static bool alreadyLoaded( const char* _name ) {
-		string name = string( _name );
+	static bool isLoaded( const char* _name ) {
+		string name = string( _name ) + SCENEBUILDER_TAIL_NODE;
 		if( nodeData[ name ].get() != NULL )
 			return true;
 		else
 			return false;
 	}
 	
-	// get a node by name
-	static osg::Node* getNode( const char* _name ) {
-		string name	= string( _name );
-		return nodeData[ name ].get();
-	}
-	
 	// give the string the "select" attribute
-	static string setSelected( const char* str ) {
-		return setUnselected( str ) + SCENEBUILDER_TAIL_SELECTED;
+	static string nameSelected( const char* str ) {
+		return nameUnselected( str ) + SCENEBUILDER_TAIL_SELECTED;
 	}
 	
 	// remove the "select" attribute from a string
-	static string setUnselected( const char* str ) {
+	static string nameUnselected( const char* str ) {
 		string text = string(str);
 		
 		string::size_type start = text.find(SCENEBUILDER_TAIL_SELECTED, 0);
@@ -90,6 +92,33 @@ public:
 			
 		return ret;	
 	}
+	
+	// get the base filename from a string
+	static string baseName( const char* str ) {
+		string text = string(str);
+		
+		string::size_type end = text.find("|", 0);
+		if(end != string::npos)
+			return text.substr(0, end-1);
+		
+		return text;	
+	}
+	
+	// indicate that this is a node
+	static string nameNode( const char* str ) {
+		return string( str ) + SCENEBUILDER_TAIL_NODE;	
+	}
+	
+	// indicate that this is a selected node
+	static string nameSelectedNode( const char* str) {
+		return nameSelected( nameNode( str ).c_str() );
+	}
+	
+	// encapsulate a Renderable inside a ref_ptr
+	static osg::ref_ptr< Renderable > makeRef( Renderable* r ) { return osg::ref_ptr< Renderable > (r); }
+	
+	// extract a renderable from a DataEntry
+	static osg::ref_ptr< Renderable > extractRenderable( DataEntry* d ) { return d->makeRenderable(); }
 	
 private:
 

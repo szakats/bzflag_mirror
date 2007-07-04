@@ -22,38 +22,70 @@ bool SceneBuilder::shutdown() {
 /**
  * Object builder.
  * This method builds and returns a node loaded from nodeFile, and will load the same node as if it were selected
- * (i.e. as if it had a different color)
+ * (i.e. as if it had a different color) and store it in the flyweight if loadSelectedToo is true
  */
 osg::ref_ptr< osg::Node > SceneBuilder::buildNode( const char* nodeFile, bool loadSelectedToo ) {
 	// string-ify the nodeFile and add the corresponsing tail
-	string nodeName = string( nodeFile ) + SCENEBUILDER_TAIL_NODE;
-	string selectedNodeName = nodeName + SCENEBUILDER_TAIL_SELECTED;
-
+	string nodeName = SceneBuilder::nameNode( nodeFile );
+	
 	// see if this node was already loaded
-	if( loadSelectedToo == false && nodeData[ nodeName ] != NULL) {
+	if(nodeData.count( nodeName ) > 0) {
 		return nodeData[ nodeName ];
-	}
-	if( loadSelectedToo == true && nodeData[ selectedNodeName ] != NULL) {
-		return nodeData[ selectedNodeName ];	
 	}
 	
 	// otherwise, load it in
-	nodeData[ nodeName ] = osgDB::readNodeFile( nodeFile );
+	osg::ref_ptr< osg::Node > node = osgDB::readNodeFile( nodeFile );
 	
+	if(node == NULL)
+		return NULL;
+		
 	// each node stores nodeName (i.e. the string it's mapped to) as its name
-	nodeData[ nodeName ]->setName( nodeName );
+	node->setName( nodeName );
+	nodeData[ nodeName ] = node;
 	
 	// load in the selected version if applicable
 	if( loadSelectedToo ) {
-		nodeData[ selectedNodeName ] = osgDB::readNodeFile( nodeFile );
-		osg::ref_ptr<osg::PositionAttitudeTransform> pat = new osg::PositionAttitudeTransform();
-		pat->addChild( nodeData[ selectedNodeName ].get() );
-		View::markSelected( pat.get() );
-		nodeData[ selectedNodeName ]->setName( selectedNodeName );
+		SceneBuilder::buildSelectedNode( nodeFile );
 	}
 	
 	return nodeData[nodeName];
 }
+
+/**
+ * Load a node and mark it selected
+ */
+ 
+osg::ref_ptr< osg::Node > SceneBuilder::buildSelectedNode( const char* fileName ) {
+	string selectedNodeName = SceneBuilder::nameSelected( SceneBuilder::nameNode( fileName ).c_str() );
+	
+	if( nodeData.count( selectedNodeName ) > 0 )
+		return nodeData[ selectedNodeName ];
+	
+	osg::ref_ptr< osg::Node > node = osgDB::readNodeFile( fileName );
+	if( node == NULL )
+		return NULL;
+	
+	SceneBuilder::markSelected( node.get() );
+	
+	node->setName( selectedNodeName );
+	nodeData[ selectedNodeName ] = node;
+	
+	return nodeData[ selectedNodeName ];
+}
+
+/**
+ * Return a node in the flyweight, or NULL if it hasn't been loaded
+ */
+ 
+osg::ref_ptr< osg::Node > SceneBuilder::getNode( const char* nodeFile ) {
+	string nodeName = nodeFile;
+	
+	if( nodeData.count( nodeName ) > 0 )
+		return nodeData[ nodeName ];
+		
+	return NULL;
+}
+
 
 /**
  * Geometry builder
@@ -169,19 +201,19 @@ const vector< osg::ref_ptr<osg::Drawable> >* SceneBuilder::getNodeGeometry( osg:
 }
 
 /**
- * Encapsulate a node inside a PositionAttitudeTransform node (i.e. this allows the node to be more easily transformed)
+ * Encapsulate a node inside a Renderable (i.e. this allows the node to be more easily transformed)
  */
-osg::ref_ptr< osg::PositionAttitudeTransform > SceneBuilder::transformable( osg::Node* node ) {
+osg::ref_ptr< Renderable > SceneBuilder::renderable( osg::Node* node, bz2object* obj ) {
 	if(node == NULL)
 		return NULL;
 	
 	// make the transform node
-	osg::ref_ptr< osg::PositionAttitudeTransform > transformNode = new osg::PositionAttitudeTransform();
+	osg::ref_ptr< Renderable > transformNode = new Renderable( node->getName().c_str(), obj );
 	
 	// assign the node
 	transformNode->addChild( node );
 	
-	// assign the transformation the same name as the node
+	// assign the renderable the same name as the node
 	transformNode->setName( node->getName());
 	
 	// return the node
@@ -223,4 +255,73 @@ vector< osg::ref_ptr< osg::Node > >* SceneBuilder::extractChildren( osg::Group* 
 	
 	// return the children
 	return children;
+}
+
+/**
+ * Mark an OSG node as selected (i.e. color it green)
+ */
+
+void SceneBuilder::markSelected( osg::Node* theNode ) {
+	
+	// try dynamic_cast-ing the node to a group
+    osg::Group* theGroup = dynamic_cast< osg::Group* > (theNode);
+    
+    // the Geodes
+    vector<osg::Geode*> theGeodes = vector<osg::Geode*>();
+    
+    // if the group dynamic_cast succeeded, then try dynamic_cast-ing its children into the geode array
+    if(theGroup != NULL) {
+    	// get the children of the group
+    	vector< osg::ref_ptr< osg::Node > >* children = SceneBuilder::extractChildren( theGroup );
+    	// see if any are geodes (if so, then add them to theGeodes)
+    	if( children->size() > 0 ) {
+    		for(vector< osg::ref_ptr< osg::Node > >::iterator i = children->begin(); i != children->end(); i++) {
+    			// try to dynamic_cast the node to a geode
+    			osg::Geode* geode = dynamic_cast< osg::Geode* > (i->get());
+    			if(geode)
+    				theGeodes.push_back( geode );	
+    		}
+    	}
+    	// free the children memory
+    	delete children;
+    }
+    else {
+    	// if that didn't work, then try making the node a geode
+    	osg::Geode* geode = dynamic_cast< osg::Geode* > (theNode);
+    	if(geode)
+    		theGeodes.push_back( geode );
+    }
+    
+    // break if there are no geodes to select
+    if( theGeodes.size() == 0) {
+    	return;
+    }
+    
+	// assign all geodes a different color
+	for(vector< osg::Geode* >::iterator i = theGeodes.begin(); i != theGeodes.end(); i++) {
+		osg::Vec4 color(0.0, 1.0, 0.0, 1.0);
+		osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
+		
+		colors->push_back( color );
+		
+		vector< osg::ref_ptr< osg::Drawable > > drawables = (*i)->getDrawableList();
+		if(drawables.size() > 0) {
+			osg::Geometry* geo;
+			for( vector< osg::ref_ptr< osg::Drawable > >::iterator i = drawables.begin(); i != drawables.end(); i++ ) {
+				geo = (*i)->asGeometry();
+				if( geo ) {
+					geo->setColorArray( colors.get() );
+					geo->setColorBinding( osg::Geometry::BIND_OVERALL );
+				}
+			}	
+		}
+		
+		osg::StateSet* states = (*i)->getOrCreateStateSet();
+		
+		osg::TexEnv* tec = new osg::TexEnv();
+		tec->setMode( osg::TexEnv::BLEND );
+		states->setTextureAttribute(0, tec, osg::StateAttribute::ON );
+		
+		(*i)->setStateSet( states );
+	}
 }
