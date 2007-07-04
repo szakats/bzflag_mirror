@@ -38,7 +38,10 @@ public:
 	string toString(void);
 	
 	// return renderable OSG node
-	osg::ref_ptr< osg::PositionAttitudeTransform > getRenderable();
+	osg::ref_ptr<Renderable> makeRenderable();
+	
+	// update this object's information into a passed renderable
+	bool updateRenderable( Renderable* r );
 	
 private:
 	Point3D size;

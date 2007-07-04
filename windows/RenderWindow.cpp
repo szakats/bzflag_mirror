@@ -42,14 +42,17 @@ int RenderWindow::handle(int event) {
 	// forward FLTK events to OSG
 	switch(event){
         case FL_PUSH:
+        	// handle single mouse clicks
         	if(Fl::event_clicks() == 0) {
-            	_gw->getEventQueue()->mouseButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button());
+        		_gw->getEventQueue()->mouseButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button() );
         	}
+        	// handle double clicks
             else {
-            	_gw->getEventQueue()->mouseDoubleButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button());
+            	_gw->getEventQueue()->mouseDoubleButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button() );
             	Fl::event_is_click(0);
             }
-			this->redraw();
+            
+            this->redraw();
             return 1;
           
         case FL_DRAG:
@@ -57,7 +60,8 @@ int RenderWindow::handle(int event) {
         	this->redraw();
 			return 1;
         case FL_RELEASE:
-            _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), Fl::event_button());
+        	
+            _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), Fl::event_button() );
         	this->redraw();    
 			return 1;
         case FL_KEYDOWN:

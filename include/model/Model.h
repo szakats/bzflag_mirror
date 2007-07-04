@@ -66,6 +66,13 @@ public:
 	static vector<Tlink*>& getTeleporterLinks();
 	static vector<define*>& getGroups();
 	
+	static void addObject( bz2object* obj );
+	static void removeObject( bz2object* obj );
+	static void setSelected( bz2object* obj );
+	static void setUnselected( bz2object* obj );
+	static void unselectAll();
+	static bool isSelected( bz2object* obj );
+	
 	// instantiated BZWB-specific API 
 	world* _getWorldData() { return worldData; }
 	options* _getOptionsData() { return optionsData; }
@@ -77,6 +84,13 @@ public:
 	vector<physics*>& _getPhysicsDrivers() { return this->phys; }
 	vector<Tlink*>& _getTeleporterLinks() { return this->links; }
 	vector<define*>& _getGroups() { return this->groups; }
+	
+	void _addObject( bz2object* obj ) { this->objects.push_back( obj ); }
+	void _removeObject( bz2object* obj );
+	void _setSelected( bz2object* obj );
+	void _setUnselected( bz2object* obj );
+	void _unselectAll();
+	bool _isSelected( bz2object* obj );
 	
 	// plugin-specific API
 	static bool registerObject(string& name, DataEntry* (*init)(string&));
@@ -169,6 +183,9 @@ private:
 	
 // save unused data chunks
 	vector<string> unusedData;
+	
+// vector of selected objects
+	vector< bz2object* > selectedObjects;
 };
 
 #include "BZWParser.h"

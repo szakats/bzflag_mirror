@@ -32,16 +32,46 @@ string box::toString(void) {
 
 // get renderable instance (will be invalid upon changing anything)
 // the transform node stores the output of this->toString() as its name
-osg::ref_ptr< osg::PositionAttitudeTransform > box::getRenderable(void) {
-	osg::ref_ptr< osg::Node > boxNode = SceneBuilder::buildNode( "share/box/box.obj", true );
+osg::ref_ptr< Renderable > box::makeRenderable(void) {
+	osg::ref_ptr< osg::Node > boxNode;
 	
-	osg::ref_ptr<osg::PositionAttitudeTransform> boxTransform = SceneBuilder::transformable( boxNode.get() );
+	if(!this->isSelected()) {
+		boxNode = SceneBuilder::buildNode( "share/box/box.obj", true );
+	}
+	else {
+		boxNode = SceneBuilder::buildSelectedNode( "share/box/box.obj" );
+	}
+	
+	osg::ref_ptr< Renderable > boxTransform = SceneBuilder::renderable( boxNode.get() );
 	
 	boxTransform->setPosition( osg::Vec3( this->getPosition()->x(), this->getPosition()->y(), this->getPosition()->z() + this->getSize()->z() / 2.0 ) );
 	boxTransform->setScale( osg::Vec3( this->getSize()->x(), this->getSize()->y(), this->getSize()->z() / 2.0 ) );
-	boxTransform->setAttitude( osg::Quat( osg::DegreesToRadians( this->rotation ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
-	
-	boxTransform->setName( this->toString() );
+	boxTransform->setRotationZ( this->rotation );
+	boxTransform->setBZWObject( this );
 	
 	return boxTransform;
+}
+
+// update the renderable
+bool box::updateRenderable( Renderable* boxTransform ) {
+	
+	osg::ref_ptr< osg::Node > boxNode;
+	
+	// get the node based on selection
+	// SceneBuilder flyweights all loaded nodes; 99% of the time all we're doing here
+	// is just acquiring a reference to an already-loaded instance.
+	if(!this->isSelected()) {
+		boxNode = SceneBuilder::buildNode( "share/box/box.obj", true );
+	}
+	else {
+		boxNode = SceneBuilder::buildSelectedNode( "share/box/box.obj" );
+	}
+	
+	boxTransform->setNode( boxNode.get() );
+	boxTransform->setPosition( osg::Vec3( this->getPosition()->x(), this->getPosition()->y(), this->getPosition()->z() + this->getSize()->z() / 2.0 ) );
+	boxTransform->setScale( osg::Vec3( this->getSize()->x(), this->getSize()->y(), this->getSize()->z() / 2.0 ) );
+	boxTransform->setRotationZ( this->rotation );
+	boxTransform->setBZWObject( this );
+	
+	return true;
 }

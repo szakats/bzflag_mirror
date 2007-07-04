@@ -541,3 +541,84 @@ vector<texturematrix*>&	Model::getTextureMatrices() { return modelRef->_getTextu
 vector<physics*>& 		Model::getPhysicsDrivers() 	{ return modelRef->_getPhysicsDrivers(); }
 vector<Tlink*>&		 	Model::getTeleporterLinks() { return modelRef->_getTeleporterLinks(); }
 vector<define*>& 		Model::getGroups() 			{ return modelRef->_getGroups(); }
+void					Model::addObject( bz2object* obj ) { modelRef->_addObject( obj ); }
+void					Model::removeObject( bz2object* obj ) { modelRef->_removeObject( obj ); }
+void					Model::setSelected( bz2object* obj ) { modelRef->_setSelected( obj ); }
+void					Model::setUnselected( bz2object* obj ) { modelRef->_setUnselected( obj ); }
+void					Model::unselectAll() { modelRef->_unselectAll(); }
+bool					Model::isSelected( bz2object* obj ) { return modelRef->_isSelected( obj ); }
+
+// remove an object by instance
+void Model::_removeObject( bz2object* obj ) {
+	if(this->objects.size() <= 0)
+		return;
+		
+	for(vector< bz2object* >::iterator i = this->objects.begin(); i != this->objects.end(); i++) {
+		if( *i == obj ) {
+			this->objects.erase( i );
+			return;	
+		}
+	}
+}
+
+// set an object as selected and update it
+void Model::_setSelected( bz2object* obj ) {
+	if( this->selectedObjects.size() < 0 )
+		return;
+		
+	obj->setSelected( true );
+	obj->setChanged( true );
+	
+	this->selectedObjects.push_back( obj );	
+	
+	// tell the View to regenerate the Renderable of this object
+	this->notifyObservers( obj );
+}
+
+// set an object as unselected and update it
+void Model::_setUnselected( bz2object* obj ) {
+	if( this->selectedObjects.size() < 0)
+		return;
+		
+	for(vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+		if( *i == obj ) {
+			obj->setSelected( false );
+			obj->setChanged( true );
+			break;
+		}	
+	}
+	
+	// tell the View to regenerate the Renderable of this object
+	this->notifyObservers( obj );
+}
+
+// determine whether or not an object is selected
+bool Model::_isSelected( bz2object* obj ) {
+	if( this->selectedObjects.size() < 0)
+		return false;
+	
+	if(obj == NULL)
+		return false;
+	
+	for(vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+		if( *i == obj ) {
+			return true;
+		}	
+	}
+	
+	return false;
+}
+
+// unselect all objects
+void Model::_unselectAll() {
+	if( this->selectedObjects.size() <= 0)
+		return;
+		
+	for(vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+		(*i)->setSelected( false );
+		(*i)->setChanged( true );
+		this->notifyObservers( *i );
+	}
+	
+	selectedObjects.clear();
+}

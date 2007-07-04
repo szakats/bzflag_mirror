@@ -25,10 +25,45 @@ View::View(Model* m, int x, int y, int w, int h, const char *label) :
    // add the ground to the root node
    this->root->addChild( this->ground.get() );
 	
+	// set the key modifiers to false
+   this->modifiers = map< int, bool >();
+   this->modifiers[ FL_SHIFT ] = false;
+   this->modifiers[ FL_CTRL ] = false;
+   this->modifiers[ FL_ALT ] = false;
+   this->modifiers[ FL_META ] = false;
+   
+   // set up the object map
+   this->objectMap = map< bz2object*, osg::ref_ptr< Renderable > >();
 	
-   // add the root node to the scene
+	// build the scene from the model
+	vector<bz2object*> objects = this->model->getObjects();
+	if(objects.size() > 0) {
+		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
+			osg::ref_ptr< Renderable > r = (*i)->makeRenderable();
+			bool result = this->root->addChild( r.get() );
+			if(result)
+				this->objectMap[ *i ] = r;
+		}
+	}
+	
+	// add the root node to the scene
    this->setSceneData( this->root.get() );
-	
+   
+   // give the View a trackball manipulator
+   this->setCameraManipulator(new osgGA::TrackballManipulator());
+   
+   // add the stats event handler to the View
+   this->addEventHandler(new osgViewer::StatsHandler());
+   
+   // make an event handler collection
+   this->eventHandlers = new EventHandlerCollection( this );
+   
+   // add the selectHandler
+   this->eventHandlers->addEventHandler( selectHandler::getName().c_str(), new selectHandler() );
+   
+   // add the scene picker event handler
+   this->addEventHandler(eventHandlers.get());
+   
 }
 
 // helper method: initialize the ground
@@ -57,9 +92,10 @@ void View::initGround( float size ) {
    groundTexCoords->push_back( osg::Vec2(0.0, size) );
    
    // make the member ground geode
-   this->ground = SceneBuilder::transformable(
+   this->ground = SceneBuilder::renderable(
    					SceneBuilder::buildGeode( "ground", groundPoints, groundIndexes, groundTexCoords, "share/world/std_ground.png" ).get()
 				  );
+				  
 }
 
 // destructor
@@ -73,179 +109,96 @@ void View::draw(void) {
 
 // handle events
 int View::handle(int event) {
+	// whatever the event was, we need to regenerate the modifier keys
+	int shiftState = Fl::event_state();
+	this->modifiers[ FL_SHIFT ] = ( shiftState & FL_SHIFT );
+	this->modifiers[ FL_CTRL ] = ( shiftState & FL_CTRL );
+	this->modifiers[ FL_META ] = ( shiftState & FL_META );
+	this->modifiers[ FL_ALT ] = ( shiftState & FL_ALT );
+	
     // pass other events to the base class
 	return RenderWindow::handle(event);
 }
 
 // update method (inherited from Observer)
 void View::update( Observable* obs, void* data ) {
+	// if data is not NULL, then we passed in an object to be updated
+	if(data != NULL) {
+		// get the bz2object
+		bz2object* obj = (bz2object*)(data);
+		
+		// see if there is a renderable for this object
+		if( this->objectMap.count( obj ) > 0 ) {
+			// if so, update it
+			obj->updateRenderable( this->objectMap[ obj ].get() );
+		}
+	}
 	
+	// refresh the scene
+	this->redraw();
 }
 
 // handle Picker events
-void View::handlePicker( Picker* picker, void* data ) {
-	osg::PositionAttitudeTransform* obj = (osg::PositionAttitudeTransform*)(data);
-	if(!obj)
+void View::handlePicker( BZEventHandler* picker, void* data ) {
+	if(!data)
 		return;
+	
+	Renderable* obj = (Renderable*)(data);
+	
+	// deselect everything upon picking a new selection
+	// unless the SHIFT key is pressed
+	if(!this->modifiers[ FL_SHIFT ])
+		this->unselectAll();
 	
 	if(!isSelected( obj )) {
 		this->setSelected( obj );	
 	}
-	else
+	else {
 		this->setUnselected( obj );
+	}
+
 }
 
 // is an object selected?
-bool View::isSelected( osg::PositionAttitudeTransform* transformedNode ) {
+bool View::isSelected( Renderable* transformedNode ) {
 	// a non-existant node isn't selected
 	if(transformedNode == NULL)
 		return false;
 	
-	// return if there are no selected objects present
-	if(this->selectedObjects.size() <= 0)
-		return false;
-	
-	// get the name
-	string name = transformedNode->getName();
-	
-	// return true or false as to whether or not a mapping exists
-	return this->selectedObjects[ name ] == NULL ? false : true;
+	return this->model->isSelected(transformedNode->getBZWObject());
 }
 /**
  * Set an object as selected (i.e. tints it green)
- * Assume it's passed the output of bz2object.getRenderable(), meaning
- * it gets a PositionAttitudeTransform node containing a Group node containing
- * the node itself or other group nodes.
  */
-void View::setSelected( osg::PositionAttitudeTransform* transformedNode ) {
+void View::setSelected( bz2object* object ) {
 	
-	// mark the node as selected
-	View::markSelected( transformedNode );
+	// tell the model that this object is to be selected
+	model->setSelected( object );
 	
-	// get the name of the node
-	string name = transformedNode->getName();
-	
-	// map the name to the object
-	this->selectedObjects[ name ] = transformedNode;
-	
-	printf("mapped |%s| as object\n", name.c_str());
 }
-void View::setSelected( bz2object& object ) { this->setSelected( object.getRenderable().get() ); }
-
-/**
- * Mark an OSG node as selected (i.e. color it green)
- */
-
-void View::markSelected( osg::PositionAttitudeTransform* transformedNode ) {
+void View::setSelected( Renderable* object ) { 
 	
-	// get the child node (there should only be one)
-	osg::Node* theNode = transformedNode->getChild( 0 );
-	
-	// see if the selection-marked version of this node is already loaded
-	if(SceneBuilder::alreadyLoaded( string(SCENEBUILDER_SELECTED_NODE_NAME( theNode->getName() )).c_str() )) {
-		transformedNode->removeChild( theNode );
-		transformedNode->addChild( SceneBuilder::getNode( string(SCENEBUILDER_SELECTED_NODE_NAME( theNode->getName() )).c_str() ));
-		return;
-	}
-	
-	// try dynamic_cast-ing the node to a group
-    osg::Group* theGroup = dynamic_cast< osg::Group* > (theNode);
-    
-    // the Geodes
-    vector<osg::Geode*> theGeodes = vector<osg::Geode*>();
-    
-    // if the group dynamic_cast succeeded, then try dynamic_cast-ing its children into the geode array
-    if(theGroup != NULL) {
-    	// get the children of the group
-    	vector< osg::ref_ptr< osg::Node > >* children = SceneBuilder::extractChildren( theGroup );
-    	// see if any are geodes (if so, then add them to theGeodes)
-    	if( children->size() > 0 ) {
-    		for(vector< osg::ref_ptr< osg::Node > >::iterator i = children->begin(); i != children->end(); i++) {
-    			// try to dynamic_cast the node to a geode
-    			osg::Geode* geode = dynamic_cast< osg::Geode* > (i->get());
-    			if(geode)
-    				theGeodes.push_back( geode );	
-    		}
-    	}
-    	// free the children memory
-    	delete children;
-    }
-    else {
-    	// if that didn't work, then try making the node a geode
-    	osg::Geode* geode = dynamic_cast< osg::Geode* > (theNode);
-    	if(geode)
-    		theGeodes.push_back( geode );
-    }
-    
-    // break if there are no geodes to select
-    if( theGeodes.size() == 0) {
-    	return;
-    }
-    
-	// assign all geodes a different color
-	for(vector< osg::Geode* >::iterator i = theGeodes.begin(); i != theGeodes.end(); i++) {
-		osg::Vec4 color(0.0, 1.0, 0.0, 1.0);
-		osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
-		
-		colors->push_back( color );
-		
-		vector< osg::ref_ptr< osg::Drawable > > drawables = (*i)->getDrawableList();
-		if(drawables.size() > 0) {
-			osg::Geometry* geo;
-			for( vector< osg::ref_ptr< osg::Drawable > >::iterator i = drawables.begin(); i != drawables.end(); i++ ) {
-				geo = (*i)->asGeometry();
-				if( geo ) {
-					geo->setColorArray( colors.get() );
-					geo->setColorBinding( osg::Geometry::BIND_OVERALL );
-				}
-			}	
-		}
-		
-		osg::StateSet* states = (*i)->getOrCreateStateSet();
-		
-		osg::TexEnv* tec = new osg::TexEnv();
-		tec->setMode( osg::TexEnv::BLEND );
-		states->setTextureAttribute(0, tec, osg::StateAttribute::ON );
-		
-		(*i)->setStateSet( states );
-	}
+	if( object->getBZWObject() != NULL )	
+		this->setSelected( object->getBZWObject() );
 }
 
 /**
  * This method does the same as setSelected, but instead of doing the selection, it undoes it.
  */
-void View::setUnselected( osg::PositionAttitudeTransform* transformedNode ) {
+void View::setUnselected( bz2object* object ) {
 	
-	// get name
-	string name = transformedNode->getName();
+	// tell the model that this is unselected
+	model->setUnselected( object );
 	
-	// remove the mapping
-	if(this->selectedObjects[ name ] != NULL)
-		this->selectedObjects[name] = NULL;
-		
-	View::markUnselected( transformedNode );
-	
-	printf("unmapped |%s| from selection\n", name.c_str());
 }
-void View::setUnselected( bz2object& object ) { this->setUnselected( object.getRenderable().get() ); }
+void View::setUnselected( Renderable* object ) { 
+	
+	if( object->getBZWObject() != NULL )
+		this->setUnselected( object->getBZWObject() );
+}
 
-void View::markUnselected( osg::PositionAttitudeTransform* transformedNode ) {
-	// get the child node (there should only be one)
-	osg::Node* theNode = transformedNode->getChild( 0 );
-	
-	string unselectedName = SceneBuilder::setUnselected( theNode->getName().c_str() );
-	printf("trying to load new child |%s|\n", unselectedName.c_str());
-	
-	// see if the selection-marked version of this node is already loaded
-	if(SceneBuilder::alreadyLoaded( unselectedName.c_str() )) {
-		if(!transformedNode->removeChild( theNode )) {
-				printf("ERROR: child does not exist for removal!\n");
-				return;
-		}
-		transformedNode->addChild( SceneBuilder::getNode( unselectedName.c_str() ));
-		return;
-	}
-	else {
-		printf("ERROR! Could not unmark |%s|\n", theNode->getName().c_str());	
-	}
+
+// mark all nodes unselected
+void View::unselectAll() {
+	this->model->unselectAll();
 }
