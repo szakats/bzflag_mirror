@@ -118,7 +118,7 @@ public:
 	static osg::ref_ptr< Renderable > makeRef( Renderable* r ) { return osg::ref_ptr< Renderable > (r); }
 	
 	// extract a renderable from a DataEntry
-	static osg::ref_ptr< Renderable > extractRenderable( DataEntry* d ) { return d->makeRenderable(); }
+	static osg::ref_ptr< Renderable > extractRenderable( bz2object* d ) { return d->makeRenderable(); }
 	
 private:
 
