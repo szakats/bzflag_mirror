@@ -9,6 +9,7 @@
 #include <osg/StateSet>
 #include <osg/Image>
 #include <osg/PositionAttitudeTransform>
+#include <osgGA/EventQueue>
 
 #include "RenderWindow.h"
 #include "../model/Model.h"
@@ -22,6 +23,8 @@
 
 #include "EventHandlerCollection.h"
 #include "eventHandlers/selectHandler.h"
+
+#include "../render/Ground.h"
 
 // forward declare the Picker class
 class BZEventHandler;
@@ -42,9 +45,6 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         // Observer update() method
         void update( Observable* obs, void* data );
         
-        // OSG Picker event handler
-        void handlePicker( BZEventHandler* picker, void* data );
-        
         // set an object as selected
         void setSelected( bz2object* object );
         void setSelected( Renderable* node );
@@ -64,6 +64,9 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         
         // is an object selected?
         bool isSelected( Renderable* node );
+        
+        // is a button down?
+        bool isPressed( int value );
         
     protected:
     
@@ -88,9 +91,6 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		map< bz2object* , osg::ref_ptr< Renderable > > objectMap;
 	
 	private:
-	
-		// helper method: initialize the ground method from a given radius
-		void initGround( float size );
 		
 		// the collection of evnet handlers
 		osg::ref_ptr< EventHandlerCollection > eventHandlers;

@@ -12,6 +12,8 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/CopyOp>
 #include <osgDB/ReadFile>
+#include <osg/Material>
+#include <osg/StateAttribute>
 
 #include "../objects/bz2object.h"
 #include "../render/Renderable.h"
@@ -63,6 +65,12 @@ public:
 	
 	// get all children from a group
 	static vector< osg::ref_ptr<osg::Node> >* extractChildren( osg::Group* group );
+	
+	// assign a texture to a node
+	static void assignTexture( const char* filename, osg::Node* node );
+	
+	// assign a material to a node
+	static void assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Vec4 specular, osg::Vec4 emissive, float shininess, float alpha, osg::Node* node );
 	
 	// see if a particular name is already mapped to a node
 	static bool isLoaded( const char* _name ) {

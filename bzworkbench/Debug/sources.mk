@@ -27,6 +27,7 @@ windows/eventHandlers \
 windows \
 widgets \
 share/box \
+render \
 objects \
 model \
 . \

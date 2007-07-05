@@ -99,15 +99,31 @@ osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* _nodeName, osg:
 	// make the geometry name
 	string geometryName = string(_nodeName) + SCENEBUILDER_TAIL_GEOMETRY;
 	
-	// string-ify the texture name
-	string textureName = string(textureFile) + SCENEBUILDER_TAIL_TEXTURE2D;
-	
 	// make a geode
 	osg::Geode* geode = new osg::Geode();
 	
 	// load up the texture
-    // load the image itself
-	if(textureFile != NULL) {
+    SceneBuilder::assignTexture( textureFile, geode );
+	
+	// assign the geometry data to the geode (assign it the flyweighted one if it exists; otherwise add this geometry)
+	if( geoData[ geometryName ] == NULL ) {
+		geoData[ geometryName ] = geometry;
+	}
+	
+	geode->addDrawable( geoData[ geometryName ].get() );
+	
+	// add this geode to nodeData to be reused again
+	if( nodeData[ nodeName ] == NULL )
+		nodeData[ nodeName ] = (osg::Node*)(geode);
+	
+	return geode;
+}
+
+// assign a texture to a Node
+void SceneBuilder::assignTexture( const char* _textureName, osg::Node* node ) {
+	if(_textureName != NULL) {
+		string textureName = string(_textureName) + SCENEBUILDER_TAIL_TEXTURE2D;
+		
 		// the texture itself
 		osg::Texture2D* texture = NULL;
 		
@@ -118,7 +134,7 @@ osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* _nodeName, osg:
 		else {
 			texture = new osg::Texture2D();
 			
-			osg::Image* image = osgDB::readImageFile( textureFile );
+			osg::Image* image = osgDB::readImageFile( _textureName );
 		
 			if( image != NULL ) {	// only build the texture if the image exists!
 			
@@ -138,33 +154,59 @@ osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* _nodeName, osg:
 		}
 		 
  		// make a new state set for the texture (so we can manipulate the texture attributes)
-		osg::StateSet* texStateSet = new osg::StateSet();
+		osg::StateSet* texStateSet = node->getOrCreateStateSet();
 		
 		// assign the texture to the state set and activate it
 		texStateSet->setTextureAttributeAndModes( 0, texture, osg::StateAttribute::ON );
 		
 		// finally, attach the texture to the geode
-		geode->setStateSet( texStateSet );
+		node->setStateSet( texStateSet );
 	}
+}
+
+// assign a material to a node
+void SceneBuilder::assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Vec4 specular, osg::Vec4 emissive, float shininess, float alpha, osg::Node* node ) {
+	osg::Material* mat = new osg::Material();
 	
-	// assign the geometry data to the geode (assign it the flyweighted one if it exists; otherwise add this geometry)
-	if( geoData[ geometryName ] == NULL ) {
-		geoData[ geometryName ] = geometry;
-	}
+	// set ambient lighting
+	mat->setAmbient( osg::Material::FRONT, ambient );
 	
-	geode->addDrawable( geoData[ geometryName ].get() );
+	// set diffuse color
+	mat->setDiffuse( osg::Material::FRONT, diffuse );
 	
-	// add this geode to nodeData to be reused again
-	if( nodeData[ nodeName ] == NULL )
-		nodeData[ nodeName ] = (osg::Node*)(geode);
+	// set specular
+	mat->setSpecular( osg::Material::FRONT, specular );
 	
-	return geode;
+	// set emissive
+	mat->setEmission( osg::Material::FRONT, emissive );
+	
+	// set shininess
+	mat->setShininess( osg::Material::FRONT, shininess );
+	
+	// set transparency
+	mat->setTransparency( osg::Material::FRONT, alpha );
+	
+	// get the state set from the node
+	osg::StateSet* stateSet = node->getOrCreateStateSet();
+	
+	// assign the material
+	stateSet->setAttribute( mat, osg::StateAttribute::OVERRIDE );
+	
+	// assign the new state set
+	node->setStateSet( stateSet );
+}
+
+// get the material from a node
+osg::Material* extractMaterial( Renderable* r ) {
+	osg::StateSet* stateSet = r->getOrCreateStateSet();
+	
+	return (osg::Material*)(stateSet->getAttribute( osg::StateAttribute::MATERIAL ) );
 }
 
 // build a geometry and call the other buildGeode method
 osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureName, bool loadSelectedToo ) {
 	// don't bother if the data is NULL
-	if(vertexes == NULL || indexes == NULL || texCoords == NULL)
+	if(vertexes == NULL || indexes == NULL)
 		return NULL;
 	
 	// make a new geometry
@@ -176,8 +218,9 @@ osg::ref_ptr< osg::Geode > SceneBuilder::buildGeode( const char* nodeName, osg::
 	// assign the indexes
 	geometry->addPrimitiveSet( indexes );
 	
-	// assign the texture coordinates
-	geometry->setTexCoordArray( 0, texCoords );
+	if( texCoords != NULL) 
+		// assign the texture coordinates
+		geometry->setTexCoordArray( 0, texCoords );
 	
 	return SceneBuilder::buildGeode( nodeName, geometry, textureName, loadSelectedToo );
 }

@@ -7,6 +7,8 @@
 #include <osgViewer/Viewer>
 #include <string>
 
+#include <FL/Fl.H>
+
 using namespace std;
 
 // This is the interface all event handlers that can be incorporated EventHandlerCollection
