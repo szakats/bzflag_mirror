@@ -6,6 +6,7 @@ bz2object::bz2object(const char* name, const char* keys) : DataEntry(name, keys)
 	this->rotation = 0.0f;
 	this->size = Point3D(-1.0f, -1.0f, -1.0f);
 	this->transformations = vector<Transform>();
+	this->setSelected( false );
 };
 
 // constructor with data
@@ -14,6 +15,7 @@ bz2object::bz2object(const char* name, const char* keys, const char* data) : Dat
 	this->size = Point3D(-1.0f, -1.0f, -1.0f);
 	this->rotation = 0.0f;
 	this->transformations = vector<Transform>();
+	this->setSelected( false );
 	string d = string(data);
 	this->update(d);
 }

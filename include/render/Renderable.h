@@ -60,6 +60,11 @@ public:
 		this->addChild( node );
 	}
 	
+	// set the color of the contained node
+	void setColor( osg::Vec4 color ) {
+			
+	}
+	
 	// angular rotators (easier than building quaterions and setting the attitude
 	// angles is in degrees, not radians
 	void setRotationX( float rotation ) { this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation ), osg::Vec3( 1.0, 0.0, 0.0 ) ) ); }

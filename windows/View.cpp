@@ -20,7 +20,7 @@ View::View(Model* m, int x, int y, int w, int h, const char *label) :
    this->root = new osg::Group();
    
    // initialize the ground
-   this->initGround( 400.0f );
+   this->ground = new Ground( 400.0f );
    
    // add the ground to the root node
    this->root->addChild( this->ground.get() );
@@ -66,38 +66,6 @@ View::View(Model* m, int x, int y, int w, int h, const char *label) :
    
 }
 
-// helper method: initialize the ground
-void View::initGround( float size ) {
-	
-   // make a ground mesh (just a plane the size of the world)
-   // ground points
-   osg::Vec3Array* groundPoints = new osg::Vec3Array();
-   groundPoints->push_back( osg::Vec3( -size, -size, 0 ) );
-   groundPoints->push_back( osg::Vec3( size, -size, 0 ) );
-   groundPoints->push_back( osg::Vec3( size, size, 0 ) );
-   groundPoints->push_back( osg::Vec3( -size, size, 0 ) );
-   
-   // ground indexes
-   osg::DrawElementsUInt* groundIndexes = new osg::DrawElementsUInt( osg::PrimitiveSet::QUADS, 0 );
-   groundIndexes->push_back( 0 );
-   groundIndexes->push_back( 3 );
-   groundIndexes->push_back( 2 );
-   groundIndexes->push_back( 1 );
-   
-   // texture coordinates
-   osg::Vec2Array* groundTexCoords = new osg::Vec2Array();
-   groundTexCoords->push_back( osg::Vec2(0.0, 0.0) );
-   groundTexCoords->push_back( osg::Vec2(size, 0.0) );
-   groundTexCoords->push_back( osg::Vec2(size, size) );
-   groundTexCoords->push_back( osg::Vec2(0.0, size) );
-   
-   // make the member ground geode
-   this->ground = SceneBuilder::renderable(
-   					SceneBuilder::buildGeode( "ground", groundPoints, groundIndexes, groundTexCoords, "share/world/std_ground.png" ).get()
-				  );
-				  
-}
-
 // destructor
 View::~View() { }
 
@@ -116,8 +84,43 @@ int View::handle(int event) {
 	this->modifiers[ FL_META ] = ( shiftState & FL_META );
 	this->modifiers[ FL_ALT ] = ( shiftState & FL_ALT );
 	
-    // pass other events to the base class
-	return RenderWindow::handle(event);
+	// forward FLTK events to OSG
+	switch(event){
+        case FL_PUSH:
+        	// handle single mouse clicks
+        	if(Fl::event_clicks() == 0) {
+        		_gw->getEventQueue()->mouseButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button() );
+        	}
+        	// handle double clicks
+            else {
+            	_gw->getEventQueue()->mouseDoubleButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button() );
+            	Fl::event_is_click(0);
+            }
+            
+            this->redraw();
+            return 1;
+          
+        case FL_DRAG:
+            _gw->getEventQueue()->mouseMotion(Fl::event_x(), Fl::event_y());
+        	this->redraw();
+			return 1;
+        case FL_RELEASE:
+        	
+            _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), Fl::event_button() );
+        	this->redraw();    
+			return 1;
+        case FL_KEYDOWN:
+            _gw->getEventQueue()->keyPress((osgGA::GUIEventAdapter::KeySymbol)Fl::event_key());
+            this->redraw();
+            return 1;
+        case FL_KEYUP:
+            _gw->getEventQueue()->keyRelease((osgGA::GUIEventAdapter::KeySymbol)Fl::event_key());
+            this->redraw();
+            return 1;
+        default:
+            // pass other events to the base class
+            return RenderWindow::handle(event);
+    }
 }
 
 // update method (inherited from Observer)
@@ -138,25 +141,9 @@ void View::update( Observable* obs, void* data ) {
 	this->redraw();
 }
 
-// handle Picker events
-void View::handlePicker( BZEventHandler* picker, void* data ) {
-	if(!data)
-		return;
-	
-	Renderable* obj = (Renderable*)(data);
-	
-	// deselect everything upon picking a new selection
-	// unless the SHIFT key is pressed
-	if(!this->modifiers[ FL_SHIFT ])
-		this->unselectAll();
-	
-	if(!isSelected( obj )) {
-		this->setSelected( obj );	
-	}
-	else {
-		this->setUnselected( obj );
-	}
-
+// is a button pressed?
+bool View::isPressed( int value ) {
+	return this->modifiers[ value ];
 }
 
 // is an object selected?

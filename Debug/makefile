@@ -13,6 +13,7 @@ RM := rm -rf
 -include windows/subdir.mk
 -include widgets/subdir.mk
 -include share/box/subdir.mk
+-include render/subdir.mk
 -include objects/subdir.mk
 -include model/subdir.mk
 -include dialogs/subdir.mk

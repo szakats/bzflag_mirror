@@ -45,10 +45,22 @@ bool selectHandler::pick(View* viewer, const osgGA::GUIEventAdapter& ea) {
             	// only look for Renderables
             	Renderable* obj = dynamic_cast< Renderable* > ( hitr->nodePath[i] );
             	if(obj != NULL && obj->getName().length() > 0) {
-            		// invoke the View's special object picker
-            		viewer->handlePicker( this, obj );
+            		
+            		if(!viewer->isPressed( FL_SHIFT )) {
+            			viewer->unselectAll();
+            		}
+            		
+					if(!viewer->isSelected( obj )) {
+						viewer->setSelected( obj );	
+					}
+					else {
+						viewer->setUnselected( obj );
+					}
+            		
             		// save the last selected object
             		this->lastSelected = obj;
+            		
+            		return true;
             	}
             }
             

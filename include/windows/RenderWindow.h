@@ -32,7 +32,7 @@ public:
 	virtual int handle(int);
 	void resize(int x, int y, int w, int h);
 	
-private:
+protected:
 
 	// reference to an embedded OSG render window
 	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> _gw;

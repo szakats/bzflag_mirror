@@ -115,15 +115,15 @@ int main(int argc, char** argv) {
 	box sceneBox1 = box();
 	box sceneBox2 = box();
 	Point3D position = Point3D( 10.0, 10.0, 0.0 );
-	Point3D position2 = Point3D( -10.0, -10.0, 0.0);
+	Point3D position2 = Point3D( -20.0, -20.0, 0.0);
 	Point3D size = Point3D( 10.0, 30.0, 30.0 );
-	float rotation = 30;
+	// float rotation = 30;
 	sceneBox1.setPosition( &position );
 	sceneBox2.setPosition( &position2 );
 	sceneBox1.setSize( &size );
 	sceneBox2.setSize( &size );
-	sceneBox1.setRotation( &rotation );
-	sceneBox2.setRotation( &rotation );
+//	sceneBox1.setRotation( &rotation );
+//	sceneBox2.setRotation( &rotation );
 	
 	model->addObject( &sceneBox1 );
 	model->addObject( &sceneBox2 );
