@@ -52,26 +52,15 @@ osg::ref_ptr< Renderable > box::makeRenderable(void) {
 	return boxTransform;
 }
 
-// update the renderable
-bool box::updateRenderable( Renderable* boxTransform ) {
+// read in data from a renderable
+void box::updateRenderable( Renderable* boxTransform ) {
+	osg::Vec3 position = boxTransform->getPosition();
+	position.set( position.x(), position.y(), position.z() - this->getSize()->z() / 2.0 );
 	
-	osg::ref_ptr< osg::Node > boxNode;
+	this->position.set( position );
+	this->size.set( boxTransform->getScale() );
+	double r, x, y, z;	// unused; just place-holders
+	boxTransform->getAttitude().getRotate(r, x, y, z);
 	
-	// get the node based on selection
-	// SceneBuilder flyweights all loaded nodes; 99% of the time all we're doing here
-	// is just acquiring a reference to an already-loaded instance.
-	if(!this->isSelected()) {
-		boxNode = SceneBuilder::buildNode( "share/box/box.obj", true );
-	}
-	else {
-		boxNode = SceneBuilder::buildSelectedNode( "share/box/box.obj" );
-	}
-	
-	boxTransform->setNode( boxNode.get() );
-	boxTransform->setPosition( osg::Vec3( this->getPosition()->x(), this->getPosition()->y(), this->getPosition()->z() + this->getSize()->z() / 2.0 ) );
-	boxTransform->setScale( osg::Vec3( this->getSize()->x(), this->getSize()->y(), this->getSize()->z() / 2.0 ) );
-	boxTransform->setRotationZ( this->rotation );
-	boxTransform->setBZWObject( this );
-	
-	return true;
+	this->rotation = r;
 }

@@ -622,3 +622,6 @@ void Model::_unselectAll() {
 	
 	selectedObjects.clear();
 }
+
+// get selection
+vector<bz2object*>& Model::getSelection() { return modelRef->_getSelection(); }

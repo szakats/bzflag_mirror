@@ -4,13 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../render/Ground.cpp 
+../render/Ground.cpp \
+../render/Selection.cpp 
 
 OBJS += \
-./render/Ground.o 
+./render/Ground.o \
+./render/Selection.o 
 
 CPP_DEPS += \
-./render/Ground.d 
+./render/Ground.d \
+./render/Selection.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
