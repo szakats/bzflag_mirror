@@ -41,7 +41,7 @@ public:
 	osg::ref_ptr<Renderable> makeRenderable();
 	
 	// update this object's information into a passed renderable
-	bool updateRenderable( Renderable* r );
+	void updateRenderable( Renderable* r );
 	
 private:
 	Point3D size;

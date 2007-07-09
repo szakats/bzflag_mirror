@@ -26,6 +26,8 @@
 
 #include "../render/Ground.h"
 
+#include "../render/Selection.h"
+
 // forward declare the Picker class
 class BZEventHandler;
 
@@ -52,6 +54,9 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         // set an object as unselected
         void setUnselected( bz2object* object );
         void setUnselected( Renderable* node );
+        
+        // tell the model an object changed
+        void refresh( Renderable* node );
         
         // select all objects
         // void selectAll();
@@ -94,6 +99,9 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		
 		// the collection of evnet handlers
 		osg::ref_ptr< EventHandlerCollection > eventHandlers;
+		
+		// the current selection
+		osg::ref_ptr< Selection > selection;
 };
 
 #endif /*VIEW_H_*/

@@ -232,6 +232,7 @@ vector<string> BZWParser::getLinesByKey(const char* _key, const char* _header, c
 
 /**
  * This method finds all occurences of a section (by looking for its header) in a chunk of text
+ * Only use this method for sections with no sub-sections
  */
 const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text, const char* _footer) {
 	string header = cutWhiteSpace(string(_header));
@@ -339,7 +340,8 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
  * General case of getSectionsByHeader.
  * This method, unlike the others, anticipates subobjects listed in internalSectionKeys, and won't be 
  * fooled by internal "end" statements.
- * Format of internalSectionKeys is "<key1><key2>...<keyN>" for N keys
+ * Format of internalSectionKeys is "<key1><key2>...<keyN>" for N keys.
+ * Use this method for sections with sub-objects.
  */
  
 const vector<string> BZWParser::getSectionsByHeader(const char* _header, const char* _text, const char* _footer, const char* internalSectionKeys, const char* sectionsToIgnore) {

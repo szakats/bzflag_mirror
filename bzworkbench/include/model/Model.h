@@ -72,6 +72,7 @@ public:
 	static void setUnselected( bz2object* obj );
 	static void unselectAll();
 	static bool isSelected( bz2object* obj );
+	static vector<bz2object*>& getSelection();
 	
 	// instantiated BZWB-specific API 
 	world* _getWorldData() { return worldData; }
@@ -91,6 +92,7 @@ public:
 	void _setUnselected( bz2object* obj );
 	void _unselectAll();
 	bool _isSelected( bz2object* obj );
+	vector<bz2object*>& _getSelection() { return this->selectedObjects; }
 	
 	// plugin-specific API
 	static bool registerObject(string& name, DataEntry* (*init)(string&));

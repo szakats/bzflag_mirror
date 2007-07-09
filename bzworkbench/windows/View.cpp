@@ -46,20 +46,23 @@ View::View(Model* m, int x, int y, int w, int h, const char *label) :
 		}
 	}
 	
+	
+   // make a new selection object
+   this->selection = new Selection();
+   
 	// add the root node to the scene
    this->setSceneData( this->root.get() );
    
    // give the View a trackball manipulator
-   this->setCameraManipulator(new osgGA::TrackballManipulator());
+   osgGA::TrackballManipulator* cameraManipulator = new osgGA::TrackballManipulator();
    
-   // add the stats event handler to the View
-   this->addEventHandler(new osgViewer::StatsHandler());
+   this->setCameraManipulator(cameraManipulator);
    
    // make an event handler collection
    this->eventHandlers = new EventHandlerCollection( this );
    
    // add the selectHandler
-   this->eventHandlers->addEventHandler( selectHandler::getName().c_str(), new selectHandler() );
+   this->eventHandlers->addEventHandler( selectHandler::getName().c_str(), new selectHandler( this, cameraManipulator ) );
    
    // add the scene picker event handler
    this->addEventHandler(eventHandlers.get());
@@ -105,7 +108,6 @@ int View::handle(int event) {
         	this->redraw();
 			return 1;
         case FL_RELEASE:
-        	
             _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), Fl::event_button() );
         	this->redraw();    
 			return 1;
@@ -133,7 +135,9 @@ void View::update( Observable* obs, void* data ) {
 		// see if there is a renderable for this object
 		if( this->objectMap.count( obj ) > 0 ) {
 			// if so, update it
-			obj->updateRenderable( this->objectMap[ obj ].get() );
+			this->root->removeChild( objectMap[ obj ].get() );
+			this->objectMap[ obj ] = obj->makeRenderable();
+			this->root->addChild( objectMap[ obj ].get() );
 		}
 	}
 	
@@ -162,11 +166,20 @@ void View::setSelected( bz2object* object ) {
 	// tell the model that this object is to be selected
 	model->setSelected( object );
 	
+	// add the selection if it isn't there.
+	if( !this->root->containsNode( this->selection.get() ) ) {
+		this->root->insertChild( this->root->getNumChildren(), this->selection.get() );
+	}
+	
+	// update our graphical selection
+	selection->add( objectMap[ object ].get() );
+	
 }
 void View::setSelected( Renderable* object ) { 
 	
 	if( object->getBZWObject() != NULL )	
 		this->setSelected( object->getBZWObject() );
+		
 }
 
 /**
@@ -176,6 +189,13 @@ void View::setUnselected( bz2object* object ) {
 	
 	// tell the model that this is unselected
 	model->setUnselected( object );
+	
+	// remove it from our graphical selection
+	selection->remove( objectMap[ object ].get() );
+	
+	// disable the 3D cursor if there are no selected objects
+	if( selection->getSelection().size() <= 0 )
+		this->root->removeChild( selection.get() );
 	
 }
 void View::setUnselected( Renderable* object ) { 
@@ -188,4 +208,15 @@ void View::setUnselected( Renderable* object ) {
 // mark all nodes unselected
 void View::unselectAll() {
 	this->model->unselectAll();
+	
+	selection->removeAll();
+	
+	this->root->removeChild( selection.get() );
+}
+
+// tell the model to regenerate a bz2object from the renderable
+void View::refresh( Renderable* r ) {
+	if(r->getBZWObject() != NULL) {
+		r->getBZWObject()->updateRenderable( r );
+	}
 }
