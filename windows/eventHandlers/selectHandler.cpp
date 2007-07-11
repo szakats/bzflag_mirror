@@ -16,21 +16,40 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     	
     	// catch drag events
     	case osgGA::GUIEventAdapter::DRAG :
+    			
     		viewer = dynamic_cast<View*>(&aa);
+    		
+    		// ignore right-click drags
+    		if( viewer && viewer->getButton() != FL_LEFT_MOUSE ) {
+    			return false;
+    		}
+    			
     		if( viewer && this->lastSelected && this->lastSelected->getName() == Selection_NODE_NAME ) {
+    			// if the last event was a DRAG event, we need to update the dx and dy
     			if( this->prevEvent == osgGA::GUIEventAdapter::DRAG ) {
 	    			this->dx = ea.getXnormalized() - this->prev_x;
 	    			this->dy = ea.getYnormalized() - this->prev_y;
     			}
+    			// otherwise, they should be zero
     			else {
     				this->dx = 0;
     				this->dy = 0;	
     			}
+    			// set the prev_x and prev_y values so we can re-compute dx and dy on the next event
 	    		this->prev_x = ea.getXnormalized();
     			this->prev_y = ea.getYnormalized();
     			
+    			// log this event
     			this->prevEvent = osgGA::GUIEventAdapter::DRAG;
-    			return this->dragSelector( viewer, ea );
+    			
+    			// do a drag selector, based on a pressed key
+    			if( viewer->getKey() == 'r'  || viewer->getKey() == 'R' ) {
+    				return this->rotateSelector(viewer, ea);	
+    			}
+    			else if( viewer->getKey() == 's' || viewer->getKey() == 'S' ) {
+    				return this->scaleSelector(viewer, ea);	
+    			}
+    			else return this->dragSelector( viewer, ea );
     		}
     		return false;
     		
@@ -64,9 +83,6 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
 
 // use the OSG intersection API to pick objects
 bool selectHandler::pickObject(View* viewer, const osgGA::GUIEventAdapter& ea) {
-	// quit if the view is invalid
-	if( viewer == NULL )
-		return false;
 		
 	// intersections with the scene
     osgUtil::LineSegmentIntersector::Intersections intersections;
@@ -111,9 +127,6 @@ bool selectHandler::pickObject(View* viewer, const osgGA::GUIEventAdapter& ea) {
 
 // use the OSG intersection API to pick objects
 bool selectHandler::pickSelector(View* viewer, const osgGA::GUIEventAdapter& ea) {
-	// quit if the view is invalid
-	if( viewer == NULL )
-		return false;
 	
 	// intersections with the scene
     osgUtil::LineSegmentIntersector::Intersections intersections;
@@ -150,7 +163,7 @@ bool selectHandler::pickSelector(View* viewer, const osgGA::GUIEventAdapter& ea)
     return false;
 }
 
-// handle drag events
+// handle translation events
 bool selectHandler::dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea ) {
 	osg::Node* node = (osg::Node*)this->lastSelectedData;
 	
@@ -198,7 +211,72 @@ bool selectHandler::dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea
 		}
 	}
 	
-	this->lastSelected->setPosition( position );
+	selection->refresh();
 		
 	return true;
+}
+
+// handle rotate events
+bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& ea ) {
+	// get the clicked axis
+	osg::Node* node = (osg::Node*)this->lastSelectedData;
+	
+	// get the angular orientation
+	double x, y, z, a;
+	osg::Quat attitude = this->lastSelected->getAttitude();
+	attitude.getRotate( a, x, y, z );
+	// convert to degrees
+	a = osg::RadiansToDegrees( a );
+	
+	// transform the 2D mouse movement into a 3D vector by transforming it into camera space
+	// get the vectors (but keep in mind that the window uses the XY-plane, but "up" in the 3D scene is along Z)
+	osg::Vec3 sideVector = this->cameraManipulator->getSideVector( this->cameraManipulator->getMatrix() );
+	osg::Vec3 upVector = this->cameraManipulator->getFrontVector( this->cameraManipulator->getMatrix() );
+	
+	// apply the transformation to each axis
+	sideVector *= ( dx );
+	upVector *= ( dy );
+	
+	// combine them into the transformation vector
+	osg::Vec3 transformVector = sideVector + upVector;
+	transformVector.normalize();
+	
+	
+	if(node->getName() == Selection_X_AXIS_NODE_NAME) {
+		// rotate x
+		a += transformVector.x();
+		x = 1.0; y = 0.0; z = 0.0;
+	}
+	else if(node->getName() == Selection_Y_AXIS_NODE_NAME) {
+		// rotate y
+		a += transformVector.y();	
+		x = 0.0; y = 1.0; z = 0.0;
+	}
+	else if(node->getName() == Selection_Z_AXIS_NODE_NAME) {
+		// rotate z
+		a += transformVector.z();
+		x = 0.0; y = 0.0; z = 1.0;
+	}
+	
+	// set the position
+	Selection* selection = dynamic_cast< Selection* >( this->lastSelected );
+	// update all objects in the selection
+	if(selection) {
+		map<Renderable*, Renderable*> selected = selection->getSelection();
+		if( selected.size() > 0 ) {
+			for(map<Renderable*, Renderable*>::iterator i = selected.begin(); i != selected.end(); i++) {
+				i->second->setAttitude( osg::Quat( osg::DegreesToRadians(a), x, y, z) );
+				this->view->refresh( i->second );
+			}	
+		}
+	}
+	
+		
+	return true;	
+}
+
+// handle scale events
+bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& ea ) {
+	printf(" desire to scale ");
+	return true;	
 }

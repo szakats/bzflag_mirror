@@ -22,7 +22,7 @@ Selection::Selection( vector<Renderable*>& selection ) {
 	}
 	
 	// compute the local origin
-	Point3D origin = this->computeLocalOrigin();
+	osg::Vec3 origin = this->computeLocalOrigin();
 	
 	// build the map geode and add it
 	this->axes = this->buildAxes( origin );
@@ -52,7 +52,7 @@ bool Selection::contains( Renderable* r ) {
 }
 
 // build the axes geode
-osg::ref_ptr< Renderable > Selection::buildAxes( Point3D localOrigin ) {
+osg::ref_ptr< Renderable > Selection::buildAxes( osg::Vec3 localOrigin ) {
 	// cone endings of the axes
 	osg::ref_ptr< osg::Cone > x_tip, y_tip, z_tip;
 	
@@ -149,8 +149,8 @@ osg::ref_ptr< Renderable > Selection::buildAxes( Point3D localOrigin ) {
 }
 
 // get the local origin
-Point3D Selection::computeLocalOrigin() {
-	float x = 0.0f, y = 0.0f, z = 0.0f;
+osg::Vec3 Selection::computeLocalOrigin() {
+	double x = 0.0, y = 0.0, z = 0.0;
 	
 	// compute the average x, y, and z values of all renderables
 	if( this->selected.size() > 0 ) {
@@ -166,7 +166,7 @@ Point3D Selection::computeLocalOrigin() {
 		z /= numElements;
 	}
 	
-	return Point3D( x, y, z );
+	return osg::Vec3( x, y, z );
 }
 
 // rebuild the axes

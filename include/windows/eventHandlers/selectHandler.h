@@ -34,6 +34,12 @@ public:
     // drag the selector
     bool dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea);
     
+    // rotate the selector (i.e. if the appropriate key is pressed)
+    bool rotateSelector( View* viewer, const osgGA::GUIEventAdapter& ea);
+    
+    // scale the selector (i.e. if the appropriate key is pressed)
+    bool scaleSelector( View* viewer, const osgGA::GUIEventAdapter& ea);
+    
 private:
     // the last Renderable to be selected
     Renderable* lastSelected;
