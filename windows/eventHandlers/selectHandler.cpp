@@ -20,13 +20,12 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     		viewer = dynamic_cast<View*>(&aa);
     		
     		// ignore right-click drags
-    		/*
+    		
     		if( viewer && viewer->getButton() != FL_LEFT_MOUSE ) {
     			return false;
     		}
-    			*/
-    		if( viewer != NULL && this->lastSelected != NULL && this->lastSelected->getName().length() > 0 &&
-    			this->lastSelected->getName() == Selection_NODE_NAME ) {
+    			
+    		if( viewer != NULL && this->lastSelected != NULL && this->lastSelected->getName() == Selection_NODE_NAME ) {
     			// if the last event was a DRAG event, we need to update the dx and dy
     			if( this->prevEvent == osgGA::GUIEventAdapter::DRAG ) {
 	    			this->dx = ea.getXnormalized() - this->prev_x;
@@ -100,7 +99,7 @@ bool selectHandler::pickObject(View* viewer, const osgGA::GUIEventAdapter& ea) {
             for(unsigned int i = 0; i < hitr->nodePath.size(); i++) {
             	// only look for Renderables
             	Renderable* obj = dynamic_cast< Renderable* > ( hitr->nodePath[i] );
-            	if(obj != NULL && obj->getName().length() > 0) {
+            	if(obj != NULL && obj->getBZWObject() != NULL && obj->getName().length() > 0) {
             		if(!viewer->isPressed( FL_SHIFT )) {
             			viewer->unselectAll();
             		}
@@ -263,9 +262,11 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 		map<Renderable*, Renderable*> selected = selection->getSelection();
 		if( selected.size() > 0 ) {
 			osg::Vec3 rotation;
+			bz2object* obj;
 			for(map<Renderable*, Renderable*>::iterator i = selected.begin(); i != selected.end(); i++) {
 				// don't do a complete rotation if "spin" isn't supported or if "rotation" is
-				if( i->second->getBZWObject() && (!i->second->getBZWObject()->isKey("shift") || i->second->getBZWObject()->isKey( "rotation" ))) {
+				obj = i->second->getBZWObject();
+				if( obj && (!obj->isKey("shift") || obj->isKey( "rotation" ))) {
 					i->second->setRotationZ( i->second->getRotation().z() + a_z);	
 				}
 				else {
