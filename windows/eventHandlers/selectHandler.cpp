@@ -223,11 +223,7 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 	osg::Node* node = (osg::Node*)this->lastSelectedData;
 	
 	// get the angular orientation
-	double x, y, z, a;
-	osg::Quat attitude = this->lastSelected->getAttitude();
-	attitude.getRotate( a, x, y, z );
-	// convert to degrees
-	a = osg::RadiansToDegrees( a );
+	double a_x = 0.0, a_y = 0.0, a_z = 0.0;
 	
 	// transform the 2D mouse movement into a 3D vector by transforming it into camera space
 	// get the vectors (but keep in mind that the window uses the XY-plane, but "up" in the 3D scene is along Z)
@@ -244,15 +240,15 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 	
 	if(node->getName() == Selection_X_AXIS_NODE_NAME) {
 		// rotate x
-		a += transformVector.x();
+		a_x += transformVector.x();
 	}
 	else if(node->getName() == Selection_Y_AXIS_NODE_NAME) {
 		// rotate y
-		a += transformVector.y();	
+		a_y += transformVector.y();	
 	}
 	else if(node->getName() == Selection_Z_AXIS_NODE_NAME) {
 		// rotate z
-		a += transformVector.z();
+		a_z += transformVector.z();
 	}
 	
 	// set the position
@@ -261,14 +257,16 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 	if(selection) {
 		map<Renderable*, Renderable*> selected = selection->getSelection();
 		if( selected.size() > 0 ) {
+			osg::Vec3 rotation;
 			for(map<Renderable*, Renderable*>::iterator i = selected.begin(); i != selected.end(); i++) {
-				i->second->setAttitude( osg::Quat( osg::DegreesToRadians(a), x, y, z) );
+				rotation = i->second->getRotation();
+				i->second->setRotation( rotation.x() + a_x, rotation.y() + a_y, rotation.z() + a_z );
 				this->view->refresh( i->second );
 			}	
 		}
 	}
 	
-		
+	
 	return true;	
 }
 

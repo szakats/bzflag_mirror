@@ -1,5 +1,13 @@
 #include "../include/render/Selection.h"
 
+
+const float Selection::CENTER_RADIUS = 2.0f;
+const float Selection::SHAFT_LENGTH = 10.0f;
+const float Selection::SHAFT_RADIUS = 0.5f;
+const float Selection::TIP_LENGTH = 3.0f;
+const float Selection::TIP_RADIUS = 1.0f;
+
+
 Selection::Selection() {
 	this->selected = map< Renderable*, Renderable* >();
 	

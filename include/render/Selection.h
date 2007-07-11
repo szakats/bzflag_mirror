@@ -64,11 +64,11 @@ public:
 private:
 
 	// some constants defining the shape and color of the axes
-	static const float CENTER_RADIUS = 2.0f;
-	static const float SHAFT_LENGTH = 10.0f;
-	static const float SHAFT_RADIUS = 0.5f;
-	static const float TIP_LENGTH = 3.0f;
-	static const float TIP_RADIUS = 1.0f;
+	static const float CENTER_RADIUS;
+	static const float SHAFT_LENGTH;
+	static const float SHAFT_RADIUS;
+	static const float TIP_LENGTH;
+	static const float TIP_RADIUS;
 	
 	// the selected renderables (really a reflexive map)
 	map< Renderable*, Renderable* > selected;
@@ -86,5 +86,5 @@ private:
 	void rebuildAxes();
 	
 };
-
+	
 #endif /*SELECTION_H_*/
