@@ -137,7 +137,7 @@ void View::update( Observable* obs, void* data ) {
 		
 		// see if there is a renderable for this object
 		if( this->objectMap.count( obj ) > 0 ) {
-			// if so, update it
+			// if so, update it (i.e. rebuild it)
 			this->root->removeChild( objectMap[ obj ].get() );
 			this->objectMap[ obj ] = obj->makeRenderable();
 			this->root->addChild( objectMap[ obj ].get() );

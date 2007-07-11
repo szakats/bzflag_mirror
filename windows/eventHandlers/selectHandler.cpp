@@ -20,10 +20,11 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     		viewer = dynamic_cast<View*>(&aa);
     		
     		// ignore right-click drags
+    		/*
     		if( viewer && viewer->getButton() != FL_LEFT_MOUSE ) {
     			return false;
     		}
-    			
+    			*/
     		if( viewer && this->lastSelected && this->lastSelected->getName() == Selection_NODE_NAME ) {
     			// if the last event was a DRAG event, we need to update the dx and dy
     			if( this->prevEvent == osgGA::GUIEventAdapter::DRAG ) {
@@ -245,17 +246,14 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 	if(node->getName() == Selection_X_AXIS_NODE_NAME) {
 		// rotate x
 		a += transformVector.x();
-		x = 1.0; y = 0.0; z = 0.0;
 	}
 	else if(node->getName() == Selection_Y_AXIS_NODE_NAME) {
 		// rotate y
 		a += transformVector.y();	
-		x = 0.0; y = 1.0; z = 0.0;
 	}
 	else if(node->getName() == Selection_Z_AXIS_NODE_NAME) {
 		// rotate z
 		a += transformVector.z();
-		x = 0.0; y = 0.0; z = 1.0;
 	}
 	
 	// set the position
@@ -277,6 +275,64 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 
 // handle scale events
 bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& ea ) {
-	printf(" desire to scale ");
+	osg::Node* node = (osg::Node*)this->lastSelectedData;
+	
+	// get the position of the last selected object (which should be the axes)
+	osg::Vec3 scale = osg::Vec3( 0, 0, 0 );
+	
+	// transform the 2D mouse movement into a 3D vector by transforming it into camera space
+	// get the vectors (but keep in mind that the window uses the XY-plane, but "up" in the 3D scene is along Z)
+	osg::Vec3 sideVector = this->cameraManipulator->getSideVector( this->cameraManipulator->getMatrix() );
+	osg::Vec3 upVector = this->cameraManipulator->getFrontVector( this->cameraManipulator->getMatrix() );
+	
+	// apply the transformation to each axis
+	sideVector *= ( dx );
+	upVector *= ( dy );
+	
+	// combine them into the transformation vector
+	osg::Vec3 transformVector = sideVector + upVector;
+	transformVector.normalize();
+	
+	
+	if(node->getName() == Selection_X_AXIS_NODE_NAME) {
+		// scale along x
+		scale.set( scale.x() +  transformVector.x(), scale.y(), scale.z() );
+	}
+	else if(node->getName() == Selection_Y_AXIS_NODE_NAME) {
+		// scale along y
+		scale.set( scale.x(), scale.y() + transformVector.y(), scale.z() );	
+	}
+	else if(node->getName() == Selection_Z_AXIS_NODE_NAME) {
+		// scale along z
+		scale.set( scale.x(), scale.y(), scale.z() + transformVector.z() );	
+	}
+	else if(node->getName() == Selection_CENTER_NODE_NAME) {
+		// scale along all three axes if we select the center
+		scale.set( scale.x() + transformVector.x(), scale.y() + transformVector.y(), scale.z() + transformVector.z());	
+	}
+	
+	// set the position
+	Selection* selection = dynamic_cast< Selection* >( this->lastSelected );
+	// update all objects in the selection
+	if(selection) {
+		map<Renderable*, Renderable*> selected = selection->getSelection();
+		if( selected.size() > 0 ) {
+			osg::Vec3 tscale;
+			for(map<Renderable*, Renderable*>::iterator i = selected.begin(); i != selected.end(); i++) {
+				tscale = i->second->getScale() + scale;
+				// no negative scaling!
+				if( tscale.x() < 0 )
+					tscale.set( 0, tscale.y(), tscale.z() );
+				if( tscale.y() < 0 )
+					tscale.set( tscale.x(), 0, tscale.z() );
+				if( tscale.z() < 0 )
+					tscale.set( tscale.x(), tscale.y(), 0 );
+				// update the scale
+				i->second->setScale( i->second->getScale() + scale );
+				this->view->refresh( i->second );
+			}	
+		}
+	}
+	
 	return true;	
 }
