@@ -32,7 +32,7 @@ int bz2object::update(string& data) {
 	// get the lines
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
 	
-	if(lines[0] == BZW_NOT_FOUND) {
+	if(BZW_NOT_FOUND == lines[0]) {
 		printf("bz2object::update(): Error! Could not find object data!\n");
 		return 0;
 	}

@@ -25,7 +25,8 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     			return false;
     		}
     			*/
-    		if( viewer && this->lastSelected && this->lastSelected->getName() == Selection_NODE_NAME ) {
+    		if( viewer != NULL && this->lastSelected != NULL && this->lastSelected->getName().length() > 0 &&
+    			this->lastSelected->getName() == Selection_NODE_NAME ) {
     			// if the last event was a DRAG event, we need to update the dx and dy
     			if( this->prevEvent == osgGA::GUIEventAdapter::DRAG ) {
 	    			this->dx = ea.getXnormalized() - this->prev_x;
@@ -253,6 +254,10 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 	
 	// set the position
 	Selection* selection = dynamic_cast< Selection* >( this->lastSelected );
+	
+	// temporarily add all Renderables to an osg::Group so we can transform them
+	// osg::Group* tmpGroup = new osg::Group();
+	
 	// update all objects in the selection
 	if(selection) {
 		map<Renderable*, Renderable*> selected = selection->getSelection();
