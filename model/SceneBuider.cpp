@@ -251,7 +251,8 @@ osg::ref_ptr< Renderable > SceneBuilder::renderable( osg::Node* node, bz2object*
 		return NULL;
 	
 	// make the transform node
-	osg::ref_ptr< Renderable > transformNode = new Renderable( node->getName().c_str(), obj );
+	osg::ref_ptr< Renderable > transformNode = new Renderable( node );
+	transformNode->setBZWObject( obj );
 	
 	// assign the node
 	transformNode->addChild( node );
