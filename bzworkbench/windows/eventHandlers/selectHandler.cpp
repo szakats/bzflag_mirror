@@ -259,8 +259,14 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 		if( selected.size() > 0 ) {
 			osg::Vec3 rotation;
 			for(map<Renderable*, Renderable*>::iterator i = selected.begin(); i != selected.end(); i++) {
-				rotation = i->second->getRotation();
-				i->second->setRotation( rotation.x() + a_x, rotation.y() + a_y, rotation.z() + a_z );
+				// don't do a complete rotation if "spin" isn't supported or if "rotation" is
+				if( i->second->getBZWObject() && (!i->second->getBZWObject()->isKey("shift") || i->second->getBZWObject()->isKey( "rotation" ))) {
+					i->second->setRotationZ( i->second->getRotation().z() + a_z);	
+				}
+				else {
+					rotation = i->second->getRotation();
+					i->second->setRotation( rotation.x() + a_x, rotation.y() + a_y, rotation.z() + a_z );
+				}
 				this->view->refresh( i->second );
 			}	
 		}

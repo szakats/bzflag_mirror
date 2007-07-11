@@ -63,8 +63,8 @@ void box::updateRenderable( Renderable* boxTransform ) {
 	pos.set( pos.x(), pos.y(), pos.z() - this->getSize()->z() / 2.0 );
 	this->position.set( pos );
 	
-	double r, x, y, z;	// unused; just place-holders
-	boxTransform->getAttitude().getRotate(r, x, y, z);
+	osg::Vec3 rotation = boxTransform->getRotation();
+	float rf = rotation.z();
 	
-	this->rotation = r;
+	this->setRotation( &rf );
 }
