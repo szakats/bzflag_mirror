@@ -16,7 +16,7 @@
 // interface header
 #include "include/TextUtils.h"
 
-#include <regex.h>
+//#include <regex.h>
 
 // system headers
 #include <string>
@@ -196,7 +196,7 @@ namespace TextUtils
 
     return tokens;
   }
-
+/*
   bool parseDuration(const char *duration, int &durationInt)
   {
     if (strcasecmp(duration,"short") == 0
@@ -241,7 +241,7 @@ namespace TextUtils
     durationInt += t;
     return true;
   }
-
+*/
   std::string url_encode(const std::string &text)
   {
     char hex[5];
