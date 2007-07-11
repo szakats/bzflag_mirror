@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="fltkd.lib wsock32.lib comctl32.lib"
+				AdditionalDependencies="fltkd.lib fltkgld.lib opengl32.lib wsock32.lib comctl32.lib osg.lib osgGA.lib osgViewer.lib osgDB.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -136,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="fltk.lib wsock32.lib comctl32.lib"
+				AdditionalDependencies="fltk.lib fltkgl.lib opengl32.lib wsock32.lib comctl32.lib osg.lib osgGA.lib osgViewer.lib osgDB.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -182,6 +182,10 @@
 				RelativePath="..\..\main.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\TextUtils.cxx"
+				>
+			</File>
 			<Filter
 				Name="Dialogs"
 				>
@@ -202,10 +206,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\dialogs\QuickLabel.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\dialogs\WorldOptionsDialog.cpp"
 					>
 				</File>
@@ -221,12 +221,168 @@
 					RelativePath="..\..\model\Model.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\model\SceneBuilder.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Windows"
 				>
 				<File
+					RelativePath="..\..\windows\ConsoleWindow.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\windows\EventHandlerCollection.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\windows\MainWindow.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\windows\RenderWindow.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\windows\View.cpp"
+					>
+				</File>
+				<Filter
+					Name="Event Handlers"
+					>
+					<File
+						RelativePath="..\..\windows\eventHandlers\selectHandler.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="Objects"
+				>
+				<File
+					RelativePath="..\..\objects\arc.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\base.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\box.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\bz2object.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\cone.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\define.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\dynamicColor.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\group.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\link.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\material.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\mesh.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\meshbox.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\meshpyr.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\options.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\physics.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\pyramid.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\sphere.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\teleporter.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\tetra.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\texturematrix.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\waterLevel.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\weapon.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\world.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\objects\zone.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Render"
+				>
+				<File
+					RelativePath="..\..\render\Ground.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\render\Selection.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Widgets"
+				>
+				<File
+					RelativePath="..\..\widgets\Console.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\widgets\QuickLabel.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\widgets\TransformWidget.cpp"
 					>
 				</File>
 			</Filter>
