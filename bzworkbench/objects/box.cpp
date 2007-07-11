@@ -56,8 +56,8 @@ osg::ref_ptr< Renderable > box::makeRenderable(void) {
 void box::updateRenderable( Renderable* boxTransform ) {
 	
 	osg::Vec3 scl = boxTransform->getScale();
-	scl.set( scl.x(), scl.y(), scl.z() / 2.0 );
-	this->size.set( scl );
+	Point3D sclP = Point3D( scl.x(), scl.y(), scl.z() * 2.0f );
+	this->setSize( &sclP );
 	
 	osg::Vec3 pos = boxTransform->getPosition();
 	pos.set( pos.x(), pos.y(), pos.z() - this->getSize()->z() / 2.0 );
