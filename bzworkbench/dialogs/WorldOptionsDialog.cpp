@@ -122,7 +122,7 @@ void WorldOptionsDialog::OKButtonCallback_real(Fl_Widget* w) {
 	
 	float size = this->worldSizeField->value();
 	
-	bool noWalls = noWallsCheckButton->value();
+	bool noWalls = (noWallsCheckButton->value() != 0);
 	
 	string sizeString = string(ftoa(size));
 	
