@@ -87,6 +87,9 @@ int View::handle(int event) {
 	this->modifiers[ FL_META ] = ( shiftState & FL_META );
 	this->modifiers[ FL_ALT ] = ( shiftState & FL_ALT );
 	
+	this->keydown = Fl::event_key();
+	this->buttondown = Fl::event_button();
+            
 	// forward FLTK events to OSG
 	switch(event){
         case FL_PUSH:
@@ -104,7 +107,7 @@ int View::handle(int event) {
             return 1;
           
         case FL_DRAG:
-            _gw->getEventQueue()->mouseMotion(Fl::event_x(), Fl::event_y());
+        	_gw->getEventQueue()->mouseMotion(Fl::event_x(), Fl::event_y());
         	this->redraw();
 			return 1;
         case FL_RELEASE:
@@ -140,6 +143,10 @@ void View::update( Observable* obs, void* data ) {
 			this->root->addChild( objectMap[ obj ].get() );
 		}
 	}
+	
+	// see if there is nothing selected (if so, make sure the selector isn't present)
+	if( this->model->getSelection().size() <= 0 && this->root->containsNode( selection.get() ) )
+		this->root->removeChild( selection.get() );
 	
 	// refresh the scene
 	this->redraw();

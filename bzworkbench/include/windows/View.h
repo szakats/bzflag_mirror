@@ -73,6 +73,12 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         // is a button down?
         bool isPressed( int value );
         
+        // get the current pressed key
+        unsigned char getKey() { return this->keydown; }
+        
+        // get the current pressed button
+        unsigned int getButton() { return this->buttondown; }
+        
     protected:
     
     	// draw method
@@ -90,6 +96,12 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		// modifier key map.
 		// maps FLTK key values to bools
 		map< int, bool > modifiers;
+		
+		// the currently-pressed key
+		unsigned char keydown;
+		
+		// the currently pressed mouse button
+		unsigned int buttondown;
 		
 		// map bz2object pointers to renderables, so we can know
 		// which objects are being rendered

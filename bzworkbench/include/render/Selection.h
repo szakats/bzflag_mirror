@@ -58,6 +58,9 @@ public:
 	// called by selectHandler to determine which part of the selector was picked
 	static osg::Node* getPickedNode( Renderable* r, const osg::NodePath& pickedNodes, unsigned int startIndex = 0 );
 	
+	// refresh (i.e. recompute center)
+	void refresh() { this->rebuildAxes(); }
+	
 private:
 
 	// some constants defining the shape and color of the axes
@@ -71,10 +74,10 @@ private:
 	map< Renderable*, Renderable* > selected;
 	
 	// compute the local origin of the selection
-	Point3D computeLocalOrigin();
+	osg::Vec3 computeLocalOrigin();
 	
 	// build the axes geode
-	osg::ref_ptr< Renderable > buildAxes( Point3D localOrigin );
+	osg::ref_ptr< Renderable > buildAxes( osg::Vec3 localOrigin );
 	
 	// store the 3-axis geode
 	osg::ref_ptr< Renderable > axes;
