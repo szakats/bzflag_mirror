@@ -242,7 +242,6 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 	osg::Vec3 transformVector = sideVector + upVector;
 	transformVector.normalize();
 	
-	
 	if(node->getName() == Selection_X_AXIS_NODE_NAME) {
 		// rotate x
 		a += transformVector.x();
