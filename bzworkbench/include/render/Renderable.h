@@ -26,12 +26,6 @@ public:
 		this->bzObj = NULL;	
 	}
 	
-	// constructor with object
-	Renderable( bz2object* data, osg::CopyOp op = 0) : osg::PositionAttitudeTransform( (data != NULL ? *(data->makeRenderable().get()) : *(new osg::PositionAttitudeTransform())), op ) {
-		this->_name = "";
-		this->bzObj = data;
-	}
-	
 	// constructor with both name and object
 	Renderable( const char* name, bz2object* data, osg::CopyOp op = 0) : osg::PositionAttitudeTransform( (data != NULL ? *(data->makeRenderable().get()) : *(new osg::PositionAttitudeTransform())), op ) {
 		this->_name = name;
@@ -67,16 +61,41 @@ public:
 	
 	// angular rotators (easier than building quaterions and setting the attitude
 	// angles is in degrees, not radians
-	void setRotationX( float rotation ) { this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation ), osg::Vec3( 1.0, 0.0, 0.0 ) ) ); }
-	void setRotationY( float rotation ) { this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation ), osg::Vec3( 0.0, 1.0, 0.0 ) ) ); }
-	void setRotationZ( float rotation ) { this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation ), osg::Vec3( 0.0, 0.0, 1.0 ) ) ); }
-	void setRotation( float rotation, osg::Vec3& axis ) { axis.normalize(); this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation ), axis ) ); }
+	void setRotationX( float r ) {
+		this->rotation.set( r, rotation.y(), rotation.z() );
+		this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation.x() ), osg::Vec3( 1.0, 0.0, 0.0 ),
+									  osg::DegreesToRadians( rotation.y() ), osg::Vec3( 0.0, 1.0, 0.0 ),
+									  osg::DegreesToRadians( rotation.z() ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
+	}
+	void setRotationY( float r ) {
+		this->rotation.set( rotation.x(), r, rotation.z() );
+		this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation.x() ), osg::Vec3( 1.0, 0.0, 0.0 ),
+									  osg::DegreesToRadians( rotation.y() ), osg::Vec3( 0.0, 1.0, 0.0 ),
+									  osg::DegreesToRadians( rotation.z() ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
+	}
+	void setRotationZ( float r ) {
+		this->rotation.set( rotation.x(), rotation.y(), r );
+		this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation.x() ), osg::Vec3( 1.0, 0.0, 0.0 ),
+									  osg::DegreesToRadians( rotation.y() ), osg::Vec3( 0.0, 1.0, 0.0 ),
+									  osg::DegreesToRadians( rotation.z() ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
+	}
+	void setRotation( float x, float y, float z ) {
+		this->rotation.set( x, y, z);
+		this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation.x() ), osg::Vec3( 1.0, 0.0, 0.0 ),
+									  osg::DegreesToRadians( rotation.y() ), osg::Vec3( 0.0, 1.0, 0.0 ),
+									  osg::DegreesToRadians( rotation.z() ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
+	}
+	
+	// getters for rotation
+	osg::Vec3 getRotation() { return this->rotation; }
 	
 protected:
 	
 	// bzw object
 	bz2object* bzObj;
 	
+	// angular orientation around 3D axes
+	osg::Vec3 rotation;
 	
 };
 

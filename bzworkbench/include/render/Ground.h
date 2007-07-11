@@ -14,7 +14,7 @@ class Ground : public Renderable {
 public:
 	
 	// default size
-	static const float DEFAULT_SIZE = 400.0f;
+	static const float DEFAULT_SIZE;
 	
 	// initialize
 	Ground( float size );

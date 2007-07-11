@@ -1,5 +1,8 @@
 #include "../include/render/Ground.h"
 
+
+const float Ground::DEFAULT_SIZE = 400.0f;
+
 // make the ground geode
 Ground::Ground( float size ) : Renderable("ground") {
 	this->size = size;
