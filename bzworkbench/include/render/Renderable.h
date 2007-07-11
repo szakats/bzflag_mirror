@@ -35,7 +35,7 @@ public:
 	}
 	
 	// getters
-	bz2object* getBZWObject() { return bzObj; }
+	bz2object* getBZWObject() { return this->bzObj; }
 	osg::ref_ptr< osg::Node > getNode() { return this->getChild( 0 ); }
 	
 	// setters
