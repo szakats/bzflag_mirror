@@ -54,13 +54,14 @@ osg::ref_ptr< Renderable > box::makeRenderable(void) {
 
 // read in data from a renderable
 void box::updateRenderable( Renderable* boxTransform ) {
-	osg::Vec3 pos = boxTransform->getPosition();
-	pos.set( pos.x(), pos.y(), pos.z() - this->getSize()->z() / 2.0 );
-	this->position.set( pos );
 	
 	osg::Vec3 scl = boxTransform->getScale();
 	scl.set( scl.x(), scl.y(), scl.z() / 2.0 );
 	this->size.set( scl );
+	
+	osg::Vec3 pos = boxTransform->getPosition();
+	pos.set( pos.x(), pos.y(), pos.z() - this->getSize()->z() / 2.0 );
+	this->position.set( pos );
 	
 	double r, x, y, z;	// unused; just place-holders
 	boxTransform->getAttitude().getRotate(r, x, y, z);
