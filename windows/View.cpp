@@ -82,10 +82,10 @@ void View::draw(void) {
 int View::handle(int event) {
 	// whatever the event was, we need to regenerate the modifier keys
 	int shiftState = Fl::event_state();
-	this->modifiers[ FL_SHIFT ] = ( shiftState & FL_SHIFT );
-	this->modifiers[ FL_CTRL ] = ( shiftState & FL_CTRL );
-	this->modifiers[ FL_META ] = ( shiftState & FL_META );
-	this->modifiers[ FL_ALT ] = ( shiftState & FL_ALT );
+	this->modifiers[ FL_SHIFT ] = (( shiftState & FL_SHIFT ) != 0);
+	this->modifiers[ FL_CTRL ] = (( shiftState & FL_CTRL ) != 0);
+	this->modifiers[ FL_META ] = (( shiftState & FL_META ) != 0);
+	this->modifiers[ FL_ALT ] = (( shiftState & FL_ALT ) != 0);
 	
 	this->keydown = Fl::event_key();
 	this->buttondown = Fl::event_button();
