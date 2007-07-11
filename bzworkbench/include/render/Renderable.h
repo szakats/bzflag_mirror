@@ -26,12 +26,6 @@ public:
 		this->bzObj = NULL;	
 	}
 	
-	// constructor with both name and object
-	Renderable( const char* name, bz2object* data, osg::CopyOp op = 0) : osg::PositionAttitudeTransform( (data != NULL ? *(data->makeRenderable().get()) : *(new osg::PositionAttitudeTransform())), op ) {
-		this->_name = name;
-		this->bzObj = data;	
-	}
-	
 	// constructor with a child node to add
 	Renderable( osg::Node* child ) : osg::PositionAttitudeTransform() {
 		this->_name = child->getName();
