@@ -41,24 +41,24 @@
 int main (int argc, char* argv[]) {
   srand(time(NULL));
 
-  std::cout << "Initializing...\n"'
+  std::cout << "Initializing...\n";
 
   GridGenerator gen;
 
-  std::cout << "Parsing options...\n"'
+  std::cout << "Parsing options...\n";
 
   gen.parseOptions(0);
 
-  std::cout << "Generating...\n"'
+  std::cout << "Generating...\n";
 
   gen.run();
 
-  std::cout << "Outputing...\n"'
+  std::cout << "Outputing...\n";
 
   std::ofstream os("test.bzw");
   gen.output(os);
 
-  std::cout << "Done.\n"'
+  std::cout << "Done.\n";
 
 }
 
