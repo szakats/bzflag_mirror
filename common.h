@@ -42,7 +42,8 @@ struct GridInfo {
 /* temporary */
 typedef int Options;
 
-static DiscreetMapNode ZeroNode = { 0, 0, 0 };
+// shouldn't put a static var into a header
+// static DiscreetMapNode ZeroNode = { 0, 0, 0 };
 
 struct Coord2D {
   int x;
