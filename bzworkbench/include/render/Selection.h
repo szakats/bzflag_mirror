@@ -13,8 +13,11 @@
 #include <GL/gl.h>
 
 #include "Point3D.h"
-#include "Renderable.h"
+#include "../objects/bz2object.h"
 #include "../model/SceneBuilder.h"
+#include "../model/Model.h"
+#include "../Observer.h"
+#include "../Observable.h"
 
 using namespace std;
 
@@ -27,39 +30,28 @@ using namespace std;
 /**
  * A selection is just a collection of selected Renderables.
  * This object will render as a set of axes, like in Blender.
+ * This class is also an observer--it watches the model for changes
+ * in object selection.
  */
 
-class Selection : public Renderable {
+class Selection : public Renderable, public Observer {
 
 public:
 
 	// constructer
 	Selection();
-	Selection( vector<Renderable*>& selection );
 	
 	// destructor
 	~Selection() {}
 	
-	// add an object to the selection
-	void add( Renderable* r );
-	
-	// remove from a selection
-	void remove( Renderable* r );
-	
-	// is selected
-	bool contains( Renderable* r );
-	
-	// remove all
-	void removeAll();
-	
-	// get the selected
-	map<Renderable*, Renderable*> getSelection() { return this->selected; }
-	
 	// called by selectHandler to determine which part of the selector was picked
 	static osg::Node* getPickedNode( Renderable* r, const osg::NodePath& pickedNodes, unsigned int startIndex = 0 );
 	
-	// refresh (i.e. recompute center)
-	void refresh() { this->rebuildAxes(); }
+	// inherited update() method
+	void update( Observable* observable, void* data );
+	
+	// regenerate the axes
+	void rebuildAxes( vector< bz2object* >& objects );
 	
 private:
 
@@ -70,20 +62,14 @@ private:
 	static const float TIP_LENGTH;
 	static const float TIP_RADIUS;
 	
-	// the selected renderables (really a reflexive map)
-	map< Renderable*, Renderable* > selected;
-	
-	// compute the local origin of the selection
-	osg::Vec3 computeLocalOrigin();
-	
 	// build the axes geode
 	osg::ref_ptr< Renderable > buildAxes( osg::Vec3 localOrigin );
 	
-	// store the 3-axis geode
+	// store the 3-axis geode (i.e. flyweight it)
 	osg::ref_ptr< Renderable > axes;
 	
-	// regenerate the axes
-	void rebuildAxes();
+	// compute the local origin
+	osg::Vec3 computeLocalOrigin( vector< bz2object* >& objects );
 	
 };
 	

@@ -26,7 +26,7 @@ public:
 	static DataEntry* init(string& data) { return new box(data); }
 	
 	// nothing to destroy...
-	~box();
+	virtual ~box();
 	
 	// getter
 	string get(void);
@@ -37,14 +37,9 @@ public:
 	// toString
 	string toString(void);
 	
-	// return renderable OSG node
-	osg::ref_ptr<Renderable> makeRenderable();
-	
-	// update this object's information into a passed renderable
-	void updateRenderable( Renderable* r );
-	
 private:
 	Point3D size;
+	
 };
 
 #endif /*BOX_H_*/

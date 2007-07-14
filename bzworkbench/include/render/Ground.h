@@ -3,7 +3,7 @@
 
 #include <osg/Geode>
 
-#include "Renderable.h"
+#include "../objects/bz2object.h"
 #include "../model/SceneBuilder.h"
 
 /**

@@ -566,6 +566,12 @@ void Model::_setSelected( bz2object* obj ) {
 	if( this->selectedObjects.size() < 0 )
 		return;
 		
+	for(vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+		if( *i == obj ) {
+			return;		// this object is already selected.
+		}	
+	}	
+	
 	obj->setSelected( true );
 	obj->setChanged( true );
 	
@@ -584,6 +590,7 @@ void Model::_setUnselected( bz2object* obj ) {
 		if( *i == obj ) {
 			obj->setSelected( false );
 			obj->setChanged( true );
+			this->selectedObjects.erase(i);
 			break;
 		}	
 	}
@@ -617,9 +624,9 @@ void Model::_unselectAll() {
 	for(vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		(*i)->setSelected( false );
 		(*i)->setChanged( true );
-		this->notifyObservers( *i );
 	}
 	
+	this->notifyObservers( NULL );
 	selectedObjects.clear();
 }
 

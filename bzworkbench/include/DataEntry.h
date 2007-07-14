@@ -5,9 +5,6 @@
 #include <string>
 #include <vector>
 
-#include <osg/Node>
-#include <osg/PositionAttitudeTransform>
-
 using namespace std;
 
 #include "ftoa.h"
@@ -181,7 +178,7 @@ public:
 	void setChanged() { this->changed = true; }
 	void setChanged(bool value) { this->changed = value; }
 	
-private:
+protected:
 	string header;
 	string keys;
 	string text;

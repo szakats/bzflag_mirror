@@ -7,7 +7,7 @@ group::group() :
 	this->tintColor = RGBA(1, 1, 1, 1);
 	this->driveThrough = false;
 	this->shootThrough = false;
-	this->name = string("");
+	this->setName("");
 }
 
 // constructor with data
@@ -17,7 +17,7 @@ group::group(string& data) :
 	this->tintColor = RGBA(1, 1, 1, 1);
 	this->driveThrough = false;
 	this->shootThrough = false;
-	this->name = string("");
+	this->setName("");
 	
 	this->update(data);	
 }
@@ -70,7 +70,7 @@ int group::update(string& data) {
 		return 0;
 	
 	// assign data
-	this->name = headers[0];
+	this->setName( headers[0] );
 	this->tintColor = (tints.size() > 0 ? RGBA( tints[0].c_str() ) : RGBA(-1, -1, -1, -1));
 	this->team = (teams.size() > 0 ? (int)(atof( teams[0].c_str() )) : -1);
 	this->driveThrough = (driveThroughs.size() == 0 ? false : true);
@@ -88,7 +88,7 @@ string group::toString(void) {
 	if(team > 0)
 		teamString = "  team " + string(itoa(team)) + "\n";
 	
-	return string("group ") + name + "\n" +
+	return string("group ") + this->getName() + "\n" +
 				  tintString + 
 				  teamString +
 				  (driveThrough == true ? "  drivethrough\n" : "") +

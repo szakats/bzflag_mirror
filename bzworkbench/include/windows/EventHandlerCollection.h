@@ -20,7 +20,7 @@
 #include <vector>
 #include <set>
 
-#include "../render/Renderable.h"
+#include "../objects/bz2object.h"
 
 class View;
 class BZEventHandler;

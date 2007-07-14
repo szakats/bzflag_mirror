@@ -5,6 +5,7 @@ const float Ground::DEFAULT_SIZE = 400.0f;
 
 // make the ground geode
 Ground::Ground( float size ) : Renderable("ground") {
+	 
 	this->size = size;
 	
 	// make the geode
@@ -32,7 +33,7 @@ Ground::Ground( float size ) : Renderable("ground") {
    groundTexCoords->push_back( osg::Vec2(0.0, size) );
    
    // make the member ground geode
-   osg::Geode* groundGeode = SceneBuilder::buildGeode( "ground", groundPoints, groundIndexes, groundTexCoords, "share/world/std_ground.png" ).get();
+   osg::Geode* groundGeode = SceneBuilder::buildGeode( "ground", groundPoints, groundIndexes, groundTexCoords, "share/world/std_ground.png" );
    
    // add it
    this->addChild( groundGeode );
@@ -84,7 +85,7 @@ osg::ref_ptr< Renderable > Ground::buildGrid( float size, float unit ) {
    		gridIndexes->push_back( i+3 );
    }
    
-   return SceneBuilder::renderable( SceneBuilder::buildGeode( "grid", gridPoints, gridIndexes, NULL, NULL).get() );
+   return new Renderable( SceneBuilder::buildGeode( "grid", gridPoints, gridIndexes, NULL, NULL) );
 }
 
 // nothing to do when freeing this object

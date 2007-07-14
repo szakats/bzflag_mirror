@@ -6,6 +6,7 @@
 #include <FL/Fl_Window.H>
 
 #include "../model/Model.h"
+#include "../model/SceneBuilder.h"
 
 #include "../dialogs/MainMenu.h"
 #include "../dialogs/WorldOptionsDialog.h"
@@ -44,6 +45,9 @@ public:
 	
 	// get the view
 	View* getView() { return view; }
+	
+	// handler
+	virtual int handle(int event);
 	
 private:
 	

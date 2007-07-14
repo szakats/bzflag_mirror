@@ -106,27 +106,23 @@ int main(int argc, char** argv) {
 	
 	// init the model
 	Model* model = new Model();
+	
 	// add supported objects
 	buildModelDatabase();
 	
 	// init the SceneBuilder
 	SceneBuilder::init();
 	
-	box sceneBox1 = box();
-	box sceneBox2 = box();
-	Point3D position = Point3D( 10.0, 10.0, 0.0 );
-	Point3D position2 = Point3D( -20.0, -20.0, 0.0);
-	Point3D size = Point3D( 10.0, 30.0, 30.0 );
-	// float rotation = 30;
-	sceneBox1.setPosition( &position );
-	sceneBox2.setPosition( &position2 );
-	sceneBox1.setSize( &size );
-	sceneBox2.setSize( &size );
-//	sceneBox1.setRotation( &rotation );
-//	sceneBox2.setRotation( &rotation );
+	box* sceneBox1 = new box();
+	box* sceneBox2 = new box();
+	osg::Vec3 position = osg::Vec3( 10.0, 10.0, 0.0 );
+	osg::Vec3 position2 = osg::Vec3( -20.0, -20.0, 0.0);
 	
-	model->addObject( &sceneBox1 );
-	model->addObject( &sceneBox2 );
+	sceneBox1->setPosition( position );
+	sceneBox2->setPosition( position2 );
+	
+	model->addObject( sceneBox1 );
+	model->addObject( sceneBox2 );
 	
 	// load the main window
 	MainWindow* mw = new MainWindow(model);

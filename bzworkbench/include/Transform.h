@@ -10,16 +10,16 @@
 using namespace std;
 
 // a metadata entry that is used to describe a transformation such as spin, shear, shift, and scale
-class Transform : public DataEntry {
+class BZTransform : public DataEntry {
 	
 	public:
 	
-		Transform() : DataEntry("", "") {
+		BZTransform() : DataEntry("", "") {
 			name = string("");
 			data = vector<float>();
 		}
 		
-		Transform(string& data) : DataEntry("", "") {
+		BZTransform(string& data) : DataEntry("", "") {
 			name = string("");
 			this->data = vector<float>();
 			this->update(data);

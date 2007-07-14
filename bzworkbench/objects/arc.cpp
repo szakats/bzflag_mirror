@@ -8,7 +8,7 @@ arc::arc() :
 	this->ratio = 1.0f;
 	this->divisions = 16;
 	this->angle = 180.0f;
-	this->name = string("default_arc");
+	this->setName("default_arc");
 	this->physicsDriver = string("");
 	flatShading = false;
 	smoothbounce = true;
@@ -23,7 +23,7 @@ arc::arc(string& data) :
 	this->ratio = 1.0f;
 	this->divisions = 16;
 	this->angle = 180.0f;
-	this->name = string("default_arc");
+	this->setName("default_arc");
 	this->physicsDriver = string("");
 	flatShading = false;
 	smoothbounce = true;
@@ -82,7 +82,7 @@ int arc::update(string& data) {
 		return 0;
 	
 	// set the data
-	this->name = names[0];
+	this->setName( names[0] );
 	this->angle = atof( angles[0].c_str() );
 	this->divisions = atoi( vDivisions[0].c_str() );
 	this->ratio = atof( ratios[0].c_str() );

@@ -9,54 +9,10 @@ const float Selection::TIP_RADIUS = 1.0f;
 
 
 Selection::Selection() {
-	this->selected = map< Renderable*, Renderable* >();
-	
 	// build the map geode and add it
-	this->axes = this->buildAxes( this->computeLocalOrigin() );
-	this->addChild( axes.get() );
+	this->axes = this->buildAxes( osg::Vec3( 0.0, 0.0, 0.0 ) );
 	
 	this->setName( Selection_NODE_NAME );
-}
-
-// add objects to the selection
-Selection::Selection( vector<Renderable*>& selection ) {
-	this->selected = map< Renderable*, Renderable* >();
-	
-	// load in the renderables
-	if(selection.size() > 0) {
-		for(vector<Renderable*>::iterator i = selection.begin(); i != selection.end(); i++) {	
-			this->selected[ *i ] = *i;
-		}
-	}
-	
-	// compute the local origin
-	osg::Vec3 origin = this->computeLocalOrigin();
-	
-	// build the map geode and add it
-	this->axes = this->buildAxes( origin );
-	this->addChild( axes.get() );
-	
-	this->setName( Selection_NODE_NAME );
-
-}
-
-// add a renderable
-void Selection::add( Renderable* r ) {
-	this->selected[ r ] = r;
-	this->rebuildAxes();
-}
-
-// remove a renderable
-void Selection::remove( Renderable* r ) {
-	if( this->selected.count(r) > 0 ) {
-		this->selected.erase( r );
-		this->rebuildAxes();
-	}
-}
-
-// do we have this renderable?
-bool Selection::contains( Renderable* r ) {
-	return ( this->selected.count( r ) > 0 ? true : false );
 }
 
 // build the axes geode
@@ -144,7 +100,7 @@ osg::ref_ptr< Renderable > Selection::buildAxes( osg::Vec3 localOrigin ) {
 	axesGroup->addChild( centerGeode );
 	
 	// encase the group into a renderable
-	osg::ref_ptr< Renderable > r = SceneBuilder::renderable( axesGroup );
+	osg::ref_ptr< Renderable > r = new Renderable( axesGroup );
 	osg::StateSet* states = axesGroup->getOrCreateStateSet();
 	
 	// disable depth testing
@@ -157,18 +113,18 @@ osg::ref_ptr< Renderable > Selection::buildAxes( osg::Vec3 localOrigin ) {
 }
 
 // get the local origin
-osg::Vec3 Selection::computeLocalOrigin() {
+osg::Vec3 Selection::computeLocalOrigin( vector< bz2object* >& objects ) {
 	double x = 0.0, y = 0.0, z = 0.0;
 	
 	// compute the average x, y, and z values of all renderables
-	if( this->selected.size() > 0 ) {
-		for( map<Renderable*, Renderable*>::iterator i = this->selected.begin(); i != this->selected.end(); i++) {
-			x += i->second->getPosition().x();
-			y += i->second->getPosition().y();
-			z += i->second->getPosition().z();
+	if( objects.size() > 0 ) {
+		for( vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
+			x += (*i)->getPosition().x();
+			y += (*i)->getPosition().y();
+			z += (*i)->getPosition().z();
 		}
 		
-		int numElements = this->selected.size();
+		int numElements = objects.size();
 		x /= numElements;
 		y /= numElements;
 		z /= numElements;
@@ -178,13 +134,8 @@ osg::Vec3 Selection::computeLocalOrigin() {
 }
 
 // rebuild the axes
-void Selection::rebuildAxes() {
-	this->axes->setPosition( this->computeLocalOrigin() );
-}
-
-// remove all
-void Selection::removeAll() {
-	this->selected.clear();	
+void Selection::rebuildAxes( vector< bz2object*>& objects ) {
+	this->axes->setPosition( this->computeLocalOrigin( objects ) );
 }
 
 // determine which child of this node was picked
@@ -199,4 +150,35 @@ osg::Node* Selection::getPickedNode( Renderable* r, const osg::NodePath& nodes, 
 	}
 	
 	return NULL;
+}
+
+// inhereted Observer method: update().
+// This method queries the Model (i.e. the passed observer) for the selected objects
+// and recomputes the axis location
+void Selection::update( Observable* observable, void* data ) {
+	// see if this was the Model
+	Model* model = dynamic_cast< Model* >( observable );
+	if(!model)
+		return;
+	
+	// update the axes
+	vector< bz2object* > selectedObjects = model->_getSelection();
+	
+	// remove the axes if there are no objects
+	if( selectedObjects.size() <= 0 && this->containsNode( axes.get() ))
+		this->removeChild( axes.get() );
+	
+	// add the axes if there are some objects
+	if( selectedObjects.size() > 0 && !this->containsNode( axes.get() ))
+		this->addChild( axes.get() );
+		
+	// recompute the center
+	this->rebuildAxes( selectedObjects );
+	
+	printf("selection:\n");
+	for(vector<bz2object*>::iterator i = selectedObjects.begin(); i != selectedObjects.end(); i++) {
+		printf("  %s\n", (*i)->getName().c_str());	
+	}
+	printf("==================================\n");
+	
 }

@@ -66,9 +66,8 @@ int define::update(string& data) {
 	vector<string> arcs = BZWParser::findSections("arc", chunks);
 	vector<arc> arcData;
 	if(arcs[0] != BZW_NOT_FOUND) {
-		arc tmp;
 		for(vector<string>::iterator i = arcs.begin(); i != arcs.end(); i++) {
-			tmp = arc();
+			arc tmp = arc();
 			if(!tmp.update(*i))
 				return 0;
 			arcData.push_back( tmp );	
@@ -79,9 +78,8 @@ int define::update(string& data) {
 	vector<string> bases = BZWParser::findSections("base", chunks);
 	vector<base> baseData;
 	if(bases[0] != BZW_NOT_FOUND) {
-		base tmp;
 		for(vector<string>::iterator i = bases.begin(); i != bases.end(); i++) {
-			tmp = base();
+			base tmp = base();
 			if(!tmp.update(*i))
 				return 0;
 			baseData.push_back( tmp );	
@@ -92,9 +90,8 @@ int define::update(string& data) {
 	vector<string> boxes = BZWParser::findSections("box", chunks);
 	vector<box> boxData;
 	if(boxes[0] != BZW_NOT_FOUND) {
-		box tmp;
 		for(vector<string>::iterator i = boxes.begin(); i != boxes.end(); i++) {
-			tmp = box();
+			box tmp = box();
 			if(!tmp.update(*i))
 				return 0;
 			boxData.push_back( tmp );	
@@ -105,9 +102,8 @@ int define::update(string& data) {
 	vector<string> cones = BZWParser::findSections("cone", chunks);
 	vector<cone> coneData;
 	if(cones[0] != BZW_NOT_FOUND) {
-		cone tmp;
 		for(vector<string>::iterator i = cones.begin(); i != cones.end(); i++) {
-			tmp = cone();
+			cone tmp = cone();
 			if(!tmp.update(*i))
 				return 0;
 			coneData.push_back( tmp );	
@@ -118,9 +114,8 @@ int define::update(string& data) {
 	vector<string> groups = BZWParser::findSections("group", chunks);
 	vector<group> groupData;
 	if(groups[0] != BZW_NOT_FOUND) {
-		group tmp;
 		for(vector<string>::iterator i = groups.begin(); i != groups.end(); i++) {
-			tmp = group();
+			group tmp = group();
 			if(!tmp.update(*i))
 				return 0;
 			groupData.push_back( tmp );	
@@ -131,9 +126,8 @@ int define::update(string& data) {
 	vector<string> meshes = BZWParser::findSections("mesh", chunks);
 	vector<mesh> meshData;
 	if(meshes[0] != BZW_NOT_FOUND) {
-		mesh tmp;
 		for(vector<string>::iterator i = meshes.begin(); i != meshes.end(); i++) {
-			tmp = mesh();
+			mesh tmp = mesh();
 			if(!tmp.update(*i))
 				return 0;
 			meshData.push_back( tmp );	
@@ -144,9 +138,8 @@ int define::update(string& data) {
 	vector<string> meshboxes = BZWParser::findSections("meshbox", chunks);
 	vector<meshbox> meshboxData;
 	if(meshboxes[0] != BZW_NOT_FOUND) {
-		meshbox tmp;
 		for(vector<string>::iterator i = meshboxes.begin(); i != meshboxes.end(); i++) {
-			tmp = meshbox();
+			meshbox tmp = meshbox();
 			if(!tmp.update(*i))
 				return 0;
 			meshboxData.push_back( tmp );	
@@ -157,9 +150,8 @@ int define::update(string& data) {
 	vector<string> meshpyrs = BZWParser::findSections("meshpyr", chunks);
 	vector<meshpyr> meshpyrData;
 	if(meshpyrs[0] != BZW_NOT_FOUND) {
-		meshpyr tmp;
 		for(vector<string>::iterator i = meshpyrs.begin(); i != meshpyrs.end(); i++) {
-			tmp = meshpyr();
+			meshpyr tmp = meshpyr();
 			if(!tmp.update(*i))
 				return 0;
 			meshpyrData.push_back( tmp );	
@@ -170,9 +162,8 @@ int define::update(string& data) {
 	vector<string> pyramids = BZWParser::findSections("pyramid", chunks);
 	vector<pyramid> pyramidData;
 	if(pyramids[0] != BZW_NOT_FOUND) {
-		pyramid tmp;
 		for(vector<string>::iterator i = pyramids.begin(); i != pyramids.end(); i++) {
-			tmp = pyramid();
+			pyramid tmp = pyramid();
 			if(!tmp.update(*i))
 				return 0;
 			pyramidData.push_back( tmp );	
@@ -183,9 +174,8 @@ int define::update(string& data) {
 	vector<string> spheres = BZWParser::findSections("sphere", chunks);
 	vector<sphere> sphereData;
 	if(spheres[0] != BZW_NOT_FOUND) {
-		sphere tmp;
 		for(vector<string>::iterator i = spheres.begin(); i != spheres.end(); i++) {
-			tmp = sphere();
+			sphere tmp = sphere();
 			if(!tmp.update(*i))
 				return 0;
 			sphereData.push_back( tmp );	
@@ -196,9 +186,8 @@ int define::update(string& data) {
 	vector<string> teleporters = BZWParser::findSections("teleporter", chunks);
 	vector<teleporter> teleporterData;
 	if(teleporters[0] != BZW_NOT_FOUND) {
-		teleporter tmp;
 		for(vector<string>::iterator i = teleporters.begin(); i != teleporters.end(); i++) {
-			tmp = teleporter();
+			teleporter tmp = teleporter();
 			if(!tmp.update(*i))
 				return 0;
 			teleporterData.push_back( tmp );	
@@ -209,9 +198,8 @@ int define::update(string& data) {
 	vector<string> tetras = BZWParser::findSections("tetra", chunks);
 	vector<tetra> tetraData;
 	if(tetras[0] != BZW_NOT_FOUND) {
-		tetra tmp;
 		for(vector<string>::iterator i = tetras.begin(); i != tetras.end(); i++) {
-			tmp = tetra();
+			tetra tmp = tetra();
 			if(!tmp.update(*i))
 				return 0;
 			tetraData.push_back( tmp );	

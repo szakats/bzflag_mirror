@@ -1,15 +1,13 @@
 #ifndef BZ2OBJECT_H_
 #define BZ2OBJECT_H_
 
+#include "../render/Renderable.h"
+#include "../render/Point3D.h"
 #include "../DataEntry.h"
 #include "../Transform.h"
-#include "../render/Point3D.h"
-#include "../model/BZWParser.h"
 
 #include <vector>
 #include <string>
-
-class Renderable;
 
 using namespace std;
 
@@ -19,7 +17,7 @@ using namespace std;
  * but simply do not support transformations
  */
 
-class bz2object : public DataEntry {
+class bz2object : public Renderable, public DataEntry {
 	
 	public:
 	
@@ -28,6 +26,9 @@ class bz2object : public DataEntry {
 		
 		// constructor with data
 		bz2object(const char* name, const char* keys, const char* data);
+		
+		// destructor
+		virtual ~bz2object() { }
 		
 		// getter
 		string get(void);
@@ -41,44 +42,32 @@ class bz2object : public DataEntry {
 		// this method only returns the (indented) lines in the BZW text and is meant to be called by derived classes
 		string BZWLines(void);
 		
-		// get the object in the form of something we can render (i.e. a PositionAttitudeTransform node containing the scenegraph node)
-		virtual osg::ref_ptr<Renderable> makeRenderable(void) { return osg::ref_ptr< Renderable > (NULL); }
-		
-		// update the bz2object's data from a renderable
-		virtual void updateRenderable( Renderable* r ) { }
-		
 		// data getters (makes MasterConfigurationDialog code easier)
-		Point3D* getPosition() { return &this->position; }
-		Point3D* getSize() { return &this->size; }
-		string* getName() { return &this->name; }
-		float* getRotation() { return &this->rotation; }
-		string* getPhyDrv() { return &this->physicsDriver; }
-		vector<Transform>* getTransformations() { return &this->transformations; }
-		vector<string>* getMaterials() { return &this->materials; }
+		string getPhyDrv() { return this->physicsDriver; }
+		vector<BZTransform>& getTransformations() { return this->transformations; }
+		vector<string>& getMaterials() { return this->materials; }
 		bool isSelected() { return this->selected; }
 		
 		// data setters (makes MasterConfigurationDialog code easier)
-		void setPosition( Point3D* position ) { this->position = *position; }
-		void setSize( Point3D* s ) { this->size = *s; }
-		void setName( const char* name ) { this->name = name; }
-		void setRotation( float* rotation ) { this->rotation = *rotation; }
 		void setPhyDrv( const char* phydrv ) { this->physicsDriver = phydrv; }
-		void setTransforms( vector<Transform>* transformations ) { this->transformations = *transformations; }
-		void setMaterials( vector<string>* materials ) { this->materials = *materials; }
+		void setTransforms( vector<BZTransform>& transformations ) { this->transformations = transformations; }
+		void setMaterials( vector<string>& materials ) { this->materials = materials; }
 		void setSelected( bool value ) { this->selected = value; }
 		
+		// make this public
+		bz2object operator =( const bz2object& obj ) { 
+			bz2object newObj(NULL, NULL);
+			memcpy(&newObj, &obj, sizeof(bz2object));
+			return newObj;
+		}
+		
 	protected:
-		Point3D position;
-		Point3D size;
-		float rotation;
-		string name, physicsDriver;
+		string physicsDriver;
 		vector<string> materials;
-		vector<Transform> transformations;
+		vector<BZTransform> transformations;
 		// set true if selected in the 3D scene
 		bool selected;
 		
 };
-
-#include "../render/Renderable.h"
 
 #endif /*BZ2OBJECT_H_*/
