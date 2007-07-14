@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="fltkd.lib fltkgld.lib opengl32.lib wsock32.lib comctl32.lib osg.lib osgGA.lib osgViewer.lib osgDB.lib"
+				AdditionalDependencies="fltkd.lib fltkgld.lib opengl32.lib wsock32.lib comctl32.lib osgd.lib osgGAd.lib osgViewerd.lib osgDBd.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
