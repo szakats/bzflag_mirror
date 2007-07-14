@@ -104,7 +104,7 @@ void TransformWidget::setFields(vector<string> fieldValues) {
 void TransformWidget::setFields(vector<float> fieldValues) {
 	int index = 0;
 	for(vector<Fl_Float_Input*>::iterator i = fields.begin(); i != fields.end(); i++) {
-		(*i)->value(ftoa(fieldValues[index]));
+		(*i)->value(ftoa(fieldValues[index]).c_str());
 		index++;
 	}	
 }
@@ -129,9 +129,9 @@ string TransformWidget::toString() {
 			dz /= divisor;	
 		}
 		
-		fields[0]->value( ftoa(dx) );
-		fields[1]->value( ftoa(dy) );
-		fields[2]->value( ftoa(dz) );
+		fields[0]->value( ftoa(dx).c_str() );
+		fields[1]->value( ftoa(dy).c_str() );
+		fields[2]->value( ftoa(dz).c_str() );
 	}
 	
 	// commit the values to the return string
