@@ -24,7 +24,7 @@ void GridGenerator::parseOptions(Options opt) {
   gi.stepX = gi.size / gi.sizeX;
   gi.stepY = gi.size / gi.sizeY;
   map.initialize(gi);
-};
+}
 
 void GridGenerator::run() { 
   int x,y;
@@ -52,7 +52,7 @@ void GridGenerator::run() {
   mats.push_back(Material("roadx","roadx"));
   mats.push_back(Material("bwall","bwall"));
   mats.push_back(Material("top","mesh"));
-};
+}
 
 void GridGenerator::output(std::ofstream& out) { 
   Generator::output(out); 
@@ -74,10 +74,10 @@ void GridGenerator::output(std::ofstream& out) {
   printf("\n");
   */
 
-};
+}
 
 GridGenerator::~GridGenerator() { 
-};
+}
 
 
   
