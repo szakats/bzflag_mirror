@@ -39,7 +39,7 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         View(Model* m, int x, int y, int w, int h, const char *label=0);
         
         // get the root node
-        osg::Group* getRootNode() { return root.get(); }
+        osg::Group* getRootNode() { return root; }
         
         // FLTK event handler
         virtual int handle(int);
@@ -49,14 +49,12 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         
         // set an object as selected
         void setSelected( bz2object* object );
-        void setSelected( Renderable* node );
         
         // set an object as unselected
         void setUnselected( bz2object* object );
-        void setUnselected( Renderable* node );
         
-        // tell the model an object changed
-        void refresh( Renderable* node );
+        // see if a renderable is contained
+       	bool contains( Renderable* node ) { return this->root->containsNode( node ); }
         
         // select all objects
         // void selectAll();
@@ -69,6 +67,7 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         
         // is an object selected?
         bool isSelected( Renderable* node );
+        bool isSelected( bz2object* obj );
         
         // is a button down?
         bool isPressed( int value );
@@ -79,6 +78,9 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         // get the current pressed button
         unsigned int getButton() { return this->buttondown; }
         
+        // get the model reference
+        const Model* getModelRef() { return this->model; }
+        
     protected:
     
     	// draw method
@@ -88,10 +90,10 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		Model* model;
 		
 		// root node
-		osg::ref_ptr< osg::Group > root;
+		osg::Group* root;
 		
 		// ground node
-		osg::ref_ptr< Renderable > ground;
+		Renderable* ground;
 		
 		// modifier key map.
 		// maps FLTK key values to bools
@@ -103,17 +105,15 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		// the currently pressed mouse button
 		unsigned int buttondown;
 		
-		// map bz2object pointers to renderables, so we can know
-		// which objects are being rendered
-		map< bz2object* , osg::ref_ptr< Renderable > > objectMap;
+		// map of bz2objects
 	
 	private:
 		
 		// the collection of evnet handlers
-		osg::ref_ptr< EventHandlerCollection > eventHandlers;
+		EventHandlerCollection* eventHandlers;
 		
 		// the current selection
-		osg::ref_ptr< Selection > selection;
+		Selection* selection;
 };
 
 #endif /*VIEW_H_*/

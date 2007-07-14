@@ -17,13 +17,15 @@
 
 #include "../objects/bz2object.h"
 #include "../render/Renderable.h"
+#include "../ftoa.h"
 
-#define SCENEBUILDER_TAIL_NODE			"|node"
-#define SCENEBUILDER_TAIL_GEOMETRY		"|geometry"
-#define SCENEBUILDER_TAIL_TEXTURE2D		"|texture2d"
-#define SCENEBUILDER_TAIL_SELECTED		"|selected"
+#define SCENEBUILDER_TAIL_NODE			"|SBnode"
+#define SCENEBUILDER_TAIL_GEOMETRY		"|SBgeometry"
+#define SCENEBUILDER_TAIL_TEXTURE2D		"|SBtexture2d"
+#define SCENEBUILDER_TAIL_SELECTED		"|SBselected"
 
 #include <map>
+#include <string>
 
 using namespace std;
 
@@ -41,30 +43,30 @@ public:
 	// shut down
 	static bool shutdown();
 	
-	// build an object and return a node containing the object.  If loadSelectedToo is true, this will also call loadSelectedNode
-	static osg::ref_ptr< osg::Node > buildNode( const char* nodeFile, bool loadSelectedToo = false );
+	// build an object and return a node containing the object.
+	static osg::Node* buildNode( const char* nodeFile );
 	
 	// build a selected node
-	static osg::ref_ptr< osg::Node > buildSelectedNode( const char* nodeFile );
+	static osg::Node* buildSelectedNode( const char* nodeFile );
 	
 	// mark a node as selected
 	static void markSelected( osg::Node* node );
 	
+	// mark a node as unselected
+	static void markUnselected( osg::Node* node );
+	
 	// get a normal node; return NULL if it hasn't been loaded
-	static osg::ref_ptr< osg::Node > getNode( const char* nodeFile );
+	// static osg::Node* getNode( const char* nodeFile );
 	
 	// build an object and return a geode containing the object
-	static osg::ref_ptr< osg::Geode > buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureFile, bool loadSelectedToo = false );
-	static osg::ref_ptr< osg::Geode > buildGeode( const char* nodeName, osg::Geometry*, const char* textureName, bool loadSelectedToo = false );
-	
-	// return a Renderable node encapsulating the node
-	static osg::ref_ptr< Renderable > renderable( osg::Node* node, bz2object* obj = NULL );
+	static osg::Geode* buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureFile, bool loadSelectedToo = false );
+	static osg::Geode* buildGeode( const char* nodeName, osg::Geometry*, const char* textureName, bool loadSelectedToo = false );
 	
 	// get the geometry data from a node
-	static const vector< osg::ref_ptr<osg::Drawable> >* getNodeGeometry( osg::PositionAttitudeTransform* node );
+	static const vector< osg::ref_ptr< osg::Drawable > >* getNodeGeometry( osg::PositionAttitudeTransform* node );
 	
 	// get all children from a group
-	static vector< osg::ref_ptr<osg::Node> >* extractChildren( osg::Group* group );
+	static vector< osg::Node* >* extractChildren( osg::Group* group );
 	
 	// assign a texture to a node
 	static void assignTexture( const char* filename, osg::Node* node );
@@ -73,14 +75,15 @@ public:
 	static void assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Vec4 specular, osg::Vec4 emissive, float shininess, float alpha, osg::Node* node );
 	
 	// see if a particular name is already mapped to a node
+	/*
 	static bool isLoaded( const char* _name ) {
 		string name = string( _name ) + SCENEBUILDER_TAIL_NODE;
-		if( nodeData[ name ].get() != NULL )
+		if( nodeData[ name ] != NULL )
 			return true;
 		else
 			return false;
 	}
-	
+	*/
 	// give the string the "select" attribute
 	static string nameSelected( const char* str ) {
 		return nameUnselected( str ) + SCENEBUILDER_TAIL_SELECTED;
@@ -114,7 +117,7 @@ public:
 	
 	// indicate that this is a node
 	static string nameNode( const char* str ) {
-		return string( str ) + SCENEBUILDER_TAIL_NODE;	
+		return itoa( ++nameCount ) + "|" + str + SCENEBUILDER_TAIL_NODE;	
 	}
 	
 	// indicate that this is a selected node
@@ -122,22 +125,22 @@ public:
 		return nameSelected( nameNode( str ).c_str() );
 	}
 	
-	// encapsulate a Renderable inside a ref_ptr
-	static osg::ref_ptr< Renderable > makeRef( Renderable* r ) { return osg::ref_ptr< Renderable > (r); }
-	
-	// extract a renderable from a DataEntry
-	static osg::ref_ptr< Renderable > extractRenderable( bz2object* d ) { return d->makeRenderable(); }
-	
 private:
-
+	
+	/*
 	// map strings to already-loaded nodes
-	static map< string, osg::ref_ptr<osg::Node> > nodeData;
+	static map< string, osg::Node* > nodeData;
 	
 	// map strings to geometry data for already-loaded geodes
-	static map< string, osg::ref_ptr<osg::Geometry> > geoData;
+	static map< string, osg::Geometry* > geoData;
 	
 	// map strings to texture data for already-loaded geodes
-	static map< string, osg::ref_ptr<osg::Texture2D> > textureData;
+	static map< string, osg::Texture2D* > textureData;
+	*/
+	
+	// this gets attached to the end of any name generated from nameNode()
+	// to make each node name identical
+	static int nameCount;
 	
 };
 

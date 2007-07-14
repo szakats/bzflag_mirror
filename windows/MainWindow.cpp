@@ -9,8 +9,9 @@ MainWindow::MainWindow() :
 	this->end();
 	
 	this->model = new Model();
-	
+	printf("2\n");
 	this->view = new View(model, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	printf("3\n");
 	view->end();
 	
 	this->add(view);
@@ -61,4 +62,16 @@ void MainWindow::openDialog(const char* _dialog) {
 	if(!initialized)
 		return;
 	
+}
+
+// handle
+int MainWindow::handle(int event) {
+	switch( event ) {
+		case FL_CLOSE:	// catch window close event
+			// make sure to de-allocate nodes
+			SceneBuilder::shutdown();
+			return 1;
+		default:
+			return Fl_Window::handle( event );
+	}
 }

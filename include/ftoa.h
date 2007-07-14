@@ -2,19 +2,16 @@
 #define FTOA_H_
 
 #include <string>
+#include "TextUtils.h"
 
 using namespace std;
 
-inline const char* ftoa(float f) {
-	char buff[30];
-	sprintf(buff, "%f", f);
-	return (string(buff).c_str());
+inline string ftoa(float f) {
+	return TextUtils::format("%f", f);
 }
 
-inline const char* itoa(int i) {
-	char buff[30];
-	sprintf(buff, "%d", i);
-	return (string(buff).c_str());	
+inline string itoa(int i) {
+	return TextUtils::format("%i", i);	
 }
 
 #endif /*FTOA_H_*/

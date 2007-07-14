@@ -1,20 +1,24 @@
 #include "../include/objects/bz2object.h"
 
 // default constructor
-bz2object::bz2object(const char* name, const char* keys) : DataEntry(name, keys) {
-	this->position = Point3D(0.0f, 0.0f, 0.0f);
-	this->rotation = 0.0f;
-	this->size = Point3D(-1.0f, -1.0f, -1.0f);
-	this->transformations = vector<Transform>();
+bz2object::bz2object(const char* name, const char* keys):
+	Renderable(),
+	DataEntry(name, keys) {
+		
+	this->transformations = vector<BZTransform>();
+	this->materials = vector<string>();
 	this->setSelected( false );
+	this->setName( "(unknown bz2object)" );
 };
 
 // constructor with data
-bz2object::bz2object(const char* name, const char* keys, const char* data) : DataEntry(name, keys, data) {
-	this->position = Point3D(0.0f, 0.0f, 0.0f);
-	this->size = Point3D(-1.0f, -1.0f, -1.0f);
-	this->rotation = 0.0f;
-	this->transformations = vector<Transform>();
+bz2object::bz2object(const char* name, const char* keys, const char* data):
+	Renderable(),
+	DataEntry(name, keys, data)
+	{
+		
+	this->transformations = vector<BZTransform>();
+	this->materials = vector<string>();
 	this->setSelected( false );
 	string d = string(data);
 	this->update(d);
@@ -118,7 +122,7 @@ int bz2object::update(string& data) {
 	if(transformKeys.size() > 0) {
 		vector<string> transforms = BZWParser::getLinesByKeys(transformKeys, header, data.c_str());
 		for(vector<string>::iterator i = transforms.begin(); i != transforms.end(); i++) {
-			transformations.push_back( Transform(*i) );	
+			transformations.push_back( BZTransform(*i) );	
 		}
 	}
 	
@@ -138,13 +142,13 @@ int bz2object::update(string& data) {
 	
 	// load in the data	
 	if(this->isKey("name") && names.size() > 0)
-		this->name = names[0];
+		this->setName( names[0] );
 	if(this->isKey("position") && positions.size() > 0)
-		this->position = Point3D( positions[0].c_str() );
+		this->setPosition( Point3D( positions[0].c_str() ) );
 	if(this->isKey("rotation") && rotations.size() > 0)
-		this->rotation = atof( rotations[0].c_str() );
+		this->setRotationZ( atof( rotations[0].c_str() ) );
 	if(this->isKey("size") && sizes.size() > 0)
-		this->size = Point3D( sizes[0].c_str() );
+		this->setScale( Point3D( sizes[0].c_str() ) );
 	if(this->isKey("phydrv") && physicsDrivers.size() > 0)
 		this->physicsDriver = physicsDrivers[0];
 	if(this->isKey("matref") && matrefs.size() > 0)
@@ -163,23 +167,23 @@ string bz2object::BZWLines(void) {
 	string ret = string("");
 	
 	// add name key/value to the string if supported
-	if(this->isKey("name") && name.length() > 0)
-		ret += "  name " + name + "\n";
+	if(this->isKey("name") && this->getName().length() > 0)
+		ret += "  name " + this->getName() + "\n";
 	
 	// add position key/value to the string if supported
 	if(this->isKey("position"))
-		ret += "  position " + position.toString();
+		ret += "  position " + Point3D( this->getPosition() ).toString();
 		
 	// add size key/value to the string if supported
-	if(this->isKey("size") && size.x() > 0 && size.y() > 0 && size.z() > 0)
-		ret += "  size " + size.toString();
+	if(this->isKey("size"))
+		ret += "  size " + Point3D( this->getScale() ).toString();
 	
 	// add rotation key/value to the string if supported
 	if(this->isKey("rotation"))
-		ret += "  rotation " + string( ftoa(rotation) ) + "\n";
+		ret += "  rotation " + string( ftoa(this->getRotation().z()) ) + "\n";
 	
 	// add all transformations to the string if they are supported
-	for(vector<Transform>::iterator i = transformations.begin(); i != transformations.end(); i++) {
+	for(vector<BZTransform>::iterator i = transformations.begin(); i != transformations.end(); i++) {
 		if(this->isKey(i->getHeader().c_str()))
 			ret += "  " + i->toString();
 	}

@@ -6,7 +6,7 @@ cone::cone() :
 	
 	// define some basic values
 	this->divisions = 16;
-	this->name = string("default_cone");
+	this->setName("default_cone");
 	this->physicsDriver = string("");
 	flatShading = false;
 	smoothbounce = true;
@@ -19,7 +19,7 @@ cone::cone(string& data) :
 	
 	// define some basic values
 	this->divisions = 16;
-	this->name = string("default_cone");
+	this->setName("default_cone");
 	this->physicsDriver = string("");
 	flatShading = false;
 	smoothbounce = true;
@@ -67,7 +67,7 @@ int cone::update(string& data) {
 		return 0;
 	
 	// set the data
-	this->name = names[0];
+	this->setName( names[0] );
 	this->divisions = atoi( vDivisions[0].c_str() );
 	this->flatShading = (flatShadings.size() == 0 ? false : true);
 	this->smoothbounce = (smoothBounces.size() == 0 ? false : true);

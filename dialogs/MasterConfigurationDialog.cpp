@@ -11,16 +11,16 @@ MasterConfigurationDialog::MasterConfigurationDialog(bz2object* obj) :
 	string objectStr = object->get();
 	
 	// read position
-	Point3D position = *(object->getPosition());
+	Point3D position = Point3D(object->getPosition());
 	
 	// read rotation
-	float rotation = *(object->getRotation());
+	float rotation = (object->getRotation().z());
 	
 	// read size
-	Point3D size = *(object->getSize());
+	Point3D size = Point3D(object->getScale());
 	
 	// read transformations
-	vector<Transform> transforms = *(object->getTransformations());
+	vector<BZTransform> transforms = (object->getTransformations());
 	
 	// find out the supported transformations and determine their field format
 	supportedTransformations = string("");
@@ -99,7 +99,7 @@ MasterConfigurationDialog::MasterConfigurationDialog(bz2object* obj) :
 	transformationScrollArea->type(Fl_Scroll::VERTICAL_ALWAYS);
 	// add the transformations if they exist and are supported
 	if(transformationFormat.length() > 0 && transforms.size() > 0) {
-		for(vector<Transform>::iterator i = transforms.begin(); i != transforms.end(); i++) {
+		for(vector<BZTransform>::iterator i = transforms.begin(); i != transforms.end(); i++) {
 			this->addTransformCallback_real(transformationScrollArea);
 			transformations[transformations.size() - 1]->setTransformationType(i->getName().c_str());
 			transformations[transformations.size() - 1]->setFields( i->getData() );

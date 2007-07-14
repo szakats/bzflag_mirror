@@ -5,7 +5,7 @@ sphere::sphere() :
 	
 	// define some basic values
 	this->divisions = 16;
-	this->name = string("default_sphere");
+	this->setName("default_sphere");
 	this->physicsDriver = string("");
 	flatShading = false;
 	smoothbounce = true;
@@ -17,7 +17,7 @@ sphere::sphere(string& data) :
 	
 	// define some basic values
 	this->divisions = 16;
-	this->name = string("default_sphere");
+	this->setName("default_sphere");
 	this->physicsDriver = string("");
 	flatShading = false;
 	smoothbounce = true;
@@ -96,7 +96,7 @@ int sphere::update(string& data) {
 		return 0;
 	
 	// set the data
-	this->name = (names.size() > 0 ? names[0] : "");
+	this->setName(names.size() > 0 ? names[0] : "");
 	this->divisions = (vDivisions.size() > 0 ? atoi( vDivisions[0].c_str() ) : 16);
 	this->flatShading = (flatShadings.size() == 0 ? false : true);
 	this->smoothbounce = (smoothBounces.size() == 0 ? false : true);

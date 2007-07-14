@@ -5,10 +5,9 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Node>
 
-#include "../objects/bz2object.h"
+#include "../model/SceneBuilder.h"
 
-// this is a subclass of osg::PositionAttitudeTransform.  It is designed to contain a DataEntry's text
-// in addition to a renderable OSG node.
+// this is a subclass of osg::PositionAttitudeTransform.  It is designed to be an easily-manipulatible node
 
 class Renderable : public osg::PositionAttitudeTransform {
 	
@@ -16,30 +15,29 @@ public:
 	
 	// default constructor
 	Renderable() : osg::PositionAttitudeTransform() {
-		this->_name = "";
-		this->bzObj = NULL;
+		this->setName("");
 	}
 	
 	// constructor with name
 	Renderable( const char* name ) : osg::PositionAttitudeTransform() {
-		this->_name = name;
-		this->bzObj = NULL;	
+		this->setName( name );
 	}
 	
 	// constructor with a child node to add
 	Renderable( osg::Node* child ) : osg::PositionAttitudeTransform() {
-		this->_name = child->getName();
-		this->bzObj = NULL;
+		if(child)
+			this->setName( child->getName() );
+		else
+			this->setName( "(unknown)" );
 		
 		this->addChild( child );	
 	}
 	
+	virtual ~Renderable() { }
+	
 	// getters
-	bz2object* getBZWObject() { return this->bzObj; }
 	osg::ref_ptr< osg::Node > getNode() { return this->getChild( 0 ); }
 	
-	// setters
-	void setBZWObject( bz2object* data ) { this->bzObj = data; }
 	// set the child node (there should only be one)
 	void setNode( osg::Node* node ) {
 		if(this->getChild(0) != NULL)
@@ -80,13 +78,10 @@ public:
 									  osg::DegreesToRadians( rotation.z() ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
 	}
 	
-	// getters for rotation
-	osg::Vec3 getRotation() { return this->rotation; }
+	// getters for rotation (make sure it can't change)
+	const osg::Vec3& getRotation() { return this->rotation; }
 	
 protected:
-	
-	// bzw object
-	bz2object* bzObj;
 	
 	// angular orientation around 3D axes
 	osg::Vec3 rotation;

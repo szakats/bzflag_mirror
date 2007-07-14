@@ -1,10 +1,6 @@
 #ifndef DEFINE_H_
 #define DEFINE_H_
 
-#include "../DataEntry.h"
-
-#include "bz2object.h"
-
 #include "arc.h"
 #include "base.h"
 #include "box.h"

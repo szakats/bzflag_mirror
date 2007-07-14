@@ -21,7 +21,7 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     		
     		// ignore right-click drags
     		
-    		if( viewer && viewer->getButton() != FL_LEFT_MOUSE ) {
+    		if( viewer && viewer->getButton() == FL_RIGHT_MOUSE ) {
     			return false;
     		}
     			
@@ -97,9 +97,10 @@ bool selectHandler::pickObject(View* viewer, const osgGA::GUIEventAdapter& ea) {
             	continue;
             
             for(unsigned int i = 0; i < hitr->nodePath.size(); i++) {
-            	// only look for Renderables
-            	Renderable* obj = dynamic_cast< Renderable* > ( hitr->nodePath[i] );
-            	if(obj != NULL && obj->getBZWObject() != NULL && obj->getName().length() > 0) {
+            	// only look for bz2objects
+            	bz2object* obj = dynamic_cast< bz2object* > ( hitr->nodePath[i] );
+            	if(obj != NULL) {
+            	   	
             		if(!viewer->isPressed( FL_SHIFT )) {
             			viewer->unselectAll();
             		}
@@ -110,6 +111,8 @@ bool selectHandler::pickObject(View* viewer, const osgGA::GUIEventAdapter& ea) {
 					else {
 						viewer->setUnselected( obj );
 					}
+					
+					printf("picked object\n");
             		
             		// save the last selected object
             		this->lastSelected = obj;
@@ -200,19 +203,28 @@ bool selectHandler::dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea
 	
 	// set the position
 	Selection* selection = dynamic_cast< Selection* >( this->lastSelected );
+	
 	// update all objects in the selection
 	if(selection) {
-		map<Renderable*, Renderable*> selected = selection->getSelection();
-		if( selected.size() > 0 ) {
+		// get the model reference from the View
+		const Model* model = this->view->getModelRef();
+		
+		// get the selected objects
+		vector< bz2object* > selected = model->getSelection();
+		
+		// transform them
+		if(selected.size() > 0) {
 			osg::Vec3 dPosition = position - selection->getPosition();
-			for(map<Renderable*, Renderable*>::iterator i = selected.begin(); i != selected.end(); i++) {
-				i->second->setPosition( i->second->getPosition() + dPosition );
-				this->view->refresh( i->second );
-			}	
+			osg::Vec3 tmp;
+			for(vector<bz2object*>::iterator i = selected.begin(); i != selected.end(); i++) {
+				tmp = (*i)->getPosition() + dPosition;
+				(*i)->setPosition( tmp );
+			}
+			
+			// finally, transform the selector itself
+			selection->rebuildAxes( selected );
 		}
 	}
-	
-	selection->refresh();
 		
 	return true;
 }
@@ -258,6 +270,7 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 	// osg::Group* tmpGroup = new osg::Group();
 	
 	// update all objects in the selection
+	/*
 	if(selection) {
 		map<Renderable*, Renderable*> selected = selection->getSelection();
 		if( selected.size() > 0 ) {
@@ -277,7 +290,7 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 			}	
 		}
 	}
-	
+	*/
 	
 	return true;	
 }
@@ -323,6 +336,7 @@ bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& e
 	// set the position
 	Selection* selection = dynamic_cast< Selection* >( this->lastSelected );
 	// update all objects in the selection
+	/*
 	if(selection) {
 		map<Renderable*, Renderable*> selected = selection->getSelection();
 		if( selected.size() > 0 ) {
@@ -341,7 +355,7 @@ bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& e
 				this->view->refresh( i->second );
 			}	
 		}
-	}
+	}*/
 	
 	return true;	
 }

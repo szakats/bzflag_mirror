@@ -8,22 +8,19 @@
 
 #include <osg/Vec3d>
 #include <osg/Vec3f>
+#include <osg/Vec3>
 
 class Point3D : public osg::Vec3
 {
 	public:
 	
-	Point3D() : osg::Vec3( 0, 0, 0 ){
-		
-	}
+	Point3D() : osg::Vec3( 0, 0, 0 ) { }
 	
-	Point3D(float x, float y, float z) : osg::Vec3( x, y, z ) {
+	Point3D(float x, float y, float z) : osg::Vec3( x, y, z ) { }
 	
-	}
+	Point3D(double x, double y, double z) : osg::Vec3( x, y, z ) { }
 	
-	Point3D(double x, double y, double z) : osg::Vec3( x, y, z ) {
-	
-	}
+	Point3D( osg::Vec3 pt ) : osg::Vec3( pt ) { }
 	
 	Point3D(const char* description) {
 		vector<string> points = BZWParser::getLineElements(description);

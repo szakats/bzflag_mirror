@@ -1,4 +1,4 @@
-# Blender3D MTL File: planet.blend
+# Blender3D MTL File: <memory>
 # Material Count: 2
 newmtl Material_boxwall.png
 Ns 96.078431
@@ -7,7 +7,7 @@ Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
-illum 2
+illum 0
 map_Kd boxwall.png
 
 
@@ -18,7 +18,7 @@ Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
-illum 2
+illum 0
 map_Kd roof.png
 
 
