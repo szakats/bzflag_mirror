@@ -18,7 +18,7 @@ Zone::Zone(int ax, int ay, int bx, int by, int atype, GridInfo gridInfo)
   b = Coord2D(bx,by);
   type = atype;
   wi = gridInfo;
-};
+}
 
 void Zone::output(std::ofstream& out) 
 {
