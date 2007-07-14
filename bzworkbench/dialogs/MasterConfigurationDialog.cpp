@@ -57,9 +57,9 @@ MasterConfigurationDialog::MasterConfigurationDialog(bz2object* obj) :
 		positionZField->deactivate();	
 	}
 	else {
-		positionXField->value(ftoa(position.x()));
-		positionYField->value(ftoa(position.y()));
-		positionZField->value(ftoa(position.z()));	
+		positionXField->value(ftoa(position.x()).c_str());
+		positionYField->value(ftoa(position.y()).c_str());
+		positionZField->value(ftoa(position.z()).c_str());	
 	}
 	
 	// rotation
@@ -71,7 +71,7 @@ MasterConfigurationDialog::MasterConfigurationDialog(bz2object* obj) :
 		rotationField->deactivate();	
 	}
 	else {
-		rotationField->value(ftoa(rotation));	
+		rotationField->value(ftoa(rotation).c_str());	
 	}
 	
 	// size
@@ -86,9 +86,9 @@ MasterConfigurationDialog::MasterConfigurationDialog(bz2object* obj) :
 		sizeZField->deactivate();	
 	}
 	else {
-		sizeXField->value(ftoa(size.x()));
-		sizeYField->value(ftoa(size.y()));
-		sizeZField->value(ftoa(size.z()));	
+		sizeXField->value(ftoa(size.x()).c_str());
+		sizeYField->value(ftoa(size.y()).c_str());
+		sizeZField->value(ftoa(size.z()).c_str());	
 	}
 	
 	// transformation scroll area
