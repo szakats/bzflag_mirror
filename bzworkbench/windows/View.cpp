@@ -1,7 +1,7 @@
 #include "../include/windows/View.h"
 
 // view constructor
-View::View(Model* m, int x, int y, int w, int h, const char *label) :
+View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *label) :
 	RenderWindow(x,y,w,h) {
 	
 	// set OSG viewport
@@ -65,6 +65,8 @@ View::View(Model* m, int x, int y, int w, int h, const char *label) :
    // add the scene picker event handler
    this->addEventHandler(eventHandlers);
    
+   // assign the parent reference
+   this->mw = mw;
 }
 
 // destructor

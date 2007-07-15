@@ -85,8 +85,18 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
 	            if (viewer) {
 	            	this->prevEvent = osgGA::GUIEventAdapter::DOUBLECLICK;
        		
-	            	this->pickObject(viewer,ea);
+	            	return this->pickObject(viewer,ea);
+	            	
 	            }
+        	}
+        	else if( ea.getButton() == FL_RIGHT_MOUSE ) {
+        		viewer = dynamic_cast<View*>(&aa);
+        		if(viewer) {
+        			this->prevEvent = osgGA::GUIEventAdapter::DOUBLECLICK;
+        			
+        			return this->configureObject(viewer, ea);
+        			
+        		}	
         	}
        		return false;
        		
@@ -170,6 +180,45 @@ bool selectHandler::pickSelector(View* viewer, const osgGA::GUIEventAdapter& ea)
             		return true;
             	}
             }
+        }
+    }
+    
+    this->lastSelected = NULL;
+    this->lastSelectedData = NULL;
+    return false;
+}
+
+// see if we picked an object and if so, configure it
+bool selectHandler::configureObject(View* viewer, const osgGA::GUIEventAdapter& ea) {
+		
+	// intersections with the scene
+    osgUtil::LineSegmentIntersector::Intersections intersections;
+	
+	// get the intersections from the point in the view where we clicked
+    if(viewer->computeIntersections( ea.getX(), ea.getY(), intersections ) ) {
+    	// iterate through the intersections
+    	for(osgUtil::LineSegmentIntersector::Intersections::iterator hitr = intersections.begin(); hitr != intersections.end(); ++hitr) {
+            
+            if(hitr->nodePath.empty())
+            	continue;
+            
+            for(unsigned int i = 0; i < hitr->nodePath.size(); i++) {
+            	// only look for bz2objects
+            	bz2object* obj = dynamic_cast< bz2object* > ( hitr->nodePath[i] );
+            	if(obj != NULL) {
+            	   	// tell the MainWindow to open up a MasterConfigurationDialog
+            	   	MainWindow* mw = viewer->requestMainWindow();
+            	   	
+            	   	if(mw) {
+            	   		mw->configure( obj );
+            	   		this->lastSelected = obj;
+            	   		return true;	
+            	   	}
+            	   	
+            	   	return false;
+            	}
+            }
+            
         }
     }
     
