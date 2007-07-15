@@ -6,6 +6,9 @@
 #include <osgViewer/Viewer>
 #include <osgGA/MatrixManipulator>
 
+#include <osg/NodeVisitor>
+#include <osg/Matrix>
+
 #include <string>
 #include <map>
 
@@ -34,11 +37,17 @@ public:
     // drag the selector
     bool dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea);
     
-    // rotate the selector (i.e. if the appropriate key is pressed)
+    // rotate (i.e. spin) the selector (i.e. if the appropriate key is pressed)
     bool rotateSelector( View* viewer, const osgGA::GUIEventAdapter& ea);
     
     // scale the selector (i.e. if the appropriate key is pressed)
     bool scaleSelector( View* viewer, const osgGA::GUIEventAdapter& ea);
+    
+    // shear the selector (i.e. if the appropriate key is pressed)
+    bool shearSelector( View* viewer, const osgGA::GUIEventAdapter& ea);
+    
+    // shift the selector (i.e. if the appropriate key is pressed)
+    bool shiftSelector( View* viewer, const osgGA::GUIEventAdapter& ea);
     
 private:
     // the last Renderable to be selected

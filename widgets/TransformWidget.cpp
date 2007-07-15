@@ -1,4 +1,5 @@
 #include "../include/widgets/TransformWidget.h"
+#include "../include/defines.h"
 
 // unused; prevents the build from breaking
 // (Fl_Group's copy constructor is private)

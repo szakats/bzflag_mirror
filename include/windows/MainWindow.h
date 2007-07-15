@@ -12,7 +12,12 @@
 #include "../dialogs/WorldOptionsDialog.h"
 #include "View.h"
 
+#include <osg/Timer>
 
+/**
+ * This is the Controller class in BZWB.  It contains the main window, directs event-handling and UI requests
+ * to dialog boxes, and forewards events to the 3D scene.
+ */
 class MainWindow : public Fl_Window
 {
 public:
@@ -62,6 +67,9 @@ private:
 	
 	// reference to the internal OSG view
 	View* view;
+	
+	// event timer
+	osg::Timer timer;
 	
 };
 
