@@ -16,13 +16,14 @@ MainWindow::MainWindow() :
 	
 	this->add(view);
 	
-//	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
-//	this->add(mainMenu);
+	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
+	this->add(mainMenu);
 	
 	initialized = true;
    
    // add the View as an observer to the Model
    model->addObserver( view );
+   
 }
 
 // construct from a model
@@ -38,8 +39,8 @@ MainWindow::MainWindow(Model* model) :
 	view->end();
 	this->add(view);
 	
-//	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
-//	this->add(mainMenu);
+	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
+	this->add(mainMenu);
 	
 	
 	initialized = true;
@@ -66,12 +67,26 @@ void MainWindow::openDialog(const char* _dialog) {
 
 // handle
 int MainWindow::handle(int event) {
+	
 	switch( event ) {
+		// catch right-click pushes--the user should double-click to access the menu
+		case FL_PUSH:
+			if( Fl::event_button() == FL_RIGHT_MOUSE) {
+				if( Fl::event_clicks() > 0 ) {
+					return Fl_Window::handle( event );
+				}
+				else {
+					return Fl::handle( event, this->view );
+				}
+			}
+			return Fl_Window::handle( event );
+			
 		case FL_CLOSE:	// catch window close event
 			// make sure to de-allocate nodes
 			SceneBuilder::shutdown();
 			return 1;
 		default:
+				
 			return Fl_Window::handle( event );
 	}
 }

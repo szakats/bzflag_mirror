@@ -7,22 +7,33 @@
 #include "DataEntry.h"
 #include "model/BZWParser.h"
 
+#include <osg/MatrixTransform>
+
 using namespace std;
 
 // a metadata entry that is used to describe a transformation such as spin, shear, shift, and scale
-class BZTransform : public DataEntry {
+class BZTransform : public DataEntry, public osg::MatrixTransform {
 	
 	public:
 	
-		BZTransform() : DataEntry("", "") {
+		BZTransform() : DataEntry("", ""), osg::MatrixTransform() {
 			name = string("");
 			data = vector<float>();
 		}
 		
-		BZTransform(string& data) : DataEntry("", "") {
+		BZTransform(string& data) : DataEntry("", ""), osg::MatrixTransform() {
 			name = string("");
 			this->data = vector<float>();
 			this->update(data);
+		}
+		
+		BZTransform( string name, float n1, float n2, float n3, float n4 ) : DataEntry("", ""), osg::MatrixTransform() {
+			this->name = name;
+			this->data = vector<float>();
+			data.push_back(n1);
+			data.push_back(n2);
+			data.push_back(n3);
+			data.push_back(n4);
 		}
 		
 		// getter
@@ -48,6 +59,19 @@ class BZTransform : public DataEntry {
 			
 			this->setHeader(name.c_str());
 			
+			// recompute this matrix
+			if( this->name == "spin" )
+				this->makeSpin();
+				
+			if( this->name == "shift" )
+				this->makeShift();
+				
+			if( this->name == "shear" )
+				this->makeShear();
+				
+			if( this->name == "scale" )
+				this->makeScale();
+			
 			return 1;
 		}
 		
@@ -69,10 +93,65 @@ class BZTransform : public DataEntry {
 		void setName(string& s) { this->name = s; }
 		void setData(vector<float>& data) { this->data = data; }
 		
-		// render
-		int render(void) { return 0; }
-	
+		// make this public
+		BZTransform operator =( const BZTransform& obj ) { 
+			BZTransform newObj = BZTransform();
+			memcpy(&newObj, &obj, sizeof(BZTransform));
+			return newObj;
+		}
+		
 	private:
+	
+		// make this into a shift matrix
+		void makeShift() {
+			double matvals[] = {
+				1.0,		0.0,		0.0,		data[0],
+				0.0,		1.0,		0.0,		data[1],
+				0.0,		0.0,		1.0,		data[2],
+				0.0,		0.0,		0.0,		1.0
+			};
+			
+			osg::Matrixd theMatrix = osg::Matrixd( matvals );
+			this->setMatrix( theMatrix );
+		}
+		
+		// make this into a scale matrix
+		void makeScale() {
+			double matvals[] = {
+				data[0],	0.0,		0.0,		0.0,
+				0.0,		data[1],	0.0,		0.0,
+				0.0,		0.0,		data[2],	0.0,
+				0.0,		0.0,		0.0,		1.0
+			};
+			
+			osg::Matrixd theMatrix = osg::Matrixd( matvals );
+			this->setMatrix( theMatrix );
+		}
+		
+		// make this into a spin matrix
+		void makeSpin() {
+			// use a quaternion to compute the "spin" matrix
+			osg::Quat quat = osg::Quat( data[0], osg::Vec3( data[1], data[2], data[3] ) );
+			
+			osg::Matrixd matrix;
+			quat.get( matrix );
+			
+			this->setMatrix( matrix );
+		}
+		
+		// make this into a shear matrix
+		void makeShear() {
+			double matvals[] = {
+				data[0],	0.0,	0.0,	0.0,
+				data[1],	1.0,	0.0,	0.0,
+				data[2],	0.0,	1.0,	0.0,
+				0.0,		0.0,	0.0,	1.0
+			};
+			
+			osg::Matrixd theMatrix = osg::Matrixd( matvals );
+			this->setMatrix( theMatrix );
+		}
+		
 		
 		string name;
 		vector<float> data;

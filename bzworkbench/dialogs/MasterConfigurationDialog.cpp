@@ -1,11 +1,14 @@
 #include "../include/dialogs/MasterConfigurationDialog.h"
+#include "../include/defines.h"
 #include <iostream>
 
-MasterConfigurationDialog::MasterConfigurationDialog(bz2object* obj) :
-	Fl_Dialog("Master Configuration Dialog", WIDTH, HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
+MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
+	ConfigurationDialog(obj, "Master Configuration Dialog", WIDTH, HEIGHT) {
 	
 	// initialize the object
-	this->object = obj;
+	this->object = dynamic_cast<bz2object*>( obj );
+	if( !this->object )
+		return;
 	
 	// get information from the object that can be put into the widgets
 	string objectStr = object->get();

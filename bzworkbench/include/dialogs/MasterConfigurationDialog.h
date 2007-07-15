@@ -12,7 +12,7 @@
 #include <FL/Fl_Menu_Button.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Scroll.H>
-#include "Fl_Dialog.h"
+#include "ConfigurationDialog.h"
 #include "../widgets/QuickLabel.h"
 #include "../widgets/TransformWidget.h"
 #include "../DataEntry.h"
@@ -28,7 +28,7 @@ using namespace std;
  * This dialog configures bz2object's general data
  */
  
-class MasterConfigurationDialog : public Fl_Dialog {
+class MasterConfigurationDialog : public ConfigurationDialog {
 	
 public:
 	
@@ -36,11 +36,13 @@ public:
 	static const int HEIGHT = 385;
 	
 	// constructor
-	MasterConfigurationDialog(bz2object* obj);
+	MasterConfigurationDialog(DataEntry* data);
+	
+	// static initializer
+	static MasterConfigurationDialog* init( DataEntry* data ) { return new MasterConfigurationDialog( data ); }
 	
 	// destructor
-	~MasterConfigurationDialog() { 
-	}
+	~MasterConfigurationDialog() { }
 	
 	// static callbacks
 	// These need to be static so the this variable, when passed to the callback, is initialized already.

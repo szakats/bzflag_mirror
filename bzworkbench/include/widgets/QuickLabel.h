@@ -7,7 +7,7 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>
 
-#include "../defines.h"
+using namespace std;
 
 // A quick'n'dirty label widget (easier than making an Fl_box, clearing its box, and giving it a label
 // all the freakin' time).

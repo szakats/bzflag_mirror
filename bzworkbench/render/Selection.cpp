@@ -175,10 +175,4 @@ void Selection::update( Observable* observable, void* data ) {
 	// recompute the center
 	this->rebuildAxes( selectedObjects );
 	
-	printf("selection:\n");
-	for(vector<bz2object*>::iterator i = selectedObjects.begin(); i != selectedObjects.end(); i++) {
-		printf("  %s\n", (*i)->getName().c_str());	
-	}
-	printf("==================================\n");
-	
 }

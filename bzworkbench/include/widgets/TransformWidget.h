@@ -13,7 +13,6 @@
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Scroll.H>
 #include "QuickLabel.h"
-#include "../defines.h"
 #include "../ftoa.h"
 #include "../Transform.h"
 
