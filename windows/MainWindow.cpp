@@ -16,7 +16,7 @@ MainWindow::MainWindow() :
 	
 	this->add(view);
 	
-	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
+	this->mainMenu = new MainMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
 	this->add(mainMenu);
 	
 	initialized = true;
@@ -39,7 +39,7 @@ MainWindow::MainWindow(Model* model) :
 	view->end();
 	this->add(view);
 	
-	this->mainMenu = new MainMenu(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
+	this->mainMenu = new MainMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
 	this->add(mainMenu);
 	
 	

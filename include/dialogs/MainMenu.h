@@ -12,12 +12,18 @@
 
 #include "../defines.h"
 
+#include "MasterConfigurationDialog.h"
+
+class MainWindow;
+
+#include "../objects/box.h"
+
 class MainMenu : public Fl_Menu_Button
 {
 public:
 	
 	// constructor and destructor
-	MainMenu(int x, int y, int width, int height);
+	MainMenu(MainWindow* parent, int x, int y, int width, int height);
 	virtual ~MainMenu();
 	
 	// callbacks
@@ -171,6 +177,9 @@ private:
 
 	// a constructor helper
 	void buildMenu(void);
+	
+	// reference to the parent
+	MainWindow* parent;
 	
 	// real callbacks
 	void addBoxCallback_real(Fl_Widget* w);

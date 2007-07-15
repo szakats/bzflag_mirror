@@ -632,3 +632,15 @@ void Model::_unselectAll() {
 
 // get selection
 vector<bz2object*>& Model::getSelection() { return modelRef->_getSelection(); }
+
+// build an object from the object registry
+DataEntry* Model::buildObject( const char* header ) { return modelRef->_buildObject( header ); }
+DataEntry* Model::_buildObject( const char* header ) {
+	string name = string(header);
+	
+	if( this->cmap.count( name ) <= 0 )
+		return NULL;
+		
+	string blank = "";
+	return cmap[name](blank);
+}
