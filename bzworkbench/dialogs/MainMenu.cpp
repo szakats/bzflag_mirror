@@ -44,12 +44,14 @@ void MainMenu::buildMenu(void) {
 
 
 // construct a menu at a given point
-MainMenu::MainMenu(int x, int y, int width, int height) :
+MainMenu::MainMenu(MainWindow* parent, int x, int y, int width, int height) :
 	Fl_Menu_Button(x, y, width, height) {
 	
 	this->buildMenu();
 	
 	this->type(Fl_Menu_Button::POPUP3);
+	
+	this->parent = parent;
 }
 
 // main destructor
@@ -59,7 +61,18 @@ MainMenu::~MainMenu() { }
 
 // add a box
 void MainMenu::addBoxCallback_real(Fl_Widget* w) {
-	printf("added a box\n");
+	DataEntry* newBox = this->parent->getModel()->_buildObject( "box" );
+	bz2object* newObj = dynamic_cast< bz2object* >( newBox );
+	
+	if(!newObj)
+		return;
+	
+	this->parent->getModel()->addObject( newObj );
+	this->parent->getView()->getRootNode()->insertChild(0, newObj );
+	
+	MasterConfigurationDialog* mcd = new MasterConfigurationDialog( newObj );
+	mcd->show();
+	
 	this->value(0);
 }
 

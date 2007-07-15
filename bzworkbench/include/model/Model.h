@@ -67,6 +67,7 @@ public:
 	static vector<define*>& getGroups();
 	
 	static void addObject( bz2object* obj );
+	static DataEntry* buildObject( const char* header );
 	static void removeObject( bz2object* obj );
 	static void setSelected( bz2object* obj );
 	static void setUnselected( bz2object* obj );
@@ -87,6 +88,7 @@ public:
 	vector<define*>& _getGroups() { return this->groups; }
 	
 	void _addObject( bz2object* obj ) { this->objects.push_back( obj ); }
+	DataEntry* _buildObject( const char* header );
 	void _removeObject( bz2object* obj );
 	void _setSelected( bz2object* obj );
 	void _setUnselected( bz2object* obj );

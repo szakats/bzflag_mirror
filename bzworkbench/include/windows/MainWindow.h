@@ -51,6 +51,9 @@ public:
 	// get the view
 	View* getView() { return view; }
 	
+	// get the model
+	Model* getModel() { return this->model; }
+	
 	// handler
 	virtual int handle(int event);
 	
