@@ -3,6 +3,8 @@
 
 #include "BZEventHandler.h"
 #include "../../render/Selection.h"
+#include "../MainWindow.h"
+
 #include <osgViewer/Viewer>
 #include <osgGA/MatrixManipulator>
 
@@ -33,6 +35,9 @@ public:
     
     // pick the selector
     bool pickSelector( View* viewer, const osgGA::GUIEventAdapter& ea);
+    
+    // configure an object
+    bool configureObject( View* viewer, const osgGA::GUIEventAdapter& ea);
     
     // drag the selector
     bool dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea);

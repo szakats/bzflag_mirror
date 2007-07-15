@@ -10,6 +10,8 @@
 
 #include "../dialogs/MainMenu.h"
 #include "../dialogs/WorldOptionsDialog.h"
+#include "../dialogs/MasterConfigurationDialog.h"
+
 #include "View.h"
 
 #include <osg/Timer>
@@ -45,14 +47,14 @@ public:
 	// destructor
 	virtual ~MainWindow();
 	
-	// static methods
-	static void openDialog(const char* dialog);
-	
 	// get the view
 	View* getView() { return view; }
 	
 	// get the model
 	Model* getModel() { return this->model; }
+	
+	// launch a MasterConfigurationDialog
+	void configure( bz2object* obj );
 	
 	// handler
 	virtual int handle(int event);

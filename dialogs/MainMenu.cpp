@@ -61,17 +61,23 @@ MainMenu::~MainMenu() { }
 
 // add a box
 void MainMenu::addBoxCallback_real(Fl_Widget* w) {
+	// we're breaking the Law of Demeter here...
+	
+	// make a new box using the Model's object registry
 	DataEntry* newBox = this->parent->getModel()->_buildObject( "box" );
+	
+	// make it into a bz2object
 	bz2object* newObj = dynamic_cast< bz2object* >( newBox );
 	
 	if(!newObj)
 		return;
 	
+	// add the object to the model and the view
 	this->parent->getModel()->addObject( newObj );
 	this->parent->getView()->getRootNode()->insertChild(0, newObj );
 	
-	MasterConfigurationDialog* mcd = new MasterConfigurationDialog( newObj );
-	mcd->show();
+	// open up a MasterConfigurationDialog and configure it
+	this->parent->configure( newObj );
 	
 	this->value(0);
 }
@@ -222,7 +228,7 @@ void MainMenu::saveSelectionCallback_real(Fl_Widget* w) {
 
 // handle configure world
 void MainMenu::configureWorldCallback_real(Fl_Widget* w) {
-	MainWindow::openDialog("WorldOptionsDialog");
+	
 	printf("configured world\n");
 	this->value(0);
 }

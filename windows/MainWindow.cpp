@@ -10,7 +10,7 @@ MainWindow::MainWindow() :
 	
 	this->model = new Model();
 	printf("2\n");
-	this->view = new View(model, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	this->view = new View(model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
 	printf("3\n");
 	view->end();
 	
@@ -35,7 +35,7 @@ MainWindow::MainWindow(Model* model) :
 	
 	this->model = model;
 	
-	this->view = new View(model, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	this->view = new View(model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
 	view->end();
 	this->add(view);
 	
@@ -55,13 +55,6 @@ MainWindow::~MainWindow() {
 		delete model;
 	
 	initialized = false;
-	
-}
-
-// opens a dialog based on input text
-void MainWindow::openDialog(const char* _dialog) {
-	if(!initialized)
-		return;
 	
 }
 
@@ -89,4 +82,10 @@ int MainWindow::handle(int event) {
 				
 			return Fl_Window::handle( event );
 	}
+}
+
+// launch a MasterConfigurationDialog
+void MainWindow::configure( bz2object* obj ) {
+	MasterConfigurationDialog* mcd = new MasterConfigurationDialog( obj );
+	mcd->show();
 }

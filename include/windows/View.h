@@ -31,12 +31,15 @@
 // forward declare the Picker class
 class BZEventHandler;
 
+// forward declare the MainWindow class
+class MainWindow;
+
 // an extension of RenderWindow and osgViewer (this will be added to the main window), and Observer
 class View : public osgViewer::Viewer, public RenderWindow, public Observer
 {
     public:
     	// constructor
-        View(Model* m, int x, int y, int w, int h, const char *label=0);
+        View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *label=0);
         
         // get the root node
         osg::Group* getRootNode() { return root; }
@@ -81,6 +84,9 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         // get the model reference
         const Model* getModelRef() { return this->model; }
         
+        // get the MainWindow parent, if possible
+        MainWindow* requestMainWindow() { return mw; }
+        
     protected:
     
     	// draw method
@@ -88,6 +94,9 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 	
 		// model reference
 		Model* model;
+		
+		// parent window reference
+		MainWindow* mw;
 		
 		// root node
 		osg::Group* root;
@@ -104,8 +113,6 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		
 		// the currently pressed mouse button
 		unsigned int buttondown;
-		
-		// map of bz2objects
 	
 	private:
 		
@@ -115,5 +122,6 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		// the current selection
 		Selection* selection;
 };
+
 
 #endif /*VIEW_H_*/
