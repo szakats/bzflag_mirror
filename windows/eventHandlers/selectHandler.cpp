@@ -19,8 +19,6 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     			
     		viewer = dynamic_cast<View*>(&aa);
     		
-    		// ignore right-click drags
-    		
     		if( viewer != NULL && this->lastSelected != NULL && this->lastSelected->getName() == Selection_NODE_NAME ) {
     			// if the last event was a DRAG event, we need to update the dx and dy
     			if( this->prevEvent == osgGA::GUIEventAdapter::DRAG ) {
@@ -67,20 +65,30 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     		}
     		return false;
     		
-    	// catch single-click events (see if we picked the selector
-       	case osgGA::GUIEventAdapter::PUSH :
-       		if( ea.getButton() == FL_LEFT_MOUSE ) {
+    	// catch single-click events (see if we picked the selector or an object)
+       	case osgGA::GUIEventAdapter::PUSH : {
+       		int button = ea.getButton();
+       		
+       		if( button == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON ) {
        			viewer = dynamic_cast<View*>(&aa);
        			if( viewer ) {
        				this->prevEvent = osgGA::GUIEventAdapter::PUSH;
        				return this->pickSelector( viewer, ea );
        			}	
        		}
+       		else if( button == osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON ) {
+        		viewer = dynamic_cast<View*>(&aa);
+        		if(viewer) {
+        			this->prevEvent = osgGA::GUIEventAdapter::PUSH;
+        			return this->configureObject(viewer, ea);
+        			
+        		}	
+        	}
        		return false;
-       		
+       	}
     	// catch double click events and do a pick
         case osgGA::GUIEventAdapter::DOUBLECLICK :
-        	if( ea.getButton() == FL_LEFT_MOUSE ) {
+        	if( ea.getButton() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON ) {
 	            viewer = dynamic_cast<View*>(&aa);
 	            if (viewer) {
 	            	this->prevEvent = osgGA::GUIEventAdapter::DOUBLECLICK;
@@ -89,15 +97,7 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
 	            	
 	            }
         	}
-        	else if( ea.getButton() == FL_RIGHT_MOUSE ) {
-        		viewer = dynamic_cast<View*>(&aa);
-        		if(viewer) {
-        			this->prevEvent = osgGA::GUIEventAdapter::DOUBLECLICK;
-        			
-        			return this->configureObject(viewer, ea);
-        			
-        		}	
-        	}
+        	
        		return false;
        		
         default:
@@ -205,7 +205,7 @@ bool selectHandler::configureObject(View* viewer, const osgGA::GUIEventAdapter& 
             for(unsigned int i = 0; i < hitr->nodePath.size(); i++) {
             	// only look for bz2objects
             	bz2object* obj = dynamic_cast< bz2object* > ( hitr->nodePath[i] );
-            	if(obj != NULL) {
+            	if(obj != NULL && obj->isSelected()) {
             	   	// tell the MainWindow to open up a MasterConfigurationDialog
             	   	MainWindow* mw = viewer->requestMainWindow();
             	   	

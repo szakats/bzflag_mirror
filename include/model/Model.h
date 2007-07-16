@@ -75,6 +75,11 @@ public:
 	static bool isSelected( bz2object* obj );
 	static vector<bz2object*>& getSelection();
 	
+	// editor-like methods (BZWB-specific)
+	static bool cutSelection();
+	static bool copySelection();
+	static bool pasteSelection();
+	
 	// instantiated BZWB-specific API 
 	world* _getWorldData() { return worldData; }
 	options* _getOptionsData() { return optionsData; }
@@ -87,7 +92,7 @@ public:
 	vector<Tlink*>& _getTeleporterLinks() { return this->links; }
 	vector<define*>& _getGroups() { return this->groups; }
 	
-	void _addObject( bz2object* obj ) { this->objects.push_back( obj ); }
+	void _addObject( bz2object* obj );
 	DataEntry* _buildObject( const char* header );
 	void _removeObject( bz2object* obj );
 	void _setSelected( bz2object* obj );
@@ -95,6 +100,11 @@ public:
 	void _unselectAll();
 	bool _isSelected( bz2object* obj );
 	vector<bz2object*>& _getSelection() { return this->selectedObjects; }
+	
+	// editor-like methods (BZWB-specific)--instantiated
+	bool _cutSelection();
+	bool _copySelection();
+	bool _pasteSelection();
 	
 	// plugin-specific API
 	static bool registerObject(string& name, DataEntry* (*init)(string&));
@@ -190,6 +200,9 @@ private:
 	
 // vector of selected objects
 	vector< bz2object* > selectedObjects;
+	
+// cut/copy buffer
+	vector< bz2object* > objectBuffer;
 };
 
 #include "BZWParser.h"
@@ -222,5 +235,6 @@ private:
 
 #include "../objects/bz2object.h"
 
+// #include "../windows/View.h"
 
 #endif /*MODEL_H_*/

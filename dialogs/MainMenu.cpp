@@ -180,25 +180,27 @@ void MainMenu::addBlueBaseCallback_real(Fl_Widget* w) {
 
 // handle cut
 void MainMenu::cutCallback_real(Fl_Widget* w) {
-	printf("did a cut\n");
+	this->parent->getModel()->_cutSelection();
 	this->value(0);
 }
 
 // handle copy
 void MainMenu::copyCallback_real(Fl_Widget* w) {
-	printf("did a copy\n");
+	this->parent->getModel()->_copySelection();
 	this->value(0);
 }
 
 // handle paste
 void MainMenu::pasteCallback_real(Fl_Widget* w) {
-	printf("did a paste\n");
+	this->parent->getModel()->_pasteSelection();
 	this->value(0);
 }
 
 // handle selection clone
 void MainMenu::cloneCallback_real(Fl_Widget* w) {
-	printf("did a clone\n");
+	this->parent->getModel()->_copySelection();
+	this->parent->getModel()->_pasteSelection();
+	
 	this->value(0);
 }
 

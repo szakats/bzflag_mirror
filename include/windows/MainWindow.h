@@ -9,12 +9,17 @@
 #include "../model/SceneBuilder.h"
 
 #include "../dialogs/MainMenu.h"
+#include "../dialogs/ConfigurationMenu.h"
+#include "../dialogs/MenuBar.h"
 #include "../dialogs/WorldOptionsDialog.h"
 #include "../dialogs/MasterConfigurationDialog.h"
 
-#include "View.h"
+#include "../dialogs/Fl_Error.h"
 
 #include <osg/Timer>
+
+class Model;
+class View;
 
 /**
  * This is the Controller class in BZWB.  It contains the main window, directs event-handling and UI requests
@@ -53,8 +58,11 @@ public:
 	// get the model
 	Model* getModel() { return this->model; }
 	
-	// launch a MasterConfigurationDialog
+	// configure an object
 	void configure( bz2object* obj );
+	
+	// throw an error message
+	void error( const char *text);
 	
 	// handler
 	virtual int handle(int event);
@@ -63,6 +71,12 @@ private:
 	
 	// reference to the main menu
 	MainMenu* mainMenu;
+	
+	// reference to the configuration menu
+	ConfigurationMenu* configurationMenu;
+	
+	// reference to the menu bar
+	MenuBar* menuBar;
 	
 	// reference to the data model
 	Model* model;
@@ -77,5 +91,8 @@ private:
 	osg::Timer timer;
 	
 };
+
+#include "../model/Model.h"
+#include "View.h"
 
 #endif /*MAINWINDOW_H_*/
