@@ -113,17 +113,6 @@ int main(int argc, char** argv) {
 	// init the SceneBuilder
 	SceneBuilder::init();
 	
-	box* sceneBox1 = new box();
-	box* sceneBox2 = new box();
-	osg::Vec3 position = osg::Vec3( 10.0, 10.0, 0.0 );
-	osg::Vec3 position2 = osg::Vec3( -20.0, -20.0, 0.0);
-	
-	sceneBox1->setPosition( position );
-	sceneBox2->setPosition( position2 );
-	
-	model->addObject( sceneBox1 );
-	model->addObject( sceneBox2 );
-	
 	// load the main window
 	MainWindow* mw = new MainWindow(model);
 	mw->resizable(mw);

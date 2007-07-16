@@ -9,15 +9,18 @@ MainWindow::MainWindow() :
 	this->end();
 	
 	this->model = new Model();
-	printf("2\n");
 	this->view = new View(model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
-	printf("3\n");
 	view->end();
-	
 	this->add(view);
+	
+	this->configurationMenu = new ConfigurationMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
+	this->add(configurationMenu);
 	
 	this->mainMenu = new MainMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
 	this->add(mainMenu);
+	
+	this->menuBar = new MenuBar( this );
+	this->add(menuBar);
 	
 	initialized = true;
    
@@ -37,11 +40,18 @@ MainWindow::MainWindow(Model* model) :
 	
 	this->view = new View(model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
 	view->end();
+	
 	this->add(view);
+	
+	
+	this->configurationMenu = new ConfigurationMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
+	this->add(configurationMenu);
 	
 	this->mainMenu = new MainMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
 	this->add(mainMenu);
 	
+	this->menuBar = new MenuBar( this );
+	this->add(menuBar);
 	
 	initialized = true;
    
@@ -84,8 +94,14 @@ int MainWindow::handle(int event) {
 	}
 }
 
-// launch a MasterConfigurationDialog
+// configure an object
 void MainWindow::configure( bz2object* obj ) {
-	MasterConfigurationDialog* mcd = new MasterConfigurationDialog( obj );
-	mcd->show();
+	this->configurationMenu->setObject( obj );
+	
+}
+
+// throw an error
+void MainWindow::error(const char* errorText) {
+	Fl_Error* errorMessage = new Fl_Error( errorText );
+	errorMessage->show();
 }

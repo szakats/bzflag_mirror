@@ -24,6 +24,8 @@ public:
 	
 	virtual ~Observable() { }
 	
+	vector<Observer*>& getObservers() { return this->observers; }
+	
 	// add an observer
 	virtual void addObserver( Observer* obs ) {
 		observers.push_back( obs );

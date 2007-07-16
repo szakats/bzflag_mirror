@@ -1,4 +1,5 @@
 #include "../include/model/Model.h"
+#include "../include/windows/View.h"
 
 // global reference to the model so the static call will work
 Model* modelRef;
@@ -87,6 +88,13 @@ Model::~Model()
 	
 	if(groups.size() > 0)
 		for(vector<define*>::iterator i = groups.begin(); i != groups.end(); i++)
+			if((*i)) {
+				delete *i;
+				*i = NULL;	
+			}
+			
+	if(objectBuffer.size() > 0)
+		for(vector<bz2object*>::iterator i = objectBuffer.begin(); i != objectBuffer.end(); i++)
 			if((*i)) {
 				delete *i;
 				*i = NULL;	
@@ -548,13 +556,46 @@ void					Model::setUnselected( bz2object* obj ) { modelRef->_setUnselected( obj 
 void					Model::unselectAll() { modelRef->_unselectAll(); }
 bool					Model::isSelected( bz2object* obj ) { return modelRef->_isSelected( obj ); }
 
+// add an object to the Model
+// TODO: This code is kludgy--all changes to the model should be forewarded to the view via the notifyObservers method
+void Model::_addObject( bz2object* obj ) {
+	if( obj == NULL )
+		return;
+		
+	this->objects.push_back( obj );
+	
+	// iterate through all Observers
+	vector<Observer*> observers = this->getObservers();
+	for(vector<Observer*>::iterator i = observers.begin(); i != observers.end(); i++) {
+		// try to dynamic_cast the Observer to a View
+		View* v = dynamic_cast<View*>( *i );
+	
+		// if the dynamic_cast worked, remove the object from the scenegraph
+		if( v ) {
+			v->getRootNode()->insertChild(0, obj );
+		}	
+	}
+}
+
 // remove an object by instance
+// TODO: This code is kludgy--all changes to the model should be forewarded to the view via the notifyObservers method
 void Model::_removeObject( bz2object* obj ) {
 	if(this->objects.size() <= 0)
 		return;
 		
 	for(vector< bz2object* >::iterator i = this->objects.begin(); i != this->objects.end(); i++) {
 		if( *i == obj ) {
+			// iterate through all Observers
+			vector<Observer*> observers = this->getObservers();
+			for(vector<Observer*>::iterator j = observers.begin(); j != observers.end(); j++) {
+				// try to dynamic_cast the Observer to a View
+				View* v = dynamic_cast<View*>( *j );
+				
+				// if the dynamic_cast worked, remove the object from the scenegraph
+				if( v ) {
+					v->getRootNode()->removeChild( *i );
+				}	
+			}
 			this->objects.erase( i );
 			return;	
 		}
@@ -643,4 +684,54 @@ DataEntry* Model::_buildObject( const char* header ) {
 		
 	string blank = "";
 	return cmap[name](blank);
+}
+
+// cut objects from the scene
+bool Model::cutSelection() { return modelRef->_cutSelection(); }
+bool Model::_cutSelection() {
+	if( this->selectedObjects.size() <= 0)
+		return false;
+	
+	this->objectBuffer.clear();
+	
+	// remove objects from the scene, but move them into the cut/copy buffer
+	for( vector<bz2object*>::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+		this->objectBuffer.push_back( *i );
+		this->_removeObject( *i );
+	}
+	
+	return true;
+}
+
+// copy objects from the scene
+bool Model::copySelection() { return modelRef->_copySelection(); }
+bool Model::_copySelection() {
+	if( this->selectedObjects.size() <= 0)
+		return false;
+	
+	this->objectBuffer.clear();
+	
+	// remove objects from the scene, but move them into the cut/copy buffer
+	for( vector<bz2object*>::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+		this->objectBuffer.push_back( *i );
+	}
+	
+	return true;
+}
+
+// paste the objectBuffer to the scene
+bool Model::pasteSelection() { return modelRef->_pasteSelection(); }
+bool Model::_pasteSelection() {
+	if( this->objectBuffer.size() <= 0)
+		return false;
+	
+	
+	// remove objects from the scene, but move them into the cut/copy buffer
+	for( vector<bz2object*>::iterator i = this->objectBuffer.begin(); i != this->objectBuffer.end(); i++) {
+		this->_addObject( *i );
+	}
+	
+	this->objectBuffer.clear();
+	
+	return true;
 }
