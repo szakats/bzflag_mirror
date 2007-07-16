@@ -12,18 +12,16 @@
 
 #include "Zone.h"
 
-Zone::Zone(int ax, int ay, int bx, int by, int atype, GridInfo gridInfo)
+Zone::Zone(Coord2D a, Coord2D b, int atype, int astep)
 {
-  a = Coord2D(ax,ay);
-  b = Coord2D(bx,by);
+  A = a;
+  B = b;
   type = atype;
-  wi = gridInfo;
+  step = astep;
 }
 
 void Zone::output(std::ofstream& out) 
 {
-  Coord2D A = worldA();
-  Coord2D B = worldB();
   switch(type) {
     case ZONEBUILD: 
       if (FULLMESH) {
@@ -43,9 +41,9 @@ void Zone::output(std::ofstream& out)
 	out << "  vertex " << B.x << " " << B.y << " " << height << "\n";
 	out << "  vertex " << A.x << " " << B.y << " " << height << "\n";
 	out << "  texcoord 0 0\n";
-	out << "  texcoord " << (b.x-a.x+1) << " 0 \n";
-	out << "  texcoord " << (b.x-a.x+1) << " " << (b.y-a.y+1) << " \n";
-	out << "  texcoord 0 " << (b.y-a.y+1) << " \n";
+	out << "  texcoord " << int((B.x-A.x)/step) << " 0 \n";
+	out << "  texcoord " << int((B.x-A.x)/step) << " " << int((B.y-A.y)/step) << " \n";
+	out << "  texcoord 0 " << int((B.x-A.x)/step) << " \n";
 	out << "  face\n";
 	out << "    vertices 0 1 5 4\n";
 	out << "  endface\n";
@@ -65,9 +63,9 @@ void Zone::output(std::ofstream& out)
 	out << "end\n\n";
       } else {
 	out << "meshbox\n";
-	out << "  position " << int((a.x+b.x-wi.sizeX-1)*wi.stepX/2) << " " << int((a.y+b.y-wi.sizeY-1)*wi.stepY/2) << " 0\n";
-	out << "  size " << int((b.x-a.x+1)* wi.stepX/2) << " " << int((b.y-a.y+1)* wi.stepY/2) << " " << ((rand()%5)*4+5) << "\n";
-	//out << "  size 10 10 " << (rand()%9+3) << "\n";
+	out << "  position " << int((A.x+B.x)/2) << " " << int((A.y+B.y)/2) << " 0\n";
+	out << "  size " << int((B.x-A.x)/2) << " " << int((B.y-A.y)/2) << " " << ((rand()%5)*4+5) << "\n";
+	out << "  size 10 10 " << (rand()%9+3) << "\n";
 	out << "  rotation 0\n";
 	out << "end\n\n";
       }
@@ -88,13 +86,13 @@ void Zone::output(std::ofstream& out)
       out << "  vertex " << A.x << " " << B.y << " 0.001\n";
       out << "  texcoord 0 0\n";
       if (type == ZONEROADH) {
-	out << "  texcoord 0 " << (b.x-a.x) << " \n";
-	out << "  texcoord " << (b.y-a.y) << " " << (b.x-a.x) << " \n";
-	out << "  texcoord " << (b.y-a.y) << " 0 \n";
+	out << "  texcoord 0 " << int((B.y-A.y)/step) << " \n";
+	out << "  texcoord " << int((B.x-A.x)/step) << " " << int((B.y-A.y)/step) << " \n";
+	out << "  texcoord " << int((B.x-A.x)/step) << " 0 \n";
       } else {
-	out << "  texcoord " << (b.x-a.x) << " 0 \n";
-	out << "  texcoord " << (b.x-a.x) << " " << (b.y-a.y) << " \n";
-	out << "  texcoord 0 " << (b.y-a.y) << " \n";
+	out << "  texcoord " << int((B.x-A.x)/step) << " 0 \n";
+	out << "  texcoord " << int((B.x-A.x)/step) << " " << int((B.y-A.y)/step) << " \n";
+	out << "  texcoord 0 " << int((B.y-A.y)/step) << " \n";
       }
       out << "  face\n";
       out << "    vertices 0 1 2 3\n";

@@ -20,17 +20,11 @@
 
 
 class Zone {
-  GridInfo wi;
-  Coord2D a,b;
+  int step;
+  Coord2D A,B;
   int type;
 public:
-  Zone(int ax, int ay, int bx, int by, int atype, GridInfo gridInfo);
-  Coord2D worldA() { 
-    return Coord2D((a.x-wi.sizeX/2)*wi.stepX,(a.y-wi.sizeY/2)*wi.stepY);
-  }
-  Coord2D worldB() { 
-    return Coord2D((b.x-wi.sizeX/2)*wi.stepX,(b.y-wi.sizeY/2)*wi.stepY);
-  }
+  Zone(Coord2D a, Coord2D b, int atype, int astep);
   void output(std::ofstream& out);
 };
 

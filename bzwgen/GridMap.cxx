@@ -55,14 +55,14 @@ void GridMap::pushZones()
       int lastx = 0;
       for (int x = 0; x < gi.sizeX; x++) {
 	if (typeCrossAround(x,y,CELLROAD) > 3) {
-	  zones.push_back(Zone(lastx  ,lasty  ,x-1,y-1,rand()%10 == 0 ? ZONEEMPTY : ZONEBUILD,gi));
-	  zones.push_back(Zone(lastx  ,y-1    ,x-1,y  ,ZONEROADH,gi));
-	  zones.push_back(Zone(x-1    ,lasty  ,x  ,y-1,ZONEROADV,gi));
-	  zones.push_back(Zone(x-1    ,y-1    ,x  ,y  ,ZONEROADC,gi));
+	  zones.push_back(Zone(worldCoord(lastx,lasty),worldCoord(x-1,y-1),rand()%10 == 0 ? ZONEEMPTY : ZONEBUILD,gi.stepX));
+	  zones.push_back(Zone(worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,ZONEROADH,gi.stepX));
+	  zones.push_back(Zone(worldCoord(x-1,lasty)  ,worldCoord(x,y-1)  ,ZONEROADV,gi.stepX));
+	  zones.push_back(Zone(worldCoord(x-1,y-1)    ,worldCoord(x,y)    ,ZONEROADC,gi.stepX));
 	  lastx = x;
 	} else if (x == gi.sizeX-1) {
-	  zones.push_back(Zone(lastx  ,lasty  ,x-1,y-1,ZONEBUILD,gi));
-	  zones.push_back(Zone(lastx  ,y-1    ,x-1,y  ,ZONEROADH,gi));
+	  zones.push_back(Zone(worldCoord(lastx,lasty),worldCoord(x-1,y-1),ZONEBUILD,gi.stepX));
+	  zones.push_back(Zone(worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,ZONEROADH,gi.stepX));
 	  lastx = x;
 	}
       }
