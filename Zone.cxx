@@ -25,9 +25,14 @@ void Zone::output(std::ofstream& out)
   switch(type) {
     case ZONEBUILD: 
       if (FULLMESH) {
-	int height = ((rand()%5)*4+5);
+	int height = ((rand()%5)*4+4);
+	if (rand()%4 == 0) height += (rand()%5)*4;
 	out << "mesh\n";
-	out << "  matref bwall\n";
+	if (rand()%2 == 0) {
+	  out << "  matref bwall\n";
+	} else {
+	  out << "  matref bwall2\n";
+	}
 	out << "  inside " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 1\n";
 	out << "  outside " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 100\n";
 	out << "  outside " << (A.x)-1 << " " << (A.y)-1 << " 0\n";
@@ -40,6 +45,7 @@ void Zone::output(std::ofstream& out)
 	out << "  vertex " << B.x << " " << A.y << " " << height << "\n";
 	out << "  vertex " << B.x << " " << B.y << " " << height << "\n";
 	out << "  vertex " << A.x << " " << B.y << " " << height << "\n";
+	out << "  color 0."<< rand()%10+80 << " 0." << rand()%20+80 << " 0."<< rand()%20+80<< " 1.0\n";
 	out << "  texcoord 0 0\n";
 	out << "  texcoord " << int((B.x-A.x)/step) << " 0 \n";
 	out << "  texcoord " << int((B.x-A.x)/step) << " " << int((B.y-A.y)/step) << " \n";

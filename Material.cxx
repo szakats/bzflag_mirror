@@ -16,6 +16,7 @@ void Material::output(std::ofstream& out) {
   out << "material\n";
   out << "  name " << name << "\n";
   out << "  texture " << file << "\n";
+  out << "  diffuse 2.0 2.0 2.0 1.0\n";
   out << "end\n\n";
 }
 

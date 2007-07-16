@@ -26,10 +26,10 @@
 // TODO: proper command line handling
 // TODO: implement option handling
 // TODO: doxygen 
-// TODO: building recoloring
+// DONE TODO: building recoloring
 // TODO: zone subdivision
 // TODO: object wrappers for basic objects
-// TODO: zones need to use world coordinates
+// DONE TODO: zones need to use world coordinates
 
 
 

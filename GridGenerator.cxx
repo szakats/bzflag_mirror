@@ -51,6 +51,7 @@ void GridGenerator::run() {
   mats.push_back(Material("road","road"));
   mats.push_back(Material("roadx","roadx"));
   mats.push_back(Material("bwall","bwall"));
+  mats.push_back(Material("bwall2","bwall2"));
   mats.push_back(Material("top","mesh"));
 }
 
