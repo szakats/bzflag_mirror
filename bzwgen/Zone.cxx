@@ -86,9 +86,9 @@ void Zone::output(std::ofstream& out)
       out << "  vertex " << A.x << " " << B.y << " 0.001\n";
       out << "  texcoord 0 0\n";
       if (type == ZONEROADH) {
-	out << "  texcoord 0 " << int((B.y-A.y)/step) << " \n";
-	out << "  texcoord " << int((B.x-A.x)/step) << " " << int((B.y-A.y)/step) << " \n";
-	out << "  texcoord " << int((B.x-A.x)/step) << " 0 \n";
+	out << "  texcoord 0 " << int((B.x-A.x)/step) << " \n";
+	out << "  texcoord " << int((B.y-A.y)/step) << " " << int((B.x-A.x)/step) << " \n";
+	out << "  texcoord " << int((B.y-A.y)/step) << " 0 \n";
       } else {
 	out << "  texcoord " << int((B.x-A.x)/step) << " 0 \n";
 	out << "  texcoord " << int((B.x-A.x)/step) << " " << int((B.y-A.y)/step) << " \n";
