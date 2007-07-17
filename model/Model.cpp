@@ -573,10 +573,11 @@ void Model::_removeObject( bz2object* obj ) {
 	vector< bz2object* >::iterator itr = objects.begin();
 	for(unsigned int i = 0; i < this->objects.size() && itr != this->objects.end(); i++, itr++) {
 		if( objects[i] == obj ) {
-			ObserverMessage obs( ObserverMessage::REMOVE_OBJECT, obj );
-			notifyObservers( &obs );
 			
 			this->objects.erase( itr );
+			
+			ObserverMessage obs( ObserverMessage::REMOVE_OBJECT, obj );
+			notifyObservers( &obs );
 		}
 	}
 }
@@ -644,8 +645,9 @@ void Model::_unselectAll() {
 		(*i)->setChanged( true );
 	}
 	
-	this->notifyObservers( NULL );
 	selectedObjects.clear();
+	this->notifyObservers( NULL );
+	
 }
 
 // get selection
@@ -671,13 +673,16 @@ bool Model::_cutSelection() {
 	
 	this->objectBuffer.clear();
 	
-	// remove objects from the scene, but move them into the cut/copy buffer
+	// remove objects from the scene, but move them into the cut/copy buffer first so they're still referenced
 	for( vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		this->objectBuffer.push_back( *i );
 	}
 	for( vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		this->_removeObject( *i );
 	}
+	
+	this->selectedObjects.clear();
+	this->notifyObservers( NULL );
 	
 	return true;
 }
@@ -690,7 +695,7 @@ bool Model::_copySelection() {
 	
 	this->objectBuffer.clear();
 	
-	// remove objects from the scene, but move them into the cut/copy buffer
+	// copy objects into the object buffer
 	for( vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		this->objectBuffer.push_back( *i );
 	}
@@ -705,11 +710,36 @@ bool Model::_pasteSelection() {
 		return false;
 	
 	
+	this->selectedObjects.clear();
+	
 	// paste objects into the scene
 	for( vector< osg::ref_ptr<bz2object> >::iterator i = this->objectBuffer.begin(); i != this->objectBuffer.end(); i++) {
 		this->_addObject( i->get() );
+		this->selectedObjects.push_back( i->get() );
 	}
 	
+	this->notifyObservers(NULL);
+	
+	return true;
+}
+
+// delete a selection
+bool Model::deleteSelection() { return modelRef->_deleteSelection(); }
+bool Model::_deleteSelection() {
+	if( this->selectedObjects.size() <= 0)
+		return false;
+	
+	// remove objects from the scene WITHOUT first referencing it (i.e. this will ensure it gets deleted)
+	vector<bz2object*>::iterator itr = selectedObjects.begin();
+	for( unsigned int i = 0; i < selectedObjects.size(); i++, itr++) {
+		bz2object* obj = selectedObjects[i];
+		selectedObjects.erase( itr );
+		this->_removeObject( obj );
+	}
+	
+	this->selectedObjects.clear();
+	
+	this->notifyObservers(NULL);
 	
 	return true;
 }

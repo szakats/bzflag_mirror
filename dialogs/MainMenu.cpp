@@ -73,7 +73,9 @@ void MainMenu::addBoxCallback_real(Fl_Widget* w) {
 		return;
 	
 	// add the object to the model
+	this->parent->getModel()->_unselectAll();
 	this->parent->getModel()->_addObject( newObj );
+	this->parent->getModel()->_setSelected( newObj );
 	
 	// open up a MasterConfigurationDialog and configure it
 	this->parent->configure( newObj );
@@ -206,7 +208,7 @@ void MainMenu::cloneCallback_real(Fl_Widget* w) {
 
 // handle deletion
 void MainMenu::deleteCallback_real(Fl_Widget* w) {
-	printf("deletion!\n");
+	this->parent->getModel()->_deleteSelection();
 	this->value(0);
 }
 
