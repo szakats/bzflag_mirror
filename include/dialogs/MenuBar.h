@@ -8,11 +8,19 @@
 
 #include <FL/Fl_File_Chooser.H>
 
+#include <FL/filename.H>
+
+#include <iostream>
+#include <fstream>
+
 #include "../model/BZWParser.h"
 #include "../model/Model.h"
 
+#include "../dialogs/Fl_Error.h"
+
 class MainWindow;
 
+using namespace std;
 /**
  * This is BZWB's menu bar class
  */
@@ -94,6 +102,10 @@ public:
 		MenuBar* mb = (MenuBar*)(data);
 		mb->unselect_all_real( w );
 	}
+	
+	// do a world save
+	void do_world_save( const char* filename );
+	
 private:
 
 	// instantiated callbacks

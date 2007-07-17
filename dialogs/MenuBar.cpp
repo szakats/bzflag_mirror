@@ -50,10 +50,54 @@ void MenuBar::open_world_real( Fl_Widget* w ) {
 }
 
 void MenuBar::save_world_real( Fl_Widget* w ) {
+	// do a "save as..." if the world is yet unnamed
+	if( this->parent->getWorldName().size() <= 0 ) {
+		this->save_world_as_real( w );
+		return;
+	}
 	
+	// save the world
+	string path = this->parent->getWorldName();
+	
+	// do a world save
+	this->do_world_save( path.c_str() );
 }
 
 void MenuBar::save_world_as_real( Fl_Widget* w ) {
+	Fl_File_Chooser* fc = new Fl_File_Chooser("share/", "*.bzw", Fl_File_Chooser::CREATE, "Save As..." );
+	fc->show();
+	
+	// wait for a value
+	while( fc->shown() ) { Fl::wait(); }
+	
+	// get a value (the file path)
+	string filename = fc->value();
+	
+	// set the world name
+	this->parent->setWorldName( filename.c_str() );
+	
+	// save the world
+	string path = this->parent->getWorldName();
+	
+	// do the world save
+	this->do_world_save( path.c_str() ); 
+}
+
+// save the world
+void MenuBar::do_world_save( const char* filename ) {
+	
+	ofstream fileOutput( filename );
+	
+	// if we can't open a new file (access permissions, etc), then bail
+	if(!fileOutput.is_open()) {
+		this->parent->error( TextUtils::format("Could not open %s for writing\n", filename).c_str() );
+		return;	
+	}
+	
+	string text = this->parent->getModel()->toString();
+	
+	fileOutput.write( text.c_str(), text.size() );
+	fileOutput.close();
 	
 }
 

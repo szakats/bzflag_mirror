@@ -67,6 +67,10 @@ public:
 	// handler
 	virtual int handle(int event);
 	
+	//get/set world name (as an absolute path)
+	string getWorldName() { return this->worldName; }
+	void setWorldName(const char* name) { this->worldName = name; }
+	
 private:
 	
 	// reference to the main menu
@@ -89,6 +93,9 @@ private:
 	
 	// event timer
 	osg::Timer timer;
+	
+	// the name of this world
+	string worldName;
 	
 };
 
