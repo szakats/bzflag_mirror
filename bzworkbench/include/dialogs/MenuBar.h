@@ -6,6 +6,11 @@
 #include <FL/Fl_Menu.H>
 #include <FL/Fl_Menu_Bar.H>
 
+#include <FL/Fl_File_Chooser.H>
+
+#include "../model/BZWParser.h"
+#include "../model/Model.h"
+
 class MainWindow;
 
 /**

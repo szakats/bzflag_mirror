@@ -96,7 +96,7 @@ int MainWindow::handle(int event) {
 
 // configure an object
 void MainWindow::configure( bz2object* obj ) {
-	this->configurationMenu->setObject( obj );
+	// this->configurationMenu->setObject( obj );
 	
 }
 

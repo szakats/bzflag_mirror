@@ -9,14 +9,14 @@ Model::Model() : Observable()
 	worldData = new world();
 	optionsData = new options();
 	waterLevelData = new waterLevel();
-	phys = vector<physics*>();
-	dynamicColors = vector<dynamicColor*>();
-	materials = vector<material*>();
-	links = vector<Tlink*>();
-	textureMatrices = vector<texturematrix*>();
-	groups = vector<define*>();
+	phys = vector< physics* >();
+	dynamicColors = vector< dynamicColor* >();
+	materials = vector< material* >();
+	links = vector< Tlink* >();
+	textureMatrices = vector< texturematrix* >();
+	groups = vector< define* >();
 	
-	objects = vector<bz2object*>();
+	objects = vector< bz2object* >();
 	modelRef = this;
 	
 	cmap = map<string, DataEntry* (*)(string&)>();
@@ -34,14 +34,14 @@ Model::Model(const char* supportedObjects, const char* objectHierarchy, const ch
 	worldData = new world();
 	optionsData = new options();
 	waterLevelData = new waterLevel();
-	phys = vector<physics*>();
-	dynamicColors = vector<dynamicColor*>();
-	materials = vector<material*>();
-	links = vector<Tlink*>();
-	textureMatrices = vector<texturematrix*>();
-	groups = vector<define*>();
+	phys = vector< physics* >();
+	dynamicColors = vector< dynamicColor* >();
+	materials = vector< material* >();
+	links = vector< Tlink* >();
+	textureMatrices = vector< texturematrix* >();
+	groups = vector< define* >();
 	
-	objects = vector<bz2object*>();
+	objects = vector< bz2object* >();
 	modelRef = this;
 	
 	cmap = map<string, DataEntry* (*)(string&)>();
@@ -56,6 +56,7 @@ Model::Model(const char* supportedObjects, const char* objectHierarchy, const ch
 
 Model::~Model()
 {
+	
 	if(worldData)
 		delete worldData;
 	
@@ -92,14 +93,7 @@ Model::~Model()
 				delete *i;
 				*i = NULL;	
 			}
-			
-	if(objectBuffer.size() > 0)
-		for(vector<bz2object*>::iterator i = objectBuffer.begin(); i != objectBuffer.end(); i++)
-			if((*i)) {
-				delete *i;
-				*i = NULL;	
-			}
-			
+		
 }
 
 // getters specific to the model
@@ -144,7 +138,10 @@ bool Model::_build(vector<string>& bzworld) {
 		if(header == "world") {
 			if(cmap[header] != NULL) {
 				this->worldData->update(*i);
-				foundWorld = true;		// there must be a world 
+				foundWorld = true;		// there must be a world
+				// tell the observers we have a different world
+				ObserverMessage obs( ObserverMessage::UPDATE_WORLD, this->worldData );
+				notifyObservers( &obs );
 				continue;
 			}
 			else {
@@ -247,7 +244,7 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse all other objects
 		else {
 			if(cmap[header] != NULL) {
-				objects.push_back((bz2object*)cmap[header](*i));
+				this->_addObject((bz2object*)cmap[header](*i));
 			}
 			else {
 				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
@@ -478,7 +475,7 @@ string& Model::_toString() {
 	// physics drivers
 	ret += "\n#--Physics Drivers-------------------------------\n\n";
 	if(phys.size() > 0) {
-		for(vector<physics*>::iterator i = phys.begin(); i != phys.end(); i++) {
+		for(vector< physics* >::iterator i = phys.begin(); i != phys.end(); i++) {
 			ret += (*i)->toString() + "\n";
 		}
 	}
@@ -486,7 +483,7 @@ string& Model::_toString() {
 	// materials
 	ret += "\n#--Materials-------------------------------------\n\n";
 	if(materials.size() > 0) {
-		for(vector<material*>::iterator i = materials.begin(); i != materials.end(); i++) {
+		for(vector< material* >::iterator i = materials.begin(); i != materials.end(); i++) {
 			ret += (*i)->toString() + "\n";
 		}	
 	}
@@ -494,7 +491,7 @@ string& Model::_toString() {
 	// dynamic colors
 	ret += "\n#--Dynamic Colors--------------------------------\n\n";
 	if(dynamicColors.size() > 0) {
-		for(vector<dynamicColor*>::iterator i = dynamicColors.begin(); i != dynamicColors.end(); i++) {
+		for(vector< dynamicColor* >::iterator i = dynamicColors.begin(); i != dynamicColors.end(); i++) {
 			ret += (*i)->toString() + "\n";	
 		}
 	}
@@ -502,7 +499,7 @@ string& Model::_toString() {
 	// texture matrices
 	ret += "\n#--Texture Matrices------------------------------\n\n";
 	if(textureMatrices.size() > 0) {
-		for(vector<texturematrix*>::iterator i = textureMatrices.begin(); i != textureMatrices.end(); i++) {
+		for(vector< texturematrix* >::iterator i = textureMatrices.begin(); i != textureMatrices.end(); i++) {
 			ret += (*i)->toString() + "\n";	
 		}
 	}
@@ -510,7 +507,7 @@ string& Model::_toString() {
 	// group defintions
 	ret += "\n#--Group Definitions-----------------------------\n\n";
 	if(groups.size() > 0) {
-		for(vector<define*>::iterator i = groups.begin(); i != groups.end(); i++) {
+		for(vector< define* >::iterator i = groups.begin(); i != groups.end(); i++) {
 			ret += (*i)->toString() + "\n";	
 		}	
 	}
@@ -518,7 +515,7 @@ string& Model::_toString() {
 	// all other objects
 	ret += "\n#--Objects---------------------------------------\n\n";
 	if(objects.size() > 0) {
-		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
+		for(vector< bz2object* >::iterator i = objects.begin(); i != objects.end(); i++) {
 			ret += (*i)->toString() + "\n";	
 		}	
 	}
@@ -526,7 +523,7 @@ string& Model::_toString() {
 	// links
 	ret += "\n#--Teleporter Links------------------------------\n\n";
 	if(links.size() > 0) {
-		for(vector<Tlink*>::iterator i = links.begin(); i != links.end(); i++) {
+		for(vector< Tlink* >::iterator i = links.begin(); i != links.end(); i++) {
 			ret += (*i)->toString() + "\n";	
 		}	
 	}
@@ -543,12 +540,12 @@ string& Model::_toString() {
 }
 
 // BZWB-specific API
-vector<bz2object*>& 	Model::getObjects() 		{ return modelRef->_getObjects(); }
-vector<material*>& 		Model::getMaterials() 		{ return modelRef->_getMaterials(); }
-vector<texturematrix*>&	Model::getTextureMatrices() { return modelRef->_getTextureMatrices(); }
-vector<physics*>& 		Model::getPhysicsDrivers() 	{ return modelRef->_getPhysicsDrivers(); }
-vector<Tlink*>&		 	Model::getTeleporterLinks() { return modelRef->_getTeleporterLinks(); }
-vector<define*>& 		Model::getGroups() 			{ return modelRef->_getGroups(); }
+vector< bz2object* >& 		Model::getObjects() 		{ return modelRef->_getObjects(); }
+vector< material* >& 		Model::getMaterials() 		{ return modelRef->_getMaterials(); }
+vector< texturematrix* >&	Model::getTextureMatrices() { return modelRef->_getTextureMatrices(); }
+vector< physics* >& 		Model::getPhysicsDrivers() 	{ return modelRef->_getPhysicsDrivers(); }
+vector< Tlink* >&		 	Model::getTeleporterLinks() { return modelRef->_getTeleporterLinks(); }
+vector< define* >&			Model::getGroups() 			{ return modelRef->_getGroups(); }
 void					Model::addObject( bz2object* obj ) { modelRef->_addObject( obj ); }
 void					Model::removeObject( bz2object* obj ) { modelRef->_removeObject( obj ); }
 void					Model::setSelected( bz2object* obj ) { modelRef->_setSelected( obj ); }
@@ -557,47 +554,29 @@ void					Model::unselectAll() { modelRef->_unselectAll(); }
 bool					Model::isSelected( bz2object* obj ) { return modelRef->_isSelected( obj ); }
 
 // add an object to the Model
-// TODO: This code is kludgy--all changes to the model should be forewarded to the view via the notifyObservers method
 void Model::_addObject( bz2object* obj ) {
 	if( obj == NULL )
 		return;
 		
 	this->objects.push_back( obj );
 	
-	// iterate through all Observers
-	vector<Observer*> observers = this->getObservers();
-	for(vector<Observer*>::iterator i = observers.begin(); i != observers.end(); i++) {
-		// try to dynamic_cast the Observer to a View
-		View* v = dynamic_cast<View*>( *i );
-	
-		// if the dynamic_cast worked, remove the object from the scenegraph
-		if( v ) {
-			v->getRootNode()->insertChild(0, obj );
-		}	
-	}
+	// tell all observers
+	ObserverMessage obs( ObserverMessage::ADD_OBJECT, obj );
+	notifyObservers( &obs );
 }
 
 // remove an object by instance
-// TODO: This code is kludgy--all changes to the model should be forewarded to the view via the notifyObservers method
 void Model::_removeObject( bz2object* obj ) {
 	if(this->objects.size() <= 0)
 		return;
-		
-	for(vector< bz2object* >::iterator i = this->objects.begin(); i != this->objects.end(); i++) {
-		if( *i == obj ) {
-			// iterate through all Observers
-			vector<Observer*> observers = this->getObservers();
-			for(vector<Observer*>::iterator j = observers.begin(); j != observers.end(); j++) {
-				// try to dynamic_cast the Observer to a View
-				View* v = dynamic_cast<View*>( *j );
-				
-				// if the dynamic_cast worked, remove the object from the scenegraph
-				if( v ) {
-					v->getRootNode()->removeChild( *i );
-				}	
-			}
-			this->objects.erase( i );
-			return;	
+	
+	vector< bz2object* >::iterator itr = objects.begin();
+	for(unsigned int i = 0; i < this->objects.size() && itr != this->objects.end(); i++, itr++) {
+		if( objects[i] == obj ) {
+			ObserverMessage obs( ObserverMessage::REMOVE_OBJECT, obj );
+			notifyObservers( &obs );
+			
+			this->objects.erase( itr );
 		}
 	}
 }
@@ -618,8 +597,7 @@ void Model::_setSelected( bz2object* obj ) {
 	
 	this->selectedObjects.push_back( obj );	
 	
-	// tell the View to regenerate the Renderable of this object
-	this->notifyObservers( obj );
+	this->notifyObservers( NULL );
 }
 
 // set an object as unselected and update it
@@ -636,8 +614,7 @@ void Model::_setUnselected( bz2object* obj ) {
 		}	
 	}
 	
-	// tell the View to regenerate the Renderable of this object
-	this->notifyObservers( obj );
+	this->notifyObservers( NULL );
 }
 
 // determine whether or not an object is selected
@@ -672,7 +649,7 @@ void Model::_unselectAll() {
 }
 
 // get selection
-vector<bz2object*>& Model::getSelection() { return modelRef->_getSelection(); }
+vector< bz2object* >& Model::getSelection() { return modelRef->_getSelection(); }
 
 // build an object from the object registry
 DataEntry* Model::buildObject( const char* header ) { return modelRef->_buildObject( header ); }
@@ -695,8 +672,10 @@ bool Model::_cutSelection() {
 	this->objectBuffer.clear();
 	
 	// remove objects from the scene, but move them into the cut/copy buffer
-	for( vector<bz2object*>::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for( vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		this->objectBuffer.push_back( *i );
+	}
+	for( vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		this->_removeObject( *i );
 	}
 	
@@ -712,7 +691,7 @@ bool Model::_copySelection() {
 	this->objectBuffer.clear();
 	
 	// remove objects from the scene, but move them into the cut/copy buffer
-	for( vector<bz2object*>::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for( vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		this->objectBuffer.push_back( *i );
 	}
 	
@@ -726,12 +705,11 @@ bool Model::_pasteSelection() {
 		return false;
 	
 	
-	// remove objects from the scene, but move them into the cut/copy buffer
-	for( vector<bz2object*>::iterator i = this->objectBuffer.begin(); i != this->objectBuffer.end(); i++) {
-		this->_addObject( *i );
+	// paste objects into the scene
+	for( vector< osg::ref_ptr<bz2object> >::iterator i = this->objectBuffer.begin(); i != this->objectBuffer.end(); i++) {
+		this->_addObject( i->get() );
 	}
 	
-	this->objectBuffer.clear();
 	
 	return true;
 }

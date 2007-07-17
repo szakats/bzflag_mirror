@@ -26,7 +26,12 @@ public:
 	box(string& data);
 	
 	static DataEntry* init() { return new box( osg::Vec3( 0.0, 0.0, 0.0 ), 0.0f, osg::Vec3( 0.0, 0.0, 0.0 ) ); }
-	static DataEntry* init(string& data) { return new box(data); }
+	static DataEntry* init(string& data) {
+		if( data.size() <= 1 )
+			return new box( osg::Vec3( 0.0, 0.0, 0.0 ), 0.0f, osg::Vec3( 0.0, 0.0, 0.0 ) );
+		else
+			return new box(data);
+	}
 	
 	// nothing to destroy...
 	virtual ~box();

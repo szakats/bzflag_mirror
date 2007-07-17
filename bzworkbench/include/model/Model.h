@@ -22,6 +22,9 @@ class material;
 #define MODEL_QUERY_COMMANDS "<get><set>"
 
 #include "../Observable.h"
+#include "ObserverMessage.h"
+
+#include <osg/ref_ptr>
 
 using namespace std;
 
@@ -59,12 +62,12 @@ public:
 	static world* getWorldData();
 	static waterLevel* getWaterLevelData();
 	static options* getOptionsData();
-	static vector<bz2object*>& getObjects();
-	static vector<material*>& getMaterials();
-	static vector<texturematrix*>& getTextureMatrices();
-	static vector<physics*>& getPhysicsDrivers();
-	static vector<Tlink*>& getTeleporterLinks();
-	static vector<define*>& getGroups();
+	static vector< bz2object* >& getObjects();
+	static vector< material* >& getMaterials();
+	static vector< texturematrix* >& getTextureMatrices();
+	static vector< physics* >& getPhysicsDrivers();
+	static vector< Tlink* >& getTeleporterLinks();
+	static vector< define* >& getGroups();
 	
 	static void addObject( bz2object* obj );
 	static DataEntry* buildObject( const char* header );
@@ -73,7 +76,7 @@ public:
 	static void setUnselected( bz2object* obj );
 	static void unselectAll();
 	static bool isSelected( bz2object* obj );
-	static vector<bz2object*>& getSelection();
+	static vector< bz2object* >& getSelection();
 	
 	// editor-like methods (BZWB-specific)
 	static bool cutSelection();
@@ -84,13 +87,13 @@ public:
 	world* _getWorldData() { return worldData; }
 	options* _getOptionsData() { return optionsData; }
 	waterLevel* _getWaterLevelData() { return waterLevelData; }
-	vector<bz2object*>& _getObjects() { return this->objects; }
-	vector<material*>& _getMaterials() { return this->materials; }
-	vector<texturematrix*>& _getTextureMatrices() { return this->textureMatrices; }
-	vector<dynamicColor*>& _getDynamicColors() { return this->dynamicColors; }
-	vector<physics*>& _getPhysicsDrivers() { return this->phys; }
-	vector<Tlink*>& _getTeleporterLinks() { return this->links; }
-	vector<define*>& _getGroups() { return this->groups; }
+	vector< bz2object* >& _getObjects() { return this->objects; }
+	vector< material* >& _getMaterials() { return this->materials; }
+	vector< texturematrix* >& _getTextureMatrices() { return this->textureMatrices; }
+	vector< dynamicColor* >& _getDynamicColors() { return this->dynamicColors; }
+	vector< physics* >& _getPhysicsDrivers() { return this->phys; }
+	vector< Tlink* >& _getTeleporterLinks() { return this->links; }
+	vector< define* >& _getGroups() { return this->groups; }
 	
 	void _addObject( bz2object* obj );
 	DataEntry* _buildObject( const char* header );
@@ -99,7 +102,7 @@ public:
 	void _setUnselected( bz2object* obj );
 	void _unselectAll();
 	bool _isSelected( bz2object* obj );
-	vector<bz2object*>& _getSelection() { return this->selectedObjects; }
+	vector< bz2object* >& _getSelection() { return this->selectedObjects; }
 	
 	// editor-like methods (BZWB-specific)--instantiated
 	bool _cutSelection();
@@ -157,25 +160,25 @@ private:
 	waterLevel* waterLevelData;
 	
 // physics
-	vector<physics*> phys;
+	vector< physics* > phys;
 	
 // materials
-	vector<material*> materials;
+	vector< material* > materials;
 	
 // group definitions
-	vector<define*> groups;
+	vector< define* > groups;
 	
 // dynamic colors
-	vector<dynamicColor*> dynamicColors;
+	vector< dynamicColor* > dynamicColors;
 
 // links
-	vector<Tlink*> links;
+	vector< Tlink* > links;
 
 // texture matrices
-	vector<texturematrix*> textureMatrices;
+	vector< texturematrix* > textureMatrices;
 	
 // objects
-	vector<bz2object*> objects;
+	vector< bz2object* > objects;
 	
 // world data (array of all objects in BZW format)
 	vector<string> data;
@@ -202,7 +205,7 @@ private:
 	vector< bz2object* > selectedObjects;
 	
 // cut/copy buffer
-	vector< bz2object* > objectBuffer;
+	vector< osg::ref_ptr< bz2object > > objectBuffer;
 };
 
 #include "BZWParser.h"

@@ -54,6 +54,7 @@ class bz2object : public Renderable, public DataEntry {
 		void setMaterials( vector<string>& materials ) { this->materials = materials; }
 		void setSelected( bool value ) { this->selected = value; }
 		
+		
 		// make this public
 		bz2object operator =( const bz2object& obj ) { 
 			bz2object newObj(NULL, NULL);

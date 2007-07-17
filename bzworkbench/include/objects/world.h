@@ -30,6 +30,17 @@ class world : public DataEntry {
 		// render method
 		int render(void);
 		
+		// bzwb-specific api
+		string& getName() { return worldName; }
+		float getSize() { return size; }
+		float getFlagHeight() { return flagHeight; }
+		bool hasWalls() { return !noWalls; }
+		
+		void setName( const char* name ) { this->worldName = name; }
+		void setSize( float size ) { this->size = size; }
+		void setFlagHeight( float height ) { this->flagHeight = height; }
+		void setWalls( bool value ) { this->noWalls = !value; }
+		
 	private:
 		string worldName;
 		float size;

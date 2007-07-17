@@ -25,12 +25,13 @@ public:
 	
 	// constructor with a child node to add
 	Renderable( osg::Node* child ) : osg::PositionAttitudeTransform() {
-		if(child)
+		if(child) {
 			this->setName( child->getName() );
-		else
+			this->addChild( child );
+		}
+		else {
 			this->setName( "(unknown)" );
-		
-		this->addChild( child );	
+		}
 	}
 	
 	virtual ~Renderable() { }
@@ -40,15 +41,10 @@ public:
 	
 	// set the child node (there should only be one)
 	void setNode( osg::Node* node ) {
-		if(this->getChild(0) != NULL)
+		if(this->getNumChildren() > 0 && this->getChild(0) != NULL)
 			this->removeChild( this->getChild(0) );
 		
 		this->addChild( node );
-	}
-	
-	// set the color of the contained node
-	void setColor( osg::Vec4 color ) {
-			
 	}
 	
 	// angular rotators (easier than building quaterions and setting the attitude

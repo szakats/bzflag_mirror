@@ -33,10 +33,10 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
    this->modifiers[ FL_META ] = false;
    
 	// build the scene from the model
-	vector<bz2object*> objects = this->model->getObjects();
+	vector< bz2object* > objects = this->model->getObjects();
 	if(objects.size() > 0) {
-		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
-			this->root->addChild( (*i) );
+		for(vector< bz2object* >::iterator i = objects.begin(); i != objects.end(); i++) {
+			this->root->addChild( *i );
 		}
 	}
 	
@@ -134,6 +134,40 @@ int View::handle(int event) {
 // update method (inherited from Observer)
 void View::update( Observable* obs, void* data ) {
 	
+	if( data != NULL ) {
+		// get the message
+		ObserverMessage* obs_msg = (ObserverMessage*)(data);
+		
+		// process the message
+		switch( obs_msg->type ) {
+			// add an object to the scene
+			case ObserverMessage::ADD_OBJECT : {
+				bz2object* obj = (bz2object*)(obs_msg->data);
+				this->getRootNode()->insertChild( 0, obj );
+					
+				break;
+			}
+			// remove an object from the scene
+			case ObserverMessage::REMOVE_OBJECT : {
+				bz2object* obj = (bz2object*)(obs_msg->data);
+				this->getRootNode()->removeChild( obj );
+				
+				break;
+			}
+			// update the world size
+			case ObserverMessage::UPDATE_WORLD : {
+				// in this case, the data will contain a pointer to the modified world object
+				world* bzworld = (world*)(obs_msg->data);
+				
+				float scaleFactor = bzworld->getSize() / Ground::DEFAULT_SIZE;
+				
+				this->ground->setScale( osg::Vec3(scaleFactor, scaleFactor, scaleFactor) );
+			}
+			default:
+				break;
+		}
+	}
+	
 	// refresh the selection
 	this->selection->update( obs, data );
 	
@@ -185,9 +219,9 @@ void View::setUnselected( bz2object* object ) {
 void View::unselectAll() {
 	
 	// mark all selected objects as unselected
-	vector<bz2object*> objects = model->_getSelection();
+	vector< bz2object* > objects = model->_getSelection();
 	if(objects.size() > 0) {
-		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
+		for(vector< bz2object* >::iterator i = objects.begin(); i != objects.end(); i++) {
 			SceneBuilder::markUnselected( *i );
 		}
 	}
