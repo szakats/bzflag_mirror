@@ -17,6 +17,7 @@
 
 #include "../objects/bz2object.h"
 #include "../objects/box.h"
+#include "../objects/world.h"
 
 #include "../Observer.h"
 #include "../render/Renderable.h"
@@ -27,6 +28,8 @@
 #include "../render/Ground.h"
 
 #include "../render/Selection.h"
+
+#include "../model/ObserverMessage.h"
 
 // forward declare the Picker class
 class BZEventHandler;

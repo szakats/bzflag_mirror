@@ -118,7 +118,7 @@ osg::Vec3 Selection::computeLocalOrigin( vector< bz2object* >& objects ) {
 	
 	// compute the average x, y, and z values of all renderables
 	if( objects.size() > 0 ) {
-		for( vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
+		for( vector< bz2object* >::iterator i = objects.begin(); i != objects.end(); i++) {
 			x += (*i)->getPosition().x();
 			y += (*i)->getPosition().y();
 			z += (*i)->getPosition().z();
@@ -134,7 +134,7 @@ osg::Vec3 Selection::computeLocalOrigin( vector< bz2object* >& objects ) {
 }
 
 // rebuild the axes
-void Selection::rebuildAxes( vector< bz2object*>& objects ) {
+void Selection::rebuildAxes( vector< bz2object* >& objects ) {
 	this->axes->setPosition( this->computeLocalOrigin( objects ) );
 }
 

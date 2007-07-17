@@ -9,6 +9,7 @@ bz2object::bz2object(const char* name, const char* keys):
 	this->materials = vector<string>();
 	this->setSelected( false );
 	this->setName( "(unknown bz2object)" );
+	
 };
 
 // constructor with data
@@ -22,6 +23,7 @@ bz2object::bz2object(const char* name, const char* keys, const char* data):
 	this->setSelected( false );
 	string d = string(data);
 	this->update(d);
+	
 }
 	
 // getter

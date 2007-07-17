@@ -72,12 +72,12 @@ void MainMenu::addBoxCallback_real(Fl_Widget* w) {
 	if(!newObj)
 		return;
 	
-	// add the object to the model and the view
-	this->parent->getModel()->addObject( newObj );
-	this->parent->getView()->getRootNode()->insertChild(0, newObj );
+	// add the object to the model
+	this->parent->getModel()->_addObject( newObj );
 	
 	// open up a MasterConfigurationDialog and configure it
 	this->parent->configure( newObj );
+	
 	
 	this->value(0);
 }

@@ -1,0 +1,32 @@
+world
+	name boxworld
+	size 300
+	flagHeight 0
+end
+
+box
+	position 0 0 0
+	size 10 10 10
+	rotation 45
+end
+
+box
+	position -200 -200 0
+	size 10 10 10
+end
+
+box
+	position 200 -200 0
+	size 10 10 10
+end
+
+box
+	position -200 200 0
+	size 10 10 10
+end
+
+box
+	position 200 200 0
+	size 10 10 10
+end
+
