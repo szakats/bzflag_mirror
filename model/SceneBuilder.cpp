@@ -1,55 +1,17 @@
 #include "../include/model/SceneBuilder.h"
 #include "../include/windows/View.h"
 
-// static members of SceneBuilder
-/*
-map< string, osg::Node* > SceneBuilder::nodeData;
-map< string, osg::Geometry* > SceneBuilder::geoData;
-map< string, osg::Texture2D* > SceneBuilder::textureData;
-*/
 int SceneBuilder::nameCount;
 
 // constructor
 bool SceneBuilder::init() {
-	/*
-	nodeData = map< string, osg::Node* >();
-	geoData = map< string, osg::Geometry* >();
-	textureData = map< string, osg::Texture2D* >();
-	*/
 	nameCount = 0;
 	return true;
 }
 
 // destructor
 bool SceneBuilder::shutdown() {
-	/*
-	if( nodeData.size() > 0 ) {
-		for(map< string, osg::Node* >::iterator i = nodeData.begin(); i != nodeData.end(); i++) {
-			if(i->second != NULL) {
-				delete (i->second);
-				i->second = NULL;
-			}
-		}
-	}
 	
-	if( geoData.size() > 0 ) {
-		for(map< string, osg::Geometry* >::iterator i = geoData.begin(); i != geoData.end(); i++) {
-			if(i->second != NULL) {
-				delete (i->second);
-				i->second = NULL;
-			}
-		}
-	}
-	
-	if( textureData.size() > 0 ) {
-		for(map< string, osg::Texture2D* >::iterator i = textureData.begin(); i != textureData.end(); i++) {
-			if(i->second != NULL) {
-				delete (i->second);
-				i->second = NULL;
-			}
-		}
-	}
-	*/
 	return true;
 }
 
@@ -61,12 +23,7 @@ bool SceneBuilder::shutdown() {
 osg::Node* SceneBuilder::buildNode( const char* nodeFile ) {
 	// string-ify the nodeFile and add the corresponsing tail
 	string nodeName = SceneBuilder::nameNode( nodeFile );
-	/*
-	// see if this node was already loaded
-	if(nodeData.count( nodeName ) > 0) {
-		return nodeData[ nodeName ];
-	}
-	*/
+	
 	// otherwise, load it in
 	osg::Node* node = osgDB::readNodeFile( nodeFile );
 	
@@ -75,9 +32,6 @@ osg::Node* SceneBuilder::buildNode( const char* nodeFile ) {
 		
 	// each node stores nodeName (i.e. the string it's mapped to) as its name
 	node->setName( nodeName );
-	
-	//nodeData[ nodeName ] = node;
-	//return nodeData[nodeName];
 	
 	return node;
 }
@@ -88,36 +42,17 @@ osg::Node* SceneBuilder::buildNode( const char* nodeFile ) {
  
 osg::Node* SceneBuilder::buildSelectedNode( const char* fileName ) {
 	string selectedNodeName = SceneBuilder::nameSelected( SceneBuilder::nameNode( fileName ).c_str() );
-	/*
-	if( nodeData.count( selectedNodeName ) > 0 )
-		return nodeData[ selectedNodeName ];
-	*/
+	
 	osg::Node* node = osgDB::readNodeFile( fileName );
 	if( node == NULL )
 		return NULL;
-	
+		
 	SceneBuilder::markSelected( node );
 	
 	node->setName( selectedNodeName );
-	//nodeData[ selectedNodeName ] = node;
-	//return nodeData[ selectedNodeName ];
+	
 	return node;
 }
-
-/**
- * Return a node in the flyweight, or NULL if it hasn't been loaded
- */
- 
-/*
-osg::Node* SceneBuilder::getNode( const char* nodeFile ) {
-	string nodeName = nodeFile;
-	
-	if( nodeData.count( nodeName ) > 0 )
-		return nodeData[ nodeName ];
-		
-	return NULL;
-}
-*/
 
 /**
  * Geometry builder
@@ -137,19 +72,7 @@ osg::Geode* SceneBuilder::buildGeode( const char* _nodeName, osg::Geometry* geom
 	// load up the texture
     SceneBuilder::assignTexture( textureFile, geode );
 	
-	// assign the geometry data to the geode (assign it the flyweighted one if it exists; otherwise add this geometry)
-	/*
-	if( geoData[ geometryName ] == NULL ) {
-		geoData[ geometryName ] = geometry;
-	}
-	*/
 	geode->addDrawable( geometry );
-	
-	// add this geode to nodeData to be reused again
-	/*
-	if( nodeData[ nodeName ] == NULL )
-		nodeData[ nodeName ] = (osg::Node*)(geode);
-	*/
 	
 	return geode;
 }
@@ -162,32 +85,22 @@ void SceneBuilder::assignTexture( const char* _textureName, osg::Node* node ) {
 		// the texture itself
 		osg::Texture2D* texture = NULL;
 		
-		// if the texture has already been loaded then initialize it
-		/*
-		if( textureData[ textureName ] != NULL) {
-			texture = textureData[ textureName ];
-		}*/
-		if(false);
-		else {
-			texture = new osg::Texture2D();
-			
-			osg::Image* image = osgDB::readImageFile( _textureName );
+		texture = new osg::Texture2D();
 		
-			if( image != NULL ) {	// only build the texture if the image exists!
+		osg::Image* image = osgDB::readImageFile( _textureName );
+	
+		if( image != NULL ) {	// only build the texture if the image exists!
+		
+			// don't allow OSG to optimize the texture (otherwise it may disappear)
+			texture->setDataVariance( osg::Object::DYNAMIC );
+		
+			// set the texture's image
+			texture->setImage( image );
 			
-				// don't allow OSG to optimize the texture (otherwise it may disappear)
-				texture->setDataVariance( osg::Object::DYNAMIC );
-			
-				// set the texture's image
-				texture->setImage( image );
-				
-				// turn on GL_REPEAT texture wrapping
-				texture->setWrap( osg::Texture::WRAP_R, osg::Texture::REPEAT );
-				texture->setWrap( osg::Texture::WRAP_S, osg::Texture::REPEAT );
-				texture->setWrap( osg::Texture::WRAP_T, osg::Texture::REPEAT ); 
-			}
-			
-			// textureData[ textureName ] = texture;
+			// turn on GL_REPEAT texture wrapping
+			texture->setWrap( osg::Texture::WRAP_R, osg::Texture::REPEAT );
+			texture->setWrap( osg::Texture::WRAP_S, osg::Texture::REPEAT );
+			texture->setWrap( osg::Texture::WRAP_T, osg::Texture::REPEAT ); 
 		}
 		 
  		// make a new state set for the texture (so we can manipulate the texture attributes)
@@ -221,7 +134,7 @@ void SceneBuilder::assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Ve
 	mat->setShininess( osg::Material::FRONT, shininess );
 	
 	// set transparency
-	mat->setTransparency( osg::Material::FRONT, alpha );
+	mat->setAlpha( osg::Material::FRONT, alpha );
 	
 	// get the state set from the node
 	osg::StateSet* stateSet = node->getOrCreateStateSet();
@@ -379,7 +292,7 @@ void SceneBuilder::markSelected( osg::Node* theNode ) {
 		osg::StateSet* states = (*i)->getOrCreateStateSet();
 		
 		osg::TexEnv* tec = new osg::TexEnv();
-		tec->setMode( osg::TexEnv::BLEND );
+		tec->setMode( osg::TexEnv::ADD );
 		states->setTextureAttribute(0, tec, osg::StateAttribute::ON );
 		
 		(*i)->setStateSet( states );

@@ -19,9 +19,17 @@ public:
 		
 	// constructor with data
 	pyramid(string& data);
+	
+	// constructor with binary data
+	pyramid( osg::Vec3 position, float rotation, osg::Vec3 scale );
 		
 	static DataEntry* init() { return new pyramid(); }
-	static DataEntry* init(string& data) { return new pyramid(data); }
+	static DataEntry* init(string& data) { 
+		if( data.size() <= 1 )
+			return new pyramid( osg::Vec3( 0.0, 0.0, 0.0 ), 0.0f, osg::Vec3( 10.0, 10.0, 10.0 ) );
+		else
+			return new pyramid(data);
+	}
 	// getter
 	string get();
 	

@@ -40,23 +40,19 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     			// handle a selector, based on a pressed key
     			switch( viewer->getKey() ) {
     				// 'r' is for "rotate" (i.e. "spin" in BZW)
-    				case 'r':
-    				case 'R':
+    				case BZ_ROTATE_KEY:
     					return this->rotateSelector( view, ea );
     				
     				// 's' is for "scale"
-    				case 's':
-    				case 'S':
+    				case BZ_SCALE_KEY:
     					return this->scaleSelector( view, ea );
     				
     				// 'l' is for "lean" (i.e. "shear" in BZW)
-    				case 'l':
-    				case 'L':
+    				case BZ_SHEAR_KEY:
     					return this->shearSelector( view, ea );
     				
     				// 't' is for "translate" (i.e. "shift" in BZW)
-    				case 't':
-    				case 'T':
+    				case BZ_SHIFT_KEY:
     					return this->shiftSelector( view, ea );
     					
     				default:
@@ -266,6 +262,7 @@ bool selectHandler::dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea
 	
 	// update all objects in the selection
 	if(selection) {
+		
 		// get the model reference from the View
 		const Model* model = this->view->getModelRef();
 		
@@ -305,9 +302,9 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 	osg::Vec3 sideVector = this->cameraManipulator->getSideVector( this->cameraManipulator->getMatrix() );
 	osg::Vec3 upVector = this->cameraManipulator->getFrontVector( this->cameraManipulator->getMatrix() );
 	
-	// apply the transformation to each axis
-	sideVector *= ( dx );
-	upVector *= ( dy );
+	// apply the transformation to each axis (only look at movement perpendicular to the axes here, since we're rotating)
+	sideVector *= ( dy );
+	upVector *= ( -dx );
 	
 	// combine them into the transformation vector
 	osg::Vec3 transformVector = sideVector + upVector;

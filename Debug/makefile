@@ -12,6 +12,7 @@ RM := rm -rf
 -include windows/eventHandlers/subdir.mk
 -include windows/subdir.mk
 -include widgets/subdir.mk
+-include share/pyramid/subdir.mk
 -include share/box/subdir.mk
 -include render/subdir.mk
 -include objects/subdir.mk

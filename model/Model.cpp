@@ -598,7 +598,10 @@ void Model::_setSelected( bz2object* obj ) {
 	
 	this->selectedObjects.push_back( obj );	
 	
-	this->notifyObservers( NULL );
+	// tell the view to mark this object as selected
+	ObserverMessage obs_msg( ObserverMessage::UPDATE_OBJECT, obj );
+	
+	this->notifyObservers( &obs_msg );
 }
 
 // set an object as unselected and update it
@@ -615,7 +618,10 @@ void Model::_setUnselected( bz2object* obj ) {
 		}	
 	}
 	
-	this->notifyObservers( NULL );
+	// tell the view to mark this object as unselected
+	ObserverMessage obs_msg( ObserverMessage::UPDATE_OBJECT, obj );
+	
+	this->notifyObservers( &obs_msg );
 }
 
 // determine whether or not an object is selected
@@ -643,6 +649,9 @@ void Model::_unselectAll() {
 	for(vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		(*i)->setSelected( false );
 		(*i)->setChanged( true );
+		// tell the view to mark this object as unselected
+		ObserverMessage obs_msg( ObserverMessage::UPDATE_OBJECT, *i );
+		this->notifyObservers( &obs_msg );
 	}
 	
 	selectedObjects.clear();
@@ -695,7 +704,7 @@ bool Model::_copySelection() {
 	
 	this->objectBuffer.clear();
 	
-	// copy objects into the object buffer
+	// copy objects into the object buffer.
 	for( vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		this->objectBuffer.push_back( *i );
 	}
@@ -710,12 +719,23 @@ bool Model::_pasteSelection() {
 		return false;
 	
 	
-	this->selectedObjects.clear();
+	this->_unselectAll();
 	
 	// paste objects into the scene
+	// create new instances; don't pass references
 	for( vector< osg::ref_ptr<bz2object> >::iterator i = this->objectBuffer.begin(); i != this->objectBuffer.end(); i++) {
-		this->_addObject( i->get() );
-		this->selectedObjects.push_back( i->get() );
+		bz2object* obj = dynamic_cast< bz2object* > (this->_buildObject( (*i)->getHeader().c_str() ));
+		if(!obj) {
+			printf("error! could not create new instance of \"%s\"\n", (*i)->getHeader().c_str() );
+			continue;
+		}
+		
+		string data = (*i)->toString();
+		obj->update( data );
+		obj->setPosition( osg::Vec3(0.0, 0.0, 0.0) );
+		
+		this->_addObject( obj );
+		this->_setSelected( obj );
 	}
 	
 	this->notifyObservers(NULL);

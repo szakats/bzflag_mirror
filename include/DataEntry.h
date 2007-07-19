@@ -27,9 +27,9 @@ public:
 	
 	// initialize the header and keys
 	DataEntry(const char* header, const char* keys) {
-		this->header = string(header);
-		this->keys = string(keys);
-		this->text = string("");
+		this->header = header;
+		this->keys = keys;
+		this->text = "";
 		this->setChanged();
 	}
 	

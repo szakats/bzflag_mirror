@@ -86,7 +86,23 @@ void MainMenu::addBoxCallback_real(Fl_Widget* w) {
 
 // add a pyramid
 void MainMenu::addPyramidCallback_real(Fl_Widget* w) {
-	printf("added a pyramid\n");
+	// make a new pyramid using the Model's object registry
+	DataEntry* newPyr = this->parent->getModel()->_buildObject( "pyramid" );
+	
+	// make it into a bz2object
+	bz2object* newObj = dynamic_cast< bz2object* >( newPyr );
+	
+	if(!newObj)
+		return;
+	
+	// add the object to the model
+	this->parent->getModel()->_unselectAll();
+	this->parent->getModel()->_addObject( newObj );
+	this->parent->getModel()->_setSelected( newObj );
+	
+	// open up a MasterConfigurationDialog and configure it
+	this->parent->configure( newObj );
+	
 	this->value(0);
 }
 

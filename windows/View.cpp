@@ -92,7 +92,10 @@ int View::handle(int event) {
 	
 	this->keydown = Fl::event_key();
 	this->buttondown = Fl::event_button();
-            
+    
+    // set up the 3D cursor by the key
+    this->selection->setStateByKey( this->keydown );
+    
 	// forward FLTK events to OSG
 	switch(event){
         case FL_PUSH:
@@ -118,10 +121,13 @@ int View::handle(int event) {
         	this->redraw();    
 			return 1;
         case FL_KEYDOWN:
-            _gw->getEventQueue()->keyPress((osgGA::GUIEventAdapter::KeySymbol)Fl::event_key());
+        
+        	_gw->getEventQueue()->keyPress((osgGA::GUIEventAdapter::KeySymbol)Fl::event_key());
             this->redraw();
             return 1;
         case FL_KEYUP:
+        	this->selection->setState( Selection::TRANSLATE);
+        	
             _gw->getEventQueue()->keyRelease((osgGA::GUIEventAdapter::KeySymbol)Fl::event_key());
             this->redraw();
             return 1;
@@ -162,6 +168,18 @@ void View::update( Observable* obs, void* data ) {
 				float scaleFactor = bzworld->getSize() / Ground::DEFAULT_SIZE;
 				
 				this->ground->setScale( osg::Vec3(scaleFactor, scaleFactor, scaleFactor) );
+				
+				break;
+			}
+			// update an object (i.e. it's selection value changed, etc.)
+			case ObserverMessage::UPDATE_OBJECT : {
+				bz2object* obj = (bz2object*)(obs_msg->data);
+				if( obj->isSelected() )
+					SceneBuilder::markSelected( obj );
+				else
+					SceneBuilder::markUnselected( obj );
+					
+				break;	
 			}
 			default:
 				break;
