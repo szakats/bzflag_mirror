@@ -7,6 +7,7 @@
 #include <FL/Fl_Menu_.H>
 #include <FL/Fl_Menu_Button.H>
 
+#include "Fl_Tweak.h"
 
 class MainWindow;
 class bz2object;
@@ -24,7 +25,7 @@ public:
 	virtual ~ConfigurationMenu() { }
 	
 	// update the object
-	void setObject( bz2object* obj ) {this->obj = obj; }
+	void setObject( bz2object* obj ) {this->obj = obj; this->buildMenu(); }
 	
 	// static callbacks
 	static void translate_x(Fl_Widget* w, void* data) {

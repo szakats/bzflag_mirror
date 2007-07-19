@@ -26,6 +26,7 @@ SUBDIRS := \
 windows/eventHandlers \
 windows \
 widgets \
+share/pyramid \
 share/box \
 render \
 objects \

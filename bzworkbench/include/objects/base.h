@@ -34,6 +34,13 @@ public:
 	// render
 	int render(void);
 	
+	// BZWB-specific getters and setters
+	int getTeam() { return this->team; }
+	string& getWeapon() { return this->weapon; }
+	
+	void setTeam( int team ) { this->team = team; }
+	void setWeapon( const char* weapon ) { this->weapon = weapon; }
+	
 private:
 	int team;
 	string weapon;
