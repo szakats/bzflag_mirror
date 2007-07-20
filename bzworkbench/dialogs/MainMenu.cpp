@@ -174,25 +174,150 @@ void MainMenu::importObjectCallback_real(Fl_Widget* w) {
 
 // add base 1
 void MainMenu::addPurpleBaseCallback_real(Fl_Widget* w) {
-	printf("added purple base\n");
+	
+	// get the objects and see that we don't have any other bases
+	vector< bz2object* > objects = this->parent->getModel()->_getObjects();
+	if( objects.size() > 0 ) {
+		base* b;
+		// find all bases
+		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
+			b = dynamic_cast< base* >( *i );
+			if(b != NULL && b->getTeam() == BASE_PURPLE)
+				return;		// there already is a purple base; don't add a second!
+		}
+	}
+	
+	// make a new base using the Model's object registry
+	DataEntry* newBase = this->parent->getModel()->_buildObject( "base" );
+	
+	// make it into a bz2object
+	base* newObj = dynamic_cast< base* >( newBase );
+	
+	if(!newObj)
+		return;
+		
+	// set the base
+	newObj->setTeam( BASE_PURPLE );
+	
+	// add the object to the model
+	this->parent->getModel()->_unselectAll();
+	this->parent->getModel()->_addObject( newObj );
+	this->parent->getModel()->_setSelected( newObj );
+	
+	// open up a MasterConfigurationDialog and configure it
+	this->parent->configure( newObj );
+	
 	this->value(0);
 }
 
 // add base 2
 void MainMenu::addRedBaseCallback_real(Fl_Widget* w) {
-	printf("added red base\n");
+	// get the objects and see that we don't have any other bases
+	vector< bz2object* > objects = this->parent->getModel()->_getObjects();
+	if( objects.size() > 0 ) {
+		base* b;
+		// find all bases
+		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
+			b = dynamic_cast< base* >( *i );
+			if(b != NULL && b->getTeam() == BASE_RED)
+				return;		// there already is a purple base; don't add a second!
+		}
+	}
+	
+	// make a new base using the Model's object registry
+	DataEntry* newBase = this->parent->getModel()->_buildObject( "base" );
+	
+	// make it into a bz2object
+	base* newObj = dynamic_cast< base* >( newBase );
+	
+	if(!newObj)
+		return;
+		
+	// set the base
+	newObj->setTeam( BASE_RED );
+	
+	// add the object to the model
+	this->parent->getModel()->_unselectAll();
+	this->parent->getModel()->_addObject( newObj );
+	this->parent->getModel()->_setSelected( newObj );
+	
+	// open up a MasterConfigurationDialog and configure it
+	this->parent->configure( newObj );
+	
 	this->value(0);
 }
 
 // add base 3
 void MainMenu::addGreenBaseCallback_real(Fl_Widget* w) {
-	printf("added green base\n");
+	// get the objects and see that we don't have any other bases
+	vector< bz2object* > objects = this->parent->getModel()->_getObjects();
+	if( objects.size() > 0 ) {
+		base* b;
+		// find all bases
+		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
+			b = dynamic_cast< base* >( *i );
+			if(b != NULL && b->getTeam() == BASE_GREEN)
+				return;		// there already is a purple base; don't add a second!
+		}
+	}
+	
+	// make a new base using the Model's object registry
+	DataEntry* newBase = this->parent->getModel()->_buildObject( "base" );
+	
+	// make it into a bz2object
+	base* newObj = dynamic_cast< base* >( newBase );
+	
+	if(!newObj)
+		return;
+		
+	// set the base
+	newObj->setTeam( BASE_GREEN );
+	
+	// add the object to the model
+	this->parent->getModel()->_unselectAll();
+	this->parent->getModel()->_addObject( newObj );
+	this->parent->getModel()->_setSelected( newObj );
+	
+	// open up a MasterConfigurationDialog and configure it
+	this->parent->configure( newObj );
+	
 	this->value(0);
 }
 
 // add base 4
 void MainMenu::addBlueBaseCallback_real(Fl_Widget* w) {
-	printf("added blue base\n");
+	// get the objects and see that we don't have any other bases
+	vector< bz2object* > objects = this->parent->getModel()->_getObjects();
+	if( objects.size() > 0 ) {
+		base* b;
+		// find all bases
+		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
+			b = dynamic_cast< base* >( *i );
+			if(b != NULL && b->getTeam() == BASE_BLUE)
+				return;		// there already is a purple base; don't add a second!
+		}
+	}
+	
+	// make a new base using the Model's object registry
+	DataEntry* newBase = this->parent->getModel()->_buildObject( "base" );
+	
+	// make it into a bz2object
+	base* newObj = dynamic_cast< base* >( newBase );
+	
+	if(!newObj)
+		return;
+		
+	// set the base
+	newObj->setTeam( BASE_BLUE );
+	
+	// add the object to the model
+	this->parent->getModel()->_unselectAll();
+	this->parent->getModel()->_addObject( newObj );
+	this->parent->getModel()->_setSelected( newObj );
+	
+	// open up a MasterConfigurationDialog and configure it
+	this->parent->configure( newObj );
+	
 	this->value(0);
 }
 

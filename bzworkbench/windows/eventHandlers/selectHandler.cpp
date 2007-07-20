@@ -201,8 +201,8 @@ bool selectHandler::configureObject(View* viewer, const osgGA::GUIEventAdapter& 
             for(unsigned int i = 0; i < hitr->nodePath.size(); i++) {
             	// only look for bz2objects
             	bz2object* obj = dynamic_cast< bz2object* > ( hitr->nodePath[i] );
-            	if(obj != NULL && obj->isSelected()) {
-            	   	// tell the MainWindow to open up a MasterConfigurationDialog
+            	if(obj != NULL/* && obj->isSelected()*/) {
+            	   	// tell the MainWindow to open up a configuration menu
             	   	MainWindow* mw = viewer->requestMainWindow();
             	   	
             	   	if(mw) {
