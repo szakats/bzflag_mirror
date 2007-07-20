@@ -190,6 +190,10 @@
 				Name="Dialogs"
 				>
 				<File
+					RelativePath="..\..\dialogs\ConfigurationMenu.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\dialogs\Fl_Dialog.cpp"
 					>
 				</File>
@@ -198,11 +202,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\dialogs\Fl_Tweak.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\dialogs\MainMenu.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\dialogs\MasterConfigurationDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\dialogs\MenuBar.cpp"
 					>
 				</File>
 				<File
