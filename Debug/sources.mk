@@ -28,6 +28,7 @@ windows \
 widgets \
 share/pyramid \
 share/box \
+share/base \
 render \
 objects \
 model \

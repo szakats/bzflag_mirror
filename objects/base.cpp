@@ -5,17 +5,56 @@ base::base() :
 	bz2object("base", "<position><rotation><size><color><oncap>") {
 	
 	team = 0;
-	weapon = string("SW");		
+	weapon = "";
+	
+	string meshname = this->getBaseMesh( this->team );
+	
+	this->baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
+	this->addChild( baseNode.get() );
+	
+	this->setName( SceneBuilder::nameNode( meshname.c_str() ) );
+	
+	this->setPosition( osg::Vec3(0.0, 0.0, 0.0) );
+	this->setScale( osg::Vec3(10.0, 10.0, 1.0) );
+	SceneBuilder::markUnselected( this );
 }
 
 // constructor with data
 base::base(string& data) :
 	bz2object("base", "<position><rotation><size><color><oncap>", data.c_str()) {
 		
-	weapon = string("SW");
+	weapon = "";
 	this->team = 0;
 	
 	this->update(data);
+	
+	string meshname = this->getBaseMesh( this->team );
+	
+	this->baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
+	this->addChild( baseNode.get() );
+	
+	this->setName( SceneBuilder::nameNode( meshname.c_str() ) );
+	
+	SceneBuilder::markUnselected( this );	
+}
+
+// constructor with binary data
+base::base( osg::Vec3 position, float rotation, osg::Vec3 size, int team, string weapon ) :
+	bz2object("base", "<position><rotation><size><color><oncap>") {
+	
+	this->weapon = weapon;
+	this->team = team;
+	
+	string meshname = this->getBaseMesh( this->team );
+	
+	this->baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
+	this->addChild( baseNode.get() );
+	
+	this->setName( SceneBuilder::nameNode( meshname.c_str() ) );
+	
+	this->setPosition( position );
+	this->setRotationZ( rotation );
+	this->setScale( size );
 }
 
 
@@ -80,4 +119,39 @@ string base::toString() {
 // render
 int base::render(void) {
 	return 0;	
+}
+
+// get the base mesh name by team
+string base::getBaseMesh( int t ) {
+	switch( t ) {
+		case BASE_RED:
+			return "share/base/red_base.obj";
+		case BASE_GREEN:
+			return "share/base/green_base.obj";
+		case BASE_BLUE:
+			return "share/base/blue_base.obj";
+		case BASE_PURPLE:
+			return "share/base/purple_base.obj";
+		default:
+			return "share/base/unknown_base.obj";	
+	}
+}
+
+// set the current team
+void base::setTeam( int t ) {
+	// get rid of the previous base node
+	this->removeChild( baseNode.get() );
+	
+	// get the new base mesh name
+	string name = this->getBaseMesh( t );
+	
+	// build the node and add it
+	this->baseNode = SceneBuilder::buildNode( name.c_str() ); 
+	this->addChild( baseNode.get() );
+	
+	// set the team
+	this->team = t;
+	
+	// set the node name
+	this->setName( SceneBuilder::nameNode( name.c_str()) );
 }
