@@ -30,9 +30,6 @@ void GridGenerator::run() {
   int x,y;
   Generator::run(); 
   for (int i = 0; i < 16; i++) {
-//  do {
-//    c = map.emptyCoord();
-//  } while (!((c.x % 3 == 2) && (c.y % 3 == 2)));
     x = rand()%(int(gi.sizeX / 5)-1)*5+4;
     y = rand()%(int(gi.sizeY / 5)-1)*5+4;
     printf("%d %d\n",x,y);
@@ -42,6 +39,7 @@ void GridGenerator::run() {
       map.settype(ax,y,CELLROAD);
     }
     for (int ay = 0; ay < gi.sizeY; ay++) {
+      if ((map.getNode(x,ay).type == CELLROAD) && (rand()%3 == 0)) break;
       map.setZ(x,ay,0);
       map.settype(x,ay,CELLROAD);
     }
