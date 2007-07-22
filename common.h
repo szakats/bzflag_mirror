@@ -17,12 +17,6 @@
 
 #define FULLMESH 1
 
-#define ZONEROADH 1
-#define ZONEROADV 2
-#define ZONEROADC 3
-#define ZONEBUILD 4
-#define ZONEEMPTY 5
-
 #define EPSILON 0.00000001f
 
 #define WORLDSIZE 400
@@ -41,9 +35,6 @@ struct GridInfo {
 
 /* temporary */
 typedef int Options;
-
-// shouldn't put a static var into a header
-// static DiscreetMapNode ZeroNode = { 0, 0, 0 };
 
 struct Coord2D {
   int x;

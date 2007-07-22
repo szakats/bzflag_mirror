@@ -10,25 +10,27 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef __MATERIAL_H__
-#define __MATERIAL_H__
 
-#include <string>
+#ifndef __FLOORZONE_H__
+#define __FLOORZONE_H__
+
 #include <vector>
-#include <fstream> 
+#include <fstream>
+#include <string>
+#include "common.h"
+#include "zone.h"
 
-class Material {
-  std::string name;
-  std::string file;
+
+class FloorZone : public Zone {
+protected:
+  std::string matref;
+  bool rotated;
 public:
-  Material(const std::string& _name, const std::string& _file) : name(_name), file(_file) {};
-  void output(std::ofstream& out);
+  FloorZone(Coord2D a, Coord2D b, int astep, const std::string& amatref, bool arotated);
+  virtual void output(std::ofstream& out);
 };
 
-typedef std::vector<Material*> MaterialVector;
-typedef MaterialVector::iterator MaterialVectIter;
-
-#endif /* __MATERIAL_H__ */
+#endif /* __FLOORZONE_H__ */
 
 // Local Variables: ***
 // mode:C++ ***

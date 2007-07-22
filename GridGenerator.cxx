@@ -48,21 +48,21 @@ void GridGenerator::run() {
   }
   map.pushZones();
 
-  mats.push_back(Material("road","road"));
-  mats.push_back(Material("roadx","roadx"));
-  mats.push_back(Material("bwall","bwall"));
-  mats.push_back(Material("bwall2","bwall2"));
-  mats.push_back(Material("top","mesh"));
+  mats.push_back(new Material("road","road"));
+  mats.push_back(new Material("roadx","roadx"));
+  mats.push_back(new Material("bwall","bwall"));
+  mats.push_back(new Material("bwall2","bwall2"));
+  mats.push_back(new Material("top","mesh"));
 }
 
 void GridGenerator::output(std::ofstream& out) { 
   Generator::output(out); 
 
   for (MaterialVectIter iter = mats.begin(); iter != mats.end(); ++iter) 
-    (*iter).output(out);
+    (*iter)->output(out);
 
   for (ZoneVectIter iter = map.zones.begin(); iter != map.zones.end(); ++iter) 
-    (*iter).output(out);
+    (*iter)->output(out);
   /*
   for (int y = 0; y < wi.sizeY; y++) {
     for (int x = 0; x < wi.sizeX; x++) {
