@@ -20,15 +20,15 @@
 
 
 class Zone {
+protected:
   int step;
   Coord2D A,B;
-  int type;
 public:
-  Zone(Coord2D a, Coord2D b, int atype, int astep);
-  void output(std::ofstream& out);
+  Zone(Coord2D a, Coord2D b, int astep);
+  virtual void output(std::ofstream& out) {};
 };
 
-typedef std::vector<Zone> ZoneVector;
+typedef std::vector<Zone*> ZoneVector;
 typedef ZoneVector::iterator ZoneVectIter;
 
 #endif /* __ZONE_H__ */

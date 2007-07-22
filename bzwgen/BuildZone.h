@@ -10,25 +10,22 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef __MATERIAL_H__
-#define __MATERIAL_H__
 
-#include <string>
-#include <vector>
-#include <fstream> 
+#ifndef __BUILDZONE_H__
+#define __BUILDZONE_H__
 
-class Material {
-  std::string name;
-  std::string file;
+#include <fstream>
+#include "common.h"
+#include "Zone.h"
+
+
+class BuildZone : public Zone {
 public:
-  Material(const std::string& _name, const std::string& _file) : name(_name), file(_file) {};
-  void output(std::ofstream& out);
+  BuildZone(Coord2D a, Coord2D b, int astep);
+  virtual void output(std::ofstream& out);
 };
 
-typedef std::vector<Material*> MaterialVector;
-typedef MaterialVector::iterator MaterialVectIter;
-
-#endif /* __MATERIAL_H__ */
+#endif /* __BUILDZONE_H__ */
 
 // Local Variables: ***
 // mode:C++ ***

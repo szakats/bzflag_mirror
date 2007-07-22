@@ -144,7 +144,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\BuildZone.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\bzwgen.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\FloorZone.cxx"
 				>
 			</File>
 			<File
@@ -174,7 +182,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\BuildZone.h"
+				>
+			</File>
+			<File
 				RelativePath=".\common.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FloorZone.h"
 				>
 			</File>
 			<File
