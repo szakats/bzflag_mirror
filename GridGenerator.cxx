@@ -53,7 +53,7 @@ void GridGenerator::run() {
   mats.push_back(new Material("top","mesh"));
 }
 
-void GridGenerator::output(std::ofstream& out) { 
+void GridGenerator::output(Output& out) { 
   Generator::output(out); 
 
   for (MaterialVectIter iter = mats.begin(); iter != mats.end(); ++iter) 

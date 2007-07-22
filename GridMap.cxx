@@ -31,7 +31,7 @@ void GridMap::clear()
   }
 }
 
-void GridMap::output(std::ofstream& out) 
+void GridMap::output(Output& out) 
 {
   for (int x = 0; x < gi.sizeX; x++)
     for (int y = 0; y < gi.sizeY; y++) 

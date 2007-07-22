@@ -18,6 +18,7 @@
 #include "Material.h"
 #include "GridMap.h"
 #include "common.h"
+#include "Output.h"
 
 class GridGenerator : public Generator {
 protected:
@@ -28,7 +29,7 @@ public:
   GridGenerator();
   void parseOptions(Options opt);
   void run();
-  void output(std::ofstream& out);
+  void output(Output& out);
   ~GridGenerator();
 };
 

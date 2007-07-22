@@ -20,31 +20,28 @@ FloorZone::FloorZone(Coord2D a, Coord2D b, int astep, const std::string& amatref
   matref = amatref;
 }
 
-void FloorZone::output(std::ofstream& out) 
+void FloorZone::output(Output& out) 
 {
-  out << "mesh\n";
-  out << "  noradar\n";
-  out << "  matref " << matref <<"\n";
-  out << "  vertex " << A.x << " " << A.y << " 0.001\n";
-  out << "  vertex " << B.x << " " << A.y << " 0.001\n";
-  out << "  vertex " << B.x << " " << B.y << " 0.001\n";
-  out << "  vertex " << A.x << " " << B.y << " 0.001\n";
-  out << "  texcoord 0 0\n";
+  out.line("mesh");
+  out.line("  noradar");
+  out.matref(matref);
+  out.vertex(A.x,A.y,0.001);
+  out.vertex(B.x,A.y,0.001);
+  out.vertex(B.x,B.y,0.001);
+  out.vertex(A.x,B.y,0.001);
+  out.texcoord(0,0);
   if (rotated) {
-    out << "  texcoord 0 " << int((B.x-A.x)/step) << " \n";
-    out << "  texcoord " << int((B.y-A.y)/step) << " " << int((B.x-A.x)/step) << " \n";
-    out << "  texcoord " << int((B.y-A.y)/step) << " 0 \n";
+    out.texcoord(0,int((B.x-A.x)/step));
+    out.texcoord(int((B.y-A.y)/step),int((B.x-A.x)/step));
+    out.texcoord(int((B.y-A.y)/step),0);
   } else {
-    out << "  texcoord " << int((B.x-A.x)/step) << " 0 \n";
-    out << "  texcoord " << int((B.x-A.x)/step) << " " << int((B.y-A.y)/step) << " \n";
-    out << "  texcoord 0 " << int((B.y-A.y)/step) << " \n";
+    out.texcoord(int((B.x-A.x)/step),0);
+    out.texcoord(int((B.x-A.x)/step),int((B.y-A.y)/step));
+    out.texcoord(0,int((B.y-A.y)/step));
   }
-  out << "  face\n";
-  out << "    vertices 0 1 2 3\n";
-  out << "    texcoords 0 1 2 3\n";
-  out << "    passable\n";
-  out << "  endface\n";
-  out << "end\n\n";
+  out.line("  passable");
+  out.face(0,1,2,3,0,1,2,3);
+  out.line("end\n");
 }
 
 // Local Variables: ***

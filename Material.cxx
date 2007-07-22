@@ -12,7 +12,7 @@
 
 #include "Material.h"
 
-void Material::output(std::ofstream& out) {
+void Material::output(Output& out) {
   out << "material\n";
   out << "  name " << name << "\n";
   out << "  texture " << file << "\n";
