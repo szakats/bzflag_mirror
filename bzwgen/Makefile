@@ -10,6 +10,8 @@ FILES = \
 	GridMap.cxx \
 	Material.cxx \
 	Zone.cxx \
+	BuildZone.cxx \
+	FloorZone.cxx \
 	bzwgen.cxx
 
 OBJECTS = ${FILES:.cxx=.o}
@@ -36,6 +38,12 @@ Material.o: Material.cxx Material.h common.h
 Zone.o: Zone.cxx Zone.h common.h
 	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
 
+BuildZone.o: BuildZone.cxx BuildZone.h common.h
+	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
+
+FloorZone.o: FloorZone.cxx FloorZone.h common.h
+	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
+    
 bzwgen.o: bzwgen.cxx common.h
 	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
 
