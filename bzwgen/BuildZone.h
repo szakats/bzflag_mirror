@@ -22,7 +22,7 @@
 class BuildZone : public Zone {
 public:
   BuildZone(Coord2D a, Coord2D b, int astep);
-  virtual void output(std::ofstream& out);
+  virtual void output(Output& out);
 };
 
 #endif /* __BUILDZONE_H__ */

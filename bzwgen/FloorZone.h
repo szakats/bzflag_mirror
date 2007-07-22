@@ -27,7 +27,7 @@ protected:
   bool rotated;
 public:
   FloorZone(Coord2D a, Coord2D b, int astep, const std::string& amatref, bool arotated);
-  virtual void output(std::ofstream& out);
+  virtual void output(Output& out);
 };
 
 #endif /* __FLOORZONE_H__ */

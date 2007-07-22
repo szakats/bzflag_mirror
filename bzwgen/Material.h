@@ -16,13 +16,14 @@
 #include <string>
 #include <vector>
 #include <fstream> 
+#include "Output.h"
 
 class Material {
   std::string name;
   std::string file;
 public:
   Material(const std::string& _name, const std::string& _file) : name(_name), file(_file) {};
-  void output(std::ofstream& out);
+  void output(Output& out);
 };
 
 typedef std::vector<Material*> MaterialVector;

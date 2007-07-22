@@ -33,6 +33,7 @@
 
 
 
+#include "Output.h"
 #include "Generator.h"
 #include "GridGenerator.h"
 #include "Material.h"
@@ -55,7 +56,7 @@ int main (int argc, char* argv[]) {
 
   std::cout << "Outputing...\n";
 
-  std::ofstream os("test.bzw");
+  Output os("test.bzw");
   gen.output(os);
 
   std::cout << "Done.\n";

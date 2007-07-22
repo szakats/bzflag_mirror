@@ -31,7 +31,7 @@ public:
   inline void setZ(Coord2D& c, int z) { map[c.y*gi.sizeX+c.x].z = z; }
   inline void settype(int x, int y, int type) { map[y*gi.sizeX+x].type = type; }
   inline void settype(Coord2D& c, int type) { map[c.y*gi.sizeX+c.x].type = type; }
-  void output(std::ofstream& out);
+  void output(Output& out);
   void pushZones();
   bool isValid(int x, int y);
   int typeAround(int x, int y, int type);

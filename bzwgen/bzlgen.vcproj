@@ -206,6 +206,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Output.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Zone.h"
 				>
 			</File>
