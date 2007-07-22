@@ -24,7 +24,7 @@ protected:
   int step;
   Coord2D A,B;
 public:
-  Zone(Coord2D a, Coord2D b, int astep);
+  Zone(Coord2D a, Coord2D b, int astep) : A(a), B(b), step(astep) {};
   virtual void output(std::ofstream& out) {};
 };
 
