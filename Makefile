@@ -9,7 +9,6 @@ FILES = \
 	GridGenerator.cxx \
 	GridMap.cxx \
 	Material.cxx \
-	Zone.cxx \
 	BuildZone.cxx \
 	FloorZone.cxx \
 	bzwgen.cxx
@@ -33,9 +32,6 @@ GridMap.o: GridMap.cxx GridMap.h common.h
 	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
 
 Material.o: Material.cxx Material.h common.h
-	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
-
-Zone.o: Zone.cxx Zone.h common.h
 	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
 
 BuildZone.o: BuildZone.cxx BuildZone.h common.h
