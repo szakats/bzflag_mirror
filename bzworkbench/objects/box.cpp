@@ -2,9 +2,8 @@
 
 // constructors
 box::box() : bz2object("box", "<position><rotation><size>") {
-	this->addChild( SceneBuilder::buildNode("share/box/box.obj") );
-	
-	this->setName( SceneBuilder::nameNode("share/box/box.obj") );
+	this->addChild( SceneBuilder::buildNode( "share/box/box.obj" ) );
+	this->setName( SceneBuilder::nameNode("box") );
 	
 	this->setPosition( osg::Vec3(0.0, 0.0, 0.0) );
 	this->setScale( osg::Vec3(10.0, 10.0, 10.0) );
@@ -13,9 +12,8 @@ box::box() : bz2object("box", "<position><rotation><size>") {
 
 // constructor with binary data
 box::box( osg::Vec3 position, float rotation, osg::Vec3 scale ) : bz2object("box", "<position><rotation><size>") {
-	this->addChild( SceneBuilder::buildNode("share/box/box.obj") );
-	
-	this->setName( SceneBuilder::nameNode("share/box/box.obj") );
+	this->addChild( SceneBuilder::buildNode( "share/box/box.obj" ) );
+	this->setName( SceneBuilder::nameNode("box") );
 	
 	this->setPosition( position );
 	this->setRotationZ( rotation );

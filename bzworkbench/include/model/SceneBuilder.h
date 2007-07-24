@@ -14,10 +14,13 @@
 #include <osgDB/ReadFile>
 #include <osg/Material>
 #include <osg/StateAttribute>
+#include <osgDB/ReaderWriter>
 
 #include "../objects/bz2object.h"
 #include "../render/Renderable.h"
 #include "../ftoa.h"
+
+#include "../render/TextureRepeaterVisitor.h"
 
 #define SCENEBUILDER_TAIL_NODE			"|SBnode"
 #define SCENEBUILDER_TAIL_GEOMETRY		"|SBgeometry"
@@ -55,12 +58,9 @@ public:
 	// mark a node as unselected
 	static void markUnselected( osg::Node* node );
 	
-	// get a normal node; return NULL if it hasn't been loaded
-	// static osg::Node* getNode( const char* nodeFile );
-	
 	// build an object and return a geode containing the object
-	static osg::Geode* buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureFile, bool loadSelectedToo = false );
-	static osg::Geode* buildGeode( const char* nodeName, osg::Geometry*, const char* textureName, bool loadSelectedToo = false );
+	static osg::Geode* buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureFile );
+	static osg::Geode* buildGeode( const char* nodeName, osg::Geometry*, const char* textureName );
 	
 	// get the geometry data from a node
 	static const vector< osg::ref_ptr< osg::Drawable > >* getNodeGeometry( osg::PositionAttitudeTransform* node );
@@ -74,16 +74,6 @@ public:
 	// assign a material to a node
 	static void assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Vec4 specular, osg::Vec4 emissive, float shininess, float alpha, osg::Node* node );
 	
-	// see if a particular name is already mapped to a node
-	/*
-	static bool isLoaded( const char* _name ) {
-		string name = string( _name ) + SCENEBUILDER_TAIL_NODE;
-		if( nodeData[ name ] != NULL )
-			return true;
-		else
-			return false;
-	}
-	*/
 	// give the string the "select" attribute
 	static string nameSelected( const char* str ) {
 		return nameUnselected( str ) + SCENEBUILDER_TAIL_SELECTED;

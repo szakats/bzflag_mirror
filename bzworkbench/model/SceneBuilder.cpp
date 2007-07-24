@@ -1,6 +1,8 @@
 #include "../include/model/SceneBuilder.h"
 #include "../include/windows/View.h"
 
+#include "../include/render/TextureScalerVisitor.h"
+
 int SceneBuilder::nameCount;
 
 // constructor
@@ -17,14 +19,16 @@ bool SceneBuilder::shutdown() {
 
 /**
  * Object builder.
- * This method builds and returns a node loaded from nodeFile, and will load the same node as if it were selected
- * (i.e. as if it had a different color) and store it in the flyweight if loadSelectedToo is true
+ * This method builds and returns a node loaded from nodeFile
  */
 osg::Node* SceneBuilder::buildNode( const char* nodeFile ) {
+	if(!nodeFile)
+		return NULL;
+		
 	// string-ify the nodeFile and add the corresponsing tail
 	string nodeName = SceneBuilder::nameNode( nodeFile );
 	
-	// otherwise, load it in
+	// load it in
 	osg::Node* node = osgDB::readNodeFile( nodeFile );
 	
 	if(node == NULL)
@@ -32,6 +36,18 @@ osg::Node* SceneBuilder::buildNode( const char* nodeFile ) {
 		
 	// each node stores nodeName (i.e. the string it's mapped to) as its name
 	node->setName( nodeName );
+	
+	// make a TextureVisitor to enable GL_REPEAT in the node's textures
+	TextureRepeaterVisitor tv = TextureRepeaterVisitor();
+	
+	// do a traversal to apply the modification
+	node->accept( tv );
+	
+	// make a TextureScalerVisitor
+	Renderable* r = new Renderable( node );
+	TextureScalerVisitor tsv = TextureScalerVisitor( r, osg::Vec3( 7.0, 3.5, 1.0 ) );
+	
+	node->accept( tsv );
 	
 	return node;
 }
@@ -59,7 +75,7 @@ osg::Node* SceneBuilder::buildSelectedNode( const char* fileName ) {
  * This method builds and returns a geometry node (a geode) from arrays of vertexes, indexes, texture coordinates, and
  * a texture filename
  */
-osg::Geode* SceneBuilder::buildGeode( const char* _nodeName, osg::Geometry* geometry, const char* textureFile, bool loadSelectedToo ) {
+osg::Geode* SceneBuilder::buildGeode( const char* _nodeName, osg::Geometry* geometry, const char* textureFile ) {
 	// make the node name
 	string nodeName = string(_nodeName) + SCENEBUILDER_TAIL_NODE;
 	
@@ -154,7 +170,7 @@ osg::Material* extractMaterial( Renderable* r ) {
 }
 
 // build a geometry and call the other buildGeode method
-osg::Geode* SceneBuilder::buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureName, bool loadSelectedToo ) {
+osg::Geode* SceneBuilder::buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureName ) {
 	// don't bother if the data is NULL
 	if(vertexes == NULL || indexes == NULL)
 		return NULL;
@@ -172,7 +188,7 @@ osg::Geode* SceneBuilder::buildGeode( const char* nodeName, osg::Vec3Array* vert
 		// assign the texture coordinates
 		geometry->setTexCoordArray( 0, texCoords );
 	
-	return SceneBuilder::buildGeode( nodeName, geometry, textureName, loadSelectedToo );
+	return SceneBuilder::buildGeode( nodeName, geometry, textureName );
 }
 
 /**

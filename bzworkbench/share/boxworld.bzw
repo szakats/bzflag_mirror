@@ -30,3 +30,29 @@ box
 	size 10 10 10
 end
 
+box
+	position 100 100 0
+	size 10 10 5
+end
+
+box
+	position 120 100 0
+	size 20 10 10
+end
+
+box
+	position 140 100 0
+	size 30 10 15
+end
+
+meshbox
+	position -100 100 0
+	size 10 10 10
+end
+
+meshbox
+	position -140 100 0
+	size 10 10 10
+	obstacle
+end
+

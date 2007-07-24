@@ -1,4 +1,5 @@
 #include "../../include/windows/eventHandlers/selectHandler.h"
+#include "../../include/render/TextureScalerVisitor.h"
 
 selectHandler::selectHandler( View* view, osgGA::MatrixManipulator* manipulator ) : BZEventHandler( view ) {
 	this->lastSelected = NULL;
@@ -410,7 +411,10 @@ bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& e
 				if( tscale.z() < 0 )
 					tscale.set( tscale.x(), tscale.y(), 0 );
 				// update the scale
-				(*i)->setScale( (*i)->getScale() + scale );
+				(*i)->setScale( tscale );
+				
+				TextureScalerVisitor tsv = TextureScalerVisitor( *i, osg::Vec3( 1.0, 1.0, 1.0 ) + scale * 0.04);
+				(*i)->accept( tsv );
 			}	
 		}
 	}
