@@ -58,7 +58,6 @@ Ground::Ground( float size ) : Renderable("ground") {
 
 osg::ref_ptr< Renderable > Ground::buildGrid( float size, float unit ) {
    
-   
    // ground vertexes
    osg::Vec3Array* gridPoints = new osg::Vec3Array();
    int numPoints = 0;

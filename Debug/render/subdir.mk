@@ -5,15 +5,21 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../render/Ground.cpp \
-../render/Selection.cpp 
+../render/Selection.cpp \
+../render/TextureRepeaterVisitor.cpp \
+../render/TextureScalerVisitor.cpp 
 
 OBJS += \
 ./render/Ground.o \
-./render/Selection.o 
+./render/Selection.o \
+./render/TextureRepeaterVisitor.o \
+./render/TextureScalerVisitor.o 
 
 CPP_DEPS += \
 ./render/Ground.d \
-./render/Selection.d 
+./render/Selection.d \
+./render/TextureRepeaterVisitor.d \
+./render/TextureScalerVisitor.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
