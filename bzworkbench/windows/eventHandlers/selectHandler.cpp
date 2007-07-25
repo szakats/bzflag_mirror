@@ -405,15 +405,15 @@ bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& e
 				tscale = (*i)->getScale() + scale;
 				// no negative scaling!
 				if( tscale.x() < 0 )
-					tscale.set( 0, tscale.y(), tscale.z() );
+					scale.set( 0, scale.y(), scale.z() );
 				if( tscale.y() < 0 )
-					tscale.set( tscale.x(), 0, tscale.z() );
+					scale.set( scale.x(), 0, scale.z() );
 				if( tscale.z() < 0 )
-					tscale.set( tscale.x(), tscale.y(), 0 );
+					scale.set( scale.x(), scale.y(), 0 );
 				// update the scale
-				(*i)->setScale( tscale );
+				(*i)->setScale( (*i)->getScale() + scale );
 				
-				TextureScalerVisitor tsv = TextureScalerVisitor( *i, osg::Vec3( 1.0, 1.0, 1.0 ) + scale * 0.04);
+				TextureScalerVisitor tsv = TextureScalerVisitor( *i, scale);
 				(*i)->accept( tsv );
 			}	
 		}

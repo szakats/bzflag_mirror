@@ -44,10 +44,10 @@ osg::Node* SceneBuilder::buildNode( const char* nodeFile ) {
 	node->accept( tv );
 	
 	// make a TextureScalerVisitor
-	Renderable* r = new Renderable( node );
-	TextureScalerVisitor tsv = TextureScalerVisitor( r, osg::Vec3( 7.0, 3.5, 1.0 ) );
+	//Renderable* r = new Renderable( node );
+	//TextureScalerVisitor tsv = TextureScalerVisitor( r, osg::Vec3( 7.0, 3.5, 1.0 ) );
 	
-	node->accept( tsv );
+	//node->accept( tsv );
 	
 	return node;
 }
