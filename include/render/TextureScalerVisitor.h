@@ -8,6 +8,10 @@
 #include <osg/Drawable>
 #include <osg/StateSet>
 
+#include <map>
+
+using namespace std;
+
 // forward declare Renderable
 class Renderable;
 
