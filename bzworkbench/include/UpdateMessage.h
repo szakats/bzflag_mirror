@@ -13,7 +13,8 @@ public:
 	enum UpdateMessageType {
 		SET_POSITION,
 		SET_ROTATION,
-		SET_SCALE
+		SET_SCALE,
+		SET_SCALE_FACTOR
 	};
 
 	int type;

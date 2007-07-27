@@ -26,6 +26,7 @@ SUBDIRS := \
 windows/eventHandlers \
 windows \
 widgets \
+share/teleporter \
 share/pyramid \
 share/box \
 share/base \

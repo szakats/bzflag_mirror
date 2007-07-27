@@ -52,6 +52,15 @@ int teleporter::update(string& data) {
 	return 1;
 }
 
+// update with binary message
+int teleporter::update( string& data, UpdateMessage& message ) {
+	int result = this->update( data );
+	if( result == 0 )
+		return result;
+		
+	// TODO: add teleporter resizing code
+}
+
 // tostring
 string teleporter::toString(void) {
 	return string("teleporter ") + lname + "\n" +

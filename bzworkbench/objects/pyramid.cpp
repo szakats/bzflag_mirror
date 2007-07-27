@@ -58,7 +58,7 @@ int pyramid::update(string& data, UpdateMessage& message) {
 	
 	// if we changed the scale, update the texture coordinates (i.e. the scale might have changed)
 	// NOTE: it is expected that message.data will point to an osg::Vec3, which contains the scaling FACTOR
-	if( message.type == UpdateMessage::SET_SCALE ) {
+	if( message.type == UpdateMessage::SET_SCALE_FACTOR ) {
 		
 		// extract the scale factor from the message
 		osg::Vec3* scaleFactor = (osg::Vec3*)message.data;
