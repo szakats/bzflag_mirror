@@ -44,6 +44,43 @@ int pyramid::update(string& data) {
 	return bz2object::update(data);	
 }
 
+// setter with messaging
+int pyramid::update(string& data, UpdateMessage& message) {
+	
+	// do the bz2object update
+	int result = bz2object::update(data);
+	
+	// bail if the update failed
+	if(result == 0) {
+		printf(" update failure\n");
+		return result;
+	}
+	
+	// if we changed the scale, update the texture coordinates (i.e. the scale might have changed)
+	// NOTE: it is expected that message.data will point to an osg::Vec3, which contains the scaling FACTOR
+	if( message.type == UpdateMessage::SET_SCALE ) {
+		
+		// extract the scale factor from the message
+		osg::Vec3* scaleFactor = (osg::Vec3*)message.data;
+		
+		// get the geometries from the box mesh
+		GeometryExtractorVisitor geoExtractor = GeometryExtractorVisitor( this );
+		vector< osg::Geometry* > geos = geoExtractor.getGeometries();
+		
+		// there should be 2 geometries (One Geometry makes up the 4 sides, the other the floor.)
+		// if there isn't, then bail
+		if( geos.size() != 2 ) {
+			printf(" error! %d geometries (expected 2)\n", geos.size());
+			return result;
+		}
+		
+		
+		
+	}
+	
+	return result;
+}
+
 // toString
 string pyramid::toString(void) {
 	return string("pyramid\n") +

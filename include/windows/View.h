@@ -10,6 +10,7 @@
 #include <osg/Image>
 #include <osg/PositionAttitudeTransform>
 #include <osgGA/EventQueue>
+#include <osg/ShadeModel>
 
 #include "RenderWindow.h"
 #include "../model/Model.h"
