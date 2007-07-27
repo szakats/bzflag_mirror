@@ -7,22 +7,19 @@ CPP_SRCS += \
 ../render/GeometryExtractorVisitor.cpp \
 ../render/Ground.cpp \
 ../render/Selection.cpp \
-../render/TextureRepeaterVisitor.cpp \
-../render/TextureScalerVisitor.cpp 
+../render/TextureRepeaterVisitor.cpp 
 
 OBJS += \
 ./render/GeometryExtractorVisitor.o \
 ./render/Ground.o \
 ./render/Selection.o \
-./render/TextureRepeaterVisitor.o \
-./render/TextureScalerVisitor.o 
+./render/TextureRepeaterVisitor.o 
 
 CPP_DEPS += \
 ./render/GeometryExtractorVisitor.d \
 ./render/Ground.d \
 ./render/Selection.d \
-./render/TextureRepeaterVisitor.d \
-./render/TextureScalerVisitor.d 
+./render/TextureRepeaterVisitor.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

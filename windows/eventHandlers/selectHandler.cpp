@@ -1,5 +1,4 @@
 #include "../../include/windows/eventHandlers/selectHandler.h"
-#include "../../include/render/TextureScalerVisitor.h"
 
 selectHandler::selectHandler( View* view, osgGA::MatrixManipulator* manipulator ) : BZEventHandler( view ) {
 	this->lastSelected = NULL;
