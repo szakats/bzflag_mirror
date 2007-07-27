@@ -191,11 +191,12 @@ int box::update(string& data, UpdateMessage& message) {
 								double y2 = (*texCoords0)[i2].y();
 								
 								// multipliers to keep the texture in shape
-								double multx1 = ( x1 != 0.0 ? 0.4 : 0.0 );
-								double multx2 = ( x2 != 0.0 ? 0.4 : 0.0 );
+								// NOTE: these were computed empirically
+								double multx1 = ( x1 != 0.0 ? 0.7 : 0.0 );
+								double multx2 = ( x2 != 0.0 ? 0.7 : 0.0 );
 								
-								double multy1 = ( y1 != 0.0 ? 1.0 : 0.0 );
-								double multy2 = ( y2 != 0.0 ? 1.0 : 0.0 );
+								double multy1 = ( y1 != 0.0 ? 3.5 : 0.0 );
+								double multy2 = ( y2 != 0.0 ? 3.5 : 0.0 );
 								
 								// reset the texture coordinates for the first two points
 								(*texCoords0)[i1].set( x1 + multx1 * ( scaleFactor->x() * sin(angle) ),
@@ -212,8 +213,8 @@ int box::update(string& data, UpdateMessage& message) {
 								double x = (*texCoords0)[i3].x(),
 									   y = (*texCoords0)[i3].y();
 								
-								double multx = ( x != 0.0 ? 0.4 : 0.0 );
-								double multy = ( y != 0.0 ? 1.0 : 0.0 );
+								double multx = ( x != 0.0 ? 0.7 : 0.0 );
+								double multy = ( y != 0.0 ? 3.5 : 0.0 );
 								
 								(*texCoords0)[i3].set( x + multx * (scaleFactor->x() * sin(angle) ),
 													  y + multy * (scaleFactor->x() * cos(angle) ) );
@@ -233,11 +234,11 @@ int box::update(string& data, UpdateMessage& message) {
 								double y2 = (*texCoords0)[i2].y();
 								
 								// multipliers to keep the texture in shape
-								double multx1 = ( x1 != 0.0 ? 0.4 : 0.0 );
-								double multx2 = ( x2 != 0.0 ? 0.4 : 0.0 );
+								double multx1 = ( x1 != 0.0 ? 0.7 : 0.0 );
+								double multx2 = ( x2 != 0.0 ? 0.7 : 0.0 );
 								
-								double multy1 = ( y1 != 0.0 ? 1.0 : 0.0 );
-								double multy2 = ( y2 != 0.0 ? 1.0 : 0.0 );
+								double multy1 = ( y1 != 0.0 ? 3.5 : 0.0 );
+								double multy2 = ( y2 != 0.0 ? 3.5 : 0.0 );
 								
 								// reset the texture coordinates for the first two points
 								(*texCoords0)[i1].set( x1 + multx1 * ( scaleFactor->y() * sin(angle) ),
@@ -254,8 +255,8 @@ int box::update(string& data, UpdateMessage& message) {
 								double x = (*texCoords0)[i3].x(),
 									   y = (*texCoords0)[i3].y();
 								
-								double multx = ( x != 0.0 ? 0.4 : 0.0 );
-								double multy = ( y != 0.0 ? 1.0 : 0.0 );
+								double multx = ( x != 0.0 ? 0.7 : 0.0 );
+								double multy = ( y != 0.0 ? 3.5 : 0.0 );
 								
 								(*texCoords0)[i3].set( x + multx * (scaleFactor->y() * sin(angle) ),
 													  y + multy * (scaleFactor->y() * cos(angle) ) );
@@ -343,11 +344,11 @@ int box::update(string& data, UpdateMessage& message) {
 								double y2 = (*texCoords1)[i2].y();
 								
 								// multipliers to keep the texture in shape
-								double multx1 = ( x1 != 0.0 ? 0.5 : 0.0 );
-								double multx2 = ( x2 != 0.0 ? 0.5 : 0.0 );
+								double multx1 = ( x1 != 0.0 ? 0.7 : 0.0 );
+								double multx2 = ( x2 != 0.0 ? 0.7 : 0.0 );
 								
-								double multy1 = ( y1 != 0.0 ? 0.5 : 0.0 );
-								double multy2 = ( y2 != 0.0 ? 0.5 : 0.0 );
+								double multy1 = ( y1 != 0.0 ? 0.7 : 0.0 );
+								double multy2 = ( y2 != 0.0 ? 0.7 : 0.0 );
 								
 								// reset the texture coordinates for the first two points
 								(*texCoords1)[i1].set( x1 + multx1 * ( scaleFactor->x() * cos(angle) ),
@@ -364,8 +365,8 @@ int box::update(string& data, UpdateMessage& message) {
 								double x = (*texCoords1)[i3].x(),
 									   y = (*texCoords1)[i3].y();
 								
-								double multx = ( x != 0.0 ? 0.5 : 0.0 );
-								double multy = ( y != 0.0 ? 0.5 : 0.0 );
+								double multx = ( x != 0.0 ? 0.7 : 0.0 );
+								double multy = ( y != 0.0 ? 0.7 : 0.0 );
 								
 								(*texCoords1)[i3].set( x + multx * (scaleFactor->x() * cos(angle) ),
 													  y + multy * (scaleFactor->x() * sin(angle) ) );
@@ -385,11 +386,11 @@ int box::update(string& data, UpdateMessage& message) {
 								double y2 = (*texCoords1)[i2].y();
 								
 								// multipliers to keep the texture in shape
-								double multx1 = ( x1 != 0.0 ? 0.5 : 0.0 );
-								double multx2 = ( x2 != 0.0 ? 0.5 : 0.0 );
+								double multx1 = ( x1 != 0.0 ? 0.7 : 0.0 );
+								double multx2 = ( x2 != 0.0 ? 0.7 : 0.0 );
 								
-								double multy1 = ( y1 != 0.0 ? 0.5 : 0.0 );
-								double multy2 = ( y2 != 0.0 ? 0.5 : 0.0 );
+								double multy1 = ( y1 != 0.0 ? 0.7 : 0.0 );
+								double multy2 = ( y2 != 0.0 ? 0.7 : 0.0 );
 								
 								// reset the texture coordinates for the first two points
 								(*texCoords1)[i1].set( x1 + multx1 * ( scaleFactor->y() * sin(angle) ),
@@ -406,8 +407,8 @@ int box::update(string& data, UpdateMessage& message) {
 								double x = (*texCoords1)[i3].x(),
 									   y = (*texCoords1)[i3].y();
 								
-								double multx = ( x != 0.0 ? 0.5 : 0.0 );
-								double multy = ( y != 0.0 ? 0.5 : 0.0 );
+								double multx = ( x != 0.0 ? 0.7 : 0.0 );
+								double multy = ( y != 0.0 ? 0.7 : 0.0 );
 								
 								(*texCoords1)[i3].set( x + multx * (scaleFactor->y() * sin(angle) ),
 													  y + multy * (scaleFactor->y() * cos(angle) ) );
@@ -432,7 +433,76 @@ int box::update(string& data, UpdateMessage& message) {
 		
 		// handle a Z scale if needed
 		if( scaleFactor->z() != 0.0 ) {
+			// get the wall primitives
+			osg::Geometry::PrimitiveSetList wallPrimitives = geos[0]->getPrimitiveSetList();
 			
+			// get the geometric vertices for the 1st geometry
+			osg::Vec3Array* vertexArray0 = dynamic_cast<osg::Vec3Array*>( geos[0]->getVertexArray() );
+			if(!vertexArray0) {
+				printf("not a Vec3Array\n");
+			}
+			
+			// get the texture coordinates  for the 1st geometry (the box.obj model uses 2D texture coordinates, and has only one texture coordinate array)
+			osg::Vec2Array* texCoords0 = dynamic_cast<osg::Vec2Array*> ( geos[0]->getTexCoordArray(0) );
+			if(!texCoords0) {
+				printf("not a Vec2Array\n");
+			}
+			
+			// iterate over the wall primitives
+			for( osg::Geometry::PrimitiveSetList::iterator i = wallPrimitives.begin(); i != wallPrimitives.end(); i++) {
+				// make sure we're still dealing with triangle strips
+				if( (*i)->getMode() != osg::PrimitiveSet::TRIANGLE_STRIP )
+					continue;
+					
+				// map of already-visited texture indices
+				map<unsigned int, unsigned int> tmp = map<unsigned int, unsigned int>();
+				
+				// texture indices
+				unsigned int i1 = (*i)->index(0),
+							 i2 = (*i)->index(1),
+							 i3;
+							 
+				// mark i1 and i2 as visited
+				tmp[i1] = i1;
+				tmp[i2] = i2;
+				
+				// iterate through the indices
+				for( unsigned int j = 2; j != (*i)->getNumIndices(); j++) {
+					// get the next index
+					i3 = (*i)->index( j );
+					
+					if( j == 2 ) {		// only do this for the first two indexes once
+						double x1 = (*texCoords0)[i1].x();
+						double x2 = (*texCoords0)[i2].x();
+						
+						double y1 = (*texCoords0)[i1].y();
+						double y2 = (*texCoords0)[i2].y();
+						
+						double multy1 = (y1 != 0.0 ? 0.35 : 0.0);
+						double multy2 = (y2 != 0.0 ? 0.35 : 0.0);
+						
+						(*texCoords0)[i1].set( x1, y1 + multy1 * scaleFactor->z() );
+						(*texCoords0)[i2].set( x2, y2 + multy2 * scaleFactor->z() );
+					}
+					
+					if( tmp.count( i3 ) == 0 ) {	// only update this texture coordinate if it hasn't been visited
+						// handle the current texture coordinate
+						double x = (*texCoords0)[i3].x();
+						double y = (*texCoords0)[i3].y();
+							
+						double multy = (y != 0.0 ? 0.35 : 0.0);
+							
+						(*texCoords0)[i3].set( x, y + multy * scaleFactor->z() );
+					}
+					
+					// advance the texture indices
+					i1 = i2;
+					i2 = i3;
+				}
+			}
+			
+			// tell OSG to rebuild the display list for the geometry
+			geos[0]->dirtyDisplayList();
 		}
 		
 	}
