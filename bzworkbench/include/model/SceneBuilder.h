@@ -65,9 +65,6 @@ public:
 	// get the geometry data from a node
 	static const vector< osg::ref_ptr< osg::Drawable > >* getNodeGeometry( osg::PositionAttitudeTransform* node );
 	
-	// get all children from a group
-	static vector< osg::Node* >* extractChildren( osg::Group* group );
-	
 	// assign a texture to a node
 	static void assignTexture( const char* filename, osg::Node* node );
 	

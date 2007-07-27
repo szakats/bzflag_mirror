@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "../render/GeometryExtractorVisitor.h"
+
 using namespace std;
 
 /**
@@ -35,6 +37,9 @@ public:
 	
 	// setter
 	int update(string& data);
+	
+	// setter with messaging
+	int update(string& data, UpdateMessage& message);
 	
 	// toString
 	string toString(void);
