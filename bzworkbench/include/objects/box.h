@@ -9,6 +9,11 @@
 
 #include "../model/SceneBuilder.h"
 
+#include "../render/GeometryExtractorVisitor.h"
+
+#include <osg/Geometry>
+#include <osg/PrimitiveSet>
+
 /**
  * Box data
  */
@@ -39,8 +44,9 @@ public:
 	// getter
 	string get(void);
 	
-	// setter
+	// setters
 	int update(string& data);
+	int update(string& data, UpdateMessage& msg);
 	
 	// toString
 	string toString(void);

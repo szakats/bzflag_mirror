@@ -13,7 +13,7 @@
 using namespace std;
 
 // forward declare Renderable
-class Renderable;
+class bz2object;
 
 /**
  * A modified osg::NodeVisitor that scales the texture coordinates of a non-mesh object (i.e. BZW 1.x objects)
@@ -25,7 +25,7 @@ class TextureScalerVisitor : public osg::NodeVisitor {
 public:
 	
 	// constructor
-	TextureScalerVisitor( Renderable* r, osg::Vec3 scaleFactor );
+	TextureScalerVisitor( bz2object* r, osg::Vec3 scaleFactor );
 	
 	// apply method for nodes (i.e. calls the apply method for Geode and Group if the passed node is an instance of one of them, otherwise nothing)
 	void apply( osg::Node& node );
@@ -36,13 +36,16 @@ public:
 	// apply method for groups (i.e. calls the apply method for each of its children)
 	void apply( osg::Group& group );
 	
+	// 
+	
 private:
 	
 	// the Renderable this visitor got applied to
-	Renderable* renderable;
+	bz2object* obj;
 	
 	// the scale factor of the Renderable
 	osg::Vec3 scaleFactor;
+	
 };
  
 

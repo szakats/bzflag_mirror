@@ -4,18 +4,21 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../render/GeometryExtractorVisitor.cpp \
 ../render/Ground.cpp \
 ../render/Selection.cpp \
 ../render/TextureRepeaterVisitor.cpp \
 ../render/TextureScalerVisitor.cpp 
 
 OBJS += \
+./render/GeometryExtractorVisitor.o \
 ./render/Ground.o \
 ./render/Selection.o \
 ./render/TextureRepeaterVisitor.o \
 ./render/TextureScalerVisitor.o 
 
 CPP_DEPS += \
+./render/GeometryExtractorVisitor.d \
 ./render/Ground.d \
 ./render/Selection.d \
 ./render/TextureRepeaterVisitor.d \

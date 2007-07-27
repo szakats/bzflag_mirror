@@ -9,6 +9,7 @@ using namespace std;
 
 #include "ftoa.h"
 #include "model/BZWParser.h"
+#include "UpdateMessage.h"
 
 // the generic map object class
 class DataEntry {
@@ -20,6 +21,8 @@ public:
 		this->setChanged();
 		return 1;
 	}
+	
+	virtual int update(string& data, UpdateMessage& msg) { return this->update( data ); }
 	
 	virtual string toString() {
 		return string("# unknown DataEntry");

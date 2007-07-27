@@ -3,10 +3,10 @@
 #define TEC( x ) (x != 0.0 ? (x > 1.0 ? 1.0 : x) : 0.0 )
 
 // constructor
-TextureScalerVisitor::TextureScalerVisitor( Renderable* r, osg::Vec3 scaleFactor ) :
+TextureScalerVisitor::TextureScalerVisitor( bz2object* obj, osg::Vec3 scaleFactor ) :
 	osg::NodeVisitor( osg::NodeVisitor::NODE_VISITOR, osg::NodeVisitor::TRAVERSE_ALL_CHILDREN ) {
 	
-	this->renderable = r;
+	this->obj = obj;
 	this->scaleFactor = scaleFactor;
 }
 	
@@ -44,7 +44,7 @@ void TextureScalerVisitor::apply( osg::Group& group ) {
 // apply method for geodes (here's where the real work is done)
 void TextureScalerVisitor::apply( osg::Geode& geode ) {
 	
-	if(this->renderable == NULL)
+	if(this->obj == NULL)
 		return;
 		
 	// get the drawables from this geode

@@ -35,6 +35,7 @@ class bz2object : public Renderable, public DataEntry {
 		
 		// setter
 		virtual int update(string& data);
+		virtual int update(string& data, UpdateMessage& msg) { return this->update( data ); }
 		
 		// toString
 		virtual string toString(void);
