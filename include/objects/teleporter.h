@@ -25,6 +25,7 @@ public:
 	
 	// setter
 	int update(string& data);
+	int update(string& data, UpdateMessage& message);
 	
 	// tostring
 	string toString(void);

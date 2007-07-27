@@ -415,7 +415,7 @@ bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& e
 				
 				// update the object (i.e. so it can handle any changes specific to itself)
 				// this needs to be done for BZW 1.x objects so their textures scale appropriately
-				UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE, &scale );
+				UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &scale );
 				string objData = (*i)->get();
 				(*i)->update( objData, msg );
 			}	
