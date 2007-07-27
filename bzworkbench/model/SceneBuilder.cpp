@@ -1,7 +1,6 @@
 #include "../include/model/SceneBuilder.h"
 #include "../include/windows/View.h"
 
-#include "../include/render/TextureScalerVisitor.h"
 
 int SceneBuilder::nameCount;
 
