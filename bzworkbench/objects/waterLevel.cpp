@@ -41,8 +41,10 @@ int waterLevel::update(string& data) {
 	
 	// get the names, but only choose the first
 	vector<string> names = BZWParser::getValuesByKey("name", header, waterData);
-	if(!hasOnlyOne(names, "name"))
+	if(names.size() > 1) {
+		printf("waterLevel::update(): error! defined \"name\" %d times!\n", names.size());
 		return 0;
+	}
 	
 	// get the material names, but only choose the last
 	vector<string> matNames = BZWParser::getValuesByKey("matref", header, waterData);

@@ -54,6 +54,9 @@ public:
 private:
 	Point3D size;
 	
+	// update the box's geometry
+	void updateGeometry( UpdateMessage& msg );
+	
 };
 
 #endif /*BOX_H_*/

@@ -46,7 +46,7 @@ void MenuBar::open_world_real( Fl_Widget* w ) {
 	vector<string> world = BZWParser::loadFile( filename.c_str() );
 	
 	// invoke the Model to build the world
-	Model::build( world );
+	this->parent->getModel()->_build( world );
 }
 
 void MenuBar::save_world_real( Fl_Widget* w ) {

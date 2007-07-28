@@ -276,6 +276,11 @@ bool selectHandler::dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea
 			for(vector<bz2object*>::iterator i = selected.begin(); i != selected.end(); i++) {
 				tmp = (*i)->getPosition() + dPosition;
 				(*i)->setPosition( tmp );
+				
+				// tell the object it got updated (i.e. so it can handle any changes specific to itself)
+				UpdateMessage msg = UpdateMessage( UpdateMessage::SET_POSITION_FACTOR, &dPosition );
+				string objData = (*i)->get();
+				(*i)->update( objData, msg );
 			}
 			
 			// finally, transform the selector itself
@@ -337,13 +342,24 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 		// transform them
 		if(selected.size() > 0) {
 			osg::Vec3 dp;
+			osg::Vec3 dr;
 			for(vector<bz2object*>::iterator i = selected.begin(); i != selected.end(); i++) {
 				// sort out objects by their rotation technique
 				dp = (*i)->getRotation();
-				if( (*i)->isKey("rotation") )
+				if( (*i)->isKey("rotation") ) {
 					(*i)->setRotationZ( dp.z() + a_z );
-				else if( (*i)->isKey("spin") )
+					dr.set( 0, 0, a_z );
+					
+				}
+				else if( (*i)->isKey("spin") ) {
 					(*i)->setRotation( dp.x() + a_x, dp.y() + a_y, dp.z() + a_z );
+					dr.set( a_x, a_y, a_z );
+				}
+				
+				// tell the object it got updated (i.e. so it can handle any changes specific to itself)
+				UpdateMessage msg = UpdateMessage( UpdateMessage::SET_ROTATION_FACTOR, &dr );
+				string objData = (*i)->get();
+				(*i)->update( objData, msg );
 			}
 			
 			// finally, transform the selector itself
@@ -413,7 +429,7 @@ bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& e
 				// update the scale
 				(*i)->setScale( (*i)->getScale() + scale );
 				
-				// update the object (i.e. so it can handle any changes specific to itself)
+				// tell the object it got updated (i.e. so it can handle any changes specific to itself)
 				// this needs to be done for BZW 1.x objects so their textures scale appropriately
 				UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &scale );
 				string objData = (*i)->get();

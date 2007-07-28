@@ -120,7 +120,24 @@ void MainMenu::addMeshpyrCallback_real(Fl_Widget* w) {
 
 // add a teleporter
 void MainMenu::addTeleporterCallback_real(Fl_Widget* w) {
-	printf("added a teleporter\n");
+	// make a new box using the Model's object registry
+	DataEntry* newTeleporter = this->parent->getModel()->_buildObject( "teleporter" );
+	
+	// make it into a bz2object
+	bz2object* newObj = dynamic_cast< bz2object* >( newTeleporter );
+	
+	if(!newObj)
+		return;
+	
+	// add the object to the model
+	this->parent->getModel()->_unselectAll();
+	this->parent->getModel()->_addObject( newObj );
+	this->parent->getModel()->_setSelected( newObj );
+	
+	// open up a MasterConfigurationDialog and configure it
+	this->parent->configure( newObj );
+	
+	
 	this->value(0);
 }
 

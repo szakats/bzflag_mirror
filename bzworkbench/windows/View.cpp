@@ -149,7 +149,12 @@ void View::update( Observable* obs, void* data ) {
 			// add an object to the scene
 			case ObserverMessage::ADD_OBJECT : {
 				bz2object* obj = (bz2object*)(obs_msg->data);
-				this->getRootNode()->insertChild( 0, obj );
+				
+				if( this->getRootNode()->getNumChildren() > 0 )
+					this->getRootNode()->insertChild( 0, obj );
+				else
+					this->getRootNode()->addChild( obj );
+					
 					
 				break;
 			}
@@ -167,7 +172,7 @@ void View::update( Observable* obs, void* data ) {
 				
 				float scaleFactor = bzworld->getSize() / Ground::DEFAULT_SIZE;
 				
-				this->ground->setScale( osg::Vec3(scaleFactor, scaleFactor, scaleFactor) );
+				this->ground->setScale( osg::Vec3(scaleFactor, scaleFactor, 0.0) );
 				
 				break;
 			}

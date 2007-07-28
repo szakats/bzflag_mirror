@@ -67,15 +67,15 @@ pyramid
 end
 
 base
-	team 2
+	color 2
 	position -100 -100 0
 	size 10 1 0
 end
 
 teleporter
 	position 50 50 0
-	size 1 0 1
-	border 1
+	size 10 0 20
+	border 1.0
 end
 
 box
