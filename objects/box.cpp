@@ -8,6 +8,7 @@ box::box() : bz2object("box", "<position><rotation><size>") {
 	this->setPosition( osg::Vec3(0.0, 0.0, 0.0) );
 	this->setScale( osg::Vec3(10.0, 10.0, 10.0) );
 	SceneBuilder::markUnselected( this );
+	
 }
 
 // constructor with binary data
@@ -17,7 +18,17 @@ box::box( osg::Vec3 position, float rotation, osg::Vec3 scale ) : bz2object("box
 	
 	this->setPosition( position );
 	this->setRotationZ( rotation );
+	// when we set the scale, we'll have to do an updateGeometry as well
 	this->setScale( scale );
+	
+	osg::Vec3 defaultScale = osg::Vec3( 10.0, 10.0, 10.0 );
+	
+	osg::Vec3 dScale = scale - defaultScale;
+	
+	UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &dScale );
+	
+	this->updateGeometry( msg );
+	
 	SceneBuilder::markUnselected( this );
 }
 
@@ -30,8 +41,17 @@ box::box(string& data) : bz2object("box", "<position><rotation><size>", data.c_s
 		this->setPosition( osg::Vec3(0.0, 0.0, 0.0) );
 		this->setScale( osg::Vec3(10.0, 10.0, 10.0) );
 	}
-	else 
+	else {
+		// fake an object scale to update the geometry
+		osg::Vec3 defaultScale = osg::Vec3( 10.0, 10.0, 10.0 );
 		this->update(data);	
+		
+		osg::Vec3 dScale = this->getScale() - defaultScale;
+		
+		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &dScale );
+		
+		this->updateGeometry( msg );
+	}
 }
 
 // nothing to destroy...
@@ -44,7 +64,7 @@ string box::get(void) {
 
 // setter (string data)
 int box::update(string& data) {
-	return this->update( data );
+	return bz2object::update( data );
 }
 
 // setter (with binary data)
@@ -59,6 +79,20 @@ int box::update(string& data, UpdateMessage& message) {
 		return result;
 	}
 	
+	this->updateGeometry( message );
+	
+	return 1;
+}
+
+// toString
+string box::toString(void) {
+	return string("box\n") +
+				  this->BZWLines() +
+				  "end\n";
+}
+
+// update the box geometry
+void box::updateGeometry( UpdateMessage& message ) {
 	// if we changed the scale, update the texture coordinates (i.e. the scale might have changed)
 	// NOTE: it is expected that message.data will point to an osg::Vec3, which contains the scaling FACTOR
 	if( message.type == UpdateMessage::SET_SCALE_FACTOR ) {
@@ -74,7 +108,7 @@ int box::update(string& data, UpdateMessage& message) {
 		// if there isn't, then bail
 		if( geos.size() != 2 ) {
 			printf(" error! %d geometries (expected 2)\n", geos.size());
-			return result;
+			return;
 		}
 		
 		// handle an X or Y scale if needed
@@ -507,13 +541,4 @@ int box::update(string& data, UpdateMessage& message) {
 		
 	}
 	
-	return 1;
 }
-
-// toString
-string box::toString(void) {
-	return string("box\n") +
-				  this->BZWLines() +
-				  "end\n";
-}
-
