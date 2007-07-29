@@ -45,15 +45,16 @@ teleporter::teleporter() :
 	UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE, &scale );
 	this->setSize( scale );
 	
-	this->updateGeometry( msg );
+	SceneBuilder::markUnselected( this );
 }
 
 // constructor with data
 teleporter::teleporter(string& data) :
-	bz2object("teleporter", "<position><size><rotation><name><border>", data.c_str()) {
+	bz2object("teleporter", "<position><size><rotation><name><border>") {
 	
 	border = 0.125;
-	realSize = Point3D( 0.0, 0.0, 0.0 );
+	osg::Vec3 scale = osg::Vec3( border, 10, 20 );
+	realSize = scale;
 	
 	this->leftLeg = new Renderable( SceneBuilder::buildNode( "share/teleporter/teleporter_leg.obj" ) );
 	this->rightLeg = new Renderable( SceneBuilder::buildNode( "share/teleporter/teleporter_leg.obj" ) );
@@ -86,16 +87,10 @@ teleporter::teleporter(string& data) :
 	this->addChild( frontPortal.get() );
 	this->addChild( rearPortal.get() );
 	
-	
-	// blow up the teleporter
-	osg::Vec3 scale = osg::Vec3( border, 10, 20 );
-	realSize = scale;
-	
-	UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE, &scale );
-	this->setSize( scale );
-	this->updateGeometry( msg );
-	
+	this->setSize( realSize );
 	this->update(data);
+	
+	SceneBuilder::markUnselected( this );
 }
 
 // getter
@@ -127,19 +122,8 @@ int teleporter::update(string& data) {
 	// get the linkage name
 	vector<string> lnames = BZWParser::getValuesByKey("teleporter", header, data.c_str());
 	
-	// get the current scale
-	osg::Vec3 scale = this->getSize();
-	
 	if(!bz2object::update(data))
 		return 0;
-	
-	// see if the scale changed
-	if( scale != this->getSize() ) {
-		// the scale changed; compute the difference and update the geometry
-		osg::Vec3 dscale = this->getSize() - scale;
-		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &dscale );
-		this->updateGeometry( msg );	
-	}
 	
 	// set the data
 	this->border = (borders.size() != 0 ? atof( borders[0].c_str() ) : 0.0f);
@@ -296,6 +280,7 @@ void teleporter::updateGeometry( UpdateMessage& message ) {
 			
 			// get the scale factor from data
 			osg::Vec3* scaleFactor = (osg::Vec3*)message.data;
+			
 			
 			// scale by X will increase the distance between the portals
 			if( scaleFactor->x() != 0.0 ) {

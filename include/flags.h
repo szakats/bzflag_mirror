@@ -14,7 +14,7 @@ static const string _teamFlags[NUM_TEAMFLAGS] = {
 	"P*"		// purple team
 };
 
-#define NUM_GOODFLAGS 26
+#define NUM_GOODFLAGS 28
 // list of good superflags
 static const string _goodFlags[NUM_GOODFLAGS] = {
 	"V",		// high speed
@@ -42,7 +42,9 @@ static const string _goodFlags[NUM_GOODFLAGS] = {
 	"TH",		// thief
 	"US",		// useless
 	"WG",		// wings
-	"SR"		// steam roller
+	"SR",		// steam roller
+	"SH",		// shield
+	"N"			// narrow
 };
 
 #define NUM_BADFLAGS 8

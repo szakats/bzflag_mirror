@@ -40,17 +40,13 @@ box::box(string& data) : bz2object("box", "<position><rotation><size>", data.c_s
 	if( data.length() <= 1 ) {
 		this->setPosition( osg::Vec3(0.0, 0.0, 0.0) );
 		this->setScale( osg::Vec3(10.0, 10.0, 10.0) );
+		
 	}
 	else {
 		// fake an object scale to update the geometry
-		osg::Vec3 defaultScale = osg::Vec3( 10.0, 10.0, 10.0 );
 		this->update(data);	
 		
-		osg::Vec3 dScale = this->getScale() - defaultScale;
 		
-		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &dScale );
-		
-		this->updateGeometry( msg );
 	}
 }
 
@@ -76,6 +72,7 @@ int box::update(string& data) {
 		this->updateGeometry( msg );
 	}
 	
+	return result;
 }
 
 // setter (with binary data)
