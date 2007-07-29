@@ -53,7 +53,6 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
    
    // give the View a trackball manipulator
    osgGA::TrackballManipulator* cameraManipulator = new osgGA::TrackballManipulator();
-   
    this->setCameraManipulator(cameraManipulator);
    
    // make an event handler collection
