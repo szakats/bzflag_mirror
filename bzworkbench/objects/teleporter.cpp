@@ -4,12 +4,14 @@
 teleporter::teleporter() :
 	bz2object("teleporter", "<position><size><rotation><name><border>") {
 	
-	border = 1.0;
+	border = 0.125;
 	realSize = Point3D( 0.0, 0.0, 0.0 );
 	
 	this->leftLeg = new Renderable( SceneBuilder::buildNode( "share/teleporter/teleporter_leg.obj" ) );
 	this->rightLeg = new Renderable( SceneBuilder::buildNode( "share/teleporter/teleporter_leg.obj" ) );
 	this->topBeam = new Renderable( SceneBuilder::buildNode( "share/teleporter/teleporter_beam.obj" ) );
+	this->frontPortal = new Renderable( SceneBuilder::buildNode( "share/teleporter/portal.obj" ) );
+	this->rearPortal = new Renderable( SceneBuilder::buildNode( "share/teleporter/portal.obj" ) );
 	
 	// offset leftLeg so it's geometric data is to the left of the local origin
 	// NOTE: leftLeg's geometry is known in advance to be a 1x1x1 cube
@@ -25,14 +27,19 @@ teleporter::teleporter() :
 	// double the width of topBeam so it rests atop leftLeg and rightLeg
 	this->topBeam->setScale( osg::Vec3( 1.0, 2.0, 1.0 ) );
 	
+	// set the positions of the portals
+	this->frontPortal->setPosition( osg::Vec3(border, 0, 0) );
+	this->rearPortal->setPosition( osg::Vec3(-border, 0, 0) );
+	
 	// add the nodes to the teleporter
 	this->addChild( leftLeg.get() );
 	this->addChild( rightLeg.get() );
 	this->addChild( topBeam.get() );
-	
+	this->addChild( frontPortal.get() );
+	this->addChild( rearPortal.get() );
 	
 	// blow up the teleporter
-	osg::Vec3 scale = osg::Vec3( 0.125, 10, 20 );
+	osg::Vec3 scale = osg::Vec3( border, 10, 20 );
 	
 	UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE, &scale );
 	
@@ -43,12 +50,14 @@ teleporter::teleporter() :
 teleporter::teleporter(string& data) :
 	bz2object("teleporter", "<position><size><rotation><name><border>", data.c_str()) {
 	
-	border = 1.0;
+	border = 0.125;
 	realSize = Point3D( 0.0, 0.0, 0.0 );
 	
 	this->leftLeg = new Renderable( SceneBuilder::buildNode( "share/teleporter/teleporter_leg.obj" ) );
 	this->rightLeg = new Renderable( SceneBuilder::buildNode( "share/teleporter/teleporter_leg.obj" ) );
 	this->topBeam = new Renderable( SceneBuilder::buildNode( "share/teleporter/teleporter_beam.obj" ) );
+	this->frontPortal = new Renderable( SceneBuilder::buildNode( "share/teleporter/portal.obj" ) );
+	this->rearPortal = new Renderable( SceneBuilder::buildNode( "share/teleporter/portal.obj" ) );
 	
 	// offset leftLeg so it's geometric data is to the left of the local origin
 	// NOTE: leftLeg's geometry is known in advance to be a 1x1x1 cube
@@ -64,14 +73,20 @@ teleporter::teleporter(string& data) :
 	// double the width of topBeam so it rests atop leftLeg and rightLeg
 	this->topBeam->setScale( osg::Vec3( 1.0, 2.0, 1.0 ) );
 	
+	// set the positions of the portals
+	this->frontPortal->setPosition( osg::Vec3(border, 0, 0) );
+	this->rearPortal->setPosition( osg::Vec3(-border, 0, 0) );
+	
 	// add the nodes to the teleporter
 	this->addChild( leftLeg.get() );
 	this->addChild( rightLeg.get() );
 	this->addChild( topBeam.get() );
+	this->addChild( frontPortal.get() );
+	this->addChild( rearPortal.get() );
 	
 	
 	// blow up the teleporter
-	osg::Vec3 scale = osg::Vec3( 0.125, 10, 20 );
+	osg::Vec3 scale = osg::Vec3( border, 10, 20 );
 	
 	UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE, &scale );
 	
@@ -180,9 +195,32 @@ void teleporter::updateGeometry( UpdateMessage& message ) {
 			// rather, we'll be changing the general shape of the teleporter
 			this->setScale( this->getScale() - (*scaleFactor) );
 			
+			// when we scale by X, we're really moving the portals closer or further away from the teleporter
+			if( scaleFactor->x() != 0.0 ) {
+				
+				// don't have the portals switch places
+				if( this->frontPortal->getPosition().x() + scaleFactor->x() <= this->rearPortal->getPosition().x() - scaleFactor->x() )
+					scaleFactor->set( 0, scaleFactor->y(), scaleFactor->z() );
+				
+				this->frontPortal->setPosition( osg::Vec3( this->frontPortal->getPosition().x() + scaleFactor->x(),
+														   this->frontPortal->getPosition().y(),
+														   this->frontPortal->getPosition().z() ) );
+														   
+				this->rearPortal->setPosition( osg::Vec3( this->rearPortal->getPosition().x() - scaleFactor->x(),
+														   this->rearPortal->getPosition().y(),
+														   this->rearPortal->getPosition().z() ) );
+			
+			}
+			
 			// when we scale by Y, we're really making the teleporter wider.
 			// to do that, we'll just move the legs further apart by scaleFactor, and stretch the top beam by scaleFactor
 			if( scaleFactor->y() != 0.0 ) {
+				// we need to clamp the width of the teleporter to 2 * border, if necessary
+				// to do so, we need to check and see if the resulting size will have negative width
+				if( this->topBeam->getScale().y() + 2 * scaleFactor->y() <= 2 * border ) {
+					
+					scaleFactor->set( scaleFactor->x(), 0, scaleFactor->z() );	
+				}
 				// scale the left leg's position
 				this->leftLeg->setPosition( osg::Vec3(  this->leftLeg->getPosition().x(),
 														this->leftLeg->getPosition().y() - scaleFactor->y(),
@@ -197,11 +235,26 @@ void teleporter::updateGeometry( UpdateMessage& message ) {
 				 this->topBeam->setScale( osg::Vec3(  this->topBeam->getScale().x(),
 							 						  this->topBeam->getScale().y() + 2 * scaleFactor->y(),
 							 						  this->topBeam->getScale().z() ) );
+							 						  
+				// scale the front portal
+				this->frontPortal->setScale( osg::Vec3( this->frontPortal->getScale().x(),
+														this->frontPortal->getScale().y() + 2 * scaleFactor->y(),
+														this->frontPortal->getScale().z() ) );
+														
+				// scale the rear portal
+				this->rearPortal->setScale( osg::Vec3(  this->rearPortal->getScale().x(),
+														this->rearPortal->getScale().y() + 2 * scaleFactor->y(),
+														this->rearPortal->getScale().z() ) );
+				
 			}
 			
 			// when we scale by Z, we're really making the teleporter taller.
 			// to do that, we'll just move the top beam higher, and scale the legs vertically
 			if( scaleFactor->z() != 0.0 ) {
+				// first, clamp the height of the teleporter to 0 if needed
+				if( this->topBeam->getPosition().z() + scaleFactor->z() <= 0 )
+					scaleFactor->set( scaleFactor->x(), scaleFactor->y(), 0 );
+					
 				// scale the left leg's height
 				this->leftLeg->setScale( osg::Vec3(  this->leftLeg->getScale().x(),
 													 this->leftLeg->getScale().y(),
@@ -216,6 +269,16 @@ void teleporter::updateGeometry( UpdateMessage& message ) {
 				this->topBeam->setPosition( osg::Vec3(  this->topBeam->getPosition().x(),
 														this->topBeam->getPosition().y(),
 														this->topBeam->getPosition().z() + scaleFactor->z() ) );
+														
+				// scale the front portal
+				this->frontPortal->setScale( osg::Vec3( this->frontPortal->getScale().x(),
+														this->frontPortal->getScale().y(),
+														this->frontPortal->getScale().z() + scaleFactor->z() ) );
+														
+				// scale the rear portal
+				this->rearPortal->setScale( osg::Vec3(  this->rearPortal->getScale().x(),
+														this->rearPortal->getScale().y(),
+														this->rearPortal->getScale().z() + scaleFactor->z() ) );
 			}
 			
 			// finally, update the real size
@@ -230,6 +293,22 @@ void teleporter::updateGeometry( UpdateMessage& message ) {
 			
 			// get the scale factor from data
 			osg::Vec3* scaleFactor = (osg::Vec3*)message.data;
+			
+			// scale by X will increase the distance between the portals
+			if( scaleFactor->x() != 0.0 ) {
+				// don't have the portals switch places
+				if( scaleFactor->x() < 0 )
+					scaleFactor->set( 0, scaleFactor->y(), scaleFactor->z() );
+				
+				this->frontPortal->setPosition( osg::Vec3( scaleFactor->x(),
+														   this->frontPortal->getPosition().y(),
+														   this->frontPortal->getPosition().z() ) );
+														   
+				this->rearPortal->setPosition( osg::Vec3( -scaleFactor->x(),
+														   this->rearPortal->getPosition().y(),
+														   this->rearPortal->getPosition().z() ) );
+			
+			}
 			
 			// when we scale by Y, we're really making the teleporter wider.
 			// to do that, we'll just move the legs further apart by scaleFactor, and stretch the top beam by scaleFactor
@@ -248,6 +327,16 @@ void teleporter::updateGeometry( UpdateMessage& message ) {
 				 this->topBeam->setScale( osg::Vec3(  this->topBeam->getScale().x(),
 							 						  2 * scaleFactor->y() + 1,
 							 						  this->topBeam->getScale().z()) );
+							 						  
+				 // scale the front portal
+				this->frontPortal->setScale( osg::Vec3( this->frontPortal->getScale().x(),
+														2 * scaleFactor->y(),
+														this->frontPortal->getScale().z() ) );
+														
+				// scale the rear portal
+				this->rearPortal->setScale( osg::Vec3(  this->rearPortal->getScale().x(),
+														2 * scaleFactor->y(),
+														this->rearPortal->getScale().z() ) );
 			}
 			
 			// when we scale by Z, we're really making the teleporter taller.
@@ -266,6 +355,16 @@ void teleporter::updateGeometry( UpdateMessage& message ) {
 				// increase the height of the top beam
 				this->topBeam->setPosition( osg::Vec3(  this->topBeam->getPosition().x(),
 														this->topBeam->getPosition().y(),
+														scaleFactor->z() ) );
+														
+				// scale the front portal
+				this->frontPortal->setScale( osg::Vec3( this->frontPortal->getScale().x(),
+														this->frontPortal->getScale().y(),
+														scaleFactor->z() ) );
+														
+				// scale the rear portal
+				this->rearPortal->setScale( osg::Vec3(  this->rearPortal->getScale().x(),
+														this->rearPortal->getScale().y(),
 														scaleFactor->z() ) );
 			}
 			

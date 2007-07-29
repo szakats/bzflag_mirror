@@ -47,7 +47,7 @@ private:
 	string lname;	// used for linkage; not the official name
 	
 	// parts of the teleporter node (necessary because teleporters don't scale normally, and we'll need to intervene :) )
-	osg::ref_ptr< Renderable > leftLeg, rightLeg, topBeam;
+	osg::ref_ptr< Renderable > leftLeg, rightLeg, topBeam, frontPortal, rearPortal;
 	
 	// helper method: update the teleporter nodes
 	void updateGeometry( UpdateMessage& message );
