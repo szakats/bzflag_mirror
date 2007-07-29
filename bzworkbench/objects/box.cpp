@@ -64,20 +64,22 @@ string box::get(void) {
 
 // setter (string data)
 int box::update(string& data) {
-	return bz2object::update( data );
+	osg::Vec3 size = this->getSize();
+	
+	int result = bz2object::update( data );
+	if( result == 0 )
+		return result;
+		
+	if( this->getSize() != size ) {
+		osg::Vec3 dsize = this->getSize() - size;
+		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &dsize );
+		this->updateGeometry( msg );
+	}
+	
 }
 
 // setter (with binary data)
 int box::update(string& data, UpdateMessage& message) {
-	
-	// do the bz2object update
-	int result = bz2object::update(data);
-	
-	// bail if the update failed
-	if(result == 0) {
-		printf(" update failure\n");
-		return result;
-	}
 	
 	this->updateGeometry( message );
 	

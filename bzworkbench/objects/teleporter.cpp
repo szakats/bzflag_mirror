@@ -40,8 +40,10 @@ teleporter::teleporter() :
 	
 	// blow up the teleporter
 	osg::Vec3 scale = osg::Vec3( border, 10, 20 );
+	realSize = scale;
 	
 	UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE, &scale );
+	this->setSize( scale );
 	
 	this->updateGeometry( msg );
 }
@@ -87,9 +89,10 @@ teleporter::teleporter(string& data) :
 	
 	// blow up the teleporter
 	osg::Vec3 scale = osg::Vec3( border, 10, 20 );
+	realSize = scale;
 	
 	UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE, &scale );
-	
+	this->setSize( scale );
 	this->updateGeometry( msg );
 	
 	this->update(data);
@@ -125,15 +128,15 @@ int teleporter::update(string& data) {
 	vector<string> lnames = BZWParser::getValuesByKey("teleporter", header, data.c_str());
 	
 	// get the current scale
-	osg::Vec3 scale = this->getScale();
+	osg::Vec3 scale = this->getSize();
 	
 	if(!bz2object::update(data))
 		return 0;
 	
 	// see if the scale changed
-	if( scale != this->getScale() ) {
+	if( scale != this->getSize() ) {
 		// the scale changed; compute the difference and update the geometry
-		osg::Vec3 dscale = this->getScale() - scale;
+		osg::Vec3 dscale = this->getSize() - scale;
 		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &dscale );
 		this->updateGeometry( msg );	
 	}
@@ -148,17 +151,17 @@ int teleporter::update(string& data) {
 // update with binary message
 int teleporter::update( string& data, UpdateMessage& message ) {
 	
-	this->updateGeometry( message );	
+	return this->update( data );	
 	
-	return 1;
 }
 
 // tostring
 string teleporter::toString(void) {
+	
 	// there's a different way of reporting size in teleporters, since the size isn't stored in the geometry
 	// get the bz2object BZW lines
 	string bzwlines = this->BZWLines();
-	
+	/*
 	// find the "size" entry and replace it with the real size
 	string::size_type sizeStart = bzwlines.find( "size", 0 );
 	if( sizeStart != string::npos ) {	// if found...
@@ -172,7 +175,7 @@ string teleporter::toString(void) {
 		else {  // cut out the end
 			bzwlines = bzwlines.substr( 0, sizeStart ) + "size " + this->realSize.toString();
 		}
-	}
+	}*/
 	
 	// finally, make that string
 	return string("teleporter ") + lname + "\n" +
@@ -193,7 +196,7 @@ void teleporter::updateGeometry( UpdateMessage& message ) {
 			
 			// undo the scale (since that was what was changed prior to this message being sent)
 			// rather, we'll be changing the general shape of the teleporter
-			this->setScale( this->getScale() - (*scaleFactor) );
+			// this->setScale( this->getScale() - (*scaleFactor) );
 			
 			// when we scale by X, we're really moving the portals closer or further away from the teleporter
 			if( scaleFactor->x() != 0.0 ) {

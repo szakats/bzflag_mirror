@@ -36,6 +36,8 @@ class Point3D : public osg::Vec3
 		}
 	}
 	
+	Point3D( string desc ) { Point3D( desc.c_str() ); }
+	
 	string toString(void) {
 		return string("") + string(ftoa(this->x())) + " " + string(ftoa(this->y())) + " " + string(ftoa(this->z())) + "\n";
 	}

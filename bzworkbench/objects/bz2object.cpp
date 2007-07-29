@@ -150,7 +150,7 @@ int bz2object::update(string& data) {
 	if(this->isKey("rotation") && rotations.size() > 0)
 		this->setRotationZ( atof( rotations[0].c_str() ) );
 	if(this->isKey("size") && sizes.size() > 0)
-		this->setScale( Point3D( sizes[0].c_str() ) );
+		this->setSize( Point3D( sizes[0].c_str() ) );
 	if(this->isKey("phydrv") && physicsDrivers.size() > 0)
 		this->physicsDriver = physicsDrivers[0];
 	if(this->isKey("matref") && matrefs.size() > 0)
@@ -178,7 +178,7 @@ string bz2object::BZWLines(void) {
 		
 	// add size key/value to the string if supported
 	if(this->isKey("size"))
-		ret += "  size " + Point3D( this->getScale() ).toString();
+		ret += "  size " + Point3D( this->getSize() ).toString();
 	
 	// add rotation key/value to the string if supported
 	if(this->isKey("rotation"))

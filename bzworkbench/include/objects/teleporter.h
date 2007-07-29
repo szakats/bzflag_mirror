@@ -31,6 +31,14 @@ public:
 	int update(string& data);
 	int update(string& data, UpdateMessage& message);
 	
+	// override the getSize and setSize methods
+	osg::Vec3 getSize() { return osg::Vec3( realSize.x(), realSize.y(), realSize.z() ); }
+	void setSize( osg::Vec3 newSize ) {
+		this->realSize = newSize;
+		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE, &newSize );
+		this->updateGeometry( msg );
+	}
+	
 	// tostring
 	string toString(void);
 	

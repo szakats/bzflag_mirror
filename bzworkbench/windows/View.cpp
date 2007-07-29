@@ -66,6 +66,29 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
    
    // assign the parent reference
    this->mw = mw;
+   
+   // build the mouse button map
+   this->buildMouseButtonMap();
+}
+
+// build the mouse button map
+void View::buildMouseButtonMap() {
+	this->mouseButtonMap = map< unsigned int, unsigned int > ();
+	
+	// default mapppings
+	
+	mouseButtonMap[ FL_MIDDLE_MOUSE ] = FL_LEFT_MOUSE;		// middle mouse drags in FLTK should translate to left mouse drags in OSG
+	
+}
+
+// get an OSG mouse event from a FLTK mouse/key combo 
+unsigned int View::remapMouseButton( unsigned int button ) {
+	//if( mouseButtonMap.count( button ) > 0 ) {
+		
+	//	return mouseButtonMap[ button ];
+	// }
+	// else
+		return button;
 }
 
 // destructor
@@ -100,11 +123,11 @@ int View::handle(int event) {
         case FL_PUSH:
         	// handle single mouse clicks
         	if(Fl::event_clicks() == 0) {
-        		_gw->getEventQueue()->mouseButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button() );
+        		_gw->getEventQueue()->mouseButtonPress(Fl::event_x(), Fl::event_y(), remapMouseButton( Fl::event_button() ) );
         	}
         	// handle double clicks
             else {
-            	_gw->getEventQueue()->mouseDoubleButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button() );
+            	_gw->getEventQueue()->mouseDoubleButtonPress(Fl::event_x(), Fl::event_y(), remapMouseButton( Fl::event_button() ) );
             	Fl::event_is_click(0);
             }
             
@@ -116,7 +139,7 @@ int View::handle(int event) {
         	this->redraw();
 			return 1;
         case FL_RELEASE:
-            _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), Fl::event_button() );
+            _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), remapMouseButton( Fl::event_button() ) );
         	this->redraw();    
 			return 1;
         case FL_KEYDOWN:

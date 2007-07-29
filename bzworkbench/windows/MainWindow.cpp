@@ -12,14 +12,17 @@ void MainWindow::buildButtonPanel() {
 	// create the buttons
 	this->addBoxButton = new Fl_ImageButton( BUTTON_PANEL_X, BUTTON_PANEL_Y, 36, 36, "share/UI/box.png");
 	this->addPyramidButton = new Fl_ImageButton( BUTTON_PANEL_X + 36, BUTTON_PANEL_Y, 36, 36, "share/UI/pyramid.png");
+	this->addTeleporterButton = new Fl_ImageButton( BUTTON_PANEL_X, BUTTON_PANEL_Y + 36, 36, 36, "share/UI/teleporter.png");
 	
 	// assign them callbacks
 	this->addBoxButton->callback( addBoxCallback, this );
 	this->addPyramidButton->callback( addPyramidCallback, this );
+	this->addTeleporterButton->callback( addTeleporterCallback, this );
 	
 	// add them to the group
 	this->objectButtonGroup->add( addBoxButton );
 	this->objectButtonGroup->add( addPyramidButton );
+	this->objectButtonGroup->add( addTeleporterButton );
 	
 	
 	// set up the "add base" button group
@@ -48,6 +51,11 @@ void MainWindow::buildButtonPanel() {
 	// add the groups
 	this->add( objectButtonGroup );
 	this->add( baseButtonGroup );
+	
+	// make the configuration button
+	this->configureButton = new Fl_Button( RENDER_WINDOW_X, RENDER_WINDOW_Y + RENDER_WINDOW_HEIGHT, 80, DEFAULT_TEXTSIZE + 6, "Configure" );
+	this->configureButton->callback( configureCallback, this );
+	this->add( configureButton );
 }
 
 
@@ -197,6 +205,24 @@ void MainWindow::addPyramidCallback_real(Fl_Widget* w) {
 	
 }
 
+// add a teleporter
+void MainWindow::addTeleporterCallback_real(Fl_Widget* w) {
+	// make a new teleporter using the Model's object registry
+	DataEntry* newTeleporter = this->getModel()->_buildObject( "teleporter" );
+	
+	// make it into a bz2object
+	bz2object* newObj = dynamic_cast< bz2object* >( newTeleporter );
+	
+	if(!newObj)
+		return;
+	
+	// add the object to the model
+	this->getModel()->_unselectAll();
+	this->getModel()->_addObject( newObj );
+	this->getModel()->_setSelected( newObj );
+	
+}
+
 // add base 1
 void MainWindow::addPurpleBaseCallback_real(Fl_Widget* w) {
 	
@@ -328,4 +354,15 @@ void MainWindow::addBlueBaseCallback_real(Fl_Widget* w) {
 	this->getModel()->_addObject( newObj );
 	this->getModel()->_setSelected( newObj );
 	
+}
+
+// launch a MasterConfigurationDialog with the configure button
+void MainWindow::configureCallback_real( Fl_Widget* w ) {
+	
+	vector< bz2object* > selection = this->model->getSelection();
+	if( selection.size() > 1 || selection.size() == 0 )
+		return;
+		
+	MasterConfigurationDialog* mcd = new MasterConfigurationDialog( selection[0] );
+	mcd->show();
 }

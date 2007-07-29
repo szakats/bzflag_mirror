@@ -429,7 +429,7 @@ bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& e
 		if( selected.size() > 0 ) {
 			osg::Vec3 tscale;
 			for(vector<bz2object*>::iterator i = selected.begin(); i != selected.end(); i++) {
-				tscale = (*i)->getScale() + scale;
+				tscale = (*i)->getSize() + scale;
 				// no negative scaling!
 				if( tscale.x() < 0 )
 					scale.set( 0, scale.y(), scale.z() );
@@ -439,7 +439,7 @@ bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& e
 					scale.set( scale.x(), scale.y(), 0 );
 				
 				// update the scale
-				(*i)->setScale( (*i)->getScale() + scale );
+				(*i)->setSize( (*i)->getSize() + scale );
 				
 				// tell the object it got updated (i.e. so it can handle any changes specific to itself)
 				// this needs to be done for BZW 1.x objects so their textures scale appropriately
