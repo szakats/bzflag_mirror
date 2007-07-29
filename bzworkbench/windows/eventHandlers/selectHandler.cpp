@@ -241,8 +241,20 @@ bool selectHandler::dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea
 	
 	// combine them into the transformation vector
 	osg::Vec3 transformVector = sideVector + upVector;
-	transformVector.normalize();
 	
+	// scale the transformVector by the distance from the eyepoint to the axis
+	// first, get the eye position of the camera
+	osg::Vec3 eye, look, dist;
+	viewer->getCamera()->getViewMatrixAsLookAt( eye, look, dist );
+	
+	// compute the vector between the camera and the axis
+	osg::Vec3 dPosition = position - eye;
+	
+	// compute the dist
+	double distance = dPosition.length() / 2;
+	
+	// finally, scale the transformVector
+	transformVector *= distance;
 	
 	if(node->getName() == Selection_X_AXIS_NODE_NAME) {
 		// translate along x
