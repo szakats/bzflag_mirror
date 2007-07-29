@@ -129,12 +129,19 @@ bool Model::_build(vector<string>& bzworld) {
 	// don't bother for empty vectors
 	if(bzworld.size() == 0)
 		return false;
-		
+	
+	// clear out the previous objects
+	this->materials.clear();
+	this->phys.clear();
+	this->dynamicColors.clear();
+	this->objects.clear();
+	this->links.clear();
+	this->textureMatrices.clear();
+	
 	// load the data in
 	bool foundWorld = false;
 	for(vector<string>::iterator i = bzworld.begin(); i != bzworld.end(); i++) {
 		string header = BZWParser::headerOf(i->c_str());
-		printf("adding %s\n", header.c_str());
 		if(header == "world") {
 			if(cmap[header] != NULL) {
 				this->worldData->update(*i);
