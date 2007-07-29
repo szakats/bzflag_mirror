@@ -42,6 +42,10 @@ class MainWindow;
 class View : public osgViewer::Viewer, public RenderWindow, public Observer
 {
     public:
+    	
+    	// default zoom
+    	static const double DEFAULT_ZOOM = 75.0;
+    	
     	// constructor
         View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *label=0);
         
@@ -117,6 +121,9 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		
 		// the currently pressed mouse button
 		unsigned int buttondown;
+		
+		// remap a mouse input into an OSG input
+		unsigned int remapMouseButton( unsigned int button );
 	
 	private:
 		
@@ -125,6 +132,13 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		
 		// the current selection
 		Selection* selection;
+		
+		// mouse button map (i.e. so we can adapt user input into input OSG expects)
+		map< unsigned int, unsigned int > mouseButtonMap;
+		
+		// build the mouse button map
+		void buildMouseButtonMap();
+		
 };
 
 

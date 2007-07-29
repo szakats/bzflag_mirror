@@ -20,7 +20,7 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	float rotation = (object->getRotation().z());
 	
 	// read size
-	Point3D size = Point3D(object->getScale());
+	Point3D size = Point3D(object->getSize());
 	
 	// read transformations
 	vector<BZTransform> transforms = (object->getTransformations());
@@ -174,10 +174,14 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
  */
 void MasterConfigurationDialog::OKButtonCallback_real(Fl_Widget* w) {
 	
+	// get the data
+	Point3D position = Point3D( string(positionXField->value()) + " " + positionYField->value() + " " + positionZField->value() + "\n" );
+	Point3D size = Point3D( string(sizeXField->value()) + " " + sizeYField->value() + " " + sizeZField->value() + "\n" );
+	
 	// get the position, rotation, and size fields and string-ify them
-	string positionString = string("position ") + positionXField->value() + " " + positionYField->value() + " " + positionZField->value() + "\n";
+	string positionString = string("position ") + string(positionXField->value()) + " " + positionYField->value() + " " + positionZField->value() + "\n";
 	string rotationString = string("rotation ") + rotationField->value() + "\n";
-	string sizeString = string("size ") + sizeXField->value() + " " + sizeYField->value() + " " + sizeZField->value() + "\n";
+	string sizeString = string("size ") + string(sizeXField->value()) + " " + sizeYField->value() + " " + sizeZField->value() + "\n";
 	
 	// get the transformations and string-ify them
 	string transformationString("");
@@ -195,8 +199,8 @@ void MasterConfigurationDialog::OKButtonCallback_real(Fl_Widget* w) {
 						  "  " + sizeString +
 						  "  " + transformationString + "\n" +
 						  "end\n";
-						  
-	object->update(objectString);
+	
+	object->update( objectString );
 	
 	Fl::delete_widget(this);	
 }

@@ -49,11 +49,17 @@ class bz2object : public Renderable, public DataEntry {
 		vector<string>& getMaterials() { return this->materials; }
 		bool isSelected() { return this->selected; }
 		
+		// use this instead of getScale()
+		virtual osg::Vec3 getSize() { return this->getScale(); }
+		
 		// data setters (makes MasterConfigurationDialog code easier)
 		void setPhyDrv( const char* phydrv ) { this->physicsDriver = phydrv; }
 		void setTransforms( vector<BZTransform>& transformations ) { this->transformations = transformations; }
 		void setMaterials( vector<string>& materials ) { this->materials = materials; }
 		void setSelected( bool value ) { this->selected = value; }
+		
+		// use this instead of setScale();
+		virtual void setSize( osg::Vec3 newSize ) { this->setScale( newSize ); }
 		
 		
 		// make this public
