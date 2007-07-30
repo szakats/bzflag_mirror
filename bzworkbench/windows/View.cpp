@@ -173,7 +173,7 @@ void View::update( Observable* obs, void* data ) {
 				bz2object* obj = (bz2object*)(obs_msg->data);
 				
 				if( this->getRootNode()->getNumChildren() > 0 )
-					this->getRootNode()->insertChild( 0, obj );
+					this->getRootNode()->insertChild( 1, obj );	// insert the child directly after the Ground object
 				else
 					this->getRootNode()->addChild( obj );
 					

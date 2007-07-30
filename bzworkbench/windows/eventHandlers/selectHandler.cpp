@@ -353,19 +353,18 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 		
 		// transform them
 		if(selected.size() > 0) {
-			osg::Vec3 dp;
-			osg::Vec3 dr;
+			osg::Vec3 dp = osg::Vec3( 0.0, 0.0, 0.0 );
+			osg::Vec3 dr = osg::Vec3( 0.0, 0.0, 0.0 );
 			for(vector<bz2object*>::iterator i = selected.begin(); i != selected.end(); i++) {
 				// sort out objects by their rotation technique
 				dp = (*i)->getRotation();
+				if( (*i)->isKey("spin") ) {
+					(*i)->setRotation( dp.x() + a_x, dp.y() + a_y, dp.z() + a_z );
+					dr.set( dr.x() + a_x, dr.y() + a_y, dr.z() + a_z );
+				}
 				if( (*i)->isKey("rotation") ) {
 					(*i)->setRotationZ( dp.z() + a_z );
-					dr.set( 0, 0, a_z );
-					
-				}
-				else if( (*i)->isKey("spin") ) {
-					(*i)->setRotation( dp.x() + a_x, dp.y() + a_y, dp.z() + a_z );
-					dr.set( a_x, a_y, a_z );
+					dr.set( dr.x(), dr.y(), dr.z() + a_z );
 				}
 				
 				// tell the object it got updated (i.e. so it can handle any changes specific to itself)

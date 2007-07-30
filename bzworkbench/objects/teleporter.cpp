@@ -49,7 +49,7 @@ teleporter::teleporter() :
 }
 
 // constructor with data
-teleporter::teleporter(string& data) :
+teleporter::teleporter(string& data) :	// don't pass the data to the parent class (this prevents super-sized teleporters)
 	bz2object("teleporter", "<position><size><rotation><name><border>") {
 	
 	border = 0.125;

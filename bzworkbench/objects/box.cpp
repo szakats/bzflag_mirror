@@ -1,7 +1,7 @@
 #include "../include/objects/box.h"
 
 // constructors
-box::box() : bz2object("box", "<position><rotation><size>") {
+box::box() : bz2object("box", "<name><position><rotation><size>") {
 	this->addChild( SceneBuilder::buildNode( "share/box/box.obj" ) );
 	this->setName( SceneBuilder::nameNode("box") );
 	
@@ -11,43 +11,16 @@ box::box() : bz2object("box", "<position><rotation><size>") {
 	
 }
 
-// constructor with binary data
-box::box( osg::Vec3 position, float rotation, osg::Vec3 scale ) : bz2object("box", "<position><rotation><size>") {
+box::box(string& data) : bz2object("box", "<name><position><rotation><size>") {
 	this->addChild( SceneBuilder::buildNode( "share/box/box.obj" ) );
 	this->setName( SceneBuilder::nameNode("box") );
 	
-	this->setPosition( position );
-	this->setRotationZ( rotation );
-	// when we set the scale, we'll have to do an updateGeometry as well
-	this->setScale( scale );
-	
-	osg::Vec3 defaultScale = osg::Vec3( 10.0, 10.0, 10.0 );
-	
-	osg::Vec3 dScale = scale - defaultScale;
-	
-	UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &dScale );
-	
-	this->updateGeometry( msg );
+	this->setPosition( osg::Vec3(0.0, 0.0, 0.0) );
+	this->setSize( osg::Vec3( 10.0, 10.0, 10.0 ) );
 	
 	SceneBuilder::markUnselected( this );
-}
-
-box::box(string& data) : bz2object("box", "<position><rotation><size>", data.c_str()) {
-	this->addChild( SceneBuilder::buildNode("share/box/box.obj") );
-	this->setName( SceneBuilder::nameNode("share/box/box.obj") );
-	SceneBuilder::markUnselected( this );
 	
-	if( data.length() <= 1 ) {
-		this->setPosition( osg::Vec3(0.0, 0.0, 0.0) );
-		this->setScale( osg::Vec3(10.0, 10.0, 10.0) );
-		
-	}
-	else {
-		// fake an object scale to update the geometry
-		this->update(data);	
-		
-		
-	}
+	this->update( data );
 }
 
 // nothing to destroy...
@@ -65,11 +38,13 @@ int box::update(string& data) {
 	int result = bz2object::update( data );
 	if( result == 0 )
 		return result;
-		
+	
 	if( this->getSize() != size ) {
 		osg::Vec3 dsize = this->getSize() - size;
+		
 		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &dsize );
 		this->updateGeometry( msg );
+		
 	}
 	
 	return result;
@@ -78,7 +53,7 @@ int box::update(string& data) {
 // setter (with binary data)
 int box::update(string& data, UpdateMessage& message) {
 	
-	this->updateGeometry( message );
+	this->update( data );
 	
 	return 1;
 }
@@ -172,7 +147,7 @@ void box::updateGeometry( UpdateMessage& message ) {
 					osg::Vec3 p1, p2, p3;
 					
 					// working vectors
-					osg::Vec3 v1, v2, n;
+					osg::Vec3 v1, v2, n, projScale;
 					
 					// working dot product
 					double dp;
@@ -203,12 +178,18 @@ void box::updateGeometry( UpdateMessage& message ) {
 						// compute one of the normals by finding the cross product between v1 and v2
 						n = (v1 ^ v2);
 						
-						// compute the dot product between the normal and the scaleFactor
-						dp = n * (*scaleFactor);
+						// project the scaleFactor onto the normal
+						projScale = n * (( n * (*scaleFactor) ) / (n.length2()));
+						
+						// compute the dot product between the normal and the projected scaleVector
+						dp = n * (projScale);
 						
 						// find the angle (in radians)
 						// dp = |n| * |scaleFactor| * cos(angle)
-						angle = acos( dp / ( n.length() * scaleFactor->length() ) );
+						if( projScale.length() > 0.001 )
+							angle = acos( dp / ( n.length() * projScale.length() ) );
+						else
+							angle = osg::PI / 2.0;		// orthogonal vectors
 						
 						// no need to scale if the scaling is happening parallel to the face (i.e. angle is 0 or pi)
 						if( fabs(angle) < 0.001 || fabs( fabs( angle ) - osg::PI ) < 0.001 )
@@ -325,7 +306,7 @@ void box::updateGeometry( UpdateMessage& message ) {
 					osg::Vec3 p1, p2, p3;
 					
 					// working vectors
-					osg::Vec3 v1, v2, n;
+					osg::Vec3 v1, v2, n, projScale;
 					
 					// working dot product
 					double dp;
@@ -356,13 +337,22 @@ void box::updateGeometry( UpdateMessage& message ) {
 						// compute one of the normals by finding the cross product between v1 and v2
 						n = (v1 ^ v2);
 						
-						// compute the dot product between the normal and the scaleFactor
-						dp = n * (*scaleFactor);
+						// project the scaleFactor onto the normal
+						projScale = n * (( n * (*scaleFactor) ) / (n.length2()));
+						
+						if( projScale.length() < 0.001 )
+							continue;
+						
+						// compute the dot product between the normal and the projected scaleVector
+						dp = n * (projScale);
 						
 						// find the angle (in radians)
 						// dp = |n| * |scaleFactor| * cos(angle)
-						angle = acos( dp / ( n.length() * scaleFactor->length() ) );
-						
+						if( projScale.length() > 0.001 )
+							angle = acos( dp / ( n.length() * projScale.length() ) );
+						else
+							angle = osg::PI / 2.0;		// orthogonal vectors
+							
 						// no need to scale if the scaling is happening parallel to the face (i.e. angle is 0 or pi)
 						if( fabs(angle) < 0.001 || fabs( fabs( angle ) - osg::PI ) < 0.001 )
 							continue;
