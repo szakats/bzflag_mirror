@@ -11,11 +11,16 @@ cone::cone() :
 	flatShading = false;
 	smoothbounce = true;
 	
+	// default size is 10x10x10
+	this->setSize( osg::Vec3( 10, 10, 10 ) );
+	
+	// build the geometry
+	this->buildGeometry();
 }
 
 // constructor with data
 cone::cone(string& data) :
-	bz2object("cone", "<position><rotation><size><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>", data.c_str()) {
+	bz2object("cone", "<position><rotation><size><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
 	
 	// define some basic values
 	this->divisions = 16;
@@ -24,7 +29,13 @@ cone::cone(string& data) :
 	flatShading = false;
 	smoothbounce = true;
 	
-	this->update(data);	
+	// default size is 10x10x10
+	this->setSize( osg::Vec3( 10, 10, 10 ) );
+	
+	if( this->update(data) == 0 ) {
+		// if the update failed, just add a default cone
+		this->buildGeometry();
+	}
 }
 
 // getter
@@ -68,7 +79,17 @@ int cone::update(string& data) {
 	
 	// set the data
 	this->setName( names[0] );
+	
+	// see if the divisions changed (if so, then update the geometry)
+	int oldDivisions = this->divisions;
 	this->divisions = atoi( vDivisions[0].c_str() );
+	if( this->divisions != oldDivisions ) {
+		this->removeChild( coneNode.get() );
+		this->removeChild( baseNode.get() );
+		
+		this->buildGeometry();
+	}
+	
 	this->flatShading = (flatShadings.size() == 0 ? false : true);
 	this->smoothbounce = (smoothBounces.size() == 0 ? false : true);
 	
@@ -87,8 +108,62 @@ string cone::toString(void) {
 
 // build the cone geometry
 void cone::buildGeometry() {
-	osg::Vec3Array* points = new osg::Vec3Array();
-   	// build the geometry
-   	// points->push_back( osg::Vec3( 
 	
+	// geometry data for the conical component
+	osg::Vec3Array* points = new osg::Vec3Array();
+	osg::DrawElementsUInt* indices = new osg::DrawElementsUInt( osg::PrimitiveSet::TRIANGLE_FAN, 0 );
+	osg::Vec2Array* texCoords = new osg::Vec2Array();
+	
+	// geometry for the base of the cone
+	osg::DrawElementsUInt* baseIndices = new osg::DrawElementsUInt( osg::PrimitiveSet::TRIANGLE_STRIP, 0 );
+	osg::Vec2Array* baseTexCoords = new osg::Vec2Array();
+	
+   	// add the tip of the cone to the conical geometry
+   	points->push_back( osg::Vec3( 0.0, 0.0, 1.0 ) );	// the tip of the cone
+   	indices->push_back( 0 );	// the index of the tip of the cone
+   	texCoords->push_back( osg::Vec2( 0.5, 0.5 ) );	// texture coordinate of the tip of the cone
+   	baseTexCoords->push_back( osg::Vec2( 0.5, 0.5) );	// just a space-holder here
+   	
+   	// build the base
+   	float radius_x = 1.0;
+   	float radius_y = 1.0;
+   	float angle;
+   	for( int i = 0; i < divisions; i++ ) {
+   		angle = 2.0 * osg::PI * ((float)i / (float)divisions);
+   		
+   		// add the vertex
+   		points->push_back( osg::Vec3( cos(angle) * radius_x, sin(angle) * radius_y, 0 ) );
+   		
+   		// add the index of that vertex to the conical geometry
+   		indices->push_back( i+1 );
+   		
+   		// add the texture coordinate of that vertex to the concial geometry
+   		texCoords->push_back( osg::Vec2( 0.5 + 0.5 * cos(angle), 0.5 + 0.5 * sin(angle) ) );
+   		
+   		// add the texture coordinate of that vertex to the base geometry
+   		baseTexCoords->push_back( osg::Vec2( 0.5 + 0.5 * cos(angle), 0.5 + 0.5 * sin(angle) ) );
+   	}
+   	
+   	// add the final face to connect the last index to the first
+   	indices->push_back( 1 );
+   	
+   	// build the base indices
+   	baseIndices->push_back(1);
+   	baseIndices->push_back(2);
+   	for( int i = 3; i <= (divisions >> 1) + 1; i++ ) {
+   		baseIndices->push_back( divisions - i + 3 );
+   		baseIndices->push_back( i );
+   	}
+   	// if we have an odd # of divisions, add the final face
+   	if( divisions % 2 == 1 ) {
+   		baseIndices->push_back( (divisions>>1) + 2 );
+   	}
+   	
+   	// build the geodes
+   	this->coneNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("cone").c_str(), points, indices, texCoords, "share/boxwall.png" );
+   	this->baseNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("conebase").c_str(), points, baseIndices, baseTexCoords, "share/roof.png" );
+   	
+   	// add the geodes to the Renderable
+   	this->addChild( coneNode.get() );
+   	this->addChild( baseNode.get() );
 }

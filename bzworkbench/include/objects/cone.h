@@ -9,6 +9,8 @@
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
+#include <math.h>
+
 class cone : public bz2object {
 public:
 	// default constructor
@@ -33,8 +35,9 @@ private:
 	bool flatShading, smoothbounce;
 	int divisions;
 	
-	// reference to the node
-	osg::ref_ptr< osg::Node > coneNode;
+	// reference to the nodes that make up the cone
+	osg::ref_ptr< osg::Geode > coneNode;
+	osg::ref_ptr< osg::Geode > baseNode;
 	
 	// helper method to build the geometry
 	void buildGeometry();
