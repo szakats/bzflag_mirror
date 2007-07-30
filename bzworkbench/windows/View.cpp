@@ -162,6 +162,10 @@ int View::handle(int event) {
 // update method (inherited from Observer)
 void View::update( Observable* obs, void* data ) {
 	
+	// refresh the selection
+	this->selection->update( obs, data );
+	
+	// process data
 	if( data != NULL ) {
 		// get the message
 		ObserverMessage* obs_msg = (ObserverMessage*)(data);
@@ -212,9 +216,6 @@ void View::update( Observable* obs, void* data ) {
 				break;
 		}
 	}
-	
-	// refresh the selection
-	this->selection->update( obs, data );
 	
 	// refresh the scene
 	this->redraw();
