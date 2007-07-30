@@ -446,12 +446,12 @@ void Selection::update( Observable* observable, void* data ) {
 	vector< bz2object* > selectedObjects = model->_getSelection();
 	
 	// remove the axes if there are no objects
-	if( selectedObjects.size() <= 0 && this->containsNode( axes.get() ))
-		this->removeChild( axes.get() );
+	if( selectedObjects.size() <= 0 && this->containsNode( selectionNode.get() ))
+		this->removeChild( selectionNode.get() );
 	
 	// add the axes if there are some objects
-	if( selectedObjects.size() > 0 && !this->containsNode( axes.get() ))
-		this->addChild( axes.get() );
+	if( selectedObjects.size() > 0 && !this->containsNode( selectionNode.get() ))
+		this->addChild( selectionNode.get() );
 		
 	// recompute the center
 	this->rebuildAxes( selectedObjects );
