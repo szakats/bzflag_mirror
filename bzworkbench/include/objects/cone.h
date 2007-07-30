@@ -8,6 +8,9 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
+#include <osg/StateSet>
+#include <osg/StateAttribute>
+#include <osg/ShadeModel>
 
 #include <math.h>
 
@@ -41,6 +44,9 @@ private:
 	
 	// helper method to build the geometry
 	void buildGeometry();
+	
+	// helper method to change the node's shading (flat-shaded or smooth-shaded)
+	void updateShadeModel();
 	
 };
 

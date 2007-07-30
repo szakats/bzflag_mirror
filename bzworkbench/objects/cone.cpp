@@ -59,13 +59,21 @@ int cone::update(string& data) {
 		
 	// get the name
 	vector<string> names = BZWParser::getValuesByKey("name", header, coneData);
-	if(!hasOnlyOne(names, "name"))
+	if(names.size() > 1) {
+		printf("cone::update(): error! defined \"name\" %d times\n", names.size() );
 		return 0;
+	}
+	if( names.size() == 0 )
+		names.push_back( string("default_cone") );	// default name is "default_cone"
 		
 	// get the divisions
 	vector<string> vDivisions = BZWParser::getValuesByKey("divisions", header, coneData);
-	if(!hasOnlyOne(vDivisions, "divisions"))
+	if( vDivisions.size() > 1 ) {
+		printf("cone::update(): error! defined \"divisions\" %d times\n", vDivisions.size() );
 		return 0;
+	}
+	if( vDivisions.size() == 0 )
+		vDivisions.push_back( string("16") );		// default # of divisions is 16
 		
 	// get flatshading
 	vector<string> flatShadings = BZWParser::getValuesByKey("flatshading", header, coneData);
@@ -91,6 +99,8 @@ int cone::update(string& data) {
 	}
 	
 	this->flatShading = (flatShadings.size() == 0 ? false : true);
+	this->updateShadeModel();		// update the shade model
+	
 	this->smoothbounce = (smoothBounces.size() == 0 ? false : true);
 	
 	return 1;
@@ -166,4 +176,26 @@ void cone::buildGeometry() {
    	// add the geodes to the Renderable
    	this->addChild( coneNode.get() );
    	this->addChild( baseNode.get() );
+}
+
+// set the shade model based on the value of flatShading
+void cone::updateShadeModel() {
+	// get state set
+	osg::StateSet* states = this->getOrCreateStateSet();
+	
+	// get the shade model
+	osg::ShadeModel* shadeModel = dynamic_cast< osg::ShadeModel* >( states->getAttribute( osg::StateAttribute::SHADEMODEL ) );
+	if( shadeModel == NULL ) {
+		shadeModel = new osg::ShadeModel();		// if one doesn't exist, then make one
+	}
+		
+	if( flatShading ) {
+		shadeModel->setMode( osg::ShadeModel::FLAT );
+	}
+	else {
+		shadeModel->setMode( osg::ShadeModel::SMOOTH );
+	}
+	
+	// set the shade model
+	states->setAttribute( shadeModel );
 }
