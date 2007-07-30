@@ -3,6 +3,12 @@
 
 #include "bz2object.h"
 
+#include "../model/SceneBuilder.h"
+#include <osg/Node>
+#include <osg/Geode>
+#include <osg/Geometry>
+#include <osg/PrimitiveSet>
+
 class cone : public bz2object {
 public:
 	// default constructor
@@ -23,12 +29,15 @@ public:
 	// toString
 	string toString(void);
 	
-	// render
-	int render(void);
-	
 private:
 	bool flatShading, smoothbounce;
 	int divisions;
+	
+	// reference to the node
+	osg::ref_ptr< osg::Node > coneNode;
+	
+	// helper method to build the geometry
+	void buildGeometry();
 	
 };
 

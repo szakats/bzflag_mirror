@@ -44,7 +44,7 @@ Ground::Ground( float size ) : Renderable("ground") {
    // make the grid
    this->grid = this->buildGrid( this->size, 10.0f );
    
-   
+   // make the grid a gray-ish color
    SceneBuilder::assignMaterial( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ),
    								 osg::Vec4( 0.2, 0.2, 0.2, 0.2 ),
    								 osg::Vec4( 0.0, 0.0, 0.0, 0.0 ),
