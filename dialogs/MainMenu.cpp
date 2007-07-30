@@ -173,7 +173,24 @@ void MainMenu::addTorusCallback_real(Fl_Widget* w) {
 
 // add a cone
 void MainMenu::addConeCallback_real(Fl_Widget* w) {
-	printf("added a cone\n");
+	// make a new box using the Model's object registry
+	DataEntry* newCone = this->parent->getModel()->_buildObject( "cone" );
+	
+	// make it into a bz2object
+	bz2object* newObj = dynamic_cast< bz2object* >( newCone );
+	
+	if(!newObj)
+		return;
+	
+	// add the object to the model
+	this->parent->getModel()->_unselectAll();
+	this->parent->getModel()->_addObject( newObj );
+	this->parent->getModel()->_setSelected( newObj );
+	
+	// open up a MasterConfigurationDialog and configure it
+	this->parent->configure( newObj );
+	
+	
 	this->value(0);
 }
 
