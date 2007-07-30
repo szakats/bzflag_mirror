@@ -134,9 +134,17 @@ bool Model::_build(vector<string>& bzworld) {
 	this->materials.clear();
 	this->phys.clear();
 	this->dynamicColors.clear();
-	this->objects.clear();
 	this->links.clear();
 	this->textureMatrices.clear();
+	
+	if( this->objects.size() > 0 ) {
+		for( vector<bz2object*>::iterator i = this->objects.begin(); i != this->objects.end(); i++) {
+			// clear out the object from the view
+			ObserverMessage obs( ObserverMessage::REMOVE_OBJECT, *i );
+			notifyObservers( &obs );
+		}
+	}
+	this->objects.clear();
 	
 	// load the data in
 	bool foundWorld = false;

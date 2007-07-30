@@ -85,7 +85,10 @@ string cone::toString(void) {
 				  "end\n";
 }
 
-// render
-int cone::render(void) {
-	return 0;	
+// build the cone geometry
+void cone::buildGeometry() {
+	osg::Vec3Array* points = new osg::Vec3Array();
+   	// build the geometry
+   	// points->push_back( osg::Vec3( 
+	
 }
