@@ -464,17 +464,17 @@ Selection::SelectionState Selection::setState( SelectionState newState ) {
 	bool addBack = this->removeChild( this->selectionNode.get() );
 	
 	switch( newState ) {
-		case TRANSLATE:
-			this->selectionNode = axes;
-			break;
-		case ROTATE:
+		case BZ_ROTATE_KEY:
+			rotator->setPosition( this->selectionNode->getPosition() );
 			this->selectionNode = rotator;
 			break;
-		case SCALE:
+		case BZ_SCALE_KEY:
+			scaler->setPosition( this->selectionNode->getPosition() );
 			this->selectionNode = scaler;
 			break;
-			
+		
 		default:
+			axes->setPosition( this->selectionNode->getPosition() );
 			this->selectionNode = axes;
 			break;
 	}
@@ -496,15 +496,18 @@ Selection::SelectionState Selection::setStateByKey( unsigned char key ) {
 	switch( key ) {
 		
 		case BZ_ROTATE_KEY:
+			rotator->setPosition( this->selectionNode->getPosition() );
 			this->selectionNode = rotator;
 			newState = ROTATE;
 			break;
 		case BZ_SCALE_KEY:
+			scaler->setPosition( this->selectionNode->getPosition() );
 			this->selectionNode = scaler;
 			newState = SCALE;
 			break;
 			
 		default:
+			axes->setPosition( this->selectionNode->getPosition() );
 			this->selectionNode = axes;
 			newState = TRANSLATE;
 			break;

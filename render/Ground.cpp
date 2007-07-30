@@ -38,11 +38,12 @@ Ground::Ground( float size ) : Renderable("ground") {
    // add it
    this->addChild( groundGeode );
    
+   // translate the ground down a bit
+   this->setPosition( osg::Vec3( 0.0, 0.0, -0.1) );
+   
    // make the grid
    this->grid = this->buildGrid( this->size, 10.0f );
    
-   // translate the grid upward a bit
-   this->grid->setPosition( osg::Vec3( 0, 0, 0.1 ) );
    
    SceneBuilder::assignMaterial( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ),
    								 osg::Vec4( 0.2, 0.2, 0.2, 0.2 ),
@@ -51,6 +52,10 @@ Ground::Ground( float size ) : Renderable("ground") {
    								 0.0f,
    								 1.0f,
    								 this->grid.get() );
+   								 
+   // disable Z-buffering (since the BZFlag client doesn't clip against the ground)
+   osg::StateSet* states = this->getOrCreateStateSet();
+   states->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF );
    
    // add the grid
    this->addChild( grid.get() );
