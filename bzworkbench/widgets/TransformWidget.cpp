@@ -130,9 +130,9 @@ string TransformWidget::toString() {
 			dz /= divisor;	
 		}
 		
-		fields[0]->value( ftoa(dx).c_str() );
-		fields[1]->value( ftoa(dy).c_str() );
-		fields[2]->value( ftoa(dz).c_str() );
+		fields[1]->value( ftoa(dx).c_str() );
+		fields[2]->value( ftoa(dy).c_str() );
+		fields[3]->value( ftoa(dz).c_str() );
 	}
 	
 	// commit the values to the return string

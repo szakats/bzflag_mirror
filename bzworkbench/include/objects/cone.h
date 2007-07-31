@@ -41,6 +41,7 @@ private:
 	// reference to the nodes that make up the cone
 	osg::ref_ptr< osg::Geode > coneNode;
 	osg::ref_ptr< osg::Geode > baseNode;
+	osg::ref_ptr< osg::Group > theCone;
 	
 	// helper method to build the geometry
 	void buildGeometry();
