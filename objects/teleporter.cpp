@@ -32,11 +32,15 @@ teleporter::teleporter() :
 	this->rearPortal->setPosition( osg::Vec3(-border, 0, 0) );
 	
 	// add the nodes to the teleporter
-	this->addChild( leftLeg.get() );
-	this->addChild( rightLeg.get() );
-	this->addChild( topBeam.get() );
-	this->addChild( frontPortal.get() );
-	this->addChild( rearPortal.get() );
+	theTeleporter = new osg::Group();
+	theTeleporter->addChild( leftLeg.get() );
+	theTeleporter->addChild( rightLeg.get() );
+	theTeleporter->addChild( topBeam.get() );
+	theTeleporter->addChild( frontPortal.get() );
+	theTeleporter->addChild( rearPortal.get() );
+	
+	this->thisNode = theTeleporter.get();
+	this->addChild( theTeleporter.get() );
 	
 	// blow up the teleporter
 	osg::Vec3 scale = osg::Vec3( border, 10, 20 );
@@ -81,11 +85,16 @@ teleporter::teleporter(string& data) :	// don't pass the data to the parent clas
 	this->rearPortal->setPosition( osg::Vec3(-border, 0, 0) );
 	
 	// add the nodes to the teleporter
-	this->addChild( leftLeg.get() );
-	this->addChild( rightLeg.get() );
-	this->addChild( topBeam.get() );
-	this->addChild( frontPortal.get() );
-	this->addChild( rearPortal.get() );
+	// add the nodes to the teleporter
+	theTeleporter = new osg::Group();
+	theTeleporter->addChild( leftLeg.get() );
+	theTeleporter->addChild( rightLeg.get() );
+	theTeleporter->addChild( topBeam.get() );
+	theTeleporter->addChild( frontPortal.get() );
+	theTeleporter->addChild( rearPortal.get() );
+	
+	this->thisNode = theTeleporter.get();
+	this->addChild( theTeleporter.get() );
 	
 	this->setSize( realSize );
 	this->update(data);

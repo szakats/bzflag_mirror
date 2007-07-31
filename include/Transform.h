@@ -8,6 +8,7 @@
 #include "model/BZWParser.h"
 
 #include <osg/MatrixTransform>
+#include <osg/PositionAttitudeTransform>
 
 using namespace std;
 
@@ -104,14 +105,10 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 	
 		// make this into a shift matrix
 		void makeShift() {
-			double matvals[] = {
-				1.0,		0.0,		0.0,		data[0],
-				0.0,		1.0,		0.0,		data[1],
-				0.0,		0.0,		1.0,		data[2],
-				0.0,		0.0,		0.0,		1.0
-			};
 			
-			osg::Matrixd theMatrix = osg::Matrixd( matvals );
+			osg::Matrixd theMatrix;
+			theMatrix.makeTranslate( osg::Vec3( data[0], data[1], data[2] ) );
+			
 			this->setMatrix( theMatrix );
 		}
 		
@@ -142,10 +139,10 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		// make this into a shear matrix
 		void makeShear() {
 			double matvals[] = {
-				data[0],	0.0,	0.0,	0.0,
-				data[1],	1.0,	0.0,	0.0,
-				data[2],	0.0,	1.0,	0.0,
-				0.0,		0.0,	0.0,	1.0
+				1.0,		0.0,		0.0, 	0.0,
+				0.0,		1.0,		0.0, 	0.0,
+				0.0,		data[0],	1.0,	0.0,
+				0.0,		data[1],	0.0,	1.0
 			};
 			
 			osg::Matrixd theMatrix = osg::Matrixd( matvals );

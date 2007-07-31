@@ -57,6 +57,9 @@ private:
 	// parts of the teleporter node (necessary because teleporters don't scale normally, and we'll need to intervene :) )
 	osg::ref_ptr< Renderable > leftLeg, rightLeg, topBeam, frontPortal, rearPortal;
 	
+	// the teleporter group
+	osg::ref_ptr< osg::Group > theTeleporter;
+	
 	// helper method: update the teleporter nodes
 	void updateGeometry( UpdateMessage& message );
 	

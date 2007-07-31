@@ -5,7 +5,9 @@ bz2object::bz2object(const char* name, const char* keys):
 	Renderable(),
 	DataEntry(name, keys) {
 		
-	this->transformations = vector<BZTransform>();
+	this->thisNode = NULL;
+		
+	this->transformations = vector< osg::ref_ptr<BZTransform> >();
 	this->materials = vector<string>();
 	this->setSelected( false );
 	this->setName( "(unknown bz2object)" );
@@ -17,13 +19,42 @@ bz2object::bz2object(const char* name, const char* keys, const char* data):
 	Renderable(),
 	DataEntry(name, keys, data)
 	{
-		
-	this->transformations = vector<BZTransform>();
+	
+	this->thisNode = NULL;
+	
+	this->transformations = vector< osg::ref_ptr<BZTransform> >();
 	this->materials = vector<string>();
 	this->setSelected( false );
 	string d = string(data);
 	this->update(d);
 	
+}
+
+// constructor with node data
+bz2object::bz2object(const char* name, const char* keys, osg::Node* node ):
+	Renderable( node ),
+	DataEntry(name, keys) {
+	
+	this->thisNode = node;
+	
+	this->transformations = vector< osg::ref_ptr<BZTransform> >();
+	this->materials = vector<string>();
+	this->setSelected( false );
+	this->setName( "(unknown bz2object)" );
+}
+
+// constructor with node and string data
+bz2object::bz2object( const char* name, const char* keys, const char* data, osg::Node* node ):
+	Renderable( node ),
+	DataEntry( name, keys, data ) {
+	
+	this->thisNode = node;
+	
+	this->transformations = vector< osg::ref_ptr<BZTransform> >();
+	this->materials = vector<string>();
+	this->setSelected( false );
+	string d = string(data);
+	this->update(d);
 }
 	
 // getter
@@ -106,7 +137,22 @@ int bz2object::update(string& data) {
 		}
 		
 	}
-	// read in the transformations
+	// remove the transformations
+	if( transformations.size() > 0 ) {
+		this->removeChild( transformations[0].get() );
+		transformations[ transformations.size() - 1 ]->removeChild( thisNode.get() );
+	}
+	else
+		this->removeChild( thisNode.get() );
+		
+	// erase transformations
+	if( transformations.size() > 0 ) {
+		vector< osg::ref_ptr< BZTransform > >::iterator itr = transformations.begin();
+		for( unsigned int i = 0; i < transformations.size() && itr != transformations.end(); i++, itr++ ) {
+			transformations.erase( itr );
+			itr = transformations.begin();
+		}
+	}
 	transformations.clear();
 	
 	// find out which transformations are valid
@@ -124,9 +170,20 @@ int bz2object::update(string& data) {
 	if(transformKeys.size() > 0) {
 		vector<string> transforms = BZWParser::getLinesByKeys(transformKeys, header, data.c_str());
 		for(vector<string>::iterator i = transforms.begin(); i != transforms.end(); i++) {
-			transformations.push_back( BZTransform(*i) );	
+			transformations.push_back( new BZTransform(*i) );	
 		}
 	}
+	
+	// add the transformations
+	if( transformations.size() > 0 ) {
+		this->addChild( transformations[0].get() );
+		for( unsigned int i = 1; i < transformations.size(); i++ ) {
+			transformations[i-1]->addChild( transformations[i].get() );
+		}
+		transformations[ transformations.size() - 1 ]->addChild( thisNode.get() );
+	}
+	else
+		this->addChild( thisNode.get() );
 	
 	// get the physics driver
 	if(this->isKey("phydrv")) {
@@ -185,9 +242,9 @@ string bz2object::BZWLines(void) {
 		ret += "  rotation " + string( ftoa(this->getRotation().z()) ) + "\n";
 	
 	// add all transformations to the string if they are supported
-	for(vector<BZTransform>::iterator i = transformations.begin(); i != transformations.end(); i++) {
-		if(this->isKey(i->getHeader().c_str()))
-			ret += "  " + i->toString();
+	for(vector< osg::ref_ptr<BZTransform> >::iterator i = transformations.begin(); i != transformations.end(); i++) {
+		if(this->isKey((*i)->getHeader().c_str()))
+			ret += "  " + (*i)->toString();
 	}
 	
 	// add phydrv key/value to the string if supported and if defined

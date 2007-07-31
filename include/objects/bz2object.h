@@ -27,6 +27,12 @@ class bz2object : public Renderable, public DataEntry {
 		// constructor with data
 		bz2object(const char* name, const char* keys, const char* data);
 		
+		// constructor with node
+		bz2object( const char* name, const char* keys, osg::Node* node );
+		
+		// constructor with node and data
+		bz2object( const char* name, const char* keys, const char* data, osg::Node* node );
+		
 		// destructor
 		virtual ~bz2object() { }
 		
@@ -45,7 +51,7 @@ class bz2object : public Renderable, public DataEntry {
 		
 		// data getters (makes MasterConfigurationDialog code easier)
 		string getPhyDrv() { return this->physicsDriver; }
-		vector<BZTransform>& getTransformations() { return this->transformations; }
+		vector< osg::ref_ptr<BZTransform> >& getTransformations() { return this->transformations; }
 		vector<string>& getMaterials() { return this->materials; }
 		bool isSelected() { return this->selected; }
 		
@@ -54,13 +60,16 @@ class bz2object : public Renderable, public DataEntry {
 		
 		// data setters (makes MasterConfigurationDialog code easier)
 		void setPhyDrv( const char* phydrv ) { this->physicsDriver = phydrv; }
-		void setTransforms( vector<BZTransform>& transformations ) { this->transformations = transformations; }
+		void setTransforms( vector< osg::ref_ptr<BZTransform> >& transformations ) { this->transformations = transformations; }
 		void setMaterials( vector<string>& materials ) { this->materials = materials; }
 		void setSelected( bool value ) { this->selected = value; }
 		
 		// use this instead of setScale();
 		virtual void setSize( osg::Vec3 newSize ) { this->setScale( newSize ); }
 		
+		// set/set the thisNode
+		osg::Node* getThisNode() { return this->thisNode.get(); }
+		void setThisNode( osg::Node* node ) { this->thisNode = node; }
 		
 		// make this public
 		bz2object operator =( const bz2object& obj ) { 
@@ -72,10 +81,12 @@ class bz2object : public Renderable, public DataEntry {
 	protected:
 		string physicsDriver;
 		vector<string> materials;
-		vector<BZTransform> transformations;
+		vector< osg::ref_ptr< BZTransform > > transformations;
 		// set true if selected in the 3D scene
 		bool selected;
 		
+		// reference to node data inside the Renderable (for changing the transformation stack)
+		osg::ref_ptr< osg::Node > thisNode;
 };
 
 #endif /*BZ2OBJECT_H_*/

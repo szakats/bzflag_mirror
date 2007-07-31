@@ -16,6 +16,7 @@ cone::cone() :
 	
 	// build the geometry
 	this->buildGeometry();
+	
 }
 
 // constructor with data
@@ -174,8 +175,12 @@ void cone::buildGeometry() {
    	this->baseNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("conebase").c_str(), points, baseIndices, baseTexCoords, "share/roof.png" );
    	
    	// add the geodes to the Renderable
-   	this->addChild( coneNode.get() );
-   	this->addChild( baseNode.get() );
+   	this->theCone = new osg::Group();
+   	theCone->addChild( coneNode.get() );
+   	theCone->addChild( baseNode.get() );
+    	
+   	thisNode = theCone.get();
+   	this->addChild( thisNode.get() );
 }
 
 // set the shade model based on the value of flatShading

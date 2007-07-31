@@ -1,8 +1,7 @@
 #include "../include/objects/box.h"
 
 // constructors
-box::box() : bz2object("box", "<name><position><rotation><size>") {
-	this->addChild( SceneBuilder::buildNode( "share/box/box.obj" ) );
+box::box() : bz2object("box", "<name><position><rotation><size>", SceneBuilder::buildNode( "share/box/box.obj" )) {
 	this->setName( SceneBuilder::nameNode("box") );
 	
 	this->setPosition( osg::Vec3(0.0, 0.0, 0.0) );
@@ -11,8 +10,7 @@ box::box() : bz2object("box", "<name><position><rotation><size>") {
 	
 }
 
-box::box(string& data) : bz2object("box", "<name><position><rotation><size>") {
-	this->addChild( SceneBuilder::buildNode( "share/box/box.obj" ) );
+box::box(string& data) : bz2object("box", "<name><position><rotation><size>", SceneBuilder::buildNode( "share/box/box.obj" )) {
 	this->setName( SceneBuilder::nameNode("box") );
 	
 	this->setPosition( osg::Vec3(0.0, 0.0, 0.0) );

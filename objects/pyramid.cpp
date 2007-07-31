@@ -1,7 +1,6 @@
 #include "../include/objects/pyramid.h"
 
-pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>") {
-	this->addChild( SceneBuilder::buildNode("share/pyramid/pyramid.obj") );
+pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("share/pyramid/pyramid.obj")) {
 	
 	this->setName( SceneBuilder::nameNode("share/pyramid/pyramid.obj") );
 	
@@ -11,8 +10,7 @@ pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>") {
 }
 
 // constructor with binary data
-pyramid::pyramid( osg::Vec3 position, float rotation, osg::Vec3 scale ) : bz2object("pyramid", "<position><rotation><size>") {
-	this->addChild( SceneBuilder::buildNode("share/pyramid/pyramid.obj") );
+pyramid::pyramid( osg::Vec3 position, float rotation, osg::Vec3 scale ) : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("share/pyramid/pyramid.obj")) {
 	
 	this->setName( SceneBuilder::nameNode("share/pyramid/pyramid.obj") );
 	
