@@ -138,15 +138,33 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		
 		// make this into a shear matrix
 		void makeShear() {
-			double matvals[] = {
-				1.0,		0.0,		0.0, 	0.0,
-				0.0,		1.0,		0.0, 	0.0,
-				0.0,		data[0],	1.0,	0.0,
-				0.0,		data[1],	0.0,	1.0
+			double matvals_xy[] = {
+				1.0,		0.0,		0.0,		0.0,
+				0.0,		1.0,		0.0,		0.0,
+				data[0],	data[1],	1.0,		0.0,
+				0.0,		0.0,		0.0,		1.0
 			};
 			
-			osg::Matrixd theMatrix = osg::Matrixd( matvals );
-			this->setMatrix( theMatrix );
+			double matvals_yz[] = {
+				1.0,		0.0,		0.0,		0.0,
+				data[0],	1.0,		data[2],	0.0,
+				0.0,		0.0,		1.0,		0.0,
+				0.0,		0.0,		0.0,		1.0
+			};
+			
+			double matvals_xz[] = {
+				1.0,		data[1],	data[2],	0.0,
+				0.0,		1.0,		0.0,		0.0,
+				0.0,		0.0,		1.0,		0.0,
+				0.0,		0.0,		0.0,		1.0
+			};
+			
+			
+			osg::Matrixd matrix_xy = osg::Matrixd( matvals_xy );
+			osg::Matrixd matrix_yz = osg::Matrixd( matvals_yz );
+			osg::Matrixd matrix_xz = osg::Matrixd( matvals_xz );
+			
+			this->setMatrix( matrix_yz * matrix_xz * matrix_xy );
 		}
 		
 		

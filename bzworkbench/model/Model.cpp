@@ -774,7 +774,6 @@ bool Model::_deleteSelection() {
 	vector<bz2object*>::iterator itr = selectedObjects.begin();
 	for( unsigned int i = 0; i < selectedObjects.size(); i++, itr++) {
 		bz2object* obj = selectedObjects[i];
-		selectedObjects.erase( itr );
 		this->_removeObject( obj );
 	}
 	
