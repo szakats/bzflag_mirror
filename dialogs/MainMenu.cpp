@@ -407,8 +407,18 @@ void MainMenu::saveSelectionCallback_real(Fl_Widget* w) {
 
 // handle configure world
 void MainMenu::configureWorldCallback_real(Fl_Widget* w) {
+	// configure the new world
+	WorldOptionsDialog* wod = new WorldOptionsDialog( this->parent->getModel()->_getWorldData(),
+													  this->parent->getModel()->_getOptionsData(),
+													  this->parent->getModel()->_getWaterLevelData());
+	wod->show();
 	
-	printf("configured world\n");
+	// wait for configuration to end
+	while( wod->shown() ) { Fl::wait(); }
+	
+	// reset the world
+	ObserverMessage obs(ObserverMessage::UPDATE_WORLD, this->parent->getModel()->_getWorldData() );
+	this->parent->getModel()->notifyObservers( &obs );
 	this->value(0);
 }
 

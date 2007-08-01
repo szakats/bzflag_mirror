@@ -196,9 +196,9 @@ void View::update( Observable* obs, void* data ) {
 				// in this case, the data will contain a pointer to the modified world object
 				world* bzworld = (world*)(obs_msg->data);
 				
-				float scaleFactor = bzworld->getSize() / Ground::DEFAULT_SIZE;
-				
-				this->ground->setScale( osg::Vec3(scaleFactor, scaleFactor, 0.0) );
+				this->root->removeChild( this->ground );
+				this->ground = new Ground( bzworld->getSize(), this->model->getWaterLevelData()->getHeight() );
+				this->root->insertChild(0, this->ground);
 				
 				break;
 			}

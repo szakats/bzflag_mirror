@@ -2,13 +2,13 @@
 
 waterLevel::waterLevel() : DataEntry("waterLevel", "<name><height><matref>") {
 	this->name = string("");
-	this->materials = vector<string>();
+	this->material = string("");
 	height = -1.0f;
 }
 
 waterLevel::waterLevel(string& data) : DataEntry("waterLevel", "<name><height><matref>", data.c_str()) {
 	this->name = string("");
-	this->materials = vector<string>();
+	this->material = string("");
 	height = -1.0f;
 	
 	this->update(data);
@@ -58,7 +58,7 @@ int waterLevel::update(string& data) {
 	if(!DataEntry::update(data))
 		return 0;
 	this->name = names[0];
-	this->materials = matNames;
+	this->material = matNames[0];
 	this->height = atof( heights[0].c_str() );
 	
 	return 1;
@@ -68,13 +68,8 @@ int waterLevel::update(string& data) {
 // toString method
 string waterLevel::toString(void) {
 	string waterLevelStr = string(ftoa(height));
-	string materialString = string("");
-	if(materials.size() >= 1)
-		for(vector<string>::iterator i = materials.begin(); i != materials.end(); i++) {
-			materialString += "  matref " + (*i) + "\n";
-		}
-	else
-		materialString = string("# matref\n");
+	string materialString = material;
+
 		
 	return string(string("waterLevel\n") +
 						 "  name " + name + "\n" +
@@ -84,7 +79,5 @@ string waterLevel::toString(void) {
 						 "end\n");
 }
 
-// render method
-int waterLevel::render(void) { return 0; }
 
 waterLevel::~waterLevel() { }

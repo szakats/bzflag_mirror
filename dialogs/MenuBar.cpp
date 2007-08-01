@@ -30,6 +30,19 @@ MenuBar::MenuBar( MainWindow* mw ) : Fl_Menu_Bar(0, 0, mw->w(), 30) {
 
 void MenuBar::new_world_real( Fl_Widget* w ) {
 	this->parent->getModel()->_newWorld();
+	
+	// configure the new world
+	WorldOptionsDialog* wod = new WorldOptionsDialog( this->parent->getModel()->_getWorldData(),
+													  this->parent->getModel()->_getOptionsData(),
+													  this->parent->getModel()->_getWaterLevelData());
+	wod->show();
+	
+	// wait for configuration to end
+	while( wod->shown() ) { Fl::wait(); }
+	
+	// reset the world
+	ObserverMessage obs(ObserverMessage::UPDATE_WORLD, this->parent->getModel()->_getWorldData() );
+	this->parent->getModel()->notifyObservers( &obs );
 }
 
 void MenuBar::open_world_real( Fl_Widget* w ) {

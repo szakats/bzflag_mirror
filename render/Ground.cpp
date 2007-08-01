@@ -4,7 +4,7 @@
 const float Ground::DEFAULT_SIZE = 400.0f;
 
 // make the ground geode
-Ground::Ground( float size ) : Renderable("ground") {
+Ground::Ground( float size, float waterLevel ) : Renderable("ground") {
 	 
 	this->size = size;
 	
@@ -54,11 +54,56 @@ Ground::Ground( float size ) : Renderable("ground") {
    								 this->grid.get() );
    								 
    // disable Z-buffering (since the BZFlag client doesn't clip against the ground)
-   osg::StateSet* states = this->getOrCreateStateSet();
-   states->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF );
+	osg::StateSet* states = groundGeode->getOrCreateStateSet();
+    states->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF );
+   
+   // see if we need to build a water level
+   if( waterLevel >= 0.0 ) {
+   		// ground points
+	   osg::Vec3Array* waterPoints = new osg::Vec3Array();
+	   waterPoints->push_back( osg::Vec3( -size, -size, waterLevel ) );
+	   waterPoints->push_back( osg::Vec3( size, -size, waterLevel ) );
+	   waterPoints->push_back( osg::Vec3( size, size, waterLevel ) );
+	   waterPoints->push_back( osg::Vec3( -size, size, waterLevel ) );
+	   
+	   // ground indexes
+	   osg::DrawElementsUInt* waterIndexes = new osg::DrawElementsUInt( osg::PrimitiveSet::QUADS, 0 );
+	   waterIndexes->push_back( 0 );
+	   waterIndexes->push_back( 3 );
+	   waterIndexes->push_back( 2 );
+	   waterIndexes->push_back( 1 );
+	   
+	   // texture coordinates
+	   osg::Vec2Array* waterTexCoords = new osg::Vec2Array();
+	   waterTexCoords->push_back( osg::Vec2(0.0, 0.0) );
+	   waterTexCoords->push_back( osg::Vec2(size / 5.0, 0.0) );
+	   waterTexCoords->push_back( osg::Vec2(size / 5.0, size / 5.0) );
+	   waterTexCoords->push_back( osg::Vec2(0.0, size / 5.0) );
+	   
+	   // make the member ground geode
+	   osg::Geode* waterGeode = SceneBuilder::buildGeode( "water", waterPoints, waterIndexes, waterTexCoords, "share/world/water.png" );
+	   
+	   // enable GL_BLEND for translucency
+	   osg::StateSet* stateSet = waterGeode->getOrCreateStateSet();
+	   stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+	   
+	   
+	   // make the water translucent
+	   SceneBuilder::assignMaterial(   osg::Vec4( 1.0, 1.0, 1.0, 0.2 ),
+									   osg::Vec4( 1.0, 1.0, 1.0, 0.2 ),
+									   osg::Vec4( 0.0, 0.0, 0.0, 0.2 ),
+									   osg::Vec4( 1.0, 1.0, 1.0, 0.2 ),
+									   0.0,
+									   1.0,
+									   waterGeode );
+	   // add it
+	   this->addChild( waterGeode );
+	   
+   }
    
    // add the grid
    this->addChild( grid.get() );
+   
 }
 
 osg::ref_ptr< Renderable > Ground::buildGrid( float size, float unit ) {

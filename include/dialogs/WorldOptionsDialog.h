@@ -6,8 +6,8 @@
 #include <FL/Fl_Check_Button.H>
 
 #include "Fl_Dialog.h"
+#include "../defines.h"
 #include "../widgets/QuickLabel.h"
-#include "../model/Model.h"
 #include "../objects/world.h"
 #include "../objects/options.h"
 #include "../objects/waterLevel.h"
@@ -28,7 +28,7 @@ public:
 	static const int HEIGHT = 205;
 	
 	// constructor
-	WorldOptionsDialog();
+	WorldOptionsDialog(world*, options*, waterLevel*);
 	
 	// destructor
 	virtual ~WorldOptionsDialog();
