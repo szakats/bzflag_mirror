@@ -14,34 +14,38 @@
 #include <iostream>
 
 
-FloorZone::FloorZone(Coord2D a, Coord2D b, int astep, const std::string& amatref, bool arotated) : Zone(a,b,astep)
+FloorZone::FloorZone(Coord2D a, Coord2D b, int astep, int matref, bool rotated) : Zone(a,b,astep)
 {
-  rotated = arotated;
-  matref = amatref;
+  mesh.matref = matref;
+
+  mesh.passable = true;
+  mesh.noradar = true;
+  if (rotated) {
+    mesh.createNewFace(
+      Vertex(A.x,A.y,0.001),
+      Vertex(B.x,A.y,0.001),
+      Vertex(B.x,B.y,0.001),
+      Vertex(A.x,B.y,0.001),
+      TexCoord(0,0),
+      TexCoord(0,int((B.x-A.x)/step)),
+      TexCoord(int((B.y-A.y)/step),int((B.x-A.x)/step)),
+      TexCoord(int((B.y-A.y)/step),0));
+  } else {
+    mesh.createNewFace(
+      Vertex(A.x,A.y,0.001),
+      Vertex(B.x,A.y,0.001),
+      Vertex(B.x,B.y,0.001),
+      Vertex(A.x,B.y,0.001),
+      TexCoord(0,0),
+      TexCoord(int((B.x-A.x)/step),0),
+      TexCoord(int((B.x-A.x)/step),int((B.y-A.y)/step)),
+      TexCoord(0,int((B.y-A.y)/step)));
+  }
 }
 
 void FloorZone::output(Output& out) 
 {
-  out.line("mesh");
-  out.line("  noradar");
-  out.matref(matref);
-  out.vertex(A.x,A.y,0.001);
-  out.vertex(B.x,A.y,0.001);
-  out.vertex(B.x,B.y,0.001);
-  out.vertex(A.x,B.y,0.001);
-  out.texcoord(0,0);
-  if (rotated) {
-    out.texcoord(0,int((B.x-A.x)/step));
-    out.texcoord(int((B.y-A.y)/step),int((B.x-A.x)/step));
-    out.texcoord(int((B.y-A.y)/step),0);
-  } else {
-    out.texcoord(int((B.x-A.x)/step),0);
-    out.texcoord(int((B.x-A.x)/step),int((B.y-A.y)/step));
-    out.texcoord(0,int((B.y-A.y)/step));
-  }
-  out.line("  passable");
-  out.face(0,1,2,3,0,1,2,3);
-  out.line("end\n");
+  mesh.output(out);
 }
 
 // Local Variables: ***
