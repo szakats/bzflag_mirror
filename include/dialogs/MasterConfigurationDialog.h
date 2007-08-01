@@ -41,8 +41,15 @@ public:
 	// static initializer
 	static MasterConfigurationDialog* init( DataEntry* data ) { return new MasterConfigurationDialog( data ); }
 	
-	// destructor
-	~MasterConfigurationDialog() { }
+	// destructor--destroy the "More..." dialog if it exists
+	~MasterConfigurationDialog() { if( moreDialog ) Fl::delete_widget( moreDialog ); }
+	
+	// set the configuration dialog to be opened when "More..." is clicked
+	void setAdditionalConfiguration( ConfigurationDialog* conf ) { 
+		this->moreDialog = conf;
+		if( conf && moreButton )	// enable the "More..." button
+			moreButton->activate();
+	}
 	
 	// static callbacks
 	// These need to be static so the this variable, when passed to the callback, is initialized already.
@@ -142,6 +149,9 @@ private:
 	void moreCallback_real(Fl_Widget* w);
 	void advancedCallback_real(Fl_Widget* w);
 	void editTextCallback_real(Fl_Widget* w);
+	
+	// the configuration dialog to be opened upon clicking "More..."
+	ConfigurationDialog* moreDialog;
 };
 
 #endif /*MASTERCONFIGURATIONDIALOG_H_*/

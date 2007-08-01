@@ -38,10 +38,15 @@ private:
 	bool flatShading, smoothbounce;
 	int divisions;
 	
+	// sweep angle
+	float sweepAngle;
+	
 	// reference to the nodes that make up the cone
 	osg::ref_ptr< osg::Geode > coneNode;
 	osg::ref_ptr< osg::Geode > baseNode;
-	osg::ref_ptr< osg::Group > theCone;
+	osg::ref_ptr< osg::Geode > crossSectionNode;	// this is only used when sweepAngle < 360
+	
+	osg::ref_ptr< osg::Group > theCone;	// the group containing the aforementioned geodes
 	
 	// helper method to build the geometry
 	void buildGeometry();
