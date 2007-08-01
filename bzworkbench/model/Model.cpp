@@ -166,7 +166,7 @@ bool Model::_build(vector<string>& bzworld) {
 				continue;
 			}
 			else {
-				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
+				printf("Model::build(world): Skipping undefined object \"%s\"\n", header.c_str());
 				unusedData.push_back(*i);
 			}
 		}
@@ -178,7 +178,7 @@ bool Model::_build(vector<string>& bzworld) {
 				continue;
 			}
 			else {
-				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
+				printf("Model::build(waterLevel): Skipping undefined object \"%s\"\n", header.c_str());
 				unusedData.push_back(*i);
 			}
 		}
@@ -190,7 +190,7 @@ bool Model::_build(vector<string>& bzworld) {
 				continue;
 			}
 			else {
-				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
+				printf("Model::build(options): Skipping undefined object \"%s\"\n", header.c_str());
 				unusedData.push_back(*i);
 			}
 		}
@@ -201,7 +201,7 @@ bool Model::_build(vector<string>& bzworld) {
 				materials.push_back((material*)cmap[header](*i));
 			}
 			else {
-				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
+				printf("Model::build(material): Skipping undefined object \"%s\"\n", header.c_str());
 				unusedData.push_back(*i);
 			}
 		}
@@ -212,7 +212,7 @@ bool Model::_build(vector<string>& bzworld) {
 				phys.push_back((physics*)cmap[header](*i));
 			}
 			else {
-				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
+				printf("Model::build(physics): Skipping undefined object \"%s\"\n", header.c_str());
 				unusedData.push_back(*i);
 			}
 		}
@@ -223,7 +223,7 @@ bool Model::_build(vector<string>& bzworld) {
 				dynamicColors.push_back((dynamicColor*)cmap[header](*i));	
 			}
 			else {
-				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
+				printf("Model::build(dynamicColor): Skipping undefined object \"%s\"\n", header.c_str());
 				unusedData.push_back(*i);
 			}
 		}
@@ -234,7 +234,7 @@ bool Model::_build(vector<string>& bzworld) {
 				groups.push_back((define*)cmap[header](*i));
 			}
 			else {
-				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
+				printf("Model::build(define): Skipping undefined object \"%s\"\n", header.c_str());
 				unusedData.push_back(*i);
 			}
 		}
@@ -245,7 +245,7 @@ bool Model::_build(vector<string>& bzworld) {
 				links.push_back((Tlink*)cmap[header](*i));	
 			}
 			else {
-				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
+				printf("Model::build(link): Skipping undefined object \"%s\"\n", header.c_str());
 				unusedData.push_back(*i);
 			}
 		}
@@ -257,7 +257,7 @@ bool Model::_build(vector<string>& bzworld) {
 				continue;	
 			}	
 			else {
-				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
+				printf("Model::build(texturematrix): Skipping undefined object \"%s\"\n", header.c_str());
 				unusedData.push_back(*i);
 			}
 		}
@@ -269,6 +269,7 @@ bool Model::_build(vector<string>& bzworld) {
 			}
 			else {
 				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
+				printf("data: \n%s\n", i->c_str());
 				unusedData.push_back(*i);
 			}
 		}
@@ -780,6 +781,26 @@ bool Model::_deleteSelection() {
 	this->selectedObjects.clear();
 	
 	this->notifyObservers(NULL);
+	
+	return true;
+}
+
+// make a new world
+bool Model::newWorld() { return modelRef->_newWorld(); }
+bool Model::_newWorld() {
+	// make a fake list of world objects (to be fed to Model::build() )
+	vector< string > theNewWorld = vector< string >();
+	
+	// add a default new "options" object
+	options newOptions = options();
+	theNewWorld.push_back( newOptions.toString() );
+	
+	// add a default new "world" object
+	world newWorld = world();
+	theNewWorld.push_back( newWorld.toString() );
+	
+	// build a blank world
+	this->_build( theNewWorld );
 	
 	return true;
 }

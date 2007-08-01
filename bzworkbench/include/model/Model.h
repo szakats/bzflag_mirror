@@ -83,6 +83,7 @@ public:
 	static bool copySelection();
 	static bool pasteSelection();
 	static bool deleteSelection();
+	static bool newWorld();
 	
 	// instantiated BZWB-specific API 
 	world* _getWorldData() { return worldData; }
@@ -110,6 +111,7 @@ public:
 	bool _copySelection();
 	bool _pasteSelection();
 	bool _deleteSelection();
+	bool _newWorld();
 	
 	// plugin-specific API
 	static bool registerObject(string& name, DataEntry* (*init)(string&));
