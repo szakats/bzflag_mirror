@@ -63,13 +63,13 @@ void GridMap::pushZones()
 	  } else {
 	    zones.push_back(new Zone(worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
 	  }
-	  zones.push_back(new FloorZone(worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, "road", true));
-	  zones.push_back(new FloorZone(worldCoord(x-1,lasty)  ,worldCoord(x,y-1)  ,gi.stepX, "road", false));
-	  zones.push_back(new FloorZone(worldCoord(x-1,y-1)    ,worldCoord(x,y)    ,gi.stepX, "roadx", false));
+	  zones.push_back(new FloorZone(worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
+	  zones.push_back(new FloorZone(worldCoord(x-1,lasty)  ,worldCoord(x,y-1)  ,gi.stepX, MATROAD, false));
+	  zones.push_back(new FloorZone(worldCoord(x-1,y-1)    ,worldCoord(x,y)    ,gi.stepX, MATROADX, false));
 	  lastx = x;
 	} else if (x == gi.sizeX-1) {
 	  zones.push_back(new BuildZone(worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
-	  zones.push_back(new FloorZone(worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, "road", true));
+	  zones.push_back(new FloorZone(worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
 	  lastx = x;
 	}
       }

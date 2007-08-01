@@ -19,14 +19,14 @@
 #include <string>
 #include "common.h"
 #include "zone.h"
+#include "Mesh.h"
 
 
 class FloorZone : public Zone {
 protected:
-  std::string matref;
-  bool rotated;
+  Mesh mesh;
 public:
-  FloorZone(Coord2D a, Coord2D b, int astep, const std::string& amatref, bool arotated);
+  FloorZone(Coord2D a, Coord2D b, int astep, int matref, bool rotated);
   virtual void output(Output& out);
 };
 
