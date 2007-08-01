@@ -24,6 +24,7 @@
 #define WORLDSIZE 400
 
 #include <vector>
+#include <math.h>
 
 struct Vertex {
   float x, y, z;
@@ -32,6 +33,35 @@ struct Vertex {
   Vertex(float _x, float _y, float _z) :x(_x), y(_y), z(_z) {}
   Vertex(float v[3]) :x(v[0]), y(v[1]), z(v[2]) {}
   
+  void add(const Vertex &v) { x += v.x; y += v.y; z += v.z; }
+  Vertex operator+(const Vertex &v) { return Vertex(x + v.x, y + v.y, z + v.z); }
+
+  void sub(const Vertex &v) { x -= v.x; y -= v.y; z -= v.z; }
+  Vertex operator-(const Vertex &v) { return Vertex(x - v.x, y - v.y, z - v.z); }
+
+  void mult(const Vertex &v) { x *= v.x; y *= v.y; z *= v.z; }
+  Vertex operator*(const Vertex &v) { return Vertex(x * v.x, y * v.y, z * v.z); }
+
+  void mult(const float f) { x *= f; y *= f; z *= f; }
+  Vertex operator*(const float f) { return Vertex(x * f, y * f, z * f); }
+
+  void div(const Vertex &v) { x /= v.x; y /= v.y; z /= v.z; }
+  Vertex operator/(const Vertex &v) { return Vertex(x / v.x, y / v.y, z / v.z); }
+
+  void div(const float f) { x /= f; y /= f; z /= f; }
+  Vertex operator/(const float f) { return Vertex(x / f, y / f, z / f); }
+
+  Vertex cross(const Vertex &v) { 
+    return Vertex(
+      y * v.z - v.y * z,
+      v.x * z - x * v.z,
+      x * v.y - v.x * y
+    );
+  }
+
+  float length() { return sqrtf(x*x + y*y + z*z); }
+  float lengthsq() { return x*x + y*y + z*z; }
+
   void set(float v[3]) { x = v[0], y = v[1], z = v[2]; }
   void set(float _x, float _y, float _z) { x = _x, y = _y, z = _z; }
   
