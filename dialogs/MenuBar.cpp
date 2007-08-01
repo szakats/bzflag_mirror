@@ -76,6 +76,9 @@ void MenuBar::save_world_as_real( Fl_Widget* w ) {
 	// wait for a value
 	while( fc->shown() ) { Fl::wait(); }
 	
+	if(fc->value() == NULL)
+		return;
+	
 	// get a value (the file path)
 	string filename = fc->value();
 	
