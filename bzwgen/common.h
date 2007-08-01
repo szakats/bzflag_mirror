@@ -14,12 +14,91 @@
 #define __COMMON_H__
 
 #define CELLROAD 1
-
 #define FULLMESH 1
-
 #define EPSILON 0.00000001f
-
 #define WORLDSIZE 400
+
+#include <vector>
+
+struct Vertex {
+  float x, y, z;
+ 
+  Vertex() : x(0.0f), y(0.0f), z(0.0f) {}
+  Vertex(float _x, float _y, float _z) :x(_x), y(_y), z(_z) {}
+  Vertex(float v[3]) :x(v[0]), y(v[1]), z(v[2]) {}
+  
+  void set(float v[3]) { x = v[0], y = v[1], z = v[2]; }
+  void set(float _x, float _y, float _z) { x = _x, y = _y, z = _z; }
+  
+  float &operator[](int i) {
+    switch (i) {
+      case 0: return x; break;
+      case 1: return y; break;
+      case 2: return z; break;
+      default: return x;
+    }
+  }
+};
+
+typedef std::vector<Vertex> VertexVector;
+typedef VertexVector::iterator VertexVectIter;
+
+struct TexCoord {
+  float s, t;
+ 
+  TexCoord() : s(0.0f), t(0.0f) {}
+  TexCoord(float _s, float _t) :s(_s), t(_t) {}
+  TexCoord(float v[2]) : s(v[0]), t(v[1]) {}
+  
+  void set(float v[2]) { s = v[0], t = v[1]; }
+  void set(float _s, float _t) { s = _s, t = _t; }
+  
+  float &operator[](int i) {
+    switch (i) { 
+      case 0: return s; break;
+      case 1: return t; break;
+      default: return s;
+    }
+  }
+};
+
+typedef std::vector<TexCoord> TexCoordVector;
+typedef TexCoordVector::iterator TexCoordVectIter;
+
+struct ID4 {
+  int a, b, c, d;
+ 
+  ID4() : a(0), b(0), c(0), d(0) {}
+  ID4(int _a, int _b, int _c, int _d) : a(_a), b(_b), c(_c), d(_d) {}
+  ID4(int v[4]) : a(v[0]), b(v[1]), c(v[2]), d(v[3]) {}
+  
+  void set(int v[4]) { a = v[0], b = v[1], c = v[2], d = v[3]; }
+  void set(int _a, int _b, int _c, int _d) { a = _a, b = _b, c = _c, d = _d; }
+  
+  int &operator[](int i) {
+    switch (i) { 
+      case 0: return a; break;
+      case 1: return b; break;
+      case 2: return c; break;
+      case 3: return d; break;
+      default: return a;
+    }
+  }
+};
+
+
+/* Assuming all faces are quads makes life a lot easier */
+struct Face {
+  ID4 vtx;
+  ID4 tcd;
+  int mat;
+  Face() : vtx(), tcd(), mat(0) {}
+  Face(ID4 _vtx, ID4 _tcd, int _mat = 0) : vtx(_vtx), tcd(_tcd), mat(_mat) {}
+};
+
+
+typedef std::vector<Face> FaceVector;
+typedef FaceVector::iterator FaceVectIter;
 
 struct DiscreetMapNode {
   int z;
