@@ -2,7 +2,7 @@
 
 // default constructor
 cone::cone() : 
-	bz2object("cone", "<position><rotation><size><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
+	bz2object("cone", "<position><rotation><size><angle><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
 	
 	// define some basic values
 	this->divisions = 16;
@@ -10,6 +10,8 @@ cone::cone() :
 	this->physicsDriver = string("");
 	flatShading = false;
 	smoothbounce = true;
+	
+	sweepAngle = 360.0f;
 	
 	// default size is 10x10x10
 	this->setSize( osg::Vec3( 10, 10, 10 ) );
@@ -21,7 +23,7 @@ cone::cone() :
 
 // constructor with data
 cone::cone(string& data) :
-	bz2object("cone", "<position><rotation><size><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
+	bz2object("cone", "<position><rotation><size><angle><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
 	
 	// define some basic values
 	this->divisions = 16;
@@ -29,6 +31,8 @@ cone::cone(string& data) :
 	this->physicsDriver = string("");
 	flatShading = false;
 	smoothbounce = true;
+	
+	sweepAngle = 360.0f;
 	
 	// default size is 10x10x10
 	this->setSize( osg::Vec3( 10, 10, 10 ) );
@@ -76,6 +80,15 @@ int cone::update(string& data) {
 	if( vDivisions.size() == 0 )
 		vDivisions.push_back( string("16") );		// default # of divisions is 16
 		
+	// get the sweep angle
+	vector<string> sweepAngles = BZWParser::getValuesByKey("angle", header, coneData);
+	if( sweepAngles.size() > 1 ) {
+		printf("cone::update(): error! defined \"divisions\" %d times\n", sweepAngles.size() );
+		return 0;
+	}
+	if( sweepAngles.size() == 0 )
+		sweepAngles.push_back( string("360") );		// default sweep is 360
+		
 	// get flatshading
 	vector<string> flatShadings = BZWParser::getValuesByKey("flatshading", header, coneData);
 	
@@ -92,7 +105,11 @@ int cone::update(string& data) {
 	// see if the divisions changed (if so, then update the geometry)
 	int oldDivisions = this->divisions;
 	this->divisions = atoi( vDivisions[0].c_str() );
-	if( this->divisions != oldDivisions ) {
+	
+	float oldSweepAngle = this->sweepAngle;
+	this->sweepAngle = atof( sweepAngles[0].c_str() );
+	
+	if( this->divisions != oldDivisions || this->sweepAngle != oldSweepAngle ) {
 		this->removeChild( coneNode.get() );
 		this->removeChild( baseNode.get() );
 		
@@ -114,12 +131,15 @@ string cone::toString(void) {
 				  "  divisions " + string(itoa(divisions)) + "\n" +
 				  (flatShading == true ? "  flatshading\n" : "") +
 				  (smoothbounce == true ? "  smoothbounce\n" : "") + 
+				  "  angle " + string(ftoa(sweepAngle) ) + 
 				  "end\n";
 }
 
 // build the cone geometry
 void cone::buildGeometry() {
-	
+	// make the group
+	this->theCone = new osg::Group();
+   	
 	// geometry data for the conical component
 	osg::Vec3Array* points = new osg::Vec3Array();
 	osg::DrawElementsUInt* indices = new osg::DrawElementsUInt( osg::PrimitiveSet::TRIANGLE_FAN, 0 );
@@ -139,43 +159,111 @@ void cone::buildGeometry() {
    	float radius_x = 1.0;
    	float radius_y = 1.0;
    	float angle;
-   	for( int i = 0; i < divisions; i++ ) {
-   		angle = 2.0 * osg::PI * ((float)i / (float)divisions);
-   		
-   		// add the vertex
-   		points->push_back( osg::Vec3( cos(angle) * radius_x, sin(angle) * radius_y, 0 ) );
-   		
-   		// add the index of that vertex to the conical geometry
-   		indices->push_back( i+1 );
-   		
-   		// add the texture coordinate of that vertex to the concial geometry
-   		texCoords->push_back( osg::Vec2( 0.5 + 0.5 * cos(angle), 0.5 + 0.5 * sin(angle) ) );
-   		
-   		// add the texture coordinate of that vertex to the base geometry
-   		baseTexCoords->push_back( osg::Vec2( 0.5 + 0.5 * cos(angle), 0.5 + 0.5 * sin(angle) ) );
-   	}
    	
-   	// add the final face to connect the last index to the first
-   	indices->push_back( 1 );
-   	
-   	// build the base indices
-   	baseIndices->push_back(1);
-   	baseIndices->push_back(2);
-   	for( int i = 3; i <= (divisions >> 1) + 1; i++ ) {
-   		baseIndices->push_back( divisions - i + 3 );
-   		baseIndices->push_back( i );
+   	// build a full cone if the sweep angle is >= 360.0 degrees
+   	if( sweepAngle >= 360.0f ) {
+	   	for( int i = 0; i < divisions; i++ ) {
+	   		angle = 2.0 * osg::PI * ((float)i / (float)divisions);
+	   		
+	   		// add the vertex
+	   		points->push_back( osg::Vec3( cos(angle) * radius_x, sin(angle) * radius_y, 0 ) );
+	   		
+	   		// add the index of that vertex to the conical geometry
+	   		indices->push_back( i+1 );
+	   		
+	   		// add the texture coordinate of that vertex to the concial geometry
+	   		texCoords->push_back( osg::Vec2( 0.5 + 0.5 * cos(angle), 0.5 + 0.5 * sin(angle) ) );
+	   		
+	   		// add the texture coordinate of that vertex to the base geometry
+	   		baseTexCoords->push_back( osg::Vec2( 0.5 + 0.5 * cos(angle), 0.5 + 0.5 * sin(angle) ) );
+	   	}
+	   	
+	   	// add the final face to connect the last index to the first
+	   	indices->push_back( 1 );
+	   	
+	   	// build the base indices
+	   	baseIndices->push_back(1);
+	   	baseIndices->push_back(2);
+	   	for( int i = 3; i <= (divisions >> 1) + 1; i++ ) {
+	   		baseIndices->push_back( divisions - i + 3 );
+	   		baseIndices->push_back( i );
+	   	}
+	   	// if we have an odd # of divisions, add the final face
+	   	if( divisions % 2 == 1 ) {
+	   		baseIndices->push_back( (divisions>>1) + 2 );
+	   	}
    	}
-   	// if we have an odd # of divisions, add the final face
-   	if( divisions % 2 == 1 ) {
-   		baseIndices->push_back( (divisions>>1) + 2 );
+   	else {			// build a section of a cone
+   		// add the center of the cone
+   		points->push_back( osg::Vec3( 0, 0, 0 ) );
+   		
+   		// it's texture coordinate
+   		baseTexCoords->push_back( osg::Vec2( 0.5, 0.5 ) );
+   		
+   		// place-holder texture coordinate
+   		texCoords->push_back( osg::Vec2( 0.5, 0.5 ) );
+	   	
+   		float sweepAngleRads = sweepAngle * osg::PI / 180.0f;
+   		for( int i = 0; i <= divisions; i++ ) {
+	   		angle = sweepAngleRads * ((float)i / (float)divisions);
+	   		
+	   		// add the vertex
+	   		points->push_back( osg::Vec3( cos(angle) * radius_x, sin(angle) * radius_y, 0 ) );
+	   		
+	   		// add the index of that vertex to the conical geometry
+	   		indices->push_back( i+2 );
+	   		
+	   		// add the texture coordinate of that vertex to the concial geometry
+	   		texCoords->push_back( osg::Vec2( 0.5 + 0.5 * cos(angle), 0.5 + 0.5 * sin(angle) ) );
+	   		
+	   		// add the texture coordinate of that vertex to the base geometry
+	   		baseTexCoords->push_back( osg::Vec2( 0.5 + 0.5 * cos(angle), 0.5 + 0.5 * sin(angle) ) );
+	   	}
+	   	
+	   	
+	   	// build the base indices
+	   	// switch to a triangle fan
+	   	baseIndices->setMode( osg::PrimitiveSet::TRIANGLE_FAN );
+	   	
+	   	// make the indices
+	   	// the first point should index the center of the cone
+	   	baseIndices->push_back( 1 );	// the 1st point is the center
+	   	for( int i = 2; i <= divisions + 2; i++ ) {
+	   		baseIndices->push_back( i );
+	   	}
+	   	
+	   	// make the cross-sections
+	   	osg::DrawElementsUInt* crossSectionIndices = new osg::DrawElementsUInt( osg::PrimitiveSet::TRIANGLE_STRIP, 0 );
+	   	
+	   	// add the indices to (1) the last point in the base, (2) the center, (3) the tip, and (4) the first point in the base
+	   	crossSectionIndices->push_back( divisions + 2 );	// the (divisions+2)-th point is the last point in the base
+	   	crossSectionIndices->push_back( 1 );	// the 1st point is the center
+	   	crossSectionIndices->push_back( 0 );			// the 0th point is the tip
+	   	crossSectionIndices->push_back( 2 );			// the 2st point is the first point in the base
+	   	
+	   	// make the cross-section texture coordinates
+	   	osg::Vec2Array* crossSectionTexCoords = new osg::Vec2Array();
+	   	
+	   	// make sure we correspond to the indices
+	   	crossSectionTexCoords->push_back( osg::Vec2( 0.0, 0.0 ) );
+	   	crossSectionTexCoords->push_back( osg::Vec2( 0.0, 0.5 ) );
+	   	crossSectionTexCoords->push_back( osg::Vec2( 1.0, 0.5 ) );
+	   	// insert place-holders
+	   	for( int i = 0; i <= divisions + 3; i++ )
+	   		crossSectionTexCoords->push_back( osg::Vec2( 1.0, 0.0 ) );
+	   		
+	   	crossSectionTexCoords->push_back( osg::Vec2( 0.0, 0.0 ) );
+	   	
+	   	// make the crossSection geode
+	   	this->crossSectionNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("coneCrossSection").c_str(), points, crossSectionIndices, crossSectionTexCoords, "share/wall.png" );
+	   	theCone->addChild( crossSectionNode.get() );
    	}
    	
    	// build the geodes
    	this->coneNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("cone").c_str(), points, indices, texCoords, "share/boxwall.png" );
-   	this->baseNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("conebase").c_str(), points, baseIndices, baseTexCoords, "share/roof.png" );
+   	this->baseNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("coneBase").c_str(), points, baseIndices, baseTexCoords, "share/roof.png" );
    	
    	// add the geodes to the Renderable
-   	this->theCone = new osg::Group();
    	theCone->addChild( coneNode.get() );
    	theCone->addChild( baseNode.get() );
     	

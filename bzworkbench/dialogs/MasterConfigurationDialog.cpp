@@ -5,6 +5,8 @@
 MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	ConfigurationDialog(obj, "Master Configuration Dialog", WIDTH, HEIGHT) {
 	
+	this->moreDialog = NULL;
+	
 	// initialize the object
 	this->object = dynamic_cast<bz2object*>( obj );
 	if( !this->object )
@@ -127,6 +129,7 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	moreButton = new Fl_Button(WIDTH - 10 - 95 - 95 - 95, 355, 90, DEFAULT_TEXTSIZE + 6, "More...");
 	moreButton->callback(moreCallback, this);
 	moreButton->when(FL_WHEN_RELEASE);
+	moreButton->deactivate();		// will be re-activated upon a successfull call to setAdditionalConfiguration()
 	
 	// edit button
 	editTextButton = new Fl_Button(WIDTH - 10 - 95 - 95, 355, 90, DEFAULT_TEXTSIZE + 6, "Edit BZW");
@@ -269,7 +272,8 @@ void MasterConfigurationDialog::removeTransformCallback_real(Fl_Widget* w) {
  * Bring up object-specific dialog box
  */
 void MasterConfigurationDialog::moreCallback_real(Fl_Widget* w) {
-	
+	if( this->moreDialog )
+		this->moreDialog->show();
 }
 
 /*
