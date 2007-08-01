@@ -23,7 +23,7 @@ public:
   FaceVector f;
   bool passable;
   bool noradar;
-  std::string matref; // temporary, int's will be used.
+  int matref; 
   Mesh() : noradar(false), passable(false) {}
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d);
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord ta, TexCoord tb, TexCoord tc, TexCoord td);

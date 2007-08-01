@@ -14,7 +14,12 @@
 #define __COMMON_H__
 
 #define CELLROAD 1
-#define FULLMESH 1
+#define MATROAD  0
+#define MATROADX 1
+#define MATWALL  2
+#define MATWALL2 3
+#define MATMESH  4
+
 #define EPSILON 0.00000001f
 #define WORLDSIZE 400
 
