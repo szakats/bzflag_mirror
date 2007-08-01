@@ -19,10 +19,10 @@
 #include "Output.h"
 
 class Material {
-  std::string name;
+  int name;
   std::string file;
 public:
-  Material(const std::string& _name, const std::string& _file) : name(_name), file(_file) {};
+  Material(const int _name, const std::string& _file) : name(_name), file(_file) {};
   void output(Output& out);
 };
 

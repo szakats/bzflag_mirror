@@ -25,6 +25,9 @@ public:
   void vertex(float x,float y,float z = 0) { 
     (*this) << "  vertex " << x << " " << y << " " << z << "\n"; 
   }
+  void vertex(Vertex v) { 
+    vertex(v.x,v.y,v.z); 
+  }
   void inside(float x,float y,float z = 0) { 
     (*this) << "  inside " << x << " " << y << " " << z << "\n"; 
   }
@@ -33,6 +36,9 @@ public:
   }
   void texcoord(float s,float t) { 
     (*this) << "  texcoord " << s << " " << t << "\n"; 
+  }
+  void texcoord(TexCoord tc) { 
+    texcoord(tc.s,tc.t);
   }
   void face(int a, int b, int c, int d) { 
     (*this) << "  face\n";
@@ -45,11 +51,17 @@ public:
     (*this) << "    texcoords " << ta << " " << tb << " " << tc << " " << td << "\n"; 
     (*this) << "  endface\n";
   }
+  void face(Face f) { 
+    (*this) << "  face\n";
+    (*this) << "    vertices " << f.vtx.a << " " << f.vtx.b << " " << f.vtx.c << " " << f.vtx.d << "\n"; 
+    (*this) << "    texcoords " << f.tcd.a << " " << f.tcd.b << " " << f.tcd.c << " " << f.tcd.d << "\n"; 
+    (*this) << "  endface\n";
+  }
   void line(const char* textline) { 
     (*this) << textline << "\n";
   }
-  void matref(const std::string& ref) { 
-    (*this) << "  matref " << ref << "\n";
+  void matref(int matref) { 
+    (*this) << "  matref mat" << matref << "\n";
   }
 };
 
