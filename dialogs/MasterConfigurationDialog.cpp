@@ -188,7 +188,7 @@ void MasterConfigurationDialog::OKButtonCallback_real(Fl_Widget* w) {
 	
 	if(transformations.size() != 0) {
 		for(vector<TransformWidget*>::iterator i = transformations.begin(); i != transformations.end(); i++) {
-			transformationString += (*i)->toString() + "  ";
+			transformationString += (*i)->toString();
 		}
 	}
 	

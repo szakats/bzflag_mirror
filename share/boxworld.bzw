@@ -87,68 +87,20 @@ cone
 	position 30 30 0
 	size 10 10 10 
 	divisions 16
-	spin 0 1 0 0
+	shear 1 0 0
 end
 
 cone
 	position 50 30 0
 	size 10 10 10
 	divisions 16
-	spin 10 1 0 0
+	shear 0 1 0
 end
 
 cone
 	position 70 30 0
 	size 10 10 10
 	divisions 16
-	spin 20 1 0 0
+	shear 1 1 0
 end
 
-cone
-	position 90 30 0
-	size 10 10 10
-	divisions 16
-	spin 30 1 0 0
-end
-
-cone
-	position 110 30 0
-	size 10 10 10
-	divisions 16
-	spin 40 1 0 0
-end
-
-cone
-	position 130 30 0
-	size 10 10 10
-	divisions 16
-	spin 50 0 1 0
-end
-
-cone
-	position 150 30 0
-	size 10 10 10
-	divisions 16
-	spin 60 1 0 0
-end
-
-cone
-	position 170 30 0
-	size 10 10 10
-	divisions 16
-	spin 70 1 0 0
-end
-
-cone
-	position 190 30 0
-	size 10 10 10
-	divisions 16
-	spin 80 1 0 0
-end
-
-cone
-	position 30 30 0
-	size 10 10 10
-	divisions 16
-	spin 90 0 0 0.5
-end
