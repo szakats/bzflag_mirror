@@ -34,13 +34,19 @@ void MenuBar::new_world_real( Fl_Widget* w ) {
 
 void MenuBar::open_world_real( Fl_Widget* w ) {
 	Fl_File_Chooser* fc = new Fl_File_Chooser("share/", "*.bzw", Fl_File_Chooser::SINGLE, "Open..." );
+	fc->value("*.bzw");
 	fc->show();
 	
 	// wait for a value
 	while( fc->shown() ) { Fl::wait(); }
 	
 	// get a value (the selected filename )
+	if(fc->value() == NULL)
+		return;
+	
 	string filename = fc->value();
+	
+	printf("file: %s\n", filename.c_str());
 	
 	// invoke BZWParser and load it
 	vector<string> world = BZWParser::loadFile( filename.c_str() );
