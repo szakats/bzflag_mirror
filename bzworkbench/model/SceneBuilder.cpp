@@ -48,6 +48,11 @@ osg::Node* SceneBuilder::buildNode( const char* nodeFile ) {
 	
 	//node->accept( tsv );
 	
+	// turn on blending
+	osg::StateSet* stateSet = node->getOrCreateStateSet();
+	stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+	   
+	
 	return node;
 }
 
@@ -220,69 +225,7 @@ void SceneBuilder::markSelected( osg::Node* theNode ) {
 								   0.0,
 								   1.0,
 								   theNode );
-	/*
-	// try dynamic_cast-ing the node to a group
-    osg::Group* theGroup = dynamic_cast< osg::Group* > (theNode);
-    
-    // the Geodes
-    vector<osg::Geode*> theGeodes = vector<osg::Geode*>();
-    
-    // if the group dynamic_cast succeeded, then try dynamic_cast-ing its children into the geode array
-    if(theGroup != NULL) {
-    	// get the children of the group
-    	vector< osg::Node* >* children = SceneBuilder::extractChildren( theGroup );
-    	// see if any are geodes (if so, then add them to theGeodes)
-    	if( children->size() > 0 ) {
-    		for(vector< osg::Node* >::iterator i = children->begin(); i != children->end(); i++) {
-    			// try to dynamic_cast the node to a geode
-    			osg::Geode* geode = dynamic_cast< osg::Geode* > (*i);
-    			if(geode)
-    				theGeodes.push_back( geode );	
-    		}
-    	}
-    	// free the children memory
-    	delete children;
-    }
-    else {
-    	// if that didn't work, then try making the node a geode
-    	osg::Geode* geode = dynamic_cast< osg::Geode* > (theNode);
-    	if(geode)
-    		theGeodes.push_back( geode );
-    }
-    
-    // break if there are no geodes to select
-    if( theGeodes.size() == 0) {
-    	return;
-    }
-    
-	// assign all geodes a different color
-	for(vector< osg::Geode* >::iterator i = theGeodes.begin(); i != theGeodes.end(); i++) {
-		osg::Vec4 color(0.0, 1.0, 0.0, 1.0);
-		osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
-		
-		colors->push_back( color );
-		
-		vector< osg::ref_ptr< osg::Drawable > > drawables = (*i)->getDrawableList();
-		if(drawables.size() > 0) {
-			osg::Geometry* geo;
-			for( vector< osg::ref_ptr< osg::Drawable > >::iterator i = drawables.begin(); i != drawables.end(); i++ ) {
-				geo = (*i)->asGeometry();
-				if( geo ) {
-					geo->setColorArray( colors.get() );
-					geo->setColorBinding( osg::Geometry::BIND_OVERALL );
-				}
-			}	
-		}
-		
-		osg::StateSet* states = (*i)->getOrCreateStateSet();
-		
-		osg::TexEnv* tec = new osg::TexEnv();
-		tec->setMode( osg::TexEnv::ADD );
-		states->setTextureAttribute(0, tec, osg::StateAttribute::ON );
-		
-		(*i)->setStateSet( states );
-	}
-	*/
+
 }
 
 // mark a node as unselected
@@ -294,68 +237,5 @@ void SceneBuilder::markUnselected( osg::Node* theNode ) {
 								   0.0,
 								   1.0,
 								   theNode );
-	/*
-	// try dynamic_cast-ing the node to a group
-    osg::Group* theGroup = dynamic_cast< osg::Group* > (theNode);
-    
-    // the Geodes
-    vector<osg::Geode*> theGeodes = vector<osg::Geode*>();
-    
-    // if the group dynamic_cast succeeded, then try dynamic_cast-ing its children into the geode array
-    if(theGroup != NULL) {
-    	// get the children of the group
-    	vector< osg::Node* >* children = SceneBuilder::extractChildren( theGroup );
-    	// see if any are geodes (if so, then add them to theGeodes)
-    	if( children->size() > 0 ) {
-    		for(vector< osg::Node* >::iterator i = children->begin(); i != children->end(); i++) {
-    			// try to dynamic_cast the node to a geode
-    			osg::Geode* geode = dynamic_cast< osg::Geode* > (*i);
-    			if(geode)
-    				theGeodes.push_back( geode );	
-    		}
-    	}
-    	// free the children memory
-    	delete children;
-    }
-    else {
-    	// if that didn't work, then try making the node a geode
-    	osg::Geode* geode = dynamic_cast< osg::Geode* > (theNode);
-    	if(geode)
-    		theGeodes.push_back( geode );
-    }
-    
-    // break if there are no geodes to select
-    if( theGeodes.size() == 0) {
-    	return;
-    }
-    
-	// disable the green coloration
-	for(vector< osg::Geode* >::iterator i = theGeodes.begin(); i != theGeodes.end(); i++) {
-		osg::Vec4 color(1.0, 1.0, 1.0, 1.0);
-		osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
-		
-		colors->push_back( color );
-		
-		vector< osg::ref_ptr< osg::Drawable > > drawables = (*i)->getDrawableList();
-		if(drawables.size() > 0) {
-			osg::Geometry* geo;
-			for( vector< osg::ref_ptr< osg::Drawable > >::iterator i = drawables.begin(); i != drawables.end(); i++ ) {
-				geo = (*i)->asGeometry();
-				if( geo ) {
-					geo->setColorArray( colors.get() );
-					geo->setColorBinding( osg::Geometry::BIND_OFF );
-				}
-			}	
-		}
-		
-		osg::StateSet* states = (*i)->getOrCreateStateSet();
-		
-		osg::TexEnv* tec = new osg::TexEnv();
-		tec->setMode( osg::TexEnv::MODULATE );
-		states->setTextureAttribute(0, tec, osg::StateAttribute::ON );
-		
-		(*i)->setStateSet( states );
-	}
-	*/
 }
 

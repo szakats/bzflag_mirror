@@ -17,7 +17,7 @@ public:
 	static const float DEFAULT_SIZE;
 	
 	// initialize
-	Ground( float size );
+	Ground( float size, float waterLevel = -1.0f );
 	
 	// uninitialize
 	~Ground();

@@ -27,14 +27,20 @@ public:
 	// toString method
 	string toString(void);
 	
-	// render method
-	int render(void);
+	// getters/setters
+	string getName() { return name; }
+	string getMaterial() { return material; }
+	float getHeight() { return height; }
+	
+	void setName( string name ) { this->name = name; }
+	void setMaterial( string material ) { this->material = material; }
+	void setHeight( float height ) { this->height = height; }
 	
 	virtual ~waterLevel();
 	
 private:
 	string name;
-	vector<string> materials;
+	string material;
 	float height;
 };
 

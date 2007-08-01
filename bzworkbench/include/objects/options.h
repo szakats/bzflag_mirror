@@ -27,8 +27,10 @@ public:
 	// toString method
 	string toString(void);
 	
-	// render method
-	int render(void);
+	// get/set the options string
+	string getOptionsString() { return optionsString; }
+	void setOptionsString( string newString ) { this->optionsString = newString; }
+	
 private:
 	string optionsString;
 };

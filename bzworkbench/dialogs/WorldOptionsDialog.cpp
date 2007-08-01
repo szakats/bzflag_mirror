@@ -11,36 +11,24 @@ string concat(vector<string> strings) {
 
 // constructor
 // The buttons and fields are initialized and placed here.
-WorldOptionsDialog::WorldOptionsDialog() :
+WorldOptionsDialog::WorldOptionsDialog( world* theWorld, options* theOptions, waterLevel* theWaterLevel ) :
 	Fl_Dialog("World Options", WIDTH, HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
 	
 	// initialize the variables
-	this->worldData 		= Model::getWorldData();
-	this->optionsData 		= Model::getOptionsData();
-	this->waterLevelData 	= Model::getWaterLevelData();
-	
-	// get the values
-	string worldString = worldData->get();
-	string optionsString = optionsData->get();
-	string waterLevelString = waterLevelData->get();
+	this->worldData 		= theWorld;
+	this->optionsData 		= theOptions;
+	this->waterLevelData 	= theWaterLevel;
 	
 	// parse the values
-	string nameStr = BZWParser::getValuesByKey("name", "world", worldString.c_str())[0];
-	float size = atof( BZWParser::getValuesByKey("size", "world", worldString.c_str())[0].c_str() );
-	float flagHeight = atof( BZWParser::getValuesByKey("flagHeight", "world", worldString.c_str())[0].c_str() );
-	bool noWalls = ( BZWParser::getValuesByKey("noWalls", "world", worldString.c_str()).size() == 0 ? false : true);
+	string nameStr = worldData->getName();
+	float size = worldData->getSize();
+	float flagHeight = worldData->getFlagHeight();
+	bool noWalls = !worldData->hasWalls();
 	
-	string options = concat( BZWParser::getLines("options", BZWParser::getSectionsByHeader("options", optionsString.c_str())[0].c_str() ) );
+	string options = optionsData->getOptionsString();
 	
-	float waterHeight = atof( BZWParser::getValuesByKey("height", "waterLevel", waterLevelString.c_str())[0].c_str() );
-	vector<string> _materials = BZWParser::getValuesByKey("material", "waterLevel", waterLevelString.c_str());
-	
-	string waterMaterial;
-	if(_materials.size() == 0)
-		waterMaterial = string("");
-	else
-		waterMaterial = _materials[0];
-		
+	float waterHeight = waterLevelData->getHeight();
+	string waterMaterial = waterLevelData->getMaterial();		
 		
 	// initialize widgets
 	worldNameLabel = new QuickLabel("Name:", 5, 5);
@@ -104,6 +92,7 @@ WorldOptionsDialog::~WorldOptionsDialog() {
 
 // set all variables from the widget values when the OK button is pressed
 void WorldOptionsDialog::OKButtonCallback_real(Fl_Widget* w) {
+	
 	unsigned char hasWater = waterCheckButton->value();
 	
 	float waterLevel;
@@ -124,37 +113,15 @@ void WorldOptionsDialog::OKButtonCallback_real(Fl_Widget* w) {
 	
 	bool noWalls = (noWallsCheckButton->value() != 0);
 	
-	string sizeString = string(ftoa(size));
+	worldData->setName( worldName.c_str() );
+	worldData->setSize( size );
+	worldData->setWalls( !noWalls );
+	worldData->setFlagHeight(flagHeight);
 	
-	string flagHeightString = string(ftoa(flagHeight));
+	optionsData->setOptionsString(optionsString);
 	
-	string waterLevelString = string(ftoa(waterLevel));
-	
-	string worldStr = string("world\n") +
-						 "  name " + worldName + "\n" +
-						 "  size " + sizeString + "\n" +
-						 "  flagHeight " + flagHeightString + "\n" +
-							(noWalls == true ? "  noWalls\n" : "# noWalls\n") +
-						 "end\n";
-						  
-	string optionsStr = string("options\n") +
-						 "  " + optionsString + "\n" +
-						 "end\n";
-						  
-	string waterLevelStr = string("waterLevel\n") +
-						 "  name defaultWaterLevel\n" +
-						 "  height " + waterLevelString + "\n" +
-						 (waterMaterialString.length() != 0 ? "  material " + waterMaterialString : "# material") + "\n" +
-						 "end\n";
-				
-	// printf("%s\n", data.c_str());
-	this->worldData->update(worldStr);
-	this->optionsData->update(optionsStr);
-	this->waterLevelData->update(waterLevelStr);
-	
-	printf(this->worldData->toString().c_str());
-	printf(this->optionsData->toString().c_str());
-	printf(this->waterLevelData->toString().c_str());
+	waterLevelData->setHeight(waterLevel);
+	waterLevelData->setMaterial(waterMaterialString);
 	
 	Fl::delete_widget(this);
 }	

@@ -49,6 +49,3 @@ string options::toString(void) {
 						this->getUnusedText() + 
 						"end\n");
 }
-
-// render method
-int options::render(void) { return 0; }
