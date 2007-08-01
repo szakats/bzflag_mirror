@@ -144,7 +144,7 @@ string BZWParser::hierarchyOf(const char* _text) {
  
 string BZWParser::headerOf(const char* _text) {
 	vector<string> elements = BZWParser::getLineElements(_text, 2);
-	if(elements.size() > 1) 
+	if(elements.size() >= 1) 
 		return elements[0];
 	else
 		return string(BZW_NOT_FOUND);

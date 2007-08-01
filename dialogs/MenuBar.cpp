@@ -29,7 +29,7 @@ MenuBar::MenuBar( MainWindow* mw ) : Fl_Menu_Bar(0, 0, mw->w(), 30) {
 }
 
 void MenuBar::new_world_real( Fl_Widget* w ) {
-	
+	this->parent->getModel()->_newWorld();
 }
 
 void MenuBar::open_world_real( Fl_Widget* w ) {
