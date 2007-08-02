@@ -74,8 +74,10 @@ int bz2object::update(string& data) {
 		return 0;
 	}
 		
-	if(!hasOnlyOne(lines, header))
+	if(!hasOnlyOne(lines, header)) {
+		printf("bz2object: improper information\n");
 		return 0;
+	}
 	
 	// just go with the first box definition we find (only one should be passed anyway)
 	const char* objData = lines[0].c_str();
@@ -168,11 +170,58 @@ int bz2object::update(string& data) {
 		
 	// get the transformation occurences
 	if(transformKeys.size() > 0) {
+		
 		vector<string> transforms = BZWParser::getLinesByKeys(transformKeys, header, data.c_str());
-		for(vector<string>::iterator i = transforms.begin(); i != transforms.end(); i++) {
-			transformations.push_back( new BZTransform(*i) );	
+		if( transforms.size() > 0 ) {
+			/**
+			 * Note: BZWB does transformations differently from BZFlag.  In BZFlag, geometric data is handled
+			 * in the raw, meaning that all transformations are relative the the world origin.  In BZWB, all 
+			 * transformations are relative to the object's local origin.  Therefore, to make sure all transformations
+			 * made to the object in BZWB are reflected EXACTLY in BZFlag, we must first shift the geometric data to
+			 * the center of the world BEFORE applying the other transformations.  After they have been applied,
+			 * then we shift it back.  Therefore, if you look at the output of BZWB, you'll notice that the block
+			 * of transformations is preceeded by "shift -x -y -z" and followed by "shift x y z", where the point
+			 * (x,y,z) is the global position of the object in question
+			 */
+			 
+			// first shift
+			Point3D newPosition = Point3D(positions[0].c_str());
+			Point3D nNewPosition = -newPosition;
+			string shift1 = "  shift " + nNewPosition.toString();
+			transformations.push_back( new BZTransform( shift1 ));
+			
+			// make sure we skip the start/end shift transformations if present
+			vector<string>::iterator start = transforms.begin();
+			vector<string>::iterator end = transforms.end()-1;
+			
+			// make the transformations
+			BZTransform t1 = BZTransform( *start );
+			BZTransform t2 = BZTransform( *end );
+			
+			// see if they are the start/end shifts
+			if( t1.getName() == "shift" && t2.getName() == "shift" &&
+				t1.getData()[0] == -t2.getData()[0] &&
+				t1.getData()[1] == -t2.getData()[1] &&
+				t1.getData()[2] == -t2.getData()[2] ) {
+					
+					// skip them
+					start++;
+					end--;
+			}
+			
+			for(vector<string>::iterator i = start; i != end+1; i++) {
+				transformations.push_back( new BZTransform(*i) );	
+			}
+			
+			// last shift
+			string shift2 = "  shift " + newPosition.toString();
+			transformations.push_back( new BZTransform( shift2 ) );
+			
 		}
+		
 	}
+	else
+		printf("no transformations supported\n");
 	
 	// add the transformations
 	if( transformations.size() > 0 ) {

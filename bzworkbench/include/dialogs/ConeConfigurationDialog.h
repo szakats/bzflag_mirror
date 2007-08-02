@@ -8,6 +8,7 @@
 
 #include "ConfigurationDialog.h"
 #include "../widgets/QuickLabel.h"
+#include "../defines.h"
 
 #include "../objects/cone.h"
 
@@ -16,8 +17,8 @@ class ConeConfigurationDialog : public ConfigurationDialog {
 public:
 
 	// dimensions
-	static const int DEFAULT_WIDTH = 200;
-	static const int DEFAULT_HEIGHT = 100;
+	static const int DEFAULT_WIDTH = 300;
+	static const int DEFAULT_HEIGHT = 150;
 
 	// constructor
 	ConeConfigurationDialog( cone* theCone );
@@ -58,7 +59,17 @@ private:
 	// subdivision counter
 	Fl_Counter* subdivisionCounter;
 	
-	// rotation label
+	// angle sweep label
+	QuickLabel* sweepAngleLabel;
+	
+	// angle sweep counter
+	Fl_Counter* sweepAngleCounter;
+	
+	// flat shading check-button
+	Fl_Check_Button* flatShadingButton;
+	
+	// smooth bounce check-button
+	Fl_Check_Button* smoothBounceButton;
 	
 	
 };

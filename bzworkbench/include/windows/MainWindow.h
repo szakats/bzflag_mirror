@@ -15,6 +15,8 @@
 #include "../dialogs/WorldOptionsDialog.h"
 #include "../dialogs/MasterConfigurationDialog.h"
 
+#include "../dialogs/ConeConfigurationDialog.h"
+
 #include "../dialogs/Fl_Error.h"
 
 #include "../widgets/Fl_ImageButton.h"

@@ -50,15 +50,18 @@ string cone::get(void) { return this->toString(); }
 int cone::update(string& data) {
 	const char* header = this->getHeader().c_str();
 	// get the chunk we need
-	
-	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
+	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str(), "end");
 	
 	// check and see if the proper data segment was found
-	if(lines[0] == BZW_NOT_FOUND)
+	if(lines[0] == BZW_NOT_FOUND) {
+		printf("cone: data not found\n");
 		return 0;
+	}
 		
-	if(!hasOnlyOne(lines, "cone"))
+	if(!hasOnlyOne(lines, "cone")) {
+		printf("cone: improper data\n");
 		return 0;
+	}
 		
 	const char* coneData = lines[0].c_str();
 		
@@ -131,7 +134,7 @@ string cone::toString(void) {
 				  "  divisions " + string(itoa(divisions)) + "\n" +
 				  (flatShading == true ? "  flatshading\n" : "") +
 				  (smoothbounce == true ? "  smoothbounce\n" : "") + 
-				  "  angle " + string(ftoa(sweepAngle) ) + 
+				  "  angle " + string(ftoa(sweepAngle) ) + "\n" + 
 				  "end\n";
 }
 

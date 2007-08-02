@@ -362,7 +362,11 @@ void MainWindow::configureCallback_real( Fl_Widget* w ) {
 	vector< bz2object* > selection = this->model->getSelection();
 	if( selection.size() > 1 || selection.size() == 0 )
 		return;
-		
-	MasterConfigurationDialog* mcd = new MasterConfigurationDialog( selection[0] );
+	
+	bz2object* obj = selection[0];
+	MasterConfigurationDialog* mcd = new MasterConfigurationDialog( obj );
 	mcd->show();
+	
+	if( obj->getHeader() == "cone" )
+		mcd->setAdditionalConfiguration( new ConeConfigurationDialog( dynamic_cast< cone* >(obj) ));
 }

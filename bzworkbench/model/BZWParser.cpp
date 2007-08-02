@@ -23,6 +23,8 @@ string cutWhiteSpace(string line) {
 	if(startIndex == len)
 		return line;
 	
+	if( endIndex <= startIndex)
+		return string(" ");
 	// return the inner content
 	return line.substr(startIndex, endIndex - startIndex + 1);
 }
@@ -272,7 +274,7 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
 			// printf("BZWParser: first element is |%s|\n", lineElements[0].c_str());
 				
 			// see if it has the header
-			if(lineElements[0].compare(header) == 0) {
+			if(lineElements[0].compare(0, header.length(), header) == 0) {
 				section += line + "\n";
 				text = text.substr(currLine.length() + 1);
 				found = true;
@@ -308,7 +310,7 @@ const vector<string> BZWParser::getSectionsByHeader(const char* _header, const c
 			section += line + "\n";
 			
 			// see if it has the end
-			if(lineElements[0].compare(footer) == 0) {
+			if(lineElements[0].compare(0, footer.length(), footer) == 0) {
 				found = true;
 				// printf("BZWParser: found footer; breaking...\n");
 				break;
