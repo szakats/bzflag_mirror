@@ -22,11 +22,12 @@
 
 class Zone {
 protected:
-  int step;
   Coord2D A,B;
+  int step;
 public:
   Zone(Coord2D a, Coord2D b, int astep) : A(a), B(b), step(astep) {};
   virtual void output(Output& out) {};
+  virtual ~Zone();
 };
 
 typedef std::vector<Zone*> ZoneVector;
