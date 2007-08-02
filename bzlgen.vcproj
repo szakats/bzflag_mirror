@@ -37,8 +37,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				WarningLevel="3"
-				WarnAsError="false"
+				WarningLevel="4"
+				WarnAsError="true"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
