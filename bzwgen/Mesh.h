@@ -25,8 +25,13 @@ public:
   bool noradar;
   bool passable;
   Mesh() : noradar(false), passable(false) {}
-  int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d);
-  int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord ta, TexCoord tb, TexCoord tc, TexCoord td);
+  int addVertex(Vertex vtx) { v.push_back(vtx); return v.size()-1; }
+  int addTexCoord(TexCoord tcx) { tc.push_back(tcx); return tc.size()-1; }
+  int addFace(Face face) { f.push_back(face); return f.size()-1; }
+  int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat = 0);
+  int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord ta, TexCoord tb, TexCoord tc, TexCoord td, int mat = 0);
+  ID4 extrudeFace(int fid, float amount);
+  Vertex faceNormal(int fid);
   void output(Output& out);
 };
 
