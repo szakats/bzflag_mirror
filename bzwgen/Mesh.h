@@ -31,8 +31,12 @@ public:
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat = 0);
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord ta, TexCoord tb, TexCoord tc, TexCoord td, int mat = 0);
   ID4 extrudeFace(int fid, float amount);
+  void expandFace(int fid, float amount);
   Vertex faceNormal(int fid);
+  Vertex faceCenter(int fid);
   void output(Output& out);
+private:
+  Vertex extensionVertex(int ida, int idb, int idc);
 };
 
 typedef std::vector<Mesh*> MeshVector;

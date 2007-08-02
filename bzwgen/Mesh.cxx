@@ -50,6 +50,41 @@ ID4 Mesh::extrudeFace(int fid, float amount) {
     );
 }
 
+Vertex Mesh::extensionVertex(int ida, int idb, int idc) {
+  Vertex a = v[idc]-v[ida];
+  Vertex b = v[idc]-v[idb];
+  a.normalize();
+  b.normalize();
+  Vertex dir = (a+b)/2;
+  dir.normalize();
+  float dot = a.dot(dir);
+  float length = 1/sqrtf(1-dot*dot);
+  return dir*length;
+}
+
+
+void Mesh::expandFace(int fid, float amount) {
+  // needs to be uniform
+  ID4 fv = f[fid].vtx;
+  Vertex v0 = v[fv[0]] + extensionVertex(fv[3],fv[1],fv[0])*amount;
+  Vertex v1 = v[fv[1]] + extensionVertex(fv[0],fv[2],fv[1])*amount;
+  Vertex v2 = v[fv[2]] + extensionVertex(fv[1],fv[3],fv[2])*amount;
+  Vertex v3 = v[fv[3]] + extensionVertex(fv[2],fv[0],fv[3])*amount;
+
+  v[fv[0]] = v0;
+  v[fv[1]] = v1;
+  v[fv[2]] = v2;
+  v[fv[3]] = v3;
+}
+
+
+
+Vertex Mesh::faceCenter(int fid) {
+  Face face = f[fid];
+  return (v[face.vtx.a]+v[face.vtx.b]+v[face.vtx.c]+v[face.vtx.d])/4;
+}
+
+
 Vertex Mesh::faceNormal(int fid) {
   Face face = f[fid];
   Vertex a = v[face.vtx.a]-v[face.vtx.b];
