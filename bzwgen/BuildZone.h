@@ -17,9 +17,11 @@
 #include <fstream>
 #include "common.h"
 #include "Zone.h"
+#include "Mesh.h"
 
 
 class BuildZone : public Zone {
+  Mesh mesh;
 public:
   BuildZone(Coord2D a, Coord2D b, int astep);
   virtual void output(Output& out);
