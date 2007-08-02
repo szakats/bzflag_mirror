@@ -14,11 +14,37 @@
 
 BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 {
+  mesh.matref = MATMESH;
+  int base = mesh.createNewFace(
+      Vertex(A.x,A.y,0.01f),
+      Vertex(B.x,A.y,0.01f),
+      Vertex(B.x,B.y,0.01f),
+      Vertex(A.x,B.y,0.01f),
+      MATMESH
+  );
+
+  int height = ((rand()%5)*4+4);
+  if (rand()%4 == 0) height += (rand()%5)*4;
+
+  ID4 sides = mesh.extrudeFace(base,height);
+
+  int wall;
+  if (rand()%2 == 0) {
+    wall = MATWALL;
+  } else {
+    wall = MATWALL2;
+  }
+
+  mesh.f[sides.a].mat = wall; 
+  mesh.f[sides.b].mat = wall; 
+  mesh.f[sides.c].mat = wall; 
+  mesh.f[sides.d].mat = wall; 
 }
 
 void BuildZone::output(Output& out) 
 {
-  int height = ((rand()%5)*4+4);
+  mesh.output(out);
+/*  int height = ((rand()%5)*4+4);
   if (rand()%4 == 0) height += (rand()%5)*4;
   out.line("mesh");
   if (rand()%2 == 0) {
@@ -49,7 +75,7 @@ void BuildZone::output(Output& out)
   out.face(3,0,4,7);
   out.matref(MATMESH);
   out.face(4,5,6,7);
-  out.line("end\n");
+  out.line("end\n");*/
 }
 
 
