@@ -22,11 +22,8 @@
 class Output : public std::ofstream {
 public:
   Output(const char* filename) : std::ofstream(filename) {}
-  void vertex(float x,float y,float z = 0) { 
-    (*this) << "  vertex " << x << " " << y << " " << z << "\n"; 
-  }
   void vertex(Vertex v) { 
-    vertex(v.x,v.y,v.z); 
+    (*this) << "  vertex " << v.x << " " << v.y << " " << v.z << "\n"; 
   }
   void inside(float x,float y,float z = 0) { 
     (*this) << "  inside " << x << " " << y << " " << z << "\n"; 
@@ -34,22 +31,8 @@ public:
   void outside(float x,float y,float z = 0) { 
     (*this) << "  outside " << x << " " << y << " " << z << "\n"; 
   }
-  void texcoord(float s,float t) { 
-    (*this) << "  texcoord " << s << " " << t << "\n"; 
-  }
   void texcoord(TexCoord tc) { 
-    texcoord(tc.s,tc.t);
-  }
-  void face(int a, int b, int c, int d) { 
-    (*this) << "  face\n";
-    (*this) << "    vertices " << a << " " << b << " " << c << " " << d << "\n"; 
-    (*this) << "  endface\n";
-  }
-  void face(int a, int b, int c, int d, int ta, int tb, int tc, int td) { 
-    (*this) << "  face\n";
-    (*this) << "    vertices " << a << " " << b << " " << c << " " << d << "\n"; 
-    (*this) << "    texcoords " << ta << " " << tb << " " << tc << " " << td << "\n"; 
-    (*this) << "  endface\n";
+    (*this) << "  texcoord " << tc.s << " " << tc.t << "\n"; 
   }
   void face(Face f, int lastmat = -1) { 
     (*this) << "  face\n";
