@@ -29,7 +29,8 @@ FloorZone::FloorZone(Coord2D a, Coord2D b, int astep, int matref, bool rotated) 
       TexCoord(0,0),
       TexCoord(0,int((B.x-A.x)/step)),
       TexCoord(int((B.y-A.y)/step),int((B.x-A.x)/step)),
-      TexCoord(int((B.y-A.y)/step),0));
+      TexCoord(int((B.y-A.y)/step),0),
+      matref);
   } else {
     mesh.createNewFace(
       Vertex(A.x,A.y,0.001),
@@ -39,7 +40,8 @@ FloorZone::FloorZone(Coord2D a, Coord2D b, int astep, int matref, bool rotated) 
       TexCoord(0,0),
       TexCoord(int((B.x-A.x)/step),0),
       TexCoord(int((B.x-A.x)/step),int((B.y-A.y)/step)),
-      TexCoord(0,int((B.y-A.y)/step)));
+      TexCoord(0,int((B.y-A.y)/step)),
+      matref);
   }
 }
 
