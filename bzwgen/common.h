@@ -51,6 +51,9 @@ struct Vertex {
   void div(const float f) { x /= f; y /= f; z /= f; }
   Vertex operator/(const float f) { return Vertex(x / f, y / f, z / f); }
 
+  void normalize() { float l = lengthsq(); if (l = 0) return; Vertex(x/l,y/l,z/l); }
+  Vertex norm() { float l = lengthsq(); if (l = 0) return Vertex(); return Vertex(x/l,y/l,z/l); }
+
   Vertex cross(const Vertex &v) { 
     return Vertex(
       y * v.z - v.y * z,
