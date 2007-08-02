@@ -35,7 +35,7 @@ int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord tca, Te
   return addFace(Face(ID4(size-4,size-3,size-2,size-1),ID4(tsize-4,tsize-3,tsize-2,tsize-1),mat));
 }
 
-ID4 Mesh::extrudeFace(int fid, float amount) {
+ID4 Mesh::extrudeFace(int fid, float amount, int mat) {
   Vertex dir = faceNormal(fid)*amount;
   ID4 base = f[fid].vtx;
   int newface = createNewFace(v[base.a]+dir,v[base.b]+dir,v[base.c]+dir,v[base.d]+dir,f[fid].mat);
@@ -43,10 +43,10 @@ ID4 Mesh::extrudeFace(int fid, float amount) {
   f.pop_back();
   ID4 top = f[fid].vtx;
   return ID4(
-      addFace(Face(ID4(base[0],base[1],top[1],top[0]))),
-      addFace(Face(ID4(base[1],base[2],top[2],top[1]))),
-      addFace(Face(ID4(base[2],base[3],top[3],top[2]))),
-      addFace(Face(ID4(base[3],base[0],top[0],top[3])))
+      addFace(Face(ID4(base[0],base[1],top[1],top[0]),mat)),
+      addFace(Face(ID4(base[1],base[2],top[2],top[1]),mat)),
+      addFace(Face(ID4(base[2],base[3],top[3],top[2]),mat)),
+      addFace(Face(ID4(base[3],base[0],top[0],top[3]),mat))
     );
 }
 
