@@ -21,7 +21,7 @@
 #define MATMESH  4
 
 #define EPSILON 0.00000001f
-#define WORLDSIZE 400
+#define WORLDSIZE 200
 
 #include <vector>
 #include <math.h>
@@ -125,6 +125,9 @@ struct ID4 {
     }
   }
 };
+
+typedef std::vector<int> IntVector;
+
 
 
 /* Assuming all faces are quads makes life a lot easier */
