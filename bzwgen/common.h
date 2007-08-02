@@ -127,8 +127,10 @@ struct Face {
   ID4 vtx;
   ID4 tcd;
   int mat;
-  Face() : vtx(), tcd(), mat(0) {}
-  Face(ID4 _vtx, ID4 _tcd, int _mat = 0) : vtx(_vtx), tcd(_tcd), mat(_mat) {}
+  bool texcoords;
+  Face() : vtx(), tcd(), mat(0), texcoords(true) {}
+  Face(ID4 _vtx, ID4 _tcd, int _mat = 0) : vtx(_vtx), tcd(_tcd), mat(_mat), texcoords(true) {}
+  Face(ID4 _vtx, int _mat = 0) : vtx(_vtx), tcd(), mat(_mat), texcoords(false) {}
 };
 
 

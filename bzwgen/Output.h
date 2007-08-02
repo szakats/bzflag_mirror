@@ -51,10 +51,13 @@ public:
     (*this) << "    texcoords " << ta << " " << tb << " " << tc << " " << td << "\n"; 
     (*this) << "  endface\n";
   }
-  void face(Face f) { 
+  void face(Face f, int lastmat = -1) { 
     (*this) << "  face\n";
+    if (lastmat >= 0) {
+      if (f.mat != lastmat) matref(f.mat);
+    }
     (*this) << "    vertices " << f.vtx.a << " " << f.vtx.b << " " << f.vtx.c << " " << f.vtx.d << "\n"; 
-    (*this) << "    texcoords " << f.tcd.a << " " << f.tcd.b << " " << f.tcd.c << " " << f.tcd.d << "\n"; 
+    if (f.texcoords) (*this) << "    texcoords " << f.tcd.a << " " << f.tcd.b << " " << f.tcd.c << " " << f.tcd.d << "\n"; 
     (*this) << "  endface\n";
   }
   void line(const char* textline) { 
