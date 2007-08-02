@@ -34,9 +34,11 @@ public:
   void expandFace(int fid, float amount);
   Vertex faceNormal(int fid);
   Vertex faceCenter(int fid);
+  IntVector* subdivdeFace(int fid, int count, bool horizontal);
   void output(Output& out);
 private:
   Vertex extensionVertex(int ida, int idb, int idc);
+
 };
 
 typedef std::vector<Mesh*> MeshVector;

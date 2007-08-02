@@ -94,6 +94,65 @@ Vertex Mesh::faceNormal(int fid) {
   return r / length;
 }
 
+IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal) {
+  ID4 cnr = f[fid].vtx;
+  Vertex stepA, stepB;
+
+  if (horizontal) {
+    stepA = (v[cnr[2]]-v[cnr[3]]) / float(count);
+    stepB = (v[cnr[1]]-v[cnr[0]]) / float(count);
+  } else {
+    stepA = (v[cnr[3]]-v[cnr[0]]) / float(count);
+    stepB = (v[cnr[2]]-v[cnr[1]]) / float(count);
+  }
+
+  IntVector* result = new IntVector();
+
+  int mat = f[fid].mat;
+  
+  int ai = 0 , bi = 0;
+  int pai = 0, pbi = 0;
+
+  if (horizontal) {
+    pai = cnr[3];
+    pbi = cnr[0];
+  } else {
+    pai = cnr[0];
+    pbi = cnr[1];
+  }
+
+  Vertex a = v[pai];
+  Vertex b = v[pbi];
+
+  result->push_back(fid);
+
+  for (int i = 0; i < count-1; i++) {
+    a = a + stepA;
+    b = b + stepB;
+    
+    ai = addVertex(a);
+    bi = addVertex(b);
+
+    result->push_back(addFace(Face(ID4(pai,pbi,bi,ai),mat)));
+
+    pai = ai;
+    pbi = bi;
+  }
+
+  if (horizontal) {
+    f[fid].vtx = ID4(ai,bi,cnr[1],cnr[2]);
+  } else {
+    f[fid].vtx = ID4(ai,bi,cnr[2],cnr[3]);
+  }
+  return result;
+
+}
+
+
+//IntVector& Mesh::subdivdeFaceV(int fid) {
+//  
+//}
+
 
 void Mesh::output(Output& out) {
   out.line("mesh");
