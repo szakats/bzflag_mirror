@@ -1,46 +1,27 @@
 CXX = g++
-LIBS =
-CFLAGS = -g -O0 -Wall -pedantic -ansi
+LIBS = -lm
+CFLAGS = -g -O0 -Wall -Werror -pedantic -ansi
 LDFLAGS =
 CPPFLAGS = -I../bzflag/include
 
 FILES = \
+	BuildZone.cxx \
+	FloorZone.cxx \
 	Generator.cxx \
 	GridGenerator.cxx \
 	GridMap.cxx \
 	Material.cxx \
-	BuildZone.cxx \
-	FloorZone.cxx \
+	Mesh.cxx \
 	bzwgen.cxx
 
 OBJECTS = ${FILES:.cxx=.o}
 
 .PHONY: all clean blather
+.SUFFIXES: .cxx .o
 
 all: blather bzwgen
 
-#.cxx.o:
-#	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
-
-Generator.o: Generator.cxx Generator.h common.h
-	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
-
-GridGenerator.o: GridGenerator.cxx GridGenerator.h common.h
-	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
-
-GridMap.o: GridMap.cxx GridMap.h common.h
-	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
-
-Material.o: Material.cxx Material.h common.h
-	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
-
-BuildZone.o: BuildZone.cxx BuildZone.h common.h
-	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
-
-FloorZone.o: FloorZone.cxx FloorZone.h common.h
-	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
-    
-bzwgen.o: bzwgen.cxx common.h
+.cxx.o: common.h
 	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
 
 blather:
