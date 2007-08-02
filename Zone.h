@@ -26,8 +26,7 @@ protected:
   int step;
 public:
   Zone(Coord2D a, Coord2D b, int astep) : A(a), B(b), step(astep) {};
-  virtual void output(Output& out) {};
-  virtual ~Zone();
+  virtual void output(Output& /* out */) {};
 };
 
 typedef std::vector<Zone*> ZoneVector;

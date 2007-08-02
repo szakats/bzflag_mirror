@@ -39,8 +39,8 @@
 #include "Material.h"
 #include "Zone.h"
 
-int main (int argc, char* argv[]) {
-  srand(time(NULL));
+int main (/*int argc, char* argv[]*/) {
+  srand((unsigned int)time(NULL));
 
   std::cout << "Initializing...\n";
 

@@ -12,7 +12,7 @@
 
 #include "Generator.h"
 
-void Generator::parseOptions(Options opt) {
+void Generator::parseOptions(Options /* opt */) {
   size = 800;
 }
   
@@ -20,7 +20,7 @@ void Generator::run() {
 
 }
 
-void Generator::output(std::ofstream& out) {
+void Generator::output(std::ofstream& /* out */) {
 }
 
 

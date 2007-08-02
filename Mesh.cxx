@@ -55,7 +55,7 @@ Vertex Mesh::faceNormal(int fid) {
   Vertex a = v[face.vtx.a]-v[face.vtx.b];
   Vertex b = v[face.vtx.a]-v[face.vtx.c];
   Vertex r = a.cross(b);
-  int length = r.length();
+  float length = r.length();
   return r / length;
 }
 

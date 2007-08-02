@@ -16,17 +16,17 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 {
   mesh.matref = MATMESH;
   int base = mesh.createNewFace(
-      Vertex(A.x,A.y,0.01f),
-      Vertex(B.x,A.y,0.01f),
-      Vertex(B.x,B.y,0.01f),
-      Vertex(A.x,B.y,0.01f),
+      Vertex((float)A.x,(float)A.y,0.01f),
+      Vertex((float)B.x,(float)A.y,0.01f),
+      Vertex((float)B.x,(float)B.y,0.01f),
+      Vertex((float)A.x,(float)B.y,0.01f),
       MATMESH
   );
 
   int height = ((rand()%5)*4+4);
   if (rand()%4 == 0) height += (rand()%5)*4;
 
-  ID4 sides = mesh.extrudeFace(base,height);
+  ID4 sides = mesh.extrudeFace(base,(float)height);
 
   int wall;
   if (rand()%2 == 0) {
