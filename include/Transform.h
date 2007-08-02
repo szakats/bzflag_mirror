@@ -128,7 +128,7 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		// make this into a spin matrix
 		void makeSpin() {
 			// use a quaternion to compute the "spin" matrix
-			osg::Quat quat = osg::Quat( data[0], osg::Vec3( data[1], data[2], data[3] ) );
+			osg::Quat quat = osg::Quat( osg::DegreesToRadians(data[0]), osg::Vec3( data[1], data[2], data[3] ) );
 			
 			osg::Matrixd matrix;
 			quat.get( matrix );

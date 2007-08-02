@@ -119,8 +119,8 @@ public:
 			
 			// check and see if the line does NOT have a supported key, and if not, add the line to ret
 			if(!hasKey(*i)) {
-				ret += "  " + (*i) + "  # BZWB:<unused>\n";
-				printf("%s: Warning! Indecipherable line \"%s\"\n", hdr, i->c_str());	
+				// ret += "  " + (*i) + "  # BZWB:<unused>\n";
+				// printf("%s: Warning! Indecipherable line \"%s\"\n", hdr, i->c_str());	
 			}
 		}
 		

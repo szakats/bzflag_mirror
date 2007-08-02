@@ -34,6 +34,17 @@ public:
 	// toString
 	string toString(void);
 	
+	// getters/setters
+	bool hasFlatShading() { return flatShading; }
+	bool hasSmoothBounce() { return smoothbounce; }
+	float getSweepAngle() { return sweepAngle; }
+	int getDivisions() { return divisions; }
+	
+	void setFlatShading(bool value) { this->flatShading = value; }
+	void setSmoothBounce(bool value) { this->smoothbounce = value; }
+	void setSweepAngle(float value) { this->sweepAngle = value; }
+	void setDivisions(int value) { this->divisions = divisions; }
+	
 private:
 	bool flatShading, smoothbounce;
 	int divisions;

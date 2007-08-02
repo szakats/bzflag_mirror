@@ -84,24 +84,13 @@ box
 end
 
 cone
-	position 30 30 0
 	size 10 10 10 
 	divisions 16
-	shear 1 0 0
-end
-
-cone
-	position 50 30 0
-	size 10 10 10
-	divisions 4
-	shear 0 0 0
-	angle 180
-end
-
-cone
-	position 70 30 0
-	size 10 10 10
-	divisions 16
+	shift -30 -30 0
+	spin 90 1 0 0
 	shear 0 0 0.5
+	shift 30 30 0
+	position 30 30 0
 end
+
 
