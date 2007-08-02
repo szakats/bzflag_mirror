@@ -40,11 +40,11 @@ int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord tca, Te
 void Mesh::output(Output& out) {
   out.line("mesh");
   out.matref(matref); // temp
-  for (int i = 0; i < v.size(); i++) out.vertex(v[i]);
-  for (int i = 0; i < tc.size(); i++) out.texcoord(tc[i]);
+  for (size_t i = 0; i < v.size(); i++) out.vertex(v[i]);
+  for (size_t i = 0; i < tc.size(); i++) out.texcoord(tc[i]);
   if (passable) out.line("  passable"); 
   if (noradar) out.line("  noradar"); 
-  for (int i = 0; i < f.size(); i++) out.face(f[i]);
+  for (size_t i = 0; i < f.size(); i++) out.face(f[i]);
   out.line("end\n");
 }
 

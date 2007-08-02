@@ -21,9 +21,9 @@ public:
   VertexVector v;
   TexCoordVector tc;
   FaceVector f;
-  bool passable;
-  bool noradar;
   int matref; 
+  bool noradar;
+  bool passable;
   Mesh() : noradar(false), passable(false) {}
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d);
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord ta, TexCoord tb, TexCoord tc, TexCoord td);
