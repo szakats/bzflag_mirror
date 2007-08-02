@@ -46,7 +46,7 @@ void Mesh::output(Output& out) {
   if (noradar) out.line("  noradar"); 
   for (int i = 0; i < f.size(); i++) out.face(f[i]);
   out.line("end\n");
-};
+}
 
 // Local Variables: ***
 // mode:C++ ***
