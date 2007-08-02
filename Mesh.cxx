@@ -68,7 +68,7 @@ void Mesh::output(Output& out) {
   for (size_t i = 0; i < tc.size(); i++) out.texcoord(tc[i]);
   if (passable) out.line("  passable"); 
   if (noradar) out.line("  noradar"); 
-  for (int i = 0; i < f.size(); i++) out.face(f[i],mat);
+  for (size_t i = 0; i < f.size(); i++) out.face(f[i],mat);
   out.line("end\n");
 }
 
