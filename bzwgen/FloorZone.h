@@ -18,7 +18,7 @@
 #include <fstream>
 #include <string>
 #include "common.h"
-#include "zone.h"
+#include "Zone.h"
 #include "Mesh.h"
 
 
