@@ -30,7 +30,7 @@ public:
   int addFace(Face face) { f.push_back(face); return f.size()-1; }
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat = 0);
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord ta, TexCoord tb, TexCoord tc, TexCoord td, int mat = 0);
-  ID4 extrudeFace(int fid, float amount);
+  ID4 extrudeFace(int fid, float amount, int mat = 0);
   void expandFace(int fid, float amount);
   Vertex faceNormal(int fid);
   Vertex faceCenter(int fid);

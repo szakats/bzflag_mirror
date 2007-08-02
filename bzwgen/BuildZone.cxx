@@ -14,7 +14,15 @@
 
 BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 {
+  int wall;
+  if (rand()%2 == 0) {
+    wall = MATWALL;
+  } else {
+    wall = MATWALL2;
+  }
+
   mesh.matref = MATMESH;
+
   int base = mesh.createNewFace(
       Vertex((float)A.x,(float)A.y,0.01f),
       Vertex((float)B.x,(float)A.y,0.01f),
@@ -23,22 +31,20 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
       MATMESH
   );
 
-  int height = ((rand()%5)*4+4);
-  if (rand()%4 == 0) height += (rand()%5)*4;
+  int height = rand()%5+1;
 
-  ID4 sides = mesh.extrudeFace(base,(float)height);
-
-  int wall;
-  if (rand()%2 == 0) {
-    wall = MATWALL;
-  } else {
-    wall = MATWALL2;
+  for (int i = 0; i < height; i++) {
+    mesh.extrudeFace(base,3.7f,wall);
+    if (i == height-1) break;
+    mesh.extrudeFace(base,0.0f,MATMESH);
+    mesh.expandFace(base,0.15f);
+    mesh.extrudeFace(base,0.3f,MATMESH);
+    mesh.extrudeFace(base,0.0f,MATMESH);
+    mesh.expandFace(base,-0.15f);
   }
-
-  mesh.f[sides.a].mat = wall; 
-  mesh.f[sides.b].mat = wall; 
-  mesh.f[sides.c].mat = wall; 
-  mesh.f[sides.d].mat = wall; 
+  mesh.extrudeFace(base,0.0f,MATMESH);
+  mesh.expandFace(base,0.2f);
+  mesh.extrudeFace(base,0.5f,MATMESH);
 }
 
 void BuildZone::output(Output& out) 
