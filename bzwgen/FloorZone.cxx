@@ -22,25 +22,25 @@ FloorZone::FloorZone(Coord2D a, Coord2D b, int astep, int matref, bool rotated) 
   mesh.noradar = true;
   if (rotated) {
     mesh.createNewFace(
-      Vertex(A.x,A.y,0.001),
-      Vertex(B.x,A.y,0.001),
-      Vertex(B.x,B.y,0.001),
-      Vertex(A.x,B.y,0.001),
-      TexCoord(0,0),
-      TexCoord(0,int((B.x-A.x)/step)),
-      TexCoord(int((B.y-A.y)/step),int((B.x-A.x)/step)),
-      TexCoord(int((B.y-A.y)/step),0),
+      Vertex((float)A.x,(float)A.y,0.001f),
+      Vertex((float)B.x,(float)A.y,0.001f),
+      Vertex((float)B.x,(float)B.y,0.001f),
+      Vertex((float)A.x,(float)B.y,0.001f),
+      TexCoord(0.0f,0.0f),
+      TexCoord(0.0f,float((B.x-A.x)/step)),
+      TexCoord(float((B.y-A.y)/step),float((B.x-A.x)/step)),
+      TexCoord(float((B.y-A.y)/step),0.0f),
       matref);
   } else {
     mesh.createNewFace(
-      Vertex(A.x,A.y,0.001),
-      Vertex(B.x,A.y,0.001),
-      Vertex(B.x,B.y,0.001),
-      Vertex(A.x,B.y,0.001),
+      Vertex((float)A.x,(float)A.y,0.001f),
+      Vertex((float)B.x,(float)A.y,0.001f),
+      Vertex((float)B.x,(float)B.y,0.001f),
+      Vertex((float)A.x,(float)B.y,0.001f),
       TexCoord(0,0),
-      TexCoord(int((B.x-A.x)/step),0),
-      TexCoord(int((B.x-A.x)/step),int((B.y-A.y)/step)),
-      TexCoord(0,int((B.y-A.y)/step)),
+      TexCoord(float((B.x-A.x)/step),0.0f),
+      TexCoord(float((B.x-A.x)/step),float((B.y-A.y)/step)),
+      TexCoord(0,float((B.y-A.y)/step)),
       matref);
   }
 }
