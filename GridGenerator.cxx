@@ -19,8 +19,8 @@ GridGenerator::GridGenerator() {
 void GridGenerator::parseOptions(Options opt) { 
   Generator::parseOptions(opt); 
   gi.size  = getSize();
-  gi.sizeX = 80;
-  gi.sizeY = 80;
+  gi.sizeX = 40;
+  gi.sizeY = 40;
   gi.stepX = gi.size / gi.sizeX;
   gi.stepY = gi.size / gi.sizeY;
   map.initialize(gi);
