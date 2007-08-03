@@ -25,12 +25,6 @@ public:
   void vertex(Vertex v) { 
     (*this) << "  vertex " << v.x << " " << v.y << " " << v.z << "\n"; 
   }
-  void inside(float x,float y,float z = 0) { 
-    (*this) << "  inside " << x << " " << y << " " << z << "\n"; 
-  }
-  void outside(float x,float y,float z = 0) { 
-    (*this) << "  outside " << x << " " << y << " " << z << "\n"; 
-  }
   void texcoord(TexCoord tc) { 
     (*this) << "  texcoord " << tc.s << " " << tc.t << "\n"; 
   }
