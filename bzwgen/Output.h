@@ -25,6 +25,9 @@ public:
   void vertex(Vertex v) { 
     (*this) << "  vertex " << v.x << " " << v.y << " " << v.z << "\n"; 
   }
+  void vertex(Vertex v, const char* name) { 
+    (*this) << "  " << name << " " << v.x << " " << v.y << " " << v.z << "\n"; 
+  }
   void texcoord(TexCoord tc) { 
     (*this) << "  texcoord " << tc.s << " " << tc.t << "\n"; 
   }

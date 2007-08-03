@@ -23,6 +23,7 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 
   mesh.matref = MATMESH;
 
+
   int base = mesh.createNewFace(
       Vertex((float)A.x,(float)A.y,0.01f),
       Vertex((float)B.x,(float)A.y,0.01f),
@@ -33,6 +34,10 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 
   int height = rand()%5+1;
 
+  mesh.io = true;
+  mesh.inside  = Vertex((float)B.x-A.x,(float)B.y-A.y,1.0f);
+  mesh.outside = Vertex((float)B.x-A.x,(float)B.y-A.y,float(height)*10.0f);
+
   ID4 fs;
 
   for (int i = 0; i < height; i++) {
@@ -41,10 +46,12 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
       Vertex vv = mesh.v[mesh.f[fs[j]].vtx[0]]-mesh.v[mesh.f[fs[j]].vtx[1]];
       int sdcount = int(vv.length()/4.0f);
       IntVector* fcs = mesh.subdivdeFace(fs[j],sdcount,true);
-      for (int k = 0; k < int(fcs->size()); k++) {
-        mesh.extrudeFace(fcs->at(k),0.0f,wall);
-        mesh.expandFace(fcs->at(k),-0.4f);
-        mesh.extrudeFace(fcs->at(k),-0.2f,wall);
+      if (wall == MATWALL2) {
+	for (int k = 0; k < int(fcs->size()); k++) {
+	  mesh.extrudeFace(fcs->at(k),0.0f,wall);
+	  mesh.expandFace(fcs->at(k),-0.4f);
+	  mesh.extrudeFace(fcs->at(k),-0.2f,wall);
+	}
       }
       delete fcs;
     }
