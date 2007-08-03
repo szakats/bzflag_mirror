@@ -151,6 +151,7 @@ IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal) {
 
 //IntVector& Mesh::subdivdeFaceV(int fid) {
 //  
+
 //}
 
 
