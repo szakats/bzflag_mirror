@@ -120,23 +120,28 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 											 data[2] == -object->getPosition().z() ) {
 			
 			// add the transformation to the list	 	
-			this->addTransformCallback_real( transformationScrollArea );
-			transformations[transformations.size() - 1]->setTransformationType( (*itr)->getName().c_str() );
-			transformations[transformations.size() - 1]->setFields( data );
+			TransformWidget* firstShift = new TransformWidget(0, 0, transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, this->transformationFormat.c_str(), false );
+			firstShift->setTransformationType( (*itr)->getName().c_str() );
+			firstShift->setFields( data );
 			
-			// deactivate it
-			transformations[transformations.size() - 1]->deactivate();
-			
-			itr++;
+			this->addTransformCallback_real( firstShift );
+			firstShift->deactivate();
 			
 			// save the reference
-			this->startShift = transformations[ transformations.size() - 1 ];
+			this->startShift = firstShift;
 		}
 		
-		for(vector< osg::ref_ptr<BZTransform> >::iterator i = itr; i != transforms.end(); i++) {
-			this->addTransformCallback_real(transformationScrollArea);
-			transformations[transformations.size() - 1]->setTransformationType((*i)->getName().c_str());
-			transformations[transformations.size() - 1]->setFields( (*i)->getData() );
+		// add the rest of the transforms
+		for(vector< osg::ref_ptr<BZTransform> >::iterator i = transforms.end() - 2; i != itr; i--) {
+			// next transform widget (the dimensions of which shall be calculated in the addTransformCallback_real method
+			TransformWidget* nextTransform = new TransformWidget(0, 0, transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, this->transformationFormat.c_str(), false);
+			
+			nextTransform->setTransformationType( (*i)->getName().c_str() );
+			nextTransform->setFields( (*i)->getData() );
+			
+			this->addTransformCallback_real(nextTransform);
+			
+			
 		}
 		
 		// see if the last transformation added was indeed the ending shift
@@ -146,15 +151,32 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 		
 		// see if this is indeed the ubiquitous shift transform
 		if( transforms.size() >= 2 &&		// there should be two transformations, then: the first shift and this one
-			(*itr)->getName() == "shift" &&  data[0] == -object->getPosition().x() &&
-											 data[1] == -object->getPosition().y() &&
-											 data[2] == -object->getPosition().z() ) {
+			(*itr)->getName() == "shift" &&  data[0] == object->getPosition().x() &&
+											 data[1] == object->getPosition().y() &&
+											 data[2] == object->getPosition().z() ) {
+			
+			TransformWidget* lastShift = new TransformWidget(transformationScrollArea->x() + 5, transformationScrollArea->y() + 3*DEFAULT_TEXTSIZE*(transforms.size()), transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, this->transformationFormat.c_str(), false );
+			lastShift->setTransformationType( (*itr)->getName().c_str() );
+			lastShift->setFields( data );
+			
+			transformations.push_back( lastShift );
+			transformationScrollArea->add( lastShift );
 			
 			// deactivate it
-			transformations[transformations.size() - 1]->deactivate();	
+			lastShift->deactivate();	
+			
+			transformationScrollArea->redraw();
 			
 			// save the reference
-			this->endShift = transformations[transformations.size()-1];						 	
+			this->endShift = lastShift;					 	
+		}
+		else {
+			TransformWidget* nextTransform = new TransformWidget(0, 0, transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, this->transformationFormat.c_str(), false);
+			
+			nextTransform->setTransformationType( (*itr)->getName().c_str() );
+			nextTransform->setFields( (*itr)->getData() );
+			
+			this->addTransformCallback_real(nextTransform);
 		}
 		
 	}
@@ -238,7 +260,7 @@ void MasterConfigurationDialog::OKButtonCallback_real(Fl_Widget* w) {
 	string transformationString("");
 	
 	if(transformations.size() != 0) {
-		for(vector<TransformWidget*>::iterator i = transformations.begin(); i != transformations.end(); i++) {
+		for(vector<TransformWidget*>::iterator i = transformations.end() - 1; i != transformations.begin() - 1; i--) {
 			if( (*i)->active() )
 				transformationString += (*i)->toString();
 		}
@@ -267,35 +289,44 @@ void MasterConfigurationDialog::CancelButtonCallback_real(Fl_Widget* w) {
 /*
  * Add a transformation to the list
  */
-void MasterConfigurationDialog::addTransformCallback_real(Fl_Widget* w) {
+void MasterConfigurationDialog::addTransformCallback_real(Fl_Widget* widgetToAdd) {
 	
 	int x = transformationScrollArea->x() + 5;
 	int y;
+	
 	// pick the value for y
-	if( transformations.size() <= 0 )		// no transformations ==> y should be just underneath the scroll area
-		y = transformationScrollArea->y() + 3*DEFAULT_TEXTSIZE;
-	else if( this->endShift != NULL )	{	// we have the ubiquitous footer shift ==> y should be above it it
-		// move endShift down
-		endShift->position( endShift->x(), endShift->y() + 3*DEFAULT_TEXTSIZE );
-		y = endShift->y() - 3*DEFAULT_TEXTSIZE;	
+	if( this->startShift != NULL )	{	// we have the ubiquitous footer shift ==> y should be above it it
+		// move the widget down
+		y = startShift->y() + 3*DEFAULT_TEXTSIZE*(transformations.size());	
 	}
 	else	// we have a transformation before this one ==> y should be just underneath it
-		y = transformations[transformations.size()-1]->y() + 3*DEFAULT_TEXTSIZE;
+		y = transformationScrollArea->y() + 3*DEFAULT_TEXTSIZE*(transformations.size()+1);
 	
 	int width = transformationScrollArea->w();
 	int height = 3*DEFAULT_TEXTSIZE;
 	
-	// new transformation widget
-	TransformWidget* t = new TransformWidget(x, y, width, height, this->transformationFormat.c_str(), false);
-	transformationScrollArea->add(t);
-	transformationScrollArea->redraw();
-	t->redraw();
+	// the passed Fl_Widget* should be the next transformation to add
+	TransformWidget* newTransform = dynamic_cast< TransformWidget* >(widgetToAdd);
 	
-	// if we have the inactive last shift, then insert the transformation just before it
-	if( this->endShift != NULL )
-		transformations.insert( transformations.end() - 2, t );
+	if( widgetToAdd == this || !newTransform ) {
+		// if the dynamic_cast failed, then just make the default
+		newTransform = new TransformWidget(x, y, width, height, this->transformationFormat.c_str(), false);
+	}
+	else {
+		newTransform->position( x, y );
+	}
+	
+	transformationScrollArea->add(newTransform);
+	transformationScrollArea->redraw();
+	newTransform->redraw();
+	
+	// if we have the inactive end shift, then insert the transformation just before it
+	if( this->endShift != NULL ) {
+		transformations.insert( transformations.end() - 1, newTransform );
+		endShift->position( endShift->x(), endShift->y() * 3*DEFAULT_TEXTSIZE );
+	}
 	else
-		transformations.push_back( t );
+		transformations.push_back( newTransform );
 }
 
 /*

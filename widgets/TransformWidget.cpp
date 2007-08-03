@@ -7,7 +7,7 @@ TransformWidget::TransformWidget(const TransformWidget& t) : Fl_Group(0, 0, 0, 0
 
 // the format for fields is "<type1:|field1|field2|field3|" ... "|fieldN|>"
 TransformWidget::TransformWidget(int x, int y, int WIDTH, int HEIGHT, const char* fields, bool active) : 
-	Fl_Group(x, y, WIDTH, 2*(DEFAULT_TEXTSIZE) + 1) {
+	Fl_Group(x, y, WIDTH, HEIGHT) {
 	
 	this->end();
 	
