@@ -148,11 +148,42 @@ IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal) {
 
 }
 
+int Mesh::partitionFace(int fid, float amount, bool horizontal) {
+  ID4 cnr = f[fid].vtx;
+  Vertex A, B;
 
-//IntVector& Mesh::subdivdeFaceV(int fid) {
-//  
+  if (horizontal) {
+    A = (v[cnr[2]]-v[cnr[3]]);
+    B = (v[cnr[1]]-v[cnr[0]]);
+  } else {
+    A = (v[cnr[3]]-v[cnr[0]]);
+    B = (v[cnr[2]]-v[cnr[1]]);
+  }
 
-//}
+  A = A * (amount / A.length());
+  B = B * (amount / A.length());
+
+  int pai = 0, pbi = 0;
+
+  if (horizontal) {
+    pai = cnr[3];
+    pbi = cnr[0];
+  } else {
+    pai = cnr[0];
+    pbi = cnr[1];
+  }
+
+  int ai = addVertex(v[pai]+A);
+  int bi = addVertex(v[pbi]+B);
+
+  int result = addFace(Face(ID4(pai,pbi,bi,ai),f[fid].mat));
+  if (horizontal) {
+    f[fid].vtx = ID4(ai,bi,cnr[1],cnr[2]);
+  } else {
+    f[fid].vtx = ID4(ai,bi,cnr[2],cnr[3]);
+  }
+  return result;
+}
 
 
 void Mesh::output(Output& out) {
