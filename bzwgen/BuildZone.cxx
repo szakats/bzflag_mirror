@@ -33,8 +33,21 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 
   int height = rand()%5+1;
 
+  ID4 fs;
+
   for (int i = 0; i < height; i++) {
-    mesh.extrudeFace(base,3.7f,wall);
+    fs = mesh.extrudeFace(base,3.7f,wall);
+    for (int j = 0; j < 4; j++) {
+      Vertex vv = mesh.v[mesh.f[fs[j]].vtx[0]]-mesh.v[mesh.f[fs[j]].vtx[1]];
+      int sdcount = int(vv.length()/4.0f);
+      IntVector* fcs = mesh.subdivdeFace(fs[j],sdcount,true);
+      for (int k = 0; k < int(fcs->size()); k++) {
+        mesh.extrudeFace(fcs->at(k),0.0f,wall);
+        mesh.expandFace(fcs->at(k),-0.4f);
+        mesh.extrudeFace(fcs->at(k),-0.2f,wall);
+      }
+      delete fcs;
+    }
     if (i == height-1) break;
     mesh.extrudeFace(base,0.0f,MATMESH);
     mesh.expandFace(base,0.15f);
