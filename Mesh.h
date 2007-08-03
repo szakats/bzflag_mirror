@@ -21,10 +21,13 @@ public:
   VertexVector v;
   TexCoordVector tc;
   FaceVector f;
+  Vertex inside;
+  Vertex outside;
   int matref; 
+  bool io;
   bool noradar;
   bool passable;
-  Mesh() : noradar(false), passable(false) {}
+  Mesh() : noradar(false), passable(false), io(false) {}
   int addVertex(Vertex vtx) { v.push_back(vtx); return v.size()-1; }
   int addTexCoord(TexCoord tcx) { tc.push_back(tcx); return tc.size()-1; }
   int addFace(Face face) { f.push_back(face); return f.size()-1; }
