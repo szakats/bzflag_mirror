@@ -189,10 +189,8 @@ int Mesh::partitionFace(int fid, float amount, bool horizontal) {
 void Mesh::output(Output& out) {
   out.line("mesh");
   out.matref(matref); 
-  if (io) {
-    out.vertex(inside,"inside");
-    out.vertex(outside,"outside");
-  }
+  for (size_t i = 0; i < inside.size(); i++) out.vertex(inside[i],"inside");
+  for (size_t i = 0; i < outside.size(); i++) out.vertex(outside[i],"outside");
   int mat = matref;
   for (size_t i = 0; i < v.size(); i++) out.vertex(v[i]);
   for (size_t i = 0; i < tc.size(); i++) out.texcoord(tc[i]);
