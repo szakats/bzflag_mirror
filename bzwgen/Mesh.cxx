@@ -161,7 +161,7 @@ int Mesh::partitionFace(int fid, float amount, bool horizontal) {
   }
 
   A = A * (amount / A.length());
-  B = B * (amount / A.length());
+  B = B * (amount / B.length());
 
   int pai = 0, pbi = 0;
 
