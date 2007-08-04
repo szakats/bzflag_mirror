@@ -41,13 +41,19 @@ public:
       vtx->push_back(_vtx[i]);
     }
   }
+  void setID4(ID4 id4) {
+    vtx->clear();
+    for (int i = 0; i < 4; i++) {
+      vtx->push_back(id4[i]);
+    }
+  }
   ~Face() {
     delete vtx;
     delete tcd;
   }
 };
 
-typedef std::vector<Face> FaceVector;
+typedef std::vector<Face*> FaceVector;
 typedef FaceVector::iterator FaceVectIter;
 
 #endif /* __FACE_H__ */
