@@ -188,18 +188,18 @@ int Mesh::partitionFace(int fid, float amount, bool horizontal) {
 
 void Mesh::output(Output& out) {
   out.line("mesh");
-  out.matref(matref); 
+  int mat = -1;
   for (size_t i = 0; i < inside.size(); i++) out.vertex(inside[i],"inside");
   for (size_t i = 0; i < outside.size(); i++) out.vertex(outside[i],"outside");
-  int mat = matref;
   for (size_t i = 0; i < v.size(); i++) out.vertex(v[i]);
   for (size_t i = 0; i < tc.size(); i++) out.texcoord(tc[i]);
   if (passable) out.line("  passable"); 
-  if (noradar) out.line("  noradar"); 
+
   for (int m = 0; m <= MAXMATERIALS; m++) {
     for (size_t i = 0; i < f.size(); i++) 
       if (f[i].mat == m) {
 	if (mat != m) out.matref(m);
+        if (noradar) out.line("  noradar"); 
 	mat = m;
 	out.face(f[i],mat);
 	mat = f[i].mat;
