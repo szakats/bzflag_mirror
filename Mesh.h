@@ -23,7 +23,6 @@ public:
   FaceVector f;
   VertexVector inside;
   VertexVector outside;
-  int matref; 
   bool noradar;
   bool passable;
   Mesh() : noradar(false), passable(false) {}
