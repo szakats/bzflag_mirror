@@ -15,14 +15,14 @@
 BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 {
   int wall;
+  int height;
   if (rand()%2 == 0) {
     wall = MATWALL;
+    height = rand()%3+1;
   } else {
     wall = MATWALL2;
+    height = rand()%6+1;
   }
-
-  mesh.matref = MATMESH;
-
 
   int base = mesh.createNewFace(
       Vertex((float)A.x,(float)A.y,0.01f),
@@ -32,28 +32,25 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
       MATMESH
   );
 
-  int height = rand()%5+1;
 
-  mesh.io = true;
-  mesh.inside  = Vertex((float)B.x-A.x,(float)B.y-A.y,1.0f);
-  mesh.outside = Vertex((float)B.x-A.x,(float)B.y-A.y,float(height)*10.0f);
+  mesh.inside.push_back(mesh.faceCenter(base)+mesh.faceNormal(base));
 
   ID4 fs;
 
   for (int i = 0; i < height; i++) {
     fs = mesh.extrudeFace(base,3.7f,wall);
     for (int j = 0; j < 4; j++) {
+      if (wall == MATWALL2) {
       Vertex vv = mesh.v[mesh.f[fs[j]].vtx[0]]-mesh.v[mesh.f[fs[j]].vtx[1]];
       int sdcount = int(vv.length()/4.0f);
-      IntVector* fcs = mesh.subdivdeFace(fs[j],sdcount,true);
-      if (wall == MATWALL2) {
+        IntVector* fcs = mesh.subdivdeFace(fs[j],sdcount,true);
 	for (int k = 0; k < int(fcs->size()); k++) {
 	  mesh.extrudeFace(fcs->at(k),0.0f,wall);
 	  mesh.expandFace(fcs->at(k),-0.4f);
 	  mesh.extrudeFace(fcs->at(k),-0.2f,wall);
 	}
-      }
       delete fcs;
+      }
     }
     if (i == height-1) break;
     mesh.extrudeFace(base,0.0f,MATMESH);
@@ -65,16 +62,51 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
   mesh.extrudeFace(base,0.0f,MATMESH);
   mesh.expandFace(base,0.2f);
   mesh.extrudeFace(base,0.5f,MATMESH);
+
+  if (wall == MATWALL && rand()%2 == 0) {
+    height = rand()%3+1;
+    Vertex vh = mesh.v[mesh.f[base].vtx[0]]-mesh.v[mesh.f[base].vtx[1]];
+    Vertex vv = mesh.v[mesh.f[base].vtx[3]]-mesh.v[mesh.f[base].vtx[0]];
+
+    bool horiz = vh.length() > vv.length();
+    float l;
+
+    if (horiz) {
+      l = vh.length();
+    } else {
+      l = vv.length();
+    }
+    
+    l /= 2.0f;
+    
+
+    int newbase = mesh.partitionFace(base,l,horiz);
+    if (rand()%2 == 0) {
+      base = newbase;
+    } else {
+    }
+    mesh.extrudeFace(base,0.0f,MATMESH);
+    mesh.expandFace(base,-0.2f);
+
+    for (int i = 0; i < height; i++) {
+      fs = mesh.extrudeFace(base,3.7f,wall);
+      if (i == height-1) break;
+      mesh.extrudeFace(base,0.0f,MATMESH);
+      mesh.expandFace(base,0.15f);
+      mesh.extrudeFace(base,0.3f,MATMESH);
+      mesh.extrudeFace(base,0.0f,MATMESH);
+      mesh.expandFace(base,-0.15f);
+    }
+    mesh.extrudeFace(base,0.0f,MATMESH);
+    mesh.expandFace(base,0.2f);
+    mesh.extrudeFace(base,0.5f,MATMESH);
+  }
 }
 
 void BuildZone::output(Output& out) 
 {
   mesh.output(out);
-/* out.inside((A.x+B.x)/2,(A.y+B.y)/2,1);
-  out.outside((A.x+B.x)/2,(A.y+B.y)/2,100);
-  out.outside((A.x)-1,(A.y)-1);
-  out.outside((B.x)+1,(B.y)+1);
-  out << "  color 0."<< rand()%10+80 << " 0." << rand()%20+80 << " 0."<< rand()%20+80<< " 1.0\n";
+/*   out << "  color 0."<< rand()%10+80 << " 0." << rand()%20+80 << " 0."<< rand()%20+80<< " 1.0\n";
 */
 }
 

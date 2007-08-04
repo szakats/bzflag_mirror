@@ -16,8 +16,6 @@
 
 FloorZone::FloorZone(Coord2D a, Coord2D b, int astep, int matref, bool rotated) : Zone(a,b,astep)
 {
-  mesh.matref = matref;
-
   mesh.passable = true;
   mesh.noradar = true;
   if (rotated) {
