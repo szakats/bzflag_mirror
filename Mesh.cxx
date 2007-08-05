@@ -69,15 +69,14 @@ Vertex Mesh::extensionVertex(int ida, int idb, int idc) {
 void Mesh::expandFace(int fid, float amount) {
   // needs to be uniform
   IntVector* fv = f[fid]->vtx;
-  Vertex v0 = v[fv->at(0)] + extensionVertex(fv->at(3),fv->at(1),fv->at(0))*amount;
-  Vertex v1 = v[fv->at(1)] + extensionVertex(fv->at(0),fv->at(2),fv->at(1))*amount;
-  Vertex v2 = v[fv->at(2)] + extensionVertex(fv->at(1),fv->at(3),fv->at(2))*amount;
-  Vertex v3 = v[fv->at(3)] + extensionVertex(fv->at(2),fv->at(0),fv->at(3))*amount;
-
-  v[fv->at(0)] = v0;
-  v[fv->at(1)] = v1;
-  v[fv->at(2)] = v2;
-  v[fv->at(3)] = v3;
+  int size = fv->size();
+  Vertex nv[10];
+  for (int i = 0; i < size; i++) {
+    nv[i] = v[fv->at(i)] + extensionVertex(fv->at(modprev(i,size)),fv->at(modnext(i,size)),fv->at(i))*amount;
+  }
+  for (int i = 0; i < size; i++) {
+    v[fv->at(i)] = nv[i];
+  }
 }
 
 
