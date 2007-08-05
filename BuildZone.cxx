@@ -38,6 +38,16 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
       MATROOF
   );
   
+  mesh.expandFace(base,0.6f);
+  mesh.extrudeFace(base,0.2f,MATMESH);
+  mesh.extrudeFace(base,0.0f,MATMESH);
+  if (wall == MATGLASS) {
+    mesh.expandFace(base,-2.6f);
+  } else {
+    mesh.expandFace(base,-1.3f);
+  }
+
+  
   mesh.inside.push_back(mesh.faceCenter(base)+mesh.faceNormal(base));
 
   IntVector* fs;
