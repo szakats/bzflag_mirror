@@ -19,7 +19,9 @@
 #define MATWALL  2
 #define MATWALL2 3
 #define MATMESH  4
-#define MAXMATERIALS 5
+#define MATROOF  5
+#define MATROOFT 6
+#define MAXMATERIALS 7
 
 #define EPSILON 0.00000001f
 #define WORLDSIZE 200
