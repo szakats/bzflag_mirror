@@ -129,23 +129,6 @@ struct ID4 {
 
 typedef std::vector<int> IntVector;
 
-
-
-/* Assuming all faces are quads makes life a lot easier */
-struct Face {
-  ID4 vtx;
-  ID4 tcd;
-  int mat;
-  bool texcoords;
-  Face() : vtx(), tcd(), mat(0), texcoords(true) {}
-  Face(ID4 _vtx, ID4 _tcd, int _mat = 0) : vtx(_vtx), tcd(_tcd), mat(_mat), texcoords(true) {}
-  Face(ID4 _vtx, int _mat = 0) : vtx(_vtx), tcd(), mat(_mat), texcoords(false) {}
-};
-
-
-typedef std::vector<Face> FaceVector;
-typedef FaceVector::iterator FaceVectIter;
-
 struct DiscreetMapNode {
   int z;
   int type;

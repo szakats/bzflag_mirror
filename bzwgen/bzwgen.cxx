@@ -60,7 +60,6 @@ int main (/*int argc, char* argv[]*/) {
   gen.output(os);
 
   std::cout << "Done.\n";
-
 }
 
 	

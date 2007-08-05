@@ -18,7 +18,7 @@ int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat) {
   v.push_back(c);
   v.push_back(d);
   int size = v.size();
-  return addFace(Face(ID4(size-4,size-3,size-2,size-1),mat));
+  return addFace(new Face(ID4(size-4,size-3,size-2,size-1),mat));
 }
 
 int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord tca, TexCoord tcb, TexCoord tcc, TexCoord tcd, int mat) {
@@ -32,22 +32,25 @@ int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord tca, Te
   tc.push_back(tcc);
   tc.push_back(tcd);
   int tsize = tc.size();
-  return addFace(Face(ID4(size-4,size-3,size-2,size-1),ID4(tsize-4,tsize-3,tsize-2,tsize-1),mat));
+  return addFace(new Face(ID4(size-4,size-3,size-2,size-1),ID4(tsize-4,tsize-3,tsize-2,tsize-1),mat));
 }
 
 ID4 Mesh::extrudeFace(int fid, float amount, int mat) {
-  Vertex dir = faceNormal(fid)*amount;
-  ID4 base = f[fid].vtx;
-  int newface = createNewFace(v[base.a]+dir,v[base.b]+dir,v[base.c]+dir,v[base.d]+dir,f[fid].mat);
+  Vertex dir = faceNormal(fid+mat-mat)*amount;
+  IntVector* base = f[fid]->vtx;
+  int newface = createNewFace(v[base->at(0)]+dir,v[base->at(1)]+dir,v[base->at(2)]+dir,v[base->at(3)]+dir,f[fid]->mat);
+  Face* todelete = f[fid];
   f[fid] = f[newface];
   f.pop_back();
-  ID4 top = f[fid].vtx;
-  return ID4(
-      addFace(Face(ID4(base[0],base[1],top[1],top[0]),mat)),
-      addFace(Face(ID4(base[1],base[2],top[2],top[1]),mat)),
-      addFace(Face(ID4(base[2],base[3],top[3],top[2]),mat)),
-      addFace(Face(ID4(base[3],base[0],top[0],top[3]),mat))
+  IntVector* top = f[fid]->vtx;
+  ID4 result = ID4(
+      addFace(new Face(ID4(base->at(0),base->at(1),top->at(1),top->at(0)),mat)),
+      addFace(new Face(ID4(base->at(1),base->at(2),top->at(2),top->at(1)),mat)),
+      addFace(new Face(ID4(base->at(2),base->at(3),top->at(3),top->at(2)),mat)),
+      addFace(new Face(ID4(base->at(3),base->at(0),top->at(0),top->at(3)),mat))
     );
+  delete todelete;
+  return result;
 }
 
 Vertex Mesh::extensionVertex(int ida, int idb, int idc) {
@@ -65,60 +68,60 @@ Vertex Mesh::extensionVertex(int ida, int idb, int idc) {
 
 void Mesh::expandFace(int fid, float amount) {
   // needs to be uniform
-  ID4 fv = f[fid].vtx;
-  Vertex v0 = v[fv[0]] + extensionVertex(fv[3],fv[1],fv[0])*amount;
-  Vertex v1 = v[fv[1]] + extensionVertex(fv[0],fv[2],fv[1])*amount;
-  Vertex v2 = v[fv[2]] + extensionVertex(fv[1],fv[3],fv[2])*amount;
-  Vertex v3 = v[fv[3]] + extensionVertex(fv[2],fv[0],fv[3])*amount;
+  IntVector* fv = f[fid]->vtx;
+  Vertex v0 = v[fv->at(0)] + extensionVertex(fv->at(3),fv->at(1),fv->at(0))*amount;
+  Vertex v1 = v[fv->at(1)] + extensionVertex(fv->at(0),fv->at(2),fv->at(1))*amount;
+  Vertex v2 = v[fv->at(2)] + extensionVertex(fv->at(1),fv->at(3),fv->at(2))*amount;
+  Vertex v3 = v[fv->at(3)] + extensionVertex(fv->at(2),fv->at(0),fv->at(3))*amount;
 
-  v[fv[0]] = v0;
-  v[fv[1]] = v1;
-  v[fv[2]] = v2;
-  v[fv[3]] = v3;
+  v[fv->at(0)] = v0;
+  v[fv->at(1)] = v1;
+  v[fv->at(2)] = v2;
+  v[fv->at(3)] = v3;
 }
 
 
 
 Vertex Mesh::faceCenter(int fid) {
-  Face face = f[fid];
-  return (v[face.vtx.a]+v[face.vtx.b]+v[face.vtx.c]+v[face.vtx.d])/4;
+  Face* face = f[fid];
+  return (v[face->vtx->at(0)]+v[face->vtx->at(1)]+v[face->vtx->at(2)]+v[face->vtx->at(3)])/4;
 }
 
 
 Vertex Mesh::faceNormal(int fid) {
-  Face face = f[fid];
-  Vertex a = v[face.vtx.a]-v[face.vtx.b];
-  Vertex b = v[face.vtx.a]-v[face.vtx.c];
+  Face* face = f[fid];
+  Vertex a = v[face->vtx->at(0)]-v[face->vtx->at(1)];
+  Vertex b = v[face->vtx->at(0)]-v[face->vtx->at(2)];
   Vertex r = a.cross(b);
   float length = r.length();
   return r / length;
 }
 
 IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal) {
-  ID4 cnr = f[fid].vtx;
+  IntVector* cnr = f[fid]->vtx;
   Vertex stepA, stepB;
 
   if (horizontal) {
-    stepA = (v[cnr[2]]-v[cnr[3]]) / float(count);
-    stepB = (v[cnr[1]]-v[cnr[0]]) / float(count);
+    stepA = (v[cnr->at(2)]-v[cnr->at(3)]) / float(count);
+    stepB = (v[cnr->at(1)]-v[cnr->at(0)]) / float(count);
   } else {
-    stepA = (v[cnr[3]]-v[cnr[0]]) / float(count);
-    stepB = (v[cnr[2]]-v[cnr[1]]) / float(count);
+    stepA = (v[cnr->at(3)]-v[cnr->at(0)]) / float(count);
+    stepB = (v[cnr->at(2)]-v[cnr->at(1)]) / float(count);
   }
 
   IntVector* result = new IntVector();
 
-  int mat = f[fid].mat;
+  int mat = f[fid]->mat;
   
   int ai = 0 , bi = 0;
   int pai = 0, pbi = 0;
 
   if (horizontal) {
-    pai = cnr[3];
-    pbi = cnr[0];
+    pai = cnr->at(3);
+    pbi = cnr->at(0);
   } else {
-    pai = cnr[0];
-    pbi = cnr[1];
+    pai = cnr->at(0);
+    pbi = cnr->at(1);
   }
 
   Vertex a = v[pai];
@@ -133,31 +136,31 @@ IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal) {
     ai = addVertex(a);
     bi = addVertex(b);
 
-    result->push_back(addFace(Face(ID4(pai,pbi,bi,ai),mat)));
+    result->push_back(addFace(new Face(ID4(pai,pbi,bi,ai),mat)));
 
     pai = ai;
     pbi = bi;
   }
 
   if (horizontal) {
-    f[fid].vtx = ID4(ai,bi,cnr[1],cnr[2]);
+    f[fid]->setID4(ID4(ai,bi,cnr->at(1),cnr->at(2)));
   } else {
-    f[fid].vtx = ID4(ai,bi,cnr[2],cnr[3]);
+    f[fid]->setID4(ID4(ai,bi,cnr->at(2),cnr->at(3)));
   }
   return result;
 
 }
 
 int Mesh::partitionFace(int fid, float amount, bool horizontal) {
-  ID4 cnr = f[fid].vtx;
+  IntVector* cnr = f[fid]->vtx;
   Vertex A, B;
 
   if (horizontal) {
-    A = (v[cnr[2]]-v[cnr[3]]);
-    B = (v[cnr[1]]-v[cnr[0]]);
+    A = (v[cnr->at(2)]-v[cnr->at(3)]);
+    B = (v[cnr->at(1)]-v[cnr->at(0)]);
   } else {
-    A = (v[cnr[3]]-v[cnr[0]]);
-    B = (v[cnr[2]]-v[cnr[1]]);
+    A = (v[cnr->at(3)]-v[cnr->at(0)]);
+    B = (v[cnr->at(2)]-v[cnr->at(1)]);
   }
 
   A = A * (amount / A.length());
@@ -166,21 +169,21 @@ int Mesh::partitionFace(int fid, float amount, bool horizontal) {
   int pai = 0, pbi = 0;
 
   if (horizontal) {
-    pai = cnr[3];
-    pbi = cnr[0];
+    pai = cnr->at(3);
+    pbi = cnr->at(0);
   } else {
-    pai = cnr[0];
-    pbi = cnr[1];
+    pai = cnr->at(0);
+    pbi = cnr->at(1);
   }
 
   int ai = addVertex(v[pai]+A);
   int bi = addVertex(v[pbi]+B);
 
-  int result = addFace(Face(ID4(pai,pbi,bi,ai),f[fid].mat));
+  int result = addFace(new Face(ID4(pai,pbi,bi,ai),f[fid]->mat));
   if (horizontal) {
-    f[fid].vtx = ID4(ai,bi,cnr[1],cnr[2]);
+    f[fid]->setID4(ID4(ai,bi,cnr->at(1),cnr->at(2)));
   } else {
-    f[fid].vtx = ID4(ai,bi,cnr[2],cnr[3]);
+    f[fid]->setID4(ID4(ai,bi,cnr->at(2),cnr->at(3)));
   }
   return result;
 }
@@ -197,12 +200,12 @@ void Mesh::output(Output& out) {
 
   for (int m = 0; m <= MAXMATERIALS; m++) {
     for (size_t i = 0; i < f.size(); i++) 
-      if (f[i].mat == m) {
+      if (f[i]->mat == m) {
 	if (mat != m) out.matref(m);
         if (noradar) out.line("  noradar"); 
 	mat = m;
 	out.face(f[i],mat);
-	mat = f[i].mat;
+	mat = f[i]->mat;
       }
   }
   out.line("end\n");

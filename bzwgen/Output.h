@@ -17,6 +17,7 @@
 #include <string>
 #include <fstream>
 #include "common.h"
+#include "Face.h"
 
 
 class Output : public std::ofstream {
@@ -31,13 +32,27 @@ public:
   void texcoord(TexCoord tc) { 
     (*this) << "  texcoord " << tc.s << " " << tc.t << "\n"; 
   }
-  void face(Face f, int lastmat = -1) { 
+  void face(Face* f, int lastmat = -1) { 
     (*this) << "  face\n";
+
     if (lastmat >= 0) {
-      if (f.mat != lastmat) matref(f.mat);
+      if (f->mat != lastmat) matref(f->mat);
     }
-    (*this) << "    vertices " << f.vtx.a << " " << f.vtx.b << " " << f.vtx.c << " " << f.vtx.d << "\n"; 
-    if (f.texcoords) (*this) << "    texcoords " << f.tcd.a << " " << f.tcd.b << " " << f.tcd.c << " " << f.tcd.d << "\n"; 
+
+    (*this) << "    vertices ";
+    for (size_t i = 0; i < f->vtx->size(); i++) {
+      (*this) << f->vtx->at(i) << " ";
+    }
+    (*this) << "\n";
+
+    if (f->texcoords) {
+      (*this) << "    texcoords ";
+      for (size_t i = 0; i < f->tcd->size(); i++) {
+        (*this) << f->tcd->at(i) << " ";
+      }
+      (*this) << "\n";
+    }
+
     (*this) << "  endface\n";
   }
   void line(const char* textline) { 
