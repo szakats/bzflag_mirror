@@ -21,7 +21,8 @@
 #define MATMESH  4
 #define MATROOF  5
 #define MATROOFT 6
-#define MAXMATERIALS 7
+#define MATGLASS 7
+#define MAXMATERIALS 8
 
 #define EPSILON 0.00000001f
 #define WORLDSIZE 200
