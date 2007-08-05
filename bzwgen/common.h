@@ -165,6 +165,9 @@ struct Coord2D {
   bool operator != (const Coord2D& b) { return !operator==(b); }
 };
 
+inline int modprev(int x, int mod) { if (x == 0) return mod-1; else return x-1; }
+inline int modnext(int x, int mod) { if (x == mod-1) return 0; else return x+1; }
+
 
 #endif /* __COMMON_H__ */
 
