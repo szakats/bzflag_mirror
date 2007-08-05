@@ -29,7 +29,7 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
       Vertex((float)B.x,(float)A.y,0.01f),
       Vertex((float)B.x,(float)B.y,0.01f),
       Vertex((float)A.x,(float)B.y,0.01f),
-      MATMESH
+      MATROOF
   );
 
 
@@ -60,9 +60,22 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
     mesh.extrudeFace(base,0.0f,MATMESH);
     mesh.expandFace(base,-0.15f);
   }
+
+  if (wall == MATWALL && rand()%2 == 0 && height <= 3 && (abs(A.x-B.x)*abs(A.y-B.y) < 5000.0f)) {
+    mesh.extrudeFace(base,0.0f,MATROOF);
+    mesh.expandFace(base,0.3f);
+    mesh.extrudeFace(base,4.0f,MATROOFT);
+    mesh.expandFace(base,-4.0f);
+
+    return;
+  }
+
+
   mesh.extrudeFace(base,0.0f,MATMESH);
   mesh.expandFace(base,0.2f);
   mesh.extrudeFace(base,0.5f,MATMESH);
+
+
 
   if (wall == MATWALL && rand()%2 == 0) {
     height = rand()%3+1;
@@ -101,7 +114,7 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
     mesh.extrudeFace(base,0.0f,MATMESH);
     mesh.expandFace(base,0.2f);
     mesh.extrudeFace(base,0.5f,MATMESH);
-  }
+  } 
 }
 
 void BuildZone::output(Output& out) 
