@@ -36,39 +36,43 @@ int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord tca, Te
 }
 
 IntVector* Mesh::extrudeFaceR(int fid, float amount, int mat) {
-  Vertex dir = faceNormal(fid+mat-mat)*amount;
-  IntVector* base = f[fid]->vtx;
+  Vertex dir = faceNormal(fid)*amount;
+  IntVector* base   = f[fid]->vtx;
   IntVector* result = new IntVector;
-  int newface = createNewFace(v[base->at(0)]+dir,v[base->at(1)]+dir,v[base->at(2)]+dir,v[base->at(3)]+dir,f[fid]->mat);
-  Face* todelete = f[fid];
-  f[fid] = f[newface];
-  f.pop_back();
-  IntVector* top = f[fid]->vtx;
+  IntVector* top    = new IntVector;
 
-  result->push_back(addFace(new Face(ID4(base->at(0),base->at(1),top->at(1),top->at(0)),mat)));
-  result->push_back(addFace(new Face(ID4(base->at(1),base->at(2),top->at(2),top->at(1)),mat)));
-  result->push_back(addFace(new Face(ID4(base->at(2),base->at(3),top->at(3),top->at(2)),mat)));
-  result->push_back(addFace(new Face(ID4(base->at(3),base->at(0),top->at(0),top->at(3)),mat)));
+  int size = base->size();
 
-  delete todelete;
+  for (int i = 0; i < size; i++) {
+    top->push_back(addVertex(v[base->at(i)]+dir));
+  }
+  f[fid]->vtx = top;
+
+  for (int i = 0; i < size; i++) {
+    result->push_back(addFace(new Face(ID4(base->at(i),base->at(modnext(i,size)),top->at(modnext(i,size)),top->at(i)),mat)));
+  }
+
+  delete base;
   return result;
 }
 
 void Mesh::extrudeFace(int fid, float amount, int mat) {
-  Vertex dir = faceNormal(fid+mat-mat)*amount;
-  IntVector* base = f[fid]->vtx;
-  int newface = createNewFace(v[base->at(0)]+dir,v[base->at(1)]+dir,v[base->at(2)]+dir,v[base->at(3)]+dir,f[fid]->mat);
-  Face* todelete = f[fid];
-  f[fid] = f[newface];
-  f.pop_back();
-  IntVector* top = f[fid]->vtx;
+  Vertex dir = faceNormal(fid)*amount;
+  IntVector* base   = f[fid]->vtx;
+  IntVector* top    = new IntVector;
 
-  addFace(new Face(ID4(base->at(0),base->at(1),top->at(1),top->at(0)),mat));
-  addFace(new Face(ID4(base->at(1),base->at(2),top->at(2),top->at(1)),mat));
-  addFace(new Face(ID4(base->at(2),base->at(3),top->at(3),top->at(2)),mat));
-  addFace(new Face(ID4(base->at(3),base->at(0),top->at(0),top->at(3)),mat));
+  int size = base->size();
 
-  delete todelete;
+  for (int i = 0; i < size; i++) {
+    top->push_back(addVertex(v[base->at(i)]+dir));
+  }
+  f[fid]->vtx = top;
+
+  for (int i = 0; i < size; i++) {
+    addFace(new Face(ID4(base->at(i),base->at(modnext(i,size)),top->at(modnext(i,size)),top->at(i)),mat));
+  }
+
+  delete base;
 }
 
 Vertex Mesh::extensionVertex(int ida, int idb, int idc) {
