@@ -29,9 +29,9 @@ void GridGenerator::parseOptions(Options opt) {
 void GridGenerator::run() { 
   int x,y;
   Generator::run(); 
-  for (int i = 0; i < 16; i++) {
-    x = rand()%(int(gi.sizeX / 5)-1)*5+4;
-    y = rand()%(int(gi.sizeY / 5)-1)*5+4;
+  for (int i = 0; i < 20; i++) {
+    x = rand()%(int(gi.sizeX / 4)-1)*4+4;
+    y = rand()%(int(gi.sizeY / 4)-1)*4+4;
     printf("%d %d\n",x,y);
 
     for (int ax = 0; ax < gi.sizeX; ax++) {

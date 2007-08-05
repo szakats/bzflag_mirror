@@ -41,7 +41,7 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
     fs = mesh.extrudeFace(base,3.7f,wall);
     for (int j = 0; j < 4; j++) {
       if (wall == MATWALL2) {
-      Vertex vv = mesh.v[mesh.f[fs[j]].vtx[0]]-mesh.v[mesh.f[fs[j]].vtx[1]];
+      Vertex vv = mesh.v[mesh.f[fs[j]]->vtx->at(0)]-mesh.v[mesh.f[fs[j]]->vtx->at(1)];
       int sdcount = int(vv.length()/4.0f);
         IntVector* fcs = mesh.subdivdeFace(fs[j],sdcount,true);
 	for (int k = 0; k < int(fcs->size()); k++) {
@@ -65,8 +65,8 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 
   if (wall == MATWALL && rand()%2 == 0) {
     height = rand()%3+1;
-    Vertex vh = mesh.v[mesh.f[base].vtx[0]]-mesh.v[mesh.f[base].vtx[1]];
-    Vertex vv = mesh.v[mesh.f[base].vtx[3]]-mesh.v[mesh.f[base].vtx[0]];
+    Vertex vh = mesh.v[mesh.f[base]->vtx->at(0)]-mesh.v[mesh.f[base]->vtx->at(1)];
+    Vertex vv = mesh.v[mesh.f[base]->vtx->at(3)]-mesh.v[mesh.f[base]->vtx->at(0)];
 
     bool horiz = vh.length() > vv.length();
     float l;

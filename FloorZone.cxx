@@ -18,6 +18,7 @@ FloorZone::FloorZone(Coord2D a, Coord2D b, int astep, int matref, bool rotated) 
 {
   mesh.passable = true;
   mesh.noradar = true;
+
   if (rotated) {
     mesh.createNewFace(
       Vertex((float)A.x,(float)A.y,0.001f),
