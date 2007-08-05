@@ -41,7 +41,9 @@ class bz2object : public Renderable, public DataEntry {
 		
 		// setter
 		virtual int update(string& data);
-		virtual int update(string& data, UpdateMessage& msg) { return this->update( data ); }
+		
+		// specific update message
+		virtual int update(UpdateMessage& msg) { return 1; }
 		
 		// toString
 		virtual string toString(void);
@@ -55,8 +57,23 @@ class bz2object : public Renderable, public DataEntry {
 		vector<string>& getMaterials() { return this->materials; }
 		bool isSelected() { return this->selected; }
 		
+		// use this instead of getPosition()
+		virtual osg::Vec3 getPos() { return this->getPosition(); }
+		
 		// use this instead of getScale()
 		virtual osg::Vec3 getSize() { return this->getScale(); }
+		
+		// use this instead of getAttitude()
+		virtual osg::Quat getRot() { return this->getAttitude(); }
+		
+		// use this instead of setPosition()
+		virtual void setPos( const osg::Vec3d& newPos ) { this->setPosition( newPos ); }
+		
+		// use this instead of setScale()
+		virtual void setSize( const osg::Vec3d& newSize ) { this->setScale( newSize ); }
+		
+		// use this instead of setAttitude()
+		virtual void setRot( const osg::Quat& newRot ) { this->setAttitude( newRot ); }
 		
 		// data setters (makes MasterConfigurationDialog code easier)
 		void setPhyDrv( const char* phydrv ) { this->physicsDriver = phydrv; }
@@ -87,6 +104,16 @@ class bz2object : public Renderable, public DataEntry {
 		
 		// reference to node data inside the Renderable (for changing the transformation stack)
 		osg::ref_ptr< osg::Node > thisNode;
+		
+	private:
+		// force these methods to be private, to guarantee that derived classes will use the given replacements
+		osg::Vec3f getPosition() { return Renderable::getPosition(); }
+		osg::Vec3f getScale() { return Renderable::getScale(); }
+		osg::Quat getAttitude() { return Renderable::getAttitude(); }
+		
+		void setPosition( const osg::Vec3d& newPosition ) { Renderable::setPosition( newPosition ); }
+		void setScale( const osg::Vec3d& newScale ) { Renderable::setScale( newScale ); }
+		void setAttitude( const osg::Quat& newAttitude ) { Renderable::setAttitude( newAttitude ); }
 };
 
 #endif /*BZ2OBJECT_H_*/

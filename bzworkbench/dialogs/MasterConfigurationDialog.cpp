@@ -19,7 +19,7 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	string objectStr = object->get();
 	
 	// read position
-	Point3D position = Point3D(object->getPosition());
+	Point3D position = Point3D(object->getPos());
 	
 	// read rotation
 	float rotation = (object->getRotation().z());
@@ -115,9 +115,9 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 		
 		// see if this is indeed the ubiquitous shift transform
 		if( transforms.size() >= 2 &&		// there should be two transformations, then: this, and the last shift
-			(*itr)->getName() == "shift" &&  data[0] == -object->getPosition().x() &&
-											 data[1] == -object->getPosition().y() &&
-											 data[2] == -object->getPosition().z() ) {
+			(*itr)->getName() == "shift" &&  data[0] == -object->getPos().x() &&
+											 data[1] == -object->getPos().y() &&
+											 data[2] == -object->getPos().z() ) {
 			
 			// add the transformation to the list	 	
 			TransformWidget* firstShift = new TransformWidget(0, 0, transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, this->transformationFormat.c_str(), false );
@@ -151,9 +151,9 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 		
 		// see if this is indeed the ubiquitous shift transform
 		if( transforms.size() >= 2 &&		// there should be two transformations, then: the first shift and this one
-			(*itr)->getName() == "shift" &&  data[0] == object->getPosition().x() &&
-											 data[1] == object->getPosition().y() &&
-											 data[2] == object->getPosition().z() ) {
+			(*itr)->getName() == "shift" &&  data[0] == object->getPos().x() &&
+											 data[1] == object->getPos().y() &&
+											 data[2] == object->getPos().z() ) {
 			
 			TransformWidget* lastShift = new TransformWidget(transformationScrollArea->x() + 5, transformationScrollArea->y() + 3*DEFAULT_TEXTSIZE*(transforms.size()), transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, this->transformationFormat.c_str(), false );
 			lastShift->setTransformationType( (*itr)->getName().c_str() );

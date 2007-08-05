@@ -220,8 +220,6 @@ int bz2object::update(string& data) {
 		}
 		
 	}
-	else
-		printf("no transformations supported\n");
 	
 	// add the transformations
 	if( transformations.size() > 0 ) {

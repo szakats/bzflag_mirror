@@ -29,7 +29,7 @@ public:
 	
 	// setter
 	int update(string& data);
-	int update(string& data, UpdateMessage& message);
+	int update(UpdateMessage& message);
 	
 	// override the getSize and setSize methods
 	osg::Vec3 getSize() { return osg::Vec3( realSize.x(), realSize.y(), realSize.z() ); }

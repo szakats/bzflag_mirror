@@ -39,13 +39,18 @@ public:
 	int update(string& data);
 	
 	// setter with messaging
-	int update(string& data, UpdateMessage& message);
+	int update(UpdateMessage& message);
 	
 	// toString
 	string toString(void);
 	
 	// render
 	int render(void);
+	
+private:
+
+	// modify the geometry
+	void updateGeometry( UpdateMessage& msg );
 };
 
 #endif /*PYRAMID_H_*/

@@ -295,3 +295,7 @@ void cone::updateShadeModel() {
 	// set the shade model
 	states->setAttribute( shadeModel );
 }
+
+int cone::update( UpdateMessage& msg ) {
+	return 1;
+}

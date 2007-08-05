@@ -1,6 +1,8 @@
 #include "../include/model/BZWParser.h"
 #include "../include/model/Model.h"
 
+Model* BZWParser::_modelRef = NULL;
+
 /**
  * Helper method:  eliminate the whitespace on the ends of the line
  */
@@ -23,7 +25,7 @@ string cutWhiteSpace(string line) {
 	if(startIndex == len)
 		return line;
 	
-	if( endIndex <= startIndex)
+	if( endIndex < startIndex)
 		return string(" ");
 	// return the inner content
 	return line.substr(startIndex, endIndex - startIndex + 1);
@@ -74,14 +76,14 @@ string BZWParser::value(const char* _key, const char* _text) {
 		return string(BZW_NOT_FOUND);
 		
 	// advance to the start of the value
-	startIndex += key.length() + 1;
+	startIndex += key.length();
 	
 	// stop if the first key is the value
 	if(startIndex > line.length())
 		return key;
 	
 	// get the value
-	string value = line.substr(startIndex, line.length() - startIndex);
+	string value = line.substr(startIndex);
 	
 	// trunicate the value and return it
 	return cutWhiteSpace(value);
@@ -103,8 +105,10 @@ string BZWParser::key(const char* _text) {
  */
  
 string BZWParser::terminatorOf(const char* _text) {
+	if( _modelRef == NULL )
+		return "";
 	string key = string(_text);
-	string terms = Model::getSupportedTerminators();
+	string terms = _modelRef->_getSupportedTerminators();
 	
 	// see of there's an unusual terminator
 	string::size_type start = terms.find("<" + key + "|", 0);
@@ -125,8 +129,10 @@ string BZWParser::terminatorOf(const char* _text) {
  * The format of the hierarchy is <subobject1><subobject2>...<subobjectN> for N subobjects
  */
 string BZWParser::hierarchyOf(const char* _text) {
+	if( _modelRef == NULL )
+		return "";
 	string key = string(_text);
-	string terms = Model::getSupportedHierarchies();
+	string terms = _modelRef->_getSupportedHierarchies();
 	
 	// find the hierarchy
 	string::size_type start = terms.find("<" + key + ":", 0);
@@ -601,13 +607,17 @@ vector<string> subobjectsOf(const char* obj) {
  */
  
 const vector<string> BZWParser::getSections(const char* _text) {
-	
+		
 	string text = string(_text);
 	
 	vector<string> ret = vector<string>();
 	
+	// don't bother if there is no model to query
+	if( _modelRef == NULL )
+		return ret;
+	
 	// start reading the stuff in
-	string buff, key, objstr, line, supportedKeys = Model::getSupportedObjects(), hierarchy = Model::getSupportedHierarchies();
+	string buff, key, objstr, line, supportedKeys = _modelRef->_getSupportedObjects(), hierarchy = _modelRef->_getSupportedHierarchies();
 	vector<string> lineElements = vector<string>();
 		
 	while(true) {
@@ -761,6 +771,12 @@ const vector<string> BZWParser::findSections(const char* _header, vector<string>
  */
  
 vector<string> BZWParser::loadFile(const char* filename) {
+	
+	vector<string> ret = vector<string>();
+	
+	if( _modelRef == NULL ) 
+		return ret;
+		
 	ifstream fileInput(filename);
 	
 	// if its not open, its not there
@@ -769,10 +785,8 @@ vector<string> BZWParser::loadFile(const char* filename) {
 		return vector<string>();
 	}
 	
-	vector<string> ret = vector<string>();
-	
 	// start reading the stuff in
-	string buff, key, objstr, line, supportedKeys = Model::getSupportedObjects(), hierarchy = Model::getSupportedHierarchies();
+	string buff, key, objstr, line, supportedKeys = _modelRef->_getSupportedObjects(), hierarchy = _modelRef->_getSupportedHierarchies();
 	vector<string> lineElements = vector<string>();
 		
 	while(!fileInput.eof()) {

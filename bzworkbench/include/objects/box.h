@@ -38,13 +38,12 @@ public:
 	
 	// setters
 	int update(string& data);
-	int update(string& data, UpdateMessage& msg);
+	int update(UpdateMessage& msg);
 	
 	// toString
 	string toString(void);
 	
 private:
-	Point3D size;
 	
 	// update the box's geometry
 	void updateGeometry( UpdateMessage& msg );

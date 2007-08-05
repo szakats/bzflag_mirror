@@ -14,8 +14,8 @@ base::base() :
 	
 	this->setName( SceneBuilder::nameNode( meshname.c_str() ) );
 	
-	this->setPosition( osg::Vec3(0.0, 0.0, 0.0) );
-	this->setScale( osg::Vec3(10.0, 10.0, 1.0) );
+	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
+	this->setSize( osg::Vec3(10.0, 10.0, 1.0) );
 	SceneBuilder::markUnselected( this );
 }
 
@@ -52,9 +52,9 @@ base::base( osg::Vec3 position, float rotation, osg::Vec3 size, int team, string
 	
 	this->setName( SceneBuilder::nameNode( meshname.c_str() ) );
 	
-	this->setPosition( position );
+	this->setPos( position );
 	this->setRotationZ( rotation );
-	this->setScale( size );
+	this->setSize( size );
 }
 
 
@@ -80,8 +80,12 @@ int base::update(string& data) {
 	
 	// get the team
 	vector<string> teams = BZWParser::getValuesByKey("color", header, baseData);
-	if(!hasOnlyOne(teams, "color"))
+	if(teams.size() > 1) {
+		printf("base::update():  Error! Defined \"color\" %d times!\n", teams.size());
 		return 0;
+	}
+	if( teams.size() == 0 )
+		teams.push_back("0");
 		
 	// get the weapon
 	vector<string> weapons = BZWParser::getValuesByKey("oncap", header, baseData);
@@ -93,7 +97,7 @@ int base::update(string& data) {
 	// make sure that the team value is sane
 	int t = atoi(teams[0].c_str());
 	if(!(t == BASE_RED || t == BASE_GREEN || t == BASE_BLUE || t == BASE_PURPLE)) {
-		printf("base::update():  Warning! Base team is not recognized...\n");	
+		printf("base::update():  Warning! Base team (%d) is not recognized...\n", t);	
 	}
 	
 	// do superclass update
