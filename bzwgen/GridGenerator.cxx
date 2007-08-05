@@ -53,6 +53,7 @@ void GridGenerator::run() {
   mats.push_back(new Material(MATMESH,"mesh"));
   mats.push_back(new Material(MATROOF,"roof"));
   mats.push_back(new Material(MATROOFT,"rooft"));
+  mats.push_back(new Material(MATGLASS,"glass"));
 }
 
 void GridGenerator::output(Output& out) { 

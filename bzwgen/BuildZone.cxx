@@ -14,9 +14,15 @@
 
 BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 {
+  int size = abs(A.x-B.x)*abs(A.y-B.y);
   int wall;
   int height;
-  if (rand()%2 == 0) {
+  float hlev = 3.7f;
+  if (rand()%2 == 0 && size < 5000) {
+    wall = MATGLASS;
+    height = rand()%6+4;
+    hlev = 8.0f;
+  } else if (rand()%2 == 0) {
     wall = MATWALL;
     height = rand()%3+1;
   } else {
@@ -31,14 +37,13 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
       Vertex((float)A.x,(float)B.y,0.01f),
       MATROOF
   );
-
-
+  
   mesh.inside.push_back(mesh.faceCenter(base)+mesh.faceNormal(base));
 
   IntVector* fs;
 
   for (int i = 0; i < height; i++) {
-    fs = mesh.extrudeFaceR(base,3.7f,wall);
+    fs = mesh.extrudeFaceR(base,hlev,wall);
     for (int j = 0; j < 4; j++) {
       if (wall == MATWALL2) {
       Vertex vv = mesh.v[mesh.f[fs->at(j)]->vtx->at(0)]-mesh.v[mesh.f[fs->at(j)]->vtx->at(1)];
@@ -54,14 +59,17 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
     }
     delete fs;
     if (i == height-1) break;
-    mesh.extrudeFace(base,0.0f,MATMESH);
-    mesh.expandFace(base,0.15f);
-    mesh.extrudeFace(base,0.3f,MATMESH);
-    mesh.extrudeFace(base,0.0f,MATMESH);
-    mesh.expandFace(base,-0.15f);
+
+    if (wall != MATGLASS) {
+      mesh.extrudeFace(base,0.0f,MATMESH);
+      mesh.expandFace(base,0.15f);
+      mesh.extrudeFace(base,0.3f,MATMESH);
+      mesh.extrudeFace(base,0.0f,MATMESH);
+      mesh.expandFace(base,-0.15f);
+    }
   }
 
-  if (wall == MATWALL && rand()%2 == 0 && height <= 3 && (abs(A.x-B.x)*abs(A.y-B.y) < 5000.0f)) {
+  if (wall == MATWALL && rand()%2 == 0 && height <= 3 && size < 5000) {
     mesh.extrudeFace(base,0.0f,MATROOF);
     mesh.expandFace(base,0.3f);
     mesh.extrudeFace(base,4.0f,MATROOFT);
