@@ -270,10 +270,10 @@ end
 
 base
 name Base
+	color 1
 	position 380 380 29
 	rotation 0
 	size 15 15 1
-	color 1
 end
 
 box

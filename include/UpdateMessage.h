@@ -1,6 +1,9 @@
 #ifndef UPDATEMESSAGE_H_
 #define UPDATEMESSAGE_H_
 
+#include <osg/Vec3>
+#include <osg/Quat>
+
 /**
  * This is a simple message class that can be sent to objects in their update() method.
  * 
@@ -24,12 +27,41 @@ public:
 	};
 
 	int type;
-	void* data;
 	
 	UpdateMessage( int type, void* data) {
 		this->type = type;
 		this->data = data;
 	}
+	
+	UpdateMessage( int type, osg::Vec3* data ) {
+		this->type = type;
+		this->vec = data;
+		this->data = data;
+	}
+	
+	UpdateMessage( int type, osg::Quat* data ) {
+		this->type = type;
+		this->quat = data;
+		this->data = data;
+	}
+	
+	void* get() { return data; }
+	
+	// message-specific getters (ensure type-safety)
+	osg::Vec3* getAsPosition() { return vec; }
+	osg::Vec3* getAsPositionFactor() { return vec; }
+	osg::Vec3* getAsScale() { return vec; }
+	osg::Vec3* getAsScaleFactor() { return vec; }
+	osg::Quat* getAsAttitude() { return quat; }
+	osg::Vec3* getAsRotation() { return vec; }
+	osg::Vec3* getAsRotationFactor() { return vec; }
+
+private:
+	
+	osg::Vec3* vec;		// position (factor), scale (factor), and rotation (factor) data
+	osg::Quat* quat;	// rotation (factor) data
+	void* data;			// other data
+	
 };
 
 #endif /*UPDATEMESSAGE_H_*/

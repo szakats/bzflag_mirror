@@ -400,9 +400,9 @@ osg::Vec3 Selection::computeLocalOrigin( vector< bz2object* >& objects ) {
 	// compute the average x, y, and z values of all renderables
 	if( objects.size() > 0 ) {
 		for( vector< bz2object* >::iterator i = objects.begin(); i != objects.end(); i++) {
-			x += (*i)->getPosition().x();
-			y += (*i)->getPosition().y();
-			z += (*i)->getPosition().z();
+			x += (*i)->getPos().x();
+			y += (*i)->getPos().y();
+			z += (*i)->getPos().z();
 		}
 		
 		int numElements = objects.size();

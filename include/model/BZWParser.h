@@ -11,6 +11,7 @@ using namespace std;
 // generic "not found" return value
 #define BZW_NOT_FOUND "NOT FOUND"
 
+class Model;
 
 class BZWParser {
 public:
@@ -18,6 +19,10 @@ public:
 	// unused
 	BZWParser() { }
 	virtual ~BZWParser() { }
+	
+	// init method to get Model reference
+	// this MUST be called BEFORE any other method
+	static void init( Model* model ) { _modelRef = model; }
 	
 	// simplest method:  get a value from a non-repeatable key in a line
 	static string value(const char* key, const char* text);
@@ -67,6 +72,8 @@ public:
 	static vector<string> loadFile(const char* filename);
 	
 private:
+
+	static Model* _modelRef;
 
 };
 

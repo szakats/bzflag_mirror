@@ -754,7 +754,7 @@ bool Model::_pasteSelection() {
 		
 		string data = (*i)->toString();
 		obj->update( data );
-		obj->setPosition( osg::Vec3(0.0, 0.0, 0.0) );
+		obj->setPos( osg::Vec3(0.0, 0.0, 0.0) );
 		
 		this->_addObject( obj );
 		this->_setSelected( obj );

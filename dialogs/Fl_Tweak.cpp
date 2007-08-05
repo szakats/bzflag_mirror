@@ -56,13 +56,13 @@ void Fl_Tweak::tweak_callback_real( Fl_Widget* w ) {
 	
 	switch( this->op ) {
 		case TRANSLATE_X:
-			this->obj->setPosition( this->obj->getPosition() + osg::Vec3( value, 0.0, 0.0 ) );
+			this->obj->setPos( this->obj->getPos() + osg::Vec3( value, 0.0, 0.0 ) );
 			break;	
 		case TRANSLATE_Y:
-			this->obj->setPosition( this->obj->getPosition() + osg::Vec3( 0.0, value, 0.0 ) );
+			this->obj->setPos( this->obj->getPos() + osg::Vec3( 0.0, value, 0.0 ) );
 			break;
 		case TRANSLATE_Z:
-			this->obj->setPosition( this->obj->getPosition() + osg::Vec3( 0.0, 0.0, value ) );
+			this->obj->setPos( this->obj->getPos() + osg::Vec3( 0.0, 0.0, value ) );
 			break;
 		case ROTATE_X:
 			this->obj->setRotationX( this->obj->getRotation().x() + value );
@@ -74,13 +74,13 @@ void Fl_Tweak::tweak_callback_real( Fl_Widget* w ) {
 			this->obj->setRotationZ( this->obj->getRotation().z() + value );
 			break;
 		case SCALE_X:
-			this->obj->setScale( this->obj->getScale() + osg::Vec3( value, 0.0, 0.0 ) );
+			this->obj->setSize( this->obj->getSize() + osg::Vec3( value, 0.0, 0.0 ) );
 			break;
 		case SCALE_Y:
-			this->obj->setScale( this->obj->getScale() + osg::Vec3( 0.0, value, 0.0 ) );
+			this->obj->setSize( this->obj->getSize() + osg::Vec3( 0.0, value, 0.0 ) );
 			break;
 		case SCALE_Z:
-			this->obj->setScale( this->obj->getScale() + osg::Vec3( 0.0, 0.0, value ) );
+			this->obj->setSize( this->obj->getSize() + osg::Vec3( 0.0, 0.0, value ) );
 			break;
 		default:
 			break;

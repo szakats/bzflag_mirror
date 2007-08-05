@@ -142,33 +142,45 @@ int teleporter::update(string& data) {
 }
 
 // update with binary message
-int teleporter::update( string& data, UpdateMessage& message ) {
+int teleporter::update( UpdateMessage& message ) {
 	
-	return this->update( data );	
+	switch( message.type ) {
+		case UpdateMessage::SET_POSITION: 	// handle a new position
+			this->setPos( *(message.getAsPosition()) );
+			break;
+			
+		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
+			this->setPos( this->getPos() + *(message.getAsPositionFactor()) );
+			break;
+			
+		case UpdateMessage::SET_ROTATION:		// handle a new rotation
+			this->setRotationZ( message.getAsRotation()->z() );
+			break;
+			
+		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
+			this->setRotationZ( this->getRotation().z() + message.getAsRotationFactor()->z() );
+			break;
+			
+		case UpdateMessage::SET_SCALE:		// handle a new scale
+			this->updateGeometry( message );
+			break;
+			
+		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
+			this->updateGeometry( message );
+			break;
+			
+		default:	// unknown event; don't handle
+			return 0;
+	}
 	
+	return 1;
 }
 
 // tostring
 string teleporter::toString(void) {
 	
-	// there's a different way of reporting size in teleporters, since the size isn't stored in the geometry
 	// get the bz2object BZW lines
 	string bzwlines = this->BZWLines();
-	/*
-	// find the "size" entry and replace it with the real size
-	string::size_type sizeStart = bzwlines.find( "size", 0 );
-	if( sizeStart != string::npos ) {	// if found...
-		// find the end of the line
-		string::size_type sizeEnd = bzwlines.find( "\n", sizeStart );
-		
-		if( sizeEnd != string::npos ) {  // if an end was found...
-			// reformulate bzwlines
-			bzwlines = bzwlines.substr( 0, sizeStart ) + "size " + this->realSize.toString() + bzwlines.substr( sizeEnd + 1 );
-		}
-		else {  // cut out the end
-			bzwlines = bzwlines.substr( 0, sizeStart ) + "size " + this->realSize.toString();
-		}
-	}*/
 	
 	// finally, make that string
 	return string("teleporter ") + lname + "\n" +
@@ -185,7 +197,7 @@ void teleporter::updateGeometry( UpdateMessage& message ) {
 		case UpdateMessage::SET_SCALE_FACTOR: {		// handle a resize
 			
 			// get the scale factor from data
-			osg::Vec3* scaleFactor = (osg::Vec3*)message.data;
+			osg::Vec3* scaleFactor = message.getAsScaleFactor();
 			
 			// undo the scale (since that was what was changed prior to this message being sent)
 			// rather, we'll be changing the general shape of the teleporter
@@ -288,7 +300,7 @@ void teleporter::updateGeometry( UpdateMessage& message ) {
 		case UpdateMessage::SET_SCALE: {		// handle a new scale
 			
 			// get the scale factor from data
-			osg::Vec3* scaleFactor = (osg::Vec3*)message.data;
+			osg::Vec3* scaleFactor = message.getAsScale();
 			
 			
 			// scale by X will increase the distance between the portals

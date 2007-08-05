@@ -30,6 +30,7 @@ public:
 	
 	// setter
 	int update(string& data);
+	int update(UpdateMessage& msg);
 	
 	// toString
 	string toString(void);
