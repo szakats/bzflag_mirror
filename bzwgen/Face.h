@@ -47,6 +47,15 @@ public:
       vtx->push_back(id4[i]);
     }
   }
+  int addVertex(int v) {
+    vtx->push_back(v);
+    return vtx->size()-1;
+  }
+  int addVertex(int v, int tc) {
+    vtx->push_back(v);
+    tcd->push_back(tc);
+    return vtx->size()-1;
+  }
   ~Face() {
     delete vtx;
     delete tcd;
