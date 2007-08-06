@@ -103,7 +103,7 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
   addDivider(base,0.2f,0.5f,MATMESH,true);
 
   if (wall == MATWALL && rand()%2 == 0) {
-    height = rand()%3+1;
+    height = rand()%3+1;/*
     Vertex vh = mesh.v[mesh.f[base]->vtx->at(0)]-mesh.v[mesh.f[base]->vtx->at(1)];
     Vertex vv = mesh.v[mesh.f[base]->vtx->at(3)]-mesh.v[mesh.f[base]->vtx->at(0)];
 
@@ -114,7 +114,10 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
       l = vh.length();
     } else {
       l = vv.length();
-    }
+    }*/
+    float l;
+    bool horiz;
+    longerSide(base,&l,&horiz);
     
     l *= 0.4f+(0.1f*float(rand()%3));
     
@@ -136,6 +139,20 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
     addDivider(base,0.2f,0.5f,MATMESH,true);
   } 
 }
+
+void BuildZone::longerSide(int face, float* length, bool* orientation) {
+  Vertex vh = mesh.v[mesh.f[face]->vtx->at(0)]-mesh.v[mesh.f[face]->vtx->at(1)];
+  Vertex vv = mesh.v[mesh.f[face]->vtx->at(3)]-mesh.v[mesh.f[face]->vtx->at(0)];
+
+  (*orientation) = vh.length() > vv.length();
+  if (*orientation) {
+    (*length) = vh.length();
+  } else {
+    (*length) = vv.length();
+  }
+}
+
+
 
 void BuildZone::addDivider(int base, float width, float height, int mat, bool noNext) {
   mesh.extrudeFace(base,0.0f,mat);
