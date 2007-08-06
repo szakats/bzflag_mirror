@@ -39,6 +39,7 @@ public:
   Vertex faceCenter(int fid);
   IntVector* subdivdeFace(int fid, int count, bool horizontal);
   int partitionFace(int fid, float amount, bool horizontal);
+  void weldVertices(int a, int b, Vertex vx);
   void output(Output& out);
 private:
   Vertex extensionVertex(int ida, int idb, int idc);
