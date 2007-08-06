@@ -84,13 +84,12 @@ box
 end
 
 cone
-	size 10 10 10 
 	divisions 16
-	shift -30 -30 0
-	spin 90 1 0 0
-	shear 0 0 0.5
-	shift 30 30 0
+#	shift -30 -30 0
+#	spin 90 1 0 0
+#	shift 30 30 0
 	position 30 30 0
+	rotation 45
 end
 
 

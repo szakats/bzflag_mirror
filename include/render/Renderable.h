@@ -74,6 +74,8 @@ public:
 									  osg::DegreesToRadians( rotation.z() ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
 	}
 	
+	void setRotation( const osg::Vec3d& rot ) { this->setRotation( rot.x(), rot.y(), rot.z() ); }
+	
 	// getters for rotation (make sure it can't change)
 	const osg::Vec3& getRotation() { return this->rotation; }
 	

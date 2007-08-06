@@ -39,7 +39,7 @@ teleporter::teleporter() :
 	theTeleporter->addChild( frontPortal.get() );
 	theTeleporter->addChild( rearPortal.get() );
 	
-	this->thisNode = theTeleporter.get();
+	this->setThisNode(theTeleporter.get());
 	this->addChild( theTeleporter.get() );
 	
 	// blow up the teleporter
@@ -93,7 +93,7 @@ teleporter::teleporter(string& data) :	// don't pass the data to the parent clas
 	theTeleporter->addChild( frontPortal.get() );
 	theTeleporter->addChild( rearPortal.get() );
 	
-	this->thisNode = theTeleporter.get();
+	this->setThisNode( theTeleporter.get() );
 	this->addChild( theTeleporter.get() );
 	
 	this->setSize( realSize );
@@ -144,6 +144,9 @@ int teleporter::update(string& data) {
 // update with binary message
 int teleporter::update( UpdateMessage& message ) {
 	
+	// superclass event handler
+	int result = bz2object::update( message );
+	
 	switch( message.type ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
 			this->setPos( *(message.getAsPosition()) );
@@ -170,7 +173,7 @@ int teleporter::update( UpdateMessage& message ) {
 			break;
 			
 		default:	// unknown event; don't handle
-			return 0;
+			return result;
 	}
 	
 	return 1;

@@ -28,6 +28,11 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 			this->update(data);
 		}
 		
+		BZTransform( string name, vector<float> data ) : DataEntry("", ""), osg::MatrixTransform() {
+			this->name = name;
+			this->data = data;
+		} 
+		
 		BZTransform( string name, float n1, float n2, float n3, float n4 ) : DataEntry("", ""), osg::MatrixTransform() {
 			this->name = name;
 			this->data = vector<float>();
@@ -93,6 +98,20 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		// data setters
 		void setName(string& s) { this->name = s; }
 		void setData(vector<float>& data) { this->data = data; }
+		void setData( const osg::Vec3d& data ) {
+			this->data.clear();
+			this->data.push_back(data.x());
+			this->data.push_back(data.y());
+			this->data.push_back(data.z());
+		}
+		
+		void setData( const osg::Vec4d& data ) {
+			this->data.clear();
+			this->data.push_back(data.x());
+			this->data.push_back(data.y());
+			this->data.push_back(data.z());
+			this->data.push_back(data.w());
+		}
 		
 		// make this public
 		BZTransform operator =( const BZTransform& obj ) { 

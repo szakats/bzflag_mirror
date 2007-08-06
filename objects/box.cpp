@@ -49,6 +49,7 @@ int box::update(string& data) {
 }
 
 // setter (with binary data)
+// NOTE: don't call superclass update method, because it deals only with transformations (which are n/a here)
 int box::update(UpdateMessage& message) {
 	
 	switch( message.type ) {
@@ -100,7 +101,7 @@ void box::updateGeometry( UpdateMessage& message ) {
 		osg::Vec3* scaleFactor = message.getAsScaleFactor();
 			
 		// get the geometries from the box mesh
-		GeometryExtractorVisitor geoExtractor = GeometryExtractorVisitor( this );
+		GeometryExtractorVisitor geoExtractor = GeometryExtractorVisitor( this->getThisNode() );
 		vector< osg::Geometry* > geos = geoExtractor.getGeometries();
 		
 		// there should be 2 geometries (One Geometry makes up the walls, the other the floor/ceiling combo.)
@@ -565,7 +566,7 @@ void box::updateGeometry( UpdateMessage& message ) {
 		osg::Vec3* scaleFactor = message.getAsScale();
 			
 		// get the geometries from the box mesh
-		GeometryExtractorVisitor geoExtractor = GeometryExtractorVisitor( this );
+		GeometryExtractorVisitor geoExtractor = GeometryExtractorVisitor( this->getThisNode() );
 		vector< osg::Geometry* > geos = geoExtractor.getGeometries();
 		
 		// there should be 2 geometries (One Geometry makes up the walls, the other the floor/ceiling combo.)

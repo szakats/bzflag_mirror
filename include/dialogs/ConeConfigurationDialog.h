@@ -33,7 +33,7 @@ public:
 	}
 	
 	// CANCEL callback
-	static void CanelCallback( Fl_Widget* w, void* data ) {
+	static void CancelCallback( Fl_Widget* w, void* data ) {
 		ConeConfigurationDialog* ccd = (ConeConfigurationDialog*)(data);
 		ccd->CancelCallback_real( w );
 	}

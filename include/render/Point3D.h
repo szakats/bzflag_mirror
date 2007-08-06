@@ -44,6 +44,9 @@ class Point3D : public osg::Vec3
 	
 	virtual ~Point3D() { }
 	
+	// convert to an osg::Vec3
+	osg::Vec3 asVec3() { return osg::Vec3( this->x(), this->y(), this->z() ); }
+	
 };
 
 #endif /*POINT3D_H_*/

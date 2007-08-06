@@ -487,7 +487,7 @@ string& Model::_toString() {
 	
 	string worldDataString = (worldData != NULL ? worldData->toString() : "\n");
 	string optionsDataString = (optionsData != NULL ? optionsData->toString() : "\n");
-	string waterLevelString = (waterLevelData != NULL ? waterLevelData->toString() : "\n");
+	string waterLevelString = (waterLevelData != NULL && waterLevelData->getHeight() > 0.0 ? waterLevelData->toString() : "\n");
 	
 	// global data
 	ret += "\n#--World-----------------------------------------\n\n" + worldDataString;

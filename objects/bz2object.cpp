@@ -12,6 +12,16 @@ bz2object::bz2object(const char* name, const char* keys):
 	this->setSelected( false );
 	this->setName( "(unknown bz2object)" );
 	
+	vector<float> data;
+	data.push_back( 0.0 );
+	data.push_back( 0.0 );
+	data.push_back( 0.0 );
+	
+	this->startShift = new BZTransform("shift", data);
+	this->endShift = new BZTransform("shift", data);
+	
+	this->addChild( startShift.get() );
+	this->startShift->addChild( endShift.get() );
 };
 
 // constructor with data
@@ -25,9 +35,19 @@ bz2object::bz2object(const char* name, const char* keys, const char* data):
 	this->transformations = vector< osg::ref_ptr<BZTransform> >();
 	this->materials = vector<string>();
 	this->setSelected( false );
+	
+	vector<float> shiftData;
+	shiftData.push_back( 0.0 );
+	shiftData.push_back( 0.0 );
+	shiftData.push_back( 0.0 );
+	
+	this->startShift = new BZTransform("shift", shiftData);
+	this->endShift = new BZTransform("shift", shiftData);
+	this->addChild( startShift.get() );
+	this->startShift->addChild( endShift.get() );
+	
 	string d = string(data);
 	this->update(d);
-	
 }
 
 // constructor with node data
@@ -41,6 +61,18 @@ bz2object::bz2object(const char* name, const char* keys, osg::Node* node ):
 	this->materials = vector<string>();
 	this->setSelected( false );
 	this->setName( "(unknown bz2object)" );
+	
+	vector<float> data;
+	data.push_back( 0.0 );
+	data.push_back( 0.0 );
+	data.push_back( 0.0 );
+	
+	this->startShift = new BZTransform("shift", data);
+	this->endShift = new BZTransform("shift", data);
+	
+	this->addChild( startShift.get() );
+	this->startShift->addChild( endShift.get() );
+	this->endShift->addChild( node );
 }
 
 // constructor with node and string data
@@ -53,6 +85,19 @@ bz2object::bz2object( const char* name, const char* keys, const char* data, osg:
 	this->transformations = vector< osg::ref_ptr<BZTransform> >();
 	this->materials = vector<string>();
 	this->setSelected( false );
+	
+	vector<float> shiftData;
+	shiftData.push_back( 0.0 );
+	shiftData.push_back( 0.0 );
+	shiftData.push_back( 0.0 );
+	
+	this->startShift = new BZTransform("shift", shiftData);
+	this->endShift = new BZTransform("shift", shiftData);
+	
+	this->addChild( startShift.get() );
+	this->startShift->addChild( endShift.get() );
+	this->endShift->addChild( node );
+	
 	string d = string(data);
 	this->update(d);
 }
@@ -139,23 +184,6 @@ int bz2object::update(string& data) {
 		}
 		
 	}
-	// remove the transformations
-	if( transformations.size() > 0 ) {
-		this->removeChild( transformations[0].get() );
-		transformations[ transformations.size() - 1 ]->removeChild( thisNode.get() );
-	}
-	else
-		this->removeChild( thisNode.get() );
-		
-	// erase transformations
-	if( transformations.size() > 0 ) {
-		vector< osg::ref_ptr< BZTransform > >::iterator itr = transformations.begin();
-		for( unsigned int i = 0; i < transformations.size() && itr != transformations.end(); i++, itr++ ) {
-			transformations.erase( itr );
-			itr = transformations.begin();
-		}
-	}
-	transformations.clear();
 	
 	// find out which transformations are valid
 	vector<string> transformKeys = vector<string>();
@@ -184,53 +212,36 @@ int bz2object::update(string& data) {
 			 * (x,y,z) is the global position of the object in question
 			 */
 			 
-			// first shift
-			Point3D newPosition = Point3D(positions[0].c_str());
-			Point3D nNewPosition = -newPosition;
-			string shift1 = "  shift " + nNewPosition.toString();
-			transformations.push_back( new BZTransform( shift1 ));
+			// update the encapsulating shifts
 			
-			// make sure we skip the start/end shift transformations if present
-			vector<string>::iterator start = transforms.begin();
-			vector<string>::iterator end = transforms.end()-1;
+			// update the first shift
+			vector<float> startShiftData;
+			startShiftData.push_back( -this->getPosition().x() );
+			startShiftData.push_back( -this->getPosition().y() );
+			startShiftData.push_back( -this->getPosition().z() );
 			
-			// make the transformations
-			BZTransform t1 = BZTransform( *start );
-			BZTransform t2 = BZTransform( *end );
+			this->startShift->setData( startShiftData );
 			
-			// see if they are the start/end shifts
-			if( t1.getName() == "shift" && t2.getName() == "shift" &&
-				t1.getData()[0] == -t2.getData()[0] &&
-				t1.getData()[1] == -t2.getData()[1] &&
-				t1.getData()[2] == -t2.getData()[2] ) {
-					
-					// skip them
-					start++;
-					end--;
+			// update the last shift
+			vector<float> endShiftData;
+			endShiftData.push_back( this->getPosition().x() );
+			endShiftData.push_back( this->getPosition().y() );
+			endShiftData.push_back( this->getPosition().z() );
+			
+			this->endShift->setData( endShiftData );
+			
+			// read in the transformations
+			vector< osg::ref_ptr< BZTransform > > newTransformations = vector< osg::ref_ptr< BZTransform > >();
+			
+			for( vector<string>::iterator i = transforms.begin(); i != transforms.end(); i++ ) {
+				newTransformations.push_back( new BZTransform( *i ) );
 			}
 			
-			for(vector<string>::iterator i = start; i != end+1; i++) {
-				transformations.push_back( new BZTransform(*i) );	
-			}
-			
-			// last shift
-			string shift2 = "  shift " + newPosition.toString();
-			transformations.push_back( new BZTransform( shift2 ) );
-			
+			// update the transformation stack
+			this->recomputeTransformations( &newTransformations );
 		}
 		
 	}
-	
-	// add the transformations
-	if( transformations.size() > 0 ) {
-		this->addChild( transformations[0].get() );
-		for( unsigned int i = 1; i < transformations.size(); i++ ) {
-			transformations[i-1]->addChild( transformations[i].get() );
-		}
-		transformations[ transformations.size() - 1 ]->addChild( thisNode.get() );
-	}
-	else
-		this->addChild( thisNode.get() );
 	
 	// get the physics driver
 	if(this->isKey("phydrv")) {
@@ -288,11 +299,24 @@ string bz2object::BZWLines(void) {
 	if(this->isKey("rotation"))
 		ret += "  rotation " + string( ftoa(this->getRotation().z()) ) + "\n";
 	
+	// add the initial transformation
+	if( this->isKey("shift") )
+		ret += "  " + startShift->toString();
+	
 	// add all transformations to the string if they are supported
 	for(vector< osg::ref_ptr<BZTransform> >::iterator i = transformations.begin(); i != transformations.end(); i++) {
 		if(this->isKey((*i)->getHeader().c_str()))
 			ret += "  " + (*i)->toString();
 	}
+	
+	// add the Euler rotation values as spin keys
+	ret += "  spin " + string(ftoa( this->getRotation().x() )) + " 1 0 0\n";
+	ret += "  spin " + string(ftoa( this->getRotation().y() )) + " 0 1 0\n";
+	ret += "  spin " + string(ftoa( this->getRotation().z() )) + " 0 0 1\n";
+	
+	// add the final transformation
+	if( this->isKey("shift") )
+		ret += "  " + endShift->toString();
 	
 	// add phydrv key/value to the string if supported and if defined
 	if(this->isKey("phydrv") && physicsDriver.length() != 0)
@@ -309,4 +333,53 @@ string bz2object::BZWLines(void) {
 	ret += this->getUnusedText();
 	
 	return ret;
+}
+
+// event handler
+int bz2object::update( UpdateMessage& message ) {
+	switch( message.type ) {
+		case UpdateMessage::SET_TRANSFORMATIONS: {		// update the transformation stack
+			vector< osg::ref_ptr< BZTransform > >* newTransformations = message.getAsTransformationStack();
+			this->recomputeTransformations( newTransformations );
+			break;
+		}
+		default:
+			return 0;		// not handled
+	}
+	
+	return 1;
+}
+
+// update the transformation stack with new ones
+void bz2object::recomputeTransformations( vector< osg::ref_ptr< BZTransform > >* newTransformations ) {
+	
+	// see if we have start/end shifts
+	if( startShift.get() == NULL || endShift.get() == NULL )
+		return;			// something seriously wrong here
+	
+	// clear all current transformations
+	if( transformations.size() > 0 ) {
+		startShift->removeChild( transformations[0].get() );
+		transformations[ transformations.size() - 1 ]->removeChild( endShift.get() );
+		transformations.clear();
+	}
+	else		// if there are no current transformations, then try to remove the endShift from the startShift
+		startShift->removeChild( endShift.get() );
+	
+	transformations = *newTransformations;	// copy the array over
+	
+	// add the new transformations
+	if( transformations.size() > 0 ) {
+		// add each transformation to the next
+		startShift->addChild( transformations[0].get() );
+		
+		for( unsigned int i = 1; i < transformations.size(); i++ ) {
+			transformations[i-1]->addChild( transformations[i].get() );
+		}
+		
+		transformations[ transformations.size() - 1 ]->addChild( endShift.get() );
+	}
+	else
+		startShift->addChild( endShift.get() );	// connect the start and end shifts if there are no transformations in between
+	
 }

@@ -112,9 +112,10 @@ int cone::update(string& data) {
 	float oldSweepAngle = this->sweepAngle;
 	this->sweepAngle = atof( sweepAngles[0].c_str() );
 	
+	// if the number of divisions changed or the sweep angle changed, rebuild the geometry
 	if( this->divisions != oldDivisions || this->sweepAngle != oldSweepAngle ) {
-		this->removeChild( coneNode.get() );
-		this->removeChild( baseNode.get() );
+		theCone->removeChild( coneNode.get() );
+		theCone->removeChild( baseNode.get() );
 		
 		this->buildGeometry();
 	}
@@ -126,6 +127,45 @@ int cone::update(string& data) {
 	
 	return 1;
 }
+
+// event handler
+int cone::update( UpdateMessage& message ) {
+	
+	// superclass event handler
+	int result = bz2object::update( message );
+	
+	switch( message.type ) {
+		case UpdateMessage::SET_POSITION: 	// handle a new position
+			this->setPos( *(message.getAsPosition()) );
+			break;
+			
+		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
+			this->setPos( this->getPos() + *(message.getAsPositionFactor()) );
+			break;
+			
+		case UpdateMessage::SET_ROTATION:		// handle a new rotation
+			this->setRotation( *(message.getAsRotation()) );
+			break;
+			
+		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
+			this->setRotation( this->getRotation() + *(message.getAsRotationFactor()) );
+			break;
+			
+		case UpdateMessage::SET_SCALE:		// handle a new scale
+			this->setSize( *(message.getAsScale()) );
+			break;
+			
+		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
+			this->setSize( this->getSize() + *(message.getAsScaleFactor()) );
+			break;
+			
+		default:	// unknown event; don't handle
+			return result;
+	}
+	
+	return 1;
+}
+
 
 // toString
 string cone::toString(void) {
@@ -270,8 +310,7 @@ void cone::buildGeometry() {
    	theCone->addChild( coneNode.get() );
    	theCone->addChild( baseNode.get() );
     	
-   	thisNode = theCone.get();
-   	this->addChild( thisNode.get() );
+   	this->setThisNode( theCone.get() );
 }
 
 // set the shade model based on the value of flatShading
@@ -294,8 +333,4 @@ void cone::updateShadeModel() {
 	
 	// set the shade model
 	states->setAttribute( shadeModel );
-}
-
-int cone::update( UpdateMessage& msg ) {
-	return 1;
 }

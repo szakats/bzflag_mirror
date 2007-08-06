@@ -43,6 +43,7 @@ int pyramid::update(string& data) {
 }
 
 // setter with messaging
+// NOTE: don't call the superclass method, because it deals solely with transformations (which are n/a here)
 int pyramid::update(UpdateMessage& message) {
 	
 	switch( message.type ) {

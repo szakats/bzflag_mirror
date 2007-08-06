@@ -153,9 +153,6 @@ private:
 	// the configuration dialog to be opened upon clicking "More..."
 	ConfigurationDialog* moreDialog;
 	
-	// references to the first and last shift transformations that cap the end of all
-	// other transformations
-	TransformWidget *startShift, *endShift;
 };
 
 #endif /*MASTERCONFIGURATIONDIALOG_H_*/
