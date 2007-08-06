@@ -12,6 +12,8 @@
 
 #include "BuildZone.h"
 
+#define INSET 1.0f
+
 BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 {
   int size = abs(A.x-B.x)*abs(A.y-B.y);
@@ -30,14 +32,42 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
     height = rand()%6+1;
   }
 
+  Face* swface = new Face();
+  swface->addVertex(mesh.addVertex(Vertex((float)A.x,(float)A.y+INSET,0.0f)));
+  swface->addVertex(mesh.addVertex(Vertex((float)A.x+INSET,(float)A.y,0.0f)));
+  swface->addVertex(mesh.addVertex(Vertex((float)B.x-INSET,(float)A.y,0.0f)));
+  swface->addVertex(mesh.addVertex(Vertex((float)B.x,(float)A.y+INSET,0.0f)));
+  swface->addVertex(mesh.addVertex(Vertex((float)B.x,(float)B.y-INSET,0.0f)));
+  swface->addVertex(mesh.addVertex(Vertex((float)B.x-INSET,(float)B.y,0.0f)));
+  swface->addVertex(mesh.addVertex(Vertex((float)A.x+INSET,(float)B.y,0.0f)));
+  swface->addVertex(mesh.addVertex(Vertex((float)A.x,(float)B.y-INSET,0.0f)));
+
+  int sidewalk = mesh.addFace(swface);
+  mesh.expandFace(sidewalk,1.0f);
+  mesh.extrudeFace(sidewalk,0.2f,MATMESH);
+  mesh.extrudeFace(sidewalk,0.0f,MATMESH);
+  if (wall == MATGLASS) {
+    mesh.expandFace(sidewalk,-3.0f);
+  } else {
+    mesh.expandFace(sidewalk,-1.7f);
+  }
+
+
   int base = mesh.createNewFace(
-      Vertex((float)A.x,(float)A.y,0.01f),
-      Vertex((float)B.x,(float)A.y,0.01f),
-      Vertex((float)B.x,(float)B.y,0.01f),
-      Vertex((float)A.x,(float)B.y,0.01f),
+      Vertex((float)A.x,(float)A.y,0.2f),
+      Vertex((float)B.x,(float)A.y,0.2f),
+      Vertex((float)B.x,(float)B.y,0.2f),
+      Vertex((float)A.x,(float)B.y,0.2f),
       MATROOF
   );
   
+  if (wall == MATGLASS) {
+    mesh.expandFace(base,-2.0f);
+  } else {
+    mesh.expandFace(base,-0.7f);
+  }
+
+  /* SIDEWALK 
   mesh.expandFace(base,0.6f);
   mesh.extrudeFace(base,0.2f,MATMESH);
   mesh.extrudeFace(base,0.0f,MATMESH);
@@ -46,6 +76,7 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
   } else {
     mesh.expandFace(base,-1.3f);
   }
+  */
 
   
   mesh.inside.push_back(mesh.faceCenter(base)+mesh.faceNormal(base));
