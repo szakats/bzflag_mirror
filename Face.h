@@ -48,6 +48,7 @@ public:
     }
   }
   int addVertex(int v) {
+    texcoords = false;
     vtx->push_back(v);
     return vtx->size()-1;
   }
