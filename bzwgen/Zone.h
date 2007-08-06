@@ -27,6 +27,9 @@ protected:
 public:
   Zone(Coord2D a, Coord2D b, int astep) : A(a), B(b), step(astep) {};
   virtual void output(Output& /* out */) {};
+  int size() {
+    return abs(A.x-B.x)*abs(A.y-B.y);
+  }
   virtual ~Zone() {};
 };
 
