@@ -38,6 +38,7 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
     height = rand()%6+1;
   }
 
+  /* SIDEWALK */
   Vertex insetX = Vertex(INSET,0.0f,0.0f);
   Vertex insetY = Vertex(0.0f,INSET,0.0f);
 
@@ -56,11 +57,6 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
   mesh.expandFace(base,1.0f);
   mesh.extrudeFace(base,0.2f,MATMESH);
   mesh.extrudeFace(base,0.0f,MATMESH);
-  if (wall == MATGLASS) {
-    mesh.expandFace(base,-3.0f);
-  } else {
-    mesh.expandFace(base,-1.7f);
-  }
 
   for (int i = 0; i < 4; i++) {
     mesh.weldVertices((*mesh.f[base]->vtx)[i],(*mesh.f[base]->vtx)[i+1],corners[i]+Vertex(0.0f,0.0f,0.2f));
@@ -74,32 +70,25 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 
   mesh.inside.push_back(mesh.faceCenter(base)+mesh.faceNormal(base));
 
+  /* BUILDING */
+
   IntVector* fs;
 
   for (int i = 0; i < height; i++) {
-    fs = mesh.extrudeFaceR(base,hlev,wall);
-    for (int j = 0; j < 4; j++) {
-      if (wall == MATWALL2) {
-      Vertex vv = mesh.v[mesh.f[fs->at(j)]->vtx->at(0)]-mesh.v[mesh.f[fs->at(j)]->vtx->at(1)];
-      int sdcount = int(vv.length()/4.0f);
-        IntVector* fcs = mesh.subdivdeFace(fs->at(j),sdcount,true);
-	for (int k = 0; k < int(fcs->size()); k++) {
-	  mesh.extrudeFace(fcs->at(k),0.0f,wall);
-	  mesh.expandFace(fcs->at(k),-0.4f);
-	  mesh.extrudeFace(fcs->at(k),-0.2f,wall);
-	}
-      delete fcs;
+    if (wall == MATWALL2) {
+      fs = mesh.extrudeFaceR(base,hlev,wall);
+      for (int j = 0; j < 4; j++) {
+	subdivideWindows(fs->at(j),wall);
       }
+      delete fs;
+    } else {
+      mesh.extrudeFace(base,hlev,wall);
     }
-    delete fs;
+
     if (i == height-1) break;
 
     if (wall != MATGLASS) {
-      mesh.extrudeFace(base,0.0f,MATMESH);
-      mesh.expandFace(base,0.15f);
-      mesh.extrudeFace(base,0.3f,MATMESH);
-      mesh.extrudeFace(base,0.0f,MATMESH);
-      mesh.expandFace(base,-0.15f);
+      addDivider(base,0.15f,0.3f,MATMESH);
     }
   }
 
@@ -108,14 +97,10 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
     mesh.expandFace(base,0.3f);
     mesh.extrudeFace(base,4.0f,MATROOFT);
     mesh.expandFace(base,-4.0f);
-
     return;
   }
 
-
-  mesh.extrudeFace(base,0.0f,MATMESH);
-  mesh.expandFace(base,0.2f);
-  mesh.extrudeFace(base,0.5f,MATMESH);
+  addDivider(base,0.2f,0.5f,MATMESH,true);
 
   if (wall == MATWALL && rand()%2 == 0) {
     height = rand()%3+1;
@@ -131,7 +116,7 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
       l = vv.length();
     }
     
-    l /= 2.0f;
+    l *= 0.4f+(0.1f*float(rand()%3));
     
 
     int newbase = mesh.partitionFace(base,l,horiz);
@@ -139,23 +124,40 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
       base = newbase;
     } else {
     }
+
     mesh.extrudeFace(base,0.0f,MATMESH);
     mesh.expandFace(base,-0.2f);
 
     for (int i = 0; i < height; i++) {
       mesh.extrudeFace(base,3.7f,wall);
       if (i == height-1) break;
-      mesh.extrudeFace(base,0.0f,MATMESH);
-      mesh.expandFace(base,0.15f);
-      mesh.extrudeFace(base,0.3f,MATMESH);
-      mesh.extrudeFace(base,0.0f,MATMESH);
-      mesh.expandFace(base,-0.15f);
+      addDivider(base,0.15f,0.3f,MATMESH);
     }
-    mesh.extrudeFace(base,0.0f,MATMESH);
-    mesh.expandFace(base,0.2f);
-    mesh.extrudeFace(base,0.5f,MATMESH);
+    addDivider(base,0.2f,0.5f,MATMESH,true);
   } 
 }
+
+void BuildZone::addDivider(int base, float width, float height, int mat, bool noNext) {
+  mesh.extrudeFace(base,0.0f,mat);
+  mesh.expandFace(base,width);
+  mesh.extrudeFace(base,height,mat);
+  if (noNext) return;
+  mesh.extrudeFace(base,0.0f,mat);
+  mesh.expandFace(base,-width);
+}
+
+void BuildZone::subdivideWindows(int wall, int mat) {
+  Vertex vv = mesh.v[mesh.f[wall]->vtx->at(0)]-mesh.v[mesh.f[wall]->vtx->at(1)];
+  int sdcount = int(vv.length()/4.0f);
+  IntVector* fcs = mesh.subdivdeFace(wall,sdcount,true);
+  for (int k = 0; k < int(fcs->size()); k++) {
+    mesh.extrudeFace(fcs->at(k),0.0f,mat);
+    mesh.expandFace(fcs->at(k),-0.4f);
+    mesh.extrudeFace(fcs->at(k),-0.2f,mat);
+  }
+  delete fcs;
+}
+
 
 void BuildZone::output(Output& out) 
 {
