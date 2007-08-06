@@ -24,6 +24,8 @@ class BuildZone : public Zone {
   Mesh mesh;
 public:
   BuildZone(Coord2D a, Coord2D b, int astep);
+  void addDivider(int base, float width, float height, int mat, bool noNext = false);
+  void subdivideWindows(int wall, int mat);
   virtual void output(Output& out);
 };
 
