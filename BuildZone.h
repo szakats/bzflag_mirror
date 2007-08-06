@@ -27,6 +27,7 @@ public:
   void addDivider(int base, float width, float height, int mat, bool noNext = false);
   void subdivideWindows(int wall, int mat);
   void longerSide(int face, float* length, bool* orientation);
+  void generateBuilding(int base, int wall);
   virtual void output(Output& out);
 };
 

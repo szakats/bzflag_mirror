@@ -22,11 +22,10 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
   corners[2] = Vertex((float)B.x,(float)B.y,0.2f);
   corners[3] = Vertex((float)A.x,(float)B.y,0.2f);
 
-  int size = abs(A.x-B.x)*abs(A.y-B.y);
   int wall;
   int height;
   float hlev = 3.7f;
-  if (rand()%2 == 0 && size < 5000) {
+  if (rand()%2 == 0 && size() < 5000) {
     wall = MATGLASS;
     height = rand()%6+4;
     hlev = 8.0f;
@@ -68,10 +67,37 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
     mesh.expandFace(base,-0.7f);
   }
 
+  bool horiz;
+  float length;
+
+  longerSide(base,&length,&horiz);
+
+  if (length > 100.f && rand()%2 == 0) {
+    int first = mesh.partitionFace(base,length/2-2.5f,horiz);
+    mesh.partitionFace(base,5.0,horiz);
+    generateBuilding(first,wall); 
+  } 
+  generateBuilding(base,wall); 
+}
+
+void BuildZone::generateBuilding(int base, int wall) {
+
   mesh.inside.push_back(mesh.faceCenter(base)+mesh.faceNormal(base));
 
-  /* BUILDING */
+  int height = 1;
+  float hlev = 3.7f;
+  if (wall == MATGLASS) {
+    height = rand()%6+4;
+    hlev = 8.0f;
+  } else if (wall == MATWALL) {
+    height = rand()%3+1;
+  } else if (wall == MATWALL2) {
+    height = rand()%6+1;
+  }
 
+  float length;
+  bool horiz;
+  
   IntVector* fs;
 
   for (int i = 0; i < height; i++) {
@@ -92,7 +118,7 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
     }
   }
 
-  if (wall == MATWALL && rand()%2 == 0 && height <= 3 && size < 5000) {
+  if (wall == MATWALL && rand()%2 == 0 && height <= 3 && size() < 5000) {
     mesh.extrudeFace(base,0.0f,MATROOF);
     mesh.expandFace(base,0.3f);
     mesh.extrudeFace(base,4.0f,MATROOFT);
@@ -103,26 +129,13 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
   addDivider(base,0.2f,0.5f,MATMESH,true);
 
   if (wall == MATWALL && rand()%2 == 0) {
-    height = rand()%3+1;/*
-    Vertex vh = mesh.v[mesh.f[base]->vtx->at(0)]-mesh.v[mesh.f[base]->vtx->at(1)];
-    Vertex vv = mesh.v[mesh.f[base]->vtx->at(3)]-mesh.v[mesh.f[base]->vtx->at(0)];
+    height = rand()%3+1;
 
-    bool horiz = vh.length() > vv.length();
-    float l;
-
-    if (horiz) {
-      l = vh.length();
-    } else {
-      l = vv.length();
-    }*/
-    float l;
-    bool horiz;
-    longerSide(base,&l,&horiz);
+    longerSide(base,&length,&horiz);
     
-    l *= 0.4f+(0.1f*float(rand()%3));
+    length *= 0.4f+(0.1f*float(rand()%3));
     
-
-    int newbase = mesh.partitionFace(base,l,horiz);
+    int newbase = mesh.partitionFace(base,length,horiz);
     if (rand()%2 == 0) {
       base = newbase;
     } else {
@@ -137,8 +150,9 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
       addDivider(base,0.15f,0.3f,MATMESH);
     }
     addDivider(base,0.2f,0.5f,MATMESH,true);
-  } 
+  }
 }
+
 
 void BuildZone::longerSide(int face, float* length, bool* orientation) {
   Vertex vh = mesh.v[mesh.f[face]->vtx->at(0)]-mesh.v[mesh.f[face]->vtx->at(1)];
@@ -151,8 +165,6 @@ void BuildZone::longerSide(int face, float* length, bool* orientation) {
     (*length) = vv.length();
   }
 }
-
-
 
 void BuildZone::addDivider(int base, float width, float height, int mat, bool noNext) {
   mesh.extrudeFace(base,0.0f,mat);

@@ -224,10 +224,12 @@ int Mesh::partitionFace(int fid, float amount, bool horizontal) {
   int ai = addVertex(v[pai]+A);
   int bi = addVertex(v[pbi]+B);
 
-  int result = addFace(new Face(ID4(pai,pbi,bi,ai),f[fid]->mat));
+  int result;
   if (horizontal) {
-    f[fid]->setID4(ID4(ai,bi,cnr->at(1),cnr->at(2)));
+    result = addFace(new Face(ID4(pbi,bi,ai,pai),f[fid]->mat));
+    f[fid]->setID4(ID4(bi,cnr->at(1),cnr->at(2),ai));
   } else {
+    result = addFace(new Face(ID4(pai,pbi,bi,ai),f[fid]->mat));
     f[fid]->setID4(ID4(ai,bi,cnr->at(2),cnr->at(3)));
   }
   return result;
