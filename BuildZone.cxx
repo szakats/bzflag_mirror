@@ -16,6 +16,12 @@
 
 BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 {
+  Vertex corners[4];
+  corners[0] = Vertex((float)A.x,(float)A.y,0.2f);
+  corners[1] = Vertex((float)B.x,(float)A.y,0.2f);
+  corners[2] = Vertex((float)B.x,(float)B.y,0.2f);
+  corners[3] = Vertex((float)A.x,(float)B.y,0.2f);
+
   int size = abs(A.x-B.x)*abs(A.y-B.y);
   int wall;
   int height;
@@ -32,53 +38,40 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
     height = rand()%6+1;
   }
 
-  Face* swface = new Face();
-  swface->addVertex(mesh.addVertex(Vertex((float)A.x,(float)A.y+INSET,0.0f)));
-  swface->addVertex(mesh.addVertex(Vertex((float)A.x+INSET,(float)A.y,0.0f)));
-  swface->addVertex(mesh.addVertex(Vertex((float)B.x-INSET,(float)A.y,0.0f)));
-  swface->addVertex(mesh.addVertex(Vertex((float)B.x,(float)A.y+INSET,0.0f)));
-  swface->addVertex(mesh.addVertex(Vertex((float)B.x,(float)B.y-INSET,0.0f)));
-  swface->addVertex(mesh.addVertex(Vertex((float)B.x-INSET,(float)B.y,0.0f)));
-  swface->addVertex(mesh.addVertex(Vertex((float)A.x+INSET,(float)B.y,0.0f)));
-  swface->addVertex(mesh.addVertex(Vertex((float)A.x,(float)B.y-INSET,0.0f)));
+  Vertex insetX = Vertex(INSET,0.0f,0.0f);
+  Vertex insetY = Vertex(0.0f,INSET,0.0f);
 
-  int sidewalk = mesh.addFace(swface);
-  mesh.expandFace(sidewalk,1.0f);
-  mesh.extrudeFace(sidewalk,0.2f,MATMESH);
-  mesh.extrudeFace(sidewalk,0.0f,MATMESH);
+  Face* swface = new Face();
+  swface->mat = MATROOF;
+  swface->addVertex(mesh.addVertex(corners[0]+insetY));
+  swface->addVertex(mesh.addVertex(corners[0]+insetX));
+  swface->addVertex(mesh.addVertex(corners[1]-insetX));
+  swface->addVertex(mesh.addVertex(corners[1]+insetY));
+  swface->addVertex(mesh.addVertex(corners[2]-insetY));
+  swface->addVertex(mesh.addVertex(corners[2]-insetX));
+  swface->addVertex(mesh.addVertex(corners[3]+insetX));
+  swface->addVertex(mesh.addVertex(corners[3]-insetY));
+
+  int base = mesh.addFace(swface);
+  mesh.expandFace(base,1.0f);
+  mesh.extrudeFace(base,0.2f,MATMESH);
+  mesh.extrudeFace(base,0.0f,MATMESH);
   if (wall == MATGLASS) {
-    mesh.expandFace(sidewalk,-3.0f);
+    mesh.expandFace(base,-3.0f);
   } else {
-    mesh.expandFace(sidewalk,-1.7f);
+    mesh.expandFace(base,-1.7f);
   }
 
+  for (int i = 0; i < 4; i++) {
+    mesh.weldVertices((*mesh.f[base]->vtx)[i],(*mesh.f[base]->vtx)[i+1],corners[i]+Vertex(0.0f,0.0f,0.2f));
+  }
 
-  int base = mesh.createNewFace(
-      Vertex((float)A.x,(float)A.y,0.2f),
-      Vertex((float)B.x,(float)A.y,0.2f),
-      Vertex((float)B.x,(float)B.y,0.2f),
-      Vertex((float)A.x,(float)B.y,0.2f),
-      MATROOF
-  );
-  
   if (wall == MATGLASS) {
     mesh.expandFace(base,-2.0f);
   } else {
     mesh.expandFace(base,-0.7f);
   }
 
-  /* SIDEWALK 
-  mesh.expandFace(base,0.6f);
-  mesh.extrudeFace(base,0.2f,MATMESH);
-  mesh.extrudeFace(base,0.0f,MATMESH);
-  if (wall == MATGLASS) {
-    mesh.expandFace(base,-2.6f);
-  } else {
-    mesh.expandFace(base,-1.3f);
-  }
-  */
-
-  
   mesh.inside.push_back(mesh.faceCenter(base)+mesh.faceNormal(base));
 
   IntVector* fs;
@@ -123,8 +116,6 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
   mesh.extrudeFace(base,0.0f,MATMESH);
   mesh.expandFace(base,0.2f);
   mesh.extrudeFace(base,0.5f,MATMESH);
-
-
 
   if (wall == MATWALL && rand()%2 == 0) {
     height = rand()%3+1;
