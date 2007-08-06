@@ -5,10 +5,9 @@
 MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	ConfigurationDialog(obj, "Master Configuration Dialog", WIDTH, HEIGHT) {
 	
-	this->moreDialog = NULL;
+	this->end();
 	
-	this->startShift = NULL;
-	this->endShift = NULL;
+	this->moreDialog = NULL;
 	
 	// initialize the object
 	this->object = dynamic_cast<bz2object*>( obj );
@@ -75,8 +74,8 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	rotationField = new Fl_Float_Input(5 + 100, 45, 100, DEFAULT_TEXTSIZE + 6, "degrees");
 	rotationField->align(FL_ALIGN_RIGHT);
 	
-	if(!object->isKey("rotation")) {
-		rotationField->deactivate();	
+	if(!object->isKey("rotation") || object->isKey("spin")) {
+		rotationField->deactivate();	// objects supporting "spin" ignore "rotation"
 	}
 	else {
 		rotationField->value(ftoa(rotation).c_str());	
@@ -107,78 +106,17 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	transformationScrollArea->type(Fl_Scroll::VERTICAL_ALWAYS);
 	// add the transformations if they exist and are supported
 	if(transformationFormat.length() > 0 && transforms.size() > 0) {
-		// check and see if the first transformation is the necessary "shift -x -y -z" transformation.
-		// if so, then deactivate it to prevent people from using it (i.e. removing it).
-		// see bz2object.cpp for details on why this is.
-		vector< osg::ref_ptr<BZTransform> >::iterator itr = transforms.begin();
-		vector<float> data = (*itr)->getData();
 		
-		// see if this is indeed the ubiquitous shift transform
-		if( transforms.size() >= 2 &&		// there should be two transformations, then: this, and the last shift
-			(*itr)->getName() == "shift" &&  data[0] == -object->getPos().x() &&
-											 data[1] == -object->getPos().y() &&
-											 data[2] == -object->getPos().z() ) {
-			
-			// add the transformation to the list	 	
-			TransformWidget* firstShift = new TransformWidget(0, 0, transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, this->transformationFormat.c_str(), false );
-			firstShift->setTransformationType( (*itr)->getName().c_str() );
-			firstShift->setFields( data );
-			
-			this->addTransformCallback_real( firstShift );
-			firstShift->deactivate();
-			
-			// save the reference
-			this->startShift = firstShift;
-		}
-		
-		// add the rest of the transforms
-		for(vector< osg::ref_ptr<BZTransform> >::iterator i = transforms.end() - 2; i != itr; i--) {
+		// add the transforms
+		for(vector< osg::ref_ptr<BZTransform> >::iterator i = transforms.end() - 1; i != transforms.begin() - 1; i--) {
 			// next transform widget (the dimensions of which shall be calculated in the addTransformCallback_real method
 			TransformWidget* nextTransform = new TransformWidget(0, 0, transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, this->transformationFormat.c_str(), false);
 			
 			nextTransform->setTransformationType( (*i)->getName().c_str() );
 			nextTransform->setFields( (*i)->getData() );
 			
-			this->addTransformCallback_real(nextTransform);
-			
-			
+			this->addTransformCallback_real(nextTransform);	
 		}
-		
-		// see if the last transformation added was indeed the ending shift
-		// and if so, deactivate it (see why in bz2object.cpp)
-		itr = transforms.end() - 1;
-		data = (*itr)->getData();
-		
-		// see if this is indeed the ubiquitous shift transform
-		if( transforms.size() >= 2 &&		// there should be two transformations, then: the first shift and this one
-			(*itr)->getName() == "shift" &&  data[0] == object->getPos().x() &&
-											 data[1] == object->getPos().y() &&
-											 data[2] == object->getPos().z() ) {
-			
-			TransformWidget* lastShift = new TransformWidget(transformationScrollArea->x() + 5, transformationScrollArea->y() + 3*DEFAULT_TEXTSIZE*(transforms.size()), transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, this->transformationFormat.c_str(), false );
-			lastShift->setTransformationType( (*itr)->getName().c_str() );
-			lastShift->setFields( data );
-			
-			transformations.push_back( lastShift );
-			transformationScrollArea->add( lastShift );
-			
-			// deactivate it
-			lastShift->deactivate();	
-			
-			transformationScrollArea->redraw();
-			
-			// save the reference
-			this->endShift = lastShift;					 	
-		}
-		else {
-			TransformWidget* nextTransform = new TransformWidget(0, 0, transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, this->transformationFormat.c_str(), false);
-			
-			nextTransform->setTransformationType( (*itr)->getName().c_str() );
-			nextTransform->setFields( (*itr)->getData() );
-			
-			this->addTransformCallback_real(nextTransform);
-		}
-		
 	}
 	
 	// add transformation button
@@ -248,33 +186,37 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 void MasterConfigurationDialog::OKButtonCallback_real(Fl_Widget* w) {
 	
 	// get the data
-	Point3D position = Point3D( string(positionXField->value()) + " " + positionYField->value() + " " + positionZField->value() + "\n" );
-	Point3D size = Point3D( string(sizeXField->value()) + " " + sizeYField->value() + " " + sizeZField->value() + "\n" );
+	osg::Vec3 position = osg::Vec3( atof(positionXField->value()), atof(positionYField->value()), atof(positionZField->value()) );
+	osg::Vec3 size = osg::Vec3( atof(sizeXField->value()), atof(sizeYField->value()), atof(sizeZField->value()) );
 	
-	// get the position, rotation, and size fields and string-ify them
-	string positionString = string("position ") + string(positionXField->value()) + " " + positionYField->value() + " " + positionZField->value() + "\n";
-	string rotationString = string("rotation ") + rotationField->value() + "\n";
-	string sizeString = string("size ") + string(sizeXField->value()) + " " + sizeYField->value() + " " + sizeZField->value() + "\n";
+	float zRotation = atof( rotationField->value() );
+	osg::Vec3 rotation = osg::Vec3( 0.0, 0.0, zRotation );
 	
-	// get the transformations and string-ify them
-	string transformationString("");
+	// get the transformations
+	vector< osg::ref_ptr< BZTransform > > transforms = vector< osg::ref_ptr< BZTransform > >();
 	
 	if(transformations.size() != 0) {
 		for(vector<TransformWidget*>::iterator i = transformations.end() - 1; i != transformations.begin() - 1; i--) {
-			if( (*i)->active() )
-				transformationString += (*i)->toString();
+			if( (*i)->active() ) {
+				string widgetData = (*i)->toString();
+				transforms.push_back( new BZTransform( widgetData ) );
+			}
 		}
 	}
 	
-	// update the object
-	string objectString = object->getHeader() + "\n" +
-						  "  " + positionString +
-						  "  " + rotationString +
-						  "  " + sizeString +
-						  "  " + transformationString + "\n" +
-						  "end\n";
+	// call updates
+	UpdateMessage positionUpdate( UpdateMessage::SET_POSITION, &position );
+	UpdateMessage sizeUpdate( UpdateMessage::SET_SCALE, &size );
+	UpdateMessage rotationUpdate( UpdateMessage::SET_ROTATION, &rotation );
+	UpdateMessage transformUpdate( UpdateMessage::SET_TRANSFORMATIONS, &transforms );
 	
-	object->update( objectString );
+	object->update( positionUpdate );
+	object->update( sizeUpdate );
+	if( object->isKey("rotation") && !object->isKey("spin"))
+		object->update( rotationUpdate );
+	object->update( transformUpdate );
+	
+	printf("data: \n|%s|\n", object->toString().c_str());
 	
 	Fl::delete_widget(this);	
 }
@@ -292,15 +234,7 @@ void MasterConfigurationDialog::CancelButtonCallback_real(Fl_Widget* w) {
 void MasterConfigurationDialog::addTransformCallback_real(Fl_Widget* widgetToAdd) {
 	
 	int x = transformationScrollArea->x() + 5;
-	int y;
-	
-	// pick the value for y
-	if( this->startShift != NULL )	{	// we have the ubiquitous footer shift ==> y should be above it it
-		// move the widget down
-		y = startShift->y() + 3*DEFAULT_TEXTSIZE*(transformations.size());	
-	}
-	else	// we have a transformation before this one ==> y should be just underneath it
-		y = transformationScrollArea->y() + 3*DEFAULT_TEXTSIZE*(transformations.size()+1);
+	int y = transformationScrollArea->y() + 3*DEFAULT_TEXTSIZE*(transformations.size()+1);
 	
 	int width = transformationScrollArea->w();
 	int height = 3*DEFAULT_TEXTSIZE;
@@ -320,13 +254,7 @@ void MasterConfigurationDialog::addTransformCallback_real(Fl_Widget* widgetToAdd
 	transformationScrollArea->redraw();
 	newTransform->redraw();
 	
-	// if we have the inactive end shift, then insert the transformation just before it
-	if( this->endShift != NULL ) {
-		transformations.insert( transformations.end() - 1, newTransform );
-		endShift->position( endShift->x(), endShift->y() * 3*DEFAULT_TEXTSIZE );
-	}
-	else
-		transformations.push_back( newTransform );
+	transformations.push_back( newTransform );
 }
 
 /*

@@ -31,14 +31,26 @@ ConeConfigurationDialog::ConeConfigurationDialog( cone* theCone ) :
 	
 	this->end();
 	
+	// add the callbacks
+	this->setOKEventHandler( OKCallback, this );
+	this->setCancelEventHandler( CancelCallback, this );
+	
 }
 
 // OK callback
 void ConeConfigurationDialog::OKCallback_real( Fl_Widget* w ) {
+	// call cone-specific setters from the UI
+	theCone->setSmoothBounce( smoothBounceButton->value() == 1 ? true : false );
+	theCone->setSweepAngle( sweepAngleCounter->value() );
+	theCone->setDivisions( (int)subdivisionCounter->value() );
+	theCone->setFlatShading( flatShadingButton->value() == 1 ? true : false );
 	
+	// don't delete this dialog box just yet...just hide it
+	this->hide();
 }
 
 // Cancel callback
 void ConeConfigurationDialog::CancelCallback_real( Fl_Widget* w ) {
-	
+	// don't delete this dialog box just yet...just hide it
+	this->hide();
 }

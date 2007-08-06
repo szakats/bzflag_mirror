@@ -3,6 +3,11 @@
 
 #include <osg/Vec3>
 #include <osg/Quat>
+#include <osg/ref_ptr>
+
+#include <vector>
+
+using namespace std;
 
 /**
  * This is a simple message class that can be sent to objects in their update() method.
@@ -11,6 +16,8 @@
  * It's the job of the update() method to interpret the message and carry out any additional changes
  * specific to the object itself.
  */
+ 
+class BZTransform;
  
 class UpdateMessage {
 	
@@ -23,16 +30,18 @@ public:
 		SET_ROTATION,				// i.e. use this to indicate a new rotation
 		SET_ROTATION_FACTOR,		// i.e. use this to indicate a change in rotation
 		SET_SCALE,					// i.e. use this to indicate a new scale
-		SET_SCALE_FACTOR			// i.e. use this to indicate a change in scale
+		SET_SCALE_FACTOR,			// i.e. use this to indicate a change in scale
+		SET_TRANSFORMATIONS			// i.e. use this along with a vector of BZTransforms to set the transformation stack
 	};
 
 	int type;
 	
+	/*
 	UpdateMessage( int type, void* data) {
 		this->type = type;
 		this->data = data;
 	}
-	
+	*/
 	UpdateMessage( int type, osg::Vec3* data ) {
 		this->type = type;
 		this->vec = data;
@@ -45,6 +54,12 @@ public:
 		this->data = data;
 	}
 	
+	UpdateMessage( int type, vector< osg::ref_ptr<BZTransform> >* data) {
+		this->type = type;
+		this->data = data;
+		this->transforms = data;
+	}
+	
 	void* get() { return data; }
 	
 	// message-specific getters (ensure type-safety)
@@ -55,13 +70,16 @@ public:
 	osg::Quat* getAsAttitude() { return quat; }
 	osg::Vec3* getAsRotation() { return vec; }
 	osg::Vec3* getAsRotationFactor() { return vec; }
+	vector< osg::ref_ptr<BZTransform> >* getAsTransformationStack() { return transforms; }
 
 private:
 	
 	osg::Vec3* vec;		// position (factor), scale (factor), and rotation (factor) data
 	osg::Quat* quat;	// rotation (factor) data
+	vector< osg::ref_ptr<BZTransform> >* transforms;	// transformations
 	void* data;			// other data
 	
 };
+
 
 #endif /*UPDATEMESSAGE_H_*/

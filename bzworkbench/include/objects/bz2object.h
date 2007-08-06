@@ -43,7 +43,7 @@ class bz2object : public Renderable, public DataEntry {
 		virtual int update(string& data);
 		
 		// specific update message
-		virtual int update(UpdateMessage& msg) { return 1; }
+		virtual int update(UpdateMessage& msg);
 		
 		// toString
 		virtual string toString(void);
@@ -67,7 +67,11 @@ class bz2object : public Renderable, public DataEntry {
 		virtual osg::Quat getRot() { return this->getAttitude(); }
 		
 		// use this instead of setPosition()
-		virtual void setPos( const osg::Vec3d& newPos ) { this->setPosition( newPos ); }
+		virtual void setPos( const osg::Vec3d& newPos ) { 
+			this->startShift->setData( -newPos );
+			this->setPosition( newPos );
+			this->endShift->setData( newPos );
+		}
 		
 		// use this instead of setScale()
 		virtual void setSize( const osg::Vec3d& newSize ) { this->setScale( newSize ); }
@@ -86,7 +90,11 @@ class bz2object : public Renderable, public DataEntry {
 		
 		// set/set the thisNode
 		osg::Node* getThisNode() { return this->thisNode.get(); }
-		void setThisNode( osg::Node* node ) { this->thisNode = node; }
+		void setThisNode( osg::Node* node ) { 
+			this->endShift->removeChild( thisNode.get() );
+			this->thisNode = node;
+			this->endShift->addChild( thisNode.get() );
+		}
 		
 		// make this public
 		bz2object operator =( const bz2object& obj ) { 
@@ -102,18 +110,24 @@ class bz2object : public Renderable, public DataEntry {
 		// set true if selected in the 3D scene
 		bool selected;
 		
-		// reference to node data inside the Renderable (for changing the transformation stack)
-		osg::ref_ptr< osg::Node > thisNode;
-		
 	private:
 		// force these methods to be private, to guarantee that derived classes will use the given replacements
 		osg::Vec3f getPosition() { return Renderable::getPosition(); }
 		osg::Vec3f getScale() { return Renderable::getScale(); }
 		osg::Quat getAttitude() { return Renderable::getAttitude(); }
-		
 		void setPosition( const osg::Vec3d& newPosition ) { Renderable::setPosition( newPosition ); }
 		void setScale( const osg::Vec3d& newScale ) { Renderable::setScale( newScale ); }
 		void setAttitude( const osg::Quat& newAttitude ) { Renderable::setAttitude( newAttitude ); }
+		
+		// start and end shift transformations (manditory)
+		osg::ref_ptr< BZTransform > startShift, endShift;
+		
+		// recompute the transformation stack
+		void recomputeTransformations( vector< osg::ref_ptr< BZTransform > >* newTransformations);
+		
+		// reference to node data inside the Renderable (for changing the transformation stack)
+		osg::ref_ptr< osg::Node > thisNode;
+		
 };
 
 #endif /*BZ2OBJECT_H_*/

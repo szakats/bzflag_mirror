@@ -41,10 +41,34 @@ public:
 	float getSweepAngle() { return sweepAngle; }
 	int getDivisions() { return divisions; }
 	
-	void setFlatShading(bool value) { this->flatShading = value; }
+	void setFlatShading(bool value) {
+		this->flatShading = value;
+		this->updateShadeModel();
+	}
+	
 	void setSmoothBounce(bool value) { this->smoothbounce = value; }
-	void setSweepAngle(float value) { this->sweepAngle = value; }
-	void setDivisions(int value) { this->divisions = divisions; }
+	
+	void setSweepAngle(float value) {
+		if( value != this->sweepAngle ) {		// refresh the geometry
+			theCone->removeChild( coneNode.get() );
+			theCone->removeChild( baseNode.get() );
+			
+			this->buildGeometry();
+		}
+		
+		this->sweepAngle = value;
+	}
+	
+	void setDivisions(int value) {
+		if( value != this->divisions ) {	// refresh the geometry
+			theCone->removeChild( coneNode.get() );
+			theCone->removeChild( baseNode.get() );
+			
+			this->buildGeometry();
+		}
+		
+		this->divisions = value;
+	}
 	
 private:
 	bool flatShading, smoothbounce;
