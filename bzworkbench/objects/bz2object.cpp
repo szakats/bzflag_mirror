@@ -310,10 +310,12 @@ string bz2object::BZWLines(void) {
 	}
 	
 	// add the Euler rotation values as spin keys
-	ret += "  spin " + string(ftoa( this->getRotation().x() )) + " 1 0 0\n";
-	ret += "  spin " + string(ftoa( this->getRotation().y() )) + " 0 1 0\n";
-	ret += "  spin " + string(ftoa( this->getRotation().z() )) + " 0 0 1\n";
-	
+	if( this->isKey("spin") ) {
+		ret += "  spin " + string(ftoa( this->getRotation().x() )) + " 1 0 0\n";
+		ret += "  spin " + string(ftoa( this->getRotation().y() )) + " 0 1 0\n";
+		ret += "  spin " + string(ftoa( this->getRotation().z() )) + " 0 0 1\n";
+	}
+		
 	// add the final transformation
 	if( this->isKey("shift") )
 		ret += "  " + endShift->toString();

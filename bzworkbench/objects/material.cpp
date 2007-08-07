@@ -2,38 +2,30 @@
 
 // default constructor
 material::material() : 
-	DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosort><noradar><nolighting><groupalpha><occluder><alphathresh>") {
+	DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosort><noradar><nolighting><groupalpha><occluder><alphathresh>"),
+	osg::Material() {
 	name = string("");
-	dynamicColor = string("");
-	textureMatrix = string("");
+	dynCol = NULL;
+	textureMatrix = NULL;
 	color = string("");
-	textures = vector<string>();
+	textures = vector< osg::ref_ptr< osg::Texture2D > >();
 	noTextures = noTexColor = noTexAlpha = true;
 	noRadar = spheremap = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = resetmat = false;
 	alphaThreshold = 1.0f;
-	ambient = RGBA(0, 0, 0, 0);
-	diffuse = RGBA(0, 0, 0, 0);
-	emissive = RGBA(0, 0, 0, 0);
-	specular = RGBA(0, 0, 0, 0);
-	shiny = 0;
 }
 
 // constructor with data
 material::material(string& data) :
-	DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosort><noradar><nolighting><groupalpha><occluder><alphathresh>", data.c_str()) {
+	DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosort><noradar><nolighting><groupalpha><occluder><alphathresh>", data.c_str()),
+	osg::Material() {
 	name = string("");
-	dynamicColor = string("");
-	textureMatrix = string("");
+	dynCol = NULL;
+	textureMatrix = NULL;
 	color = string("");
-	textures = vector<string>();
+	textures = vector< osg::ref_ptr< osg::Texture2D > >();
 	noTextures = noTexColor = noTexAlpha = true;
 	noRadar = spheremap = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = resetmat = false;
 	alphaThreshold = 1.0f;
-	ambient = RGBA(0, 0, 0, 0);
-	diffuse = RGBA(0, 0, 0, 0);
-	emissive = RGBA(0, 0, 0, 0);
-	specular = RGBA(0, 0, 0, 0);
-	shiny = 0;
 	
 	this->update(data);
 }
@@ -170,14 +162,24 @@ int material::update(string& data) {
 	if(!DataEntry::update(data))
 		return 0;
 	this->name = names[0];
-	this->dynamicColor = (dyncols.size() != 0 ? dyncols[0] : "");
-	this->textureMatrix = (texmats.size() != 0 ? texmats[0] : "");
-	this->emissive = (emissives.size() != 0 ? RGBA( emissives[0].c_str() ) : RGBA(0, 0, 0, 0));
-	this->specular = (speculars.size() != 0 ? RGBA( speculars[0].c_str() ) : RGBA(0, 0, 0, 0));
-	this->ambient = (ambients.size() != 0 ? RGBA( ambients[0].c_str() ) : RGBA(1, 1, 1, 1));
-	this->diffuse = (diffuses.size() != 0 ? RGBA( diffuses[0].c_str() ) : RGBA(1, 1, 1, 1));
-	this->textures = texs;
-	this->materials = matrefs;
+	this->dynCol = (dyncols.size() != 0 ? (dynamicColor*)Model::command( MODEL_GET, "dynamicColor", dyncols[0] ) : NULL);
+	this->textureMatrix = (texmats.size() != 0 ? (texturematrix*)Model::command( MODEL_GET, "texturematrix", texmats[0]) : NULL);
+	(emissives.size() != 0 ? this->setEmissive(RGBA( emissives[0].c_str() )) : this->setEmissive(RGBA(0, 0, 0, 0)));
+	(speculars.size() != 0 ? this->setSpecular(RGBA( speculars[0].c_str() )) : this->setSpecular(RGBA(0, 0, 0, 0)));
+	(ambients.size() != 0 ? this->setAmbient(RGBA( ambients[0].c_str() )) : this->setAmbient(RGBA(1, 1, 1, 1)));
+	(diffuses.size() != 0 ? this->setDiffuse(RGBA( diffuses[0].c_str() )) : this->setDiffuse(RGBA(1, 1, 1, 1)));
+	
+	this->textures.clear();
+	this->materials.clear();
+	// get the materials from the model
+	for( vector<string>::iterator i = matrefs.begin(); i != matrefs.end(); i++) {
+		material* mat = (material*)Model::command( MODEL_GET, "material", *i );
+		if( mat != NULL )
+			this->materials.push_back( mat );
+	}
+	
+	// this->textures = texs;
+	
 	this->noTextures = (notextures.size() == 0 ? false : true);
 	this->noTexColor = (notexcolors.size() == 0 ? false : true);
 	this->spheremap = (spheremaps.size() == 0 ? false : true);
@@ -190,7 +192,7 @@ int material::update(string& data) {
 	this->occluder = (occluders.size() == 0 ? false : true);
 	this->resetmat = (resetmats.size() == 0 ? false : true);
 	this->noLighting = (nolightings.size() == 0 ? false : true);
-	this->shiny = (shininesses.size() > 0 ? atoi( shininesses[0].c_str() ) : 0);
+	(shininesses.size() > 0 ? this->setShininess(atof( shininesses[0].c_str() )) : this->setShininess(0.0) );
 	this->alphaThreshold = (alphathresholds.size() > 0 ? atof( alphathresholds[0].c_str() ) : 1.0f);
 	
 	return 1;
@@ -199,19 +201,31 @@ int material::update(string& data) {
 // tostring
 string material::toString(void) {
 	string texString = string("");
-	for(vector<string>::iterator i = textures.begin(); i != textures.end(); i++) {
-		texString += "  addtexture " + (*i) + "\n";	
+	for(vector< osg::ref_ptr<osg::Texture2D> >::iterator i = textures.begin(); i != textures.end(); i++) {
+		string filename = (*i)->getImage()->getFileName();
+		string::size_type suffixIndex = filename.find(".png");
+		if( suffixIndex != string::npos )
+			filename = filename.substr(0, suffixIndex );
+			
+		texString += "  addtexture " + filename + "\n";	
 	}
 	
 	string matString = string("");
-	for(vector<string>::iterator i = materials.begin(); i != materials.end(); i++) {
-		matString += "  matref " + (*i) + "\n";	
+	for(vector< osg::ref_ptr< material > >::iterator i = materials.begin(); i != materials.end(); i++) {
+		matString += "  matref " + (*i)->getName() + "\n";	
 	}
+	
+	// color strings
+	string ambientString = "  ambient " + RGBA( this->getAmbient().x(), this->getAmbient().y(), this->getAmbient().z(), this->getAmbient().w() ).toString();
+	string diffuseString = "  diffuse " + RGBA( this->getDiffuse().x(), this->getDiffuse().y(), this->getDiffuse().z(), this->getDiffuse().w() ).toString();
+	string specularString = "  ambient " + RGBA( this->getSpecular().x(), this->getSpecular().y(), this->getSpecular().z(), this->getSpecular().w() ).toString();
+	string emissiveString = "  ambient " + RGBA( this->getEmissive().x(), this->getEmissive().y(), this->getEmissive().z(), this->getEmissive().w() ).toString();
+	
 	
 	return string("material\n") +
 				  (name.length() == 0 ? string("# name") : "  name " + name) + "\n" +
-				  (dynamicColor.length() != 0 ? string("  dyncol ") + dynamicColor : string("  dyncol -1")) + "\n" +
-				  (textureMatrix.length() != 0 ? string("  texmat ") + textureMatrix : string("  texmat -1")) + "\n" +
+				  (dynCol != NULL ? string("  dyncol ") + dynCol->getName() : string("  dyncol -1")) + "\n" +
+				  (textureMatrix != NULL ? string("  texmat ") + textureMatrix->getName() : string("  texmat -1")) + "\n" +
 				  (color.length() != 0 ? string("  color ") + color + "\n" : "") +
 				  (noTextures == true ? "  notextures\n" : "") +
 				  (noTexColor == true ? "  notexcolor\n" : "") +
@@ -225,19 +239,14 @@ string material::toString(void) {
 				  (groupAlpha == true ? "  groupalpha\n" : "") +
 				  (occluder == true ? "  occluder\n" : "") +
 				  (resetmat == true ? "  resetmat\n" : "") +
-				  "  ambient " + ambient.toString() +
-				  (color.length() == 0 ? "  diffuse " + diffuse.toString() : "") +
-				  "  specular " + specular.toString() +
-				  "  emission " + emissive.toString() +
-				  "  shininess " + string(itoa(shiny)) + "\n" +
+				  "  ambient " + ambientString +
+				  (color.length() == 0 ? "  diffuse " + diffuseString : "") +
+				  "  specular " + specularString +
+				  "  emission " + emissiveString +
+				  "  shininess " + string(ftoa(this->getShininess())) + "\n" +
 				  "  alphathresh " + string(ftoa(alphaThreshold)) + "\n" +
 				  texString +
 				  matString +
 				  this->getUnusedText() + 
 				  "end\n";
-}
-
-// render
-int material::render(void) {
-	return 0;
 }

@@ -65,10 +65,12 @@ int pyramid::update(UpdateMessage& message) {
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
 			this->updateGeometry( message );
+			this->setSize( *(message.getAsScale()) );
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
 			this->updateGeometry( message );
+			this->setSize( this->getSize() + *(message.getAsScaleFactor()) );
 			break;
 			
 		default:	// unknown event; don't handle

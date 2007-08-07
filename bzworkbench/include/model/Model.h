@@ -19,7 +19,7 @@ class DataEntry;
 class material;
 
 // supported query commands.
-#define MODEL_QUERY_COMMANDS "<get><set>"
+#define MODEL_GET "get"
 
 #include "../Observable.h"
 #include "ObserverMessage.h"
@@ -36,13 +36,13 @@ public:
 	
 	virtual ~Model();
 	
-	// query method; data is a command
+	// string-based control mechanism
 	// command syntax: "<command> <object> <name>[ data]", where
-	// command is the query command, object is the type of object, and data is any additional data the command would need
-	static string& query(const char* command);
+	// command is the query command, object is the type of object, the name is the object's name, and data is any additional data the command would need
+	static DataEntry* command(const string& command, const string& object, const string& name, const string& data = "" );
 	
 	// the real query method
-	string& _query(const char* command);
+	DataEntry* _command(const string& command, const string& object, const string& name, const string& data = "" );
 	
 	// this method builds the model from a vector of BZW-formatted strings
 	// returns true of it builds properly

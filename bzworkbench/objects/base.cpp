@@ -159,3 +159,39 @@ void base::setTeam( int t ) {
 	// set the node name
 	this->setName( SceneBuilder::nameNode( name.c_str()) );
 }
+
+// setter (with binary data)
+// NOTE: don't call superclass update method, because it deals only with transformations (which are n/a here)
+int base::update(UpdateMessage& message) {
+	
+	switch( message.type ) {
+		case UpdateMessage::SET_POSITION: 	// handle a new position
+			this->setPos( *(message.getAsPosition()) );
+			break;
+			
+		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
+			this->setPos( this->getPos() + *(message.getAsPositionFactor()) );
+			break;
+			
+		case UpdateMessage::SET_ROTATION:		// handle a new rotation
+			this->setRotationZ( message.getAsRotation()->z() );
+			break;
+			
+		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
+			this->setRotationZ( this->getRotation().z() + message.getAsRotationFactor()->z() );
+			break;
+			
+		case UpdateMessage::SET_SCALE:		// handle a new scale
+			this->setSize( *(message.getAsScale()) );
+			break;
+			
+		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
+			this->setSize( this->getSize() + *(message.getAsScaleFactor()) );
+			break;
+			
+		default:	// unknown event; don't handle
+			return 0;
+	}
+	
+	return 1;
+}

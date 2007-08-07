@@ -83,7 +83,7 @@ int group::update(string& data) {
 // toString
 string group::toString(void) {
 	string tintString = string(""), teamString = string("");
-	if(tintColor.r > 0 && tintColor.g > 0 && tintColor.b > 0 && tintColor.a > 0)
+	if(tintColor.r() > 0 && tintColor.g() > 0 && tintColor.b() > 0 && tintColor.a() > 0)
 		tintString = "  tint " + tintColor.toString();
 	if(team > 0)
 		teamString = "  team " + string(itoa(team)) + "\n";
