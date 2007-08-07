@@ -71,10 +71,12 @@ int box::update(UpdateMessage& message) {
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
 			this->updateGeometry( message );
+			this->setSize( *(message.getAsScale()) );
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
 			this->updateGeometry( message );
+			this->setSize( this->getSize() + *(message.getAsScaleFactor()) );
 			break;
 			
 		default:	// unknown event; don't handle
@@ -93,6 +95,7 @@ string box::toString(void) {
 
 // update the box geometry
 void box::updateGeometry( UpdateMessage& message ) {
+	
 	// if we changed the scale, update the texture coordinates (i.e. the scale might have changed)
 	// NOTE: it is expected that message.data will point to an osg::Vec3, which contains the scaling FACTOR
 	if( message.type == UpdateMessage::SET_SCALE_FACTOR ) {

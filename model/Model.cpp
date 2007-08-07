@@ -107,17 +107,67 @@ const string Model::getSupportedTerminators() { return modelRef->_getSupportedTe
 const string Model::_getSupportedTerminators() { return this->objectTerminators; }
 
 // the query method
-string& Model::query(const char* command) { 
-	return modelRef->_query(command);
+DataEntry* Model::command(const string& command, const string& object, const string& name, const string& data) { 
+	return modelRef->_command(command, object, name, data);
 }
 
 // the *real* query method
-string& Model::_query(const char* command) {
-	// get the command sequence
-	// vector<string> commandElements = BZW
+// TODO: add more features
+DataEntry* Model::_command(const string& command, const string& object, const string& name, const string& data) {
+	// see if this is a "get" command
+	if( command == MODEL_GET ) {
+		// determine which type of object
+		
+		// handle dynamicColor
+		if( object == "dynamicColor" ) {
+			for( vector< dynamicColor* >::iterator i = this->dynamicColors.begin(); i != this->dynamicColors.end(); i++ ) {
+				if( (*i)->getName() == name )
+					return *i;
+			}
+		}
+		
+		// handle texturematrices
+		else if( object == "texturematrix" ) {
+			for( vector< texturematrix* >::iterator i = this->textureMatrices.begin(); i != this->textureMatrices.end(); i++ ) {
+				if( (*i)->getName() == name )
+					return *i;
+			}
+		}
+		
+		// handle physics drivers
+		else if( object == "phydrv" ) {
+			for( vector< physics* >::iterator i = this->phys.begin(); i != this->phys.end(); i++ ) {
+				if( (*i)->getName() == name )
+					return *i;
+			}
+		}
+		
+		// handle materials
+		else if( object == "material" ) {
+			for( vector< material* >::iterator i = this->materials.begin(); i != this->materials.end(); i++ ) {
+				if( (*i)->getName() == name )
+					return *i;
+			}
+		}
+		
+		// handle teleporter links
+		else if( object == "link" ) {
+			for( vector< Tlink* >::iterator i = this->links.begin(); i != this->links.end(); i++ ) {
+				if( (*i)->getName() == name )
+					return *i;
+			}
+		}
+		
+		// handle all other objects
+		else {
+			for( vector< bz2object* >::iterator i = this->objects.begin(); i != this->objects.end(); i++) {
+				if( (*i)->getName() == name )
+					return *i;
+			}
+		}
+	}
 	
-	string str("");
-	return str;
+	return NULL;
 }
 
 // the static build method

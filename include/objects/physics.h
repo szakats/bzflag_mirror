@@ -31,6 +31,12 @@ public:
 	// render
 	int render(void);
 	
+	// getters
+	string& getName() { return this->name; }
+	
+	// setters
+	void setName( const string& name ) { this->name = name; }
+	
 private:
 	
 	Point3D linear, angular;

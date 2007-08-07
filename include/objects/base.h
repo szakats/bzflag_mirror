@@ -35,8 +35,8 @@ public:
 	// setter
 	int update(string& data);
 	
-	// event handler (just call the superclass method)
-	int update( UpdateMessage& msg ) { return bz2object::update( msg ); }
+	// event handler
+	int update( UpdateMessage& msg );
 	
 	// tostring
 	string toString();
