@@ -80,16 +80,51 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
   generateBuilding(base,wall); 
 }
 
+void BuildZone::generateSkyscraper(int base, int wall) {
+  int height = rand()%6+4;
+  int high = false;
+  if (rand()%3 == 0) high = true;
+  float hlev = 8.0f;
+  if (!high) {
+    IntVector* sides;
+    sides = mesh.extrudeFaceR(base,hlev*float(height),wall);
+      for(size_t i = 0; i < sides->size(); i++) {
+	IntVector* fcs = mesh.subdivdeFace((*sides)[i],3,true);
+	mesh.extrudeFace((*fcs)[1],-5.0,wall);
+      delete fcs;
+    }
+    delete sides;
+    if (!high) addDivider(base,0.2f,0.5f,MATMESH,true);
+  } else {
+    while(height > 0) {
+      height = rand()%5+2;
+      mesh.extrudeFaceR(base,hlev*float(height),wall);
+      if (rand()%3 == 0) return;
+      bool horiz;
+      float length;
+      longerSide(base,&length,&horiz);
+      float divlength = length * 0.66f;
+      if (rand()%2 == 0) {
+	base = mesh.partitionFace(base,divlength,horiz);
+      } else {
+	mesh.partitionFace(base,length-divlength,horiz);
+      }
+    }
+  }
+}
+
 void BuildZone::generateBuilding(int base, int wall) {
 
   mesh.inside.push_back(mesh.faceCenter(base)+mesh.faceNormal(base));
 
+  if (wall == MATGLASS) {
+    generateSkyscraper(base,wall);
+    return;
+  }
+
   int height = 1;
   float hlev = 3.7f;
-  if (wall == MATGLASS) {
-    height = rand()%6+4;
-    hlev = 8.0f;
-  } else if (wall == MATWALL) {
+  if (wall == MATWALL) {
     height = rand()%3+1;
   } else if (wall == MATWALL2) {
     height = rand()%6+1;
@@ -113,9 +148,7 @@ void BuildZone::generateBuilding(int base, int wall) {
 
     if (i == height-1) break;
 
-    if (wall != MATGLASS) {
-      addDivider(base,0.15f,0.3f,MATMESH);
-    }
+    addDivider(base,0.15f,0.3f,MATMESH);
   }
 
   if (wall == MATWALL && rand()%2 == 0 && height <= 3 && size() < 5000) {

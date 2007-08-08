@@ -28,6 +28,7 @@ public:
   void subdivideWindows(int wall, int mat);
   void longerSide(int face, float* length, bool* orientation);
   void generateBuilding(int base, int wall);
+  void generateSkyscraper(int base, int wall);
   virtual void output(Output& out);
 };
 
