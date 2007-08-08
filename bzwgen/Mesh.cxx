@@ -179,7 +179,11 @@ IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal) {
     ai = addVertex(a);
     bi = addVertex(b);
 
-    result->push_back(addFace(new Face(ID4(pai,pbi,bi,ai),mat)));
+    if (horizontal) {
+      result->push_back(addFace(new Face(ID4(pbi,bi,ai,pai),mat)));
+    } else {
+      result->push_back(addFace(new Face(ID4(pai,pbi,bi,ai),mat)));
+    }
 
     pai = ai;
     pbi = bi;
@@ -188,7 +192,7 @@ IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal) {
   result->push_back(fid);
 
   if (horizontal) {
-    f[fid]->setID4(ID4(ai,bi,cnr->at(1),cnr->at(2)));
+    f[fid]->setID4(ID4(bi,cnr->at(1),cnr->at(2),ai));
   } else {
     f[fid]->setID4(ID4(ai,bi,cnr->at(2),cnr->at(3)));
   }
