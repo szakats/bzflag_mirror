@@ -16,7 +16,7 @@
 
 #include <string>
 #include <fstream>
-#include "common.h"
+#include "globals.h"
 #include "Face.h"
 
 

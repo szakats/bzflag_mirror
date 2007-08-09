@@ -14,6 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include "time.h"
+#include "Token.h"
 
 // TODO list for simple grid based generator
 // ------------------------------------------

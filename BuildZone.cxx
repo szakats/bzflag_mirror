@@ -99,7 +99,7 @@ void BuildZone::generateSkyscraper(int base, int wall) {
     while(height > 0) {
       height = rand()%5+2;
       mesh.extrudeFaceR(base,hlev*float(height),wall);
-      if (rand()%3 == 0) return;
+      if (rand()%3 == 0) return; 
       bool horiz;
       float length;
       longerSide(base,&length,&horiz);

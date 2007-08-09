@@ -178,6 +178,10 @@
 				RelativePath=".\Mesh.cxx"
 				>
 			</File>
+			<File
+				RelativePath=".\Token.cxx"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -185,11 +189,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\BasicShape.h"
+				>
+			</File>
+			<File
 				RelativePath=".\BuildZone.h"
 				>
 			</File>
 			<File
-				RelativePath=".\common.h"
+				RelativePath=".\CompFace.h"
 				>
 			</File>
 			<File
@@ -202,6 +210,10 @@
 			</File>
 			<File
 				RelativePath=".\Generator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\globals.h"
 				>
 			</File>
 			<File
@@ -222,6 +234,14 @@
 			</File>
 			<File
 				RelativePath=".\Output.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RuleParser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Token.h"
 				>
 			</File>
 			<File

@@ -13,7 +13,7 @@
 #ifndef __FACE_H__
 #define __FACE_H__
 
-#include "common.h"
+#include "globals.h"
 #include "Output.h"
 
 class Face {
@@ -57,7 +57,7 @@ public:
     tcd->push_back(tc);
     return vtx->size()-1;
   }
-  ~Face() {
+  virtual ~Face() {
     delete vtx;
     delete tcd;
   }

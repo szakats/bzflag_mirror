@@ -17,7 +17,7 @@
 #include <vector>
 #include <fstream>
 #include "Output.h"
-#include "common.h"
+#include "globals.h"
 
 
 class Zone {

@@ -15,7 +15,7 @@
 
 #include <vector>
 #include <fstream> 
-#include "common.h"
+#include "globals.h"
 
 
 class Generator {

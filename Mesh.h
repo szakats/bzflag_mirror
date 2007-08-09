@@ -13,7 +13,7 @@
 #ifndef __MESH_H__
 #define __MESH_H__
 
-#include "common.h"
+#include "globals.h"
 #include "Output.h"
 #include "Face.h"
 
