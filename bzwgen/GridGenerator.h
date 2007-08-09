@@ -17,7 +17,7 @@
 #include "Generator.h"
 #include "Material.h"
 #include "GridMap.h"
-#include "common.h"
+#include "globals.h"
 #include "Output.h"
 
 class GridGenerator : public Generator {

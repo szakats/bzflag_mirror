@@ -15,7 +15,7 @@
 #define __BUILDZONE_H__
 
 #include <fstream>
-#include "common.h"
+#include "globals.h"
 #include "Zone.h"
 #include "Mesh.h"
 

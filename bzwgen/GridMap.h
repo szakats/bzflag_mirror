@@ -13,7 +13,7 @@
 #ifndef __MAP_H__
 #define __MAP_H__
 
-#include "common.h"
+#include "globals.h"
 #include "Zone.h"
 
 class GridMap {

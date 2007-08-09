@@ -17,7 +17,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include "common.h"
+#include "globals.h"
 #include "Zone.h"
 #include "Mesh.h"
 
