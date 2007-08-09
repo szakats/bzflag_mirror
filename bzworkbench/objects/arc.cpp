@@ -9,7 +9,7 @@ arc::arc() :
 	this->divisions = 16;
 	this->angle = 180.0f;
 	this->setName("default_arc");
-	this->physicsDriver = string("");
+	this->physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	
@@ -24,7 +24,7 @@ arc::arc(string& data) :
 	this->divisions = 16;
 	this->angle = 180.0f;
 	this->setName("default_arc");
-	this->physicsDriver = string("");
+	this->physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	

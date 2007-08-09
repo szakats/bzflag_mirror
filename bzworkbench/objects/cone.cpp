@@ -7,7 +7,7 @@ cone::cone() :
 	// define some basic values
 	this->divisions = 16;
 	this->setName("default_cone");
-	this->physicsDriver = string("");
+	this->physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	
@@ -28,7 +28,7 @@ cone::cone(string& data) :
 	// define some basic values
 	this->divisions = 16;
 	this->setName("default_cone");
-	this->physicsDriver = string("");
+	this->physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	

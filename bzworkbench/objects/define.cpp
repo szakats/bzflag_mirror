@@ -2,13 +2,13 @@
 
 // constructor
 define::define() : DataEntry("define", "<arc><base><box><cone><group><mesh><meshbox><meshpyr><pyramid><sphere><teleporter><tetra>") {
-	this->objects = vector<bz2object*>();
+	this->objects = vector< osg::ref_ptr<bz2object> >();
 	this->name = "";	
 }
 
 // constructor with data
 define::define(string& data) : DataEntry("define", "<arc><base><box><cone><group><mesh><meshbox><meshpyr><pyramid><sphere><teleporter><tetra>", data.c_str()) {
-	this->objects = vector<bz2object*>();
+	this->objects = vector< osg::ref_ptr<bz2object> >();
 	this->name = "";	
 	this->update(data);
 }
@@ -16,14 +16,7 @@ define::define(string& data) : DataEntry("define", "<arc><base><box><cone><group
 // destructor
 define::~define() {
 	// free previous objects
-	if(objects.size() > 0) {
-		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
-			if(*i != NULL) {
-				delete *i;
-				*i = NULL;	
-			}	
-		}	
-	}
+	objects.clear();
 }
 
 // getter
@@ -215,16 +208,7 @@ int define::update(string& data) {
 	// commit name
 	this->name = names[0];
 	
-	// free previous objects
-	if(objects.size() > 0) {
-		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
-			if(*i != NULL) {
-				delete *i;
-				*i = NULL;	
-			}	
-		}	
-	}
-	
+	// free previous objects	
 	objects.clear();
 	
 	// commit arcs
@@ -318,13 +302,10 @@ int define::update(string& data) {
 string define::toString(void) {
 	string objString = "";
 	if(objects.size() > 0) {
-		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
+		for(vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++) {
 			objString += (*i)->toString() + "\n";
 		}
 	}
 	
 	return "define " + name + "\n" + objString + "enddef\n";
 }
-
-// render
-int define::render(void) { return 0; }

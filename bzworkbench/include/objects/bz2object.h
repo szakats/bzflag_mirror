@@ -6,6 +6,9 @@
 #include "../DataEntry.h"
 #include "../Transform.h"
 
+class physics;
+class material;
+
 #include <vector>
 #include <string>
 
@@ -18,6 +21,9 @@ using namespace std;
  */
 
 class bz2object : public Renderable, public DataEntry {
+	
+	// allow SceneBuilder to modify bz2objects
+	friend class SceneBuilder;
 	
 	public:
 	
@@ -52,9 +58,9 @@ class bz2object : public Renderable, public DataEntry {
 		string BZWLines(void);
 		
 		// data getters (makes MasterConfigurationDialog code easier)
-		string getPhyDrv() { return this->physicsDriver; }
+		osg::ref_ptr<physics> getPhyDrv() { return this->physicsDriver; }
 		vector< osg::ref_ptr<BZTransform> >& getTransformations() { return this->transformations; }
-		vector<string>& getMaterials() { return this->materials; }
+		vector< osg::ref_ptr<material> >& getMaterials() { return this->materials; }
 		bool isSelected() { return this->selected; }
 		
 		// use this instead of getPosition()
@@ -80,9 +86,9 @@ class bz2object : public Renderable, public DataEntry {
 		virtual void setRot( const osg::Quat& newRot ) { this->setAttitude( newRot ); }
 		
 		// data setters (makes MasterConfigurationDialog code easier)
-		void setPhyDrv( const char* phydrv ) { this->physicsDriver = phydrv; }
+		void setPhyDrv( physics* phydrv ) { this->physicsDriver = phydrv; }
 		void setTransforms( vector< osg::ref_ptr<BZTransform> >& transformations ) { this->transformations = transformations; }
-		void setMaterials( vector<string>& materials ) { this->materials = materials; }
+		void setMaterials( vector< osg::ref_ptr< material > >& materials ) { this->materials = materials; }
 		void setSelected( bool value ) { this->selected = value; }
 		
 		// use this instead of setScale();
@@ -104,8 +110,8 @@ class bz2object : public Renderable, public DataEntry {
 		}
 		
 	protected:
-		string physicsDriver;
-		vector<string> materials;
+		osg::ref_ptr< physics > physicsDriver;
+		vector< osg::ref_ptr< material > > materials;
 		vector< osg::ref_ptr< BZTransform > > transformations;
 		// set true if selected in the 3D scene
 		bool selected;
@@ -128,6 +134,11 @@ class bz2object : public Renderable, public DataEntry {
 		// reference to node data inside the Renderable (for changing the transformation stack)
 		osg::ref_ptr< osg::Node > thisNode;
 		
+		// saved state set
+		osg::ref_ptr< osg::StateSet > savedStateSet;
 };
+
+#include "physics.h"
+#include "material.h"
 
 #endif /*BZ2OBJECT_H_*/

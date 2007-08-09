@@ -48,17 +48,17 @@ public:
 	virtual ~DataEntry() { }
 	
 	// is the key supported?
-	bool isKey(string& key) {
+	bool isKey(const string& key) {
 		string::size_type index = this->keys.find("<" + key + ">", 0);
 		if(index != string::npos)
 			return true;
 		return false;
 	}
-	bool isKey(const char* key) { string k = string(key); return isKey(k); }
+	// bool isKey(const char* key) { string k = string(key); return isKey(k); }
 	
 	
 	// does a line have a key?
-	bool hasKey(string& line) {
+	bool hasKey(const string& line) {
 		// get the keys
 		vector<string> keys = this->getKeys();
 		

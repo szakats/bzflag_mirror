@@ -41,15 +41,17 @@ public:
 	// toString
 	string toString(void);
 	
-	// render
-	int render(void);
+	// getters
+	string& getName() { return this->name; }
+	vector< osg::ref_ptr< bz2object > >& getObjects() { return this->objects; }
+	
 	
 private:
 	// name
 	string name;
 
 	// the objects in the definition 
-	vector<bz2object*> objects;
+	vector< osg::ref_ptr< bz2object > > objects;
 };
 
 #endif /*DEFINE_H_*/
