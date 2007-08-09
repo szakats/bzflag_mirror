@@ -135,7 +135,7 @@ void SceneBuilder::assignTexture( const char* _textureName, osg::Node* node ) {
 }
 
 // assign a material to a node
-void SceneBuilder::assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Vec4 specular, osg::Vec4 emissive, float shininess, float alpha, osg::Node* node ) {
+void SceneBuilder::assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Vec4 specular, osg::Vec4 emissive, float shininess, float alpha, osg::Node* node, osg::StateAttribute::Values val ) {
 	osg::Material* mat = new osg::Material();
 	
 	// set ambient lighting
@@ -160,10 +160,34 @@ void SceneBuilder::assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Ve
 	osg::StateSet* stateSet = node->getOrCreateStateSet();
 	
 	// assign the material
-	stateSet->setAttribute( mat, osg::StateAttribute::OVERRIDE );
+	stateSet->setAttribute( mat, val);
 	
 	// assign the new state set
 	node->setStateSet( stateSet );
+}
+
+// assign a BZWB material to a bz2object
+void SceneBuilder::assignBZMaterial( material* bzmat, bz2object* obj ) {
+	osg::StateSet* stateSet = obj->getOrCreateStateSet();
+	
+	osg::Material* mat = (osg::Material*)stateSet->getAttribute( osg::StateAttribute::MATERIAL );
+	
+	// set ambient lighting
+	mat->setAmbient( osg::Material::FRONT, bzmat->getAmbient() );
+	
+	// set diffuse color
+	mat->setDiffuse( osg::Material::FRONT, bzmat->getDiffuse() );
+	
+	// set specular
+	mat->setSpecular( osg::Material::FRONT, bzmat->getSpecular() );
+	
+	// set emissive
+	mat->setEmission( osg::Material::FRONT, bzmat->getEmissive() );
+	
+	// set shininess
+	mat->setShininess( osg::Material::FRONT, bzmat->getShininess() );
+	
+	stateSet->setAttribute( mat, osg::StateAttribute::ON );
 }
 
 // get the material from a node
@@ -237,5 +261,53 @@ void SceneBuilder::markUnselected( osg::Node* theNode ) {
 								   0.0,
 								   1.0,
 								   theNode );
+}
+
+// mark the object selected without destroying its state set
+void SceneBuilder::markSelectedAndPreserveStateSet( bz2object* theNode ) {
+	osg::StateSet* currStateSet = theNode->getOrCreateStateSet();
+	osg::Material* currMaterial = (osg::Material*)currStateSet->getAttribute( osg::StateAttribute::MATERIAL );
+	if( currStateSet != NULL ) {
+		theNode->savedStateSet = new osg::StateSet( *currStateSet );
+		printf(" saving states\n");
+		
+		if( currMaterial != NULL ) {
+			printf("    ambient:  %f %f %f %f\n", currMaterial->getAmbient( osg::Material::FRONT ).x(), currMaterial->getAmbient( osg::Material::FRONT ).y(), currMaterial->getAmbient( osg::Material::FRONT ).z(), currMaterial->getAmbient( osg::Material::FRONT ).w() );
+			printf("    diffuse:  %f %f %f %f\n", currMaterial->getDiffuse( osg::Material::FRONT ).x(), currMaterial->getDiffuse( osg::Material::FRONT ).y(), currMaterial->getDiffuse( osg::Material::FRONT ).z(), currMaterial->getDiffuse( osg::Material::FRONT ).w() );
+			printf("    specular: %f %f %f %f\n", currMaterial->getSpecular( osg::Material::FRONT ).x(), currMaterial->getSpecular( osg::Material::FRONT ).y(), currMaterial->getSpecular( osg::Material::FRONT ).z(), currMaterial->getSpecular( osg::Material::FRONT ).w() );
+			printf("    emissive: %f %f %f %f\n", currMaterial->getEmission( osg::Material::FRONT ).x(), currMaterial->getEmission( osg::Material::FRONT ).y(), currMaterial->getEmission( osg::Material::FRONT ).z(), currMaterial->getEmission( osg::Material::FRONT ).w() );
+		}
+	}
+	
+	SceneBuilder::assignMaterial(  osg::Vec4( 0.0, 1.0, 0.0, 1.0 ),
+								   osg::Vec4( 1.0, 1.0, 1.0, 1.0 ),
+								   osg::Vec4( 0.0, 0.0, 0.0, 1.0 ),
+								   osg::Vec4( 0.0, 1.0, 0.0, 1.0 ),
+								   0.0,
+								   1.0,
+								   theNode,
+								   osg::StateAttribute::OVERRIDE );
+
+}
+
+// mark a node as unselected by restoring it's state set if applicable
+void SceneBuilder::markUnselectedAndRestoreStateSet( bz2object* theNode ) {
+	osg::StateSet* stateSet = theNode->savedStateSet.get();
+	osg::Material* mat = (osg::Material*)stateSet->getAttribute( osg::StateAttribute::MATERIAL );
+	if( stateSet != NULL ) {
+		printf(" restoring states\n");
+		
+		if( mat != NULL ) {
+			printf("    ambient:  %f %f %f %f\n", mat->getAmbient( osg::Material::FRONT ).x(), mat->getAmbient( osg::Material::FRONT ).y(), mat->getAmbient( osg::Material::FRONT ).z(), mat->getAmbient( osg::Material::FRONT ).w() );
+			printf("    diffuse:  %f %f %f %f\n", mat->getDiffuse( osg::Material::FRONT ).x(), mat->getDiffuse( osg::Material::FRONT ).y(), mat->getDiffuse( osg::Material::FRONT ).z(), mat->getDiffuse( osg::Material::FRONT ).w() );
+			printf("    specular: %f %f %f %f\n", mat->getSpecular( osg::Material::FRONT ).x(), mat->getSpecular( osg::Material::FRONT ).y(), mat->getSpecular( osg::Material::FRONT ).z(), mat->getSpecular( osg::Material::FRONT ).w() );
+			printf("    emissive: %f %f %f %f\n", mat->getEmission( osg::Material::FRONT ).x(), mat->getEmission( osg::Material::FRONT ).y(), mat->getEmission( osg::Material::FRONT ).z(), mat->getEmission( osg::Material::FRONT ).w() );
+		}
+		
+		theNode->setStateSet( stateSet );
+	}
+	
+	else
+		SceneBuilder::markUnselected( theNode );
 }
 

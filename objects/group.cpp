@@ -8,6 +8,9 @@ group::group() :
 	this->driveThrough = false;
 	this->shootThrough = false;
 	this->setName("");
+	
+	// shade this object pink
+	
 }
 
 // constructor with data
@@ -97,5 +100,12 @@ string group::toString(void) {
 				  "end\n";
 }
 
-// render
-int group::render(void) { return 0; }
+// build the ring geometry around the objects
+void buildGeometry() {
+	
+}
+
+// re-compute the list of objects contained in the group
+void updateObjects() {
+	
+}

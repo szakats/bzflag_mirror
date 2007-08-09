@@ -1,7 +1,8 @@
 #include "../include/objects/physics.h"
 
-physics::physics() : 
-	DataEntry("physics", "<name><linear><angular><slide><death>") {
+physics::physics() :
+	DataEntry("physics", "<name><linear><angular><slide><death>"),
+	osg::Referenced() {
 	name = string("");
 	deathMessage = string("");
 	slide = 0.0f;
@@ -9,8 +10,32 @@ physics::physics() :
 	angular = Point3D(0.0f, 0.0f, 0.0f);
 }
 
+// osg-specific constructor
+physics::physics( bool threadSafe ) :
+	DataEntry("physics", "<name><linear><angular><slide><death>"),
+	osg::Referenced( threadSafe ) {
+	name = string("");
+	deathMessage = string("");
+	slide = 0.0f;
+	linear = Point3D(0.0f, 0.0f, 0.0f);
+	angular = Point3D(0.0f, 0.0f, 0.0f);
+}
+
+// osg-specific constructor
+physics::physics( const osg::Referenced& ref ) :
+	DataEntry("physics", "<name><linear><angular><slide><death>"),
+	osg::Referenced( ref ) {
+	name = string("");
+	deathMessage = string("");
+	slide = 0.0f;
+	linear = Point3D(0.0f, 0.0f, 0.0f);
+	angular = Point3D(0.0f, 0.0f, 0.0f);
+}
+
+// constructor with string data
 physics::physics(string& data) : 
-	DataEntry("physics", "<name><linear><angular><slide><death>", data.c_str()) {
+	DataEntry("physics", "<name><linear><angular><slide><death>", data.c_str()),
+	osg::Referenced() {
 	name = string("");
 	deathMessage = string("");
 	slide = 0.0f;

@@ -10,6 +10,8 @@
 
 using namespace std;
 
+class define;		// pre-declare define class
+
 class group : public bz2object {
 	
 	public:
@@ -32,8 +34,6 @@ class group : public bz2object {
 		// toString
 		string toString(void);
 		
-		// render
-		int render(void);
 		
 	private:
 		// member data
@@ -41,6 +41,20 @@ class group : public bz2object {
 		bool driveThrough, shootThrough;
 		int team;
 		
+		// reference to the definition
+		define* def;
+		
+		// the ring structure around the groups
+		osg::ref_ptr< osg::Geode > ring;
+		
+		// build the ring-like structure around the objects
+		void buildGeometry();
+		
+		// update the child objects
+		void updateObjects();
+		
 };
+
+#include "define.h"
 
 #endif /*GROUP_H_*/

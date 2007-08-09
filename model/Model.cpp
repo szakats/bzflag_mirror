@@ -158,6 +158,14 @@ DataEntry* Model::_command(const string& command, const string& object, const st
 			}
 		}
 		
+		// handle definitions
+		else if( object == "define" ) {
+			for( vector< define* >::iterator i = this->groups.begin(); i != this->groups.end(); i++ ) {
+				if( (*i)->getName() == name )
+					return *i;
+			}
+		}
+		
 		// handle all other objects
 		else {
 			for( vector< bz2object* >::iterator i = this->objects.begin(); i != this->objects.end(); i++) {

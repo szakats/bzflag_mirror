@@ -8,7 +8,7 @@ bz2object::bz2object(const char* name, const char* keys):
 	this->thisNode = NULL;
 		
 	this->transformations = vector< osg::ref_ptr<BZTransform> >();
-	this->materials = vector<string>();
+	this->materials = vector< osg::ref_ptr< material > >();
 	this->setSelected( false );
 	this->setName( "(unknown bz2object)" );
 	
@@ -22,6 +22,9 @@ bz2object::bz2object(const char* name, const char* keys):
 	
 	this->addChild( startShift.get() );
 	this->startShift->addChild( endShift.get() );
+	
+	this->savedStateSet = NULL;
+	
 };
 
 // constructor with data
@@ -33,7 +36,7 @@ bz2object::bz2object(const char* name, const char* keys, const char* data):
 	this->thisNode = NULL;
 	
 	this->transformations = vector< osg::ref_ptr<BZTransform> >();
-	this->materials = vector<string>();
+	this->materials = vector< osg::ref_ptr< material > >();
 	this->setSelected( false );
 	
 	vector<float> shiftData;
@@ -45,6 +48,8 @@ bz2object::bz2object(const char* name, const char* keys, const char* data):
 	this->endShift = new BZTransform("shift", shiftData);
 	this->addChild( startShift.get() );
 	this->startShift->addChild( endShift.get() );
+	
+	this->savedStateSet = NULL;
 	
 	string d = string(data);
 	this->update(d);
@@ -58,7 +63,7 @@ bz2object::bz2object(const char* name, const char* keys, osg::Node* node ):
 	this->thisNode = node;
 	
 	this->transformations = vector< osg::ref_ptr<BZTransform> >();
-	this->materials = vector<string>();
+	this->materials = vector< osg::ref_ptr< material > >();
 	this->setSelected( false );
 	this->setName( "(unknown bz2object)" );
 	
@@ -69,6 +74,8 @@ bz2object::bz2object(const char* name, const char* keys, osg::Node* node ):
 	
 	this->startShift = new BZTransform("shift", data);
 	this->endShift = new BZTransform("shift", data);
+	
+	this->savedStateSet = NULL;
 	
 	this->addChild( startShift.get() );
 	this->startShift->addChild( endShift.get() );
@@ -83,7 +90,7 @@ bz2object::bz2object( const char* name, const char* keys, const char* data, osg:
 	this->thisNode = node;
 	
 	this->transformations = vector< osg::ref_ptr<BZTransform> >();
-	this->materials = vector<string>();
+	this->materials = vector< osg::ref_ptr< material > >();
 	this->setSelected( false );
 	
 	vector<float> shiftData;
@@ -93,6 +100,8 @@ bz2object::bz2object( const char* name, const char* keys, const char* data, osg:
 	
 	this->startShift = new BZTransform("shift", shiftData);
 	this->endShift = new BZTransform("shift", shiftData);
+	
+	this->savedStateSet = NULL;
 	
 	this->addChild( startShift.get() );
 	this->startShift->addChild( endShift.get() );
@@ -266,10 +275,14 @@ int bz2object::update(string& data) {
 		this->setRotationZ( atof( rotations[0].c_str() ) );
 	if(this->isKey("size") && sizes.size() > 0)
 		this->setSize( Point3D( sizes[0].c_str() ) );
-	if(this->isKey("phydrv") && physicsDrivers.size() > 0)
-		this->physicsDriver = physicsDrivers[0];
-	if(this->isKey("matref") && matrefs.size() > 0)
-		this->materials = matrefs;
+	if(this->isKey("phydrv") && physicsDrivers.size() > 0) {
+		this->physicsDriver = new physics( physicsDrivers[0] );
+	}
+	if(this->isKey("matref") && matrefs.size() > 0) {
+		for( vector<string>::iterator i = matrefs.begin(); i != matrefs.end(); i++ ) {
+			
+		}
+	}
 		
 	return DataEntry::update(data);
 }
@@ -321,13 +334,13 @@ string bz2object::BZWLines(void) {
 		ret += "  " + endShift->toString();
 	
 	// add phydrv key/value to the string if supported and if defined
-	if(this->isKey("phydrv") && physicsDriver.length() != 0)
-		ret += "  phydrv " + physicsDriver + "\n";
+	if(this->isKey("phydrv") && physicsDriver != NULL)
+		ret += "  phydrv " + physicsDriver->getName() + "\n";
 	
 	// add all matref key/value pairs to the string if supported and defined
 	if(this->isKey("matref") && materials.size() != 0) {
-		for(vector<string>::iterator i = materials.begin(); i != materials.end(); i++) {
-			ret += "  matref " + (*i) + "\n";
+		for(vector<osg::ref_ptr<material> >::iterator i = materials.begin(); i != materials.end(); i++) {
+			ret += "  matref " + (*i)->getName() + "\n";
 		}	
 	}
 	

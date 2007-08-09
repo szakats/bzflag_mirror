@@ -6,12 +6,18 @@
 #include "../ftoa.h"
 #include "../model/BZWParser.h"
 
-class physics : public DataEntry {
+#include <osg/Referenced>
+
+class physics : public DataEntry, public osg::Referenced {
 
 public:
 
 	// default constructor
 	physics();
+	
+	// constructors for osg::Referenced
+	physics( bool threadSafe );
+	physics( const osg::Referenced& ref );
 	
 	// constructor with data
 	physics(string& data);

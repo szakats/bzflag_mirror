@@ -16,8 +16,6 @@
 #include <osg/StateAttribute>
 #include <osgDB/ReaderWriter>
 
-#include "../objects/bz2object.h"
-#include "../render/Renderable.h"
 #include "../ftoa.h"
 
 #include "../render/TextureRepeaterVisitor.h"
@@ -31,6 +29,9 @@
 #include <string>
 
 using namespace std;
+
+class bz2object;
+class material;
 
 /**
  * This is a data broker that stores single instances of scene data to save memory, and just passes out references.
@@ -53,9 +54,11 @@ public:
 	static osg::Node* buildSelectedNode( const char* nodeFile );
 	
 	// mark a node as selected
+	static void markSelectedAndPreserveStateSet( bz2object* node );
 	static void markSelected( osg::Node* node );
 	
 	// mark a node as unselected
+	static void markUnselectedAndRestoreStateSet( bz2object* node );
 	static void markUnselected( osg::Node* node );
 	
 	// build an object and return a geode containing the object
@@ -69,7 +72,10 @@ public:
 	static void assignTexture( const char* filename, osg::Node* node );
 	
 	// assign a material to a node
-	static void assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Vec4 specular, osg::Vec4 emissive, float shininess, float alpha, osg::Node* node );
+	static void assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Vec4 specular, osg::Vec4 emissive, float shininess, float alpha, osg::Node* node, osg::StateAttribute::Values val = osg::StateAttribute::OVERRIDE );
+	
+	// assign a BZWB material to the node
+	static void assignBZMaterial( material* mat, bz2object* obj );
 	
 	// give the string the "select" attribute
 	static string nameSelected( const char* str ) {

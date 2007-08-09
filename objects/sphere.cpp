@@ -6,7 +6,7 @@ sphere::sphere() :
 	// define some basic values
 	this->divisions = 16;
 	this->setName("default_sphere");
-	this->physicsDriver = string("");
+	this->physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	
@@ -18,7 +18,7 @@ sphere::sphere(string& data) :
 	// define some basic values
 	this->divisions = 16;
 	this->setName("default_sphere");
-	this->physicsDriver = string("");
+	this->physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	

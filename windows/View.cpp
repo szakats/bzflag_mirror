@@ -206,9 +206,9 @@ void View::update( Observable* obs, void* data ) {
 			case ObserverMessage::UPDATE_OBJECT : {
 				bz2object* obj = (bz2object*)(obs_msg->data);
 				if( obj->isSelected() )
-					SceneBuilder::markSelected( obj );
+					SceneBuilder::markSelectedAndPreserveStateSet( obj );
 				else
-					SceneBuilder::markUnselected( obj );
+					SceneBuilder::markUnselectedAndRestoreStateSet( obj );
 					
 				break;	
 			}
