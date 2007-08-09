@@ -38,10 +38,13 @@
 #include "Generator.h"
 #include "GridGenerator.h"
 #include "Material.h"
+#include "commandArgs.h"
 #include "Zone.h"
 
-int main (/*int argc, char* argv[]*/) {
+int main (int argc, char* argv[]) {
   srand((unsigned int)time(NULL));
+
+  CCommandLineArgs cmd(argc,argv);
 
   std::cout << "Initializing...\n";
 
