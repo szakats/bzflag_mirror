@@ -59,6 +59,12 @@ bool hasLine(string text) {
  	string::size_type index = line.find(key + " ", 0);
  	if(index == 0) 
  		return true;
+ 		
+ 	// sometimes the key IS the line, so there won't be a trailing space
+ 	index = line.find(key, 0);
+ 	if( index == 0)
+ 		return true;
+ 		
  	return false;
  }
 
@@ -177,7 +183,7 @@ vector<string> BZWParser::getLines(const char* _start, const char* _text) {
 			break;
 			
 		// get a line
-		string currLine = cutLine(section);
+		string currLine = cutLine(section);		
 		
 		// try to find the header in it
 		string::size_type index = currLine.find(header, 0);
@@ -228,9 +234,11 @@ vector<string> BZWParser::getLinesByKey(const char* _key, const char* _header, c
 	vector<string> ret = vector<string>();
 	
 	// find the lines with the matching key
-	for(vector<string>::iterator i = lines.begin(); i != lines.end(); i++) {
-		if(isKey(key, *i)) {
-			ret.push_back(*i);
+	if( lines.size() > 0 ) {
+		for(vector<string>::iterator i = lines.begin(); i != lines.end(); i++) {
+			if(isKey(key, *i)) {
+				ret.push_back(*i);
+			}
 		}
 	}
 	
@@ -506,9 +514,11 @@ vector<string> BZWParser::getValuesByKey(const char* _key, const char* _header, 
 	vector<string> ret = vector<string>();
 	
 	// get the values and load up ret
-	for(vector<string>::iterator i = lines.begin(); i != lines.end(); i++) {
-		string value = BZWParser::value(_key, i->c_str());
-		ret.push_back( value );
+	if( lines.size() > 0 ) {
+		for(vector<string>::iterator i = lines.begin(); i != lines.end(); i++) {
+			string value = BZWParser::value(_key, i->c_str());
+			ret.push_back( value );
+		}
 	}
 	
 	return ret;

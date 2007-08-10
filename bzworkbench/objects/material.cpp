@@ -3,29 +3,47 @@
 // default constructor
 material::material() : 
 	DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosort><noradar><nolighting><groupalpha><occluder><alphathresh>"),
-	osg::Material() {
+	osg::StateSet() {
 	name = string("");
 	dynCol = NULL;
 	textureMatrix = NULL;
 	color = string("");
 	textures = vector< osg::ref_ptr< osg::Texture2D > >();
 	noTextures = noTexColor = noTexAlpha = true;
-	noRadar = spheremap = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = resetmat = false;
+	noRadar = spheremap = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = false;
 	alphaThreshold = 1.0f;
+	
+	// allocate a material
+	this->finalMaterial = new osg::Material();
+	this->setAttribute( finalMaterial.get(), osg::StateAttribute::ON );
+	
+	this->setAmbient( osg::Vec4( -1, -1, -1, -1) );
+	this->setDiffuse( osg::Vec4( -1, -1, -1, -1) );
+	this->setSpecular( osg::Vec4( -1, -1, -1, -1) );
+	this->setEmissive( osg::Vec4( -1, -1, -1, -1) );
 }
 
 // constructor with data
 material::material(string& data) :
 	DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosort><noradar><nolighting><groupalpha><occluder><alphathresh>", data.c_str()),
-	osg::Material() {
+	osg::StateSet() {
 	name = string("");
 	dynCol = NULL;
 	textureMatrix = NULL;
 	color = string("");
 	textures = vector< osg::ref_ptr< osg::Texture2D > >();
 	noTextures = noTexColor = noTexAlpha = true;
-	noRadar = spheremap = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = resetmat = false;
+	noRadar = spheremap = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = false;
 	alphaThreshold = 1.0f;
+	
+	// allocate a material
+	this->finalMaterial = new osg::Material();
+	this->setAttribute( finalMaterial.get(), osg::StateAttribute::ON );
+	
+	this->setAmbient( osg::Vec4( -1, -1, -1, -1) );
+	this->setDiffuse( osg::Vec4( -1, -1, -1, -1) );
+	this->setSpecular( osg::Vec4( -1, -1, -1, -1) );
+	this->setEmissive( osg::Vec4( -1, -1, -1, -1) );
 	
 	this->update(data);
 }
@@ -47,12 +65,29 @@ int material::update(string& data) {
 	if(!hasOnlyOne(chunks, "material"))
 		return 0;
 	
-	const char* materialData = chunks[0].c_str();
+	const char* tmp = chunks[0].c_str();
 	
 	// get the name
-	vector<string> names = BZWParser::getValuesByKey("name", header, materialData);
+	vector<string> names = BZWParser::getValuesByKey("name", header, tmp);
 	if(!hasOnlyOne(names, "name"))
 		return 0;
+	
+	// get resetmats if any
+	vector<string> resetmats = BZWParser::getLinesByKey("resetmat", header, tmp);
+	
+	string matData = tmp;
+	
+	if( resetmats.size() > 0 ) {
+		// find the location of the last resetmat
+		string::size_type i = matData.rfind("resetmat", matData.length() - 1);
+		
+		// eliminate all texture data before it
+		matData = "material\n" + matData.substr(i);
+		
+		printf("material data is \n|%s|\n", tmp );
+	}
+	
+	const char* materialData = matData.c_str();
 	
 	// get the dynamic color
 	vector<string> dyncols = BZWParser::getValuesByKey("dyncol", header, materialData);
@@ -73,7 +108,7 @@ int material::update(string& data) {
 	vector<string> diffs = BZWParser::getValuesByKey("diffuse", header, materialData);
 	if((colors.size() > 1 && diffs.size() == 0) || 
 	   (colors.size() == 0 && diffs.size() > 1)) {
-	   	printf("material::update():  Error! Could not parse \"color\" or \"diffuse\" properly!\n");
+	   printf("material::update():  Error! Could not parse \"color\" or \"diffuse\" properly!\n");
 	   return 0;
 	}
 	   
@@ -81,24 +116,12 @@ int material::update(string& data) {
 	
 	// get the ambient colors
 	vector<string> ambients = BZWParser::getValuesByKey("ambient", header, materialData);
-	if(ambients.size() > 1) {
-		printf("material::update(): Error! Defined \"ambient\" %d times!\n", ambients.size());
-		return 0;
-	}
-		
+	
 	// get the emissive colors
 	vector<string> emissives = BZWParser::getValuesByKey("emission", header, materialData);
-	if(emissives.size() > 1) {
-		printf("material::update(): Error! Defined \"emissive\" %d times!\n", emissives.size());
-		return 0;
-	}
 	
 	// get the specular colors
 	vector<string> speculars = BZWParser::getValuesByKey("specular", header, materialData);
-	if(speculars.size() > 1) {
-		printf("material::update(): Error! Defined \"specular\" %d times!\n", speculars.size());
-		return 0;
-	}
 	
 	// get the textures
 	vector<string> texs = BZWParser::getValuesByKey("addtexture", header, materialData);
@@ -136,11 +159,6 @@ int material::update(string& data) {
 	// get occluder
 	vector<string> occluders = BZWParser::getValuesByKey("occluder", header, materialData);
 	
-	// get resetmat
-	vector<string> resetmats = BZWParser::getValuesByKey("resetmat", header, materialData);
-	if(resetmats.size() > 1)
-		printf("material::update(): Warning!  Multiple \"resetmat\" declared!\n");
-	
 	// get shininess
 	vector<string> shininesses = BZWParser::getValuesByKey("shininess", header, materialData);
 	if(shininesses.size() > 1) {
@@ -164,10 +182,10 @@ int material::update(string& data) {
 	this->name = names[0];
 	this->dynCol = (dyncols.size() != 0 ? (dynamicColor*)Model::command( MODEL_GET, "dynamicColor", dyncols[0] ) : NULL);
 	this->textureMatrix = (texmats.size() != 0 ? (texturematrix*)Model::command( MODEL_GET, "texturematrix", texmats[0]) : NULL);
-	(emissives.size() != 0 ? this->setEmissive(RGBA( emissives[0].c_str() )) : this->setEmissive(RGBA(0, 0, 0, 0)));
-	(speculars.size() != 0 ? this->setSpecular(RGBA( speculars[0].c_str() )) : this->setSpecular(RGBA(0, 0, 0, 0)));
-	(ambients.size() != 0 ? this->setAmbient(RGBA( ambients[0].c_str() )) : this->setAmbient(RGBA(1, 1, 1, 1)));
-	(diffuses.size() != 0 ? this->setDiffuse(RGBA( diffuses[0].c_str() )) : this->setDiffuse(RGBA(1, 1, 1, 1)));
+	(emissives.size() != 0 ? this->setEmissive(RGBA( emissives[emissives.size() - 1].c_str() )) : this->setEmissive(RGBA(-1, -1, -1, -1)));
+	(speculars.size() != 0 ? this->setSpecular(RGBA( speculars[speculars.size() - 1].c_str() )) : this->setSpecular(RGBA(-1, -1, -1, -1)));
+	(ambients.size() != 0 ? this->setAmbient(RGBA( ambients[ambients.size() - 1].c_str() )) : this->setAmbient(RGBA(-1, -1, -1, -1)));
+	(diffuses.size() != 0 ? this->setDiffuse(RGBA( diffuses[diffuses.size() - 1].c_str() )) : this->setDiffuse(RGBA(-1, -1, -1, -1)));
 	
 	this->textures.clear();
 	this->materials.clear();
@@ -190,7 +208,6 @@ int material::update(string& data) {
 	this->noTexAlpha = (notexalphas.size() == 0 ? false : true);
 	this->groupAlpha = (groupalphas.size() == 0 ? false : true);
 	this->occluder = (occluders.size() == 0 ? false : true);
-	this->resetmat = (resetmats.size() == 0 ? false : true);
 	this->noLighting = (nolightings.size() == 0 ? false : true);
 	(shininesses.size() > 0 ? this->setShininess(atof( shininesses[0].c_str() )) : this->setShininess(0.0) );
 	this->alphaThreshold = (alphathresholds.size() > 0 ? atof( alphathresholds[0].c_str() ) : 1.0f);
@@ -201,32 +218,55 @@ int material::update(string& data) {
 // tostring
 string material::toString(void) {
 	string texString = string("");
-	for(vector< osg::ref_ptr<osg::Texture2D> >::iterator i = textures.begin(); i != textures.end(); i++) {
-		string filename = (*i)->getImage()->getFileName();
-		string::size_type suffixIndex = filename.find(".png");
-		if( suffixIndex != string::npos )
-			filename = filename.substr(0, suffixIndex );
-			
-		texString += "  addtexture " + filename + "\n";	
+	if( textures.size() > 0 ) {
+		for(vector< osg::ref_ptr<osg::Texture2D> >::iterator i = textures.begin(); i != textures.end(); i++) {
+			string filename = (*i)->getImage()->getFileName();
+			string::size_type suffixIndex = filename.find(".png");
+			if( suffixIndex != string::npos )
+				filename = filename.substr(0, suffixIndex );
+				
+			texString += "  addtexture " + filename + "\n";	
+		}
 	}
 	
 	string matString = string("");
-	for(vector< osg::ref_ptr< material > >::iterator i = materials.begin(); i != materials.end(); i++) {
-		matString += "  matref " + (*i)->getName() + "\n";	
+	if( materials.size() > 0 ) {
+		for(vector< osg::ref_ptr< material > >::iterator i = materials.begin(); i != materials.end(); i++) {
+			matString += "  matref " + (*i)->getName() + "\n";	
+		}
 	}
+	// colors
+	string ambientString, diffuseString, specularString, emissiveString;
 	
-	// color strings
-	string ambientString = "  ambient " + RGBA( this->getAmbient().x(), this->getAmbient().y(), this->getAmbient().z(), this->getAmbient().w() ).toString();
-	string diffuseString = "  diffuse " + RGBA( this->getDiffuse().x(), this->getDiffuse().y(), this->getDiffuse().z(), this->getDiffuse().w() ).toString();
-	string specularString = "  ambient " + RGBA( this->getSpecular().x(), this->getSpecular().y(), this->getSpecular().z(), this->getSpecular().w() ).toString();
-	string emissiveString = "  ambient " + RGBA( this->getEmissive().x(), this->getEmissive().y(), this->getEmissive().z(), this->getEmissive().w() ).toString();
+	RGBA ambientColor = RGBA( this->getAmbient().x(), this->getAmbient().y(), this->getAmbient().z(), this->getAmbient().w() );
+	RGBA diffuseColor = RGBA( this->getDiffuse().x(), this->getDiffuse().y(), this->getDiffuse().z(), this->getDiffuse().w() );
+	RGBA specularColor = RGBA( this->getSpecular().x(), this->getSpecular().y(), this->getSpecular().z(), this->getSpecular().w() );
+	RGBA emissiveColor = RGBA( this->getEmissive().x(), this->getEmissive().y(), this->getEmissive().z(), this->getEmissive().w() );
 	
+	if( IS_VALID_COLOR( ambientColor ) )
+		ambientString = "  ambient " + ambientColor.toString();
+	else
+		ambientString = "";
+		
+	if( IS_VALID_COLOR( diffuseColor ) )
+		diffuseString = "  diffuse " + diffuseColor.toString();
+	else
+		diffuseString = "";
+		
+	if( IS_VALID_COLOR( specularColor ) )
+		specularString = "  specular " + specularColor.toString();
+	else
+		specularString = "";
+		
+	if( IS_VALID_COLOR( emissiveColor ) )
+		emissiveString = "  emissive " + emissiveColor.toString();
+	else	
+		emissiveString = "";
 	
 	return string("material\n") +
 				  (name.length() == 0 ? string("# name") : "  name " + name) + "\n" +
 				  (dynCol != NULL ? string("  dyncol ") + dynCol->getName() : string("  dyncol -1")) + "\n" +
 				  (textureMatrix != NULL ? string("  texmat ") + textureMatrix->getName() : string("  texmat -1")) + "\n" +
-				  (color.length() != 0 ? string("  color ") + color + "\n" : "") +
 				  (noTextures == true ? "  notextures\n" : "") +
 				  (noTexColor == true ? "  notexcolor\n" : "") +
 				  (noTexAlpha == true ? "  notexalpha\n" : "") +
@@ -238,15 +278,88 @@ string material::toString(void) {
 				  (noRadar == true ? "  noradar\n" : "") +
 				  (groupAlpha == true ? "  groupalpha\n" : "") +
 				  (occluder == true ? "  occluder\n" : "") +
-				  (resetmat == true ? "  resetmat\n" : "") +
-				  "  ambient " + ambientString +
-				  (color.length() == 0 ? "  diffuse " + diffuseString : "") +
-				  "  specular " + specularString +
-				  "  emission " + emissiveString +
+				  ambientString +
+				  (color.length() == 0 ? diffuseString : string("  color ") + color + "\n" ) +
+				  specularString +
+				  emissiveString +
 				  "  shininess " + string(ftoa(this->getShininess())) + "\n" +
 				  "  alphathresh " + string(ftoa(alphaThreshold)) + "\n" +
 				  texString +
 				  matString +
 				  this->getUnusedText() + 
 				  "end\n";
+}
+
+// compute the final material from a list of materials
+material* material::computeFinalMaterial( vector< osg::ref_ptr< material > >& materialList ) { 
+	osg::Vec4 ambient, diffuse, specular, emissive;
+	float shininess = -1.0;
+	bool hasAmbient = false, hasSpecular = false, hasDiffuse = false, hasEmissive = false;
+	
+	osg::Texture2D* tex = NULL;
+	
+	if( materialList.size() > 0 ) {
+		for( vector< osg::ref_ptr< material > >::iterator i = materialList.begin(); i != materialList.end(); i++ ) {
+			// get OSG's material from the material class
+			osg::Material* mat = dynamic_cast< osg::Material* >(((*i)->getAttribute( osg::StateAttribute::MATERIAL ) ));
+			
+			// if it's valid, get the colors
+			// NOTE: BZFlag pays attention only to the FIRST occurence of a color, so don't look anymore if one is found
+			if( mat ) {
+				if( !hasAmbient && IS_VALID_COLOR( mat->getAmbient( osg::Material::FRONT ) ) ) {
+					ambient = mat->getAmbient( osg::Material::FRONT );
+					hasAmbient = true;
+				}
+					
+				if( !hasDiffuse && IS_VALID_COLOR( mat->getDiffuse( osg::Material::FRONT ) ) ) {
+					diffuse = mat->getDiffuse( osg::Material::FRONT );
+					hasDiffuse = true;
+				}	
+					
+				if( !hasSpecular && IS_VALID_COLOR( mat->getSpecular( osg::Material::FRONT ) ) ) {
+					specular = mat->getSpecular( osg::Material::FRONT );
+					hasSpecular = true;
+				}
+				
+				if( !hasEmissive && IS_VALID_COLOR( mat->getEmission( osg::Material::FRONT ) ) ) {
+					emissive = mat->getSpecular( osg::Material::FRONT );
+					hasEmissive = true;
+				}
+				
+				if( shininess < 0 )
+					shininess = mat->getShininess( osg::Material::FRONT );
+			}
+			
+			// get the texture
+			osg::Texture2D* texture = dynamic_cast< osg::Texture2D* >( (*i)->getAttribute( osg::StateAttribute::TEXTURE ) );
+			
+			// see if the texture is valid
+			// NOTE: BZFlag pays attention only to the LAST texture declared
+			if( texture )
+				tex = texture;
+		}
+	}
+	
+	// build the material
+	material* mat = new material();
+	
+	mat->setAmbient( ambient );
+	mat->setDiffuse( diffuse );
+	mat->setSpecular( specular );
+	mat->setEmissive( emissive );
+	mat->setShininess( shininess );
+	
+	if( tex != NULL )
+		mat->setTextureAttribute( 0, tex );
+		
+	return mat;
+}
+
+// compute the final texture
+// simple: BZFlag only pays attention to the last texture declared
+void material::computeFinalTexture() { 
+	if( textures.size() > 0 )
+		finalTexture = textures[ textures.size() - 1 ];
+	else
+		finalTexture = NULL;
 }
