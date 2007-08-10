@@ -22,7 +22,7 @@ public:
 		return 1;
 	}
 	
-	virtual int update(string& data, UpdateMessage& msg) { return this->update( data ); }
+	virtual int update(UpdateMessage& msg) { return 1; }
 	
 	virtual string toString() {
 		return string("# unknown DataEntry");

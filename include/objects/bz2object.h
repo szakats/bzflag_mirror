@@ -109,6 +109,14 @@ class bz2object : public Renderable, public DataEntry {
 			return newObj;
 		}
 		
+		// some basic control methods
+		void addMaterial( material* mat );
+		void insertMaterial( unsigned int index, material* mat );
+		void removeMaterial( material* mat );
+		void removeMaterial( unsigned int index );
+		
+		
+		
 	protected:
 		osg::ref_ptr< physics > physicsDriver;
 		vector< osg::ref_ptr< material > > materials;

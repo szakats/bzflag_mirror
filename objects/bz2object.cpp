@@ -398,3 +398,54 @@ void bz2object::recomputeTransformations( vector< osg::ref_ptr< BZTransform > >*
 		startShift->addChild( endShift.get() );	// connect the start and end shifts if there are no transformations in between
 	
 }
+
+// add a material to the object
+void bz2object::addMaterial( material* mat ) {
+	this->materials.push_back( mat );
+}
+
+// insert a material
+void bz2object::insertMaterial( unsigned int index, material* mat ) {
+	if( index > materials.size() - 1 )
+		return;
+		
+	if( materials.size() == 0 ) {
+		materials.push_back( mat );
+	}
+	else {
+		vector< osg::ref_ptr< material > >::iterator itr = this->materials.begin();
+		for( unsigned int i = 0; i < materials.size(); i++, itr++ ) {
+			if( i == index ) {
+				materials.insert( itr, mat );
+				break;
+			}
+		}
+	}
+}
+
+// remove a material
+void bz2object::removeMaterial( material* mat ) {
+	if( materials.size() == 0 )
+		return;
+	
+	for( vector< osg::ref_ptr< material > >::iterator i = materials.begin(); i != materials.end(); i++ ) {
+		if( i->get() == mat ) {
+			materials.erase( i );
+			break;
+		}
+	}
+}
+
+// remove a material by index
+void bz2object::removeMaterial( unsigned int index ) {
+	if( index >= materials.size() || index < 0 ) 
+		return;
+	
+	vector< osg::ref_ptr< material > >::iterator itr = materials.begin();
+	for( unsigned int i = 0; i < materials.size(); i++, itr++ ) {
+		if( i == index ) {
+			materials.erase( itr );
+			break;
+		}
+	}
+}

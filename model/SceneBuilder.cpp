@@ -168,26 +168,8 @@ void SceneBuilder::assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Ve
 
 // assign a BZWB material to a bz2object
 void SceneBuilder::assignBZMaterial( material* bzmat, bz2object* obj ) {
-	osg::StateSet* stateSet = obj->getOrCreateStateSet();
+	obj->setStateSet( bzmat );
 	
-	osg::Material* mat = (osg::Material*)stateSet->getAttribute( osg::StateAttribute::MATERIAL );
-	
-	// set ambient lighting
-	mat->setAmbient( osg::Material::FRONT, bzmat->getAmbient() );
-	
-	// set diffuse color
-	mat->setDiffuse( osg::Material::FRONT, bzmat->getDiffuse() );
-	
-	// set specular
-	mat->setSpecular( osg::Material::FRONT, bzmat->getSpecular() );
-	
-	// set emissive
-	mat->setEmission( osg::Material::FRONT, bzmat->getEmissive() );
-	
-	// set shininess
-	mat->setShininess( osg::Material::FRONT, bzmat->getShininess() );
-	
-	stateSet->setAttribute( mat, osg::StateAttribute::ON );
 }
 
 // get the material from a node

@@ -53,7 +53,7 @@ int define::update(string& data) {
 	// get the chunks
 	vector<string> chunks = BZWParser::getSections( defineData );
 	
-	// get all the supported objects
+	// get all the supported objects from the lines, but don't commit them yet
 	
 	// arc
 	vector<string> arcs = BZWParser::findSections("arc", chunks);
@@ -200,7 +200,7 @@ int define::update(string& data) {
 	}
 	
 	
-	// base-class update
+	// base-class update (must be done BEFORE commiting new objects)
 	if(!DataEntry::update(data)) {
 		return 0;
 	}

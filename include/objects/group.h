@@ -31,6 +31,13 @@ class group : public bz2object {
 		// setter
 		int update(string& data);
 		
+		// event handler
+		int update( UpdateMessage& msg);
+		
+		// get position (average position of objects it contains)
+		// this is mainly to allow the 3D selector to work
+		osg::Vec3 getPos();
+		
 		// toString
 		string toString(void);
 		
@@ -52,6 +59,8 @@ class group : public bz2object {
 		
 		// update the child objects
 		void updateObjects();
+		
+		osg::Vec3 pos;	// shift the group by pos (since groups have no concept of position)
 		
 };
 
