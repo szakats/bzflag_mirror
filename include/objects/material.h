@@ -49,11 +49,11 @@ public:
 	vector< osg::ref_ptr< material > >& getMaterials() { return materials; }
 	vector< osg::ref_ptr< osg::Texture2D > >& getTextures() { return textures; }
 	
-	const osg::Vec4& getAmbient() { return finalMaterial->getAmbient( osg::Material::FRONT ); }
-	const osg::Vec4& getDiffuse() { return finalMaterial->getDiffuse(osg::Material::FRONT); }
-	const osg::Vec4& getSpecular() { return finalMaterial->getSpecular(osg::Material::FRONT); }
-	const osg::Vec4& getEmissive() { return finalMaterial->getEmission(osg::Material::FRONT); }
-	float getShininess() { return finalMaterial->getShininess(osg::Material::FRONT); }
+	const osg::Vec4& getAmbient() { return getCurrentMaterial()->getAmbient( osg::Material::FRONT ); }
+	const osg::Vec4& getDiffuse() { return getCurrentMaterial()->getDiffuse(osg::Material::FRONT); }
+	const osg::Vec4& getSpecular() { return getCurrentMaterial()->getSpecular(osg::Material::FRONT); }
+	const osg::Vec4& getEmissive() { return getCurrentMaterial()->getEmission(osg::Material::FRONT); }
+	float getShininess() { return getCurrentMaterial()->getShininess(osg::Material::FRONT); }
 	
 	float getAlphaThreshold() { return alphaThreshold; }
 	bool usesTextures() { return !noTextures; }
@@ -71,6 +71,7 @@ public:
 	
 	void setMaterials( vector< osg::ref_ptr< material > >& mats ) {
 		this->materials = materials;
+		computeFinalMaterial();
 	}
 	
 	void setTextures( const vector< osg::ref_ptr< osg::Texture2D > >& textures ) {
@@ -78,17 +79,17 @@ public:
 		computeFinalTexture();
 	}
 	
-	void setAmbient( const osg::Vec4& rgba ) { finalMaterial->setAmbient( osg::Material::FRONT, rgba ); }
-	void setDiffuse( const osg::Vec4& rgba ) { finalMaterial->setDiffuse( osg::Material::FRONT, rgba ); }
-	void setSpecular( const osg::Vec4& rgba ) { finalMaterial->setSpecular( osg::Material::FRONT, rgba ); }
-	void setEmissive( const osg::Vec4& rgba ) { finalMaterial->setEmission( osg::Material::FRONT, rgba ); }
+	void setAmbient( const osg::Vec4& rgba ) { getCurrentMaterial()->setAmbient( osg::Material::FRONT, rgba ); }
+	void setDiffuse( const osg::Vec4& rgba ) { getCurrentMaterial()->setDiffuse( osg::Material::FRONT, rgba ); }
+	void setSpecular( const osg::Vec4& rgba ) { getCurrentMaterial()->setSpecular( osg::Material::FRONT, rgba ); }
+	void setEmissive( const osg::Vec4& rgba ) { getCurrentMaterial()->setEmission( osg::Material::FRONT, rgba ); }
 	// setters with RGBA values
 	void setAmbient( const RGBA& rgba ) { this->setAmbient( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
 	void setDiffuse( const RGBA& rgba ) { this->setDiffuse( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
 	void setSpecular( const RGBA& rgba ) { this->setSpecular( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
 	void setEmissive( const RGBA& rgba ) { this->setEmissive( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
 	
-	void setShininess( float shininess ) { finalMaterial->setShininess( osg::Material::FRONT, shininess );  }
+	void setShininess( float shininess ) { getCurrentMaterial()->setShininess( osg::Material::FRONT, shininess );  }
 	
 	void setAlphaThreshold( float alphaThreshold ) { this->alphaThreshold = alphaThreshold; }
 	void useTextures( bool value ) { this->noTextures = !value; }
@@ -104,6 +105,12 @@ public:
 	// this entails merging parts of other materials
 	static material* computeFinalMaterial( vector< osg::ref_ptr< material > >& materialList );
 	
+	// get the current material
+	osg::Material* getCurrentMaterial();
+	
+	// get the current texture
+	osg::Texture2D* getCurrentTexture();
+	
 private:
 	string name, color;
 	dynamicColor* dynCol;
@@ -112,15 +119,14 @@ private:
 	vector< osg::ref_ptr< material > > materials;		// the various material references
 	vector< osg::ref_ptr< osg::Texture2D > > textures;	// the various textures from "texture" and "addTexture"
 	
-	osg::ref_ptr< osg::Material > finalMaterial;		// this is the final material that is computed from the references to other materials
-	osg::ref_ptr< osg::Texture2D > finalTexture;		// this is the final texture that is computed from the other textures
-	
 	bool noTextures, noTexColor, noTexAlpha, spheremap, noShadow, noCulling, noSorting, noRadar, noLighting, groupAlpha, occluder;
 	float alphaThreshold;
 	
-	// compute the final texture
+	// compute the final OSG texture
 	void computeFinalTexture();
 	
+	// compute the final OSG material
+	void computeFinalMaterial();
 };
 
 #endif /*MATERIAL_H_*/

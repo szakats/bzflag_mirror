@@ -109,12 +109,20 @@ class bz2object : public Renderable, public DataEntry {
 			return newObj;
 		}
 		
-		// some basic control methods
+		// some basic control methods for transformations
+		// TODO: to be implemented if needed
+		/*
+		void addTransformation( BZTransform* t );
+		void insertTransformation( unsigned int index, BZTransform* t );
+		void removeTransformation( BZTransform* t );
+		void removeTransformation( unsigned int index );
+		*/
+		
+		// some basic control methods for materials
 		void addMaterial( material* mat );
 		void insertMaterial( unsigned int index, material* mat );
 		void removeMaterial( material* mat );
 		void removeMaterial( unsigned int index );
-		
 		
 		
 	protected:
@@ -123,6 +131,9 @@ class bz2object : public Renderable, public DataEntry {
 		vector< osg::ref_ptr< BZTransform > > transformations;
 		// set true if selected in the 3D scene
 		bool selected;
+		
+		// set the material of this object
+		void recomputeMaterial();
 		
 	private:
 		// force these methods to be private, to guarantee that derived classes will use the given replacements

@@ -97,6 +97,37 @@ osg::Geode* SceneBuilder::buildGeode( const char* _nodeName, osg::Geometry* geom
 	return geode;
 }
 
+/**
+ * Build a Texture2D from a file; return NULL if not found
+ */
+ 
+osg::Texture2D* SceneBuilder::buildTexture2D( const char* filename ) {
+	if( filename != NULL ) {
+		osg::Texture2D* texture = NULL;
+		
+		osg::Image* image = osgDB::readImageFile( filename );
+	
+		if( image != NULL ) {	// only build the texture if the image exists!
+			
+			texture = new osg::Texture2D();
+		
+			// don't allow OSG to optimize the texture (otherwise it may disappear)
+			texture->setDataVariance( osg::Object::DYNAMIC );
+		
+			// set the texture's image
+			texture->setImage( image );
+			
+			// turn on GL_REPEAT texture wrapping
+			texture->setWrap( osg::Texture::WRAP_R, osg::Texture::REPEAT );
+			texture->setWrap( osg::Texture::WRAP_S, osg::Texture::REPEAT );
+			texture->setWrap( osg::Texture::WRAP_T, osg::Texture::REPEAT ); 
+		}
+		
+		return texture;
+	}
+	return NULL;
+}
+
 // assign a texture to a Node
 void SceneBuilder::assignTexture( const char* _textureName, osg::Node* node ) {
 	if(_textureName != NULL) {

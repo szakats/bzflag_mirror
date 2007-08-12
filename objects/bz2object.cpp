@@ -275,14 +275,27 @@ int bz2object::update(string& data) {
 		this->setRotationZ( atof( rotations[0].c_str() ) );
 	if(this->isKey("size") && sizes.size() > 0)
 		this->setSize( Point3D( sizes[0].c_str() ) );
+	
+	// query the model for a physics driver
 	if(this->isKey("phydrv") && physicsDrivers.size() > 0) {
-		this->physicsDriver = new physics( physicsDrivers[0] );
+		physics* phys = (physics*)Model::command( MODEL_GET, "phydrv", physicsDrivers[0] );
+		this->physicsDriver = phys;
 	}
+	
 	if(this->isKey("matref") && matrefs.size() > 0) {
+		// erase previous materials
+		materials.clear();
+		// use the model to resolve the references into material pointers
 		for( vector<string>::iterator i = matrefs.begin(); i != matrefs.end(); i++ ) {
-			
+			material* mat = (material*)Model::command( MODEL_GET, "material", *i );
+			if( mat )
+				materials.push_back( mat );
 		}
+		
+		// assign the material
+		this->setStateSet( material::computeFinalMaterial(materials) );
 	}
+	
 		
 	return DataEntry::update(data);
 }
@@ -448,4 +461,10 @@ void bz2object::removeMaterial( unsigned int index ) {
 			break;
 		}
 	}
+}
+
+// recompute the material
+void bz2object::recomputeMaterial() {
+	material* mat = material::computeFinalMaterial( this->materials );
+	SceneBuilder::assignBZMaterial( mat, this );
 }
