@@ -25,6 +25,7 @@ class material;
 #include "ObserverMessage.h"
 
 #include <osg/ref_ptr>
+#include <osg/Vec3>
 
 using namespace std;
 
@@ -63,11 +64,11 @@ public:
 	static waterLevel* getWaterLevelData();
 	static options* getOptionsData();
 	static vector< bz2object* >& getObjects();
-	static vector< material* >& getMaterials();
-	static vector< texturematrix* >& getTextureMatrices();
-	static vector< physics* >& getPhysicsDrivers();
-	static vector< Tlink* >& getTeleporterLinks();
-	static vector< define* >& getGroups();
+	static map< string, material* >& getMaterials();
+	static map< string, texturematrix* >& getTextureMatrices();
+	static map< string, physics* >& getPhysicsDrivers();
+	static map< string, Tlink* >& getTeleporterLinks();
+	static map< string, define* >& getGroups();
 	
 	static void addObject( bz2object* obj );
 	static DataEntry* buildObject( const char* header );
@@ -77,6 +78,8 @@ public:
 	static void unselectAll();
 	static bool isSelected( bz2object* obj );
 	static vector< bz2object* >& getSelection();
+	static void assignMaterial( const string& matref, bz2object* obj );
+	static void assignMaterial( material* matref, bz2object* obj );
 	
 	// editor-like methods (BZWB-specific)
 	static bool cutSelection();
@@ -89,13 +92,13 @@ public:
 	world* _getWorldData() { return worldData; }
 	options* _getOptionsData() { return optionsData; }
 	waterLevel* _getWaterLevelData() { return waterLevelData; }
-	vector< bz2object* >& _getObjects() { return this->objects; }
-	vector< material* >& _getMaterials() { return this->materials; }
-	vector< texturematrix* >& _getTextureMatrices() { return this->textureMatrices; }
-	vector< dynamicColor* >& _getDynamicColors() { return this->dynamicColors; }
-	vector< physics* >& _getPhysicsDrivers() { return this->phys; }
-	vector< Tlink* >& _getTeleporterLinks() { return this->links; }
-	vector< define* >& _getGroups() { return this->groups; }
+	vector<bz2object* >& _getObjects() { return this->objects; }
+	map< string, material* >& _getMaterials() { return this->materials; }
+	map< string, texturematrix* >& _getTextureMatrices() { return this->textureMatrices; }
+	map< string, dynamicColor* >& _getDynamicColors() { return this->dynamicColors; }
+	map< string, physics* >& _getPhysicsDrivers() { return this->phys; }
+	map< string, Tlink* >& _getTeleporterLinks() { return this->links; }
+	map< string, define* >& _getGroups() { return this->groups; }
 	
 	void _addObject( bz2object* obj );
 	DataEntry* _buildObject( const char* header );
@@ -105,6 +108,8 @@ public:
 	void _unselectAll();
 	bool _isSelected( bz2object* obj );
 	vector< bz2object* >& _getSelection() { return this->selectedObjects; }
+	void _assignMaterial( const string& matref, bz2object* obj );
+	void _assignMaterial( material* matref, bz2object* obj );
 	
 	// editor-like methods (BZWB-specific)--instantiated
 	bool _cutSelection();
@@ -163,23 +168,24 @@ private:
 	options* optionsData;
 	waterLevel* waterLevelData;
 	
-// physics
-	vector< physics* > phys;
+// physics (map refname to object )
+	map< string, physics* > phys;
 	
-// materials
-	vector< material* > materials;
+// materials (map refname to object )
+	map< string, material* > materials;
+	osg::ref_ptr< material > defaultMaterial; 		// default material
 	
-// group definitions
-	vector< define* > groups;
+// group definitions (map refname to object)
+	map< string, define* > groups;
 	
-// dynamic colors
-	vector< dynamicColor* > dynamicColors;
+// dynamic colors (map refname to the object )
+	map< string, dynamicColor* > dynamicColors;
 
-// links
-	vector< Tlink* > links;
+// links (map refname to the object )
+	map< string, Tlink* > links;
 
-// texture matrices
-	vector< texturematrix* > textureMatrices;
+// texture matrices (map refname to the object itself) 
+	map< string, texturematrix* > textureMatrices;
 	
 // objects
 	vector< bz2object* > objects;

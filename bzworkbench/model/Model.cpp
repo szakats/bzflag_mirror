@@ -9,12 +9,24 @@ Model::Model() : Observable()
 	worldData = new world();
 	optionsData = new options();
 	waterLevelData = new waterLevel();
-	phys = vector< physics* >();
-	dynamicColors = vector< dynamicColor* >();
-	materials = vector< material* >();
-	links = vector< Tlink* >();
-	textureMatrices = vector< texturematrix* >();
-	groups = vector< define* >();
+	phys = map< string, physics* >();
+	dynamicColors = map< string, dynamicColor* >();
+	materials = map< string, material* >();
+	links = map< string, Tlink* >();
+	textureMatrices = map< string, texturematrix* >();
+	groups = map< string, define* >();
+	
+	// make a default material
+	defaultMaterial = new material();
+	defaultMaterial->setAmbient( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ) );
+	defaultMaterial->setDiffuse( osg::Vec4( 1, 1.0, 1.0, 1.0 ) );
+	defaultMaterial->setSpecular( osg::Vec4( 0.0, 0.0, 0.0, 0.0) );
+	defaultMaterial->setEmissive( osg::Vec4( 0.0, 0.0, 0.0, 1.0) );
+	
+	vector< osg::ref_ptr<osg::Texture2D> > defaultTextures = vector< osg::ref_ptr< osg::Texture2D > >();
+	defaultTextures.push_back( SceneBuilder::buildTexture2D( "share/roof.png" ) );
+	
+	defaultMaterial->setTextures( defaultTextures );
 	
 	objects = vector< bz2object* >();
 	modelRef = this;
@@ -34,12 +46,24 @@ Model::Model(const char* supportedObjects, const char* objectHierarchy, const ch
 	worldData = new world();
 	optionsData = new options();
 	waterLevelData = new waterLevel();
-	phys = vector< physics* >();
-	dynamicColors = vector< dynamicColor* >();
-	materials = vector< material* >();
-	links = vector< Tlink* >();
-	textureMatrices = vector< texturematrix* >();
-	groups = vector< define* >();
+	phys = map< string, physics* >();
+	dynamicColors = map< string, dynamicColor* >();
+	materials = map< string, material* >();
+	links = map< string, Tlink* >();
+	textureMatrices = map< string, texturematrix* >();
+	groups = map< string, define* >();
+	
+	// make a default material
+	defaultMaterial = new material();
+	defaultMaterial->setAmbient( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ) );
+	defaultMaterial->setDiffuse( osg::Vec4( 1, 1.0, 1.0, 1.0 ) );
+	defaultMaterial->setSpecular( osg::Vec4( 0.0, 0.0, 0.0, 0.0) );
+	defaultMaterial->setEmissive( osg::Vec4( 0.0, 0.0, 0.0, 1.0) );
+	
+	vector< osg::ref_ptr<osg::Texture2D> > defaultTextures = vector< osg::ref_ptr< osg::Texture2D > >();
+	defaultTextures.push_back( SceneBuilder::buildTexture2D( "share/roof.png" ) );
+	
+	defaultMaterial->setTextures( defaultTextures );
 	
 	objects = vector< bz2object* >();
 	modelRef = this;
@@ -67,17 +91,17 @@ Model::~Model()
 		delete waterLevelData;
 		
 	if(phys.size() > 0)
-		for(vector<physics*>::iterator i = phys.begin(); i != phys.end(); i++)
-			if((*i)) {
-				delete *i;
-				*i = NULL;	
+		for(map<string, physics*>::iterator i = phys.begin(); i != phys.end(); i++)
+			if((i->second)) {
+				delete i->second;
+				i->second = NULL;	
 			}
 			
 	if(materials.size() > 0)
-		for(vector<material*>::iterator i = materials.begin(); i != materials.end(); i++)
-			if((*i)) {
-				delete *i;
-				*i = NULL;	
+		for(map<string, material*>::iterator i = materials.begin(); i != materials.end(); i++)
+			if((i->second)) {
+				delete i->second;
+				i->second = NULL;	
 			}
 			
 	if(objects.size() > 0)
@@ -88,10 +112,10 @@ Model::~Model()
 			}
 	
 	if(groups.size() > 0)
-		for(vector<define*>::iterator i = groups.begin(); i != groups.end(); i++)
-			if((*i)) {
-				delete *i;
-				*i = NULL;	
+		for(map<string, define*>::iterator i = groups.begin(); i != groups.end(); i++)
+			if((i->second)) {
+				delete i->second;
+				i->second = NULL;	
 			}
 		
 }
@@ -120,50 +144,32 @@ DataEntry* Model::_command(const string& command, const string& object, const st
 		
 		// handle dynamicColor
 		if( object == "dynamicColor" ) {
-			for( vector< dynamicColor* >::iterator i = this->dynamicColors.begin(); i != this->dynamicColors.end(); i++ ) {
-				if( (*i)->getName() == name )
-					return *i;
-			}
+			return ( dynamicColors.count( name ) > 0 ? dynamicColors[name] : NULL );
 		}
 		
 		// handle texturematrices
 		else if( object == "texturematrix" ) {
-			for( vector< texturematrix* >::iterator i = this->textureMatrices.begin(); i != this->textureMatrices.end(); i++ ) {
-				if( (*i)->getName() == name )
-					return *i;
-			}
+			return ( textureMatrices.count( name ) > 0 ? textureMatrices[name] : NULL );
 		}
 		
 		// handle physics drivers
 		else if( object == "phydrv" ) {
-			for( vector< physics* >::iterator i = this->phys.begin(); i != this->phys.end(); i++ ) {
-				if( (*i)->getName() == name )
-					return *i;
-			}
+			return ( phys.count( name ) > 0 ? phys[name] : NULL );
 		}
 		
 		// handle materials
 		else if( object == "material" ) {
-			for( vector< material* >::iterator i = this->materials.begin(); i != this->materials.end(); i++ ) {
-				if( (*i)->getName() == name )
-					return *i;
-			}
+			return (materials.count( name ) > 0 ? materials[name] : NULL );
 		}
 		
 		// handle teleporter links
 		else if( object == "link" ) {
-			for( vector< Tlink* >::iterator i = this->links.begin(); i != this->links.end(); i++ ) {
-				if( (*i)->getName() == name )
-					return *i;
-			}
+			return (links.count( name ) > 0 ? links[name] : NULL );
 		}
 		
 		// handle definitions
 		else if( object == "define" ) {
-			for( vector< define* >::iterator i = this->groups.begin(); i != this->groups.end(); i++ ) {
-				if( (*i)->getName() == name )
-					return *i;
-			}
+			return (groups.count( name ) > 0 ? groups[name] : NULL );
 		}
 		
 		// handle all other objects
@@ -256,7 +262,10 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse materials
 		else if(header == "material") {
 			if(cmap[header] != NULL) {
-				materials.push_back((material*)cmap[header](*i));
+				material* mat = ((material*)cmap[header](*i));
+				if( mat ) {
+					materials[ mat->getName() ] = mat;
+				}
 			}
 			else {
 				printf("Model::build(material): Skipping undefined object \"%s\"\n", header.c_str());
@@ -267,7 +276,10 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse physics
 		else if(header == "physics") {
 			if(cmap[header] != NULL) {
-				phys.push_back((physics*)cmap[header](*i));
+				physics* p = (physics*)cmap[header](*i);
+				if( p ) {
+					phys[ p->getName() ] = p;
+				}
 			}
 			else {
 				printf("Model::build(physics): Skipping undefined object \"%s\"\n", header.c_str());
@@ -278,7 +290,10 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse dynamicColors
 		else if(header == "dynamicColor") {
 			if(cmap[header] != NULL) {
-				dynamicColors.push_back((dynamicColor*)cmap[header](*i));	
+				dynamicColor* dynCol = (dynamicColor*)cmap[header](*i);
+				if( dynCol ) {
+					dynamicColors[ dynCol->getName() ] = dynCol;
+				}
 			}
 			else {
 				printf("Model::build(dynamicColor): Skipping undefined object \"%s\"\n", header.c_str());
@@ -289,7 +304,10 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse group definitions
 		else if(header == "define") {
 			if(cmap[header] != NULL) {
-				groups.push_back((define*)cmap[header](*i));
+				define* def = (define*)cmap[header](*i);
+				if( def ) {
+					groups[ def->getName() ] = def;
+				}
 			}
 			else {
 				printf("Model::build(define): Skipping undefined object \"%s\"\n", header.c_str());
@@ -300,7 +318,10 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse links
 		else if(header == "link") {
 			if(cmap[header] != NULL) {
-				links.push_back((Tlink*)cmap[header](*i));	
+				Tlink* link = (Tlink*)cmap[header](*i);
+				if( link ) {
+					links[ link->getName() ] = link;
+				}
 			}
 			else {
 				printf("Model::build(link): Skipping undefined object \"%s\"\n", header.c_str());
@@ -311,8 +332,10 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse texturematrices
 		else if(header == "texturematrix") {
 			if(cmap[header] != NULL) {
-				textureMatrices.push_back((texturematrix*)cmap[header](*i));
-				continue;	
+				texturematrix* tm = (texturematrix*)cmap[header](*i);
+				if( tm ) {
+					textureMatrices[ tm->getName() ] = tm;
+				}
 			}	
 			else {
 				printf("Model::build(texturematrix): Skipping undefined object \"%s\"\n", header.c_str());
@@ -555,40 +578,40 @@ string& Model::_toString() {
 	// physics drivers
 	ret += "\n#--Physics Drivers-------------------------------\n\n";
 	if(phys.size() > 0) {
-		for(vector< physics* >::iterator i = phys.begin(); i != phys.end(); i++) {
-			ret += (*i)->toString() + "\n";
+		for(map< string, physics* >::iterator i = phys.begin(); i != phys.end(); i++) {
+			ret += i->second->toString() + "\n";
 		}
 	}
 	
 	// materials
 	ret += "\n#--Materials-------------------------------------\n\n";
 	if(materials.size() > 0) {
-		for(vector< material* >::iterator i = materials.begin(); i != materials.end(); i++) {
-			ret += (*i)->toString() + "\n";
+		for(map< string, material* >::iterator i = materials.begin(); i != materials.end(); i++) {
+			ret += i->second->toString() + "\n";
 		}	
 	}
 	
 	// dynamic colors
 	ret += "\n#--Dynamic Colors--------------------------------\n\n";
 	if(dynamicColors.size() > 0) {
-		for(vector< dynamicColor* >::iterator i = dynamicColors.begin(); i != dynamicColors.end(); i++) {
-			ret += (*i)->toString() + "\n";	
+		for(map< string, dynamicColor* >::iterator i = dynamicColors.begin(); i != dynamicColors.end(); i++) {
+			ret += i->second->toString() + "\n";	
 		}
 	}
 	
 	// texture matrices
 	ret += "\n#--Texture Matrices------------------------------\n\n";
 	if(textureMatrices.size() > 0) {
-		for(vector< texturematrix* >::iterator i = textureMatrices.begin(); i != textureMatrices.end(); i++) {
-			ret += (*i)->toString() + "\n";	
+		for(map< string, texturematrix* >::iterator i = textureMatrices.begin(); i != textureMatrices.end(); i++) {
+			ret += i->second->toString() + "\n";	
 		}
 	}
 	
 	// group defintions
 	ret += "\n#--Group Definitions-----------------------------\n\n";
 	if(groups.size() > 0) {
-		for(vector< define* >::iterator i = groups.begin(); i != groups.end(); i++) {
-			ret += (*i)->toString() + "\n";	
+		for(map< string, define* >::iterator i = groups.begin(); i != groups.end(); i++) {
+			ret += i->second->toString() + "\n";	
 		}	
 	}
 	
@@ -603,8 +626,8 @@ string& Model::_toString() {
 	// links
 	ret += "\n#--Teleporter Links------------------------------\n\n";
 	if(links.size() > 0) {
-		for(vector< Tlink* >::iterator i = links.begin(); i != links.end(); i++) {
-			ret += (*i)->toString() + "\n";	
+		for(map< string, Tlink* >::iterator i = links.begin(); i != links.end(); i++) {
+			ret += i->second->toString() + "\n";	
 		}	
 	}
 	
@@ -621,11 +644,11 @@ string& Model::_toString() {
 
 // BZWB-specific API
 vector< bz2object* >& 		Model::getObjects() 		{ return modelRef->_getObjects(); }
-vector< material* >& 		Model::getMaterials() 		{ return modelRef->_getMaterials(); }
-vector< texturematrix* >&	Model::getTextureMatrices() { return modelRef->_getTextureMatrices(); }
-vector< physics* >& 		Model::getPhysicsDrivers() 	{ return modelRef->_getPhysicsDrivers(); }
-vector< Tlink* >&		 	Model::getTeleporterLinks() { return modelRef->_getTeleporterLinks(); }
-vector< define* >&			Model::getGroups() 			{ return modelRef->_getGroups(); }
+map< string, material* >& 		Model::getMaterials() 		{ return modelRef->_getMaterials(); }
+map< string, texturematrix* >&	Model::getTextureMatrices() { return modelRef->_getTextureMatrices(); }
+map< string, physics* >& 		Model::getPhysicsDrivers() 	{ return modelRef->_getPhysicsDrivers(); }
+map< string, Tlink* >&		 	Model::getTeleporterLinks() { return modelRef->_getTeleporterLinks(); }
+map< string, define* >&			Model::getGroups() 			{ return modelRef->_getGroups(); }
 void					Model::addObject( bz2object* obj ) { modelRef->_addObject( obj ); }
 void					Model::removeObject( bz2object* obj ) { modelRef->_removeObject( obj ); }
 void					Model::setSelected( bz2object* obj ) { modelRef->_setSelected( obj ); }
@@ -861,4 +884,36 @@ bool Model::_newWorld() {
 	this->_build( theNewWorld );
 	
 	return true;
+}
+
+// assign a material and make sure the Model has a reference to it
+void Model::assignMaterial( const string& matref, bz2object* obj ) { modelRef->_assignMaterial( matref, obj ); }
+void Model::assignMaterial( material* matref, bz2object* obj ) { modelRef->_assignMaterial( matref, obj ); }
+
+void Model::_assignMaterial( const string& matref, bz2object* obj ) {
+	material* mat;
+	
+	// do we have this material?
+	if( materials.count( matref ) > 0 )
+		mat = materials[matref];	// then load it from our mapping
+	else
+		mat = defaultMaterial.get();	// otherwise, use the default material
+	
+	// give the material to the object (and it will update itself)
+	
+}
+
+void Model::_assignMaterial( material* matref, bz2object* obj ) {
+	
+	// if the material reference was NULL, just use the normal default material
+	if( matref == NULL ) {
+		SceneBuilder::assignBZMaterial( defaultMaterial.get(), obj );
+		return;
+	}
+	
+	// otherwise, make sure this material exists (if not, then add it)
+	if( materials.count( matref->getName() ) == 0 )
+		materials[ matref->getName() ] = matref;
+		
+	
 }

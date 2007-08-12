@@ -14,13 +14,13 @@ material::material() :
 	alphaThreshold = 1.0f;
 	
 	// allocate a material
-	this->finalMaterial = new osg::Material();
-	this->setAttribute( finalMaterial.get(), osg::StateAttribute::ON );
+	osg::Material* finalMaterial = new osg::Material();
+	this->setAttribute( finalMaterial, osg::StateAttribute::ON );
 	
-	this->setAmbient( osg::Vec4( -1, -1, -1, -1) );
-	this->setDiffuse( osg::Vec4( -1, -1, -1, -1) );
-	this->setSpecular( osg::Vec4( -1, -1, -1, -1) );
-	this->setEmissive( osg::Vec4( -1, -1, -1, -1) );
+	this->setAmbient( osg::Vec4( 1, 1, 1, 1) );
+	this->setDiffuse( osg::Vec4( 1, 1, 1, 1) );
+	this->setSpecular( osg::Vec4( 0, 0, 0, 1) );
+	this->setEmissive( osg::Vec4( 1, 1, 1, 1) );
 }
 
 // constructor with data
@@ -37,13 +37,13 @@ material::material(string& data) :
 	alphaThreshold = 1.0f;
 	
 	// allocate a material
-	this->finalMaterial = new osg::Material();
-	this->setAttribute( finalMaterial.get(), osg::StateAttribute::ON );
+	osg::Material* finalMaterial = new osg::Material();
+	this->setAttribute( finalMaterial, osg::StateAttribute::ON );
 	
-	this->setAmbient( osg::Vec4( -1, -1, -1, -1) );
-	this->setDiffuse( osg::Vec4( -1, -1, -1, -1) );
-	this->setSpecular( osg::Vec4( -1, -1, -1, -1) );
-	this->setEmissive( osg::Vec4( -1, -1, -1, -1) );
+	this->setAmbient( osg::Vec4( 1, 1, 1, 1) );
+	this->setDiffuse( osg::Vec4( 1, 1, 1, 1) );
+	this->setSpecular( osg::Vec4( 0, 0, 0, 1) );
+	this->setEmissive( osg::Vec4( 1, 1, 1, 1) );
 	
 	this->update(data);
 }
@@ -124,7 +124,8 @@ int material::update(string& data) {
 	vector<string> speculars = BZWParser::getValuesByKey("specular", header, materialData);
 	
 	// get the textures
-	vector<string> texs = BZWParser::getValuesByKey("addtexture", header, materialData);
+	vector<string> addtexs = BZWParser::getValuesByKey("addtexture", header, materialData);
+	vector<string> texs = BZWParser::getValuesByKey("texture", header, materialData );
 	
 	// get notextures
 	vector<string> notextures = BZWParser::getValuesByKey("notexture", header, materialData);
@@ -195,6 +196,8 @@ int material::update(string& data) {
 		if( mat != NULL )
 			this->materials.push_back( mat );
 	}
+	// compute the final material
+	this->computeFinalMaterial();
 	
 	// this->textures = texs;
 	
@@ -292,9 +295,11 @@ string material::toString(void) {
 
 // compute the final material from a list of materials
 material* material::computeFinalMaterial( vector< osg::ref_ptr< material > >& materialList ) { 
-	osg::Vec4 ambient, diffuse, specular, emissive;
-	float shininess = -1.0;
-	bool hasAmbient = false, hasSpecular = false, hasDiffuse = false, hasEmissive = false;
+	osg::Vec4 ambient = osg::Vec4( 0, 0, 0, 0),
+			  diffuse = osg::Vec4( 0, 0, 0, 0),
+			  specular = osg::Vec4( 0, 0, 0, 0),
+			  emissive = osg::Vec4( 0, 0, 0, 0);
+	float shiny = 0.0;
 	
 	osg::Texture2D* tex = NULL;
 	
@@ -304,38 +309,33 @@ material* material::computeFinalMaterial( vector< osg::ref_ptr< material > >& ma
 			osg::Material* mat = dynamic_cast< osg::Material* >(((*i)->getAttribute( osg::StateAttribute::MATERIAL ) ));
 			
 			// if it's valid, get the colors
-			// NOTE: BZFlag pays attention only to the FIRST occurence of a color, so don't look anymore if one is found
+			// NOTE: BZFlag pays attention only to the LAST occurence of a color
 			if( mat ) {
-				if( !hasAmbient && IS_VALID_COLOR( mat->getAmbient( osg::Material::FRONT ) ) ) {
+				if(IS_VALID_COLOR( mat->getAmbient( osg::Material::FRONT ) ) ) {
 					ambient = mat->getAmbient( osg::Material::FRONT );
-					hasAmbient = true;
 				}
 					
-				if( !hasDiffuse && IS_VALID_COLOR( mat->getDiffuse( osg::Material::FRONT ) ) ) {
+				if(IS_VALID_COLOR( mat->getDiffuse( osg::Material::FRONT ) ) ) {
 					diffuse = mat->getDiffuse( osg::Material::FRONT );
-					hasDiffuse = true;
 				}	
 					
-				if( !hasSpecular && IS_VALID_COLOR( mat->getSpecular( osg::Material::FRONT ) ) ) {
+				if(IS_VALID_COLOR( mat->getSpecular( osg::Material::FRONT ) ) ) {
 					specular = mat->getSpecular( osg::Material::FRONT );
-					hasSpecular = true;
 				}
 				
-				if( !hasEmissive && IS_VALID_COLOR( mat->getEmission( osg::Material::FRONT ) ) ) {
+				if(IS_VALID_COLOR( mat->getEmission( osg::Material::FRONT ) ) ) {
 					emissive = mat->getSpecular( osg::Material::FRONT );
-					hasEmissive = true;
 				}
 				
-				if( shininess < 0 )
-					shininess = mat->getShininess( osg::Material::FRONT );
+				shiny = mat->getShininess( osg::Material::FRONT );
 			}
 			
 			// get the texture
 			osg::Texture2D* texture = dynamic_cast< osg::Texture2D* >( (*i)->getAttribute( osg::StateAttribute::TEXTURE ) );
 			
 			// see if the texture is valid
-			// NOTE: BZFlag pays attention only to the LAST texture declared
-			if( texture )
+			// NOTE: BZFlag pays attention only to the FIRST texture declared
+			if( !texture )
 				tex = texture;
 		}
 	}
@@ -347,7 +347,7 @@ material* material::computeFinalMaterial( vector< osg::ref_ptr< material > >& ma
 	mat->setDiffuse( diffuse );
 	mat->setSpecular( specular );
 	mat->setEmissive( emissive );
-	mat->setShininess( shininess );
+	mat->setShininess( shiny );
 	
 	if( tex != NULL )
 		mat->setTextureAttribute( 0, tex );
@@ -356,10 +356,75 @@ material* material::computeFinalMaterial( vector< osg::ref_ptr< material > >& ma
 }
 
 // compute the final texture
-// simple: BZFlag only pays attention to the last texture declared
+// simple: BZFlag only pays attention to the first texture declared
 void material::computeFinalTexture() { 
-	if( textures.size() > 0 )
-		finalTexture = textures[ textures.size() - 1 ];
-	else
-		finalTexture = NULL;
+	
+	if( textures.size() > 0 ) {
+		osg::Texture2D* finalTexture = textures[ 0 ].get();
+		this->setTextureAttribute( 0, finalTexture );
+	}
+	else {
+		this->setTextureAttribute( 0, NULL );
+	}
+}
+
+// compute the final osg material
+void material::computeFinalMaterial() {
+	
+	osg::Vec4 ambient = osg::Vec4( 0, 0, 0, 0),
+			  diffuse = osg::Vec4( 0, 0, 0, 0),
+			  specular = osg::Vec4( 0, 0, 0, 0),
+			  emissive = osg::Vec4( 0, 0, 0, 0);
+			  
+	float shiny = 0.0;
+	
+	if( materials.size() > 0 ) {
+		
+		for( vector< osg::ref_ptr< material > >::iterator i = materials.begin(); i != materials.end(); i++ ) {
+			
+			material* mat = i->get();
+			
+			// NOTE: BZFlag pays attention only to the LAST occurence of a color
+			if( mat ) {
+				if(IS_VALID_COLOR( mat->getAmbient() ) ) {
+					ambient = mat->getAmbient();
+				}
+					
+				if(IS_VALID_COLOR( mat->getDiffuse() ) ) {
+					diffuse = mat->getDiffuse();
+				}	
+					
+				if(IS_VALID_COLOR( mat->getSpecular() ) ) {
+					specular = mat->getSpecular();
+				}
+				
+				if(IS_VALID_COLOR( mat->getEmissive() ) ) {
+					emissive = mat->getSpecular();
+				}
+				
+				shiny = mat->getShininess();
+			}
+		}
+		
+		osg::Material* finalMaterial = new osg::Material();
+			
+		finalMaterial->setAmbient( osg::Material::FRONT, ambient );
+		finalMaterial->setDiffuse( osg::Material::FRONT, diffuse );
+		finalMaterial->setSpecular( osg::Material::FRONT, specular );
+		finalMaterial->setEmission( osg::Material::FRONT, emissive );
+		finalMaterial->setShininess( osg::Material::FRONT, shiny );
+		
+		this->setAttribute( finalMaterial, osg::StateAttribute::ON );
+	}
+	
+}
+
+// get the current material
+osg::Material* material::getCurrentMaterial() {
+	return (osg::Material*)this->getAttribute( osg::StateAttribute::MATERIAL );
+}
+
+// get the current texture
+osg::Texture2D* material::getCurrentTexture() {
+	return (osg::Texture2D*)this->getTextureAttribute( 0, osg::StateAttribute::TEXTURE );
 }

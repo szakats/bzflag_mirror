@@ -53,6 +53,9 @@ public:
 	// build a selected node
 	static osg::Node* buildSelectedNode( const char* nodeFile );
 	
+	// build a texture
+	static osg::Texture2D* buildTexture2D( const char* filename );
+	
 	// mark a node as selected
 	static void markSelectedAndPreserveStateSet( bz2object* node );
 	static void markSelected( osg::Node* node );
