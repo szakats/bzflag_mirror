@@ -11,6 +11,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osgGA/EventQueue>
 #include <osg/ShadeModel>
+#include <osg/LightModel>
 
 #include "RenderWindow.h"
 #include "../model/Model.h"

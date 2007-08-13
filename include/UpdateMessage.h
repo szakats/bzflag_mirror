@@ -33,12 +33,14 @@ public:
 		SET_SCALE,					// i.e. use this to indicate a new scale
 		SET_SCALE_FACTOR,			// i.e. use this to indicate a change in scale
 		
-		PUSH_TRANSFOMRATION,		// i.e. push a transformation
-		POP_TRANSFORMATION,			// i.e. pop a transformation
+		ADD_TRANSFOMRATION,			// i.e. push a transformation
+		REMOVE_TRANSFORMATION,		// i.e. pop a transformation
+		UPDATE_TRANSFORMATION,		// i.e. change a transformation
 		SET_TRANSFORMATIONS,		// i.e. use this along with a vector of BZTransforms to set the transformation stack
 		
-		PUSH_MATERIAL,				// i.e. push a material to the object's material list
-		POP_MATERIAL,				// i.e. pop a material from the object's material list
+		ADD_MATERIAL,				// i.e. push a material to the object's material list
+		REMOVE_MATERIAL,			// i.e. pop a material from the object's material list
+		UPDATE_MATERIAL,			// i.e. change a material
 		SET_MATERIALS,				// i.e. set the entire list of materials
 		
 		SET_PHYDRV,					// i.e. set the physics driver

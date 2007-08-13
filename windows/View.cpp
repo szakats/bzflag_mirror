@@ -19,6 +19,17 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
    // initialize the root node
    this->root = new osg::Group();
    
+   // configure the stateset of the root node
+   osg::StateSet* stateSet = root->getOrCreateStateSet();
+   
+   // disable OSG's shading by making full white ambient light
+   osg::LightModel* lighting = new osg::LightModel();
+   lighting->setAmbientIntensity( osg::Vec4( 1, 1, 1, 1 ) );
+   
+   stateSet->setAttribute( lighting, osg::StateAttribute::OVERRIDE );
+   
+   stateSet->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::ON );
+   
    // initialize the ground
    this->ground = new Ground( 400.0f );
    
@@ -228,54 +239,27 @@ bool View::isPressed( int value ) {
 
 bool View::isSelected( bz2object* obj ) { return this->model->isSelected( obj ); }
 /**
- * Set an object as selected (i.e. tints it green)
+ * Tell the model to select an object
  */
 void View::setSelected( bz2object* object ) {
 	
-	if(object == NULL)
-		return;
-		
-	// tell the model that this object is to be selected
-	model->setSelected( object );
-	
-	// mark it so
-	SceneBuilder::markSelected( object );
-	
-	// update the selection
-	this->selection->update( this->model, NULL );
+	this->model->_setSelected( object );
 }
 
 /**
- * This method does the same as setSelected, but instead of doing the selection, it undoes it.
+ * Tell the model to unselect an object
  */
 void View::setUnselected( bz2object* object ) {
 	
-	// tell the model that this is unselected
-	model->setUnselected( object );
-	
-	// mark it so
-	SceneBuilder::markUnselected( object );
-	
-	// update the 3D cursor
-	this->selection->update( this->model, NULL );
+	this->model->_setUnselected( object );
 }
 
 
-// mark all nodes unselected
+/**
+ * Tell the model to unselect all selected objects
+ */
 void View::unselectAll() {
 	
-	// mark all selected objects as unselected
-	vector< bz2object* > objects = model->_getSelection();
-	if(objects.size() > 0) {
-		for(vector< bz2object* >::iterator i = objects.begin(); i != objects.end(); i++) {
-			SceneBuilder::markUnselected( *i );
-		}
-	}
-	
-	// unselect the objects
-	this->model->unselectAll();
-	
-	// update the 3D cursor
-	this->selection->update( this->model, NULL );
+	this->model->_unselectAll();
 }
 

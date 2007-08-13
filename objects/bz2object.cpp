@@ -17,11 +17,22 @@ bz2object::bz2object(const char* name, const char* keys):
 	data.push_back( 0.0 );
 	data.push_back( 0.0 );
 	
+	vector<float> spinData_x, spinData_y, spinData_z;
+	spinData_x.push_back(0.0);	spinData_x.push_back(1.0);	spinData_x.push_back(0.0);	spinData_x.push_back(0.0);
+	spinData_y.push_back(0.0);	spinData_y.push_back(0.0);	spinData_y.push_back(1.0);	spinData_y.push_back(0.0);
+	spinData_z.push_back(0.0);	spinData_z.push_back(0.0);	spinData_z.push_back(0.0);	spinData_z.push_back(1.0);
+	
 	this->startShift = new BZTransform("shift", data);
+	this->spin_x = new BZTransform("spin", spinData_x);
+	this->spin_y = new BZTransform("spin", spinData_y);
+	this->spin_z = new BZTransform("spin", spinData_z);
 	this->endShift = new BZTransform("shift", data);
 	
 	this->addChild( startShift.get() );
-	this->startShift->addChild( endShift.get() );
+	startShift->addChild( endShift.get() );
+	endShift->addChild( spin_x.get() );
+	spin_x->addChild( spin_y.get() );
+	spin_y->addChild( spin_z.get() );
 	
 	this->savedStateSet = NULL;
 	
@@ -39,15 +50,27 @@ bz2object::bz2object(const char* name, const char* keys, const char* data):
 	this->materials = vector< osg::ref_ptr< material > >();
 	this->setSelected( false );
 	
-	vector<float> shiftData;
-	shiftData.push_back( 0.0 );
-	shiftData.push_back( 0.0 );
-	shiftData.push_back( 0.0 );
+	vector<float> sdata;
+	sdata.push_back( 0.0 );
+	sdata.push_back( 0.0 );
+	sdata.push_back( 0.0 );
 	
-	this->startShift = new BZTransform("shift", shiftData);
-	this->endShift = new BZTransform("shift", shiftData);
+	vector<float> spinData_x, spinData_y, spinData_z;
+	spinData_x.push_back(0.0);	spinData_x.push_back(1.0);	spinData_x.push_back(0.0);	spinData_x.push_back(0.0);
+	spinData_y.push_back(0.0);	spinData_y.push_back(0.0);	spinData_y.push_back(1.0);	spinData_y.push_back(0.0);
+	spinData_z.push_back(0.0);	spinData_z.push_back(0.0);	spinData_z.push_back(0.0);	spinData_z.push_back(1.0);
+	
+	this->startShift = new BZTransform("shift", sdata);
+	this->spin_x = new BZTransform("spin", spinData_x);
+	this->spin_y = new BZTransform("spin", spinData_y);
+	this->spin_z = new BZTransform("spin", spinData_z);
+	this->endShift = new BZTransform("shift", sdata);
+	
 	this->addChild( startShift.get() );
-	this->startShift->addChild( endShift.get() );
+	startShift->addChild( endShift.get() );
+	endShift->addChild( spin_x.get() );
+	spin_x->addChild( spin_y.get() );
+	spin_y->addChild( spin_z.get() );
 	
 	this->savedStateSet = NULL;
 	
@@ -72,14 +95,24 @@ bz2object::bz2object(const char* name, const char* keys, osg::Node* node ):
 	data.push_back( 0.0 );
 	data.push_back( 0.0 );
 	
+	vector<float> spinData_x, spinData_y, spinData_z;
+	spinData_x.push_back(0.0);	spinData_x.push_back(1.0);	spinData_x.push_back(0.0);	spinData_x.push_back(0.0);
+	spinData_y.push_back(0.0);	spinData_y.push_back(0.0);	spinData_y.push_back(1.0);	spinData_y.push_back(0.0);
+	spinData_z.push_back(0.0);	spinData_z.push_back(0.0);	spinData_z.push_back(0.0);	spinData_z.push_back(1.0);
+	
 	this->startShift = new BZTransform("shift", data);
+	this->spin_x = new BZTransform("spin", spinData_x);
+	this->spin_y = new BZTransform("spin", spinData_y);
+	this->spin_z = new BZTransform("spin", spinData_z);
 	this->endShift = new BZTransform("shift", data);
 	
-	this->savedStateSet = NULL;
-	
 	this->addChild( startShift.get() );
-	this->startShift->addChild( endShift.get() );
-	this->endShift->addChild( node );
+	startShift->addChild( endShift.get() );
+	endShift->addChild( spin_x.get() );
+	spin_x->addChild( spin_y.get() );
+	spin_y->addChild( spin_z.get() );
+	
+	this->savedStateSet = NULL;
 }
 
 // constructor with node and string data
@@ -93,19 +126,29 @@ bz2object::bz2object( const char* name, const char* keys, const char* data, osg:
 	this->materials = vector< osg::ref_ptr< material > >();
 	this->setSelected( false );
 	
-	vector<float> shiftData;
-	shiftData.push_back( 0.0 );
-	shiftData.push_back( 0.0 );
-	shiftData.push_back( 0.0 );
+	vector<float> sdata;
+	sdata.push_back( 0.0 );
+	sdata.push_back( 0.0 );
+	sdata.push_back( 0.0 );
 	
-	this->startShift = new BZTransform("shift", shiftData);
-	this->endShift = new BZTransform("shift", shiftData);
+	vector<float> spinData_x, spinData_y, spinData_z;
+	spinData_x.push_back(0.0);	spinData_x.push_back(1.0);	spinData_x.push_back(0.0);	spinData_x.push_back(0.0);
+	spinData_y.push_back(0.0);	spinData_y.push_back(0.0);	spinData_y.push_back(1.0);	spinData_y.push_back(0.0);
+	spinData_z.push_back(0.0);	spinData_z.push_back(0.0);	spinData_z.push_back(0.0);	spinData_z.push_back(1.0);
 	
-	this->savedStateSet = NULL;
+	this->startShift = new BZTransform("shift", sdata);
+	this->spin_x = new BZTransform("spin", spinData_x);
+	this->spin_y = new BZTransform("spin", spinData_y);
+	this->spin_z = new BZTransform("spin", spinData_z);
+	this->endShift = new BZTransform("shift", sdata);
 	
 	this->addChild( startShift.get() );
-	this->startShift->addChild( endShift.get() );
-	this->endShift->addChild( node );
+	startShift->addChild( endShift.get() );
+	endShift->addChild( spin_x.get() );
+	spin_x->addChild( spin_y.get() );
+	spin_y->addChild( spin_z.get() );
+	
+	this->savedStateSet = NULL;
 	
 	string d = string(data);
 	this->update(d);
@@ -194,6 +237,51 @@ int bz2object::update(string& data) {
 		
 	}
 	
+	// get the physics driver
+	if(this->isKey("phydrv")) {
+		physicsDrivers = BZWParser::getValuesByKey("phydrv", header, objData);
+		if(physicsDrivers.size() > 1) {
+			printf("%s::update(): Error! Defined \"phydrv\" %d times!\n", header, physicsDrivers.size());
+			return 0;
+		}
+	}
+	
+	// get materials
+	if(this->isKey("matref")) {
+		matrefs = BZWParser::getValuesByKey("matref", header, objData);
+	}
+	
+	// load in the simpler data
+	if(this->isKey("name") && names.size() > 0)
+		this->setName( names[0] );
+	if(this->isKey("position") && positions.size() > 0)
+		this->setPosition( Point3D( positions[0].c_str() ) );
+	if(this->isKey("rotation") && rotations.size() > 0)
+		this->setRotationZ( atof( rotations[0].c_str() ) );
+	if(this->isKey("size") && sizes.size() > 0)
+		this->setSize( Point3D( sizes[0].c_str() ) );
+	
+	// query the model for a physics driver
+	if(this->isKey("phydrv") && physicsDrivers.size() > 0) {
+		physics* phys = (physics*)Model::command( MODEL_GET, "phydrv", physicsDrivers[0] );
+		this->physicsDriver = phys;
+	}
+	
+	if(this->isKey("matref") && matrefs.size() > 0) {
+		// erase previous materials
+		materials.clear();
+		// use the model to resolve the references into material pointers
+		for( vector<string>::iterator i = matrefs.begin(); i != matrefs.end(); i++ ) {
+			material* mat = (material*)Model::command( MODEL_GET, "material", *i );
+			if( mat )
+				materials.push_back( mat );
+		}
+		
+		// assign the material
+		this->setStateSet( material::computeFinalMaterial(materials) );
+	}
+	
+	
 	// find out which transformations are valid
 	vector<string> transformKeys = vector<string>();
 	if(this->isKey("shear"))
@@ -239,11 +327,53 @@ int bz2object::update(string& data) {
 			
 			this->endShift->setData( endShiftData );
 			
-			// read in the transformations
+			// update rotations (find any occurrences of an angular rotation about cartesian axes )
+			
+			// handle x
+			for( vector<string>::iterator i = transforms.begin(); i != transforms.end(); i++ ) {
+				if( BZWParser::key( i->c_str() ) == "spin" ) {
+					BZTransform t = BZTransform( *i );
+					if( t.getData()[1] == 1.0f && t.getData()[2] == 0.0f && t.getData()[3] == 0.0f ) {
+						// this must be the rotation around x
+						this->spin_x->setData( t.getData() );
+						transforms.erase(i);		// don't duplicate it later on
+						break;
+					}
+				}
+			}
+			
+			// handle y
+			for( vector<string>::iterator i = transforms.begin(); i != transforms.end(); i++ ) {
+				if( BZWParser::key( i->c_str() ) == "spin" ) {
+					BZTransform t = BZTransform( *i );
+					if( t.getData()[1] == 0.0f && t.getData()[2] == 1.0f && t.getData()[3] == 0.0f ) {
+						// this must be the rotation around x
+						this->spin_y->setData( t.getData() );
+						transforms.erase(i);		// don't duplicate it later on
+						break;
+					}
+				}
+			}
+			
+			// handle z
+			for( vector<string>::iterator i = transforms.begin(); i != transforms.end(); i++ ) {
+				if( BZWParser::key( i->c_str() ) == "spin" ) {
+					BZTransform t = BZTransform( *i );
+					if( t.getData()[1] == 0.0f && t.getData()[2] == 0.0f && t.getData()[3] == 1.0f ) {
+						// this must be the rotation around x
+						this->spin_z->setData( t.getData() );
+						transforms.erase(i);		// don't duplicate it later on
+						break;
+					}
+				}
+			}
+			
+			
+			// read in the remaining transformations
 			vector< osg::ref_ptr< BZTransform > > newTransformations = vector< osg::ref_ptr< BZTransform > >();
 			
 			for( vector<string>::iterator i = transforms.begin(); i != transforms.end(); i++ ) {
-				newTransformations.push_back( new BZTransform( *i ) );
+				transformations.push_back( new BZTransform( *i ) );
 			}
 			
 			// update the transformation stack
@@ -251,51 +381,6 @@ int bz2object::update(string& data) {
 		}
 		
 	}
-	
-	// get the physics driver
-	if(this->isKey("phydrv")) {
-		physicsDrivers = BZWParser::getValuesByKey("phydrv", header, objData);
-		if(physicsDrivers.size() > 1) {
-			printf("%s::update(): Error! Defined \"phydrv\" %d times!\n", header, physicsDrivers.size());
-			return 0;
-		}
-	}
-	
-	// get materials
-	if(this->isKey("matref")) {
-		matrefs = BZWParser::getValuesByKey("matref", header, objData);
-	}
-	
-	// load in the data	
-	if(this->isKey("name") && names.size() > 0)
-		this->setName( names[0] );
-	if(this->isKey("position") && positions.size() > 0)
-		this->setPosition( Point3D( positions[0].c_str() ) );
-	if(this->isKey("rotation") && rotations.size() > 0)
-		this->setRotationZ( atof( rotations[0].c_str() ) );
-	if(this->isKey("size") && sizes.size() > 0)
-		this->setSize( Point3D( sizes[0].c_str() ) );
-	
-	// query the model for a physics driver
-	if(this->isKey("phydrv") && physicsDrivers.size() > 0) {
-		physics* phys = (physics*)Model::command( MODEL_GET, "phydrv", physicsDrivers[0] );
-		this->physicsDriver = phys;
-	}
-	
-	if(this->isKey("matref") && matrefs.size() > 0) {
-		// erase previous materials
-		materials.clear();
-		// use the model to resolve the references into material pointers
-		for( vector<string>::iterator i = matrefs.begin(); i != matrefs.end(); i++ ) {
-			material* mat = (material*)Model::command( MODEL_GET, "material", *i );
-			if( mat )
-				materials.push_back( mat );
-		}
-		
-		// assign the material
-		this->setStateSet( material::computeFinalMaterial(materials) );
-	}
-	
 		
 	return DataEntry::update(data);
 }
@@ -322,7 +407,7 @@ string bz2object::BZWLines(void) {
 		ret += "  size " + Point3D( this->getSize() ).toString();
 	
 	// add rotation key/value to the string if supported
-	if(this->isKey("rotation"))
+	if(this->isKey("rotation") && !this->isKey("spin"))
 		ret += "  rotation " + string( ftoa(this->getRotation().z()) ) + "\n";
 	
 	// add the initial transformation
@@ -337,9 +422,9 @@ string bz2object::BZWLines(void) {
 	
 	// add the Euler rotation values as spin keys
 	if( this->isKey("spin") ) {
-		ret += "  spin " + string(ftoa( this->getRotation().x() )) + " 1 0 0\n";
-		ret += "  spin " + string(ftoa( this->getRotation().y() )) + " 0 1 0\n";
-		ret += "  spin " + string(ftoa( this->getRotation().z() )) + " 0 0 1\n";
+		ret += "  " + spin_x->toString();
+		ret += "  " + spin_y->toString();
+		ret += "  " + spin_z->toString();
 	}
 		
 	// add the final transformation
@@ -367,8 +452,67 @@ string bz2object::BZWLines(void) {
 int bz2object::update( UpdateMessage& message ) {
 	switch( message.type ) {
 		case UpdateMessage::SET_TRANSFORMATIONS: {		// update the transformation stack
+			if( !( isKey("spin") || isKey("shift") || isKey("shear") || isKey("scale") ) )
+				break;
+				
 			vector< osg::ref_ptr< BZTransform > >* newTransformations = message.getAsTransformationStack();
 			this->recomputeTransformations( newTransformations );
+			break;
+		}
+		
+		case UpdateMessage::SET_MATERIALS: {		// update the material stack
+			if( !isKey("matref") )
+				break;
+				
+			vector< osg::ref_ptr< material > >* materialList = message.getAsMaterialList();
+			if( materialList != NULL ) {
+				materials = *materialList;
+				refreshMaterial();
+			}
+			break;
+		}
+		
+		case UpdateMessage::ADD_MATERIAL:	{ 		// push a material
+			if( !isKey("matref") )
+				break;
+				
+			this->addMaterial( message.getAsMaterial() );
+			break;
+		}
+		
+		case UpdateMessage::REMOVE_MATERIAL: {			// remove a material
+			if( !isKey("matref") )
+				break;
+			
+			this->removeMaterial( message.getAsMaterial() );
+			break;
+		}
+		
+		case UpdateMessage::UPDATE_MATERIAL: {		// update a material in the material list, or add it if it doesn't exist
+			if( !isKey("matref") )
+				break;
+			
+			material* mat = message.getAsMaterial();
+			
+			// search for the material in the list
+			if( materials.size() > 0 ) {
+				unsigned int i = 0;
+				for( vector< osg::ref_ptr< material > >::iterator itr = materials.begin(); itr != materials.end(); itr++, i++) {
+					if( itr->get() == mat ) {
+						printf(" updating material...\n");
+						materials[i] = mat;
+						break;
+					}
+				}
+				
+				this->refreshMaterial();
+			}
+			else {
+				materials.push_back( mat );
+				printf(" adding material...\n" );
+				this->refreshMaterial();
+			}
+			
 			break;
 		}
 		default:
@@ -381,8 +525,8 @@ int bz2object::update( UpdateMessage& message ) {
 // update the transformation stack with new ones
 void bz2object::recomputeTransformations( vector< osg::ref_ptr< BZTransform > >* newTransformations ) {
 	
-	// see if we have start/end shifts
-	if( startShift.get() == NULL || endShift.get() == NULL )
+	// see if we have start/end/ shifts and spins
+	if( startShift.get() == NULL || endShift.get() == NULL || spin_x.get() == NULL || spin_y.get() == NULL || spin_z.get() == NULL)
 		return;			// something seriously wrong here
 	
 	// clear all current transformations
@@ -407,14 +551,17 @@ void bz2object::recomputeTransformations( vector< osg::ref_ptr< BZTransform > >*
 		
 		transformations[ transformations.size() - 1 ]->addChild( endShift.get() );
 	}
-	else
+	else {
 		startShift->addChild( endShift.get() );	// connect the start and end shifts if there are no transformations in between
-	
+	}
 }
 
 // add a material to the object
 void bz2object::addMaterial( material* mat ) {
-	this->materials.push_back( mat );
+	if( mat != NULL ) {
+		this->materials.push_back( mat );
+		this->refreshMaterial();
+	}
 }
 
 // insert a material
@@ -434,11 +581,13 @@ void bz2object::insertMaterial( unsigned int index, material* mat ) {
 			}
 		}
 	}
+	
+	this->refreshMaterial();
 }
 
 // remove a material
 void bz2object::removeMaterial( material* mat ) {
-	if( materials.size() == 0 )
+	if( materials.size() == 0 || mat == NULL )
 		return;
 	
 	for( vector< osg::ref_ptr< material > >::iterator i = materials.begin(); i != materials.end(); i++ ) {
@@ -447,6 +596,8 @@ void bz2object::removeMaterial( material* mat ) {
 			break;
 		}
 	}
+	
+	this->refreshMaterial();
 }
 
 // remove a material by index
@@ -461,10 +612,12 @@ void bz2object::removeMaterial( unsigned int index ) {
 			break;
 		}
 	}
+	
+	this->refreshMaterial();
 }
 
 // recompute the material
-void bz2object::recomputeMaterial() {
+void bz2object::refreshMaterial() {
 	material* mat = material::computeFinalMaterial( this->materials );
 	SceneBuilder::assignBZMaterial( mat, this );
 }

@@ -21,6 +21,8 @@ class texturematrix;
 #define IS_VALID_COLOR( c ) (c.x() >= 0.0 && c.y() >= 0.0 && c.z() >= 0.0 && c.w() >= 0.0)
 
 class material : public DataEntry, public osg::StateSet {
+	
+	friend class SceneBuilder;		// allow SceneBuilder to access protected/private methods
 
 public:
 	// default constructor
@@ -70,12 +72,28 @@ public:
 	void setTextureMatrix( texturematrix* texmat ) { this->textureMatrix = texmat; }
 	
 	void setMaterials( vector< osg::ref_ptr< material > >& mats ) {
-		this->materials = materials;
+		this->materials.clear();
+		
+		if( mats.size() > 0 ) {
+			for( vector< osg::ref_ptr< material > >::iterator i = mats.begin(); i != mats.end(); i++ ) {
+				if( i->get() != NULL )
+					materials.push_back( *i );
+			}
+		}
+		
 		computeFinalMaterial();
 	}
 	
-	void setTextures( const vector< osg::ref_ptr< osg::Texture2D > >& textures ) {
-		this->textures = textures;
+	void setTextures( vector< osg::ref_ptr< osg::Texture2D > >& texs ) {
+		this->textures.clear();
+		
+		if( texs.size() > 0 ) {
+			for( vector< osg::ref_ptr< osg::Texture2D > >::iterator i = texs.begin(); i != texs.end(); i++ ) {
+				if( i->get() != NULL )
+					textures.push_back( *i );
+			}
+		}
+		
 		computeFinalTexture();
 	}
 	

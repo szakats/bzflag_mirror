@@ -85,6 +85,48 @@ class bz2object : public Renderable, public DataEntry {
 		// use this instead of setAttitude()
 		virtual void setRot( const osg::Quat& newRot ) { this->setAttitude( newRot ); }
 		
+		// override Renderable's setRotationX() method
+		virtual void setRotationX( float x ) {
+			Renderable::setRotationX( x );
+			
+			vector<float> spinData;
+			spinData.push_back( x );	spinData.push_back(1.0);	spinData.push_back(0.0);	spinData.push_back(0.0);
+			spin_x->setData( spinData );
+		}
+		
+		// override Renderable's setRotationY() method
+		virtual void setRotationY( float y ) {
+			Renderable::setRotationY( y );
+			
+			vector<float> spinData;
+			spinData.push_back( y );	spinData.push_back(0.0);	spinData.push_back(1.0);	spinData.push_back(0.0);
+			spin_y->setData( spinData );
+		}
+		
+		// override Renderable's setRotationZ() method
+		virtual void setRotationZ( float z ) {
+			Renderable::setRotationX( z );
+			
+			vector<float> spinData;
+			spinData.push_back( z );	spinData.push_back(0.0);	spinData.push_back(0.0);	spinData.push_back(1.0);
+			spin_z->setData( spinData );
+		}
+		
+		// override Renderable's setRotation() method
+		virtual void setRotation( float x, float y, float z ) {
+			Renderable::setRotation( x, y, z );
+			
+			vector<float> spinData_x, spinData_y, spinData_z;
+			spinData_x.push_back(x);	spinData_x.push_back(1.0);	spinData_x.push_back(0.0);	spinData_x.push_back(0.0);
+			spinData_y.push_back(y);	spinData_y.push_back(0.0);	spinData_y.push_back(1.0);	spinData_y.push_back(0.0);
+			spinData_z.push_back(z);	spinData_z.push_back(0.0);	spinData_z.push_back(0.0);	spinData_z.push_back(1.0);
+			
+			spin_x->setData( spinData_x );
+			spin_y->setData( spinData_y );
+			spin_z->setData( spinData_z );
+		}
+		virtual void setRotation( const osg::Vec3& rot ) { this->setRotation( rot.x(), rot.y(), rot.z() ); }
+		
 		// data setters (makes MasterConfigurationDialog code easier)
 		void setPhyDrv( physics* phydrv ) { this->physicsDriver = phydrv; }
 		void setTransforms( vector< osg::ref_ptr<BZTransform> >& transformations ) { this->transformations = transformations; }
@@ -132,8 +174,8 @@ class bz2object : public Renderable, public DataEntry {
 		// set true if selected in the 3D scene
 		bool selected;
 		
-		// set the material of this object
-		void recomputeMaterial();
+		// set the material of this object from the list of materials
+		void refreshMaterial();
 		
 	private:
 		// force these methods to be private, to guarantee that derived classes will use the given replacements
@@ -144,8 +186,8 @@ class bz2object : public Renderable, public DataEntry {
 		void setScale( const osg::Vec3d& newScale ) { Renderable::setScale( newScale ); }
 		void setAttitude( const osg::Quat& newAttitude ) { Renderable::setAttitude( newAttitude ); }
 		
-		// start and end shift transformations (manditory)
-		osg::ref_ptr< BZTransform > startShift, endShift;
+		// start and end shift transformations (manditory), as well as angular orientation transformations
+		osg::ref_ptr< BZTransform > startShift, endShift, spin_x, spin_y, spin_z;
 		
 		// recompute the transformation stack
 		void recomputeTransformations( vector< osg::ref_ptr< BZTransform > >* newTransformations);

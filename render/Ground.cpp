@@ -45,13 +45,14 @@ Ground::Ground( float size, float waterLevel ) : Renderable("ground") {
    this->grid = this->buildGrid( this->size, 10.0f );
    
    // make the grid a gray-ish color
-   SceneBuilder::assignMaterial( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ),
-   								 osg::Vec4( 0.2, 0.2, 0.2, 0.2 ),
+   SceneBuilder::assignMaterial( osg::Vec4( 0.05, 0.05, 0.05, 0.2 ),
+   								 osg::Vec4( 0.2, 0.2, 0.2, 1.0 ),
    								 osg::Vec4( 0.0, 0.0, 0.0, 0.0 ),
    								 osg::Vec4( 0.0, 0.0, 0.0, 0.0 ),
    								 0.0f,
    								 1.0f,
-   								 this->grid.get() );
+   								 this->grid.get(),
+   								 osg::StateAttribute::OVERRIDE );
    								 
    // disable Z-buffering (since the BZFlag client doesn't clip against the ground)
 	osg::StateSet* states = groundGeode->getOrCreateStateSet();

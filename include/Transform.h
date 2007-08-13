@@ -96,13 +96,14 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		vector<float> getData() { return data; }
 		
 		// data setters
-		void setName(string& s) { this->name = s; }
-		void setData(vector<float>& data) { this->data = data; }
+		void setName(string& s) { this->name = s; this->refreshMatrix(); }
+		void setData(const vector<float>& data) { this->data = data; this->refreshMatrix(); }
 		void setData( const osg::Vec3d& data ) {
 			this->data.clear();
 			this->data.push_back(data.x());
 			this->data.push_back(data.y());
 			this->data.push_back(data.z());
+			this->refreshMatrix();
 		}
 		
 		void setData( const osg::Vec4d& data ) {
@@ -111,6 +112,7 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 			this->data.push_back(data.y());
 			this->data.push_back(data.z());
 			this->data.push_back(data.w());
+			this->refreshMatrix();
 		}
 		
 		// make this public
@@ -166,6 +168,17 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		string name;
 		vector<float> data;
 		vector<string> transformationFormats;
+		
+		void refreshMatrix() {
+			if( name == "shift" )
+				this->makeShift();
+			else if(name == "spin" )
+				this->makeSpin();
+			else if(name == "shear" )
+				this->makeShear();
+			else if(name == "scale" )
+				this->makeScale();
+		}
 };
 
 #endif /*TRANSFORM_H_*/

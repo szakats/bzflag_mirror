@@ -79,7 +79,7 @@ osg::Node* SceneBuilder::buildSelectedNode( const char* fileName ) {
  * This method builds and returns a geometry node (a geode) from arrays of vertexes, indexes, texture coordinates, and
  * a texture filename
  */
-osg::Geode* SceneBuilder::buildGeode( const char* _nodeName, osg::Geometry* geometry, const char* textureFile ) {
+osg::Geode* SceneBuilder::buildGeode( const char* _nodeName, osg::Geometry* geometry, const char* textureFile, unsigned int textureMode ) {
 	// make the node name
 	string nodeName = string(_nodeName) + SCENEBUILDER_TAIL_NODE;
 	
@@ -90,7 +90,7 @@ osg::Geode* SceneBuilder::buildGeode( const char* _nodeName, osg::Geometry* geom
 	osg::Geode* geode = new osg::Geode();
 	
 	// load up the texture
-    SceneBuilder::assignTexture( textureFile, geode );
+    SceneBuilder::assignTexture( textureFile, geode, textureMode );
 	
 	geode->addDrawable( geometry );
 	
@@ -129,7 +129,7 @@ osg::Texture2D* SceneBuilder::buildTexture2D( const char* filename ) {
 }
 
 // assign a texture to a Node
-void SceneBuilder::assignTexture( const char* _textureName, osg::Node* node ) {
+void SceneBuilder::assignTexture( const char* _textureName, osg::Node* node, unsigned int mode ) {
 	if(_textureName != NULL) {
 		string textureName = string(_textureName) + SCENEBUILDER_TAIL_TEXTURE2D;
 		
@@ -158,7 +158,7 @@ void SceneBuilder::assignTexture( const char* _textureName, osg::Node* node ) {
 		osg::StateSet* texStateSet = node->getOrCreateStateSet();
 		
 		// assign the texture to the state set and activate it
-		texStateSet->setTextureAttributeAndModes( 0, texture, osg::StateAttribute::ON );
+		texStateSet->setTextureAttributeAndModes( 0, texture, mode );
 		
 		// finally, attach the texture to the geode
 		node->setStateSet( texStateSet );
@@ -211,7 +211,7 @@ osg::Material* extractMaterial( Renderable* r ) {
 }
 
 // build a geometry and call the other buildGeode method
-osg::Geode* SceneBuilder::buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureName ) {
+osg::Geode* SceneBuilder::buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureName, unsigned int textureMode ) {
 	// don't bother if the data is NULL
 	if(vertexes == NULL || indexes == NULL)
 		return NULL;
@@ -229,7 +229,7 @@ osg::Geode* SceneBuilder::buildGeode( const char* nodeName, osg::Vec3Array* vert
 		// assign the texture coordinates
 		geometry->setTexCoordArray( 0, texCoords );
 	
-	return SceneBuilder::buildGeode( nodeName, geometry, textureName );
+	return SceneBuilder::buildGeode( nodeName, geometry, textureName, textureMode );
 }
 
 /**
@@ -261,7 +261,8 @@ void SceneBuilder::markSelected( osg::Node* theNode ) {
 								   osg::Vec4( 0.0, 1.0, 0.0, 1.0 ),
 								   0.0,
 								   1.0,
-								   theNode );
+								   theNode,
+								   osg::StateAttribute::OVERRIDE );
 
 }
 
@@ -273,11 +274,13 @@ void SceneBuilder::markUnselected( osg::Node* theNode ) {
 								   osg::Vec4( 1.0, 1.0, 1.0, 1.0 ),
 								   0.0,
 								   1.0,
-								   theNode );
+								   theNode,
+								   osg::StateAttribute::OVERRIDE );
 }
 
 // mark the object selected without destroying its state set
 void SceneBuilder::markSelectedAndPreserveStateSet( bz2object* theNode ) {
+	
 	osg::StateSet* currStateSet = theNode->getOrCreateStateSet();
 	osg::Material* currMaterial = (osg::Material*)currStateSet->getAttribute( osg::StateAttribute::MATERIAL );
 	if( currStateSet != NULL ) {
@@ -305,6 +308,7 @@ void SceneBuilder::markSelectedAndPreserveStateSet( bz2object* theNode ) {
 
 // mark a node as unselected by restoring it's state set if applicable
 void SceneBuilder::markUnselectedAndRestoreStateSet( bz2object* theNode ) {
+	
 	osg::StateSet* stateSet = theNode->savedStateSet.get();
 	osg::Material* mat = (osg::Material*)stateSet->getAttribute( osg::StateAttribute::MATERIAL );
 	if( stateSet != NULL ) {
