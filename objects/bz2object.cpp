@@ -257,7 +257,7 @@ int bz2object::update(string& data) {
 	if(this->isKey("position") && positions.size() > 0)
 		this->setPosition( Point3D( positions[0].c_str() ) );
 	if(this->isKey("rotation") && rotations.size() > 0)
-		this->setRotationZ( atof( rotations[0].c_str() ) );
+		Renderable::setRotationZ( atof( rotations[0].c_str() ) );
 	if(this->isKey("size") && sizes.size() > 0)
 		this->setSize( Point3D( sizes[0].c_str() ) );
 	
