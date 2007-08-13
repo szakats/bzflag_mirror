@@ -38,9 +38,9 @@ int box::update(string& data) {
 		return result;
 	
 	if( this->getSize() != size ) {
-		size = this->getSize();
+		size = this->getSize() - size;
 		
-		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE, &size );
+		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &size );
 		this->updateGeometry( msg );
 		
 	}
@@ -69,16 +69,43 @@ int box::update(UpdateMessage& message) {
 			this->setRotationZ( this->getRotation().z() + message.getAsRotationFactor()->z() );
 			break;
 			
-		case UpdateMessage::SET_SCALE:		// handle a new scale
-			this->updateGeometry( message );
+		case UpdateMessage::SET_SCALE: {	// handle a new scale (only scale one axis at a time)
+			osg::Vec3 scale = *(message.getAsScale()) - this->getSize();
+			
+			osg::Vec3 scale_x = osg::Vec3( scale.x(), 0, 0 );
+			osg::Vec3 scale_y = osg::Vec3( 0, scale.y(), 0 );
+			osg::Vec3 scale_z = osg::Vec3( 0, 0, scale.z() );
+			
+			UpdateMessage scaleX( UpdateMessage::SET_SCALE_FACTOR, &scale_x );
+			UpdateMessage scaleY( UpdateMessage::SET_SCALE_FACTOR, &scale_y );
+			UpdateMessage scaleZ( UpdateMessage::SET_SCALE_FACTOR, &scale_z );
+			
+			this->updateGeometry( scaleX );
+			this->updateGeometry( scaleY );
+			this->updateGeometry( scaleZ );
+			
 			this->setSize( *(message.getAsScale()) );
 			break;
+		}
+		
+		case UpdateMessage::SET_SCALE_FACTOR: {	// handle a scaling factor (again, 1 axis at a time)
+			osg::Vec3 scale = *(message.getAsScaleFactor());
 			
-		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
-			this->updateGeometry( message );
+			osg::Vec3 scale_x = osg::Vec3( scale.x(), 0, 0 );
+			osg::Vec3 scale_y = osg::Vec3( 0, scale.y(), 0 );
+			osg::Vec3 scale_z = osg::Vec3( 0, 0, scale.z() );
+			
+			UpdateMessage scaleX( UpdateMessage::SET_SCALE_FACTOR, &scale_x );
+			UpdateMessage scaleY( UpdateMessage::SET_SCALE_FACTOR, &scale_y );
+			UpdateMessage scaleZ( UpdateMessage::SET_SCALE_FACTOR, &scale_z );
+			
+			this->updateGeometry( scaleX );
+			this->updateGeometry( scaleY );
+			this->updateGeometry( scaleZ );
+			
 			this->setSize( this->getSize() + *(message.getAsScaleFactor()) );
 			break;
-			
+		}
 		default:	// unknown event; don't handle
 			return 0;
 	}
@@ -561,7 +588,6 @@ void box::updateGeometry( UpdateMessage& message ) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	// do a full scale
 	else if( message.type == UpdateMessage::SET_SCALE ) {
 		

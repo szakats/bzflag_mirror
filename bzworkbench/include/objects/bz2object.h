@@ -105,10 +105,11 @@ class bz2object : public Renderable, public DataEntry {
 		
 		// override Renderable's setRotationZ() method
 		virtual void setRotationZ( float z ) {
-			Renderable::setRotationX( z );
+			Renderable::setRotationZ( z );
 			
 			vector<float> spinData;
 			spinData.push_back( z );	spinData.push_back(0.0);	spinData.push_back(0.0);	spinData.push_back(1.0);
+			
 			spin_z->setData( spinData );
 		}
 		
