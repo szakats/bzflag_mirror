@@ -4,7 +4,7 @@
 material::material() : 
 	DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosort><noradar><nolighting><groupalpha><occluder><alphathresh>"),
 	osg::StateSet() {
-	name = string("");
+	name = SceneBuilder::makeUniqueName("material");
 	dynCol = NULL;
 	textureMatrix = NULL;
 	color = string("");
@@ -15,7 +15,10 @@ material::material() :
 	
 	// allocate a material
 	osg::Material* finalMaterial = new osg::Material();
-	this->setAttribute( finalMaterial, osg::StateAttribute::ON );
+	this->setAttribute( finalMaterial, osg::StateAttribute::ON  | osg::StateAttribute::OVERRIDE );
+	
+	// deactivate texturing
+	this->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF  | osg::StateAttribute::OVERRIDE );
 	
 	this->setAmbient( osg::Vec4( 1, 1, 1, 1) );
 	this->setDiffuse( osg::Vec4( 1, 1, 1, 1) );
@@ -27,7 +30,7 @@ material::material() :
 material::material(string& data) :
 	DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosort><noradar><nolighting><groupalpha><occluder><alphathresh>", data.c_str()),
 	osg::StateSet() {
-	name = string("");
+	name = SceneBuilder::makeUniqueName("material");
 	dynCol = NULL;
 	textureMatrix = NULL;
 	color = string("");
@@ -38,12 +41,16 @@ material::material(string& data) :
 	
 	// allocate a material
 	osg::Material* finalMaterial = new osg::Material();
-	this->setAttribute( finalMaterial, osg::StateAttribute::ON );
+	this->setAttribute( finalMaterial, osg::StateAttribute::ON  | osg::StateAttribute::OVERRIDE );
 	
 	this->setAmbient( osg::Vec4( 1, 1, 1, 1) );
 	this->setDiffuse( osg::Vec4( 1, 1, 1, 1) );
 	this->setSpecular( osg::Vec4( 0, 0, 0, 1) );
-	this->setEmissive( osg::Vec4( 1, 1, 1, 1) );
+	this->setEmissive( osg::Vec4( 0, 0, 0, 1) );
+	
+	// deactivate texturing
+	this->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE );
+	
 	
 	this->update(data);
 }
@@ -124,8 +131,8 @@ int material::update(string& data) {
 	vector<string> speculars = BZWParser::getValuesByKey("specular", header, materialData);
 	
 	// get the textures
-	vector<string> addtexs = BZWParser::getValuesByKey("addtexture", header, materialData);
-	vector<string> texs = BZWParser::getValuesByKey("texture", header, materialData );
+	vector<string> texs = BZWParser::getValuesByKey("addtexture", header, materialData);
+	// vector<string> texs = BZWParser::getValuesByKey("texture", header, materialData );
 	
 	// get notextures
 	vector<string> notextures = BZWParser::getValuesByKey("notexture", header, materialData);
@@ -199,7 +206,20 @@ int material::update(string& data) {
 	// compute the final material
 	this->computeFinalMaterial();
 	
-	// this->textures = texs;
+	// get the textures
+	this->textures.clear();
+	if( texs.size() > 0 ) {
+		for( vector<string>::iterator i = texs.begin(); i != texs.end(); i++ ) {
+			// filename should be the texture name + .png
+			string filename = (*i) + ".png";
+			osg::Texture2D* tex = SceneBuilder::buildTexture2D( filename.c_str() );
+			if( tex )
+				textures.push_back( tex );
+		}
+	}
+	
+	// compute the final texture
+	this->computeFinalTexture();
 	
 	this->noTextures = (notextures.size() == 0 ? false : true);
 	this->noTexColor = (notexcolors.size() == 0 ? false : true);
@@ -262,7 +282,7 @@ string material::toString(void) {
 		specularString = "";
 		
 	if( IS_VALID_COLOR( emissiveColor ) )
-		emissiveString = "  emissive " + emissiveColor.toString();
+		emissiveString = "  emission " + emissiveColor.toString();
 	else	
 		emissiveString = "";
 	
@@ -305,6 +325,10 @@ material* material::computeFinalMaterial( vector< osg::ref_ptr< material > >& ma
 	
 	if( materialList.size() > 0 ) {
 		for( vector< osg::ref_ptr< material > >::iterator i = materialList.begin(); i != materialList.end(); i++ ) {
+			
+			(*i)->computeFinalMaterial();
+			(*i)->computeFinalTexture();
+			
 			// get OSG's material from the material class
 			osg::Material* mat = dynamic_cast< osg::Material* >(((*i)->getAttribute( osg::StateAttribute::MATERIAL ) ));
 			
@@ -331,12 +355,14 @@ material* material::computeFinalMaterial( vector< osg::ref_ptr< material > >& ma
 			}
 			
 			// get the texture
-			osg::Texture2D* texture = dynamic_cast< osg::Texture2D* >( (*i)->getAttribute( osg::StateAttribute::TEXTURE ) );
+			osg::Texture2D* texture = dynamic_cast< osg::Texture2D* >( (*i)->getTextureAttribute( 0, osg::StateAttribute::TEXTURE ) );
 			
 			// see if the texture is valid
 			// NOTE: BZFlag pays attention only to the FIRST texture declared
-			if( !texture )
+			if( !tex && texture ) {
 				tex = texture;
+				printf("  got texture %s\n", texture->getImage()->getFileName().c_str() );
+			}
 		}
 	}
 	
@@ -349,9 +375,14 @@ material* material::computeFinalMaterial( vector< osg::ref_ptr< material > >& ma
 	mat->setEmissive( emissive );
 	mat->setShininess( shiny );
 	
-	if( tex != NULL )
-		mat->setTextureAttribute( 0, tex );
-		
+	if( tex != NULL ) {
+		mat->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+		mat->setTextureAttribute( 0, tex, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+	}
+	else {
+		// deactivate texturing if there was none
+		mat->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE );
+	}
 	return mat;
 }
 
@@ -361,10 +392,11 @@ void material::computeFinalTexture() {
 	
 	if( textures.size() > 0 ) {
 		osg::Texture2D* finalTexture = textures[ 0 ].get();
+		this->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
 		this->setTextureAttribute( 0, finalTexture );
 	}
 	else {
-		this->setTextureAttribute( 0, NULL );
+		this->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE );
 	}
 }
 
@@ -414,7 +446,7 @@ void material::computeFinalMaterial() {
 		finalMaterial->setEmission( osg::Material::FRONT, emissive );
 		finalMaterial->setShininess( osg::Material::FRONT, shiny );
 		
-		this->setAttribute( finalMaterial, osg::StateAttribute::ON );
+		this->setAttribute( finalMaterial, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
 	}
 	
 }

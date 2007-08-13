@@ -6,7 +6,7 @@ cone::cone() :
 	
 	// define some basic values
 	this->divisions = 16;
-	this->setName("default_cone");
+	this->setName( SceneBuilder::makeUniqueName("default_cone"));
 	this->physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
@@ -26,19 +26,21 @@ cone::cone(string& data) :
 	bz2object("cone", "<position><rotation><size><angle><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
 	
 	// define some basic values
-	this->divisions = 16;
-	this->setName("default_cone");
+	this->divisions = -1;	// bogus value (fixed by update)
+	this->setName(SceneBuilder::makeUniqueName("default_cone"));
 	this->physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	
-	sweepAngle = 360.0f;
+	sweepAngle = 0.0f;		// bogus value (fixed by update)
 	
 	// default size is 10x10x10
 	this->setSize( osg::Vec3( 10, 10, 10 ) );
 	
 	if( this->update(data) == 0 ) {
 		// if the update failed, just add a default cone
+		this->divisions = 16;
+		this->sweepAngle = 360.0f;
 		this->buildGeometry();
 	}
 }
@@ -114,9 +116,10 @@ int cone::update(string& data) {
 	
 	// if the number of divisions changed or the sweep angle changed, rebuild the geometry
 	if( this->divisions != oldDivisions || this->sweepAngle != oldSweepAngle ) {
-		theCone->removeChild( coneNode.get() );
-		theCone->removeChild( baseNode.get() );
-		
+		if( theCone.get() != NULL ) {
+			theCone->removeChild( coneNode.get() );
+			theCone->removeChild( baseNode.get() );
+		}
 		this->buildGeometry();
 	}
 	
@@ -303,14 +306,18 @@ void cone::buildGeometry() {
    	}
    	
    	// build the geodes
-   	this->coneNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("cone").c_str(), points, indices, texCoords, "share/boxwall.png" );
-   	this->baseNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("coneBase").c_str(), points, baseIndices, baseTexCoords, "share/roof.png" );
+   	this->coneNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("cone").c_str(), points, indices, texCoords, "share/boxwall.png", osg::StateAttribute::ON );
+   	this->baseNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("coneBase").c_str(), points, baseIndices, baseTexCoords, "share/roof.png", osg::StateAttribute::ON );
    	
    	// add the geodes to the Renderable
    	theCone->addChild( coneNode.get() );
    	theCone->addChild( baseNode.get() );
     	
    	this->setThisNode( theCone.get() );
+   	
+   	// enable texturing
+   	osg::StateSet* stateSet = theCone->getOrCreateStateSet();
+   	stateSet->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::ON );
 }
 
 // set the shade model based on the value of flatShading

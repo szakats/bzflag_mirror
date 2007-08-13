@@ -110,21 +110,6 @@ int main(int argc, char** argv) {
 	MainWindow* mw = new MainWindow(model);
 	mw->resizable(mw);
 	
-	material mat = material();
-	
-	string matString = string("material\n") +
-							  "  name poop\n" +
-							  "  ambient 1 1 1 1\n" +
-							  "  texture /home/jude/Desktop/bzwb_icon\n" +
-							  "  resetmat \n" + 
-							  "  ambient 0 0 0 1\n" +
-							  "  texture /home/jude/Desktop/test\n" +
-							  "end\n";
-							  
-	mat.update( matString );
-	
-	printf("material: \n%s\n", mat.toString().c_str() );
-	
 	// show the main window
 	mw->show();
 	

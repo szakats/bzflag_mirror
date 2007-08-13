@@ -65,14 +65,14 @@ public:
 	static void markUnselected( osg::Node* node );
 	
 	// build an object and return a geode containing the object
-	static osg::Geode* buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureFile );
-	static osg::Geode* buildGeode( const char* nodeName, osg::Geometry*, const char* textureName );
+	static osg::Geode* buildGeode( const char* nodeName, osg::Vec3Array* vertexes, osg::DrawElementsUInt* indexes, osg::Vec2Array* texCoords, const char* textureFile, unsigned int textureMode = osg::StateAttribute::ON );
+	static osg::Geode* buildGeode( const char* nodeName, osg::Geometry*, const char* textureName, unsigned int textureMode = osg::StateAttribute::ON );
 	
 	// get the geometry data from a node
 	static const vector< osg::ref_ptr< osg::Drawable > >* getNodeGeometry( osg::PositionAttitudeTransform* node );
 	
 	// assign a texture to a node
-	static void assignTexture( const char* filename, osg::Node* node );
+	static void assignTexture( const char* filename, osg::Node* node, unsigned int mode=osg::StateAttribute::ON );
 	
 	// assign a material to a node
 	static void assignMaterial( osg::Vec4 ambient, osg::Vec4 diffuse, osg::Vec4 specular, osg::Vec4 emissive, float shininess, float alpha, osg::Node* node, osg::StateAttribute::Values val = osg::StateAttribute::OVERRIDE );
@@ -119,6 +119,11 @@ public:
 	// indicate that this is a selected node
 	static string nameSelectedNode( const char* str) {
 		return nameSelected( nameNode( str ).c_str() );
+	}
+	
+	// make a unique name
+	static string makeUniqueName( const char* name ) {
+		return string(name) + "_" + string(itoa(nameCount++));
 	}
 	
 private:

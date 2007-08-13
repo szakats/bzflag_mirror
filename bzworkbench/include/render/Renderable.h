@@ -49,35 +49,35 @@ public:
 	
 	// angular rotators (easier than building quaterions and setting the attitude
 	// angles is in degrees, not radians
-	void setRotationX( float r ) {
+	virtual void setRotationX( float r ) {
 		this->rotation.set( r, rotation.y(), rotation.z() );
 		this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation.x() ), osg::Vec3( 1.0, 0.0, 0.0 ),
 									  osg::DegreesToRadians( rotation.y() ), osg::Vec3( 0.0, 1.0, 0.0 ),
 									  osg::DegreesToRadians( rotation.z() ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
 	}
-	void setRotationY( float r ) {
+	virtual void setRotationY( float r ) {
 		this->rotation.set( rotation.x(), r, rotation.z() );
 		this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation.x() ), osg::Vec3( 1.0, 0.0, 0.0 ),
 									  osg::DegreesToRadians( rotation.y() ), osg::Vec3( 0.0, 1.0, 0.0 ),
 									  osg::DegreesToRadians( rotation.z() ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
 	}
-	void setRotationZ( float r ) {
+	virtual void setRotationZ( float r ) {
 		this->rotation.set( rotation.x(), rotation.y(), r );
 		this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation.x() ), osg::Vec3( 1.0, 0.0, 0.0 ),
 									  osg::DegreesToRadians( rotation.y() ), osg::Vec3( 0.0, 1.0, 0.0 ),
 									  osg::DegreesToRadians( rotation.z() ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
 	}
-	void setRotation( float x, float y, float z ) {
+	virtual void setRotation( float x, float y, float z ) {
 		this->rotation.set( x, y, z);
 		this->setAttitude( osg::Quat( osg::DegreesToRadians( rotation.x() ), osg::Vec3( 1.0, 0.0, 0.0 ),
 									  osg::DegreesToRadians( rotation.y() ), osg::Vec3( 0.0, 1.0, 0.0 ),
 									  osg::DegreesToRadians( rotation.z() ), osg::Vec3( 0.0, 0.0, 1.0 ) ) );
 	}
 	
-	void setRotation( const osg::Vec3d& rot ) { this->setRotation( rot.x(), rot.y(), rot.z() ); }
+	virtual void setRotation( const osg::Vec3d& rot ) { this->setRotation( rot.x(), rot.y(), rot.z() ); }
 	
 	// getters for rotation (make sure it can't change)
-	const osg::Vec3& getRotation() { return this->rotation; }
+	virtual const osg::Vec3& getRotation() { return this->rotation; }
 	
 protected:
 	

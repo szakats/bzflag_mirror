@@ -24,7 +24,7 @@ Model::Model() : Observable()
 	defaultMaterial->setEmissive( osg::Vec4( 0.0, 0.0, 0.0, 1.0) );
 	
 	vector< osg::ref_ptr<osg::Texture2D> > defaultTextures = vector< osg::ref_ptr< osg::Texture2D > >();
-	defaultTextures.push_back( SceneBuilder::buildTexture2D( "share/roof.png" ) );
+	defaultTextures.push_back( SceneBuilder::buildTexture2D( "share/tetrawall.png" ) );
 	
 	defaultMaterial->setTextures( defaultTextures );
 	
@@ -61,7 +61,7 @@ Model::Model(const char* supportedObjects, const char* objectHierarchy, const ch
 	defaultMaterial->setEmissive( osg::Vec4( 0.0, 0.0, 0.0, 1.0) );
 	
 	vector< osg::ref_ptr<osg::Texture2D> > defaultTextures = vector< osg::ref_ptr< osg::Texture2D > >();
-	defaultTextures.push_back( SceneBuilder::buildTexture2D( "share/roof.png" ) );
+	defaultTextures.push_back( SceneBuilder::buildTexture2D( "share/tetrawall.png" ) );
 	
 	defaultMaterial->setTextures( defaultTextures );
 	
@@ -900,13 +900,15 @@ void Model::_assignMaterial( const string& matref, bz2object* obj ) {
 		mat = defaultMaterial.get();	// otherwise, use the default material
 	
 	// give the material to the object (and it will update itself)
-	
+	UpdateMessage msg( UpdateMessage::UPDATE_MATERIAL, mat );
+	obj->update( msg );
 }
 
 void Model::_assignMaterial( material* matref, bz2object* obj ) {
 	
 	// if the material reference was NULL, just use the normal default material
 	if( matref == NULL ) {
+		printf(" NULL material, using defaults\n" );
 		SceneBuilder::assignBZMaterial( defaultMaterial.get(), obj );
 		return;
 	}
@@ -915,5 +917,7 @@ void Model::_assignMaterial( material* matref, bz2object* obj ) {
 	if( materials.count( matref->getName() ) == 0 )
 		materials[ matref->getName() ] = matref;
 		
-	
+	// give the material to the object (and it will update itself)
+	UpdateMessage msg( UpdateMessage::UPDATE_MATERIAL, matref );
+	obj->update( msg );
 }
