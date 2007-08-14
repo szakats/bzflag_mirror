@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../dialogs/AdvancedOptionsDialog.cpp \
 ../dialogs/ConeConfigurationDialog.cpp \
 ../dialogs/ConfigurationMenu.cpp \
 ../dialogs/Fl_Dialog.cpp \
@@ -15,6 +16,7 @@ CPP_SRCS += \
 ../dialogs/WorldOptionsDialog.cpp 
 
 OBJS += \
+./dialogs/AdvancedOptionsDialog.o \
 ./dialogs/ConeConfigurationDialog.o \
 ./dialogs/ConfigurationMenu.o \
 ./dialogs/Fl_Dialog.o \
@@ -26,6 +28,7 @@ OBJS += \
 ./dialogs/WorldOptionsDialog.o 
 
 CPP_DEPS += \
+./dialogs/AdvancedOptionsDialog.d \
 ./dialogs/ConeConfigurationDialog.d \
 ./dialogs/ConfigurationMenu.d \
 ./dialogs/Fl_Dialog.d \

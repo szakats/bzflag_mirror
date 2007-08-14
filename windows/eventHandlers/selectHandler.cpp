@@ -185,6 +185,7 @@ bool selectHandler::pickSelector(View* viewer, const osgGA::GUIEventAdapter& ea)
 }
 
 // see if we picked an object and if so, configure it
+// TODO: get this to work properly
 bool selectHandler::configureObject(View* viewer, const osgGA::GUIEventAdapter& ea) {
 		
 	// intersections with the scene

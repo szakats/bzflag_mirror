@@ -76,6 +76,7 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	
 	if(!object->isKey("rotation") || object->isKey("spin")) {
 		rotationField->deactivate();	// objects supporting "spin" ignore "rotation"
+		rotationLabel->deactivate();
 	}
 	else {
 		rotationField->value(ftoa(rotation).c_str());	
@@ -98,9 +99,27 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 		sizeZField->value(ftoa(size.z()).c_str());	
 	}
 	
+	// spin (BZW 2.0 objects only)
+	spinLabel = new QuickLabel("Spin", 5, 105);
+	spinXField = new Fl_Float_Input(5 + 100, 105, 100, DEFAULT_TEXTSIZE + 6, "rx");
+	spinYField = new Fl_Float_Input(5 + 100 + 120, 105, 100, DEFAULT_TEXTSIZE + 6, "ry");
+	spinZField = new Fl_Float_Input(5 + 100 + 120 + 120, 105, 100, DEFAULT_TEXTSIZE + 6, "rz");
+	
+	if( !object->isKey("spin") ) {
+		spinXField->deactivate();
+		spinYField->deactivate();
+		spinZField->deactivate();
+		spinLabel->deactivate();
+	}
+	else {
+		spinXField->value(ftoa(object->getRotation().x()).c_str());
+		spinYField->value(ftoa(object->getRotation().y()).c_str());
+		spinZField->value(ftoa(object->getRotation().z()).c_str());	
+	}
+	
 	// transformation scroll area
-	transformationLabel = new QuickLabel("Transformations (order matters)", 5, 115);
-	transformationScrollArea = new Fl_Scroll(5, 145, WIDTH - 10, 200);
+	transformationLabel = new QuickLabel("Transformations (order matters)", 5, 145);
+	transformationScrollArea = new Fl_Scroll(5, 175, WIDTH - 10, 200);
 	transformationScrollArea->end();
 	transformationScrollArea->box(FL_UP_BOX);
 	transformationScrollArea->type(Fl_Scroll::VERTICAL_ALWAYS);
@@ -120,32 +139,32 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	}
 	
 	// add transformation button
-	addTransformationButton = new Fl_Button(15, 355, 90, DEFAULT_TEXTSIZE + 6, "Add");
+	addTransformationButton = new Fl_Button(15, 385, 90, DEFAULT_TEXTSIZE + 6, "Add");
 	addTransformationButton->callback(addTransformCallback, this);
 	addTransformationButton->when(FL_WHEN_RELEASE);
 	if(transformationFormat.length() == 0)
 		addTransformationButton->deactivate();	// don't add transformations if none are supported
 	
 	// remove transformation button
-	removeTransformationButton = new Fl_Button(110, 355, 90, DEFAULT_TEXTSIZE + 6, "Remove");
+	removeTransformationButton = new Fl_Button(110, 385, 90, DEFAULT_TEXTSIZE + 6, "Remove");
 	removeTransformationButton->callback(removeTransformCallback, this);
 	removeTransformationButton->when(FL_WHEN_RELEASE);
 	if(transformationFormat.length() == 0)
 		removeTransformationButton->deactivate(); // don't remove transformations if none can be added
 	
 	// more button
-	moreButton = new Fl_Button(WIDTH - 10 - 95 - 95 - 95, 355, 90, DEFAULT_TEXTSIZE + 6, "More...");
+	moreButton = new Fl_Button(WIDTH - 10 - 95 - 95 - 95, 385, 90, DEFAULT_TEXTSIZE + 6, "More...");
 	moreButton->callback(moreCallback, this);
 	moreButton->when(FL_WHEN_RELEASE);
 	moreButton->deactivate();		// will be re-activated upon a successfull call to setAdditionalConfiguration()
 	
 	// edit button
-	editTextButton = new Fl_Button(WIDTH - 10 - 95 - 95, 355, 90, DEFAULT_TEXTSIZE + 6, "Edit BZW");
+	editTextButton = new Fl_Button(WIDTH - 10 - 95 - 95, 385, 90, DEFAULT_TEXTSIZE + 6, "Edit BZW");
 	editTextButton->callback(editTextCallback, this);
 	editTextButton->when(FL_WHEN_RELEASE);
 	
 	// advanced button
-	advancedButton = new Fl_Button(WIDTH - 10 - 95, 355, 90, DEFAULT_TEXTSIZE + 6, "Advanced...");
+	advancedButton = new Fl_Button(WIDTH - 10 - 95, 385, 90, DEFAULT_TEXTSIZE + 6, "Advanced...");
 	advancedButton->callback(advancedCallback, this);
 	advancedButton->when(FL_WHEN_RELEASE);
 	
@@ -164,6 +183,10 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	this->add(sizeXField);
 	this->add(sizeYField);
 	this->add(sizeZField);
+	this->add(spinLabel);
+	this->add(spinXField);
+	this->add(spinYField);
+	this->add(spinZField);
 	this->add(transformationLabel);
 	this->add(transformationScrollArea);
 	this->add(addTransformationButton);
@@ -188,6 +211,7 @@ void MasterConfigurationDialog::OKButtonCallback_real(Fl_Widget* w) {
 	// get the data
 	osg::Vec3 position = osg::Vec3( atof(positionXField->value()), atof(positionYField->value()), atof(positionZField->value()) );
 	osg::Vec3 size = osg::Vec3( atof(sizeXField->value()), atof(sizeYField->value()), atof(sizeZField->value()) );
+	osg::Vec3 spinVals = osg::Vec3( atof(spinXField->value()), atof(spinYField->value()), atof(spinZField->value()) );
 	
 	float zRotation = atof( rotationField->value() );
 	osg::Vec3 rotation = osg::Vec3( 0.0, 0.0, zRotation );
@@ -214,6 +238,9 @@ void MasterConfigurationDialog::OKButtonCallback_real(Fl_Widget* w) {
 	object->update( sizeUpdate );
 	if( object->isKey("rotation") && !object->isKey("spin"))
 		object->update( rotationUpdate );
+	if( object->isKey("spin") ) {
+		object->setRotation( spinVals );
+	}
 	object->update( transformUpdate );
 	
 	printf("data: \n|%s|\n", object->toString().c_str());
@@ -305,7 +332,8 @@ void MasterConfigurationDialog::moreCallback_real(Fl_Widget* w) {
  * Bring up the Advanced... dialog
  */
 void MasterConfigurationDialog::advancedCallback_real(Fl_Widget* w) {
-	
+	AdvancedOptionsDialog* aod = new AdvancedOptionsDialog( this->object );
+	aod->show();
 }
 
 /*
