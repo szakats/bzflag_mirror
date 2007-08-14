@@ -6,18 +6,21 @@
 CPP_SRCS += \
 ../widgets/Console.cpp \
 ../widgets/Fl_ImageButton.cpp \
+../widgets/MaterialWidget.cpp \
 ../widgets/QuickLabel.cpp \
 ../widgets/TransformWidget.cpp 
 
 OBJS += \
 ./widgets/Console.o \
 ./widgets/Fl_ImageButton.o \
+./widgets/MaterialWidget.o \
 ./widgets/QuickLabel.o \
 ./widgets/TransformWidget.o 
 
 CPP_DEPS += \
 ./widgets/Console.d \
 ./widgets/Fl_ImageButton.d \
+./widgets/MaterialWidget.d \
 ./widgets/QuickLabel.d \
 ./widgets/TransformWidget.d 
 

@@ -48,6 +48,8 @@
 
 #include "include/TextUtils.h"
 
+#include "include/dialogs/AdvancedOptionsDialog.h"
+
 #include <string>
 #include <vector>
 

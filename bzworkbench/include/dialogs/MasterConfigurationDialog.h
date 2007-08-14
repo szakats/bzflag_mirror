@@ -13,6 +13,7 @@
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Scroll.H>
 #include "ConfigurationDialog.h"
+#include "AdvancedOptionsDialog.h"
 #include "../widgets/QuickLabel.h"
 #include "../widgets/TransformWidget.h"
 #include "../DataEntry.h"
@@ -33,7 +34,7 @@ class MasterConfigurationDialog : public ConfigurationDialog {
 public:
 	
 	static const int WIDTH = 650;
-	static const int HEIGHT = 385;
+	static const int HEIGHT = 415;
 	
 	// constructor
 	MasterConfigurationDialog(DataEntry* data);
@@ -107,6 +108,10 @@ private:
 	
 	// size input
 	Fl_Float_Input *sizeXField, *sizeYField, *sizeZField;
+	
+	// spin input (if applicable)
+	Fl_Float_Input *spinXField, *spinYField, *spinZField;
+	QuickLabel* spinLabel;
 	
 	// add Transformation button
 	Fl_Button* addTransformationButton;
