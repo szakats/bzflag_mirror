@@ -3,6 +3,7 @@
 %}
 DIGIT [0-9]
 ID [a-z][a-z0-9]*
+%option noyywrap
 %%
 "->"                { return(DEFSIGN);  }
 {DIGIT}+            { return(NUMBER);   }
@@ -15,5 +16,10 @@ subdivide           { return(SUBDIVIDE);}
 {ID}                { return(NONTERM);  }
 #[^\n]*
 [ \t\n]+
-.                   { return(yytext[0]; }
+.                   { return(yytext[0]); }
 %%
+
+void yyerror (char *s) 
+{
+  printf ("%s\n", s);
+}
