@@ -6,7 +6,6 @@
 #include "parser.hxx"
 
 // Ugly hacks to surpress GCC warnings
-#define YY_NO_UNPUT 1
 #define YY_NEVER_INTERACTIVE 1
 #define YY_INPUT(buf,result,max_size) \
 	if ( ((result = fread( buf, 1, max_size, yyin )) == 0) \
@@ -30,7 +29,7 @@ subdivide             { return(SUBDIVIDE);}
 {ID}                  { yylval.id = strdup(yytext); return(NONTERM);  }
 #[^\n\r]*
 [ \t\n\r]+
-.                     { return(yytext[0]); }
+.                     {  if (yytext[0] == 'a') unput(' '); return(yytext[0]); }
 %%
 
 int yywrap () {
