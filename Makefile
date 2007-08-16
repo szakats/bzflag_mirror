@@ -1,6 +1,6 @@
 CXX = g++
 LIBS = -lm
-CFLAGS = -g -O0 -Wall -Werror -pedantic -ansi
+CFLAGS = -g -O0 -Wall -pedantic -ansi
 LDFLAGS =
 CPPFLAGS = -I../bzflag/include
 
@@ -12,18 +12,25 @@ FILES = \
 	GridMap.cxx \
 	Material.cxx \
 	Mesh.cxx \
+	OSFile.cpp \
+	TextUtils.cpp \
+	commandArgs.cpp \
+	parser.cxx \
+	lexer.cxx \
 	bzwgen.cxx
 
 OBJECTS = ${FILES:.cxx=.o}
 
 .PHONY: all clean blather
-.SUFFIXES: .cxx .o
+.SUFFIXES: .cxx .o .l .y
 
 all: blather bzwgen
 
 .cxx.o: common.h
 	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
-
+	
+%.cxx: 
+	
 blather:
 	@echo ""
 	@echo "Using the following settings:"
@@ -45,4 +52,3 @@ bzwgen: ${OBJECTS}
 	@echo ""
 	${CXX} -o $@ ${OBJECTS} ${CFLAGS} ${LDFLAGS} ${LIBS}
 	@echo "Done!"
-
