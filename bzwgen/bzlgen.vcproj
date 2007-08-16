@@ -204,10 +204,6 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\Token.cxx"
-				>
-			</File>
 			<Filter
 				Name="GPLib"
 				>
@@ -231,15 +227,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\BasicShape.h"
-				>
-			</File>
-			<File
 				RelativePath=".\BuildZone.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CompFace.h"
 				>
 			</File>
 			<File
@@ -283,14 +271,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\RuleParser.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Token.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Zone.h"
 				>
 			</File>
@@ -323,10 +303,30 @@
 			<File
 				RelativePath=".\lexer.l"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Running flex"
+						CommandLine="flex -o$(InputName).cxx $(InputFileName)"
+						Outputs="$(InputName).cxx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\parser.y"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Running bison"
+						CommandLine="bison -d -o$(InputName).cxx $(InputFileName)"
+						Outputs="$(InputName).cxx;$(InputName).cxx.h"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>
