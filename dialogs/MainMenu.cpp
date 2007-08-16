@@ -192,24 +192,6 @@ void MainMenu::addConeCallback_real(Fl_Widget* w) {
 	if(!newObj)
 		return;
 	
-	/**
-	 * Example material application
-	 */
-	 
-	material* mat = new material();
-	mat->setAmbient( osg::Vec4( 1, 0, 0, 1 ) );
-	mat->setDiffuse( osg::Vec4( 1, 0, 0, 1 ) );
-	mat->setSpecular( osg::Vec4( 0, 0, 0, 1 ) );
-	mat->setEmissive( osg::Vec4( 0, 0, 0, 1 ) );
-	
-	vector< osg::ref_ptr< osg::Texture2D > > textures = vector< osg::ref_ptr< osg::Texture2D > >();
-	textures.push_back( SceneBuilder::buildTexture2D( "share/wall.png" ) );
-	
-	mat->setTextures( textures );
-	
-	Model::assignMaterial( mat, newObj );
-	
-	
 	// add the object to the model
 	this->parent->getModel()->_unselectAll();
 	this->parent->getModel()->_addObject( newObj );
