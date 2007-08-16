@@ -14,12 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include "time.h"
-// win32 bison from unixutls produces different file name than the nix one
-#ifdef _WIN32
-  #include "parser.cxx.h"
-#else
-  #include "parser.hxx"
-#endif
+#include "parser.hxx"
 
 // TODO list for simple grid based generator
 // ------------------------------------------

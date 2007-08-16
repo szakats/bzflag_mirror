@@ -1,11 +1,5 @@
 %{
-// win32 bison from unixutls produces different file name than the nix one
-#ifdef _WIN32
-  #include "parser.cxx.h"
-#else
-  #include "parser.hxx"
-#endif
-
+#include "parser.hxx"
 #include <memory>
 #define YY_NEVER_INTERACTIVE 1
 %}
