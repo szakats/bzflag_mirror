@@ -14,7 +14,6 @@
 #include <fstream>
 #include <iostream>
 #include "time.h"
-#include "parser.hxx"
 
 // TODO list for simple grid based generator
 // ------------------------------------------
@@ -39,19 +38,21 @@
 #include "Material.h"
 #include "commandArgs.h"
 #include "Zone.h"
+#include "RuleSet.h"
 
-extern int yyparse();
+extern int yyparse(RuleSet*);
 extern FILE* yyin;
 
 int main (int argc, char* argv[]) {
   COSDir ruledir("rules");
   COSFile file;
+  RuleSet* ruleset = new RuleSet();
   
   while (ruledir.GetNextFile(file,"*.set",false)) {
     std::cout << "Loading " << file.GetOSName() << "... ";
     file.Open("r");
     yyin = file.GetFile();
-    if (yyparse() == 0) {
+    if (yyparse(ruleset) == 0) {
       std::cout << "done.\n";
     } else {
       std::cout << "failed!\n";

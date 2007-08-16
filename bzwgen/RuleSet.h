@@ -10,21 +10,20 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef __RULE_H__
-#define __RULE_H__
+#ifndef __RULESET_H__
+#define __RULESET_H__
 
 #include <string>
-#include <map>
+#include "Rule.h"
 
-class Rule {
-  std::string name;
+class RuleSet {
+  RuleMap rules;
 public:
-  Rule(const std::string& _name) : name(_name) {};
+  RuleSet() {}
+  void addRule(std::string& name, Rule* rule) { rules[name] = rule; }
 };
 
-typedef std::map <std::string, Rule*> RuleMap;
-
-#endif /* __RULE_H__ */
+#endif /* __RULESET_H__ */
 
 // Local Variables: ***
 // mode:C++ ***

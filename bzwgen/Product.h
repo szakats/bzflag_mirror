@@ -10,21 +10,19 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef __RULE_H__
-#define __RULE_H__
+#ifndef __PRODUCT_H__
+#define __PRODUCT_H__
 
-#include <string>
-#include <map>
+#include <vector>
 
-class Rule {
-  std::string name;
+class Product {
 public:
-  Rule(const std::string& _name) : name(_name) {};
+  Product() {};
 };
 
-typedef std::map <std::string, Rule*> RuleMap;
+typedef std::vector <Product*> ProductVector;
 
-#endif /* __RULE_H__ */
+#endif /* __PRODUCT_H__ */
 
 // Local Variables: ***
 // mode:C++ ***

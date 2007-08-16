@@ -1,6 +1,9 @@
 %{
-#include "parser.hxx"
 #include <memory>
+#include <string>
+#include "RuleSet.h"
+#include "Product.h"
+#include "parser.hxx"
 
 // Ugly hacks to surpress GCC warnings
 #define YY_NO_UNPUT 1
@@ -24,7 +27,7 @@ expand                { return(EXPAND);   }
 taper                 { return(TAPER);    }
 random                { return(RANDOM);   }
 subdivide             { return(SUBDIVIDE);}
-{ID}                  { yylval.id = (char *) strdup(yytext); return(NONTERM);  }
+{ID}                  { yylval.id = strdup(yytext); return(NONTERM);  }
 #[^\n\r]*
 [ \t\n\r]+
 .                     { return(yytext[0]); }
@@ -34,7 +37,7 @@ int yywrap () {
   return 1;
 }
 
-void yyerror (char *s) 
+void yyerror(RuleSet *ruleset, char* s)
 {
   printf ("%s at line %d\n", s, yylineno);
 }
