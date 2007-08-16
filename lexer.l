@@ -2,7 +2,15 @@
 #include "parser.hxx"
 #include <memory>
 
+// Ugly hacks to surpress GCC warnings
+#define YY_NO_UNPUT 1
 #define YY_NEVER_INTERACTIVE 1
+#define YY_INPUT(buf,result,max_size) \
+	if ( ((result = fread( buf, 1, max_size, yyin )) == 0) \
+		  && ferror( yyin ) ) \
+		YY_FATAL_ERROR( "input in flex scanner failed" );
+// End of hacks.
+		
 %}
 DIGIT [0-9]
 ID [a-z][a-z0-9]*
