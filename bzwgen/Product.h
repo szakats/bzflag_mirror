@@ -21,6 +21,7 @@ public:
 };
 
 typedef std::vector <Product*> ProductVector;
+typedef ProductVector::iterator ProductVectIter;
 
 #endif /* __PRODUCT_H__ */
 

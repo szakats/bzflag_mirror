@@ -21,6 +21,10 @@ class RuleSet {
 public:
   RuleSet() {}
   void addRule(std::string& name, Rule* rule) { rules[name] = rule; }
+  ~RuleSet() { 
+    RuleMapIter itr;
+    for (itr = rules.begin();itr != rules.end(); ++itr) delete itr->second; 
+  }
 };
 
 #endif /* __RULESET_H__ */

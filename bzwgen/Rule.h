@@ -15,14 +15,22 @@
 
 #include <string>
 #include <map>
+#include "Product.h"
 
 class Rule {
   std::string name;
+  ProductVector* products;
 public:
-  Rule(const std::string& _name) : name(_name) {};
+  Rule(const std::string& _name, ProductVector* _products) : name(_name), products(_products) {};
+  ~Rule() { 
+    ProductVectIter itr; 
+    for (itr = products->begin(); itr!= products->end(); ++itr) delete (*itr);
+    delete products; 
+  }
 };
 
 typedef std::map <std::string, Rule*> RuleMap;
+typedef RuleMap::iterator RuleMapIter;
 
 #endif /* __RULE_H__ */
 

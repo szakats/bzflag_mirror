@@ -30,7 +30,7 @@ void yyunput(int, char*);
 ruleset : /* empty */
   | ruleset NONTERM products ';' { 
     std::string name = std::string($2);
-    ruleset->addRule(name,new Rule(name));
+    ruleset->addRule(name,new Rule(name,$3));
   }
 ;
 products : /* empty */ { $$ = new ProductVector(); }
