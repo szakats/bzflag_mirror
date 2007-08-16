@@ -1,5 +1,7 @@
 #include "../include/windows/View.h"
 
+const double View::DEFAULT_ZOOM = 75.0;
+
 // view constructor
 View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *label) :
 	RenderWindow(x,y,w,h) {
