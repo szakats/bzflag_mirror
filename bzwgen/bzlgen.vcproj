@@ -208,15 +208,15 @@
 				Name="GPLib"
 				>
 				<File
-					RelativePath=".\commandArgs.cpp"
+					RelativePath=".\commandArgs.cxx"
 					>
 				</File>
 				<File
-					RelativePath=".\OSFile.cpp"
+					RelativePath=".\OSFile.cxx"
 					>
 				</File>
 				<File
-					RelativePath=".\TextUtils.cpp"
+					RelativePath=".\TextUtils.cxx"
 					>
 				</File>
 			</Filter>
@@ -260,6 +260,10 @@
 			</File>
 			<File
 				RelativePath=".\Mesh.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Operation.h"
 				>
 			</File>
 			<File

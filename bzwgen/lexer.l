@@ -3,6 +3,7 @@
 #include <string>
 #include "RuleSet.h"
 #include "Product.h"
+#include "Operation.h"
 #include "parser.hxx"
 
 // Ugly hacks to surpress GCC warnings
