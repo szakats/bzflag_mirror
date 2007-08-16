@@ -5,19 +5,20 @@
 %}
 DIGIT [0-9]
 ID [a-z][a-z0-9]*
+%option yylineno
 %%
-"->"                { return(DEFSIGN);  }
-{DIGIT}+            { return(NUMBER);   }
-{DIGIT}+"."{DIGIT}* { return(NUMBER);   }
-extrude             { return(EXTRUDE);  }
-expand              { return(EXPAND);   }
-taper               { return(TAPER);    }
-random              { return(RANDOM);   }
-subdivide           { return(SUBDIVIDE);}
-{ID}                { return(NONTERM);  }
+"->"                  { return(DEFSIGN);  }
+-?{DIGIT}+            { return(NUMBER);   }
+-?{DIGIT}+"."{DIGIT}* { return(NUMBER);   }
+extrude               { return(EXTRUDE);  }
+expand                { return(EXPAND);   }
+taper                 { return(TAPER);    }
+random                { return(RANDOM);   }
+subdivide             { return(SUBDIVIDE);}
+{ID}                  { return(NONTERM);  }
 #[^\n]*
 [ \t\n]+
-.                   { return(yytext[0]); }
+.                     { return(yytext[0]); }
 %%
 
 int yywrap () {
@@ -26,5 +27,5 @@ int yywrap () {
 
 void yyerror (char *s) 
 {
-  printf ("%s\n", s);
+  printf ("%s at line %d\n", s, yylineno);
 }
