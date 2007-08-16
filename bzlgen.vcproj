@@ -178,7 +178,7 @@
 					>
 					<Tool
 						Name="VCCLCompilerTool"
-						WarningLevel="4"
+						WarningLevel="3"
 						WarnAsError="false"
 					/>
 				</FileConfiguration>
@@ -271,7 +271,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Product.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Rule.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RuleSet.h"
 				>
 			</File>
 			<File
