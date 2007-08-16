@@ -32,7 +32,6 @@ void GridGenerator::run() {
   for (int i = 0; i < 20; i++) {
     x = rand()%(int(gi.sizeX / 4)-1)*4+4;
     y = rand()%(int(gi.sizeY / 4)-1)*4+4;
-    printf("%d %d\n",x,y);
 
     for (int ax = 0; ax < gi.sizeX; ax++) {
       map.setZ(ax,y,0);
