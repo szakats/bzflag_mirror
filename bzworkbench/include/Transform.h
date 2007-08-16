@@ -31,6 +31,7 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		BZTransform( string name, vector<float> data ) : DataEntry("", ""), osg::MatrixTransform() {
 			this->name = name;
 			this->data = data;
+			refreshMatrix();
 		} 
 		
 		BZTransform( string name, float n1, float n2, float n3, float n4 ) : DataEntry("", ""), osg::MatrixTransform() {
@@ -40,6 +41,7 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 			data.push_back(n2);
 			data.push_back(n3);
 			data.push_back(n4);
+			refreshMatrix();
 		}
 		
 		// getter
@@ -66,17 +68,7 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 			this->setHeader(name.c_str());
 			
 			// recompute this matrix
-			if( this->name == "spin" )
-				this->makeSpin();
-				
-			if( this->name == "shift" )
-				this->makeShift();
-				
-			if( this->name == "shear" )
-				this->makeShear();
-				
-			if( this->name == "scale" )
-				this->makeScale();
+			this->refreshMatrix();
 			
 			return 1;
 		}
@@ -142,6 +134,7 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		
 		// make this into a spin matrix
 		void makeSpin() {
+			
 			// use a quaternion to compute the "spin" matrix
 			osg::Quat quat = osg::Quat( osg::DegreesToRadians(data[0]), osg::Vec3( data[1], data[2], data[3] ) );
 			
@@ -149,14 +142,49 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 			matrix.makeRotate( quat );
 			
 			this->setMatrix( matrix );
+			/*
+			osg::Vec3 vec = osg::Vec3( data[1], data[2], data[3] );
+			float len2 = vec.length2();
+			float scale = 1.0f / sqrt(len2);
+			
+			osg::Vec3 n = osg::Vec3( vec.x() * scale, vec.y() * scale, vec.z() * scale );
+			
+			float cos_val = cos( osg::DegreesToRadians( data[0] ) );
+			float sin_val = sin( osg::DegreesToRadians( data[0] ) );
+			float icos_val = 1.0f - cos_val;
+			
+			// taken from BZFlag's MeshTransform.cxx file
+			float t[4][4];
+			t[3][3] = 1.0f;
+			t[0][3] = t[1][3] = t[2][3] = 0.0f;
+			t[3][0] = t[3][1] = t[3][2] = 0.0f;
+			t[0][0] = (n.x() * n.x() * icos_val) + cos_val;
+			t[0][1] = (n.x() * n.y() * icos_val) - (n.z() * sin_val);
+			t[0][2] = (n.x() * n.z() * icos_val) + (n.y() * sin_val);
+			t[1][0] = (n.y() * n.x() * icos_val) + (n.z() * sin_val);
+			t[1][1] = (n.y() * n.y() * icos_val) + cos_val;
+			t[1][2] = (n.y() * n.z() * icos_val) - (n.x() * sin_val);
+			t[2][0] = (n.z() * n.x() * icos_val) - (n.y() * sin_val);
+			t[2][1] = (n.z() * n.y() * icos_val) + (n.x() * sin_val);
+			t[2][2] = (n.z() * n.z() * icos_val) + cos_val;
+			
+			float matVals[] = {
+				t[0][0],	t[1][0],	t[2][0],	t[3][0],
+				t[0][1],	t[1][1],	t[2][1],	t[3][1],
+				t[0][2],	t[1][2],	t[2][2],	t[3][2],
+				t[0][3],	t[1][3],	t[2][3],	t[3][3]
+			};
+			
+			osg::Matrixd matrix = osg::Matrixd( matVals );
+			this->setMatrix( matrix );*/
 		}
 		
 		// make this into a shear matrix
 		void makeShear() {
 			double matvals[] = {
-				0.0,		data[2],	data[1],	0.0,
-				data[2],	0.0,		data[0],	0.0,
-				data[1],	data[0],	0.0,		0.0,
+				1.0,		0.0,		data[2],	0.0,
+				0.0,		1.0,		0.0,		0.0,
+				data[0],	data[1],	1.0,		0.0,
 				0.0,		0.0,		0.0,		1.0
 			};
 			

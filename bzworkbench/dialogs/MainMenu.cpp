@@ -71,6 +71,8 @@ void MainMenu::addBoxCallback_real(Fl_Widget* w) {
 	
 	if(!newObj)
 		return;
+		
+	newObj->setName( SceneBuilder::makeUniqueName("box") );
 	
 	// add the object to the model
 	this->parent->getModel()->_unselectAll();
@@ -94,6 +96,8 @@ void MainMenu::addPyramidCallback_real(Fl_Widget* w) {
 	
 	if(!newObj)
 		return;
+	
+	newObj->setName( SceneBuilder::makeUniqueName("pyramid") );
 	
 	// add the object to the model
 	this->parent->getModel()->_unselectAll();
@@ -129,9 +133,15 @@ void MainMenu::addTeleporterCallback_real(Fl_Widget* w) {
 	if(!newObj)
 		return;
 	
+	string name = SceneBuilder::makeUniqueName("teleporter");
+	printf("teleporter name: %s\n", name.c_str());
+	
+	newObj->setName( name );
+	
 	// add the object to the model
 	this->parent->getModel()->_unselectAll();
 	this->parent->getModel()->_addObject( newObj );
+	this->parent->getModel()->_setSelected( newObj );
 	this->parent->getModel()->_setSelected( newObj );
 	
 	// open up a MasterConfigurationDialog and configure it
@@ -251,6 +261,9 @@ void MainMenu::addPurpleBaseCallback_real(Fl_Widget* w) {
 	// set the base
 	newObj->setTeam( BASE_PURPLE );
 	
+	newObj->setName( "purple_base" );
+	
+	
 	// add the object to the model
 	this->parent->getModel()->_unselectAll();
 	this->parent->getModel()->_addObject( newObj );
@@ -285,6 +298,9 @@ void MainMenu::addRedBaseCallback_real(Fl_Widget* w) {
 	if(!newObj)
 		return;
 		
+	newObj->setName( "red_base" );
+	
+	
 	// set the base
 	newObj->setTeam( BASE_RED );
 	
@@ -358,7 +374,9 @@ void MainMenu::addBlueBaseCallback_real(Fl_Widget* w) {
 	
 	if(!newObj)
 		return;
-		
+	
+	newObj->setName( "blue_base" );
+	
 	// set the base
 	newObj->setTeam( BASE_BLUE );
 	
@@ -454,6 +472,41 @@ void MainMenu::configureObjectCallback_real(Fl_Widget* w) {
 
 // handle teleporter linking
 void MainMenu::linkCallback_real(Fl_Widget* w) {
-	printf("linkage\n");
+	// get all selected objects
+	vector< bz2object* > selection = this->parent->getModel()->_getSelection(); 
+	if( selection.size() <= 0 )
+		return;
+		
+	// map of teleporter links to create
+	map< teleporter*, teleporter* > teleporterMap;
+	for( vector< bz2object *>::iterator i = selection.begin(); i != selection.end(); i++ ) {
+		if( (*i)->getHeader() == "teleporter" ) {
+			teleporter* t1 = dynamic_cast< teleporter* > (*i);
+			if( !t1 )
+				continue;
+			
+			// get other teleporters
+			if( selection.size() >= 2 ) {
+				for( vector< bz2object* >::iterator j = i+1; j != selection.end(); j++ ) {
+						
+					if( (*j)->getHeader() == "teleporter" ) {
+						teleporter* t2 = dynamic_cast< teleporter* >( *j );
+						if( !t2 )
+							continue;
+							
+						teleporterMap[ t1 ] = t2;
+					}
+				}
+			}
+		}
+	}
+	
+	// make the links
+	if( teleporterMap.size() > 0 ) {
+		for( map< teleporter*, teleporter* >::iterator i = teleporterMap.begin(); i != teleporterMap.end(); i++ ) {
+			this->parent->getModel()->_linkTeleporters( i->first, i->second );
+		}
+	}
+	
 	this->value(0);
 }

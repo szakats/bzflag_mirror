@@ -17,6 +17,7 @@ class Tlink;
 class define;
 class DataEntry;
 class material;
+class teleporter;
 
 // supported query commands.
 #define MODEL_GET "get"
@@ -87,6 +88,7 @@ public:
 	static bool pasteSelection();
 	static bool deleteSelection();
 	static bool newWorld();
+	static bool linkTeleporters( teleporter* t1, teleporter* t2 );
 	
 	// instantiated BZWB-specific API 
 	world* _getWorldData() { return worldData; }
@@ -117,6 +119,7 @@ public:
 	bool _pasteSelection();
 	bool _deleteSelection();
 	bool _newWorld();
+	bool _linkTeleporters( teleporter* t1, teleporter* t2 );
 	
 	// plugin-specific API
 	static bool registerObject(string& name, DataEntry* (*init)(string&));

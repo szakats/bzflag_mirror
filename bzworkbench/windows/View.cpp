@@ -94,16 +94,6 @@ void View::buildMouseButtonMap() {
 	
 }
 
-// get an OSG mouse event from a FLTK mouse/key combo 
-unsigned int View::remapMouseButton( unsigned int button ) {
-	//if( mouseButtonMap.count( button ) > 0 ) {
-		
-	//	return mouseButtonMap[ button ];
-	// }
-	// else
-		return button;
-}
-
 // destructor
 View::~View() {
 	if(eventHandlers)
@@ -136,11 +126,11 @@ int View::handle(int event) {
         case FL_PUSH:
         	// handle single mouse clicks
         	if(Fl::event_clicks() == 0) {
-        		_gw->getEventQueue()->mouseButtonPress(Fl::event_x(), Fl::event_y(), remapMouseButton( Fl::event_button() ) );
+        		_gw->getEventQueue()->mouseButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button() );
         	}
         	// handle double clicks
             else {
-            	_gw->getEventQueue()->mouseDoubleButtonPress(Fl::event_x(), Fl::event_y(), remapMouseButton( Fl::event_button() ) );
+            	_gw->getEventQueue()->mouseDoubleButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button() );
             	Fl::event_is_click(0);
             }
             
@@ -152,7 +142,7 @@ int View::handle(int event) {
         	this->redraw();
 			return 1;
         case FL_RELEASE:
-            _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), remapMouseButton( Fl::event_button() ) );
+            _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), Fl::event_button() );
         	this->redraw();    
 			return 1;
         case FL_KEYDOWN:

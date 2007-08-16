@@ -1,5 +1,12 @@
 #include "../include/objects/material.h"
 
+// build the aliases for the textures
+void material::buildAliases() { 
+	textureAliases = map< string, string > ();
+	
+	textureAliases[ "std_ground" ] = "share/world/std_ground.png";
+}
+
 // default constructor
 material::material() : 
 	DataEntry("material", "<name><texture><addtexture><matref><notextures><notexcolor><notexalpha><texmat><dyncol><ambient><diffuse><color><specular><emission><shininess><resetmat><spheremap><noshadow><noculling><nosort><noradar><nolighting><groupalpha><occluder><alphathresh>"),
@@ -131,8 +138,10 @@ int material::update(string& data) {
 	vector<string> speculars = BZWParser::getValuesByKey("specular", header, materialData);
 	
 	// get the textures
-	vector<string> texs = BZWParser::getValuesByKey("addtexture", header, materialData);
-	// vector<string> texs = BZWParser::getValuesByKey("texture", header, materialData );
+	vector<string> textureKeys;
+	textureKeys.push_back("addtexture");
+	textureKeys.push_back("texture");
+	vector<string> texs = BZWParser::getValuesByKeys(textureKeys, header, materialData);
 	
 	// get notextures
 	vector<string> notextures = BZWParser::getValuesByKey("notexture", header, materialData);
@@ -211,7 +220,10 @@ int material::update(string& data) {
 	if( texs.size() > 0 ) {
 		for( vector<string>::iterator i = texs.begin(); i != texs.end(); i++ ) {
 			// filename should be the texture name + .png
-			string filename = (*i) + ".png";
+			string filename = (*i);
+			if( i->find(".png", filename.size() - 4) == string::npos ) {
+				filename = (*i) + ".png";
+			}
 			osg::Texture2D* tex = SceneBuilder::buildTexture2D( filename.c_str() );
 			if( tex )
 				textures.push_back( tex );

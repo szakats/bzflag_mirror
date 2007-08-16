@@ -32,6 +32,12 @@ public:
 	virtual int handle(int);
 	void resize(int x, int y, int w, int h);
 	
+	// get the embedded view
+	osgViewer::GraphicsWindowEmbedded* getOSGGraphicsWindow() { return _gw.get(); }
+	
+	// set the embedded view
+	void setOSGGraphicsWindow( osgViewer::GraphicsWindowEmbedded* gw ) { this->_gw = gw; }
+	
 protected:
 
 	// reference to an embedded OSG render window

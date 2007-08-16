@@ -1,15 +1,20 @@
 #ifndef LINK_H_
 #define LINK_H_
 
-#include "../DataEntry.h"
-#include "../model/BZWParser.h"
+#include "bz2object.h"
+
+#include <osg/ShapeDrawable>
+#include <osg/Geode>
+#include <osg/Shape>
+
+class teleporter;
 
 /**
  * Link object between teleporters.
  * Needs to be called "Tlink" because link() is a system call
  * which voids the effect of the constructor
  */
-class Tlink : public DataEntry {
+class Tlink : public bz2object {
 	
 public:
 	
@@ -31,17 +36,26 @@ public:
 	// toString
 	string toString(void);
 	
-	// render
-	int render(void);
-	
 	// getters
 	string& getName() { return this->name; }
+	teleporter* getFrom() { return from; }
+	teleporter* getTo() { return to; }
 	
 	// setters
 	void setName( const string& name ) { this->name = name; }
+	void setFrom( teleporter* from ) { this->from = from; }
+	void setTo( teleporter* to ) { this->to = to; }
 	
 private:
-	string name, from, to;
+	string name;
+	teleporter *from;
+	teleporter *to;
+	
+	// build the linkage geometry
+	void buildGeometry();
 };
+
+
+#include "teleporter.h"
 
 #endif /*LINK_H_*/

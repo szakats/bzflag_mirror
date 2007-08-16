@@ -143,8 +143,14 @@ private:
 	// compute the final OSG texture
 	void computeFinalTexture();
 	
+	// list of texture aliases (input: texture alias; output: BZWB texture file)
+	map< string, string > textureAliases;
+	
 	// compute the final OSG material
 	void computeFinalMaterial();
+	
+	// build the alias map
+	void buildAliases();
 };
 
 #endif /*MATERIAL_H_*/

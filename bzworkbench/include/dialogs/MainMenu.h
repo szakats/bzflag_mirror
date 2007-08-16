@@ -20,6 +20,8 @@ class MainWindow;
 
 class MainMenu : public Fl_Menu_Button
 {
+	friend class MainWindow;		// let MainWindow call the private callbacks
+	
 public:
 	
 	// constructor and destructor

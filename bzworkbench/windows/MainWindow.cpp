@@ -168,6 +168,7 @@ void MainWindow::error(const char* errorText) {
 	errorMessage->show();
 }
 
+/*
 // add a box
 void MainWindow::addBoxCallback_real(Fl_Widget* w) {
 	
@@ -354,7 +355,7 @@ void MainWindow::addBlueBaseCallback_real(Fl_Widget* w) {
 	this->getModel()->_addObject( newObj );
 	this->getModel()->_setSelected( newObj );
 	
-}
+}*/
 
 // launch a MasterConfigurationDialog with the configure button
 void MainWindow::configureCallback_real( Fl_Widget* w ) {

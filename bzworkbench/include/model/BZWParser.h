@@ -64,6 +64,9 @@ public:
 	// get lines starting with a key from a set of keys keys in a section, preserving the order
 	static vector<string> getLinesByKeys(vector<string> keys, const char* header, const char* section);
 	
+	// get the values corresponsding to certain keys in order
+	static vector<string> getValuesByKeys(vector<string> keys, const char* header, const char* section );
+	
 	// get all values from a line
 	static vector<string> getLineElements(const char* line);
 	static vector<string> getLineElements(const char* line, int count);
