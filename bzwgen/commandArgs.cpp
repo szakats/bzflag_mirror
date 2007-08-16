@@ -12,7 +12,9 @@
 
 
 #include "commandArgs.h"
-#pragma warning(disable:4996)
+#ifdef _MSC_VER
+  #pragma warning(disable:4996)
+#endif
 inline  bool operator < (const std::string &s1,const std::string &s2) { return (s1.compare(s2)<0);}
 
 void GetCommandName ( char *szData )

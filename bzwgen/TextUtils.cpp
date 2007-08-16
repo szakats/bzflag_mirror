@@ -12,7 +12,9 @@
 
 // interface header
 #include "TextUtils.h"
-#pragma warning(disable:4996)
+#ifdef _MSC_VER
+  #pragma warning(disable:4996)
+#endif
 #ifdef _WIN32
 	#ifndef vsnprintf
 		#define vsnprintf _vsnprintf

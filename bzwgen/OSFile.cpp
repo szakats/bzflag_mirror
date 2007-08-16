@@ -16,8 +16,10 @@
 
 #include "OSFile.h"
 #include "TextUtils.h"
-#pragma warning(disable:4996)
-#pragma warning(disable:4100)
+#ifdef _MSC_VER
+  #pragma warning(disable:4996)
+  #pragma warning(disable:4100)
+#endif
 #ifdef _WIN32
   #define strcasecmp stricmp
   #pragma warning( disable : 4786 )  // Disable warning message

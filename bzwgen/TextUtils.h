@@ -16,7 +16,9 @@
 
 #ifndef __TEXTUTILS_H__
 #define	__TEXTUTILS_H__
-#pragma warning(disable:4244)
+#ifdef _MSC_VER
+  #pragma warning(disable:4244)
+#endif
 /* system interface headers */
 #include <algorithm>
 #include <ctype.h>
