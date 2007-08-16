@@ -14,7 +14,12 @@
 #include <fstream>
 #include <iostream>
 #include "time.h"
-#include "parser.cxx.h"
+// win32 bison from unixutls produces different file name than the nix one
+#ifdef _WIN32
+  #include "parser.cxx.h"
+#else
+  #include "parser.hxx"
+#endif
 
 // TODO list for simple grid based generator
 // ------------------------------------------
@@ -46,7 +51,7 @@ extern FILE* yyin;
 int main (int argc, char* argv[]) {
   COSDir ruledir("rules");
   COSFile file;
-
+  
   while (ruledir.GetNextFile(file,false)) {
     std::cout << "Loading " << file.GetOSName() << "... ";
     file.Open("r");
