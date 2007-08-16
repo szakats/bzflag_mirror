@@ -21,6 +21,7 @@ class Product {
   float rarity;
 public:
   Product(OperationVector* _ops, float _rarity = 1.0f) : ops(_ops), rarity(_rarity) {};
+  float getRarity() { return rarity; }
   ~Product() {
     OperationVectIter itr; 
     for (itr = ops->begin(); itr!= ops->end(); ++itr) delete (*itr);

@@ -22,6 +22,20 @@ class Rule {
   ProductVector* products;
 public:
   Rule(const std::string& _name, ProductVector* _products) : name(_name), products(_products) {};
+  Product* getProduct() {
+    int size = products->size();
+    if (size == 0) return NULL;
+    ProductVectIter itr = products->begin();
+    if (size == 1) return (*itr);
+    float roll = (float)(rand()) / (float)(RAND_MAX);
+    do {
+      float rarity = (*itr)->getRarity();
+      if (rarity < roll) return (*itr);
+      roll -= rarity;
+      ++itr;
+    } while (itr!= products->end());
+    return NULL;
+  }
   ~Rule() { 
     ProductVectIter itr; 
     for (itr = products->begin(); itr!= products->end(); ++itr) delete (*itr);
