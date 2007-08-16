@@ -1,3 +1,10 @@
+%{
+#include <memory>
+
+void yyerror(char* s);
+int yylex();
+%}
+
 %start ruleset
 %token DEFSIGN EXTRUDE EXPAND TAPER RANDOM SUBDIVIDE
 %token NUMBER
