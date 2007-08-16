@@ -115,6 +115,8 @@ Coord2D GridMap::emptyCoord() {
 }
 
 GridMap::~GridMap() {
+  ZoneVectIter itr; 
+  for (itr = zones.begin(); itr!= zones.end(); ++itr) delete (*itr);
 	delete map;
 }
 // Local Variables: ***
