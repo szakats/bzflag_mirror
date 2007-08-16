@@ -267,7 +267,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\parser.cxx.h"
+				RelativePath=".\parser.hxx"
 				>
 			</File>
 			<File
@@ -328,7 +328,7 @@
 						Name="VCCustomBuildTool"
 						Description="Running bison"
 						CommandLine="bison -d -o$(InputName).cxx $(InputFileName)"
-						Outputs="$(InputName).cxx;$(InputName).cxx.h"
+						Outputs="$(InputName).cxx;$(InputName).hxx"
 					/>
 				</FileConfiguration>
 			</File>
