@@ -1,6 +1,6 @@
 CXX = g++
 LIBS = -lm
-CFLAGS = -g -O0 -Wall -pedantic -ansi
+CFLAGS = -g -O0 -Wall -Werror -pedantic -ansi
 LDFLAGS =
 CPPFLAGS = -I../bzflag/include
 
@@ -29,7 +29,11 @@ all: blather bzwgen
 .cxx.o: common.h
 	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
 	
-%.cxx: 
+lexer.cxx: lexer.l
+	flex -o$@ $<
+
+parser.cxx: parser.y
+	bison -d -o$@ $<
 	
 blather:
 	@echo ""
