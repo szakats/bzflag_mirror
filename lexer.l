@@ -17,8 +17,8 @@ taper                 { return(TAPER);    }
 random                { return(RANDOM);   }
 subdivide             { return(SUBDIVIDE);}
 {ID}                  { yylval.id = (char *) strdup(yytext); return(NONTERM);  }
-#[^\n]*
-[ \t\n]+
+#[^\n\r]*
+[ \t\n\r]+
 .                     { return(yytext[0]); }
 %%
 
