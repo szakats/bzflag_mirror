@@ -15,6 +15,7 @@
 #include <iostream>
 #include "time.h"
 #include "Token.h"
+#include "parser.cxx.h"
 
 // TODO list for simple grid based generator
 // ------------------------------------------
@@ -41,7 +42,21 @@
 #include "commandArgs.h"
 #include "Zone.h"
 
+extern int yyparse();
+extern FILE* yyin;
+
 int main (int argc, char* argv[]) {
+  COSDir ruledir("rules");
+  COSFile file;
+
+  while (ruledir.GetNextFile(file,false)) {
+    printf("Loading %s...\n",file.GetOSName());
+    file.Open("r");
+    yyin = file.GetFile();
+    yyparse();
+    file.Close();
+  }
+
   srand((unsigned int)time(NULL));
 
   CCommandLineArgs cmd(argc,argv);
