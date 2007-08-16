@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="fltkd.lib fltkgld.lib opengl32.lib wsock32.lib comctl32.lib osgd.lib osgGAd.lib osgViewerd.lib osgDBd.lib"
+				AdditionalDependencies="fltkd.lib fltkgld.lib fltkimagesd.lib fltkpngd.lib fltkzd.lib opengl32.lib wsock32.lib comctl32.lib osgd.lib osgGAd.lib osgViewerd.lib osgDBd.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -189,6 +189,14 @@
 			<Filter
 				Name="Dialogs"
 				>
+				<File
+					RelativePath="..\..\dialogs\AdvancedOptionsDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\dialogs\ConeConfigurationDialog.cpp"
+					>
+				</File>
 				<File
 					RelativePath="..\..\dialogs\ConfigurationMenu.cpp"
 					>
@@ -374,11 +382,19 @@
 				Name="Render"
 				>
 				<File
+					RelativePath="..\..\render\GeometryExtractorVisitor.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\render\Ground.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\render\Selection.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\render\TextureRepeaterVisitor.cpp"
 					>
 				</File>
 			</Filter>
@@ -387,6 +403,14 @@
 				>
 				<File
 					RelativePath="..\..\widgets\Console.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\widgets\Fl_ImageButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\widgets\MaterialWidget.cpp"
 					>
 				</File>
 				<File
