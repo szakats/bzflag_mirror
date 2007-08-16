@@ -45,7 +45,7 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
     public:
     	
     	// default zoom
-    	static const double DEFAULT_ZOOM = 75.0;
+    	static const double DEFAULT_ZOOM;
     	
     	// constructor
         View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *label=0);
