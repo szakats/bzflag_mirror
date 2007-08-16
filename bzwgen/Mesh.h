@@ -41,6 +41,7 @@ public:
   int partitionFace(int fid, float amount, bool horizontal);
   void weldVertices(int a, int b, Vertex vx);
   void output(Output& out);
+  ~Mesh();
 private:
   Vertex extensionVertex(int ida, int idb, int idc);
 

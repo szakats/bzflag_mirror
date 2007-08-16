@@ -262,6 +262,11 @@ void Mesh::output(Output& out) {
   out.line("end\n");
 }
 
+Mesh::~Mesh() {
+  FaceVectIter itr; 
+  for (itr = f.begin(); itr!= f.end(); ++itr) delete (*itr);
+}
+
 // Local Variables: ***
 // mode:C++ ***
 // tab-width: 8 ***
