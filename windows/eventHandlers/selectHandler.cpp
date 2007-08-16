@@ -492,5 +492,5 @@ bool selectHandler::shearSelector( View* viewer, const osgGA::GUIEventAdapter& e
 
 // translate ("shift") the selector (i.e. if the appropriate key is pressed)
 bool selectHandler::shiftSelector( View* viewer, const osgGA::GUIEventAdapter& ea) {
-	
+	return false;
 }
