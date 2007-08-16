@@ -19,7 +19,6 @@
 
 // TODO list for simple grid based generator
 // ------------------------------------------
-// DONE TODO: meshes
 // PARTIAL DONE TODO: textures
 // PARTIAL DONE TODO: random empty areas (parks?)
 // TODO: railway/highway
@@ -50,10 +49,14 @@ int main (int argc, char* argv[]) {
   COSFile file;
 
   while (ruledir.GetNextFile(file,false)) {
-    printf("Loading %s...\n",file.GetOSName());
+    std::cout << "Loading " << file.GetOSName() << "... ";
     file.Open("r");
     yyin = file.GetFile();
-    yyparse();
+    if (yyparse() == 0) {
+      std::cout << "done.\n";
+    } else {
+      std::cout << "failed!\n";
+    }
     file.Close();
   }
 
@@ -62,23 +65,21 @@ int main (int argc, char* argv[]) {
   CCommandLineArgs cmd(argc,argv);
 
   std::cout << "Initializing...\n";
-
   GridGenerator gen;
+  std::cout << "done.\n";
 
   std::cout << "Parsing options...\n";
-
   gen.parseOptions(0);
+  std::cout << "done.\n";
 
   std::cout << "Generating...\n";
-
   gen.run();
-
-  std::cout << "Outputing...\n";
+  std::cout << "done.\n";
 
   Output os("test.bzw");
+  std::cout << "Outputing... ";
   gen.output(os);
-
-  std::cout << "Done.\n";
+  std::cout << "done.\n";
 }
 
 	
