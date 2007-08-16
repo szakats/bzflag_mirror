@@ -1,6 +1,6 @@
 CXX = g++
 LIBS = -lm
-CFLAGS = -g -O0 -Wall -Werror -pedantic -ansi
+CFLAGS = -g -O0 -Wall -pedantic -ansi
 LDFLAGS =
 CPPFLAGS = -I../bzflag/include
 

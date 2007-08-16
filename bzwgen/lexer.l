@@ -1,6 +1,7 @@
 %{
 #include "parser.hxx"
 #include <memory>
+
 #define YY_NEVER_INTERACTIVE 1
 %}
 DIGIT [0-9]
