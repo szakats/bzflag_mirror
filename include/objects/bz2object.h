@@ -88,6 +88,7 @@ class bz2object : public Renderable, public DataEntry {
 		// override Renderable's setRotationX() method
 		virtual void setRotationX( float x ) {
 			Renderable::setRotationX( x );
+			// rotation.set( x, rotation.y(), rotation.z() );
 			
 			vector<float> spinData;
 			spinData.push_back( x );	spinData.push_back(1.0);	spinData.push_back(0.0);	spinData.push_back(0.0);
@@ -97,6 +98,7 @@ class bz2object : public Renderable, public DataEntry {
 		// override Renderable's setRotationY() method
 		virtual void setRotationY( float y ) {
 			Renderable::setRotationY( y );
+			// rotation.set( rotation.x(), y, rotation.z() );
 			
 			vector<float> spinData;
 			spinData.push_back( y );	spinData.push_back(0.0);	spinData.push_back(1.0);	spinData.push_back(0.0);
@@ -106,6 +108,7 @@ class bz2object : public Renderable, public DataEntry {
 		// override Renderable's setRotationZ() method
 		virtual void setRotationZ( float z ) {
 			Renderable::setRotationZ( z );
+			// this->rotation.set( rotation.x(), rotation.y(), z );
 			
 			vector<float> spinData;
 			spinData.push_back( z );	spinData.push_back(0.0);	spinData.push_back(0.0);	spinData.push_back(1.0);
@@ -116,6 +119,7 @@ class bz2object : public Renderable, public DataEntry {
 		// override Renderable's setRotation() method
 		virtual void setRotation( float x, float y, float z ) {
 			Renderable::setRotation( x, y, z );
+			// this->rotation.set( x, y, z );
 			
 			vector<float> spinData_x, spinData_y, spinData_z;
 			spinData_x.push_back(x);	spinData_x.push_back(1.0);	spinData_x.push_back(0.0);	spinData_x.push_back(0.0);

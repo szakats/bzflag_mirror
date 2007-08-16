@@ -549,6 +549,24 @@ vector<string> BZWParser::getLinesByKeys(vector<string> keys, const char* _heade
 }
 
 /**
+ * Get values corresponding to keys in the order in which they appear
+ */
+
+vector<string> BZWParser::getValuesByKeys(vector<string> keys, const char* header, const char* text ) {
+	vector<string> linesByKeys = BZWParser::getLinesByKeys( keys, header, text );
+	
+	vector<string> ret = vector<string>();
+	
+	if( linesByKeys.size() > 0 ) {
+		for( vector<string>::iterator i = linesByKeys.begin(); i != linesByKeys.end(); i++ ) {
+			ret.push_back( BZWParser::key( i->c_str() ) );
+		}
+	}
+	
+	return ret;
+}
+
+/**
  * This method gets all the elements in a line separated by one or more spaces
  * Pass -1 to count to get all elements
  */

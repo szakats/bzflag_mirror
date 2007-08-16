@@ -58,6 +58,7 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     				default:
     					return this->dragSelector( view, ea );
     			}
+    			
     		}
     		return false;
     		
@@ -97,7 +98,8 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
        		return false;
        		
         default:
-            return false;
+        	// assume we handled everything
+            return true;
     }
 }
 
@@ -319,8 +321,8 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 	osg::Vec3 upVector = this->cameraManipulator->getFrontVector( this->cameraManipulator->getMatrix() );
 	
 	// apply the transformation to each axis (only look at movement perpendicular to the axes here, since we're rotating)
-	sideVector *= ( dy );
-	upVector *= ( -dx );
+	sideVector *= ( dx );
+	upVector *= ( dy );
 	
 	// combine them into the transformation vector
 	osg::Vec3 transformVector = sideVector + upVector;

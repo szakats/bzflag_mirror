@@ -122,9 +122,6 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		
 		// the currently pressed mouse button
 		unsigned int buttondown;
-		
-		// remap a mouse input into an OSG input
-		unsigned int remapMouseButton( unsigned int button );
 	
 	private:
 		

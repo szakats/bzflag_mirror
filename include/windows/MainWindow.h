@@ -91,37 +91,44 @@ public:
 	// static callbacks for buttons
 	static void addBoxCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		mw->addBoxCallback_real( w );
+		//mw->addBoxCallback_real( w );
+		mw->mainMenu->addBoxCallback_real( w );
 	}
 	
 	static void addPyramidCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		mw->addPyramidCallback_real( w );
+		// mw->addPyramidCallback_real( w );
+		mw->mainMenu->addPyramidCallback_real( w );
 	}
 	
 	static void addTeleporterCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		mw->addTeleporterCallback_real( w );
+		// mw->addTeleporterCallback_real( w );
+		mw->mainMenu->addTeleporterCallback_real( w );
 	}
 	
 	static void addBlueBaseCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		mw->addBlueBaseCallback_real( w );
+		// mw->addBlueBaseCallback_real( w );
+		mw->mainMenu->addBlueBaseCallback_real( w );
 	}
 	
 	static void addGreenBaseCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		mw->addGreenBaseCallback_real( w );
+		// mw->addGreenBaseCallback_real( w );
+		mw->mainMenu->addGreenBaseCallback_real( w );
 	}
 	
 	static void addPurpleBaseCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		mw->addPurpleBaseCallback_real( w );
+		// mw->addPurpleBaseCallback_real( w );
+		mw->mainMenu->addPurpleBaseCallback_real( w );
 	}
 	
 	static void addRedBaseCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		mw->addRedBaseCallback_real( w );
+		// mw->addRedBaseCallback_real( w );
+		mw->mainMenu->addRedBaseCallback_real( w );
 	}
 	
 	static void configureCallback(Fl_Widget* w, void* data) {

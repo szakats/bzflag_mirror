@@ -92,6 +92,9 @@ private:
 	// build the rotator geode
 	osg::ref_ptr< Renderable > buildRotator( osg::Vec3 localOrigin );
 	
+	// build a copy of the local object axes
+	osg::ref_ptr< Renderable > buildLocalAxes( osg::Vec3 localOrigin );
+	
 	// the current node
 	osg::ref_ptr< Renderable > selectionNode;
 	
@@ -103,6 +106,12 @@ private:
 	
 	// store the rotate selector
 	osg::ref_ptr< Renderable > rotator;
+	
+	// local axis copy
+	osg::ref_ptr< Renderable > objectAxes;
+	
+	// local axis group
+	osg::ref_ptr< Renderable > objectAxisGroup;
 	
 	// compute the local origin
 	osg::Vec3 computeLocalOrigin( vector< bz2object* >& objects );

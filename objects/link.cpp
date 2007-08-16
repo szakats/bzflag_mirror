@@ -1,17 +1,17 @@
 #include "../include/objects/link.h"
 
 // constructor
-Tlink::Tlink() : DataEntry("link", "<name><from><to>") {
+Tlink::Tlink() : bz2object("link", "<name><from><to>") {
 	name = string("default_link");
-	from = string("*");
-	to = string("*");
+	from = NULL;
+	to = NULL;
 }
 
 // constructor with data
-Tlink::Tlink(string& data) : DataEntry("link", "<name><from><to>", data.c_str()) {
+Tlink::Tlink(string& data) : bz2object("link", "<name><from><to>") {
 	name = string("default_link");
-	from = string("*");
-	to = string("*");
+	from = NULL;
+	to = NULL;
 	
 	this->update(data);	
 }
@@ -58,22 +58,62 @@ int Tlink::update(string& data) {
 	
 	// load in the data
 	this->name = (names.size() != 0 ? names[0] : "");
-	this->from = froms[0];
-	this->to = tos[0];
+	
+	teleporter* prevFrom = from;
+	teleporter* prevTo = to;
+	
+	this->from = dynamic_cast< teleporter* > (Model::command( MODEL_GET, "teleporter", froms[0] ));
+	this->to = dynamic_cast< teleporter* > (Model::command( MODEL_GET, "teleporter", tos[0] ));
+	
+	if( from && to && (prevFrom != from || prevTo != to) )
+		this->buildGeometry();
 	
 	return 1;
 }
 
 // toString
 string Tlink::toString(void) {
+	string fromName = (from == NULL ? "# from:(unknown)\n" : "  from " + from->getName() + "\n");
+	string toName = (to == NULL ? "# to:(unknown)\n" : "  to " + to->getName() + "\n" );
+	
 	return string("link\n") +
 				  (name.length() != 0 ? "  name " + name : "# name") + "\n" +
-				  "  from " + from + "\n" +
-				  "  to " + to + "\n" +
+				  fromName + 
+				  toName + 
 				  "end\n";
 }
 
-// render
-int Tlink::render(void) {
-	return 0;	
+// build the link geometry
+void Tlink::buildGeometry() {
+	// don't draw links if there aren't defined "from" or "to" values
+	if( from == NULL || to == NULL )
+		return;
+		
+	// basically, make a yellow line between the teleporters
+	osg::ref_ptr< osg::Cylinder > line;
+	
+	// get the positions of the teleporters
+	osg::Vec3 fromPos = from->getPos();
+	osg::Vec3 toPos = to->getPos();
+	
+	// raise the positions to the top of the teleporters
+	fromPos.set( fromPos.x(), fromPos.y(), fromPos.z() + from->getSize().z() );
+	toPos.set( toPos.x(), toPos.y(), toPos.z() + to->getSize().z() );
+	
+	// compute the length
+	osg::Vec3 diff = toPos - fromPos;
+	double length = diff.length();
+	
+	// make the line
+	line = new osg::Cylinder( fromPos, 0.1, length );
+	
+	// make a ShapeDrawable to contain the line
+	osg::ref_ptr< osg::ShapeDrawable > drawable = new osg::ShapeDrawable( line.get() );
+	
+	// contain the drawable inside a goede
+	osg::ref_ptr< osg::Geode > geode = new osg::Geode();
+	geode->addDrawable( drawable.get() );
+	
+	// assign the node
+	this->setThisNode( geode.get() );
 }

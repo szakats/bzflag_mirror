@@ -27,12 +27,15 @@ bz2object::bz2object(const char* name, const char* keys):
 	this->spin_y = new BZTransform("spin", spinData_y);
 	this->spin_z = new BZTransform("spin", spinData_z);
 	this->endShift = new BZTransform("shift", data);
-	
-	this->addChild( startShift.get() );
-	startShift->addChild( endShift.get() );
-	endShift->addChild( spin_x.get() );
+	/*
+	this->addChild( spin_x.get() );
 	spin_x->addChild( spin_y.get() );
 	spin_y->addChild( spin_z.get() );
+	spin_z->addChild( startShift.get() );
+	startShift->addChild( endShift.get() );
+	*/
+	this->addChild( startShift.get() );
+	startShift->addChild( endShift.get() );
 	
 	this->savedStateSet = NULL;
 	
@@ -66,11 +69,15 @@ bz2object::bz2object(const char* name, const char* keys, const char* data):
 	this->spin_z = new BZTransform("spin", spinData_z);
 	this->endShift = new BZTransform("shift", sdata);
 	
-	this->addChild( startShift.get() );
-	startShift->addChild( endShift.get() );
-	endShift->addChild( spin_x.get() );
+	/*
+	this->addChild( spin_x.get() );
 	spin_x->addChild( spin_y.get() );
 	spin_y->addChild( spin_z.get() );
+	spin_z->addChild( startShift.get() );
+	startShift->addChild( endShift.get() );
+	*/
+	this->addChild( startShift.get() );
+	startShift->addChild( endShift.get() );
 	
 	this->savedStateSet = NULL;
 	
@@ -106,11 +113,16 @@ bz2object::bz2object(const char* name, const char* keys, osg::Node* node ):
 	this->spin_z = new BZTransform("spin", spinData_z);
 	this->endShift = new BZTransform("shift", data);
 	
-	this->addChild( startShift.get() );
-	startShift->addChild( endShift.get() );
-	endShift->addChild( spin_x.get() );
+	/*
+	this->addChild( spin_x.get() );
 	spin_x->addChild( spin_y.get() );
 	spin_y->addChild( spin_z.get() );
+	spin_z->addChild( startShift.get() );
+	startShift->addChild( endShift.get() );
+	*/
+	this->addChild( startShift.get() );
+	startShift->addChild( endShift.get() );
+	endShift->addChild( node );
 	
 	this->savedStateSet = NULL;
 }
@@ -142,11 +154,16 @@ bz2object::bz2object( const char* name, const char* keys, const char* data, osg:
 	this->spin_z = new BZTransform("spin", spinData_z);
 	this->endShift = new BZTransform("shift", sdata);
 	
-	this->addChild( startShift.get() );
-	startShift->addChild( endShift.get() );
-	endShift->addChild( spin_x.get() );
+	/*
+	this->addChild( spin_x.get() );
 	spin_x->addChild( spin_y.get() );
 	spin_y->addChild( spin_z.get() );
+	spin_z->addChild( startShift.get() );
+	startShift->addChild( endShift.get() );
+	*/
+	this->addChild( startShift.get() );
+	startShift->addChild( endShift.get() );
+	endShift->addChild( node );
 	
 	this->savedStateSet = NULL;
 	
@@ -413,18 +430,18 @@ string bz2object::BZWLines(void) {
 	// add the initial transformation
 	if( this->isKey("shift") )
 		ret += "  " + startShift->toString();
-	
-	// add all transformations to the string if they are supported
-	for(vector< osg::ref_ptr<BZTransform> >::iterator i = transformations.begin(); i != transformations.end(); i++) {
-		if(this->isKey((*i)->getHeader().c_str()))
-			ret += "  " + (*i)->toString();
-	}
-	
+		
 	// add the Euler rotation values as spin keys
 	if( this->isKey("spin") ) {
 		ret += "  " + spin_x->toString();
 		ret += "  " + spin_y->toString();
 		ret += "  " + spin_z->toString();
+	}
+	
+	// add all transformations to the string if they are supported
+	for(vector< osg::ref_ptr<BZTransform> >::iterator i = transformations.begin(); i != transformations.end(); i++) {
+		if(this->isKey((*i)->getHeader().c_str()))
+			ret += "  " + (*i)->toString();
 	}
 		
 	// add the final transformation

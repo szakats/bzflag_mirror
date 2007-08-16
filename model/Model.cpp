@@ -677,10 +677,11 @@ void Model::_removeObject( bz2object* obj ) {
 	for(unsigned int i = 0; i < this->objects.size() && itr != this->objects.end(); i++, itr++) {
 		if( objects[i] == obj ) {
 			
-			this->objects.erase( itr );
-			
 			ObserverMessage obs( ObserverMessage::REMOVE_OBJECT, obj );
 			notifyObservers( &obs );
+			this->objects.erase( itr );
+			
+			break;
 		}
 	}
 }
@@ -854,9 +855,12 @@ bool Model::_deleteSelection() {
 	
 	// remove objects from the scene WITHOUT first referencing it (i.e. this will ensure it gets deleted)
 	vector<bz2object*>::iterator itr = selectedObjects.begin();
-	for( unsigned int i = 0; i < selectedObjects.size(); i++, itr++) {
-		bz2object* obj = selectedObjects[i];
+	for(; itr != selectedObjects.end(); ) {
+		bz2object* obj = *itr;
 		this->_removeObject( obj );
+		
+		selectedObjects.erase( itr );
+		itr = selectedObjects.begin();
 	}
 	
 	this->selectedObjects.clear();
@@ -921,3 +925,40 @@ void Model::_assignMaterial( material* matref, bz2object* obj ) {
 	UpdateMessage msg( UpdateMessage::UPDATE_MATERIAL, matref );
 	obj->update( msg );
 }
+
+// link two teleporters together if they are not explicitly linked
+// return TRUE if a new link was created; FALSE if it already exists
+bool Model::linkTeleporters( teleporter* from, teleporter* to ) {
+	return modelRef->_linkTeleporters( from, to );
+}
+
+bool Model::_linkTeleporters( teleporter* from, teleporter* to ) {
+	// make sure that we don't already have a link
+	if( links.size() > 0 ) {
+		for( map< string, Tlink* >::iterator i = links.begin(); i != links.end(); i++ ) {
+			if( (i->second->getTo() == from && i->second->getFrom() == to) ||
+				(i->second->getTo() == to && i->second->getFrom() == from) )
+					return false;
+		}
+	}
+	
+	// no such link exists; create it
+	Tlink* newLink = new Tlink();
+	string newLinkName = SceneBuilder::makeUniqueName("link");
+	
+	newLink->setName( newLinkName );
+	newLink->setFrom( from );
+	newLink->setTo( to );
+	
+	printf("  linked %s to %s\n", from->getName().c_str(), to->getName().c_str() );
+	
+	// add the link to the database
+	links[ newLinkName ] = newLink;
+	
+	// tell the view to add it
+	// ObserverMessage msg( ObserverMessage::ADD_OBJECT, newLink );
+	// notifyObservers( &msg );
+	
+	return true;
+}
+

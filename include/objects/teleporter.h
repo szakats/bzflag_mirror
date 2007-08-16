@@ -44,15 +44,12 @@ public:
 	
 	// binary getters and setters
 	float getBorder() { return border; }
-	string getLinkName() { return lname; }
 	
 	void setBorder( float b ) { this->border = b; }
-	void setLinkName( const char* s ) { this->lname = s; }
 	
 private:
 	
 	float border;
-	string lname;	// used for linkage; not the official name
 	
 	// parts of the teleporter node (necessary because teleporters don't scale normally, and we'll need to intervene :) )
 	osg::ref_ptr< Renderable > leftLeg, rightLeg, topBeam, frontPortal, rearPortal;
