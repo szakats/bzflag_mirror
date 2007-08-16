@@ -1,9 +1,10 @@
 %{
-#include "parser.tab.h"
+#include "parser.cxx.h"
+#include <memory>
+#define YY_NEVER_INTERACTIVE 1
 %}
 DIGIT [0-9]
 ID [a-z][a-z0-9]*
-%option noyywrap
 %%
 "->"                { return(DEFSIGN);  }
 {DIGIT}+            { return(NUMBER);   }
@@ -18,6 +19,10 @@ subdivide           { return(SUBDIVIDE);}
 [ \t\n]+
 .                   { return(yytext[0]); }
 %%
+
+int yywrap () {
+  return 1;
+}
 
 void yyerror (char *s) 
 {
