@@ -353,6 +353,7 @@ int bz2object::update(string& data) {
 					if( t.getData()[1] == 1.0f && t.getData()[2] == 0.0f && t.getData()[3] == 0.0f ) {
 						// this must be the rotation around x
 						this->spin_x->setData( t.getData() );
+						this->setRotationX( t.getData()[0] );	// change the spin appearance as well
 						transforms.erase(i);		// don't duplicate it later on
 						break;
 					}
@@ -364,8 +365,9 @@ int bz2object::update(string& data) {
 				if( BZWParser::key( i->c_str() ) == "spin" ) {
 					BZTransform t = BZTransform( *i );
 					if( t.getData()[1] == 0.0f && t.getData()[2] == 1.0f && t.getData()[3] == 0.0f ) {
-						// this must be the rotation around x
+						// this must be the rotation around y
 						this->spin_y->setData( t.getData() );
+						this->setRotationY( t.getData()[0] );	// change the spin appearance as well
 						transforms.erase(i);		// don't duplicate it later on
 						break;
 					}
@@ -377,8 +379,9 @@ int bz2object::update(string& data) {
 				if( BZWParser::key( i->c_str() ) == "spin" ) {
 					BZTransform t = BZTransform( *i );
 					if( t.getData()[1] == 0.0f && t.getData()[2] == 0.0f && t.getData()[3] == 1.0f ) {
-						// this must be the rotation around x
+						// this must be the rotation around z
 						this->spin_z->setData( t.getData() );
+						this->setRotationZ( t.getData()[0] );	// change the spin appearance as well
 						transforms.erase(i);		// don't duplicate it later on
 						break;
 					}
@@ -430,18 +433,18 @@ string bz2object::BZWLines(void) {
 	// add the initial transformation
 	if( this->isKey("shift") )
 		ret += "  " + startShift->toString();
-		
-	// add the Euler rotation values as spin keys
-	if( this->isKey("spin") ) {
-		ret += "  " + spin_x->toString();
-		ret += "  " + spin_y->toString();
-		ret += "  " + spin_z->toString();
-	}
 	
 	// add all transformations to the string if they are supported
 	for(vector< osg::ref_ptr<BZTransform> >::iterator i = transformations.begin(); i != transformations.end(); i++) {
 		if(this->isKey((*i)->getHeader().c_str()))
 			ret += "  " + (*i)->toString();
+	}
+	
+	// add the Euler rotation values as spin keys
+	if( this->isKey("spin") ) {
+		ret += "  " + spin_x->toString();
+		ret += "  " + spin_y->toString();
+		ret += "  " + spin_z->toString();
 	}
 		
 	// add the final transformation
