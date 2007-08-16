@@ -20,7 +20,7 @@ void yyunput(int, char*);
 }
 %start ruleset
 %token DEFSIGN EXTRUDE EXPAND TAPER RANDOM SUBDIVIDE
-%token NUMBER
+%token <fl> NUMBER
 %token <id> NONTERM
 %type <pv> products
 %type <p> product
@@ -36,8 +36,8 @@ ruleset : /* empty */
 products : /* empty */ { $$ = new ProductVector(); }
   | products product { $$ = $1; $$->push_back($2); }
 ;
-product : DEFSIGN NUMBER ':' ops { $$ = new Product(); }
-  | DEFSIGN ops { $$ = new Product(); }
+product : DEFSIGN NUMBER ':' ops { $$ = new Product($4,$2); }
+  | DEFSIGN ops { $$ = new Product($2); }
 ;
 ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }

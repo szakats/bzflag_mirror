@@ -21,6 +21,7 @@ public:
 };
 
 typedef std::vector <Operation*> OperationVector;
+typedef OperationVector::iterator OperationVectIter;
 
 #endif /* __OPERATION_H__ */
 

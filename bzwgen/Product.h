@@ -14,10 +14,18 @@
 #define __PRODUCT_H__
 
 #include <vector>
+#include "Operation.h"
 
 class Product {
+  OperationVector* ops;
+  float rarity;
 public:
-  Product() {};
+  Product(OperationVector* _ops, float _rarity = 1.0f) : ops(_ops), rarity(_rarity) {};
+  ~Product() {
+    OperationVectIter itr; 
+    for (itr = ops->begin(); itr!= ops->end(); ++itr) delete (*itr);
+    delete ops; 
+  }
 };
 
 typedef std::vector <Product*> ProductVector;
