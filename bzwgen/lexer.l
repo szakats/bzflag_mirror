@@ -8,14 +8,14 @@ ID [a-z][a-z0-9]*
 %option yylineno
 %%
 "->"                  { return(DEFSIGN);  }
--?{DIGIT}+            { return(NUMBER);   }
--?{DIGIT}+"."{DIGIT}* { return(NUMBER);   }
+-?{DIGIT}+            { yylval.fl = (float)atof(yytext); return(NUMBER);   }
+-?{DIGIT}+"."{DIGIT}* { yylval.fl = (float)atof(yytext); return(NUMBER);   }
 extrude               { return(EXTRUDE);  }
 expand                { return(EXPAND);   }
 taper                 { return(TAPER);    }
 random                { return(RANDOM);   }
 subdivide             { return(SUBDIVIDE);}
-{ID}                  { return(NONTERM);  }
+{ID}                  { yylval.id = (char *) strdup(yytext); return(NONTERM);  }
 #[^\n]*
 [ \t\n]+
 .                     { return(yytext[0]); }

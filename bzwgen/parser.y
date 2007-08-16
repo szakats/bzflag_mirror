@@ -1,17 +1,22 @@
 %{
 #include <memory>
+#include "Rule.h"
 
 void yyerror(char* s);
 int yylex();
 %}
 
+%union {
+  char *id;
+  float fl;
+}
 %start ruleset
 %token DEFSIGN EXTRUDE EXPAND TAPER RANDOM SUBDIVIDE
 %token NUMBER
-%token NONTERM
+%token <id> NONTERM
 %%
 ruleset : /* empty */
-  | ruleset NONTERM products ';'
+  | ruleset NONTERM products ';' 
 ;
 products : /* empty */
   | products product
@@ -26,7 +31,7 @@ op : EXTRUDE '(' expr ')'
   | EXPAND '(' expr ')'
   | TAPER '(' expr ')'
   | SUBDIVIDE '(' expr ')'
-  | NONTERM
+  | NONTERM {  }
 ;
 expr : RANDOM '(' expr ',' expr ',' expr ')'
   | NUMBER
