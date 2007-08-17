@@ -180,6 +180,7 @@ inline float randomFloat01() { return (float)(rand()) / (float)(RAND_MAX); }
 inline float randomFloat(float range) { return randomFloat01()*range; }
 inline float randomFloatRange(float min, float max) { return randomFloat(max-min)+min; }
 inline float randomFloatRangeStep(float min, float max, float step) { int steps = int(max-min / step); return randomInt(steps+1)*step + min; }
+inline int round(float f) { return int(f+0.5f); }
 
 
 #endif /* __COMMON_H__ */
