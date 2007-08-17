@@ -253,7 +253,6 @@ void Mesh::output(Output& out) {
     for (size_t i = 0; i < f.size(); i++) 
       if (f[i]->mat == m) {
 	if (mat != m) out.matref(m);
-        if (noradar) out.line("  noradar"); 
 	mat = m;
 	out.face(f[i],mat);
 	mat = f[i]->mat;

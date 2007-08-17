@@ -24,9 +24,8 @@ public:
   FaceVector f;
   VertexVector inside;
   VertexVector outside;
-  bool noradar;
   bool passable;
-  Mesh() : noradar(false), passable(false) {}
+  Mesh() : passable(false) {}
   int addVertex(Vertex vtx) { v.push_back(vtx); return v.size()-1; }
   int addTexCoord(TexCoord tcx) { tc.push_back(tcx); return tc.size()-1; }
   int addFace(Face* face) { f.push_back(face); return f.size()-1; }

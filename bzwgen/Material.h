@@ -21,8 +21,9 @@
 class Material {
   int name;
   std::string file;
+  bool noradar;
 public:
-  Material(const int _name, const std::string& _file) : name(_name), file(_file) {};
+  Material(const int _name, const std::string& _file, bool _noradar = false) : name(_name), file(_file), noradar(_noradar) {};
   void output(Output& out);
 };
 

@@ -16,6 +16,7 @@ void Material::output(Output& out) {
   out << "material\n";
   out << "  name mat" << name << "\n";
   out << "  texture " << file << "\n";
+  if (noradar) out << "  noradar\n";
   out << "end\n\n";
 }
 
