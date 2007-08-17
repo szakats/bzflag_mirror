@@ -20,8 +20,8 @@
 
 class Operation {
 public:
-  int runMesh(Mesh*,int) {}
-  ~Operation() {}
+  virtual int runMesh(Mesh*,int) = 0;
+  virtual ~Operation() {}
 };
 
 typedef std::vector <Operation*> OperationVector;
@@ -31,9 +31,11 @@ class OperationNonterminal : public Operation {
   std::string ref;
 public:
   OperationNonterminal(std::string& _ref) : ref(_ref) { };
+  int runMesh(Mesh*,int) { return 0; };
 };
 
 class OperationSingle : public Operation {
+protected:
   Expression *exp;
   float value;
 public:
@@ -48,14 +50,29 @@ public:
 class OperationExtrude : public OperationSingle {
 public:
   OperationExtrude(Expression* _exp) : OperationSingle(_exp) {}
+  int runMesh(Mesh* mesh,int face) { 
+    flatten();
+    mesh->extrudeFace(face,value);
+    return face; 
+  };
 };
 class OperationExpand : public OperationSingle {
 public:
   OperationExpand(Expression* _exp) : OperationSingle(_exp) {}
+  int runMesh(Mesh* mesh,int face) { 
+    flatten();
+    mesh->expandFace(face,value);
+    return face; 
+  };
 };
 class OperationSubdivide : public OperationSingle {
 public:
   OperationSubdivide(Expression* _exp) : OperationSingle(_exp) {}
+  int runMesh(Mesh* mesh,int face) { 
+    flatten();
+    mesh->subdivdeFace(face,int(value),true);
+    return face; 
+  };
 };
 
 
