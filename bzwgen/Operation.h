@@ -61,7 +61,7 @@ public:
   OperationExpand(Expression* _exp) : OperationSingle(_exp) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
-    mesh->expandFace(face,value);
+    mesh->expandFace(face,value,MATGLASS);
     return face; 
   };
 };
