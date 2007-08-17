@@ -64,15 +64,15 @@ int main (int argc, char* argv[]) {
 
   CCommandLineArgs cmd(argc,argv);
 
-  std::cout << "Initializing...\n";
+  std::cout << "Initializing... ";
   GridGenerator gen(ruleset);
   std::cout << "done.\n";
 
-  std::cout << "Parsing options...\n";
+  std::cout << "Parsing options... ";
   gen.parseOptions(0);
   std::cout << "done.\n";
 
-  std::cout << "Generating...\n";
+  std::cout << "Generating... ";
   gen.run();
   std::cout << "done.\n";
 

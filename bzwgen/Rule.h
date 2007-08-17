@@ -36,7 +36,6 @@ public:
       roll -= rarity;
       ++itr;
     } while (itr!= products->end());
-    printf("NULL(%f.2)",roll);
     return NULL;
   }
   int runMesh(Mesh* mesh, int face) {
