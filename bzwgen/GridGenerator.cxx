@@ -13,7 +13,8 @@
 #include "GridGenerator.h"
 #include "Zone.h"
 
-GridGenerator::GridGenerator() {
+
+GridGenerator::GridGenerator(RuleSet* _ruleset) : Generator(_ruleset) { 
 }
 
 void GridGenerator::parseOptions(Options opt) { 

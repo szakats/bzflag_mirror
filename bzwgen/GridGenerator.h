@@ -19,6 +19,7 @@
 #include "GridMap.h"
 #include "globals.h"
 #include "Output.h"
+#include "RuleSet.h"
 
 class GridGenerator : public Generator {
 protected:
@@ -26,7 +27,7 @@ protected:
   MaterialVector mats;
   GridMap map;
 public:
-  GridGenerator();
+  GridGenerator(RuleSet* ruleset);
   void parseOptions(Options opt);
   void run();
   void output(Output& out);

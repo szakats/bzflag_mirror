@@ -65,7 +65,7 @@ int main (int argc, char* argv[]) {
   CCommandLineArgs cmd(argc,argv);
 
   std::cout << "Initializing...\n";
-  GridGenerator gen;
+  GridGenerator gen(ruleset);
   std::cout << "done.\n";
 
   std::cout << "Parsing options...\n";

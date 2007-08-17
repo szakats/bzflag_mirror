@@ -16,16 +16,20 @@
 #include <vector>
 #include <fstream> 
 #include "globals.h"
+#include "RuleSet.h"
 
 
 class Generator {
 protected:
   int size;
+  RuleSet* ruleset;
 public:
-  void parseOptions(Options opt);
-  void run();
+  Generator(RuleSet* _ruleset) : ruleset(_ruleset) {}
+  virtual void parseOptions(Options opt);
+  virtual void run();
   inline int getSize() { return size; }
-  void output(std::ofstream& out);
+  virtual void output(std::ofstream& out);
+  virtual ~Generator() {}
 };
 
 typedef std::vector<Generator> GeneratorVector;
