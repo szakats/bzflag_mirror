@@ -59,6 +59,17 @@ public:
     return face; 
   };
 };
+
+class OperationMaterial : public OperationSingle {
+public:
+  OperationMaterial(Expression* _exp) : OperationSingle(_exp) {}
+  int runMesh(Mesh* mesh,int face) { 
+    flatten();
+    mesh->f[face]->mat = round(value);
+    return face; 
+  };
+};
+
 class OperationExpand : public OperationSingle {
 public:
   OperationExpand(Expression* _exp) : OperationSingle(_exp) {}
@@ -73,7 +84,7 @@ public:
   OperationSubdivide(Expression* _exp) : OperationSingle(_exp) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
-    mesh->subdivdeFace(face,int(value),true);
+    mesh->subdivdeFace(face,round(value),true);
     return face; 
   };
 };
