@@ -171,45 +171,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\lexer.cxx"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						WarningLevel="3"
-						WarnAsError="false"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\Material.cxx"
 				>
 			</File>
 			<File
 				RelativePath=".\Mesh.cxx"
-				>
-			</File>
-			<File
-				RelativePath=".\parser.cxx"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						WarningLevel="3"
-						WarnAsError="false"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\Rule.cxx"
-				>
-			</File>
-			<File
-				RelativePath=".\RuleSet.cxx"
 				>
 			</File>
 			<Filter
@@ -228,6 +194,44 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Language"
+				>
+				<File
+					RelativePath=".\lexer.cxx"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="3"
+							WarnAsError="false"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\parser.cxx"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="3"
+							WarnAsError="false"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Rule.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\RuleSet.cxx"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -236,10 +240,6 @@
 			>
 			<File
 				RelativePath=".\BuildZone.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Expression.h"
 				>
 			</File>
 			<File
@@ -275,27 +275,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Operation.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Output.h"
-				>
-			</File>
-			<File
-				RelativePath=".\parser.hxx"
-				>
-			</File>
-			<File
-				RelativePath=".\Product.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Rule.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RuleSet.h"
 				>
 			</File>
 			<File
@@ -315,6 +295,34 @@
 				</File>
 				<File
 					RelativePath=".\TextUtils.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Language"
+				>
+				<File
+					RelativePath=".\Expression.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Operation.h"
+					>
+				</File>
+				<File
+					RelativePath=".\parser.hxx"
+					>
+				</File>
+				<File
+					RelativePath=".\Product.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Rule.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RuleSet.h"
 					>
 				</File>
 			</Filter>
