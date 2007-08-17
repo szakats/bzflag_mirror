@@ -13,8 +13,8 @@
 #include "Operation.h"
 #include "RuleSet.h"
 
-int OperationNonterminal::runMesh(Mesh*,int) { 
-  return 0;
+int OperationNonterminal::runMesh(Mesh* mesh, int face) { 
+  return ruleset->runMesh(mesh,face,ref);
 }
 
 

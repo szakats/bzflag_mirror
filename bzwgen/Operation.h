@@ -34,7 +34,7 @@ class OperationNonterminal : public Operation {
   RuleSet* ruleset;
 public:
   OperationNonterminal(std::string& _ref, RuleSet* _ruleset) : ref(_ref), ruleset(_ruleset) { };
-  int runMesh(Mesh*,int);
+  int runMesh(Mesh* mesh, int face);
 };
 
 class OperationSingle : public Operation {
