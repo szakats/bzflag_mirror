@@ -24,7 +24,6 @@
 class GridGenerator : public Generator {
 protected:
   GridInfo gi;
-  MaterialVector mats;
   GridMap map;
 public:
   GridGenerator(RuleSet* ruleset);
