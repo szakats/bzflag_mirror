@@ -27,10 +27,13 @@ public:
 typedef std::vector <Operation*> OperationVector;
 typedef OperationVector::iterator OperationVectIter;
 
+class RuleSet; // To avoid .h file recursion
+
 class OperationNonterminal : public Operation {
   std::string ref;
+  RuleSet* ruleset;
 public:
-  OperationNonterminal(std::string& _ref) : ref(_ref) { };
+  OperationNonterminal(std::string& _ref, RuleSet* _ruleset) : ref(_ref), ruleset(_ruleset) { };
   int runMesh(Mesh*,int);
 };
 
