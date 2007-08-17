@@ -5,6 +5,7 @@
 #include "RuleSet.h"
 #include "Product.h"
 #include "Operation.h"
+#include "Expression.h"
 
 void yyerror(RuleSet *ruleset, char* s);
 int yylex();
@@ -19,7 +20,7 @@ void yyunput(int, char*);
   Operation* o;
 }
 %start ruleset
-%token DEFSIGN EXTRUDE EXPAND TAPER RANDOM SUBDIVIDE
+%token DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDE
 %token <fl> NUMBER
 %token <id> NONTERM
 %type <pv> products
@@ -44,7 +45,6 @@ ops : /* empty */ { $$ = new OperationVector(); }
 ;
 op : EXTRUDE '(' expr ')' { $$ = new Operation(); }
   | EXPAND '(' expr ')' { $$ = new Operation(); }
-  | TAPER '(' expr ')' { $$ = new Operation(); }
   | SUBDIVIDE '(' expr ')' { $$ = new Operation(); }
   | NONTERM { $$ = new Operation(); }
 ;

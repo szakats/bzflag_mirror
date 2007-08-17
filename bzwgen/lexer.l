@@ -4,6 +4,7 @@
 #include "RuleSet.h"
 #include "Product.h"
 #include "Operation.h"
+#include "Expression.h"
 #include "parser.hxx"
 
 // Ugly hacks to surpress GCC warnings
@@ -26,7 +27,6 @@ ID [a-z][a-z0-9]*
 -?{DIGIT}+"."{DIGIT}* { yylval.fl = (float)atof(yytext); return(NUMBER);   }
 extrude               { return(EXTRUDE);  }
 expand                { return(EXPAND);   }
-taper                 { return(TAPER);    }
 random                { return(RANDOM);   }
 subdivide             { return(SUBDIVIDE);}
 {ID}                  { yylval.id = strdup(yytext); return(NONTERM);  }
