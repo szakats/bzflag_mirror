@@ -61,6 +61,11 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
     mesh.weldVertices((*mesh.f[base]->vtx)[i],(*mesh.f[base]->vtx)[i+1],corners[i]+Vertex(0.0f,0.0f,0.2f));
   }
 
+  if (randomBool()) {
+    generator->getRuleSet()->runMesh(mesh,base,"floor");
+    return;
+  }
+
   if (wall == MATGLASS) {
     mesh.expandFace(base,-2.0f);
   } else {

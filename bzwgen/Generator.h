@@ -29,6 +29,7 @@ public:
   virtual void parseOptions(Options opt);
   virtual void run();
   inline int getSize() { return size; }
+  inline RuleSet* getRuleSet() { return ruleset; }
   virtual void output(std::ofstream& out);
   Material* getMaterial(int id) { return mats[id]; }
   virtual ~Generator() {
