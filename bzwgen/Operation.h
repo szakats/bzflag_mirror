@@ -33,8 +33,10 @@ public:
 
 class OperationSingle : public Operation {
   Expression *exp;
+  float value;
 public:
   OperationSingle(Expression* _exp) : exp(_exp) { };
+  void flatten() { value = exp->calculate(); }
   ~OperationSingle() {
     delete exp;
   }
