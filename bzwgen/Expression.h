@@ -34,7 +34,11 @@ class ExpressionRandom : public Expression {
   Expression* max;
   Expression* step;
 public:
-  ExpressionRandom(Expression* _min, Expression* _max, Expression* _step) : min(_min), max(_max), step(_step) {};
+  ExpressionRandom(Expression* _min, Expression* _max, Expression* _step) {
+    min = _min;
+    max = _max;
+    step = _step;
+  };
   float calculate() { 
     float stepc = step->calculate();
     if (fabs(stepc) < 0.0001f) return randomFloatRange(min->calculate(),max->calculate());

@@ -18,6 +18,7 @@ void yyunput(int, char*);
   Product* p;
   OperationVector* ov;
   Operation* o;
+  Expression* e;
 }
 %start ruleset
 %token DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDE
@@ -27,6 +28,7 @@ void yyunput(int, char*);
 %type <p> product
 %type <ov> ops
 %type <o> op
+%type <e> expr
 %%
 ruleset : /* empty */
   | ruleset NONTERM products ';' { 
@@ -43,12 +45,12 @@ product : DEFSIGN NUMBER ':' ops { $$ = new Product($4,$2); }
 ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }
 ;
-op : EXTRUDE '(' expr ')' { $$ = new Operation(); }
-  | EXPAND '(' expr ')' { $$ = new Operation(); }
-  | SUBDIVIDE '(' expr ')' { $$ = new Operation(); }
-  | NONTERM { $$ = new Operation(); }
+op : EXTRUDE '(' expr ')' { $$ = new OperationExtrude($3); }
+  | EXPAND '(' expr ')' { $$ = new OperationExpand($3); }
+  | SUBDIVIDE '(' expr ')' { $$ = new OperationSubdivide($3); }
+  | NONTERM { std::string name = std::string($1); $$ = new OperationNonterminal(name); }
 ;
-expr : RANDOM '(' expr ',' expr ',' expr ')'
-  | NUMBER
+expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$7); }
+  | NUMBER { $$ = new ExpressionConst($1); }
   ;
 %%
