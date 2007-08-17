@@ -211,6 +211,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\Operation.cxx"
+					>
+				</File>
+				<File
 					RelativePath=".\parser.cxx"
 					>
 					<FileConfiguration

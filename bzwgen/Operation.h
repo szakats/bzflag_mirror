@@ -31,7 +31,7 @@ class OperationNonterminal : public Operation {
   std::string ref;
 public:
   OperationNonterminal(std::string& _ref) : ref(_ref) { };
-  int runMesh(Mesh*,int) { return 0; };
+  int runMesh(Mesh*,int);
 };
 
 class OperationSingle : public Operation {
