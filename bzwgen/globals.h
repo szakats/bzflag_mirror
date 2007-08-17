@@ -171,6 +171,15 @@ struct Coord2D {
 inline int modprev(int x, int mod) { if (x == 0) return mod-1; else return x-1; }
 inline int modnext(int x, int mod) { if (x == mod-1) return 0; else return x+1; }
 
+inline int randomInt01() { return rand()%2; }
+inline int randomInt(int range) { return rand()%range; }
+inline int randomIntRange(int min, int max) { return randomInt(max-min)+min; }
+inline bool randomBool() { return rand()%2 == 0; }
+inline float randomFloat01() { return (float)(rand()) / (float)(RAND_MAX); }
+inline float randomFloat(float range) { return randomFloat01()*range; }
+inline float randomFloatRange(float min, float max) { return randomFloat(max-min)+min; }
+inline float randomFloatRangeStep(float min, float max, float step) { int steps = int(max-min / step); return randomInt(steps+1)*step + min; }
+
 
 #endif /* __COMMON_H__ */
 
