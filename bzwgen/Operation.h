@@ -16,9 +16,11 @@
 #include <vector>
 #include <string>
 #include "Expression.h"
+#include "Mesh.h"
 
 class Operation {
 public:
+  int runMesh(Mesh*,int) {}
   ~Operation() {}
 };
 

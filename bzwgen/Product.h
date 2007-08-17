@@ -15,12 +15,20 @@
 
 #include <vector>
 #include "Operation.h"
+#include "Mesh.h"
 
 class Product {
   OperationVector* ops;
   float rarity;
 public:
   Product(OperationVector* _ops, float _rarity = 1.0f) : ops(_ops), rarity(_rarity) {};
+  int runMesh(Mesh* mesh, int face) {
+    for (size_t i = 0; i < ops->size(); i++) {
+      face = ops->at(i)->runMesh(mesh,face);
+      if (face == -1) return -1;
+    }
+    return face;
+  }
   float getRarity() { return rarity; }
   ~Product() {
     OperationVectIter itr; 

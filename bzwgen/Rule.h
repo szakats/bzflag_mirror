@@ -17,6 +17,7 @@
 #include <map>
 #include "Product.h"
 #include "globals.h"
+#include "Mesh.h"
 
 class Rule {
   std::string name;
@@ -36,6 +37,11 @@ public:
       ++itr;
     } while (itr!= products->end());
     return NULL;
+  }
+  int runMesh(Mesh* mesh, int face) {
+    Product* product = getProduct();
+    if (product == NULL) return -1;
+    return product->runMesh(mesh,face);
   }
   ~Rule() { 
     ProductVectIter itr; 

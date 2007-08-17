@@ -15,11 +15,17 @@
 
 #include <string>
 #include "Rule.h"
+#include "Mesh.h"
 
 class RuleSet {
   RuleMap rules;
 public:
   RuleSet() {}
+  int runMesh(Mesh* mesh, int face, std::string& rulename) {
+    RuleMapIter itr = rules.find(rulename); 
+    if (itr == rules.end()) return -1;
+    return itr->second->runMesh(mesh,face);
+  }
   void addRule(std::string& name, Rule* rule) { rules[name] = rule; }
   ~RuleSet() { 
     RuleMapIter itr;
