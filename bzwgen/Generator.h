@@ -31,7 +31,10 @@ public:
   inline int getSize() { return size; }
   virtual void output(std::ofstream& out);
   Material* getMaterial(int id) { return mats[id]; }
-  virtual ~Generator() {}
+  virtual ~Generator() {
+    MaterialVectIter itr; 
+    for (itr = mats.begin(); itr!= mats.end(); ++itr) delete (*itr);
+  }
 };
 
 typedef std::vector<Generator> GeneratorVector;
