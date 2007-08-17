@@ -22,21 +22,29 @@ public:
   virtual ~Expression() {};
 };
 
-class ExpressionConst {
+class ExpressionConst : public Expression {
   float value;
 public:
   ExpressionConst(float _value) : value(_value) {};
   float calculate() { return value; };
 };
 
-class ExpressionRandom {
-  float min, max, step;
+class ExpressionRandom : public Expression {
+  Expression* min;
+  Expression* max;
+  Expression* step;
 public:
-  ExpressionRandom(float _min, float _max, float _step) : min(_min), max(_max), step(_step) {};
+  ExpressionRandom(Expression* _min, Expression* _max, Expression* _step) : min(_min), max(_max), step(_step) {};
   float calculate() { 
-    if (fabs(step) < 0.0001) return randomFloatRange(min,max);
-    return randomFloatRangeStep(min,max,step); 
+    float stepc = step->calculate();
+    if (fabs(stepc) < 0.0001f) return randomFloatRange(min->calculate(),max->calculate());
+    return randomFloatRangeStep(min->calculate(),max->calculate(),stepc); 
   };
+  ~ExpressionRandom() {
+    delete min;
+    delete max;
+    delete step;
+  }
 };
 
 #endif /* __EXPRESSION_H__ */
