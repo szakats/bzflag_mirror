@@ -231,6 +231,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Expression.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Face.h"
 				>
 			</File>

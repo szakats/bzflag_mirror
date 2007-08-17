@@ -30,15 +30,16 @@ void GridGenerator::run() {
   int x,y;
   Generator::run(); 
   for (int i = 0; i < 20; i++) {
-    x = rand()%(int(gi.sizeX / 4)-1)*4+4;
-    y = rand()%(int(gi.sizeY / 4)-1)*4+4;
+    // TODO: replace this with randomIntRange or the like
+    x = randomInt(int(gi.sizeX / 4)-1)*4+4;
+    y = randomInt(int(gi.sizeY / 4)-1)*4+4;
 
     for (int ax = 0; ax < gi.sizeX; ax++) {
       map.setZ(ax,y,0);
       map.settype(ax,y,CELLROAD);
     }
     for (int ay = 0; ay < gi.sizeY; ay++) {
-      if ((map.getNode(x,ay).type == CELLROAD) && (rand()%3 == 0)) break;
+      if ((map.getNode(x,ay).type == CELLROAD) && randomChance(33)) break;
       map.setZ(x,ay,0);
       map.settype(x,ay,CELLROAD);
     }

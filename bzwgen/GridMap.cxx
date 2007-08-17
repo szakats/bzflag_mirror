@@ -58,7 +58,7 @@ void GridMap::pushZones()
       int lastx = 0;
       for (int x = 0; x < gi.sizeX; x++) {
 	if (typeCrossAround(x,y,CELLROAD) > 3) {
-	  if (rand()%10 > 0) {
+	  if (randomChance(90)) {
 	    zones.push_back(new BuildZone(worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
 	  } else {
 	    zones.push_back(new Zone(worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
@@ -108,8 +108,8 @@ int GridMap::typeCrossAround(int x, int y, int type)
 Coord2D GridMap::emptyCoord() {
   int x,y;
   do {
-    x = rand()%gi.sizeX;
-    y = rand()%gi.sizeY;
+    x = randomInt(gi.sizeX);
+    y = randomInt(gi.sizeY);
   } while (getNode(x,y).type > 0);
   return Coord2D(x,y);
 }

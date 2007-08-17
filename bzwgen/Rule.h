@@ -16,6 +16,7 @@
 #include <string>
 #include <map>
 #include "Product.h"
+#include "globals.h"
 
 class Rule {
   std::string name;
@@ -27,7 +28,7 @@ public:
     if (size == 0) return NULL;
     ProductVectIter itr = products->begin();
     if (size == 1) return (*itr);
-    float roll = (float)(rand()) / (float)(RAND_MAX);
+    float roll = randomFloat01();
     do {
       float rarity = (*itr)->getRarity();
       if (rarity < roll) return (*itr);

@@ -175,6 +175,7 @@ inline int randomInt01() { return rand()%2; }
 inline int randomInt(int range) { return rand()%range; }
 inline int randomIntRange(int min, int max) { return randomInt(max-min)+min; }
 inline bool randomBool() { return rand()%2 == 0; }
+inline bool randomChance(int chance) { return randomInt(100) < chance; }
 inline float randomFloat01() { return (float)(rand()) / (float)(RAND_MAX); }
 inline float randomFloat(float range) { return randomFloat01()*range; }
 inline float randomFloatRange(float min, float max) { return randomFloat(max-min)+min; }

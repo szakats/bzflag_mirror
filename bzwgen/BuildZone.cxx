@@ -25,16 +25,16 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
   int wall;
   int height;
   float hlev = 3.7f;
-  if (rand()%2 == 0 && size() < 5000) {
+  if (randomBool() && size() < 5000) {
     wall = MATGLASS;
-    height = rand()%6+4;
+    height = randomInt(6)+4;
     hlev = 8.0f;
-  } else if (rand()%2 == 0) {
+  } else if (randomBool()) {
     wall = MATWALL;
-    height = rand()%3+1;
+    height = randomInt(3)+1;
   } else {
     wall = MATWALL2;
-    height = rand()%6+1;
+    height = randomInt(6)+1;
   }
 
   /* SIDEWALK */
@@ -72,7 +72,7 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 
   longerSide(base,&length,&horiz);
 
-  if (length > 100.f && rand()%2 == 0) {
+  if (length > 100.f && randomBool()) {
     int first = mesh.partitionFace(base,length/2-2.5f,horiz);
     mesh.partitionFace(base,5.0,horiz);
     generateBuilding(first,wall); 
@@ -81,9 +81,9 @@ BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
 }
 
 void BuildZone::generateSkyscraper(int base, int wall) {
-  int height = rand()%6+4;
+  int height = randomInt(6)+4;
   int high = false;
-  if (rand()%3 == 0) high = true;
+  if (randomChance(33)) high = true;
   float hlev = 8.0f;
   if (!high) {
     IntVector* sides;
@@ -97,14 +97,14 @@ void BuildZone::generateSkyscraper(int base, int wall) {
     if (!high) addDivider(base,0.2f,0.5f,MATMESH,true);
   } else {
     while(height > 0) {
-      height = rand()%5+2;
+      height = randomInt(5)+2;
       mesh.extrudeFaceR(base,hlev*float(height),wall);
-      if (rand()%3 == 0) return; 
+      if (randomChance(33)) return; 
       bool horiz;
       float length;
       longerSide(base,&length,&horiz);
       float divlength = length * 0.66f;
-      if (rand()%2 == 0) {
+      if (randomBool()) {
 	base = mesh.partitionFace(base,divlength,horiz);
       } else {
 	mesh.partitionFace(base,length-divlength,horiz);
@@ -125,9 +125,9 @@ void BuildZone::generateBuilding(int base, int wall) {
   int height = 1;
   float hlev = 3.7f;
   if (wall == MATWALL) {
-    height = rand()%3+1;
+    height = randomInt(3)+1;
   } else if (wall == MATWALL2) {
-    height = rand()%6+1;
+    height = randomInt(6)+1;
   }
 
   float length;
@@ -151,7 +151,7 @@ void BuildZone::generateBuilding(int base, int wall) {
     addDivider(base,0.15f,0.3f,MATMESH);
   }
 
-  if (wall == MATWALL && rand()%2 == 0 && height <= 3 && size() < 5000) {
+  if (wall == MATWALL && randomBool() && height <= 3 && size() < 5000) {
     mesh.extrudeFace(base,0.0f,MATROOF);
     mesh.expandFace(base,0.3f);
     mesh.extrudeFace(base,4.0f,MATROOFT);
@@ -161,15 +161,15 @@ void BuildZone::generateBuilding(int base, int wall) {
 
   addDivider(base,0.2f,0.5f,MATMESH,true);
 
-  if (wall == MATWALL && rand()%2 == 0) {
-    height = rand()%3+1;
+  if (wall == MATWALL && randomBool()) {
+    height = randomInt(3)+1;
 
     longerSide(base,&length,&horiz);
     
-    length *= 0.4f+(0.1f*float(rand()%3));
+    length *= 0.4f+(0.1f*float(randomInt(3)));
     
     int newbase = mesh.partitionFace(base,length,horiz);
-    if (rand()%2 == 0) {
+    if (randomBool()) {
       base = newbase;
     } else {
     }
