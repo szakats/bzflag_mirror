@@ -204,6 +204,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\RuleSet.cxx"
+				>
+			</File>
 			<Filter
 				Name="GPLib"
 				>
