@@ -52,7 +52,7 @@ public:
   OperationExtrude(Expression* _exp) : OperationSingle(_exp) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
-    mesh->extrudeFace(face,value);
+    mesh->extrudeFace(face,value,MATGLASS);
     return face; 
   };
 };
@@ -61,7 +61,7 @@ public:
   OperationExpand(Expression* _exp) : OperationSingle(_exp) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
-    mesh->expandFace(face,value,MATGLASS);
+    mesh->expandFace(face,value);
     return face; 
   };
 };
