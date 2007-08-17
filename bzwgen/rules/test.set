@@ -2,8 +2,9 @@
 
 floor
 -> 0.4 : extrude(random(16.0,80.0,8.0)) top 
--> 0.4 : extrude(random(16.0,64.0,8.0)) floorcont 
--> 0.2 : extrude(random(32.0,96.0,8.0)) expand(20.0) top
+-> 0.3 : extrude(random(16.0,64.0,8.0)) floorcont 
+-> 0.2 : extrude(random(32.0,96.0,8.0)) expand(-10.0) top
+-> 0.1 : 
 ;
 
 insetwall -> extrude(-5.0) ;
