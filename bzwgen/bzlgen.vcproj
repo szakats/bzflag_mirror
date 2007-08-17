@@ -205,6 +205,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Rule.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\RuleSet.cxx"
 				>
 			</File>

@@ -24,30 +24,9 @@ class Rule {
   ProductVector* products;
 public:
   Rule(const std::string& _name, ProductVector* _products) : name(_name), products(_products) {};
-  Product* getProduct() {
-    int size = products->size();
-    if (size == 0) return NULL;
-    ProductVectIter itr = products->begin();
-    if (size == 1) return (*itr);
-    float roll = randomFloat01();
-    do {
-      float rarity = (*itr)->getRarity();
-      if (rarity > roll) return (*itr);
-      roll -= rarity;
-      ++itr;
-    } while (itr!= products->end());
-    return NULL;
-  }
-  int runMesh(Mesh* mesh, int face) {
-    Product* product = getProduct();
-    if (product == NULL) return -1;
-    return product->runMesh(mesh,face);
-  }
-  ~Rule() { 
-    ProductVectIter itr; 
-    for (itr = products->begin(); itr!= products->end(); ++itr) delete (*itr);
-    delete products; 
-  }
+  Product* getProduct();
+  int runMesh(Mesh* mesh, int face);
+  ~Rule();
 };
 
 typedef std::map <std::string, Rule*> RuleMap;
