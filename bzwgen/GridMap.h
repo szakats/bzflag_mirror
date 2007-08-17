@@ -15,14 +15,16 @@
 
 #include "globals.h"
 #include "Zone.h"
+#include "Generator.h"
 
 class GridMap {
   DiscreetMapNode* map;
+  Generator* generator;
 public:
   GridInfo gi;
   ZoneVector zones;
   GridMap() { map = NULL; };
-  void initialize(GridInfo gridInfo);
+  void initialize(Generator* _generator);
   inline DiscreetMapNode getNode(int x, int y)	{ return map[y*gi.sizeX+x]; }
   inline DiscreetMapNode getNode(Coord2D& c)  { return map[c.y*gi.sizeX+c.x]; }
   void clear();

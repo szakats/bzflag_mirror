@@ -31,6 +31,7 @@ public:
   void parseOptions(Options opt);
   void run();
   void output(Output& out);
+  GridInfo getGridInfo() { return gi; }
   ~GridGenerator();
 };
 

@@ -26,7 +26,7 @@ class FloorZone : public Zone {
 protected:
   Mesh mesh;
 public:
-  FloorZone(Coord2D a, Coord2D b, int astep, int matref, bool rotated);
+  FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int matref, bool rotated);
   virtual void output(Output& out);
 };
 

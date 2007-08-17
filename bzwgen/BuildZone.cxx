@@ -14,7 +14,7 @@
 
 #define INSET 1.0f
 
-BuildZone::BuildZone(Coord2D a, Coord2D b, int astep) : Zone(a,b,astep)
+BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Zone(_generator,a,b,astep)
 {
   Vertex corners[4];
   corners[0] = Vertex((float)A.x,(float)A.y,0.2f);

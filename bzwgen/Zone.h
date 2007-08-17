@@ -18,14 +18,16 @@
 #include <fstream>
 #include "Output.h"
 #include "globals.h"
+#include "Generator.h"
 
 
 class Zone {
 protected:
   Coord2D A,B;
+  Generator* generator;
   int step;
 public:
-  Zone(Coord2D a, Coord2D b, int astep) : A(a), B(b), step(astep) {};
+  Zone(Generator* _generator, Coord2D a, Coord2D b, int astep) : generator(_generator), A(a), B(b), step(astep) {};
   virtual void output(Output& /* out */) {};
   int size() {
     return abs(A.x-B.x)*abs(A.y-B.y);

@@ -13,12 +13,14 @@
 #include "GridMap.h"
 #include "FloorZone.h"
 #include "BuildZone.h"
+#include "GridGenerator.h"
 #include <iostream>
 #include <string>
 
-void GridMap::initialize(GridInfo gridInfo) 
+void GridMap::initialize(Generator* _generator) 
 {
-  gi = gridInfo;
+  generator = _generator;
+  gi = ((GridGenerator*)_generator)->getGridInfo();
   map = new DiscreetMapNode[gi.sizeX*gi.sizeY];
   clear();
 }
@@ -59,17 +61,17 @@ void GridMap::pushZones()
       for (int x = 0; x < gi.sizeX; x++) {
 	if (typeCrossAround(x,y,CELLROAD) > 3) {
 	  if (randomChance(90)) {
-	    zones.push_back(new BuildZone(worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
+	    zones.push_back(new BuildZone(generator,worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
 	  } else {
-	    zones.push_back(new Zone(worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
+	    zones.push_back(new Zone(generator,worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
 	  }
-	  zones.push_back(new FloorZone(worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
-	  zones.push_back(new FloorZone(worldCoord(x-1,lasty)  ,worldCoord(x,y-1)  ,gi.stepX, MATROAD, false));
-	  zones.push_back(new FloorZone(worldCoord(x-1,y-1)    ,worldCoord(x,y)    ,gi.stepX, MATROADX, false));
+	  zones.push_back(new FloorZone(generator,worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
+	  zones.push_back(new FloorZone(generator,worldCoord(x-1,lasty)  ,worldCoord(x,y-1)  ,gi.stepX, MATROAD, false));
+	  zones.push_back(new FloorZone(generator,worldCoord(x-1,y-1)    ,worldCoord(x,y)    ,gi.stepX, MATROADX, false));
 	  lastx = x;
 	} else if (x == gi.sizeX-1) {
-	  zones.push_back(new BuildZone(worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
-	  zones.push_back(new FloorZone(worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
+	  zones.push_back(new BuildZone(generator,worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
+	  zones.push_back(new FloorZone(generator,worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
 	  lastx = x;
 	}
       }

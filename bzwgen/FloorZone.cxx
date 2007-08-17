@@ -14,7 +14,7 @@
 #include <iostream>
 
 
-FloorZone::FloorZone(Coord2D a, Coord2D b, int astep, int matref, bool rotated) : Zone(a,b,astep)
+FloorZone::FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int matref, bool rotated) : Zone(_generator,a,b,astep)
 {
   mesh.passable = true;
   mesh.noradar = true;

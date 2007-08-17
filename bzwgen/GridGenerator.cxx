@@ -24,7 +24,7 @@ void GridGenerator::parseOptions(Options opt) {
   gi.sizeY = 40;
   gi.stepX = gi.size / gi.sizeX;
   gi.stepY = gi.size / gi.sizeY;
-  map.initialize(gi);
+  map.initialize(this);
 }
 
 void GridGenerator::run() { 
