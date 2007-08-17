@@ -16,15 +16,26 @@
 #include <string>
 #include "Rule.h"
 #include "Mesh.h"
+#define MAX_RECURSION 1000
 
 class RuleSet {
   RuleMap rules;
+  int recursion;
 public:
-  RuleSet() {}
+  RuleSet() : recursion(0) {}
   int runMesh(Mesh* mesh, int face, std::string& rulename) {
+    if (recursion == -1) return -1;
+    recursion++;
+    if (recursion == MAX_RECURSION) {
+      recursion = -1;
+      printf("\nRecursion level 1000 reached! Are you sure you have no infinite loops?\n");
+      return -1;
+    }
     RuleMapIter itr = rules.find(rulename); 
     if (itr == rules.end()) return -1;
-    return itr->second->runMesh(mesh,face);
+    int result = itr->second->runMesh(mesh,face);
+    recursion--;
+    return result;
   }
   void addRule(std::string& name, Rule* rule) { rules[name] = rule; }
   ~RuleSet() { 
