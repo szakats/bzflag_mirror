@@ -62,7 +62,8 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   }
 
   if (randomBool()) {
-    generator->getRuleSet()->runMesh(mesh,base,"floor");
+    std::string name = "floor";
+    generator->getRuleSet()->runMesh(&mesh,base,name);
     return;
   }
 
