@@ -1,9 +1,9 @@
 # Test file for the parser. Will be changed to something more working later.
 
 floor
--> 0.4 : material(7) extrude(random(16.0,80.0,8.0)) top 
+-> 0.4 : material(7) extrude(random(16.0,64.0,8.0)) top 
 -> 0.3 : material(7) extrude(20.0) floorcont 
--> 0.2 : material(7) extrude(random(32.0,80.0,8.0)) expand(-10.0) top
+-> 0.2 : material(7) extrude(random(32.0,64.0,8.0)) expand(-10.0) top
 -> 0.1 : 
 ;
 
@@ -14,7 +14,7 @@ top -> material(4) extrude(0.0) expand(0.3) extrude(0.5) material(5);
 ledge -> material(4) extrude(0.0) expand(0.3) extrude(0.5) extrude(0.0) expand(-0.3) material(7);
 
 floorcont
--> 0.6 : ledge extrude(random(16.0,64.0,8.0)) floorcont
+-> 0.6 : ledge extrude(20.0) floorcont
 -> 0.4 : top
 ;
 
