@@ -8,8 +8,8 @@ building
 building1 
 -> 0.6 : material(7) extrude(4.0) b1floors
 -> 0.2 : material(3) extrude(3.7) extrude(0) expand(1.0) b1floors
--> 0.1 : material(3) extrude(random(12.0,40.0,4.0)) [ * b1sky * b1sky ]
--> 0.1 : material(3) extrude(random(12.0,40.0,4.0)) [ b1sky * b1sky * ]
+-> 0.1 : material(3) extrude(random(12.0,40.0,4.0)) [ * b1sky * b1sky ] top
+-> 0.1 : material(3) extrude(random(12.0,40.0,4.0)) [ b1sky * b1sky * ] top
 ;
 
 b1sky 

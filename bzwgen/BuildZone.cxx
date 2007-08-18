@@ -63,7 +63,7 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
 
   if (randomChance(70)) {
     std::string name = "building";
-    mesh.inside.push_back(mesh.faceCenter(base)+mesh.faceNormal(base)*0.01f);
+    mesh.inside.push_back(mesh.faceCenter(base));
     generator->getRuleSet()->runMesh(&mesh,base,name);
     return;
   }
