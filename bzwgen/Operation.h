@@ -75,8 +75,8 @@ class OperationMultifaces : public OperationSingle {
 protected:
   StringVector* facerules;
   IntVector* faces;
-  RuleSet* ruleset;
   bool allsame;
+  RuleSet* ruleset;
 public:
   OperationMultifaces(Expression* _exp, StringVector* _facerules, RuleSet* _ruleset);
   int runMesh(Mesh* mesh,int);

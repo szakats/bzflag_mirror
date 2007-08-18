@@ -56,7 +56,7 @@ int OperationExtrude::runMesh(Mesh* mesh,int face) {
     mesh->extrudeFace(face,value,mesh->f[face]->mat);
   }
   return face; 
-};
+}
 
 int OperationSubdivide::runMesh(Mesh* mesh,int face) { 
   flatten();
@@ -68,7 +68,7 @@ int OperationSubdivide::runMesh(Mesh* mesh,int face) {
     OperationMultifaces::runMesh(mesh,face);
   }
   return face; 
-};
+}
 
 
 
