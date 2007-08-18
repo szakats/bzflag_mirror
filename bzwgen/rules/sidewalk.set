@@ -1,0 +1,3 @@
+# Test file for the parser. Will be changed to something more working later.
+
+sidewalk -> material($MATMESH) expand(2.0) chamfer(1.0) extrude(0.2) ;

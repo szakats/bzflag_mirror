@@ -19,10 +19,10 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   Mesh* mesh = new Mesh();
 
   Vertex corners[4];
-  corners[0] = Vertex((float)A.x,(float)A.y,0.2f);
-  corners[1] = Vertex((float)B.x,(float)A.y,0.2f);
-  corners[2] = Vertex((float)B.x,(float)B.y,0.2f);
-  corners[3] = Vertex((float)A.x,(float)B.y,0.2f);
+  corners[0] = Vertex((float)A.x,(float)A.y,0.0f);
+  corners[1] = Vertex((float)B.x,(float)A.y,0.0f);
+  corners[2] = Vertex((float)B.x,(float)B.y,0.0f);
+  corners[3] = Vertex((float)A.x,(float)B.y,0.0f);
 
   /* SIDEWALK */
 
@@ -33,10 +33,9 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   }
 
   int base = mesh->addFace(swface);
+  std::string name = "sidewalk";
   mesh->inside.push_back(mesh->faceCenter(base));
-  mesh->expandFace(base,1.0f);
-  mesh->chamferFace(base,1.0f);
-  mesh->extrudeFace(base,0.2f,MATMESH);
+  generator->getRuleSet()->runMesh(mesh,base,name);
 
   meshes.push_back(mesh);
 
