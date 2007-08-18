@@ -65,6 +65,7 @@ class OperationMaterial : public OperationSingle {
 public:
   OperationMaterial(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
   int runMesh(Mesh* mesh,int face) { 
+    if (mesh == NULL) return 0;
     flatten();
     mesh->f[face]->mat = round(value);
     return face; 
@@ -75,6 +76,7 @@ class OperationExpand : public OperationSingle {
 public:
   OperationExpand(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
   int runMesh(Mesh* mesh,int face) { 
+    if (mesh == NULL) return 0;
     flatten();
     mesh->expandFace(face,value);
     return face; 
@@ -90,6 +92,7 @@ public:
   OperationMultifaces(RuleSet* _ruleset, Expression* _exp, StringVector* _facerules);
   int runMesh(Mesh* mesh,int);
   ~OperationMultifaces() {
+    if (mesh == NULL) return 0;
     if (facerules != NULL) delete facerules;
     if (faces != NULL) delete faces;
   }  
