@@ -70,6 +70,18 @@ int OperationSubdivide::runMesh(Mesh* mesh,int face) {
   return face; 
 }
 
+int OperationPartition::runMesh(Mesh* mesh,int face) { 
+  flatten();
+  if (facerules == NULL) {
+    mesh->partitionFace(face,value,horiz);
+  } else {
+    faces = new IntVector();
+    faces->push_back(mesh->partitionFace(face,value,horiz));
+    OperationMultifaces::runMesh(mesh,face);
+  }
+  return face; 
+}
+
 
 
 

@@ -99,6 +99,13 @@ public:
   int runMesh(Mesh* mesh,int face);
 };
 
+class OperationPartition : public OperationMultifaces {
+  bool horiz;
+public:
+  OperationPartition(Expression* _exp, bool _horiz, StringVector* facerules, RuleSet* _ruleset ) : OperationMultifaces(_exp,facerules,_ruleset), horiz(_horiz) {}
+  int runMesh(Mesh* mesh,int face);
+};
+
 
 #endif /* __OPERATION_H__ */
 
