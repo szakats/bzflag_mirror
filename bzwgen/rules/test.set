@@ -6,18 +6,18 @@ building
 ;
 
 building1 
--> 0.6 : material(7) extrude(4.0) b1floors
--> 0.2 : material(3) extrude(3.7) extrude(0) expand(1.0) b1floors
--> 0.1 : material(3) extrude(random(12.0,40.0,4.0)) [ * b1sky * b1sky ] top
--> 0.1 : material(3) extrude(random(12.0,40.0,4.0)) [ b1sky * b1sky * ] top
+-> 0.6 : material($MATGLASS) extrude(4.0) b1floors
+-> 0.2 : material($MATWALL2) extrude(3.7) extrude(0) expand(1.0) b1floors
+-> 0.1 : material($MATWALL2) extrude(random(12.0,40.0,4.0)) [ * b1sky * b1sky ] top
+-> 0.1 : material($MATWALL2) extrude(random(12.0,40.0,4.0)) [ b1sky * b1sky * ] top
 ;
 
 b1sky 
--> material(7) ;
+-> material($MATGLASS) ;
 
 b1floors
--> 0.6 : ledge material(3) extrude(3.7) b1floors
--> 0.2 : ledge material(3) extrude(3.7) [ @b1special ] b1floors
+-> 0.6 : ledge material($MATWALL2) extrude(3.7) b1floors
+-> 0.2 : ledge material($MATWALL2) extrude(3.7) [ @b1special ] b1floors
 -> 0.2 : top
 ;
 
@@ -29,9 +29,9 @@ b1insetwall -> extrude(-3.0) ;
 
 
 skyscraper
--> 0.4 : material(7) extrude(random(16.0,32.0,8.0)) [ @specialwall ] top 
--> 0.3 : material(7) extrude(16.0) skycont 
--> 0.28 : material(7) extrude(random(24.0,40.0,8.0)) expand(-10.0) top
+-> 0.4 : material($MATGLASS) extrude(random(16.0,32.0,8.0)) [ @specialwall ] top 
+-> 0.3 : material($MATGLASS) extrude(16.0) skycont 
+-> 0.28 : material($MATGLASS) extrude(random(24.0,40.0,8.0)) expand(-10.0) top
 -> 0.02 : 
 ;
 
@@ -39,12 +39,12 @@ specialwall -> subdivideh(3) [ * insetwall * ] ;
 
 insetwall -> extrude(-5.0) ;
 
-top -> material(4) extrude(0.0) expand(0.3) extrude(0.5) material(5);
+top -> material($MATMESH) extrude(0.0) expand(0.3) extrude(0.5) material($MATROOF);
 
-ledge -> material(4) extrude(0.0) expand(0.3) extrude(0.5) extrude(0.0) expand(-0.3) ;
+ledge -> material($MATMESH) extrude(0.0) expand(0.3) extrude(0.5) extrude(0.0) expand(-0.3) ;
 
 skycont
--> 0.6 : ledge material(7) extrude(16.0) skycont
+-> 0.6 : ledge material($MATGLASS) extrude(16.0) skycont
 -> 0.4 : top
 ;
 

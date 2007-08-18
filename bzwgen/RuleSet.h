@@ -25,6 +25,7 @@ class RuleSet {
 public:
   RuleSet() : recursion(0) {}
   int runMesh(Mesh* mesh, int face, std::string& rulename);
+  void initialize() { std::string init = std::string("initialize"); runMesh(NULL,0,init); }
   void addAttr(std::string& name, float value) { attrmap[name] = value; }
   float getAttr(std::string& name); 
   void addRule(std::string& name, Rule* rule);

@@ -1,0 +1,10 @@
+initialize -> 
+assign(MATROAD  = 0)
+assign(MATROADX = 1)
+assign(MATWALL  = 2)
+assign(MATWALL2 = 3)
+assign(MATMESH  = 4)
+assign(MATROOF  = 5)
+assign(MATROOFT = 6)
+assign(MATGLASS = 7)
+;

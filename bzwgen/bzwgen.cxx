@@ -46,6 +46,8 @@ int main (int argc, char* argv[]) {
     file.Close();
   }
 
+  ruleset->initialize();
+
   srand((unsigned int)time(NULL));
 
   CCommandLineArgs cmd(argc,argv);
