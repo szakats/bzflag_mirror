@@ -16,7 +16,8 @@
 
 BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Zone(_generator,a,b,astep)
 {
-  mesh = new Mesh();
+  Mesh* mesh = new Mesh();
+  meshes.push_back(mesh);
 
   Vertex corners[4];
   corners[0] = Vertex((float)A.x,(float)A.y,0.2f);
@@ -232,7 +233,8 @@ void BuildZone::subdivideWindows(Mesh* mesh, int wall, int mat) {
 
 void BuildZone::output(Output& out) 
 {
-  mesh->output(out);
+  MeshVectIter itr; 
+  for (itr = meshes.begin(); itr!= meshes.end(); ++itr) (*itr)->output(out);
 /*   out << "  color 0."<< rand()%10+80 << " 0." << rand()%20+80 << " 0."<< rand()%20+80<< " 1.0\n";
 */
 }

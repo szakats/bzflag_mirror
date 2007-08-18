@@ -21,7 +21,7 @@
 
 
 class BuildZone : public Zone {
-  Mesh* mesh;
+  MeshVector meshes;
 public:
   BuildZone(Generator* _generator,Coord2D a, Coord2D b, int astep);
   void addDivider(Mesh* mesh, int base, float width, float height, int mat, bool noNext = false);
@@ -30,7 +30,10 @@ public:
   void generateBuilding(Mesh* mesh, int base, int wall);
   void generateSkyscraper(Mesh* mesh, int base, int wall);
   virtual void output(Output& out);
-  ~BuildZone() { delete mesh; }
+  ~BuildZone() { 
+    MeshVectIter itr; 
+    for (itr = meshes.begin(); itr!= meshes.end(); ++itr) delete (*itr);
+  }
 };
 
 #endif /* __BUILDZONE_H__ */
