@@ -23,8 +23,8 @@
 
 class Zone {
 protected:
-  Coord2D A,B;
   Generator* generator;
+  Coord2D A,B;
   int step;
 public:
   Zone(Generator* _generator, Coord2D a, Coord2D b, int astep) : generator(_generator), A(a), B(b), step(astep) {};
