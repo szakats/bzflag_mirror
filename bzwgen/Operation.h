@@ -52,6 +52,14 @@ public:
   }
 };
 
+class OperationAssign : public OperationSingle {
+protected:
+  std::string attrname;
+public:
+  OperationAssign(RuleSet* _ruleset, Expression* _exp, std::string& _attrname ) : OperationSingle(_ruleset,_exp), attrname(_attrname) {}
+  int runMesh(Mesh*,int face);
+};
+
 
 class OperationMaterial : public OperationSingle {
 public:

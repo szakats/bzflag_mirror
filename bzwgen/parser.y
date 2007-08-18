@@ -23,7 +23,7 @@ void yyunput(int, char*);
   Expression* e;
 }
 %start ruleset
-%token DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV MATERIAL
+%token ASSIGN DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV MATERIAL
 %token <fl> NUMBER
 %token <id> NONTERM ATTRIBUTE
 %type <pv> products
@@ -67,6 +67,7 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | PARTITIONH '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$5); }
   | PARTITIONV '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$5); }
   | MATERIAL '(' expr ')' { $$ = new OperationMaterial(ruleset,$3); }
+  | ASSIGN '(' NONTERM '=' expr ')' { std::string name = std::string($3); $$ = new OperationAssign(ruleset,$5,name); }
   | NONTERM { std::string name = std::string($1); $$ = new OperationNonterminal(ruleset,name); }
 ;
 expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$7); }

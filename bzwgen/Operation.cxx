@@ -17,6 +17,12 @@ int OperationNonterminal::runMesh(Mesh* mesh, int face) {
   return ruleset->runMesh(mesh,face,ref);
 }
 
+int OperationAssign::runMesh(Mesh*, int face) { 
+  flatten();
+  ruleset->addAttr(attrname,value);
+  return face; 
+};
+
 OperationMultifaces::OperationMultifaces(RuleSet* _ruleset, Expression* _exp, StringVector* _facerules) 
 : OperationSingle(_ruleset, _exp), facerules(_facerules), faces(NULL), allsame(false) {
   if (facerules != NULL) {

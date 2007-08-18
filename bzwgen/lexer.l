@@ -7,7 +7,8 @@
 #include "Expression.h"
 #include "parser.hxx"
 
-// Ugly hacks to surpress GCC warnings
+// Ugly hacks to surpress warnings
+#define strdup _strdup
 #define YY_NEVER_INTERACTIVE 1
 #define YY_INPUT(buf,result,max_size) \
 	if ( ((result = fread( buf, 1, max_size, yyin )) == 0) \
@@ -28,6 +29,7 @@ ID [a-zA-Z][a-zA-Z0-9]*
 extrude               { return(EXTRUDE);  }
 expand                { return(EXPAND);   }
 random                { return(RANDOM);   }
+assign                { return(ASSIGN);   }
 material              { return(MATERIAL);   }
 subdivideh            { return(SUBDIVIDEH);}
 subdividev            { return(SUBDIVIDEV);}
