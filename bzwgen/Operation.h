@@ -55,7 +55,7 @@ public:
   OperationExtrude(Expression* _exp) : OperationSingle(_exp) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
-    mesh->extrudeFace(face,value,MATGLASS);
+    mesh->extrudeFace(face,value,mesh->f[face]->mat);
     return face; 
   };
 };
