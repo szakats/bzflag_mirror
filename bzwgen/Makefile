@@ -10,16 +10,16 @@ FILES = \
 	GridGenerator.cxx \
 	GridMap.cxx \
 	Material.cxx \
+	Mesh.cxx \
+	Operation.cxx \
+	OSFile.cxx \
 	Rule.cxx \
 	RuleSet.cxx \
-	Operation.cxx \
-	Mesh.cxx \
-	OSFile.cxx \
 	TextUtils.cxx \
+	bzwgen.cxx \
 	commandArgs.cxx \
 	parser.cxx \
-	lexer.cxx \
-	bzwgen.cxx
+	lexer.cxx
 
 OBJECTS = ${FILES:.cxx=.o}
 
