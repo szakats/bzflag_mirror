@@ -19,7 +19,7 @@
 		
 %}
 DIGIT [0-9]
-ID [a-z][a-z0-9]*
+ID [a-zA-Z][a-zA-Z0-9]*
 %option yylineno
 %%
 "->"                  { return(DEFSIGN);  }
@@ -33,6 +33,7 @@ subdivideh            { return(SUBDIVIDEH);}
 subdividev            { return(SUBDIVIDEV);}
 partitionh            { return(PARTITIONH);}
 partitionv            { return(PARTITIONV);}
+"$"{ID}               { yylval.id = strdup(yytext+1); return(ATTRIBUTE);  }
 {ID}                  { yylval.id = strdup(yytext); return(NONTERM);  }
 #[^\n]*
 [ \t\n\r]+

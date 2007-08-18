@@ -25,7 +25,7 @@ void yyunput(int, char*);
 %start ruleset
 %token DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV MATERIAL
 %token <fl> NUMBER
-%token <id> NONTERM
+%token <id> NONTERM ATTRIBUTE
 %type <pv> products
 %type <p> product
 %type <ov> ops
