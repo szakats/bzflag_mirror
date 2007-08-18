@@ -16,7 +16,7 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     	
     	// catch drag events
     	case osgGA::GUIEventAdapter::DRAG :
-    			
+    		
     		viewer = dynamic_cast<View*>(&aa);
     		
     		if( viewer != NULL && this->lastSelected != NULL && this->lastSelected->getName() == Selection_NODE_NAME ) {
@@ -66,14 +66,14 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
        	case osgGA::GUIEventAdapter::PUSH : {
        		int button = ea.getButton();
        		
-       		if( button == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON ) {
+       		if( button == FL_LEFT_MOUSE ) {
        			viewer = dynamic_cast<View*>(&aa);
        			if( viewer ) {
        				this->prevEvent = osgGA::GUIEventAdapter::PUSH;
        				return this->pickSelector( viewer, ea );
        			}	
        		}
-       		else if( button == osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON ) {
+       		else if( button == FL_RIGHT_MOUSE ) {
         		viewer = dynamic_cast<View*>(&aa);
         		if(viewer) {
         			this->prevEvent = osgGA::GUIEventAdapter::PUSH;
@@ -85,7 +85,7 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
        	}
     	// catch double click events and do a pick
         case osgGA::GUIEventAdapter::DOUBLECLICK :
-        	if( ea.getButton() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON ) {
+        	if( ea.getButton() == FL_LEFT_MOUSE ) {
 	            viewer = dynamic_cast<View*>(&aa);
 	            if (viewer) {
 	            	this->prevEvent = osgGA::GUIEventAdapter::DOUBLECLICK;
