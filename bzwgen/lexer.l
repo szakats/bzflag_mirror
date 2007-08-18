@@ -31,6 +31,8 @@ random                { return(RANDOM);   }
 material              { return(MATERIAL);   }
 subdivideh            { return(SUBDIVIDEH);}
 subdividev            { return(SUBDIVIDEV);}
+partitionh            { return(PARTITIONH);}
+partitionv            { return(PARTITIONV);}
 {ID}                  { yylval.id = strdup(yytext); return(NONTERM);  }
 #[^\n]*
 [ \t\n\r]+

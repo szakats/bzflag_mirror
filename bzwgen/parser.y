@@ -23,7 +23,7 @@ void yyunput(int, char*);
   Expression* e;
 }
 %start ruleset
-%token DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDEH SUBDIVIDEV MATERIAL
+%token DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV MATERIAL
 %token <fl> NUMBER
 %token <id> NONTERM
 %type <pv> products
@@ -31,7 +31,7 @@ void yyunput(int, char*);
 %type <ov> ops
 %type <o> op
 %type <e> expr
-%type <ids> faces faceparam
+%type <ids> faces faceparam singleface
 %%
 ruleset : /* empty */
   | ruleset NONTERM products ';' { 
@@ -53,6 +53,10 @@ faceparam : /* empty */ { $$ = NULL; }
   | '[' '@' NONTERM ']' { std::string name = '@'+std::string($3); $$ = new StringVector(); $$->push_back(name); }
   | '[' faces ']' { $$ = $2; }
 ;
+singleface : /* empty */ { $$ = NULL; }
+  | '[' '@' NONTERM ']' { std::string name = std::string($3); $$ = new StringVector(); $$->push_back(name); }
+  | '[' NONTERM ']' { std::string name = std::string($2); $$ = new StringVector(); $$->push_back(name); }
+  ;
 ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }
 ;
@@ -60,6 +64,8 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude($3,$5,ruleset); 
   | EXPAND '(' expr ')' { $$ = new OperationExpand($3); }
   | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide($3,true,$5,ruleset); }
   | SUBDIVIDEV '(' expr ')' faceparam { $$ = new OperationSubdivide($3,false,$5,ruleset); }
+  | PARTITIONH '(' expr ')' singleface { $$ = new OperationPartition($3,true,$5,ruleset); }
+  | PARTITIONV '(' expr ')' singleface { $$ = new OperationPartition($3,false,$5,ruleset); }
   | MATERIAL '(' expr ')' { $$ = new OperationMaterial($3); }
   | NONTERM { std::string name = std::string($1); $$ = new OperationNonterminal(name,ruleset); }
 ;
