@@ -13,8 +13,6 @@
 
 * .bzw object placement - for allowing the placement of arbitrary .bzw objects, will need a place object rule
 
-* Multi-mesh zones - zones should have the ability to hold multiple meshes, not just one, the sidewalk should be a separate mesh
-
 * Separate floor levels for buildings - so they look more real, with doors too
 
 * Non-quad shapes - badly needed
