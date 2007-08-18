@@ -79,9 +79,15 @@ protected:
 public:
   OperationMultifaces(Expression* _exp, StringVector* _facerules) 
   : OperationSingle(_exp), facerules(_facerules), faces(NULL), allsame(false) {
-    if (facerules != NULL && facerules->size() == 1 && facerules->at(0)[0] == '@') {
-      allsame = true;
-      facerules->at(0).erase(0,1);
+    if (facerules != NULL) {
+      if (facerules->size() == 0) {
+        delete facerules; 
+        facerules = NULL;
+      } else
+      if (facerules->size() == 1 && facerules->at(0)[0] == '@') {
+        allsame = true;
+        facerules->at(0).erase(0,1);
+      }
     }
   }
   int runMesh(Mesh*,int) { 
