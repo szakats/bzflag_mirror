@@ -45,21 +45,21 @@ products : /* empty */ { $$ = new ProductVector(); }
 product : DEFSIGN NUMBER ':' ops { $$ = new Product($4,$2); }
   | DEFSIGN ops { $$ = new Product($2); }
 ;
-faces : /* empty */
-  | faces NONTERM 
-  | faces '*'
+faces : /* empty */ { $$ = new StringVector(); }
+  | faces NONTERM  { std::string name = std::string($2); $$->push_back(name); }
+  | faces '*' { std::string name = std::string(""); $$->push_back(name); }
 ;
-faceparam : /* empty */ 
-  | '[' '@' NONTERM ']' 
-  | '[' faces ']' 
+faceparam : /* empty */ { $$ = NULL; }
+  | '[' '@' NONTERM ']' { std::string name = '@'+std::string($3); $$ = new StringVector(); $$->push_back(name); }
+  | '[' faces ']' { $$ = $2; }
 ;
 ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }
 ;
-op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude($3); }
+op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude($3,$5); }
   | EXPAND '(' expr ')' { $$ = new OperationExpand($3); }
-  | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide($3,true); }
-  | SUBDIVIDEV '(' expr ')' faceparam { $$ = new OperationSubdivide($3,false); }
+  | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide($3,true,$5); }
+  | SUBDIVIDEV '(' expr ')' faceparam { $$ = new OperationSubdivide($3,false,$5); }
   | MATERIAL '(' expr ')' { $$ = new OperationMaterial($3); }
   | NONTERM { std::string name = std::string($1); $$ = new OperationNonterminal(name,ruleset); }
 ;

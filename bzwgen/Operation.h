@@ -85,7 +85,7 @@ public:
     }
   }
   int runMesh(Mesh*,int) { 
-    
+    return 0;
   }
   ~OperationMultifaces() {
     if (facerules != NULL) delete facerules;
@@ -95,7 +95,7 @@ public:
 
 class OperationExtrude : public OperationMultifaces {
 public:
-  OperationExtrude(Expression* _exp) : OperationMultifaces(_exp,NULL) {}
+  OperationExtrude(Expression* _exp, StringVector* facerules) : OperationMultifaces(_exp,facerules) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
     mesh->extrudeFace(face,value,mesh->f[face]->mat);
@@ -107,7 +107,7 @@ class OperationSubdivide : public OperationMultifaces {
   bool horiz;
   StringVector* faces;
 public:
-  OperationSubdivide(Expression* _exp, bool _horiz ) : OperationMultifaces(_exp,NULL), horiz(_horiz) {}
+  OperationSubdivide(Expression* _exp, bool _horiz, StringVector* facerules ) : OperationMultifaces(_exp,facerules), horiz(_horiz) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
     mesh->subdivdeFace(face,round(value),horiz);
