@@ -17,6 +17,7 @@
 #include <string>
 #include "Expression.h"
 #include "Mesh.h"
+#include "globals.h"
 
 class Operation {
 public:
@@ -50,16 +51,6 @@ public:
 };
 
 
-class OperationExtrude : public OperationSingle {
-public:
-  OperationExtrude(Expression* _exp) : OperationSingle(_exp) {}
-  int runMesh(Mesh* mesh,int face) { 
-    flatten();
-    mesh->extrudeFace(face,value,mesh->f[face]->mat);
-    return face; 
-  };
-};
-
 class OperationMaterial : public OperationSingle {
 public:
   OperationMaterial(Expression* _exp) : OperationSingle(_exp) {}
@@ -79,10 +70,44 @@ public:
     return face; 
   };
 };
-class OperationSubdivide : public OperationSingle {
-  bool horiz;
+
+class OperationMultifaces : public OperationSingle {
+protected:
+  StringVector* facerules;
+  IntVector* faces;
+  bool allsame;
 public:
-  OperationSubdivide(Expression* _exp, bool _horiz ) : OperationSingle(_exp), horiz(_horiz) {}
+  OperationMultifaces(Expression* _exp, StringVector* _facerules) 
+  : OperationSingle(_exp), facerules(_facerules), faces(NULL), allsame(false) {
+    if (facerules != NULL && facerules->size() == 1 && facerules->at(0)[0] == '@') {
+      allsame = true;
+      facerules->at(0).erase(0,1);
+    }
+  }
+  int runMesh(Mesh*,int) { 
+    
+  }
+  ~OperationMultifaces() {
+    if (facerules != NULL) delete facerules;
+    if (faces != NULL) delete faces;
+  }  
+};
+
+class OperationExtrude : public OperationMultifaces {
+public:
+  OperationExtrude(Expression* _exp) : OperationMultifaces(_exp,NULL) {}
+  int runMesh(Mesh* mesh,int face) { 
+    flatten();
+    mesh->extrudeFace(face,value,mesh->f[face]->mat);
+    return face; 
+  };
+};
+
+class OperationSubdivide : public OperationMultifaces {
+  bool horiz;
+  StringVector* faces;
+public:
+  OperationSubdivide(Expression* _exp, bool _horiz ) : OperationMultifaces(_exp,NULL), horiz(_horiz) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
     mesh->subdivdeFace(face,round(value),horiz);

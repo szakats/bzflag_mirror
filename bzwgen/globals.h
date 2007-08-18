@@ -29,6 +29,7 @@
 
 #include <vector>
 #include <math.h>
+#include <string>
 
 struct Vertex {
   float x, y, z;
@@ -131,6 +132,7 @@ struct ID4 {
 };
 
 typedef std::vector<int> IntVector;
+typedef std::vector<std::string> StringVector;
 
 struct DiscreetMapNode {
   int z;

@@ -1,6 +1,7 @@
 %{
 #include <memory>
 #include <string>
+#include "globals.h"
 #include "Rule.h"
 #include "RuleSet.h"
 #include "Product.h"
@@ -17,6 +18,7 @@ void yyunput(int, char*);
   ProductVector* pv;
   Product* p;
   OperationVector* ov;
+  StringVector* ids;
   Operation* o;
   Expression* e;
 }
@@ -29,6 +31,7 @@ void yyunput(int, char*);
 %type <ov> ops
 %type <o> op
 %type <e> expr
+%type <ids> faces faceparam
 %%
 ruleset : /* empty */
   | ruleset NONTERM products ';' { 
