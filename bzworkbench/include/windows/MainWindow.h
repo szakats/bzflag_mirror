@@ -91,44 +91,37 @@ public:
 	// static callbacks for buttons
 	static void addBoxCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		//mw->addBoxCallback_real( w );
-		mw->mainMenu->addBoxCallback_real( w );
+		mw->menuBar->addBoxCallback_real( w );
 	}
 	
 	static void addPyramidCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		// mw->addPyramidCallback_real( w );
-		mw->mainMenu->addPyramidCallback_real( w );
+		mw->menuBar->addPyramidCallback_real( w );
 	}
 	
 	static void addTeleporterCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		// mw->addTeleporterCallback_real( w );
-		mw->mainMenu->addTeleporterCallback_real( w );
+		mw->menuBar->addTeleporterCallback_real( w );
 	}
 	
 	static void addBlueBaseCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		// mw->addBlueBaseCallback_real( w );
-		mw->mainMenu->addBlueBaseCallback_real( w );
+		mw->menuBar->addBlueBaseCallback_real( w );
 	}
 	
 	static void addGreenBaseCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		// mw->addGreenBaseCallback_real( w );
-		mw->mainMenu->addGreenBaseCallback_real( w );
+		mw->menuBar->addGreenBaseCallback_real( w );
 	}
 	
 	static void addPurpleBaseCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		// mw->addPurpleBaseCallback_real( w );
-		mw->mainMenu->addPurpleBaseCallback_real( w );
+		mw->menuBar->addPurpleBaseCallback_real( w );
 	}
 	
 	static void addRedBaseCallback(Fl_Widget* w, void* data) {
 		MainWindow* mw = (MainWindow*)(data);
-		// mw->addRedBaseCallback_real( w );
-		mw->mainMenu->addRedBaseCallback_real( w );
+		mw->menuBar->addRedBaseCallback_real( w );
 	}
 	
 	static void configureCallback(Fl_Widget* w, void* data) {
@@ -181,16 +174,6 @@ private:
 	Fl_ImageButton* addGreenBaseButton;
 	Fl_ImageButton* addPurpleBaseButton;
 	Fl_ImageButton* addRedBaseButton;
-	
-	// instantiated callbacks
-	void addBoxCallback_real( Fl_Widget* w );
-	void addPyramidCallback_real( Fl_Widget* w );
-	void addTeleporterCallback_real( Fl_Widget* w );
-	
-	void addBlueBaseCallback_real( Fl_Widget* w );
-	void addGreenBaseCallback_real( Fl_Widget* w );
-	void addPurpleBaseCallback_real( Fl_Widget* w );
-	void addRedBaseCallback_real( Fl_Widget* w );
 	
 	void configureCallback_real( Fl_Widget* w );
 	
