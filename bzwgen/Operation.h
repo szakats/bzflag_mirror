@@ -78,19 +78,7 @@ protected:
   RuleSet* ruleset;
   bool allsame;
 public:
-  OperationMultifaces(Expression* _exp, StringVector* _facerules, RuleSet* _ruleset) 
-  : OperationSingle(_exp), facerules(_facerules), faces(NULL), allsame(false), ruleset(_ruleset) {
-    if (facerules != NULL) {
-      if (facerules->size() == 0) {
-        delete facerules; 
-        facerules = NULL;
-      } else
-      if (facerules->size() == 1 && facerules->at(0)[0] == '@') {
-        allsame = true;
-        facerules->at(0).erase(0,1);
-      }
-    }
-  }
+  OperationMultifaces(Expression* _exp, StringVector* _facerules, RuleSet* _ruleset);
   int runMesh(Mesh* mesh,int);
   ~OperationMultifaces() {
     if (facerules != NULL) delete facerules;
@@ -101,33 +89,14 @@ public:
 class OperationExtrude : public OperationMultifaces {
 public:
   OperationExtrude(Expression* _exp, StringVector* facerules, RuleSet* _ruleset) : OperationMultifaces(_exp,facerules,_ruleset) {}
-  int runMesh(Mesh* mesh,int face) { 
-    flatten();
-    if (facerules != NULL) {
-      faces = mesh->extrudeFaceR(face,value,mesh->f[face]->mat);
-      OperationMultifaces::runMesh(mesh,face);
-    } else {
-      mesh->extrudeFace(face,value,mesh->f[face]->mat);
-    }
-    return face; 
-  };
+  int runMesh(Mesh* mesh,int face);
 };
 
 class OperationSubdivide : public OperationMultifaces {
   bool horiz;
 public:
   OperationSubdivide(Expression* _exp, bool _horiz, StringVector* facerules, RuleSet* _ruleset ) : OperationMultifaces(_exp,facerules,_ruleset), horiz(_horiz) {}
-  int runMesh(Mesh* mesh,int face) { 
-    flatten();
-    faces = mesh->subdivdeFace(face,round(value),horiz);
-    if (facerules == NULL) {
-      delete faces;
-      faces = NULL;
-    } else {
-      OperationMultifaces::runMesh(mesh,face);
-    }
-    return face; 
-  };
+  int runMesh(Mesh* mesh,int face);
 };
 
 

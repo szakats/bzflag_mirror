@@ -17,6 +17,20 @@ int OperationNonterminal::runMesh(Mesh* mesh, int face) {
   return ruleset->runMesh(mesh,face,ref);
 }
 
+OperationMultifaces::OperationMultifaces(Expression* _exp, StringVector* _facerules, RuleSet* _ruleset) 
+: OperationSingle(_exp), facerules(_facerules), faces(NULL), allsame(false), ruleset(_ruleset) {
+  if (facerules != NULL) {
+    if (facerules->size() == 0) {
+      delete facerules; 
+      facerules = NULL;
+    } else
+      if (facerules->size() == 1 && facerules->at(0)[0] == '@') {
+        allsame = true;
+        facerules->at(0).erase(0,1);
+      }
+  }
+}
+
 int OperationMultifaces::runMesh(Mesh* mesh,int) {
   if (allsame) {
     for (size_t i = 0; i < faces->size(); i++)
@@ -31,6 +45,32 @@ int OperationMultifaces::runMesh(Mesh* mesh,int) {
 
   return 0;
 }
+
+
+int OperationExtrude::runMesh(Mesh* mesh,int face) { 
+  flatten();
+  if (facerules != NULL) {
+    faces = mesh->extrudeFaceR(face,value,mesh->f[face]->mat);
+    OperationMultifaces::runMesh(mesh,face);
+  } else {
+    mesh->extrudeFace(face,value,mesh->f[face]->mat);
+  }
+  return face; 
+};
+
+int OperationSubdivide::runMesh(Mesh* mesh,int face) { 
+  flatten();
+  faces = mesh->subdivdeFace(face,round(value),horiz);
+  if (facerules == NULL) {
+    delete faces;
+    faces = NULL;
+  } else {
+    OperationMultifaces::runMesh(mesh,face);
+  }
+  return face; 
+};
+
+
 
 
 // Local Variables: ***
