@@ -15,23 +15,6 @@
 #include <iostream>
 #include "time.h"
 
-// TODO list for simple grid based generator
-// ------------------------------------------
-// PARTIAL DONE TODO: textures
-// PARTIAL DONE TODO: random empty areas (parks?)
-// TODO: railway/highway
-// DONE TODO: cleanup, file split
-// TODO: team bases!
-// TODO: proper command line handling
-// TODO: implement option handling
-// TODO: doxygen 
-// DONE TODO: building recoloring
-// TODO: zone subdivision
-// TODO: object wrappers for basic objects
-// DONE TODO: zones need to use world coordinates
-
-
-
 #include "Output.h"
 #include "Generator.h"
 #include "GridGenerator.h"

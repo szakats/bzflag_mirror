@@ -1,0 +1,42 @@
+ TODO file for bzwgen
+======================
+
+* Texture coords - currently I just assume that the texturing is done autmatically
+
+* Attributes in the grammar - basically C-like defines that are allowed to be set and retrieved instead of numbers
+
+* Roof types - for non-skyscraper buildings, this might need some few grammar operations implemented
+
+* Triangulation/Convexation algorithm - to handle non-convex shapes
+
+* Fixing expand to handle non-convex shapes properly
+
+* Snapgrids - to make buildings follow set snap lines, needs Attributes to be implemented
+
+* .bzw object placement - for allowing the placement of arbitrary .bzw objects, will need a place object rule
+
+* Multi-mesh zones - zones should have the ability to hold multiple meshes, not just one, the sidewalk should be a separate mesh
+
+* Separate floor levels for buildings - so they look more real, with doors too
+
+* Non-quad shapes - badly needed
+
+* Tesselate algorithm - quad to oct for example
+
+* Multishapes - will need a serious rehaul of the grammar though :/
+
+* Bases support - needed to make the thing useful xP
+
+* Scatter maps - like the default random bzfs map but better
+
+* Definition files - for generator flavours
+
+* Command line arguments - at least to change output name :P
+
+* N-gon generation - for non quad buildings
+
+* Better zone split algorithm - the current one sucks badly
+
+* Documentation of the source code - it's getting less and less self-explanatory
+
+* Documentation of the grammar files - badly needed
