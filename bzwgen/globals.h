@@ -31,6 +31,8 @@
 #include <math.h>
 #include <string>
 
+extern int debugLevel;
+
 struct Vertex {
   float x, y, z;
  

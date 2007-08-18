@@ -24,7 +24,7 @@ class RuleSet {
 public:
   RuleSet() : recursion(0) {}
   int runMesh(Mesh* mesh, int face, std::string& rulename);
-  void addRule(std::string& name, Rule* rule) { rules[name] = rule; }
+  void addRule(std::string& name, Rule* rule);
   ~RuleSet();
 };
 

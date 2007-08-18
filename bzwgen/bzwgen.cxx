@@ -43,6 +43,8 @@
 extern int yyparse(RuleSet*);
 extern FILE* yyin;
 
+int debugLevel = 2;
+
 int main (int argc, char* argv[]) {
   COSDir ruledir("rules");
   COSFile file;

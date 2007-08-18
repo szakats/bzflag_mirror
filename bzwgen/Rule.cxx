@@ -24,6 +24,7 @@ Product* Rule::getProduct() {
     roll -= rarity;
     ++itr;
   } while (itr!= products->end());
+  if (debugLevel > 0) printf("Warning : Rule '%s' returned no product!\n",name.c_str());
   return NULL;
 }
 int Rule::runMesh(Mesh* mesh, int face) {

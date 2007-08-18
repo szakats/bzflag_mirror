@@ -11,13 +11,22 @@
  */
 
 #include "RuleSet.h"
+#include "globals.h"
+
+void RuleSet::addRule(std::string& name, Rule* rule) { 
+  if (debugLevel > 1) {
+    printf("Added rule '%s'.\n",rule->getName().c_str());
+  }
+  rules[name] = rule; 
+}
+
 
 int RuleSet::runMesh(Mesh* mesh, int face, std::string& rulename) {
   if (recursion == -1) return -1;
   recursion++;
   if (recursion == MAX_RECURSION) {
     recursion = -1;
-    printf("\nRecursion level 1000 reached! Are you sure you have no infinite loops?\n");
+    printf("Warning : Recursion level 1000 reached! Are you sure you have no infinite loops?\n");
     return -1;
   }
   RuleMapIter itr = rules.find(rulename); 
