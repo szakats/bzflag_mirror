@@ -31,8 +31,8 @@ b1insetwall -> extrude(-3.0) ;
 skyscraper
 -> 0.4 : material(7) extrude(random(16.0,32.0,8.0)) [ @specialwall ] top 
 -> 0.3 : material(7) extrude(16.0) skycont 
--> 0.2 : material(7) extrude(random(24.0,40.0,8.0)) expand(-10.0) top
--> 0.1 : 
+-> 0.28 : material(7) extrude(random(24.0,40.0,8.0)) expand(-10.0) top
+-> 0.02 : 
 ;
 
 specialwall -> subdivideh(3) [ * insetwall * ] ;
