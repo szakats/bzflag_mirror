@@ -279,7 +279,7 @@ void Mesh::chamferFace(int fid, float amount) {
     Vertex a = in[i]-in[modprev(i,size)];
     Vertex b = in[i]-in[modnext(i,size)];
     float af = (a.length()-amount)/a.length();
-    float bf = (a.length()-amount)/b.length();
+    float bf = (b.length()-amount)/b.length();
     a = in[modprev(i,size)]+a*af;
     b = in[modnext(i,size)]+b*bf;
     v[old[i]] = a;
