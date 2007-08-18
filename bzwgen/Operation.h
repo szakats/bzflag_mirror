@@ -92,7 +92,6 @@ public:
   OperationMultifaces(RuleSet* _ruleset, Expression* _exp, StringVector* _facerules);
   int runMesh(Mesh* mesh,int);
   ~OperationMultifaces() {
-    if (mesh == NULL) return 0;
     if (facerules != NULL) delete facerules;
     if (faces != NULL) delete faces;
   }  
