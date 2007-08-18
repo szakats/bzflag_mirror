@@ -91,7 +91,7 @@ public:
       }
     }
   }
-  int runMesh(Mesh*,int);
+  int runMesh(Mesh* mesh,int);
   ~OperationMultifaces() {
     if (facerules != NULL) delete facerules;
     if (faces != NULL) delete faces;

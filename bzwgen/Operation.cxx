@@ -17,7 +17,18 @@ int OperationNonterminal::runMesh(Mesh* mesh, int face) {
   return ruleset->runMesh(mesh,face,ref);
 }
 
-int OperationMultifaces::runMesh(Mesh*,int) { 
+int OperationMultifaces::runMesh(Mesh* mesh,int) {
+  if (allsame) {
+    for (size_t i = 0; i < faces->size(); i++)
+      ruleset->runMesh(mesh,faces->at(i),facerules->at(0));
+    return 0;
+  }
+  for (size_t i = 0; i < facerules->size(); i++) {
+    if (facerules->at(i).empty()) continue;
+    if (i >= faces->size()) break;
+    ruleset->runMesh(mesh,faces->at(i),facerules->at(i));
+  }
+
   return 0;
 }
 
