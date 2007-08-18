@@ -30,6 +30,7 @@
 #include <vector>
 #include <math.h>
 #include <string>
+#include <map>
 
 extern int debugLevel;
 
@@ -135,6 +136,7 @@ struct ID4 {
 
 typedef std::vector<int> IntVector;
 typedef std::vector<std::string> StringVector;
+typedef std::map<std::string,float> AttributeMap;
 
 struct DiscreetMapNode {
   int z;

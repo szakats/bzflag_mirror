@@ -20,6 +20,16 @@ void RuleSet::addRule(std::string& name, Rule* rule) {
   rules[name] = rule; 
 }
 
+float RuleSet::getAttr(std::string& name) {
+  AttributeMap::iterator itr = attrmap.find(name); 
+  if (itr == attrmap.end()) {
+    printf("Warning : attribute '%s' not found!\n",name.c_str());
+    return 0.0f;
+  }
+  return itr->second;
+}
+
+
 
 int RuleSet::runMesh(Mesh* mesh, int face, std::string& rulename) {
   if (recursion == -1) return -1;

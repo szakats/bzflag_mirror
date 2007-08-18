@@ -20,10 +20,13 @@
 
 class RuleSet {
   RuleMap rules;
+  AttributeMap attrmap;
   int recursion;
 public:
   RuleSet() : recursion(0) {}
   int runMesh(Mesh* mesh, int face, std::string& rulename);
+  void addAttr(std::string& name, float value) { attrmap[name] = value; }
+  float getAttr(std::string& name); 
   void addRule(std::string& name, Rule* rule);
   ~RuleSet();
 };
