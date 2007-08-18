@@ -375,14 +375,14 @@ waterLevel* Model::getWaterLevelData() { return modelRef->_getWaterLevelData(); 
  * Returns true of the object was added; false if there's something already registered with that name
  */
 bool Model::registerObject(string& name, DataEntry* (*init)(string&)) { return modelRef->_registerObject(name, init); }
-bool Model::registerObject(const char* name, const char* hierarchy, const char* terminator, DataEntry* (*init)(string&))
-	{ return modelRef->_registerObject(name, hierarchy, terminator, init); }
+bool Model::registerObject(const char* name, const char* hierarchy, const char* terminator, DataEntry* (*init)(string&), ConfigurationDialog* (*config)(DataEntry*))
+	{ return modelRef->_registerObject(name, hierarchy, terminator, init, config); }
 	
 bool Model::_registerObject(string& name, DataEntry* (*init)(string&)) {
-	return this->_registerObject( name.c_str(), "", "end", init);
+	return this->_registerObject( name.c_str(), "", "end", init, NULL);
 }
 
-bool Model::_registerObject(const char* _name, const char* _hierarchy, const char* _terminator, DataEntry* (*init)(string&)) {
+bool Model::_registerObject(const char* _name, const char* _hierarchy, const char* _terminator, DataEntry* (*init)(string&), ConfigurationDialog* (*config)(DataEntry*)) {
 	// catch NULLs
 	if(_name == NULL)
 		return false;
@@ -406,6 +406,9 @@ bool Model::_registerObject(const char* _name, const char* _hierarchy, const cha
 	
 	// add the initializer for this object
 	this->cmap[ name ] = init;
+	
+	// add the configuration dialog for this object
+	this->configMap[ name ] = config;
 	
 	return true;
 		
@@ -962,3 +965,17 @@ bool Model::_linkTeleporters( teleporter* from, teleporter* to ) {
 	return true;
 }
 
+ConfigurationDialog* Model::configureObject( DataEntry* d) { return modelRef->_configureObject( d ); }
+// configure an object
+ConfigurationDialog* Model::_configureObject( DataEntry* d ) {
+	if( d == NULL )
+		return NULL;
+		
+	if( configMap.count( d->getHeader() ) == 0 )
+		return NULL;
+		
+	if( configMap[ d->getHeader() ] == NULL )
+		return NULL;
+		
+	return configMap[ d->getHeader() ](d);
+}

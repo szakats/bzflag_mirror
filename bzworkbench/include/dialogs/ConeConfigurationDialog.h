@@ -23,6 +23,15 @@ public:
 	// constructor
 	ConeConfigurationDialog( cone* theCone );
 	
+	// static constructor
+	static ConfigurationDialog* init( DataEntry* d ) { 
+		cone* c = dynamic_cast< cone* > (d);
+		if( c )
+			return new ConeConfigurationDialog( dynamic_cast< cone* >( d ) );
+		else
+			return NULL;
+	}
+	
 	// destructor
 	virtual ~ConeConfigurationDialog() { }
 	
