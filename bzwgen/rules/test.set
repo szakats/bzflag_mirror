@@ -7,7 +7,7 @@ floor
 -> 0.1 : 
 ;
 
-specialwall -> subdivide(3) [ * insetwall * ] ;
+specialwall -> subdivideh(3) [ * insetwall * ] ;
 
 insetwall -> extrude(-5.0) ;
 

@@ -29,7 +29,8 @@ extrude               { return(EXTRUDE);  }
 expand                { return(EXPAND);   }
 random                { return(RANDOM);   }
 material              { return(MATERIAL);   }
-subdivide             { return(SUBDIVIDE);}
+subdivideh            { return(SUBDIVIDEH);}
+subdividev            { return(SUBDIVIDEV);}
 {ID}                  { yylval.id = strdup(yytext); return(NONTERM);  }
 #[^\n\r]*
 [ \t\n\r]+

@@ -80,11 +80,12 @@ public:
   };
 };
 class OperationSubdivide : public OperationSingle {
+  bool horiz;
 public:
-  OperationSubdivide(Expression* _exp) : OperationSingle(_exp) {}
+  OperationSubdivide(Expression* _exp, bool _horiz ) : OperationSingle(_exp), horiz(_horiz) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
-    mesh->subdivdeFace(face,round(value),true);
+    mesh->subdivdeFace(face,round(value),horiz);
     return face; 
   };
 };
