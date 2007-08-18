@@ -13,7 +13,6 @@ FILES = \
 	Rule.cxx \
 	RuleSet.cxx \
 	Operation.cxx \
-	Material.cxx \
 	Mesh.cxx \
 	OSFile.cxx \
 	TextUtils.cxx \
