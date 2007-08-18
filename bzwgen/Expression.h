@@ -14,7 +14,10 @@
 #define __EXPRESSION_H__
 
 #include <vector>
+#include <string>
 #include "globals.h"
+
+class RuleSet;
 
 class Expression {
 public:
@@ -27,6 +30,14 @@ class ExpressionConst : public Expression {
 public:
   ExpressionConst(float _value) : value(_value) {};
   float calculate() { return value; };
+};
+
+class ExpressionAttribute : public Expression {
+  RuleSet* ruleset;
+  std::string attrname;
+public:
+  ExpressionAttribute(RuleSet* _ruleset, std::string& _attrname) : ruleset(_ruleset), attrname(_attrname) {};
+  float calculate();
 };
 
 class ExpressionRandom : public Expression {

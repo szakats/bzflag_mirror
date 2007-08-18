@@ -12,6 +12,7 @@ FILES = \
 	Material.cxx \
 	Mesh.cxx \
 	Operation.cxx \
+	Expression.cxx \
 	OSFile.cxx \
 	Rule.cxx \
 	RuleSet.cxx \

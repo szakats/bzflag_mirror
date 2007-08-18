@@ -198,6 +198,10 @@
 				Name="Language"
 				>
 				<File
+					RelativePath=".\Expression.cxx"
+					>
+				</File>
+				<File
 					RelativePath=".\lexer.cxx"
 					>
 					<FileConfiguration
