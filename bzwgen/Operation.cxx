@@ -17,6 +17,10 @@ int OperationNonterminal::runMesh(Mesh* mesh, int face) {
   return ruleset->runMesh(mesh,face,ref);
 }
 
+int OperationMultifaces::runMesh(Mesh*,int) { 
+  return 0;
+}
+
 
 // Local Variables: ***
 // mode:C++ ***

@@ -75,10 +75,11 @@ class OperationMultifaces : public OperationSingle {
 protected:
   StringVector* facerules;
   IntVector* faces;
+  RuleSet* ruleset;
   bool allsame;
 public:
-  OperationMultifaces(Expression* _exp, StringVector* _facerules) 
-  : OperationSingle(_exp), facerules(_facerules), faces(NULL), allsame(false) {
+  OperationMultifaces(Expression* _exp, StringVector* _facerules, RuleSet* _ruleset) 
+  : OperationSingle(_exp), facerules(_facerules), faces(NULL), allsame(false), ruleset(_ruleset) {
     if (facerules != NULL) {
       if (facerules->size() == 0) {
         delete facerules; 
@@ -90,10 +91,7 @@ public:
       }
     }
   }
-  int runMesh(Mesh*,int) { 
-
-    return 0;
-  }
+  int runMesh(Mesh*,int);
   ~OperationMultifaces() {
     if (facerules != NULL) delete facerules;
     if (faces != NULL) delete faces;
@@ -102,7 +100,7 @@ public:
 
 class OperationExtrude : public OperationMultifaces {
 public:
-  OperationExtrude(Expression* _exp, StringVector* facerules) : OperationMultifaces(_exp,facerules) {}
+  OperationExtrude(Expression* _exp, StringVector* facerules, RuleSet* _ruleset) : OperationMultifaces(_exp,facerules,_ruleset) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
     if (facerules != NULL) {
@@ -118,7 +116,7 @@ public:
 class OperationSubdivide : public OperationMultifaces {
   bool horiz;
 public:
-  OperationSubdivide(Expression* _exp, bool _horiz, StringVector* facerules ) : OperationMultifaces(_exp,facerules), horiz(_horiz) {}
+  OperationSubdivide(Expression* _exp, bool _horiz, StringVector* facerules, RuleSet* _ruleset ) : OperationMultifaces(_exp,facerules,_ruleset), horiz(_horiz) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
     faces = mesh->subdivdeFace(face,round(value),horiz);

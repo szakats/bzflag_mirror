@@ -56,10 +56,10 @@ faceparam : /* empty */ { $$ = NULL; }
 ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }
 ;
-op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude($3,$5); }
+op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude($3,$5,ruleset); }
   | EXPAND '(' expr ')' { $$ = new OperationExpand($3); }
-  | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide($3,true,$5); }
-  | SUBDIVIDEV '(' expr ')' faceparam { $$ = new OperationSubdivide($3,false,$5); }
+  | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide($3,true,$5,ruleset); }
+  | SUBDIVIDEV '(' expr ')' faceparam { $$ = new OperationSubdivide($3,false,$5,ruleset); }
   | MATERIAL '(' expr ')' { $$ = new OperationMaterial($3); }
   | NONTERM { std::string name = std::string($1); $$ = new OperationNonterminal(name,ruleset); }
 ;
