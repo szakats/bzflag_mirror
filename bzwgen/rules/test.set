@@ -1,9 +1,37 @@
 # Test file for the parser. Will be changed to something more working later.
 
-floor
--> 0.4 : material(7) extrude(random(16.0,64.0,8.0)) [ @specialwall ] top 
--> 0.3 : material(7) extrude(20.0) floorcont 
--> 0.2 : material(7) extrude(random(32.0,64.0,8.0)) expand(-10.0) top
+building
+-> 0.2 : skyscraper
+-> 0.8 : building1
+;
+
+building1 
+-> 0.6 : material(7) extrude(4.0) b1floors
+-> 0.2 : material(3) extrude(3.7) extrude(0) expand(1.0) b1floors
+-> 0.1 : material(3) extrude(random(12.0,40.0,4.0)) [ * b1sky * b1sky ]
+-> 0.1 : material(3) extrude(random(12.0,40.0,4.0)) [ b1sky * b1sky * ]
+;
+
+b1sky 
+-> material(7) ;
+
+b1floors
+-> 0.6 : ledge material(3) extrude(3.7) b1floors
+-> 0.2 : ledge material(3) extrude(3.7) [ @b1special ] b1floors
+-> 0.2 : top
+;
+
+b1special
+-> subdivideh(3) [ * b1insetwall * ] 
+;
+
+b1insetwall -> extrude(-3.0) ;
+
+
+skyscraper
+-> 0.4 : material(7) extrude(random(16.0,32.0,8.0)) [ @specialwall ] top 
+-> 0.3 : material(7) extrude(16.0) skycont 
+-> 0.2 : material(7) extrude(random(24.0,40.0,8.0)) expand(-10.0) top
 -> 0.1 : 
 ;
 
@@ -13,10 +41,10 @@ insetwall -> extrude(-5.0) ;
 
 top -> material(4) extrude(0.0) expand(0.3) extrude(0.5) material(5);
 
-ledge -> material(4) extrude(0.0) expand(0.3) extrude(0.5) extrude(0.0) expand(-0.3) material(7);
+ledge -> material(4) extrude(0.0) expand(0.3) extrude(0.5) extrude(0.0) expand(-0.3) ;
 
-floorcont
--> 0.6 : ledge extrude(20.0) floorcont
+skycont
+-> 0.6 : ledge material(7) extrude(16.0) skycont
 -> 0.4 : top
 ;
 

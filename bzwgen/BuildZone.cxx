@@ -61,8 +61,8 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
     mesh.weldVertices((*mesh.f[base]->vtx)[i],(*mesh.f[base]->vtx)[i+1],corners[i]+Vertex(0.0f,0.0f,0.2f));
   }
 
-  if (randomBool()) {
-    std::string name = "floor";
+  if (randomChance(70)) {
+    std::string name = "building";
     mesh.inside.push_back(mesh.faceCenter(base)+mesh.faceNormal(base));
     generator->getRuleSet()->runMesh(&mesh,base,name);
     return;
