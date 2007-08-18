@@ -21,15 +21,16 @@
 
 
 class BuildZone : public Zone {
-  Mesh mesh;
+  Mesh* mesh;
 public:
   BuildZone(Generator* _generator,Coord2D a, Coord2D b, int astep);
-  void addDivider(int base, float width, float height, int mat, bool noNext = false);
-  void subdivideWindows(int wall, int mat);
-  void longerSide(int face, float* length, bool* orientation);
-  void generateBuilding(int base, int wall);
-  void generateSkyscraper(int base, int wall);
+  void addDivider(Mesh* mesh, int base, float width, float height, int mat, bool noNext = false);
+  void subdivideWindows(Mesh* mesh, int wall, int mat);
+  void longerSide(Mesh* mesh, int face, float* length, bool* orientation);
+  void generateBuilding(Mesh* mesh, int base, int wall);
+  void generateSkyscraper(Mesh* mesh, int base, int wall);
   virtual void output(Output& out);
+  ~BuildZone() { delete mesh; }
 };
 
 #endif /* __BUILDZONE_H__ */
