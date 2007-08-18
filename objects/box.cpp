@@ -52,6 +52,8 @@ int box::update(string& data) {
 // NOTE: don't call superclass update method, because it deals only with transformations (which are n/a here)
 int box::update(UpdateMessage& message) {
 	
+	int result = bz2object::update( message );
+	
 	switch( message.type ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
 			this->setPos( *(message.getAsPosition()) );
@@ -107,7 +109,7 @@ int box::update(UpdateMessage& message) {
 			break;
 		}
 		default:	// unknown event; don't handle
-			return 0;
+			return result;
 	}
 	
 	return 1;
@@ -571,6 +573,8 @@ void box::updateGeometry( UpdateMessage& message ) {
 						double multy = (y != 0.0 ? 0.35 : 0.0);
 							
 						(*texCoords0)[i3].set( x, y + multy * scaleFactor->z() );
+						
+						tmp[i3] = i3;
 					}
 					
 					// advance the texture indices
@@ -588,6 +592,7 @@ void box::updateGeometry( UpdateMessage& message ) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
 	// do a full scale
 	else if( message.type == UpdateMessage::SET_SCALE ) {
 		
@@ -637,17 +642,16 @@ void box::updateGeometry( UpdateMessage& message ) {
 				printf("not a Vec2Array\n");
 			}
 			
-			/*
-			 * Basically, we're going to compute the normals for each of the faces, so we can compute the dot product
-			 * between the scaleFactor and the normal, and then the angle between the two vectors.  The angle will
-			 * be used to compute the scaling factor.
-			 * 
-			 * For example,
-			 * (0 or pi) radians ==> scaleFactor || normal ==> no scaling; and
-			 * pi/2 radians ==> scaleFactor _|_ normal ==> full scaling
-			 * 
-			 * NOTE: We know in advance here that OSG will load box.obj's data as triangle strips.
-			 */
+			
+			 // Basically, we're going to compute the normals for each of the faces, so we can compute the dot product
+			 // between the scaleFactor and the normal, and then the angle between the two vectors.  The angle will
+			 // be used to compute the scaling factor.
+			 // 
+			 // For example,
+			 // (0 or pi) radians ==> scaleFactor || normal ==> no scaling; and
+			 // pi/2 radians ==> scaleFactor _|_ normal ==> full scaling
+			 // 
+			 // NOTE: We know in advance here that OSG will load box.obj's data as triangle strips.
 			
 			if( vertexArray0 != NULL && texCoords0 != NULL && vertexArray1 != NULL && texCoords1 != NULL ) {
 				// iterate through the wall primitives
@@ -1048,5 +1052,5 @@ void box::updateGeometry( UpdateMessage& message ) {
 		}
 		
 	}
-	
+	*/
 }
