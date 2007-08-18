@@ -17,7 +17,7 @@
 
 * Non-quad shapes - badly needed
 
-* Tesselate algorithm - quad to oct for example
+* Chamfer algorithm - quad to oct for example
 
 * Multishapes - will need a serious rehaul of the grammar though :/
 

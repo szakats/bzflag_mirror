@@ -261,6 +261,34 @@ void Mesh::output(Output& out) {
   out.line("end\n");
 }
 
+// TODO: handle texcoords?
+// TODO: handle previous?
+void Mesh::chamferFace(int fid, float amount) {
+  IntVector old;
+  int size = f[fid]->vtx->size();
+  for (int i = 0; i < size; i++) {
+    old.push_back(f[fid]->vtx->at(i));
+  }
+  f[fid]->vtx->clear();
+  VertexVector in;
+  VertexVector out;
+  for (int i = 0; i < size; i++) {
+    in.push_back(v[old[i]]);
+  }
+  for (int i = 0; i < size; i++) {
+    Vertex a = in[i]-in[modprev(i,size)];
+    Vertex b = in[i]-in[modnext(i,size)];
+    float af = (a.length()-amount)/a.length();
+    float bf = (a.length()-amount)/b.length();
+    a = in[modprev(i,size)]+a*af;
+    b = in[modnext(i,size)]+b*bf;
+    v[old[i]] = a;
+    f[fid]->vtx->push_back(old[i]);
+    f[fid]->vtx->push_back(addVertex(b));
+  }
+}
+
+
 Mesh::~Mesh() {
   FaceVectIter itr; 
   for (itr = f.begin(); itr!= f.end(); ++itr) delete (*itr);
