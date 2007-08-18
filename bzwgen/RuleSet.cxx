@@ -21,7 +21,10 @@ int RuleSet::runMesh(Mesh* mesh, int face, std::string& rulename) {
     return -1;
   }
   RuleMapIter itr = rules.find(rulename); 
-  if (itr == rules.end()) return -1;
+  if (itr == rules.end()) {
+    printf("Warning : rule '%s' not found!",rulename);
+    return -1;
+  }
   int result = itr->second->runMesh(mesh,face);
   recursion--;
   return result;
