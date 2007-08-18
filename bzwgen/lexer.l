@@ -28,6 +28,7 @@ ID [a-z][a-z0-9]*
 extrude               { return(EXTRUDE);  }
 expand                { return(EXPAND);   }
 random                { return(RANDOM);   }
+material              { return(MATERIAL);   }
 subdivide             { return(SUBDIVIDE);}
 {ID}                  { yylval.id = strdup(yytext); return(NONTERM);  }
 #[^\n\r]*

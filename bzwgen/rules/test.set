@@ -9,7 +9,7 @@ floor
 
 insetwall -> extrude(-5.0) ;
 
-top -> extrude(0.0) expand(0.3) extrude(0.5) ;
+top -> material(4) extrude(0.0) expand(0.3) extrude(0.5) material(5);
 
 ledge -> extrude(0.0) expand(0.3) extrude(0.5) expand(-0.3) ;
 

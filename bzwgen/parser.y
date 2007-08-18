@@ -21,7 +21,7 @@ void yyunput(int, char*);
   Expression* e;
 }
 %start ruleset
-%token DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDE
+%token DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDE MATERIAL
 %token <fl> NUMBER
 %token <id> NONTERM
 %type <pv> products
@@ -48,6 +48,7 @@ ops : /* empty */ { $$ = new OperationVector(); }
 op : EXTRUDE '(' expr ')' { $$ = new OperationExtrude($3); }
   | EXPAND '(' expr ')' { $$ = new OperationExpand($3); }
   | SUBDIVIDE '(' expr ')' { $$ = new OperationSubdivide($3); }
+  | MATERIAL '(' expr ')' { $$ = new OperationMaterial($3); }
   | NONTERM { std::string name = std::string($1); $$ = new OperationNonterminal(name,ruleset); }
 ;
 expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$7); }
