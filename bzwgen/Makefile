@@ -10,6 +10,10 @@ FILES = \
 	GridGenerator.cxx \
 	GridMap.cxx \
 	Material.cxx \
+	Rule.cxx \
+	RuleSet.cxx \
+	Operation.cxx \
+	Material.cxx \
 	Mesh.cxx \
 	OSFile.cxx \
 	TextUtils.cxx \
