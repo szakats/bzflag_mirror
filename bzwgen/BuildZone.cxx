@@ -25,31 +25,22 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   corners[3] = Vertex((float)A.x,(float)B.y,0.2f);
 
   /* SIDEWALK */
-  Vertex insetX = Vertex(INSET,0.0f,0.0f);
-  Vertex insetY = Vertex(0.0f,INSET,0.0f);
 
   Face* swface = new Face();
   swface->mat = MATMESH;
-  swface->addVertex(mesh->addVertex(corners[0]+insetY));
-  swface->addVertex(mesh->addVertex(corners[0]+insetX));
-  swface->addVertex(mesh->addVertex(corners[1]-insetX));
-  swface->addVertex(mesh->addVertex(corners[1]+insetY));
-  swface->addVertex(mesh->addVertex(corners[2]-insetY));
-  swface->addVertex(mesh->addVertex(corners[2]-insetX));
-  swface->addVertex(mesh->addVertex(corners[3]+insetX));
-  swface->addVertex(mesh->addVertex(corners[3]-insetY));
+  for (int i = 0; i < 4; i++) {
+    swface->addVertex(mesh->addVertex(corners[i]));
+  }
 
   int base = mesh->addFace(swface);
   mesh->inside.push_back(mesh->faceCenter(base));
   mesh->expandFace(base,1.0f);
+  mesh->chamferFace(base,1.0f);
   mesh->extrudeFace(base,0.2f,MATMESH);
 
   meshes.push_back(mesh);
 
-//  for (int i = 0; i < 4; i++) {
-//    mesh->weldVertices((*mesh->f[base]->vtx)[i],(*mesh->f[base]->vtx)[i+1],corners[i]+Vertex(0.0f,0.0f,0.2f));
-//  }
-
+  return;
   /* SIDEWALK END */
 
   if (randomChance(3)) return;
