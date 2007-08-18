@@ -25,6 +25,8 @@ class teleporter;
 #include "../Observable.h"
 #include "ObserverMessage.h"
 
+#include "../dialogs/ConfigurationDialog.h"
+
 #include <osg/ref_ptr>
 #include <osg/Vec3>
 
@@ -81,6 +83,7 @@ public:
 	static vector< bz2object* >& getSelection();
 	static void assignMaterial( const string& matref, bz2object* obj );
 	static void assignMaterial( material* matref, bz2object* obj );
+	static ConfigurationDialog* configureObject( DataEntry* obj );
 	
 	// editor-like methods (BZWB-specific)
 	static bool cutSelection();
@@ -112,6 +115,7 @@ public:
 	vector< bz2object* >& _getSelection() { return this->selectedObjects; }
 	void _assignMaterial( const string& matref, bz2object* obj );
 	void _assignMaterial( material* matref, bz2object* obj );
+	ConfigurationDialog* _configureObject( DataEntry* obj );
 	
 	// editor-like methods (BZWB-specific)--instantiated
 	bool _cutSelection();
@@ -123,7 +127,7 @@ public:
 	
 	// plugin-specific API
 	static bool registerObject(string& name, DataEntry* (*init)(string&));
-	static bool registerObject(const char* name, const char* hierarchy, const char* terminator, DataEntry* (*init)(string&));
+	static bool registerObject(const char* name, const char* hierarchy, const char* terminator, DataEntry* (*init)(string&), ConfigurationDialog* (*config)(DataEntry*) = NULL);
 	static bool isSupportedObject(const char* name);
 	static bool isSupportedTerminator(const char* name, const char* end);
 	static bool isSupportedHierarchy(const char* name);
@@ -132,6 +136,8 @@ public:
 	static const string getSupportedObjects();
 	static const string getSupportedHierarchies();
 	static const string getSupportedTerminators();
+	static bool hasInitializer( DataEntry* d );
+	static bool hasConfigurationDialog( DataEntry* d );
 	
 	// methods to manipulate the aforementioned strings
 	static bool addObjectSupport(const char* name);
@@ -154,7 +160,7 @@ public:
 	
 	// instantiated plug-in API
 	bool _registerObject(string& name, DataEntry* (*init)(string&));
-	bool _registerObject(const char* name, const char* hierarchy, const char* terminator, DataEntry* (*init)(string&));
+	bool _registerObject(const char* name, const char* hierarchy, const char* terminator, DataEntry* (*init)(string&), ConfigurationDialog* (*config)(DataEntry*));
 	bool _isSupportedObject(const char* name);
 	bool _isSupportedTerminator(const char* name, const char* end);
 	bool _isSupportedHierarchy(const char* name);
@@ -163,6 +169,8 @@ public:
 	const string _getSupportedObjects();
 	const string _getSupportedHierarchies();
 	const string _getSupportedTerminators();
+	bool _hasInitializer( DataEntry* d ) { return ( cmap.count( d->getHeader() ) == 0 || cmap[ d->getHeader() ] == NULL ) ? false : true; }
+	bool _hasConfigurationDialog( DataEntry* d ) { return ( configMap.count( d->getHeader() ) == 0 || configMap[ d->getHeader() ] == NULL ) ? false : true; }
 	
 private:
 
@@ -198,6 +206,9 @@ private:
 	
 // map from strings to initializers
 	map<string, DataEntry* (*)(string&)> cmap;
+	
+// map from strings to configuration dialog initializers
+	map<string, ConfigurationDialog* (*)(DataEntry*)> configMap;
 	
 // build the default bzw objects in
 	void buildDatabase();

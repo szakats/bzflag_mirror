@@ -179,6 +179,6 @@ void MainWindow::configureCallback_real( Fl_Widget* w ) {
 	MasterConfigurationDialog* mcd = new MasterConfigurationDialog( obj );
 	mcd->show();
 	
-	if( obj->getHeader() == "cone" )
-		mcd->setAdditionalConfiguration( new ConeConfigurationDialog( dynamic_cast< cone* >(obj) ));
+	if( this->model->_hasInitializer( obj ) )
+		mcd->setAdditionalConfiguration( this->model->_configureObject( obj ) );
 }

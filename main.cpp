@@ -66,7 +66,7 @@ void buildModelDatabase() {
 	Model::registerObject("arc", NULL, "end", arc::init);
 	Model::registerObject("base", NULL, "end", base::init);
 	Model::registerObject("box", NULL, "end", box::init);
-	Model::registerObject("cone", NULL, "end", cone::init);
+	Model::registerObject("cone", NULL, "end", cone::init, ConeConfigurationDialog::init);
 	Model::registerObject("dynamicColor", NULL, "end", dynamicColor::init);
 	Model::registerObject("group", NULL, "end", group::init);
 	Model::registerObject("link", NULL, "end", Tlink::init);
