@@ -56,7 +56,7 @@ int main (int argc, char* argv[]) {
       std::cout << "done.\n";
     } else {
       std::cout << "failed!\n";
-      return 1;
+      return 0;
     }
     file.Close();
   }

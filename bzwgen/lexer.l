@@ -32,7 +32,7 @@ material              { return(MATERIAL);   }
 subdivideh            { return(SUBDIVIDEH);}
 subdividev            { return(SUBDIVIDEV);}
 {ID}                  { yylval.id = strdup(yytext); return(NONTERM);  }
-#[^\n\r]*
+#[^\n]*
 [ \t\n\r]+
 .                     { return(yytext[0]); }
 %%
