@@ -93,6 +93,9 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         // get the model reference
         const Model* getModelRef() { return this->model; }
         
+        // get the selection reference
+        Selection* getSelectionNode() { return this->selection; }
+        
         // get the MainWindow parent, if possible
         MainWindow* requestMainWindow() { return mw; }
         
