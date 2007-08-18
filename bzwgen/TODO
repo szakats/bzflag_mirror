@@ -17,8 +17,6 @@
 
 * Non-quad shapes - badly needed
 
-* Chamfer algorithm - quad to oct for example
-
 * Multishapes - will need a serious rehaul of the grammar though :/
 
 * Bases support - needed to make the thing useful xP
