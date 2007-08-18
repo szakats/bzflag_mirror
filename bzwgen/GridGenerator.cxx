@@ -30,7 +30,7 @@ void GridGenerator::parseOptions(Options opt) {
 void GridGenerator::run() { 
   int x,y;
   Generator::run(); 
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < 30; i++) {
     // TODO: replace this with randomIntRange or the like
     x = randomInt(int(gi.sizeX / 4)-1)*4+4;
     y = randomInt(int(gi.sizeY / 4)-1)*4+4;
