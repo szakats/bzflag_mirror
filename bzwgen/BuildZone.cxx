@@ -40,7 +40,6 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
 
   meshes.push_back(mesh);
 
-  return;
   /* SIDEWALK END */
 
   if (randomChance(3)) return;
