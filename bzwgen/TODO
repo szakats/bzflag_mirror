@@ -3,8 +3,6 @@
 
 * Texture coords - currently I just assume that the texturing is done autmatically
 
-* Attributes in the grammar - basically C-like defines that are allowed to be set and retrieved instead of numbers
-
 * Roof types - for non-skyscraper buildings, this might need some few grammar operations implemented
 
 * Triangulation/Convexation algorithm - to handle non-convex shapes
