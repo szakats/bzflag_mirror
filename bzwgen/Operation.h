@@ -19,8 +19,13 @@
 #include "Mesh.h"
 #include "globals.h"
 
+class RuleSet; // To avoid .h file recursion
+
 class Operation {
+protected:
+  RuleSet* ruleset;
 public:
+  Operation(RuleSet* _ruleset) : ruleset(_ruleset) {}
   virtual int runMesh(Mesh*,int) = 0;
   virtual ~Operation() {}
 };
@@ -28,13 +33,10 @@ public:
 typedef std::vector <Operation*> OperationVector;
 typedef OperationVector::iterator OperationVectIter;
 
-class RuleSet; // To avoid .h file recursion
-
 class OperationNonterminal : public Operation {
   std::string ref;
-  RuleSet* ruleset;
 public:
-  OperationNonterminal(std::string& _ref, RuleSet* _ruleset) : ref(_ref), ruleset(_ruleset) { };
+  OperationNonterminal(RuleSet* _ruleset, std::string& _ref) : Operation(_ruleset), ref(_ref) { };
   int runMesh(Mesh* mesh, int face);
 };
 
@@ -43,7 +45,7 @@ protected:
   Expression *exp;
   float value;
 public:
-  OperationSingle(Expression* _exp) : exp(_exp) { };
+  OperationSingle(RuleSet* _ruleset, Expression* _exp) : Operation(_ruleset), exp(_exp) { };
   void flatten() { value = exp->calculate(); }
   ~OperationSingle() {
     delete exp;
@@ -53,7 +55,7 @@ public:
 
 class OperationMaterial : public OperationSingle {
 public:
-  OperationMaterial(Expression* _exp) : OperationSingle(_exp) {}
+  OperationMaterial(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
     mesh->f[face]->mat = round(value);
@@ -63,7 +65,7 @@ public:
 
 class OperationExpand : public OperationSingle {
 public:
-  OperationExpand(Expression* _exp) : OperationSingle(_exp) {}
+  OperationExpand(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
   int runMesh(Mesh* mesh,int face) { 
     flatten();
     mesh->expandFace(face,value);
@@ -76,9 +78,8 @@ protected:
   StringVector* facerules;
   IntVector* faces;
   bool allsame;
-  RuleSet* ruleset;
 public:
-  OperationMultifaces(Expression* _exp, StringVector* _facerules, RuleSet* _ruleset);
+  OperationMultifaces(RuleSet* _ruleset, Expression* _exp, StringVector* _facerules);
   int runMesh(Mesh* mesh,int);
   ~OperationMultifaces() {
     if (facerules != NULL) delete facerules;
@@ -88,21 +89,21 @@ public:
 
 class OperationExtrude : public OperationMultifaces {
 public:
-  OperationExtrude(Expression* _exp, StringVector* facerules, RuleSet* _ruleset) : OperationMultifaces(_exp,facerules,_ruleset) {}
+  OperationExtrude(RuleSet* _ruleset, Expression* _exp, StringVector* facerules) : OperationMultifaces(_ruleset,_exp,facerules) {}
   int runMesh(Mesh* mesh,int face);
 };
 
 class OperationSubdivide : public OperationMultifaces {
   bool horiz;
 public:
-  OperationSubdivide(Expression* _exp, bool _horiz, StringVector* facerules, RuleSet* _ruleset ) : OperationMultifaces(_exp,facerules,_ruleset), horiz(_horiz) {}
+  OperationSubdivide(RuleSet* _ruleset, Expression* _exp, bool _horiz, StringVector* facerules) : OperationMultifaces(_ruleset,_exp,facerules), horiz(_horiz) {}
   int runMesh(Mesh* mesh,int face);
 };
 
 class OperationPartition : public OperationMultifaces {
   bool horiz;
 public:
-  OperationPartition(Expression* _exp, bool _horiz, StringVector* facerules, RuleSet* _ruleset ) : OperationMultifaces(_exp,facerules,_ruleset), horiz(_horiz) {}
+  OperationPartition(RuleSet* _ruleset, Expression* _exp, bool _horiz, StringVector* facerules) : OperationMultifaces(_ruleset,_exp,facerules), horiz(_horiz) {}
   int runMesh(Mesh* mesh,int face);
 };
 

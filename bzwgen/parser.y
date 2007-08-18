@@ -60,14 +60,14 @@ singleface : /* empty */ { $$ = NULL; }
 ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }
 ;
-op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude($3,$5,ruleset); }
-  | EXPAND '(' expr ')' { $$ = new OperationExpand($3); }
-  | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide($3,true,$5,ruleset); }
-  | SUBDIVIDEV '(' expr ')' faceparam { $$ = new OperationSubdivide($3,false,$5,ruleset); }
-  | PARTITIONH '(' expr ')' singleface { $$ = new OperationPartition($3,true,$5,ruleset); }
-  | PARTITIONV '(' expr ')' singleface { $$ = new OperationPartition($3,false,$5,ruleset); }
-  | MATERIAL '(' expr ')' { $$ = new OperationMaterial($3); }
-  | NONTERM { std::string name = std::string($1); $$ = new OperationNonterminal(name,ruleset); }
+op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); }
+  | EXPAND '(' expr ')' { $$ = new OperationExpand(ruleset,$3); }
+  | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,true,$5); }
+  | SUBDIVIDEV '(' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,false,$5); }
+  | PARTITIONH '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$5); }
+  | PARTITIONV '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$5); }
+  | MATERIAL '(' expr ')' { $$ = new OperationMaterial(ruleset,$3); }
+  | NONTERM { std::string name = std::string($1); $$ = new OperationNonterminal(ruleset,name); }
 ;
 expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$7); }
   | NUMBER { $$ = new ExpressionConst($1); }

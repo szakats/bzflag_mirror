@@ -17,8 +17,8 @@ int OperationNonterminal::runMesh(Mesh* mesh, int face) {
   return ruleset->runMesh(mesh,face,ref);
 }
 
-OperationMultifaces::OperationMultifaces(Expression* _exp, StringVector* _facerules, RuleSet* _ruleset) 
-: OperationSingle(_exp), facerules(_facerules), faces(NULL), allsame(false), ruleset(_ruleset) {
+OperationMultifaces::OperationMultifaces(RuleSet* _ruleset, Expression* _exp, StringVector* _facerules) 
+: OperationSingle(_ruleset, _exp), facerules(_facerules), faces(NULL), allsame(false) {
   if (facerules != NULL) {
     if (facerules->size() == 0) {
       delete facerules; 
