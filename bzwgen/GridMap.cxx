@@ -33,10 +33,38 @@ void GridMap::clear()
   }
 }
 
+void GridMap::growZone(int x,int y,int type) {
+  int xe = x;
+  int ye = y;
+  while(xe < gi.sizeX) {
+    xe++;
+    int etype = getNode(xe,y).type;
+    if (etype == CELLROAD && typeCrossAround(xe,y,CELLROAD) > 3) break;
+    if (etype != type) break;
+  }
+  while(ye < gi.sizeY) {
+    ye++;
+    int etype = getNode(x,ye).type;
+    if (etype == CELLROAD && typeCrossAround(x,ye,CELLROAD) > 3) break;
+    if (etype != type) break;
+  }
+  int zone = zones.size();
+  for (int xx = x; xx < xe; xx++) 
+    for (int yy = y; yy < ye; yy++) 
+      setzone(xx,yy,zone);
+  if (type == CELLROAD) {
+    if (debugLevel == 3) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX, MATROAD, x-xe < y-ye));
+  } else {
+    if (debugLevel == 3) { printf("Building zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    zones.push_back(new BuildZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX));
+  }
+}
+
 
 void GridMap::pushZones() 
 {
-  int lasty = 0;
+/*  int lasty = 0;
   int y = 0;
   do {
     if (getNode(0,y).type == CELLROAD) {
@@ -56,6 +84,24 @@ void GridMap::pushZones()
       }
       lasty = y;
     } 
+    y++;
+  } while (y < gi.sizeY);*/
+  int y = 0;
+  int x = 0;
+  do {
+    x = 0;
+    do {
+      if (getNode(x,y).zone == -1) {
+        if (getNode(x,y).type == CELLROAD && typeCrossAround(x,y,CELLROAD) > 3) {
+          setzone(x,y,zones.size());
+          if (debugLevel == 3) { printf("Crossroad zone added : (%d,%d)\n",x,y); }
+          zones.push_back(new FloorZone(generator,worldCoord(x,y)    ,worldCoord(x+1,y+1)    ,gi.stepX, MATROADX, false));
+        } else {
+          growZone(x,y,getNode(x,y).type);
+        }  
+      }
+      x++;
+    } while (x < gi.sizeX);
     y++;
   } while (y < gi.sizeY);
 }

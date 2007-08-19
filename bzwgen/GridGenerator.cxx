@@ -44,6 +44,7 @@ void GridGenerator::parseOptions(Options opt) {
 void GridGenerator::run() { 
   int x,y;
   Generator::run(); 
+  map.clear();
   for (int i = 0; i < subdiv; i++) {
     // TODO: replace this with randomIntRange or the like
     x = randomInt(int(gi.sizeX / snapX)-1)*snapX+snapX;

@@ -32,8 +32,9 @@ void printHelp() {
   std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n\n";
   std::cout << "Command line arguments:\n";
   std::cout << "-h (--help)                shows help\n";
+  std::cout << "-d (--debug) integer       sets debug level (0-4)(default: 1)\n";
   std::cout << "-o (--output) filename     sets output filename (default: test.bzw)\n";
-  std::cout << "-d (--rulesdir) directory  sets rules directory (defualt: rules)\n";
+  std::cout << "-r (--rulesdir) directory  sets rules directory (defualt: rules)\n";
   std::cout << "-s (--size) integer        sets world size (defualt: 800)\n";
   std::cout << "-g (--gridsize) integer    sets grid size (defualt: 40)\n";
   std::cout << "-s (--gridsnap) integer    sets the grid snap (defualt: 3)\n";
@@ -50,7 +51,9 @@ int main (int argc, char* argv[]) {
 
   if (cmd->Exists("h"))         { printHelp(); return 0; }
   if (cmd->Exists("-help"))     { printHelp(); return 0; }
-  if (cmd->Exists("h"))         { debugLevel = cmd->GetDataI("d"); }
+  if (cmd->Exists("d"))         { debugLevel = cmd->GetDataI("d"); }
+  if (cmd->Exists("-debug"))    { debugLevel = cmd->GetDataI("-debug"); }
+  if (cmd->Exists("r"))         { ruledir    = cmd->GetDataS("r"); }
   if (cmd->Exists("-rulesdir")) { ruledir    = cmd->GetDataS("-rulesdir"); }
   if (cmd->Exists("o"))         { outname    = cmd->GetDataS("o"); }
   if (cmd->Exists("-output"))   { outname    = cmd->GetDataS("-output"); }

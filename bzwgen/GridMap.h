@@ -30,7 +30,9 @@ public:
   void clear();
   Coord2D worldCoord(int x, int y) { return Coord2D((x-gi.sizeX/2)*gi.stepX,(y-gi.sizeY/2)*gi.stepY); }
   inline void settype(int x, int y, int type) { map[y*gi.sizeX+x].type = type; }
+  inline void setzone(int x, int y, int zone) { map[y*gi.sizeX+x].zone = zone; }
   inline void settype(Coord2D& c, int type) { map[c.y*gi.sizeX+c.x].type = type; }
+  void growZone(int x,int y,int type);
   void pushZones();
   bool isValid(int x, int y);
   int typeAround(int x, int y, int type);
