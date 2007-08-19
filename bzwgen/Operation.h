@@ -40,6 +40,13 @@ public:
   int runMesh(Mesh* mesh, int face);
 };
 
+class OperationSpawn : public Operation {
+  std::string ref;
+public:
+  OperationSpawn(RuleSet* _ruleset, std::string& _ref) : Operation(_ruleset), ref(_ref) { };
+  int runMesh(Mesh* mesh, int face);
+};
+
 class OperationSingle : public Operation {
 protected:
   Expression *exp;

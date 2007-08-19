@@ -17,6 +17,11 @@ int OperationNonterminal::runMesh(Mesh* mesh, int face) {
   return ruleset->runMesh(mesh,face,ref);
 }
 
+int OperationSpawn::runMesh(Mesh* mesh, int face) { 
+  ruleset->runNewMesh(mesh,face,ref);
+  return face;
+}
+
 int OperationAssign::runMesh(Mesh*, int face) { 
   flatten();
   ruleset->addAttr(attrname,value);
