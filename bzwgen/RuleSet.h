@@ -22,9 +22,12 @@ class RuleSet {
   RuleMap rules;
   AttributeMap attrmap;
   int recursion;
+  MeshVector* meshes;
 public:
-  RuleSet() : recursion(0) {}
+  RuleSet() : recursion(0), meshes(NULL) {}
+  MeshVector* run(Mesh* initial_mesh, int initial_face, std::string& rulename);
   int runMesh(Mesh* mesh, int face, std::string& rulename);
+  int runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename);
   void initialize() { std::string init = std::string("initialize"); runMesh(NULL,0,init); }
   void addAttr(std::string& name, float value) { attrmap[name] = value; }
   float getAttr(std::string& name); 

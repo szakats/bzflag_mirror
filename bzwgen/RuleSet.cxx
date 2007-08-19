@@ -49,6 +49,28 @@ int RuleSet::runMesh(Mesh* mesh, int face, std::string& rulename) {
   return result;
 }
 
+MeshVector* RuleSet::run(Mesh* initial_mesh, int initial_face, std::string& rulename) {
+  meshes = new MeshVector();
+  meshes->push_back(initial_mesh);
+  if (runMesh(initial_mesh,initial_face,rulename) == -1) {
+    printf("RuleSet::run failed with start rule '%s!'\n",rulename.c_str());
+  }
+  return meshes;
+}
+
+int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename) {
+  Mesh* newmesh = new Mesh();
+  Face* newface = new Face();
+  int size = old_mesh->f[old_face]->vtx->size();
+  for (int i = 0; i < size; i++) {
+    newface->vtx->push_back(newmesh->addVertex(old_mesh->v[old_mesh->f[old_face]->vtx->at(i)]));
+  }
+  int newfaceid = newmesh->addFace(newface);
+  meshes->push_back(newmesh);
+  return runMesh(newmesh,newfaceid,rulename);
+}
+
+
 RuleSet::~RuleSet() { 
   RuleMapIter itr;
   for (itr = rules.begin();itr != rules.end(); ++itr) delete itr->second; 
