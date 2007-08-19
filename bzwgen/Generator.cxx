@@ -12,15 +12,21 @@
 
 #include "Generator.h"
 
-void Generator::parseOptions(Options /* opt */) {
+void Generator::parseOptions(Options opt) {
   size = 800;
+  if (opt->Exists("s"))     { size = opt->GetDataI("s"); }
+  if (opt->Exists("-size")) { size = opt->GetDataI("-size"); }
 }
   
 void Generator::run() {
 
 }
 
-void Generator::output(std::ofstream& /* out */) {
+void Generator::output(std::ofstream& out ) {
+  out << "world\n";
+  out << "  name BZWGen Generated City\n";
+  out << "  size " << int(size / 2) << "\n";
+  out << "end\n\n";
 }
 
 
