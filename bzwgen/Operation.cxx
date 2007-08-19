@@ -21,7 +21,7 @@ int OperationAssign::runMesh(Mesh*, int face) {
   flatten();
   ruleset->addAttr(attrname,value);
   return face; 
-};
+}
 
 OperationMultifaces::OperationMultifaces(RuleSet* _ruleset, Expression* _exp, StringVector* _facerules) 
 : OperationSingle(_ruleset, _exp), facerules(_facerules), faces(NULL), allsame(false) {
