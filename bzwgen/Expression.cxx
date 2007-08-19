@@ -15,7 +15,7 @@
 
 float ExpressionAttribute::calculate() {
   return ruleset->getAttr(attrname);
-}; 
+}
 
 // Local Variables: ***
 // mode:C++ ***
