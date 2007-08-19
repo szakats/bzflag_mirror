@@ -87,18 +87,29 @@ Vertex Mesh::extensionVertex(int ida, int idb, int idc) {
   return dir*length;
 }
 
+void Mesh::taperFace(int fid, float amount) {
+  IntVector* fv = f[fid]->vtx;
+  int size = fv->size();
+  Vertex c = faceCenter(fid);
+  for (int i = 0; i < size; i++) {
+    Vertex vv = v[fv->at(i)];
+    v[fv->at(i)] = (vv - c)*amount+c;
+  }
+}
+
 
 void Mesh::expandFace(int fid, float amount) {
   // needs to be uniform
   IntVector* fv = f[fid]->vtx;
   int size = fv->size();
-  Vertex nv[10];
+  Vertex* nv = new Vertex[size];
   for (int i = 0; i < size; i++) {
     nv[i] = v[fv->at(i)] + extensionVertex(fv->at(modprev(i,size)),fv->at(modnext(i,size)),fv->at(i))*amount;
   }
   for (int i = 0; i < size; i++) {
     v[fv->at(i)] = nv[i];
   }
+  delete nv;
 }
 
 /* this operation leaves one unused vertex unfortunately */
