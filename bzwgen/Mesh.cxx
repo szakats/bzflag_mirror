@@ -125,6 +125,11 @@ void Mesh::weldVertices(int a, int b, Vertex vx) {
   v[a] = vx;  
 }
 
+void Mesh::weldVertices(int a, int b) {
+  Vertex c = (v[a]+v[b])/2;
+  weldVertices(a,b,c);
+}
+
 
 
 Vertex Mesh::faceCenter(int fid) {

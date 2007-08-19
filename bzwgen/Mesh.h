@@ -40,6 +40,7 @@ public:
   int partitionFace(int fid, float amount, bool horizontal);
   void chamferFace(int fid, float amount);
   void weldVertices(int a, int b, Vertex vx);
+  void weldVertices(int a, int b);
   void output(Output& out);
   ~Mesh();
 private:
