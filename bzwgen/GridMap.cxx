@@ -28,28 +28,11 @@ void GridMap::initialize(Generator* _generator)
 void GridMap::clear() 
 {
   for (int i = 0; i < gi.sizeX*gi.sizeY; i++) {
-    map[i].z = 0;
+    map[i].zone = -1;
     map[i].type = 0;
   }
 }
 
-void GridMap::output(Output& out) 
-{
-  for (int x = 0; x < gi.sizeX; x++)
-    for (int y = 0; y < gi.sizeY; y++) 
-      if ( getNode(x,y).type != 0 ) {
-	out << "meshbox\n";
-	out << "  position " << (x-int(gi.sizeX / 2))*gi.stepX << " " << (y-int(gi.sizeY / 2))*gi.stepY << " 0\n";
-	if (getNode(x,y).z == 0) {
-	  out << "  noradar\n";
-	  out << "  size 5 5 0\n";
-	} else {
-	  out << "  size 5 5 " << getNode(x,y).z << "\n";
-	}
-	out << "  rotation 0\n";
-	out << "end\n\n";
-      }
-}
 
 void GridMap::pushZones() 
 {
@@ -59,17 +42,17 @@ void GridMap::pushZones()
     if (getNode(0,y).type == CELLROAD) {
       int lastx = 0;
       for (int x = 0; x < gi.sizeX; x++) {
-	if (typeCrossAround(x,y,CELLROAD) > 3) {
-    zones.push_back(new BuildZone(generator,worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
-	  zones.push_back(new FloorZone(generator,worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
-	  zones.push_back(new FloorZone(generator,worldCoord(x-1,lasty)  ,worldCoord(x,y-1)  ,gi.stepX, MATROAD, false));
-	  zones.push_back(new FloorZone(generator,worldCoord(x-1,y-1)    ,worldCoord(x,y)    ,gi.stepX, MATROADX, false));
-	  lastx = x;
-	} else if (x == gi.sizeX-1) {
-	  zones.push_back(new BuildZone(generator,worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
-	  zones.push_back(new FloorZone(generator,worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
-	  lastx = x;
-	}
+        if (typeCrossAround(x,y,CELLROAD) > 3) {
+          zones.push_back(new BuildZone(generator,worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
+          zones.push_back(new FloorZone(generator,worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
+          zones.push_back(new FloorZone(generator,worldCoord(x-1,lasty)  ,worldCoord(x,y-1)  ,gi.stepX, MATROAD, false));
+          zones.push_back(new FloorZone(generator,worldCoord(x-1,y-1)    ,worldCoord(x,y)    ,gi.stepX, MATROADX, false));
+          lastx = x;
+        } else if (x == gi.sizeX-1) {
+          zones.push_back(new BuildZone(generator,worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
+          zones.push_back(new FloorZone(generator,worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
+          lastx = x;
+        }
       }
       lasty = y;
     } 

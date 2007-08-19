@@ -29,11 +29,8 @@ public:
   inline DiscreetMapNode getNode(Coord2D& c)  { return map[c.y*gi.sizeX+c.x]; }
   void clear();
   Coord2D worldCoord(int x, int y) { return Coord2D((x-gi.sizeX/2)*gi.stepX,(y-gi.sizeY/2)*gi.stepY); }
-  inline void setZ(int x, int y, int z)	{ map[y*gi.sizeX+x].z = z; }
-  inline void setZ(Coord2D& c, int z) { map[c.y*gi.sizeX+c.x].z = z; }
   inline void settype(int x, int y, int type) { map[y*gi.sizeX+x].type = type; }
   inline void settype(Coord2D& c, int type) { map[c.y*gi.sizeX+c.x].type = type; }
-  void output(Output& out);
   void pushZones();
   bool isValid(int x, int y);
   int typeAround(int x, int y, int type);
