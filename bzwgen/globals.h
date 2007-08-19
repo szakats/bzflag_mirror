@@ -26,12 +26,12 @@
 #define MAXMATERIALS 9
 
 #define EPSILON 0.00000001f
-#define WORLDSIZE 200
 
 #include <vector>
 #include <math.h>
 #include <string>
 #include <map>
+#include "commandArgs.h"
 
 extern int debugLevel;
 
@@ -151,8 +151,7 @@ struct GridInfo {
   int stepX,stepY;
 };
 
-/* temporary */
-typedef int Options;
+typedef CCommandLineArgs* Options;
 
 struct Coord2D {
   int x;

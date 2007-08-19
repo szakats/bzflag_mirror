@@ -26,10 +26,16 @@
 extern int yyparse(RuleSet*);
 extern FILE* yyin;
 
-int debugLevel = 2;
+int debugLevel = 1;
 
 int main (int argc, char* argv[]) {
-  COSDir ruledir("rules");
+  CCommandLineArgs* cmd = new CCommandLineArgs(argc,argv);
+
+  COSDir ruledir;
+  ruledir = "rules";
+  if (cmd->Exists("d"))         { debugLevel = cmd->GetDataI("d"); }
+  if (cmd->Exists("-rulesdir")) { ruledir    = cmd->GetDataS("-rulesdir"); }
+  
   COSFile file;
   RuleSet* ruleset = new RuleSet();
   
@@ -50,14 +56,12 @@ int main (int argc, char* argv[]) {
 
   srand((unsigned int)time(NULL));
 
-  CCommandLineArgs cmd(argc,argv);
-
   std::cout << "Initializing... ";
   GridGenerator gen(ruleset);
   std::cout << "done.\n";
 
   std::cout << "Parsing options... ";
-  gen.parseOptions(0);
+  gen.parseOptions(cmd);
   std::cout << "done.\n";
 
   std::cout << "Generating... ";
@@ -68,6 +72,8 @@ int main (int argc, char* argv[]) {
   std::cout << "Outputing... ";
   gen.output(os);
   std::cout << "done.\n";
+
+  delete cmd;
 }
 
 	
