@@ -8,7 +8,9 @@
 #include "parser.hxx"
 
 // Ugly hacks to surpress warnings
-#define strdup _strdup
+#ifdef _MSC_VER
+  #define strdup _strdup
+#endif
 #define YY_NEVER_INTERACTIVE 1
 #define YY_INPUT(buf,result,max_size) \
 	if ( ((result = fread( buf, 1, max_size, yyin )) == 0) \
