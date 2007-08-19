@@ -33,8 +33,11 @@ int main (int argc, char* argv[]) {
 
   COSDir ruledir;
   ruledir = "rules";
+  std::string outname = "test.bzw";
   if (cmd->Exists("d"))         { debugLevel = cmd->GetDataI("d"); }
   if (cmd->Exists("-rulesdir")) { ruledir    = cmd->GetDataS("-rulesdir"); }
+  if (cmd->Exists("o"))         { outname    = cmd->GetDataS("o"); }
+  if (cmd->Exists("-output"))   { outname    = cmd->GetDataS("-output"); }
   
   COSFile file;
   RuleSet* ruleset = new RuleSet();
@@ -68,7 +71,7 @@ int main (int argc, char* argv[]) {
   gen.run();
   std::cout << "done.\n";
 
-  Output os("test.bzw");
+  Output os(outname.c_str());
   std::cout << "Outputing... ";
   gen.output(os);
   std::cout << "done.\n";
