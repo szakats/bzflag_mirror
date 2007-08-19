@@ -28,7 +28,7 @@ void GridGenerator::parseOptions(Options opt) {
   snapX = 3;
   snapY = 3;
 
-  if (opt->Exists("s"))         { snapX = snapY = opt->GetDataI("g"); }
+  if (opt->Exists("p"))         { snapX = snapY = opt->GetDataI("p"); }
   if (opt->Exists("-gridsnap")) { snapX = snapY = opt->GetDataI("-gridsnap"); }
 
   subdiv = 30;
