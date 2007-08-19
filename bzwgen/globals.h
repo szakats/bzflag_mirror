@@ -140,7 +140,6 @@ typedef std::vector<std::string> StringVector;
 typedef std::map<std::string,float> AttributeMap;
 
 struct DiscreetMapNode {
-  int z;
   int type;
   int zone;
 };

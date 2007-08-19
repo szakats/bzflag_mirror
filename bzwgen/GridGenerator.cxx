@@ -25,6 +25,12 @@ void GridGenerator::parseOptions(Options opt) {
   if (opt->Exists("g"))         { gi.sizeY = gi.sizeX = opt->GetDataI("g"); }
   if (opt->Exists("-gridsize")) { gi.sizeY = gi.sizeX = opt->GetDataI("-gridsize"); }
 
+  snapX = 4;
+  snapY = 4;
+
+  if (opt->Exists("s"))         { snapX = snapY = opt->GetDataI("g"); }
+  if (opt->Exists("-gridsnap")) { snapX = snapY = opt->GetDataI("-gridsnap"); }
+
   gi.stepX = gi.size / gi.sizeX;
   gi.stepY = gi.size / gi.sizeY;
   map.initialize(this);
@@ -35,16 +41,14 @@ void GridGenerator::run() {
   Generator::run(); 
   for (int i = 0; i < 30; i++) {
     // TODO: replace this with randomIntRange or the like
-    x = randomInt(int(gi.sizeX / 4)-1)*4+4;
-    y = randomInt(int(gi.sizeY / 4)-1)*4+4;
+    x = randomInt(int(gi.sizeX / snapX)-1)*snapX+snapX;
+    y = randomInt(int(gi.sizeY / snapY)-1)*snapY+snapY;
 
     for (int ax = 0; ax < gi.sizeX; ax++) {
-      map.setZ(ax,y,0);
       map.settype(ax,y,CELLROAD);
     }
     for (int ay = 0; ay < gi.sizeY; ay++) {
       if ((map.getNode(x,ay).type == CELLROAD) && randomChance(33)) break;
-      map.setZ(x,ay,0);
       map.settype(x,ay,CELLROAD);
     }
   }

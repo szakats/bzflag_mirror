@@ -25,6 +25,7 @@ class GridGenerator : public Generator {
 protected:
   GridInfo gi;
   GridMap map;
+  int snapX, snapY;
 public:
   GridGenerator(RuleSet* ruleset);
   void parseOptions(Options opt);
