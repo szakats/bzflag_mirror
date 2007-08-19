@@ -31,6 +31,11 @@ void GridGenerator::parseOptions(Options opt) {
   if (opt->Exists("s"))         { snapX = snapY = opt->GetDataI("g"); }
   if (opt->Exists("-gridsnap")) { snapX = snapY = opt->GetDataI("-gridsnap"); }
 
+  subdiv = 30;
+
+  if (opt->Exists("v"))       { subdiv = opt->GetDataI("v"); }
+  if (opt->Exists("-subdiv")) { subdiv = opt->GetDataI("-subdiv"); }
+
   gi.stepX = gi.size / gi.sizeX;
   gi.stepY = gi.size / gi.sizeY;
   map.initialize(this);
@@ -39,7 +44,7 @@ void GridGenerator::parseOptions(Options opt) {
 void GridGenerator::run() { 
   int x,y;
   Generator::run(); 
-  for (int i = 0; i < 30; i++) {
+  for (int i = 0; i < subdiv; i++) {
     // TODO: replace this with randomIntRange or the like
     x = randomInt(int(gi.sizeX / snapX)-1)*snapX+snapX;
     y = randomInt(int(gi.sizeY / snapY)-1)*snapY+snapY;
@@ -73,18 +78,6 @@ void GridGenerator::output(Output& out) {
 
   for (ZoneVectIter iter = map.zones.begin(); iter != map.zones.end(); ++iter) 
     (*iter)->output(out);
-  /*
-  for (int y = 0; y < wi.sizeY; y++) {
-    for (int x = 0; x < wi.sizeX; x++) {
-      if (map.getNode(x,y).type == CELLROAD) {
-	printf("x");
-      } else {
-      printf("#");
-    }
-  }
-  printf("\n");
-  */
-
 }
 
 GridGenerator::~GridGenerator() { 

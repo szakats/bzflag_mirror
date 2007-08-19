@@ -26,6 +26,7 @@ protected:
   GridInfo gi;
   GridMap map;
   int snapX, snapY;
+  int subdiv;
 public:
   GridGenerator(RuleSet* ruleset);
   void parseOptions(Options opt);

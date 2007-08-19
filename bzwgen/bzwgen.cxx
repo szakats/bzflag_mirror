@@ -37,6 +37,7 @@ void printHelp() {
   std::cout << "-s (--size) integer        sets world size (defualt: 800)\n";
   std::cout << "-g (--gridsize) integer    sets grid size (defualt: 40)\n";
   std::cout << "-s (--gridsnap) integer    sets the grid snap (defualt: 3)\n";
+  std::cout << "-v (--subdiv) integer      sets the number of subdivisions (defualt: 30)\n";
   std::cout << "-b (--bases) integer       sets number of bases (0/2/4)(defualt: 0)\n\n";
 }
 
