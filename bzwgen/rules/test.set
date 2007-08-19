@@ -32,7 +32,7 @@ skyscraper
 -> 0.2 : material($MATGLASS) chamfer(3.0) extrude(random(16.0,32.0,8.0)) top 
 -> 0.2 : material($MATGLASS) extrude(random(16.0,32.0,8.0)) [ @specialwall ] top 
 -> 0.3 : material($MATGLASS) extrude(16.0) skycont 
--> 0.28 : material($MATGLASS) extrude(random(24.0,40.0,8.0)) expand(-10.0) top
+-> 0.28 : material($MATGLASS) extrude(random(24.0,40.0,8.0)) taper(0.6) top
 -> 0.02 : 
 ;
 
