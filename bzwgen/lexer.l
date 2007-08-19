@@ -31,6 +31,7 @@ ID [a-zA-Z][a-zA-Z0-9]*
 extrude               { return(EXTRUDE);  }
 expand                { return(EXPAND);   }
 chamfer               { return(CHAMFER);   }
+unchamfer             { return(UNCHAMFER);   }
 random                { return(RANDOM);   }
 assign                { return(ASSIGN);   }
 material              { return(MATERIAL);   }
