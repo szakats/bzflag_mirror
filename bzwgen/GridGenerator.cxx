@@ -20,8 +20,11 @@ GridGenerator::GridGenerator(RuleSet* _ruleset) : Generator(_ruleset) {
 void GridGenerator::parseOptions(Options opt) { 
   Generator::parseOptions(opt); 
   gi.size  = getSize();
-  gi.sizeX = 40;
-  gi.sizeY = 40;
+  gi.sizeX = gi.sizeY = 40;
+
+  if (opt->Exists("g"))         { gi.sizeY = gi.sizeX = opt->GetDataI("g"); }
+  if (opt->Exists("-gridsize")) { gi.sizeY = gi.sizeX = opt->GetDataI("-gridsize"); }
+
   gi.stepX = gi.size / gi.sizeX;
   gi.stepY = gi.size / gi.sizeY;
   map.initialize(this);
