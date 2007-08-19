@@ -97,19 +97,7 @@ int group::update( UpdateMessage& message ) {
 	switch( message.type ) {
 			
 		case UpdateMessage::SET_POSITION_FACTOR: {	// handle a translation
-			osg::Vec3 translationFactor = *(message.getAsPositionFactor());
-			pos += translationFactor;
-			
-			// get objects
-			vector< osg::ref_ptr< bz2object > > objects = def->getObjects();
-			
-			// propogate the translation into child objects
-			if( objects.size() > 0 ) {
-				for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
-					UpdateMessage msg( UpdateMessage::SET_POSITION_FACTOR, &translationFactor );
-					(*i)->update( msg );
-				}
-			}
+			this->setPos( *(message.getAsPositionFactor()) );
 			
 			break;
 		}
@@ -193,7 +181,7 @@ void group::updateObjects() {
 	this->removeChildren(0, this->getNumChildren());
 	
 	// get the "define" reference
-	define* def = (define*)Model::command( MODEL_GET, "define", this->getName() );
+	define* def = dynamic_cast< define* >(Model::command( MODEL_GET, "define", this->getName() ));
 	
 	// if it was valid, add the objects
 	if( def != NULL ) {
@@ -211,3 +199,6 @@ void group::updateObjects() {
 		}
 	}
 }
+
+// set the associated definition
+void group::setDefine( define* def ) { this->def = def; setName( def->getName() ); }

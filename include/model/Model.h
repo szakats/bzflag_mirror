@@ -18,6 +18,7 @@ class define;
 class DataEntry;
 class material;
 class teleporter;
+class group;
 
 // supported query commands.
 #define MODEL_GET "get"
@@ -92,6 +93,8 @@ public:
 	static bool deleteSelection();
 	static bool newWorld();
 	static bool linkTeleporters( teleporter* t1, teleporter* t2 );
+	static void groupObjects( vector< osg::ref_ptr< bz2object > >& objects );
+	static void ungroupObjects( group* g );
 	
 	// instantiated BZWB-specific API 
 	world* _getWorldData() { return worldData; }
@@ -124,6 +127,8 @@ public:
 	bool _deleteSelection();
 	bool _newWorld();
 	bool _linkTeleporters( teleporter* t1, teleporter* t2 );
+	void _groupObjects( vector< osg::ref_ptr< bz2object > >& objects );
+	void _ungroupObjects( group* g );
 	
 	// plugin-specific API
 	static bool registerObject(string& name, DataEntry* (*init)(string&));
@@ -171,6 +176,15 @@ public:
 	const string _getSupportedTerminators();
 	bool _hasInitializer( DataEntry* d ) { return ( cmap.count( d->getHeader() ) == 0 || cmap[ d->getHeader() ] == NULL ) ? false : true; }
 	bool _hasConfigurationDialog( DataEntry* d ) { return ( configMap.count( d->getHeader() ) == 0 || configMap[ d->getHeader() ] == NULL ) ? false : true; }
+	
+	// misc API
+	static vector< osg::ref_ptr< bz2object > > toRefList( vector< bz2object* >& objs );
+	static vector< bz2object* > toNonRefList( vector< osg::ref_ptr< bz2object > >& objs );
+	
+	// instantiated misc API
+	vector< osg::ref_ptr< bz2object > > _toRefList( vector< bz2object* >& objs );
+	vector< bz2object* > _toNonRefList( vector< osg::ref_ptr< bz2object > >& objs );
+	
 	
 private:
 

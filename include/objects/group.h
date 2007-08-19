@@ -41,6 +41,11 @@ class group : public bz2object {
 		// toString
 		string toString(void);
 		
+		// get the definition
+		define* getDefine() { return this->def; }
+		
+		// set the definition
+		void setDefine( define* def );
 		
 	private:
 		// member data

@@ -979,3 +979,76 @@ ConfigurationDialog* Model::_configureObject( DataEntry* d ) {
 		
 	return configMap[ d->getHeader() ](d);
 }
+
+// group objects together
+void Model::groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) { modelRef->_groupObjects( objects ); }
+void Model::_groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) {
+	// create a "define" object for these objects if one does not exist yet
+	define* def = new define();
+	if( !def )
+		return;
+	
+	string defName = SceneBuilder::makeUniqueName("define");
+	
+	// assign the objects
+	def->setObjects( objects );
+	
+	// set the name
+	def->setName( defName );
+	
+	// make a group
+	group* grp = new group();
+	
+	// assign it to the define (the group will re-name itself automatically)
+	grp->setDefine( def );
+	
+	// add this group
+	_addObject( grp );
+	
+	// add this definition
+	groups[ defName ] = def;
+	
+	// remove all the objects within the passed vector (they are now part of the define)
+	for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
+		_removeObject( i->get() );
+	}
+	
+	// set the group as selected
+	_setSelected( grp );
+}
+
+// ungroup objects
+void Model::ungroupObjects( group* g ) { modelRef->_ungroupObjects( g ); }
+void Model::_ungroupObjects( group* g ) {
+	
+}
+
+// turn a vector of ref_ptrs to bz2objects into a vector of pointers to bz2objects
+vector< bz2object* > Model::toNonRefList( vector< osg::ref_ptr< bz2object > >& objs ) { return modelRef->_toNonRefList( objs ); }
+vector< bz2object* > Model::_toNonRefList( vector< osg::ref_ptr< bz2object > >& objs ) {
+	vector< bz2object* > ret = vector< bz2object* > ();
+	
+	if( objs.size() == 0 ) 
+		return ret;
+		
+	for( vector< osg::ref_ptr< bz2object > >::iterator i = objs.begin(); i != objs.end(); i++ ) {
+		ret.push_back( i->get() );
+	}
+	
+	return ret;
+}
+
+// turn a vector of pointers to bz2objects into a vector of ref_ptrs to bz2objects
+vector< osg::ref_ptr< bz2object > > Model::toRefList( vector< bz2object* >& objs ) { return modelRef->_toRefList( objs ); }
+vector< osg::ref_ptr< bz2object > > Model::_toRefList( vector< bz2object* >& objs ) {
+	vector< osg::ref_ptr< bz2object > > ret = vector< osg::ref_ptr< bz2object > > ();
+	
+	if( objs.size() == 0 ) 
+		return ret;
+		
+	for( vector< bz2object* >::iterator i = objs.begin(); i != objs.end(); i++ ) {
+		ret.push_back( *i );
+	}
+	
+	return ret;
+}
