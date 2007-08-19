@@ -526,7 +526,20 @@ void MenuBar::delete_real(Fl_Widget* w) {
 
 // handle (un)grouping
 void MenuBar::groupCallback_real(Fl_Widget* w) {
-	printf("(un)grouped\n");
+	// get the selection
+	vector< bz2object* > objects = this->parent->getModel()->_getSelection();
+	
+	if( objects.size() < 0 )
+		return;
+		
+	// only do an un-group if the only object selected is a group
+	if( objects.size() == 1 && objects[0]->getHeader() == "group" )
+		this->parent->getModel()->_ungroupObjects( dynamic_cast< group* > (objects[0]) );
+	else {
+		vector< osg::ref_ptr< bz2object > > refList = this->parent->getModel()->toRefList( objects );
+		this->parent->getModel()->_groupObjects( refList );
+	}
+	
 	this->value(0);
 }
 
