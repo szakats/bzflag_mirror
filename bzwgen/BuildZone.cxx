@@ -34,6 +34,17 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   }
 
   int base = mesh->addFace(swface);
+
+  // in future this will be the only way :)
+
+  if (randomChance(50) && size() < 20000) {
+    delete meshes;
+    std::string rulename = std::string("start");
+    MeshVector* newmeshes = generator->getRuleSet()->run(mesh,base,rulename);
+    meshes = newmeshes;
+    return;
+  }
+
   std::string name = "sidewalk";
   mesh->inside.push_back(mesh->faceCenter(base));
   generator->getRuleSet()->runMesh(mesh,base,name);
@@ -70,12 +81,14 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
     height = randomInt(6)+1;
   }
 
-  if (randomChance(70)) {
+  if (randomChance(50)) {
     std::string name = "building";
     mesh->inside.push_back(mesh->faceCenter(base));
     generator->getRuleSet()->runMesh(mesh,base,name);
     return;
   }
+
+  mesh->f[base]->mat = MATROOF;
 
   if (wall == MATGLASS) {
     mesh->expandFace(base,-2.0f);

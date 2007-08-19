@@ -45,7 +45,7 @@ public:
     }
     (*this) << "\n";
 
-    if (f->texcoords) {
+    if (f->texcoords && f->tcd->size() > 0) {
       (*this) << "    texcoords ";
       for (size_t i = 0; i < f->tcd->size(); i++) {
         (*this) << f->tcd->at(i) << " ";
