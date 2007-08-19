@@ -16,6 +16,7 @@
 
 BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Zone(_generator,a,b,astep)
 {
+  meshes = new MeshVector();
   Mesh* mesh = new Mesh();
 
   Vertex corners[4];
@@ -37,7 +38,7 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   mesh->inside.push_back(mesh->faceCenter(base));
   generator->getRuleSet()->runMesh(mesh,base,name);
 
-  meshes.push_back(mesh);
+  meshes->push_back(mesh);
 
   /* SIDEWALK END */
 
@@ -52,7 +53,7 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   base = mesh->addFace(baseface);
   mesh->inside.push_back(mesh->faceCenter(base));
 
-  meshes.push_back(mesh);
+  meshes->push_back(mesh);
 
   int wall;
   int height;
@@ -239,7 +240,7 @@ void BuildZone::subdivideWindows(Mesh* mesh, int wall, int mat) {
 void BuildZone::output(Output& out) 
 {
   MeshVectIter itr; 
-  for (itr = meshes.begin(); itr!= meshes.end(); ++itr) (*itr)->output(out);
+  for (itr = meshes->begin(); itr!= meshes->end(); ++itr) (*itr)->output(out);
 /*   out << "  color 0."<< rand()%10+80 << " 0." << rand()%20+80 << " 0."<< rand()%20+80<< " 1.0\n";
 */
 }
