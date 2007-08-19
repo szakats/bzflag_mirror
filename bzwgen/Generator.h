@@ -24,6 +24,7 @@ protected:
   int size;
   RuleSet* ruleset;
   MaterialVector mats;
+  int bases;
 public:
   Generator(RuleSet* _ruleset) : ruleset(_ruleset) {}
   virtual void parseOptions(Options opt);

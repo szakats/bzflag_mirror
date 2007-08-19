@@ -14,8 +14,13 @@
 
 void Generator::parseOptions(Options opt) {
   size = 800;
+  bases = 0;
+
   if (opt->Exists("s"))     { size = opt->GetDataI("s"); }
   if (opt->Exists("-size")) { size = opt->GetDataI("-size"); }
+
+  if (opt->Exists("b"))      { bases = opt->GetDataI("b"); }
+  if (opt->Exists("-bases")) { bases = opt->GetDataI("-bases"); }
 }
   
 void Generator::run() {

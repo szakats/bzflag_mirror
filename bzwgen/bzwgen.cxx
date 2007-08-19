@@ -35,7 +35,9 @@ void printHelp() {
   std::cout << "-o (--output) filename     sets output filename (default: test.bzw)\n";
   std::cout << "-d (--rulesdir) directory  sets rules directory (defualt: rules)\n";
   std::cout << "-s (--size) integer        sets world size (defualt: 800)\n";
-  std::cout << "-g (--gridsize) integer    sets grid size (defualt: 40)\n\n";
+  std::cout << "-g (--gridsize) integer    sets grid size (defualt: 40)\n";
+  std::cout << "-s (--gridsnap) integer    sets the grid snap (defualt: 4)\n";
+  std::cout << "-b (--bases) integer       sets number of bases (0/2/4)(defualt: 0)\n\n";
 }
 
 int main (int argc, char* argv[]) {
