@@ -7,4 +7,5 @@ assign(MATMESH  = 4)
 assign(MATROOF  = 5)
 assign(MATROOFT = 6)
 assign(MATGLASS = 7)
+assign(MATGRASS = 8)
 ;

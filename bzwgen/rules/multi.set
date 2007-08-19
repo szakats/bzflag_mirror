@@ -1,0 +1,5 @@
+start 
+-> 0.5 : sidewalk spawn(building)
+-> 0.3 : skysidewalk spawn(skyscraper)
+-> 0.3 : longsidewalk spawn(building)
+;
