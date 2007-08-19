@@ -55,6 +55,7 @@ public:
     for (int i = 0; i < int(size / 2); i++) {
       mesh->weldVertices(mesh->f[face]->vtx->at(i),mesh->f[face]->vtx->at(i+1));
     }
+    return face;
   }
 };
 
