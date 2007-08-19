@@ -50,12 +50,22 @@ void GridGenerator::run() {
     x = randomInt(int(gi.sizeX / snapX)-1)*snapX+snapX;
     y = randomInt(int(gi.sizeY / snapY)-1)*snapY+snapY;
 
+    if (map.getNode(x,y).type > 0) continue;
+
     for (int ax = 0; ax < gi.sizeX; ax++) {
-      map.settype(ax,y,CELLROAD);
+      if (map.getNode(ax,y).type == CELLROAD) {
+        map.settype(ax,y,CELLROADX);
+      } else {
+        map.settype(ax,y,CELLROAD);
+      }
     }
     for (int ay = 0; ay < gi.sizeY; ay++) {
-      if ((map.getNode(x,ay).type == CELLROAD) && randomChance(33)) break;
-      map.settype(x,ay,CELLROAD);
+      if (map.getNode(x,ay).type == CELLROAD) {
+        map.settype(x,ay,CELLROADX);
+        if (randomChance(33)) break;
+      } else {
+        map.settype(x,ay,CELLROAD);
+      }
     }
   }
   map.pushZones();

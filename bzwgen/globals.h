@@ -13,16 +13,17 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#define CELLROAD 1
-#define MATROAD  0
-#define MATROADX 1
-#define MATWALL  2
-#define MATWALL2 3
-#define MATMESH  4
-#define MATROOF  5
-#define MATROOFT 6
-#define MATGLASS 7
-#define MATGRASS 8
+#define CELLROAD  1
+#define CELLROADX 2
+#define MATROAD   0
+#define MATROADX  1
+#define MATWALL   2
+#define MATWALL2  3
+#define MATMESH   4
+#define MATROOF   5
+#define MATROOFT  6
+#define MATGLASS  7
+#define MATGRASS  8
 #define MAXMATERIALS 9
 
 #define EPSILON 0.00000001f

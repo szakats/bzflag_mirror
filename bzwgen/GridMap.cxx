@@ -39,13 +39,11 @@ void GridMap::growZone(int x,int y,int type) {
   while(xe < gi.sizeX) {
     xe++;
     int etype = getNode(xe,y).type;
-    if (etype == CELLROAD && typeCrossAround(xe,y,CELLROAD) > 3) break;
     if (etype != type) break;
   }
   while(ye < gi.sizeY) {
     ye++;
     int etype = getNode(x,ye).type;
-    if (etype == CELLROAD && typeCrossAround(x,ye,CELLROAD) > 3) break;
     if (etype != type) break;
   }
   int zone = zones.size();
@@ -55,6 +53,9 @@ void GridMap::growZone(int x,int y,int type) {
   if (type == CELLROAD) {
     if (debugLevel == 3) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX, MATROAD, x-xe < y-ye));
+  } else if (type == CELLROADX) {
+    if (debugLevel == 3) { printf("Crossroads zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX, MATROADX,true));
   } else {
     if (debugLevel == 3) { printf("Building zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new BuildZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX));
@@ -64,41 +65,13 @@ void GridMap::growZone(int x,int y,int type) {
 
 void GridMap::pushZones() 
 {
-/*  int lasty = 0;
-  int y = 0;
-  do {
-    if (getNode(0,y).type == CELLROAD) {
-      int lastx = 0;
-      for (int x = 0; x < gi.sizeX; x++) {
-        if (typeCrossAround(x,y,CELLROAD) > 3) {
-          zones.push_back(new BuildZone(generator,worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
-          zones.push_back(new FloorZone(generator,worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
-          zones.push_back(new FloorZone(generator,worldCoord(x-1,lasty)  ,worldCoord(x,y-1)  ,gi.stepX, MATROAD, false));
-          zones.push_back(new FloorZone(generator,worldCoord(x-1,y-1)    ,worldCoord(x,y)    ,gi.stepX, MATROADX, false));
-          lastx = x;
-        } else if (x == gi.sizeX-1) {
-          zones.push_back(new BuildZone(generator,worldCoord(lastx,lasty),worldCoord(x-1,y-1),gi.stepX));
-          zones.push_back(new FloorZone(generator,worldCoord(lastx,y-1)  ,worldCoord(x-1,y)  ,gi.stepX, MATROAD, true));
-          lastx = x;
-        }
-      }
-      lasty = y;
-    } 
-    y++;
-  } while (y < gi.sizeY);*/
   int y = 0;
   int x = 0;
   do {
     x = 0;
     do {
       if (getNode(x,y).zone == -1) {
-        if (getNode(x,y).type == CELLROAD && typeCrossAround(x,y,CELLROAD) > 3) {
-          setzone(x,y,zones.size());
-          if (debugLevel == 3) { printf("Crossroad zone added : (%d,%d)\n",x,y); }
-          zones.push_back(new FloorZone(generator,worldCoord(x,y)    ,worldCoord(x+1,y+1)    ,gi.stepX, MATROADX, false));
-        } else {
-          growZone(x,y,getNode(x,y).type);
-        }  
+        growZone(x,y,getNode(x,y).type);
       }
       x++;
     } while (x < gi.sizeX);
