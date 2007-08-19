@@ -25,8 +25,8 @@ void GridGenerator::parseOptions(Options opt) {
   if (opt->Exists("g"))         { gi.sizeY = gi.sizeX = opt->GetDataI("g"); }
   if (opt->Exists("-gridsize")) { gi.sizeY = gi.sizeX = opt->GetDataI("-gridsize"); }
 
-  snapX = 4;
-  snapY = 4;
+  snapX = 3;
+  snapY = 3;
 
   if (opt->Exists("s"))         { snapX = snapY = opt->GetDataI("g"); }
   if (opt->Exists("-gridsnap")) { snapX = snapY = opt->GetDataI("-gridsnap"); }
