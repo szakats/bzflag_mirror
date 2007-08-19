@@ -23,7 +23,7 @@ void yyunput(int, char*);
   Expression* e;
 }
 %start ruleset
-%token SPAWN CHAMFER UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV MATERIAL
+%token TAPER SPAWN CHAMFER UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV MATERIAL
 %token <fl> NUMBER
 %token <id> NONTERM ATTRIBUTE
 %type <pv> products
@@ -62,6 +62,7 @@ ops : /* empty */ { $$ = new OperationVector(); }
 ;
 op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); }
   | EXPAND '(' expr ')' { $$ = new OperationExpand(ruleset,$3); }
+  | TAPER '(' expr ')' { $$ = new OperationTaper(ruleset,$3); }
   | CHAMFER '(' expr ')' { $$ = new OperationChamfer(ruleset,$3); }
   | UNCHAMFER '(' ')' { $$ = new OperationUnchamfer(ruleset); }
   | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,true,$5); }

@@ -102,6 +102,17 @@ public:
   };
 };
 
+class OperationTaper : public OperationSingle {
+public:
+  OperationTaper(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
+  int runMesh(Mesh* mesh,int face) { 
+    if (mesh == NULL) return 0;
+    flatten();
+    mesh->taperFace(face,value);
+    return face; 
+  };
+};
+
 class OperationChamfer : public OperationSingle {
 public:
   OperationChamfer(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}

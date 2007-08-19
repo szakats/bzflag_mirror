@@ -40,6 +40,7 @@ subdividev            { return(SUBDIVIDEV);}
 partitionh            { return(PARTITIONH);}
 partitionv            { return(PARTITIONV);}
 spawn                 { return(SPAWN);}
+taper                 { return(TAPER);}
 "$"{ID}               { yylval.id = strdup(yytext+1); return(ATTRIBUTE);  }
 {ID}                  { yylval.id = strdup(yytext); return(NONTERM);  }
 #[^\n]*
