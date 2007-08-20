@@ -33,7 +33,7 @@ void printHelp() {
   std::cout << "Command line arguments:\n";
   std::cout << "-h (--help)                shows help\n";
   std::cout << "-d (--debug) integer       sets debug level (0-4)(default: 2)\n";
-  std::cout << "-o (--output) filename     sets output filename (default: test.bzw)\n";
+  std::cout << "-o (--output) filename     sets output filename (default: map.bzw)\n";
   std::cout << "-r (--rulesdir) directory  sets rules directory (defualt: rules)\n";
   std::cout << "-s (--size) integer        sets world size (defualt: 800)\n";
   std::cout << "-g (--gridsize) integer    sets grid size (defualt: 42)\n";
@@ -48,7 +48,7 @@ int main (int argc, char* argv[]) {
 
   COSDir ruledir;
   ruledir = "rules";
-  std::string outname = "test.bzw";
+  std::string outname = "map.bzw";
 
   if (cmd->Exists("h"))         { printHelp(); return 0; }
   if (cmd->Exists("-help"))     { printHelp(); return 0; }
