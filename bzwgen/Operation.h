@@ -72,6 +72,15 @@ public:
   }
 };
 
+class OperationAssert : public OperationSingle {
+public:
+  OperationAssert(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
+  int runMesh(Mesh* mesh,int face) {
+    flatten(mesh,face);
+    return value >= 0.0f;
+  }
+};
+
 class OperationAssign : public OperationSingle {
 protected:
   std::string attrname;
