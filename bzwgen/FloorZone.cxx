@@ -16,6 +16,10 @@
 
 FloorZone::FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int matref, bool rotated) : Zone(_generator,a,b,astep)
 {
+  if ((A.x == B.x) || (A.y == B.y)) {
+    if (debugLevel > 0) { printf("Bad floor coords! (%d,%d)*(%d,%d)\n",A.x,A.y,B.x,B.y); }
+    return;
+  }
   mesh.passable = true;
 
   if (rotated) {

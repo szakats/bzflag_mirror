@@ -26,19 +26,19 @@
 extern int yyparse(RuleSet*);
 extern FILE* yyin;
 
-int debugLevel = 1;
+int debugLevel = 2;
 
 void printHelp() {
   std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n\n";
   std::cout << "Command line arguments:\n";
   std::cout << "-h (--help)                shows help\n";
-  std::cout << "-d (--debug) integer       sets debug level (0-4)(default: 1)\n";
+  std::cout << "-d (--debug) integer       sets debug level (0-4)(default: 2)\n";
   std::cout << "-o (--output) filename     sets output filename (default: test.bzw)\n";
   std::cout << "-r (--rulesdir) directory  sets rules directory (defualt: rules)\n";
   std::cout << "-s (--size) integer        sets world size (defualt: 800)\n";
-  std::cout << "-g (--gridsize) integer    sets grid size (defualt: 40)\n";
+  std::cout << "-g (--gridsize) integer    sets grid size (defualt: 42)\n";
   std::cout << "-p (--gridsnap) integer    sets the grid snap (defualt: 3)\n";
-  std::cout << "-v (--subdiv) integer      sets the number of subdivisions (defualt: 30)\n";
+  std::cout << "-v (--subdiv) integer      sets the number of subdivisions (defualt: 120)\n";
   std::cout << "-b (--bases) integer       sets number of bases (0/2/4)(defualt: 0)\n\n";
 }
 

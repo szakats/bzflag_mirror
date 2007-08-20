@@ -21,7 +21,7 @@ GridGenerator::GridGenerator(RuleSet* _ruleset) : Generator(_ruleset) {
 void GridGenerator::parseOptions(Options opt) { 
   Generator::parseOptions(opt); 
   gi.size  = getSize();
-  gi.sizeX = gi.sizeY = 40;
+  gi.sizeX = gi.sizeY = 42;
 
   if (opt->Exists("g"))         { gi.sizeY = gi.sizeX = opt->GetDataI("g"); }
   if (opt->Exists("-gridsize")) { gi.sizeY = gi.sizeX = opt->GetDataI("-gridsize"); }
@@ -32,7 +32,7 @@ void GridGenerator::parseOptions(Options opt) {
   if (opt->Exists("p"))         { snapX = snapY = opt->GetDataI("p"); }
   if (opt->Exists("-gridsnap")) { snapX = snapY = opt->GetDataI("-gridsnap"); }
 
-  subdiv = 30;
+  subdiv = 120;
 
   if (opt->Exists("v"))       { subdiv = opt->GetDataI("v"); }
   if (opt->Exists("-subdiv")) { subdiv = opt->GetDataI("-subdiv"); }
@@ -43,7 +43,7 @@ void GridGenerator::parseOptions(Options opt) {
 }
 
 #define SETROAD(cx,cy)  { if (map.getNode(cx,cy).type == CELLROAD) { map.settype(cx,cy,CELLROADX);         } else { map.settype(cx,cy,CELLROAD); } }
-#define SETROADF(cx,cy) { if (map.getNode(cx,cy).type == CELLROAD) { map.settype(cx,cy,CELLROADX); return; } else { map.settype(cx,cy,CELLROAD); } }
+#define SETROADF(cx,cy) { if (map.getNode(cx,cy).type == CELLROAD) { map.settype(cx,cy,CELLROADX); break;  } else { map.settype(cx,cy,CELLROAD); } }
 
 void GridGenerator::plotRoad(int x, int y, bool horiz, int  collision) {
   if (collision == 0) {
@@ -67,6 +67,7 @@ void GridGenerator::plotRoad(int x, int y, bool horiz, int  collision) {
 
 void GridGenerator::run() { 
   int x,y;
+  if (debugLevel > 1) printf("\nRunning GridGenerator...\n");
   Generator::run(); 
   map.clear();
   if (bases > 0) {
@@ -82,19 +83,46 @@ void GridGenerator::run() {
     }
   }
 
-  for (int i = 0; i < subdiv; i++) {
-    // TODO: replace this with randomIntRange or the like
+  int fullslice = 8;
+
+  bool horiz = randomBool();
+
+  if (debugLevel > 1) printf("Full slices (%d)...\n",fullslice);
+  for (int i = 0; i < fullslice; i++) {
+    if (debugLevel > 2) printf("Performing ");
+    //printf("(%d,%d,%d,%d)...\n",snapX,snapY,gi.sizeX,gi.sizeY);
     if (bases > 0) {
-      x = randomInt(int(gi.sizeX / snapX)-2)*snapX+snapX;
-      y = randomInt(int(gi.sizeY / snapY)-2)*snapY+snapY;
+      x = randomIntRangeStep(snapX,gi.sizeX-snapX*2,3*snapX);
+      y = randomIntRangeStep(snapY,gi.sizeY-snapY*2,3*snapY);
     } else {
-      x = randomInt(int(gi.sizeX / snapX)-1)*snapX+snapX;
-      y = randomInt(int(gi.sizeY / snapY)-1)*snapY+snapY;
+      x = randomIntRangeStep(snapX,gi.sizeX-snapX,3*snapX);
+      y = randomIntRangeStep(snapY,gi.sizeY-snapY,3*snapY);
+    }
+    horiz = !horiz;
+    if (debugLevel > 2) printf("slice (%d,%d)...\n",x,y);
+    plotRoad(x,y,horiz,0);
+  }
+
+  if (debugLevel > 1) printf("Subdivision (%d)...\n",subdiv);
+  for (int i = fullslice; i < subdiv; i++) {
+    if (bases > 0) {
+      x = randomIntRangeStep(snapX,gi.sizeX-snapX*2,snapX);
+      y = randomIntRangeStep(snapY,gi.sizeY-snapY*2,snapY);
+    } else {
+      x = randomIntRangeStep(snapX,gi.sizeX-snapX,snapX);
+      y = randomIntRangeStep(snapY,gi.sizeY-snapY,snapY);
     }
 
-    if (map.getNode(x,y).type > 0) continue;
+    horiz = !horiz;
 
-    for (int ax = 0; ax < gi.sizeX; ax++) {
+    if (horiz) {
+      if (map.getNode(x+1,y).type > 0) continue;
+    } else {
+      if (map.getNode(x,y+1).type > 0) continue;
+    }
+    
+    plotRoad(x,y,horiz,1);
+/*    for (int ax = 0; ax < gi.sizeX; ax++) {
       if (map.getNode(ax,y).type == CELLROAD) {
         map.settype(ax,y,CELLROADX);
       } else {
@@ -108,10 +136,11 @@ void GridGenerator::run() {
       } else {
         map.settype(x,ay,CELLROAD);
       }
-    }
+    }*/
   }
+  if (debugLevel > 1) printf("Pushing zones...\n");
   map.pushZones();
-
+  if (debugLevel > 1) printf("Registering materials...\n");
 
   mats.push_back(new Material(MATROAD,"road",true));
   mats.push_back(new Material(MATROADX,"roadx",true));
