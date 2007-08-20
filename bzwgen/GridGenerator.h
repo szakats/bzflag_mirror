@@ -25,6 +25,7 @@ class GridGenerator : public Generator {
 protected:
   GridInfo gi;
   GridMap map;
+  int fullslice;
   int snapX, snapY;
   int subdiv;
 public:

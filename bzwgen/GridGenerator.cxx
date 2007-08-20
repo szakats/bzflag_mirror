@@ -37,6 +37,13 @@ void GridGenerator::parseOptions(Options opt) {
   if (opt->Exists("v"))       { subdiv = opt->GetDataI("v"); }
   if (opt->Exists("-subdiv")) { subdiv = opt->GetDataI("-subdiv"); }
 
+  fullslice = 8;
+
+  if (opt->Exists("f"))          { subdiv = opt->GetDataI("f"); }
+  if (opt->Exists("-fullslice")) { subdiv = opt->GetDataI("-fullslice"); }
+
+  if (fullslice > subdiv) subdiv = fullslice;
+
   gi.stepX = gi.size / gi.sizeX;
   gi.stepY = gi.size / gi.sizeY;
   map.initialize(this);
@@ -83,7 +90,6 @@ void GridGenerator::run() {
     }
   }
 
-  int fullslice = 8;
 
   bool horiz = randomBool();
 
