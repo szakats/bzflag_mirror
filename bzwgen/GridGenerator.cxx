@@ -12,6 +12,7 @@
 
 #include "GridGenerator.h"
 #include "Zone.h"
+#include "FloorZone.h"
 
 
 GridGenerator::GridGenerator(RuleSet* _ruleset) : Generator(_ruleset) { 
@@ -66,10 +67,28 @@ void GridGenerator::run() {
   int x,y;
   Generator::run(); 
   map.clear();
+  if (bases > 0) {
+    plotRoad(snapX,snapY,true,0);
+    plotRoad(snapX,snapY,false,0);
+    plotRoad(gi.sizeX-snapX-1,gi.sizeY-snapY-1,true,0);
+    plotRoad(gi.sizeX-snapX-1,gi.sizeY-snapY-1,false,0);
+    for(x = 0; x < snapX; x++)                 for (y = 0; y < snapY; y++) map.settype(x,y,CELLBASE);
+    for(x = gi.sizeX-snapX; x < gi.sizeX; x++) for (y = gi.sizeY-snapY; y < gi.sizeY; y++) map.settype(x,y,CELLBASE);
+    if (bases > 2) {
+      for(x = 0; x < snapX; x++)                 for (y = gi.sizeY-snapY; y < gi.sizeY; y++) map.settype(x,y,CELLBASE);
+      for(x = gi.sizeX-snapX; x < gi.sizeX; x++) for (y = 0; y < snapY; y++) map.settype(x,y,CELLBASE);
+    }
+  }
+
   for (int i = 0; i < subdiv; i++) {
     // TODO: replace this with randomIntRange or the like
-    x = randomInt(int(gi.sizeX / snapX)-1)*snapX+snapX;
-    y = randomInt(int(gi.sizeY / snapY)-1)*snapY+snapY;
+    if (bases > 0) {
+      x = randomInt(int(gi.sizeX / snapX)-2)*snapX+snapX;
+      y = randomInt(int(gi.sizeY / snapY)-2)*snapY+snapY;
+    } else {
+      x = randomInt(int(gi.sizeX / snapX)-1)*snapX+snapX;
+      y = randomInt(int(gi.sizeY / snapY)-1)*snapY+snapY;
+    }
 
     if (map.getNode(x,y).type > 0) continue;
 
@@ -90,6 +109,7 @@ void GridGenerator::run() {
     }
   }
   map.pushZones();
+
 
   mats.push_back(new Material(MATROAD,"road",true));
   mats.push_back(new Material(MATROADX,"roadx",true));

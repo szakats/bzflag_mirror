@@ -15,6 +15,7 @@
 
 #define CELLROAD  1
 #define CELLROADX 2
+#define CELLBASE  3
 #define MATROAD   0
 #define MATROADX  1
 #define MATWALL   2

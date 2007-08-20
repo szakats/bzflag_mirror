@@ -12,10 +12,13 @@
 
 #include "GridMap.h"
 #include "FloorZone.h"
+#include "BaseZone.h"
 #include "BuildZone.h"
 #include "GridGenerator.h"
 #include <iostream>
 #include <string>
+
+int BaseZone::color = 1;
 
 void GridMap::initialize(Generator* _generator) 
 {
@@ -56,6 +59,9 @@ void GridMap::growZone(int x,int y,int type) {
   } else if (type == CELLROADX) {
     if (debugLevel == 3) { printf("Crossroads zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX, MATROADX,true));
+  } else if (type == CELLBASE) {
+    if (debugLevel == 3) { printf("Base zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    zones.push_back(new BaseZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)));
   } else {
     if (debugLevel == 3) { printf("Building zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new BuildZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX));

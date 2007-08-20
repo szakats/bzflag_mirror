@@ -24,9 +24,9 @@
 
 class BaseZone : public Zone {
 protected:
-  int color;
+  static int color;
 public:
-  BaseZone(Generator* _generator, Coord2D a, Coord2D b) : Zone(_generator,a,b,0) {};
+  BaseZone(Generator* _generator, Coord2D a, Coord2D b) : Zone(_generator,a,b,0) { color = 1;};
   int setColor(int _color) { color = _color; }
   virtual void output(Output& out) {
     out << "base\n";
@@ -34,6 +34,7 @@ public:
     out << "  size " << abs(A.x-B.x)/2 << " " << abs(A.y-B.y)/2 << " 0\n";
     out << "  color " << color << "\n";
     out << "end\n\n";
+    color++;
   }
 };
 

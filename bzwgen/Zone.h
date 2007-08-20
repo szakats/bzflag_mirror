@@ -32,6 +32,8 @@ public:
   int size() {
     return abs(A.x-B.x)*abs(A.y-B.y);
   }
+  Coord2D getA() { return A; }
+  Coord2D getB() { return B; }
   virtual ~Zone() {};
 };
 
