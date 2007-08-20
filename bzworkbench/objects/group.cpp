@@ -1,3 +1,15 @@
+/* BZWorkbench
+ * Copyright (c) 1993 - 2007 Tim Riker
+ *
+ * This package is free software;  you can redistribute it and/or
+ * modify it under the terms of the license found in the file
+ * named COPYING that should have accompanied this file.
+ *
+ * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "../include/objects/group.h"
 
 // constructor
@@ -95,9 +107,13 @@ int group::update( UpdateMessage& message ) {
 	int result = bz2object::update( message );
 	
 	switch( message.type ) {
+		
+		case UpdateMessage::SET_POSITION: {
+			this->setPos( *(message.getAsPosition()) );
+		}
 			
 		case UpdateMessage::SET_POSITION_FACTOR: {	// handle a translation
-			this->setPos( *(message.getAsPositionFactor()) );
+			this->setPos( this->getPos() + *(message.getAsPositionFactor()) );
 			
 			break;
 		}
@@ -123,34 +139,6 @@ int group::update( UpdateMessage& message ) {
 	
 	return 1;	
 }
-
-// get position (for the 3D cursor, mainly)
-// groups have no concept of position, so we'll return the average position of the child objects
-osg::Vec3 group::getPos() {
-	if( def == NULL )
-		return osg::Vec3( 0, 0, 0 );		// no definition association!
-		
-	// get the objects
-	vector< osg::ref_ptr< bz2object > > objects = def->getObjects();
-	
-	if( objects.size() <= 0 )
-		return osg::Vec3( 0, 0, 0);		// no objects!
-	
-	// compute the average position
-	float x = 0.0, y = 0.0, z = 0.0;
-	for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
-		x += (*i)->getPos().x();
-		y += (*i)->getPos().y();
-		z += (*i)->getPos().z();
-	}
-	
-	x /= objects.size();
-	y /= objects.size();
-	z /= objects.size();
-	
-	return osg::Vec3( x, y, z);
-}
-
 
 // toString
 string group::toString(void) {
@@ -201,4 +189,18 @@ void group::updateObjects() {
 }
 
 // set the associated definition
-void group::setDefine( define* def ) { this->def = def; setName( def->getName() ); }
+void group::setDefine( define* def ) {
+	this->def = def;
+	setName( def->getName() ); 
+	
+	// purge the previous objects
+	this->removeChildren( 0, this->getNumChildren() );
+	
+	// add the new ones
+	vector< osg::ref_ptr< bz2object > > objects = def->getObjects();
+	if( objects.size() > 0 ) {
+		for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
+			this->addChild( i->get() );
+		}
+	}
+}
