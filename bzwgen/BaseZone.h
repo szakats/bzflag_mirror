@@ -27,7 +27,7 @@ protected:
   static int color;
 public:
   BaseZone(Generator* _generator, Coord2D a, Coord2D b) : Zone(_generator,a,b,0) { color = 1;};
-  int setColor(int _color) { color = _color; }
+  void setColor(int _color) { color = _color; }
   virtual void output(Output& out) {
     out << "base\n";
     out << "  position " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 0\n";
