@@ -64,6 +64,20 @@ public:
   }
 };
 
+class ExpressionDouble : public Expression {
+  Expression* a;
+  Expression* b;
+public:
+  ExpressionDouble(Expression* _a, Expression* _b) : a(_a), b(_b) {};
+  virtual float calc(float av, float bv) = 0;
+  float calculate(Mesh* mesh,int face) { 
+    float av = a->calculate(mesh,face);
+    float bv = b->calculate(mesh,face);
+    return calc(av,bv);
+  }
+};
+
+
 #endif /* __EXPRESSION_H__ */
 
 // Local Variables: ***
