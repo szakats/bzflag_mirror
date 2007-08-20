@@ -12,9 +12,12 @@
 
 
 #include "commandArgs.h"
+#include "TextUtils.h"
+
 #ifdef _MSC_VER
   #pragma warning(disable:4996)
 #endif
+
 inline  bool operator < (const std::string &s1,const std::string &s2) { return (s1.compare(s2)<0);}
 
 void GetCommandName ( char *szData )
@@ -25,6 +28,11 @@ void GetCommandName ( char *szData )
 	while(*szData++)
 		*szData = toupper(*szData);
 #endif
+}
+
+std::string GetCommandName ( std::string &name )
+{
+	return TextUtils::toupper(name);
 }
 
 CCommandLineArgs::CCommandLineArgs()
@@ -73,11 +81,36 @@ void CCommandLineArgs::Set ( const char* szCommandLine )
 	if (!szCommandLine || !szCommandLine[0])
 		return;
 
+	std::vector<std::string> params = TextUtils::tokenize(std::string(szCommandLine),std::string("-"));
+
+	for ( int i = 0; i < (int) params.size(); i++ )
+	{
+		std::string param = params[i];
+		if (param.size())
+		{
+			if (strrchr(param.c_str(),' ') == NULL )
+
+				commands[GetCommandName(param)] = std::string("1");
+			else
+			{
+				std::string key = TextUtils::tokenize(param,std::string(" "))[0];
+				std::string data = param.c_str()+1+key.size();
+				commands[GetCommandName(key)] = data;
+			}
+		}
+	}
+}
+
+/*void CCommandLineArgs::Set ( const char* szCommandLine )
+{
+	if (!szCommandLine || !szCommandLine[0])
+		return;
+
 	std::string key;
 	std::string data;
 	
 	char szTemp[512];
-	const char *pTemp;
+	char *pTemp;
 
 	int pos = 0;
 	int len = (int)strlen(szCommandLine);
@@ -128,7 +161,7 @@ void CCommandLineArgs::Set ( const char* szCommandLine )
 			}
 		}
 	}
-}
+} */
 
 void CCommandLineArgs::Set ( COSFile &file )
 {
