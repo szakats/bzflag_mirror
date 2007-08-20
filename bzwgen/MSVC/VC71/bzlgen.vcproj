@@ -18,7 +18,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../;../../inc/"
-				WarningLevel="4"
+				WarningLevel="3"
 				WarnAsError="TRUE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
