@@ -49,8 +49,8 @@ void GridGenerator::parseOptions(Options opt) {
   map.initialize(this);
 }
 
-#define SETROAD(cx,cy)  { if (map.getNode(cx,cy).type == CELLROAD) { map.settype(cx,cy,CELLROADX);         } else { map.settype(cx,cy,CELLROAD); } }
-#define SETROADF(cx,cy) { if (map.getNode(cx,cy).type == CELLROAD) { map.settype(cx,cy,CELLROADX); break;  } else { map.settype(cx,cy,CELLROAD); } }
+#define SETROAD(cx,cy)  { if (map.getNode(cx,cy).type > 0) { map.settype(cx,cy,CELLROADX);         } else { map.settype(cx,cy,CELLROAD); } }
+#define SETROADF(cx,cy) { if (map.getNode(cx,cy).type > 0) { map.settype(cx,cy,CELLROADX); break;  } else { map.settype(cx,cy,CELLROAD); } }
 
 void GridGenerator::plotRoad(int x, int y, bool horiz, int  collision) {
   if (collision == 0) {
@@ -106,6 +106,14 @@ void GridGenerator::run() {
     }
     horiz = !horiz;
     if (debugLevel > 2) printf("slice (%d,%d)...\n",x,y);
+
+    if (map.getNode(x,y).type == CELLROADX) continue;
+    if (horiz) {
+      if (map.getNode(x+1,y).type > 0) continue;
+    } else {
+      if (map.getNode(x,y+1).type > 0) continue;
+    }
+
     plotRoad(x,y,horiz,0);
   }
 
@@ -121,6 +129,7 @@ void GridGenerator::run() {
 
     horiz = !horiz;
 
+    if (map.getNode(x,y).type == CELLROADX) continue;
     if (horiz) {
       if (map.getNode(x+1,y).type > 0) continue;
     } else {
