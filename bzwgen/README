@@ -10,16 +10,3 @@ BZFlag sourebase.
 
 The author's blog for the project can be found at
 http://bzflag.chaosforge.org/
-
------------------Building-------------------------------------
-
-Note that when you commit new versions of the windows bison files
-please note that you must make the following change to lexer.cxx
-
-#include <unistd.h>
-
-must be changed to
-
-#ifndef _WIN32
-#include <unistd.h>
-#endif
