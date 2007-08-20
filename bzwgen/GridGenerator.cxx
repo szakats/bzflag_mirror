@@ -41,6 +41,27 @@ void GridGenerator::parseOptions(Options opt) {
   map.initialize(this);
 }
 
+void GridGenerator::plotRoad(int x, int y, bool horiz, int ) {
+  if (horiz) {
+    for (int xx = 0; xx < gi.sizeX; xx++) {
+      if (map.getNode(xx,y).type == CELLROAD) {
+        map.settype(xx,y,CELLROADX);
+      } else {
+        map.settype(xx,y,CELLROAD);
+      }
+    }
+  } else {
+    for (int yy = 0; yy < gi.sizeX; yy++) {
+      if (map.getNode(x,y).type == CELLROAD) {
+        map.settype(x,yy,CELLROADX);
+      } else {
+        map.settype(x,yy,CELLROAD);
+      }
+    }
+  }
+}
+
+
 void GridGenerator::run() { 
   int x,y;
   Generator::run(); 
