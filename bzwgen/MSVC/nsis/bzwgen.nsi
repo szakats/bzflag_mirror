@@ -3,7 +3,7 @@
 ;Redesigned for BZFlag by blast007
 
 ;--------------------------------
-;BZLgen Version Variables
+;BZWgen Version Variables
 
   !define VER_MAJOR 0
   !define VER_MINOR .0.1
@@ -28,11 +28,11 @@
 ;Configuration
 
   ;General
-  Name "BZlGen ${VER_MAJOR}${VER_MINOR}"
-  OutFile "..\..\bzlgen-${VER_MAJOR}${VER_MINOR}.exe"
+  Name "BZWGen ${VER_MAJOR}${VER_MINOR}"
+  OutFile "..\..\bzwgen-${VER_MAJOR}${VER_MINOR}.exe"
 
   ;Default installation folder
-  InstallDir "$PROGRAMFILES\BZlgen${VER_MAJOR}${VER_MINOR}"
+  InstallDir "$PROGRAMFILES\BZWgen${VER_MAJOR}${VER_MINOR}"
 
   ; Make it look pretty in XP
   XPStyle on
@@ -47,7 +47,7 @@
 ;Interface Settings
 
   ;Icons
-  !define MUI_ICON ..\BZlgen.ico
+  !define MUI_ICON ..\BZWgen.ico
   !define MUI_UNICON uninstall.ico
 
   ;Bitmaps
@@ -76,7 +76,7 @@
 
   ;Start Menu Folder Page Configuration
   !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM" 
-  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\BZlgen${VER_MAJOR}${VER_MINOR}" 
+  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\BZWgen${VER_MAJOR}${VER_MINOR}" 
   !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
 
   !insertmacro MUI_PAGE_STARTMENU Application $STARTMENU_FOLDER
@@ -110,18 +110,18 @@
 ;--------------------------------
 ;Installer Sections
 
-Section "!BZlgen (Required)" BZlgen
+Section "!BZWgen (Required)" BZWgen
   ;Make it required
   SectionIn RO
 
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
   ; Put file there
-  File ..\..\BZlgen.exe
+  File ..\..\BZWgen.exe
   File ..\..\AUTHORS
   File ..\..\COPYING
   File ..\..\README
-  File bzlgen.exe.manifest
+  File bzwgen.exe.manifest
   
   ; make the data dir
   SetOutPath $INSTDIR\media
@@ -132,11 +132,11 @@ Section "!BZlgen (Required)" BZlgen
   File ..\..\rules\*.*
 
   ; Write the installation path into the registry
-  WriteRegStr HKLM SOFTWARE\BZlgen${VER_MAJOR}${VER_MINOR} "Install_Dir" "$INSTDIR"
+  WriteRegStr HKLM SOFTWARE\BZWgen${VER_MAJOR}${VER_MINOR} "Install_Dir" "$INSTDIR"
 
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZlgen${VER_MAJOR}${VER_MINOR}" "DisplayName" "BZlgen ${VER_MAJOR}${VER_MINOR} (remove only)"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZlgen${VER_MAJOR}${VER_MINOR}" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZWgen${VER_MAJOR}${VER_MINOR}" "DisplayName" "BZlgen ${VER_MAJOR}${VER_MINOR} (remove only)"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZWgen${VER_MAJOR}${VER_MINOR}" "UninstallString" '"$INSTDIR\uninstall.exe"'
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
@@ -147,7 +147,7 @@ Section "!BZlgen (Required)" BZlgen
     SetOutPath $INSTDIR
     CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
     CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
-    CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\BZlgen ${VER_MAJOR}${VER_MINOR}.lnk" "$INSTDIR\bzflag.exe" "" "$INSTDIR\bzflag.exe" 0
+    CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\BZWgen ${VER_MAJOR}${VER_MINOR}.lnk" "$INSTDIR\bzflag.exe" "" "$INSTDIR\bzflag.exe" 0
   
   !insertmacro MUI_STARTMENU_WRITE_END
 
@@ -157,11 +157,11 @@ SectionEnd
 ;Descriptions
 
   ;Language strings
-  LangString DESC_BZlgen ${LANG_ENGLISH} "Installs the main city generator files"
+  LangString DESC_BZWgen ${LANG_ENGLISH} "Installs the main city generator files"
 
   ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-    !insertmacro MUI_DESCRIPTION_TEXT ${BZlgen} $(DESC_BZlgen)
+    !insertmacro MUI_DESCRIPTION_TEXT ${BZWgen} $(DESC_BZWgen)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;--------------------------------
@@ -169,9 +169,9 @@ SectionEnd
 
 Section "Uninstall"
   ;remove registry keys
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZlgen${VER_MAJOR}${VER_MINOR}"
-  DeleteRegKey HKLM "SOFTWARE\BZlgen${VER_MAJOR}${VER_MINOR}"
-  DeleteRegKey HKCU "Software\BZlgen"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZWgen${VER_MAJOR}${VER_MINOR}"
+  DeleteRegKey HKLM "SOFTWARE\BZWgen${VER_MAJOR}${VER_MINOR}"
+  DeleteRegKey HKCU "Software\BZWgen"
 
   ; remove files
   Delete $INSTDIR\*.*

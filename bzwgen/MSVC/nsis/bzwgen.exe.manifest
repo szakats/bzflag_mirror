@@ -6,7 +6,7 @@
     processorArchitecture="x86" 
     version="1.0.0.0"
     type="win32"
-    name="bzlgen.exe"/>
+    name="bzwgen.exe"/>
     <description>BZLgen</description>
     <dependency>
     <dependentAssembly>

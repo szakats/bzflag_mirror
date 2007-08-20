@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="bzlgen"
+	Name="bzwgen"
 	ProjectGUID="{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}"
 	>
 	<Platforms>
