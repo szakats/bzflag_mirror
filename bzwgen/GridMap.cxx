@@ -21,13 +21,13 @@ void GridMap::initialize(Generator* _generator)
 {
   generator = _generator;
   gi = ((GridGenerator*)_generator)->getGridInfo();
-  map = new DiscreetMapNode[gi.sizeX*gi.sizeY];
+  map = new DiscreetMapNode[(gi.sizeX+1)*(gi.sizeY+1)];
   clear();
 }
 
 void GridMap::clear() 
 {
-  for (int i = 0; i < gi.sizeX*gi.sizeY; i++) {
+  for (int i = 0; i < (gi.sizeX+1)*(gi.sizeY+1); i++) {
     map[i].zone = -1;
     map[i].type = 0;
   }
