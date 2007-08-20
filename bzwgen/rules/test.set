@@ -45,7 +45,7 @@ top -> material($MATMESH) extrude(0.0) expand(0.3) extrude(0.5) material($MATROO
 topdingbat 
 -> 0.2  : spawn(toptop) 
 -> 0.2  : material($MATMESH)
--> 0.02 : extrude(0.0) expand(-2.0) extrude(0.3) material($MATGRASS)
+-> 0.02 : extrude(0.0) expand(-2.0) extrude(-0.3) material($MATGRASS)
 -> 0.58 : 
 ;
 
