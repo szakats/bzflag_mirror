@@ -42,24 +42,26 @@ void GridGenerator::parseOptions(Options opt) {
   map.initialize(this);
 }
 
-void GridGenerator::plotRoad(int x, int y, bool horiz, int ) {
-  if (horiz) {
-    for (int xx = 0; xx < gi.sizeX; xx++) {
-      if (map.getNode(xx,y).type == CELLROAD) {
-        map.settype(xx,y,CELLROADX);
-      } else {
-        map.settype(xx,y,CELLROAD);
-      }
-    }
-  } else {
-    for (int yy = 0; yy < gi.sizeX; yy++) {
-      if (map.getNode(x,y).type == CELLROAD) {
-        map.settype(x,yy,CELLROADX);
-      } else {
-        map.settype(x,yy,CELLROAD);
-      }
-    }
+#define SETROAD(cx,cy)  { if (map.getNode(cx,cy).type == CELLROAD) { map.settype(cx,cy,CELLROADX);         } else { map.settype(cx,cy,CELLROAD); } }
+#define SETROADF(cx,cy) { if (map.getNode(cx,cy).type == CELLROAD) { map.settype(cx,cy,CELLROADX); return; } else { map.settype(cx,cy,CELLROAD); } }
+
+void GridGenerator::plotRoad(int x, int y, bool horiz, int  collision) {
+  if (collision == 0) {
+    if (horiz) {
+      for (int xx = 0; xx < gi.sizeX; xx++) SETROAD(xx,y)
+    } else {
+      for (int yy = 0; yy < gi.sizeX; yy++) SETROAD(x,yy)
+    } 
+    return;
   }
+  if (horiz) {
+    for (int xx = x;   xx < gi.sizeX; xx++) SETROADF(xx,y)
+    for (int xx = x-1; xx >= 0; xx--)       SETROADF(xx,y)
+  } else {
+    for (int yy = y;   yy < gi.sizeY; yy++) SETROADF(x,yy)
+    for (int yy = y-1; yy >= 0; yy--)       SETROADF(x,yy)
+  } 
+  
 }
 
 

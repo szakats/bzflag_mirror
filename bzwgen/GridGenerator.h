@@ -32,7 +32,7 @@ public:
   void parseOptions(Options opt);
   void run();
   void output(Output& out);
-  void plotRoad(int x, int y, bool horiz, int collision);
+  void plotRoad(int x, int y, bool horiz, int collision = 0);
   GridInfo getGridInfo() { return gi; }
   ~GridGenerator();
 };
