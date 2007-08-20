@@ -78,18 +78,22 @@ public:
 };
 
 class ExpressionAdd : public ExpressionDouble {
+public:
   ExpressionAdd(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
   float calc(float av, float bv) { return av + bv; }
 };
 class ExpressionSub : public ExpressionDouble {
+public:
   ExpressionSub(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
   float calc(float av, float bv) { return av - bv; }
 };
 class ExpressionDiv : public ExpressionDouble {
+public:
   ExpressionDiv(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
   float calc(float av, float bv) { return av / bv; }
 };
 class ExpressionMult : public ExpressionDouble {
+public:
   ExpressionMult(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
   float calc(float av, float bv) { return av * bv; }
 };

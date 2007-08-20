@@ -26,6 +26,8 @@ void yyunput(int, char*);
 %token TAPER SPAWN CHAMFER UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV MATERIAL
 %token <fl> NUMBER
 %token <id> NONTERM ATTRIBUTE
+%left '-' '+'
+%left '*' '/'
 %type <pv> products
 %type <p> product
 %type <ov> ops
@@ -75,6 +77,10 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | NONTERM { std::string name = std::string($1); $$ = new OperationNonterminal(ruleset,name); }
 ;
 expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$7); }
+  | expr '+' expr { $$ = new ExpressionAdd($1,$3); }
+  | expr '-' expr { $$ = new ExpressionSub($1,$3); }
+  | expr '*' expr { $$ = new ExpressionMult($1,$3); }
+  | expr '/' expr { $$ = new ExpressionDiv($1,$3); }
   | NUMBER { $$ = new ExpressionConst($1); }
   | ATTRIBUTE { std::string name = std::string($1); $$ = new ExpressionAttribute(ruleset,name); }
   ;
