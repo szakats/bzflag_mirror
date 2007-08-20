@@ -77,6 +77,7 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | NONTERM { std::string name = std::string($1); $$ = new OperationNonterminal(ruleset,name); }
 ;
 expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$7); }
+  | '(' expr ')'   { $$ = $2; }
   | expr '+' expr { $$ = new ExpressionAdd($1,$3); }
   | expr '-' expr { $$ = new ExpressionSub($1,$3); }
   | expr '*' expr { $$ = new ExpressionMult($1,$3); }
