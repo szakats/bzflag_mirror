@@ -127,6 +127,10 @@ Section "!BZlgen (Required)" BZlgen
   SetOutPath $INSTDIR\media
   File ..\..\media\*.*
 
+  ; make the data dir
+  SetOutPath $INSTDIR\rules
+  File ..\..\rules\*.*
+
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\BZlgen${VER_MAJOR}${VER_MINOR} "Install_Dir" "$INSTDIR"
 
@@ -172,11 +176,13 @@ Section "Uninstall"
   ; remove files
   Delete $INSTDIR\*.*
   Delete $INSTDIR\media\*.*
+  Delete $INSTDIR\rules\*.*
 
   ; MUST REMOVE UNINSTALLER, too
   Delete $INSTDIR\uninstall.exe
 
   ; remove directories used.
+  RMDir "$INSTDIR\rules"
   RMDir "$INSTDIR\media"
   RMDir "$INSTDIR"
   
