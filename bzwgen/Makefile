@@ -4,21 +4,21 @@ CFLAGS = -g -O0 -Wall -Werror -pedantic -ansi -I./inc
 LDFLAGS =
 
 FILES = \
-	src\BuildZone.cxx \
-	src\FloorZone.cxx \
-	src\Generator.cxx \
-	src\GridGenerator.cxx \
-	src\GridMap.cxx \
-	src\Material.cxx \
-	src\Mesh.cxx \
-	src\Operation.cxx \
-	src\Expression.cxx \
-	src\OSFile.cxx \
-	src\Rule.cxx \
-	src\RuleSet.cxx \
-	src\TextUtils.cxx \
-	src\bzwgen.cxx \
-	src\commandArgs.cxx \
+	src/BuildZone.cxx \
+	src/FloorZone.cxx \
+	src/Generator.cxx \
+	src/GridGenerator.cxx \
+	src/GridMap.cxx \
+	src/Material.cxx \
+	src/Mesh.cxx \
+	src/Operation.cxx \
+	src/Expression.cxx \
+	src/OSFile.cxx \
+	src/Rule.cxx \
+	src/RuleSet.cxx \
+	src/TextUtils.cxx \
+	src/bzwgen.cxx \
+	src/commandArgs.cxx \
 	parser.cxx \
 	lexer.cxx
 
