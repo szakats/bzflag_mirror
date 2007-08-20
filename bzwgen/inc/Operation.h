@@ -77,7 +77,7 @@ public:
   OperationAssert(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
   int runMesh(Mesh* mesh,int face) {
     flatten(mesh,face);
-    return value >= 0.0f;
+    if (value >= 0.0f) return face; else return -1;
   }
 };
 
