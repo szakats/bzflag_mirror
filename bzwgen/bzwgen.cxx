@@ -49,6 +49,9 @@ int main (int argc, char* argv[]) {
   ruledir = "rules";
   std::string outname = "map.bzw";
 
+  if (cmd->Exists("c"))         { COSFile f = COSFile(cmd->GetDataS("c"));       cmd->Set(f); }
+  if (cmd->Exists("-config"))   { COSFile f = COSFile(cmd->GetDataS("-config")); cmd->Set(f); }
+
   if (cmd->Exists("h"))         { printHelp(); return 0; }
   if (cmd->Exists("-help"))     { printHelp(); return 0; }
   if (cmd->Exists("d"))         { debugLevel = cmd->GetDataI("d"); }
