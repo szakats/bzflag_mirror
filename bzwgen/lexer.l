@@ -39,6 +39,7 @@ subdivideh            { return(SUBDIVIDEH);}
 subdividev            { return(SUBDIVIDEV);}
 partitionh            { return(PARTITIONH);}
 partitionv            { return(PARTITIONV);}
+face                  { return(FACE); }
 spawn                 { return(SPAWN);}
 taper                 { return(TAPER);}
 "$"{ID}               { yylval.id = strdup(yytext+1); return(ATTRIBUTE);  }

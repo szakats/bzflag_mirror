@@ -16,6 +16,8 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
+#include <cctype>
 #include "globals.h"
 #include "Mesh.h"
 
@@ -40,6 +42,25 @@ class ExpressionAttribute : public Expression {
 public:
   ExpressionAttribute(RuleSet* _ruleset, std::string& _attrname) : ruleset(_ruleset), attrname(_attrname) {};
   float calculate(Mesh*,int);
+};
+
+class ExpressionFaceAttribute : public Expression {
+  std::string attrname;
+public:
+  ExpressionFaceAttribute(std::string& _attrname) : attrname(_attrname) { 
+    std::transform(attrname.begin(), attrname.end(), attrname.begin(), tolower);
+  };
+  float calculate(Mesh* mesh,int face) {
+    if (attrname == "x") return mesh->faceCenter(face).x;
+    if (attrname == "y") return mesh->faceCenter(face).x;
+    if (attrname == "z") return mesh->faceCenter(face).x;
+    if (attrname == "h") 
+      return (mesh->v[mesh->f[face]->vtx->at(0)] - mesh->v[mesh->f[face]->vtx->at(1)]).length();
+    if (attrname == "v") 
+      return (mesh->v[mesh->f[face]->vtx->at(3)] - mesh->v[mesh->f[face]->vtx->at(0)]).length();
+    if (debugLevel > 1) printf("Unknown face() attribute : '%s'!\n",attrname.c_str());
+    return 0.0f;
+  };
 };
 
 class ExpressionRandom : public Expression {
