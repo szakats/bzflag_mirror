@@ -244,6 +244,13 @@
 					RelativePath="..\..\src\RuleSet.cxx">
 				</File>
 			</Filter>
+			<Filter
+				Name="API"
+				Filter="">
+				<File
+					RelativePath="..\..\inc\RuleAPI.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -309,13 +316,13 @@
 					RelativePath="..\parser.hxx">
 				</File>
 				<File
-					RelativePath="..\..\Product.h">
+					RelativePath="..\..\inc\Product.h">
 				</File>
 				<File
-					RelativePath="..\..\Rule.h">
+					RelativePath="..\..\inc\Rule.h">
 				</File>
 				<File
-					RelativePath="..\..\RuleSet.h">
+					RelativePath="..\..\inc\RuleSet.h">
 				</File>
 			</Filter>
 		</Filter>
