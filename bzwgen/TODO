@@ -19,17 +19,11 @@
 
 * Multishapes - will need a serious rehaul of the grammar though :/
 
-* Bases support - needed to make the thing useful xP
-
 * Scatter maps - like the default random bzfs map but better
 
 * Definition files - for generator flavours
 
-* Command line arguments - at least to change output name :P
-
 * N-gon generation - for non quad buildings
-
-* Better zone split algorithm - the current one sucks badly
 
 * Documentation of the source code - it's getting less and less self-explanatory
 
