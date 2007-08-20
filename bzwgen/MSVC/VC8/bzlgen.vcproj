@@ -39,7 +39,7 @@
 				Optimization="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				AdditionalIncludeDirectories="..\..\inc\"
+				AdditionalIncludeDirectories="..\..\inc\;..\"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -204,7 +204,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\lexer.cxx"
+					RelativePath="..\lexer.cxx"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -221,7 +221,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\parser.cxx"
+					RelativePath="..\parser.cxx"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -324,7 +324,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\inc\parser.hxx"
+					RelativePath="..\parser.hxx"
 					>
 				</File>
 				<File

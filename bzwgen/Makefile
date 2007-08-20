@@ -19,8 +19,8 @@ FILES = \
 	src\TextUtils.cxx \
 	src\bzwgen.cxx \
 	src\commandArgs.cxx \
-	src\parser.cxx \
-	src\lexer.cxx
+	parser.cxx \
+	lexer.cxx
 
 OBJECTS = ${FILES:.cxx=.o}
 
