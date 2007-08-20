@@ -102,7 +102,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "parser.y"
+#line 1 "..\\..\\parser.y"
 
 #include <memory>
 #include <string>
@@ -137,7 +137,7 @@ void yyunput(int, char*);
 #endif
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 16 "parser.y"
+#line 16 "..\\..\\parser.y"
 typedef union _YYSTYPE {
   char *id;
   float fl;
@@ -149,7 +149,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 196 of yacc.c.  */
-#line 153 "parser.cxx"
+#line 153 "..\\parser.cxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -161,7 +161,7 @@ typedef union _YYSTYPE {
 
 
 /* Line 219 of yacc.c.  */
-#line 165 "parser.cxx"
+#line 165 "..\\parser.cxx"
 
 #if ! defined (YYSIZE_T) && defined (__SIZE_TYPE__)
 # define YYSIZE_T __SIZE_TYPE__
@@ -1248,7 +1248,7 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 41 "parser.y"
+#line 41 "..\\..\\parser.y"
     { 
     std::string name = std::string((yyvsp[-2].id));
     ruleset->addRule(name,new Rule(name,(yyvsp[-1].pv)));
@@ -1256,202 +1256,202 @@ yyreduce:
     break;
 
   case 4:
-#line 46 "parser.y"
+#line 46 "..\\..\\parser.y"
     { (yyval.pv) = new ProductVector(); ;}
     break;
 
   case 5:
-#line 47 "parser.y"
+#line 47 "..\\..\\parser.y"
     { (yyval.pv) = (yyvsp[-1].pv); (yyval.pv)->push_back((yyvsp[0].p)); ;}
     break;
 
   case 6:
-#line 49 "parser.y"
+#line 49 "..\\..\\parser.y"
     { (yyval.p) = new Product((yyvsp[0].ov),(yyvsp[-2].fl)); ;}
     break;
 
   case 7:
-#line 50 "parser.y"
+#line 50 "..\\..\\parser.y"
     { (yyval.p) = new Product((yyvsp[0].ov)); ;}
     break;
 
   case 8:
-#line 52 "parser.y"
+#line 52 "..\\..\\parser.y"
     { (yyval.ids) = new StringVector(); ;}
     break;
 
   case 9:
-#line 53 "parser.y"
+#line 53 "..\\..\\parser.y"
     { std::string name = std::string((yyvsp[0].id)); (yyval.ids)->push_back(name); ;}
     break;
 
   case 10:
-#line 54 "parser.y"
+#line 54 "..\\..\\parser.y"
     { std::string name = std::string(""); (yyval.ids)->push_back(name); ;}
     break;
 
   case 11:
-#line 56 "parser.y"
+#line 56 "..\\..\\parser.y"
     { (yyval.ids) = NULL; ;}
     break;
 
   case 12:
-#line 57 "parser.y"
+#line 57 "..\\..\\parser.y"
     { std::string name = '@'+std::string((yyvsp[-1].id)); (yyval.ids) = new StringVector(); (yyval.ids)->push_back(name); ;}
     break;
 
   case 13:
-#line 58 "parser.y"
+#line 58 "..\\..\\parser.y"
     { (yyval.ids) = (yyvsp[-1].ids); ;}
     break;
 
   case 14:
-#line 60 "parser.y"
+#line 60 "..\\..\\parser.y"
     { (yyval.ids) = NULL; ;}
     break;
 
   case 15:
-#line 61 "parser.y"
+#line 61 "..\\..\\parser.y"
     { std::string name = std::string((yyvsp[-1].id)); (yyval.ids) = new StringVector(); (yyval.ids)->push_back(name); ;}
     break;
 
   case 16:
-#line 62 "parser.y"
+#line 62 "..\\..\\parser.y"
     { std::string name = std::string((yyvsp[-1].id)); (yyval.ids) = new StringVector(); (yyval.ids)->push_back(name); ;}
     break;
 
   case 17:
-#line 64 "parser.y"
+#line 64 "..\\..\\parser.y"
     { (yyval.ov) = new OperationVector(); ;}
     break;
 
   case 18:
-#line 65 "parser.y"
+#line 65 "..\\..\\parser.y"
     { (yyval.ov) = (yyvsp[-1].ov); (yyval.ov)->push_back((yyvsp[0].o)); ;}
     break;
 
   case 19:
-#line 67 "parser.y"
+#line 67 "..\\..\\parser.y"
     { (yyval.o) = new OperationExtrude(ruleset,(yyvsp[-2].e),(yyvsp[0].ids)); ;}
     break;
 
   case 20:
-#line 68 "parser.y"
+#line 68 "..\\..\\parser.y"
     { (yyval.o) = new OperationExpand(ruleset,(yyvsp[-1].e)); ;}
     break;
 
   case 21:
-#line 69 "parser.y"
+#line 69 "..\\..\\parser.y"
     { (yyval.o) = new OperationTaper(ruleset,(yyvsp[-1].e)); ;}
     break;
 
   case 22:
-#line 70 "parser.y"
+#line 70 "..\\..\\parser.y"
     { (yyval.o) = new OperationChamfer(ruleset,(yyvsp[-1].e)); ;}
     break;
 
   case 23:
-#line 71 "parser.y"
+#line 71 "..\\..\\parser.y"
     { (yyval.o) = new OperationAssert(ruleset,(yyvsp[-1].e)); ;}
     break;
 
   case 24:
-#line 72 "parser.y"
+#line 72 "..\\..\\parser.y"
     { (yyval.o) = new OperationUnchamfer(ruleset); ;}
     break;
 
   case 25:
-#line 73 "parser.y"
+#line 73 "..\\..\\parser.y"
     { (yyval.o) = new OperationSubdivide(ruleset,(yyvsp[-2].e),true,(yyvsp[0].ids)); ;}
     break;
 
   case 26:
-#line 74 "parser.y"
+#line 74 "..\\..\\parser.y"
     { (yyval.o) = new OperationSubdivide(ruleset,(yyvsp[-2].e),false,(yyvsp[0].ids)); ;}
     break;
 
   case 27:
-#line 75 "parser.y"
+#line 75 "..\\..\\parser.y"
     { (yyval.o) = new OperationPartition(ruleset,(yyvsp[-2].e),true,(yyvsp[0].ids)); ;}
     break;
 
   case 28:
-#line 76 "parser.y"
+#line 76 "..\\..\\parser.y"
     { (yyval.o) = new OperationPartition(ruleset,(yyvsp[-2].e),false,(yyvsp[0].ids)); ;}
     break;
 
   case 29:
-#line 77 "parser.y"
+#line 77 "..\\..\\parser.y"
     { (yyval.o) = new OperationMaterial(ruleset,(yyvsp[-1].e)); ;}
     break;
 
   case 30:
-#line 78 "parser.y"
+#line 78 "..\\..\\parser.y"
     { std::string name = std::string((yyvsp[-3].id)); (yyval.o) = new OperationAssign(ruleset,(yyvsp[-1].e),name); ;}
     break;
 
   case 31:
-#line 79 "parser.y"
+#line 79 "..\\..\\parser.y"
     { std::string name = std::string((yyvsp[-1].id)); (yyval.o) = new OperationSpawn(ruleset,name); ;}
     break;
 
   case 32:
-#line 80 "parser.y"
+#line 80 "..\\..\\parser.y"
     { std::string name = std::string((yyvsp[0].id)); (yyval.o) = new OperationNonterminal(ruleset,name); ;}
     break;
 
   case 33:
-#line 82 "parser.y"
+#line 82 "..\\..\\parser.y"
     { (yyval.e) = new ExpressionRandom((yyvsp[-5].e),(yyvsp[-3].e),(yyvsp[-1].e)); ;}
     break;
 
   case 34:
-#line 83 "parser.y"
+#line 83 "..\\..\\parser.y"
     { (yyval.e) = (yyvsp[-1].e); ;}
     break;
 
   case 35:
-#line 84 "parser.y"
+#line 84 "..\\..\\parser.y"
     { (yyval.e) = new ExpressionAdd((yyvsp[-2].e),(yyvsp[0].e)); ;}
     break;
 
   case 36:
-#line 85 "parser.y"
+#line 85 "..\\..\\parser.y"
     { (yyval.e) = new ExpressionSub((yyvsp[-2].e),(yyvsp[0].e)); ;}
     break;
 
   case 37:
-#line 86 "parser.y"
+#line 86 "..\\..\\parser.y"
     { (yyval.e) = new ExpressionMult((yyvsp[-2].e),(yyvsp[0].e)); ;}
     break;
 
   case 38:
-#line 87 "parser.y"
+#line 87 "..\\..\\parser.y"
     { (yyval.e) = new ExpressionDiv((yyvsp[-2].e),(yyvsp[0].e)); ;}
     break;
 
   case 39:
-#line 88 "parser.y"
+#line 88 "..\\..\\parser.y"
     { (yyval.e) = new ExpressionGreater((yyvsp[-2].e),(yyvsp[0].e)); ;}
     break;
 
   case 40:
-#line 89 "parser.y"
+#line 89 "..\\..\\parser.y"
     { (yyval.e) = new ExpressionGreater((yyvsp[0].e),(yyvsp[-2].e)); ;}
     break;
 
   case 41:
-#line 90 "parser.y"
+#line 90 "..\\..\\parser.y"
     { std::string name = std::string((yyvsp[-1].id)); (yyval.e) = new ExpressionFaceAttribute(name); ;}
     break;
 
   case 42:
-#line 91 "parser.y"
+#line 91 "..\\..\\parser.y"
     { (yyval.e) = new ExpressionConst((yyvsp[0].fl)); ;}
     break;
 
   case 43:
-#line 92 "parser.y"
+#line 92 "..\\..\\parser.y"
     { std::string name = std::string((yyvsp[0].id)); (yyval.e) = new ExpressionAttribute(ruleset,name); ;}
     break;
 
@@ -1460,7 +1460,7 @@ yyreduce:
     }
 
 /* Line 1126 of yacc.c.  */
-#line 1464 "parser.cxx"
+#line 1464 "..\\parser.cxx"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1728,5 +1728,5 @@ yyreturn:
 }
 
 
-#line 94 "parser.y"
+#line 94 "..\\..\\parser.y"
 

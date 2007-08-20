@@ -75,7 +75,7 @@
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 16 "parser.y"
+#line 16 "..\\..\\parser.y"
 typedef union _YYSTYPE {
   char *id;
   float fl;
@@ -87,7 +87,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 91 "parser.hxx"
+#line 91 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
