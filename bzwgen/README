@@ -1,0 +1,12 @@
+
+BZlGen is a random world generator for the game BZFlag,
+(http://www.bzflag.org), and is distributed as free
+open soruce software under the Lessger Gnu Public License (LGPL).
+See the COPYING file for more information on the license.
+
+BZlgen was origonaly writen as part of the Google Summer of Code
+program by Kornel "Epyon" Kisielewicz, and is now a part of the
+BZFlag sourebase.
+
+The author's blog for the project can be found at
+http://bzflag.chaosforge.org/
