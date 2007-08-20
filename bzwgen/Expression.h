@@ -77,6 +77,25 @@ public:
   }
 };
 
+class ExpressionAdd : public ExpressionDouble {
+  ExpressionAdd(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
+  float calc(float av, float bv) { return av + bv; }
+};
+class ExpressionSub : public ExpressionDouble {
+  ExpressionSub(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
+  float calc(float av, float bv) { return av - bv; }
+};
+class ExpressionDiv : public ExpressionDouble {
+  ExpressionDiv(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
+  float calc(float av, float bv) { return av / bv; }
+};
+class ExpressionMult : public ExpressionDouble {
+  ExpressionMult(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
+  float calc(float av, float bv) { return av * bv; }
+};
+
+
+
 
 #endif /* __EXPRESSION_H__ */
 
