@@ -37,9 +37,9 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="..\..\inc\;..\"
 				WarningLevel="4"
 				WarnAsError="true"
-				AdditionalIncludeDirectories="..\..\inc\;..\"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -359,7 +359,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Running flex"
-						CommandLine="flex -o$..\(InputName).cxx $(InputFileName)"
+						CommandLine="flex -o..\$(InputName).cxx ..\..\$(InputFileName)"
 						Outputs="$(InputName).cxx"
 					/>
 				</FileConfiguration>
@@ -373,7 +373,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Running bison"
-						CommandLine="bison -d -o$(InputName).cxx $(InputFileName)"
+						CommandLine="bison -d -o..\$(InputName).cxx ..\..\$(InputFileName)"
 						Outputs="$..\(InputName).cxx;$(InputName).hxx"
 					/>
 				</FileConfiguration>
