@@ -37,6 +37,7 @@ void GridMap::clear()
 }
 
 void GridMap::growZone(int x,int y,int type) {
+  if (debugLevel > 3) { printf("Pushing zone at : (%d,%d)\n",x,y); }
   int xe = x;
   int ye = y;
   while(xe < gi.sizeX) {
@@ -54,18 +55,19 @@ void GridMap::growZone(int x,int y,int type) {
     for (int yy = y; yy < ye; yy++) 
       setzone(xx,yy,zone);
   if (type == CELLROAD) {
-    if (debugLevel == 3) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    if (debugLevel > 2) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX, MATROAD, x-xe < y-ye));
   } else if (type == CELLROADX) {
-    if (debugLevel == 3) { printf("Crossroads zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    if (debugLevel > 2) { printf("Crossroads zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX, MATROADX,true));
   } else if (type == CELLBASE) {
-    if (debugLevel == 3) { printf("Base zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    if (debugLevel > 2) { printf("Base zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new BaseZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)));
   } else {
-    if (debugLevel == 3) { printf("Building zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    if (debugLevel > 2) { printf("Building zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new BuildZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX));
   }
+  if (debugLevel > 3) { printf("Zone successfuly created.\n",x,y,xe,ye); }
 }
 
 
