@@ -23,7 +23,9 @@
 #ifdef __cplusplus
 
 #include <stdlib.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif //_WIN32
 
 /* Use prototypes in function declarations. */
 #define YY_USE_PROTOS
