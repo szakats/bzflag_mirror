@@ -66,7 +66,7 @@ protected:
   float value;
 public:
   OperationSingle(RuleSet* _ruleset, Expression* _exp) : Operation(_ruleset), exp(_exp) { };
-  void flatten() { value = exp->calculate(); }
+  void flatten(Mesh* mesh,int face) { value = exp->calculate(mesh,face); }
   ~OperationSingle() {
     delete exp;
   }
@@ -86,7 +86,7 @@ public:
   OperationMaterial(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
   int runMesh(Mesh* mesh,int face) { 
     if (mesh == NULL) return 0;
-    flatten();
+    flatten(mesh,face);
     mesh->f[face]->mat = round(value);
     return face; 
   };
@@ -97,7 +97,7 @@ public:
   OperationExpand(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
   int runMesh(Mesh* mesh,int face) { 
     if (mesh == NULL) return 0;
-    flatten();
+    flatten(mesh,face);
     mesh->expandFace(face,value);
     return face; 
   };
@@ -108,7 +108,7 @@ public:
   OperationTaper(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
   int runMesh(Mesh* mesh,int face) { 
     if (mesh == NULL) return 0;
-    flatten();
+    flatten(mesh,face);
     mesh->taperFace(face,value);
     return face; 
   };
@@ -119,7 +119,7 @@ public:
   OperationChamfer(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
   int runMesh(Mesh* mesh,int face) { 
     if (mesh == NULL) return 0;
-    flatten();
+    flatten(mesh,face);
     mesh->chamferFace(face,value);
     return face; 
   };

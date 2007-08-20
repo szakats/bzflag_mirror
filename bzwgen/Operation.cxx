@@ -22,8 +22,8 @@ int OperationSpawn::runMesh(Mesh* mesh, int face) {
   return face;
 }
 
-int OperationAssign::runMesh(Mesh*, int face) { 
-  flatten();
+int OperationAssign::runMesh(Mesh* mesh, int face) { 
+  flatten(mesh,face);
   ruleset->addAttr(attrname,value);
   return face; 
 }
@@ -61,7 +61,7 @@ int OperationMultifaces::runMesh(Mesh* mesh,int) {
 
 int OperationExtrude::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
-  flatten();
+  flatten(mesh,face);
   if (facerules != NULL) {
     faces = mesh->extrudeFaceR(face,value,mesh->f[face]->mat);
     OperationMultifaces::runMesh(mesh,face);
@@ -73,7 +73,7 @@ int OperationExtrude::runMesh(Mesh* mesh,int face) {
 
 int OperationSubdivide::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
-  flatten();
+  flatten(mesh,face);
   faces = mesh->subdivdeFace(face,round(value),horiz);
   if (facerules == NULL) {
     delete faces;
@@ -86,7 +86,7 @@ int OperationSubdivide::runMesh(Mesh* mesh,int face) {
 
 int OperationPartition::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
-  flatten();
+  flatten(mesh,face);
   if (facerules == NULL) {
     mesh->partitionFace(face,value,horiz);
   } else {

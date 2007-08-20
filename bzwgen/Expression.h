@@ -17,12 +17,13 @@
 #include <vector>
 #include <string>
 #include "globals.h"
+#include "Mesh.h"
 
 class RuleSet;
 
 class Expression {
 public:
-  virtual float calculate() = 0;
+  virtual float calculate(Mesh*,int) = 0;
   virtual ~Expression() {};
 };
 
@@ -30,7 +31,7 @@ class ExpressionConst : public Expression {
   float value;
 public:
   ExpressionConst(float _value) : value(_value) {};
-  float calculate() { return value; };
+  float calculate(Mesh*,int) { return value; };
 };
 
 class ExpressionAttribute : public Expression {
@@ -38,7 +39,7 @@ class ExpressionAttribute : public Expression {
   std::string attrname;
 public:
   ExpressionAttribute(RuleSet* _ruleset, std::string& _attrname) : ruleset(_ruleset), attrname(_attrname) {};
-  float calculate();
+  float calculate(Mesh*,int);
 };
 
 class ExpressionRandom : public Expression {
@@ -51,10 +52,10 @@ public:
     max = _max;
     step = _step;
   };
-  float calculate() { 
-    float stepc = step->calculate();
-    if (fabs(stepc) < 0.0001f) return randomFloatRange(min->calculate(),max->calculate());
-    return randomFloatRangeStep(min->calculate(),max->calculate(),stepc); 
+  float calculate(Mesh* mesh,int face) { 
+    float stepc = step->calculate(mesh,face);
+    if (fabs(stepc) < 0.0001f) return randomFloatRange(min->calculate(mesh,face),max->calculate(mesh,face));
+    return randomFloatRangeStep(min->calculate(mesh,face),max->calculate(mesh,face),stepc); 
   };
   ~ExpressionRandom() {
     delete min;

@@ -13,7 +13,7 @@
 #include "Expression.h"
 #include "RuleSet.h"
 
-float ExpressionAttribute::calculate() {
+float ExpressionAttribute::calculate(Mesh*,int) {
   return ruleset->getAttr(attrname);
 }
 
