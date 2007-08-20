@@ -26,7 +26,9 @@ extern int yyparse(RuleSet*);
 extern FILE* yyin;
 
 int debugLevel = 2;
-
+CCommandLineArgs  cmd;
+COSDir ruledir;
+  
 void printHelp() {
   std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n\n";
   std::cout << "Command line arguments:\n";
@@ -42,24 +44,53 @@ void printHelp() {
   std::cout << "-b (--bases) integer       sets number of bases (0/2/4)(defualt: 0)\n\n";
 }
 
-int main (int argc, char* argv[]) {
-  CCommandLineArgs* cmd = new CCommandLineArgs(argc,argv);
+#ifdef _USE_LIB_RULES_
+const char* getLibExtension ( void )
+{
+#ifdef _WIN32
+  return "*.dll";
+#else
+  return "*.so";
+#endif
+}
 
-  COSDir ruledir;
+void loadOnePlugIn ( const char* file )
+{
+#ifdef _WIN32
+
+#else
+
+#endif
+}
+#endif //_USE_LIB_RULES_
+
+void loadPlugIns ( void )
+{
+#ifdef _USE_LIB_RULES_
+
+  while (ruledir.GetNextFile(file,getLibExtension(),false))
+    loadOnePlugIn(file.GetOSName());
+
+#endif // _USE_LIB_RULES_
+}
+
+int main (int argc, char* argv[]) {
+  cmd.Set(argc,argv);
+
   ruledir = "rules";
   std::string outname = "map.bzw";
 
-  if (cmd->Exists("c"))         { COSFile f = COSFile(cmd->GetDataS("c"));       cmd->Set(f); }
-  if (cmd->Exists("-config"))   { COSFile f = COSFile(cmd->GetDataS("-config")); cmd->Set(f); }
+  if (cmd.Exists("c"))         { COSFile f = COSFile(cmd.GetDataS("c"));       cmd.Set(f); }
+  if (cmd.Exists("-config"))   { COSFile f = COSFile(cmd.GetDataS("-config")); cmd.Set(f); }
 
-  if (cmd->Exists("h"))         { printHelp(); return 0; }
-  if (cmd->Exists("-help"))     { printHelp(); return 0; }
-  if (cmd->Exists("d"))         { debugLevel = cmd->GetDataI("d"); }
-  if (cmd->Exists("-debug"))    { debugLevel = cmd->GetDataI("-debug"); }
-  if (cmd->Exists("r"))         { ruledir    = cmd->GetDataS("r"); }
-  if (cmd->Exists("-rulesdir")) { ruledir    = cmd->GetDataS("-rulesdir"); }
-  if (cmd->Exists("o"))         { outname    = cmd->GetDataS("o"); }
-  if (cmd->Exists("-output"))   { outname    = cmd->GetDataS("-output"); }
+  if (cmd.Exists("h"))         { printHelp(); return 0; }
+  if (cmd.Exists("-help"))     { printHelp(); return 0; }
+  if (cmd.Exists("d"))         { debugLevel = cmd.GetDataI("d"); }
+  if (cmd.Exists("-debug"))    { debugLevel = cmd.GetDataI("-debug"); }
+  if (cmd.Exists("r"))         { ruledir    = cmd.GetDataS("r"); }
+  if (cmd.Exists("-rulesdir")) { ruledir    = cmd.GetDataS("-rulesdir"); }
+  if (cmd.Exists("o"))         { outname    = cmd.GetDataS("o"); }
+  if (cmd.Exists("-output"))   { outname    = cmd.GetDataS("-output"); }
   
   COSFile file;
   RuleSet* ruleset = new RuleSet();
@@ -77,6 +108,8 @@ int main (int argc, char* argv[]) {
     file.Close();
   }
 
+  loadPlugIns();
+
   ruleset->initialize();
 
   srand((unsigned int)time(NULL));
@@ -86,7 +119,7 @@ int main (int argc, char* argv[]) {
   std::cout << "done.\n";
 
   std::cout << "Parsing options... ";
-  gen.parseOptions(cmd);
+  gen.parseOptions(&cmd);
   std::cout << "done.\n";
 
   std::cout << "Generating... ";
@@ -97,8 +130,6 @@ int main (int argc, char* argv[]) {
   std::cout << "Outputing... ";
   gen.output(os);
   std::cout << "done.\n";
-
-  delete cmd;
 }
 
 	

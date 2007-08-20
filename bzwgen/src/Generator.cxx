@@ -12,7 +12,7 @@
 
 #include "Generator.h"
 
-void Generator::parseOptions(Options opt) {
+void Generator::parseOptions(CCommandLineArgs* opt) {
   size = 800;
   bases = 0;
 

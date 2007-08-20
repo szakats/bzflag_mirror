@@ -18,7 +18,7 @@
 GridGenerator::GridGenerator(RuleSet* _ruleset) : Generator(_ruleset) { 
 }
 
-void GridGenerator::parseOptions(Options opt) { 
+void GridGenerator::parseOptions(CCommandLineArgs* opt) { 
   Generator::parseOptions(opt); 
   gi.size  = getSize();
   gi.sizeX = gi.sizeY = 42;

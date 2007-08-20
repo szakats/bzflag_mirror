@@ -152,8 +152,6 @@ struct GridInfo {
   int stepX,stepY;
 };
 
-typedef CCommandLineArgs* Options;
-
 struct Coord2D {
   int x;
   int y;

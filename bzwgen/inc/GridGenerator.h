@@ -30,7 +30,7 @@ protected:
   int subdiv;
 public:
   GridGenerator(RuleSet* ruleset);
-  void parseOptions(Options opt);
+  void parseOptions(CCommandLineArgs* opt);
   void run();
   void output(Output& out);
   void plotRoad(int x, int y, bool horiz, int collision = 0);

@@ -19,6 +19,7 @@
 #include "RuleSet.h"
 #include "Material.h"
 
+
 class Generator {
 protected:
   int size;
@@ -27,7 +28,7 @@ protected:
   int bases;
 public:
   Generator(RuleSet* _ruleset) : ruleset(_ruleset) {}
-  virtual void parseOptions(Options opt);
+  virtual void parseOptions(CCommandLineArgs* opt);
   virtual void run();
   inline int getSize() { return size; }
   inline RuleSet* getRuleSet() { return ruleset; }
