@@ -1,26 +1,26 @@
 CXX = g++
 LIBS = -lm
-CFLAGS = -g -O0 -Wall -Werror -pedantic -ansi
+CFLAGS = -g -O0 -Wall -Werror -pedantic -ansi -I./inc
 LDFLAGS =
 
 FILES = \
-	BuildZone.cxx \
-	FloorZone.cxx \
-	Generator.cxx \
-	GridGenerator.cxx \
-	GridMap.cxx \
-	Material.cxx \
-	Mesh.cxx \
-	Operation.cxx \
-	Expression.cxx \
-	OSFile.cxx \
-	Rule.cxx \
-	RuleSet.cxx \
-	TextUtils.cxx \
-	bzwgen.cxx \
-	commandArgs.cxx \
-	parser.cxx \
-	lexer.cxx
+	src\BuildZone.cxx \
+	src\FloorZone.cxx \
+	src\Generator.cxx \
+	src\GridGenerator.cxx \
+	src\GridMap.cxx \
+	src\Material.cxx \
+	src\Mesh.cxx \
+	src\Operation.cxx \
+	src\Expression.cxx \
+	src\OSFile.cxx \
+	src\Rule.cxx \
+	src\RuleSet.cxx \
+	src\TextUtils.cxx \
+	src\bzwgen.cxx \
+	src\commandArgs.cxx \
+	src\parser.cxx \
+	src\lexer.cxx
 
 OBJECTS = ${FILES:.cxx=.o}
 

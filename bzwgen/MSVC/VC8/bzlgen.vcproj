@@ -39,6 +39,7 @@
 				Optimization="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				AdditionalIncludeDirectories="..\..\inc\"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -105,6 +106,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="..\..\inc\"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -147,50 +149,50 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\BuildZone.cxx"
+				RelativePath="..\..\src\BuildZone.cxx"
 				>
 			</File>
 			<File
-				RelativePath="..\..\bzwgen.cxx"
+				RelativePath="..\..\src\bzwgen.cxx"
 				>
 			</File>
 			<File
-				RelativePath="..\..\FloorZone.cxx"
+				RelativePath="..\..\src\FloorZone.cxx"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Generator.cxx"
+				RelativePath="..\..\src\Generator.cxx"
 				>
 			</File>
 			<File
-				RelativePath="..\..\GridGenerator.cxx"
+				RelativePath="..\..\src\GridGenerator.cxx"
 				>
 			</File>
 			<File
-				RelativePath="..\..\GridMap.cxx"
+				RelativePath="..\..\src\GridMap.cxx"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Material.cxx"
+				RelativePath="..\..\src\Material.cxx"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Mesh.cxx"
+				RelativePath="..\..\src\Mesh.cxx"
 				>
 			</File>
 			<Filter
 				Name="GPLib"
 				>
 				<File
-					RelativePath="..\..\commandArgs.cxx"
+					RelativePath="..\..\src\commandArgs.cxx"
 					>
 				</File>
 				<File
-					RelativePath="..\..\OSFile.cxx"
+					RelativePath="..\..\src\OSFile.cxx"
 					>
 				</File>
 				<File
-					RelativePath="..\..\TextUtils.cxx"
+					RelativePath="..\..\src\TextUtils.cxx"
 					>
 				</File>
 			</Filter>
@@ -198,28 +200,11 @@
 				Name="Language"
 				>
 				<File
-					RelativePath="..\..\Expression.cxx"
+					RelativePath="..\..\src\Expression.cxx"
 					>
 				</File>
 				<File
-					RelativePath="..\..\lexer.cxx"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							WarningLevel="3"
-							WarnAsError="false"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\..\Operation.cxx"
-					>
-				</File>
-				<File
-					RelativePath="..\..\parser.cxx"
+					RelativePath="..\..\src\lexer.cxx"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -232,11 +217,28 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\Rule.cxx"
+					RelativePath="..\..\src\Operation.cxx"
 					>
 				</File>
 				<File
-					RelativePath="..\..\RuleSet.cxx"
+					RelativePath="..\..\src\parser.cxx"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="3"
+							WarnAsError="false"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\Rule.cxx"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\RuleSet.cxx"
 					>
 				</File>
 			</Filter>
@@ -247,66 +249,66 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\BaseZone.h"
+				RelativePath="..\..\inc\BaseZone.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\BuildZone.h"
+				RelativePath="..\..\inc\BuildZone.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Face.h"
+				RelativePath="..\..\inc\Face.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\FloorZone.h"
+				RelativePath="..\..\inc\FloorZone.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Generator.h"
+				RelativePath="..\..\inc\Generator.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\globals.h"
+				RelativePath="..\..\inc\globals.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\GridGenerator.h"
+				RelativePath="..\..\inc\GridGenerator.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\GridMap.h"
+				RelativePath="..\..\inc\GridMap.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Material.h"
+				RelativePath="..\..\inc\Material.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Mesh.h"
+				RelativePath="..\..\inc\Mesh.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Output.h"
+				RelativePath="..\..\inc\Output.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Zone.h"
+				RelativePath="..\..\inc\Zone.h"
 				>
 			</File>
 			<Filter
 				Name="GPLib"
 				>
 				<File
-					RelativePath="..\..\commandArgs.h"
+					RelativePath="..\..\inc\commandArgs.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\OSFile.h"
+					RelativePath="..\..\inc\OSFile.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\TextUtils.h"
+					RelativePath="..\..\inc\TextUtils.h"
 					>
 				</File>
 			</Filter>
@@ -314,27 +316,27 @@
 				Name="Language"
 				>
 				<File
-					RelativePath="..\..\Expression.h"
+					RelativePath="..\..\inc\Expression.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\Operation.h"
+					RelativePath="..\..\inc\Operation.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\parser.hxx"
+					RelativePath="..\..\inc\parser.hxx"
 					>
 				</File>
 				<File
-					RelativePath="..\..\Product.h"
+					RelativePath="..\..\inc\Product.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\Rule.h"
+					RelativePath="..\..\inc\Rule.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\RuleSet.h"
+					RelativePath="..\..\inc\RuleSet.h"
 					>
 				</File>
 			</Filter>
