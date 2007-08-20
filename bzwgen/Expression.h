@@ -118,6 +118,11 @@ public:
   ExpressionMult(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
   float calc(float av, float bv) { return av * bv; }
 };
+class ExpressionGreater : public ExpressionDouble {
+public:
+  ExpressionGreater(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
+  float calc(float av, float bv) { if(av > bv) return 1.0; else return -1.0; }
+};
 
 
 
