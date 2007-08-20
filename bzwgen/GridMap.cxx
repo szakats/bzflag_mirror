@@ -67,7 +67,7 @@ void GridMap::growZone(int x,int y,int type) {
     if (debugLevel > 2) { printf("Building zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new BuildZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX));
   }
-  if (debugLevel > 3) { printf("Zone successfuly created.\n",x,y,xe,ye); }
+  if (debugLevel > 3) { printf("Zone successfuly created : (%d,%d * %d,%d)\n",x,y,xe,ye); }
 }
 
 
