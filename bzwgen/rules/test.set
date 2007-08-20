@@ -51,7 +51,7 @@ insetwall -> extrude(-5.0) ;
 top -> material($MATMESH) extrude(0.0) expand(0.3) extrude(0.5) material($MATROOF) topdingbat;
 
 topdingbat 
--> 0.2  : spawn(toptop) 
+-> 0.2  : assert(face(h) > 15.0) assert(face(v) > 15.0) spawn(toptop) 
 -> 0.2  : material($MATMESH)
 -> 0.02 : extrude(0.0) expand(-2.0) extrude(-0.3) material($MATGRASS)
 -> 0.58 : 
@@ -66,8 +66,8 @@ ledge -> material($MATMESH) extrude(0.0) expand(0.3) extrude(0.5) extrude(0.0) e
 
 skycont
 -> 0.4 : ledge material($MATGLASS) extrude(16.0) skycont
--> 0.1 : ledge partitionh(face(h)/3) material($MATGLASS) extrude(16.0) skycont
--> 0.1 : ledge partitionv(face(v)/3) material($MATGLASS) extrude(16.0) skycont
+-> 0.1 : ledge assert(face(h) > 6.0) partitionh(face(h)/3) material($MATGLASS) extrude(16.0) skycont
+-> 0.1 : ledge assert(face(v) > 6.0) partitionv(face(v)/3) material($MATGLASS) extrude(16.0) skycont
 -> 0.4 : top
 ;
 
