@@ -30,7 +30,7 @@ OBJECTS = ${FILES:.cxx=.o}
 all: blather bzwgen
 
 .cxx.o: common.h
-	${CXX} ${CFLAGS} ${CPPFLAGS} -c $<
+	${CXX} ${CFLAGS} ${CPPFLAGS} -c -o $@ $<
 	
 lexer.cxx: lexer.l
 	flex -o$@ $<
