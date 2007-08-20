@@ -19,11 +19,13 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="../;../../inc/"
 				WarningLevel="3"
-				WarnAsError="TRUE"/>
+				WarnAsError="TRUE"
+				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLinkerTool"/>
+				Name="VCLinkerTool"
+				GenerateDebugInformation="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
