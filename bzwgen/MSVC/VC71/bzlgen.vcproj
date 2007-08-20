@@ -27,7 +27,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy debug\*.exe ..\..\*.exe"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -47,6 +48,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1">
 			<Tool
@@ -59,7 +61,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy release\*.exe ..\..\*.exe"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -95,7 +98,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy debug\*.exe ..\..\*.exe"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -365,7 +369,8 @@
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="bison -d -o..\$(InputName).cxx $(InputFileName)"/>
+						CommandLine="bison -d -o..\$(InputName).cxx $(InputFileName)
+"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug(bison)|Win32">
@@ -379,7 +384,8 @@
 					Name="Release(bison)|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="bison -d -o..\$(InputName).cxx $(InputFileName)"/>
+						CommandLine="bison -d -o..\$(InputName).cxx $(InputFileName)
+"/>
 				</FileConfiguration>
 			</File>
 		</Filter>
