@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -24,9 +24,8 @@ public:
   FaceVector f;
   VertexVector inside;
   VertexVector outside;
-  bool noradar;
   bool passable;
-  Mesh() : noradar(false), passable(false) {}
+  Mesh() : passable(false) {}
   int addVertex(Vertex vtx) { v.push_back(vtx); return v.size()-1; }
   int addTexCoord(TexCoord tcx) { tc.push_back(tcx); return tc.size()-1; }
   int addFace(Face* face) { f.push_back(face); return f.size()-1; }
@@ -39,8 +38,12 @@ public:
   Vertex faceCenter(int fid);
   IntVector* subdivdeFace(int fid, int count, bool horizontal);
   int partitionFace(int fid, float amount, bool horizontal);
+  void chamferFace(int fid, float amount);
+  void taperFace(int fid, float amount);
   void weldVertices(int a, int b, Vertex vx);
+  void weldVertices(int a, int b);
   void output(Output& out);
+  ~Mesh();
 private:
   Vertex extensionVertex(int ida, int idb, int idc);
 

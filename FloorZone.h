@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -9,7 +9,6 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-
 
 #ifndef __FLOORZONE_H__
 #define __FLOORZONE_H__
@@ -26,7 +25,7 @@ class FloorZone : public Zone {
 protected:
   Mesh mesh;
 public:
-  FloorZone(Coord2D a, Coord2D b, int astep, int matref, bool rotated);
+  FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int matref, bool rotated);
   virtual void output(Output& out);
 };
 

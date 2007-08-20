@@ -171,19 +171,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\lexer.cxx"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						WarningLevel="3"
-						WarnAsError="false"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\Material.cxx"
 				>
 			</File>
@@ -191,32 +178,65 @@
 				RelativePath=".\Mesh.cxx"
 				>
 			</File>
-			<File
-				RelativePath=".\parser.cxx"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						WarningLevel="3"
-						WarnAsError="false"
-					/>
-				</FileConfiguration>
-			</File>
 			<Filter
 				Name="GPLib"
 				>
 				<File
-					RelativePath=".\commandArgs.cpp"
+					RelativePath=".\commandArgs.cxx"
 					>
 				</File>
 				<File
-					RelativePath=".\OSFile.cpp"
+					RelativePath=".\OSFile.cxx"
 					>
 				</File>
 				<File
-					RelativePath=".\TextUtils.cpp"
+					RelativePath=".\TextUtils.cxx"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Language"
+				>
+				<File
+					RelativePath=".\Expression.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\lexer.cxx"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="3"
+							WarnAsError="false"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Operation.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\parser.cxx"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="3"
+							WarnAsError="false"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Rule.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\RuleSet.cxx"
 					>
 				</File>
 			</Filter>
@@ -226,6 +246,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\BaseZone.h"
+				>
+			</File>
 			<File
 				RelativePath=".\BuildZone.h"
 				>
@@ -267,22 +291,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\parser.hxx"
-				>
-			</File>
-			<File
-				RelativePath=".\Product.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Rule.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RuleSet.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Zone.h"
 				>
 			</File>
@@ -299,6 +307,34 @@
 				</File>
 				<File
 					RelativePath=".\TextUtils.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Language"
+				>
+				<File
+					RelativePath=".\Expression.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Operation.h"
+					>
+				</File>
+				<File
+					RelativePath=".\parser.hxx"
+					>
+				</File>
+				<File
+					RelativePath=".\Product.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Rule.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RuleSet.h"
 					>
 				</File>
 			</Filter>

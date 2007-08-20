@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -15,23 +15,24 @@
 
 #include "globals.h"
 #include "Zone.h"
+#include "Generator.h"
 
 class GridMap {
   DiscreetMapNode* map;
+  Generator* generator;
 public:
   GridInfo gi;
   ZoneVector zones;
   GridMap() { map = NULL; };
-  void initialize(GridInfo gridInfo);
+  void initialize(Generator* _generator);
   inline DiscreetMapNode getNode(int x, int y)	{ return map[y*gi.sizeX+x]; }
   inline DiscreetMapNode getNode(Coord2D& c)  { return map[c.y*gi.sizeX+c.x]; }
   void clear();
   Coord2D worldCoord(int x, int y) { return Coord2D((x-gi.sizeX/2)*gi.stepX,(y-gi.sizeY/2)*gi.stepY); }
-  inline void setZ(int x, int y, int z)	{ map[y*gi.sizeX+x].z = z; }
-  inline void setZ(Coord2D& c, int z) { map[c.y*gi.sizeX+c.x].z = z; }
   inline void settype(int x, int y, int type) { map[y*gi.sizeX+x].type = type; }
+  inline void setzone(int x, int y, int zone) { map[y*gi.sizeX+x].zone = zone; }
   inline void settype(Coord2D& c, int type) { map[c.y*gi.sizeX+c.x].type = type; }
-  void output(Output& out);
+  void growZone(int x,int y,int type);
   void pushZones();
   bool isValid(int x, int y);
   int typeAround(int x, int y, int type);

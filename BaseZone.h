@@ -11,36 +11,34 @@
  */
 
 
-#ifndef __ZONE_H__
-#define __ZONE_H__
+#ifndef __BASEZONE_H__
+#define __BASEZONE_H__
 
 #include <vector>
 #include <fstream>
-#include "Output.h"
+#include <string>
 #include "globals.h"
-#include "Generator.h"
+#include "Zone.h"
+#include "Mesh.h"
 
 
-class Zone {
+class BaseZone : public Zone {
 protected:
-  Generator* generator;
-  Coord2D A,B;
-  int step;
+  static int color;
 public:
-  Zone(Generator* _generator, Coord2D a, Coord2D b, int astep) : generator(_generator), A(a), B(b), step(astep) {};
-  virtual void output(Output& /* out */) {};
-  int size() {
-    return abs(A.x-B.x)*abs(A.y-B.y);
+  BaseZone(Generator* _generator, Coord2D a, Coord2D b) : Zone(_generator,a,b,0) { color = 1;};
+  void setColor(int _color) { color = _color; }
+  virtual void output(Output& out) {
+    out << "base\n";
+    out << "  position " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 0\n";
+    out << "  size " << abs(A.x-B.x)/2 << " " << abs(A.y-B.y)/2 << " 0\n";
+    out << "  color " << color << "\n";
+    out << "end\n\n";
+    color++;
   }
-  Coord2D getA() { return A; }
-  Coord2D getB() { return B; }
-  virtual ~Zone() {};
 };
 
-typedef std::vector<Zone*> ZoneVector;
-typedef ZoneVector::iterator ZoneVectIter;
-
-#endif /* __ZONE_H__ */
+#endif /* __BASEZONE_H__ */
 
 // Local Variables: ***
 // mode:C++ ***

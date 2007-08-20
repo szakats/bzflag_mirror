@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -10,27 +10,9 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-
 #include <fstream>
 #include <iostream>
 #include "time.h"
-
-// TODO list for simple grid based generator
-// ------------------------------------------
-// PARTIAL DONE TODO: textures
-// PARTIAL DONE TODO: random empty areas (parks?)
-// TODO: railway/highway
-// DONE TODO: cleanup, file split
-// TODO: team bases!
-// TODO: proper command line handling
-// TODO: implement option handling
-// TODO: doxygen 
-// DONE TODO: building recoloring
-// TODO: zone subdivision
-// TODO: object wrappers for basic objects
-// DONE TODO: zones need to use world coordinates
-
-
 
 #include "Output.h"
 #include "Generator.h"
@@ -43,8 +25,42 @@
 extern int yyparse(RuleSet*);
 extern FILE* yyin;
 
+int debugLevel = 2;
+
+void printHelp() {
+  std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n\n";
+  std::cout << "Command line arguments:\n";
+  std::cout << "-h (--help)                shows help\n";
+  std::cout << "-d (--debug) integer       sets debug level (0-4)(default: 2)\n";
+  std::cout << "-o (--output) filename     sets output filename (default: map.bzw)\n";
+  std::cout << "-r (--rulesdir) directory  sets rules directory (defualt: rules)\n";
+  std::cout << "-s (--size) integer        sets world size (defualt: 800)\n";
+  std::cout << "-g (--gridsize) integer    sets grid size (defualt: 42)\n";
+  std::cout << "-p (--gridsnap) integer    sets the grid snap (defualt: 3)\n";
+  std::cout << "-f (--fullslice) integer   sets the number of full slices (defualt: 8)\n";
+  std::cout << "-v (--subdiv) integer      sets the number of subdivisions (defualt: 120)\n";
+  std::cout << "-b (--bases) integer       sets number of bases (0/2/4)(defualt: 0)\n\n";
+}
+
 int main (int argc, char* argv[]) {
-  COSDir ruledir("rules");
+  CCommandLineArgs* cmd = new CCommandLineArgs(argc,argv);
+
+  COSDir ruledir;
+  ruledir = "rules";
+  std::string outname = "map.bzw";
+
+  if (cmd->Exists("c"))         { COSFile f = COSFile(cmd->GetDataS("c"));       cmd->Set(f); }
+  if (cmd->Exists("-config"))   { COSFile f = COSFile(cmd->GetDataS("-config")); cmd->Set(f); }
+
+  if (cmd->Exists("h"))         { printHelp(); return 0; }
+  if (cmd->Exists("-help"))     { printHelp(); return 0; }
+  if (cmd->Exists("d"))         { debugLevel = cmd->GetDataI("d"); }
+  if (cmd->Exists("-debug"))    { debugLevel = cmd->GetDataI("-debug"); }
+  if (cmd->Exists("r"))         { ruledir    = cmd->GetDataS("r"); }
+  if (cmd->Exists("-rulesdir")) { ruledir    = cmd->GetDataS("-rulesdir"); }
+  if (cmd->Exists("o"))         { outname    = cmd->GetDataS("o"); }
+  if (cmd->Exists("-output"))   { outname    = cmd->GetDataS("-output"); }
+  
   COSFile file;
   RuleSet* ruleset = new RuleSet();
   
@@ -56,30 +72,33 @@ int main (int argc, char* argv[]) {
       std::cout << "done.\n";
     } else {
       std::cout << "failed!\n";
+      return 0;
     }
     file.Close();
   }
 
+  ruleset->initialize();
+
   srand((unsigned int)time(NULL));
 
-  CCommandLineArgs cmd(argc,argv);
-
-  std::cout << "Initializing...\n";
-  GridGenerator gen;
+  std::cout << "Initializing... ";
+  GridGenerator gen(ruleset);
   std::cout << "done.\n";
 
-  std::cout << "Parsing options...\n";
-  gen.parseOptions(0);
+  std::cout << "Parsing options... ";
+  gen.parseOptions(cmd);
   std::cout << "done.\n";
 
-  std::cout << "Generating...\n";
+  std::cout << "Generating... ";
   gen.run();
   std::cout << "done.\n";
 
-  Output os("test.bzw");
+  Output os(outname.c_str());
   std::cout << "Outputing... ";
   gen.output(os);
   std::cout << "done.\n";
+
+  delete cmd;
 }
 
 	

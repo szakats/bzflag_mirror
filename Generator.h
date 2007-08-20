@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -16,16 +16,27 @@
 #include <vector>
 #include <fstream> 
 #include "globals.h"
-
+#include "RuleSet.h"
+#include "Material.h"
 
 class Generator {
 protected:
   int size;
+  RuleSet* ruleset;
+  MaterialVector mats;
+  int bases;
 public:
-  void parseOptions(Options opt);
-  void run();
+  Generator(RuleSet* _ruleset) : ruleset(_ruleset) {}
+  virtual void parseOptions(Options opt);
+  virtual void run();
   inline int getSize() { return size; }
-  void output(std::ofstream& out);
+  inline RuleSet* getRuleSet() { return ruleset; }
+  virtual void output(std::ofstream& out);
+  Material* getMaterial(int id) { return mats[id]; }
+  virtual ~Generator() {
+    MaterialVectIter itr; 
+    for (itr = mats.begin(); itr!= mats.end(); ++itr) delete (*itr);
+  }
 };
 
 typedef std::vector<Generator> GeneratorVector;

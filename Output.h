@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -9,7 +9,6 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-
 
 #ifndef __OUTPUT_H__
 #define __OUTPUT_H__
@@ -45,7 +44,7 @@ public:
     }
     (*this) << "\n";
 
-    if (f->texcoords) {
+    if (f->texcoords && f->tcd->size() > 0) {
       (*this) << "    texcoords ";
       for (size_t i = 0; i < f->tcd->size(); i++) {
         (*this) << f->tcd->at(i) << " ";

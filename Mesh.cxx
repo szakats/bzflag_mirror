@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -87,18 +87,29 @@ Vertex Mesh::extensionVertex(int ida, int idb, int idc) {
   return dir*length;
 }
 
+void Mesh::taperFace(int fid, float amount) {
+  IntVector* fv = f[fid]->vtx;
+  int size = fv->size();
+  Vertex c = faceCenter(fid);
+  for (int i = 0; i < size; i++) {
+    Vertex vv = v[fv->at(i)];
+    v[fv->at(i)] = (vv - c)*amount+c;
+  }
+}
+
 
 void Mesh::expandFace(int fid, float amount) {
   // needs to be uniform
   IntVector* fv = f[fid]->vtx;
   int size = fv->size();
-  Vertex nv[10];
+  Vertex* nv = new Vertex[size];
   for (int i = 0; i < size; i++) {
     nv[i] = v[fv->at(i)] + extensionVertex(fv->at(modprev(i,size)),fv->at(modnext(i,size)),fv->at(i))*amount;
   }
   for (int i = 0; i < size; i++) {
     v[fv->at(i)] = nv[i];
   }
+  delete nv;
 }
 
 /* this operation leaves one unused vertex unfortunately */
@@ -123,6 +134,11 @@ void Mesh::weldVertices(int a, int b, Vertex vx) {
     }
   }
   v[a] = vx;  
+}
+
+void Mesh::weldVertices(int a, int b) {
+  Vertex c = (v[a]+v[b])/2;
+  weldVertices(a,b,c);
 }
 
 
@@ -253,13 +269,45 @@ void Mesh::output(Output& out) {
     for (size_t i = 0; i < f.size(); i++) 
       if (f[i]->mat == m) {
 	if (mat != m) out.matref(m);
-        if (noradar) out.line("  noradar"); 
 	mat = m;
 	out.face(f[i],mat);
 	mat = f[i]->mat;
       }
   }
   out.line("end\n");
+}
+
+// TODO: handle texcoords?
+// TODO: handle previous?
+void Mesh::chamferFace(int fid, float amount) {
+  IntVector old;
+  int size = f[fid]->vtx->size();
+  for (int i = 0; i < size; i++) {
+    old.push_back(f[fid]->vtx->at(i));
+  }
+  f[fid]->vtx->clear();
+  VertexVector in;
+  VertexVector out;
+  for (int i = 0; i < size; i++) {
+    in.push_back(v[old[i]]);
+  }
+  for (int i = 0; i < size; i++) {
+    Vertex a = in[i]-in[modprev(i,size)];
+    Vertex b = in[i]-in[modnext(i,size)];
+    float af = (a.length()-amount)/a.length();
+    float bf = (b.length()-amount)/b.length();
+    a = in[modprev(i,size)]+a*af;
+    b = in[modnext(i,size)]+b*bf;
+    v[old[i]] = a;
+    f[fid]->vtx->push_back(old[i]);
+    f[fid]->vtx->push_back(addVertex(b));
+  }
+}
+
+
+Mesh::~Mesh() {
+  FaceVectIter itr; 
+  for (itr = f.begin(); itr!= f.end(); ++itr) delete (*itr);
 }
 
 // Local Variables: ***

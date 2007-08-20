@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -19,17 +19,22 @@
 #include "GridMap.h"
 #include "globals.h"
 #include "Output.h"
+#include "RuleSet.h"
 
 class GridGenerator : public Generator {
 protected:
   GridInfo gi;
-  MaterialVector mats;
   GridMap map;
+  int fullslice;
+  int snapX, snapY;
+  int subdiv;
 public:
-  GridGenerator();
+  GridGenerator(RuleSet* ruleset);
   void parseOptions(Options opt);
   void run();
   void output(Output& out);
+  void plotRoad(int x, int y, bool horiz, int collision = 0);
+  GridInfo getGridInfo() { return gi; }
   ~GridGenerator();
 };
 

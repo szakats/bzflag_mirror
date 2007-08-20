@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -9,6 +9,7 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+
 
 
 #ifndef __BUILDZONE_H__
@@ -21,15 +22,20 @@
 
 
 class BuildZone : public Zone {
-  Mesh mesh;
+  MeshVector* meshes;
 public:
-  BuildZone(Coord2D a, Coord2D b, int astep);
-  void addDivider(int base, float width, float height, int mat, bool noNext = false);
-  void subdivideWindows(int wall, int mat);
-  void longerSide(int face, float* length, bool* orientation);
-  void generateBuilding(int base, int wall);
-  void generateSkyscraper(int base, int wall);
+  BuildZone(Generator* _generator,Coord2D a, Coord2D b, int astep);
+  void addDivider(Mesh* mesh, int base, float width, float height, int mat, bool noNext = false);
+  void subdivideWindows(Mesh* mesh, int wall, int mat);
+  void longerSide(Mesh* mesh, int face, float* length, bool* orientation);
+  void generateBuilding(Mesh* mesh, int base, int wall);
+  void generateSkyscraper(Mesh* mesh, int base, int wall);
   virtual void output(Output& out);
+  ~BuildZone() { 
+    MeshVectIter itr; 
+    for (itr = meshes->begin(); itr!= meshes->end(); ++itr) delete (*itr);
+    delete meshes;
+  }
 };
 
 #endif /* __BUILDZONE_H__ */

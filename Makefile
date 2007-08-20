@@ -2,7 +2,6 @@ CXX = g++
 LIBS = -lm
 CFLAGS = -g -O0 -Wall -Werror -pedantic -ansi
 LDFLAGS =
-CPPFLAGS = -I../bzflag/include
 
 FILES = \
 	BuildZone.cxx \
@@ -12,12 +11,16 @@ FILES = \
 	GridMap.cxx \
 	Material.cxx \
 	Mesh.cxx \
-	OSFile.cpp \
-	TextUtils.cpp \
-	commandArgs.cpp \
+	Operation.cxx \
+	Expression.cxx \
+	OSFile.cxx \
+	Rule.cxx \
+	RuleSet.cxx \
+	TextUtils.cxx \
+	bzwgen.cxx \
+	commandArgs.cxx \
 	parser.cxx \
-	lexer.cxx \
-	bzwgen.cxx
+	lexer.cxx
 
 OBJECTS = ${FILES:.cxx=.o}
 

@@ -10,30 +10,12 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "Generator.h"
+#include "Expression.h"
+#include "RuleSet.h"
 
-void Generator::parseOptions(Options opt) {
-  size = 800;
-  bases = 0;
-
-  if (opt->Exists("s"))     { size = opt->GetDataI("s"); }
-  if (opt->Exists("-size")) { size = opt->GetDataI("-size"); }
-
-  if (opt->Exists("b"))      { bases = opt->GetDataI("b"); }
-  if (opt->Exists("-bases")) { bases = opt->GetDataI("-bases"); }
+float ExpressionAttribute::calculate(Mesh*,int) {
+  return ruleset->getAttr(attrname);
 }
-  
-void Generator::run() {
-
-}
-
-void Generator::output(std::ofstream& out ) {
-  out << "world\n";
-  out << "  name BZWGen Generated City\n";
-  out << "  size " << int(size / 2) << "\n";
-  out << "end\n\n";
-}
-
 
 // Local Variables: ***
 // mode:C++ ***

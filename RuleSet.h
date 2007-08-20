@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -10,17 +10,30 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+
 #ifndef __RULESET_H__
 #define __RULESET_H__
 
 #include <string>
 #include "Rule.h"
+#include "Mesh.h"
+#define MAX_RECURSION 1000
 
 class RuleSet {
   RuleMap rules;
+  AttributeMap attrmap;
+  int recursion;
+  MeshVector* meshes;
 public:
-  RuleSet() {}
-  void addRule(std::string& name, Rule* rule) { rules[name] = rule; }
+  RuleSet() : recursion(0), meshes(NULL) {}
+  MeshVector* run(Mesh* initial_mesh, int initial_face, std::string& rulename);
+  int runMesh(Mesh* mesh, int face, std::string& rulename);
+  int runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename);
+  void initialize() { std::string init = std::string("initialize"); runMesh(NULL,0,init); }
+  void addAttr(std::string& name, float value) { attrmap[name] = value; }
+  float getAttr(std::string& name); 
+  void addRule(std::string& name, Rule* rule);
+  ~RuleSet();
 };
 
 #endif /* __RULESET_H__ */

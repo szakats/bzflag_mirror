@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -16,6 +16,7 @@ void Material::output(Output& out) {
   out << "material\n";
   out << "  name mat" << name << "\n";
   out << "  texture " << file << "\n";
+  if (noradar) out << "  noradar\n";
   out << "end\n\n";
 }
 

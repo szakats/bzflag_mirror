@@ -1,17 +1,73 @@
 # Test file for the parser. Will be changed to something more working later.
 
-floor
--> 0.4 : extrude(random(16.0,80.0,8.0)) top 
--> 0.4 : extrude(random(16.0,64.0,8.0)) floorcont 
--> 0.2 : extrude(random(32.0,96.0,8.0)) taper(20.0) top
+building
+-> 0.2 : skyscraper
+-> 0.8 : building1
 ;
+
+building1 
+-> 0.3 : material($MATGLASS) extrude(4.0) [ b1entry * b1entry * ] b1floors
+-> 0.3 : material($MATGLASS) extrude(4.0) [ * b1entry * b1entry ] b1floors
+-> 0.2 : material($MATWALL2) extrude(3.7) [ * b1entry * b1entry ] extrude(0) expand(1.0) b1floors
+-> 0.1 : material($MATWALL2) extrude(random(12.0,40.0,4.0)) [ * specialwall * specialwall ] top
+-> 0.1 : material($MATWALL2) extrude(random(12.0,40.0,4.0)) [ specialwall * specialwall * ] top
+;
+
+b1entry 
+-> partitionh(face(h)/2 - 2.0) partitionh(4.0) [ b1entrya ]
+;
+b1entrya
+-> extrude(-2.0) material($MATROOF)
+; 
+
+b1sky 
+-> material($MATGLASS) ;
+
+b1floors
+-> 0.6 : ledge material($MATWALL2) extrude(3.7) b1floors
+-> 0.2 : ledge material($MATWALL2) extrude(3.7) [ @b1special ] b1floors
+-> 0.2 : top
+;
+
+b1special
+-> subdivideh(3) [ * b1insetwall * ] 
+;
+
+b1insetwall -> extrude(-3.0) ;
+
+
+skyscraper
+-> 0.2 : material($MATGLASS) chamfer(3.0) extrude(random(16.0,80.0,8.0)) top 
+-> 0.2 : material($MATGLASS) extrude(random(16.0,80.0,8.0)) [ @specialwall ] top 
+-> 0.3 : material($MATGLASS) extrude(16.0) skycont 
+-> 0.28 : material($MATGLASS) extrude(random(24.0,64.0,8.0)) taper(0.6) top
+-> 0.02 : 
+;
+
+specialwall -> material($MATGLASS) subdivideh(3) [ * insetwall * ] ;
 
 insetwall -> extrude(-5.0) ;
 
-top -> extrude(0.0) expand(0.3) extrude(0.5) ;
+top -> material($MATMESH) extrude(0.0) expand(0.3) extrude(0.5) material($MATROOF) topdingbat;
 
-floorcont
--> 0.6 : extrude(random(16.0,64.0,8.0)) floorcont
--> 0.4 : 
+topdingbat 
+-> 0.2  : assert(face(h) > 15.0) assert(face(v) > 15.0) spawn(toptop) 
+-> 0.2  : material($MATMESH)
+-> 0.02 : extrude(0.0) expand(-2.0) extrude(-0.3) material($MATGRASS)
+-> 0.58 : 
+;
+
+toptop 
+-> 0.6 : expand(-5.0) material($MATMESH) extrude(2.0) top
+-> 0.4 : expand(-5.0) material($MATMESH) chamfer(1.0) extrude(2.0)
+;
+
+ledge -> material($MATMESH) extrude(0.0) expand(0.3) extrude(0.5) extrude(0.0) expand(-0.3) ;
+
+skycont
+-> 0.4 : ledge material($MATGLASS) extrude(16.0) skycont
+-> 0.1 : ledge assert(face(h) > 6.0) partitionh(face(h)/3) material($MATGLASS) extrude(16.0) skycont
+-> 0.1 : ledge assert(face(v) > 6.0) partitionv(face(v)/3) material($MATGLASS) extrude(16.0) skycont
+-> 0.4 : top
 ;
 

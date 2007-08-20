@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -14,10 +14,13 @@
 #include <iostream>
 
 
-FloorZone::FloorZone(Coord2D a, Coord2D b, int astep, int matref, bool rotated) : Zone(a,b,astep)
+FloorZone::FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int matref, bool rotated) : Zone(_generator,a,b,astep)
 {
+  if ((A.x == B.x) || (A.y == B.y)) {
+    if (debugLevel > 0) { printf("Bad floor coords! (%d,%d)*(%d,%d)\n",A.x,A.y,B.x,B.y); }
+    return;
+  }
   mesh.passable = true;
-  mesh.noradar = true;
 
   if (rotated) {
     mesh.createNewFace(

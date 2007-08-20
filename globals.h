@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -13,22 +13,29 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#define CELLROAD 1
-#define MATROAD  0
-#define MATROADX 1
-#define MATWALL  2
-#define MATWALL2 3
-#define MATMESH  4
-#define MATROOF  5
-#define MATROOFT 6
-#define MATGLASS 7
-#define MAXMATERIALS 8
+#define CELLROAD  1
+#define CELLROADX 2
+#define CELLBASE  3
+#define MATROAD   0
+#define MATROADX  1
+#define MATWALL   2
+#define MATWALL2  3
+#define MATMESH   4
+#define MATROOF   5
+#define MATROOFT  6
+#define MATGLASS  7
+#define MATGRASS  8
+#define MAXMATERIALS 9
 
 #define EPSILON 0.00000001f
-#define WORLDSIZE 200
 
 #include <vector>
 #include <math.h>
+#include <string>
+#include <map>
+#include "commandArgs.h"
+
+extern int debugLevel;
 
 struct Vertex {
   float x, y, z;
@@ -131,9 +138,10 @@ struct ID4 {
 };
 
 typedef std::vector<int> IntVector;
+typedef std::vector<std::string> StringVector;
+typedef std::map<std::string,float> AttributeMap;
 
 struct DiscreetMapNode {
-  int z;
   int type;
   int zone;
 };
@@ -144,8 +152,7 @@ struct GridInfo {
   int stepX,stepY;
 };
 
-/* temporary */
-typedef int Options;
+typedef CCommandLineArgs* Options;
 
 struct Coord2D {
   int x;
@@ -170,6 +177,18 @@ struct Coord2D {
 
 inline int modprev(int x, int mod) { if (x == 0) return mod-1; else return x-1; }
 inline int modnext(int x, int mod) { if (x == mod-1) return 0; else return x+1; }
+
+inline int randomInt01() { return rand()%2; }
+inline int randomInt(int range) { if (range == 0) return 0; return rand()%range; }
+inline int randomIntRange(int min, int max) { return randomInt(max-min)+min; }
+inline int randomIntRangeStep(int min, int max, int step) { if (step == 0) return 0; int steps = int((max-min) / step);  return randomInt(steps+1)*step+min; }
+inline bool randomBool() { return rand()%2 == 0; }
+inline bool randomChance(int chance) { return randomInt(100) < chance; }
+inline float randomFloat01() { return (float)(rand()) / (float)(RAND_MAX); }
+inline float randomFloat(float range) { return randomFloat01()*range; }
+inline float randomFloatRange(float min, float max) { return randomFloat(max-min)+min; }
+inline float randomFloatRangeStep(float min, float max, float step) { if (step == 0) return 0.0; int steps = int((max-min) / step); return randomInt(steps+1)*step + min; }
+inline int round(float f) { return int(f+0.5f); }
 
 
 #endif /* __COMMON_H__ */

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -9,6 +9,7 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+
 
 #ifndef __MATERIAL_H__
 #define __MATERIAL_H__
@@ -21,8 +22,9 @@
 class Material {
   int name;
   std::string file;
+  bool noradar;
 public:
-  Material(const int _name, const std::string& _file) : name(_name), file(_file) {};
+  Material(const int _name, const std::string& _file, bool _noradar = false) : name(_name), file(_file), noradar(_noradar) {};
   void output(Output& out);
 };
 

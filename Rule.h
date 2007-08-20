@@ -15,14 +15,23 @@
 
 #include <string>
 #include <map>
+#include "Product.h"
+#include "globals.h"
+#include "Mesh.h"
 
 class Rule {
   std::string name;
+  ProductVector* products;
 public:
-  Rule(const std::string& _name) : name(_name) {};
+  Rule(const std::string& _name, ProductVector* _products) : name(_name), products(_products) {};
+  Product* getProduct();
+  int runMesh(Mesh* mesh, int face);
+  std::string& getName() { return name; }
+  ~Rule();
 };
 
 typedef std::map <std::string, Rule*> RuleMap;
+typedef RuleMap::iterator RuleMapIter;
 
 #endif /* __RULE_H__ */
 
