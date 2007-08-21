@@ -24,7 +24,7 @@ void yyunput(int, char*);
   Expression* e;
 }
 %start ruleset
-%token NEG ASSERTION FACE TAPER SPAWN CHAMFER UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV MATERIAL
+%token NEG ASSERTION FACE TAPER SPAWN CHAMFER UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI MATERIAL
 %token <fl> NUMBER
 %token <id> NONTERM ATTRIBUTE
 %nonassoc '<' '>'
@@ -77,6 +77,8 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | SUBDIVIDEV '(' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,false,$5); }
   | PARTITIONH '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$5); }
   | PARTITIONV '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$5); }
+  | PARTITIONHI '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$5,true); }
+  | PARTITIONVI '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$5,true); }
   | MATERIAL '(' expr ')' { $$ = new OperationMaterial(ruleset,$3); }
   | ASSIGN '(' NONTERM '=' expr ')' { std::string name = std::string($3); $$ = new OperationAssign(ruleset,$5,name); }
   | SPAWN '(' NONTERM ')' { std::string name = std::string($3); $$ = new OperationSpawn(ruleset,name); }

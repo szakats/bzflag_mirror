@@ -39,6 +39,8 @@ subdivideh            { return(SUBDIVIDEH);}
 subdividev            { return(SUBDIVIDEV);}
 partitionh            { return(PARTITIONH);}
 partitionv            { return(PARTITIONV);}
+partitionhi           { return(PARTITIONHI);}
+partitionvi           { return(PARTITIONVI);}
 face                  { return(FACE); }
 assert                { return(ASSERTION); }
 spawn                 { return(SPAWN);}

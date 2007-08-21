@@ -45,10 +45,12 @@
      SUBDIVIDEV = 271,
      PARTITIONH = 272,
      PARTITIONV = 273,
-     MATERIAL = 274,
-     NUMBER = 275,
-     NONTERM = 276,
-     ATTRIBUTE = 277
+     PARTITIONHI = 274,
+     PARTITIONVI = 275,
+     MATERIAL = 276,
+     NUMBER = 277,
+     NONTERM = 278,
+     ATTRIBUTE = 279
    };
 #endif
 /* Tokens.  */
@@ -68,10 +70,12 @@
 #define SUBDIVIDEV 271
 #define PARTITIONH 272
 #define PARTITIONV 273
-#define MATERIAL 274
-#define NUMBER 275
-#define NONTERM 276
-#define ATTRIBUTE 277
+#define PARTITIONHI 274
+#define PARTITIONVI 275
+#define MATERIAL 276
+#define NUMBER 277
+#define NONTERM 278
+#define ATTRIBUTE 279
 
 
 
@@ -89,7 +93,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 93 "..\\parser.hxx"
+#line 97 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
