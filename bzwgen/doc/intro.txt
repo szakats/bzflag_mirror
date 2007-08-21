@@ -1,0 +1,77 @@
+Quick introduction to BZWGen grammar 
+(to be expanded into a full documentation)
+-------------------------------------------
+
+The language is based around rules, that are in files in the "rules" folder. The rule files currently use the same namespace, so they basically could be treated as one big file. The language is case-semsitive, whitespace is ignored.
+
+The rule files are loaded at startup, and specific rules are executed as needed by the generator. As for now rules operate on a single face, passing it through all the operations and passing them to other rules.
+
+
+Rules
+======
+
+Rules have the form:
+
+rule -> (one or more products) ;
+
+(note the ampersand at the end). If a rule has more then one product it must also include a probability value between 0.0 and 1.0, which is added before the ":" sign. Example:
+
+rule -> 
+  0.2 : product1
+  0.6 : product2
+  0.2 : product3
+;
+
+Probability should add up to 1.0. Note that there is just one ampersand at the end. When the generator executes a rule, it picks only ONE of the products at random with the given probability.
+
+initialize
+-----------
+
+The language has currently one special rule : "initialize", this one usualy is in the init.set file, and is executed once, right after all the rules have been read. DO NOT include any geometry code because it will crash badly. This rule is mainly for initalizeing constant values (currently initializes material constants).
+
+Current generator
+------------------
+
+Current generator calls three rules:
+
+* sidewalk -- which should be a rule to generate sidewalks as separate objects
+* building -- which should be a rule to generate buildings as separate objects
+* start -- which should be a rule to generate both buildings and sidewalks on the passed face
+
+This will however change in the near future.
+
+
+Products
+=========
+
+Products are sets of operations and calls to other rules. They operations are linear, and executed in order, with the input face being passed along to each next operation. Calls to other rules are made by their pure name, hence the names should not conflict with the operation names.
+
+
+Operations
+===========
+
+Operations are usualy geometric operations done on the passed to them face. Some of them are "branching" -- meaning that the operation passes the original face further, but produces other faces that can be "delegated" to other rules. The syntax of a operation is usualy:
+
+   operation_name ( paramters ) [ branch_rules ]
+
+Parameters are seperated by commas (,) branch rules by spaces. Parameters are either a constant number (float) or an Expression (see below). Branch rules list a sequence of rulenames. They are matched in sequence with the additonal faces that the given operation produces. 
+
+Example : we run "subdivide(3)" then we will have 2 additional faces (the last one is passed back into the grammar), so we can write "subdivide(3) [ rule1 rule2 ] rule3" which will direct the first face to rule1, the second to rule2 and the third to rule3.
+
+If we don't care about a particular face, we can write "*" instead, it then will be skipped, but the order will be preserved.
+
+Example : "subdivide(5) [ * * door ] " means that we only care about the central face of subdivision - ignore the first, ignore the second, send the third to "door" and ignore the rest.
+
+
+Expressions
+============ 
+
+Currently the language supports a small set of expressions. They all are evaluated to a float number. If a given operation needs a integer it will be rounded from the float. If it needs a boolean, the float will be checked wether it's negative (false) or positive (true). Technically 0.0 is also false, but don't rely on that. All current boolean expressions resolve to -1.0 or 1.0.
+
+
+List of Expressions
+====================
+
+
+List of Operations
+===================
