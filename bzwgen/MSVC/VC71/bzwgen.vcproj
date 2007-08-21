@@ -334,7 +334,7 @@
 		<Filter
 			Name="Parser Files">
 			<File
-				RelativePath="..\..\..\lexer.l">
+				RelativePath="..\..\..\src\lexer.l">
 				<FileConfiguration
 					Name="Debug|Win32"
 					ExcludedFromBuild="TRUE">
@@ -362,7 +362,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\parser.y">
+				RelativePath="..\..\..\src\parser.y">
 				<FileConfiguration
 					Name="Debug|Win32"
 					ExcludedFromBuild="TRUE">

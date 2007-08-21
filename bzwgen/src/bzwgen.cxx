@@ -65,7 +65,7 @@ void printHelp() {
   printHelpCommand("p","gridsnap","integer    sets the grid snap (defualt: 3)");
   printHelpCommand("f","fullslice","integer   sets the number of full slices (defualt: 8)");
   printHelpCommand("v","subdiv","integer      sets the number of subdivisions (defualt: 120)");
-  printHelpCommand("b","bases)","integer      sets number of bases (0/2/4)(defualt: 0)\n");
+  printHelpCommand("b","bases","integer       sets number of bases (0/2/4)(defualt: 0)\n");
 }
 
 std::vector<void*> handleList;

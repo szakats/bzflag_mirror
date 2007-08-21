@@ -75,7 +75,7 @@
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 16 "..\\..\\parser.y"
+#line 16 "..\\..\\src\\parser.y"
 typedef union _YYSTYPE {
   char *id;
   float fl;

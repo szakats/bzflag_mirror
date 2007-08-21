@@ -351,7 +351,7 @@
 			Name="Parser Files"
 			>
 			<File
-				RelativePath="..\..\lexer.l"
+				RelativePath="..\..\src\lexer.l"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -359,13 +359,13 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Running flex"
-						CommandLine="flex -o..\$(InputName).cxx ..\..\$(InputFileName)"
+						CommandLine="flex -o..\$(InputName).cxx ..\..\src\$(InputFileName)"
 						Outputs="$(InputName).cxx"
 					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\parser.y"
+				RelativePath="..\..\src\parser.y"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -373,7 +373,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Running bison"
-						CommandLine="bison -d -o..\$(InputName).cxx ..\..\$(InputFileName)"
+						CommandLine="bison -d -o..\$(InputName).cxx ..\..\src\$(InputFileName)"
 						Outputs="$..\(InputName).cxx;$(InputName).hxx"
 					/>
 				</FileConfiguration>
