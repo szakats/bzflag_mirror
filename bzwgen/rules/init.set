@@ -1,11 +1,26 @@
+# ------------------------------------------------------------------------
+#  BZWGen 0.1.1 grammar file
+#  init.set -- pre-run initialization of variables
+#
+#  This rule set file has just one rule "initialize" - it is run 
+#  immidately after the parser reads all grammar files. As such, the
+#  rule may not include ANY geometric operations, and should only be made
+#  out of definitions
+# ------------------------------------------------------------------------
+
+
 initialize -> 
-assign(MATROAD  = 0)
-assign(MATROADX = 1)
-assign(MATWALL  = 2)
-assign(MATWALL2 = 3)
-assign(MATMESH  = 4)
-assign(MATROOF  = 5)
-assign(MATROOFT = 6)
-assign(MATGLASS = 7)
-assign(MATGRASS = 8)
+  assign(MATROAD  = 0)
+  assign(MATROADX = 1)
+  assign(MATWALL  = 2)
+  assign(MATWALL2 = 3)
+  assign(MATMESH  = 4)
+  assign(MATROOF  = 5)
+  assign(MATROOFT = 6)
+  assign(MATGLASS = 7)
+  assign(MATGRASS = 8)
 ;
+
+# ------------------------------------------------------------------------
+#  end of file
+# ------------------------------------------------------------------------
