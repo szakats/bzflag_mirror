@@ -33,6 +33,7 @@ extern FILE* yyin;
 int debugLevel = 2;
 CCommandLineArgs  cmd;
 COSDir ruledir;
+std::string texturepath;
 
 #ifdef _USE_GNU_DELIMS
 std::string argumentDeliminator = "--";
@@ -66,7 +67,8 @@ void printHelp() {
   printHelpCommand("f","fullslice","integer    sets the number of full slices (defualt: 8)");
   printHelpCommand("v","subdiv","integer       sets the number of subdivisions (defualt: 120)");
   printHelpCommand("b","bases","integer        sets number of bases (0/2/4)(defualt: 0)");
-  printHelpCommand("l","detail","integer       sets the level of detail (1-3)(defualt: 3)\n");
+  printHelpCommand("l","detail","integer       sets the level of detail (1-3)(defualt: 3)");
+  printHelpCommand("t","texture","URL          sets the URL for textures\n");
 }
 
 std::vector<void*> handleList;
@@ -155,6 +157,8 @@ int main (int argc, char* argv[]) {
   if (cmd.Exists("output"))   { outname    = cmd.GetDataS("output"); }
   if (cmd.Exists("l"))        { detail     = cmd.GetDataI("l"); }
   if (cmd.Exists("detail"))   { detail     = cmd.GetDataI("detail"); }
+  if (cmd.Exists("t"))        { texturepath= cmd.GetDataS("t"); }
+  if (cmd.Exists("texture"))  { texturepath= cmd.GetDataS("texture"); }
   
   COSFile file;
   RuleSet* ruleset = new RuleSet();

@@ -36,6 +36,7 @@
 #include "commandArgs.h"
 
 extern int debugLevel;
+extern std::string texturepath;
 
 struct Vertex {
   float x, y, z;
