@@ -3,10 +3,16 @@
 #  build.set -- standard buildings
 # ------------------------------------------------------------------------
 
+build_preprocess
+  -> 0.5 : (face(h) > 60) partitionh(face(h)/2 - 2.5) [ build_preprocess ] partitionh(5.0) build_preprocess
+  -> 0.5 : (face(v) > 60) partitionv(face(v)/2 - 2.5) [ build_preprocess ] partitionv(5.0) build_preprocess
+  -> spawn(build_run)
+;
+
 build_run
--> 0.2 : sky_run
--> 0.2 : assign(BUILD_MAT = $MATWALL)  build_1
--> 0.6 : assign(BUILD_MAT = $MATWALL2) build_2
+  -> 0.2 : sky_run
+  -> 0.2 : assign(BUILD_MAT = $MATWALL)  build_1
+  -> 0.6 : assign(BUILD_MAT = $MATWALL2) build_2
 ;
 
 build_2 

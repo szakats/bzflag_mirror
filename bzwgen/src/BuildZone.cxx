@@ -42,7 +42,7 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
 
   // in future this will be the only way :)
 
-  if (randomChance(50) && size() < 20000) {
+  if (randomChance(70)) {
     delete meshes;
     std::string rulename = std::string("start");
     MeshVector* newmeshes = generator->getRuleSet()->run(mesh,base,rulename);
@@ -96,16 +96,6 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
     mesh->expandFace(base,-0.7f);
   }
 
-  bool horiz;
-  float length;
-
-  longerSide(mesh,base,&length,&horiz);
-
-  if (length > 100.f && randomBool()) {
-    int first = mesh->partitionFace(base,length/2-2.5f,horiz);
-    mesh->partitionFace(base,5.0,horiz);
-    generateBuilding(mesh,first,wall); 
-  } 
   generateBuilding(mesh,base,wall); 
 }
 
