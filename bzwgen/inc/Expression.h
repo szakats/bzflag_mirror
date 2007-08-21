@@ -58,6 +58,9 @@ public:
       return (mesh->v[mesh->f[face]->vtx->at(0)] - mesh->v[mesh->f[face]->vtx->at(1)]).length();
     if (attrname == "v") 
       return (mesh->v[mesh->f[face]->vtx->at(3)] - mesh->v[mesh->f[face]->vtx->at(0)]).length();
+    if (attrname == "s") 
+      return (mesh->v[mesh->f[face]->vtx->at(3)] - mesh->v[mesh->f[face]->vtx->at(0)]).length() * 
+             (mesh->v[mesh->f[face]->vtx->at(0)] - mesh->v[mesh->f[face]->vtx->at(1)]).length();
     if (debugLevel > 1) printf("Unknown face() attribute : '%s'!\n",attrname.c_str());
     return 0.0f;
   };
