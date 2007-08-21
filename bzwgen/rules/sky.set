@@ -3,21 +3,20 @@
 #  sky.set -- generation of skyscrapers
 # ------------------------------------------------------------------------
 
-
 sky_run
--> 0.2 : mat_glass chamfer(3.0) extrude(random(16.0,80.0,8.0)) roof_run
--> 0.2 : mat_glass extrude(random(16.0,80.0,8.0)) [ @sky_inset ] roof_run 
--> 0.3 : mat_glass extrude(16.0) sky_continue 
--> 0.3 : mat_glass extrude(random(24.0,64.0,8.0)) taper(0.6) roof_run
+  -> 0.2 : mat_glass chamfer(3.0) extrude(random(16.0,80.0,8.0)) roof_run
+  -> 0.2 : mat_glass extrude(random(16.0,80.0,8.0)) [ @sky_inset ] roof_run 
+  -> 0.3 : mat_glass extrude(16.0) sky_continue 
+  -> 0.3 : mat_glass extrude(random(24.0,64.0,8.0)) taper(0.6) roof_run
 ;
 
 sky_inset -> mat_glass subdivideh(3) [ * common_inset5 * ] ;
 
 sky_continue
--> 0.4 : common_ledge mat_glass extrude(16.0) sky_continue
--> 0.1 : common_ledge assert(face(h) > 6.0) partitionh(face(h)/3) mat_glass extrude(16.0) sky_continue
--> 0.1 : common_ledge assert(face(v) > 6.0) partitionv(face(v)/3) mat_glass extrude(16.0) sky_continue
--> 0.4 : roof_run
+  -> 0.4 : common_ledge mat_glass extrude(16.0) sky_continue
+  -> 0.1 : common_ledge assert(face(h) > 6.0) partitionh(face(h)/3) mat_glass extrude(16.0) sky_continue
+  -> 0.1 : common_ledge assert(face(v) > 6.0) partitionv(face(v)/3) mat_glass extrude(16.0) sky_continue
+  -> 0.4 : roof_run
 ;
 
 
