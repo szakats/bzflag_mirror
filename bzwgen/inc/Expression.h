@@ -85,6 +85,15 @@ public:
   }
 };
 
+class ExpressionNeg : public Expression {
+  Expression* a;
+public:
+  ExpressionNeg(Expression* _a) : a(_a) {};
+  float calculate(Mesh* mesh,int face) { 
+    return -a->calculate(mesh,face);
+  }
+};
+
 class ExpressionDouble : public Expression {
   Expression* a;
   Expression* b;

@@ -19,6 +19,8 @@ initialize ->
   assign(MATROOFT = 6)
   assign(MATGLASS = 7)
   assign(MATGRASS = 8)
+  assign(LEDGEHEIGHT = 0.5)
+  assign(LEDGEWIDTH  = 0.3)
 ;
 
 # ------------------------------------------------------------------------

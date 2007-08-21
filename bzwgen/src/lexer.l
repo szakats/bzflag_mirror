@@ -43,6 +43,7 @@ face                  { return(FACE); }
 assert                { return(ASSERTION); }
 spawn                 { return(SPAWN);}
 taper                 { return(TAPER);}
+neg                   { return(NEG);}
 "$"{ID}               { yylval.id = strdup(yytext+1); return(ATTRIBUTE);  }
 {ID}                  { yylval.id = strdup(yytext); return(NONTERM);  }
 #[^\n]*

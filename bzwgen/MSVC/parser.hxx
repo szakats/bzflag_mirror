@@ -29,47 +29,49 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     ASSERTION = 258,
-     FACE = 259,
-     TAPER = 260,
-     SPAWN = 261,
-     CHAMFER = 262,
-     UNCHAMFER = 263,
-     ASSIGN = 264,
-     DEFSIGN = 265,
-     EXTRUDE = 266,
-     EXPAND = 267,
-     RANDOM = 268,
-     SUBDIVIDEH = 269,
-     SUBDIVIDEV = 270,
-     PARTITIONH = 271,
-     PARTITIONV = 272,
-     MATERIAL = 273,
-     NUMBER = 274,
-     NONTERM = 275,
-     ATTRIBUTE = 276
+     NEG = 258,
+     ASSERTION = 259,
+     FACE = 260,
+     TAPER = 261,
+     SPAWN = 262,
+     CHAMFER = 263,
+     UNCHAMFER = 264,
+     ASSIGN = 265,
+     DEFSIGN = 266,
+     EXTRUDE = 267,
+     EXPAND = 268,
+     RANDOM = 269,
+     SUBDIVIDEH = 270,
+     SUBDIVIDEV = 271,
+     PARTITIONH = 272,
+     PARTITIONV = 273,
+     MATERIAL = 274,
+     NUMBER = 275,
+     NONTERM = 276,
+     ATTRIBUTE = 277
    };
 #endif
 /* Tokens.  */
-#define ASSERTION 258
-#define FACE 259
-#define TAPER 260
-#define SPAWN 261
-#define CHAMFER 262
-#define UNCHAMFER 263
-#define ASSIGN 264
-#define DEFSIGN 265
-#define EXTRUDE 266
-#define EXPAND 267
-#define RANDOM 268
-#define SUBDIVIDEH 269
-#define SUBDIVIDEV 270
-#define PARTITIONH 271
-#define PARTITIONV 272
-#define MATERIAL 273
-#define NUMBER 274
-#define NONTERM 275
-#define ATTRIBUTE 276
+#define NEG 258
+#define ASSERTION 259
+#define FACE 260
+#define TAPER 261
+#define SPAWN 262
+#define CHAMFER 263
+#define UNCHAMFER 264
+#define ASSIGN 265
+#define DEFSIGN 266
+#define EXTRUDE 267
+#define EXPAND 268
+#define RANDOM 269
+#define SUBDIVIDEH 270
+#define SUBDIVIDEV 271
+#define PARTITIONH 272
+#define PARTITIONV 273
+#define MATERIAL 274
+#define NUMBER 275
+#define NONTERM 276
+#define ATTRIBUTE 277
 
 
 
@@ -87,7 +89,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 91 "..\\parser.hxx"
+#line 93 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
