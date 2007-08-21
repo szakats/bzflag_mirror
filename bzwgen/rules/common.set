@@ -1,0 +1,35 @@
+# ------------------------------------------------------------------------
+#  BZWGen 0.1.1 grammar file
+#  common.set -- common definitions for use with all the grammar rules
+#
+#  This file holds common rules to be used by any of the rules in the 
+#  system. 
+# ------------------------------------------------------------------------
+
+# -- Material rules -- 
+# For usage in branch rules if only the material changes
+
+mat_wall  -> material($MATWALL);
+mat_wall2 -> material($MATWALL2);
+mat_mesh  -> material($MATMESH);
+mat_roof  -> material($MATROOF);
+mat_rooft -> material($MATROOFT);
+mat_glass -> material($MATGLASS);
+mat_grass -> material($MATGRASS);
+
+
+# -- Building primitives --
+
+common_ledge -> 
+  material($MATMESH) 
+  extrude(0.0) 
+  expand($LEDGEWIDTH) 
+  extrude($LEDGEHEIGHT) 
+  extrude(0.0) 
+  expand(neg($LEDGEWIDTH))
+ ;
+
+# ------------------------------------------------------------------------
+#  end of file
+# ------------------------------------------------------------------------
+
