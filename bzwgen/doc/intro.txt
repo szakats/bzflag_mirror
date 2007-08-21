@@ -1,6 +1,6 @@
-Quick introduction to BZWGen grammar 
+Quick introduction to BZWGen grammar (as for v.0.1.1)
 (to be expanded into a full documentation)
--------------------------------------------
+------------------------------------------------------
 
 The language is based around rules, that are in files in the "rules" folder. The rule files currently use the same namespace, so they basically could be treated as one big file. The language is case-semsitive, whitespace is ignored.
 
