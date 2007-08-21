@@ -41,6 +41,7 @@ void printHelpCommand ( const char* shortName, const char* longName, const char*
   std::cout << shortName;
   std::cout << " (";
   std::cout << argumentDeliminator;
+  std::cout << longName;
   std::cout << ") ";
   std::cout << description;
   std::cout << "\n";
