@@ -84,13 +84,13 @@ int main (int argc, char* argv[]) {
   if (cmd.Exists("-config"))   { COSFile f = COSFile(cmd.GetDataS("-config")); cmd.Set(f); }
 
   if (cmd.Exists("h"))         { printHelp(); return 0; }
-  if (cmd.Exists("-help"))     { printHelp(); return 0; }
+  if (cmd.Exists("help"))     { printHelp(); return 0; }
   if (cmd.Exists("d"))         { debugLevel = cmd.GetDataI("d"); }
-  if (cmd.Exists("-debug"))    { debugLevel = cmd.GetDataI("-debug"); }
+  if (cmd.Exists("debug"))    { debugLevel = cmd.GetDataI("-debug"); }
   if (cmd.Exists("r"))         { ruledir    = cmd.GetDataS("r"); }
-  if (cmd.Exists("-rulesdir")) { ruledir    = cmd.GetDataS("-rulesdir"); }
+  if (cmd.Exists("rulesdir")) { ruledir    = cmd.GetDataS("-rulesdir"); }
   if (cmd.Exists("o"))         { outname    = cmd.GetDataS("o"); }
-  if (cmd.Exists("-output"))   { outname    = cmd.GetDataS("-output"); }
+  if (cmd.Exists("output"))   { outname    = cmd.GetDataS("-output"); }
   
   COSFile file;
   RuleSet* ruleset = new RuleSet();
