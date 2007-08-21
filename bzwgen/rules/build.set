@@ -37,8 +37,21 @@ build_entrydoor -> extrude(-2.0) mat_roof ;
 build_cont
   -> 0.5 : common_ledge material($BUILD_MAT) extrude(3.7) build_cont
   -> 0.2 : common_ledge material($BUILD_MAT) extrude(3.7) [ @build_insetwall ] build_cont
+  -> 0.1 : (face(h) > 100) common_ledge build_parth build_cont
+  -> 0.1 : (face(v) > 100) common_ledge build_partv build_cont
   -> 0.3 : roof_run
 ;
+
+build_parth
+  -> partitionh(face(h)/3) material($BUILD_MAT) extrude(3.7) 
+  -> partitionhi(2*face(h)/3) material($BUILD_MAT) extrude(3.7) 
+;
+
+build_partv
+  -> partitionv(face(v)/3) material($BUILD_MAT) extrude(3.7) 
+  -> partitionvi(2*face(v)/3) material($BUILD_MAT) extrude(3.7) 
+;
+
 
 build_insetwall
   -> 0.8 : subdivideh(3) [ * build_inset * ] 

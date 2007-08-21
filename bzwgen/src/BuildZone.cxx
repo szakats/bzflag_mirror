@@ -112,9 +112,7 @@ void BuildZone::generateBuilding(Mesh* mesh, int base, int wall) {
     height = randomInt(6)+1;
   }
 
-  float length;
-  bool horiz;
-  
+ 
   IntVector* fs;
 
   for (int i = 0; i < height; i++) {
@@ -143,42 +141,6 @@ void BuildZone::generateBuilding(Mesh* mesh, int base, int wall) {
 
   addDivider(mesh,base,0.2f,0.5f,MATMESH,true);
 
-  if (wall == MATWALL && randomBool()) {
-    height = randomInt(3)+1;
-
-    longerSide(mesh,base,&length,&horiz);
-    
-    length *= 0.4f+(0.1f*float(randomInt(3)));
-    
-    int newbase = mesh->partitionFace(base,length,horiz);
-    if (randomBool()) {
-      base = newbase;
-    } else {
-    }
-
-    mesh->extrudeFace(base,0.0f,MATMESH);
-    mesh->expandFace(base,-0.2f);
-
-    for (int i = 0; i < height; i++) {
-      mesh->extrudeFace(base,3.7f,wall);
-      if (i == height-1) break;
-      addDivider(mesh,base,0.15f,0.3f,MATMESH);
-    }
-    addDivider(mesh,base,0.2f,0.5f,MATMESH,true);
-  }
-}
-
-
-void BuildZone::longerSide(Mesh* mesh, int face, float* length, bool* orientation) {
-  Vertex vh = mesh->v[mesh->f[face]->vtx->at(0)]-mesh->v[mesh->f[face]->vtx->at(1)];
-  Vertex vv = mesh->v[mesh->f[face]->vtx->at(3)]-mesh->v[mesh->f[face]->vtx->at(0)];
-
-  (*orientation) = vh.length() > vv.length();
-  if (*orientation) {
-    (*length) = vh.length();
-  } else {
-    (*length) = vv.length();
-  }
 }
 
 void BuildZone::addDivider(Mesh* mesh, int base, float width, float height, int mat, bool noNext) {
