@@ -13,10 +13,20 @@ sky_run
 sky_inset -> mat_glass subdivideh(3) [ * common_inset5 * ] ;
 
 sky_continue
-  -> 0.4 : common_ledge mat_glass extrude(16.0) sky_continue
-  -> 0.1 : common_ledge assert(face(h) > 6.0) partitionh(face(h)/3) mat_glass extrude(16.0) sky_continue
-  -> 0.1 : common_ledge assert(face(v) > 6.0) partitionv(face(v)/3) mat_glass extrude(16.0) sky_continue
-  -> 0.4 : roof_run
+  -> 0.3 : common_ledge mat_glass extrude(16.0) sky_continue
+  -> 0.2 : common_ledge sky_part mat_glass extrude(16.0) sky_continue
+  -> 0.2 : common_ledge sky_parti mat_glass extrude(16.0) sky_continue
+  -> 0.3 : roof_run
+;
+
+sky_part
+  -> (face(h) > face(v)) assert(face(h) > 6.0) partitionh(face(h)/3) 
+  -> assert(face(v) > 6.0) partitionv(face(v)/3) 
+;
+
+sky_parti
+  -> (face(h) > face(v)) assert(face(h) > 6.0) partitionhi(2*face(h)/3) 
+  -> assert(face(v) > 6.0) partitionvi(2*face(v)/3) 
 ;
 
 
