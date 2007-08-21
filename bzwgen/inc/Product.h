@@ -15,13 +15,15 @@
 
 #include <vector>
 #include "Operation.h"
+#include "Expression.h"
 #include "Mesh.h"
 
 class Product {
   OperationVector* ops;
   float rarity;
+  Expression* cond;
 public:
-  Product(OperationVector* _ops, float _rarity = 1.0f) : ops(_ops), rarity(_rarity) {};
+  Product(OperationVector* _ops, float _rarity, Expression* _cond = NULL) : ops(_ops), rarity(_rarity), cond(_cond) {};
   int runMesh(Mesh* mesh, int face) {
     for (size_t i = 0; i < ops->size(); i++) {
       face = ops->at(i)->runMesh(mesh,face);
@@ -29,11 +31,16 @@ public:
     }
     return face;
   }
+  bool conditionsMet(Mesh* mesh, int face) { 
+    if (cond == NULL) return true;
+    return cond->calculate(mesh,face) >= 0.0f;
+  }
   float getRarity() { return rarity; }
   ~Product() {
     OperationVectIter itr; 
     for (itr = ops->begin(); itr!= ops->end(); ++itr) delete (*itr);
     delete ops; 
+    if (cond != NULL) delete cond;
   }
 };
 

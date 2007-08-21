@@ -24,7 +24,7 @@ class Rule {
   ProductVector* products;
 public:
   Rule(const std::string& _name, ProductVector* _products) : name(_name), products(_products) {};
-  Product* getProduct();
+  Product* getProduct(Mesh* mesh, int face);
   int runMesh(Mesh* mesh, int face);
   std::string& getName() { return name; }
   ~Rule();

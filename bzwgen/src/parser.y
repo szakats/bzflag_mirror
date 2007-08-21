@@ -34,7 +34,7 @@ void yyunput(int, char*);
 %type <p> product
 %type <ov> ops
 %type <o> op
-%type <e> expr
+%type <e> expr cond
 %type <ids> faces faceparam singleface
 %%
 ruleset : /* empty */
@@ -43,11 +43,14 @@ ruleset : /* empty */
     ruleset->addRule(name,new Rule(name,$3));
   }
 ;
+cond : /* empty */ { $$ = NULL; }
+  | '(' expr ')' { $$ = $2; }
+  ;
 products : /* empty */ { $$ = new ProductVector(); }
   | products product { $$ = $1; $$->push_back($2); }
 ;
 product : DEFSIGN NUMBER ':' ops { $$ = new Product($4,$2); }
-  | DEFSIGN ops { $$ = new Product($2); }
+  | DEFSIGN cond ops { $$ = new Product($3,1.0f); }
 ;
 faces : /* empty */ { $$ = new StringVector(); }
   | faces NONTERM  { std::string name = std::string($2); $$->push_back(name); }

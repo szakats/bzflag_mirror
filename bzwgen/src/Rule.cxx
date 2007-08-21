@@ -12,23 +12,24 @@
 
 #include "Rule.h"
 
-Product* Rule::getProduct() {
+Product* Rule::getProduct(Mesh* mesh, int face) {
   int size = products->size();
   if (size == 0) return NULL;
   ProductVectIter itr = products->begin();
-  if (size == 1) return (*itr);
   float roll = randomFloat01();
   do {
-    float rarity = (*itr)->getRarity();
-    if (rarity > roll) return (*itr);
-    roll -= rarity;
+    if ((*itr)->conditionsMet(mesh,face)) {
+      float rarity = (*itr)->getRarity();
+      if (rarity > roll) return (*itr);
+      roll -= rarity;
+    }
     ++itr;
   } while (itr!= products->end());
   if (debugLevel > 0) printf("Warning : Rule '%s' returned no product!\n",name.c_str());
   return NULL;
 }
 int Rule::runMesh(Mesh* mesh, int face) {
-  Product* product = getProduct();
+  Product* product = getProduct(mesh,face);
   if (product == NULL) return -1;
   return product->runMesh(mesh,face);
 }
