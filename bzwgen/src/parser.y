@@ -12,7 +12,8 @@ void yyerror(RuleSet *ruleset, char* s);
 int yylex();
 void yyunput(int, char*);
 %}
-%parse-param {RuleSet *ruleset}%union _YYSTYPE {
+%parse-param {RuleSet *ruleset}
+%union _YYSTYPE {
   char *id;
   float fl;
   ProductVector* pv;
