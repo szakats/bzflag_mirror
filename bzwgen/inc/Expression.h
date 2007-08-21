@@ -133,6 +133,17 @@ public:
   float calc(float av, float bv) { if(av > bv) return 1.0; else return -1.0; }
 };
 
+class ExpressionAnd : public ExpressionDouble {
+public:
+  ExpressionAnd(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
+  float calc(float av, float bv) { return (av >= 0.0f && bv >= 0.0f); }
+};
+
+class ExpressionOr : public ExpressionDouble {
+public:
+  ExpressionOr(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
+  float calc(float av, float bv) { return (av >= 0.0f || bv >= 0.0f); }
+};
 
 
 
