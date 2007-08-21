@@ -12,17 +12,26 @@ Rules
 
 Rules have the form:
 
-rule -> (one or more products) ;
+rule (one or more products) ;
 
 (note the semicolon at the end). If a rule has more then one product it must also include a probability value between 0.0 and 1.0, which is added before the ":" sign. Example:
 
-rule -> 
-  0.2 : product1
-  0.6 : product2
-  0.2 : product3
+rule 
+  -> 0.2 : product1
+  -> 0.6 : product2
+  -> 0.2 : product3
 ;
 
 Probability should add up to 1.0. Note that there is just one semicolon at the end. When the generator executes a rule, it picks only ONE of the products at random with the given probability.
+
+Instead of a probablility a condition may be added (see Expressions). Example:
+
+rule 
+  -> (face(h) > 5) product1
+  -> product2
+;
+
+This will choose product1 if the face horizontal length is greater than 5, product2 otherwise. It's a good idea to provide a rule with no conditions even if epmty so the compiler doesn't cry that a rule returned NULL.
 
 initialize
 -----------
