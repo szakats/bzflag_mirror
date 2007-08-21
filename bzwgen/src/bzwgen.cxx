@@ -28,20 +28,37 @@ extern FILE* yyin;
 int debugLevel = 2;
 CCommandLineArgs  cmd;
 COSDir ruledir;
+
+#ifdef _USE_GNU_DELIMS
+std::string argumentDeliminator = "--";
+#else
+std::string argumentDeliminator = "-";
+#endif //_USE_GNU_DELIMS
+
+void printHelpCommand ( const char* shortName, const char* longName, const char* description )
+{
+  std::cout << argumentDeliminator;
+  std::cout << shortName;
+  std::cout << " (";
+  std::cout << argumentDeliminator;
+  std::cout << ") ";
+  std::cout << description;
+  std::cout << "\n";
+}
   
 void printHelp() {
   std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n\n";
   std::cout << "Command line arguments:\n";
-  std::cout << "-h (-help)                shows help\n";
-  std::cout << "-d (-debug) integer       sets debug level (0-4)(default: 2)\n";
-  std::cout << "-o (-output) filename     sets output filename (default: map.bzw)\n";
-  std::cout << "-r (-rulesdir) directory  sets rules directory (defualt: rules)\n";
-  std::cout << "-s (-size) integer        sets world size (defualt: 800)\n";
-  std::cout << "-g (-gridsize) integer    sets grid size (defualt: 42)\n";
-  std::cout << "-p (-gridsnap) integer    sets the grid snap (defualt: 3)\n";
-  std::cout << "-f (-fullslice) integer   sets the number of full slices (defualt: 8)\n";
-  std::cout << "-v (-subdiv) integer      sets the number of subdivisions (defualt: 120)\n";
-  std::cout << "-b (-bases) integer       sets number of bases (0/2/4)(defualt: 0)\n\n";
+  printHelpCommand("h","help","               shows help");
+  printHelpCommand("d","debug","integer       sets debug level (0-4)(default: 2)");
+  printHelpCommand("o","output","filename     sets output filename (default: map.bzw)");
+  printHelpCommand("r","rulesdir","directory  sets rules directory (defualt: rules)");;
+  printHelpCommand("s","size","integer        sets world size (defualt: 800)");
+  printHelpCommand("g","gridsize","integer    sets grid size (defualt: 42)");
+  printHelpCommand("p","gridsnap","integer    sets the grid snap (defualt: 3)");
+  printHelpCommand("f","fullslice","integer   sets the number of full slices (defualt: 8)");
+  printHelpCommand("v","subdiv","integer      sets the number of subdivisions (defualt: 120)");
+  printHelpCommand("b","bases)","integer      sets number of bases (0/2/4)(defualt: 0)\n");
 }
 
 #ifdef _USE_LIB_RULES_
@@ -75,6 +92,8 @@ void loadPlugIns ( void )
 }
 
 int main (int argc, char* argv[]) {
+
+  cmd.SetDelimnator(argumentDeliminator);
   cmd.Set(argc,argv);
 
   ruledir = "rules";
