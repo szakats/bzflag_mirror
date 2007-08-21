@@ -1,50 +1,52 @@
-# Test file for the parser. Will be changed to something more working later.
+# ------------------------------------------------------------------------
+#  BZWGen 0.1.1 grammar file
+#  build.set -- standard buildings
+# ------------------------------------------------------------------------
 
-building
+build_run
 -> 0.2 : sky_run
--> 0.6 : building2
--> 0.2 : building1
+-> 0.6 : build_2
+-> 0.2 : build_1
 ;
 
-building2 
--> 0.3 : mat_glass extrude(4.0) [ entry * entry * ] b2floors
--> 0.3 : mat_glass extrude(4.0) [ * entry * entry ] b2floors
--> 0.2 : mat_wall2 extrude(3.7) [ * entry * entry ] extrude(0) expand(1.0) b2floors
--> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ * bspecialwall * bspecialwall ] roof_run
--> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ bspecialwall * bspecialwall * ] roof_run
+build_2 
+-> 0.3 : mat_glass extrude(4.0) [ build_entry * build_entry * ] build_2cont
+-> 0.3 : mat_glass extrude(4.0) [ * build_entry * build_entry ] build_2cont
+-> 0.2 : mat_wall2 extrude(3.7) [ * build_entry * build_entry ] extrude(0) expand(1.0) build_2cont
+-> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ * build_insetwall * build_insetwall ] roof_run
+-> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ build_insetwall * build_insetwall * ] roof_run
 ;
 
-building1
--> 0.3 : mat_wall extrude(4.0) [ entry * entry * ] b1floors
--> 0.3 : mat_wall extrude(4.0) [ * entry * entry ] b1floors
--> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ * bspecialwall * bspecialwall ] roof_run
--> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ bspecialwall * bspecialwall * ] roof_run
+build_1
+-> 0.3 : mat_wall extrude(4.0) [ build_entry * build_entry * ] build_1cont
+-> 0.3 : mat_wall extrude(4.0) [ * build_entry * build_entry ] build_1cont
+-> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ * build_insetwall * build_insetwall ] roof_run
+-> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ build_insetwall * build_insetwall * ] roof_run
 ;
 
-entry 
--> partitionh(face(h)/2 - 2.0) partitionh(4.0) [ entryext ]
-;
+build_entry -> partitionh(face(h)/2 - 2.0) partitionh(4.0) [ build_entrydoor ] ;
 
-entryext
--> extrude(-2.0) mat_roof
-; 
+build_entrydoor -> extrude(-2.0) mat_roof ; 
 
-b1floors
--> 0.5 : common_ledge mat_wall extrude(3.7) b1floors
--> 0.2 : common_ledge mat_wall extrude(3.7) [ @bspecialwall ] b1floors
+build_1cont
+-> 0.5 : common_ledge mat_wall extrude(3.7) build_1cont
+-> 0.2 : common_ledge mat_wall extrude(3.7) [ @build_insetwall ] build_1cont
 -> 0.3 : roof_run
 ;
 
-b2floors
--> 0.6 : common_ledge mat_wall2 extrude(3.7) b2floors
--> 0.2 : common_ledge mat_wall2 extrude(3.7) [ @bspecialwall ] b2floors
+build_2cont
+-> 0.6 : common_ledge mat_wall2 extrude(3.7) build_2cont
+-> 0.2 : common_ledge mat_wall2 extrude(3.7) [ @build_insetwall ] build_2cont
 -> 0.2 : roof_run
 ;
 
-bspecialwall
--> 0.8 : subdivideh(3) [ * binsetwall * ] 
+build_insetwall
+-> 0.8 : subdivideh(3) [ * build_inset * ] 
 -> 0.2 : subdivideh(3) [ * common_inset5 * ] 
 ;
 
-binsetwall -> extrude(-3.0) mat_glass;
+build_inset -> extrude(-3.0) mat_glass ;
 
+# ------------------------------------------------------------------------
+#  end of file
+# ------------------------------------------------------------------------
