@@ -54,7 +54,7 @@ Operations are usualy geometric operations done on the passed to them face. Some
 
    operation_name ( paramters ) [ branch_rules ]
 
-Parameters are seperated by commas (,) branch rules by spaces. Parameters are either a constant number (float) or an Expression (see below). Branch rules list a sequence of rulenames. They are matched in sequence with the additonal faces that the given operation produces. 
+Parameters are seperated by commas (,) branch rules by spaces. Parameters are either a constant number (float) or an Expression (see below). Branch rules list a sequence of rulenames. Branch rules are always optional. They are matched in sequence with the additonal faces that the given operation produces. 
 
 Example : we run "subdivide(3)" then we will have 2 additional faces (the last one is passed back into the grammar), so we can write "subdivide(3) [ rule1 rule2 ] rule3" which will direct the first face to rule1, the second to rule2 and the third to rule3.
 
@@ -87,6 +87,11 @@ Arithmetic ops
 
 The parser supports +, -, /, * operations and grouping with (). Care should be taken with the '-' sign -- see Constants above.
 
+Comparision ops
+----------------
+
+Currently just two comparision operations are supported: < and >. They are currently only used for the assert Operation.
+
 Functions
 ----------
 
@@ -96,5 +101,28 @@ random(min,max,step) -- returns a random floating point number between min and m
 
 face(attr) -- returns an attribute of the current face. 'attr' must be one of the following : x,y,z,h,v -- these are x,y,z coordinates of the face's center point, horizontal length for a quad, and vertical length for a quad. h and v are not supported currently for non-quads!
 
+
 List of Operations
 ===================
+
+Geometric
+----------
+expand ( amount ) 
+taper ( amount )
+chamfer ( amount )
+unchamfer ( )
+
+Generative
+-----------
+extrude ( amount ) [ list ]
+subdivideh ( number ) [ list ]
+subdividev ( number ) [ list ]
+partitionh ( position ) [ single ]
+partitionv ( position ) [ single ]
+
+Control
+--------
+assertion ( condition )
+assign ( name = value )
+material ( number )
+spawn ( rulename )
