@@ -56,16 +56,17 @@ void printHelp() {
   std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n";
   printf("Version %s.%s.%s(%s)\n\n",MajorVersion,MinorVersion,Revision,BuildState);
   std::cout << "Command line arguments:\n";
-  printHelpCommand("h","help","               shows help");
-  printHelpCommand("d","debug","integer       sets debug level (0-4)(default: 2)");
-  printHelpCommand("o","output","filename     sets output filename (default: map.bzw)");
-  printHelpCommand("r","rulesdir","directory  sets rules directory (defualt: rules)");;
-  printHelpCommand("s","size","integer        sets world size (defualt: 800)");
-  printHelpCommand("g","gridsize","integer    sets grid size (defualt: 42)");
-  printHelpCommand("p","gridsnap","integer    sets the grid snap (defualt: 3)");
-  printHelpCommand("f","fullslice","integer   sets the number of full slices (defualt: 8)");
-  printHelpCommand("v","subdiv","integer      sets the number of subdivisions (defualt: 120)");
-  printHelpCommand("b","bases","integer       sets number of bases (0/2/4)(defualt: 0)\n");
+  printHelpCommand("h","help","                shows help");
+  printHelpCommand("d","debug","integer        sets debug level (0-4)(default: 2)");
+  printHelpCommand("o","output","filename      sets output filename (default: map.bzw)");
+  printHelpCommand("r","rulesdir","directory   sets rules directory (defualt: rules)");;
+  printHelpCommand("s","size","integer         sets world size (defualt: 800)");
+  printHelpCommand("g","gridsize","integer     sets grid size (defualt: 42)");
+  printHelpCommand("p","gridsnap","integer     sets the grid snap (defualt: 3)");
+  printHelpCommand("f","fullslice","integer    sets the number of full slices (defualt: 8)");
+  printHelpCommand("v","subdiv","integer       sets the number of subdivisions (defualt: 120)");
+  printHelpCommand("b","bases","integer        sets number of bases (0/2/4)(defualt: 0)");
+  printHelpCommand("l","detail","integer       sets the level of detail (1-3)(defualt: 3)\n");
 }
 
 std::vector<void*> handleList;
@@ -139,6 +140,8 @@ int main (int argc, char* argv[]) {
   ruledir = "rules";
   std::string outname = "map.bzw";
 
+  int detail = 3;
+
   if (cmd.Exists("c"))        { COSFile f = COSFile(cmd.GetDataS("c"));      cmd.Set(f); }
   if (cmd.Exists("config"))   { COSFile f = COSFile(cmd.GetDataS("config")); cmd.Set(f); }
 
@@ -150,6 +153,8 @@ int main (int argc, char* argv[]) {
   if (cmd.Exists("rulesdir")) { ruledir    = cmd.GetDataS("rulesdir"); }
   if (cmd.Exists("o"))        { outname    = cmd.GetDataS("o"); }
   if (cmd.Exists("output"))   { outname    = cmd.GetDataS("output"); }
+  if (cmd.Exists("l"))        { detail     = cmd.GetDataI("l"); }
+  if (cmd.Exists("detail"))   { detail     = cmd.GetDataI("detail"); }
   
   COSFile file;
   RuleSet* ruleset = new RuleSet();
@@ -169,7 +174,9 @@ int main (int argc, char* argv[]) {
 
   loadPlugIns();
 
+  std::string sdetail = "DETAIL";
   ruleset->initialize();
+  ruleset->addAttr(sdetail,float(detail));
 
   srand((unsigned int)time(NULL));
 
