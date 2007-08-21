@@ -73,8 +73,7 @@ void CCommandLineArgs::Set ( const char* szCommandLine )
 		std::string param = params[i];
 		if (param.size())
 		{
-			if (strrchr(param.c_str(),' ') == NULL )
-
+			if (strrchr(param.c_str(),' ') == NULL)
 				commands[GetCommandName(param)] = std::string("1");
 			else
 			{
@@ -111,8 +110,8 @@ void CCommandLineArgs::Set ( COSFile &file )
 			data.erase(0,1);
 			key = GetCommandName(key);
 			commands[key] = data;
-			data.erase(0,data.size());
-			key.erase(0,key.size());
+			data.clear();
+			key.clear();
 		}
 		else
 			data = c;
