@@ -50,7 +50,7 @@ products : /* empty */ { $$ = new ProductVector(); }
   | products product { $$ = $1; $$->push_back($2); }
 ;
 product : DEFSIGN NUMBER ':' ops { $$ = new Product($4,$2); }
-  | DEFSIGN cond ops { $$ = new Product($3,1.0f); }
+  | DEFSIGN cond ops { $$ = new Product($3,1.0f,$2); }
 ;
 faces : /* empty */ { $$ = new StringVector(); }
   | faces NONTERM  { std::string name = std::string($2); $$->push_back(name); }

@@ -1289,7 +1289,7 @@ yyreduce:
 
   case 9:
 #line 53 "..\\..\\src\\parser.y"
-    { (yyval.p) = new Product((yyvsp[0].ov),1.0f); ;}
+    { (yyval.p) = new Product((yyvsp[0].ov),1.0f,(yyvsp[-1].e)); ;}
     break;
 
   case 10:
