@@ -1,6 +1,6 @@
 start 
 -> 0.5 : sidewalk spawn(building)
--> 0.2 : skysidewalk spawn(skyscraper)
+-> 0.2 : skysidewalk spawn(sky_run)
 -> 0.2 : longsidewalk spawn(building)
 -> 0.1 : sidewalk material($MATGRASS)
 ;
