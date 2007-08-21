@@ -113,7 +113,7 @@ Functions are evaluated dynamically. Currently the following functions are suppo
 
 random(min,max,step) -- returns a random floating point number between min and max, in steps of "step" (eg. random(1.0,5.0,1.5) may return one of : 1.0,2.5,4.0)
 
-face(attr) -- returns an attribute of the current face. 'attr' must be one of the following : x,y,z,h,v -- these are x,y,z coordinates of the face's center point, horizontal length for a quad, and vertical length for a quad. h and v are not supported currently for non-quads!
+face(attr) -- returns an attribute of the current face. 'attr' must be one of the following : x,y,z,h,v,s -- these are x,y,z coordinates of the face's center point, horizontal length for a quad, vertical length for a quad, and size of the quad. h, v and s are not supported currently for non-quads!
 
 
 List of Operations
