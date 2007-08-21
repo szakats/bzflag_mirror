@@ -23,24 +23,24 @@ void GridGenerator::parseOptions(CCommandLineArgs* opt) {
   gi.size  = getSize();
   gi.sizeX = gi.sizeY = 42;
 
-  if (opt->Exists("g"))         { gi.sizeY = gi.sizeX = opt->GetDataI("g"); }
-  if (opt->Exists("-gridsize")) { gi.sizeY = gi.sizeX = opt->GetDataI("-gridsize"); }
+  if (opt->Exists("g"))        { gi.sizeY = gi.sizeX = opt->GetDataI("g"); }
+  if (opt->Exists("gridsize")) { gi.sizeY = gi.sizeX = opt->GetDataI("gridsize"); }
 
   snapX = 3;
   snapY = 3;
 
-  if (opt->Exists("p"))         { snapX = snapY = opt->GetDataI("p"); }
-  if (opt->Exists("-gridsnap")) { snapX = snapY = opt->GetDataI("-gridsnap"); }
+  if (opt->Exists("p"))        { snapX = snapY = opt->GetDataI("p"); }
+  if (opt->Exists("gridsnap")) { snapX = snapY = opt->GetDataI("gridsnap"); }
 
   subdiv = 120;
 
-  if (opt->Exists("v"))       { subdiv = opt->GetDataI("v"); }
-  if (opt->Exists("-subdiv")) { subdiv = opt->GetDataI("-subdiv"); }
+  if (opt->Exists("v"))      { subdiv = opt->GetDataI("v"); }
+  if (opt->Exists("subdiv")) { subdiv = opt->GetDataI("subdiv"); }
 
   fullslice = 8;
 
-  if (opt->Exists("f"))          { subdiv = opt->GetDataI("f"); }
-  if (opt->Exists("-fullslice")) { subdiv = opt->GetDataI("-fullslice"); }
+  if (opt->Exists("f"))         { subdiv = opt->GetDataI("f"); }
+  if (opt->Exists("fullslice")) { subdiv = opt->GetDataI("fullslice"); }
 
   if (fullslice > subdiv) subdiv = fullslice;
 
