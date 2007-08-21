@@ -15,7 +15,7 @@
 
 inline  bool operator < (const std::string &s1,const std::string &s2) { return (s1.compare(s2)<0);}
 
-std::string GetCommandName ( std::string &name )
+std::string GetCommandName ( std::string name )
 {
 	return TextUtils::toupper(name);
 }
