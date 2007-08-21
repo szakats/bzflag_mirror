@@ -22,6 +22,11 @@
 #include "Zone.h"
 #include "RuleSet.h"
 
+#define MajorVersion "0"
+#define MinorVersion "1"
+#define Revision     "1"
+#define BuildState "development"
+
 extern int yyparse(RuleSet*);
 extern FILE* yyin;
 
@@ -46,9 +51,10 @@ void printHelpCommand ( const char* shortName, const char* longName, const char*
   std::cout << description;
   std::cout << "\n";
 }
-  
+
 void printHelp() {
-  std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n\n";
+  std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n";
+  printf("Version %s.%s.%s(%s)\n\n",MajorVersion,MinorVersion,Revision,BuildState);
   std::cout << "Command line arguments:\n";
   printHelpCommand("h","help","               shows help");
   printHelpCommand("d","debug","integer       sets debug level (0-4)(default: 2)");
