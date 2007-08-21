@@ -68,6 +68,8 @@ void printHelp() {
   printHelpCommand("b","bases)","integer      sets number of bases (0/2/4)(defualt: 0)\n");
 }
 
+std::vector<void*> handleList;
+
 #ifdef _USE_LIB_RULES_
 const char* getLibExtension ( void )
 {
@@ -80,8 +82,33 @@ const char* getLibExtension ( void )
 
 void loadOnePlugIn ( const char* file )
 {
+  bool *init ( int* ) = 0;
 #ifdef _WIN32
+    HANDLE hLib = LoadLibrary(file);
+    if (!hLib)
+      return;
+    
+    init = GetProcAddress(hLib,"bzwgen_init_plugin");
+    if (!init)
+    {
+      FreeLibrary(hLib);
+      return;
+    }
+    handleList.push_back((void*)hLib);
+#else
 
+#endif
+  
+  if (init && *init(0))
+  {
+    // do something
+  }
+}
+
+void freeOnePlugIn ( void *handle )
+{
+#ifdef _WIN32
+  FreeLibrary((HMODULE)handle);
 #else
 
 #endif
@@ -91,10 +118,16 @@ void loadOnePlugIn ( const char* file )
 void loadPlugIns ( void )
 {
 #ifdef _USE_LIB_RULES_
-
   while (ruledir.GetNextFile(file,getLibExtension(),false))
     loadOnePlugIn(file.GetOSName());
+#endif // _USE_LIB_RULES_
+}
 
+void freePlugins ( void )
+{
+ #ifdef _USE_LIB_RULES_
+  for ( int i = 0; i < (int)handleList.size(); i++ )
+    freeOnePlugIn(handleList[i]);
 #endif // _USE_LIB_RULES_
 }
 
