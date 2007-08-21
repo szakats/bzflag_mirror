@@ -1,18 +1,16 @@
+
+Origonal Author: 
 Kornel "Epyon" Kisielewicz 
----------------------------
-Original Author:
 homepage : http://chaosforge.org/
 e-mail   : admin@chaosforge.org
 
-Corrections (especialy GCC compatibility)
-------------------------------------------
-Daniel Remenak, Jeffery Myers, blast007, Constitution
-
-Parts of GPLib from the OpenCombat project
--------------------------------------------
-Jeffery Myers
+Additional developers:
+Daniel Remenak (DTRemenak)
+Jeffery Myers (JeffM)
+Scott Somebody (blast007)
+Joshua Bodine (Constitution)
+Bryan Jennings (Bryjen)
 
 patches from:
--------------------------------------------
 Thomas Daede (TD-linux): Add an option to prepend a URL to all textures.
 
