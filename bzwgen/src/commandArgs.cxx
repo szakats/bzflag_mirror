@@ -80,7 +80,7 @@ void CCommandLineArgs::Set ( const char* szCommandLine )
 	if (!szCommandLine || !szCommandLine[0])
 		return;
 
-	std::vector<std::string> params = TextUtils::tokenize(std::string(szCommandLine),std::string("-"));
+	std::vector<std::string> params = TextUtils::tokenize(std::string(szCommandLine),deliminator);
 
 	for ( int i = 0; i < (int) params.size(); i++ )
 	{
@@ -99,68 +99,6 @@ void CCommandLineArgs::Set ( const char* szCommandLine )
 		}
 	}
 }
-
-/*void CCommandLineArgs::Set ( const char* szCommandLine )
-{
-	if (!szCommandLine || !szCommandLine[0])
-		return;
-
-	std::string key;
-	std::string data;
-	
-	char szTemp[512];
-	char *pTemp;
-
-	int pos = 0;
-	int len = (int)strlen(szCommandLine);
-
-	while (pos < len)
-	{
-		pTemp = strchr(&szCommandLine[pos],'-');
-		if (!pTemp)
-			pos = len;
-		else
-		{
-			pos = (int)(pTemp-szCommandLine);
-			pos += 1;
-
-			pTemp=strchr(pTemp+1,' ');
-			if (pTemp)
-			{
-				strncpy(szTemp,&szCommandLine[pos],pTemp-&szCommandLine[pos]);
-				szTemp[pTemp-&szCommandLine[pos]]= '\0';
-
-				GetCommandName(szTemp);
-				key=szTemp;
-
-				pos = (int)(pTemp-szCommandLine+1);
-				
-				pTemp=strchr(pTemp+1,'-');	
-				if (!pTemp)
-				{	// we are done
-					pTemp = (char*)&szCommandLine[len];
-					strncpy(szTemp,&szCommandLine[pos],pTemp-&szCommandLine[pos]);
-					szTemp[pTemp-&szCommandLine[pos]]= '\0';
-					pos = len;
-				}
-				else
-				{	// we are not done
-					if (pTemp-&szCommandLine[pos] != 0)
-					{
-						strncpy(szTemp,&szCommandLine[pos],pTemp-&szCommandLine[pos]-1);
-						szTemp[pTemp-&szCommandLine[pos]-1]= '\0';
-						pos = (int)(pTemp-szCommandLine);
-					}
-					else
-						szTemp[0] = '\0';
-				}
-				
-				data = szTemp;
-				commands[key]=data;
-			}
-		}
-	}
-} */
 
 void CCommandLineArgs::Set ( COSFile &file )
 {
@@ -204,6 +142,7 @@ void CCommandLineArgs::Set ( COSFile &file )
 
 void CCommandLineArgs::Clear ( void )
 {
+	deliminator = "-";
 	commands.clear();
 }
 

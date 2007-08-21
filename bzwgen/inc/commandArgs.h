@@ -33,6 +33,8 @@ public:
 	CCommandLineArgs( const char* szCommandLine );
 	CCommandLineArgs( COSFile &file );
 
+	void SetDelimnator ( std::string d ){deliminator = d;}
+
 	void Set ( int argc, char *argv[] );
 	void Set ( const char* szCommandLine );
 	void Set ( COSFile &file );
@@ -49,6 +51,7 @@ public:
 private:
 	typedef std::map<std::string,std::string> tmCommandMap;
 	tmCommandMap		commands;
+	std::string			deliminator;
 };
 #endif//_COMMAND_ARGS_H_
 
