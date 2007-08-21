@@ -11,3 +11,8 @@ Daniel Remenak, Jeffery Myers, blast007, Constitution
 Parts of GPLib from the OpenCombat project
 -------------------------------------------
 Jeffery Myers
+
+patches from:
+-------------------------------------------
+Thomas Daede (TD-linux): Add an option to prepend a URL to all textures.
+
