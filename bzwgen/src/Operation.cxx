@@ -87,14 +87,24 @@ int OperationSubdivide::runMesh(Mesh* mesh,int face) {
 int OperationPartition::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
   flatten(mesh,face);
+  int other;
   if (facerules == NULL) {
-    mesh->partitionFace(face,value,horiz);
+    other = mesh->partitionFace(face,value,horiz);
   } else {
     faces = new IntVector();
-    faces->push_back(mesh->partitionFace(face,value,horiz));
+    other = mesh->partitionFace(face,value,horiz);
+    if (inverse) {
+      faces->push_back(face);
+    } else {
+      faces->push_back(other);
+    }
     OperationMultifaces::runMesh(mesh,face);
   }
-  return face; 
+  if (inverse) {
+    return other; 
+  } else {
+    return face;
+  }
 }
 
 
