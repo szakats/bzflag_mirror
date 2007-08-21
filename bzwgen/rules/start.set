@@ -4,9 +4,9 @@
 # ------------------------------------------------------------------------
 
 start 
-  -> 0.5 : sidewalk_normal  spawn(building)
+  -> 0.5 : sidewalk_normal  spawn(build_run)
   -> 0.2 : sidewalk_sky     spawn(sky_run)
-  -> 0.2 : sidewalk_long    spawn(building)
+  -> 0.2 : sidewalk_long    spawn(build_run)
   -> 0.1 : sidewalk_normal  mat_grass
 ;
 

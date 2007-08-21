@@ -2,21 +2,21 @@
 
 building
 -> 0.2 : sky_run
--> 0.6 : building1
--> 0.2 : building2
+-> 0.6 : building2
+-> 0.2 : building1
 ;
 
-building1 
--> 0.3 : mat_glass extrude(4.0) [ entry * entry * ] b1floors
--> 0.3 : mat_glass extrude(4.0) [ * entry * entry ] b1floors
--> 0.2 : mat_wall2 extrude(3.7) [ * entry * entry ] extrude(0) expand(1.0) b1floors
+building2 
+-> 0.3 : mat_glass extrude(4.0) [ entry * entry * ] b2floors
+-> 0.3 : mat_glass extrude(4.0) [ * entry * entry ] b2floors
+-> 0.2 : mat_wall2 extrude(3.7) [ * entry * entry ] extrude(0) expand(1.0) b2floors
 -> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ * bspecialwall * bspecialwall ] roof_run
 -> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ bspecialwall * bspecialwall * ] roof_run
 ;
 
-building2
--> 0.3 : mat_wall extrude(4.0) [ entry * entry * ] b2floors
--> 0.3 : mat_wall extrude(4.0) [ * entry * entry ] b2floors
+building1
+-> 0.3 : mat_wall extrude(4.0) [ entry * entry * ] b1floors
+-> 0.3 : mat_wall extrude(4.0) [ * entry * entry ] b1floors
 -> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ * bspecialwall * bspecialwall ] roof_run
 -> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ bspecialwall * bspecialwall * ] roof_run
 ;
@@ -29,15 +29,15 @@ entryext
 -> extrude(-2.0) mat_roof
 ; 
 
-b2floors
--> 0.5 : common_ledge mat_wall2 extrude(3.7) b2floors
--> 0.2 : common_ledge mat_wall2 extrude(3.7) [ @bspecialwall ] b2floors
+b1floors
+-> 0.5 : common_ledge mat_wall extrude(3.7) b1floors
+-> 0.2 : common_ledge mat_wall extrude(3.7) [ @bspecialwall ] b1floors
 -> 0.3 : roof_run
 ;
 
-b1floors
--> 0.6 : common_ledge mat_wall2 extrude(3.7) b1floors
--> 0.2 : common_ledge mat_wall2 extrude(3.7) [ @bspecialwall ] b1floors
+b2floors
+-> 0.6 : common_ledge mat_wall2 extrude(3.7) b2floors
+-> 0.2 : common_ledge mat_wall2 extrude(3.7) [ @bspecialwall ] b2floors
 -> 0.2 : roof_run
 ;
 
