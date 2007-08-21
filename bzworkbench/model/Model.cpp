@@ -40,7 +40,7 @@ Model::Model() : Observable()
 	
 	defaultMaterial->setTextures( defaultTextures );
 	
-	objects = vector< bz2object* >();
+	objects = objRefList();
 	modelRef = this;
 	
 	cmap = map<string, DataEntry* (*)(string&)>();
@@ -77,7 +77,7 @@ Model::Model(const char* supportedObjects, const char* objectHierarchy, const ch
 	
 	defaultMaterial->setTextures( defaultTextures );
 	
-	objects = vector< bz2object* >();
+	objects = objRefList();
 	modelRef = this;
 	
 	cmap = map<string, DataEntry* (*)(string&)>();
@@ -117,10 +117,9 @@ Model::~Model()
 			}
 			
 	if(objects.size() > 0)
-		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++)
-			if((*i)) {
-				delete *i;
-				*i = NULL;	
+		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++)
+			if((i->get())) {
+				*i = NULL;	// this will deref the object, calling a destructor
 			}
 	
 	if(groups.size() > 0)
@@ -186,9 +185,9 @@ DataEntry* Model::_command(const string& command, const string& object, const st
 		
 		// handle all other objects
 		else {
-			for( vector< bz2object* >::iterator i = this->objects.begin(); i != this->objects.end(); i++) {
+			for( objRefList::iterator i = this->objects.begin(); i != this->objects.end(); i++) {
 				if( (*i)->getName() == name )
-					return *i;
+					return i->get();
 			}
 		}
 	}
@@ -214,10 +213,10 @@ bool Model::_build(vector<string>& bzworld) {
 	this->textureMatrices.clear();
 	this->_unselectAll();
 	if( this->objects.size() > 0 ) {
-		vector< bz2object* >::iterator itr = objects.begin();
+		objRefList::iterator itr = objects.begin();
 		while( itr != objects.end() ) {
 			
-			ObserverMessage obs( ObserverMessage::REMOVE_OBJECT, *itr );
+			ObserverMessage obs( ObserverMessage::REMOVE_OBJECT, itr->get() );
 			notifyObservers( &obs );
 			
 			this->objects.erase( itr );
@@ -633,7 +632,7 @@ string& Model::_toString() {
 	// all other objects
 	ret += "\n#--Objects---------------------------------------\n\n";
 	if(objects.size() > 0) {
-		for(vector< bz2object* >::iterator i = objects.begin(); i != objects.end(); i++) {
+		for(objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
 			ret += (*i)->toString() + "\n";	
 		}	
 	}
@@ -658,7 +657,7 @@ string& Model::_toString() {
 }
 
 // BZWB-specific API
-vector< bz2object* >& 		Model::getObjects() 		{ return modelRef->_getObjects(); }
+Model::objRefList& 				Model::getObjects() 		{ return modelRef->_getObjects(); }
 map< string, material* >& 		Model::getMaterials() 		{ return modelRef->_getMaterials(); }
 map< string, texturematrix* >&	Model::getTextureMatrices() { return modelRef->_getTextureMatrices(); }
 map< string, physics* >& 		Model::getPhysicsDrivers() 	{ return modelRef->_getPhysicsDrivers(); }
@@ -688,7 +687,7 @@ void Model::_removeObject( bz2object* obj ) {
 	if(this->objects.size() <= 0)
 		return;
 	
-	vector< bz2object* >::iterator itr = objects.begin();
+	objRefList::iterator itr = objects.begin();
 	for(unsigned int i = 0; i < this->objects.size() && itr != this->objects.end(); i++, itr++) {
 		if( objects[i] == obj ) {
 			
@@ -706,7 +705,7 @@ void Model::_setSelected( bz2object* obj ) {
 	if( this->selectedObjects.size() < 0 )
 		return;
 		
-	for(vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for(objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		if( *i == obj ) {
 			return;		// this object is already selected.
 		}	
@@ -728,7 +727,7 @@ void Model::_setUnselected( bz2object* obj ) {
 	if( this->selectedObjects.size() < 0)
 		return;
 		
-	for(vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for(objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		if( *i == obj ) {
 			obj->setSelected( false );
 			obj->setChanged( true );
@@ -751,7 +750,7 @@ bool Model::_isSelected( bz2object* obj ) {
 	if(obj == NULL)
 		return false;
 	
-	for(vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for(objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		if( *i == obj ) {
 			return true;
 		}	
@@ -765,11 +764,11 @@ void Model::_unselectAll() {
 	if( this->selectedObjects.size() <= 0)
 		return;
 		
-	for(vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for(objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		(*i)->setSelected( false );
 		(*i)->setChanged( true );
 		// tell the view to mark this object as unselected
-		ObserverMessage obs_msg( ObserverMessage::UPDATE_OBJECT, *i );
+		ObserverMessage obs_msg( ObserverMessage::UPDATE_OBJECT, i->get() );
 		this->notifyObservers( &obs_msg );
 	}
 	
@@ -779,7 +778,7 @@ void Model::_unselectAll() {
 }
 
 // get selection
-vector< bz2object* >& Model::getSelection() { return modelRef->_getSelection(); }
+Model::objRefList& Model::getSelection() { return modelRef->_getSelection(); }
 
 // build an object from the object registry
 DataEntry* Model::buildObject( const char* header ) { return modelRef->_buildObject( header ); }
@@ -802,11 +801,11 @@ bool Model::_cutSelection() {
 	this->objectBuffer.clear();
 	
 	// remove objects from the scene, but move them into the cut/copy buffer first so they're still referenced
-	for( vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for( objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		this->objectBuffer.push_back( *i );
 	}
-	for( vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
-		this->_removeObject( *i );
+	for( objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+		this->_removeObject( i->get() );
 	}
 	
 	this->selectedObjects.clear();
@@ -824,7 +823,7 @@ bool Model::_copySelection() {
 	this->objectBuffer.clear();
 	
 	// copy objects into the object buffer.
-	for( vector< bz2object* >::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for( objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
 		this->objectBuffer.push_back( *i );
 	}
 	
@@ -851,7 +850,7 @@ bool Model::_pasteSelection() {
 		
 		string data = (*i)->toString();
 		obj->update( data );
-		obj->setPos( osg::Vec3(0.0, 0.0, 0.0) );
+		obj->setPos( obj->getPos() + osg::Vec3(10.0, 10.0, 0.0) );
 		
 		this->_addObject( obj );
 		this->_setSelected( obj );
@@ -869,9 +868,9 @@ bool Model::_deleteSelection() {
 		return false;
 	
 	// remove objects from the scene WITHOUT first referencing it (i.e. this will ensure it gets deleted)
-	vector<bz2object*>::iterator itr = selectedObjects.begin();
+	Model::objRefList::iterator itr = selectedObjects.begin();
 	for(; itr != selectedObjects.end(); ) {
-		bz2object* obj = *itr;
+		bz2object* obj = itr->get();
 		this->_removeObject( obj );
 		
 		selectedObjects.erase( itr );
@@ -1033,34 +1032,4 @@ void Model::_groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) {
 void Model::ungroupObjects( group* g ) { modelRef->_ungroupObjects( g ); }
 void Model::_ungroupObjects( group* g ) {
 	
-}
-
-// turn a vector of ref_ptrs to bz2objects into a vector of pointers to bz2objects
-vector< bz2object* > Model::toNonRefList( vector< osg::ref_ptr< bz2object > >& objs ) { return modelRef->_toNonRefList( objs ); }
-vector< bz2object* > Model::_toNonRefList( vector< osg::ref_ptr< bz2object > >& objs ) {
-	vector< bz2object* > ret = vector< bz2object* > ();
-	
-	if( objs.size() == 0 ) 
-		return ret;
-		
-	for( vector< osg::ref_ptr< bz2object > >::iterator i = objs.begin(); i != objs.end(); i++ ) {
-		ret.push_back( i->get() );
-	}
-	
-	return ret;
-}
-
-// turn a vector of pointers to bz2objects into a vector of ref_ptrs to bz2objects
-vector< osg::ref_ptr< bz2object > > Model::toRefList( vector< bz2object* >& objs ) { return modelRef->_toRefList( objs ); }
-vector< osg::ref_ptr< bz2object > > Model::_toRefList( vector< bz2object* >& objs ) {
-	vector< osg::ref_ptr< bz2object > > ret = vector< osg::ref_ptr< bz2object > > ();
-	
-	if( objs.size() == 0 ) 
-		return ret;
-		
-	for( vector< bz2object* >::iterator i = objs.begin(); i != objs.end(); i++ ) {
-		ret.push_back( *i );
-	}
-	
-	return ret;
 }

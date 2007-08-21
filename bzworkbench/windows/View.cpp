@@ -58,10 +58,10 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
    this->modifiers[ FL_META ] = false;
    
 	// build the scene from the model
-	vector< bz2object* > objects = this->model->getObjects();
+	Model::objRefList objects = this->model->getObjects();
 	if(objects.size() > 0) {
-		for(vector< bz2object* >::iterator i = objects.begin(); i != objects.end(); i++) {
-			this->root->addChild( *i );
+		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
+			this->root->addChild( i->get() );
 		}
 	}
 	

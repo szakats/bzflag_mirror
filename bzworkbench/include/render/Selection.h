@@ -77,7 +77,7 @@ public:
 	void update( Observable* observable, void* data );
 	
 	// regenerate the axes
-	void rebuildAxes( vector< bz2object* >& objects );
+	void rebuildAxes( Model::objRefList& objects );
 	
 	// set the state
 	SelectionState setState( SelectionState state );
@@ -126,7 +126,7 @@ private:
 	osg::ref_ptr< Renderable > objectAxisGroup;
 	
 	// compute the local origin
-	osg::Vec3 computeLocalOrigin( vector< bz2object* >& objects );
+	osg::Vec3 computeLocalOrigin( Model::objRefList& objects );
 	
 };
 	

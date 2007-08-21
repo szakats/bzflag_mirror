@@ -548,12 +548,12 @@ osg::ref_ptr< Renderable > Selection::buildRotator( osg::Vec3 localOrigin ) {
 }
 
 // get the local origin
-osg::Vec3 Selection::computeLocalOrigin( vector< bz2object* >& objects ) {
+osg::Vec3 Selection::computeLocalOrigin( Model::objRefList& objects ) {
 	double x = 0.0, y = 0.0, z = 0.0;
 	
 	// compute the average x, y, and z values of all renderables
 	if( objects.size() > 0 ) {
-		for( vector< bz2object* >::iterator i = objects.begin(); i != objects.end(); i++) {
+		for( Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
 			x += (*i)->getPos().x();
 			y += (*i)->getPos().y();
 			z += (*i)->getPos().z();
@@ -569,7 +569,7 @@ osg::Vec3 Selection::computeLocalOrigin( vector< bz2object* >& objects ) {
 }
 
 // rebuild the axes
-void Selection::rebuildAxes( vector< bz2object* >& objects ) {
+void Selection::rebuildAxes( Model::objRefList& objects ) {
 	this->selectionNode->setPosition( this->computeLocalOrigin( objects ) );
 	
 	objectAxisGroup->setPosition( osg::Vec3( 0, 0, 0 ) );
@@ -578,7 +578,7 @@ void Selection::rebuildAxes( vector< bz2object* >& objects ) {
 	objectAxisGroup->removeChildren( 0, objectAxisGroup->getNumChildren() );
 	
 	// recompute them
-	for( vector< bz2object* >::iterator i = objects.begin(); i != objects.end(); i++ ) {
+	for( Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++ ) {
 		Renderable* r = new Renderable( objectAxes.get() );
 		
 		r->setPosition( (*i)->getPos() );
@@ -612,7 +612,7 @@ void Selection::update( Observable* observable, void* data ) {
 		return;
 	
 	// update the axes
-	vector< bz2object* > selectedObjects = model->_getSelection();
+	Model::objRefList selectedObjects = model->_getSelection();
 	
 	// remove the axes if there are no objects
 	if( selectedObjects.size() <= 0 && this->containsNode( selectionNode.get() )) {

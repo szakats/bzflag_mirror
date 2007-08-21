@@ -48,6 +48,9 @@ using namespace std;
 class Model : public Observable
 {
 public:
+
+	typedef vector< osg::ref_ptr< bz2object > > objRefList;
+	
 	Model();
 	Model(const char* supportedObjects, const char* objectHierarchy, const char* terminators);
 	
@@ -79,7 +82,7 @@ public:
 	static world* getWorldData();
 	static waterLevel* getWaterLevelData();
 	static options* getOptionsData();
-	static vector< bz2object* >& getObjects();
+	static objRefList& getObjects();
 	static map< string, material* >& getMaterials();
 	static map< string, texturematrix* >& getTextureMatrices();
 	static map< string, physics* >& getPhysicsDrivers();
@@ -93,7 +96,7 @@ public:
 	static void setUnselected( bz2object* obj );
 	static void unselectAll();
 	static bool isSelected( bz2object* obj );
-	static vector< bz2object* >& getSelection();
+	static objRefList& getSelection();
 	static void assignMaterial( const string& matref, bz2object* obj );
 	static void assignMaterial( material* matref, bz2object* obj );
 	static ConfigurationDialog* configureObject( DataEntry* obj );
@@ -105,14 +108,14 @@ public:
 	static bool deleteSelection();
 	static bool newWorld();
 	static bool linkTeleporters( teleporter* t1, teleporter* t2 );
-	static void groupObjects( vector< osg::ref_ptr< bz2object > >& objects );
+	static void groupObjects( Model::objRefList& objects );
 	static void ungroupObjects( group* g );
 	
 	// instantiated BZWB-specific API 
 	world* _getWorldData() { return worldData; }
 	options* _getOptionsData() { return optionsData; }
 	waterLevel* _getWaterLevelData() { return waterLevelData; }
-	vector<bz2object* >& _getObjects() { return this->objects; }
+	objRefList& _getObjects() { return this->objects; }
 	map< string, material* >& _getMaterials() { return this->materials; }
 	map< string, texturematrix* >& _getTextureMatrices() { return this->textureMatrices; }
 	map< string, dynamicColor* >& _getDynamicColors() { return this->dynamicColors; }
@@ -127,7 +130,7 @@ public:
 	void _setUnselected( bz2object* obj );
 	void _unselectAll();
 	bool _isSelected( bz2object* obj );
-	vector< bz2object* >& _getSelection() { return this->selectedObjects; }
+	objRefList& _getSelection() { return this->selectedObjects; }
 	void _assignMaterial( const string& matref, bz2object* obj );
 	void _assignMaterial( material* matref, bz2object* obj );
 	ConfigurationDialog* _configureObject( DataEntry* obj );
@@ -139,7 +142,7 @@ public:
 	bool _deleteSelection();
 	bool _newWorld();
 	bool _linkTeleporters( teleporter* t1, teleporter* t2 );
-	void _groupObjects( vector< osg::ref_ptr< bz2object > >& objects );
+	void _groupObjects( Model::objRefList& objects );
 	void _ungroupObjects( group* g );
 	
 	// plugin-specific API
@@ -189,15 +192,6 @@ public:
 	bool _hasInitializer( DataEntry* d ) { return ( cmap.count( d->getHeader() ) == 0 || cmap[ d->getHeader() ] == NULL ) ? false : true; }
 	bool _hasConfigurationDialog( DataEntry* d ) { return ( configMap.count( d->getHeader() ) == 0 || configMap[ d->getHeader() ] == NULL ) ? false : true; }
 	
-	// misc API
-	static vector< osg::ref_ptr< bz2object > > toRefList( vector< bz2object* >& objs );
-	static vector< bz2object* > toNonRefList( vector< osg::ref_ptr< bz2object > >& objs );
-	
-	// instantiated misc API
-	vector< osg::ref_ptr< bz2object > > _toRefList( vector< bz2object* >& objs );
-	vector< bz2object* > _toNonRefList( vector< osg::ref_ptr< bz2object > >& objs );
-	
-	
 private:
 
 // world options
@@ -225,7 +219,7 @@ private:
 	map< string, texturematrix* > textureMatrices;
 	
 // objects
-	vector< bz2object* > objects;
+	objRefList objects;
 	
 // world data (array of all objects in BZW format)
 	vector<string> data;
@@ -252,10 +246,10 @@ private:
 	vector<string> unusedData;
 	
 // vector of selected objects
-	vector< bz2object* > selectedObjects;
+	objRefList selectedObjects;
 	
 // cut/copy buffer
-	vector< osg::ref_ptr< bz2object > > objectBuffer;
+	objRefList objectBuffer;
 };
 
 #include "BZWParser.h"

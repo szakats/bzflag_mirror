@@ -294,13 +294,13 @@ bool selectHandler::dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea
 		const Model* model = this->view->getModelRef();
 		
 		// get the selected objects
-		vector< bz2object* > selected = model->getSelection();
+		Model::objRefList selected = model->getSelection();
 		
 		// transform them
 		if(selected.size() > 0) {
 			osg::Vec3 dPosition = position - selection->getPosition();
 			osg::Vec3 tmp;
-			for(vector<bz2object*>::iterator i = selected.begin(); i != selected.end(); i++) {
+			for(Model::objRefList::iterator i = selected.begin(); i != selected.end(); i++) {
 				tmp = (*i)->getPos() + dPosition;
 				
 				// tell the object it got updated (i.e. so it can handle any changes specific to itself)
@@ -362,13 +362,13 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 		const Model* model = this->view->getModelRef();
 		
 		// get the selected objects
-		vector< bz2object* > selected = model->getSelection();
+		Model::objRefList selected = model->getSelection();
 		
 		// transform them
 		if(selected.size() > 0) {
 			osg::Vec3 dp = osg::Vec3( 0.0, 0.0, 0.0 );
 			osg::Vec3 dr = osg::Vec3( 0.0, 0.0, 0.0 );
-			for(vector<bz2object*>::iterator i = selected.begin(); i != selected.end(); i++) {
+			for(Model::objRefList::iterator i = selected.begin(); i != selected.end(); i++) {
 				// sort out objects by their rotation technique
 				dp = (*i)->getRotation();
 				dr.set( dr.x() + a_x, dr.y() + a_y, dr.z() + a_z );
@@ -429,10 +429,10 @@ bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& e
 	// update all objects in the selection
 	
 	if(selection) {
-		vector<bz2object*> selected = this->view->getModelRef()->getSelection();
+		Model::objRefList selected = this->view->getModelRef()->getSelection();
 		if( selected.size() > 0 ) {
 			osg::Vec3 tscale;
-			for(vector<bz2object*>::iterator i = selected.begin(); i != selected.end(); i++) {
+			for(Model::objRefList::iterator i = selected.begin(); i != selected.end(); i++) {
 				tscale = (*i)->getSize() + scale;
 				// no negative scaling!
 				if( tscale.x() < 0 )
@@ -491,10 +491,10 @@ bool selectHandler::shearSelector( View* viewer, const osgGA::GUIEventAdapter& e
 	Selection* selection = dynamic_cast< Selection* >( this->lastSelected );
 	
 	if(selection) {
-		vector< bz2object* > selected = this->view->getModelRef()->getSelection();
+		Model::objRefList selected = this->view->getModelRef()->getSelection();
 		
 		if(selected.size() > 0) {
-			for( vector<bz2object*>::iterator i = selected.begin(); i != selected.end(); i++) {
+			for( Model::objRefList::iterator i = selected.begin(); i != selected.end(); i++) {
 				
 			}
 		}

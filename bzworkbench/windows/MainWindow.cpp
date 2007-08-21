@@ -183,11 +183,11 @@ void MainWindow::error(const char* errorText) {
 // launch a MasterConfigurationDialog with the configure button
 void MainWindow::configureCallback_real( Fl_Widget* w ) {
 	
-	vector< bz2object* > selection = this->model->getSelection();
+	Model::objRefList selection = this->model->getSelection();
 	if( selection.size() > 1 || selection.size() == 0 )
 		return;
 	
-	bz2object* obj = selection[0];
+	bz2object* obj = selection[0].get();
 	MasterConfigurationDialog* mcd = new MasterConfigurationDialog( obj );
 	mcd->show();
 	

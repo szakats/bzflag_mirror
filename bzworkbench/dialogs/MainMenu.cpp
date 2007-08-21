@@ -232,12 +232,12 @@ void MainMenu::importObjectCallback_real(Fl_Widget* w) {
 void MainMenu::addPurpleBaseCallback_real(Fl_Widget* w) {
 	
 	// get the objects and see that we don't have any other bases
-	vector< bz2object* > objects = this->parent->getModel()->_getObjects();
+	Model::objRefList objects = this->parent->getModel()->_getObjects();
 	if( objects.size() > 0 ) {
 		base* b;
 		// find all bases
-		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
-			b = dynamic_cast< base* >( *i );
+		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
+			b = dynamic_cast< base* >( i->get() );
 			if(b != NULL && b->getTeam() == BASE_PURPLE)
 				return;		// there already is a purple base; don't add a second!
 		}
@@ -272,12 +272,12 @@ void MainMenu::addPurpleBaseCallback_real(Fl_Widget* w) {
 // add base 2
 void MainMenu::addRedBaseCallback_real(Fl_Widget* w) {
 	// get the objects and see that we don't have any other bases
-	vector< bz2object* > objects = this->parent->getModel()->_getObjects();
+	Model::objRefList objects = this->parent->getModel()->_getObjects();
 	if( objects.size() > 0 ) {
 		base* b;
 		// find all bases
-		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
-			b = dynamic_cast< base* >( *i );
+		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
+			b = dynamic_cast< base* >( i->get() );
 			if(b != NULL && b->getTeam() == BASE_RED)
 				return;		// there already is a purple base; don't add a second!
 		}
@@ -312,12 +312,12 @@ void MainMenu::addRedBaseCallback_real(Fl_Widget* w) {
 // add base 3
 void MainMenu::addGreenBaseCallback_real(Fl_Widget* w) {
 	// get the objects and see that we don't have any other bases
-	vector< bz2object* > objects = this->parent->getModel()->_getObjects();
+	Model::objRefList objects = this->parent->getModel()->_getObjects();
 	if( objects.size() > 0 ) {
 		base* b;
 		// find all bases
-		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
-			b = dynamic_cast< base* >( *i );
+		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
+			b = dynamic_cast< base* >( i->get() );
 			if(b != NULL && b->getTeam() == BASE_GREEN)
 				return;		// there already is a purple base; don't add a second!
 		}
@@ -349,12 +349,12 @@ void MainMenu::addGreenBaseCallback_real(Fl_Widget* w) {
 // add base 4
 void MainMenu::addBlueBaseCallback_real(Fl_Widget* w) {
 	// get the objects and see that we don't have any other bases
-	vector< bz2object* > objects = this->parent->getModel()->_getObjects();
+	Model::objRefList objects = this->parent->getModel()->_getObjects();
 	if( objects.size() > 0 ) {
 		base* b;
 		// find all bases
-		for(vector<bz2object*>::iterator i = objects.begin(); i != objects.end(); i++) {
-			b = dynamic_cast< base* >( *i );
+		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
+			b = dynamic_cast< base* >( i->get() );
 			if(b != NULL && b->getTeam() == BASE_BLUE)
 				return;		// there already is a purple base; don't add a second!
 		}
@@ -467,24 +467,24 @@ void MainMenu::configureObjectCallback_real(Fl_Widget* w) {
 // handle teleporter linking
 void MainMenu::linkCallback_real(Fl_Widget* w) {
 	// get all selected objects
-	vector< bz2object* > selection = this->parent->getModel()->_getSelection(); 
+	Model::objRefList selection = this->parent->getModel()->_getSelection(); 
 	if( selection.size() <= 0 )
 		return;
 		
 	// map of teleporter links to create
 	map< teleporter*, teleporter* > teleporterMap;
-	for( vector< bz2object *>::iterator i = selection.begin(); i != selection.end(); i++ ) {
+	for( Model::objRefList::iterator i = selection.begin(); i != selection.end(); i++ ) {
 		if( (*i)->getHeader() == "teleporter" ) {
-			teleporter* t1 = dynamic_cast< teleporter* > (*i);
+			teleporter* t1 = dynamic_cast< teleporter* > (i->get());
 			if( !t1 )
 				continue;
 			
 			// get other teleporters
 			if( selection.size() >= 2 ) {
-				for( vector< bz2object* >::iterator j = i+1; j != selection.end(); j++ ) {
+				for( Model::objRefList::iterator j = i+1; j != selection.end(); j++ ) {
 						
 					if( (*j)->getHeader() == "teleporter" ) {
-						teleporter* t2 = dynamic_cast< teleporter* >( *j );
+						teleporter* t2 = dynamic_cast< teleporter* >( j->get() );
 						if( !t2 )
 							continue;
 							
