@@ -28,7 +28,7 @@ void yyunput(int, char*);
 %token <fl> NUMBER
 %token <id> NONTERM ATTRIBUTE
 %left '&' '|'
-%nonassoc '<' '>'
+%nonassoc '<' '>' '='
 %left '-' '+'
 %left '*' '/'
 %type <pv> products
@@ -94,6 +94,7 @@ expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$
   | expr '>' expr { $$ = new ExpressionGreater($1,$3); }
   | expr '<' expr { $$ = new ExpressionGreater($3,$1); }
   | expr '&' expr { $$ = new ExpressionAnd($1,$3); }
+  | expr '=' expr { $$ = new ExpressionEqual($1,$3); }
   | expr '|' expr { $$ = new ExpressionOr($1,$3); }
   | FACE '(' NONTERM ')' { std::string name = std::string($3); $$ = new ExpressionFaceAttribute(name); }
   | NUMBER { $$ = new ExpressionConst($1); }
