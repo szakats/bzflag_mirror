@@ -80,6 +80,7 @@ void CCommandLineArgs::Set ( const char* szCommandLine )
 			{
 				std::string key = TextUtils::tokenize(param,std::string(" "))[0];
 				std::string data = param.c_str()+1+key.size();
+				if (data[data.size() - 1] == ' ') data.erase(data.size() - 1);
 				commands[GetCommandName(key)] = data;
 			}
 		}
