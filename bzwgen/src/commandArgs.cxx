@@ -19,16 +19,6 @@
 
 inline  bool operator < (const std::string &s1,const std::string &s2) { return (s1.compare(s2)<0);}
 
-void GetCommandName ( char *szData )
-{
-#ifdef	_WIN32
-	strupr(szData);
-#else
-	while(*szData++)
-		*szData = toupper(*szData);
-#endif
-}
-
 std::string GetCommandName ( std::string &name )
 {
 	return TextUtils::toupper(name);
@@ -122,7 +112,7 @@ void CCommandLineArgs::Set ( COSFile &file )
 		else if (c == '\n')
 		{
 			data.erase(0,1);
-			GetCommandName((char*)key.c_str());
+			key = GetCommandName(key);
 			commands[key] = data;
 			data.erase(0,data.size());
 			key.erase(0,key.size());
@@ -134,8 +124,7 @@ void CCommandLineArgs::Set ( COSFile &file )
 	if ((key.size() > 0) )
 	{
 		data.erase(0,1);
-		GetCommandName((char*)key.c_str());
-		commands[key] = data;
+		commands[GetCommandName(key)] = data;
 	}
 	file.Close();
 }
@@ -148,37 +137,22 @@ void CCommandLineArgs::Clear ( void )
 
 bool CCommandLineArgs::Exists ( const char* szKey )
 {
-	std::string key = szKey;
-
-	GetCommandName((char*)key.c_str());
-
-	tmCommandMap::iterator itr = commands.find(key);
-
-	return (itr != commands.end());
+	return (commands.find(GetCommandName(std::string(szKey))) != commands.end());
 }
 
 const char* CCommandLineArgs::GetDataS ( const char* szKey )
 {
-	std::string key = szKey;
-
-	GetCommandName((char*)key.c_str());
-
-	tmCommandMap::iterator itr = commands.find(key);
+	tmCommandMap::iterator itr = commands.find(GetCommandName(std::string(szKey)));
 
 	if(itr == commands.end())
 		return false;
 
 	return itr->second.c_str();
-
 }
 
 int CCommandLineArgs::GetDataI ( const char* szKey )
 {
-	std::string key = szKey;
-
-	GetCommandName((char*)key.c_str());
-
-	tmCommandMap::iterator itr = commands.find(key);
+	tmCommandMap::iterator itr = commands.find(GetCommandName(std::string(szKey)));
 
 	if(itr == commands.end())
 		return false;
@@ -188,30 +162,20 @@ int CCommandLineArgs::GetDataI ( const char* szKey )
 
 bool CCommandLineArgs::GetDataB ( const char* szKey )
 {
-	std::string key = szKey;
-
-	GetCommandName((char*)key.c_str());
-
-	tmCommandMap::iterator itr = commands.find(key);
+	tmCommandMap::iterator itr = commands.find(GetCommandName(std::string(szKey)));
 
 	if(itr == commands.end())
 		return false;
 
 	return itr->second.c_str()[0] != '0';
-
 }
 
 float CCommandLineArgs::GetDataF ( const char* szKey )
 {
-	std::string key = szKey;
-
-	GetCommandName((char*)key.c_str());
-
-	tmCommandMap::iterator itr = commands.find(key);
+	tmCommandMap::iterator itr = commands.find(GetCommandName(std::string(szKey)));
 
 	if(itr == commands.end())
 		return false;
 
 	return (float)atof(itr->second.c_str());
-
 }
