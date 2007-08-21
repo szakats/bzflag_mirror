@@ -6,7 +6,7 @@
 ;BZWgen Version Variables
 
   !define VER_MAJOR 0
-  !define VER_MINOR .0.1
+  !define VER_MINOR .1.1
 
 ;--------------------------------
 ;Compression options
