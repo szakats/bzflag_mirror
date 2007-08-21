@@ -31,7 +31,7 @@ rule
   -> product2
 ;
 
-This will choose product1 if the face horizontal length is greater than 5, product2 otherwise. It's a good idea to provide a rule with no conditions even if epmty so the compiler doesn't cry that a rule returned NULL.
+This will choose product1 if the face horizontal length is greater than 5, product2 otherwise. It's a good idea to provide a rule with no conditions even if epmty so the compiler doesn't cry that a rule returned NULL. It is also possible to combine probability with conditionals. In this case the sum of probability should be one considering ONLY those products that are always true, or have a non-probability tagged product at the end.
 
 initialize
 -----------
