@@ -19,8 +19,8 @@ FILES = \
 	src/TextUtils.cxx \
 	src/bzwgen.cxx \
 	src/commandArgs.cxx \
-	parser.cxx \
-	lexer.cxx
+	src/parser.cxx \
+	src/lexer.cxx
 
 OBJECTS = ${FILES:.cxx=.o}
 
@@ -32,10 +32,10 @@ all: blather bzwgen
 .cxx.o: common.h
 	${CXX} ${CFLAGS} ${CPPFLAGS} -c -o $@ $<
 	
-lexer.cxx: lexer.l
+src/lexer.cxx: src/lexer.l
 	flex -o$@ $<
 
-parser.cxx: parser.y
+src/parser.cxx: src/parser.y
 	bison -d -o$@ $<
 	
 blather:
@@ -50,7 +50,7 @@ blather:
 
 clean:
 	@echo "Cleaning up..."
-	rm -f bzwgen ${OBJECTS}
+	rm -f bzwgen src/lexer.cxx src/parser.[ch]xx ${OBJECTS}
 	@echo "Done."
 
 bzwgen: ${OBJECTS}
