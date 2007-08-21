@@ -62,16 +62,39 @@ If we don't care about a particular face, we can write "*" instead, it then will
 
 Example : "subdivide(5) [ * * door ] " means that we only care about the central face of subdivision - ignore the first, ignore the second, send the third to "door" and ignore the rest.
 
+If we want ALL of the faces to follow the same rule then we pass the rulename with a "@" sign before it.
+
 
 Expressions
 ============ 
 
 Currently the language supports a small set of expressions. They all are evaluated to a float number. If a given operation needs a integer it will be rounded from the float. If it needs a boolean, the float will be checked wether it's negative (false) or positive (true). Technically 0.0 is also false, but don't rely on that. All current boolean expressions resolve to -1.0 or 1.0.
 
+Expressions may be one of the following:
 
-List of Expressions
-====================
+Constants
+----------
 
+The grammar accepts both whole numbers and floating point (only in the x.y notation). Negative numbers are supported, though care should be taken to make them stick to the number and not anything else (the parser is buggy in this case currently, so 2-3 will *not* be parsed correctly).
+
+Attributes
+-----------
+
+These are evaluated at RUNTIME, so they may be changed between executions. Attributes are created using the assign() command, and start with a $ sign. It is a good practice to write them uppercase to avoid confusion with rules and operations. Attributes may be used in expressions. 
+
+Arithmetic ops
+---------------
+
+The parser supports +, -, /, * operations and grouping with (). Care should be taken with the '-' sign -- see Constants above.
+
+Functions
+----------
+
+Functions are evaluated dynamically. Currently the following functions are supported:
+
+random(min,max,step) -- returns a random floating point number between min and max, in steps of "step" (eg. random(1.0,5.0,1.5) may return one of : 1.0,2.5,4.0)
+
+face(attr) -- returns an attribute of the current face. 'attr' must be one of the following : x,y,z,h,v -- these are x,y,z coordinates of the face's center point, horizontal length for a quad, and vertical length for a quad. h and v are not supported currently for non-quads!
 
 List of Operations
 ===================
