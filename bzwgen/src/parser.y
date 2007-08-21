@@ -49,7 +49,7 @@ cond : /* empty */ { $$ = NULL; }
 products : /* empty */ { $$ = new ProductVector(); }
   | products product { $$ = $1; $$->push_back($2); }
 ;
-product : DEFSIGN NUMBER ':' ops { $$ = new Product($4,$2); }
+product : DEFSIGN NUMBER ':' cond ops { $$ = new Product($5,$2,$4); }
   | DEFSIGN cond ops { $$ = new Product($3,1.0f,$2); }
 ;
 faces : /* empty */ { $$ = new StringVector(); }
