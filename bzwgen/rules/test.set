@@ -2,38 +2,54 @@
 
 building
 -> 0.2 : skyscraper
--> 0.8 : building1
+-> 0.6 : building1
+-> 0.2 : building2
 ;
 
 building1 
--> 0.3 : material($MATGLASS) extrude(4.0) [ b1entry * b1entry * ] b1floors
--> 0.3 : material($MATGLASS) extrude(4.0) [ * b1entry * b1entry ] b1floors
--> 0.2 : material($MATWALL2) extrude(3.7) [ * b1entry * b1entry ] extrude(0) expand(1.0) b1floors
--> 0.1 : material($MATWALL2) extrude(random(12.0,40.0,4.0)) [ * specialwall * specialwall ] top
--> 0.1 : material($MATWALL2) extrude(random(12.0,40.0,4.0)) [ specialwall * specialwall * ] top
+-> 0.3 : material($MATGLASS) extrude(4.0) [ entry * entry * ] b1floors
+-> 0.3 : material($MATGLASS) extrude(4.0) [ * entry * entry ] b1floors
+-> 0.2 : material($MATWALL2) extrude(3.7) [ * entry * entry ] extrude(0) expand(1.0) b1floors
+-> 0.1 : material($MATWALL2) extrude(random(12.0,40.0,4.0)) [ * bspecialwall * bspecialwall ] top
+-> 0.1 : material($MATWALL2) extrude(random(12.0,40.0,4.0)) [ bspecialwall * bspecialwall * ] top
 ;
 
-b1entry 
--> partitionh(face(h)/2 - 2.0) partitionh(4.0) [ b1entrya ]
+building2
+-> 0.3 : material($MATWALL) extrude(4.0) [ entry * entry * ] b2floors
+-> 0.3 : material($MATWALL) extrude(4.0) [ * entry * entry ] b2floors
+-> 0.2 : material($MATWALL) extrude(random(12.0,40.0,4.0)) [ * bspecialwall * bspecialwall ] top
+-> 0.2 : material($MATWALL) extrude(random(12.0,40.0,4.0)) [ bspecialwall * bspecialwall * ] top
 ;
-b1entrya
+
+entry 
+-> partitionh(face(h)/2 - 2.0) partitionh(4.0) [ entryext ]
+;
+
+entryext
 -> extrude(-2.0) material($MATROOF)
 ; 
 
 b1sky 
 -> material($MATGLASS) ;
 
+b2floors
+-> 0.5 : ledge material($MATWALL2) extrude(3.7) b2floors
+-> 0.2 : ledge material($MATWALL2) extrude(3.7) [ @bspecialwall ] b2floors
+-> 0.3 : top
+;
+
 b1floors
 -> 0.6 : ledge material($MATWALL2) extrude(3.7) b1floors
--> 0.2 : ledge material($MATWALL2) extrude(3.7) [ @b1special ] b1floors
+-> 0.2 : ledge material($MATWALL2) extrude(3.7) [ @bspecialwall ] b1floors
 -> 0.2 : top
 ;
 
-b1special
--> subdivideh(3) [ * b1insetwall * ] 
+bspecialwall
+-> 0.8 : subdivideh(3) [ * binsetwall * ] 
+-> 0.2 : subdivideh(3) [ * insetwall * ] 
 ;
 
-b1insetwall -> extrude(-3.0) ;
+binsetwall -> extrude(-3.0) material($MATGLASS);
 
 
 skyscraper
