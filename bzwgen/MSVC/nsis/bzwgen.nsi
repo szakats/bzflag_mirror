@@ -135,7 +135,7 @@ Section "!BZWgen (Required)" BZWgen
   WriteRegStr HKLM SOFTWARE\BZWgen${VER_MAJOR}${VER_MINOR} "Install_Dir" "$INSTDIR"
 
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZWgen${VER_MAJOR}${VER_MINOR}" "DisplayName" "BZlgen ${VER_MAJOR}${VER_MINOR} (remove only)"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZWgen${VER_MAJOR}${VER_MINOR}" "DisplayName" "BZWGen ${VER_MAJOR}${VER_MINOR} (remove only)"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BZWgen${VER_MAJOR}${VER_MINOR}" "UninstallString" '"$INSTDIR\uninstall.exe"'
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -147,7 +147,7 @@ Section "!BZWgen (Required)" BZWgen
     SetOutPath $INSTDIR
     CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
     CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
-    CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\BZWgen ${VER_MAJOR}${VER_MINOR}.lnk" "$INSTDIR\bzflag.exe" "" "$INSTDIR\bzflag.exe" 0
+    CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\BZWgen ${VER_MAJOR}${VER_MINOR}.lnk" "$INSTDIR\BZWGen.exe" "" "$INSTDIR\BZWGen.exe" 0
   
   !insertmacro MUI_STARTMENU_WRITE_END
 
