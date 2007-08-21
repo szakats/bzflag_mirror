@@ -27,6 +27,7 @@ void yyunput(int, char*);
 %token NEG ASSERTION FACE TAPER SPAWN CHAMFER UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXPAND RANDOM SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI MATERIAL
 %token <fl> NUMBER
 %token <id> NONTERM ATTRIBUTE
+%left '&' '|'
 %nonassoc '<' '>'
 %left '-' '+'
 %left '*' '/'
@@ -92,6 +93,8 @@ expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$
   | expr '/' expr { $$ = new ExpressionDiv($1,$3); }
   | expr '>' expr { $$ = new ExpressionGreater($1,$3); }
   | expr '<' expr { $$ = new ExpressionGreater($3,$1); }
+  | expr '&' expr { $$ = new ExpressionAnd($1,$3); }
+  | expr '|' expr { $$ = new ExpressionOr($1,$3); }
   | FACE '(' NONTERM ')' { std::string name = std::string($3); $$ = new ExpressionFaceAttribute(name); }
   | NUMBER { $$ = new ExpressionConst($1); }
   | ATTRIBUTE { std::string name = std::string($1); $$ = new ExpressionAttribute(ruleset,name); }
