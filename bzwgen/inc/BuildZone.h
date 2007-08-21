@@ -29,7 +29,6 @@ public:
   void subdivideWindows(Mesh* mesh, int wall, int mat);
   void longerSide(Mesh* mesh, int face, float* length, bool* orientation);
   void generateBuilding(Mesh* mesh, int base, int wall);
-  void generateSkyscraper(Mesh* mesh, int base, int wall);
   virtual void output(Output& out);
   ~BuildZone() { 
     MeshVectIter itr; 
