@@ -50,7 +50,7 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
     return;
   }
 
-  std::string name = "sidewalk";
+  std::string name = "sidewalk_normal";
   mesh->inside.push_back(mesh->faceCenter(base));
   generator->getRuleSet()->runMesh(mesh,base,name);
 

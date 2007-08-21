@@ -1,5 +1,42 @@
-# Test file for the parser. Will be changed to something more working later.
+# ------------------------------------------------------------------------
+#  BZWGen 0.1.1 grammar file
+#  sidewalk.set -- generation of sidewalks
+# ------------------------------------------------------------------------
 
-sidewalk -> material($MATMESH) expand(2.0) chamfer(1.0) extrude(0.2) extrude(0.0) unchamfer() expand(-2.0) ;
-skysidewalk -> material($MATMESH) expand(2.0) chamfer(1.0) extrude(0.2) extrude(0.0) expand(-2.0) material($MATGRASS) extrude(0.0) unchamfer() expand(-4.0);
-longsidewalk -> material($MATMESH) expand(2.0) chamfer(1.0) extrude(0.2) extrude(0.0) unchamfer() expand(-6.0) ;
+sidewalk_normal -> 
+  mat_mesh 
+  expand(2.0) 
+  chamfer(1.0) 
+  extrude(0.2) 
+  extrude(0.0) 
+  unchamfer() 
+  expand(-2.0) 
+;
+
+sidewalk_sky -> 
+  mat_mesh 
+  expand(2.0) 
+  chamfer(1.0) 
+  extrude(0.2) 
+  extrude(0.0) 
+  expand(-2.0) 
+  mat_grass 
+  extrude(0.0) 
+  unchamfer() 
+  expand(-4.0)
+;
+
+sidewalk_long -> 
+  mat_mesh 
+  expand(2.0) 
+  chamfer(1.0) 
+  extrude(0.2) 
+  extrude(0.0) 
+  unchamfer() 
+  expand(-6.0) 
+;
+
+# ------------------------------------------------------------------------
+#  end of file
+# ------------------------------------------------------------------------
+
