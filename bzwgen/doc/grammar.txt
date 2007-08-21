@@ -101,6 +101,11 @@ Comparision ops
 
 Currently just two comparision operations are supported: < and >. They are currently only used for the assert Operation.
 
+Boolean ops
+----------------
+
+AND and OR are supported by using the & and | signs. They have lowest priority so grouping the expressions with () is usualy not needed.
+
 Functions
 ----------
 
