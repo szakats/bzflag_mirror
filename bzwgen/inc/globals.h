@@ -25,7 +25,9 @@
 #define MATROOFT  6
 #define MATGLASS  7
 #define MATGRASS  8
-#define MAXMATERIALS 9
+#define MATDOORW  9
+#define MATDOORR  10
+#define MAXMATERIALS 11
 
 #define EPSILON 0.00000001f
 

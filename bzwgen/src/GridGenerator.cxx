@@ -166,6 +166,8 @@ void GridGenerator::run() {
   mats.push_back(new Material(MATROOFT,"rooft"));
   mats.push_back(new Material(MATGLASS,"glass"));
   mats.push_back(new Material(MATGRASS,"std_ground"));
+  mats.push_back(new Material(MATDOORW,"doorw"));
+  mats.push_back(new Material(MATDOORR,"doorr"));
 }
 
 void GridGenerator::output(Output& out) { 
