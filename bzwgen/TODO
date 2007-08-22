@@ -7,8 +7,6 @@
 
 * Triangulation/Convexation algorithm - to handle non-convex shapes
 
-* Fixing expand to handle non-convex shapes properly
-
 * Snapgrids - to make buildings follow set snap lines, needs Attributes to be implemented
 
 * .bzw object placement - for allowing the placement of arbitrary .bzw objects, will need a place object rule

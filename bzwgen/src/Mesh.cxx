@@ -104,7 +104,10 @@ void Mesh::expandFace(int fid, float amount) {
   int size = fv->size();
   Vertex* nv = new Vertex[size];
   for (int i = 0; i < size; i++) {
-    nv[i] = v[fv->at(i)] + extensionVertex(fv->at(modprev(i,size)),fv->at(modnext(i,size)),fv->at(i))*amount;
+    Vertex a = v[fv->at(modnext(i,size))] - v[fv->at(modprev(i,size))];
+    Vertex b = v[fv->at(i)] - v[fv->at(modprev(i,size))];
+    float sign = fsign(a.dot(b));
+    nv[i] = v[fv->at(i)] + extensionVertex(fv->at(modprev(i,size)),fv->at(modnext(i,size)),fv->at(i))*amount*sign;
   }
   for (int i = 0; i < size; i++) {
     v[fv->at(i)] = nv[i];

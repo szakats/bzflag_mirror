@@ -189,6 +189,8 @@ inline float randomFloatRange(float min, float max) { return randomFloat(max-min
 inline float randomFloatRangeStep(float min, float max, float step) { if (step == 0) return 0.0; int steps = int((max-min) / step); return randomInt(steps+1)*step + min; }
 inline int round(float f) { return int(f+0.5f); }
 
+inline float fsign(float f) { if (f == 0.0f) return 0.0f; if (f < 0.0f) return -1.0f; else return 1.0f; };
+
 
 #endif /* __COMMON_H__ */
 
