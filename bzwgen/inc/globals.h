@@ -106,7 +106,12 @@ struct TexCoord {
   
   void set(float v[2]) { s = v[0], t = v[1]; }
   void set(float _s, float _t) { s = _s, t = _t; }
-  
+
+  // This may be evil, but TexCoords do not need to be fully perfect :P
+  bool operator==(const TexCoord& b) {
+    return (fabs(s - b.s) < EPSILON && fabs(t - b.t) < EPSILON);
+  }
+
   float &operator[](int i) {
     switch (i) { 
       case 0: return s; break;

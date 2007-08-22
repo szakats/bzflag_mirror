@@ -27,7 +27,13 @@ public:
   bool passable;
   Mesh() : passable(false) {}
   int addVertex(Vertex vtx) { v.push_back(vtx); return v.size()-1; }
-  int addTexCoord(TexCoord tcx) { tc.push_back(tcx); return tc.size()-1; }
+  int addTexCoord(TexCoord tcx) { 
+    for (size_t i = 0; i < tc.size(); i++) {
+      if (tc[i] == tcx) return i;
+    }
+    tc.push_back(tcx); 
+    return tc.size()-1; 
+  }
   int addFace(Face* face) { f.push_back(face); return f.size()-1; }
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat = 0);
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord ta, TexCoord tb, TexCoord tc, TexCoord td, int mat = 0);
@@ -44,7 +50,7 @@ public:
   void weldVertices(int a, int b);
   void output(Output& out);
   void textureFaceFull(int fid);
-  void textureFaceQuad(int fid, float a, float b, float c, float d);
+  void textureFaceQuad(int fid, float au, float av, float bu, float bv);
   ~Mesh();
 private:
   Vertex extensionVertex(int ida, int idb, int idc);
