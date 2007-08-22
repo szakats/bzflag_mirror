@@ -13,7 +13,7 @@ roof_bonus
 ;
 
 roof_building
-  -> 0.6 : expand(-5.0) mat_mesh extrude(2.0) roof_run
+  -> 0.6 : expand(-5.0) mat_mesh extrude(2.0) mat_roof
   -> 0.4 : expand(-5.0) mat_mesh chamfer(1.0) extrude(2.0)
 ;
 
