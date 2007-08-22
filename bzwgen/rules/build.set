@@ -60,7 +60,7 @@ build_insetwall
 build_inset -> extrude(-3.0) mat_glass ;
 
 build_detail 
-  -> ($BUILD_MAT = $MATWALL2) subdivideh(face(h)/4) [ @build_window ]
+  -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) subdivideh(face(h)/4) [ @build_window ]
   ->
 ;
 
