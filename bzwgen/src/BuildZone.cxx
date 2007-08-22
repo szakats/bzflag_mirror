@@ -12,8 +12,6 @@
 
 #include "BuildZone.h"
 
-#define INSET 1.0f
-
 BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Zone(_generator,a,b,astep)
 {
   meshes = NULL;
@@ -21,7 +19,6 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
     if (debugLevel > 0) { printf("Bad building coords! (%d,%d)*(%d,%d)\n",A.x,A.y,B.x,B.y); }
     return;
   }
-  meshes = new MeshVector();
   Mesh* mesh = new Mesh();
 
   Vertex corners[4];
@@ -29,8 +26,6 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   corners[1] = Vertex((float)B.x,(float)A.y,0.0f);
   corners[2] = Vertex((float)B.x,(float)B.y,0.0f);
   corners[3] = Vertex((float)A.x,(float)B.y,0.0f);
-
-  /* SIDEWALK */
 
   Face* swface = new Face();
   swface->mat = MATMESH;
@@ -40,130 +35,10 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
 
   int base = mesh->addFace(swface);
 
-  // in future this will be the only way :)
-
-  if (randomChance(70)) {
-    delete meshes;
-    std::string rulename = std::string("start");
-    MeshVector* newmeshes = generator->getRuleSet()->run(mesh,base,rulename);
-    meshes = newmeshes;
-    return;
-  }
-
-  std::string name = "sidewalk_normal";
-  mesh->inside.push_back(mesh->faceCenter(base));
-  generator->getRuleSet()->runMesh(mesh,base,name);
-
-  meshes->push_back(mesh);
-
-  /* SIDEWALK END */
-
-  if (randomChance(3)) return;
-
-  mesh = new Mesh();
-  Face* baseface = new Face();
-
-  for (int i = 0; i < 4; i++) {
-    baseface->addVertex(mesh->addVertex(corners[i]));
-  }
-  base = mesh->addFace(baseface);
-  mesh->inside.push_back(mesh->faceCenter(base));
-
-  meshes->push_back(mesh);
-
-  int wall;
-  int height;
-  if (randomBool()) {
-    wall = MATWALL;
-    height = randomInt(3)+1;
-  } else {
-    wall = MATWALL2;
-    height = randomInt(6)+1;
-  }
-
-  if (randomChance(50)) {
-    std::string name = "build_run";
-    mesh->inside.push_back(mesh->faceCenter(base));
-    generator->getRuleSet()->runMesh(mesh,base,name);
-    return;
-  }
-
-  mesh->f[base]->mat = MATROOF;
-
-  if (wall == MATGLASS) {
-    mesh->expandFace(base,-2.0f);
-  } else {
-    mesh->expandFace(base,-0.7f);
-  }
-
-  generateBuilding(mesh,base,wall); 
+  std::string rulename = std::string("start");
+  meshes = generator->getRuleSet()->run(mesh,base,rulename);
+  return;
 }
-
-
-void BuildZone::generateBuilding(Mesh* mesh, int base, int wall) {
-
-  mesh->inside.push_back(mesh->faceCenter(base)+mesh->faceNormal(base));
-
-  int height = 1;
-  float hlev = 3.7f;
-  if (wall == MATWALL) {
-    height = randomInt(3)+1;
-  } else if (wall == MATWALL2) {
-    height = randomInt(6)+1;
-  }
-
- 
-  IntVector* fs;
-
-  for (int i = 0; i < height; i++) {
-    if (wall == MATWALL2) {
-      fs = mesh->extrudeFaceR(base,hlev,wall);
-      for (int j = 0; j < 4; j++) {
-	      subdivideWindows(mesh,fs->at(j),wall);
-      }
-      delete fs;
-    } else {
-      mesh->extrudeFace(base,hlev,wall);
-    }
-
-    if (i == height-1) break;
-
-    addDivider(mesh,base,0.15f,0.3f,MATMESH);
-  }
-
-  if (wall == MATWALL && randomBool() && height <= 3 && size() < 5000) {
-    mesh->extrudeFace(base,0.0f,MATROOF);
-    mesh->expandFace(base,0.3f);
-    mesh->extrudeFace(base,4.0f,MATROOFT);
-    mesh->expandFace(base,-4.0f);
-    return;
-  }
-
-  addDivider(mesh,base,0.2f,0.5f,MATMESH,true);
-
-}
-
-void BuildZone::addDivider(Mesh* mesh, int base, float width, float height, int mat, bool noNext) {
-  mesh->extrudeFace(base,0.0f,mat);
-  mesh->expandFace(base,width);
-  mesh->extrudeFace(base,height,mat);
-  if (noNext) return;
-  mesh->extrudeFace(base,0.0f,mat);
-  mesh->expandFace(base,-width);
-}
-
-void BuildZone::subdivideWindows(Mesh* mesh, int wall, int mat) {
-  Vertex vv = mesh->v[mesh->f[wall]->vtx->at(0)]-mesh->v[mesh->f[wall]->vtx->at(1)];
-  int sdcount = int(vv.length()/4.0f);
-  IntVector* fcs = mesh->subdivdeFace(wall,sdcount,true);
-  for (int k = 0; k < int(fcs->size()); k++) {
-    mesh->extrudeFace(fcs->at(k),0.0f,mat);
-    mesh->expandFace(fcs->at(k),-0.4f);
-    mesh->extrudeFace(fcs->at(k),-0.2f,mat);
-  }
-  delete fcs;
-}
-
 
 void BuildZone::output(Output& out) 
 {

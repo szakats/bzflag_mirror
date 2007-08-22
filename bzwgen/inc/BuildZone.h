@@ -25,9 +25,6 @@ class BuildZone : public Zone {
   MeshVector* meshes;
 public:
   BuildZone(Generator* _generator,Coord2D a, Coord2D b, int astep);
-  void addDivider(Mesh* mesh, int base, float width, float height, int mat, bool noNext = false);
-  void subdivideWindows(Mesh* mesh, int wall, int mat);
-  void generateBuilding(Mesh* mesh, int base, int wall);
   virtual void output(Output& out);
   ~BuildZone() { 
     MeshVectIter itr; 

@@ -4,8 +4,8 @@
 # ------------------------------------------------------------------------
 
 build_preprocess
-  -> 0.5 : (face(h) > 60) partitionh(face(h)/2 - 2.5) [ build_preprocess ] partitionh(5.0) build_preprocess
-  -> 0.5 : (face(v) > 60) partitionv(face(v)/2 - 2.5) [ build_preprocess ] partitionv(5.0) build_preprocess
+  -> 0.4 : (face(h) > 60) partitionh(face(h)/2 - 2.5) [ build_preprocess ] partitionh(5.0) build_preprocess
+  -> 0.4 : (face(v) > 60) partitionv(face(v)/2 - 2.5) [ build_preprocess ] partitionv(5.0) build_preprocess
   -> spawn(build_run)
 ;
 
@@ -35,7 +35,7 @@ build_entry -> partitionh(face(h)/2 - 2.0) partitionh(4.0) [ build_entrydoor ] ;
 build_entrydoor -> extrude(-2.0) mat_roof ; 
 
 build_cont
-  -> 0.5 : common_ledge material($BUILD_MAT) extrude(3.7) build_cont
+  -> 0.5 : common_ledge material($BUILD_MAT) extrude(3.7) [ @build_detail ] build_cont
   -> 0.2 : common_ledge material($BUILD_MAT) extrude(3.7) [ @build_insetwall ] build_cont
   -> 0.1 : (face(h) > 100) common_ledge build_parth build_cont
   -> 0.1 : (face(v) > 100) common_ledge build_partv build_cont
@@ -52,13 +52,20 @@ build_partv
   -> partitionvi(2*face(v)/3) material($BUILD_MAT) extrude(3.7) 
 ;
 
-
 build_insetwall
-  -> 0.8 : subdivideh(3) [ * build_inset * ] 
-  -> 0.2 : subdivideh(3) [ * common_inset5 * ] 
+  -> 0.8 : subdivideh(3) [ build_detail build_inset build_detail ] 
+  -> 0.2 : subdivideh(3) [ build_detail common_inset5 build_detail ] 
 ;
 
 build_inset -> extrude(-3.0) mat_glass ;
+
+build_detail 
+  -> ($BUILD_MAT = $MATWALL2) subdivideh(face(h)/4) [ @build_window ]
+  ->
+;
+
+build_window -> extrude(0) expand(-0.4) extrude(-0.2);
+  
 
 # ------------------------------------------------------------------------
 #  end of file
