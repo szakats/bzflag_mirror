@@ -24,7 +24,7 @@
 
 #define MajorVersion "0"
 #define MinorVersion "1"
-#define Revision     "1"
+#define Revision     "2"
 #define BuildState "development"
 
 extern int yyparse(RuleSet*);
@@ -198,6 +198,7 @@ int main (int argc, char* argv[]) {
 
   Output os(outname.c_str());
   std::cout << "Outputing... ";
+  os << "#\n# BZWGen (" << MajorVersion << "." << MinorVersion << "." Revision << ") generated map file\n#\n\n";
   gen.output(os);
   std::cout << "done.\n";
 }
