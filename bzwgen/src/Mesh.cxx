@@ -315,6 +315,7 @@ void Mesh::textureFaceFull(int fid) {
   tcd->push_back(addTexCoord(TexCoord(0.0f,1.0f)));
   tcd->push_back(addTexCoord(TexCoord(1.0f,1.0f)));
   tcd->push_back(addTexCoord(TexCoord(1.0f,0.0f)));
+  f[fid]->texcoords = true;
 }
 
 Mesh::~Mesh() {
