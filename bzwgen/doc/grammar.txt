@@ -1,4 +1,4 @@
-Quick introduction to BZWGen grammar (as for v.0.1.1)
+Quick introduction to BZWGen grammar (as for v.0.1.2)
 (to be expanded into a full documentation)
 ------------------------------------------------------
 
@@ -41,13 +41,9 @@ The language has currently one special rule : "initialize", this one usualy is i
 Current generator
 ------------------
 
-Current generator calls three rules:
+Current generator calls only one rule from the start.set:
 
-* sidewalk -- which should be a rule to generate sidewalks as separate objects
-* building -- which should be a rule to generate buildings as separate objects
-* start -- which should be a rule to generate both buildings and sidewalks on the passed face
-
-This will however change in the near future.
+* start -- is a rule to generate both buildings and sidewalks on the passed face
 
 
 Products
