@@ -32,7 +32,11 @@ build_1
 
 build_entry -> partitionh(face(h)/2 - 2.0) partitionh(4.0) [ build_entrydoor ] ;
 
-build_entrydoor -> extrude(-2.0) mat_roof ; 
+build_entrydoor 
+  -> ($BUILD_MAT = $MATWALL2) mat_mesh extrude(-2.0) mat_doorw 
+  -> ($BUILD_MAT = $MATWALL)  mat_roof extrude(-2.0) mat_doorr 
+  -> mat_roof extrude(-2.0) 
+; 
 
 build_cont
   -> 0.5 : common_ledge material($BUILD_MAT) extrude(3.7) [ @build_detail ] build_cont
