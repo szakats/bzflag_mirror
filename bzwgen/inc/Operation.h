@@ -69,6 +69,19 @@ public:
   }
 };
 
+class OperationTextureQuad : public Operation {
+  Expression* a;
+  Expression* b;
+  Expression* c;
+  Expression* d;
+public:
+  OperationTextureQuad(RuleSet* _ruleset, Expression* _a, Expression* _b, Expression* _c, Expression* _d) : Operation(_ruleset), a(_a), b(_b), c(_c), d(_d) { };
+  int runMesh(Mesh* mesh, int face) {
+    mesh->textureFaceQuad(face,a->calculate(mesh,face),b->calculate(mesh,face),c->calculate(mesh,face),d->calculate(mesh,face));
+    return face;
+  }
+};
+
 class OperationSingle : public Operation {
 protected:
   Expression *exp;
