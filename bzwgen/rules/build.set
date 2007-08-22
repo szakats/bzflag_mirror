@@ -18,19 +18,19 @@ build_run
 build_2 
   -> 0.3 : mat_glass extrude(4.0) [ build_entry * build_entry * ] build_cont
   -> 0.3 : mat_glass extrude(4.0) [ * build_entry * build_entry ] build_cont
-  -> 0.2 : mat_wall2 extrude(3.7) [ * build_entry * build_entry ] extrude(0) expand(1.0) build_cont
-  -> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ * build_insetwall * build_insetwall ] roof_run
-  -> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ build_insetwall * build_insetwall * ] roof_run
+  -> 0.2 : mat_wall2 extrude(3.7) [ build_texture build_entry build_texture build_entry ] extrude(0) expand(1.0) build_cont
+  -> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ build_texture build_insetwall build_texture build_insetwall ] roof_run
+  -> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ build_insetwall build_texture build_insetwall build_texture ] roof_run
 ;
 
 build_1
-  -> 0.3 : mat_wall extrude(4.0) [ build_entry * build_entry * ] build_cont
-  -> 0.3 : mat_wall extrude(4.0) [ * build_entry * build_entry ] build_cont
-  -> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ * build_insetwall * build_insetwall ] build_roof 
-  -> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ build_insetwall * build_insetwall * ] build_roof 
+  -> 0.3 : mat_wall extrude(4.0) [ build_entry build_texture build_entry build_texture ] build_cont
+  -> 0.3 : mat_wall extrude(4.0) [ build_texture build_entry build_texture build_entry ] build_cont
+  -> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ build_texture build_insetwall build_texture build_insetwall ] build_roof 
+  -> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ build_insetwall build_texture build_insetwall build_texture ] build_roof 
 ;
 
-build_entry -> partitionh(face(h)/2 - 2.0) partitionh(4.0) [ build_entrydoor ] ;
+build_entry -> partitionh(face(h)/2 - 2.0) [ build_texture ] partitionh(4.0) [ build_entrydoor ]  build_texture;
 
 build_entrydoor 
   -> ($BUILD_MAT = $MATWALL2) mat_mesh extrude(-2.0) mat_doorw texturefull()
@@ -39,8 +39,8 @@ build_entrydoor
 ; 
 
 build_cont
-  -> 0.5 : common_ledge material($BUILD_MAT) extrude(3.7) [ @build_detail ] build_cont
-  -> 0.2 : common_ledge material($BUILD_MAT) extrude(3.7) [ @build_insetwall ] build_cont
+  -> 0.5 : common_ledge extrude(3.7) [ @build_detail ] build_cont
+  -> 0.2 : common_ledge extrude(3.7) [ @build_insetwall ] build_cont
   -> 0.1 : (face(h) > 100) common_ledge build_parth build_cont
   -> 0.1 : (face(v) > 100) common_ledge build_partv build_cont
   -> 0.3 : build_roof
@@ -53,28 +53,33 @@ build_roof
 
 
 build_parth
-  -> partitionh(face(h)/3) material($BUILD_MAT) extrude(3.7) 
-  -> partitionhi(2*face(h)/3) material($BUILD_MAT) extrude(3.7) 
+  -> partitionh(face(h)/3) extrude(3.7) [ @build_maptexture ]
+  -> partitionhi(2*face(h)/3) extrude(3.7) [ @build_maptexture ]
 ;
 
 build_partv
-  -> partitionv(face(v)/3) material($BUILD_MAT) extrude(3.7) 
-  -> partitionvi(2*face(v)/3) material($BUILD_MAT) extrude(3.7) 
+  -> partitionv(face(v)/3) extrude(3.7) [ @build_maptexture ]
+  -> partitionvi(2*face(v)/3) extrude(3.7) [ @build_maptexture ]
 ;
 
-build_insetwall
-  -> 0.8 : subdivideh(3) [ build_detail build_inset build_detail ] 
-  -> 0.2 : subdivideh(3) [ build_detail common_inset5 build_detail ] 
-;
+build_insetwall -> subdivideh(3) [ build_detail build_inset build_detail ] ;
 
-build_inset -> extrude(-3.0) mat_glass ;
+build_inset 
+  -> 0.8 : extrude(-3.0) [ @build_maptexture ] build_texture mat_glass
+  -> 0.2 : extrude(-3.0) [ @build_maptexture ] build_maptexture
+;
 
 build_detail 
-  -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) subdivideh(face(h)/4) [ @build_window ]
-  ->
+  -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) mat_wall subdivideh(face(h)/4) [ @build_window ]
+  -> build_maptexture
 ;
 
 build_window -> extrude(0) expand(-0.4) extrude(-0.2);
+
+build_maptexture -> material($BUILD_MAT) build_texture;
+
+build_texture -> texturequad(0.0,0.0,round(face(h)/4.0)*0.5,round(face(v)/4.0)*0.5);
+
   
 # ------------------------------------------------------------------------
 #  end of file
