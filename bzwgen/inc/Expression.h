@@ -139,7 +139,7 @@ public:
 class ExpressionEqual : public ExpressionDouble {
 public:
   ExpressionEqual(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
-  float calc(float av, float bv) { if (abs(av - bv) < 0.001f) return 1.0; else return -1.0; }
+  float calc(float av, float bv) { if (fabs(av - bv) < 0.001f) return 1.0; else return -1.0; }
 };
 
 class ExpressionAnd : public ExpressionDouble {
