@@ -43,6 +43,7 @@ public:
   void weldVertices(int a, int b, Vertex vx);
   void weldVertices(int a, int b);
   void output(Output& out);
+  void textureFaceFull(int fid);
   ~Mesh();
 private:
   Vertex extensionVertex(int ida, int idb, int idc);
