@@ -137,7 +137,11 @@ partitionv ( position ) [ single ]
 
 Control
 --------
-assertion ( condition )
-assign ( name = value )
-material ( number )
-spawn ( rulename )
+
+assertion ( condition ) -- checks wether condition is true, if it is, continues, if not, immidately breaks the generation of the model at this stage.
+
+assign ( name = value ) -- assigns attribute 'name' with the 'value'.
+
+material ( number ) -- assignes the current and future faces produced from this point on material with the id 'number'.
+
+spawn ( rulename ) -- duplicates the current face, and uses it as a base to produce a NEW mesh, starting with the rule 'rulename'.
