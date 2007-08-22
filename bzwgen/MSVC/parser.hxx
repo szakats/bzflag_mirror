@@ -29,57 +29,59 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     NEG = 258,
-     ASSERTION = 259,
-     FACE = 260,
-     TAPER = 261,
-     SPAWN = 262,
-     CHAMFER = 263,
-     TEXTUREFULL = 264,
-     TEXTUREQUAD = 265,
-     UNCHAMFER = 266,
-     ASSIGN = 267,
-     DEFSIGN = 268,
-     EXTRUDE = 269,
-     EXPAND = 270,
-     RANDOM = 271,
-     MATERIAL = 272,
-     SUBDIVIDEH = 273,
-     SUBDIVIDEV = 274,
-     PARTITIONH = 275,
-     PARTITIONV = 276,
-     PARTITIONHI = 277,
-     PARTITIONVI = 278,
-     NUMBER = 279,
-     NONTERM = 280,
-     ATTRIBUTE = 281
+     ROUND = 258,
+     NEG = 259,
+     ASSERTION = 260,
+     FACE = 261,
+     TAPER = 262,
+     SPAWN = 263,
+     CHAMFER = 264,
+     TEXTUREFULL = 265,
+     TEXTUREQUAD = 266,
+     UNCHAMFER = 267,
+     ASSIGN = 268,
+     DEFSIGN = 269,
+     EXTRUDE = 270,
+     EXPAND = 271,
+     RANDOM = 272,
+     MATERIAL = 273,
+     SUBDIVIDEH = 274,
+     SUBDIVIDEV = 275,
+     PARTITIONH = 276,
+     PARTITIONV = 277,
+     PARTITIONHI = 278,
+     PARTITIONVI = 279,
+     NUMBER = 280,
+     NONTERM = 281,
+     ATTRIBUTE = 282
    };
 #endif
 /* Tokens.  */
-#define NEG 258
-#define ASSERTION 259
-#define FACE 260
-#define TAPER 261
-#define SPAWN 262
-#define CHAMFER 263
-#define TEXTUREFULL 264
-#define TEXTUREQUAD 265
-#define UNCHAMFER 266
-#define ASSIGN 267
-#define DEFSIGN 268
-#define EXTRUDE 269
-#define EXPAND 270
-#define RANDOM 271
-#define MATERIAL 272
-#define SUBDIVIDEH 273
-#define SUBDIVIDEV 274
-#define PARTITIONH 275
-#define PARTITIONV 276
-#define PARTITIONHI 277
-#define PARTITIONVI 278
-#define NUMBER 279
-#define NONTERM 280
-#define ATTRIBUTE 281
+#define ROUND 258
+#define NEG 259
+#define ASSERTION 260
+#define FACE 261
+#define TAPER 262
+#define SPAWN 263
+#define CHAMFER 264
+#define TEXTUREFULL 265
+#define TEXTUREQUAD 266
+#define UNCHAMFER 267
+#define ASSIGN 268
+#define DEFSIGN 269
+#define EXTRUDE 270
+#define EXPAND 271
+#define RANDOM 272
+#define MATERIAL 273
+#define SUBDIVIDEH 274
+#define SUBDIVIDEV 275
+#define PARTITIONH 276
+#define PARTITIONV 277
+#define PARTITIONHI 278
+#define PARTITIONVI 279
+#define NUMBER 280
+#define NONTERM 281
+#define ATTRIBUTE 282
 
 
 
@@ -97,7 +99,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 101 "..\\parser.hxx"
+#line 103 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

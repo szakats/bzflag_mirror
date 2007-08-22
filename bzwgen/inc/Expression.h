@@ -97,6 +97,15 @@ public:
   }
 };
 
+class ExpressionRound : public Expression {
+  Expression* a;
+public:
+  ExpressionRound(Expression* _a) : a(_a) {};
+  float calculate(Mesh* mesh,int face) { 
+    return float(round(a->calculate(mesh,face)));
+  }
+};
+
 class ExpressionDouble : public Expression {
   Expression* a;
   Expression* b;

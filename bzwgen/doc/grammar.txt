@@ -111,6 +111,10 @@ random(min,max,step) -- returns a random floating point number between min and m
 
 face(attr) -- returns an attribute of the current face. 'attr' must be one of the following : x,y,z,h,v,s -- these are x,y,z coordinates of the face's center point, horizontal length for a quad, vertical length for a quad, and size of the quad. h, v and s are not supported currently for non-quads!
 
+neg(attr) -- temporary "negation" function instead of the precedesing '-' sign.
+
+round(attr) -- round the float to the nearest whole number.
+
 
 List of Operations
 ===================

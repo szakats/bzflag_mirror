@@ -24,7 +24,7 @@ void yyunput(int, char*);
   Expression* e;
 }
 %start ruleset
-%token NEG ASSERTION FACE TAPER SPAWN CHAMFER TEXTUREFULL TEXTUREQUAD
+%token ROUND NEG ASSERTION FACE TAPER SPAWN CHAMFER TEXTUREFULL TEXTUREQUAD
 %token UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXPAND RANDOM MATERIAL
 %token SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI 
 %token <fl> NUMBER
@@ -92,6 +92,7 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
 expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$7); }
   | '(' expr ')'   { $$ = $2; }
   | NEG '(' expr ')' { $$ = new ExpressionNeg($3); }
+  | ROUND '(' expr ')' { $$ = new ExpressionRound($3); }
   | expr '-' expr { $$ = new ExpressionSub($1,$3); }
   | expr '*' expr { $$ = new ExpressionMult($1,$3); }
   | expr '/' expr { $$ = new ExpressionDiv($1,$3); }
