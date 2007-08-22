@@ -318,7 +318,7 @@ void Mesh::textureFaceFull(int fid) {
   f[fid]->texcoords = true;
 }
 
-void Mesh::textureFaceQuad(float a,b,c,d) {
+void Mesh::textureFaceQuad(int fid, float a, float b, float c, float d) {
   IntVector* tcd = f[fid]->tcd;
   tcd->clear();
   tcd->push_back(addTexCoord(TexCoord(0.0f,0.0f)));

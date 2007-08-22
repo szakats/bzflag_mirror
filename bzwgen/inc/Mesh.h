@@ -44,7 +44,7 @@ public:
   void weldVertices(int a, int b);
   void output(Output& out);
   void textureFaceFull(int fid);
-  void textureFaceQuad(float a,b,c,d);
+  void textureFaceQuad(int fid, float a, float b, float c, float d);
   ~Mesh();
 private:
   Vertex extensionVertex(int ida, int idb, int idc);
