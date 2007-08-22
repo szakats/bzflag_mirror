@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------
-#  BZWGen 0.1.1 grammar file
+#  BZWGen 0.1.2 grammar file
 #  init.set -- pre-run initialization of variables
 #
 #  This rule set file has just one rule "initialize" - it is run 

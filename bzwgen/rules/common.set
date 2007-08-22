@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------
-#  BZWGen 0.1.1 grammar file
+#  BZWGen 0.1.2 grammar file
 #  common.set -- common definitions for use with all the grammar rules
 #
 #  This file holds common rules to be used by any of the rules in the 
