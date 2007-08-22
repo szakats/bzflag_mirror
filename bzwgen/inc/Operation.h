@@ -60,6 +60,15 @@ public:
   }
 };
 
+class OperationTextureFull : public Operation {
+public:
+  OperationTextureFull(RuleSet* _ruleset) : Operation(_ruleset) { };
+  int runMesh(Mesh* mesh, int face) {
+    mesh->textureFaceFull(face);
+    return face;
+  }
+};
+
 class OperationSingle : public Operation {
 protected:
   Expression *exp;

@@ -35,22 +35,23 @@
      TAPER = 261,
      SPAWN = 262,
      CHAMFER = 263,
-     UNCHAMFER = 264,
-     ASSIGN = 265,
-     DEFSIGN = 266,
-     EXTRUDE = 267,
-     EXPAND = 268,
-     RANDOM = 269,
-     SUBDIVIDEH = 270,
-     SUBDIVIDEV = 271,
-     PARTITIONH = 272,
-     PARTITIONV = 273,
-     PARTITIONHI = 274,
-     PARTITIONVI = 275,
-     MATERIAL = 276,
-     NUMBER = 277,
-     NONTERM = 278,
-     ATTRIBUTE = 279
+     TEXTUREFULL = 264,
+     UNCHAMFER = 265,
+     ASSIGN = 266,
+     DEFSIGN = 267,
+     EXTRUDE = 268,
+     EXPAND = 269,
+     RANDOM = 270,
+     MATERIAL = 271,
+     SUBDIVIDEH = 272,
+     SUBDIVIDEV = 273,
+     PARTITIONH = 274,
+     PARTITIONV = 275,
+     PARTITIONHI = 276,
+     PARTITIONVI = 277,
+     NUMBER = 278,
+     NONTERM = 279,
+     ATTRIBUTE = 280
    };
 #endif
 /* Tokens.  */
@@ -60,22 +61,23 @@
 #define TAPER 261
 #define SPAWN 262
 #define CHAMFER 263
-#define UNCHAMFER 264
-#define ASSIGN 265
-#define DEFSIGN 266
-#define EXTRUDE 267
-#define EXPAND 268
-#define RANDOM 269
-#define SUBDIVIDEH 270
-#define SUBDIVIDEV 271
-#define PARTITIONH 272
-#define PARTITIONV 273
-#define PARTITIONHI 274
-#define PARTITIONVI 275
-#define MATERIAL 276
-#define NUMBER 277
-#define NONTERM 278
-#define ATTRIBUTE 279
+#define TEXTUREFULL 264
+#define UNCHAMFER 265
+#define ASSIGN 266
+#define DEFSIGN 267
+#define EXTRUDE 268
+#define EXPAND 269
+#define RANDOM 270
+#define MATERIAL 271
+#define SUBDIVIDEH 272
+#define SUBDIVIDEV 273
+#define PARTITIONH 274
+#define PARTITIONV 275
+#define PARTITIONHI 276
+#define PARTITIONVI 277
+#define NUMBER 278
+#define NONTERM 279
+#define ATTRIBUTE 280
 
 
 
@@ -93,7 +95,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 97 "..\\parser.hxx"
+#line 99 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

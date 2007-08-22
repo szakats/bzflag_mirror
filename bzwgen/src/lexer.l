@@ -42,6 +42,7 @@ partitionv            { return(PARTITIONV);}
 partitionhi           { return(PARTITIONHI);}
 partitionvi           { return(PARTITIONVI);}
 face                  { return(FACE); }
+texturefull           { return(TEXTUREFULL); }
 assert                { return(ASSERTION); }
 spawn                 { return(SPAWN);}
 taper                 { return(TAPER);}
