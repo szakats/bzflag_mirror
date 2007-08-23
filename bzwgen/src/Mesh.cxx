@@ -182,28 +182,37 @@ IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal, float ssnap) 
   
   int ai = 0 , bi = 0;
   int pai = 0, pbi = 0;
+  int as = 0, bs = 0;
 
   if (horizontal) {
-    pai = cnr->at(3);
-    pbi = cnr->at(0);
+    as = cnr->at(3);
+    bs = cnr->at(0);
   } else {
-    pai = cnr->at(0);
-    pbi = cnr->at(1);
+    as = cnr->at(0);
+    bs = cnr->at(1);
   }
+  pai = as;
+  pbi = bs;
 
-  Vertex a = v[pai];
-  Vertex b = v[pbi];
+  Vertex a = v[as];
+  Vertex b = v[bs];
 
   for (int i = 0; i < count-1; i++) {
     a = a + stepA;
     b = b + stepB;
 
     if (ssnap > EPSILON) {
-      float la = a.length();
-      float lb = b.length();
+      Vertex A = v[as]-a;
+      Vertex B = v[bs]-b;
 
-      ai = addVertex(a*(snap(la,s)/la));
-      bi = addVertex(b*(snap(lb,s)/lb));
+      float la = A.length();
+      float lb = B.length();
+
+      Vertex sa = v[as]-(A.norm()*snap(la,s));
+      Vertex sb = v[bs]-(B.norm()*snap(lb,s));
+
+      ai = addVertex(sa);
+      bi = addVertex(sb);
     } else {
       ai = addVertex(a);
       bi = addVertex(b);

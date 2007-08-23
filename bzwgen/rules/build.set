@@ -62,7 +62,7 @@ build_partv
   -> partitionvi(2*face(v)/3,4) material($BUILD_MAT) extrudet(3.7)
 ;
 
-build_insetwall -> subdivideh(3) [ build_detail build_inset build_detail ] ;
+build_insetwall -> subdivideh(3,4) [ build_detail build_inset build_detail ] ;
 
 build_inset 
   -> 0.8 : material($BUILD_MAT) extrudet(-3.0) texture() mat_glass
