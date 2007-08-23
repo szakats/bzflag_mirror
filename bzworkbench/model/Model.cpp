@@ -1036,5 +1036,41 @@ void Model::_groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) {
 // ungroup objects
 void Model::ungroupObjects( group* g ) { modelRef->_ungroupObjects( g ); }
 void Model::_ungroupObjects( group* g ) {
+	// get the objects from the group
+	vector< osg::ref_ptr< bz2object > > objs = g->getDefine()->getObjects();
+	
+	// get the group's position so the objects can be translated to their current position in the group relative to the world
+	osg::Vec3 p = g->getPos();
+	
+	if( objects.size() > 0 ) {
+		for( vector< osg::ref_ptr< bz2object > >::iterator i = objs.begin(); i != objs.end(); i++ ) {
+			(*i)->setPos( (*i)->getPos() + p );
+			_addObject( i->get() );		// add the object
+			_setSelected( i->get() );	// select the object
+		}
+	}
+	
+	// see if we need to remove the associated define
+	bool noRefs = true;	// set to false if other groups are referencing this group's "define"
+	string defName = g->getDefine()->getName();
+	for( vector< osg::ref_ptr< bz2object > >::iterator i = this->objects.begin(); i != this->objects.end(); i++ ) {
+		group* grp = dynamic_cast< group* > ( i->get() );
+		if( !grp )
+			continue;
+		
+		// if the associated "define" has the same name as the define from this group, then we don't erase it
+		if( grp->getDefine()->getName() == defName ) {
+			noRefs = false;
+			break;
+		}
+	}
+	
+	// remove the group itself
+	_removeObject( g );
+	
+	// if no references to the define were found, then remove this define
+	if( noRefs ) {
+		this->groups.erase( defName );
+	}
 	
 }
