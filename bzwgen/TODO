@@ -1,8 +1,6 @@
  TODO file for bzwgen
 ======================
 
-* Texture coords - currently the app just assume that the texturing is done autmatically
-
 * Roof types - for non-skyscraper buildings, this might need some few grammar operations implemented
 
 * Triangulation/Convexation algorithm - to handle non-convex shapes
