@@ -70,7 +70,7 @@ build_inset
 ;
 
 build_detail 
-  -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) mat_wall subdivideh(face(h)/4) [ @build_window ]
+  -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) mat_wall2 textureclear() subdivideh(face(h)/4) [ @build_window ]
   -> texture()
 ;
 

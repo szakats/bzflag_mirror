@@ -46,6 +46,7 @@ face                  { return(FACE); }
 texture               { return(TEXTURE); }
 texturefull           { return(TEXTUREFULL); }
 texturequad           { return(TEXTUREQUAD); }
+textureclear          { return(TEXTURECLEAR); }
 assert                { return(ASSERTION); }
 spawn                 { return(SPAWN);}
 taper                 { return(TAPER);}

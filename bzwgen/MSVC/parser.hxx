@@ -39,23 +39,24 @@
      TEXTURE = 265,
      TEXTUREFULL = 266,
      TEXTUREQUAD = 267,
-     UNCHAMFER = 268,
-     ASSIGN = 269,
-     DEFSIGN = 270,
-     EXTRUDE = 271,
-     EXTRUDET = 272,
-     EXPAND = 273,
-     RANDOM = 274,
-     MATERIAL = 275,
-     SUBDIVIDEH = 276,
-     SUBDIVIDEV = 277,
-     PARTITIONH = 278,
-     PARTITIONV = 279,
-     PARTITIONHI = 280,
-     PARTITIONVI = 281,
-     NUMBER = 282,
-     NONTERM = 283,
-     ATTRIBUTE = 284
+     TEXTURECLEAR = 268,
+     UNCHAMFER = 269,
+     ASSIGN = 270,
+     DEFSIGN = 271,
+     EXTRUDE = 272,
+     EXTRUDET = 273,
+     EXPAND = 274,
+     RANDOM = 275,
+     MATERIAL = 276,
+     SUBDIVIDEH = 277,
+     SUBDIVIDEV = 278,
+     PARTITIONH = 279,
+     PARTITIONV = 280,
+     PARTITIONHI = 281,
+     PARTITIONVI = 282,
+     NUMBER = 283,
+     NONTERM = 284,
+     ATTRIBUTE = 285
    };
 #endif
 /* Tokens.  */
@@ -69,23 +70,24 @@
 #define TEXTURE 265
 #define TEXTUREFULL 266
 #define TEXTUREQUAD 267
-#define UNCHAMFER 268
-#define ASSIGN 269
-#define DEFSIGN 270
-#define EXTRUDE 271
-#define EXTRUDET 272
-#define EXPAND 273
-#define RANDOM 274
-#define MATERIAL 275
-#define SUBDIVIDEH 276
-#define SUBDIVIDEV 277
-#define PARTITIONH 278
-#define PARTITIONV 279
-#define PARTITIONHI 280
-#define PARTITIONVI 281
-#define NUMBER 282
-#define NONTERM 283
-#define ATTRIBUTE 284
+#define TEXTURECLEAR 268
+#define UNCHAMFER 269
+#define ASSIGN 270
+#define DEFSIGN 271
+#define EXTRUDE 272
+#define EXTRUDET 273
+#define EXPAND 274
+#define RANDOM 275
+#define MATERIAL 276
+#define SUBDIVIDEH 277
+#define SUBDIVIDEV 278
+#define PARTITIONH 279
+#define PARTITIONV 280
+#define PARTITIONHI 281
+#define PARTITIONVI 282
+#define NUMBER 283
+#define NONTERM 284
+#define ATTRIBUTE 285
 
 
 
@@ -103,7 +105,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 107 "..\\parser.hxx"
+#line 109 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

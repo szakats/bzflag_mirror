@@ -69,6 +69,15 @@ public:
   }
 };
 
+class OperationTextureClear : public Operation {
+public:
+  OperationTextureClear(RuleSet* _ruleset) : Operation(_ruleset) { };
+  int runMesh(Mesh* mesh, int face) {
+    mesh->f[face]->tcd->clear();
+    return face;
+  }
+};
+
 class OperationTexture : public Operation {
 public:
   OperationTexture(RuleSet* _ruleset) : Operation(_ruleset) { };
