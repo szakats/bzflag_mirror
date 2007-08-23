@@ -30,6 +30,7 @@ public:
   int runMesh(Mesh* mesh, int face, std::string& rulename);
   int runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename);
   void initialize() { std::string init = std::string("initialize"); runMesh(NULL,0,init); }
+  void addAttr(const char* name, float value) { std::string temp = name; addAttr(temp,value); }
   void addAttr(std::string& name, float value) { attrmap[name] = value; }
   float getAttr(std::string& name); 
   float getAttr(const char* name) { std::string temp = name; return getAttr(temp); }
