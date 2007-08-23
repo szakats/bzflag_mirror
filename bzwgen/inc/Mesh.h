@@ -51,6 +51,8 @@ public:
   void output(Output& out);
   void textureFaceFull(int fid);
   void textureFaceQuad(int fid, float au, float av, float bu, float bv);
+  float faceH(int face) { return (v[f[face]->vtx->at(0)] - v[f[face]->vtx->at(1)]).length(); }
+  float faceV(int face) { return (v[f[face]->vtx->at(3)] - v[f[face]->vtx->at(0)]).length(); }
   ~Mesh();
 private:
   Vertex extensionVertex(int ida, int idb, int idc);

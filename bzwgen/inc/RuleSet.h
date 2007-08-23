@@ -32,6 +32,7 @@ public:
   void initialize() { std::string init = std::string("initialize"); runMesh(NULL,0,init); }
   void addAttr(std::string& name, float value) { attrmap[name] = value; }
   float getAttr(std::string& name); 
+  float getAttr(const char* name) { std::string temp = name; return getAttr(temp); }
   void addRule(std::string& name, Rule* rule);
   ~RuleSet();
 };

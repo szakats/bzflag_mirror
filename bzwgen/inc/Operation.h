@@ -176,6 +176,12 @@ public:
   int runMesh(Mesh* mesh,int face);
 };
 
+class OperationExtrudeT : public OperationMultifaces {
+public:
+  OperationExtrudeT(RuleSet* _ruleset, Expression* _exp, StringVector* facerules) : OperationMultifaces(_ruleset,_exp,facerules) {}
+  int runMesh(Mesh* mesh,int face);
+};
+
 class OperationSubdivide : public OperationMultifaces {
   bool horiz;
 public:
