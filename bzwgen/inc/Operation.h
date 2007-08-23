@@ -199,8 +199,9 @@ public:
 
 class OperationSubdivide : public OperationMultifaces {
   bool horiz;
+  Expression* esnap;
 public:
-  OperationSubdivide(RuleSet* _ruleset, Expression* _exp, bool _horiz, StringVector* facerules) : OperationMultifaces(_ruleset,_exp,facerules), horiz(_horiz) {}
+  OperationSubdivide(RuleSet* _ruleset, Expression* _exp, bool _horiz, StringVector* facerules, Expression* _esnap = NULL) : OperationMultifaces(_ruleset,_exp,facerules), horiz(_horiz), esnap(_esnap) {}
   int runMesh(Mesh* mesh,int face);
 };
 

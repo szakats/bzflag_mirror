@@ -95,7 +95,9 @@ int OperationTexture::runMesh(Mesh* mesh, int face) {
 int OperationSubdivide::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
   flatten(mesh,face);
-  faces = mesh->subdivdeFace(face,round(value),horiz);
+  float snap = 0.0f;
+  if (esnap != NULL) snap = esnap->calculate(mesh,face);
+  faces = mesh->subdivdeFace(face,round(value),horiz,snap);
   if (facerules == NULL) {
     delete faces;
     faces = NULL;
