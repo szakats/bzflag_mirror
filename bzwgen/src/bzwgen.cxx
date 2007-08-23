@@ -43,12 +43,16 @@ std::string argumentDeliminator = "-";
 
 void printHelpCommand ( const char* shortName, const char* longName, const char* description )
 {
-  std::cout << argumentDeliminator;
-  std::cout << shortName;
-  std::cout << " (";
+  if (shortName && strlen(shortName))
+  {
+    std::cout << argumentDeliminator;
+    std::cout << shortName;
+    std::cout << " (";
+  }
   std::cout << argumentDeliminator;
   std::cout << longName;
-  std::cout << ") ";
+  if (shortName && strlen(shortName))
+    std::cout << ") ";
   std::cout << description;
   std::cout << "\n";
 }
@@ -144,21 +148,21 @@ int main (int argc, char* argv[]) {
 
   int detail = 3;
 
-  if (cmd.Exists("c"))        { COSFile f = COSFile(cmd.GetDataS("c"));      cmd.Set(f); }
-  if (cmd.Exists("config"))   { COSFile f = COSFile(cmd.GetDataS("config")); cmd.Set(f); }
+  if (cmd.Exists("c"))	      cmd.Set(COSFile(cmd.GetDataS("c")));
+  else if (cmd.Exists("config"))   cmd.Set(COSFile(cmd.GetDataS("config")));
 
-  if (cmd.Exists("h"))        { printHelp(); return 0; }
-  if (cmd.Exists("help"))     { printHelp(); return 0; }
-  if (cmd.Exists("d"))        { debugLevel = cmd.GetDataI("d"); }
-  if (cmd.Exists("debug"))    { debugLevel = cmd.GetDataI("debug"); }
-  if (cmd.Exists("r"))        { ruledir    = cmd.GetDataS("r"); }
-  if (cmd.Exists("rulesdir")) { ruledir    = cmd.GetDataS("rulesdir"); }
-  if (cmd.Exists("o"))        { outname    = cmd.GetDataS("o"); }
-  if (cmd.Exists("output"))   { outname    = cmd.GetDataS("output"); }
-  if (cmd.Exists("l"))        { detail     = cmd.GetDataI("l"); }
-  if (cmd.Exists("detail"))   { detail     = cmd.GetDataI("detail"); }
-  if (cmd.Exists("t"))        { texturepath= cmd.GetDataS("t"); }
-  if (cmd.Exists("texture"))  { texturepath= cmd.GetDataS("texture"); }
+  if (cmd.Exists("h"))		    { printHelp(); return 0; }
+  else if (cmd.Exists("help"))	    { printHelp(); return 0; }
+  if (cmd.Exists("d"))		    { debugLevel = cmd.GetDataI("d"); }
+  else if (cmd.Exists("debug"))	    { debugLevel = cmd.GetDataI("debug"); }
+  if (cmd.Exists("r"))		    { ruledir    = cmd.GetDataS("r"); }
+  else if (cmd.Exists("rulesdir"))  { ruledir    = cmd.GetDataS("rulesdir"); }
+  if (cmd.Exists("o"))		    { outname    = cmd.GetDataS("o"); }
+  else if (cmd.Exists("output"))    { outname    = cmd.GetDataS("output"); }
+  if (cmd.Exists("l"))		    { detail     = cmd.GetDataI("l"); }
+  else if (cmd.Exists("detail"))    { detail     = cmd.GetDataI("detail"); }
+  if (cmd.Exists("t"))		    { texturepath= cmd.GetDataS("t"); }
+  else if (cmd.Exists("texture"))   { texturepath= cmd.GetDataS("texture"); }
   
   COSFile file;
   RuleSet* ruleset = new RuleSet();
