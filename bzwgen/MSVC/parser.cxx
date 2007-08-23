@@ -1590,17 +1590,17 @@ yyreduce:
 
   case 45:
 #line 97 "..\\..\\src\\parser.y"
-    { std::string name = std::string((yyvsp[-3].id)); (yyval.o) = new OperationAssign(ruleset,(yyvsp[-1].e),name); ;}
+    { (yyval.o) = new OperationAssign(ruleset,(yyvsp[-1].e),(yyvsp[-3].id)); ;}
     break;
 
   case 46:
 #line 98 "..\\..\\src\\parser.y"
-    { std::string name = std::string((yyvsp[-1].id)); (yyval.o) = new OperationSpawn(ruleset,name); ;}
+    { (yyval.o) = new OperationSpawn(ruleset,(yyvsp[-1].id)); ;}
     break;
 
   case 47:
 #line 99 "..\\..\\src\\parser.y"
-    { std::string name = std::string((yyvsp[0].id)); (yyval.o) = new OperationNonterminal(ruleset,name); ;}
+    { (yyval.o) = new OperationNonterminal(ruleset,(yyvsp[0].id)); ;}
     break;
 
   case 48:
@@ -1665,7 +1665,7 @@ yyreduce:
 
   case 60:
 #line 113 "..\\..\\src\\parser.y"
-    { std::string name = std::string((yyvsp[-1].id)); (yyval.e) = new ExpressionFaceAttribute(name); ;}
+    { (yyval.e) = new ExpressionFaceAttribute((yyvsp[-1].id)); ;}
     break;
 
   case 61:
@@ -1675,7 +1675,7 @@ yyreduce:
 
   case 62:
 #line 115 "..\\..\\src\\parser.y"
-    { std::string name = std::string((yyvsp[0].id)); (yyval.e) = new ExpressionAttribute(ruleset,name); ;}
+    { (yyval.e) = new ExpressionAttribute(ruleset,(yyvsp[0].id)); ;}
     break;
 
 

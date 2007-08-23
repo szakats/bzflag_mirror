@@ -94,9 +94,9 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | PARTITIONHI '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$7,true,$5); }
   | PARTITIONVI '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$7,true,$5); }
   | MATERIAL '(' expr ')' { $$ = new OperationMaterial(ruleset,$3); }
-  | ASSIGN '(' NONTERM '=' expr ')' { std::string name = std::string($3); $$ = new OperationAssign(ruleset,$5,name); }
-  | SPAWN '(' NONTERM ')' { std::string name = std::string($3); $$ = new OperationSpawn(ruleset,name); }
-  | NONTERM { std::string name = std::string($1); $$ = new OperationNonterminal(ruleset,name); }
+  | ASSIGN '(' NONTERM '=' expr ')' { $$ = new OperationAssign(ruleset,$5,$3); }
+  | SPAWN '(' NONTERM ')' { $$ = new OperationSpawn(ruleset,$3); }
+  | NONTERM { $$ = new OperationNonterminal(ruleset,$1); }
 ;
 expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$7); }
   | '(' expr ')'   { $$ = $2; }
@@ -110,8 +110,8 @@ expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$
   | expr '&' expr { $$ = new ExpressionAnd($1,$3); }
   | expr '=' expr { $$ = new ExpressionEqual($1,$3); }
   | expr '|' expr { $$ = new ExpressionOr($1,$3); }
-  | FACE '(' NONTERM ')' { std::string name = std::string($3); $$ = new ExpressionFaceAttribute(name); }
+  | FACE '(' NONTERM ')' { $$ = new ExpressionFaceAttribute($3); }
   | NUMBER { $$ = new ExpressionConst($1); }
-  | ATTRIBUTE { std::string name = std::string($1); $$ = new ExpressionAttribute(ruleset,name); }
+  | ATTRIBUTE { $$ = new ExpressionAttribute(ruleset,$1); }
   ;
 %%

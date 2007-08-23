@@ -359,7 +359,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Running flex"
-						CommandLine="flex -o..\$(InputName).cxx ..\..\src\$(InputFileName)"
+						CommandLine="flex -o..\$(InputName).cxx ..\..\src\$(InputFileName)&#x0D;&#x0A;"
 						Outputs="$(InputName).cxx"
 					/>
 				</FileConfiguration>
@@ -373,7 +373,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Running bison"
-						CommandLine="bison -d -o..\$(InputName).cxx ..\..\src\$(InputFileName)"
+						CommandLine="bison -d -o..\$(InputName).cxx ..\..\src\$(InputFileName)&#x0D;&#x0A;"
 						Outputs="$..\(InputName).cxx;$(InputName).hxx"
 					/>
 				</FileConfiguration>

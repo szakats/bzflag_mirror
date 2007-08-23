@@ -37,14 +37,14 @@ typedef OperationVector::iterator OperationVectIter;
 class OperationNonterminal : public Operation {
   std::string ref;
 public:
-  OperationNonterminal(RuleSet* _ruleset, std::string& _ref) : Operation(_ruleset), ref(_ref) { };
+  OperationNonterminal(RuleSet* _ruleset, const char* _ref) : Operation(_ruleset), ref(_ref) { };
   int runMesh(Mesh* mesh, int face);
 };
 
 class OperationSpawn : public Operation {
   std::string ref;
 public:
-  OperationSpawn(RuleSet* _ruleset, std::string& _ref) : Operation(_ruleset), ref(_ref) { };
+  OperationSpawn(RuleSet* _ruleset, const char* _ref) : Operation(_ruleset), ref(_ref) { };
   int runMesh(Mesh* mesh, int face);
 };
 
@@ -122,7 +122,7 @@ class OperationAssign : public OperationSingle {
 protected:
   std::string attrname;
 public:
-  OperationAssign(RuleSet* _ruleset, Expression* _exp, std::string& _attrname ) : OperationSingle(_ruleset,_exp), attrname(_attrname) {}
+  OperationAssign(RuleSet* _ruleset, Expression* _exp, const char* _attrname ) : OperationSingle(_ruleset,_exp), attrname(_attrname) {}
   int runMesh(Mesh*,int face);
 };
 
