@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include <osg/Vec3Array>
+
 using namespace std;
 
 class define;		// pre-declare define class
@@ -72,6 +74,9 @@ class group : public bz2object {
 		
 		// update the child objects
 		void updateObjects();
+		
+		// re-compute the children
+		void computeChildren();
 		
 		osg::Vec3 pos;	// shift the group by pos (since groups have no concept of position)
 		

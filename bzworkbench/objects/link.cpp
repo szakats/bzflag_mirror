@@ -112,20 +112,5 @@ void Tlink::buildGeometry() {
 	fromPos.set( fromPos.x(), fromPos.y(), fromPos.z() + from->getSize().z() );
 	toPos.set( toPos.x(), toPos.y(), toPos.z() + to->getSize().z() );
 	
-	// compute the length
-	osg::Vec3 diff = toPos - fromPos;
-	double length = diff.length();
 	
-	// make the line
-	line = new osg::Cylinder( fromPos, 0.1, length );
-	
-	// make a ShapeDrawable to contain the line
-	osg::ref_ptr< osg::ShapeDrawable > drawable = new osg::ShapeDrawable( line.get() );
-	
-	// contain the drawable inside a goede
-	osg::ref_ptr< osg::Geode > geode = new osg::Geode();
-	geode->addDrawable( drawable.get() );
-	
-	// assign the node
-	this->setThisNode( geode.get() );
 }

@@ -996,8 +996,13 @@ void Model::groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) { model
 void Model::_groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) {
 	// create a "define" object for these objects if one does not exist yet
 	define* def = new define();
-	if( !def )
+	if( !def || objects.size() == 0 )
 		return;
+		
+	// unselect all objects
+	for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++) {
+		_setUnselected( i->get() );
+	}
 	
 	string defName = SceneBuilder::makeUniqueName("define");
 	

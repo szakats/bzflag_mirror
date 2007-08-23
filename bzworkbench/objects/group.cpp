@@ -110,6 +110,8 @@ int group::update( UpdateMessage& message ) {
 		
 		case UpdateMessage::SET_POSITION: {
 			this->setPos( *(message.getAsPosition()) );
+			
+			break;
 		}
 			
 		case UpdateMessage::SET_POSITION_FACTOR: {	// handle a translation
@@ -142,6 +144,7 @@ int group::update( UpdateMessage& message ) {
 
 // toString
 string group::toString(void) {
+	osg::Vec3 p = this->getPos();
 	string tintString = string(""), teamString = string("");
 	if(tintColor.r() > 0 && tintColor.g() > 0 && tintColor.b() > 0 && tintColor.a() > 0)
 		tintString = "  tint " + tintColor.toString();
@@ -153,39 +156,54 @@ string group::toString(void) {
 				  teamString +
 				  (driveThrough == true ? "  drivethrough\n" : "") +
 				  (shootThrough == true ? "  shootThrough\n" : "") +
-				  "shift " + ftoa(pos.x()) + " " + ftoa(pos.y()) + " " + ftoa(pos.z()) + "\n" +  // add the pos value as a "shift" transformation
 				  this->BZWLines() +
+				  "  shift " + ftoa(p.x()) + " " + ftoa(p.y()) + " " + ftoa(p.z()) + "\n" +  // add the pos value as a "shift" transformation
 				  "end\n";
 }
 
 // build the ring geometry around the objects
 void group::buildGeometry() {
+	// compute the maximum radius outside the center
+	float maxRadius2 = 25.0f;	// radius squared (saves sqrt() calls)
+	if( this->getNumChildren() > 0 ) {
+		// get each child
+		for( unsigned int i = 0; i < this->getNumChildren; i++ ) {
+			osg::Node* child = this->getChild( i );
+			bz2object* obj = dynamic_cast< bz2object* >(child);
+			if( obj ) {
+				// only count bz2object instances
+				osg::Vec3 p = obj->getPos();
+				// the group's position relative to the objects is (0,0,0), so just square the position and take the length
+				float len2 = p.x()*p.x() + p.y()*p.y() + p.z()*p.z();
+				
+				// see if it's bigger than the maximum radius
+				if( len2 > maxRadius2 ) {
+					maxRadius2 = len2;
+				}
+			}
+		}
+	}
 	
+	// now find the maximum radius
+	float maxRadius = fsqrt( maxRadius2 );
+	
+	// NOW we can build the geometry
+	osg::Vec3Array* points = new osg::Vec3Array();
+	
+	// increment by degrees (less float-point error)
+	for( float angle = 0.0f; angle < 360.0f; angle += 5.0f ) {
+		
+	}
 }
 
 // re-compute the list of objects contained in the group
 void group::updateObjects() {
-	// remove all current objects
-	this->removeChildren(0, this->getNumChildren());
 	
 	// get the "define" reference
 	define* def = dynamic_cast< define* >(Model::command( MODEL_GET, "define", this->getName() ));
 	
-	// if it was valid, add the objects
-	if( def != NULL ) {
-		this->def = def;
-		// get the objects
-		vector< osg::ref_ptr< bz2object > > objects = def->getObjects();
-		
-		// put each object inside a PositionAttitudeTransform
-		// add them as children of this object
-		if( objects.size() > 0 ) {	
-			for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
-				this->addChild( i->get() );
-				printf(" added %s\n", (*i)->getName().c_str() );
-			}
-		}
-	}
+	// reload the children
+	setDefine( def );
 }
 
 // set the associated definition
@@ -193,14 +211,45 @@ void group::setDefine( define* def ) {
 	this->def = def;
 	setName( def->getName() ); 
 	
-	// purge the previous objects
-	this->removeChildren( 0, this->getNumChildren() );
+	// reload the children
+	computeChildren();
+}
+
+// set the children
+void group::computeChildren() {
+	// remove all current objects
+	if( this->getNumChildren() > 0 )
+		this->removeChildren(0, this->getNumChildren());
 	
-	// add the new ones
-	vector< osg::ref_ptr< bz2object > > objects = def->getObjects();
-	if( objects.size() > 0 ) {
-		for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
-			this->addChild( i->get() );
+	// if the def is valid, add the objects
+	if( def != NULL ) {
+		this->def = def;
+		// get the objects
+		vector< osg::ref_ptr< bz2object > > objects = def->getObjects();
+		// put each object inside a PositionAttitudeTransform
+		// add them as children of this object
+		if( objects.size() > 0 ) {	
+			// first, compute the group's center
+			float x = 0.0f, y = 0.0f, z = 0.0f;
+			for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
+				x += i->get()->getPos().x();
+				y += i->get()->getPos().y();
+				z += i->get()->getPos().z();
+			}
+			
+			x /= objects.size();
+			y /= objects.size();
+			z /= objects.size();
+			
+			osg::Vec3 position = osg::Vec3( x, y, z );
+			this->setPos( position );
+			
+			for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
+				this->addChild( i->get() );
+				i->get()->setPos( i->get()->getPos() - position );
+				
+				printf(" added %s\n", (*i)->getName().c_str() );
+			}
 		}
 	}
 }
