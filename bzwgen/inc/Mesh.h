@@ -42,7 +42,7 @@ public:
   void expandFace(int fid, float amount);
   Vertex faceNormal(int fid);
   Vertex faceCenter(int fid);
-  IntVector* subdivdeFace(int fid, int count, bool horizontal);
+  IntVector* subdivdeFace(int fid, int count, bool horizontal, float ssnap = 0.0f);
   int partitionFace(int fid, float amount, bool horizontal);
   void chamferFace(int fid, float amount);
   void taperFace(int fid, float amount);

@@ -161,16 +161,19 @@ Vertex Mesh::faceNormal(int fid) {
   return r / length;
 }
 
-IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal) {
+IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal, float ssnap) {
   IntVector* cnr = f[fid]->vtx;
   Vertex stepA, stepB;
 
+  float s = ssnap;
   if (horizontal) {
     stepA = (v[cnr->at(2)]-v[cnr->at(3)]) / float(count);
     stepB = (v[cnr->at(1)]-v[cnr->at(0)]) / float(count);
+    if (ssnap > EPSILON) s = refinesnap(ssnap,faceH(fid));
   } else {
     stepA = (v[cnr->at(3)]-v[cnr->at(0)]) / float(count);
     stepB = (v[cnr->at(2)]-v[cnr->at(1)]) / float(count);
+    if (ssnap > EPSILON) s = refinesnap(ssnap,faceV(fid));
   }
 
   IntVector* result = new IntVector();
@@ -194,9 +197,17 @@ IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal) {
   for (int i = 0; i < count-1; i++) {
     a = a + stepA;
     b = b + stepB;
-    
-    ai = addVertex(a);
-    bi = addVertex(b);
+
+    if (ssnap > EPSILON) {
+      float la = a.length();
+      float lb = b.length();
+
+      ai = addVertex(a*(snap(la,s)/la));
+      bi = addVertex(b*(snap(lb,s)/lb));
+    } else {
+      ai = addVertex(a);
+      bi = addVertex(b);
+    }
 
     if (horizontal) {
       result->push_back(addFace(new Face(ID4(pbi,bi,ai,pai),mat)));
