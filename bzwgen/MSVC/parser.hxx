@@ -54,9 +54,13 @@
      PARTITIONV = 280,
      PARTITIONHI = 281,
      PARTITIONVI = 282,
-     NUMBER = 283,
-     NONTERM = 284,
-     ATTRIBUTE = 285
+     PARTITIONHS = 283,
+     PARTITIONVS = 284,
+     PARTITIONHIS = 285,
+     PARTITIONVIS = 286,
+     NUMBER = 287,
+     NONTERM = 288,
+     ATTRIBUTE = 289
    };
 #endif
 /* Tokens.  */
@@ -85,9 +89,13 @@
 #define PARTITIONV 280
 #define PARTITIONHI 281
 #define PARTITIONVI 282
-#define NUMBER 283
-#define NONTERM 284
-#define ATTRIBUTE 285
+#define PARTITIONHS 283
+#define PARTITIONVS 284
+#define PARTITIONHIS 285
+#define PARTITIONVIS 286
+#define NUMBER 287
+#define NONTERM 288
+#define ATTRIBUTE 289
 
 
 
@@ -105,7 +113,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 109 "..\\parser.hxx"
+#line 117 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
