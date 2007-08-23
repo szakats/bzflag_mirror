@@ -21,7 +21,6 @@ group::group() :
 	this->shootThrough = false;
 	this->setName("");
 	this->setPos( osg::Vec3( 0.0, 0.0, 0.0 ) );
-	pos = osg::Vec3( 0.0, 0.0, 0.0 );
 }
 
 // constructor with data
@@ -33,8 +32,7 @@ group::group(string& data) :
 	this->shootThrough = false;
 	this->setName("");
 	this->setPos( osg::Vec3( 0.0, 0.0, 0.0 ) );
-	this->update(data);	
-	pos = this->getPos();
+	this->update(data);
 }
 
 // getter
@@ -120,19 +118,20 @@ int group::update( UpdateMessage& message ) {
 			break;
 		}
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
-			this->setRotation( *(message.getAsRotation()) );
+			// propogate rotation events to the children objects
+			
 			break;
 			
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
-			this->setRotation( this->getRotation() + *(message.getAsRotationFactor()) );
+			
 			break;
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
-			this->setSize( *(message.getAsScale()) );
+			
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
-			this->setSize( this->getSize() + *(message.getAsScaleFactor()) );
+			
 			break;
 			
 		default:	// unknown event; don't handle
@@ -185,15 +184,55 @@ void group::buildGeometry() {
 	}
 	
 	// now find the maximum radius
-	float maxRadius = sqrt( maxRadius2 );
+	float maxRadius = 1.5 * sqrt( maxRadius2 );
 	
 	// NOW we can build the geometry
 	osg::Vec3Array* points = new osg::Vec3Array();
 	
+	// primitive set
+	osg::DrawElementsUInt* primitives = new osg::DrawElementsUInt( osg::PrimitiveSet::TRIANGLE_STRIP, 0 );
+	
+	int index = 0;
 	// increment by degrees (less float-point error)
-	for( float angle = 0.0f; angle < 360.0f; angle += 5.0f ) {
+	for( float angle = 0.0f; angle < 360.0f; angle += 5.0f, index += 2 ) {
+		float radAngle = osg::DegreesToRadians( angle );
 		
+		// add mesh data
+		points->push_back( osg::Vec3( maxRadius * cos( radAngle ), maxRadius * sin( radAngle ), this->getPos().z() ));
+		points->push_back( osg::Vec3( maxRadius * cos( radAngle ), maxRadius * sin( radAngle ), this->getPos().z() + 3 ));
+	
+		// add primitive indexes
+		primitives->push_back( index );
+		primitives->push_back( index + 1 );
 	}
+	
+	// the geometry node
+	this->geoRing = new osg::Geode();
+	
+	// build that geode!
+	osg::Geometry* geometry = new osg::Geometry();
+	geometry->setVertexArray( points );
+	geometry->addPrimitiveSet( primitives );
+	geoRing->addDrawable( geometry );
+	
+	// just name it
+	geoRing->setName("group_container");
+	
+	// make it fushia
+	SceneBuilder::assignMaterial( osg::Vec4( 1.0, 0.0, 1.0, 1.0 ),
+								  osg::Vec4( 1.0, 0.0, 1.0, 1.0 ),
+								  osg::Vec4( 1.0, 0.0, 1.0, 1.0 ),
+								  osg::Vec4( 1.0, 0.0, 1.0, 1.0 ),
+								  0.0,
+								  1.0,
+								  geoRing.get(),
+								  osg::StateAttribute::OVERRIDE );
+	
+	// remove it if it already exists
+	if( this->containsNode( geoRing.get() ) && geoRing.get() != NULL )
+		this->removeChild( geoRing.get() );
+	
+	this->addChild( geoRing.get() );
 }
 
 // re-compute the list of objects contained in the group
@@ -204,6 +243,9 @@ void group::updateObjects() {
 	
 	// reload the children
 	setDefine( def );
+	
+	// update the geometry
+	buildGeometry();
 }
 
 // set the associated definition
@@ -213,6 +255,9 @@ void group::setDefine( define* def ) {
 	
 	// reload the children
 	computeChildren();
+	
+	// recompute the geometry
+	this->buildGeometry();
 }
 
 // set the children

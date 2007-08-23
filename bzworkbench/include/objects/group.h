@@ -78,8 +78,8 @@ class group : public bz2object {
 		// re-compute the children
 		void computeChildren();
 		
-		osg::Vec3 pos;	// shift the group by pos (since groups have no concept of position)
-		
+		// the container node
+		osg::ref_ptr< osg::Geode > geoRing;
 };
 
 #include "define.h"
