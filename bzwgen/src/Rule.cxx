@@ -20,7 +20,7 @@ Product* Rule::getProduct(Mesh* mesh, int face) {
   do {
     if ((*itr)->conditionsMet(mesh,face)) {
       float rarity = (*itr)->getRarity();
-      if (rarity > roll) return (*itr);
+      if (rarity >= roll) return (*itr);
       roll -= rarity;
     }
     ++itr;
