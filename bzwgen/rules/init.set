@@ -23,7 +23,7 @@ initialize ->
   assign(MATDOORR = 10)
   assign(LEDGEHEIGHT = 0.5)
   assign(LEDGEWIDTH  = 0.3)
-  assign(TEXSNAP = 4.0)
+  assign(SNAP = 4.0)
   assign(TEXTILE = 0.5)
 ;
 

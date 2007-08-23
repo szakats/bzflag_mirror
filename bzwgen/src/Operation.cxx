@@ -75,10 +75,10 @@ int OperationExtrudeT::runMesh(Mesh* mesh,int face) {
   if (mesh == NULL) return 0;
   flatten(mesh,face);
   faces = mesh->extrudeFaceR(face,value,mesh->f[face]->mat);\
-  float texsnap = ruleset->getAttr("TEXSNAP");
+  float snap = ruleset->getAttr("SNAP");
   float textile = ruleset->getAttr("TEXTILE");
   for (size_t i = 0; i < faces->size(); i++) {
-    mesh->textureFace(faces->at(i),texsnap,textile);
+    mesh->textureFace(faces->at(i),snap,textile);
   }
   if (facerules != NULL) {
     OperationMultifaces::runMesh(mesh,face);
@@ -87,7 +87,7 @@ int OperationExtrudeT::runMesh(Mesh* mesh,int face) {
 }
 
 int OperationTexture::runMesh(Mesh* mesh, int face) {
-  mesh->textureFace(face,ruleset->getAttr("TEXSNAP"),ruleset->getAttr("TEXTILE"));
+  mesh->textureFace(face,ruleset->getAttr("SNAP"),ruleset->getAttr("TEXTILE"));
   return face;
 }
 
@@ -108,6 +108,13 @@ int OperationSubdivide::runMesh(Mesh* mesh,int face) {
 int OperationPartition::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
   flatten(mesh,face);
+  if (snapped) {
+    float s = ruleset->getAttr("SNAP");
+    float l;
+    if (horiz) { l = mesh->faceH(face); } else { l = mesh->faceV(face); }
+    s = refinesnap(s,l);
+    value = snap(value,s);
+  }
   int other;
   if (facerules == NULL) {
     other = mesh->partitionFace(face,value,horiz);
