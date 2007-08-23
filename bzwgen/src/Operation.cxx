@@ -108,8 +108,8 @@ int OperationSubdivide::runMesh(Mesh* mesh,int face) {
 int OperationPartition::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
   flatten(mesh,face);
-  if (snapped) {
-    float s = ruleset->getAttr("SNAP");
+  if (esnap != NULL) {
+    float s = esnap->calculate(mesh,face);
     float l;
     if (horiz) { l = mesh->faceH(face); } else { l = mesh->faceV(face); }
     s = refinesnap(s,l);

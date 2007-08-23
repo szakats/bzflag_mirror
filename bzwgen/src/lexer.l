@@ -42,10 +42,6 @@ partitionh            { return(PARTITIONH);}
 partitionv            { return(PARTITIONV);}
 partitionhi           { return(PARTITIONHI);}
 partitionvi           { return(PARTITIONVI);}
-partitionhs           { return(PARTITIONHS);}
-partitionvs           { return(PARTITIONVS);}
-partitionhis          { return(PARTITIONHIS);}
-partitionvis          { return(PARTITIONVIS);}
 face                  { return(FACE); }
 texture               { return(TEXTURE); }
 texturefull           { return(TEXTUREFULL); }

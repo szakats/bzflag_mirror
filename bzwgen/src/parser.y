@@ -26,7 +26,7 @@ void yyunput(int, char*);
 %start ruleset
 %token ROUND NEG ASSERTION FACE TAPER SPAWN CHAMFER TEXTURE TEXTUREFULL TEXTUREQUAD TEXTURECLEAR
 %token UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXTRUDET EXPAND RANDOM MATERIAL
-%token SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI PARTITIONHS PARTITIONVS PARTITIONHIS PARTITIONVIS 
+%token SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI 
 %token <fl> NUMBER
 %token <id> NONTERM ATTRIBUTE
 %left '&' '|'
@@ -87,10 +87,10 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | PARTITIONV '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$5); }
   | PARTITIONHI '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$5,true); }
   | PARTITIONVI '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$5,true); }
-  | PARTITIONHS '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$5,false,true); }
-  | PARTITIONVS '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$5,false,true); }
-  | PARTITIONHIS '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$5,true,true); }
-  | PARTITIONVIS '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$5,true,true); }
+  | PARTITIONH '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$7,false,$5); }
+  | PARTITIONV '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$7,false,$5); }
+  | PARTITIONHI '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$7,true,$5); }
+  | PARTITIONVI '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$7,true,$5); }
   | MATERIAL '(' expr ')' { $$ = new OperationMaterial(ruleset,$3); }
   | ASSIGN '(' NONTERM '=' expr ')' { std::string name = std::string($3); $$ = new OperationAssign(ruleset,$5,name); }
   | SPAWN '(' NONTERM ')' { std::string name = std::string($3); $$ = new OperationSpawn(ruleset,name); }

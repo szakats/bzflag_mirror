@@ -207,9 +207,9 @@ public:
 class OperationPartition : public OperationMultifaces {
   bool horiz;
   bool inverse;
-  bool snapped;
+  Expression* esnap;
 public:
-  OperationPartition(RuleSet* _ruleset, Expression* _exp, bool _horiz, StringVector* facerules, bool _inverse = false, bool _snapped = false) : OperationMultifaces(_ruleset,_exp,facerules), horiz(_horiz), inverse(_inverse), snapped(_snapped) {}
+  OperationPartition(RuleSet* _ruleset, Expression* _exp, bool _horiz, StringVector* facerules, bool _inverse = false, Expression* _esnap = NULL) : OperationMultifaces(_ruleset,_exp,facerules), horiz(_horiz), inverse(_inverse), esnap(_esnap) {}
   int runMesh(Mesh* mesh,int face);
 };
 
