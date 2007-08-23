@@ -133,19 +133,23 @@ unchamfer ( ) -- operation to undo the previous one. It welds pairs of vertices 
 
 Generative
 -----------
+
+Note : "snap" argument is always optional, and allows the divisions to snap to nearest snap line as defined by the argument. The argument is refined to the closest value that fills the lenght perfectly.
+
 extrude ( amount ) [ list ] -- probably the most important operation. Extrudes the face by 'amount' in the direction of it's normal, producing a amount of additional faces equal to the amount of face sides. The faces are returned in the branch list. The original extruded face is returned.
 
-subdivideh ( number ) [ list ] -- subdivides the current face into 'number' segments horizontaly. The segments are returned in the branch list, the last one is returned as result.
+subdivideh ( number , snap ) [ list ] -- subdivides the current face into 'number' segments horizontaly. The segments are returned in the branch list, the last one is returned as result.
 
-subdividev ( number ) [ list ] -- subdivides the current face into 'number' segments vertically. The segments are returned in the branch list, the last one is returned as result.
+subdividev ( number , snap ) [ list ] -- subdivides the current face into 'number' segments vertically. The segments are returned in the branch list, the last one is returned as result.
 
-partitionh ( position ) [ single ] -- divides the current face into two faces horizontally, using 'position' as the split position. The first face (the one with length equal to position) is returned in the branch list, the remainder is returned as result.
+partitionh ( position , snap ) [ single ] -- divides the current face into two faces horizontally, using 'position' as the split position. The first face (the one with length equal to position) is returned in the branch list, the remainder is returned as result.
 
-partitionv ( position ) [ single ] -- divides the current face into two faces vertically, using 'position' as the split position. The first face (the one with length equal to position) is returned in the branch list, the remainder is returned as result.
+partitionv ( position , snap ) [ single ] -- divides the current face into two faces vertically, using 'position' as the split position. The first face (the one with length equal to position) is returned in the branch list, the remainder is returned as result.
 
-partitionhi ( position ) [ single ] -- same as partitionh, only the face returned as a value, and as the branch rule are swapped.
+partitionhi ( position , snap ) [ single ] -- same as partitionh, only the face returned as a value, and as the branch rule are swapped.
 
-partitionvi ( position ) [ single ] -- same as partitionv, only the face returned as a value, and as the branch rule are swapped.
+partitionvi ( position , snap ) [ single ] -- same as partitionv, only the face returned as a value, and as the branch rule are swapped.
+
 
 Control
 --------
@@ -157,3 +161,15 @@ assign ( name = value ) -- assigns attribute 'name' with the 'value'.
 material ( number ) -- assignes the current and future faces produced from this point on material with the id 'number'.
 
 spawn ( rulename ) -- duplicates the current face, and uses it as a base to produce a NEW mesh, starting with the rule 'rulename'.
+
+
+Texture
+--------
+
+texture ( ) -- does default texturing of the face based on the SNAP and TEXTILE values
+
+texturefull () -- textures the face fully using 1 and 0 values
+
+texturequad ( au, av, bu, bv ) -- textures the quad using the provided float values
+
+textureclear () -- clears the texcoords on the given face
