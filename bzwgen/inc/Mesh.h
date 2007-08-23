@@ -49,6 +49,7 @@ public:
   void weldVertices(int a, int b, Vertex vx);
   void weldVertices(int a, int b);
   void output(Output& out);
+  void textureFace(int fid, float snap, float tile);
   void textureFaceFull(int fid);
   void textureFaceQuad(int fid, float au, float av, float bu, float bv);
   float faceH(int face) { return (v[f[face]->vtx->at(0)] - v[f[face]->vtx->at(1)]).length(); }

@@ -328,6 +328,11 @@ void Mesh::textureFaceQuad(int fid, float au, float av, float bu, float bv) {
   f[fid]->texcoords = true;
 }
 
+void Mesh::textureFace(int fid, float snap, float tile) {
+  textureFaceQuad(fid,0.0f,0.0f,round(faceH(fid)/snap)*textile,round(faceV(fid)/snap)*tile);
+}
+
+
 Mesh::~Mesh() {
   FaceVectIter itr; 
   for (itr = f.begin(); itr!= f.end(); ++itr) delete (*itr);
