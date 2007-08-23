@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include <osg/Vec3Array>
+#include <osg/Vec3>
 
 using namespace std;
 

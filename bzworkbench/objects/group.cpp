@@ -167,7 +167,7 @@ void group::buildGeometry() {
 	float maxRadius2 = 25.0f;	// radius squared (saves sqrt() calls)
 	if( this->getNumChildren() > 0 ) {
 		// get each child
-		for( unsigned int i = 0; i < this->getNumChildren; i++ ) {
+		for( unsigned int i = 0; i < this->getNumChildren(); i++ ) {
 			osg::Node* child = this->getChild( i );
 			bz2object* obj = dynamic_cast< bz2object* >(child);
 			if( obj ) {
@@ -185,7 +185,7 @@ void group::buildGeometry() {
 	}
 	
 	// now find the maximum radius
-	float maxRadius = fsqrt( maxRadius2 );
+	float maxRadius = sqrt( maxRadius2 );
 	
 	// NOW we can build the geometry
 	osg::Vec3Array* points = new osg::Vec3Array();
