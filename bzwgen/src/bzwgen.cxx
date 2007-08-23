@@ -210,9 +210,8 @@ int main (int argc, char* argv[]) {
 
   loadPlugIns();
 
-  std::string sdetail = "DETAIL";
   ruleset->initialize();
-  ruleset->addAttr(sdetail,float(detail));
+  ruleset->addAttr("DETAIL",float(detail));
 
   srand((unsigned int)time(NULL));
 
