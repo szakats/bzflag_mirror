@@ -170,7 +170,6 @@ bool getOptionS ( std::string &val, char* shortName, char* longName )
   return false;
 }
 
-
 int main (int argc, char* argv[]) {
 
   cmd.SetDelimnator(argumentDeliminator);
