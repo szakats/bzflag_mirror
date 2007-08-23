@@ -199,6 +199,7 @@ inline int round(float f) { return int(f+0.5f); }
 inline float fsign(float f) { if (f == 0.0f) return 0.0f; if (f < 0.0f) return -1.0f; else return 1.0f; }
 
 inline float snap(float f,float snapval) { return float(round(f/snapval))*snapval; }
+inline float refinesnap(float oldsnap, float max) { return (max/float(round(max/oldsnap))); }
 
 #endif /* __COMMON_H__ */
 
