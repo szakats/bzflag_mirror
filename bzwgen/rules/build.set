@@ -53,13 +53,13 @@ build_roof
 
 
 build_parth
-  -> partitionh(face(h)/3)    material($BUILD_MAT) extrudet(3.7)
-  -> partitionhi(2*face(h)/3) material($BUILD_MAT) extrudet(3.7)
+  -> partitionh(face(h)/3,4)    material($BUILD_MAT) extrudet(3.7)
+  -> partitionhi(2*face(h)/3,4) material($BUILD_MAT) extrudet(3.7)
 ;
 
 build_partv
-  -> partitionv(face(v)/3)    material($BUILD_MAT) extrudet(3.7)
-  -> partitionvi(2*face(v)/3) material($BUILD_MAT) extrudet(3.7)
+  -> partitionv(face(v)/3,4)    material($BUILD_MAT) extrudet(3.7)
+  -> partitionvi(2*face(v)/3,4) material($BUILD_MAT) extrudet(3.7)
 ;
 
 build_insetwall -> subdivideh(3) [ build_detail build_inset build_detail ] ;
