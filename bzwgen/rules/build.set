@@ -65,8 +65,8 @@ build_partv
 build_insetwall -> subdivideh(3,4) [ build_detail build_inset build_detail ] ;
 
 build_inset 
-  -> 0.8 : material($BUILD_MAT) extrudet(-3.0) texture() mat_glass
-  -> 0.2 : material($BUILD_MAT) extrudet(-3.0) texture()
+  -> 0.8 : material($BUILD_MAT) extrudet(-3.0) [ @mat_roof ] texture() mat_glass
+  -> 0.2 : material($BUILD_MAT) extrudet(-3.0) [ @mat_roof ] texture()
 ;
 
 build_detail 
