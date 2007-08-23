@@ -71,7 +71,7 @@ build_inset
 
 build_detail 
   -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) mat_wall2 textureclear() subdivideh(face(h)/4) [ @build_window ]
-  -> texture()
+  -> material($BUILD_MAT) texture()
 ;
 
 build_window -> extrude(0) expand(-0.4) extrude(-0.2);
