@@ -287,30 +287,30 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 	*yy_cp = '\0'; \
 	yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 31
-#define YY_END_OF_BUFFER 32
-static yyconst short int yy_acclist[184] =
+#define YY_NUM_RULES 32
+#define YY_END_OF_BUFFER 33
+static yyconst short int yy_acclist[185] =
     {   0,
-       32,   30,   31,   29,   30,   31,   29,   31,   28,   30,
-       31,   30,   31,   30,   31,    2,   30,   31,   27,   30,
-       31,   27,   30,   31,   27,   30,   31,   27,   30,   31,
-       27,   30,   31,   27,   30,   31,   27,   30,   31,   27,
-       30,   31,   27,   30,   31,   27,   30,   31,   27,   30,
-       31,   27,   30,   31,   29,   28,   26,    2,    1,    3,
-       27,   27,   27,   27,   27,   27,   27,   27,   27,   27,
-       27,   27,   27,   27,   27,   26,    3,   27,   27,   27,
-       27,   27,   27,   24,   27,   27,   27,   27,   27,   27,
-       27,   27,   27,   27,   27,   27,   27,   27,   18,   27,
+       33,   31,   32,   30,   31,   32,   30,   32,   29,   31,
+       32,   31,   32,   31,   32,    2,   31,   32,   28,   31,
+       32,   28,   31,   32,   28,   31,   32,   28,   31,   32,
+       28,   31,   32,   28,   31,   32,   28,   31,   32,   28,
+       31,   32,   28,   31,   32,   28,   31,   32,   28,   31,
+       32,   28,   31,   32,   30,   29,   27,    2,    1,    3,
+       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
+       28,   28,   28,   28,   28,   27,    3,   28,   28,   28,
+       28,   28,   28,   25,   28,   28,   28,   28,   28,   28,
+       28,   28,   28,   28,   28,   28,   28,   28,   18,   28,
 
-       27,   27,   27,   27,   27,   27,   27,   27,   27,   27,
-       27,   27,   27,   27,   27,   27,   27,   25,   27,   22,
-       27,   27,   23,   27,   27,   27,   21,   27,   10,   27,
-       27,    6,   27,   27,   27,   27,    9,   27,   27,   27,
-       27,    7,   27,    4,   27,   27,   27,   27,   27,   27,
-        5,   27,   11,   27,   27,   27,   27,   27,   27,   27,
-       27,   27,   27,    8,   27,   14,   27,   15,   27,   12,
-       27,   13,   27,   27,   27,   16,   27,   17,   27,   19,
-       27,   20,   27
+       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
+       28,   28,   28,   28,   28,   28,   28,   26,   28,   23,
+       28,   28,   24,   28,   28,   28,   22,   28,   10,   28,
+       28,    6,   28,   28,   28,   28,    9,   28,   28,   28,
+       28,    7,   28,    4,   28,   28,   28,   28,   19,   28,
+       28,    5,   28,   11,   28,   28,   28,   28,   28,   28,
+       28,   28,   28,   28,    8,   28,   14,   28,   15,   28,
+       12,   28,   13,   28,   28,   28,   16,   28,   17,   28,
+       20,   28,   21,   28
     } ;
 
 static yyconst short int yy_accept[132] =
@@ -326,10 +326,10 @@ static yyconst short int yy_accept[132] =
       115,  116,  117,  118,  120,  122,  123,  125,  126,  127,
       129,  131,  132,  134,  135,  136,  137,  139,  140,  141,
 
-      142,  144,  146,  147,  148,  149,  150,  151,  153,  155,
-      156,  157,  158,  159,  160,  161,  162,  163,  164,  166,
-      168,  170,  172,  174,  175,  176,  178,  180,  182,  184,
-      184
+      142,  144,  146,  147,  148,  149,  151,  152,  154,  156,
+      157,  158,  159,  160,  161,  162,  163,  164,  165,  167,
+      169,  171,  173,  175,  176,  177,  179,  181,  183,  185,
+      185
     } ;
 
 static yyconst int yy_ec[256] =
@@ -833,52 +833,52 @@ YY_RULE_SETUP
 case 19:
 YY_RULE_SETUP
 #line 46 "..\\..\\src\\lexer.l"
-{ return(TEXTUREFULL); }
+{ return(TEXTURE); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 47 "..\\..\\src\\lexer.l"
-{ return(TEXTUREQUAD); }
+{ return(TEXTUREFULL); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 48 "..\\..\\src\\lexer.l"
-{ return(ASSERTION); }
+{ return(TEXTUREQUAD); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 49 "..\\..\\src\\lexer.l"
-{ return(SPAWN);}
+{ return(ASSERTION); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 50 "..\\..\\src\\lexer.l"
-{ return(TAPER);}
+{ return(SPAWN);}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 51 "..\\..\\src\\lexer.l"
-{ return(NEG);}
+{ return(TAPER);}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 52 "..\\..\\src\\lexer.l"
-{ return(ROUND); }
+{ return(NEG);}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 53 "..\\..\\src\\lexer.l"
-{ yylval.id = strdup(yytext+1); return(ATTRIBUTE);  }
+{ return(ROUND); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 54 "..\\..\\src\\lexer.l"
-{ yylval.id = strdup(yytext); return(NONTERM);  }
+{ yylval.id = strdup(yytext+1); return(ATTRIBUTE);  }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 55 "..\\..\\src\\lexer.l"
-
+{ yylval.id = strdup(yytext); return(NONTERM);  }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
@@ -888,14 +888,19 @@ YY_RULE_SETUP
 case 30:
 YY_RULE_SETUP
 #line 57 "..\\..\\src\\lexer.l"
-{ return(yytext[0]); }
+
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 58 "..\\..\\src\\lexer.l"
+{ return(yytext[0]); }
+	YY_BREAK
+case 32:
+YY_RULE_SETUP
+#line 59 "..\\..\\src\\lexer.l"
 ECHO;
 	YY_BREAK
-#line 899 "..\\lexer.cxx"
+#line 904 "..\\lexer.cxx"
 			case YY_STATE_EOF(INITIAL):
 				yyterminate();
 
@@ -1779,7 +1784,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 58 "..\\..\\src\\lexer.l"
+#line 59 "..\\..\\src\\lexer.l"
 
 
 int yywrap () {

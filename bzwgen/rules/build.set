@@ -11,26 +11,26 @@ build_preprocess
 
 build_run
   -> 0.2 : sky_run
-  -> 0.2 : assign(BUILD_MAT = $MATWALL)  build_1
-  -> 0.6 : assign(BUILD_MAT = $MATWALL2) build_2
+  -> 0.2 : assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL)  build_1
+  -> 0.6 : assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL2) build_2
 ;
 
 build_2 
-  -> 0.3 : mat_glass extrude(4.0) [ build_entry * build_entry * ] build_cont
-  -> 0.3 : mat_glass extrude(4.0) [ * build_entry * build_entry ] build_cont
-  -> 0.2 : mat_wall2 extrude(3.7) [ build_texture build_entry build_texture build_entry ] extrude(0) expand(1.0) build_cont
-  -> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ build_texture build_insetwall build_texture build_insetwall ] roof_run
-  -> 0.1 : mat_wall2 extrude(random(12.0,40.0,4.0)) [ build_insetwall build_texture build_insetwall build_texture ] roof_run
+  -> 0.3 : mat_glass extrudet(4.0) [ build_entry * build_entry * ] build_cont
+  -> 0.3 : mat_glass extrudet(4.0) [ * build_entry * build_entry ] build_cont
+  -> 0.2 : mat_wall2 extrudet(3.7) [ * build_entry * build_entry ] extrude(0) expand(1.0) build_cont
+  -> 0.1 : mat_wall2 extrudet(random(12.0,40.0,4.0)) [ * build_insetwall * build_insetwall ] roof_run
+  -> 0.1 : mat_wall2 extrudet(random(12.0,40.0,4.0)) [ build_insetwall * build_insetwall ] roof_run
 ;
 
 build_1
-  -> 0.3 : mat_wall extrude(4.0) [ build_entry build_texture build_entry build_texture ] build_cont
-  -> 0.3 : mat_wall extrude(4.0) [ build_texture build_entry build_texture build_entry ] build_cont
-  -> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ build_texture build_insetwall build_texture build_insetwall ] build_roof 
-  -> 0.2 : mat_wall extrude(random(12.0,40.0,4.0)) [ build_insetwall build_texture build_insetwall build_texture ] build_roof 
+  -> 0.3 : mat_wall extrudet(4.0) [ build_entry * build_entry * ] build_cont
+  -> 0.3 : mat_wall extrudet(4.0) [ * build_entry * build_entry ] build_cont
+  -> 0.2 : mat_wall extrudet(random(12.0,40.0,4.0)) [ * build_insetwall * build_insetwall ] build_roof 
+  -> 0.2 : mat_wall extrudet(random(12.0,40.0,4.0)) [ build_insetwall * build_insetwall * ] build_roof 
 ;
 
-build_entry -> partitionh(face(h)/2 - 2.0) [ build_texture ] partitionh(4.0) [ build_entrydoor ]  build_texture;
+build_entry -> partitionh(face(h)/2 - 2.0) [ common_texture ] partitionh(4.0) [ build_entrydoor ]  texture();
 
 build_entrydoor 
   -> ($BUILD_MAT = $MATWALL2) mat_mesh extrude(-2.0) mat_doorw texturefull()
@@ -47,38 +47,34 @@ build_cont
 ;
 
 build_roof 
-  -> 0.5 : (face(s) < 20000 & face(z) < 25) mat_mesh extrude(0) expand(0.3) mat_rooft extrude(5) expand(-5) mat_roof
+  -> 0.5 : (face(s) < 20000 & face(z) < 20) mat_mesh extrude(0) expand(0.3) mat_rooft extrude(5) expand(-5) mat_roof
   -> roof_run
 ;
 
 
 build_parth
-  -> partitionh(face(h)/3) extrude(3.7) [ @build_maptexture ]
-  -> partitionhi(2*face(h)/3) extrude(3.7) [ @build_maptexture ]
+  -> partitionh(face(h)/3)    material($BUILD_MAT) extrudet(3.7)
+  -> partitionhi(2*face(h)/3) material($BUILD_MAT) extrudet(3.7)
 ;
 
 build_partv
-  -> partitionv(face(v)/3) extrude(3.7) [ @build_maptexture ]
-  -> partitionvi(2*face(v)/3) extrude(3.7) [ @build_maptexture ]
+  -> partitionv(face(v)/3)    material($BUILD_MAT) extrudet(3.7)
+  -> partitionvi(2*face(v)/3) material($BUILD_MAT) extrudet(3.7)
 ;
 
 build_insetwall -> subdivideh(3) [ build_detail build_inset build_detail ] ;
 
 build_inset 
-  -> 0.8 : extrude(-3.0) [ @build_maptexture ] build_texture mat_glass
-  -> 0.2 : extrude(-3.0) [ @build_maptexture ] build_maptexture
+  -> 0.8 : material($BUILD_MAT) extrudet(-3.0) texture() mat_glass
+  -> 0.2 : material($BUILD_MAT) extrudet(-3.0) texture()
 ;
 
 build_detail 
   -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) mat_wall subdivideh(face(h)/4) [ @build_window ]
-  -> build_maptexture
+  -> texture()
 ;
 
 build_window -> extrude(0) expand(-0.4) extrude(-0.2);
-
-build_maptexture -> material($BUILD_MAT) build_texture;
-
-build_texture -> texturequad(0.0,0.0,round(face(h)/4.0)*0.5,round(face(v)/4.0)*0.5);
 
   
 # ------------------------------------------------------------------------

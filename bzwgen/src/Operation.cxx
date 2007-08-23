@@ -78,13 +78,19 @@ int OperationExtrudeT::runMesh(Mesh* mesh,int face) {
   float texsnap = ruleset->getAttr("TEXSNAP");
   float textile = ruleset->getAttr("TEXTILE");
   for (size_t i = 0; i < faces->size(); i++) {
-    mesh->textureFaceQuad(faces->at(i),0.0f,0.0f,round(mesh->faceH(faces->at(i))/texsnap)*textile,round(mesh->faceV(faces->at(i))/texsnap)*textile);
+    mesh->textureFace(faces->at(i),texsnap,textile);
   }
   if (facerules != NULL) {
     OperationMultifaces::runMesh(mesh,face);
   }
   return face; 
 }
+
+int OperationTexture::runMesh(Mesh* mesh, int face) {
+  mesh->textureFace(face,ruleset->getAttr("TEXSNAP"),ruleset->getAttr("TEXTILE"));
+  return face;
+}
+
 
 int OperationSubdivide::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;

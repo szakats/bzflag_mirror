@@ -33,6 +33,8 @@ common_ledge ->
 
 common_inset5 -> extrude(-5.0) ;
 
+common_texture -> texture() ;
+
 
 # ------------------------------------------------------------------------
 #  end of file

@@ -69,6 +69,12 @@ public:
   }
 };
 
+class OperationTexture : public Operation {
+public:
+  OperationTexture(RuleSet* _ruleset) : Operation(_ruleset) { };
+  int runMesh(Mesh* mesh, int face);
+};
+
 class OperationTextureQuad : public Operation {
   Expression* a;
   Expression* b;

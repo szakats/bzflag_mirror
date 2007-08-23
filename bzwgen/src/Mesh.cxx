@@ -329,7 +329,7 @@ void Mesh::textureFaceQuad(int fid, float au, float av, float bu, float bv) {
 }
 
 void Mesh::textureFace(int fid, float snap, float tile) {
-  textureFaceQuad(fid,0.0f,0.0f,round(faceH(fid)/snap)*textile,round(faceV(fid)/snap)*tile);
+  textureFaceQuad(fid,0.0f,0.0f,round(faceH(fid)/snap)*tile,round(faceV(fid)/snap)*tile);
 }
 
 
