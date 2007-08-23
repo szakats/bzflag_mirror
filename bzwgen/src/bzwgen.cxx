@@ -59,19 +59,19 @@ void printHelpCommand ( const char* shortName, const char* longName, const char*
 
 void printHelp() {
   std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n";
-  printf("Version %s.%s.%s(%s)\n\n",MajorVersion,MinorVersion,Revision,BuildState);
+  printf("Version %s.%s.%s(%s)\ncopyright 2007 BZFlag Project and Tim Rikker\n\n",MajorVersion,MinorVersion,Revision,BuildState);
   std::cout << "Command line arguments:\n";
   printHelpCommand("h","help","                shows help");
   printHelpCommand("d","debug","integer        sets debug level (0-4)(default: 2)");
   printHelpCommand("o","output","filename      sets output filename (default: map.bzw)");
-  printHelpCommand("r","rulesdir","directory   sets rules directory (defualt: rules)");;
-  printHelpCommand("s","size","integer         sets world size (defualt: 800)");
-  printHelpCommand("g","gridsize","integer     sets grid size (defualt: 42)");
-  printHelpCommand("p","gridsnap","integer     sets the grid snap (defualt: 3)");
-  printHelpCommand("f","fullslice","integer    sets the number of full slices (defualt: 8)");
-  printHelpCommand("v","subdiv","integer       sets the number of subdivisions (defualt: 120)");
-  printHelpCommand("b","bases","integer        sets number of bases (0/2/4)(defualt: 0)");
-  printHelpCommand("l","detail","integer       sets the level of detail (1-3)(defualt: 3)");
+  printHelpCommand("r","rulesdir","directory   sets rules directory (default: rules)");;
+  printHelpCommand("s","size","integer         sets world size (default: 800)");
+  printHelpCommand("g","gridsize","integer     sets grid size (default: 42)");
+  printHelpCommand("p","gridsnap","integer     sets the grid snap (default: 3)");
+  printHelpCommand("f","fullslice","integer    sets the number of full slices (default: 8)");
+  printHelpCommand("v","subdiv","integer       sets the number of subdivisions (default: 120)");
+  printHelpCommand("b","bases","integer        sets number of bases (0/2/4)(default: 0)");
+  printHelpCommand("l","detail","integer       sets the level of detail (1-3)(default: 3)");
   printHelpCommand("t","texture","URL          sets the URL for textures\n");
 }
 
@@ -138,31 +138,60 @@ void freePlugins ( void )
 #endif // _USE_LIB_RULES_
 }
 
+bool getOptionI ( int &val, char* shortName, char* longName )
+{
+  if (cmd.Exists(shortName))
+  {
+    val = cmd.GetDataI(shortName);
+    return true;
+  }
+
+  if (cmd.Exists(longName))
+  {
+    val = cmd.GetDataI(longName);
+    return true;
+  }
+  return false;
+}
+
+bool getOptionS ( std::string &val, char* shortName, char* longName )
+{
+  if (cmd.Exists(shortName))
+  {
+    val = cmd.GetDataS(shortName);
+    return true;
+  }
+
+  if (cmd.Exists(longName))
+  {
+    val = cmd.GetDataS(longName);
+    return true;
+  }
+  return false;
+}
+
+
 int main (int argc, char* argv[]) {
 
   cmd.SetDelimnator(argumentDeliminator);
   cmd.Set(argc,argv);
 
-  ruledir = "rules";
-  std::string outname = "map.bzw";
+  if (cmd.Exists("h") || cmd.Exists("help"))	  { printHelp(); return 0; }
+
+ if (cmd.Exists("c"))		    cmd.Set(COSFile(cmd.GetDataS("c")));
+  else if (cmd.Exists("config"))    cmd.Set(COSFile(cmd.GetDataS("config")));
+
+  ruledir .SetStdDir("./rules");
+  std::string temp,outname = "map.bzw";
 
   int detail = 3;
 
-  if (cmd.Exists("c"))	      cmd.Set(COSFile(cmd.GetDataS("c")));
-  else if (cmd.Exists("config"))   cmd.Set(COSFile(cmd.GetDataS("config")));
-
-  if (cmd.Exists("h"))		    { printHelp(); return 0; }
-  else if (cmd.Exists("help"))	    { printHelp(); return 0; }
-  if (cmd.Exists("d"))		    { debugLevel = cmd.GetDataI("d"); }
-  else if (cmd.Exists("debug"))	    { debugLevel = cmd.GetDataI("debug"); }
-  if (cmd.Exists("r"))		    { ruledir    = cmd.GetDataS("r"); }
-  else if (cmd.Exists("rulesdir"))  { ruledir    = cmd.GetDataS("rulesdir"); }
-  if (cmd.Exists("o"))		    { outname    = cmd.GetDataS("o"); }
-  else if (cmd.Exists("output"))    { outname    = cmd.GetDataS("output"); }
-  if (cmd.Exists("l"))		    { detail     = cmd.GetDataI("l"); }
-  else if (cmd.Exists("detail"))    { detail     = cmd.GetDataI("detail"); }
-  if (cmd.Exists("t"))		    { texturepath= cmd.GetDataS("t"); }
-  else if (cmd.Exists("texture"))   { texturepath= cmd.GetDataS("texture"); }
+  getOptionI(debugLevel,"d","debug");
+  getOptionS(outname,"o","output");
+  getOptionI(detail,"l","detail");
+  getOptionS(texturepath,"t","texture");
+  if(getOptionS(temp,"r","rulesdir"))
+    ruledir.SetOSDir(temp.c_str());
   
   COSFile file;
   RuleSet* ruleset = new RuleSet();

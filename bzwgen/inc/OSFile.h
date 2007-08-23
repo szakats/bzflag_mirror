@@ -106,7 +106,7 @@ public:
 	COSDir();
 	COSDir( const COSDir &r);
 	COSDir& operator = (const COSDir &r);
-	COSDir( const char* szDirName );
+	explicit COSDir( const char* szDirName );
 	~COSDir();
 
 	void SetStdDir ( const char* szDirName );
