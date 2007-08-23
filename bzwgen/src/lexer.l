@@ -29,6 +29,7 @@ ID [a-zA-Z_][a-zA-Z0-9_]*
 -?{DIGIT}+            { yylval.fl = (float)atof(yytext); return(NUMBER);   }
 -?{DIGIT}+"."{DIGIT}* { yylval.fl = (float)atof(yytext); return(NUMBER);   }
 extrude               { return(EXTRUDE);  }
+extrudet              { return(EXTRUDET);  }
 expand                { return(EXPAND);   }
 chamfer               { return(CHAMFER);   }
 unchamfer             { return(UNCHAMFER);   }

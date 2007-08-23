@@ -42,18 +42,19 @@
      ASSIGN = 268,
      DEFSIGN = 269,
      EXTRUDE = 270,
-     EXPAND = 271,
-     RANDOM = 272,
-     MATERIAL = 273,
-     SUBDIVIDEH = 274,
-     SUBDIVIDEV = 275,
-     PARTITIONH = 276,
-     PARTITIONV = 277,
-     PARTITIONHI = 278,
-     PARTITIONVI = 279,
-     NUMBER = 280,
-     NONTERM = 281,
-     ATTRIBUTE = 282
+     EXTRUDET = 271,
+     EXPAND = 272,
+     RANDOM = 273,
+     MATERIAL = 274,
+     SUBDIVIDEH = 275,
+     SUBDIVIDEV = 276,
+     PARTITIONH = 277,
+     PARTITIONV = 278,
+     PARTITIONHI = 279,
+     PARTITIONVI = 280,
+     NUMBER = 281,
+     NONTERM = 282,
+     ATTRIBUTE = 283
    };
 #endif
 /* Tokens.  */
@@ -70,18 +71,19 @@
 #define ASSIGN 268
 #define DEFSIGN 269
 #define EXTRUDE 270
-#define EXPAND 271
-#define RANDOM 272
-#define MATERIAL 273
-#define SUBDIVIDEH 274
-#define SUBDIVIDEV 275
-#define PARTITIONH 276
-#define PARTITIONV 277
-#define PARTITIONHI 278
-#define PARTITIONVI 279
-#define NUMBER 280
-#define NONTERM 281
-#define ATTRIBUTE 282
+#define EXTRUDET 271
+#define EXPAND 272
+#define RANDOM 273
+#define MATERIAL 274
+#define SUBDIVIDEH 275
+#define SUBDIVIDEV 276
+#define PARTITIONH 277
+#define PARTITIONV 278
+#define PARTITIONHI 279
+#define PARTITIONVI 280
+#define NUMBER 281
+#define NONTERM 282
+#define ATTRIBUTE 283
 
 
 
@@ -99,7 +101,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 103 "..\\parser.hxx"
+#line 105 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

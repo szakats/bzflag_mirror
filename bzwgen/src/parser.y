@@ -25,7 +25,7 @@ void yyunput(int, char*);
 }
 %start ruleset
 %token ROUND NEG ASSERTION FACE TAPER SPAWN CHAMFER TEXTUREFULL TEXTUREQUAD
-%token UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXPAND RANDOM MATERIAL
+%token UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXTRUDET EXPAND RANDOM MATERIAL
 %token SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI 
 %token <fl> NUMBER
 %token <id> NONTERM ATTRIBUTE
@@ -71,6 +71,7 @@ ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }
 ;
 op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); }
+  | EXTRUDET '(' expr ')' faceparam { $$ = new OperationExtrudeT(ruleset,$3,$5); }
   | EXPAND '(' expr ')' { $$ = new OperationExpand(ruleset,$3); }
   | TAPER '(' expr ')' { $$ = new OperationTaper(ruleset,$3); }
   | CHAMFER '(' expr ')' { $$ = new OperationChamfer(ruleset,$3); }
