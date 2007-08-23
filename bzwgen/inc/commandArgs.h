@@ -31,13 +31,13 @@ public:
 	~CCommandLineArgs();
 	CCommandLineArgs( int argc, char *argv[] );
 	CCommandLineArgs( const char* szCommandLine );
-	CCommandLineArgs( COSFile &file );
+	CCommandLineArgs( const COSFile &file );
 
 	void SetDelimnator ( std::string d ){deliminator = d;}
 
 	void Set ( int argc, char *argv[] );
 	void Set ( const char* szCommandLine );
-	void Set ( COSFile &file );
+	void Set ( const COSFile &file );
 
 	void Clear ( void );
 

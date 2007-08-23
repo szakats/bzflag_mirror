@@ -42,7 +42,7 @@ CCommandLineArgs::CCommandLineArgs( const char* szCommandLine )
 	Set(szCommandLine);
 }
 
-CCommandLineArgs::CCommandLineArgs( COSFile &file )
+CCommandLineArgs::CCommandLineArgs( const COSFile &file )
 {
 	Clear();
 	Set(file);
@@ -86,13 +86,14 @@ void CCommandLineArgs::Set ( const char* szCommandLine )
 	}
 }
 
-void CCommandLineArgs::Set ( COSFile &file )
+void CCommandLineArgs::Set ( const COSFile &_file )
 {
 	// read in a file or something
 
 	std::string key;
 	std::string data;
 
+	COSFile	file = _file;
 	unsigned char c;
 
 	file.Open("rt");
