@@ -21,17 +21,24 @@
 
 class Output : public std::ofstream {
 public:
-  Output(const char* filename) : std::ofstream(filename) {}
+  int vertices;
+  int texcoords;
+  int faces;
+  Output(const char* filename) : std::ofstream(filename), vertices(0), texcoords(0), faces(0) {}
   void vertex(Vertex v) { 
+    vertices++;
     (*this) << "  vertex " << v.x << " " << v.y << " " << v.z << "\n"; 
   }
   void vertex(Vertex v, const char* name) { 
+    vertices++;
     (*this) << "  " << name << " " << v.x << " " << v.y << " " << v.z << "\n"; 
   }
   void texcoord(TexCoord tc) { 
+    texcoords++;
     (*this) << "  texcoord " << tc.s << " " << tc.t << "\n"; 
   }
   void face(Face* f, int lastmat = -1) { 
+    faces++;
     (*this) << "  face\n";
 
     if (lastmat >= 0) {
@@ -59,6 +66,12 @@ public:
   }
   void matref(int matref) { 
     (*this) << "  matref mat" << matref << "\n";
+  }
+  void footer() {
+    (*this) << "\n\n# end of world\n";
+    (*this) << "# " << vertices <<" vertices\n";
+    (*this) << "# " << texcoords <<" texcoords\n";
+    (*this) << "# " << faces <<" faces\n\n";
   }
 };
 

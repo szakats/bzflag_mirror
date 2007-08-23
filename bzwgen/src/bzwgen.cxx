@@ -231,7 +231,10 @@ int main (int argc, char* argv[]) {
   std::cout << "Outputing... ";
   os << "#\n# BZWGen (" << MajorVersion << "." << MinorVersion << "." Revision << ") generated map file\n#\n\n";
   gen.output(os);
+  os.footer();
   std::cout << "done.\n";
+  std::cout << "\n" << os.vertices << " vertices, " << os.texcoords << " texcoords and " << os.faces << " faces generated.\n";
+
 }
 
 	
