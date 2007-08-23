@@ -177,7 +177,7 @@ int main (int argc, char* argv[]) {
 
   if (cmd.Exists("h") || cmd.Exists("help"))	  { printHelp(); return 0; }
 
- if (cmd.Exists("c"))		    cmd.Set(COSFile(cmd.GetDataS("c")));
+  if (cmd.Exists("c"))		    cmd.Set(COSFile(cmd.GetDataS("c")));
   else if (cmd.Exists("config"))    cmd.Set(COSFile(cmd.GetDataS("config")));
 
   ruledir .SetStdDir("./rules");
