@@ -27,6 +27,8 @@ protected:
   MaterialVector mats;
   int bases;
 public:
+  bool ctfSafe;
+
   Generator(RuleSet* _ruleset) : ruleset(_ruleset) {}
   virtual void parseOptions(CCommandLineArgs* opt);
   virtual void run();

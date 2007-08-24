@@ -15,12 +15,15 @@
 void Generator::parseOptions(CCommandLineArgs* opt) {
   size = 800;
   bases = 0;
+  ctfSafe = false;
 
   if (opt->Exists("s"))    { size = opt->GetDataI("s"); }
   if (opt->Exists("size")) { size = opt->GetDataI("size"); }
 
   if (opt->Exists("b"))     { bases = opt->GetDataI("b"); }
   if (opt->Exists("bases")) { bases = opt->GetDataI("bases"); }
+
+  if (opt->Exists("ctfsafe")) { ctfSafe = true; }
 }
   
 void Generator::run() {
