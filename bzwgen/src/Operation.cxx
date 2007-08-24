@@ -23,7 +23,7 @@ int OperationSpawn::runMesh(Mesh* mesh, int face) {
 }
 
 int OperationSpawnNGon::runMesh(Mesh* mesh, int face) { 
-  int newface = mesh->createNGon(mesh->faceCenter(face),min(mesh->faceH(face),mesh->faceV(face))/2,round(expr->calculate(mesh,face)));
+  int newface = mesh->createNGon(mesh->faceCenter(face),minf(mesh->faceH(face),mesh->faceV(face))/2,round(expr->calculate(mesh,face)));
   int result = OperationSpawn::runMesh(mesh,newface);
   delete mesh->f[mesh->f.size()-1];
   mesh->f.pop_back();

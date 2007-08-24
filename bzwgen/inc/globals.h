@@ -201,6 +201,8 @@ inline float fsign(float f) { if (f == 0.0f) return 0.0f; if (f < 0.0f) return -
 inline float snap(float f,float snapval) { return float(round(f/snapval))*snapval; }
 inline float refinesnap(float oldsnap, float max) { return (max/float(round(max/oldsnap))); }
 
+inline float minf(float a,float b) { if (a < b) return a; else return b; }
+
 #endif /* __COMMON_H__ */
 
 // Local Variables: ***
