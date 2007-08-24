@@ -29,67 +29,69 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     ROUND = 258,
-     NEG = 259,
-     ASSERTION = 260,
-     FACE = 261,
-     TAPER = 262,
-     SPAWN = 263,
-     CHAMFER = 264,
-     TEXTURE = 265,
-     TEXTUREFULL = 266,
-     TEXTUREQUAD = 267,
-     TEXTURECLEAR = 268,
-     SPAWNNGON = 269,
-     UNCHAMFER = 270,
-     ASSIGN = 271,
-     DEFSIGN = 272,
-     EXTRUDE = 273,
-     EXTRUDET = 274,
-     EXPAND = 275,
-     RANDOM = 276,
-     MATERIAL = 277,
-     SUBDIVIDEH = 278,
-     SUBDIVIDEV = 279,
-     PARTITIONH = 280,
-     PARTITIONV = 281,
-     PARTITIONHI = 282,
-     PARTITIONVI = 283,
-     NUMBER = 284,
-     NONTERM = 285,
-     ATTRIBUTE = 286
+     TEST = 258,
+     ROUND = 259,
+     NEG = 260,
+     ASSERTION = 261,
+     FACE = 262,
+     TAPER = 263,
+     SPAWN = 264,
+     CHAMFER = 265,
+     TEXTURE = 266,
+     TEXTUREFULL = 267,
+     TEXTUREQUAD = 268,
+     TEXTURECLEAR = 269,
+     SPAWNNGON = 270,
+     UNCHAMFER = 271,
+     ASSIGN = 272,
+     DEFSIGN = 273,
+     EXTRUDE = 274,
+     EXTRUDET = 275,
+     EXPAND = 276,
+     RANDOM = 277,
+     MATERIAL = 278,
+     SUBDIVIDEH = 279,
+     SUBDIVIDEV = 280,
+     PARTITIONH = 281,
+     PARTITIONV = 282,
+     PARTITIONHI = 283,
+     PARTITIONVI = 284,
+     NUMBER = 285,
+     NONTERM = 286,
+     ATTRIBUTE = 287
    };
 #endif
 /* Tokens.  */
-#define ROUND 258
-#define NEG 259
-#define ASSERTION 260
-#define FACE 261
-#define TAPER 262
-#define SPAWN 263
-#define CHAMFER 264
-#define TEXTURE 265
-#define TEXTUREFULL 266
-#define TEXTUREQUAD 267
-#define TEXTURECLEAR 268
-#define SPAWNNGON 269
-#define UNCHAMFER 270
-#define ASSIGN 271
-#define DEFSIGN 272
-#define EXTRUDE 273
-#define EXTRUDET 274
-#define EXPAND 275
-#define RANDOM 276
-#define MATERIAL 277
-#define SUBDIVIDEH 278
-#define SUBDIVIDEV 279
-#define PARTITIONH 280
-#define PARTITIONV 281
-#define PARTITIONHI 282
-#define PARTITIONVI 283
-#define NUMBER 284
-#define NONTERM 285
-#define ATTRIBUTE 286
+#define TEST 258
+#define ROUND 259
+#define NEG 260
+#define ASSERTION 261
+#define FACE 262
+#define TAPER 263
+#define SPAWN 264
+#define CHAMFER 265
+#define TEXTURE 266
+#define TEXTUREFULL 267
+#define TEXTUREQUAD 268
+#define TEXTURECLEAR 269
+#define SPAWNNGON 270
+#define UNCHAMFER 271
+#define ASSIGN 272
+#define DEFSIGN 273
+#define EXTRUDE 274
+#define EXTRUDET 275
+#define EXPAND 276
+#define RANDOM 277
+#define MATERIAL 278
+#define SUBDIVIDEH 279
+#define SUBDIVIDEV 280
+#define PARTITIONH 281
+#define PARTITIONV 282
+#define PARTITIONHI 283
+#define PARTITIONVI 284
+#define NUMBER 285
+#define NONTERM 286
+#define ATTRIBUTE 287
 
 
 
@@ -107,7 +109,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 111 "..\\parser.hxx"
+#line 113 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
