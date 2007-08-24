@@ -38,6 +38,7 @@ public:
     (*this) << "  texcoord " << tc.s << " " << tc.t << "\n"; 
   }
   void face(Face* f, int lastmat = -1) { 
+    if (!f->output) return;
     faces++;
     (*this) << "  face\n";
 

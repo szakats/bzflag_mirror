@@ -22,11 +22,12 @@ public:
   IntVector* tcd;
   int mat;
   bool texcoords;
-  Face() : mat(0), texcoords(true) {
+  bool output;
+  Face() : mat(0), texcoords(true),output(true) {
     vtx = new IntVector;
     tcd = new IntVector;
   }
-  Face(ID4 _vtx, ID4 _tcd, int _mat = 0) : mat(_mat), texcoords(true) {
+  Face(ID4 _vtx, ID4 _tcd, int _mat = 0) : mat(_mat), texcoords(true), output(true) {
     vtx = new IntVector;
     tcd = new IntVector;
     for (int i = 0; i < 4; i++) {
@@ -34,7 +35,7 @@ public:
       tcd->push_back(_tcd[i]);
     }
   }
-  Face(ID4 _vtx, int _mat = 0) : mat(_mat), texcoords(false) {
+  Face(ID4 _vtx, int _mat = 0) : mat(_mat), texcoords(false), output(true) {
     vtx = new IntVector;
     tcd = new IntVector;
     for (int i = 0; i < 4; i++) {
