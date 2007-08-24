@@ -3,8 +3,6 @@
 
 * Roof types - for non-skyscraper buildings, this might need some few grammar operations implemented
 
-* Triangulation/Convexation algorithm - to handle non-convex shapes
-
 * .bzw object placement - for allowing the placement of arbitrary .bzw objects, will need a place object rule
 
 * Separate floor levels for buildings - so they look more real, with doors too
