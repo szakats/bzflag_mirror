@@ -21,6 +21,7 @@
 #include "commandArgs.h"
 #include "Zone.h"
 #include "RuleSet.h"
+#include "MultiFace.h"
 
 #define MajorVersion "0"
 #define MinorVersion "1"
