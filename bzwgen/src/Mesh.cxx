@@ -11,6 +11,8 @@
  */
 
 #include "Mesh.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat) {
   v.push_back(a);
@@ -34,6 +36,17 @@ int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord tca, Te
   int tsize = tc.size();
   return addFace(new Face(ID4(size-4,size-3,size-2,size-1),ID4(tsize-4,tsize-3,tsize-2,tsize-1),mat));
 }
+
+int Mesh::createNGon(Vertex center, float radius, int n) {
+  Face* face = new Face();
+  float step = (2*float(M_PI))/n;
+  for (int i = 0; i < n; i++) {
+    int vt = addVertex(center+Vertex(radius*cos(step*float(i)),radius*sin(step*float(i)),0.0f));
+    face->vtx->push_back(vt);
+  }
+  return addFace(face);
+}
+
 
 IntVector* Mesh::extrudeFaceR(int fid, float amount, int mat) {
   Vertex dir = faceNormal(fid)*amount;

@@ -52,6 +52,7 @@ public:
   void textureFace(int fid, float snap, float tile);
   void textureFaceFull(int fid);
   void textureFaceQuad(int fid, float au, float av, float bu, float bv);
+  int createNGon(Vertex center, float radius, int n);
   float faceH(int face) { return (v[f[face]->vtx->at(0)] - v[f[face]->vtx->at(1)]).length(); }
   float faceV(int face) { return (v[f[face]->vtx->at(3)] - v[f[face]->vtx->at(0)]).length(); }
   ~Mesh();
