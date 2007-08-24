@@ -203,6 +203,18 @@ inline float refinesnap(float oldsnap, float max) { return (max/float(round(max/
 
 inline float minf(float a,float b) { if (a < b) return a; else return b; }
 
+inline bool intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P) {
+  float d = ((B.x-A.x)*(D.y-C.y)-(B.y-A.y)*(D.x-C.x));
+  if (fabs(d) < EPSILON) return false;
+  float r = ((A.y-C.y)*(D.x-C.x)-(A.x-C.x)*(D.y-C.y))/d;
+  float s = ((A.y-C.y)*(B.x-A.x)-(A.x-C.x)*(B.y-A.y))/d;
+  if (r >= 0 && r <= 1 && s >= 0 && s <= 1) {
+    P.x = A.x+r*(B.x-A.x);
+    P.y = A.y+r*(B.y-A.y);
+    return true;
+  } else return false;
+}
+
 #endif /* __COMMON_H__ */
 
 // Local Variables: ***
