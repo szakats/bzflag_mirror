@@ -43,6 +43,7 @@ partitionv            { return(PARTITIONV);}
 partitionhi           { return(PARTITIONHI);}
 partitionvi           { return(PARTITIONVI);}
 face                  { return(FACE); }
+spawnngon             { return(SPAWNNGON); }
 texture               { return(TEXTURE); }
 texturefull           { return(TEXTUREFULL); }
 texturequad           { return(TEXTUREQUAD); }

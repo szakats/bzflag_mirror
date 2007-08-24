@@ -40,23 +40,24 @@
      TEXTUREFULL = 266,
      TEXTUREQUAD = 267,
      TEXTURECLEAR = 268,
-     UNCHAMFER = 269,
-     ASSIGN = 270,
-     DEFSIGN = 271,
-     EXTRUDE = 272,
-     EXTRUDET = 273,
-     EXPAND = 274,
-     RANDOM = 275,
-     MATERIAL = 276,
-     SUBDIVIDEH = 277,
-     SUBDIVIDEV = 278,
-     PARTITIONH = 279,
-     PARTITIONV = 280,
-     PARTITIONHI = 281,
-     PARTITIONVI = 282,
-     NUMBER = 283,
-     NONTERM = 284,
-     ATTRIBUTE = 285
+     SPAWNNGON = 269,
+     UNCHAMFER = 270,
+     ASSIGN = 271,
+     DEFSIGN = 272,
+     EXTRUDE = 273,
+     EXTRUDET = 274,
+     EXPAND = 275,
+     RANDOM = 276,
+     MATERIAL = 277,
+     SUBDIVIDEH = 278,
+     SUBDIVIDEV = 279,
+     PARTITIONH = 280,
+     PARTITIONV = 281,
+     PARTITIONHI = 282,
+     PARTITIONVI = 283,
+     NUMBER = 284,
+     NONTERM = 285,
+     ATTRIBUTE = 286
    };
 #endif
 /* Tokens.  */
@@ -71,23 +72,24 @@
 #define TEXTUREFULL 266
 #define TEXTUREQUAD 267
 #define TEXTURECLEAR 268
-#define UNCHAMFER 269
-#define ASSIGN 270
-#define DEFSIGN 271
-#define EXTRUDE 272
-#define EXTRUDET 273
-#define EXPAND 274
-#define RANDOM 275
-#define MATERIAL 276
-#define SUBDIVIDEH 277
-#define SUBDIVIDEV 278
-#define PARTITIONH 279
-#define PARTITIONV 280
-#define PARTITIONHI 281
-#define PARTITIONVI 282
-#define NUMBER 283
-#define NONTERM 284
-#define ATTRIBUTE 285
+#define SPAWNNGON 269
+#define UNCHAMFER 270
+#define ASSIGN 271
+#define DEFSIGN 272
+#define EXTRUDE 273
+#define EXTRUDET 274
+#define EXPAND 275
+#define RANDOM 276
+#define MATERIAL 277
+#define SUBDIVIDEH 278
+#define SUBDIVIDEV 279
+#define PARTITIONH 280
+#define PARTITIONV 281
+#define PARTITIONHI 282
+#define PARTITIONVI 283
+#define NUMBER 284
+#define NONTERM 285
+#define ATTRIBUTE 286
 
 
 
@@ -105,7 +107,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 109 "..\\parser.hxx"
+#line 111 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
