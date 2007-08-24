@@ -112,6 +112,7 @@ void Mesh::taperFace(int fid, float amount) {
 
 
 void Mesh::expandFace(int fid, float amount) {
+  Vertex normal = faceNormal(fid);
   // needs to be uniform
   IntVector* fv = f[fid]->vtx;
   int size = fv->size();
@@ -119,7 +120,7 @@ void Mesh::expandFace(int fid, float amount) {
   for (int i = 0; i < size; i++) {
     Vertex a = v[fv->at(modnext(i,size))] - v[fv->at(modprev(i,size))];
     Vertex b = v[fv->at(i)] - v[fv->at(modprev(i,size))];
-    float sign = fsign(a.dot(b));
+    float sign = fsign( b.cross(a).dot(normal) );
     nv[i] = v[fv->at(i)] + extensionVertex(fv->at(modprev(i,size)),fv->at(modnext(i,size)),fv->at(i))*amount*sign;
   }
   for (int i = 0; i < size; i++) {
