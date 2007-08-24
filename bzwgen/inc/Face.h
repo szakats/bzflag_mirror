@@ -58,6 +58,10 @@ public:
     tcd->push_back(tc);
     return vtx->size()-1;
   }
+  int getVertexIndex(int vid) {
+    for (size_t i = 0; i < vtx->size(); i++) if (vtx->at(i) == vid) return i;
+    return -1;
+  }
   virtual ~Face() {
     delete vtx;
     delete tcd;

@@ -71,7 +71,6 @@ void printHelp() {
   printHelpCommand("f","fullslice","integer    sets the number of full slices (default: 8)");
   printHelpCommand("v","subdiv","integer       sets the number of subdivisions (default: 120)");
   printHelpCommand("b","bases","integer        sets number of bases (0/2/4)(default: 0)");
-  printHelpCommand("","ctfsafe","                   turns flag safety zones on for CTF maps");
   printHelpCommand("l","detail","integer       sets the level of detail (1-3)(default: 3)");
   printHelpCommand("t","texture","URL          sets the URL for textures\n");
 }

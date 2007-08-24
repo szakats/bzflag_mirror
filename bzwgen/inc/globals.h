@@ -147,6 +147,7 @@ struct ID4 {
 
 typedef std::vector<int> IntVector;
 typedef std::vector<std::string> StringVector;
+typedef std::vector<bool> BoolVector;
 typedef std::map<std::string,float> AttributeMap;
 
 struct DiscreetMapNode {
@@ -211,6 +212,7 @@ inline bool intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P) {
   if (r >= 0 && r <= 1 && s >= 0 && s <= 1) {
     P.x = A.x+r*(B.x-A.x);
     P.y = A.y+r*(B.y-A.y);
+    P.z = A.z;
     return true;
   } else return false;
 }

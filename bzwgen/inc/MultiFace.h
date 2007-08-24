@@ -25,16 +25,55 @@ public:
   MultiFace(Mesh* _mesh) : Face(), mesh(_mesh) {
     comps = new FaceVector;
   }
+  void refineFace(Face* f) {
+    int i = 0;
+    while (i < int(f->vtx->size())) {
+      Vertex ipoint;
+      int index;
+      if (vertexNearestIntersect(f->vtx->at(i),f->vtx->at(modnext(i,f->vtx->size())),ipoint,index)) {
+        int ipid = mesh->addVertex(ipoint);
+        f->vtx->insert(f->vtx->begin()+i+1,ipid);
+        vtx->insert(vtx->begin()+index+1,ipid);
+      }
+      i++;
+    }
+  }
   int addFace(Face* f) {
     if (comps->size() == 0) {
       for (size_t i = 0; i < f->vtx->size(); i++) 
         vtx->push_back(f->vtx->at(i));
     } else {
-      int size = f->vtx->size();
-      bool inside = vertexInside(f->vtx->at(0));
-      for (int i = 0; i < size; i++) {
-//        addSegment(f->vtx->at(i),f->vtx->at(modnext(i,size)));
+      refineFace(f);
+      IntVector* newvtx = new IntVector;
+      int fsize = f->vtx->size();
+      int size = vtx->size();
+      int index = 0;
+      for (index = 0; index < fsize; index++) 
+        if (getVertexIndex(f->vtx->at(index)) < 0 && !vertexInside(f->vtx->at(index))) break;
+      // check if no vertices are inside?
+      int end = index;
+      bool newf = true;
+      bool first = true;
+      int getvert;
+      int next;
+      while (first || !newf || (index != end)) {
+        first = false;
+        if (newf) {
+          newvtx->push_back(f->vtx->at(index));
+          next = modnext(index,fsize);
+          getvert = getVertexIndex(f->vtx->at(next));
+        } else {
+          newvtx->push_back(vtx->at(index));
+          next = modnext(index,size);
+          getvert = f->getVertexIndex(vtx->at(next));
+        }
+        if (getvert != -1) {
+          newf = !newf;
+          index = getvert;
+        } else index = next;
       }
+      delete vtx;
+      vtx = newvtx;
     }
     comps->push_back(f);
     return comps->size()-1;
@@ -50,6 +89,25 @@ public:
       if (intersectZ(A,B,mesh->v[vtx->at(i)],mesh->v[vtx->at(modnext(i,size))],P)) count++;
     }      
     return (count%2 == 1);
+  }
+  bool vertexNearestIntersect(int begin, int end, Vertex &P, int &index) {
+    Vertex A = mesh->v[begin];
+    Vertex B = mesh->v[end];
+    float length = (A-B).length();
+    int size = vtx->size();
+    float distance = length + 1.0f;
+    Vertex R;
+    for (int i = 0; i < size; i++) {
+      if (intersectZ(A,B,mesh->v[vtx->at(i)],mesh->v[vtx->at(modnext(i,size))],R)) {
+        float thisdistance = (A-P).length();
+        if (thisdistance < distance) {
+          distance = thisdistance;
+          P = R;
+          index = i;
+        }
+      }
+    }      
+    return distance <= length;
   }
   virtual ~MultiFace() {
     delete comps;
