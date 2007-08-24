@@ -30,6 +30,9 @@
 #define MAXMATERIALS 11
 
 #define EPSILON 0.00000001f
+#ifdef _MSC_VER
+#pragma warning(disable:4996)
+#endif
 
 #include <vector>
 #include <math.h>
@@ -67,6 +70,8 @@ struct Vertex {
 
   void normalize() { float l = length(); if (l == 0.0f) return; x/=l; y/=l; z/=l; }
   Vertex norm() { float l = length(); if (l == 0.0f) return Vertex(); return Vertex(x/l,y/l,z/l); }
+
+  std::string toString() { char buffer[80]; sprintf(buffer, "[%.2f,%.2f,%.2f]",x,y,z); return std::string(buffer); }
 
   Vertex cross(const Vertex &v) { 
     return Vertex(
