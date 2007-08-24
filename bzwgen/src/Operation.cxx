@@ -12,6 +12,7 @@
 
 #include "Operation.h"
 #include "RuleSet.h"
+#include "MultiFace.h"
 
 int OperationNonterminal::runMesh(Mesh* mesh, int face) { 
   return ruleset->runMesh(mesh,face,ref);
@@ -143,6 +144,37 @@ int OperationPartition::runMesh(Mesh* mesh,int face) {
   } else {
     return face;
   }
+}
+
+int OperationTest::runMesh(Mesh* mesh, int face) {
+  MultiFace* mf = new MultiFace(mesh);
+  Face* f1 = new Face();
+  Face* f2 = new Face();
+  for (int i = 0; i < 4; i++) {
+    int f1vid = mesh->f[face]->vtx->at(i);
+    int f2vid = mesh->addVertex(mesh->v[mesh->f[face]->vtx->at(i)]);
+    f1->vtx->push_back(f1vid);
+    f2->vtx->push_back(f2vid);
+  }
+  mesh->v[f1->vtx->at(0)] = mesh->v[f1->vtx->at(0)]+Vertex(0.0f,+4.0f,0.0f);
+  mesh->v[f1->vtx->at(1)] = mesh->v[f1->vtx->at(1)]+Vertex(0.0f,+4.0f,0.0f);
+  mesh->v[f1->vtx->at(2)] = mesh->v[f1->vtx->at(2)]+Vertex(0.0f,-4.0f,0.0f);
+  mesh->v[f1->vtx->at(3)] = mesh->v[f1->vtx->at(3)]+Vertex(0.0f,-4.0f,0.0f);
+
+  mesh->v[f2->vtx->at(0)] = mesh->v[f2->vtx->at(0)]+Vertex(+4.0f,0.0f,0.0f);
+  mesh->v[f2->vtx->at(1)] = mesh->v[f2->vtx->at(1)]+Vertex(-4.0f,0.0f,0.0f);
+  mesh->v[f2->vtx->at(2)] = mesh->v[f2->vtx->at(2)]+Vertex(-4.0f,0.0f,0.0f);
+  mesh->v[f2->vtx->at(3)] = mesh->v[f2->vtx->at(3)]+Vertex(+4.0f,0.0f,0.0f);
+
+  printf("Adding face1...\n");
+  mf->addFace(f1);
+  printf("Adding face2...\n");
+  mf->addFace(f2);
+  printf("Done. (%d)\n",mf->vtx->size());
+
+  delete mesh->f[face];
+  mesh->f[face] = mf;
+  return face;
 }
 
 

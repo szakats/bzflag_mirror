@@ -45,7 +45,7 @@ class OperationTest : public Operation {
   std::string ref;
 public:
   OperationTest(RuleSet* _ruleset) : Operation(_ruleset) { };
-  int runMesh(Mesh*, int) { return 0; };
+  int runMesh(Mesh* mesh, int face);
 };
 
 class OperationSpawn : public Operation {
