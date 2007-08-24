@@ -41,7 +41,7 @@ int Mesh::createNGon(Vertex center, float radius, int n) {
   Face* face = new Face();
   float step = (2*float(M_PI))/n;
   for (int i = 0; i < n; i++) {
-    int vt = addVertex(center+Vertex(radius*cos(step*float(i)),radius*sin(step*float(i)),0.0f));
+    int vt = addVertex(center+Vertex(radius*cos(step*float(i)-step/2),radius*sin(step*float(i)-step/2),0.0f));
     face->vtx->push_back(vt);
   }
   return addFace(face);
