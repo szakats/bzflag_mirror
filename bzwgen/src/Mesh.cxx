@@ -121,6 +121,16 @@ void Mesh::scaleFace(int fid, float x, float y) {
   }
 }
 
+void Mesh::translateFace(int fid, float x, float y, float z) {
+  IntVector* fv = f[fid]->vtx;
+  int size = fv->size();
+  for (int i = 0; i < size; i++) {
+    v[fv->at(i)].x += x;
+    v[fv->at(i)].y += y;
+    v[fv->at(i)].z += z;
+  }
+}
+
 
 void Mesh::expandFace(int fid, float amount) {
   Vertex normal = faceNormal(fid);

@@ -47,6 +47,7 @@ public:
   void chamferFace(int fid, float amount);
   void taperFace(int fid, float amount);
   void scaleFace(int fid, float x, float y);
+  void translateFace(int fid, float x, float y, float z);
   void weldVertices(int a, int b, Vertex vx);
   void weldVertices(int a, int b);
   void output(Output& out);
