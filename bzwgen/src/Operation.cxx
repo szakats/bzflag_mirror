@@ -177,6 +177,13 @@ int OperationTest::runMesh(Mesh* mesh, int face) {
   return face;
 }
 
+int OperationMultiFace::runMesh(Mesh* mesh, int face) {
+  MultiFace* mf = new MultiFace(mesh);
+  mf->addFace(mesh->f[face]);
+  mesh->f[face] = mf;
+  return face;
+}
+
 
 
 

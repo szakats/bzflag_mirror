@@ -42,9 +42,14 @@ public:
 };
 
 class OperationTest : public Operation {
-  std::string ref;
 public:
   OperationTest(RuleSet* _ruleset) : Operation(_ruleset) { };
+  int runMesh(Mesh* mesh, int face);
+};
+
+class OperationMultiFace : public Operation {
+public:
+  OperationMultiFace(RuleSet* _ruleset) : Operation(_ruleset) { };
   int runMesh(Mesh* mesh, int face);
 };
 
