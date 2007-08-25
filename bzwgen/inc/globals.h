@@ -221,6 +221,9 @@ inline bool intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P) {
     return true;
   } else return false;
 }
+inline bool samepointZ(Vertex A, Vertex B) {
+  return (fabs(A.x-B.x) < EPSILON && fabs(A.y-B.y) < EPSILON);
+}
 
 #endif /* __COMMON_H__ */
 
