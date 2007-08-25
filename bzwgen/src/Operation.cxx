@@ -22,9 +22,12 @@ int OperationAddFace::runMesh(Mesh* mesh, int face) {
   if (!mesh->f[face]->isMultiFace()) {
     printf("Error: addface passed a non-MultiFace parameter!");
   }
+  IntVector* fvtx = mesh->f[face]->vtx;
   Face* clone = new Face();
-  for (size_t i = 0; i < mesh->f[face]->vtx->size(); i++) {
-    clone->vtx->push_back(mesh->addVertex(mesh->v[mesh->f[face]->vtx->at(i)]));
+  int fsize = fvtx->size();
+  clone->vtx->resize(fsize);
+  for (int i = 0; i < fsize; i++) {
+    (*clone->vtx)[i] = mesh->addVertex(mesh->v[fvtx->at(i)]);
   }
   int newface = mesh->addFace(clone);
   newface = ruleset->runMesh(mesh,newface,ref);

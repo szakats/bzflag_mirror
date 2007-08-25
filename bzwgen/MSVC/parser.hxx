@@ -29,83 +29,85 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     TRANSLATE = 258,
-     SCALE = 259,
-     TEST = 260,
-     ROUND = 261,
-     NEG = 262,
-     ASSERTION = 263,
-     FACE = 264,
-     TAPER = 265,
-     SPAWN = 266,
-     CHAMFER = 267,
-     TEXTURE = 268,
-     TEXTUREFULL = 269,
-     TEXTUREQUAD = 270,
-     TEXTURECLEAR = 271,
-     SPAWNNGON = 272,
-     UNCHAMFER = 273,
-     ASSIGN = 274,
-     DEFSIGN = 275,
-     EXTRUDE = 276,
-     EXTRUDET = 277,
-     EXPAND = 278,
-     RANDOM = 279,
-     MATERIAL = 280,
-     SUBDIVIDEH = 281,
-     SUBDIVIDEV = 282,
-     PARTITIONH = 283,
-     PARTITIONV = 284,
-     PARTITIONHI = 285,
-     PARTITIONVI = 286,
-     MULTIFACE = 287,
-     FREE = 288,
-     NGON = 289,
-     REMOVE = 290,
-     ADDFACE = 291,
-     NUMBER = 292,
-     NONTERM = 293,
-     ATTRIBUTE = 294
+     TRANSLATER = 258,
+     TRANSLATE = 259,
+     SCALE = 260,
+     TEST = 261,
+     ROUND = 262,
+     NEG = 263,
+     ASSERTION = 264,
+     FACE = 265,
+     TAPER = 266,
+     SPAWN = 267,
+     CHAMFER = 268,
+     TEXTURE = 269,
+     TEXTUREFULL = 270,
+     TEXTUREQUAD = 271,
+     TEXTURECLEAR = 272,
+     SPAWNNGON = 273,
+     UNCHAMFER = 274,
+     ASSIGN = 275,
+     DEFSIGN = 276,
+     EXTRUDE = 277,
+     EXTRUDET = 278,
+     EXPAND = 279,
+     RANDOM = 280,
+     MATERIAL = 281,
+     SUBDIVIDEH = 282,
+     SUBDIVIDEV = 283,
+     PARTITIONH = 284,
+     PARTITIONV = 285,
+     PARTITIONHI = 286,
+     PARTITIONVI = 287,
+     MULTIFACE = 288,
+     FREE = 289,
+     NGON = 290,
+     REMOVE = 291,
+     ADDFACE = 292,
+     NUMBER = 293,
+     NONTERM = 294,
+     ATTRIBUTE = 295
    };
 #endif
 /* Tokens.  */
-#define TRANSLATE 258
-#define SCALE 259
-#define TEST 260
-#define ROUND 261
-#define NEG 262
-#define ASSERTION 263
-#define FACE 264
-#define TAPER 265
-#define SPAWN 266
-#define CHAMFER 267
-#define TEXTURE 268
-#define TEXTUREFULL 269
-#define TEXTUREQUAD 270
-#define TEXTURECLEAR 271
-#define SPAWNNGON 272
-#define UNCHAMFER 273
-#define ASSIGN 274
-#define DEFSIGN 275
-#define EXTRUDE 276
-#define EXTRUDET 277
-#define EXPAND 278
-#define RANDOM 279
-#define MATERIAL 280
-#define SUBDIVIDEH 281
-#define SUBDIVIDEV 282
-#define PARTITIONH 283
-#define PARTITIONV 284
-#define PARTITIONHI 285
-#define PARTITIONVI 286
-#define MULTIFACE 287
-#define FREE 288
-#define NGON 289
-#define REMOVE 290
-#define ADDFACE 291
-#define NUMBER 292
-#define NONTERM 293
-#define ATTRIBUTE 294
+#define TRANSLATER 258
+#define TRANSLATE 259
+#define SCALE 260
+#define TEST 261
+#define ROUND 262
+#define NEG 263
+#define ASSERTION 264
+#define FACE 265
+#define TAPER 266
+#define SPAWN 267
+#define CHAMFER 268
+#define TEXTURE 269
+#define TEXTUREFULL 270
+#define TEXTUREQUAD 271
+#define TEXTURECLEAR 272
+#define SPAWNNGON 273
+#define UNCHAMFER 274
+#define ASSIGN 275
+#define DEFSIGN 276
+#define EXTRUDE 277
+#define EXTRUDET 278
+#define EXPAND 279
+#define RANDOM 280
+#define MATERIAL 281
+#define SUBDIVIDEH 282
+#define SUBDIVIDEV 283
+#define PARTITIONH 284
+#define PARTITIONV 285
+#define PARTITIONHI 286
+#define PARTITIONVI 287
+#define MULTIFACE 288
+#define FREE 289
+#define NGON 290
+#define REMOVE 291
+#define ADDFACE 292
+#define NUMBER 293
+#define NONTERM 294
+#define ATTRIBUTE 295
 
 
 
@@ -123,7 +125,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 127 "..\\parser.hxx"
+#line 129 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

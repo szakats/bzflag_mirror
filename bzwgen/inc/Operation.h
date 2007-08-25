@@ -159,6 +159,19 @@ public:
   }
 };
 
+class OperationTranslateR : public Operation {
+  Expression* x;
+  Expression* y;
+  Expression* z;
+public:
+  OperationTranslateR(RuleSet* _ruleset, Expression* _x, Expression* _y, Expression* _z) : Operation(_ruleset), x(_x), y(_y), z(_z) { };
+  int runMesh(Mesh* mesh, int face) {
+    if (mesh == NULL) return 0;
+    mesh->translateFace(face,x->calculate(mesh,face)*mesh->faceH(face),y->calculate(mesh,face)*mesh->faceV(face),z->calculate(mesh,face)*mesh->faceCenter(face).z);
+    return face; 
+  }
+};
+
 class OperationSingle : public Operation {
 protected:
   Expression *exp;
