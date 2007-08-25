@@ -79,6 +79,15 @@ public:
   }
 };
 
+class OperationFree : public Operation {
+public:
+  OperationFree(RuleSet* _ruleset) : Operation(_ruleset) { };
+  int runMesh(Mesh* mesh, int face) {
+    mesh->freeFace(face);
+    return face;
+  }
+};
+
 class OperationTextureFull : public Operation {
 public:
   OperationTextureFull(RuleSet* _ruleset) : Operation(_ruleset) { };

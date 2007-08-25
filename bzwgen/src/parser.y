@@ -28,7 +28,7 @@ void yyunput(int, char*);
 %token TEXTURE TEXTUREFULL TEXTUREQUAD TEXTURECLEAR
 %token SPAWNNGON UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXTRUDET EXPAND RANDOM MATERIAL
 %token SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI 
-%token MULTIFACE
+%token MULTIFACE FREE
 %token <fl> NUMBER
 %token <id> NONTERM ATTRIBUTE
 %left '&' '|'
@@ -99,6 +99,7 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | TRANSLATE '(' expr ',' expr ',' expr ')' { $$ = new OperationTranslate(ruleset,$3,$5,$7); }
   | MATERIAL '(' expr ')' { $$ = new OperationMaterial(ruleset,$3); }
   | MULTIFACE '(' ')' { $$ = new OperationMultiFace(ruleset); }
+  | FREE '(' ')' { $$ = new OperationFree(ruleset); }
   | ASSIGN '(' NONTERM '=' expr ')' { $$ = new OperationAssign(ruleset,$5,$3); }
   | TEST '(' ')' { $$ = new OperationTest(ruleset); }
   | SPAWN '(' NONTERM ')' { $$ = new OperationSpawn(ruleset,$3); }
