@@ -3,7 +3,7 @@
 #  roof.set -- generation of roofs
 # ------------------------------------------------------------------------
 
-roof_run -> mat_mesh extrude(0.0) expand(0.3) extrude(0.5) mat_roof roof_bonus;
+roof_run -> roof_classic roof_bonus;
 
 roof_bonus
   -> 0.2  : assert(face(h) > 15.0) assert(face(v) > 15.0) spawn(roof_building) 
@@ -15,6 +15,10 @@ roof_bonus
 roof_building
   -> 0.6 : expand(-5.0) mat_mesh extrude(2.0) mat_roof
   -> 0.4 : expand(-5.0) mat_mesh chamfer(1.0) extrude(2.0)
+;
+
+roof_classic 
+  -> mat_mesh extrude(0.0) expand(0.3) extrude(0.5) mat_roof 
 ;
 
 # ------------------------------------------------------------------------
