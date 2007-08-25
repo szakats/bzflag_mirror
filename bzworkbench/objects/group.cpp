@@ -86,10 +86,18 @@ int group::update(string& data) {
 		
 	// get shootthrough
 	vector<string> shootThroughs = BZWParser::getValuesByKey("shootthrough", header, groupData);
-		
+			
 	// do base class update
 	if(!bz2object::update(data))
 		return 0;
+		
+	// the superclass bz2object will apply "spin" transformations if present.  These need to be forewarded
+	// to the container object, and removed from the group for correct rendering
+	osg::Vec3 rot = this->getRotation();
+	if( this->container.get() != NULL )
+		this->container->setRotation( rot );
+		
+	this->setRotation( osg::Vec3( 0, 0, 0 ) );
 	
 	// assign data
 	// see if the name changed (if so, recompute the object list)
