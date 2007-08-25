@@ -162,6 +162,17 @@ public:
   }
 };
 
+class OperationNGon : public OperationSingle {
+public:
+  OperationNGon(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
+  int runMesh(Mesh* mesh,int face) {
+    flatten(mesh,face);
+    mesh->freeFace(face);
+    face = mesh->createNGon(mesh->faceCenter(face),minf(mesh->faceH(face),mesh->faceV(face))/2,round(value));
+    return face;
+  }
+};
+
 class OperationAssert : public OperationSingle {
 public:
   OperationAssert(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}

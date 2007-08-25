@@ -60,9 +60,10 @@
      PARTITIONVI = 286,
      MULTIFACE = 287,
      FREE = 288,
-     NUMBER = 289,
-     NONTERM = 290,
-     ATTRIBUTE = 291
+     NGON = 289,
+     NUMBER = 290,
+     NONTERM = 291,
+     ATTRIBUTE = 292
    };
 #endif
 /* Tokens.  */
@@ -97,9 +98,10 @@
 #define PARTITIONVI 286
 #define MULTIFACE 287
 #define FREE 288
-#define NUMBER 289
-#define NONTERM 290
-#define ATTRIBUTE 291
+#define NGON 289
+#define NUMBER 290
+#define NONTERM 291
+#define ATTRIBUTE 292
 
 
 
@@ -117,7 +119,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 121 "..\\parser.hxx"
+#line 123 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

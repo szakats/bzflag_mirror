@@ -47,6 +47,7 @@ partitionhi           { return(PARTITIONHI);}
 partitionvi           { return(PARTITIONVI);}
 face                  { return(FACE); }
 free                  { return(FREE); }
+ngon                  { return(NGON); }
 test                  { return(TEST); }
 spawnngon             { return(SPAWNNGON); }
 texture               { return(TEXTURE); }
