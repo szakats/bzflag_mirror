@@ -833,7 +833,7 @@ YY_RULE_SETUP
 case 13:
 YY_RULE_SETUP
 #line 40 "..\\..\\src\\lexer.l"
-{ return(TRANSLATE); }
+{ return(TRANSLATER); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP

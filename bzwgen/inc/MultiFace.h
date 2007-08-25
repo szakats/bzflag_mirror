@@ -30,12 +30,22 @@ public:
     while (i < int(f->vtx->size())) {
       Vertex ipoint;
       int index;
-      //printf("Intersect... (%d,%d)\n",i,modnext(i,f->vtx->size()));
+      printf("Intersect... (%d,%d)\n",i,modnext(i,f->vtx->size()));
       if (vertexNearestIntersect(f->vtx->at(i),f->vtx->at(modnext(i,f->vtx->size())),ipoint,index)) {
-        int ipid = mesh->addVertex(ipoint);
-        printf("%s\n",ipoint.toString().c_str());
-        f->vtx->insert(f->vtx->begin()+i+1,ipid);
-        vtx->insert(vtx->begin()+index+1,ipid);
+        printf("Nearerst found... (%d) : ",index);
+        int ipid;
+        if (samepointZ(ipoint,mesh->v[modnext(i,f->vtx->size())])) {
+          printf("Is samepoint with next\n",index);
+          vtx->insert(vtx->begin()+index+1,modnext(i,f->vtx->size()));
+        } else if (samepointZ(ipoint,mesh->v[vtx->at(index)])) {
+          printf("Is samepoint with itself\n",index);
+          f->vtx->insert(f->vtx->begin()+i+1,vtx->at(index));
+        } else {
+          printf("Is normal\n",index);
+          ipid = mesh->addVertex(ipoint);
+          f->vtx->insert(f->vtx->begin()+i+1,ipid);
+          vtx->insert(vtx->begin()+index+1,ipid);
+        }
       }
       i++;
     }
