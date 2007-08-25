@@ -128,6 +128,19 @@ public:
   }
 };
 
+class OperationTranslate : public Operation {
+  Expression* x;
+  Expression* y;
+  Expression* z;
+public:
+  OperationTranslate(RuleSet* _ruleset, Expression* _x, Expression* _y, Expression* _z) : Operation(_ruleset), x(_x), y(_y), z(_z) { };
+  int runMesh(Mesh* mesh, int face) {
+    if (mesh == NULL) return 0;
+    mesh->translateFace(face,x->calculate(mesh,face),y->calculate(mesh,face),z->calculate(mesh,face));
+    return face; 
+  }
+};
+
 class OperationSingle : public Operation {
 protected:
   Expression *exp;
