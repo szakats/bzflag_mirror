@@ -81,6 +81,15 @@ public:
   }
 };
 
+class OperationRemove : public Operation {
+public:
+  OperationRemove(RuleSet* _ruleset) : Operation(_ruleset) { };
+  int runMesh(Mesh* mesh, int face) {
+    mesh->f[face]->output = false;
+    return face;
+  }
+};
+
 class OperationTextureFull : public Operation {
 public:
   OperationTextureFull(RuleSet* _ruleset) : Operation(_ruleset) { };

@@ -55,6 +55,7 @@ texturequad           { return(TEXTUREQUAD); }
 textureclear          { return(TEXTURECLEAR); }
 assert                { return(ASSERTION); }
 spawn                 { return(SPAWN);}
+remove                { return(REMOVE);}
 taper                 { return(TAPER);}
 neg                   { return(NEG);}
 round                 { return(ROUND); }

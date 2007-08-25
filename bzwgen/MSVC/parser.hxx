@@ -61,9 +61,10 @@
      MULTIFACE = 287,
      FREE = 288,
      NGON = 289,
-     NUMBER = 290,
-     NONTERM = 291,
-     ATTRIBUTE = 292
+     REMOVE = 290,
+     NUMBER = 291,
+     NONTERM = 292,
+     ATTRIBUTE = 293
    };
 #endif
 /* Tokens.  */
@@ -99,9 +100,10 @@
 #define MULTIFACE 287
 #define FREE 288
 #define NGON 289
-#define NUMBER 290
-#define NONTERM 291
-#define ATTRIBUTE 292
+#define REMOVE 290
+#define NUMBER 291
+#define NONTERM 292
+#define ATTRIBUTE 293
 
 
 
@@ -119,7 +121,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 123 "..\\parser.hxx"
+#line 125 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
