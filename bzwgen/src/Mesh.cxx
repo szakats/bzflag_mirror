@@ -157,21 +157,22 @@ void Mesh::weldVertices(int a, int b, Vertex vx) {
     int indexb = -1;
     for (size_t j = 0; j < f[i]->vtx->size(); j++) {    
       if (f[i]->vtx->at(j) == b) {
-	indexb = j;
+        indexb = j;
       } else if (f[i]->vtx->at(j) == a) {
-	indexa = j;
+        indexa = j;
       }
     }
     if (indexb != -1) {
       if (indexa != -1) {
-	f[i]->vtx->erase(f[i]->vtx->begin()+indexb);
-	if (f[i]->texcoords) f[i]->tcd->erase(f[i]->vtx->begin()+indexb);  
+        f[i]->vtx->erase(f[i]->vtx->begin()+indexb);
+        if (f[i]->texcoords) f[i]->tcd->erase(f[i]->vtx->begin()+indexb);  
       } else {
-	(*f[i]->vtx)[indexb] = a;
+        (*f[i]->vtx)[indexb] = a;
       }
     }
   }
   v[a] = vx;  
+  freeVertices.push_back(b);
 }
 
 void Mesh::weldVertices(int a, int b) {

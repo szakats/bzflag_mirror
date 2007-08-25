@@ -22,11 +22,22 @@ public:
   VertexVector v;
   TexCoordVector tc;
   FaceVector f;
+  IntVector freeVertices;
   VertexVector inside;
   VertexVector outside;
   bool passable;
   Mesh() : passable(false) {}
-  int addVertex(Vertex vtx) { v.push_back(vtx); return v.size()-1; }
+  int addVertex(Vertex vtx) { 
+    if (freeVertices.size() > 0) {
+      int free = freeVertices[freeVertices.size()-1];
+      freeVertices.pop_back();
+      v[free] = vtx;
+      return free;
+    } else {
+      v.push_back(vtx); 
+      return v.size()-1; 
+    }
+  }
   int addTexCoord(TexCoord tcx) { 
     for (size_t i = 0; i < tc.size(); i++) {
       if (tc[i] == tcx) return i;
