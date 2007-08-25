@@ -126,6 +126,10 @@ expand ( amount ) -- does a linear expansion of the face. Linear meaning that th
 
 taper ( amount ) -- taperizes the face. Contrary to expand it is not linear. Also 'amount' is a floating point value between 1.0 and 0.0, describing the amount of taperization. 1.0 is unchanged, 0.0 reduces the face to almost a single point.
 
+scale ( amount x, amount y ) -- taperizes the face with different values depending on the axis. 'amount x' and 'amount y' is a floating point value between 1.0 and 0.0, describing the amount of taperization on the given axis. 1.0 is unchanged, 0.0 reduces the face to almost a single point.
+
+translate ( x, y, z ) -- translates the face using the given coordinates. Note that all the face's vertices are translated!
+
 chamfer ( amount ) -- chamfer substitutes all vertices of the face with two, and performes a chamfer on them, meaning that the new points will be in distance 'amount' from the original one, along the face edges. Warning: this operation should be only applied to a new, not yet connected face, for it doesn't refine the rest of the geometry.
 
 unchamfer ( ) -- operation to undo the previous one. It welds pairs of vertices in the face. Unfortunately this operation is suboptimal, for it leaves 4 unused vertices in the mesh.
