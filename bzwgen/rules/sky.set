@@ -31,7 +31,7 @@ sky_parti
   -> assert(face(v) > 6.0) partitionvi(2*face(v)/3,4) 
 ;
 
-sky_inset5 -> extrudet(-5) texture() ;
+sky_inset5 -> extrudet(-5) [ common_remove * * * ] texture() ;
 
 
 # ------------------------------------------------------------------------

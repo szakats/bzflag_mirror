@@ -34,8 +34,8 @@ build_1
 build_entry -> partitionh(face(h)/2 - 2.0) [ common_texture ] partitionh(4.0) [ build_entrydoor ]  texture();
 
 build_entrydoor 
-  -> ($BUILD_MAT = $MATWALL2) mat_mesh extrude(-2.0) mat_doorw texturefull()
-  -> ($BUILD_MAT = $MATWALL)  mat_roof extrude(-2.0) mat_doorr texturefull()
+  -> ($BUILD_MAT = $MATWALL2) mat_mesh extrude(-2.0) [ common_remove * * * ] mat_doorw texturefull()
+  -> ($BUILD_MAT = $MATWALL)  mat_roof extrude(-2.0) [ common_remove * * * ] mat_doorr texturefull()
   -> mat_roof extrude(-2.0) 
 ; 
 
