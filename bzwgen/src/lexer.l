@@ -37,7 +37,7 @@ random                { return(RANDOM);   }
 assign                { return(ASSIGN);   }
 scale                 { return(SCALE);   }
 translate             { return(TRANSLATE); }
-translater            { return(TRANSLATE); }
+translater            { return(TRANSLATER); }
 material              { return(MATERIAL);   }
 multiface             { return(MULTIFACE); }
 subdivideh            { return(SUBDIVIDEH);}
