@@ -62,6 +62,7 @@ public:
     for (size_t i = 0; i < vtx->size(); i++) if (vtx->at(i) == vid) return i;
     return -1;
   }
+  virtual bool isMultiFace() { return false; }
   virtual ~Face() {
     delete vtx;
     delete tcd;
