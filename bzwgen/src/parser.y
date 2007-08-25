@@ -24,7 +24,7 @@ void yyunput(int, char*);
   Expression* e;
 }
 %start ruleset
-%token TEST ROUND NEG ASSERTION FACE TAPER SPAWN CHAMFER TEXTURE TEXTUREFULL TEXTUREQUAD TEXTURECLEAR
+%token SCALE TEST ROUND NEG ASSERTION FACE TAPER SPAWN CHAMFER TEXTURE TEXTUREFULL TEXTUREQUAD TEXTURECLEAR
 %token SPAWNNGON UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXTRUDET EXPAND RANDOM MATERIAL
 %token SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI 
 %token MULTIFACE
@@ -94,6 +94,7 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | PARTITIONV '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$7,false,$5); }
   | PARTITIONHI '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$7,true,$5); }
   | PARTITIONVI '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$7,true,$5); }
+  | SCALE '(' expr ',' expr ')' { $$ = new OperationScale(ruleset,$3,$5); }
   | MATERIAL '(' expr ')' { $$ = new OperationMaterial(ruleset,$3); }
   | MULTIFACE '(' ')' { $$ = new OperationMultiFace(ruleset); }
   | ASSIGN '(' NONTERM '=' expr ')' { $$ = new OperationAssign(ruleset,$5,$3); }

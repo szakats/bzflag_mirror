@@ -35,6 +35,7 @@ chamfer               { return(CHAMFER);   }
 unchamfer             { return(UNCHAMFER);   }
 random                { return(RANDOM);   }
 assign                { return(ASSIGN);   }
+scale                 { return(SCALE);   }
 material              { return(MATERIAL);   }
 multiface             { return(MULTIFACE); }
 subdivideh            { return(SUBDIVIDEH);}

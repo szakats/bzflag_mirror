@@ -116,6 +116,18 @@ public:
   }
 };
 
+class OperationScale : public Operation {
+  Expression* x;
+  Expression* y;
+public:
+  OperationScale(RuleSet* _ruleset, Expression* _x, Expression* _y) : Operation(_ruleset), x(_x), y(_y) { };
+  int runMesh(Mesh* mesh, int face) {
+    if (mesh == NULL) return 0;
+    mesh->scaleFace(face,x->calculate(mesh,face),y->calculate(mesh,face));
+    return face; 
+  }
+};
+
 class OperationSingle : public Operation {
 protected:
   Expression *exp;
