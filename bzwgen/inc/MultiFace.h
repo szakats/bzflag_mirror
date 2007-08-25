@@ -115,6 +115,7 @@ public:
     }      
     return distance <= length;
   }
+  virtual bool isMultiFace() { return true; }
   virtual ~MultiFace() {
     delete comps;
   }
