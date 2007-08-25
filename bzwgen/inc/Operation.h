@@ -60,13 +60,6 @@ public:
   int runMesh(Mesh* mesh, int face);
 };
 
-class OperationSpawnNGon : public OperationSpawn {
-  Expression* expr;
-public:
-  OperationSpawnNGon(RuleSet* _ruleset, const char* _ref,Expression * _expr) : OperationSpawn(_ruleset,_ref), expr(_expr) { };
-  int runMesh(Mesh* mesh, int face);
-};
-
 class OperationUnchamfer : public Operation {
 public:
   OperationUnchamfer(RuleSet* _ruleset) : Operation(_ruleset) { };

@@ -104,7 +104,6 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | ASSIGN '(' NONTERM '=' expr ')' { $$ = new OperationAssign(ruleset,$5,$3); }
   | TEST '(' ')' { $$ = new OperationTest(ruleset); }
   | SPAWN '(' NONTERM ')' { $$ = new OperationSpawn(ruleset,$3); }
-  | SPAWNNGON '(' NONTERM ',' expr ')' { $$ = new OperationSpawnNGon(ruleset,$3,$5); }
   | NONTERM { $$ = new OperationNonterminal(ruleset,$1); }
 ;
 expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$7); }

@@ -49,7 +49,6 @@ face                  { return(FACE); }
 free                  { return(FREE); }
 ngon                  { return(NGON); }
 test                  { return(TEST); }
-spawnngon             { return(SPAWNNGON); }
 texture               { return(TEXTURE); }
 texturefull           { return(TEXTUREFULL); }
 texturequad           { return(TEXTUREQUAD); }
