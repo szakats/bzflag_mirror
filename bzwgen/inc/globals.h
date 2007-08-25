@@ -225,7 +225,7 @@ inline bool commonrange(float a1, float a2, float b1, float b2, float &na2) {
   if (inrange(a2,b1,b2)) {
     na2 = a2; 
   } else {
-    if (a2 > a1) na2 = max(b1,b2); else na2 = min(b1,b2);
+    if (a2 > a1) na2 = maxf(b1,b2); else na2 = minf(b1,b2);
   }
   return true;
 }
@@ -261,6 +261,7 @@ inline bool intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P) {
     return true;
   } else return false;
 }
+
 inline bool samepointZ(Vertex A, Vertex B) {
   return (fabs(A.x-B.x) < EPSILON && fabs(A.y-B.y) < EPSILON);
 }
