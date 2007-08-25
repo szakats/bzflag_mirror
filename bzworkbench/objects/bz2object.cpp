@@ -434,13 +434,17 @@ string bz2object::BZWLines(void) {
 	if(this->isKey("position"))
 		ret += "  position " + Point3D( this->getPosition() ).toString();
 		
+	// add rotation key/value to the string if supported
+	if(this->isKey("rotation") && !this->isKey("spin"))
+		ret += "  rotation " + string( ftoa(this->getRotation().z()) ) + "\n";
+		
 	// add size key/value to the string if supported
 	if(this->isKey("size"))
 		ret += "  size " + Point3D( this->getSize() ).toString();
 	
-	// add rotation key/value to the string if supported
-	if(this->isKey("rotation") && !this->isKey("spin"))
-		ret += "  rotation " + string( ftoa(this->getRotation().z()) ) + "\n";
+	// add a scale if size isn't supported (this is the case with groups, for example)
+	if( !this->isKey("size") && this->isKey("scale") )
+		ret += "  scale " + Point3D( this->getSize() ).toString();
 	
 	// add the initial transformation
 	if( this->isKey("shift") )
@@ -462,6 +466,10 @@ string bz2object::BZWLines(void) {
 	// add the final transformation
 	if( this->isKey("shift") )
 		ret += "  " + endShift->toString();
+	
+	// if position isn't supported, then add another shift to emulate it (i.e. with groups)
+	if( !this->isKey("position") && this->isKey("shift") )
+		ret += "  shift " + Point3D( this->getPos() ).toString();
 	
 	// add phydrv key/value to the string if supported and if defined
 	if(this->isKey("phydrv") && physicsDriver != NULL)

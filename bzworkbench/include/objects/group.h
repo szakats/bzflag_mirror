@@ -63,11 +63,11 @@ class group : public bz2object {
 		bool driveThrough, shootThrough;
 		int team;
 		
+		// the actual object group container
+		osg::ref_ptr< Renderable > container;
+		
 		// reference to the definition
 		define* def;
-		
-		// the ring structure around the groups
-		osg::ref_ptr< osg::Geode > ring;
 		
 		// build the ring-like structure around the objects
 		void buildGeometry();

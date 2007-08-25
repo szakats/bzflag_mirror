@@ -16,22 +16,31 @@
 group::group() : 
 	bz2object("group", "<shift><shear><scale><spin><team><tint><drivethrough><shootthrough><phydrv><matref>") {
 	this->team = 0;
+	this->def = NULL;
 	this->tintColor = RGBA(1, 1, 1, 1);
 	this->driveThrough = false;
 	this->shootThrough = false;
 	this->setName("");
 	this->setPos( osg::Vec3( 0.0, 0.0, 0.0 ) );
+	
+	this->container = new Renderable();
+	this->geoRing = NULL;
 }
 
 // constructor with data
 group::group(string& data) : 
 	bz2object("group", "<shift><shear><scale><spin><team><tint><drivethrough><shootthrough><phydrv><matref>", data.c_str()) {
 	this->team = 0;
+	this->def = NULL;
 	this->tintColor = RGBA(1, 1, 1, 1);
 	this->driveThrough = false;
 	this->shootThrough = false;
 	this->setName("");
 	this->setPos( osg::Vec3( 0.0, 0.0, 0.0 ) );
+	
+	this->container = new Renderable();
+	this->geoRing = NULL;
+	
 	this->update(data);
 }
 
@@ -119,18 +128,26 @@ int group::update( UpdateMessage& message ) {
 		}
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
 			// propogate rotation events to the children objects
+			this->container->setRotation( *(message.getAsRotation()) );
+			this->buildGeometry();
 			
 			break;
 			
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
+			this->container->setRotation( *(message.getAsRotationFactor()) + this->container->getRotation()  );
+			this->buildGeometry();
 			
 			break;
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
+			this->container->setScale( *(message.getAsScale()) );
+			this->buildGeometry();
 			
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
+			this->container->setScale( *(message.getAsScaleFactor()) + this->container->getScale() );
+			this->buildGeometry();
 			
 			break;
 			
@@ -150,28 +167,44 @@ string group::toString(void) {
 	if(team > 0)
 		teamString = "  team " + string(itoa(team)) + "\n";
 	
-	return string("group ") + this->getName() + "\n" +
+	// temporarily set the rotation of the root group node from the container child so BZWLines() translates
+	// the rotation values into "spin" lines
+	this->setRotation( this->container->getRotation() );
+	
+	string ret = string("group ") + this->getName() + "\n" +
 				  tintString + 
 				  teamString +
 				  (driveThrough == true ? "  drivethrough\n" : "") +
 				  (shootThrough == true ? "  shootThrough\n" : "") +
 				  this->BZWLines() +
-				  "  shift " + ftoa(p.x()) + " " + ftoa(p.y()) + " " + ftoa(p.z()) + "\n" +  // add the pos value as a "shift" transformation
 				  "end\n";
+				  
+	// reset the rotation to 0 (so only the container has the spin transformations)
+	this->setRotation( osg::Vec3( 0.0, 0.0, 0.0 ) );
+	
+	// return the string data
+	return ret;
 }
 
 // build the ring geometry around the objects
 void group::buildGeometry() {
 	// compute the maximum radius outside the center
 	float maxRadius2 = 25.0f;	// radius squared (saves sqrt() calls)
-	if( this->getNumChildren() > 0 ) {
+	float maxDim = 0.0f;
+	if( this->container->getNumChildren() > 0 ) {
 		// get each child
-		for( unsigned int i = 0; i < this->getNumChildren(); i++ ) {
-			osg::Node* child = this->getChild( i );
+		for( unsigned int i = 0; i < this->container->getNumChildren(); i++ ) {
+			osg::Node* child = this->container->getChild( i );
 			bz2object* obj = dynamic_cast< bz2object* >(child);
 			if( obj ) {
 				// only count bz2object instances
 				osg::Vec3 p = obj->getPos();
+				osg::Vec3 size = obj->getSize();
+				
+				// compute the largest dimension
+				float maxSizeDim = max( size.x(), max( size.y(), size.z() ) );
+				maxDim = max( maxSizeDim, maxDim );
+				
 				// the group's position relative to the objects is (0,0,0), so just square the position and take the length
 				float len2 = p.x()*p.x() + p.y()*p.y() + p.z()*p.z();
 				
@@ -184,7 +217,7 @@ void group::buildGeometry() {
 	}
 	
 	// now find the maximum radius
-	float maxRadius = 1.5 * sqrt( maxRadius2 );
+	float maxRadius = sqrt( maxRadius2 ) + maxDim;
 	
 	// NOW we can build the geometry
 	osg::Vec3Array* points = new osg::Vec3Array();
@@ -206,6 +239,10 @@ void group::buildGeometry() {
 		primitives->push_back( index + 1 );
 	}
 	
+	// make it loop back
+	primitives->push_back( 0 );
+	primitives->push_back( 1 );
+	
 	// the geometry node
 	this->geoRing = new osg::Geode();
 	
@@ -222,7 +259,7 @@ void group::buildGeometry() {
 	SceneBuilder::assignMaterial( osg::Vec4( 1.0, 0.0, 1.0, 1.0 ),
 								  osg::Vec4( 1.0, 0.0, 1.0, 1.0 ),
 								  osg::Vec4( 1.0, 0.0, 1.0, 1.0 ),
-								  osg::Vec4( 1.0, 0.0, 1.0, 1.0 ),
+								  osg::Vec4( 0.0, 0.0, 0.0, 0.0 ),
 								  0.0,
 								  1.0,
 								  geoRing.get(),
@@ -263,8 +300,8 @@ void group::setDefine( define* def ) {
 // set the children
 void group::computeChildren() {
 	// remove all current objects
-	if( this->getNumChildren() > 0 )
-		this->removeChildren(0, this->getNumChildren());
+	if( this->container->getNumChildren() > 0 )
+		this->container->removeChildren(0, this->container->getNumChildren());
 	
 	// if the def is valid, add the objects
 	if( def != NULL ) {
@@ -290,11 +327,14 @@ void group::computeChildren() {
 			this->setPos( position );
 			
 			for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
-				this->addChild( i->get() );
+				this->container->addChild( i->get() );
 				i->get()->setPos( i->get()->getPos() - position );
 				
 				printf(" added %s\n", (*i)->getName().c_str() );
 			}
 		}
 	}
+	
+	if( !this->containsNode( container.get() ) )
+		this->addChild( container.get() );
 }
