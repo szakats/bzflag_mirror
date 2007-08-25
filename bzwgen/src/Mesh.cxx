@@ -150,7 +150,6 @@ void Mesh::expandFace(int fid, float amount) {
   delete nv;
 }
 
-/* this operation leaves one unused vertex unfortunately */
 void Mesh::weldVertices(int a, int b, Vertex vx) {
   for (size_t i = 0; i < f.size(); i++) {
     int indexa = -1;
@@ -387,6 +386,14 @@ void Mesh::textureFaceQuad(int fid, float au, float av, float bu, float bv) {
 void Mesh::textureFace(int fid, float snap, float tile) {
   textureFaceQuad(fid,0.0f,0.0f,round(faceH(fid)/snap)*tile,round(faceV(fid)/snap)*tile);
 }
+
+void Mesh::freeFace(int fid) {
+  f[fid]->output = false;
+  for (size_t i = 0; i < f[fid]->vtx->size(); i++) {
+    freeVertices.push_back(f[fid]->vtx->at(i));
+  }
+}
+
 
 
 Mesh::~Mesh() {
