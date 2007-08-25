@@ -28,5 +28,7 @@
 
 // for windows users...
 #define _CRT_SECURE_NO_DEPRECATE
+// #define vsnprintf _vsnprintf
+// uncomment the above line to ensure that BZWB build properly
 
 #endif /* DEFINES_H_ */

@@ -121,6 +121,15 @@ int group::update( UpdateMessage& message ) {
 	// superclass update (i.e. handle transformation changes)
 	int result = bz2object::update( message );
 	
+	// make sure we keep the Euler "spin" transformations 0 in the group
+	// and forward any existing ones to the container node
+	osg::Vec3 rot = this->getRotation();
+	if( this->container.get() != NULL )
+		this->container->setRotation( rot );
+		
+	this->setRotation( osg::Vec3( 0, 0, 0 ) );
+	
+	// NOW handle the messages
 	switch( message.type ) {
 		
 		case UpdateMessage::SET_POSITION: {

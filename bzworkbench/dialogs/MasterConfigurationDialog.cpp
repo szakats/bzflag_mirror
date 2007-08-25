@@ -65,12 +65,16 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	// initialize widgets
 	
 	// position
-	positionLabel = new QuickLabel("Position", 5, 15);
+	if( object->isKey("position") )
+		positionLabel = new QuickLabel("Position", 5, 15);
+	else if( object->isKey("shift") )	// "shift" can emulate "position"
+		positionLabel = new QuickLabel("Shift", 5, 15);
+		
 	positionXField = new Fl_Float_Input(5 + 100, 15, 100, DEFAULT_TEXTSIZE + 6, "X");
 	positionYField = new Fl_Float_Input(5 + 100 + 120, 15, 100, DEFAULT_TEXTSIZE + 6, "Y");
 	positionZField = new Fl_Float_Input(5 + 100 + 120 + 120, 15, 100, DEFAULT_TEXTSIZE + 6, "Z");
 	
-	if(!object->isKey("position")) {
+	if(!(object->isKey("position") || object->isKey("shift")) ) {
 		positionXField->deactivate();
 		positionYField->deactivate();
 		positionZField->deactivate();	
@@ -95,12 +99,16 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	}
 	
 	// size
-	sizeLabel = new QuickLabel("Size", 5, 75);
+	if( object->isKey("size") )
+		sizeLabel = new QuickLabel("Size", 5, 75);
+	else if( object->isKey("scale") )
+		sizeLabel = new QuickLabel("Scale", 5, 75);
+		
 	sizeXField = new Fl_Float_Input(5 + 100, 75, 100, DEFAULT_TEXTSIZE + 6, "dx");
 	sizeYField = new Fl_Float_Input(5 + 100 + 120, 75, 100, DEFAULT_TEXTSIZE + 6, "dy");
 	sizeZField = new Fl_Float_Input(5 + 100 + 120 + 120, 75, 100, DEFAULT_TEXTSIZE + 6, "dz");
 	
-	if(!object->isKey("size")) {
+	if(!(object->isKey("size") || object->isKey("scale")) ) {
 		sizeXField->deactivate();
 		sizeYField->deactivate();
 		sizeZField->deactivate();	
@@ -246,10 +254,15 @@ void MasterConfigurationDialog::OKButtonCallback_real(Fl_Widget* w) {
 	UpdateMessage rotationUpdate( UpdateMessage::SET_ROTATION, &rotation );
 	UpdateMessage transformUpdate( UpdateMessage::SET_TRANSFORMATIONS, &transforms );
 	
-	object->update( positionUpdate );
-	object->update( sizeUpdate );
+	if( object->isKey("position") || object->isKey("shift") )
+		object->update( positionUpdate );
+		
+	if( object->isKey("size") || object->isKey("scale") )
+		object->update( sizeUpdate );
+		
 	if( object->isKey("rotation") && !object->isKey("spin"))
 		object->update( rotationUpdate );
+		
 	if( object->isKey("spin") ) {
 		object->setRotation( spinVals );
 	}
