@@ -186,9 +186,10 @@ Vertex Mesh::faceCenter(int fid) {
   return (v[face->vtx->at(0)]+v[face->vtx->at(1)]+v[face->vtx->at(2)]+v[face->vtx->at(3)])/4;
 }
 
-
+// TODO : remove hack for multifaces;
 Vertex Mesh::faceNormal(int fid) {
   Face* face = f[fid];
+  if (face->isMultiFace()) return Vertex(0.0f,0.0f,1.0f);
   Vertex a = v[face->vtx->at(0)]-v[face->vtx->at(1)];
   Vertex b = v[face->vtx->at(0)]-v[face->vtx->at(2)];
   Vertex r = a.cross(b);
