@@ -110,6 +110,17 @@ void Mesh::taperFace(int fid, float amount) {
   }
 }
 
+void Mesh::scaleFace(int fid, float x, float y) {
+  IntVector* fv = f[fid]->vtx;
+  int size = fv->size();
+  Vertex c = faceCenter(fid);
+  for (int i = 0; i < size; i++) {
+    Vertex vc = v[fv->at(i)] - c;
+    v[fv->at(i)].x = vc.x*x+c.x;
+    v[fv->at(i)].y = vc.y*y+c.y;
+  }
+}
+
 
 void Mesh::expandFace(int fid, float amount) {
   Vertex normal = faceNormal(fid);
