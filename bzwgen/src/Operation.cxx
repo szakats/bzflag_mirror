@@ -18,6 +18,20 @@ int OperationNonterminal::runMesh(Mesh* mesh, int face) {
   return ruleset->runMesh(mesh,face,ref);
 }
 
+int OperationAddFace::runMesh(Mesh* mesh, int face) { 
+  if (!mesh->f[face]->isMultiFace()) {
+    printf("Error: addface passed a non-MultiFace parameter!");
+  }
+  Face* clone = new Face();
+  for (size_t i = 0; i < mesh->f[face]->vtx->size(); i++) {
+    clone->vtx->push_back(mesh->addVertex(mesh->v[mesh->f[face]->vtx->at(i)]));
+  }
+  int newface = mesh->addFace(clone);
+  newface = ruleset->runMesh(mesh,newface,ref);
+  ((MultiFace*)mesh->f[face])->addFace(mesh->f[newface]);
+  return face;
+}
+
 int OperationSpawn::runMesh(Mesh* mesh, int face) { 
   ruleset->runNewMesh(mesh,face,ref);
   return face;

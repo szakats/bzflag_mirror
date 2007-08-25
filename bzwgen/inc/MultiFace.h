@@ -42,6 +42,7 @@ public:
   }
   int addFace(Face* f) {
     printf("Addface start... (%d,%d)\n",vtx->size(),f->vtx->size());
+    f->output = false;
     if (comps->size() == 0) {
       for (size_t i = 0; i < f->vtx->size(); i++) 
         vtx->push_back(f->vtx->at(i));

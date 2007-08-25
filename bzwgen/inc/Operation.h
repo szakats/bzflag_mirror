@@ -41,6 +41,13 @@ public:
   int runMesh(Mesh* mesh, int face);
 };
 
+class OperationAddFace : public Operation {
+  std::string ref;
+public:
+  OperationAddFace(RuleSet* _ruleset, const char* _ref) : Operation(_ruleset), ref(_ref) { };
+  int runMesh(Mesh* mesh, int face);
+};
+
 class OperationTest : public Operation {
 public:
   OperationTest(RuleSet* _ruleset) : Operation(_ruleset) { };
