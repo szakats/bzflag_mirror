@@ -62,6 +62,10 @@ public:
     for (size_t i = 0; i < vtx->size(); i++) if (vtx->at(i) == vid) return i;
     return -1;
   }
+  bool hasVertex(int vid) {
+    for (size_t i = 0; i < vtx->size(); i++) if (vtx->at(i) == vid) return true;
+    return false;
+  }
   int vertex(int vid) { 
     int size = vtx->size();
     if (vid >= 0) {
@@ -72,6 +76,9 @@ public:
   }
   void insertVertexAfter(int index,int vid) {
     vtx->insert(vtx->begin()+index+1,vid);
+  }
+  void removeVertex(int index) {
+    vtx->erase(vtx->begin()+index);
   }
   int size() { return vtx->size(); }
   virtual bool isMultiFace() { return false; }
