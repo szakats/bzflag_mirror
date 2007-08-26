@@ -11,6 +11,7 @@ FILES = \
 	src/GridMap.cxx \
 	src/Material.cxx \
 	src/Mesh.cxx \
+	src/MultiFace.cxx \
 	src/Operation.cxx \
 	src/Expression.cxx \
 	src/OSFile.cxx \
