@@ -18,6 +18,8 @@
 
 //#include <regex.h>
 
+#include "include/defines.h"
+
 // system headers
 #include <string>
 #include <algorithm>
