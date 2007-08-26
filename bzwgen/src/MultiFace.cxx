@@ -14,10 +14,75 @@
 
 IntVector* MultiFace::detachFace(int id) {
   if (comps->size() < 2) return NULL;
-  if (id > int(comps->size())) return NULL;
+  if (id >= int(comps->size())) return NULL;
+  
+  IntVector* result = new IntVector;
+  Face* f = comps->at(id);
+
+  int index = pickRemovalIndex(comps->at(id));
+
+  while (index >= 0) {
+    IntVector* nvtx = new IntVector;
+
+    int vid = vertex(index);
+    int svid = vertex(index);
+
+    do {
+      int gindex = getVertexIndex(vid);
+      int findex = f->getVertexIndex(vid);
+      int oindex;
+      Face* oface = getOtherFaceWithVertex(f,vid);
+      if (oface != NULL) {
+        oindex = oface->getVertexIndex(vid);
+      } else {
+        oindex = -1;
+      }
+
+      nvtx->push_back(vid);
+
+      if (oindex < 0 ) {
+        removeVertex(gindex);
+        vid = f->vertex(findex+1);
+      } else {
+        
+
+      }
+    } while (vid != svid);
+
+    Face* nface = new Face();
+    nface->vtx = nvtx;
+    int fid = mesh->addFace(nface);
+    result->push_back(fid);
+    index = pickRemovalIndex(comps->at(id));
+  }
+
+  delete comps->at(id);
+  comps->erase(comps->begin() + id);
+
+  if (result->size() == 0) {
+    delete result;
+    result = NULL;
+  }
+  return result;
+}
+
+Face* MultiFace::getOtherFaceWithVertex(Face* f, int vid) {
+  for (size_t fi = 0; fi < comps->size(); fi++) {
+    if (comps->at(fi) != f) {
+      for (int i = 0; i < size(); i++) {
+        if (comps->at(fi)->hasVertex(vid)) return comps->at(fi);
+      }
+    }
+  }
   return NULL;
 }
 
+int MultiFace::pickRemovalIndex(Face *f) {
+  for (int i = 0; i < size(); i++) {
+    if (f->hasVertex(vertex(i))) return i;
+  }
+  return -1;
+}
 
 void MultiFace::refineFace(Face* f) {
   int i = 0;

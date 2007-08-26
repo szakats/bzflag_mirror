@@ -22,18 +22,17 @@ class MultiFace : public Face {
   FaceVector* comps;
   Mesh* mesh;
 public:
-  MultiFace(Mesh* _mesh) : Face(), mesh(_mesh) {
-    comps = new FaceVector;
-  }
+  MultiFace(Mesh* _mesh) : Face(), mesh(_mesh) { comps = new FaceVector; }
   IntVector* detachFace(int id);
-  void refineFace(Face* f);
   int addFace(Face* f);
+  virtual bool isMultiFace() { return true; }
+  virtual ~MultiFace() { delete comps; }
+private:
+  void refineFace(Face* f);
   bool vertexInside(int vid);
   bool vertexNearestIntersect(int begin, int end, Vertex &P, int &index);
-  virtual bool isMultiFace() { return true; }
-  virtual ~MultiFace() {
-    delete comps;
-  }
+  int pickRemovalIndex(Face *f);
+  Face* getOtherFaceWithVertex(Face* f, int vid);
 };
 
 
