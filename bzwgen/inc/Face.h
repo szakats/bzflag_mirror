@@ -62,6 +62,18 @@ public:
     for (size_t i = 0; i < vtx->size(); i++) if (vtx->at(i) == vid) return i;
     return -1;
   }
+  int vertex(int vid) { 
+    int size = vtx->size();
+    if (vid >= 0) {
+      return vtx->at(vid % size);
+    } else {
+      return vtx->at((vid + size*int(-vid/4+1)) % size);
+    }
+  }
+  void insertVertexAfter(int index,int vid) {
+    vtx->insert(vtx->begin()+index+1,vid);
+  }
+  int size() { return vtx->size(); }
   virtual bool isMultiFace() { return false; }
   virtual ~Face() {
     delete vtx;
