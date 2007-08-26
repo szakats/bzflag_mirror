@@ -29,7 +29,7 @@
 #define MATDOORR  10
 #define MAXMATERIALS 11
 
-#define EPSILON 0.000001f
+#define EPSILON 0.0001f
 #ifdef _MSC_VER
 #pragma warning(disable:4996)
 #endif
