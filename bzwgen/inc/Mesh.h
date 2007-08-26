@@ -25,6 +25,7 @@ public:
   IntVector freeVertices;
   VertexVector inside;
   VertexVector outside;
+  VertexVector vbase;
   bool passable;
   Mesh() : passable(false) {}
   int addVertex(Vertex vtx) { 
@@ -75,6 +76,12 @@ public:
       result += v[face->vtx->at(i)].toString()+ " ";
     result += ")";
     return result;
+  }
+  void pushBase(int fid) {
+    vbase.clear();
+    for (int i = 0; i < f[fid]->size(); i++) {
+      vbase.push_back(v[f[fid]->vertex(i)]);
+    }
   }
   ~Mesh();
 private:
