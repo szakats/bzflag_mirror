@@ -31,7 +31,7 @@ public:
       Vertex ipoint;
       int index;
       printf("Intersect... (%d,%d)\n",i,modnext(i,f->size()));
-      printf("Multi%s\n",mesh->faceToString(this).c_str());
+//      printf("Multi%s\n",mesh->faceToString(this).c_str());
       if (vertexNearestIntersect(f->vertex(i),f->vertex(i+1),ipoint,index)) {
         printf("Nearerst found... (%d) %s : ",index,ipoint.toString().c_str());
         int ipid;
@@ -55,8 +55,8 @@ public:
   }
   int addFace(Face* f) {
     printf("Addface start... (%d,%d)\n",size(),f->size());
-    printf("Multi%s\n",mesh->faceToString(this).c_str());
-    printf("Add%s\n",mesh->faceToString(f).c_str());
+//    printf("Multi%s\n",mesh->faceToString(this).c_str());
+//    printf("Add%s\n",mesh->faceToString(f).c_str());
     f->output = false;
     if (comps->size() == 0) {
       for (int i = 0; i < f->size(); i++) 
@@ -134,14 +134,16 @@ public:
           }
         }
       }
-      if (r == 2) {
-        float thisdistance = (A-R2).length();
-        if (thisdistance < EPSILON) continue;
-        printf("ICH(2):%s\n",R2.toString().c_str());
-        if (thisdistance < distance) {
-          distance = thisdistance;
-          P = R2;
-          index = i;
+      if (!samepointZ(mesh->v[vertex(i)],R2)) {
+        if (r == 2) {
+          float thisdistance = (A-R2).length();
+          if (thisdistance < EPSILON) continue;
+          printf("ICH(2):%s\n",R2.toString().c_str());
+          if (thisdistance < distance) {
+            distance = thisdistance;
+            P = R2;
+            index = i;
+          }
         }
       }
     }      
