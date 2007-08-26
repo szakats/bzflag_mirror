@@ -77,6 +77,7 @@ public:
       int getvert;
       int next;
       while (first || !newf || (index != end)) {
+        printf("--- %d,%d\n",index,newf);
         first = false;
         if (newf) {
           newvtx->push_back(f->vertex(index));
@@ -103,6 +104,7 @@ public:
     Vertex A = mesh->v[vid];
     Vertex B = mesh->v[vid];
     B.y = 100000.0f; // sufficient to be out of range
+    B.x = 200000.0f; // sufficient to be out of range
     Vertex P1;
     Vertex P2;
     int count = 0;

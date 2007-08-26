@@ -14,14 +14,14 @@ start
 ;
 
 test_run
-  -> scale(0.8,1) multiface() addface(test_add1) addface(test_add2) mat_wall extrude(4) 
+  -> scale(0.8,1) multiface() addface(test_add1) addface(test_add2) mat_wall extrudet(4) common_ledge mat_wall extrudet(4) roof_classic
 ;
 test_add1
-  -> scale(1.25,0.2) translater(-0.1,2,0)
+  -> scale(1.0,0.2) translater(0,2,0)
 ;
 
 test_add2
-  -> scale(1.25,0.2) translater(-0.1,-2,0)
+  -> scale(1.0,0.2) translater(0,-2,0)
 ;
 
 # ------------------------------------------------------------------------
