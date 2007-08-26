@@ -14,7 +14,7 @@ start
 ;
 
 test_run
-  -> scale(0.8,1) multiface() addface(test_add) mat_wall extrude(4) common_ledge extrude(4) roof_classic
+  -> scale(0.8,1) multiface() addface(test_add) mat_wall extrude(4) 
 ;
 test_add
   -> scale(1.25,0.8) translater(0,0.125,0)

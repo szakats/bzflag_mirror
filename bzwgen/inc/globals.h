@@ -29,7 +29,7 @@
 #define MATDOORR  10
 #define MAXMATERIALS 11
 
-#define EPSILON 0.0001f
+#define EPSILON 0.001f
 #ifdef _MSC_VER
 #pragma warning(disable:4996)
 #endif
@@ -217,49 +217,53 @@ inline bool inrange(float a, float r1, float r2) {
           else return a > r2-EPSILON && a < r1+EPSILON; 
 }
 
-inline bool commonrange(float a1, float a2, float b1, float b2, float &na1) { 
+inline bool commonrange(float a1, float a2, float b1, float b2, float &c1, float &c2) { 
   float mina = minf(a1,a2);
   float maxa = maxf(a1,a2);
-  if (maxa < b1+EPSILON && maxa < b2+EPSILON) return false;
-  if (mina > b1-EPSILON && mina > b2-EPSILON) return false;
-  if (inrange(a1,b1,b2)) {
-    na1 = a1; 
-  } else {
-    if (a2 > a1) na1 = minf(b1,b2); else na1 = maxf(b1,b2);
-  }
+  float minb = minf(b1,b2);
+  float maxb = maxf(b1,b2);
+  if (maxa < minb-EPSILON) return false;
+  if (mina > maxb+EPSILON) return false;
+  c1 = maxf(mina,minb);
+  c2 = minf(maxa,maxb);
   return true;
 }
 
-inline bool intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P) {
+inline int intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P1, Vertex& P2) {
   float d = ((B.x-A.x)*(D.y-C.y)-(B.y-A.y)*(D.x-C.x));
   float r = ((A.y-C.y)*(D.x-C.x)-(A.x-C.x)*(D.y-C.y));
   float s = ((A.y-C.y)*(B.x-A.x)-(A.x-C.x)*(B.y-A.y));
   if (iszero(d)) {
     if (iszero(r)) { // parallel and coincident
-      float na;
+      float e;
+      float f;
       if (iszero(A.y-C.y)&&iszero(B.y-D.y)) {                   // parallel on X
-        if (commonrange(A.x,B.x,C.x,D.x,na)) { // AB and CD have common point
-          P = A;
-          P.x = na;
-          return true;
-        } else return false;
+        if (commonrange(A.x,B.x,C.x,D.x,e,f)) { // AB and CD have common point
+          P1 = A;
+          P2 = A;
+          P1.x = e;
+          P2.x = f;
+          if (iszero(e-f)) return 1; else return 2;
+        } else return 0;
       } else {                                 // parallel on Y
-        if (commonrange(A.y,B.y,C.y,D.y,na)) { // AB and CD have common point
-          P = A;
-          P.y = na;
-          return true;
-        } else return false;
+        if (commonrange(A.y,B.y,C.y,D.y,e,f)) { // AB and CD have common point
+          P1 = A;
+          P2 = A;
+          P1.y = e;
+          P2.y = f;
+          if (iszero(e-f)) return 1; else return 2;
+        } else return 0;
       }
-    } else return false; // parallel but not coincident
+    } else return 0; // parallel but not coincident
   }
   r = r/d;
   s = s/d;
   if (r > 0-EPSILON && r < 1+EPSILON && s > 0-EPSILON && s < 1+EPSILON) {
-    P.x = A.x+r*(B.x-A.x);
-    P.y = A.y+r*(B.y-A.y);
-    P.z = A.z;
-    return true;
-  } else return false;
+    P1.x = A.x+r*(B.x-A.x);
+    P1.y = A.y+r*(B.y-A.y);
+    P1.z = A.z;
+    return 1;
+  } else return 0;
 }
 
 inline bool samepointZ(Vertex A, Vertex B) {

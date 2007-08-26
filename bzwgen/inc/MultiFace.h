@@ -35,15 +35,14 @@ public:
       if (vertexNearestIntersect(f->vertex(i),f->vertex(i+1),ipoint,index)) {
         printf("Nearerst found... (%d) %s : ",index,ipoint.toString().c_str());
         int ipid;
-        if (samepointZ(ipoint,mesh->v[f->vertex(i+1)])) {
+        if (samepointZ(mesh->v[f->vertex(i+1)],mesh->v[vertex(index+1)])) {
+          printf("Is common\n");
+        } else if (samepointZ(ipoint,mesh->v[f->vertex(i+1)])) {
           printf("Is samepoint with next\n");
           insertVertexAfter(index,f->vertex(i+1));
         } else if (samepointZ(ipoint,mesh->v[vertex(index+1)])) {
           printf("Is samepoint with itself\n");
           f->insertVertexAfter(i,vertex(index+1));
-        } else if (samepointZ(ipoint,mesh->v[vertex(index)])) {
-          printf("Is samepoint with itself\n");
-          f->insertVertexAfter(i,vertex(index));
         } else {
           printf("Is normal\n");
           ipid = mesh->addVertex(ipoint);
@@ -104,10 +103,11 @@ public:
     Vertex A = mesh->v[vid];
     Vertex B = mesh->v[vid];
     B.y = 100000.0f; // sufficient to be out of range
-    Vertex P;
+    Vertex P1;
+    Vertex P2;
     int count = 0;
     for (int i = 0; i < size(); i++) {
-      if (intersectZ(A,B,mesh->v[vertex(i)],mesh->v[vertex(i+1)],P)) count++;
+      if (intersectZ(A,B,mesh->v[vertex(i)],mesh->v[vertex(i+1)],P1,P2) > 0) count++;
     }      
     return (count%2 == 1);
   }
@@ -117,20 +117,35 @@ public:
     float length = (A-B).length();
     int tsize = size();
     float distance = length + 1.0f;
-    Vertex R;
+    Vertex R1;
+    Vertex R2;
     for (int i = 0; i < tsize; i++) {
-      if (intersectZ(A,B,mesh->v[vertex(i)],mesh->v[vertex(i+1)],R)) {
-        float thisdistance = (A-R).length();
+      int r = intersectZ(A,B,mesh->v[vertex(i)],mesh->v[vertex(i+1)],R1,R2);
+      if (!samepointZ(mesh->v[vertex(i)],R1)) {
+        if (r > 0) {
+          float thisdistance = (A-R1).length();
+          if (thisdistance > EPSILON) {
+            printf("ICH:%s\n",R1.toString().c_str());
+            if (thisdistance < distance) {
+              distance = thisdistance;
+              P = R1;
+              index = i;
+            }
+          }
+        }
+      }
+      if (r == 2) {
+        float thisdistance = (A-R2).length();
         if (thisdistance < EPSILON) continue;
-        printf("ICH:%s\n",R.toString().c_str());
+        printf("ICH(2):%s\n",R2.toString().c_str());
         if (thisdistance < distance) {
           distance = thisdistance;
-          P = R;
+          P = R2;
           index = i;
         }
       }
     }      
-    return distance <= length;
+    return distance <= length+EPSILON;
   }
   virtual bool isMultiFace() { return true; }
   virtual ~MultiFace() {

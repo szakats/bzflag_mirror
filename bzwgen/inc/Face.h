@@ -67,7 +67,7 @@ public:
     if (vid >= 0) {
       return vtx->at(vid % size);
     } else {
-      return vtx->at((vid + size*int(-vid/4+1)) % size);
+      return vtx->at((vid + size*int(-vid/size+1)) % size);
     }
   }
   void insertVertexAfter(int index,int vid) {
