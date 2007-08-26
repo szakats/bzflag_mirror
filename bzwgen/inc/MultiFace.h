@@ -33,6 +33,7 @@ private:
   bool vertexNearestIntersect(int begin, int end, Vertex &P, int &index);
   int pickRemovalIndex(Face *f);
   Face* getOtherFaceWithVertex(Face* f, int vid);
+  bool isLeftOfVectors(int x, int a, int b, int c);
 };
 
 

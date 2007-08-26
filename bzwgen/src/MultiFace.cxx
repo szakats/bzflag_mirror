@@ -26,9 +26,11 @@ IntVector* MultiFace::detachFace(int id) {
 
     int vid = vertex(index);
     int svid = vertex(index);
+    int lastgindex = index;
 
     do {
       int gindex = getVertexIndex(vid);
+      if (gindex != -1) lastgindex = gindex;
       int findex = f->getVertexIndex(vid);
       int oindex;
       Face* oface = getOtherFaceWithVertex(f,vid);
@@ -44,8 +46,26 @@ IntVector* MultiFace::detachFace(int id) {
         removeVertex(gindex);
         vid = f->vertex(findex+1);
       } else {
-        
-
+        int nextovid = oface->vertex(oindex-1);
+        if (findex < 0) {
+          if (gindex < 0) insertVertexBefore(lastgindex,vid);
+          vid = nextovid;
+        } else {
+          int nextfvid = f->vertex(findex+1);
+          int prevfvid = f->vertex(findex-1);
+          int prevovid = oface->vertex(oindex-1);
+          if (nextovid == nextfvid) {
+            vid = nextfvid;
+          } else if (prevfvid == nextovid) {
+            vid = nextfvid;
+          } else {
+            if (isLeftOfVectors(prevovid,prevfvid,vid,nextfvid))  {
+              vid = nextfvid;
+            } else { 
+              vid = nextovid;
+            }
+          }
+        }
       }
     } while (vid != svid);
 
@@ -64,6 +84,19 @@ IntVector* MultiFace::detachFace(int id) {
     result = NULL;
   }
   return result;
+}
+
+bool MultiFace::isLeftOfVectors(int x, int a, int b, int c) {
+  Vertex P = mesh->v[b];
+  Vertex C = (mesh->v[c]-P).norm();
+  Vertex A = (P-mesh->v[a]).norm();
+  Vertex X = (mesh->v[x]-P).norm();
+  Vertex Xline = A+X;
+  Vertex Pline = A+C;
+
+  Vertex normal = Vertex(0.0f,0.0f,1.0f);//faceNormal(fid);
+  float sign = fsign( Pline.cross(Xline).dot(normal) );
+  return sign >= 0;
 }
 
 Face* MultiFace::getOtherFaceWithVertex(Face* f, int vid) {

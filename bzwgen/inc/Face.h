@@ -77,6 +77,9 @@ public:
   void insertVertexAfter(int index,int vid) {
     vtx->insert(vtx->begin()+index+1,vid);
   }
+  void insertVertexBefore(int index,int vid) {
+    vtx->insert(vtx->begin()+index,vid);
+  }
   void removeVertex(int index) {
     vtx->erase(vtx->begin()+index);
   }
