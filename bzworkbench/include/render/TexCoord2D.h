@@ -15,7 +15,7 @@
 
 #include <string>
 #include <vector>
-#include "../model/BZWParser.h"
+#include "model/BZWParser.h"
 
 class TexCoord2D {
 	public:

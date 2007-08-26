@@ -18,20 +18,20 @@
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Box.H>
 
-#include "../model/Model.h"
-#include "../model/SceneBuilder.h"
+#include "model/Model.h"
+#include "model/SceneBuilder.h"
 
-#include "../dialogs/MainMenu.h"
-#include "../dialogs/ConfigurationMenu.h"
-#include "../dialogs/MenuBar.h"
-#include "../dialogs/WorldOptionsDialog.h"
-#include "../dialogs/MasterConfigurationDialog.h"
+#include "dialogs/MainMenu.h"
+#include "dialogs/ConfigurationMenu.h"
+#include "dialogs/MenuBar.h"
+#include "dialogs/WorldOptionsDialog.h"
+#include "dialogs/MasterConfigurationDialog.h"
 
-#include "../dialogs/ConeConfigurationDialog.h"
+#include "dialogs/ConeConfigurationDialog.h"
 
-#include "../dialogs/Fl_Error.h"
+#include "dialogs/Fl_Error.h"
 
-#include "../widgets/Fl_ImageButton.h"
+#include "widgets/Fl_ImageButton.h"
 
 #include <osg/Timer>
 
@@ -196,7 +196,7 @@ private:
 	Fl_Button* configureButton;
 };
 
-#include "../model/Model.h"
+#include "model/Model.h"
 #include "View.h"
 
 #endif /*MAINWINDOW_H_*/

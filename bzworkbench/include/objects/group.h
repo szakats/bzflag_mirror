@@ -14,8 +14,8 @@
 #define GROUP_H_
 
 #include "bz2object.h"
-#include "../render/RGBA.h"
-#include "../model/BZWParser.h"
+#include "render/RGBA.h"
+#include "model/BZWParser.h"
 
 #include <string>
 #include <vector>

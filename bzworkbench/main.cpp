@@ -102,9 +102,7 @@ void buildModelDatabase() {
 	Model::registerObject("zone", NULL, "end", zone::init);
 	
 	Model::registerObject("define", "<define:<arc><base><box><cone><group><mesh><meshbox><meshpyr><pyramid><sphere><teleporter><tetra>>", "enddef", define::init);
-	
 }
-
 
 int main(int argc, char** argv) {
 	
@@ -129,5 +127,4 @@ int main(int argc, char** argv) {
 	
 	// run the program
 	return Fl::run();
-	
 }

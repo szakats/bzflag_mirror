@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-#include "../render/GeometryExtractorVisitor.h"
+#include "render/GeometryExtractorVisitor.h"
 
 using namespace std;
 

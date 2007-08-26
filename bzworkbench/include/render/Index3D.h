@@ -13,7 +13,7 @@
 #ifndef INDEX3D_H_
 #define INDEX3D_H_
 
-#include "../model/BZWParser.h"
+#include "model/BZWParser.h"
 
 class Index3D {
 	

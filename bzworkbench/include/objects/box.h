@@ -13,15 +13,15 @@
 #ifndef BOX_H_
 #define BOX_H_
 
-#include "../DataEntry.h"
-#include "../render/Point3D.h"
-#include "../ftoa.h"
-#include "../model/BZWParser.h"
+#include "DataEntry.h"
+#include "render/Point3D.h"
+#include "ftoa.h"
+#include "model/BZWParser.h"
 #include "bz2object.h"
 
-#include "../model/SceneBuilder.h"
+#include "model/SceneBuilder.h"
 
-#include "../render/GeometryExtractorVisitor.h"
+#include "render/GeometryExtractorVisitor.h"
 
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>

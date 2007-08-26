@@ -13,10 +13,10 @@
 #ifndef PHYSICS_H_
 #define PHYSICS_H_
 
-#include "../DataEntry.h"
-#include "../render/Point3D.h"
-#include "../ftoa.h"
-#include "../model/BZWParser.h"
+#include "DataEntry.h"
+#include "render/Point3D.h"
+#include "ftoa.h"
+#include "model/BZWParser.h"
 
 #include <osg/Referenced>
 

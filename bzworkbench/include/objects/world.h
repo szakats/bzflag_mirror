@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
-#include "../DataEntry.h"
-#include "../model/BZWParser.h"
+#include "DataEntry.h"
+#include "model/BZWParser.h"
 
 class world : public DataEntry {
 	public:

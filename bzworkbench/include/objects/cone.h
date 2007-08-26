@@ -15,7 +15,7 @@
 
 #include "bz2object.h"
 
-#include "../model/SceneBuilder.h"
+#include "model/SceneBuilder.h"
 #include <osg/Node>
 #include <osg/Geode>
 #include <osg/Geometry>

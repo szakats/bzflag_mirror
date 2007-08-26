@@ -13,10 +13,10 @@
 #ifndef MATERIAL_H_
 #define MATERIAL_H_
 
-#include "../DataEntry.h"
-#include "../render/RGBA.h"
-#include "../model/BZWParser.h"
-#include "../model/Model.h"
+#include "DataEntry.h"
+#include "render/RGBA.h"
+#include "model/BZWParser.h"
+#include "model/Model.h"
 
 #include <string>
 #include <vector>

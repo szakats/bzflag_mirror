@@ -14,8 +14,8 @@
 #define TELEPORTER_H_
 
 #include "bz2object.h"
-#include "../model/SceneBuilder.h"
-#include "../render/Point3D.h"
+#include "model/SceneBuilder.h"
+#include "render/Point3D.h"
 
 #include <string>
 #include <vector>

@@ -13,7 +13,7 @@
 #ifndef WATERLEVEL_H_
 #define WATERLEVEL_H_
 
-#include "../DataEntry.h"
+#include "DataEntry.h"
 #include <string>
 
 using namespace std;

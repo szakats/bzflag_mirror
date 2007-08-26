@@ -15,8 +15,8 @@
 
 #include <string>
 #include <vector>
-#include "../model/BZWParser.h"
-#include "../ftoa.h"
+#include "model/BZWParser.h"
+#include "ftoa.h"
 
 #include <osg/Vec3d>
 #include <osg/Vec3f>

@@ -14,7 +14,7 @@
 #define ARC_H_
 
 #include "bz2object.h"
-#include "../model/BZWParser.h"
+#include "model/BZWParser.h"
 #include <string>
 #include <vector>
 

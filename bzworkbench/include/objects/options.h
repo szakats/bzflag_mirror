@@ -13,7 +13,7 @@
 #ifndef OPTIONS_H_
 #define OPTIONS_H_
 
-#include "../DataEntry.h"
+#include "DataEntry.h"
 #include <string>
 
 using namespace std;

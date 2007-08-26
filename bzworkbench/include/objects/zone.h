@@ -14,7 +14,7 @@
 #define ZONE_H_
 
 #include "bz2object.h"
-#include "../flags.h"
+#include "flags.h"
 
 /**
  * Zone object
