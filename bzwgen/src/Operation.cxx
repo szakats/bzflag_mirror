@@ -20,7 +20,8 @@ int OperationNonterminal::runMesh(Mesh* mesh, int face) {
 
 int OperationAddFace::runMesh(Mesh* mesh, int face) { 
   if (!mesh->f[face]->isMultiFace()) {
-    printf("Error: addface passed a non-MultiFace parameter!");
+    printf("Error: addface passed on a non-MultiFace face!");
+    return face;
   }
   Face* clone = new Face();
   int fsize = mesh->vbase.size();
@@ -58,6 +59,21 @@ OperationMultifaces::OperationMultifaces(RuleSet* _ruleset, Expression* _exp, St
       }
   }
 }
+
+int OperationDetachFace::runMesh(Mesh* mesh,int face) {
+  if (!mesh->f[face]->isMultiFace()) {
+    printf("Error: detachface passed on a non-MultiFace face!");
+    return face;
+  }
+  flatten(mesh,face);
+  faces = ((MultiFace*)mesh->f[face])->detachFace(round(value));
+  if (faces != NULL) {
+    OperationMultifaces::runMesh(mesh,face);
+    delete faces;
+  }
+  return face;
+}
+
 
 int OperationMultifaces::runMesh(Mesh* mesh,int) {
   if (mesh == NULL) return 0;

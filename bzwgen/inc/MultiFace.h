@@ -25,6 +25,11 @@ public:
   MultiFace(Mesh* _mesh) : Face(), mesh(_mesh) {
     comps = new FaceVector;
   }
+  IntVector* detachFace(int id) {
+    if (comps->size() < 2) return NULL;
+    if (id > int(comps->size())) return NULL;
+    return NULL;
+  }
   void refineFace(Face* f) {
     int i = 0;
     while (i < int(f->size())) {

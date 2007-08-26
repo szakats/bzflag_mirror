@@ -271,6 +271,13 @@ public:
   }  
 };
 
+class OperationDetachFace : public OperationMultifaces {
+public:
+  OperationDetachFace(RuleSet* _ruleset, Expression* _exp, StringVector* facerules) : OperationMultifaces(_ruleset,_exp,facerules) {}
+  int runMesh(Mesh* mesh,int face);
+};
+
+
 class OperationExtrude : public OperationMultifaces {
 public:
   OperationExtrude(RuleSet* _ruleset, Expression* _exp, StringVector* facerules) : OperationMultifaces(_ruleset,_exp,facerules) {}
