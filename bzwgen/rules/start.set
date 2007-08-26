@@ -4,7 +4,7 @@
 # ------------------------------------------------------------------------
 
 start 
-#  -> 0.5  : sidewalk_sky spawn(test_run)
+#  -> 0.2  : sidewalk_sky spawn(test_run)
   -> 0.2  : (face(s) < 20000) sidewalk_sky spawn(sky_run)
   -> 0.2  : (face(h)/face(v) < 1.5 & face(v)/face(h) < 1.5) sidewalk_sky spawn(ngon_run) 
   -> 0.2  : (face(h)/face(v) < 1.5 & face(v)/face(h) < 1.5) sidewalk_sky spawn(ngon_run) 
@@ -13,15 +13,31 @@ start
   -> 0.4  : sidewalk_long    build_preprocess
 ;
 
-test_run
-  -> scale(0.8,1) multiface() addface(test_add1) addface(test_add2) mat_wall extrudet(4) common_ledge mat_wall extrudet(4) roof_classic
+test_init 
+  -> assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL1) 
 ;
+
+test_run
+  -> 0.6 : test_init scale(0.8,1) multiface() addface(test_add1) addface(test_add2) mat_wall extrudet(4) test_rest
+  -> 0.4 : test_init scale(0.5,1) multiface() addface(test_add3) mat_wall extrudet(4) test_rest
+;
+
+test_rest
+  -> 0.7 : common_ledge mat_wall extrudet(4) test_rest
+  -> 0.3 : roof_classic
+;
+
 test_add1
   -> scale(1.0,0.2) translater(0,2,0)
 ;
 
 test_add2
   -> scale(1.0,0.2) translater(0,-2,0)
+;
+
+test_add3
+  -> 0.5 : ngon(8)
+  -> 0.5 : ngon(6)
 ;
 
 # ------------------------------------------------------------------------
