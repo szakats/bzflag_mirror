@@ -12,9 +12,37 @@
 
 #include "MultiFace.h"
 
+void MultiFace::updateFaces(float z) {
+  printf("Update (%.2f)...\n",z);
+  for (size_t fi = 0; fi < comps->size(); fi++) {
+    Face* f = comps->at(fi);
+    for (int t = 0; t < f->size(); t++) {
+      if (f->tcd->at(t) < 0) {
+        mesh->v[f->vtx->at(t)].z = z;
+      } else {
+        (*f->vtx)[t] = vertex(f->tcd->at(t));
+      }
+    }
+  }
+}
+
+void MultiFace::storeFaces() {
+  for (size_t fi = 0; fi < comps->size(); fi++) {
+    Face* f = comps->at(fi);
+    f->tcd->resize(f->size());
+    for (int t = 0; t < f->size(); t++) {
+      (*f->tcd)[t] = getVertexIndex(f->vertex(t));
+    }
+  }
+}
+
+
 IntVector* MultiFace::detachFace(int id) {
+  printf("Detach face\n");
   if (comps->size() < 2) return NULL;
   if (id >= int(comps->size())) return NULL;
+  updateFaces(mesh->v[vertex(0)].z);
+  printf("Entering...\n");
   
   IntVector* result = new IntVector;
   Face* f = comps->at(id);
@@ -22,6 +50,7 @@ IntVector* MultiFace::detachFace(int id) {
   int index = pickRemovalIndex(comps->at(id));
 
   while (index >= 0) {
+    printf("Element iteration...\n");
     IntVector* nvtx = new IntVector;
 
     int vid = vertex(index);
@@ -29,6 +58,7 @@ IntVector* MultiFace::detachFace(int id) {
     int lastgindex = index;
 
     do {
+      printf("Vertex iteration...\n");
       int gindex = getVertexIndex(vid);
       if (gindex != -1) lastgindex = gindex;
       int findex = f->getVertexIndex(vid);
@@ -43,6 +73,7 @@ IntVector* MultiFace::detachFace(int id) {
       nvtx->push_back(vid);
 
       if (oindex < 0 ) {
+        printf("Remove\n");
         removeVertex(gindex);
         vid = f->vertex(findex+1);
       } else {
@@ -83,6 +114,7 @@ IntVector* MultiFace::detachFace(int id) {
     delete result;
     result = NULL;
   }
+  storeFaces();
   return result;
 }
 
@@ -122,21 +154,21 @@ void MultiFace::refineFace(Face* f) {
   while (i < int(f->size())) {
     Vertex ipoint;
     int index;
-    printf("Intersect... (%d,%d)\n",i,modnext(i,f->size()));
+    //printf("Intersect... (%d,%d)\n",i,modnext(i,f->size()));
     //      printf("Multi%s\n",mesh->faceToString(this).c_str());
     if (vertexNearestIntersect(f->vertex(i),f->vertex(i+1),ipoint,index)) {
-      printf("Nearerst found... (%d) %s : ",index,ipoint.toString().c_str());
+      //printf("Nearerst found... (%d) %s : ",index,ipoint.toString().c_str());
       int ipid;
       if (samepointZ(mesh->v[f->vertex(i+1)],mesh->v[vertex(index+1)])) {
-        printf("Is common\n");
+        //printf("Is common\n");
       } else if (samepointZ(ipoint,mesh->v[f->vertex(i+1)])) {
-        printf("Is samepoint with next\n");
+        //printf("Is samepoint with next\n");
         insertVertexAfter(index,f->vertex(i+1));
       } else if (samepointZ(ipoint,mesh->v[vertex(index+1)])) {
-        printf("Is samepoint with itself\n");
+        //printf("Is samepoint with itself\n");
         f->insertVertexAfter(i,vertex(index+1));
       } else {
-        printf("Is normal\n");
+        //printf("Is normal\n");
         ipid = mesh->addVertex(ipoint);
         f->insertVertexAfter(i,ipid);
         insertVertexAfter(index,ipid);
@@ -148,7 +180,7 @@ void MultiFace::refineFace(Face* f) {
 
 
 int MultiFace::addFace(Face* f) {
-  printf("Addface start... (%d,%d)\n",size(),f->size());
+  //printf("Addface start... (%d,%d)\n",size(),f->size());
   //    printf("Multi%s\n",mesh->faceToString(this).c_str());
   //    printf("Add%s\n",mesh->faceToString(f).c_str());
   f->output = false;
@@ -159,7 +191,7 @@ int MultiFace::addFace(Face* f) {
     refineFace(f);
     int fsize = f->size();
     int tsize = size();
-    printf("Refined... (%d,%d)\n",tsize,fsize);
+    //printf("Refined... (%d,%d)\n",tsize,fsize);
     IntVector* newvtx = new IntVector;
     int index = 0;
     for (index = 0; index < fsize; index++) 
@@ -171,7 +203,7 @@ int MultiFace::addFace(Face* f) {
     int getvert;
     int next;
     while (first || !newf || (index != end)) {
-      printf("--- %d,%d\n",index,newf);
+      //printf("--- %d,%d\n",index,newf);
       first = false;
       if (newf) {
         newvtx->push_back(f->vertex(index));
@@ -191,7 +223,8 @@ int MultiFace::addFace(Face* f) {
     vtx = newvtx;
   }
   comps->push_back(f);
-  printf("Addface end... (%d,%d)\n",size(),f->size());
+  storeFaces();
+  //printf("Addface end... (%d,%d)\n",size(),f->size());
   return comps->size()-1;
 }
 
@@ -221,14 +254,11 @@ bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index
   Vertex R2;
   for (int i = 0; i < tsize; i++) {
     int r = intersectZ(A,B,mesh->v[vertex(i)],mesh->v[vertex(i+1)],R1,R2);
-    printf("I!");
     if (r > 0) {
-      printf("r>0!");
       if (!samepointZ(mesh->v[vertex(i)],R1)) {
-        printf("ns!");
         float thisdistance = (A-R1).length();
         if (thisdistance > EPSILON) {
-          printf("ICH:%s\n",R1.toString().c_str());
+//          printf("ICH:%s\n",R1.toString().c_str());
           if (thisdistance < distance) {
             distance = thisdistance;
             P = R1;
@@ -238,12 +268,10 @@ bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index
       }
     }
     if (r == 2) {
-      printf("r=2!");
       if (!samepointZ(mesh->v[vertex(i)],R2)) {
-        printf("ns!");
         float thisdistance = (A-R2).length();
         if (thisdistance < EPSILON) continue;
-        printf("ICH(2):%s\n",R2.toString().c_str());
+//        printf("ICH(2):%s\n",R2.toString().c_str());
         if (thisdistance < distance) {
           distance = thisdistance;
           P = R2;

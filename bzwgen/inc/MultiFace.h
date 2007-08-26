@@ -28,6 +28,8 @@ public:
   virtual bool isMultiFace() { return true; }
   virtual ~MultiFace() { delete comps; }
 private:
+  void updateFaces(float z);
+  void storeFaces();
   void refineFace(Face* f);
   bool vertexInside(int vid);
   bool vertexNearestIntersect(int begin, int end, Vertex &P, int &index);
