@@ -48,6 +48,7 @@ partitionhi           { return(PARTITIONHI);}
 partitionvi           { return(PARTITIONVI);}
 face                  { return(FACE); }
 addface               { return(ADDFACE); }
+detachface            { return(DETACHFACE); }
 free                  { return(FREE); }
 ngon                  { return(NGON); }
 test                  { return(TEST); }

@@ -64,9 +64,10 @@
      NGON = 290,
      REMOVE = 291,
      ADDFACE = 292,
-     NUMBER = 293,
-     NONTERM = 294,
-     ATTRIBUTE = 295
+     DETACHFACE = 293,
+     NUMBER = 294,
+     NONTERM = 295,
+     ATTRIBUTE = 296
    };
 #endif
 /* Tokens.  */
@@ -105,9 +106,10 @@
 #define NGON 290
 #define REMOVE 291
 #define ADDFACE 292
-#define NUMBER 293
-#define NONTERM 294
-#define ATTRIBUTE 295
+#define DETACHFACE 293
+#define NUMBER 294
+#define NONTERM 295
+#define ATTRIBUTE 296
 
 
 
@@ -125,7 +127,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 129 "..\\parser.hxx"
+#line 131 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
