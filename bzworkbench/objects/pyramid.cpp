@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/pyramid.h"
+#include "objects/pyramid.h"
 
 pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("share/pyramid/pyramid.obj")) {
 	

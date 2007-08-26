@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/render/TextureRepeaterVisitor.h"
+#include "render/TextureRepeaterVisitor.h"
 
 // constructor
 TextureRepeaterVisitor::TextureRepeaterVisitor() :

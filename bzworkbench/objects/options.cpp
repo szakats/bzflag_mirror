@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/options.h"
+#include "objects/options.h"
 
 // default constructor
 options::options() : DataEntry("options", "") {

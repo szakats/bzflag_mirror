@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/arc.h"
+#include "objects/arc.h"
 
 // default constructor
 arc::arc() : 

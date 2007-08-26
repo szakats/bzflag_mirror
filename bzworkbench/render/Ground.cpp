@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/render/Ground.h"
+#include "render/Ground.h"
 
 
 const float Ground::DEFAULT_SIZE = 400.0f;

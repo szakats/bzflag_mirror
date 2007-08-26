@@ -14,11 +14,11 @@
 // #include "common.h"
 
 // interface header
-#include "include/TextUtils.h"
+#include "TextUtils.h"
 
 //#include <regex.h>
 
-#include "include/defines.h"
+#include "defines.h"
 
 // system headers
 #include <string>
@@ -27,6 +27,7 @@
 #include <stdarg.h>
 #include <vector>
 #include <stdio.h>
+#include <stdarg.h>
 
 namespace TextUtils
 {

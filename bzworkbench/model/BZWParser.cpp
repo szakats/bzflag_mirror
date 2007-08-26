@@ -10,8 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/model/BZWParser.h"
-#include "../include/model/Model.h"
+#include "model/BZWParser.h"
+#include "model/Model.h"
 
 Model* BZWParser::_modelRef = NULL;
 

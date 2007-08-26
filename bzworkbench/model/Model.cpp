@@ -10,8 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/model/Model.h"
-#include "../include/windows/View.h"
+#include "model/Model.h"
+#include "windows/View.h"
 
 // global reference to the model so the static call will work
 Model* modelRef;

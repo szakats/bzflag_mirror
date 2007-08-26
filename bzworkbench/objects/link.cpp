@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/link.h"
+#include "objects/link.h"
 
 // constructor
 Tlink::Tlink() : bz2object("link", "<name><from><to>") {

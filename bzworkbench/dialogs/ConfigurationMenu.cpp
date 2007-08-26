@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/dialogs/ConfigurationMenu.h"
+#include "dialogs/ConfigurationMenu.h"
 
 // build the menu
 void ConfigurationMenu::buildMenu(void) {

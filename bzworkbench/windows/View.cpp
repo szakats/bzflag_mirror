@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/windows/View.h"
+#include "windows/View.h"
 
 const double View::DEFAULT_ZOOM = 75.0;
 

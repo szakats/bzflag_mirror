@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/dialogs/Fl_Tweak.h"
+#include "dialogs/Fl_Tweak.h"
 
 // constructor function
 Fl_Tweak::Fl_Tweak( bz2object* obj, TweakOp op ) : Fl_Dialog( "Configure", DEFAULT_WIDTH, DEFAULT_HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL ) {

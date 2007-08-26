@@ -21,7 +21,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_NEED_VNSPRINTF"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -29,7 +29,7 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -37,13 +37,24 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="fltkd.lib fltkgld.lib fltkimagesd.lib fltkpngd.lib fltkzd.lib opengl32.lib wsock32.lib comctl32.lib osgd.lib osgGAd.lib osgViewerd.lib osgDBd.lib"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="$(OSG_ROOT)/lib/debug"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy debug\*.exe ..\..\*.exe
+copy $(OSG_ROOT)\lib\debug\OpenThreadsd.dll ..\..\OpenThreadsd.dll
+copy $(OSG_ROOT)\lib\debug\osgd.dll ..\..\osgd.dll
+copy $(OSG_ROOT)\lib\debug\osgGAd.dll ..\..\osgGAd.dll
+copy $(OSG_ROOT)\lib\debug\osgUtild.dll ..\..\osgUtild.dll
+copy $(OSG_ROOT)\lib\debug\osgViewerd.dll ..\..\osgViewerd.dll
+copy $(OSG_ROOT)\lib\debug\osgTextd.dll ..\..\osgTextd.dll
+copy $(OSG_ROOT)\lib\debug\osgDBd.dll ..\..\osgDBd.dll
+copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\debug\osgdb_pngd.dll ..\..\osgdb_pngd.dlll
+"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -70,7 +81,7 @@
 			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_NEED_VNSPRINTF"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
@@ -83,6 +94,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="fltk.lib fltkgl.lib fltkimages.lib fltkpng.lib fltkz.lib opengl32.lib wsock32.lib comctl32.lib osg.lib osgGA.lib osgViewer.lib osgDB.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(OSG_ROOT)/lib/release"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"

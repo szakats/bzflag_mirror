@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/material.h"
+#include "objects/material.h"
 
 // build the aliases for the textures
 void material::buildAliases() { 

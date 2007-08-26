@@ -10,8 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/widgets/TransformWidget.h"
-#include "../include/defines.h"
+#include "widgets/TransformWidget.h"
+#include "defines.h"
 
 // unused; prevents the build from breaking
 // (Fl_Group's copy constructor is private)

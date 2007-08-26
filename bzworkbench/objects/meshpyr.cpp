@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/meshpyr.h"
+#include "objects/meshpyr.h"
 
 // default constructor
 meshpyr::meshpyr() : bz2object("meshpyr", "<position><rotation><size><matref><phydrv>") { }

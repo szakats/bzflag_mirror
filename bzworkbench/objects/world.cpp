@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/world.h"
+#include "objects/world.h"
 
 world::world() : DataEntry("world", "<name><size><flagHeight><noWalls>") {
 	this->worldName = string("");

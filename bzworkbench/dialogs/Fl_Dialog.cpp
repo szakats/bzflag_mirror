@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/dialogs/Fl_Dialog.h"
+#include "dialogs/Fl_Dialog.h"
 
 // a helper method to build the default group and initialize member variables
 void Fl_Dialog::doConstructor(int width, int height) {

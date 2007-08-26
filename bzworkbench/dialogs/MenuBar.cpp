@@ -10,8 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/dialogs/MenuBar.h"
-#include "../include/model/Model.h"
+#include "dialogs/MenuBar.h"
+#include "model/Model.h"
 
 void MenuBar::buildMenu(void) {
 	

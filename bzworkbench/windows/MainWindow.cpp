@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/windows/MainWindow.h"
+#include "windows/MainWindow.h"
 
 bool MainWindow::initialized = false;
 

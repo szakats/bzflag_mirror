@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/widgets/MaterialWidget.h"
+#include "widgets/MaterialWidget.h"
 
 // copy constructor (does nothing )
 MaterialWidget::MaterialWidget( const MaterialWidget& mat ) : Fl_Group( 0, 0, 0, 0 ) { this->end(); }

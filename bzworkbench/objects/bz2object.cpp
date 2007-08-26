@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/bz2object.h"
+#include "objects/bz2object.h"
 
 // default constructor
 bz2object::bz2object(const char* name, const char* keys):

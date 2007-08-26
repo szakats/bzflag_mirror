@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/box.h"
+#include "objects/box.h"
 
 // constructors
 box::box() : bz2object("box", "<name><position><rotation><size>", SceneBuilder::buildNode( "share/box/box.obj" )) {

@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/dialogs/AdvancedOptionsDialog.h"
+#include "dialogs/AdvancedOptionsDialog.h"
 
 // main constructor
 AdvancedOptionsDialog::AdvancedOptionsDialog( bz2object* obj ) :

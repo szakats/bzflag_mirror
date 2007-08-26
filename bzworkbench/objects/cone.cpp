@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/cone.h"
+#include "objects/cone.h"
 
 // default constructor
 cone::cone() : 

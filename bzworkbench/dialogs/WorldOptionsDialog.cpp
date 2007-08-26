@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/dialogs/WorldOptionsDialog.h"
+#include "dialogs/WorldOptionsDialog.h"
 
 // helper method--concat strings from a vector of strings
 string concat(vector<string> strings) {

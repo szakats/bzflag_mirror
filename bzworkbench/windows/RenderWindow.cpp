@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/windows/RenderWindow.h"
+#include "windows/RenderWindow.h"
 
 // constructor with model
 RenderWindow::RenderWindow() :

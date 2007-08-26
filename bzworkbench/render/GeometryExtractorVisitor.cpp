@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/render/GeometryExtractorVisitor.h"
+#include "render/GeometryExtractorVisitor.h"
 
 // constructor
 GeometryExtractorVisitor::GeometryExtractorVisitor( osg::Node* node ) :

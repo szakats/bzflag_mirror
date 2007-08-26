@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/meshbox.h"
+#include "objects/meshbox.h"
 
 // construct an empty box
 meshbox::meshbox() : 

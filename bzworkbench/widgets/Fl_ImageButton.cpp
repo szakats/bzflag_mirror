@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/widgets/Fl_ImageButton.h"
+#include "widgets/Fl_ImageButton.h"
 
 // constructor
 Fl_ImageButton::Fl_ImageButton( int x, int y, int width, int height, const char* imageFile ) :

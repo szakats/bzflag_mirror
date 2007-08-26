@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/dialogs/Fl_Error.h"
+#include "dialogs/Fl_Error.h"
 
 Fl_Error::Fl_Error(const char* message) :
 	Fl_Dialog("BZWorkbench Error", DEFAULT_WIDTH, 200, Fl_Dialog::Fl_OK) {

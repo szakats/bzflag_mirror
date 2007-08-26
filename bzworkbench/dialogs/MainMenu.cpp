@@ -10,8 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/dialogs/MainMenu.h"
-#include "../include/windows/MainWindow.h"
+#include "dialogs/MainMenu.h"
+#include "windows/MainWindow.h"
 
 // builds the menu widgets
 void MainMenu::buildMenu(void) {

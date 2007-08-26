@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/dialogs/ConeConfigurationDialog.h"
+#include "dialogs/ConeConfigurationDialog.h"
 
 // constructor
 ConeConfigurationDialog::ConeConfigurationDialog( cone* theCone ) :

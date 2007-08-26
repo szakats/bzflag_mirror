@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/zone.h"
+#include "objects/zone.h"
 
 // constructor
 zone::zone() : bz2object("zone", "<name><position><size><rotation><team><flag><safety><zoneflag>") {

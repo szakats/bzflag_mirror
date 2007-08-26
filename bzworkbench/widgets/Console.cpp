@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/widgets/Console.h"
+#include "widgets/Console.h"
 
 // empty constructor
 Console::Console(int x, int y, int width, int height, int lineLimit) :

@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/mesh.h"
+#include "objects/mesh.h"
 
 // default constructor
 mesh::mesh(void) :

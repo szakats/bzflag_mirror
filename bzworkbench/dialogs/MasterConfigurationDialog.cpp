@@ -10,8 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/dialogs/MasterConfigurationDialog.h"
-#include "../include/defines.h"
+#include "dialogs/MasterConfigurationDialog.h"
+#include "defines.h"
 #include <iostream>
 
 MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :

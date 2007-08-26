@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/render/Selection.h"
+#include "render/Selection.h"
 
 
 const float Selection::CENTER_RADIUS = 0.5f;

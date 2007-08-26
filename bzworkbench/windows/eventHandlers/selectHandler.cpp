@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../../include/windows/eventHandlers/selectHandler.h"
+#include "windows/eventHandlers/selectHandler.h"
 
 selectHandler::selectHandler( View* view, osgGA::MatrixManipulator* manipulator ) : BZEventHandler( view ) {
 	this->lastSelected = NULL;

@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/windows/EventHandlerCollection.h"
+#include "windows/EventHandlerCollection.h"
 
 // add an event handler
 bool EventHandlerCollection::addEventHandler( const char* _name, BZEventHandler* eventHandler )  {

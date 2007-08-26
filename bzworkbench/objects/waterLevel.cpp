@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/waterLevel.h"
+#include "objects/waterLevel.h"
 
 waterLevel::waterLevel() : DataEntry("waterLevel", "<name><height><matref>") {
 	this->name = string("");

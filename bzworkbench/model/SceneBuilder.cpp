@@ -10,8 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/model/SceneBuilder.h"
-#include "../include/windows/View.h"
+#include "model/SceneBuilder.h"
+#include "windows/View.h"
 
 
 int SceneBuilder::nameCount;

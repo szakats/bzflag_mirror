@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/tetra.h"
+#include "objects/tetra.h"
 
 // no arg constructor
 tetra::tetra() : bz2object("tetra", "<name><vertex><scale><shift><shear><spin><matref>") {

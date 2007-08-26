@@ -10,7 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/objects/teleporter.h"
+#include "objects/teleporter.h"
 
 // constructor
 teleporter::teleporter() :

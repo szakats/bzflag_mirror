@@ -10,8 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "../include/widgets/QuickLabel.h"
-#include "../include/defines.h"
+#include "widgets/QuickLabel.h"
+#include "defines.h"
 
 // initializes the text
 QuickLabel::QuickLabel(const char* labelText, int x, int y) : 
