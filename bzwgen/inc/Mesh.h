@@ -69,6 +69,13 @@ public:
   int createNGon(Vertex center, float radius, int n);
   float faceH(int face) { return (v[f[face]->vtx->at(0)] - v[f[face]->vtx->at(1)]).length(); }
   float faceV(int face) { return (v[f[face]->vtx->at(3)] - v[f[face]->vtx->at(0)]).length(); }
+  std::string faceToString(Face* face) { 
+    std::string result = "Face: ( ";
+    for (size_t i = 0; i < face->vtx->size(); i++)
+      result += v[face->vtx->at(i)].toString()+ " ";
+    result += ")";
+    return result;
+  }
   ~Mesh();
 private:
   Vertex extensionVertex(int ida, int idb, int idc);

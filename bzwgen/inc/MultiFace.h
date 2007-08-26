@@ -31,17 +31,18 @@ public:
       Vertex ipoint;
       int index;
       printf("Intersect... (%d,%d)\n",i,modnext(i,f->vtx->size()));
+      printf("Multi%s\n",mesh->faceToString(this).c_str());
       if (vertexNearestIntersect(f->vtx->at(i),f->vtx->at(modnext(i,f->vtx->size())),ipoint,index)) {
-        printf("Nearerst found... (%d) : ",index);
+        printf("Nearerst found... (%d) %s : ",index,ipoint.toString().c_str());
         int ipid;
         if (samepointZ(ipoint,mesh->v[modnext(i,f->vtx->size())])) {
-          printf("Is samepoint with next\n",index);
+          printf("Is samepoint with next\n");
           vtx->insert(vtx->begin()+index+1,modnext(i,f->vtx->size()));
-        } else if (samepointZ(ipoint,mesh->v[vtx->at(index)])) {
-          printf("Is samepoint with itself\n",index);
+        } else if (samepointZ(ipoint,mesh->v[vtx->at(index)]) || samepointZ(ipoint,mesh->v[vtx->at(modnext(index,vtx->size()))])) {
+          printf("Is samepoint with itself\n");
           f->vtx->insert(f->vtx->begin()+i+1,vtx->at(index));
         } else {
-          printf("Is normal\n",index);
+          printf("Is normal\n");
           ipid = mesh->addVertex(ipoint);
           f->vtx->insert(f->vtx->begin()+i+1,ipid);
           vtx->insert(vtx->begin()+index+1,ipid);
@@ -52,6 +53,8 @@ public:
   }
   int addFace(Face* f) {
     printf("Addface start... (%d,%d)\n",vtx->size(),f->vtx->size());
+    printf("Multi%s\n",mesh->faceToString(this).c_str());
+    printf("Add%s\n",mesh->faceToString(f).c_str());
     f->output = false;
     if (comps->size() == 0) {
       for (size_t i = 0; i < f->vtx->size(); i++) 
@@ -117,6 +120,7 @@ public:
       if (intersectZ(A,B,mesh->v[vtx->at(i)],mesh->v[vtx->at(modnext(i,size))],R)) {
         float thisdistance = (A-R).length();
         if (thisdistance < EPSILON) continue;
+        printf("ICH:%s\n",R.toString().c_str());
         if (thisdistance < distance) {
           distance = thisdistance;
           P = R;

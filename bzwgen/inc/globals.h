@@ -29,7 +29,7 @@
 #define MATDOORR  10
 #define MAXMATERIALS 11
 
-#define EPSILON 0.00000001f
+#define EPSILON 0.000001f
 #ifdef _MSC_VER
 #pragma warning(disable:4996)
 #endif
@@ -71,7 +71,7 @@ struct Vertex {
   void normalize() { float l = length(); if (l == 0.0f) return; x/=l; y/=l; z/=l; }
   Vertex norm() { float l = length(); if (l == 0.0f) return Vertex(); return Vertex(x/l,y/l,z/l); }
 
-  std::string toString() { char buffer[80]; sprintf(buffer, "[%.2f,%.2f,%.2f]",x,y,z); return std::string(buffer); }
+  std::string toString() { char buffer[80]; sprintf(buffer, "[%.4f,%.4f,%.4f]",x,y,z); return std::string(buffer); }
 
   Vertex cross(const Vertex &v) { 
     return Vertex(
@@ -217,15 +217,15 @@ inline bool inrange(float a, float r1, float r2) {
           else return a > r2-EPSILON && a < r1+EPSILON; 
 }
 
-inline bool commonrange(float a1, float a2, float b1, float b2, float &na2) { 
+inline bool commonrange(float a1, float a2, float b1, float b2, float &na1) { 
   float mina = minf(a1,a2);
   float maxa = maxf(a1,a2);
   if (maxa < b1+EPSILON && maxa < b2+EPSILON) return false;
   if (mina > b1-EPSILON && mina > b2-EPSILON) return false;
-  if (inrange(a2,b1,b2)) {
-    na2 = a2; 
+  if (inrange(a1,b1,b2)) {
+    na1 = a1; 
   } else {
-    if (a2 > a1) na2 = maxf(b1,b2); else na2 = minf(b1,b2);
+    if (a2 > a1) na1 = minf(b1,b2); else na1 = maxf(b1,b2);
   }
   return true;
 }
@@ -236,17 +236,17 @@ inline bool intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P) {
   float s = ((A.y-C.y)*(B.x-A.x)-(A.x-C.x)*(B.y-A.y));
   if (iszero(d)) {
     if (iszero(r)) { // parallel and coincident
-      float nb;
-      if (iszero(A.x-C.x)) {                   // parallel on X
-        if (commonrange(A.x,B.x,C.x,D.x,nb)) { // AB and CD have common point
-          P = B;
-          P.x = nb;
+      float na;
+      if (iszero(A.y-C.y)&&iszero(B.y-D.y)) {                   // parallel on X
+        if (commonrange(A.x,B.x,C.x,D.x,na)) { // AB and CD have common point
+          P = A;
+          P.x = na;
           return true;
         } else return false;
       } else {                                 // parallel on Y
-        if (commonrange(A.y,B.y,C.y,D.y,nb)) { // AB and CD have common point
-          P = B;
-          P.y = nb;
+        if (commonrange(A.y,B.y,C.y,D.y,na)) { // AB and CD have common point
+          P = A;
+          P.y = na;
           return true;
         } else return false;
       }
