@@ -27,47 +27,50 @@ public:
   }
   void refineFace(Face* f) {
     int i = 0;
-    while (i < int(f->vtx->size())) {
+    while (i < int(f->size())) {
       Vertex ipoint;
       int index;
-      printf("Intersect... (%d,%d)\n",i,modnext(i,f->vtx->size()));
+      printf("Intersect... (%d,%d)\n",i,modnext(i,f->size()));
       printf("Multi%s\n",mesh->faceToString(this).c_str());
-      if (vertexNearestIntersect(f->vtx->at(i),f->vtx->at(modnext(i,f->vtx->size())),ipoint,index)) {
+      if (vertexNearestIntersect(f->vertex(i),f->vertex(i+1),ipoint,index)) {
         printf("Nearerst found... (%d) %s : ",index,ipoint.toString().c_str());
         int ipid;
-        if (samepointZ(ipoint,mesh->v[modnext(i,f->vtx->size())])) {
+        if (samepointZ(ipoint,mesh->v[f->vertex(i+1)])) {
           printf("Is samepoint with next\n");
-          vtx->insert(vtx->begin()+index+1,modnext(i,f->vtx->size()));
-        } else if (samepointZ(ipoint,mesh->v[vtx->at(index)]) || samepointZ(ipoint,mesh->v[vtx->at(modnext(index,vtx->size()))])) {
+          insertVertexAfter(index,f->vertex(i+1));
+        } else if (samepointZ(ipoint,mesh->v[vertex(index+1)])) {
           printf("Is samepoint with itself\n");
-          f->vtx->insert(f->vtx->begin()+i+1,vtx->at(index));
+          f->insertVertexAfter(i,vertex(index+1));
+        } else if (samepointZ(ipoint,mesh->v[vertex(index)])) {
+          printf("Is samepoint with itself\n");
+          f->insertVertexAfter(i,vertex(index));
         } else {
           printf("Is normal\n");
           ipid = mesh->addVertex(ipoint);
-          f->vtx->insert(f->vtx->begin()+i+1,ipid);
-          vtx->insert(vtx->begin()+index+1,ipid);
+          f->insertVertexAfter(i,ipid);
+          insertVertexAfter(index,ipid);
         }
       }
       i++;
     }
   }
   int addFace(Face* f) {
-    printf("Addface start... (%d,%d)\n",vtx->size(),f->vtx->size());
+    printf("Addface start... (%d,%d)\n",size(),f->size());
     printf("Multi%s\n",mesh->faceToString(this).c_str());
     printf("Add%s\n",mesh->faceToString(f).c_str());
     f->output = false;
     if (comps->size() == 0) {
-      for (size_t i = 0; i < f->vtx->size(); i++) 
-        vtx->push_back(f->vtx->at(i));
+      for (int i = 0; i < f->size(); i++) 
+        vtx->push_back(f->vertex(i));
     } else {
       refineFace(f);
-      printf("Refined... (%d,%d)\n",vtx->size(),f->vtx->size());
+      int fsize = f->size();
+      int tsize = size();
+      printf("Refined... (%d,%d)\n",tsize,fsize);
       IntVector* newvtx = new IntVector;
-      int fsize = f->vtx->size();
-      int size = vtx->size();
       int index = 0;
       for (index = 0; index < fsize; index++) 
-        if (getVertexIndex(f->vtx->at(index)) < 0 && !vertexInside(f->vtx->at(index))) break;
+        if (getVertexIndex(f->vertex(index)) < 0 && !vertexInside(f->vertex(index))) break;
       // check if no vertices are inside?
       int end = index;
       bool newf = true;
@@ -77,13 +80,13 @@ public:
       while (first || !newf || (index != end)) {
         first = false;
         if (newf) {
-          newvtx->push_back(f->vtx->at(index));
+          newvtx->push_back(f->vertex(index));
           next = modnext(index,fsize);
-          getvert = getVertexIndex(f->vtx->at(next));
+          getvert = getVertexIndex(f->vertex(next));
         } else {
-          newvtx->push_back(vtx->at(index));
-          next = modnext(index,size);
-          getvert = f->getVertexIndex(vtx->at(next));
+          newvtx->push_back(vertex(index));
+          next = modnext(index,tsize);
+          getvert = f->getVertexIndex(vertex(next));
         }
         if (getvert != -1) {
           newf = !newf;
@@ -94,7 +97,7 @@ public:
       vtx = newvtx;
     }
     comps->push_back(f);
-    printf("Addface end... (%d,%d)\n",vtx->size(),f->vtx->size());
+    printf("Addface end... (%d,%d)\n",size(),f->size());
     return comps->size()-1;
   }
   bool vertexInside(int vid) {
@@ -103,9 +106,8 @@ public:
     B.y = 100000.0f; // sufficient to be out of range
     Vertex P;
     int count = 0;
-    int size = vtx->size();
-    for (int i = 0; i < size; i++) {
-      if (intersectZ(A,B,mesh->v[vtx->at(i)],mesh->v[vtx->at(modnext(i,size))],P)) count++;
+    for (int i = 0; i < size(); i++) {
+      if (intersectZ(A,B,mesh->v[vertex(i)],mesh->v[vertex(i+1)],P)) count++;
     }      
     return (count%2 == 1);
   }
@@ -113,11 +115,11 @@ public:
     Vertex A = mesh->v[begin];
     Vertex B = mesh->v[end];
     float length = (A-B).length();
-    int size = vtx->size();
+    int tsize = size();
     float distance = length + 1.0f;
     Vertex R;
-    for (int i = 0; i < size; i++) {
-      if (intersectZ(A,B,mesh->v[vtx->at(i)],mesh->v[vtx->at(modnext(i,size))],R)) {
+    for (int i = 0; i < tsize; i++) {
+      if (intersectZ(A,B,mesh->v[vertex(i)],mesh->v[vertex(i+1)],R)) {
         float thisdistance = (A-R).length();
         if (thisdistance < EPSILON) continue;
         printf("ICH:%s\n",R.toString().c_str());
