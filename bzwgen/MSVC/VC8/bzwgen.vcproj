@@ -217,6 +217,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\src\MultiFace.cxx"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\Operation.cxx"
 					>
 				</File>
