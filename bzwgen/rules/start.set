@@ -4,7 +4,7 @@
 # ------------------------------------------------------------------------
 
 start 
-#  -> 0.5  : sidewalk_sky spawn(test_run)
+ # -> 0.5  : sidewalk_sky spawn(test_run)
   -> 0.2  : (face(s) < 20000) sidewalk_sky spawn(sky_run)
   -> 0.2  : (face(h)/face(v) < 1.5 & face(v)/face(h) < 1.5) sidewalk_sky spawn(ngon_run) 
   -> 0.2  : (face(h)/face(v) < 1.5 & face(v)/face(h) < 1.5) sidewalk_sky spawn(ngon_run) 
@@ -17,7 +17,7 @@ test_run
   -> scale(0.8,1) multiface() addface(test_add) mat_wall extrude(4) 
 ;
 test_add
-  -> scale(1.25,0.8) translater(0,0.125,0)
+  -> scale(1.25,0.8) translater(0.0,0.125,0)
 ;
 
 # ------------------------------------------------------------------------

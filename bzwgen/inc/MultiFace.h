@@ -121,8 +121,11 @@ public:
     Vertex R2;
     for (int i = 0; i < tsize; i++) {
       int r = intersectZ(A,B,mesh->v[vertex(i)],mesh->v[vertex(i+1)],R1,R2);
-      if (!samepointZ(mesh->v[vertex(i)],R1)) {
-        if (r > 0) {
+      printf("I!");
+      if (r > 0) {
+        printf("r>0!");
+        if (!samepointZ(mesh->v[vertex(i)],R1)) {
+          printf("ns!");
           float thisdistance = (A-R1).length();
           if (thisdistance > EPSILON) {
             printf("ICH:%s\n",R1.toString().c_str());
@@ -134,8 +137,10 @@ public:
           }
         }
       }
-      if (!samepointZ(mesh->v[vertex(i)],R2)) {
-        if (r == 2) {
+      if (r == 2) {
+        printf("r=2!");
+        if (!samepointZ(mesh->v[vertex(i)],R2)) {
+          printf("ns!");
           float thisdistance = (A-R2).length();
           if (thisdistance < EPSILON) continue;
           printf("ICH(2):%s\n",R2.toString().c_str());
