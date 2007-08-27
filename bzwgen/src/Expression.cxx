@@ -19,8 +19,8 @@ double ExpressionAttribute::calculate(Mesh*,int) {
 
 double ExpressionFaceAttribute::calculate(Mesh* mesh,int face) {
   if (attrname == "x") return mesh->faceCenter(face).x;
-  if (attrname == "y") return mesh->faceCenter(face).x;
-  if (attrname == "z") return mesh->faceCenter(face).x;
+  if (attrname == "y") return mesh->faceCenter(face).y;
+  if (attrname == "z") return mesh->faceCenter(face).z;
   if (attrname == "h") return mesh->faceH(face);
   if (attrname == "v") return mesh->faceV(face);
   if (attrname == "s") return mesh->faceH(face) * mesh->faceV(face);
