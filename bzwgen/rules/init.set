@@ -16,7 +16,7 @@ initialize ->
   loadmaterial(MATROOF,roof)
   loadmaterial(MATROOFT,rooft)
   loadmaterial(MATGLASS,glass)
-  loadmaterial(MATGRASS,std_ground)
+  loadmaterial(MATGRASS,grass)
   loadmaterial(MATDOORW,doorw)
   loadmaterial(MATDOORR,doorr)
   assign(LEDGEHEIGHT = 0.5)
