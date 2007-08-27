@@ -332,7 +332,7 @@ int Mesh::partitionFace(int fid, float amount, bool horizontal) {
 }
 
 
-void Mesh::output(Output& out) {
+void Mesh::output(Output& out, int materialCount) {
   out.line("mesh");
   int mat = -1;
   for (size_t i = 0; i < inside.size(); i++) out.vertex(inside[i],"inside");
@@ -341,7 +341,7 @@ void Mesh::output(Output& out) {
   for (size_t i = 0; i < tc.size(); i++) out.texcoord(tc[i]);
   if (passable) out.line("  passable"); 
 
-  for (int m = 0; m <= MAXMATERIALS; m++) {
+  for (int m = 0; m <= materialCount; m++) {
     for (size_t i = 0; i < f.size(); i++) 
       if (f[i]->mat == m) {
         if (mat != m) out.matref(m);

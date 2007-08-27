@@ -39,6 +39,7 @@ public:
   float getAttr(const char* name) { std::string temp = name; return getAttr(temp); }
   void addRule(std::string& name, Rule* rule);
   void output(Output& out );
+  int materialsCount() { return materials.size(); }
   ~RuleSet();
 };
 

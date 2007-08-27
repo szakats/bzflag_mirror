@@ -47,7 +47,7 @@ public:
   void translateFace(int fid, float x, float y, float z);
   void weldVertices(int a, int b, Vertex vx);
   void weldVertices(int a, int b);
-  void output(Output& out);
+  void output(Output& out, int materialCount);
   void textureFace(int fid, float snap, float tile);
   void textureFaceFull(int fid);
   void textureFaceQuad(int fid, float au, float av, float bu, float bv);

@@ -27,7 +27,7 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   corners[3] = Vertex((float)A.x,(float)B.y,0.0f);
 
   Face* swface = new Face();
-  swface->mat = MATMESH;
+  swface->mat = 0;
   for (int i = 0; i < 4; i++) {
     swface->addVertex(mesh->addVertex(corners[i]));
   }
@@ -42,7 +42,7 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
 void BuildZone::output(Output& out) {
   if (meshes == NULL) return;
   MeshVectIter itr; 
-  for (itr = meshes->begin(); itr!= meshes->end(); ++itr) (*itr)->output(out);
+  for (itr = meshes->begin(); itr!= meshes->end(); ++itr) (*itr)->output(out,generator->getRuleSet()->materialsCount()+RESERVEDMATERIALS);
 }
 
 BuildZone::~BuildZone () { 

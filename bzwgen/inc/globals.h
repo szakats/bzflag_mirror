@@ -18,16 +18,7 @@
 #define CELLBASE  3
 #define MATROAD   0
 #define MATROADX  1
-#define MATWALL   2
-#define MATWALL2  3
-#define MATMESH   4
-#define MATROOF   5
-#define MATROOFT  6
-#define MATGLASS  7
-#define MATGRASS  8
-#define MATDOORW  9
-#define MATDOORR  10
-#define MAXMATERIALS 11
+#define RESERVEDMATERIALS 3
 
 #define EPSILON 0.01f
 #ifdef _MSC_VER

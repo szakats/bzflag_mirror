@@ -34,7 +34,7 @@ FloorZone::FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int
 
 void FloorZone::output(Output& out) 
 {
-  mesh.output(out);
+  mesh.output(out,generator->getRuleSet()->materialsCount()+RESERVEDMATERIALS);
 }
 
 // Local Variables: ***
