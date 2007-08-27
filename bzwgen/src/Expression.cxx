@@ -17,6 +17,25 @@ float ExpressionAttribute::calculate(Mesh*,int) {
   return ruleset->getAttr(attrname);
 }
 
+float ExpressionFaceAttribute::calculate(Mesh* mesh,int face) {
+  if (attrname == "x") return mesh->faceCenter(face).x;
+  if (attrname == "y") return mesh->faceCenter(face).x;
+  if (attrname == "z") return mesh->faceCenter(face).x;
+  if (attrname == "h") return mesh->faceH(face);
+  if (attrname == "v") return mesh->faceV(face);
+  if (attrname == "s") return mesh->faceH(face) * mesh->faceV(face);
+  if (attrname == "c") {
+    if (mesh->f[face]->isMultiFace()) {
+      return float(((MultiFace*)mesh->f[face])->componentCount());
+    } else {
+      if (debugLevel > 1) printf("Warning : face(c) called with non-MultiFace!\n");
+    }
+  }
+  if (debugLevel > 1) printf("Warning : Unknown face() attribute : '%s'!\n",attrname.c_str());
+  return 0.0f;
+}
+
+
 // Local Variables: ***
 // mode:C++ ***
 // tab-width: 8 ***
