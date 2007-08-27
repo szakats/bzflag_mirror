@@ -138,7 +138,6 @@ void GridGenerator::run() {
 
 void GridGenerator::output(Output& out) { 
   Generator::output(out); 
-  for (MaterialVectIter iter = mats.begin(); iter != mats.end(); ++iter) (*iter)->output(out);
   for (ZoneVectIter iter = map.zones.begin(); iter != map.zones.end(); ++iter)  (*iter)->output(out);
 }
 

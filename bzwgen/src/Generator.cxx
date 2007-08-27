@@ -35,6 +35,8 @@ void Generator::output(std::ofstream& out ) {
   out << "  name BZWGen Generated City\n";
   out << "  size " << int(size / 2) << "\n";
   out << "end\n\n";
+
+  for (MaterialVectIter iter = mats.begin(); iter != mats.end(); ++iter) (*iter)->output(out);
 }
 
 
