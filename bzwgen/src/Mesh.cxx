@@ -109,12 +109,9 @@ void Mesh::extrudeFace(int fid, float amount, int mat) {
 }
 
 Vertex Mesh::extensionVertex(int ida, int idb, int idc) {
-  Vertex a = v[idc]-v[ida];
-  Vertex b = v[idc]-v[idb];
-  a.normalize();
-  b.normalize();
-  Vertex dir = (a+b)/2;
-  dir.normalize();
+  Vertex a = (v[idc]-v[ida]).norm();
+  Vertex b = (v[idc]-v[idb]).norm();
+  Vertex dir = ((a+b)/2).norm();
   float dot = a.dot(dir);
   float length = 1/sqrtf(1-dot*dot);
   return dir*length;
@@ -347,10 +344,10 @@ void Mesh::output(Output& out) {
   for (int m = 0; m <= MAXMATERIALS; m++) {
     for (size_t i = 0; i < f.size(); i++) 
       if (f[i]->mat == m) {
-	if (mat != m) out.matref(m);
-	mat = m;
-	out.face(f[i],mat);
-	mat = f[i]->mat;
+        if (mat != m) out.matref(m);
+        mat = m;
+        out.face(f[i],mat);
+        mat = f[i]->mat;
       }
   }
   out.line("end\n");
