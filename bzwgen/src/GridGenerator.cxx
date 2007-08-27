@@ -71,92 +71,58 @@ void GridGenerator::plotRoad(int x, int y, bool horiz, int  collision) {
   
 }
 
+void GridGenerator::performSlice(bool full, int snapmod, bool horiz) {
+  int bmod = bases > 0 ? 2 : 1;
+  int x = randomIntRangeStep(snapX,gi.sizeX-snapX*bmod,snapmod*snapX);
+  int y = randomIntRangeStep(snapY,gi.sizeY-snapY*bmod,snapmod*snapY);
+
+  if (debugLevel > 2) printf("slice (%d,%d)...\n",x,y);
+
+  if (map.getNode(x,y).type == CELLROADX) return;
+
+  if (map.getNode(horiz ? Coord2D(x+1,y) : Coord2D(x,y+1)).type > 0) return;
+
+  plotRoad(x,y,horiz,full ? 0 : 1);
+}
 
 void GridGenerator::run() { 
-  int x,y;
   if (debugLevel > 1) printf("\nRunning GridGenerator...\n");
+
   Generator::run(); 
   map.clear();
+
   if (bases > 0) {
     plotRoad(snapX,snapY,true,0);
     plotRoad(snapX,snapY,false,0);
     plotRoad(gi.sizeX-snapX-1,gi.sizeY-snapY-1,true,0);
     plotRoad(gi.sizeX-snapX-1,gi.sizeY-snapY-1,false,0);
-    for(x = 0; x < snapX; x++)                 for (y = 0; y < snapY; y++) map.settype(x,y,CELLBASE);
-    for(x = gi.sizeX-snapX; x < gi.sizeX; x++) for (y = gi.sizeY-snapY; y < gi.sizeY; y++) map.settype(x,y,CELLBASE);
+
+    map.setAreaType(Coord2D(0,snapX),                Coord2D(0,snapY),                CELLBASE);
+    map.setAreaType(Coord2D(gi.sizeX-snapX,gi.sizeX),Coord2D(gi.sizeY-snapY,gi.sizeY),CELLBASE);
     if (bases > 2) {
-      for(x = 0; x < snapX; x++)                 for (y = gi.sizeY-snapY; y < gi.sizeY; y++) map.settype(x,y,CELLBASE);
-      for(x = gi.sizeX-snapX; x < gi.sizeX; x++) for (y = 0; y < snapY; y++) map.settype(x,y,CELLBASE);
+      map.setAreaType(Coord2D(0,snapX),                Coord2D(gi.sizeY-snapY,gi.sizeY),CELLBASE);
+      map.setAreaType(Coord2D(gi.sizeX-snapX,gi.sizeX),Coord2D(0,snapY),                CELLBASE);
     }
   }
-
 
   bool horiz = randomBool();
 
   if (debugLevel > 1) printf("Full slices (%d)...\n",fullslice);
   for (int i = 0; i < fullslice; i++) {
-    if (debugLevel > 2) printf("Performing ");
-    //printf("(%d,%d,%d,%d)...\n",snapX,snapY,gi.sizeX,gi.sizeY);
-    if (bases > 0) {
-      x = randomIntRangeStep(snapX,gi.sizeX-snapX*2,3*snapX);
-      y = randomIntRangeStep(snapY,gi.sizeY-snapY*2,3*snapY);
-    } else {
-      x = randomIntRangeStep(snapX,gi.sizeX-snapX,3*snapX);
-      y = randomIntRangeStep(snapY,gi.sizeY-snapY,3*snapY);
-    }
     horiz = !horiz;
-    if (debugLevel > 2) printf("slice (%d,%d)...\n",x,y);
-
-    if (map.getNode(x,y).type == CELLROADX) continue;
-    if (horiz) {
-      if (map.getNode(x+1,y).type > 0) continue;
-    } else {
-      if (map.getNode(x,y+1).type > 0) continue;
-    }
-
-    plotRoad(x,y,horiz,0);
+    performSlice(true,3,horiz);
   }
 
   if (debugLevel > 1) printf("Subdivision (%d)...\n",subdiv);
   for (int i = fullslice; i < subdiv; i++) {
-    if (bases > 0) {
-      x = randomIntRangeStep(snapX,gi.sizeX-snapX*2,snapX);
-      y = randomIntRangeStep(snapY,gi.sizeY-snapY*2,snapY);
-    } else {
-      x = randomIntRangeStep(snapX,gi.sizeX-snapX,snapX);
-      y = randomIntRangeStep(snapY,gi.sizeY-snapY,snapY);
-    }
-
     horiz = !horiz;
-
-    if (map.getNode(x,y).type == CELLROADX) continue;
-    if (horiz) {
-      if (map.getNode(x+1,y).type > 0) continue;
-    } else {
-      if (map.getNode(x,y+1).type > 0) continue;
-    }
-    
-    plotRoad(x,y,horiz,1);
-/*    for (int ax = 0; ax < gi.sizeX; ax++) {
-      if (map.getNode(ax,y).type == CELLROAD) {
-        map.settype(ax,y,CELLROADX);
-      } else {
-        map.settype(ax,y,CELLROAD);
-      }
-    }
-    for (int ay = 0; ay < gi.sizeY; ay++) {
-      if (map.getNode(x,ay).type == CELLROAD) {
-        map.settype(x,ay,CELLROADX);
-        if (randomChance(33)) break;
-      } else {
-        map.settype(x,ay,CELLROAD);
-      }
-    }*/
+    performSlice(false,1,horiz);
   }
+
   if (debugLevel > 1) printf("Pushing zones...\n");
   map.pushZones();
+  
   if (debugLevel > 1) printf("Registering materials...\n");
-
   mats.push_back(new Material(MATROAD,"road",true));
   mats.push_back(new Material(MATROADX,"roadx",true));
   mats.push_back(new Material(MATWALL,"bwall"));
@@ -172,12 +138,8 @@ void GridGenerator::run() {
 
 void GridGenerator::output(Output& out) { 
   Generator::output(out); 
-
-  for (MaterialVectIter iter = mats.begin(); iter != mats.end(); ++iter) 
-    (*iter)->output(out);
-
-  for (ZoneVectIter iter = map.zones.begin(); iter != map.zones.end(); ++iter) 
-    (*iter)->output(out);
+  for (MaterialVectIter iter = mats.begin(); iter != mats.end(); ++iter) (*iter)->output(out);
+  for (ZoneVectIter iter = map.zones.begin(); iter != map.zones.end(); ++iter)  (*iter)->output(out);
 }
 
 GridGenerator::~GridGenerator() { 

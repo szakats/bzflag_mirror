@@ -50,10 +50,9 @@ void GridMap::growZone(int x,int y,int type) {
     int etype = getNode(x,ye).type;
     if (etype != type) break;
   }
-  int zone = zones.size();
-  for (int xx = x; xx < xe; xx++) 
-    for (int yy = y; yy < ye; yy++) 
-      setzone(xx,yy,zone);
+
+  setAreaZone(Coord2D(x,xe),Coord2D(y,ye),zones.size());
+
   if (type == CELLROAD) {
     if (debugLevel > 2) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX, MATROAD, x-xe < y-ye));
@@ -68,6 +67,18 @@ void GridMap::growZone(int x,int y,int type) {
     zones.push_back(new BuildZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX));
   }
   if (debugLevel > 3) { printf("Zone successfuly created : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+}
+
+void GridMap::setAreaType(Coord2D a, Coord2D b, int type) {
+  for (int xx = a.x; xx < b.x; xx++) 
+    for (int yy = a.y; yy < b.y; yy++) 
+      settype(xx,yy,type);
+}
+
+void GridMap::setAreaZone(Coord2D a, Coord2D b, int zone) {
+  for (int xx = a.x; xx < b.x; xx++) 
+    for (int yy = a.y; yy < b.y; yy++) 
+      setzone(xx,yy,zone);
 }
 
 

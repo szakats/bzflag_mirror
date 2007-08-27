@@ -33,9 +33,11 @@ public:
   void parseOptions(CCommandLineArgs* opt);
   void run();
   void output(Output& out);
-  void plotRoad(int x, int y, bool horiz, int collision = 0);
   GridInfo getGridInfo() { return gi; }
   ~GridGenerator();
+private:
+  void plotRoad(int x, int y, bool horiz, int collision = 0);
+  void performSlice(bool full, int snapmod, bool horiz);
 };
 
 #endif /* __GRIDGENERATOR_H__ */
