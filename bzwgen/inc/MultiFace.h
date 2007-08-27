@@ -30,9 +30,9 @@ public:
 private:
   void updateFaces(float z);
   void storeFaces();
-  void refineFace(Face* f);
+  void refineFace(Face* f, Face* target);
   bool vertexInside(int vid);
-  bool vertexNearestIntersect(int begin, int end, Vertex &P, int &index);
+  bool vertexNearestIntersect(int begin, int end, Vertex &P, int &index, Face* target);
   int pickRemovalIndex(Face *f);
   Face* getOtherFaceWithVertex(Face* f, int vid);
   bool isLeftOfVectors(int x, int a, int b, int c);
