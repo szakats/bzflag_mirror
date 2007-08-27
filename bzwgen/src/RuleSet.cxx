@@ -14,9 +14,7 @@
 #include "globals.h"
 
 void RuleSet::addRule(std::string& name, Rule* rule) { 
-  if (debugLevel > 1) {
-    printf("Added rule '%s'.\n",rule->getName().c_str());
-  }
+  if (debugLevel > 1) printf("Added rule '%s'.\n",rule->getName().c_str());
   rules[name] = rule; 
 }
 
@@ -39,12 +37,14 @@ int RuleSet::runMesh(Mesh* mesh, int face, std::string& rulename) {
     printf("Warning : Recursion level 1000 reached! Are you sure you have no infinite loops?\n");
     return -1;
   }
+
   RuleMapIter itr = rules.find(rulename); 
   if (itr == rules.end()) {
     printf("Warning : rule '%s' not found!\n",rulename.c_str());
     return -1;
   }
   int result = itr->second->runMesh(mesh,face);
+
   recursion--;
   return result;
 }
@@ -54,16 +54,14 @@ MeshVector* RuleSet::run(Mesh* initial_mesh, int initial_face, std::string& rule
   meshes->push_back(initial_mesh);
   initial_mesh->pushBase(initial_face);
   initial_mesh->inside.push_back(initial_mesh->faceCenter(initial_face)+initial_mesh->faceNormal(initial_face)*0.05f);
-  if (runMesh(initial_mesh,initial_face,rulename) == -1) {
-    printf("RuleSet::run failed with start rule '%s!'\n",rulename.c_str());
-  }
+  if (runMesh(initial_mesh,initial_face,rulename) == -1) printf("RuleSet::run failed with start rule '%s!'\n",rulename.c_str());
   return meshes;
 }
 
 int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename) {
   Mesh* newmesh = new Mesh();
   Face* newface = new Face();
-  int size = old_mesh->f[old_face]->vtx->size();
+  int size = old_mesh->f[old_face]->size();
   for (int i = 0; i < size; i++) {
     newface->vtx->push_back(i);
     newmesh->addVertex(old_mesh->v[old_mesh->f[old_face]->vtx->at(i)]);

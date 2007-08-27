@@ -27,6 +27,7 @@ public:
   int addFace(Face* f);
   virtual bool isMultiFace() { return true; }
   virtual ~MultiFace() { delete comps; }
+  int componentCount() { return comps->size(); }
 private:
   void updateFaces(float z);
   void storeFaces();
