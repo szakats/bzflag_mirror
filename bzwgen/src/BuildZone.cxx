@@ -12,8 +12,7 @@
 
 #include "BuildZone.h"
 
-BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Zone(_generator,a,b,astep)
-{
+BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Zone(_generator,a,b,astep) {
   meshes = NULL;
   if ((A.x == B.x) || (A.y == B.y)) {
     if (debugLevel > 0) { printf("Bad building coords! (%d,%d)*(%d,%d)\n",A.x,A.y,B.x,B.y); }
@@ -40,15 +39,18 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   return;
 }
 
-void BuildZone::output(Output& out) 
-{
+void BuildZone::output(Output& out) {
   if (meshes == NULL) return;
   MeshVectIter itr; 
   for (itr = meshes->begin(); itr!= meshes->end(); ++itr) (*itr)->output(out);
-/*   out << "  color 0."<< rand()%10+80 << " 0." << rand()%20+80 << " 0."<< rand()%20+80<< " 1.0\n";
-*/
 }
 
+BuildZone::~BuildZone () { 
+  if (meshes == NULL) return;
+  MeshVectIter itr; 
+  for (itr = meshes->begin(); itr!= meshes->end(); ++itr) delete (*itr);
+  delete meshes;
+}
 
 // Local Variables: ***
 // mode:C++ ***

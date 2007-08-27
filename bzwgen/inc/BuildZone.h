@@ -26,11 +26,7 @@ class BuildZone : public Zone {
 public:
   BuildZone(Generator* _generator,Coord2D a, Coord2D b, int astep);
   virtual void output(Output& out);
-  ~BuildZone() { 
-    MeshVectIter itr; 
-    for (itr = meshes->begin(); itr!= meshes->end(); ++itr) delete (*itr);
-    delete meshes;
-  }
+  ~BuildZone();
 };
 
 #endif /* __BUILDZONE_H__ */
