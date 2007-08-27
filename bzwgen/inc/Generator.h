@@ -34,7 +34,7 @@ public:
   virtual void run();
   inline int getSize() { return size; }
   inline RuleSet* getRuleSet() { return ruleset; }
-  virtual void output(std::ofstream& out);
+  virtual void output(Output& out);
   Material* getMaterial(int id) { return mats[id]; }
   virtual ~Generator() {
     MaterialVectIter itr; 

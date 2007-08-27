@@ -30,7 +30,7 @@ void Generator::run() {
 
 }
 
-void Generator::output(std::ofstream& out ) {
+void Generator::output(Output& out) {
   out << "world\n";
   out << "  name BZWGen Generated City\n";
   out << "  size " << int(size / 2) << "\n";
