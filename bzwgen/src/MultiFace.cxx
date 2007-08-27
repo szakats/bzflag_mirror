@@ -13,16 +13,12 @@
 #include "MultiFace.h"
 
 void MultiFace::updateFaces(float z) {
-  printf("Update (%.2f)...\n",z);
   for (size_t fi = 0; fi < comps->size(); fi++) {
     Face* f = comps->at(fi);
-    printf("FACE(%d)",fi);
     for (int t = 0; t < f->size(); t++) {
       if (f->tcd->at(t) < 0) {
-        printf("REUSE!");
-        mesh->v[f->vtx->at(t)].z = z;
+        mesh->v[f->vertex(t)].z = z;
       } else {
-        printf("(%d->%d)",t,vertex(f->tcd->at(t)));
         (*f->vtx)[t] = vertex(f->tcd->at(t));
       }
     }
@@ -45,10 +41,10 @@ IntVector* MultiFace::detachFace(int id) {
   if (comps->size() < 2) return NULL;
   if (id >= int(comps->size())) return NULL;
   updateFaces(mesh->v[vertex(0)].z);
-  printf("Entering...\n");
   
-  IntVector* result = new IntVector();
+  IntVector* result  = new IntVector();
   IntVector* visited = new IntVector();
+
   Face* f = comps->at(id);
 
   int index = pickRemovalIndex(comps->at(id),visited);
@@ -57,28 +53,24 @@ IntVector* MultiFace::detachFace(int id) {
     printf("Element iteration...\n");
     IntVector* nvtx = new IntVector;
 
-    int vid = vertex(index);
+    int vid  = vertex(index);
     int svid = vertex(index);
     int lastgindex = index;
 
     do {
-      printf("Vertex iteration...(%d,index = %d)\n",vid,getVertexIndex(vid));
       int gindex = getVertexIndex(vid);
+      printf("Vertex iteration...(%d,index = %d)\n",vid,gindex);
       if (gindex != -1) lastgindex = gindex;
       int findex = f->getVertexIndex(vid);
       int oindex;
       Face* oface = getOtherFaceWithVertex(f,vid);
-      if (oface != NULL) {
-        oindex = oface->getVertexIndex(vid);
-      } else {
-        oindex = -1;
-      }
+      oindex = (oface == NULL) ? -1 : oface->getVertexIndex(vid);
 
       visited->push_back(vid);
       nvtx->push_back(vid);
 
       if (oindex < 0 ) {
-        printf("Remove\n");
+        printf("Remove (%d)\n",vid);
         removeVertex(gindex);
         vid = f->vertex(findex+1);
       } else {
@@ -95,11 +87,7 @@ IntVector* MultiFace::detachFace(int id) {
           } else if (prevfvid == nextovid) {
             vid = nextfvid;
           } else {
-            if (isLeftOfVectors(prevovid,prevfvid,vid,nextfvid))  {
-              vid = nextfvid;
-            } else { 
-              vid = nextovid;
-            }
+            vid = isLeftOfVectors(prevovid,prevfvid,vid,nextfvid) ? nextfvid : nextovid;
           }
         }
       }
@@ -108,14 +96,14 @@ IntVector* MultiFace::detachFace(int id) {
     Face* nface = new Face();
     nface->mat = mat;
     nface->vtx = nvtx;
-    int fid = mesh->addFace(nface);
-    result->push_back(fid);
+    result->push_back(mesh->addFace(nface));
     index = pickRemovalIndex(comps->at(id),visited);
   }
 
   printf("Cleaning up\n");
   delete visited;
   delete comps->at(id);
+
   comps->erase(comps->begin() + id);
 
   if (result->size() == 0) {
@@ -138,19 +126,15 @@ bool MultiFace::isLeftOfVectors(int x, int a, int b, int c) {
   Vertex Pline = A+C;
 
   Vertex normal = Vertex(0.0f,0.0f,1.0f);//faceNormal(fid);
-  float sign = -fsign( Pline.cross(Xline).dot(normal) );
-  return sign >= 0;
+
+  return fsign( Xline.cross(Pline).dot(normal) ) >= 0;
 }
 
 // BUUUUUG, doesn't handle inter-face jumps when doing the cut edge!
 
 Face* MultiFace::getOtherFaceWithVertex(Face* f, int vid) {
   for (size_t fi = 0; fi < comps->size(); fi++) {
-    if (comps->at(fi) != f) {
-      for (int i = 0; i < size(); i++) {
-        if (comps->at(fi)->hasVertex(vid)) return comps->at(fi);
-      }
-    }
+    if (comps->at(fi) != f && comps->at(fi)->hasVertex(vid)) return comps->at(fi);
   }
   return NULL;
 }
@@ -173,7 +157,7 @@ int MultiFace::pickRemovalIndex(Face *f,IntVector* visited) {
 
 void MultiFace::refineFace(Face* f, Face* target) {
   int i = 0;
-  while (i < int(f->size())) {
+  while (i < f->size()) {
     Vertex ipoint;
     int index;
     //printf("Intersect... (%d,%d)\n",i,modnext(i,f->size()));
