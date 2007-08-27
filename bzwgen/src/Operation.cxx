@@ -145,10 +145,8 @@ int OperationPartition::runMesh(Mesh* mesh,int face) {
   if (mesh == NULL) return 0;
   flatten(mesh,face);
   if (esnap != NULL) {
-    float s = esnap->calculate(mesh,face);
-    float l;
-    if (horiz) { l = mesh->faceH(face); } else { l = mesh->faceV(face); }
-    s = refinesnap(s,l);
+    float l = horiz ? mesh->faceH(face) : mesh->faceV(face);
+    float s = refinesnap(esnap->calculate(mesh,face),l);
     value = snap(value,s);
   }
   int other;
@@ -157,18 +155,10 @@ int OperationPartition::runMesh(Mesh* mesh,int face) {
   } else {
     faces = new IntVector();
     other = mesh->partitionFace(face,value,horiz);
-    if (inverse) {
-      faces->push_back(face);
-    } else {
-      faces->push_back(other);
-    }
+    faces->push_back(inverse ? face : other);
     OperationMultifaces::runMesh(mesh,face);
   }
-  if (inverse) {
-    return other; 
-  } else {
-    return face;
-  }
+  return inverse ? other : face;
 }
 
 int OperationTest::runMesh(Mesh* mesh, int face) {
