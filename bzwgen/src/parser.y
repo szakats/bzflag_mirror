@@ -25,8 +25,8 @@ void yyunput(int, char*);
 }
 %start ruleset
 %token TRANSLATER TRANSLATE SCALE TEST ROUND NEG ASSERTION FACE TAPER SPAWN CHAMFER 
-%token TEXTURE TEXTUREFULL TEXTUREQUAD TEXTURECLEAR
-%token SPAWNNGON UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXTRUDET EXPAND RANDOM MATERIAL
+%token TEXTURE TEXTUREFULL TEXTUREQUAD TEXTURECLEAR MATERIAL LOADMATERIAL
+%token SPAWNNGON UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXTRUDET EXPAND RANDOM 
 %token SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI 
 %token MULTIFACE FREE NGON REMOVE ADDFACE DETACHFACE
 %token <fl> NUMBER
@@ -99,6 +99,7 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | TRANSLATE '(' expr ',' expr ',' expr ')' { $$ = new OperationTranslate(ruleset,$3,$5,$7); }
   | TRANSLATER '(' expr ',' expr ',' expr ')' { $$ = new OperationTranslateR(ruleset,$3,$5,$7); }
   | MATERIAL '(' expr ')' { $$ = new OperationMaterial(ruleset,$3); }
+  | LOADMATERIAL '(' NONTERM ',' NONTERM ')' { $$ = new OperationLoadMaterial(ruleset,$3,$5); }
   | MULTIFACE '(' ')' { $$ = new OperationMultiFace(ruleset); }
   | FREE '(' ')' { $$ = new OperationFree(ruleset); }
   | REMOVE '(' ')' { $$ = new OperationRemove(ruleset); }

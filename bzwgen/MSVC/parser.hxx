@@ -44,30 +44,31 @@
      TEXTUREFULL = 270,
      TEXTUREQUAD = 271,
      TEXTURECLEAR = 272,
-     SPAWNNGON = 273,
-     UNCHAMFER = 274,
-     ASSIGN = 275,
-     DEFSIGN = 276,
-     EXTRUDE = 277,
-     EXTRUDET = 278,
-     EXPAND = 279,
-     RANDOM = 280,
-     MATERIAL = 281,
-     SUBDIVIDEH = 282,
-     SUBDIVIDEV = 283,
-     PARTITIONH = 284,
-     PARTITIONV = 285,
-     PARTITIONHI = 286,
-     PARTITIONVI = 287,
-     MULTIFACE = 288,
-     FREE = 289,
-     NGON = 290,
-     REMOVE = 291,
-     ADDFACE = 292,
-     DETACHFACE = 293,
-     NUMBER = 294,
-     NONTERM = 295,
-     ATTRIBUTE = 296
+     MATERIAL = 273,
+     LOADMATERIAL = 274,
+     SPAWNNGON = 275,
+     UNCHAMFER = 276,
+     ASSIGN = 277,
+     DEFSIGN = 278,
+     EXTRUDE = 279,
+     EXTRUDET = 280,
+     EXPAND = 281,
+     RANDOM = 282,
+     SUBDIVIDEH = 283,
+     SUBDIVIDEV = 284,
+     PARTITIONH = 285,
+     PARTITIONV = 286,
+     PARTITIONHI = 287,
+     PARTITIONVI = 288,
+     MULTIFACE = 289,
+     FREE = 290,
+     NGON = 291,
+     REMOVE = 292,
+     ADDFACE = 293,
+     DETACHFACE = 294,
+     NUMBER = 295,
+     NONTERM = 296,
+     ATTRIBUTE = 297
    };
 #endif
 /* Tokens.  */
@@ -86,30 +87,31 @@
 #define TEXTUREFULL 270
 #define TEXTUREQUAD 271
 #define TEXTURECLEAR 272
-#define SPAWNNGON 273
-#define UNCHAMFER 274
-#define ASSIGN 275
-#define DEFSIGN 276
-#define EXTRUDE 277
-#define EXTRUDET 278
-#define EXPAND 279
-#define RANDOM 280
-#define MATERIAL 281
-#define SUBDIVIDEH 282
-#define SUBDIVIDEV 283
-#define PARTITIONH 284
-#define PARTITIONV 285
-#define PARTITIONHI 286
-#define PARTITIONVI 287
-#define MULTIFACE 288
-#define FREE 289
-#define NGON 290
-#define REMOVE 291
-#define ADDFACE 292
-#define DETACHFACE 293
-#define NUMBER 294
-#define NONTERM 295
-#define ATTRIBUTE 296
+#define MATERIAL 273
+#define LOADMATERIAL 274
+#define SPAWNNGON 275
+#define UNCHAMFER 276
+#define ASSIGN 277
+#define DEFSIGN 278
+#define EXTRUDE 279
+#define EXTRUDET 280
+#define EXPAND 281
+#define RANDOM 282
+#define SUBDIVIDEH 283
+#define SUBDIVIDEV 284
+#define PARTITIONH 285
+#define PARTITIONV 286
+#define PARTITIONHI 287
+#define PARTITIONVI 288
+#define MULTIFACE 289
+#define FREE 290
+#define NGON 291
+#define REMOVE 292
+#define ADDFACE 293
+#define DETACHFACE 294
+#define NUMBER 295
+#define NONTERM 296
+#define ATTRIBUTE 297
 
 
 
@@ -127,7 +129,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 131 "..\\parser.hxx"
+#line 133 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

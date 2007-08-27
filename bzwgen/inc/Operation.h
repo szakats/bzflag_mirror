@@ -41,6 +41,14 @@ public:
   int runMesh(Mesh* mesh, int face);
 };
 
+class OperationLoadMaterial : public Operation {
+  std::string id;
+  std::string filename;
+public:
+  OperationLoadMaterial(RuleSet* _ruleset, const char* _id, const char* _filename ) : Operation(_ruleset), id(_id), filename(_filename) { };
+  int runMesh(Mesh* mesh, int face);
+};
+
 class OperationAddFace : public Operation {
   std::string ref;
 public:

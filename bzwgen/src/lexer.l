@@ -39,6 +39,7 @@ scale                 { return(SCALE);   }
 translate             { return(TRANSLATE); }
 translater            { return(TRANSLATER); }
 material              { return(MATERIAL);   }
+loadmaterial          { return(LOADMATERIAL);   }
 multiface             { return(MULTIFACE); }
 subdivideh            { return(SUBDIVIDEH);}
 subdividev            { return(SUBDIVIDEV);}

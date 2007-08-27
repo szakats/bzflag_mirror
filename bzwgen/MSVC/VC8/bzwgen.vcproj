@@ -180,6 +180,10 @@
 				RelativePath="..\..\src\Mesh.cxx"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\MultiFace.cxx"
+				>
+			</File>
 			<Filter
 				Name="GPLib"
 				>
@@ -215,10 +219,6 @@
 							WarnAsError="false"
 						/>
 					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\..\src\MultiFace.cxx"
-					>
 				</File>
 				<File
 					RelativePath="..\..\src\Operation.cxx"

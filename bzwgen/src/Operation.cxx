@@ -18,6 +18,12 @@ int OperationNonterminal::runMesh(Mesh* mesh, int face) {
   return ruleset->runMesh(mesh,face,ref);
 }
 
+int OperationLoadMaterial::runMesh(Mesh*, int face) {
+  ruleset->loadMaterial(id,filename);
+  return face;
+}
+
+
 int OperationAddFace::runMesh(Mesh* mesh, int face) { 
   if (!mesh->f[face]->isMultiFace()) {
     printf("Error: addface passed on a non-MultiFace face!");
