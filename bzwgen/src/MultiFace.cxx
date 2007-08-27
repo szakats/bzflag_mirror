@@ -102,7 +102,6 @@ IntVector* MultiFace::detachFace(int id) {
 
   printf("Cleaning up\n");
   delete visited;
-  delete comps->at(id);
 
   comps->erase(comps->begin() + id);
 

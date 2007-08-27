@@ -427,8 +427,7 @@ void Mesh::pushBase(int fid) {
 }
 
 Mesh::~Mesh() {
-  FaceVectIter itr; 
-  for (itr = f.begin(); itr!= f.end(); ++itr) delete (*itr);
+  for (FaceVectIter itr = f.begin(); itr!= f.end(); ++itr) delete (*itr);
 }
 
 
