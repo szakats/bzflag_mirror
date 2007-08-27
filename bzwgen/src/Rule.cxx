@@ -30,8 +30,7 @@ Product* Rule::getProduct(Mesh* mesh, int face) {
 }
 int Rule::runMesh(Mesh* mesh, int face) {
   Product* product = getProduct(mesh,face);
-  if (product == NULL) return -1;
-  return product->runMesh(mesh,face);
+  return product == NULL ? -1 : product->runMesh(mesh,face);
 }
 
 Rule::~Rule() { 

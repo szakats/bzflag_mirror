@@ -32,8 +32,7 @@ public:
     return face;
   }
   bool conditionsMet(Mesh* mesh, int face) { 
-    if (cond == NULL) return true;
-    return cond->calculate(mesh,face) >= 0.0f;
+    return cond == NULL ? true : (cond->calculate(mesh,face) >= 0.0f);
   }
   float getRarity() { return rarity; }
   ~Product() {

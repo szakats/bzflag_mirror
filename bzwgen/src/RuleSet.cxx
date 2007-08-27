@@ -54,7 +54,8 @@ MeshVector* RuleSet::run(Mesh* initial_mesh, int initial_face, std::string& rule
   meshes->push_back(initial_mesh);
   initial_mesh->pushBase(initial_face);
   initial_mesh->inside.push_back(initial_mesh->faceCenter(initial_face)+initial_mesh->faceNormal(initial_face)*0.05f);
-  if (runMesh(initial_mesh,initial_face,rulename) == -1) printf("RuleSet::run failed with start rule '%s!'\n",rulename.c_str());
+  if (runMesh(initial_mesh,initial_face,rulename) == -1) 
+    printf("RuleSet::run failed with start rule '%s!'\n",rulename.c_str());
   return meshes;
 }
 

@@ -69,7 +69,7 @@ struct Vertex {
   Vertex operator/(const float f) { return Vertex(x / f, y / f, z / f); }
 
   void normalize() { float l = length(); if (l == 0.0f) return; x/=l; y/=l; z/=l; }
-  Vertex norm() { float l = length(); if (l == 0.0f) return Vertex(); return Vertex(x/l,y/l,z/l); }
+  Vertex norm() { float l = length(); return (l == 0.0f) ? Vertex() : Vertex(x/l,y/l,z/l); }
 
   std::string toString() { char buffer[80]; sprintf(buffer, "[%.4f,%.4f,%.4f]",x,y,z); return std::string(buffer); }
 
@@ -187,11 +187,11 @@ struct Coord2D {
   bool operator != (const Coord2D& b) { return !operator==(b); }
 };
 
-inline int modprev(int x, int mod) { if (x == 0) return mod-1; else return x-1; }
-inline int modnext(int x, int mod) { if (x == mod-1) return 0; else return x+1; }
+inline int modprev(int x, int mod) { return (x == 0) ? mod-1 : x-1; }
+inline int modnext(int x, int mod) { return (x == mod-1) ? 0 : x+1; }
 
 inline int randomInt01() { return rand()%2; }
-inline int randomInt(int range) { if (range == 0) return 0; return rand()%range; }
+inline int randomInt(int range) { return (range == 0) ? 0 : rand()%range; }
 inline int randomIntRange(int min, int max) { return randomInt(max-min)+min; }
 inline int randomIntRangeStep(int min, int max, int step) { if (step == 0) return 0; int steps = int((max-min) / step);  return randomInt(steps+1)*step+min; }
 inline bool randomBool() { return rand()%2 == 0; }
@@ -202,19 +202,18 @@ inline float randomFloatRange(float min, float max) { return randomFloat(max-min
 inline float randomFloatRangeStep(float min, float max, float step) { if (step == 0) return 0.0; int steps = int((max-min) / step); return randomInt(steps+1)*step + min; }
 inline int round(float f) { return int(f+0.5f); }
 
-inline float fsign(float f) { if (f == 0.0f) return 0.0f; if (f < 0.0f) return -1.0f; else return 1.0f; }
+inline float fsign(float f) { if (f == 0.0f) return 0.0f; return (f < 0.0f) ? -1.0f : 1.0f; }
 
 inline float snap(float f,float snapval) { return float(round(f/snapval))*snapval; }
 inline float refinesnap(float oldsnap, float max) { return (max/float(round(max/oldsnap))); }
 
-inline float minf(float a,float b) { if (a < b) return a; else return b; }
-inline float maxf(float a,float b) { if (a > b) return a; else return b; }
+inline float minf(float a,float b) { return a < b ? a : b; }
+inline float maxf(float a,float b) { return a > b ? a : b; }
 
 inline bool iszero(float f) { return fabs(f) < EPSILON; }
 
 inline bool inrange(float a, float r1, float r2) { 
-  if (r2 > r1) return a > r1-EPSILON && a < r2+EPSILON; 
-          else return a > r2-EPSILON && a < r1+EPSILON; 
+  return (r2 > r1) ? (a > r1-EPSILON && a < r2+EPSILON) : (a > r2-EPSILON && a < r1+EPSILON); 
 }
 
 inline bool commonrange(float a1, float a2, float b1, float b2, float &c1, float &c2) { 
@@ -222,8 +221,7 @@ inline bool commonrange(float a1, float a2, float b1, float b2, float &c1, float
   float maxa = maxf(a1,a2);
   float minb = minf(b1,b2);
   float maxb = maxf(b1,b2);
-  if (maxa < minb-EPSILON) return false;
-  if (mina > maxb+EPSILON) return false;
+  if (maxa < minb-EPSILON || mina > maxb+EPSILON) return false;
   c1 = maxf(mina,minb);
   c2 = minf(maxa,maxb);
   return true;
@@ -239,25 +237,23 @@ inline int intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P1, Vertex
       float f;
       if (iszero(A.y-C.y)&&iszero(B.y-D.y)) {                   // parallel on X
         if (commonrange(A.x,B.x,C.x,D.x,e,f)) { // AB and CD have common point
-          P1 = A;
-          P2 = A;
+          P1 = P2 = A;
           P1.x = e;
           P2.x = f;
-          if (iszero(e-f)) return 1; else return 2;
+          return iszero(e-f) ? 1 : 2;
         } else return 0;
       } else {                                 // parallel on Y
         if (commonrange(A.y,B.y,C.y,D.y,e,f)) { // AB and CD have common point
-          P1 = A;
-          P2 = A;
+          P1 = P2 = A;
           P1.y = e;
           P2.y = f;
-          if (iszero(e-f)) return 1; else return 2;
+          return iszero(e-f) ? 1 : 2;
         } else return 0;
       }
     } else return 0; // parallel but not coincident
   }
-  r = r/d;
-  s = s/d;
+  r /= d;
+  s /= d;
   if (r > 0-EPSILON && r < 1+EPSILON && s > 0-EPSILON && s < 1+EPSILON) {
     P1.x = A.x+r*(B.x-A.x);
     P1.y = A.y+r*(B.y-A.y);

@@ -119,11 +119,9 @@ IntVector* MultiFace::detachFace(int id) {
 
 bool MultiFace::isLeftOfVectors(int x, int a, int b, int c) {
   Vertex P = mesh->v[b];
-  Vertex C = (mesh->v[c]-P).norm();
   Vertex A = (P-mesh->v[a]).norm();
-  Vertex X = (mesh->v[x]-P).norm();
-  Vertex Xline = A+X;
-  Vertex Pline = A+C;
+  Vertex Xline = A+(mesh->v[x]-P).norm();
+  Vertex Pline = A+(mesh->v[c]-P).norm();
 
   Vertex normal = Vertex(0.0f,0.0f,1.0f);//faceNormal(fid);
 
