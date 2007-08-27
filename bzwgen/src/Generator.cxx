@@ -37,6 +37,7 @@ void Generator::output(Output& out) {
   out << "end\n\n";
 
   for (MaterialVectIter iter = mats.begin(); iter != mats.end(); ++iter) (*iter)->output(out);
+  if (ruleset != NULL) ruleset->output(out);
 }
 
 
