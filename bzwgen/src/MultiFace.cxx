@@ -61,7 +61,7 @@ IntVector* MultiFace::detachFace(int id) {
     int lastgindex = index;
 
     do {
-//      printf("Vertex iteration...(%d,index = %d)\n",vid,getVertexIndex(vid));
+      printf("Vertex iteration...(%d,index = %d)\n",vid,getVertexIndex(vid));
       int gindex = getVertexIndex(vid);
       if (gindex != -1) lastgindex = gindex;
       int findex = f->getVertexIndex(vid);
@@ -130,7 +130,7 @@ bool MultiFace::isLeftOfVectors(int x, int a, int b, int c) {
   Vertex Pline = A+C;
 
   Vertex normal = Vertex(0.0f,0.0f,1.0f);//faceNormal(fid);
-  float sign = fsign( Pline.cross(Xline).dot(normal) );
+  float sign = -fsign( Pline.cross(Xline).dot(normal) );
   return sign >= 0;
 }
 
