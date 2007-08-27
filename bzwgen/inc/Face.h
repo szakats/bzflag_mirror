@@ -42,6 +42,12 @@ public:
       vtx->push_back(_vtx[i]);
     }
   }
+  IntVector* vtxClone() {
+    int fsize = size();
+    IntVector* copy = new IntVector(fsize);
+    for (int i = 0; i < fsize; i++) (*copy)[i] = vtx->at(i);
+    return copy;
+  }
   void setID4(ID4 id4) {
     vtx->clear();
     for (int i = 0; i < 4; i++) {

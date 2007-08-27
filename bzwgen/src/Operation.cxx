@@ -195,7 +195,7 @@ int OperationTest::runMesh(Mesh* mesh, int face) {
   mf->addFace(f1);
   printf("Adding face2...\n");
   mf->addFace(f2);
-  printf("Done. (%d)\n",mf->vtx->size());
+  printf("Done. (%d)\n",mf->size());
 
   delete mesh->f[face];
   mesh->f[face] = mf;
