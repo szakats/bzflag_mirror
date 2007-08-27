@@ -82,12 +82,13 @@ int OperationMultifaces::runMesh(Mesh* mesh,int) {
       ruleset->runMesh(mesh,faces->at(i),facerules->at(0));
     return 0;
   }
-  for (size_t i = 0; i < facerules->size(); i++) {
-    if (facerules->at(i).empty()) continue;
-    if (i >= faces->size()) break;
-    ruleset->runMesh(mesh,faces->at(i),facerules->at(i));
+  if (facerules != NULL) {
+    for (size_t i = 0; i < facerules->size(); i++) {
+      if (facerules->at(i).empty()) continue;
+      if (i >= faces->size()) break;
+      ruleset->runMesh(mesh,faces->at(i),facerules->at(i));
+    }
   }
-
   return 0;
 }
 

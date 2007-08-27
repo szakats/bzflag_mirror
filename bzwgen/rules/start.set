@@ -19,15 +19,15 @@ test_init
 
 test_run
 #  -> 0.6 : test_init scale(0.8,1) multiface() addface(test_add1) addface(test_add2) mat_wall extrudet(4) test_rest
-#  -> 0.4 : test_init scale(0.5,1) multiface() addface(test_add3) mat_wall extrudet(4) test_rest
+  -> 0.4 : test_init scale(0.5,1) multiface() addface(test_add3) mat_wall extrudet(4) test_rest
    -> test_init scale(0.8,1) multiface() addface(test_add0) mat_wall extrudet(4) test_rest
 ;
 
 test_rest
   -> 0.5 : common_ledge mat_wall extrudet(4) test_rest
-#  -> 0.0 : roof_classic
-  -> 0.5 : detachface(1) mat_wall extrudet(4) roof_classic
-#  -> 0.2 : detachface(0) mat_wall extrudet(4) roof_classic
+#  -> 0.1 : roof_classic
+  -> 0.3 : detachface(1) [@roof_classic] mat_wall extrudet(4) roof_classic
+  -> 0.2 : common_ledge detachface(0) mat_wall extrudet(4) roof_classic
 ;
 
 test_add0

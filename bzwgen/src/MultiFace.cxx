@@ -47,10 +47,11 @@ IntVector* MultiFace::detachFace(int id) {
   updateFaces(mesh->v[vertex(0)].z);
   printf("Entering...\n");
   
-  IntVector* result = new IntVector;
+  IntVector* result = new IntVector();
+  IntVector* visited = new IntVector();
   Face* f = comps->at(id);
 
-  int index = pickRemovalIndex(comps->at(id));
+  int index = pickRemovalIndex(comps->at(id),visited);
 
   while (index >= 0) {
     printf("Element iteration...\n");
@@ -73,6 +74,7 @@ IntVector* MultiFace::detachFace(int id) {
         oindex = -1;
       }
 
+      visited->push_back(vid);
       nvtx->push_back(vid);
 
       if (oindex < 0 ) {
@@ -104,20 +106,26 @@ IntVector* MultiFace::detachFace(int id) {
     } while (vid != svid);
 
     Face* nface = new Face();
+    nface->mat = mat;
     nface->vtx = nvtx;
     int fid = mesh->addFace(nface);
     result->push_back(fid);
-    index = pickRemovalIndex(comps->at(id));
+    index = pickRemovalIndex(comps->at(id),visited);
   }
 
+  printf("Cleaning up\n");
+  delete visited;
   delete comps->at(id);
   comps->erase(comps->begin() + id);
 
   if (result->size() == 0) {
+    printf("Result Zero\n");
     delete result;
     result = NULL;
   }
+  printf("Storing faces\n");
   storeFaces();
+  printf("Done\n");
   return result;
 }
 
@@ -134,6 +142,8 @@ bool MultiFace::isLeftOfVectors(int x, int a, int b, int c) {
   return sign >= 0;
 }
 
+// BUUUUUG, doesn't handle inter-face jumps when doing the cut edge!
+
 Face* MultiFace::getOtherFaceWithVertex(Face* f, int vid) {
   for (size_t fi = 0; fi < comps->size(); fi++) {
     if (comps->at(fi) != f) {
@@ -145,9 +155,18 @@ Face* MultiFace::getOtherFaceWithVertex(Face* f, int vid) {
   return NULL;
 }
 
-int MultiFace::pickRemovalIndex(Face *f) {
+int MultiFace::pickRemovalIndex(Face *f,IntVector* visited) {
   for (int i = 0; i < size(); i++) {
-    if (f->hasVertex(vertex(i))) return i;
+    if (f->hasVertex(vertex(i))) {
+      bool found = false;
+      if (visited->size() > 0) 
+        for (size_t k = 0; k < visited->size(); k++)
+          if (visited->at(k) == vertex(i)) {
+            found = true;
+            break;
+          }
+      if (!found) return i;
+    } 
   }
   return -1;
 }
