@@ -14,6 +14,26 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+int Mesh::addVertex(Vertex vtx) { 
+  if (freeVertices.size() > 0) {
+    int free = freeVertices[freeVertices.size()-1];
+    freeVertices.pop_back();
+    v[free] = vtx;
+    return free;
+  } else {
+    v.push_back(vtx); 
+    return v.size()-1; 
+  }
+}
+
+int Mesh::addTexCoord(TexCoord tcx) { 
+  for (size_t i = 0; i < tc.size(); i++) {
+    if (tc[i] == tcx) return i;
+  }
+  tc.push_back(tcx); 
+  return tc.size()-1; 
+}
+
 int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat) {
   v.push_back(a);
   v.push_back(b);
@@ -395,12 +415,25 @@ void Mesh::freeFace(int fid) {
   }
 }
 
-
+std::string Mesh::faceToString(Face* face) { 
+  std::string result = "Face: ( ";
+  for (size_t i = 0; i < face->vtx->size(); i++)
+    result += v[face->vtx->at(i)].toString()+ " ";
+  result += ")";
+  return result;
+}
+void Mesh::pushBase(int fid) {
+  vbase.clear();
+  for (int i = 0; i < f[fid]->size(); i++) {
+    vbase.push_back(v[f[fid]->vertex(i)]);
+  }
+}
 
 Mesh::~Mesh() {
   FaceVectIter itr; 
   for (itr = f.begin(); itr!= f.end(); ++itr) delete (*itr);
 }
+
 
 // Local Variables: ***
 // mode:C++ ***

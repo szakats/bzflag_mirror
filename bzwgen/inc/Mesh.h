@@ -28,24 +28,8 @@ public:
   VertexVector vbase;
   bool passable;
   Mesh() : passable(false) {}
-  int addVertex(Vertex vtx) { 
-    if (freeVertices.size() > 0) {
-      int free = freeVertices[freeVertices.size()-1];
-      freeVertices.pop_back();
-      v[free] = vtx;
-      return free;
-    } else {
-      v.push_back(vtx); 
-      return v.size()-1; 
-    }
-  }
-  int addTexCoord(TexCoord tcx) { 
-    for (size_t i = 0; i < tc.size(); i++) {
-      if (tc[i] == tcx) return i;
-    }
-    tc.push_back(tcx); 
-    return tc.size()-1; 
-  }
+  int addVertex(Vertex vtx);
+  int addTexCoord(TexCoord tcx);
   int addFace(Face* face) { f.push_back(face); return f.size()-1; }
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat = 0);
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord ta, TexCoord tb, TexCoord tc, TexCoord td, int mat = 0);
@@ -70,19 +54,8 @@ public:
   int createNGon(Vertex center, float radius, int n);
   float faceH(int face) { return (v[f[face]->vtx->at(0)] - v[f[face]->vtx->at(1)]).length(); }
   float faceV(int face) { return (v[f[face]->vtx->at(3)] - v[f[face]->vtx->at(0)]).length(); }
-  std::string faceToString(Face* face) { 
-    std::string result = "Face: ( ";
-    for (size_t i = 0; i < face->vtx->size(); i++)
-      result += v[face->vtx->at(i)].toString()+ " ";
-    result += ")";
-    return result;
-  }
-  void pushBase(int fid) {
-    vbase.clear();
-    for (int i = 0; i < f[fid]->size(); i++) {
-      vbase.push_back(v[f[fid]->vertex(i)]);
-    }
-  }
+  std::string faceToString(Face* face);
+  void pushBase(int fid);
   ~Mesh();
 private:
   Vertex extensionVertex(int ida, int idb, int idc);
