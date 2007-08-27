@@ -29,7 +29,7 @@ Flex  : http://gnuwin32.sourceforge.net/packages/flex.htm
 Bison : http://gnuwin32.sourceforge.net/packages/bison.htm
 
 If you use bison or flex from other sources, be sure that flex is
-at least version 2.5.4 and bison at least 2.1.
+at least version 2.5.4 and bison at least 1.875.
 
 You'll need to have them in your PATH for the automated build of
 MSVC to work.
