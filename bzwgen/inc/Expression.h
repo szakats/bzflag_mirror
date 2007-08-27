@@ -66,7 +66,9 @@ public:
     return randomFloatRangeStep(vmin->calculate(mesh,face),vmax->calculate(mesh,face),stepc); 
   };
   ~ExpressionRandom() {
-    delete vmin, vmax, step;
+    delete vmin;
+    delete vmax;
+    delete step;
   }
 };
 
