@@ -51,7 +51,7 @@ void GridMap::growZone(int x,int y,int type) {
     if (etype != type) break;
   }
 
-  setAreaZone(Coord2D(x,xe),Coord2D(y,ye),zones.size());
+  setAreaZone(Coord2D(x,y),Coord2D(xe,ye),zones.size());
 
   if (type == CELLROAD) {
     if (debugLevel > 2) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
