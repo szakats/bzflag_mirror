@@ -20,7 +20,7 @@
 #define MATROADX  1
 #define RESERVEDMATERIALS 3
 
-#define EPSILON 0.01f
+#define EPSILON 0.001
 #ifdef _MSC_VER
 #pragma warning(disable:4996)
 #endif
@@ -35,11 +35,11 @@ extern int debugLevel;
 extern std::string texturepath;
 
 struct Vertex {
-  float x, y, z;
+  double x, y, z;
  
-  Vertex() : x(0.0f), y(0.0f), z(0.0f) {}
-  Vertex(float _x, float _y, float _z) :x(_x), y(_y), z(_z) {}
-  Vertex(float v[3]) :x(v[0]), y(v[1]), z(v[2]) {}
+  Vertex() : x(0.0), y(0.0), z(0.0) {}
+  Vertex(double _x, double _y, double _z) :x(_x), y(_y), z(_z) {}
+  Vertex(double v[3]) :x(v[0]), y(v[1]), z(v[2]) {}
   
   void add(const Vertex &v) { x += v.x; y += v.y; z += v.z; }
   Vertex operator+(const Vertex &v) { return Vertex(x + v.x, y + v.y, z + v.z); }
@@ -50,17 +50,17 @@ struct Vertex {
   void mult(const Vertex &v) { x *= v.x; y *= v.y; z *= v.z; }
   Vertex operator*(const Vertex &v) { return Vertex(x * v.x, y * v.y, z * v.z); }
 
-  void mult(const float f) { x *= f; y *= f; z *= f; }
-  Vertex operator*(const float f) { return Vertex(x * f, y * f, z * f); }
+  void mult(const double f) { x *= f; y *= f; z *= f; }
+  Vertex operator*(const double f) { return Vertex(x * f, y * f, z * f); }
 
   void div(const Vertex &v) { x /= v.x; y /= v.y; z /= v.z; }
   Vertex operator/(const Vertex &v) { return Vertex(x / v.x, y / v.y, z / v.z); }
 
-  void div(const float f) { x /= f; y /= f; z /= f; }
-  Vertex operator/(const float f) { return Vertex(x / f, y / f, z / f); }
+  void div(const double f) { x /= f; y /= f; z /= f; }
+  Vertex operator/(const double f) { return Vertex(x / f, y / f, z / f); }
 
-  void normalize() { float l = length(); if (l == 0.0f) return; x/=l; y/=l; z/=l; }
-  Vertex norm() { float l = length(); return (l == 0.0f) ? Vertex() : Vertex(x/l,y/l,z/l); }
+  void normalize() { double l = length(); if (l == 0.0) return; x/=l; y/=l; z/=l; }
+  Vertex norm() { double l = length(); return (l == 0.0) ? Vertex() : Vertex(x/l,y/l,z/l); }
 
   std::string toString() { char buffer[80]; sprintf(buffer, "[%.4f,%.4f,%.4f]",x,y,z); return std::string(buffer); }
 
@@ -72,15 +72,15 @@ struct Vertex {
     );
   }
 
-  float dot(const Vertex &v) { return x*v.x + y*v.y + z*v.z; }
+  double dot(const Vertex &v) { return x*v.x + y*v.y + z*v.z; }
 
-  float length() { return sqrtf(x*x + y*y + z*z); }
-  float lengthsq() { return x*x + y*y + z*z; }
+  double length() { return sqrt(x*x + y*y + z*z); }
+  double lengthsq() { return x*x + y*y + z*z; }
 
-  void set(float v[3]) { x = v[0], y = v[1], z = v[2]; }
-  void set(float _x, float _y, float _z) { x = _x, y = _y, z = _z; }
+  void set(double v[3]) { x = v[0], y = v[1], z = v[2]; }
+  void set(double _x, double _y, double _z) { x = _x, y = _y, z = _z; }
   
-  float &operator[](int i) {
+  double &operator[](int i) {
     switch (i) {
       case 0: return x; break;
       case 1: return y; break;
@@ -94,21 +94,21 @@ typedef std::vector<Vertex> VertexVector;
 typedef VertexVector::iterator VertexVectIter;
 
 struct TexCoord {
-  float s, t;
+  double s, t;
  
-  TexCoord() : s(0.0f), t(0.0f) {}
-  TexCoord(float _s, float _t) :s(_s), t(_t) {}
-  TexCoord(float v[2]) : s(v[0]), t(v[1]) {}
+  TexCoord() : s(0.0), t(0.0) {}
+  TexCoord(double _s, double _t) :s(_s), t(_t) {}
+  TexCoord(double v[2]) : s(v[0]), t(v[1]) {}
   
-  void set(float v[2]) { s = v[0], t = v[1]; }
-  void set(float _s, float _t) { s = _s, t = _t; }
+  void set(double v[2]) { s = v[0], t = v[1]; }
+  void set(double _s, double _t) { s = _s, t = _t; }
 
   // This may be evil, but TexCoords do not need to be fully perfect :P
   bool operator==(const TexCoord& b) {
     return (fabs(s - b.s) < EPSILON && fabs(t - b.t) < EPSILON);
   }
 
-  float &operator[](int i) {
+  double &operator[](int i) {
     switch (i) { 
       case 0: return s; break;
       case 1: return t; break;
@@ -144,7 +144,7 @@ struct ID4 {
 typedef std::vector<int> IntVector;
 typedef std::vector<std::string> StringVector;
 typedef std::vector<bool> BoolVector;
-typedef std::map<std::string,float> AttributeMap;
+typedef std::map<std::string,double> AttributeMap;
 
 struct DiscreetMapNode {
   int type;
@@ -187,31 +187,31 @@ inline int randomIntRange(int min, int max) { return randomInt(max-min)+min; }
 inline int randomIntRangeStep(int min, int max, int step) { if (step == 0) return 0; int steps = int((max-min) / step);  return randomInt(steps+1)*step+min; }
 inline bool randomBool() { return rand()%2 == 0; }
 inline bool randomChance(int chance) { return randomInt(100) < chance; }
-inline float randomFloat01() { return (float)(rand()) / (float)(RAND_MAX); }
-inline float randomFloat(float range) { return randomFloat01()*range; }
-inline float randomFloatRange(float min, float max) { return randomFloat(max-min)+min; }
-inline float randomFloatRangeStep(float min, float max, float step) { if (step == 0) return 0.0; int steps = int((max-min) / step); return randomInt(steps+1)*step + min; }
-inline int round(float f) { return int(f+0.5f); }
+inline double randomdouble01() { return (double)(rand()) / (double)(RAND_MAX); }
+inline double randomdouble(double range) { return randomdouble01()*range; }
+inline double randomdoubleRange(double min, double max) { return randomdouble(max-min)+min; }
+inline double randomdoubleRangeStep(double min, double max, double step) { if (step == 0) return 0.0; int steps = int((max-min) / step); return randomInt(steps+1)*step + min; }
+inline int round(double f) { return int(f+0.5f); }
 
-inline float fsign(float f) { if (f == 0.0f) return 0.0f; return (f < 0.0f) ? -1.0f : 1.0f; }
+inline double fsign(double f) { if (f == 0.0) return 0.0; return (f < 0.0) ? -1.0 : 1.0; }
 
-inline float snap(float f,float snapval) { return float(round(f/snapval))*snapval; }
-inline float refinesnap(float oldsnap, float max) { return (max/float(round(max/oldsnap))); }
+inline double snap(double f,double snapval) { return double(round(f/snapval))*snapval; }
+inline double refinesnap(double oldsnap, double max) { return (max/double(round(max/oldsnap))); }
 
-inline float minf(float a,float b) { return a < b ? a : b; }
-inline float maxf(float a,float b) { return a > b ? a : b; }
+inline double minf(double a,double b) { return a < b ? a : b; }
+inline double maxf(double a,double b) { return a > b ? a : b; }
 
-inline bool iszero(float f) { return fabs(f) < EPSILON; }
+inline bool iszero(double f) { return fabs(f) < EPSILON; }
 
-inline bool inrange(float a, float r1, float r2) { 
+inline bool inrange(double a, double r1, double r2) { 
   return (r2 > r1) ? (a > r1-EPSILON && a < r2+EPSILON) : (a > r2-EPSILON && a < r1+EPSILON); 
 }
 
-inline bool commonrange(float a1, float a2, float b1, float b2, float &c1, float &c2) { 
-  float mina = minf(a1,a2);
-  float maxa = maxf(a1,a2);
-  float minb = minf(b1,b2);
-  float maxb = maxf(b1,b2);
+inline bool commonrange(double a1, double a2, double b1, double b2, double &c1, double &c2) { 
+  double mina = minf(a1,a2);
+  double maxa = maxf(a1,a2);
+  double minb = minf(b1,b2);
+  double maxb = maxf(b1,b2);
   if (maxa < minb-EPSILON || mina > maxb+EPSILON) return false;
   c1 = maxf(mina,minb);
   c2 = minf(maxa,maxb);
@@ -219,13 +219,13 @@ inline bool commonrange(float a1, float a2, float b1, float b2, float &c1, float
 }
 
 inline int intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P1, Vertex& P2) {
-  float d = ((B.x-A.x)*(D.y-C.y)-(B.y-A.y)*(D.x-C.x));
-  float r = ((A.y-C.y)*(D.x-C.x)-(A.x-C.x)*(D.y-C.y));
-  float s = ((A.y-C.y)*(B.x-A.x)-(A.x-C.x)*(B.y-A.y));
+  double d = ((B.x-A.x)*(D.y-C.y)-(B.y-A.y)*(D.x-C.x));
+  double r = ((A.y-C.y)*(D.x-C.x)-(A.x-C.x)*(D.y-C.y));
+  double s = ((A.y-C.y)*(B.x-A.x)-(A.x-C.x)*(B.y-A.y));
   if (iszero(d)) {
     if (iszero(r)) { // parallel and coincident
-      float e;
-      float f;
+      double e;
+      double f;
       if (iszero(A.y-C.y)&&iszero(B.y-D.y)) {                   // parallel on X
         if (commonrange(A.x,B.x,C.x,D.x,e,f)) { // AB and CD have common point
           P1 = P2 = A;

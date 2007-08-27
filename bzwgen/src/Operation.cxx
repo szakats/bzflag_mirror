@@ -115,8 +115,8 @@ int OperationExtrudeT::runMesh(Mesh* mesh,int face) {
   if (mesh == NULL) return 0;
   flatten(mesh,face);
   faces = mesh->extrudeFaceR(face,value,mesh->f[face]->mat);\
-  float snap = ruleset->getAttr("SNAP");
-  float textile = ruleset->getAttr("TEXTILE");
+  double snap = ruleset->getAttr("SNAP");
+  double textile = ruleset->getAttr("TEXTILE");
   for (size_t i = 0; i < faces->size(); i++) {
     mesh->textureFace(faces->at(i),snap,textile);
   }
@@ -135,7 +135,7 @@ int OperationTexture::runMesh(Mesh* mesh, int face) {
 int OperationSubdivide::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
   flatten(mesh,face);
-  float snap = 0.0f;
+  double snap = 0.0;
   if (esnap != NULL) snap = esnap->calculate(mesh,face);
   faces = mesh->subdivdeFace(face,round(value),horiz,snap);
   if (facerules == NULL) {
@@ -151,8 +151,8 @@ int OperationPartition::runMesh(Mesh* mesh,int face) {
   if (mesh == NULL) return 0;
   flatten(mesh,face);
   if (esnap != NULL) {
-    float l = horiz ? mesh->faceH(face) : mesh->faceV(face);
-    float s = refinesnap(esnap->calculate(mesh,face),l);
+    double l = horiz ? mesh->faceH(face) : mesh->faceV(face);
+    double s = refinesnap(esnap->calculate(mesh,face),l);
     value = snap(value,s);
   }
   int other;
@@ -177,15 +177,15 @@ int OperationTest::runMesh(Mesh* mesh, int face) {
     f1->vtx->push_back(f1vid);
     f2->vtx->push_back(f2vid);
   }
-  mesh->v[f1->vtx->at(0)] = mesh->v[f1->vtx->at(0)]+Vertex(0.0f,+4.0f,0.0f);
-  mesh->v[f1->vtx->at(1)] = mesh->v[f1->vtx->at(1)]+Vertex(0.0f,+4.0f,0.0f);
-  mesh->v[f1->vtx->at(2)] = mesh->v[f1->vtx->at(2)]+Vertex(0.0f,-4.0f,0.0f);
-  mesh->v[f1->vtx->at(3)] = mesh->v[f1->vtx->at(3)]+Vertex(0.0f,-4.0f,0.0f);
+  mesh->v[f1->vtx->at(0)] = mesh->v[f1->vtx->at(0)]+Vertex(0.0,+4.0,0.0);
+  mesh->v[f1->vtx->at(1)] = mesh->v[f1->vtx->at(1)]+Vertex(0.0,+4.0,0.0);
+  mesh->v[f1->vtx->at(2)] = mesh->v[f1->vtx->at(2)]+Vertex(0.0,-4.0,0.0);
+  mesh->v[f1->vtx->at(3)] = mesh->v[f1->vtx->at(3)]+Vertex(0.0,-4.0,0.0);
 
-  mesh->v[f2->vtx->at(0)] = mesh->v[f2->vtx->at(0)]+Vertex(+4.0f,0.0f,0.0f);
-  mesh->v[f2->vtx->at(1)] = mesh->v[f2->vtx->at(1)]+Vertex(-4.0f,0.0f,0.0f);
-  mesh->v[f2->vtx->at(2)] = mesh->v[f2->vtx->at(2)]+Vertex(-4.0f,0.0f,0.0f);
-  mesh->v[f2->vtx->at(3)] = mesh->v[f2->vtx->at(3)]+Vertex(+4.0f,0.0f,0.0f);
+  mesh->v[f2->vtx->at(0)] = mesh->v[f2->vtx->at(0)]+Vertex(+4.0,0.0,0.0);
+  mesh->v[f2->vtx->at(1)] = mesh->v[f2->vtx->at(1)]+Vertex(-4.0,0.0,0.0);
+  mesh->v[f2->vtx->at(2)] = mesh->v[f2->vtx->at(2)]+Vertex(-4.0,0.0,0.0);
+  mesh->v[f2->vtx->at(3)] = mesh->v[f2->vtx->at(3)]+Vertex(+4.0,0.0,0.0);
 
   printf("Adding face1...\n");
   mf->addFace(f1);

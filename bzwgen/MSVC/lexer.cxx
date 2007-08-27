@@ -796,12 +796,12 @@ YY_RULE_SETUP
 case 2:
 YY_RULE_SETUP
 #line 29 "..\\..\\src\\lexer.l"
-{ yylval.fl = (float)atof(yytext); return(NUMBER);   }
+{ yylval.fl = (double)atof(yytext); return(NUMBER);   }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
 #line 30 "..\\..\\src\\lexer.l"
-{ yylval.fl = (float)atof(yytext); return(NUMBER);   }
+{ yylval.fl = (double)atof(yytext); return(NUMBER);   }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP

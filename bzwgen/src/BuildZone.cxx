@@ -22,10 +22,10 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   Mesh* mesh = new Mesh();
 
   Vertex corners[4];
-  corners[0] = Vertex((float)A.x,(float)A.y,0.0f);
-  corners[1] = Vertex((float)B.x,(float)A.y,0.0f);
-  corners[2] = Vertex((float)B.x,(float)B.y,0.0f);
-  corners[3] = Vertex((float)A.x,(float)B.y,0.0f);
+  corners[0] = Vertex((double)A.x,(double)A.y,0.0);
+  corners[1] = Vertex((double)B.x,(double)A.y,0.0);
+  corners[2] = Vertex((double)B.x,(double)B.y,0.0);
+  corners[3] = Vertex((double)A.x,(double)B.y,0.0);
 
   Face* swface = new Face();
   swface->mat = 0;

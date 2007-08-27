@@ -26,15 +26,15 @@ class RuleSet;
 
 class Expression {
 public:
-  virtual float calculate(Mesh*,int) = 0;
+  virtual double calculate(Mesh*,int) = 0;
   virtual ~Expression() {};
 };
 
 class ExpressionConst : public Expression {
-  float value;
+  double value;
 public:
-  ExpressionConst(float _value) : value(_value) {};
-  float calculate(Mesh*,int) { return value; };
+  ExpressionConst(double _value) : value(_value) {};
+  double calculate(Mesh*,int) { return value; };
 };
 
 class ExpressionAttribute : public Expression {
@@ -42,7 +42,7 @@ class ExpressionAttribute : public Expression {
   std::string attrname;
 public:
   ExpressionAttribute(RuleSet* _ruleset, const char* _attrname) : ruleset(_ruleset), attrname(_attrname) {};
-  float calculate(Mesh*,int);
+  double calculate(Mesh*,int);
 };
 
 class ExpressionFaceAttribute : public Expression {
@@ -51,7 +51,7 @@ public:
   ExpressionFaceAttribute(const char* _attrname) : attrname(_attrname) { 
     std::transform(attrname.begin(), attrname.end(), attrname.begin(), tolower);
   };
-  float calculate(Mesh* mesh,int face);
+  double calculate(Mesh* mesh,int face);
 };
 
 class ExpressionRandom : public Expression {
@@ -60,10 +60,10 @@ class ExpressionRandom : public Expression {
   Expression* step;
 public:
   ExpressionRandom(Expression* _min, Expression* _max, Expression* _step) : vmin(_min), vmax(_max), step(_step) { };
-  float calculate(Mesh* mesh,int face) { 
-    float stepc = step->calculate(mesh,face);
-    if (fabs(stepc) < 0.0001f) return randomFloatRange(vmin->calculate(mesh,face),vmax->calculate(mesh,face));
-    return randomFloatRangeStep(vmin->calculate(mesh,face),vmax->calculate(mesh,face),stepc); 
+  double calculate(Mesh* mesh,int face) { 
+    double stepc = step->calculate(mesh,face);
+    if (fabs(stepc) < 0.0001f) return randomdoubleRange(vmin->calculate(mesh,face),vmax->calculate(mesh,face));
+    return randomdoubleRangeStep(vmin->calculate(mesh,face),vmax->calculate(mesh,face),stepc); 
   };
   ~ExpressionRandom() {
     delete vmin;
@@ -76,7 +76,7 @@ class ExpressionNeg : public Expression {
   Expression* a;
 public:
   ExpressionNeg(Expression* _a) : a(_a) {};
-  float calculate(Mesh* mesh,int face) { 
+  double calculate(Mesh* mesh,int face) { 
     return -a->calculate(mesh,face);
   }
 };
@@ -85,8 +85,8 @@ class ExpressionRound : public Expression {
   Expression* a;
 public:
   ExpressionRound(Expression* _a) : a(_a) {};
-  float calculate(Mesh* mesh,int face) { 
-    return float(round(a->calculate(mesh,face)));
+  double calculate(Mesh* mesh,int face) { 
+    return double(round(a->calculate(mesh,face)));
   }
 };
 
@@ -95,10 +95,10 @@ class ExpressionDouble : public Expression {
   Expression* b;
 public:
   ExpressionDouble(Expression* _a, Expression* _b) : a(_a), b(_b) {};
-  virtual float calc(float av, float bv) = 0;
-  float calculate(Mesh* mesh,int face) { 
-    float av = a->calculate(mesh,face);
-    float bv = b->calculate(mesh,face);
+  virtual double calc(double av, double bv) = 0;
+  double calculate(Mesh* mesh,int face) { 
+    double av = a->calculate(mesh,face);
+    double bv = b->calculate(mesh,face);
     return calc(av,bv);
   }
 };
@@ -106,45 +106,45 @@ public:
 class ExpressionAdd : public ExpressionDouble {
 public:
   ExpressionAdd(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
-  float calc(float av, float bv) { return av + bv; }
+  double calc(double av, double bv) { return av + bv; }
 };
 class ExpressionSub : public ExpressionDouble {
 public:
   ExpressionSub(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
-  float calc(float av, float bv) { return av - bv; }
+  double calc(double av, double bv) { return av - bv; }
 };
 class ExpressionDiv : public ExpressionDouble {
 public:
   ExpressionDiv(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
-  float calc(float av, float bv) { return av / bv; }
+  double calc(double av, double bv) { return av / bv; }
 };
 class ExpressionMult : public ExpressionDouble {
 public:
   ExpressionMult(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
-  float calc(float av, float bv) { return av * bv; }
+  double calc(double av, double bv) { return av * bv; }
 };
 class ExpressionGreater : public ExpressionDouble {
 public:
   ExpressionGreater(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
-  float calc(float av, float bv) { if(av > bv) return 1.0; else return -1.0; }
+  double calc(double av, double bv) { if(av > bv) return 1.0; else return -1.0; }
 };
 
 class ExpressionEqual : public ExpressionDouble {
 public:
   ExpressionEqual(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
-  float calc(float av, float bv) { if (fabs(av - bv) < 0.001f) return 1.0; else return -1.0; }
+  double calc(double av, double bv) { if (fabs(av - bv) < 0.001f) return 1.0; else return -1.0; }
 };
 
 class ExpressionAnd : public ExpressionDouble {
 public:
   ExpressionAnd(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
-  float calc(float av, float bv) { if (av >= 0.0f && bv >= 0.0f) return 1.0; else return -1.0; }
+  double calc(double av, double bv) { if (av >= 0.0 && bv >= 0.0) return 1.0; else return -1.0; }
 };
 
 class ExpressionOr : public ExpressionDouble {
 public:
   ExpressionOr(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
-  float calc(float av, float bv) { if (av >= 0.0f || bv >= 0.0f)return 1.0; else return -1.0; }
+  double calc(double av, double bv) { if (av >= 0.0 || bv >= 0.0)return 1.0; else return -1.0; }
 };
 
 

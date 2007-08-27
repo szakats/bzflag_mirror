@@ -16,10 +16,10 @@ Product* Rule::getProduct(Mesh* mesh, int face) {
   int size = products->size();
   if (size == 0) return NULL;
   ProductVectIter itr = products->begin();
-  float roll = randomFloat01();
+  double roll = randomdouble01();
   do {
     if ((*itr)->conditionsMet(mesh,face)) {
-      float rarity = (*itr)->getRarity();
+      double rarity = (*itr)->getRarity();
       if (rarity >= roll) return (*itr);
       roll -= rarity;
     }

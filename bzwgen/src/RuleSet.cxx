@@ -18,11 +18,11 @@ void RuleSet::addRule(std::string& name, Rule* rule) {
   rules[name] = rule; 
 }
 
-float RuleSet::getAttr(std::string& name) {
+double RuleSet::getAttr(std::string& name) {
   AttributeMap::iterator itr = attrmap.find(name); 
   if (itr == attrmap.end()) {
     printf("Warning : attribute '%s' not found!\n",name.c_str());
-    return 0.0f;
+    return 0.0;
   }
   return itr->second;
 }
@@ -76,7 +76,7 @@ int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename) {
 
 void RuleSet::loadMaterial(std::string& id, std::string& name) {
   int matid = RESERVEDMATERIALS+materials.size();
-  addAttr(id,float(matid));
+  addAttr(id,double(matid));
   materials.push_back(new Material(matid,name));
 }
 

@@ -29,7 +29,7 @@ public:
   virtual ~MultiFace() { delete comps; }
   int componentCount() { return comps->size(); }
 private:
-  void updateFaces(float z);
+  void updateFaces(double z);
   void storeFaces();
   void refineFace(Face* f, Face* target);
   bool vertexInside(int vid);

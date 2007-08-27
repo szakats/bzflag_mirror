@@ -33,27 +33,27 @@ public:
   int addFace(Face* face) { f.push_back(face); return f.size()-1; }
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat = 0);
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord ta, TexCoord tb, TexCoord tc, TexCoord td, int mat = 0);
-  void extrudeFace(int fid, float amount, int mat = 0);
-  IntVector* extrudeFaceR(int fid, float amount, int mat = 0);
-  void expandFace(int fid, float amount);
+  void extrudeFace(int fid, double amount, int mat = 0);
+  IntVector* extrudeFaceR(int fid, double amount, int mat = 0);
+  void expandFace(int fid, double amount);
   Vertex faceNormal(int fid);
   Vertex faceCenter(int fid);
-  IntVector* subdivdeFace(int fid, int count, bool horizontal, float ssnap = 0.0f);
-  int partitionFace(int fid, float amount, bool horizontal);
-  void chamferFace(int fid, float amount);
-  void taperFace(int fid, float amount);
-  void scaleFace(int fid, float x, float y);
+  IntVector* subdivdeFace(int fid, int count, bool horizontal, double ssnap = 0.0);
+  int partitionFace(int fid, double amount, bool horizontal);
+  void chamferFace(int fid, double amount);
+  void taperFace(int fid, double amount);
+  void scaleFace(int fid, double x, double y);
   void freeFace(int fid);
-  void translateFace(int fid, float x, float y, float z);
+  void translateFace(int fid, double x, double y, double z);
   void weldVertices(int a, int b, Vertex vx);
   void weldVertices(int a, int b);
   void output(Output& out, int materialCount);
-  void textureFace(int fid, float snap, float tile);
+  void textureFace(int fid, double snap, double tile);
   void textureFaceFull(int fid);
-  void textureFaceQuad(int fid, float au, float av, float bu, float bv);
-  int createNGon(Vertex center, float radius, int n);
-  float faceH(int face) { return (v[f[face]->vtx->at(0)] - v[f[face]->vtx->at(1)]).length(); }
-  float faceV(int face) { return (v[f[face]->vtx->at(3)] - v[f[face]->vtx->at(0)]).length(); }
+  void textureFaceQuad(int fid, double au, double av, double bu, double bv);
+  int createNGon(Vertex center, double radius, int n);
+  double faceH(int face) { return (v[f[face]->vtx->at(0)] - v[f[face]->vtx->at(1)]).length(); }
+  double faceV(int face) { return (v[f[face]->vtx->at(3)] - v[f[face]->vtx->at(0)]).length(); }
   std::string faceToString(Face* face);
   void pushBase(int fid);
   ~Mesh();

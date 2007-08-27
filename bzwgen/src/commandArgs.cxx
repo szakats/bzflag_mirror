@@ -167,12 +167,12 @@ bool CCommandLineArgs::GetDataB ( const char* szKey )
 	return itr->second.c_str()[0] != '0';
 }
 
-float CCommandLineArgs::GetDataF ( const char* szKey )
+double CCommandLineArgs::GetDataF ( const char* szKey )
 {
 	tmCommandMap::iterator itr = commands.find(GetCommandName(std::string(szKey)));
 
 	if(itr == commands.end())
 		return false;
 
-	return (float)atof(itr->second.c_str());
+	return (double)atof(itr->second.c_str());
 }

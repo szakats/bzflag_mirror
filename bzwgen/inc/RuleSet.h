@@ -33,10 +33,10 @@ public:
   int runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename);
   void loadMaterial(std::string& id, std::string& name);
   void initialize() { std::string init = std::string("initialize"); runMesh(NULL,0,init); }
-  void addAttr(const char* name, float value) { std::string temp = name; addAttr(temp,value); }
-  void addAttr(std::string& name, float value) { attrmap[name] = value; }
-  float getAttr(std::string& name); 
-  float getAttr(const char* name) { std::string temp = name; return getAttr(temp); }
+  void addAttr(const char* name, double value) { std::string temp = name; addAttr(temp,value); }
+  void addAttr(std::string& name, double value) { attrmap[name] = value; }
+  double getAttr(std::string& name); 
+  double getAttr(const char* name) { std::string temp = name; return getAttr(temp); }
   void addRule(std::string& name, Rule* rule);
   void output(Output& out );
   int materialsCount() { return materials.size(); }

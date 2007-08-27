@@ -26,8 +26,8 @@ ID [a-zA-Z_][a-zA-Z0-9_]*
 %option yylineno
 %%
 "->"                  { return(DEFSIGN);  }
--?{DIGIT}+            { yylval.fl = (float)atof(yytext); return(NUMBER);   }
--?{DIGIT}+"."{DIGIT}* { yylval.fl = (float)atof(yytext); return(NUMBER);   }
+-?{DIGIT}+            { yylval.fl = (double)atof(yytext); return(NUMBER);   }
+-?{DIGIT}+"."{DIGIT}* { yylval.fl = (double)atof(yytext); return(NUMBER);   }
 extrude               { return(EXTRUDE);  }
 extrudet              { return(EXTRUDET);  }
 expand                { return(EXPAND);   }

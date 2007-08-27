@@ -57,18 +57,18 @@ int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord tca, Te
   return addFace(new Face(ID4(size-4,size-3,size-2,size-1),ID4(tsize-4,tsize-3,tsize-2,tsize-1),mat));
 }
 
-int Mesh::createNGon(Vertex center, float radius, int n) {
+int Mesh::createNGon(Vertex center, double radius, int n) {
   Face* face = new Face();
-  float step = (2*float(M_PI))/n;
+  double step = (2*double(M_PI))/n;
   for (int i = 0; i < n; i++) {
-    int vt = addVertex(center+Vertex(radius*cos(step*float(i)-step/2),radius*sin(step*float(i)-step/2),0.0f));
+    int vt = addVertex(center+Vertex(radius*cos(step*double(i)-step/2),radius*sin(step*double(i)-step/2),0.0));
     face->vtx->push_back(vt);
   }
   return addFace(face);
 }
 
 
-IntVector* Mesh::extrudeFaceR(int fid, float amount, int mat) {
+IntVector* Mesh::extrudeFaceR(int fid, double amount, int mat) {
   Vertex dir = faceNormal(fid)*amount;
   IntVector* base   = f[fid]->vtx;
   IntVector* result = new IntVector;
@@ -89,7 +89,7 @@ IntVector* Mesh::extrudeFaceR(int fid, float amount, int mat) {
   return result;
 }
 
-void Mesh::extrudeFace(int fid, float amount, int mat) {
+void Mesh::extrudeFace(int fid, double amount, int mat) {
   Vertex dir = faceNormal(fid)*amount;
   IntVector* base   = f[fid]->vtx;
   IntVector* top    = new IntVector;
@@ -112,12 +112,12 @@ Vertex Mesh::extensionVertex(int ida, int idb, int idc) {
   Vertex a = (v[idc]-v[ida]).norm();
   Vertex b = (v[idc]-v[idb]).norm();
   Vertex dir = ((a+b)/2).norm();
-  float dot = a.dot(dir);
-  float length = 1/sqrtf(1-dot*dot);
+  double dot = a.dot(dir);
+  double length = 1/sqrt(1-dot*dot);
   return dir*length;
 }
 
-void Mesh::taperFace(int fid, float amount) {
+void Mesh::taperFace(int fid, double amount) {
   IntVector* fv = f[fid]->vtx;
   int size = fv->size();
   Vertex c = faceCenter(fid);
@@ -127,7 +127,7 @@ void Mesh::taperFace(int fid, float amount) {
   }
 }
 
-void Mesh::scaleFace(int fid, float x, float y) {
+void Mesh::scaleFace(int fid, double x, double y) {
   IntVector* fv = f[fid]->vtx;
   int size = fv->size();
   Vertex c = faceCenter(fid);
@@ -138,7 +138,7 @@ void Mesh::scaleFace(int fid, float x, float y) {
   }
 }
 
-void Mesh::translateFace(int fid, float x, float y, float z) {
+void Mesh::translateFace(int fid, double x, double y, double z) {
   IntVector* fv = f[fid]->vtx;
   int size = fv->size();
   for (int i = 0; i < size; i++) {
@@ -149,7 +149,7 @@ void Mesh::translateFace(int fid, float x, float y, float z) {
 }
 
 
-void Mesh::expandFace(int fid, float amount) {
+void Mesh::expandFace(int fid, double amount) {
   Vertex normal = faceNormal(fid);
   // needs to be uniform
   IntVector* fv = f[fid]->vtx;
@@ -158,7 +158,7 @@ void Mesh::expandFace(int fid, float amount) {
   for (int i = 0; i < size; i++) {
     Vertex a = v[fv->at(modnext(i,size))] - v[fv->at(modprev(i,size))];
     Vertex b = v[fv->at(i)] - v[fv->at(modprev(i,size))];
-    float sign = fsign( b.cross(a).dot(normal) );
+    double sign = fsign( b.cross(a).dot(normal) );
     nv[i] = v[fv->at(i)] + extensionVertex(fv->at(modprev(i,size)),fv->at(modnext(i,size)),fv->at(i))*amount*sign;
   }
   for (int i = 0; i < size; i++) {
@@ -206,26 +206,26 @@ Vertex Mesh::faceCenter(int fid) {
 // TODO : remove hack for multifaces;
 Vertex Mesh::faceNormal(int fid) {
   Face* face = f[fid];
-  if (face->isMultiFace()) return Vertex(0.0f,0.0f,1.0f);
+  if (face->isMultiFace()) return Vertex(0.0,0.0,1.0);
   Vertex a = v[face->vtx->at(0)]-v[face->vtx->at(1)];
   Vertex b = v[face->vtx->at(0)]-v[face->vtx->at(2)];
   Vertex r = a.cross(b);
-  float length = r.length();
+  double length = r.length();
   return r / length;
 }
 
-IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal, float ssnap) {
+IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal, double ssnap) {
   IntVector* cnr = f[fid]->vtx;
   Vertex stepA, stepB;
 
-  float s = ssnap;
+  double s = ssnap;
   if (horizontal) {
-    stepA = (v[cnr->at(2)]-v[cnr->at(3)]) / float(count);
-    stepB = (v[cnr->at(1)]-v[cnr->at(0)]) / float(count);
+    stepA = (v[cnr->at(2)]-v[cnr->at(3)]) / double(count);
+    stepB = (v[cnr->at(1)]-v[cnr->at(0)]) / double(count);
     if (ssnap > EPSILON) s = refinesnap(ssnap,faceH(fid));
   } else {
-    stepA = (v[cnr->at(3)]-v[cnr->at(0)]) / float(count);
-    stepB = (v[cnr->at(2)]-v[cnr->at(1)]) / float(count);
+    stepA = (v[cnr->at(3)]-v[cnr->at(0)]) / double(count);
+    stepB = (v[cnr->at(2)]-v[cnr->at(1)]) / double(count);
     if (ssnap > EPSILON) s = refinesnap(ssnap,faceV(fid));
   }
 
@@ -258,8 +258,8 @@ IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal, float ssnap) 
       Vertex A = v[as]-a;
       Vertex B = v[bs]-b;
 
-      float la = A.length();
-      float lb = B.length();
+      double la = A.length();
+      double lb = B.length();
 
       Vertex sa = v[as]-(A.norm()*snap(la,s));
       Vertex sb = v[bs]-(B.norm()*snap(lb,s));
@@ -292,7 +292,7 @@ IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal, float ssnap) 
 
 }
 
-int Mesh::partitionFace(int fid, float amount, bool horizontal) {
+int Mesh::partitionFace(int fid, double amount, bool horizontal) {
   IntVector* cnr = f[fid]->vtx;
   Vertex A, B;
 
@@ -355,7 +355,7 @@ void Mesh::output(Output& out, int materialCount) {
 
 // TODO: handle texcoords?
 // TODO: handle previous?
-void Mesh::chamferFace(int fid, float amount) {
+void Mesh::chamferFace(int fid, double amount) {
   IntVector old;
   int size = f[fid]->vtx->size();
   for (int i = 0; i < size; i++) {
@@ -370,8 +370,8 @@ void Mesh::chamferFace(int fid, float amount) {
   for (int i = 0; i < size; i++) {
     Vertex a = in[i]-in[modprev(i,size)];
     Vertex b = in[i]-in[modnext(i,size)];
-    float af = (a.length()-amount)/a.length();
-    float bf = (b.length()-amount)/b.length();
+    double af = (a.length()-amount)/a.length();
+    double bf = (b.length()-amount)/b.length();
     a = in[modprev(i,size)]+a*af;
     b = in[modnext(i,size)]+b*bf;
     v[old[i]] = a;
@@ -384,14 +384,14 @@ void Mesh::chamferFace(int fid, float amount) {
 void Mesh::textureFaceFull(int fid) {
   IntVector* tcd = f[fid]->tcd;
   tcd->clear();
-  tcd->push_back(addTexCoord(TexCoord(0.0f,0.0f)));
-  tcd->push_back(addTexCoord(TexCoord(1.0f,0.0f)));
-  tcd->push_back(addTexCoord(TexCoord(1.0f,1.0f)));
-  tcd->push_back(addTexCoord(TexCoord(0.0f,1.0f)));
+  tcd->push_back(addTexCoord(TexCoord(0.0,0.0)));
+  tcd->push_back(addTexCoord(TexCoord(1.0,0.0)));
+  tcd->push_back(addTexCoord(TexCoord(1.0,1.0)));
+  tcd->push_back(addTexCoord(TexCoord(0.0,1.0)));
   f[fid]->texcoords = true;
 }
 
-void Mesh::textureFaceQuad(int fid, float au, float av, float bu, float bv) {
+void Mesh::textureFaceQuad(int fid, double au, double av, double bu, double bv) {
   IntVector* tcd = f[fid]->tcd;
   tcd->clear();
   tcd->push_back(addTexCoord(TexCoord(au,av)));
@@ -401,8 +401,8 @@ void Mesh::textureFaceQuad(int fid, float au, float av, float bu, float bv) {
   f[fid]->texcoords = true;
 }
 
-void Mesh::textureFace(int fid, float snap, float tile) {
-  textureFaceQuad(fid,0.0f,0.0f,round(faceH(fid)/snap)*tile,round(faceV(fid)/snap)*tile);
+void Mesh::textureFace(int fid, double snap, double tile) {
+  textureFaceQuad(fid,0.0,0.0,round(faceH(fid)/snap)*tile,round(faceV(fid)/snap)*tile);
 }
 
 void Mesh::freeFace(int fid) {

@@ -120,7 +120,7 @@
 #line 16 "..\\..\\src\\parser.y"
 typedef union _YYSTYPE {
   char *id;
-  float fl;
+  double fl;
   ProductVector* pv;
   Product* p;
   OperationVector* ov;

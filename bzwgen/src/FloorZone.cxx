@@ -23,12 +23,12 @@ FloorZone::FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int
   mesh.passable = true;
 
   mesh.createNewFace(
-    Vertex((float)A.x,(float)A.y,0.001f), Vertex((float)B.x,(float)A.y,0.001f),
-    Vertex((float)B.x,(float)B.y,0.001f), Vertex((float)A.x,(float)B.y,0.001f),
-    TexCoord(0.0f,0.0f),
-    rotated ? TexCoord(0.0f,float((B.x-A.x)/step))                  : TexCoord(float((B.x-A.x)/step),0.0f),
-    rotated ? TexCoord(float((B.y-A.y)/step),float((B.x-A.x)/step)) : TexCoord(float((B.x-A.x)/step),float((B.y-A.y)/step)),
-    rotated ? TexCoord(float((B.y-A.y)/step),0.0f)                  : TexCoord(0,float((B.y-A.y)/step)),
+    Vertex((double)A.x,(double)A.y,0.001f), Vertex((double)B.x,(double)A.y,0.001f),
+    Vertex((double)B.x,(double)B.y,0.001f), Vertex((double)A.x,(double)B.y,0.001f),
+    TexCoord(0.0,0.0),
+    rotated ? TexCoord(0.0,double((B.x-A.x)/step))                  : TexCoord(double((B.x-A.x)/step),0.0),
+    rotated ? TexCoord(double((B.y-A.y)/step),double((B.x-A.x)/step)) : TexCoord(double((B.x-A.x)/step),double((B.y-A.y)/step)),
+    rotated ? TexCoord(double((B.y-A.y)/step),0.0)                  : TexCoord(0,double((B.y-A.y)/step)),
     matref);
 }
 

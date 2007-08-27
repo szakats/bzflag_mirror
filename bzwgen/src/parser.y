@@ -15,7 +15,7 @@ void yyunput(int, char*);
 %parse-param {RuleSet *ruleset}
 %union _YYSTYPE {
   char *id;
-  float fl;
+  double fl;
   ProductVector* pv;
   Product* p;
   OperationVector* ov;
@@ -55,7 +55,7 @@ products : /* empty */ { $$ = new ProductVector(); }
   | products product { $$ = $1; $$->push_back($2); }
 ;
 product : DEFSIGN NUMBER ':' cond ops { $$ = new Product($5,$2,$4); }
-  | DEFSIGN cond ops { $$ = new Product($3,1.0f,$2); }
+  | DEFSIGN cond ops { $$ = new Product($3,1.0,$2); }
 ;
 faces : /* empty */ { $$ = new StringVector(); }
   | faces NONTERM  { std::string name = std::string($2); $$->push_back(name); }

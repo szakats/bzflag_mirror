@@ -46,7 +46,7 @@ public:
 	const char* GetDataS ( const char* szKey );
 	int GetDataI ( const char* szKey );
 	bool GetDataB ( const char* szKey );
-	float GetDataF ( const char* szKey );
+	double GetDataF ( const char* szKey );
 
 private:
 	typedef std::map<std::string,std::string> tmCommandMap;

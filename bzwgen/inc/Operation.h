@@ -183,7 +183,7 @@ public:
 class OperationSingle : public Operation {
 protected:
   Expression *exp;
-  float value;
+  double value;
 public:
   OperationSingle(RuleSet* _ruleset, Expression* _exp) : Operation(_ruleset), exp(_exp) { };
   void flatten(Mesh* mesh,int face) { value = exp->calculate(mesh,face); }
@@ -208,7 +208,7 @@ public:
   OperationAssert(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
   int runMesh(Mesh* mesh,int face) {
     flatten(mesh,face);
-    if (value >= 0.0f) return face; else return -1;
+    if (value >= 0.0) return face; else return -1;
   }
 };
 

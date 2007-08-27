@@ -182,7 +182,7 @@ void yyunput(int, char*);
 #line 16 "..\\..\\src\\parser.y"
 typedef union _YYSTYPE {
   char *id;
-  float fl;
+  double fl;
   ProductVector* pv;
   Product* p;
   OperationVector* ov;
@@ -1498,7 +1498,7 @@ yyreduce:
 
   case 9:
 #line 58 "..\\..\\src\\parser.y"
-    { (yyval.p) = new Product((yyvsp[0].ov),1.0f,(yyvsp[-1].e)); ;}
+    { (yyval.p) = new Product((yyvsp[0].ov),1.0,(yyvsp[-1].e)); ;}
     break;
 
   case 10:

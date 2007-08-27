@@ -212,7 +212,7 @@ int main (int argc, char* argv[]) {
   loadPlugIns();
 
   ruleset->initialize();
-  ruleset->addAttr("DETAIL",float(detail));
+  ruleset->addAttr("DETAIL",double(detail));
 
   srand((unsigned int)time(NULL));
 

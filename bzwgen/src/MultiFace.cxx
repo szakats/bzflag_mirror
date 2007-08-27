@@ -12,7 +12,7 @@
 
 #include "MultiFace.h"
 
-void MultiFace::updateFaces(float z) {
+void MultiFace::updateFaces(double z) {
   for (size_t fi = 0; fi < comps->size(); fi++) {
     Face* f = comps->at(fi);
     for (int t = 0; t < f->size(); t++) {
@@ -123,7 +123,7 @@ bool MultiFace::isLeftOfVectors(int x, int a, int b, int c) {
   Vertex Xline = A+(mesh->v[x]-P).norm();
   Vertex Pline = A+(mesh->v[c]-P).norm();
 
-  Vertex normal = Vertex(0.0f,0.0f,1.0f);//faceNormal(fid);
+  Vertex normal = Vertex(0.0,0.0,1.0);//faceNormal(fid);
 
   return fsign( Xline.cross(Pline).dot(normal) ) >= 0;
 }
@@ -237,8 +237,8 @@ int MultiFace::addFace(Face* f) {
 bool MultiFace::vertexInside(int vid) {
   Vertex A = mesh->v[vid];
   Vertex B = mesh->v[vid];
-  B.y = 100000.0f; // sufficient to be out of range
-  B.x = 200000.0f; // sufficient to be out of range
+  B.y = 100000.0; // sufficient to be out of range
+  B.x = 200000.0; // sufficient to be out of range
   Vertex P1;
   Vertex P2;
   int count = 0;
@@ -252,16 +252,16 @@ bool MultiFace::vertexInside(int vid) {
 bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index, Face* face) {
   Vertex A = mesh->v[begin];
   Vertex B = mesh->v[end];
-  float length = (A-B).length();
+  double length = (A-B).length();
   int tsize = face->size();
-  float distance = length + 1.0f;
+  double distance = length + 1.0;
   Vertex R1;
   Vertex R2;
   for (int i = 0; i < tsize; i++) {
     int r = intersectZ(A,B,mesh->v[face->vertex(i)],mesh->v[face->vertex(i+1)],R1,R2);
     if (r > 0) {
       if (!samepointZ(mesh->v[face->vertex(i)],R1)) {
-        float thisdistance = (A-R1).length();
+        double thisdistance = (A-R1).length();
         if (thisdistance > EPSILON) {
 //          printf("ICH:%s\n",R1.toString().c_str());
           if (thisdistance < distance) {
@@ -274,7 +274,7 @@ bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index
     }
     if (r == 2) {
       if (!samepointZ(mesh->v[face->vertex(i)],R2)) {
-        float thisdistance = (A-R2).length();
+        double thisdistance = (A-R2).length();
         if (thisdistance < EPSILON) continue;
 //        printf("ICH(2):%s\n",R2.toString().c_str());
         if (thisdistance < distance) {
