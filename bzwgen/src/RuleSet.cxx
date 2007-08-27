@@ -74,10 +74,19 @@ int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename) {
   return runMesh(newmesh,newfaceid,rulename);
 }
 
+void RuleSet::loadMaterial(std::string& id, std::string& name) {
+  int matid = 100+materials.size();
+  addAttr(id,float(matid));
+  materials.push_back(new Material(matid,name));
+}
+
+void RuleSet::output(Output& out ) {
+  for (MaterialVectIter itr = materials.begin(); itr!= materials.end(); ++itr) (*itr)->output(out);
+}
 
 RuleSet::~RuleSet() { 
-  RuleMapIter itr;
-  for (itr = rules.begin();itr != rules.end(); ++itr) delete itr->second; 
+  for (RuleMapIter itr = rules.begin();itr != rules.end(); ++itr) delete itr->second; 
+  for (MaterialVectIter itr = materials.begin(); itr!= materials.end(); ++itr) delete (*itr);
 }
 
 // Local Variables: ***

@@ -17,6 +17,7 @@
 #include <string>
 #include "Rule.h"
 #include "Mesh.h"
+#include "Material.h"
 #define MAX_RECURSION 1000
 
 class RuleSet {
@@ -24,17 +25,20 @@ class RuleSet {
   AttributeMap attrmap;
   int recursion;
   MeshVector* meshes;
+  MaterialVector materials;
 public:
-  RuleSet() : recursion(0), meshes(NULL) {}
+  RuleSet() : recursion(0), meshes(NULL) { }
   MeshVector* run(Mesh* initial_mesh, int initial_face, std::string& rulename);
   int runMesh(Mesh* mesh, int face, std::string& rulename);
   int runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename);
+  void loadMaterial(std::string& id, std::string& name);
   void initialize() { std::string init = std::string("initialize"); runMesh(NULL,0,init); }
   void addAttr(const char* name, float value) { std::string temp = name; addAttr(temp,value); }
   void addAttr(std::string& name, float value) { attrmap[name] = value; }
   float getAttr(std::string& name); 
   float getAttr(const char* name) { std::string temp = name; return getAttr(temp); }
   void addRule(std::string& name, Rule* rule);
+  void output(Output& out );
   ~RuleSet();
 };
 
