@@ -191,12 +191,12 @@ inline double randomdouble01() { return (double)(rand()) / (double)(RAND_MAX); }
 inline double randomdouble(double range) { return randomdouble01()*range; }
 inline double randomdoubleRange(double min, double max) { return randomdouble(max-min)+min; }
 inline double randomdoubleRangeStep(double min, double max, double step) { if (step == 0) return 0.0; int steps = int((max-min) / step); return randomInt(steps+1)*step + min; }
-inline int round(double f) { return int(f+0.5f); }
+inline int roundToInt(double f) { return int(f+0.5f); }
 
 inline double fsign(double f) { if (f == 0.0) return 0.0; return (f < 0.0) ? -1.0 : 1.0; }
 
-inline double snap(double f,double snapval) { return double(round(f/snapval))*snapval; }
-inline double refinesnap(double oldsnap, double max) { return (max/double(round(max/oldsnap))); }
+inline double snap(double f,double snapval) { return double(roundToInt(f/snapval))*snapval; }
+inline double refinesnap(double oldsnap, double max) { return (max/double(roundToInt(max/oldsnap))); }
 
 inline double minf(double a,double b) { return a < b ? a : b; }
 inline double maxf(double a,double b) { return a > b ? a : b; }

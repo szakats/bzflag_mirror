@@ -103,7 +103,7 @@ bool GridMap::isValid(int x, int y) {
 }
 
 
-int GridMap::typeAround(int x, int y, int type) 
+int GridMap::typeAroundToInt(int x, int y, int type) 
 {
   int count = 0;
   for (int xx = x-1; xx <= x+1; xx++) 
@@ -112,7 +112,7 @@ int GridMap::typeAround(int x, int y, int type)
   return count;
 }
 
-int GridMap::typeCrossAround(int x, int y, int type) 
+int GridMap::typeCrossAroundToInt(int x, int y, int type) 
 {
   int count = 0;
   if (getNode(x,y).type == type) count++;

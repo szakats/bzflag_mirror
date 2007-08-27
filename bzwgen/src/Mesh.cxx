@@ -402,7 +402,7 @@ void Mesh::textureFaceQuad(int fid, double au, double av, double bu, double bv) 
 }
 
 void Mesh::textureFace(int fid, double snap, double tile) {
-  textureFaceQuad(fid,0.0,0.0,round(faceH(fid)/snap)*tile,round(faceV(fid)/snap)*tile);
+  textureFaceQuad(fid,0.0,0.0,roundToInt(faceH(fid)/snap)*tile,roundToInt(faceV(fid)/snap)*tile);
 }
 
 void Mesh::freeFace(int fid) {

@@ -72,7 +72,7 @@ int OperationDetachFace::runMesh(Mesh* mesh,int face) {
     return face;
   }
   flatten(mesh,face);
-  faces = ((MultiFace*)mesh->f[face])->detachFace(round(value));
+  faces = ((MultiFace*)mesh->f[face])->detachFace(roundToInt(value));
   if (faces != NULL) {
     OperationMultifaces::runMesh(mesh,face);
     delete faces;
@@ -137,7 +137,7 @@ int OperationSubdivide::runMesh(Mesh* mesh,int face) {
   flatten(mesh,face);
   double snap = 0.0;
   if (esnap != NULL) snap = esnap->calculate(mesh,face);
-  faces = mesh->subdivdeFace(face,round(value),horiz,snap);
+  faces = mesh->subdivdeFace(face,roundToInt(value),horiz,snap);
   if (facerules == NULL) {
     delete faces;
     faces = NULL;

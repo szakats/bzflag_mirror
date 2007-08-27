@@ -198,7 +198,7 @@ public:
   int runMesh(Mesh* mesh,int face) {
     flatten(mesh,face);
     mesh->freeFace(face);
-    face = mesh->createNGon(mesh->faceCenter(face),minf(mesh->faceH(face),mesh->faceV(face))/2,round(value));
+    face = mesh->createNGon(mesh->faceCenter(face),minf(mesh->faceH(face),mesh->faceV(face))/2,roundToInt(value));
     return face;
   }
 };
@@ -227,7 +227,7 @@ public:
   int runMesh(Mesh* mesh,int face) { 
     if (mesh == NULL) return 0;
     flatten(mesh,face);
-    mesh->f[face]->mat = round(value);
+    mesh->f[face]->mat = roundToInt(value);
     return face; 
   };
 };

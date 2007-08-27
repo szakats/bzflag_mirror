@@ -37,8 +37,8 @@ public:
   void growZone(int x,int y,int type);
   void pushZones();
   bool isValid(int x, int y);
-  int typeAround(int x, int y, int type);
-  int typeCrossAround(int x, int y, int type); 
+  int typeAroundToInt(int x, int y, int type);
+  int typeCrossAroundToInt(int x, int y, int type); 
   Coord2D emptyCoord();
   ~GridMap();
 };

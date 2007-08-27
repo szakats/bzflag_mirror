@@ -86,7 +86,7 @@ class ExpressionRound : public Expression {
 public:
   ExpressionRound(Expression* _a) : a(_a) {};
   double calculate(Mesh* mesh,int face) { 
-    return double(round(a->calculate(mesh,face)));
+    return double(roundToInt(a->calculate(mesh,face)));
   }
 };
 
