@@ -107,13 +107,13 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\debug\osgdb_pngd.dll ..\..\osgdb_pngd.dlll
 				Name="VCPostBuildEventTool"
 				CommandLine="copy release\*.exe ..\..\*.exe
 copy $(OSG_ROOT)\lib\release\OpenThreads.dll ..\..\OpenThreads.dll
-copy $(OSG_ROOT)\lib\release\osgd.dll ..\..\osg.dll
+copy $(OSG_ROOT)\lib\release\osg.dll ..\..\osg.dll
 copy $(OSG_ROOT)\lib\release\osgGA.dll ..\..\osgGA.dll
 copy $(OSG_ROOT)\lib\release\osgUtil.dll ..\..\osgUtil.dll
 copy $(OSG_ROOT)\lib\release\osgViewer.dll ..\..\osgViewer.dll
 copy $(OSG_ROOT)\lib\release\osgText.dll ..\..\osgText.dll
 copy $(OSG_ROOT)\lib\release\osgDB.dll ..\..\osgDB.dll
-copy $(OSG_ROOT)\lib\osgPlugins-2.0.0release\osgdb_png.dll ..\..\osgdb_png.dlll
+copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_png.dll ..\..\osgdb_png.dlll
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
