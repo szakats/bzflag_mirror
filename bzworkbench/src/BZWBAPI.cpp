@@ -11,3 +11,28 @@
  */
 
 #include "BZWBAPI.h"
+#include "BZWBPlugins.h"
+
+// custom pluginHandler
+BZWB_API bool bz_registerCustomPluginHandler(const char *extension, bzwb_APIPluginHandler *handler)
+{
+	if(!extension || !handler)
+		return false;
+
+	std::string ext=extension;
+
+	return registerCustomPluginHandler(ext, handler);
+}
+
+//-------------------------------------------------------------------------
+
+BZWB_API bool bz_removeCustomPluginHandler(const char *extension, bzwb_APIPluginHandler *handler)
+{
+	if(!extension || !handler)
+		return false;
+
+	std::string ext=extension;
+
+	return removeCustomPluginHandler(ext, handler);
+}
+

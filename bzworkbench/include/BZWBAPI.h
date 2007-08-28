@@ -34,7 +34,18 @@
 
 #define BZWB_API_VERSION	1
 
-#define BZWB_GET_PLUGIN_VERSION BZF_PLUGIN_CALL int bzwb_GetVersion ( void ) { return BZWB_API_VERSION;}
+#define BZWB_GET_PLUGIN_VERSION BZWB_PLUGIN_CALL int bzwb_GetVersion ( void ) { return BZWB_API_VERSION;}
+
+class bzwb_APIPluginHandler
+{
+public:
+	virtual ~bzwb_APIPluginHandler(){};
+	virtual bool handle ( const char* plugin, const char* param ) = 0;
+};
+// custom pluginHandler
+BZWB_API bool bz_registerCustomPluginHandler ( const char* extension, bzwb_APIPluginHandler * handler );
+BZWB_API bool bz_removeCustomPluginHandler ( const char* extension, bzwb_APIPluginHandler * handler );
+
 
 
 #endif /*BZWB_API_H_*/

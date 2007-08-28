@@ -60,6 +60,8 @@
 
 #include "TextUtils.h"
 
+#include "BZWBPlugins.h"
+
 #include "dialogs/AdvancedOptionsDialog.h"
 
 #include <string>
@@ -106,6 +108,8 @@ void buildModelDatabase() {
 
 int main(int argc, char** argv) {
 	
+	initPlugins();
+
 	// init the model
 	Model* model = new Model();
 	

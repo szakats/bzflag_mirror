@@ -146,6 +146,9 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_obj.dll ..\..\osgdb_obj.dll
 				RelativePath="..\..\src\main.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\OSFile.cxx">
+			</File>
+			<File
 				RelativePath="..\..\src\TextUtils.cxx">
 			</File>
 			<Filter
@@ -369,6 +372,9 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_obj.dll ..\..\osgdb_obj.dll
 			</File>
 			<File
 				RelativePath="..\..\include\Model.h">
+			</File>
+			<File
+				RelativePath="..\..\include\OSFile.h">
 			</File>
 			<File
 				RelativePath="..\..\include\QuickLabel.h">
