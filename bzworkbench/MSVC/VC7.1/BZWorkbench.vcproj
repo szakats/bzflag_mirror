@@ -113,7 +113,7 @@ copy $(OSG_ROOT)\lib\release\osgUtil.dll ..\..\osgUtil.dll
 copy $(OSG_ROOT)\lib\release\osgViewer.dll ..\..\osgViewer.dll
 copy $(OSG_ROOT)\lib\release\osgText.dll ..\..\osgText.dll
 copy $(OSG_ROOT)\lib\release\osgDB.dll ..\..\osgDB.dll
-copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_png.dll ..\..\osgdb_png.dlll
+copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_png.dll ..\..\osgdb_png.dll
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
