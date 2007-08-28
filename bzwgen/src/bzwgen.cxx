@@ -28,6 +28,7 @@
 #define BuildState "development"
 
 extern int yyparse(RuleSet*);
+extern int yylineno;
 extern FILE* yyin;
 
 int debugLevel = 2;
@@ -205,8 +206,9 @@ int main (int argc, char* argv[]) {
       std::cout << "done.\n";
     } else {
       std::cout << "failed!\n";
-      return 0;
+      return 1;
     }
+    yylineno = 1;
     file.Close();
   }
 
