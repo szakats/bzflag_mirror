@@ -23,16 +23,16 @@ C_UPPER_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-windows/eventHandlers \
-windows \
-widgets \
-share/teleporter \
-share/pyramid \
-share/box \
-share/base \
-render \
-objects \
-model \
-. \
-dialogs \
+src/windows/eventHandlers \
+src/windows \
+src/widgets \
+src/share/teleporter \
+src/share/pyramid \
+src/share/box \
+src/share/base \
+src/render \
+src/objects \
+src/model \
+src/ \
+src/dialogs \
 

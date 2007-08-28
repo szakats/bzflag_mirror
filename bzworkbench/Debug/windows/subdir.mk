@@ -4,29 +4,29 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../windows/ConsoleWindow.cpp \
-../windows/EventHandlerCollection.cpp \
-../windows/MainWindow.cpp \
-../windows/RenderWindow.cpp \
-../windows/View.cpp 
+../src/windows/ConsoleWindow.cpp \
+../src/windows/EventHandlerCollection.cpp \
+../src/windows/MainWindow.cpp \
+../src/windows/RenderWindow.cpp \
+../src/windows/View.cpp 
 
 OBJS += \
-./windows/ConsoleWindow.o \
-./windows/EventHandlerCollection.o \
-./windows/MainWindow.o \
-./windows/RenderWindow.o \
-./windows/View.o 
+./src/windows/ConsoleWindow.o \
+./src/windows/EventHandlerCollection.o \
+./src/windows/MainWindow.o \
+./src/windows/RenderWindow.o \
+./src/windows/View.o 
 
 CPP_DEPS += \
-./windows/ConsoleWindow.d \
-./windows/EventHandlerCollection.d \
-./windows/MainWindow.d \
-./windows/RenderWindow.d \
-./windows/View.d 
+./src/windows/ConsoleWindow.d \
+./src/windows/EventHandlerCollection.d \
+./src/windows/MainWindow.d \
+./src/windows/RenderWindow.d \
+./src/windows/View.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-windows/%.o: ../windows/%.cpp
+src/windows/%.o: ../src/windows/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	g++ -I/usr/include/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"

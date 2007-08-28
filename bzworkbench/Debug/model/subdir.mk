@@ -4,23 +4,23 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../model/BZWParser.cpp \
-../model/Model.cpp \
-../model/SceneBuilder.cpp 
+../src/model/BZWParser.cpp \
+../src/model/Model.cpp \
+../src/model/SceneBuilder.cpp 
 
 OBJS += \
-./model/BZWParser.o \
-./model/Model.o \
-./model/SceneBuilder.o 
+./src/model/BZWParser.o \
+./src/model/Model.o \
+./src/model/SceneBuilder.o 
 
 CPP_DEPS += \
-./model/BZWParser.d \
-./model/Model.d \
-./model/SceneBuilder.d 
+./src/model/BZWParser.d \
+./src/model/Model.d \
+./src/model/SceneBuilder.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-model/%.o: ../model/%.cpp
+src/model/%.o: ../src/model/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	g++ -I/usr/include/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"

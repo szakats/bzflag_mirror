@@ -179,54 +179,54 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\main.cpp"
+				RelativePath="..\..\src\main.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\TextUtils.cxx"
+				RelativePath="..\..\src\TextUtils.cxx"
 				>
 			</File>
 			<Filter
 				Name="Dialogs"
 				>
 				<File
-					RelativePath="..\..\dialogs\AdvancedOptionsDialog.cpp"
+					RelativePath="..\..\src\dialogs\AdvancedOptionsDialog.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\dialogs\ConeConfigurationDialog.cpp"
+					RelativePath="..\..\src\dialogs\ConeConfigurationDialog.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\dialogs\ConfigurationMenu.cpp"
+					RelativePath="..\..\src\dialogs\ConfigurationMenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\dialogs\Fl_Dialog.cpp"
+					RelativePath="..\..\src\dialogs\Fl_Dialog.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\dialogs\Fl_Error.cpp"
+					RelativePath="..\..\src\dialogs\Fl_Error.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\dialogs\Fl_Tweak.cpp"
+					RelativePath="..\..\src\dialogs\Fl_Tweak.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\dialogs\MainMenu.cpp"
+					RelativePath="..\..\src\dialogs\MainMenu.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\dialogs\MasterConfigurationDialog.cpp"
+					RelativePath="..\..\src\dialogs\MasterConfigurationDialog.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\dialogs\MenuBar.cpp"
+					RelativePath="..\..\src\dialogs\MenuBar.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\dialogs\WorldOptionsDialog.cpp"
+					RelativePath="..\..\src\dialogs\WorldOptionsDialog.cpp"
 					>
 				</File>
 			</Filter>
@@ -234,15 +234,15 @@
 				Name="Model"
 				>
 				<File
-					RelativePath="..\..\model\BZWParser.cpp"
+					RelativePath="..\..\src\model\BZWParser.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\model\Model.cpp"
+					RelativePath="..\..\src\model\Model.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\model\SceneBuilder.cpp"
+					RelativePath="..\..\src\model\SceneBuilder.cpp"
 					>
 				</File>
 			</Filter>
@@ -250,30 +250,30 @@
 				Name="Windows"
 				>
 				<File
-					RelativePath="..\..\windows\ConsoleWindow.cpp"
+					RelativePath="..\..\src\windows\ConsoleWindow.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\windows\EventHandlerCollection.cpp"
+					RelativePath="..\..\src\windows\EventHandlerCollection.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\windows\MainWindow.cpp"
+					RelativePath="..\..\src\windows\MainWindow.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\windows\RenderWindow.cpp"
+					RelativePath="..\..\src\windows\RenderWindow.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\windows\View.cpp"
+					RelativePath="..\..\src\windows\View.cpp"
 					>
 				</File>
 				<Filter
 					Name="Event Handlers"
 					>
 					<File
-						RelativePath="..\..\windows\eventHandlers\selectHandler.cpp"
+						RelativePath="..\..\src\windows\eventHandlers\selectHandler.cpp"
 						>
 					</File>
 				</Filter>
@@ -282,99 +282,99 @@
 				Name="Objects"
 				>
 				<File
-					RelativePath="..\..\objects\arc.cpp"
+					RelativePath="..\..\src\objects\arc.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\base.cpp"
+					RelativePath="..\..\src\objects\base.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\box.cpp"
+					RelativePath="..\..\src\objects\box.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\bz2object.cpp"
+					RelativePath="..\..\src\objects\bz2object.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\cone.cpp"
+					RelativePath="..\..\src\objects\cone.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\define.cpp"
+					RelativePath="..\..\src\objects\define.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\dynamicColor.cpp"
+					RelativePath="..\..\src\objects\dynamicColor.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\group.cpp"
+					RelativePath="..\..\src\objects\group.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\link.cpp"
+					RelativePath="..\..\src\objects\link.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\material.cpp"
+					RelativePath="..\..\src\objects\material.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\mesh.cpp"
+					RelativePath="..\..\src\objects\mesh.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\meshbox.cpp"
+					RelativePath="..\..\src\objects\meshbox.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\meshpyr.cpp"
+					RelativePath="..\..\src\objects\meshpyr.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\options.cpp"
+					RelativePath="..\..\src\objects\options.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\physics.cpp"
+					RelativePath="..\..\src\objects\physics.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\pyramid.cpp"
+					RelativePath="..\..\src\objects\pyramid.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\sphere.cpp"
+					RelativePath="..\..\src\objects\sphere.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\teleporter.cpp"
+					RelativePath="..\..\src\objects\teleporter.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\tetra.cpp"
+					RelativePath="..\..\src\objects\tetra.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\texturematrix.cpp"
+					RelativePath="..\..\src\objects\texturematrix.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\waterLevel.cpp"
+					RelativePath="..\..\src\objects\waterLevel.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\weapon.cpp"
+					RelativePath="..\..\osrc\bjects\weapon.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\world.cpp"
+					RelativePath="..\..\osrc\bjects\world.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\objects\zone.cpp"
+					RelativePath="..\..\src\objects\zone.cpp"
 					>
 				</File>
 			</Filter>
@@ -382,19 +382,19 @@
 				Name="Render"
 				>
 				<File
-					RelativePath="..\..\render\GeometryExtractorVisitor.cpp"
+					RelativePath="..\..\src\render\GeometryExtractorVisitor.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\render\Ground.cpp"
+					RelativePath="..\..\src\render\Ground.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\render\Selection.cpp"
+					RelativePath="..\..\src\render\Selection.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\render\TextureRepeaterVisitor.cpp"
+					RelativePath="..\..\src\render\TextureRepeaterVisitor.cpp"
 					>
 				</File>
 			</Filter>
@@ -402,23 +402,23 @@
 				Name="Widgets"
 				>
 				<File
-					RelativePath="..\..\widgets\Console.cpp"
+					RelativePath="..\..\src\widgets\Console.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\widgets\Fl_ImageButton.cpp"
+					RelativePath="..\..\src\widgets\Fl_ImageButton.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\widgets\MaterialWidget.cpp"
+					RelativePath="..\..\src\widgets\MaterialWidget.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\widgets\QuickLabel.cpp"
+					RelativePath="..\..\src\widgets\QuickLabel.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\widgets\TransformWidget.cpp"
+					RelativePath="..\..\src\widgets\TransformWidget.cpp"
 					>
 				</File>
 			</Filter>

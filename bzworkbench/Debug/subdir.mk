@@ -4,31 +4,31 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../main.cpp 
+../src/main.cpp 
 
 CXX_SRCS += \
-../TextUtils.cxx 
+../src/TextUtils.cxx 
 
 OBJS += \
-./TextUtils.o \
-./main.o 
+./src/TextUtils.o \
+./src/main.o 
 
 CPP_DEPS += \
-./main.d 
+./src/main.d 
 
 CXX_DEPS += \
 ./TextUtils.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-%.o: ../%.cxx
+src/%.o: ../src/%.cxx
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	g++ -I/usr/include/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
-%.o: ../%.cpp
+src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	g++ -I/usr/include/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
