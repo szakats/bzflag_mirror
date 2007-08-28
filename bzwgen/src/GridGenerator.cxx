@@ -97,11 +97,11 @@ void GridGenerator::run() {
     plotRoad(gi.sizeX-snapX-1,gi.sizeY-snapY-1,true,0);
     plotRoad(gi.sizeX-snapX-1,gi.sizeY-snapY-1,false,0);
 
-    map.setAreaType(Coord2D(0,snapX),                Coord2D(0,snapY),                CELLBASE);
-    map.setAreaType(Coord2D(gi.sizeX-snapX,gi.sizeX),Coord2D(gi.sizeY-snapY,gi.sizeY),CELLBASE);
+    map.setAreaType(Coord2D(0,0),Coord2D(snapX,snapY),CELLBASE);
+    map.setAreaType(Coord2D(gi.sizeX-snapX,gi.sizeY-snapY),Coord2D(gi.sizeX,gi.sizeY),CELLBASE);
     if (bases > 2) {
-      map.setAreaType(Coord2D(0,snapX),                Coord2D(gi.sizeY-snapY,gi.sizeY),CELLBASE);
-      map.setAreaType(Coord2D(gi.sizeX-snapX,gi.sizeX),Coord2D(0,snapY),                CELLBASE);
+      map.setAreaType(Coord2D(0,gi.sizeY-snapY),Coord2D(snapX,gi.sizeY),CELLBASE);
+      map.setAreaType(Coord2D(gi.sizeX-snapX,0),Coord2D(gi.sizeX,snapY),CELLBASE);
     }
   }
 
