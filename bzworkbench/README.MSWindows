@@ -1,0 +1,21 @@
+Project files for BZWorkbench are provided for both Visual Studio .net 2003 and 2005 ( VC 7.1 and VC8 repsectivly ).
+
+You will need 2 thrid party librarys to be able to build the editor.
+
+Open SceneGraph (OSG) for the 3d drawing.
+	It can be found at http://www.openscenegraph.org/
+
+The Fast Light Toolkit (FLTK) for the interface
+	it can be found at http://www.fltk.org/
+
+The build projects for windows (VC7.1) assume you have 2 environment variables set on your system to indicate where these librarys are located.
+
+OSG_ROOT and FLTK_ROOT
+
+they should each point to the root dir that contains the apropriate library.
+
+You will need to compile the librarys in ether release or debug mode, depending on how you want to build BZWB, they must match.
+
+WHen building OSG, make sure that you also include their own 3rd party libs, and set the PNG include and library paths, so OSG builds the PNG reader that is used for textures.
+
+Once you have these libraries build and the environment variables set, the BZWB build system will copy all needed exe and dll files to the root level of the source tree for ease of use.

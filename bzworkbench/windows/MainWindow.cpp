@@ -70,7 +70,6 @@ void MainWindow::buildButtonPanel() {
 	this->add( configureButton );
 }
 
-
 // default constructor
 MainWindow::MainWindow() :
 	Fl_Window(DEFAULT_WIDTH, DEFAULT_HEIGHT, "BZWorkbench") {

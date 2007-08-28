@@ -1,5 +1,4 @@
-the build on windows (VC7.1) assumes you have 2 environment variiables set on your system
+BZWorkbench is a full featured world editor for the game BZFlag.
+http://www.BZFlag.org
 
-OSG_ROOT and FLTK_ROOT
-
-they should each point to the root dir that contains the apropriate library
+It is currently under heavy development after being initaly writen for the google summer of code program.
