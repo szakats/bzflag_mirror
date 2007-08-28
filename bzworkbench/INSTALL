@@ -9,9 +9,6 @@ the following library and source dependencies:
 	(*)	OpenSceneGraph 2.0
 	(*)	OpenGL 1.4
 
-Currently, BZWorkbench only runs on UNIX platforms (including Mac OS X), 
-and has only been tested by the developer on Debian GNU/Linux 4.0.  It 
-might run on Cygwin; but you're on your own there.
 
 To run BZWorkbench, you should either copy, move, or symlink the 
 bzworkbench binary to the root of the source tree.  Otherwise, it will 
