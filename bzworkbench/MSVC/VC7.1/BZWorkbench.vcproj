@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include"
+				AdditionalIncludeDirectories="..\..\include;&quot;$(FLTK_ROOT)&quot;;&quot;$(OSG_ROOT)\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_NEED_VNSPRINTF"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -37,7 +37,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="fltkd.lib fltkgld.lib fltkimagesd.lib fltkpngd.lib fltkzd.lib opengl32.lib wsock32.lib comctl32.lib osgd.lib osgGAd.lib osgViewerd.lib osgDBd.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(OSG_ROOT)/lib/debug"
+				AdditionalLibraryDirectories="&quot;$(OSG_ROOT)/lib/debug&quot;;&quot;$(FLTK_ROOT)/lib&quot;"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				TargetMachine="1"/>
@@ -81,6 +81,7 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\debug\osgdb_pngd.dll ..\..\osgdb_pngd.dlll
 			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="..\..\include;&quot;$(FLTK_ROOT)&quot;;&quot;$(OSG_ROOT)\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_NEED_VNSPRINTF"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -94,7 +95,7 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\debug\osgdb_pngd.dll ..\..\osgdb_pngd.dlll
 				Name="VCLinkerTool"
 				AdditionalDependencies="fltk.lib fltkgl.lib fltkimages.lib fltkpng.lib fltkz.lib opengl32.lib wsock32.lib comctl32.lib osg.lib osgGA.lib osgViewer.lib osgDB.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(OSG_ROOT)/lib/release"
+				AdditionalLibraryDirectories="&quot;$(OSG_ROOT)/lib/release&quot;;&quot;$(FLTK_ROOT)/lib&quot;"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
