@@ -54,7 +54,8 @@ copy $(OSG_ROOT)\lib\debug\osgViewerd.dll ..\..\osgViewerd.dll
 copy $(OSG_ROOT)\lib\debug\osgTextd.dll ..\..\osgTextd.dll
 copy $(OSG_ROOT)\lib\debug\osgDBd.dll ..\..\osgDBd.dll
 copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\debug\osgdb_pngd.dll ..\..\osgdb_pngd.dll
-copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\debug\osgdb_objd.dll ..\..\osgdb_objd.dll"/>
+copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\debug\osgdb_objd.dll ..\..\osgdb_objd.dll
+"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -114,7 +115,8 @@ copy $(OSG_ROOT)\lib\release\osgViewer.dll ..\..\osgViewer.dll
 copy $(OSG_ROOT)\lib\release\osgText.dll ..\..\osgText.dll
 copy $(OSG_ROOT)\lib\release\osgDB.dll ..\..\osgDB.dll
 copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_png.dll ..\..\osgdb_png.dll
-copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_obj.dll ..\..\osgdb_obj.dll"/>
+copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_obj.dll ..\..\osgdb_obj.dll
+"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -236,7 +238,7 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_obj.dll ..\..\osgdb_obj.dll"
 					RelativePath="..\..\src\objects\define.cpp">
 				</File>
 				<File
-					RelativePath="..\..\objects\dynamicColor.cpp">
+					RelativePath="..\..\src\objects\dynamicColor.cpp">
 				</File>
 				<File
 					RelativePath="..\..\src\objects\group.cpp">
