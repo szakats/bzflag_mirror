@@ -27,6 +27,7 @@ initialize ->
   assign(TYPE_SKY = 1)
   assign(TYPE_RED = 2)
   assign(TYPE_WHITE = 3)
+  assign(TYPE_NGON = 4)
 ;
 
 # ------------------------------------------------------------------------

@@ -23,12 +23,15 @@ roof_classic
 ;
 
 roof_antenna -> 
-  mat_roof
   assign(ROOF_SIZEH = face(h)) 
   assign(ROOF_SIZEV = face(v)) 
   translater(random(0.2,0.8,0.2) - 0.4,random(0.2,0.8,0.2) - 0.4,0) 
-  ngon(4,0.4)
-  extrude(8) 
+  ngon(4,2.0)
+  mat_roof
+  extrude(0.8)
+  extrude(0)
+  expand(-1.6)
+  extrude(random(0,12,4)+12)
   taper(0.5)
 ;
 

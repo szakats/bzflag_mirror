@@ -119,6 +119,7 @@ expr : RANDOM '(' expr ',' expr ',' expr ')' { $$ = new ExpressionRandom($3,$5,$
   | NEG '(' expr ')' { $$ = new ExpressionNeg($3); }
   | ROUND '(' expr ')' { $$ = new ExpressionRound($3); }
   | expr '-' expr { $$ = new ExpressionSub($1,$3); }
+  | expr '+' expr { $$ = new ExpressionAdd($1,$3); }
   | expr '*' expr { $$ = new ExpressionMult($1,$3); }
   | expr '/' expr { $$ = new ExpressionDiv($1,$3); }
   | expr '>' expr { $$ = new ExpressionGreater($1,$3); }

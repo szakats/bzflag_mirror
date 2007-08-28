@@ -3,9 +3,16 @@
 #  ngon.set -- operations for multisided buildings
 # ------------------------------------------------------------------------
 
+ngon_init ->
+  assign(TYPE = $TYPE_NGON) 
+  assign(TEXSNAP = 4) 
+  assign(TEXTILE = 0.5) 
+  assign(BUILD_MAT = $MATWALL2) 
+;
+
 ngon_run 
-  -> 0.3 : assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL2) ngon(6) ngon_bottom
-  -> 0.7 : assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL2) ngon(8) ngon_bottom
+  -> 0.3 : ngon_init ngon(6) ngon_bottom
+  -> 0.7 : ngon_init ngon(8) ngon_bottom
 ;
 ngon_bottom
   -> mat_glass extrudet(4.0) [ build_entry ] ngon_cont
