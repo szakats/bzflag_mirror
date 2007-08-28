@@ -1,0 +1,9 @@
+; Win32CommonControls.def : Declares the module parameters for the DLL.
+
+LIBRARY      "Win32CommonControls"
+
+EXPORTS
+    ; Explicit exports can go here
+bzwb_GetVersion
+bzwb_Load
+bzwb_Unload
