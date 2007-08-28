@@ -3,7 +3,13 @@
 #  sidewalk.set -- generation of sidewalks
 # ------------------------------------------------------------------------
 
+sidewalk_init 
+  -> ($PASSABLE_SIDEWALK) drivethrough () 
+  ->
+;
+
 sidewalk_normal -> 
+  sidewalk_init
   mat_mesh 
   expand(2.0) 
   chamfer(1.0) 
@@ -14,6 +20,7 @@ sidewalk_normal ->
 ;
 
 sidewalk_sky -> 
+  sidewalk_init
   mat_mesh 
   expand(2.0) 
   chamfer(1.0) 
@@ -27,6 +34,7 @@ sidewalk_sky ->
 ;
 
 sidewalk_long -> 
+  sidewalk_init
   mat_mesh 
   expand(2.0) 
   chamfer(1.0) 

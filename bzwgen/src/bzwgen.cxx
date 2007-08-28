@@ -73,6 +73,7 @@ void printHelp() {
   printHelpCommand("b","bases","integer        sets number of bases (0/2/4)(default: 0)");
   printHelpCommand("","ctfsafe","                   turns flag safety zones on for CTF maps");
   printHelpCommand("l","detail","integer       sets the level of detail (1-3)(default: 3)");
+  printHelpCommand("w","sidewalk","            sets sidewalks passable (default: false)");
   printHelpCommand("t","texture","URL          sets the URL for textures\n");
 }
 
@@ -211,8 +212,12 @@ int main (int argc, char* argv[]) {
 
   loadPlugIns();
 
+  bool passsidewalk = false;
+  if (cmd.Exists("w") || cmd.Exists("sidewalk")) { passsidewalk = true; }
+
   ruleset->initialize();
   ruleset->addAttr("DETAIL",double(detail));
+  ruleset->addAttr("PASSABLE_SIDEWALK",double(passsidewalk ? 1.0 : -1.0));
 
   srand((unsigned int)time(NULL));
 

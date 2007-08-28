@@ -345,6 +345,7 @@ void Mesh::output(Output& out, int materialCount) {
     for (size_t i = 0; i < f.size(); i++) 
       if (f[i]->mat == m) {
         if (mat != m) out.matref(m);
+        if (passable) out.line("  passable"); 
         mat = m;
         out.face(f[i],mat);
         mat = f[i]->mat;
