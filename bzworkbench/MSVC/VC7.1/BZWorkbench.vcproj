@@ -53,7 +53,7 @@ copy $(OSG_ROOT)\lib\debug\osgUtild.dll ..\..\osgUtild.dll
 copy $(OSG_ROOT)\lib\debug\osgViewerd.dll ..\..\osgViewerd.dll
 copy $(OSG_ROOT)\lib\debug\osgTextd.dll ..\..\osgTextd.dll
 copy $(OSG_ROOT)\lib\debug\osgDBd.dll ..\..\osgDBd.dll
-copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\debug\osgdb_pngd.dll ..\..\osgdb_pngd.dlll
+copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\debug\osgdb_pngd.dll ..\..\osgdb_pngd.dll
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -87,7 +87,7 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\debug\osgdb_pngd.dll ..\..\osgdb_pngd.dlll
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
