@@ -15,6 +15,8 @@
 #include "OSFile.h"
 #include <map>
 
+Fl_Window *the_mainWindow = NULL;
+
 #ifdef _WIN32
 std::string extension = ".dll";
 std::string globalPluginDir = ".\\plugins\\";

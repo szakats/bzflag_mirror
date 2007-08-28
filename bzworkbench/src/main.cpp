@@ -108,8 +108,6 @@ void buildModelDatabase() {
 
 int main(int argc, char** argv) {
 	
-	initPlugins();
-
 	// init the model
 	Model* model = new Model();
 	
@@ -128,6 +126,10 @@ int main(int argc, char** argv) {
 	
 	// show the main window
 	mw->show();
+	
+	// load any plugins
+	the_mainWindow = mw;
+	initPlugins();
 	
 	// run the program
 	return Fl::run();

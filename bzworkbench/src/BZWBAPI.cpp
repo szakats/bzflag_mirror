@@ -12,9 +12,10 @@
 
 #include "BZWBAPI.h"
 #include "BZWBPlugins.h"
+#include "FL/x.h"
 
 // custom pluginHandler
-BZWB_API bool bz_registerCustomPluginHandler(const char *extension, bzwb_APIPluginHandler *handler)
+BZWB_API bool bzwb_registerCustomPluginHandler(const char *extension, bzwb_APIPluginHandler *handler)
 {
 	if(!extension || !handler)
 		return false;
@@ -26,7 +27,7 @@ BZWB_API bool bz_registerCustomPluginHandler(const char *extension, bzwb_APIPlug
 
 //-------------------------------------------------------------------------
 
-BZWB_API bool bz_removeCustomPluginHandler(const char *extension, bzwb_APIPluginHandler *handler)
+BZWB_API bool bzwb_removeCustomPluginHandler(const char *extension, bzwb_APIPluginHandler *handler)
 {
 	if(!extension || !handler)
 		return false;
@@ -36,3 +37,14 @@ BZWB_API bool bz_removeCustomPluginHandler(const char *extension, bzwb_APIPlugin
 	return removeCustomPluginHandler(ext, handler);
 }
 
+//-------------------------------------------------------------------------
+
+BZWB_API unsigned int bzwb_getOSMainWindowHandle ( void )
+{
+	if (!the_mainWindow)
+		return 0;
+#ifdef _WIN32
+	return (unsigned int)fl_xid(the_mainWindow);
+#endif //_WIN32
+	return 0;
+}

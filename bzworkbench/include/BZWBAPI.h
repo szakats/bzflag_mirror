@@ -43,9 +43,10 @@ public:
 	virtual bool handle ( const char* plugin, const char* param ) = 0;
 };
 // custom pluginHandler
-BZWB_API bool bz_registerCustomPluginHandler ( const char* extension, bzwb_APIPluginHandler * handler );
-BZWB_API bool bz_removeCustomPluginHandler ( const char* extension, bzwb_APIPluginHandler * handler );
+BZWB_API bool bzwb_registerCustomPluginHandler ( const char* extension, bzwb_APIPluginHandler * handler );
+BZWB_API bool bzwb_removeCustomPluginHandler ( const char* extension, bzwb_APIPluginHandler * handler );
 
-
+// OS common controlls
+BZWB_API unsigned int bzwb_getOSMainWindowHandle ( void );
 
 #endif /*BZWB_API_H_*/

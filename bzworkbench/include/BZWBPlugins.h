@@ -17,6 +17,11 @@
 #include <vector>
 #include "BZWBAPI.h"
 
+#include "windows/MainWindow.h"
+
+// plugins need this, we just need a global to hang this on
+extern Fl_Window *the_mainWindow;
+
 void initPlugins ( void );
 
 bool loadPlugin ( std::string plugin, std::string config );

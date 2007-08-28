@@ -347,10 +347,16 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_obj.dll ..\..\osgdb_obj.dll
 				RelativePath="..\..\include\BZWParser.h">
 			</File>
 			<File
+				RelativePath="..\..\include\windows\ConsoleWindow.h">
+			</File>
+			<File
 				RelativePath="..\..\include\DataEntry.h">
 			</File>
 			<File
 				RelativePath="..\..\include\defines.h">
+			</File>
+			<File
+				RelativePath="..\..\include\windows\EventHandlerCollection.h">
 			</File>
 			<File
 				RelativePath="..\..\include\Fl_Dialog.h">
@@ -362,10 +368,7 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_obj.dll ..\..\osgdb_obj.dll
 				RelativePath="..\..\include\ftoa.h">
 			</File>
 			<File
-				RelativePath="..\..\include\MainMenu.h">
-			</File>
-			<File
-				RelativePath="..\..\include\MainWindow.h">
+				RelativePath="..\..\include\windows\MainWindow.h">
 			</File>
 			<File
 				RelativePath="..\..\include\MasterConfigurationDialog.h">
@@ -380,10 +383,16 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_obj.dll ..\..\osgdb_obj.dll
 				RelativePath="..\..\include\QuickLabel.h">
 			</File>
 			<File
+				RelativePath="..\..\include\windows\RenderWindow.h">
+			</File>
+			<File
 				RelativePath="..\..\include\Transform.h">
 			</File>
 			<File
 				RelativePath="..\..\include\TransformWidget.h">
+			</File>
+			<File
+				RelativePath="..\..\include\windows\View.h">
 			</File>
 			<File
 				RelativePath="..\..\include\WorldOptionsDialog.h">
