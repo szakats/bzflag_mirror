@@ -96,6 +96,15 @@ public:
   }
 };
 
+class OperationDriveThrough : public Operation {
+public:
+  OperationDriveThrough(RuleSet* _ruleset) : Operation(_ruleset) { };
+  int runMesh(Mesh* mesh, int face) {
+    mesh->passable = true;
+    return face;
+  }
+};
+
 class OperationRemove : public Operation {
 public:
   OperationRemove(RuleSet* _ruleset) : Operation(_ruleset) { };

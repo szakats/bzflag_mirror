@@ -66,9 +66,10 @@
      REMOVE = 292,
      ADDFACE = 293,
      DETACHFACE = 294,
-     NUMBER = 295,
-     NONTERM = 296,
-     ATTRIBUTE = 297
+     DRIVETHROUGH = 295,
+     NUMBER = 296,
+     NONTERM = 297,
+     ATTRIBUTE = 298
    };
 #endif
 /* Tokens.  */
@@ -109,9 +110,10 @@
 #define REMOVE 292
 #define ADDFACE 293
 #define DETACHFACE 294
-#define NUMBER 295
-#define NONTERM 296
-#define ATTRIBUTE 297
+#define DRIVETHROUGH 295
+#define NUMBER 296
+#define NONTERM 297
+#define ATTRIBUTE 298
 
 
 
@@ -129,7 +131,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 133 "..\\parser.hxx"
+#line 135 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
