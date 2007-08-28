@@ -1,0 +1,5 @@
+the build on windows (VC7.1) assumes you have 2 environment variiables set on your system
+
+OSG_ROOT and FLTK_ROOT
+
+they should each point to the root dir that contains the apropriate library
