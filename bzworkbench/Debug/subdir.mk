@@ -4,7 +4,9 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/main.cpp 
+../src/main.cpp \
+../src/BZWBAPI.cpp \
+../src/BZWBPlugins.cpp
 
 CXX_SRCS += \
 ../src/TextUtils.cxx 
