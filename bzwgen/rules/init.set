@@ -23,6 +23,10 @@ initialize ->
   assign(LEDGEWIDTH  = 0.3)
   assign(SNAP = 4.0)
   assign(TEXTILE = 0.5)
+  assign(TYPE = 0)
+  assign(TYPE_SKY = 1)
+  assign(TYPE_RED = 2)
+  assign(TYPE_WHITE = 3)
 ;
 
 # ------------------------------------------------------------------------

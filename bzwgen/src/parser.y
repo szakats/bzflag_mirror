@@ -105,6 +105,7 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | MULTIFACE '(' ')' { $$ = new OperationMultiFace(ruleset); }
   | FREE '(' ')' { $$ = new OperationFree(ruleset); }
   | REMOVE '(' ')' { $$ = new OperationRemove(ruleset); }
+  | NGON '(' expr ',' expr ')' { $$ = new OperationNGon(ruleset,$3,$5); }
   | NGON '(' expr ')' { $$ = new OperationNGon(ruleset,$3); }
   | ASSIGN '(' NONTERM '=' expr ')' { $$ = new OperationAssign(ruleset,$5,$3); }
   | TEST '(' ')' { $$ = new OperationTest(ruleset); }

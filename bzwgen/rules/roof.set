@@ -6,6 +6,7 @@
 roof_run -> roof_classic roof_bonus;
 
 roof_bonus
+  -> 0.3  : ($TYPE = $TYPE_SKY & face(s) < 20000) spawn(roof_antenna) roof_bonus
   -> 0.2  : assert(face(h) > 15.0) assert(face(v) > 15.0) spawn(roof_building) 
   -> 0.2  : mat_mesh
   -> 0.02 : extrude(0.0) expand(-2.0) extrude(-0.3) mat_grass
@@ -19,6 +20,16 @@ roof_building
 
 roof_classic 
   -> mat_mesh extrude(0.0) expand(0.3) extrude(0.5) mat_roof 
+;
+
+roof_antenna -> 
+  mat_roof
+  assign(ROOF_SIZEH = face(h)) 
+  assign(ROOF_SIZEV = face(v)) 
+  translater(random(0.2,0.8,0.2) - 0.4,random(0.2,0.8,0.2) - 0.4,0) 
+  ngon(4,0.4)
+  extrude(8) 
+  taper(0.5)
 ;
 
 # ------------------------------------------------------------------------

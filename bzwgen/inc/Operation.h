@@ -202,12 +202,17 @@ public:
 };
 
 class OperationNGon : public OperationSingle {
+  Expression* nsize;
 public:
-  OperationNGon(RuleSet* _ruleset, Expression* _exp) : OperationSingle(_ruleset,_exp) {}
+  OperationNGon(RuleSet* _ruleset, Expression* _exp, Expression* _nsize = NULL) : OperationSingle(_ruleset,_exp), nsize(_nsize) {}
   int runMesh(Mesh* mesh,int face) {
     flatten(mesh,face);
     mesh->freeFace(face);
-    face = mesh->createNGon(mesh->faceCenter(face),minf(mesh->faceH(face),mesh->faceV(face))/2,roundToInt(value));
+    if (nsize != NULL) {
+      face = mesh->createNGon(mesh->faceCenter(face),nsize->calculate(mesh,face),roundToInt(value));
+    } else {
+      face = mesh->createNGon(mesh->faceCenter(face),minf(mesh->faceH(face),mesh->faceV(face))/2,roundToInt(value));
+    }
     return face;
   }
 };
