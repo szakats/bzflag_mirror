@@ -26,6 +26,13 @@ typedef struct
 	std::string					title;
 }trStandardFileOpen;
 
+typedef struct 
+{
+	std::string					filename;
+	std::string					extension;
+	std::string					title;
+}trStandardFileSave;
+
 bool getStdFileOpen ( trStandardFileOpen &data )
 {
 	OPENFILENAME	ofn;
@@ -98,6 +105,71 @@ bool getStdFileOpen ( trStandardFileOpen &data )
 	return good;
 }
 
+bool getStdFileSave ( trStandardFileSave &data)
+{
+	OPENFILENAME	ofn;
+
+	memset(&ofn,0,sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = theAppWindow;
+	ofn.hInstance = NULL;
+
+	char filter[1024] = {0};
+
+	int pos = 0;
+
+	if (data.extension.size())
+	{
+		int size = 0;
+		char temp[128] = {0};
+		sprintf(temp,"%s Files (*.%s)",data.extension.c_str(),data.extension.c_str());
+		size += 11 + (data.extension.size()*2);
+		temp[size] = 0;
+		size++;
+		sprintf(temp+size,"*.%s",data.extension.c_str());
+		size += 2 + (1);
+		temp[size] = 0;
+		size++;		
+		memcpy(filter + pos,temp,size);
+		pos += size;
+	}
+	strcat(filter+pos,"All Files (*.*)");
+	pos += 15;
+	filter[pos] = 0;
+	pos++;
+	strcat(filter+pos,"*.*");
+
+	ofn.lpstrFilter = filter;
+	ofn.nFilterIndex = 0;
+	ofn.nMaxFile = _MAX_PATH;
+	ofn.nMaxFileTitle = _MAX_PATH + _MAX_EXT;
+
+	char defaultExtension[_MAX_EXT];
+	if ( data.extension.size() )
+		strcpy(defaultExtension,data.extension.c_str());
+	else
+		strcpy(defaultExtension,"*");
+
+	ofn.lpstrDefExt = defaultExtension;
+
+	char filename[MAX_PATH];
+	char title[MAX_PATH];
+
+	strcpy(filename,data.filename.c_str());
+	strcpy(title,data.title.c_str());
+
+	ofn.lpstrFile = filename;
+	ofn.lpstrFileTitle = title;
+	ofn.Flags = OFN_HIDEREADONLY;
+
+	bool good = GetSaveFileName(&ofn) != 0;
+	if (good)
+	{
+		data.filename = ofn.lpstrFile;
+	}
+
+	return good;
+}
 
 class  Win32OpenDialog : public bzw_OpenDialogControlHandler
 {
@@ -135,6 +207,41 @@ public:
 
 Win32OpenDialog	openDialog;
 
+class  Win32SaveDialog : public bzw_SaveDialogControlHandler
+{
+public:
+	Win32SaveDialog():bzw_SaveDialogControlHandler(){};
+
+	virtual bool handle ( void )
+	{
+		std::string realExtension = extension;
+
+		char filter[512];
+		sprintf(filter,"%s files (%s)|%s|All Files (*.*)|*.*||",realExtension.c_str()+1,extension.c_str(),extension.c_str());
+
+		realExtension.erase(realExtension.begin());
+
+		std::string path = directory + file;
+
+		trStandardFileSave saveData;
+
+		saveData.extension = realExtension;
+		saveData.filename = file;
+		saveData.title = description;
+		if (getStdFileSave(saveData))
+		{
+			file = saveData.filename;
+			sucsessful = true;
+		}
+		else
+			sucsessful = false;
+
+		return true;
+	}
+};
+
+Win32SaveDialog	saveDialog;
+
 BZWB_PLUGIN_CALL int bzwb_Load (const char* /*commandLine*/, void * instance )
 {
 	theAppWindow = (HWND) bzwb_getOSMainWindowHandle();
@@ -146,12 +253,14 @@ BZWB_PLUGIN_CALL int bzwb_Load (const char* /*commandLine*/, void * instance )
 	BOOL bRet = InitCommonControlsEx(&InitCtrls);
 
 	bzwb_registerCommonControlHandler(openDialog.type, &openDialog);
+	bzwb_registerCommonControlHandler(saveDialog.type, &saveDialog);
 	return 0;
 }
 
 BZWB_PLUGIN_CALL int bzwb_Unload (void)
 {
 	bzwb_removeCommonControlHandlerr(openDialog.type, &openDialog);
+	bzwb_removeCommonControlHandlerr(saveDialog.type, &saveDialog);
 	return 0;
 }
 
