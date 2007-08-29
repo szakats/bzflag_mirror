@@ -78,6 +78,7 @@ public:
 	std::string file;
 	std::string extension;
 	std::string directory;
+	std::string description;
 	bool		sucsessful;
 
 	bzw_OpenDialogControlHandler ( void ) :
