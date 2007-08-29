@@ -136,17 +136,11 @@ void MenuBar::save_world_real( Fl_Widget* w ) {
 }
 
 void MenuBar::save_world_as_real( Fl_Widget* w ) {
-	Fl_File_Chooser* fc = new Fl_File_Chooser("share/", "*.bzw", Fl_File_Chooser::CREATE, "Save As..." );
-	fc->show();
 	
-	// wait for a value
-	while( fc->shown() ) { Fl::wait(); }
-	
-	if(fc->value() == NULL)
+	string filename;
+
+	if (!callSaveFileDialog(filename,this->parent->getWorldName().c_str(),"share/","*.bzw","Open..."))
 		return;
-	
-	// get a value (the file path)
-	string filename = fc->value();
 	
 	// set the world name
 	this->parent->setWorldName( filename.c_str() );

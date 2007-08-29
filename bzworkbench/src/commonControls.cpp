@@ -58,7 +58,7 @@ void removeControlHandler ( bzwb_eCommonControlType type, bzwb_BaseCommonControl
 bool callOpenFileDialog ( std::string  &result, const char* file, const char *dir, const char *extension, const char* description  )
 {
 	// see if anyone wants to handle it.
-	controlHanderList handlers = getControlHandlers(eOpenDialog);
+	controlHanderList handlers = getControlHandlers(eOpenFileDialog);
 	for (int i = 0; i < (int)handlers.size(); i++)
 	{
 		bzw_OpenDialogControlHandler *handler = (bzw_OpenDialogControlHandler*)handlers[i];
@@ -86,6 +86,44 @@ bool callOpenFileDialog ( std::string  &result, const char* file, const char *di
 	while( fc->shown() ) { Fl::wait(); }
 
 	// get a value (the selected filename )
+	if(fc->value() == NULL)
+		return false;
+
+	result = fc->value();
+	return true;
+}
+
+bool callSaveFileDialog ( std::string  &result, const char* file, const char *dir, const char *extension, const char* description )
+{
+	// see if anyone wants to handle it.
+	controlHanderList handlers = getControlHandlers(eSaveFileDialog);
+	for (int i = 0; i < (int)handlers.size(); i++)
+	{
+		bzw_SaveDialogControlHandler *handler = (bzw_SaveDialogControlHandler*)handlers[i];
+
+		handler->file = file;
+		handler->extension = extension;
+		handler->directory = dir;
+		handler->sucsessful = false;
+		handler->description = description;
+		handler->parent = bzwb_getOSMainWindowHandle();
+
+		if ( handlers[i]->handle() )
+		{
+			result = handler->file;
+			return handler->sucsessful;
+		}
+	}
+
+	Fl_File_Chooser* fc = new Fl_File_Chooser(dir, extension, Fl_File_Chooser::CREATE, description);
+	
+	if(file)
+		fc->value(file);
+	fc->show();
+
+	// wait for a value
+	while( fc->shown() ) { Fl::wait(); }
+
 	if(fc->value() == NULL)
 		return false;
 

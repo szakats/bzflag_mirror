@@ -26,6 +26,7 @@ void addControlHandler ( bzwb_eCommonControlType type, bzwb_BaseCommonControlHan
 void removeControlHandler ( bzwb_eCommonControlType type, bzwb_BaseCommonControlHandler* handler );
 
 bool callOpenFileDialog ( std::string  &result, const char* file, const char *dir, const char *extension, const char* description );
+bool callSaveFileDialog ( std::string  &result, const char* file, const char *dir, const char *extension, const char* description );
 
 
 

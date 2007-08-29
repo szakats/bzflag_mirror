@@ -54,7 +54,8 @@ BZWB_API unsigned int bzwb_getOSWindowHandle ( unsigned int window );
 
 typedef enum
 {
-	eOpenDialog = 0,
+	eOpenFileDialog = 0,
+	eSaveFileDialog,
 	eLastCommonControl
 }bzwb_eCommonControlType;
 
@@ -72,9 +73,7 @@ public:
 
 class  bzw_OpenDialogControlHandler : public bzwb_BaseCommonControlHandler
 {
-public:
-	bzwb_eCommonControlType	type;
-	
+public:	
 	std::string file;
 	std::string extension;
 	std::string directory;
@@ -84,13 +83,27 @@ public:
 	bzw_OpenDialogControlHandler ( void ) :
 	bzwb_BaseCommonControlHandler()
 	{ 
-		type = eOpenDialog;
+		type = eOpenFileDialog;
 		sucsessful = false;
 	}
 	virtual ~bzw_OpenDialogControlHandler (){};
 
 	virtual bool handle ( void ) {return false;}
 };
+
+class  bzw_SaveDialogControlHandler : public bzw_OpenDialogControlHandler
+{
+public:
+
+	bzw_SaveDialogControlHandler ( void ) :
+	bzw_OpenDialogControlHandler()
+	{ 
+		type = eSaveFileDialog;
+	}
+	virtual ~bzw_SaveDialogControlHandler (){};
+
+};
+
 
 BZWB_API bool bzwb_registerCommonControlHandler ( bzwb_eCommonControlType type, bzwb_BaseCommonControlHandler * handler );
 BZWB_API bool bzwb_removeCommonControlHandlerr ( bzwb_eCommonControlType type, bzwb_BaseCommonControlHandler * handler );

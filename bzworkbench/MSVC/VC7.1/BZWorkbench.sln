@@ -5,14 +5,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BZWorkbench", "BZWorkbench.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32CommonControls", "..\..\plugins\Win32CommonControls\Win32CommonControls_VC71.vcproj", "{E61F009A-695C-43AA-B3CF-0723B73DC840}"
 	ProjectSection(ProjectDependencies) = postProject
+		{8C08EC81-1202-49F7-BC76-46EC0DE8DAE6} = {8C08EC81-1202-49F7-BC76-46EC0DE8DAE6}
 	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
 		Release = Release
-	EndGlobalSection
-	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{8C08EC81-1202-49F7-BC76-46EC0DE8DAE6}.Debug.ActiveCfg = Debug|Win32
