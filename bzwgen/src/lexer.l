@@ -41,6 +41,8 @@ translater            { return(TRANSLATER); }
 material              { return(MATERIAL);   }
 loadmaterial          { return(LOADMATERIAL);   }
 multiface             { return(MULTIFACE); }
+repeath				  { return(REPEATH);}
+repeatv               { return(REPEATV);}
 subdivideh            { return(SUBDIVIDEH);}
 subdividev            { return(SUBDIVIDEV);}
 partitionh            { return(PARTITIONH);}

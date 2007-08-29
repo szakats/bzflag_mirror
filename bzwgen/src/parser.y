@@ -27,7 +27,7 @@ void yyunput(int, char*);
 %token TRANSLATER TRANSLATE SCALE TEST ROUND NEG ASSERTION FACE TAPER SPAWN CHAMFER 
 %token TEXTURE TEXTUREFULL TEXTUREQUAD TEXTURECLEAR MATERIAL LOADMATERIAL
 %token SPAWNNGON UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXTRUDET EXPAND RANDOM 
-%token SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI 
+%token REPEATH REPEATV SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI 
 %token MULTIFACE FREE NGON REMOVE ADDFACE DETACHFACE
 %token DRIVETHROUGH
 %token <fl> NUMBER
@@ -85,6 +85,8 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | TEXTUREFULL '(' ')' { $$ = new OperationTextureFull(ruleset); }
   | TEXTURECLEAR '(' ')' { $$ = new OperationTextureClear(ruleset); }
   | TEXTUREQUAD '(' expr ',' expr ',' expr ',' expr ')' { $$ = new OperationTextureQuad(ruleset,$3,$5,$7,$9); }
+  | REPEATH '(' expr ')' faceparam { $$ = new OperationRepeat(ruleset,$3,true,$5); }
+  | REPEATV '(' expr ')' faceparam { $$ = new OperationRepeat(ruleset,$3,false,$5); }
   | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,true,$5); }
   | SUBDIVIDEV '(' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,false,$5); }
   | SUBDIVIDEH '(' expr ',' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,true,$7,$5); }

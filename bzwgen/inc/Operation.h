@@ -320,6 +320,13 @@ public:
   int runMesh(Mesh* mesh,int face);
 };
 
+class OperationRepeat : public OperationMultifaces {
+  bool horiz;
+public:
+  OperationRepeat(RuleSet* _ruleset, Expression* _exp, bool _horiz, StringVector* facerules) : OperationMultifaces(_ruleset,_exp,facerules), horiz(_horiz) {}
+  int runMesh(Mesh* mesh,int face);
+};
+
 class OperationPartition : public OperationMultifaces {
   bool horiz;
   bool inverse;
