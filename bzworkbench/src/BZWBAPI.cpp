@@ -13,6 +13,7 @@
 #include "BZWBAPI.h"
 #include "BZWBPlugins.h"
 #include "FL/x.h"
+#include "commonControls.h"
 
 // custom pluginHandler
 BZWB_API bool bzwb_registerCustomPluginHandler(const char *extension, bzwb_APIPluginHandler *handler)
@@ -48,3 +49,22 @@ BZWB_API unsigned int bzwb_getOSMainWindowHandle ( void )
 #endif //_WIN32
 	return 0;
 }
+
+BZWB_API bool bzwb_registerCommonControlHandler ( bzwb_eCommonControlType type, bzwb_BaseCommonControlHandler * handler )
+{
+	if ( !handler )
+		return false;
+
+	addControlHandler ( type, handler );
+	return true;
+}
+
+BZWB_API bool bzwb_removeCommonControlHandlerr ( bzwb_eCommonControlType type, bzwb_BaseCommonControlHandler * handler )
+{
+	if ( !handler )
+		return false;
+
+	removeControlHandler ( type, handler );
+	return true;
+}
+

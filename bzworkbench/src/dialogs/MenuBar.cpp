@@ -12,6 +12,7 @@
 
 #include "dialogs/MenuBar.h"
 #include "model/Model.h"
+#include "commonControls.h"
 
 void MenuBar::buildMenu(void) {
 	
@@ -92,7 +93,13 @@ void MenuBar::new_world_real( Fl_Widget* w ) {
 }
 
 void MenuBar::open_world_real( Fl_Widget* w ) {
-	Fl_File_Chooser* fc = new Fl_File_Chooser("share/", "*.bzw", Fl_File_Chooser::SINGLE, "Open..." );
+
+	string filename ;
+
+	if (!callOpenFileDialog(filename,"*.bzw","share/","*.bzw","Open..."))
+		return;
+
+	/*Fl_File_Chooser* fc = new Fl_File_Chooser("share/", "*.bzw", Fl_File_Chooser::SINGLE, "Open..." );
 	fc->value("*.bzw");
 	fc->show();
 	
@@ -103,7 +110,7 @@ void MenuBar::open_world_real( Fl_Widget* w ) {
 	if(fc->value() == NULL)
 		return;
 	
-	string filename = fc->value();
+	string filename = fc->value(); */
 	
 	printf("file: %s\n", filename.c_str());
 	

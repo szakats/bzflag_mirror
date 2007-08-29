@@ -3,6 +3,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BZWorkbench", "BZWorkbench.
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32CommonControls", "..\..\plugins\Win32CommonControls\Win32CommonControls_VC71.vcproj", "{E61F009A-695C-43AA-B3CF-0723B73DC840}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -15,6 +19,10 @@ Global
 		{8C08EC81-1202-49F7-BC76-46EC0DE8DAE6}.Debug.Build.0 = Debug|Win32
 		{8C08EC81-1202-49F7-BC76-46EC0DE8DAE6}.Release.ActiveCfg = Release|Win32
 		{8C08EC81-1202-49F7-BC76-46EC0DE8DAE6}.Release.Build.0 = Release|Win32
+		{E61F009A-695C-43AA-B3CF-0723B73DC840}.Debug.ActiveCfg = Debug|Win32
+		{E61F009A-695C-43AA-B3CF-0723B73DC840}.Debug.Build.0 = Debug|Win32
+		{E61F009A-695C-43AA-B3CF-0723B73DC840}.Release.ActiveCfg = Release|Win32
+		{E61F009A-695C-43AA-B3CF-0723B73DC840}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

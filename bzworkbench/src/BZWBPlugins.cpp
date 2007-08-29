@@ -106,7 +106,7 @@ int getPluginVersion ( HINSTANCE hLib )
 
 PluginLoadReturn load1Plugin ( std::string plugin, std::string config )
 {
-	int (*lpProc)(const char*);
+	int (*lpProc)(const char*,void*);
 
 	std::string realPluginName = findPlugin(plugin);
 	if (pluginExists(realPluginName))
@@ -126,10 +126,10 @@ PluginLoadReturn load1Plugin ( std::string plugin, std::string config )
 		}
 		else
 		{
-			lpProc = (int (__cdecl *)(const char*))GetProcAddress(hLib, "bzwb_Load");
+			lpProc = (int (__cdecl *)(const char*, void*))GetProcAddress(hLib, "bzwb_Load");
 			if (lpProc)
 			{
-				lpProc(config.c_str());
+				lpProc(config.c_str(),hLib);
 				printf("Plugin:%s loaded\n",plugin.c_str());
 
 				trPluginRecord pluginRecord;
@@ -191,7 +191,7 @@ int getPluginVersion ( void* hLib )
 
 PluginLoadReturn load1Plugin ( std::string plugin, std::string config )
 {
-	int (*lpProc)(const char*);
+	int (*lpProc)(const char*,void*);
 
 	std::string realPluginName = findPlugin(plugin);
 
@@ -219,10 +219,10 @@ PluginLoadReturn load1Plugin ( std::string plugin, std::string config )
 		}
 		else
 		{
-			lpProc = force_cast<int (*)(const char*)>(dlsym(hLib,"bzwb_Load"));
+			lpProc = force_cast<int (*)(const char*,void*)>(dlsym(hLib,"bzwb_Load"));
 			if (lpProc)
 			{
-				(*lpProc)(config.c_str());
+				(*lpProc)(config.c_str(),hLib);
 				printf("Plugin:%s loaded\n",plugin.c_str());
 				trPluginRecord pluginRecord;
 				pluginRecord.handle = hLib;

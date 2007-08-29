@@ -32,6 +32,8 @@
 #define BZEB_PLUGIN_CALL extern "C"
 #endif
 
+#include <string>
+
 #define BZWB_API_VERSION	1
 
 #define BZWB_GET_PLUGIN_VERSION BZWB_PLUGIN_CALL int bzwb_GetVersion ( void ) { return BZWB_API_VERSION;}
@@ -48,5 +50,49 @@ BZWB_API bool bzwb_removeCustomPluginHandler ( const char* extension, bzwb_APIPl
 
 // OS common controlls
 BZWB_API unsigned int bzwb_getOSMainWindowHandle ( void );
+BZWB_API unsigned int bzwb_getOSWindowHandle ( unsigned int window );
+
+typedef enum
+{
+	eOpenDialog = 0,
+	eLastCommonControl
+}bzwb_eCommonControlType;
+
+class bzwb_BaseCommonControlHandler
+{
+public:
+	bzwb_eCommonControlType	type;
+	unsigned int			parent;
+
+	bzwb_BaseCommonControlHandler () { type = eLastCommonControl; parent = 0; }
+	virtual ~bzwb_BaseCommonControlHandler (){};
+
+	virtual bool handle ( void ) {return false;}
+};
+
+class  bzw_OpenDialogControlHandler : public bzwb_BaseCommonControlHandler
+{
+public:
+	bzwb_eCommonControlType	type;
+	
+	std::string file;
+	std::string extension;
+	std::string directory;
+	bool		sucsessful;
+
+	bzw_OpenDialogControlHandler ( void ) :
+	bzwb_BaseCommonControlHandler()
+	{ 
+		type = eOpenDialog;
+		sucsessful = false;
+	}
+	virtual ~bzw_OpenDialogControlHandler (){};
+
+	virtual bool handle ( void ) {return false;}
+};
+
+BZWB_API bool bzwb_registerCommonControlHandler ( bzwb_eCommonControlType type, bzwb_BaseCommonControlHandler * handler );
+BZWB_API bool bzwb_removeCommonControlHandlerr ( bzwb_eCommonControlType type, bzwb_BaseCommonControlHandler * handler );
+
 
 #endif /*BZWB_API_H_*/
