@@ -17,13 +17,13 @@
 MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	ConfigurationDialog(obj, "Master Configuration Dialog", WIDTH, HEIGHT) {
 	
-	this->end();
+	end();
 	
-	this->moreDialog = NULL;
+	moreDialog = NULL;
 	
 	// initialize the object
-	this->object = dynamic_cast<bz2object*>( obj );
-	if( !this->object )
+	object = dynamic_cast<bz2object*>( obj );
+	if( !object )
 		return;
 	
 	// get information from the object that can be put into the widgets
@@ -149,12 +149,12 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 		// add the transforms
 		for(vector< osg::ref_ptr<BZTransform> >::iterator i = transforms.end() - 1; i != transforms.begin() - 1; i--) {
 			// next transform widget (the dimensions of which shall be calculated in the addTransformCallback_real method
-			TransformWidget* nextTransform = new TransformWidget(0, 0, transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, this->transformationFormat.c_str(), false);
+			TransformWidget* nextTransform = new TransformWidget(0, 0, transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, transformationFormat.c_str(), false);
 			
 			nextTransform->setTransformationType( (*i)->getName().c_str() );
 			nextTransform->setFields( (*i)->getData() );
 			
-			this->addTransformCallback_real(nextTransform);	
+			addTransformCallback_real(nextTransform);	
 		}
 	}
 	
@@ -189,31 +189,31 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 	advancedButton->when(FL_WHEN_RELEASE);
 	
 	// add default OK/Cancel callbacks
-	this->setOKEventHandler(OKButtonCallback, this);
-	this->setCancelEventHandler(CancelButtonCallback, this);
+	setOKEventHandler(OKButtonCallback, this);
+	setCancelEventHandler(CancelButtonCallback, this);
 	
 	// add widgets
-	this->add(positionLabel);
-	this->add(positionXField);
-	this->add(positionYField);
-	this->add(positionZField);
-	this->add(rotationLabel);
-	this->add(rotationField);
-	this->add(sizeLabel);
-	this->add(sizeXField);
-	this->add(sizeYField);
-	this->add(sizeZField);
-	this->add(spinLabel);
-	this->add(spinXField);
-	this->add(spinYField);
-	this->add(spinZField);
-	this->add(transformationLabel);
-	this->add(transformationScrollArea);
-	this->add(addTransformationButton);
-	this->add(removeTransformationButton);
-	this->add(moreButton);
-	this->add(editTextButton);
-	this->add(advancedButton);
+	add(positionLabel);
+	add(positionXField);
+	add(positionYField);
+	add(positionZField);
+	add(rotationLabel);
+	add(rotationField);
+	add(sizeLabel);
+	add(sizeXField);
+	add(sizeYField);
+	add(sizeZField);
+	add(spinLabel);
+	add(spinXField);
+	add(spinYField);
+	add(spinZField);
+	add(transformationLabel);
+	add(transformationScrollArea);
+	add(addTransformationButton);
+	add(removeTransformationButton);
+	add(moreButton);
+	add(editTextButton);
+	add(advancedButton);
 	
 }
 
@@ -296,7 +296,7 @@ void MasterConfigurationDialog::addTransformCallback_real(Fl_Widget* widgetToAdd
 	
 	if( widgetToAdd == this || !newTransform ) {
 		// if the dynamic_cast failed, then just make the default
-		newTransform = new TransformWidget(x, y, width, height, this->transformationFormat.c_str(), false);
+		newTransform = new TransformWidget(x, y, width, height, transformationFormat.c_str(), false);
 	}
 	else {
 		newTransform->position( x, y );
@@ -349,15 +349,15 @@ void MasterConfigurationDialog::removeTransformCallback_real(Fl_Widget* w) {
  * Bring up object-specific dialog box
  */
 void MasterConfigurationDialog::moreCallback_real(Fl_Widget* w) {
-	if( this->moreDialog )
-		this->moreDialog->show();
+	if( moreDialog )
+		moreDialog->show();
 }
 
 /*
  * Bring up the Advanced... dialog
  */
 void MasterConfigurationDialog::advancedCallback_real(Fl_Widget* w) {
-	AdvancedOptionsDialog* aod = new AdvancedOptionsDialog( this->object );
+	AdvancedOptionsDialog* aod = new AdvancedOptionsDialog( object );
 	aod->show();
 }
 

@@ -15,26 +15,26 @@
 // add an event handler
 bool EventHandlerCollection::addEventHandler( const char* _name, BZEventHandler* eventHandler )  {
 	string name = string(_name);
-	if( this->eventHandlers.count( name ) > 0 )
+	if( eventHandlers.count( name ) > 0 )
 		return false;
 		
-	this->eventHandlers[ name ] = eventHandler;
+	eventHandlers[ name ] = eventHandler;
 	return true;
 }
 
 // remove an event handler
 bool EventHandlerCollection::removeEventHandler( const char* _name ) {
 	string name = string(_name);
-	if( this->eventHandlers.count( name ) <= 0)
+	if( eventHandlers.count( name ) <= 0)
 		return false;
 	
-	this->eventHandlers.erase( name );
+	eventHandlers.erase( name );
 	return true;
 }
 
 // get an event handler
 osg::ref_ptr< BZEventHandler > EventHandlerCollection::getEventHandler( const char* name ) {
-	return this->eventHandlers[ string(name) ];
+	return eventHandlers[ string(name) ];
 }
 
 // set an event handler
@@ -42,10 +42,10 @@ osg::ref_ptr< BZEventHandler > EventHandlerCollection::setEventHandler( const ch
 	osg::ref_ptr< BZEventHandler > prevHandler = NULL;
 	string name = string(_name);
 	
-	if( this->eventHandlers.count( name ) > 0 )	
-		prevHandler = this->eventHandlers[ name ];
+	if( eventHandlers.count( name ) > 0 )	
+		prevHandler = eventHandlers[ name ];
 		
-	this->eventHandlers[name] = osg::ref_ptr< BZEventHandler >( eventHandler );
+	eventHandlers[name] = osg::ref_ptr< BZEventHandler >( eventHandler );
 	
 	return prevHandler;
 }
@@ -53,13 +53,13 @@ osg::ref_ptr< BZEventHandler > EventHandlerCollection::setEventHandler( const ch
 // assign a current event handler
 void EventHandlerCollection::makeCurrentHandler( const char* _name )  {
 	if(_name == NULL) {
-		this->currentEventHandler = NULL;
+		currentEventHandler = NULL;
 		return;	
 	}
 	
 	string name = string(_name);
-	if( this->eventHandlers.count( name ) > 0 ) {
-		this->currentEventHandler = this->eventHandlers[ name ].get();
+	if( eventHandlers.count( name ) > 0 ) {
+		currentEventHandler = eventHandlers[ name ].get();
 	}
 }
 
@@ -70,9 +70,9 @@ bool EventHandlerCollection::handle( const osgGA::GUIEventAdapter& ea, osgGA::GU
 		return currentEventHandler->handle( ea, aa );	
 	}
 	// otherwise, pass the data on to ALL event handlers
-	else if( this->eventHandlers.size() > 0 ) {
+	else if( eventHandlers.size() > 0 ) {
 		bool handled = false;
-		for( map< string, osg::ref_ptr< BZEventHandler > >::iterator i = this->eventHandlers.begin(); i != this->eventHandlers.end() && !handled; i++) {
+		for( map< string, osg::ref_ptr< BZEventHandler > >::iterator i = eventHandlers.begin(); i != eventHandlers.end() && !handled; i++) {
 			handled = i->second->handle( ea, aa );
 		}
 		return handled;
@@ -99,7 +99,7 @@ bool Picker::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& a
         	if( ea.getButton() == FL_LEFT_MOUSE ) {
 	            viewer = dynamic_cast<View*>(&aa);
 	            if (viewer)
-	            	this->pick(viewer,ea);
+	            	pick(viewer,ea);
         	}
        		return false;
        		

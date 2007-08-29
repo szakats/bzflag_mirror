@@ -41,7 +41,7 @@ public:
 	
 	// get/set the options string
 	string getOptionsString() { return optionsString; }
-	void setOptionsString( string newString ) { this->optionsString = newString; }
+	void setOptionsString( string newString ) { optionsString = newString; }
 	
 private:
 	string optionsString;

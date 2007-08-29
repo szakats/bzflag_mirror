@@ -14,15 +14,15 @@
 
 // constructor
 define::define() : DataEntry("define", "<arc><base><box><cone><group><mesh><meshbox><meshpyr><pyramid><sphere><teleporter><tetra>") {
-	this->objects = vector< osg::ref_ptr<bz2object> >();
-	this->name = "";	
+	objects = vector< osg::ref_ptr<bz2object> >();
+	name = "";	
 }
 
 // constructor with data
 define::define(string& data) : DataEntry("define", "<arc><base><box><cone><group><mesh><meshbox><meshpyr><pyramid><sphere><teleporter><tetra>", data.c_str()) {
-	this->objects = vector< osg::ref_ptr<bz2object> >();
-	this->name = "";	
-	this->update(data);
+	objects = vector< osg::ref_ptr<bz2object> >();
+	name = "";	
+	update(data);
 }
 
 // destructor
@@ -32,11 +32,11 @@ define::~define() {
 }
 
 // getter
-string define::get(void) { return this->toString(); }
+string define::get(void) { return toString(); }
 
 // setter
 int define::update(string& data) {
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get the text
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -218,7 +218,7 @@ int define::update(string& data) {
 	}
 	
 	// commit name
-	this->name = names[0];
+	name = names[0];
 	
 	// free previous objects	
 	objects.clear();
@@ -226,84 +226,84 @@ int define::update(string& data) {
 	// commit arcs
 	if(arcData.size() > 0) {
 		for(vector<arc>::iterator i = arcData.begin(); i != arcData.end(); i++) {
-			this->objects.push_back( new arc(*i) );	
+			objects.push_back( new arc(*i) );	
 		}	
 	}
 	
 	// commit bases
 	if(baseData.size() > 0) {
 		for(vector<base>::iterator i = baseData.begin(); i != baseData.end(); i++) {
-			this->objects.push_back( new base(*i) );	
+			objects.push_back( new base(*i) );	
 		}	
 	}
 	
 	// commit boxes
 	if(boxData.size() > 0) {
 		for(vector<box>::iterator i = boxData.begin(); i != boxData.end(); i++) {
-			this->objects.push_back( new box(*i) );	
+			objects.push_back( new box(*i) );	
 		}	
 	}
 	
 	// commit cones
 	if(coneData.size() > 0) {
 		for(vector<cone>::iterator i = coneData.begin(); i != coneData.end(); i++) {
-			this->objects.push_back( new cone(*i) );	
+			objects.push_back( new cone(*i) );	
 		}	
 	}
 	
 	// commit groups
 	if(groupData.size() > 0) {
 		for(vector<group>::iterator i = groupData.begin(); i != groupData.end(); i++) {
-			this->objects.push_back( new group(*i) );	
+			objects.push_back( new group(*i) );	
 		}	
 	}
 	
 	// commit meshes
 	if(meshData.size() > 0) {
 		for(vector<mesh>::iterator i = meshData.begin(); i != meshData.end(); i++) {
-			this->objects.push_back( new mesh(*i) );	
+			objects.push_back( new mesh(*i) );	
 		}	
 	}
 	
 	// commit meshboxes
 	if(meshboxData.size() > 0) {
 		for(vector<meshbox>::iterator i = meshboxData.begin(); i != meshboxData.end(); i++) {
-			this->objects.push_back( new meshbox(*i) );	
+			objects.push_back( new meshbox(*i) );	
 		}	
 	}
 	
 	// commit meshpyrs
 	if(meshpyrData.size() > 0) {
 		for(vector<meshpyr>::iterator i = meshpyrData.begin(); i != meshpyrData.end(); i++) {
-			this->objects.push_back( new meshpyr(*i) );	
+			objects.push_back( new meshpyr(*i) );	
 		}	
 	}
 	
 	// commit pyramids
 	if(pyramidData.size() > 0) {
 		for(vector<pyramid>::iterator i = pyramidData.begin(); i != pyramidData.end(); i++) {
-			this->objects.push_back( new pyramid(*i) );	
+			objects.push_back( new pyramid(*i) );	
 		}	
 	}
 	
 	// commit spheres
 	if(sphereData.size() > 0) {
 		for(vector<sphere>::iterator i = sphereData.begin(); i != sphereData.end(); i++) {
-			this->objects.push_back( new sphere(*i) );	
+			objects.push_back( new sphere(*i) );	
 		}	
 	}
 	
 	// commit teleporters
 	if(teleporterData.size() > 0) {
 		for(vector<teleporter>::iterator i = teleporterData.begin(); i != teleporterData.end(); i++) {
-			this->objects.push_back( new teleporter(*i) );	
+			objects.push_back( new teleporter(*i) );	
 		}
 	}
 	
 	// commit tetras
 	if(tetraData.size() > 0) {
 		for(vector<tetra>::iterator i = tetraData.begin(); i != tetraData.end(); i++) {
-			this->objects.push_back( new tetra(*i) );	
+			objects.push_back( new tetra(*i) );	
 		}	
 	}
 	

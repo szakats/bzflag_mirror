@@ -50,10 +50,10 @@ public:
 	int render(void);
 	
 	// getters
-	string& getName() { return this->name; }
+	string& getName() { return name; }
 	
 	// setters
-	void setName( const string& name ) { this->name = name; }
+	void setName( const string& _name ) { name = _name; }
 	
 private:
 	

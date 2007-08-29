@@ -34,15 +34,15 @@ material::material() :
 	
 	// allocate a material
 	osg::Material* finalMaterial = new osg::Material();
-	this->setAttribute( finalMaterial, osg::StateAttribute::ON  | osg::StateAttribute::OVERRIDE );
+	setAttribute( finalMaterial, osg::StateAttribute::ON  | osg::StateAttribute::OVERRIDE );
 	
 	// deactivate texturing
-	this->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF  | osg::StateAttribute::OVERRIDE );
+	setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF  | osg::StateAttribute::OVERRIDE );
 	
-	this->setAmbient( osg::Vec4( 1, 1, 1, 1) );
-	this->setDiffuse( osg::Vec4( 1, 1, 1, 1) );
-	this->setSpecular( osg::Vec4( 0, 0, 0, 1) );
-	this->setEmissive( osg::Vec4( 1, 1, 1, 1) );
+	setAmbient( osg::Vec4( 1, 1, 1, 1) );
+	setDiffuse( osg::Vec4( 1, 1, 1, 1) );
+	setSpecular( osg::Vec4( 0, 0, 0, 1) );
+	setEmissive( osg::Vec4( 1, 1, 1, 1) );
 }
 
 // constructor with data
@@ -60,27 +60,27 @@ material::material(string& data) :
 	
 	// allocate a material
 	osg::Material* finalMaterial = new osg::Material();
-	this->setAttribute( finalMaterial, osg::StateAttribute::ON  | osg::StateAttribute::OVERRIDE );
+	setAttribute( finalMaterial, osg::StateAttribute::ON  | osg::StateAttribute::OVERRIDE );
 	
-	this->setAmbient( osg::Vec4( 1, 1, 1, 1) );
-	this->setDiffuse( osg::Vec4( 1, 1, 1, 1) );
-	this->setSpecular( osg::Vec4( 0, 0, 0, 1) );
-	this->setEmissive( osg::Vec4( 0, 0, 0, 1) );
+	setAmbient( osg::Vec4( 1, 1, 1, 1) );
+	setDiffuse( osg::Vec4( 1, 1, 1, 1) );
+	setSpecular( osg::Vec4( 0, 0, 0, 1) );
+	setEmissive( osg::Vec4( 0, 0, 0, 1) );
 	
 	// deactivate texturing
-	this->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE );
+	setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE );
 	
 	
-	this->update(data);
+	update(data);
 }
 
 // getter
-string material::get(void) { return this->toString(); }
+string material::get(void) { return toString(); }
 
 // setter
 int material::update(string& data) {
 	
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get the section
 	vector<string> chunks = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -208,27 +208,27 @@ int material::update(string& data) {
 	// load the retrieved data into the class
 	if(!DataEntry::update(data))
 		return 0;
-	this->name = names[0];
-	this->dynCol = (dyncols.size() != 0 ? (dynamicColor*)Model::command( MODEL_GET, "dynamicColor", dyncols[0] ) : NULL);
-	this->textureMatrix = (texmats.size() != 0 ? (texturematrix*)Model::command( MODEL_GET, "texturematrix", texmats[0]) : NULL);
-	(emissives.size() != 0 ? this->setEmissive(RGBA( emissives[emissives.size() - 1].c_str() )) : this->setEmissive(RGBA(-1, -1, -1, -1)));
-	(speculars.size() != 0 ? this->setSpecular(RGBA( speculars[speculars.size() - 1].c_str() )) : this->setSpecular(RGBA(-1, -1, -1, -1)));
-	(ambients.size() != 0 ? this->setAmbient(RGBA( ambients[ambients.size() - 1].c_str() )) : this->setAmbient(RGBA(-1, -1, -1, -1)));
-	(diffuses.size() != 0 ? this->setDiffuse(RGBA( diffuses[diffuses.size() - 1].c_str() )) : this->setDiffuse(RGBA(-1, -1, -1, -1)));
+	name = names[0];
+	dynCol = (dyncols.size() != 0 ? (dynamicColor*)Model::command( MODEL_GET, "dynamicColor", dyncols[0] ) : NULL);
+	textureMatrix = (texmats.size() != 0 ? (texturematrix*)Model::command( MODEL_GET, "texturematrix", texmats[0]) : NULL);
+	(emissives.size() != 0 ? setEmissive(RGBA( emissives[emissives.size() - 1].c_str() )) : setEmissive(RGBA(-1, -1, -1, -1)));
+	(speculars.size() != 0 ? setSpecular(RGBA( speculars[speculars.size() - 1].c_str() )) : setSpecular(RGBA(-1, -1, -1, -1)));
+	(ambients.size() != 0 ? setAmbient(RGBA( ambients[ambients.size() - 1].c_str() )) : setAmbient(RGBA(-1, -1, -1, -1)));
+	(diffuses.size() != 0 ? setDiffuse(RGBA( diffuses[diffuses.size() - 1].c_str() )) : setDiffuse(RGBA(-1, -1, -1, -1)));
 	
-	this->textures.clear();
-	this->materials.clear();
+	textures.clear();
+	materials.clear();
 	// get the materials from the model
 	for( vector<string>::iterator i = matrefs.begin(); i != matrefs.end(); i++) {
 		material* mat = (material*)Model::command( MODEL_GET, "material", *i );
 		if( mat != NULL )
-			this->materials.push_back( mat );
+			materials.push_back( mat );
 	}
 	// compute the final material
-	this->computeFinalMaterial();
+	computeFinalMaterial();
 	
 	// get the textures
-	this->textures.clear();
+	textures.clear();
 	if( texs.size() > 0 ) {
 		for( vector<string>::iterator i = texs.begin(); i != texs.end(); i++ ) {
 			// filename should be the texture name + .png
@@ -243,21 +243,21 @@ int material::update(string& data) {
 	}
 	
 	// compute the final texture
-	this->computeFinalTexture();
+	computeFinalTexture();
 	
-	this->noTextures = (notextures.size() == 0 ? false : true);
-	this->noTexColor = (notexcolors.size() == 0 ? false : true);
-	this->spheremap = (spheremaps.size() == 0 ? false : true);
-	this->noShadow = (noshadows.size() == 0 ? false : true);
-	this->noCulling = (nocullings.size() == 0 ? false : true);
-	this->noSorting = (nosortings.size() == 0 ? false : true);
-	this->noRadar = (noradars.size() == 0 ? false : true);
-	this->noTexAlpha = (notexalphas.size() == 0 ? false : true);
-	this->groupAlpha = (groupalphas.size() == 0 ? false : true);
-	this->occluder = (occluders.size() == 0 ? false : true);
-	this->noLighting = (nolightings.size() == 0 ? false : true);
-	(shininesses.size() > 0 ? this->setShininess(atof( shininesses[0].c_str() )) : this->setShininess(0.0) );
-	this->alphaThreshold = (alphathresholds.size() > 0 ? atof( alphathresholds[0].c_str() ) : 1.0f);
+	noTextures = (notextures.size() == 0 ? false : true);
+	noTexColor = (notexcolors.size() == 0 ? false : true);
+	spheremap = (spheremaps.size() == 0 ? false : true);
+	noShadow = (noshadows.size() == 0 ? false : true);
+	noCulling = (nocullings.size() == 0 ? false : true);
+	noSorting = (nosortings.size() == 0 ? false : true);
+	noRadar = (noradars.size() == 0 ? false : true);
+	noTexAlpha = (notexalphas.size() == 0 ? false : true);
+	groupAlpha = (groupalphas.size() == 0 ? false : true);
+	occluder = (occluders.size() == 0 ? false : true);
+	noLighting = (nolightings.size() == 0 ? false : true);
+	(shininesses.size() > 0 ? setShininess(atof( shininesses[0].c_str() )) : setShininess(0.0) );
+	alphaThreshold = (alphathresholds.size() > 0 ? atof( alphathresholds[0].c_str() ) : 1.0f);
 	
 	return 1;
 }
@@ -285,10 +285,10 @@ string material::toString(void) {
 	// colors
 	string ambientString, diffuseString, specularString, emissiveString;
 	
-	RGBA ambientColor = RGBA( this->getAmbient().x(), this->getAmbient().y(), this->getAmbient().z(), this->getAmbient().w() );
-	RGBA diffuseColor = RGBA( this->getDiffuse().x(), this->getDiffuse().y(), this->getDiffuse().z(), this->getDiffuse().w() );
-	RGBA specularColor = RGBA( this->getSpecular().x(), this->getSpecular().y(), this->getSpecular().z(), this->getSpecular().w() );
-	RGBA emissiveColor = RGBA( this->getEmissive().x(), this->getEmissive().y(), this->getEmissive().z(), this->getEmissive().w() );
+	RGBA ambientColor = RGBA( getAmbient().x(), getAmbient().y(), getAmbient().z(), getAmbient().w() );
+	RGBA diffuseColor = RGBA( getDiffuse().x(), getDiffuse().y(), getDiffuse().z(), getDiffuse().w() );
+	RGBA specularColor = RGBA( getSpecular().x(), getSpecular().y(), getSpecular().z(), getSpecular().w() );
+	RGBA emissiveColor = RGBA( getEmissive().x(), getEmissive().y(), getEmissive().z(), getEmissive().w() );
 	
 	if( IS_VALID_COLOR( ambientColor ) )
 		ambientString = "  ambient " + ambientColor.toString();
@@ -329,11 +329,11 @@ string material::toString(void) {
 				  (color.length() == 0 ? diffuseString : string("  color ") + color + "\n" ) +
 				  specularString +
 				  emissiveString +
-				  "  shininess " + string(ftoa(this->getShininess())) + "\n" +
+				  "  shininess " + string(ftoa(getShininess())) + "\n" +
 				  "  alphathresh " + string(ftoa(alphaThreshold)) + "\n" +
 				  texString +
 				  matString +
-				  this->getUnusedText() + 
+				  getUnusedText() + 
 				  "end\n";
 }
 
@@ -416,11 +416,11 @@ void material::computeFinalTexture() {
 	
 	if( textures.size() > 0 ) {
 		osg::Texture2D* finalTexture = textures[ 0 ].get();
-		this->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
-		this->setTextureAttribute( 0, finalTexture );
+		setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+		setTextureAttribute( 0, finalTexture );
 	}
 	else {
-		this->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE );
+		setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE );
 	}
 }
 
@@ -470,17 +470,17 @@ void material::computeFinalMaterial() {
 		finalMaterial->setEmission( osg::Material::FRONT, emissive );
 		finalMaterial->setShininess( osg::Material::FRONT, shiny );
 		
-		this->setAttribute( finalMaterial, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+		setAttribute( finalMaterial, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
 	}
 	
 }
 
 // get the current material
 osg::Material* material::getCurrentMaterial() {
-	return (osg::Material*)this->getAttribute( osg::StateAttribute::MATERIAL );
+	return (osg::Material*)getAttribute( osg::StateAttribute::MATERIAL );
 }
 
 // get the current texture
 osg::Texture2D* material::getCurrentTexture() {
-	return (osg::Texture2D*)this->getTextureAttribute( 0, osg::StateAttribute::TEXTURE );
+	return (osg::Texture2D*)getTextureAttribute( 0, osg::StateAttribute::TEXTURE );
 }

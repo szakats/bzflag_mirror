@@ -16,9 +16,9 @@ sphere::sphere() :
 	bz2object("sphere", "<position><rotation><size><radius><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
 	
 	// define some basic values
-	this->divisions = 16;
-	this->setName("default_sphere");
-	this->physicsDriver = NULL;
+	divisions = 16;
+	setName("default_sphere");
+	physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	
@@ -28,21 +28,21 @@ sphere::sphere(string& data) :
 	bz2object("sphere", "<position><rotation><size><radius><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>", data.c_str()) {
 	
 	// define some basic values
-	this->divisions = 16;
-	this->setName("default_sphere");
-	this->physicsDriver = NULL;
+	divisions = 16;
+	setName("default_sphere");
+	physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	
-	this->update(data);	
+	update(data);	
 }
 
 // getter
-string sphere::get(void) { return this->toString(); }
+string sphere::get(void) { return toString(); }
 
 // setter
 int sphere::update(string& data) {
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	// get the chunk we need
 	
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -108,10 +108,10 @@ int sphere::update(string& data) {
 		return 0;
 	
 	// set the data
-	this->setName(names.size() > 0 ? names[0] : "");
-	this->divisions = (vDivisions.size() > 0 ? atoi( vDivisions[0].c_str() ) : 16);
-	this->flatShading = (flatShadings.size() == 0 ? false : true);
-	this->smoothbounce = (smoothBounces.size() == 0 ? false : true);
+	setName(names.size() > 0 ? names[0] : "");
+	divisions = (vDivisions.size() > 0 ? atoi( vDivisions[0].c_str() ) : 16);
+	flatShading = (flatShadings.size() == 0 ? false : true);
+	smoothbounce = (smoothBounces.size() == 0 ? false : true);
 	
 	return 1;
 }
@@ -119,7 +119,7 @@ int sphere::update(string& data) {
 // toString
 string sphere::toString(void) {
 	return string("sphere\n") +
-				  this->BZWLines() +
+				  BZWLines() +
 				  "  divisions " + string(itoa(divisions)) + "\n" +
 				  (flatShading == true ? "  flatshading\n" : "") +
 				  (smoothbounce == true ? "  smoothbounce\n" : "") + 

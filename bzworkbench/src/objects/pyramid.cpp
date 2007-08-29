@@ -14,40 +14,40 @@
 
 pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("share/pyramid/pyramid.obj")) {
 	
-	this->setName( SceneBuilder::nameNode("share/pyramid/pyramid.obj") );
+	setName( SceneBuilder::nameNode("share/pyramid/pyramid.obj") );
 	
-	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	this->setSize( osg::Vec3(10.0, 10.0, 10.0) );
+	setPos( osg::Vec3(0.0, 0.0, 0.0) );
+	setSize( osg::Vec3(10.0, 10.0, 10.0) );
 	SceneBuilder::markUnselected( this );
 }
 
 // constructor with binary data
 pyramid::pyramid( osg::Vec3 position, float rotation, osg::Vec3 scale ) : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("share/pyramid/pyramid.obj")) {
 	
-	this->setName( SceneBuilder::nameNode("share/pyramid/pyramid.obj") );
+	setName( SceneBuilder::nameNode("share/pyramid/pyramid.obj") );
 	
-	this->setPos( position );
-	this->setRotationZ( rotation );
-	this->setSize( scale );
+	setPos( position );
+	setRotationZ( rotation );
+	setSize( scale );
 	SceneBuilder::markUnselected( this );
 }
 
 // constructor with string
 pyramid::pyramid(string& data) : bz2object("pyramid", "<position><rotation><size>", data.c_str()) {
-	this->addChild( SceneBuilder::buildNode("share/pyramid/pyramid.obj") );
-	this->setName( SceneBuilder::nameNode("share/pyramid/pyramid.obj") );
+	addChild( SceneBuilder::buildNode("share/pyramid/pyramid.obj") );
+	setName( SceneBuilder::nameNode("share/pyramid/pyramid.obj") );
 	SceneBuilder::markUnselected( this );
 	
 	if( data.length() <= 1 ) {
-		this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
-		this->setSize( osg::Vec3(10.0, 10.0, 10.0) );
+		setPos( osg::Vec3(0.0, 0.0, 0.0) );
+		setSize( osg::Vec3(10.0, 10.0, 10.0) );
 	}
 	else 
-		this->update(data);	
+		update(data);	
 }	
 
 // getter
-string pyramid::get() { return this->toString(); }
+string pyramid::get() { return toString(); }
 
 // setter
 int pyramid::update(string& data) {
@@ -60,29 +60,29 @@ int pyramid::update(UpdateMessage& message) {
 	
 	switch( message.type ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
-			this->setPos( *(message.getAsPosition()) );
+			setPos( *(message.getAsPosition()) );
 			break;
 			
 		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
-			this->setPos( this->getPos() + *(message.getAsPositionFactor()) );
+			setPos( getPos() + *(message.getAsPositionFactor()) );
 			break;
 			
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
-			this->setRotationZ( message.getAsRotation()->z() );
+			setRotationZ( message.getAsRotation()->z() );
 			break;
 			
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
-			this->setRotationZ( this->getRotation().z() + message.getAsRotationFactor()->z() );
+			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
 			break;
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
-			this->updateGeometry( message );
-			this->setSize( *(message.getAsScale()) );
+			updateGeometry( message );
+			setSize( *(message.getAsScale()) );
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
-			this->updateGeometry( message );
-			this->setSize( this->getSize() + *(message.getAsScaleFactor()) );
+			updateGeometry( message );
+			setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
 			
 		default:	// unknown event; don't handle
@@ -95,7 +95,7 @@ int pyramid::update(UpdateMessage& message) {
 // toString
 string pyramid::toString(void) {
 	return string("pyramid\n") +
-				  this->BZWLines() +
+				  BZWLines() +
 				  "end\n";	
 }
 

@@ -16,45 +16,45 @@
 Console::Console(int x, int y, int width, int height, int lineLimit) :
 	Fl_Multiline_Input(x, y, width, height) { 
 	
-	this->lineLimit = lineLimit;
-	this->writeOn = false;
+	lineLimit = lineLimit;
+	writeOn = false;
 }
 	
 // construct with text
 Console::Console(int x, int y,int width, int height, const char* text, int lineLimit) :
 	Fl_Multiline_Input(x, y, width, height) {
 
-	this->lineLimit = lineLimit;
+	lineLimit = lineLimit;
 	Fl_Multiline_Input::value( text );
-	this->writeOn = false;
+	writeOn = false;
 }
 
 // construct with a string
 Console::Console(int x, int y,int width, int height, string& text, int lineLimit) :
 	Fl_Multiline_Input(x, y, width, height) {
 
-	this->lineLimit = lineLimit;
-	this->value( text );
-	this->writeOn = false;
+	lineLimit = lineLimit;
+	value( text );
+	writeOn = false;
 }
 
 // construct with a vector of strings
 Console::Console(int x, int y,int width, int height, vector<string>& text, int lineLimit) :
 	Fl_Multiline_Input(x, y, width, height) {
 	
-	this->lineLimit = lineLimit;
-	this->value( text );
+	lineLimit = lineLimit;
+	value( text );
 }
 
 // set read only
 void Console::setReadOnly(bool value) {
-	this->writeOn = !value;
+	writeOn = !value;
 	Fl_Multiline_Input::readonly((value == true ? 1 : 0));	
 }
 
 // set read/write
 void Console::setReadWrite(bool value) {
-	this->writeOn = value;
+	writeOn = value;
 	Fl_Multiline_Input::readonly((!value == true ? 1 : 0));	
 }
 
@@ -83,7 +83,7 @@ void Console::add(const char* text) {
 	string currValue = Fl_Multiline_Input::value();
 	Fl_Multiline_Input::value( concat(currValue.c_str(), text).c_str() );	
 }
-void Console::add(string& text) { this->add( text.c_str() ); }
+void Console::add(string& text) { add( text.c_str() ); }
 void Console::add(vector<string>& text) {
 	string data = "";
 	if(text.size() > 0) {
@@ -91,7 +91,7 @@ void Console::add(vector<string>& text) {
 			data += (*i) + '\n';	
 		}	
 	}
-	this->add(data.c_str());
+	add(data.c_str());
 }
 
 // clamp the text to a certain number of lines (specifically, keep the last ones)

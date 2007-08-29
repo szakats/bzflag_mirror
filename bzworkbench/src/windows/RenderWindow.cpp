@@ -16,25 +16,25 @@
 RenderWindow::RenderWindow() :
 	Fl_Gl_Window(DEFAULT_WIDTH, DEFAULT_HEIGHT) {
 	
-	this->end();
+	end();
 	
 	// initialize the OSG embedded graphics window
-	this->_gw = new osgViewer::GraphicsWindowEmbedded(this->x(), this->y(), DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	_gw = new osgViewer::GraphicsWindowEmbedded(x(), y(), DEFAULT_WIDTH, DEFAULT_HEIGHT);
 	
 	// make this resizable
-	this->resizable(this);
+	resizable(this);
 }
 
 RenderWindow::RenderWindow(int x, int y, int width, int height) :
 	Fl_Gl_Window(x, y, width, height) {
 	
-	this->end();
+	end();
 	
 	// initialize the OSG embedded graphics window
-	this->_gw = new osgViewer::GraphicsWindowEmbedded(x,y,width,height);
+	_gw = new osgViewer::GraphicsWindowEmbedded(x,y,width,height);
 	
 	// make this resizable
-	this->resizable(this);
+	resizable(this);
 	
 }
 
@@ -64,25 +64,25 @@ int RenderWindow::handle(int event) {
             	Fl::event_is_click(0);
             }
             
-            this->redraw();
+            redraw();
             return 1;
           
         case FL_DRAG:
             _gw->getEventQueue()->mouseMotion(Fl::event_x(), Fl::event_y());
-        	this->redraw();
+        	redraw();
 			return 1;
         case FL_RELEASE:
         	
             _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), Fl::event_button() );
-        	this->redraw();    
+        	redraw();    
 			return 1;
         case FL_KEYDOWN:
             _gw->getEventQueue()->keyPress((osgGA::GUIEventAdapter::KeySymbol)Fl::event_key());
-            this->redraw();
+            redraw();
             return 1;
         case FL_KEYUP:
             _gw->getEventQueue()->keyRelease((osgGA::GUIEventAdapter::KeySymbol)Fl::event_key());
-            this->redraw();
+            redraw();
             return 1;
         default:
             // pass other events to the base class

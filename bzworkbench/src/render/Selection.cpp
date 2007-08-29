@@ -22,42 +22,42 @@ const float Selection::TIP_RADIUS = 1.0f;
 
 Selection::Selection( SelectionState state ) {
 	
-	this->state = state;
+	state = state;
 	
-	this->objectAxisGroup = new Renderable();
+	objectAxisGroup = new Renderable();
 	
 	// build the axis geode and add it
-	this->axes = this->buildAxes( osg::Vec3( 0.0, 0.0, 0.0 ) );
+	axes = buildAxes( osg::Vec3( 0.0, 0.0, 0.0 ) );
 	
 	// build the rotator geode
-	this->rotator = this->buildRotator( osg::Vec3( 0.0, 0.0, 0.0 ) );
+	rotator = buildRotator( osg::Vec3( 0.0, 0.0, 0.0 ) );
 	
 	// build the scale geode
-	this->scaler = this->buildScaler( osg::Vec3( 0.0, 0.0, 0.0 ) );
+	scaler = buildScaler( osg::Vec3( 0.0, 0.0, 0.0 ) );
 	
 	// build a copy of the local object axes
-	this->objectAxes = this->buildLocalAxes( osg::Vec3( 0.0, 0.0, 0.0 ) );
+	objectAxes = buildLocalAxes( osg::Vec3( 0.0, 0.0, 0.0 ) );
 	
-	this->addChild( objectAxisGroup.get() );
+	addChild( objectAxisGroup.get() );
 	
 	// assign the selector geode based on state
 	switch( state ) {
 		case TRANSLATE:
-			this->selectionNode = axes;
+			selectionNode = axes;
 			break;
 		case ROTATE:
-			this->selectionNode = rotator;
+			selectionNode = rotator;
 			break;
 		case SCALE:
-			this->selectionNode = scaler;
+			selectionNode = scaler;
 			break;
 			
 		default:
-			this->selectionNode = axes;
+			selectionNode = axes;
 			break;
 	}
 	
-	this->setName( Selection_NODE_NAME );
+	setName( Selection_NODE_NAME );
 	
 }
 
@@ -570,7 +570,7 @@ osg::Vec3 Selection::computeLocalOrigin( Model::objRefList& objects ) {
 
 // rebuild the axes
 void Selection::rebuildAxes( Model::objRefList& objects ) {
-	this->selectionNode->setPosition( this->computeLocalOrigin( objects ) );
+	selectionNode->setPosition( computeLocalOrigin( objects ) );
 	
 	objectAxisGroup->setPosition( osg::Vec3( 0, 0, 0 ) );
 	
@@ -615,83 +615,83 @@ void Selection::update( Observable* observable, void* data ) {
 	Model::objRefList selectedObjects = model->_getSelection();
 	
 	// remove the axes if there are no objects
-	if( selectedObjects.size() <= 0 && this->containsNode( selectionNode.get() )) {
-		this->removeChild( selectionNode.get() );
-		this->removeChild( objectAxisGroup.get() );
+	if( selectedObjects.size() <= 0 && containsNode( selectionNode.get() )) {
+		removeChild( selectionNode.get() );
+		removeChild( objectAxisGroup.get() );
 		objectAxisGroup->removeChildren( 0, objectAxisGroup->getNumChildren() );
 	}
 	
 	// add the axes if there are some objects
-	if( selectedObjects.size() > 0 && !this->containsNode( selectionNode.get() )) {
-		this->addChild( selectionNode.get() );
-		this->addChild( objectAxisGroup.get() );
+	if( selectedObjects.size() > 0 && !containsNode( selectionNode.get() )) {
+		addChild( selectionNode.get() );
+		addChild( objectAxisGroup.get() );
 	}
 		
 	// recompute the center
 	if( selectedObjects.size() > 0 )
-		this->rebuildAxes( selectedObjects );
+		rebuildAxes( selectedObjects );
 	
 }
 
 // set the state of the selector
 Selection::SelectionState Selection::setState( SelectionState newState ) {
 	
-	bool addBack = this->removeChild( this->selectionNode.get() );
+	bool addBack = removeChild( selectionNode.get() );
 	
 	switch( newState ) {
 		case BZ_ROTATE_KEY:
-			rotator->setPosition( this->selectionNode->getPosition() );
-			this->selectionNode = rotator;
+			rotator->setPosition( selectionNode->getPosition() );
+			selectionNode = rotator;
 			break;
 		case BZ_SCALE_KEY:
-			scaler->setPosition( this->selectionNode->getPosition() );
-			this->selectionNode = scaler;
+			scaler->setPosition( selectionNode->getPosition() );
+			selectionNode = scaler;
 			break;
 		
 		default:
-			axes->setPosition( this->selectionNode->getPosition() );
-			this->selectionNode = axes;
+			axes->setPosition( selectionNode->getPosition() );
+			selectionNode = axes;
 			break;
 	}
 	
 	if( addBack )
-		this->addChild( this->selectionNode.get() );
+		addChild( selectionNode.get() );
 	
-	SelectionState ret = this->state;
-	this->state = newState;
+	SelectionState ret = state;
+	state = newState;
 	return ret;
 }
 
 // set the state of the selector
 Selection::SelectionState Selection::setStateByKey( unsigned char key ) {
 	
-	bool addBack = this->removeChild( this->selectionNode.get() );
+	bool addBack = removeChild( selectionNode.get() );
 	SelectionState newState;
 	
 	switch( key ) {
 		
 		case BZ_ROTATE_KEY:
-			rotator->setPosition( this->selectionNode->getPosition() );
-			this->selectionNode = rotator;
+			rotator->setPosition( selectionNode->getPosition() );
+			selectionNode = rotator;
 			newState = ROTATE;
 			break;
 		case BZ_SCALE_KEY:
-			scaler->setPosition( this->selectionNode->getPosition() );
-			this->selectionNode = scaler;
+			scaler->setPosition( selectionNode->getPosition() );
+			selectionNode = scaler;
 			newState = SCALE;
 			break;
 			
 		default:
-			axes->setPosition( this->selectionNode->getPosition() );
-			this->selectionNode = axes;
+			axes->setPosition( selectionNode->getPosition() );
+			selectionNode = axes;
 			newState = TRANSLATE;
 			break;
 	}
 	
 	if( addBack )
-		this->addChild( this->selectionNode.get() );
+		addChild( selectionNode.get() );
 	
-	SelectionState ret = this->state;
-	this->state = newState;
+	SelectionState ret = state;
+	state = newState;
 	return ret;
 }

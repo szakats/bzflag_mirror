@@ -25,16 +25,16 @@ meshbox::meshbox(string& data) :
 	topMaterials = vector<string>();
 	outsideMaterials = vector<string>();
 	
-	this->update(data);
+	update(data);
 }
 
 // getter
-string meshbox::get(void) { return this->toString(); }
+string meshbox::get(void) { return toString(); }
 
 // setter
 int meshbox::update(string& data) {
 	// get the header
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get the sections
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -87,7 +87,7 @@ string meshbox::toString(void) {
 		}
 	}
 	return string("meshbox\n") +
-				  this->BZWLines() +
+				  BZWLines() +
 				  outsidemats +
 				  topmats +
 				  "end\n";

@@ -16,18 +16,18 @@
 AdvancedOptionsDialog::AdvancedOptionsDialog( bz2object* obj ) :
 	ConfigurationDialog( obj, "Advanced Options", DEFAULT_WIDTH, DEFAULT_HEIGHT ) {
 	
-	this->obj = obj;
+	obj = obj;
 	
-	this->begin();
+	begin();
 	
-	this->materialLabel = new QuickLabel("Materials (order matters)", 5, 5);
-	this->materialNew = new Fl_Button(DEFAULT_WIDTH - 180, 5, 55, DEFAULT_TEXTSIZE + 6, "New" );
-	this->materialEdit = new Fl_Button(DEFAULT_WIDTH - 120, 5, 55, DEFAULT_TEXTSIZE + 6, "Edit" );
-	this->materialDelete = new Fl_Button( DEFAULT_WIDTH - 60, 5, 55, DEFAULT_TEXTSIZE + 6, "Delete");
-	this->materialList = new Fl_Scroll( 5, 30, DEFAULT_WIDTH - 10, 120 );
-	this->materialList->end();
-	this->materialList->box(FL_UP_BOX);
-	this->materialList->type(Fl_Scroll::VERTICAL_ALWAYS);
+	materialLabel = new QuickLabel("Materials (order matters)", 5, 5);
+	materialNew = new Fl_Button(DEFAULT_WIDTH - 180, 5, 55, DEFAULT_TEXTSIZE + 6, "New" );
+	materialEdit = new Fl_Button(DEFAULT_WIDTH - 120, 5, 55, DEFAULT_TEXTSIZE + 6, "Edit" );
+	materialDelete = new Fl_Button( DEFAULT_WIDTH - 60, 5, 55, DEFAULT_TEXTSIZE + 6, "Delete");
+	materialList = new Fl_Scroll( 5, 30, DEFAULT_WIDTH - 10, 120 );
+	materialList->end();
+	materialList->box(FL_UP_BOX);
+	materialList->type(Fl_Scroll::VERTICAL_ALWAYS);
 	
 	// add materials
 	// first, query the model for them
@@ -42,26 +42,26 @@ AdvancedOptionsDialog::AdvancedOptionsDialog( bz2object* obj ) :
 	}
 	
 	// second, add the widgets
-	this->materialWidgets = vector< MaterialWidget* >();
-	vector< osg::ref_ptr< material > > objMaterials = this->obj->getMaterials();
+	materialWidgets = vector< MaterialWidget* >();
+	vector< osg::ref_ptr< material > > objMaterials = obj->getMaterials();
 	if( objMaterials.size() > 0 ) {
 		for( vector< osg::ref_ptr< material > >::iterator i = objMaterials.begin(); i != objMaterials.end(); i++ ) {
 			MaterialWidget* mw = new MaterialWidget( materialList->x() + 5, 0, materialList->w() - 10, 2 * DEFAULT_TEXTSIZE, materialRefs );
 			mw->setSelectedMaterial( (*i)->getName() );
-			this->addMaterialCallback_real( this->materialList, mw );
+			addMaterialCallback_real( materialList, mw );
 		}
 	}
 	
-	this->phydrvLabel = new QuickLabel("Physics Driver", 5, 190 );
-	this->phydrvNew = new Fl_Button( DEFAULT_WIDTH - 180, 190, 55, DEFAULT_TEXTSIZE + 6, "New" );
-	this->phydrvEdit = new Fl_Button( DEFAULT_WIDTH - 120, 190, 55, DEFAULT_TEXTSIZE + 6, "Edit" );
-	this->phydrvDelete = new Fl_Button( DEFAULT_WIDTH - 60, 190, 55, DEFAULT_TEXTSIZE + 6, "Delete" );
-	this->phydrvMenu = new Fl_Menu_Button( 5, 215, DEFAULT_WIDTH - 10, DEFAULT_TEXTSIZE + 6, "(coming soon)" );
+	phydrvLabel = new QuickLabel("Physics Driver", 5, 190 );
+	phydrvNew = new Fl_Button( DEFAULT_WIDTH - 180, 190, 55, DEFAULT_TEXTSIZE + 6, "New" );
+	phydrvEdit = new Fl_Button( DEFAULT_WIDTH - 120, 190, 55, DEFAULT_TEXTSIZE + 6, "Edit" );
+	phydrvDelete = new Fl_Button( DEFAULT_WIDTH - 60, 190, 55, DEFAULT_TEXTSIZE + 6, "Delete" );
+	phydrvMenu = new Fl_Menu_Button( 5, 215, DEFAULT_WIDTH - 10, DEFAULT_TEXTSIZE + 6, "(coming soon)" );
 	
-	this->setOKEventHandler( this->OKCallback, this );
-	this->setCancelEventHandler( this->CancelCallback, this );
+	setOKEventHandler( OKCallback, this );
+	setCancelEventHandler( CancelCallback, this );
 	
-	this->end();
+	end();
 }
 
 // OK callback
@@ -78,8 +78,8 @@ void AdvancedOptionsDialog::CancelCallback_real( Fl_Widget* w ) {
 void AdvancedOptionsDialog::addMaterialCallback_real( Fl_Widget* w, MaterialWidget* mw ) {
 	// add an existing material widget if one is passed
 	if( mw != NULL ) {
-		int x = this->materialList->x() + 5;
-		int y = this->materialList->y() + 5 + 2 * DEFAULT_TEXTSIZE * ( this->materialList->children() - 1 );
+		int x = materialList->x() + 5;
+		int y = materialList->y() + 5 + 2 * DEFAULT_TEXTSIZE * ( materialList->children() - 1 );
 		mw->position( x, y );
 		materialList->add( mw );
 	}

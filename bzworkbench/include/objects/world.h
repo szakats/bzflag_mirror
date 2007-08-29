@@ -48,10 +48,10 @@ class world : public DataEntry {
 		float getFlagHeight() { return flagHeight; }
 		bool hasWalls() { return !noWalls; }
 		
-		void setName( const char* name ) { this->worldName = name; }
-		void setSize( float size ) { this->size = size; }
-		void setFlagHeight( float height ) { this->flagHeight = height; }
-		void setWalls( bool value ) { this->noWalls = !value; }
+		void setName( const char* name ) { worldName = name; }
+		void setSize( float size ) { size = size; }
+		void setFlagHeight( float height ) { flagHeight = height; }
+		void setWalls( bool value ) { noWalls = !value; }
 		
 	private:
 		string worldName;

@@ -13,10 +13,10 @@
 #include "windows/eventHandlers/selectHandler.h"
 
 selectHandler::selectHandler( View* view, osgGA::MatrixManipulator* manipulator ) : BZEventHandler( view ) {
-	this->lastSelected = NULL;
-	this->lastSelectedData = NULL;
+	lastSelected = NULL;
+	lastSelectedData = NULL;
 	dx = dy = prev_x = prev_y = 0.0;
-	this->cameraManipulator = manipulator;
+	cameraManipulator = manipulator;
 }
 
 // handle an event
@@ -31,44 +31,44 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
     		
     		viewer = dynamic_cast<View*>(&aa);
     		
-    		if( viewer != NULL && this->lastSelected != NULL && this->lastSelected->getName() == Selection_NODE_NAME ) {
+    		if( viewer != NULL && lastSelected != NULL && lastSelected->getName() == Selection_NODE_NAME ) {
     			// if the last event was a DRAG event, we need to update the dx and dy
-    			if( this->prevEvent == osgGA::GUIEventAdapter::DRAG ) {
-	    			this->dx = ea.getXnormalized() - this->prev_x;
-	    			this->dy = ea.getYnormalized() - this->prev_y;
+    			if( prevEvent == osgGA::GUIEventAdapter::DRAG ) {
+	    			dx = ea.getXnormalized() - prev_x;
+	    			dy = ea.getYnormalized() - prev_y;
     			}
     			// otherwise, they should be zero
     			else {
-    				this->dx = 0;
-    				this->dy = 0;	
+    				dx = 0;
+    				dy = 0;	
     			}
     			// set the prev_x and prev_y values so we can re-compute dx and dy on the next event
-	    		this->prev_x = ea.getXnormalized();
-    			this->prev_y = ea.getYnormalized();
+	    		prev_x = ea.getXnormalized();
+    			prev_y = ea.getYnormalized();
     			
     			// log this event
-    			this->prevEvent = osgGA::GUIEventAdapter::DRAG;
+    			prevEvent = osgGA::GUIEventAdapter::DRAG;
     			
     			// handle a selector, based on a pressed key
     			switch( viewer->getKey() ) {
     				// 'r' is for "rotate" (i.e. "spin" in BZW)
     				case BZ_ROTATE_KEY:
-    					return this->rotateSelector( view, ea );
+    					return rotateSelector( view, ea );
     				
     				// 's' is for "scale"
     				case BZ_SCALE_KEY:
-    					return this->scaleSelector( view, ea );
+    					return scaleSelector( view, ea );
     				
     				// 'l' is for "lean" (i.e. "shear" in BZW)
     				case BZ_SHEAR_KEY:
-    					return this->shearSelector( view, ea );
+    					return shearSelector( view, ea );
     				
     				// 't' is for "translate" (i.e. "shift" in BZW)
     				case BZ_SHIFT_KEY:
-    					return this->shiftSelector( view, ea );
+    					return shiftSelector( view, ea );
     					
     				default:
-    					return this->dragSelector( view, ea );
+    					return dragSelector( view, ea );
     			}
     			
     		}
@@ -81,15 +81,15 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
        		if( button == FL_LEFT_MOUSE ) {
        			viewer = dynamic_cast<View*>(&aa);
        			if( viewer ) {
-       				this->prevEvent = osgGA::GUIEventAdapter::PUSH;
-       				return this->pickSelector( viewer, ea );
+       				prevEvent = osgGA::GUIEventAdapter::PUSH;
+       				return pickSelector( viewer, ea );
        			}	
        		}
        		else if( button == FL_RIGHT_MOUSE ) {
         		viewer = dynamic_cast<View*>(&aa);
         		if(viewer) {
-        			this->prevEvent = osgGA::GUIEventAdapter::PUSH;
-        			return this->configureObject(viewer, ea);
+        			prevEvent = osgGA::GUIEventAdapter::PUSH;
+        			return configureObject(viewer, ea);
         			
         		}	
         	}
@@ -100,9 +100,9 @@ bool selectHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
         	if( ea.getButton() == FL_LEFT_MOUSE ) {
 	            viewer = dynamic_cast<View*>(&aa);
 	            if (viewer) {
-	            	this->prevEvent = osgGA::GUIEventAdapter::DOUBLECLICK;
+	            	prevEvent = osgGA::GUIEventAdapter::DOUBLECLICK;
        		
-	            	return this->pickObject(viewer,ea);
+	            	return pickObject(viewer,ea);
 	            	
 	            }
         	}
@@ -146,7 +146,7 @@ bool selectHandler::pickObject(View* viewer, const osgGA::GUIEventAdapter& ea) {
 					}
 					
             		// save the last selected object
-            		this->lastSelected = obj;
+            		lastSelected = obj;
             		
             		return true;
             	}
@@ -155,8 +155,8 @@ bool selectHandler::pickObject(View* viewer, const osgGA::GUIEventAdapter& ea) {
         }
     }
     
-    this->lastSelected = NULL;
-    this->lastSelectedData = NULL;
+    lastSelected = NULL;
+    lastSelectedData = NULL;
     return false;
 }
 
@@ -182,10 +182,10 @@ bool selectHandler::pickSelector(View* viewer, const osgGA::GUIEventAdapter& ea)
         			osg::Node* pickedNode = Selection::getPickedNode( obj, hitr->nodePath, i+1 );
         			
             		// save the last selected object
-            		this->lastSelected = obj;
+            		lastSelected = obj;
             		
             		// save the node that was picked
-            		this->lastSelectedData = pickedNode;
+            		lastSelectedData = pickedNode;
             		
             		return true;
             	}
@@ -193,8 +193,8 @@ bool selectHandler::pickSelector(View* viewer, const osgGA::GUIEventAdapter& ea)
         }
     }
     
-    this->lastSelected = NULL;
-    this->lastSelectedData = NULL;
+    lastSelected = NULL;
+    lastSelectedData = NULL;
     return false;
 }
 
@@ -222,7 +222,7 @@ bool selectHandler::configureObject(View* viewer, const osgGA::GUIEventAdapter& 
             	   	
             	   	if(mw) {
             	   		mw->configure( obj );
-            	   		this->lastSelected = obj;
+            	   		lastSelected = obj;
             	   		return true;	
             	   	}
             	   	
@@ -233,22 +233,22 @@ bool selectHandler::configureObject(View* viewer, const osgGA::GUIEventAdapter& 
         }
     }
     
-    this->lastSelected = NULL;
-    this->lastSelectedData = NULL;
+    lastSelected = NULL;
+    lastSelectedData = NULL;
     return false;
 }
 
 // handle translation events
 bool selectHandler::dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea ) {
-	osg::Node* node = (osg::Node*)this->lastSelectedData;
+	osg::Node* node = (osg::Node*)lastSelectedData;
 	
 	// get the position of the last selected object (which should be the axes)
-	osg::Vec3 position = this->lastSelected->getPosition();
+	osg::Vec3 position = lastSelected->getPosition();
 	
 	// transform the 2D mouse movement into a 3D vector by transforming it into camera space
 	// get the vectors (but keep in mind that the window uses the XY-plane, but "up" in the 3D scene is along Z)
-	osg::Vec3 sideVector = this->cameraManipulator->getSideVector( this->cameraManipulator->getMatrix() );
-	osg::Vec3 upVector = this->cameraManipulator->getFrontVector( this->cameraManipulator->getMatrix() );
+	osg::Vec3 sideVector = cameraManipulator->getSideVector( cameraManipulator->getMatrix() );
+	osg::Vec3 upVector = cameraManipulator->getFrontVector( cameraManipulator->getMatrix() );
 	
 	// apply the transformation to each axis
 	sideVector *= ( dx );
@@ -285,13 +285,13 @@ bool selectHandler::dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea
 	}
 	
 	// set the position
-	Selection* selection = dynamic_cast< Selection* >( this->lastSelected );
+	Selection* selection = dynamic_cast< Selection* >( lastSelected );
 	
 	// update all objects in the selection
 	if(selection) {
 		
 		// get the model reference from the View
-		const Model* model = this->view->getModelRef();
+		const Model* model = view->getModelRef();
 		
 		// get the selected objects
 		Model::objRefList selected = model->getSelection();
@@ -319,18 +319,18 @@ bool selectHandler::dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea
 // handle rotate events
 bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& ea ) {
 	// get the clicked axis
-	osg::Node* node = (osg::Node*)this->lastSelectedData;
+	osg::Node* node = (osg::Node*)lastSelectedData;
 	
 	// get the position of the selector
-	osg::Vec3 position = this->lastSelected->getPosition();
+	osg::Vec3 position = lastSelected->getPosition();
 	
 	// get the angular orientation
 	double a_x = 0.0, a_y = 0.0, a_z = 0.0;
 	
 	// transform the 2D mouse movement into a 3D vector by transforming it into camera space
 	// get the vectors (but keep in mind that the window uses the XY-plane, but "up" in the 3D scene is along Z)
-	osg::Vec3 sideVector = this->cameraManipulator->getSideVector( this->cameraManipulator->getMatrix() );
-	osg::Vec3 upVector = this->cameraManipulator->getFrontVector( this->cameraManipulator->getMatrix() );
+	osg::Vec3 sideVector = cameraManipulator->getSideVector( cameraManipulator->getMatrix() );
+	osg::Vec3 upVector = cameraManipulator->getFrontVector( cameraManipulator->getMatrix() );
 	
 	// apply the transformation to each axis (only look at movement perpendicular to the axes here, since we're rotating)
 	sideVector *= ( dx );
@@ -354,12 +354,12 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 	}
 	
 	// set the position
-	Selection* selection = dynamic_cast< Selection* >( this->lastSelected );
+	Selection* selection = dynamic_cast< Selection* >( lastSelected );
 	
 	// update all objects in the selection
 	if(selection) {
 		// get the model reference from the View
-		const Model* model = this->view->getModelRef();
+		const Model* model = view->getModelRef();
 		
 		// get the selected objects
 		Model::objRefList selected = model->getSelection();
@@ -388,15 +388,15 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 
 // handle scale events
 bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& ea ) {
-	osg::Node* node = (osg::Node*)this->lastSelectedData;
+	osg::Node* node = (osg::Node*)lastSelectedData;
 	
 	// get the position of the last selected object (which should be the axes)
 	osg::Vec3 scale = osg::Vec3( 0, 0, 0 );
 	
 	// transform the 2D mouse movement into a 3D vector by transforming it into camera space
 	// get the vectors (but keep in mind that the window uses the XY-plane, but "up" in the 3D scene is along Z)
-	osg::Vec3 sideVector = this->cameraManipulator->getSideVector( this->cameraManipulator->getMatrix() );
-	osg::Vec3 upVector = this->cameraManipulator->getFrontVector( this->cameraManipulator->getMatrix() );
+	osg::Vec3 sideVector = cameraManipulator->getSideVector( cameraManipulator->getMatrix() );
+	osg::Vec3 upVector = cameraManipulator->getFrontVector( cameraManipulator->getMatrix() );
 	
 	// apply the transformation to each axis
 	sideVector *= ( dx );
@@ -425,11 +425,11 @@ bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& e
 	}
 	
 	// set the position
-	Selection* selection = dynamic_cast< Selection* >( this->lastSelected );
+	Selection* selection = dynamic_cast< Selection* >( lastSelected );
 	// update all objects in the selection
 	
 	if(selection) {
-		Model::objRefList selected = this->view->getModelRef()->getSelection();
+		Model::objRefList selected = view->getModelRef()->getSelection();
 		if( selected.size() > 0 ) {
 			osg::Vec3 tscale;
 			for(Model::objRefList::iterator i = selected.begin(); i != selected.end(); i++) {
@@ -455,15 +455,15 @@ bool selectHandler::scaleSelector( View* viewer, const osgGA::GUIEventAdapter& e
 
 // shear the selector (i.e. if the appropriate key is pressed)
 bool selectHandler::shearSelector( View* viewer, const osgGA::GUIEventAdapter& ea) {
-	osg::Node* node = (osg::Node*)this->lastSelectedData;
+	osg::Node* node = (osg::Node*)lastSelectedData;
 	
 	// shear movements
 	double s_x = 0.0, s_y = 0.0, s_z = 0.0;
 	
 	// transform the 2D mouse movement into a 3D vector by transforming it into camera space
 	// get the vectors (but keep in mind that the window uses the XY-plane, but "up" in the 3D scene is along Z)
-	osg::Vec3 sideVector = this->cameraManipulator->getSideVector( this->cameraManipulator->getMatrix() );
-	osg::Vec3 upVector = this->cameraManipulator->getFrontVector( this->cameraManipulator->getMatrix() );
+	osg::Vec3 sideVector = cameraManipulator->getSideVector( cameraManipulator->getMatrix() );
+	osg::Vec3 upVector = cameraManipulator->getFrontVector( cameraManipulator->getMatrix() );
 	
 	// apply the transformation to each axis
 	sideVector *= ( dx );
@@ -488,10 +488,10 @@ bool selectHandler::shearSelector( View* viewer, const osgGA::GUIEventAdapter& e
 	}
 	
 	// set the position
-	Selection* selection = dynamic_cast< Selection* >( this->lastSelected );
+	Selection* selection = dynamic_cast< Selection* >( lastSelected );
 	
 	if(selection) {
-		Model::objRefList selected = this->view->getModelRef()->getSelection();
+		Model::objRefList selected = view->getModelRef()->getSelection();
 		
 		if(selected.size() > 0) {
 			for( Model::objRefList::iterator i = selected.begin(); i != selected.end(); i++) {

@@ -49,14 +49,14 @@ public:
 	string toString(void);
 	
 	// getters
-	string& getName() { return this->name; }
+	string& getName() { return name; }
 	teleporter* getFrom() { return from; }
 	teleporter* getTo() { return to; }
 	
 	// setters
-	void setName( const string& name ) { this->name = name; }
-	void setFrom( teleporter* from ) { this->from = from; }
-	void setTo( teleporter* to ) { this->to = to; }
+	void setName( const string& _name ) { name = _name; }
+	void setFrom( teleporter* _from ) { from = _from; }
+	void setTo( teleporter* _to ) { to = _to; }
 	
 private:
 	string name;

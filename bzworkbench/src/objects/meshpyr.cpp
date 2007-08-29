@@ -16,10 +16,10 @@
 meshpyr::meshpyr() : bz2object("meshpyr", "<position><rotation><size><matref><phydrv>") { }
 
 // constructor with data
-meshpyr::meshpyr(string& data) : bz2object("meshpyr", "<position><rotation><size><matref><phydrv>", data.c_str()) { this->update(data); }
+meshpyr::meshpyr(string& data) : bz2object("meshpyr", "<position><rotation><size><matref><phydrv>", data.c_str()) { update(data); }
 
 // getter
-string meshpyr::get(void) { return this->toString(); }
+string meshpyr::get(void) { return toString(); }
 
 // setter
 int meshpyr::update(string& data) {
@@ -29,7 +29,7 @@ int meshpyr::update(string& data) {
 // tostring
 string meshpyr::toString(void) {
 	return string("meshpyr\n") +
-				  this->BZWLines() +
+				  BZWLines() +
 				  "end\n";
 }
 

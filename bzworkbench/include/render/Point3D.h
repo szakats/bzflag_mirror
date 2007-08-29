@@ -39,25 +39,25 @@ class Point3D : public osg::Vec3
 		
 		// only initialize from the string if there are at least 3 elements
 		if(points.size() >= 3) {
-			this->set( atof( points[0].c_str() ),
+			set( atof( points[0].c_str() ),
 					   atof( points[1].c_str() ),
 					   atof( points[2].c_str() ));
 		}
 		else {
-			this->set(0,0,0);
+			set(0,0,0);
 		}
 	}
 	
 	Point3D( string desc ) { Point3D( desc.c_str() ); }
 	
 	string toString(void) {
-		return string("") + string(ftoa(this->x())) + " " + string(ftoa(this->y())) + " " + string(ftoa(this->z())) + "\n";
+		return string("") + string(ftoa(x())) + " " + string(ftoa(y())) + " " + string(ftoa(z())) + "\n";
 	}
 	
 	virtual ~Point3D() { }
 	
 	// convert to an osg::Vec3
-	osg::Vec3 asVec3() { return osg::Vec3( this->x(), this->y(), this->z() ); }
+	osg::Vec3 asVec3() { return osg::Vec3( x(), y(), z() ); }
 	
 };
 

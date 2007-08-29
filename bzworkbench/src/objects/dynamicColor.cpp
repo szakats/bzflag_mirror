@@ -16,28 +16,28 @@
 dynamicColor::dynamicColor() :
 	DataEntry("dynamicColor", "<red><green><blue><alpha><name>") {
 		
-	this->name = string("");
-	this->redCommands = vector<ColorCommand>();
-	this->greenCommands = vector<ColorCommand>();
-	this->blueCommands = vector<ColorCommand>();
-	this->alphaCommands = vector<ColorCommand>();
+	name = string("");
+	redCommands = vector<ColorCommand>();
+	greenCommands = vector<ColorCommand>();
+	blueCommands = vector<ColorCommand>();
+	alphaCommands = vector<ColorCommand>();
 }
 
 // constructor with data
 dynamicColor::dynamicColor(string& data) :
 	DataEntry("dynamicColor", "<red><green><blue><alpha><name>", data.c_str()) {
 	
-	this->name = string("");
-	this->redCommands = vector<ColorCommand>();
-	this->greenCommands = vector<ColorCommand>();
-	this->blueCommands = vector<ColorCommand>();
-	this->alphaCommands = vector<ColorCommand>();
+	name = string("");
+	redCommands = vector<ColorCommand>();
+	greenCommands = vector<ColorCommand>();
+	blueCommands = vector<ColorCommand>();
+	alphaCommands = vector<ColorCommand>();
 	
-	this->update(data);
+	update(data);
 }
 
 // getter
-string dynamicColor::get(void) { return this->toString(); }
+string dynamicColor::get(void) { return toString(); }
 
 /**
  * Helper method:  check and see if the commands given are valid ColorCommands
@@ -98,7 +98,7 @@ string stringifyCommands(vector<ColorCommand>& commands, const char* color) {
 
 // setter
 int dynamicColor::update(string& data) {
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get the section
 	vector<string> lines = BZWParser::getSectionsByHeader( header, data.c_str() );
@@ -140,11 +140,11 @@ int dynamicColor::update(string& data) {
 		return 0;
 		
 	// commit the data
-	this->redCommands = parseCommands( redCommandVals );
-	this->greenCommands = parseCommands( greenCommandVals );
-	this->blueCommands = parseCommands( blueCommandVals );
-	this->alphaCommands = parseCommands( alphaCommandVals );
-	this->name = names[0];
+	redCommands = parseCommands( redCommandVals );
+	greenCommands = parseCommands( greenCommandVals );
+	blueCommands = parseCommands( blueCommandVals );
+	alphaCommands = parseCommands( alphaCommandVals );
+	name = names[0];
 	
 	return 1;
 }

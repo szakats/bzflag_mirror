@@ -29,8 +29,8 @@ public:
 	
 	virtual string get(void) = 0;
 	virtual int update(string& data) {
-		this->text = data;
-		this->setChanged();
+		text = data;
+		setChanged();
 		return 1;
 	}
 	
@@ -42,18 +42,18 @@ public:
 	
 	// initialize the header and keys
 	DataEntry(const char* header, const char* keys) {
-		this->header = header;
-		this->keys = keys;
-		this->text = "";
-		this->setChanged();
+		header = header;
+		keys = keys;
+		text = "";
+		setChanged();
 	}
 	
 	// initialize the header and keys and data
-	DataEntry(const char* header, const char* keys, const char* data) {
-		this->header = string(header);
-		this->keys = string(keys);
-		this->text = string(data);	
-		this->setChanged();
+	DataEntry(const char* _header, const char* _keys, const char* _data) {
+		header = string(_header);
+		keys = string(_keys);
+		text = string(_data);	
+		setChanged();
 	}
 	
 	
@@ -61,7 +61,7 @@ public:
 	
 	// is the key supported?
 	bool isKey(const string& key) {
-		string::size_type index = this->keys.find("<" + key + ">", 0);
+		string::size_type index = keys.find("<" + key + ">", 0);
 		if(index != string::npos)
 			return true;
 		return false;
@@ -72,7 +72,7 @@ public:
 	// does a line have a key?
 	bool hasKey(const string& line) {
 		// get the keys
-		vector<string> keys = this->getKeys();
+		vector<string> keys = getKeys();
 		
 		// determine whether or not the line starts with one of them
 		for(vector<string>::iterator i = keys.begin(); i != keys.end(); i++) {
@@ -110,7 +110,7 @@ public:
 		const char* hdr = header.c_str();
 		
 		// get the lines
-		vector<string> sections = BZWParser::getSectionsByHeader(hdr, this->text.c_str());
+		vector<string> sections = BZWParser::getSectionsByHeader(hdr, text.c_str());
 		if(sections[0] == BZW_NOT_FOUND) {
 			// printf("%s::update(): Error! Could not restore original text!\n", hdr);
 			return ret;
@@ -181,17 +181,17 @@ public:
 	string getHeader(void) { return header; }
 	
 	//  get the original text
-	string getText() { return this->text; }
+	string getText() { return text; }
 	
 	// set the header
-	void setHeader(const char* c) { this->header = string(c); }
+	void setHeader(const char* c) { header = string(c); }
 	
 	// set the keys
-	void setKeys(const char* c) { this->keys = string(c); }
+	void setKeys(const char* c) { keys = string(c); }
 	
 	// set changed
-	void setChanged() { this->changed = true; }
-	void setChanged(bool value) { this->changed = value; }
+	void setChanged() { changed = true; }
+	void setChanged(bool value) { changed = value; }
 	
 protected:
 	string header;

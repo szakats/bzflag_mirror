@@ -17,15 +17,15 @@ texturematrix::texturematrix() :
 	DataEntry("texturematrix", "<name><scale><spin><shift><center><fixedscale><fixedspin><fixedshift>") {
 	
 	
-	this->name = string("default_texturematrix");
-	this->fixedSpin = 0.0f;
-	this->texCenter = TexCoord2D();
-	this->texFixedScale = TexCoord2D();
-	this->texFixedShift = TexCoord2D();
-	this->texFreq = TexCoord2D();
-	this->texScale = TexCoord2D();
-	this->texShift = TexCoord2D();
-	this->spin = 0.0f;
+	name = string("default_texturematrix");
+	fixedSpin = 0.0f;
+	texCenter = TexCoord2D();
+	texFixedScale = TexCoord2D();
+	texFixedShift = TexCoord2D();
+	texFreq = TexCoord2D();
+	texScale = TexCoord2D();
+	texShift = TexCoord2D();
+	spin = 0.0f;
 }
 
 // constructor with data
@@ -35,11 +35,11 @@ texturematrix::texturematrix(string& data) :
 }
 
 // getter
-string texturematrix::get(void) { return this->toString(); }
+string texturematrix::get(void) { return toString(); }
 
 // setter
 int texturematrix::update(string& data) {
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get the data
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -105,15 +105,15 @@ int texturematrix::update(string& data) {
 	string texFreqs = texScaleLineElements[0] + " " + texScaleLineElements[1] + "\0";
 	string texScales = texScaleLineElements[2] + " " + texScaleLineElements[3] + "\0";
 	
-	this->name = names[0];
-	this->texScale = TexCoord2D( texScales.c_str() );
-	this->spin = atof( spins[0].c_str() );
-	this->texCenter = TexCoord2D( centers[0].c_str() );
-	this->texFixedScale = TexCoord2D( fixedScales[0].c_str() );
-	this->texFixedShift = TexCoord2D( fixedShifts[0].c_str() );
-	this->texFreq = TexCoord2D( texFreqs.c_str() );
-	this->texShift = TexCoord2D( shifts[0].c_str() );
-	this->fixedSpin = atof( fixedSpins[0].c_str() );
+	name = names[0];
+	texScale = TexCoord2D( texScales.c_str() );
+	spin = atof( spins[0].c_str() );
+	texCenter = TexCoord2D( centers[0].c_str() );
+	texFixedScale = TexCoord2D( fixedScales[0].c_str() );
+	texFixedShift = TexCoord2D( fixedShifts[0].c_str() );
+	texFreq = TexCoord2D( texFreqs.c_str() );
+	texShift = TexCoord2D( shifts[0].c_str() );
+	fixedSpin = atof( fixedSpins[0].c_str() );
 	
 	return 1;
 }

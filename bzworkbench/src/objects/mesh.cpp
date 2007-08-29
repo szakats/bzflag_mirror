@@ -43,15 +43,15 @@ mesh::mesh(string& data) :
 	drawInfo = DrawInfo();
 	materialMap = map<string, string>();
 	
-	this->update(data);
+	update(data);
 }
 
 // getter
-string mesh::get(void) { return this->toString(); }
+string mesh::get(void) { return toString(); }
 
 // setter
 int mesh::update(string& data) {
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get lines
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str(), "end", "<drawinfo><face>", "");

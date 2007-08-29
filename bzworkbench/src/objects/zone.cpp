@@ -23,15 +23,15 @@ zone::zone(string& data) : bz2object("zone", "<name><position><size><rotation><t
 	teams = vector<int>();
 	safety = vector<int>();
 	
-	this->update(data);
+	update(data);
 }
 
 // getter
-string zone::get(void) { return this->toString(); }
+string zone::get(void) { return toString(); }
 
 // setter
 int zone::update(string& data) {
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get the sections
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -48,7 +48,7 @@ int zone::update(string& data) {
 	const char* zoneData = lines[0].c_str();
 	
 	// get the team values
-	vector<string> teams = BZWParser::getValuesByKey("team", header, zoneData);
+	vector<string> tempTeams = BZWParser::getValuesByKey("team", header, zoneData);
 		
 	// get the safety values
 	vector<string> safties = BZWParser::getValuesByKey("safety", header, zoneData);
@@ -63,8 +63,8 @@ int zone::update(string& data) {
 	vector<string> teamElements = vector<string>(), flagElements = vector<string>(), safetyElements = vector<string>();
 	
 	// read in the given teams
-	if(teams.size() > 0)
-		teamElements = BZWParser::getLineElements( teams[0].c_str() );
+	if(tempTeams.size() > 0)
+		teamElements = BZWParser::getLineElements( tempTeams[0].c_str() );
 	
 	// read in the flags
 	if(flagVals.size() > 0)
@@ -142,10 +142,10 @@ int zone::update(string& data) {
 	if(!bz2object::update(data))
 		return 0;
 	 
-	this->teams = teamCandidates;
-	this->safety = safetyCandidates;
-	this->zoneflags = zoneflagCandidates;
-	this->flags = flagElements;
+	teams = teamCandidates;
+	safety = safetyCandidates;
+	zoneflags = zoneflagCandidates;
+	flags = flagElements;
 	
 	return 1;
 }
@@ -160,7 +160,7 @@ string zone::toString(void) {
 	
 	// make the "safety" string
 	if(safety.size() > 0) {
-		for(vector<int>::iterator index = this->safety.begin(); index != this->safety.end(); index++) {
+		for(vector<int>::iterator index = safety.begin(); index != safety.end(); index++) {
 			safetyString += string(itoa(*index)) + " ";
 		}
 		safetyString += "\n";
@@ -168,7 +168,7 @@ string zone::toString(void) {
 	
 	if(teams.size() > 0) {
 		// make the "team" string
-		for(vector<int>::iterator index = this->teams.begin(); index != this->teams.end(); index++) {
+		for(vector<int>::iterator index = teams.begin(); index != teams.end(); index++) {
 			teamString += string(itoa(*index)) + " ";
 		}
 		teamString += "\n";
@@ -176,7 +176,7 @@ string zone::toString(void) {
 	
 	if(flags.size() > 0) {
 		// make the "flag" string
-		for(vector<string>::iterator index = this->flags.begin(); index != this->flags.end(); index++) {
+		for(vector<string>::iterator index = flags.begin(); index != flags.end(); index++) {
 			flagString += (*index) + " ";
 		}
 		flagString += "\n";
@@ -184,13 +184,13 @@ string zone::toString(void) {
 	
 	if(zoneflags.size() > 0) {
 		// make the "zoneflag" strings
-		for(vector<FlagElement>::iterator index = this->zoneflags.begin(); index != this->zoneflags.end(); index++) {
+		for(vector<FlagElement>::iterator index = zoneflags.begin(); index != zoneflags.end(); index++) {
 			zoneflagString += "  zoneflag " + index->toString() + "\n";	
 		}
 	}
 	
 	return string("zone\n") +
-				  this->BZWLines() +
+				  BZWLines() +
 				  (safetyString.length() == 0 ? "# safety\n" : "  safety " + safetyString) +
 				  (teamString.length() == 0 ? "# team\n" : "  team " + teamString) +
 				  (flagString.length() == 0 ? "# flag\n" : "  flag " + flagString) +

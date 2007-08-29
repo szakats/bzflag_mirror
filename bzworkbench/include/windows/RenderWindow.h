@@ -48,7 +48,7 @@ public:
 	osgViewer::GraphicsWindowEmbedded* getOSGGraphicsWindow() { return _gw.get(); }
 	
 	// set the embedded view
-	void setOSGGraphicsWindow( osgViewer::GraphicsWindowEmbedded* gw ) { this->_gw = gw; }
+	void setOSGGraphicsWindow( osgViewer::GraphicsWindowEmbedded* gw ) { _gw = gw; }
 	
 protected:
 

@@ -78,7 +78,7 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         void setUnselected( bz2object* object );
         
         // see if a renderable is contained
-       	bool contains( Renderable* node ) { return this->root->containsNode( node ); }
+       	bool contains( Renderable* node ) { return root->containsNode( node ); }
         
         // select all objects
         // void selectAll();
@@ -97,16 +97,16 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
         bool isPressed( int value );
         
         // get the current pressed key
-        unsigned char getKey() { return this->keydown; }
+        unsigned char getKey() { return keydown; }
         
         // get the current pressed button
-        unsigned int getButton() { return this->buttondown; }
+        unsigned int getButton() { return buttondown; }
         
         // get the model reference
-        const Model* getModelRef() { return this->model; }
+        const Model* getModelRef() { return model; }
         
         // get the selection reference
-        Selection* getSelectionNode() { return this->selection; }
+        Selection* getSelectionNode() { return selection; }
         
         // get the MainWindow parent, if possible
         MainWindow* requestMainWindow() { return mw; }

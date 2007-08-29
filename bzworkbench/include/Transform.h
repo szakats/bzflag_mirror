@@ -34,21 +34,21 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 			data = vector<float>();
 		}
 		
-		BZTransform(string& data) : DataEntry("", ""), osg::MatrixTransform() {
+		BZTransform(string& _data) : DataEntry("", ""), osg::MatrixTransform() {
 			name = string("");
-			this->data = vector<float>();
-			this->update(data);
+			data = vector<float>();
+			update(_data);
 		}
 		
-		BZTransform( string name, vector<float> data ) : DataEntry("", ""), osg::MatrixTransform() {
-			this->name = name;
-			this->data = data;
+		BZTransform( string _name, vector<float> _data ) : DataEntry("", ""), osg::MatrixTransform() {
+			name = _name;
+			data = _data;
 			refreshMatrix();
 		} 
 		
-		BZTransform( string name, float n1, float n2, float n3, float n4 ) : DataEntry("", ""), osg::MatrixTransform() {
-			this->name = name;
-			this->data = vector<float>();
+		BZTransform( string _name, float n1, float n2, float n3, float n4 ) : DataEntry("", ""), osg::MatrixTransform() {
+			name = _name;
+			data = vector<float>();
 			data.push_back(n1);
 			data.push_back(n2);
 			data.push_back(n3);
@@ -58,13 +58,13 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		
 		// getter
 		string get(void) {
-			return this->toString();	
+			return toString();	
 		}
 		
 		// setter
 		int update(string& newData) {
 			// expect just one line
-			this->name = BZWParser::key(newData.c_str());
+			name = BZWParser::key(newData.c_str());
 			
 			// break up the line
 			vector<string> elements = BZWParser::getLineElements(newData.c_str());
@@ -77,10 +77,10 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 				data.push_back( atof( i->c_str() ) );
 			}
 			
-			this->setHeader(name.c_str());
+			setHeader(name.c_str());
 			
 			// recompute this matrix
-			this->refreshMatrix();
+			refreshMatrix();
 			
 			return 1;
 		}
@@ -100,23 +100,23 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		vector<float> getData() { return data; }
 		
 		// data setters
-		void setName(string& s) { this->name = s; this->refreshMatrix(); }
-		void setData(const vector<float>& data) { this->data = data; this->refreshMatrix(); }
-		void setData( const osg::Vec3d& data ) {
-			this->data.clear();
-			this->data.push_back(data.x());
-			this->data.push_back(data.y());
-			this->data.push_back(data.z());
-			this->refreshMatrix();
+		void setName(string& s) { name = s; refreshMatrix(); }
+		void setData(const vector<float>& inputData) { data = inputData; refreshMatrix(); }
+		void setData( const osg::Vec3d& inputData ) {
+			data.clear();
+			data.push_back(inputData.x());
+			data.push_back(inputData.y());
+			data.push_back(inputData.z());
+			refreshMatrix();
 		}
 		
-		void setData( const osg::Vec4d& data ) {
-			this->data.clear();
-			this->data.push_back(data.x());
-			this->data.push_back(data.y());
-			this->data.push_back(data.z());
-			this->data.push_back(data.w());
-			this->refreshMatrix();
+		void setData( const osg::Vec4d& inputData ) {
+			data.clear();
+			data.push_back(inputData.x());
+			data.push_back(inputData.y());
+			data.push_back(inputData.z());
+			data.push_back(inputData.w());
+			refreshMatrix();
 		}
 		
 		// make this public
@@ -134,14 +134,14 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 			osg::Matrixd theMatrix;
 			theMatrix.makeTranslate( osg::Vec3( data[0], data[1], data[2] ) );
 			
-			this->setMatrix( theMatrix );
+			setMatrix( theMatrix );
 		}
 		
 		// make this into a scale matrix
 		void makeScale() {
 			osg::Matrixd theMatrix;
 			theMatrix.makeScale( data[0], data[1], data[2] );
-			this->setMatrix( theMatrix );
+			setMatrix( theMatrix );
 		}
 		
 		// make this into a spin matrix
@@ -153,7 +153,7 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 			osg::Matrix matrix;
 			matrix.makeRotate( quat );
 			
-			this->setMatrix( matrix );
+			setMatrix( matrix );
 		}
 		
 		// make this into a shear matrix
@@ -166,7 +166,7 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 			};
 			
 			osg::Matrixd matrix = osg::Matrixd( matvals );
-			this->setMatrix( matrix );
+			setMatrix( matrix );
 		}
 		
 		
@@ -176,13 +176,13 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		
 		void refreshMatrix() {
 			if( name == "shift" )
-				this->makeShift();
+				makeShift();
 			else if(name == "spin" )
-				this->makeSpin();
+				makeSpin();
 			else if(name == "shear" )
-				this->makeShear();
+				makeShear();
 			else if(name == "scale" )
-				this->makeScale();
+				makeScale();
 		}
 };
 

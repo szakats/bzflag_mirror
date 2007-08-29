@@ -52,7 +52,7 @@ class group : public bz2object {
 		string toString(void);
 		
 		// get the definition
-		define* getDefine() { return this->def; }
+		define* getDefine() { return def; }
 		
 		// set the definition
 		void setDefine( define* def );

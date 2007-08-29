@@ -46,9 +46,9 @@ public:
 	// override the getSize and setSize methods
 	osg::Vec3 getSize() { return osg::Vec3( realSize.x(), realSize.y(), realSize.z() ); }
 	void setSize( osg::Vec3 newSize ) {
-		this->realSize = newSize;
+		realSize = newSize;
 		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE, &newSize );
-		this->updateGeometry( msg );
+		updateGeometry( msg );
 	}
 	
 	// tostring
@@ -57,7 +57,7 @@ public:
 	// binary getters and setters
 	float getBorder() { return border; }
 	
-	void setBorder( float b ) { this->border = b; }
+	void setBorder( float b ) { border = b; }
 	
 private:
 	

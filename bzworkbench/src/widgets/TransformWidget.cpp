@@ -15,20 +15,20 @@
 
 // unused; prevents the build from breaking
 // (Fl_Group's copy constructor is private)
-TransformWidget::TransformWidget(const TransformWidget& t) : Fl_Group(0, 0, 0, 0) { this->end(); }
+TransformWidget::TransformWidget(const TransformWidget& t) : Fl_Group(0, 0, 0, 0) { end(); }
 
 // the format for fields is "<type1:|field1|field2|field3|" ... "|fieldN|>"
-TransformWidget::TransformWidget(int x, int y, int WIDTH, int HEIGHT, const char* fields, bool active) : 
+TransformWidget::TransformWidget(int x, int y, int WIDTH, int HEIGHT, const char* inputFields, bool active) : 
 	Fl_Group(x, y, WIDTH, HEIGHT) {
 	
-	this->end();
+	end();
 	
-	string transforms = string(fields);
+	string transforms = string(inputFields);
 	transformTypes = vector<string>();
 	
 	// initialize data
-	format = string(fields);
-	this->fields = vector<Fl_Float_Input*>();
+	format = string(inputFields);
+	fields = vector<Fl_Float_Input*>();
 	
 	// initialize the members
 	typeMenu = new Fl_Menu_Button(x + 30, y, 100, DEFAULT_TEXTSIZE + 6);
@@ -65,15 +65,15 @@ TransformWidget::TransformWidget(int x, int y, int WIDTH, int HEIGHT, const char
 	
 	// build the transformation types menu
 	for(vector<string>::iterator i = transformTypes.begin(); i != transformTypes.end(); i++) {
-		typeMenu->add( i->c_str(), 0, this->getTransformationCallback, this);
+		typeMenu->add( i->c_str(), 0, getTransformationCallback, this);
 	}
 	
 	// label it
 	typeMenu->label(transformTypes[0].c_str());
 	
 	// add the widgets
-	this->add(typeMenu);
-	this->add(activeButton);
+	add(typeMenu);
+	add(activeButton);
 	
 	// build the fields
 	changeFields(transformTypes[0].c_str());
@@ -168,7 +168,7 @@ void TransformWidget::getTransformationCallback_real(TransformWidget* t, Fl_Menu
 	const Fl_Menu_Item* menu = mb->menu();
 	mb->label(menu[mb->value()].label());
 	changeFields(mb->label());
-	this->parent()->redraw();
+	parent()->redraw();
 }
 
 // change callbacks based on a new selection
@@ -178,7 +178,7 @@ void TransformWidget::changeFields(const char* name) {
 	// remove previous fields
 	if(fields.size() != 0) {
 		for(vector<Fl_Float_Input*>::iterator i = fields.begin(); i != fields.end(); i++) {
-			this->remove(*i);
+			remove(*i);
 			delete *i;
 		}	
 	}
@@ -192,8 +192,8 @@ void TransformWidget::changeFields(const char* name) {
 	
 	string fieldList = format.substr(startIndex, endIndex - startIndex + 1);
 	
-	int x = this->x() + 150;
-	int y = this->y();
+	int tempX = x() + 150;
+	int tempY = y();
 			
 	string fieldName;
 	// find all fields and make them
@@ -206,19 +206,19 @@ void TransformWidget::changeFields(const char* name) {
 		fieldName = fieldList.substr(start+1, end - (start+1));
 		
 		// add the float field
-		Fl_Float_Input* newfield = new Fl_Float_Input(x, y, 100, DEFAULT_TEXTSIZE + 6);
+		Fl_Float_Input* newfield = new Fl_Float_Input(tempX, tempY, 100, DEFAULT_TEXTSIZE + 6);
 		newfield->copy_label(fieldName.c_str());
 		newfield->align(FL_ALIGN_TOP);
 		
 		fields.push_back(newfield);
-		this->add(newfield);
+		add(newfield);
 		newfield->value("0.000000");
 		
 		// advance fieldList
 		fieldList = fieldList.substr(end);	
 		
 		// advance X
-		x += 120;
+		tempX += 120;
 		
 		// break when we run out of string
 		if(fieldList.length() < 2)

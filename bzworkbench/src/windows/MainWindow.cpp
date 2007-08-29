@@ -17,78 +17,78 @@ bool MainWindow::initialized = false;
 // build up the button panel
 void MainWindow::buildButtonPanel() {
 	// set up the "add object" button group
-	this->objectButtonGroup = new Fl_Group( BUTTON_PANEL_X, BUTTON_PANEL_Y, BUTTON_PANEL_WIDTH, BUTTON_PANEL_HEIGHT, "Add Object");
-	this->objectButtonGroup->end();
-	this->objectButtonGroup->align( FL_ALIGN_LEFT | FL_ALIGN_TOP );
+	objectButtonGroup = new Fl_Group( BUTTON_PANEL_X, BUTTON_PANEL_Y, BUTTON_PANEL_WIDTH, BUTTON_PANEL_HEIGHT, "Add Object");
+	objectButtonGroup->end();
+	objectButtonGroup->align( FL_ALIGN_LEFT | FL_ALIGN_TOP );
 	
 	// create the buttons
-	this->addBoxButton = new Fl_ImageButton( BUTTON_PANEL_X, BUTTON_PANEL_Y, 36, 36, "share/UI/box.png");
-	this->addPyramidButton = new Fl_ImageButton( BUTTON_PANEL_X + 36, BUTTON_PANEL_Y, 36, 36, "share/UI/pyramid.png");
-	this->addTeleporterButton = new Fl_ImageButton( BUTTON_PANEL_X, BUTTON_PANEL_Y + 36, 36, 36, "share/UI/teleporter.png");
+	addBoxButton = new Fl_ImageButton( BUTTON_PANEL_X, BUTTON_PANEL_Y, 36, 36, "share/UI/box.png");
+	addPyramidButton = new Fl_ImageButton( BUTTON_PANEL_X + 36, BUTTON_PANEL_Y, 36, 36, "share/UI/pyramid.png");
+	addTeleporterButton = new Fl_ImageButton( BUTTON_PANEL_X, BUTTON_PANEL_Y + 36, 36, 36, "share/UI/teleporter.png");
 	
 	// assign them callbacks
-	this->addBoxButton->callback( addBoxCallback, this );
-	this->addPyramidButton->callback( addPyramidCallback, this );
-	this->addTeleporterButton->callback( addTeleporterCallback, this );
+	addBoxButton->callback( addBoxCallback, this );
+	addPyramidButton->callback( addPyramidCallback, this );
+	addTeleporterButton->callback( addTeleporterCallback, this );
 	
 	// add them to the group
-	this->objectButtonGroup->add( addBoxButton );
-	this->objectButtonGroup->add( addPyramidButton );
-	this->objectButtonGroup->add( addTeleporterButton );
+	objectButtonGroup->add( addBoxButton );
+	objectButtonGroup->add( addPyramidButton );
+	objectButtonGroup->add( addTeleporterButton );
 	
 	
 	// set up the "add base" button group
-	this->baseButtonGroup = new Fl_Group( BASE_PANEL_X, BASE_PANEL_Y, BASE_PANEL_WIDTH, BASE_PANEL_HEIGHT, "Add Base");
-	this->baseButtonGroup->end();
-	this->baseButtonGroup->align( FL_ALIGN_LEFT | FL_ALIGN_TOP );
+	baseButtonGroup = new Fl_Group( BASE_PANEL_X, BASE_PANEL_Y, BASE_PANEL_WIDTH, BASE_PANEL_HEIGHT, "Add Base");
+	baseButtonGroup->end();
+	baseButtonGroup->align( FL_ALIGN_LEFT | FL_ALIGN_TOP );
 	
 	// create the base buttons
-	this->addBlueBaseButton = new Fl_ImageButton( BASE_PANEL_X, BASE_PANEL_Y, 36, 36, "share/UI/bluebase.png");
-	this->addGreenBaseButton = new Fl_ImageButton( BASE_PANEL_X + 36, BASE_PANEL_Y, 36, 36, "share/UI/greenbase.png");
-	this->addPurpleBaseButton = new Fl_ImageButton( BASE_PANEL_X, BASE_PANEL_Y + 36, 36, 36, "share/UI/purplebase.png");
-	this->addRedBaseButton = new Fl_ImageButton( BASE_PANEL_X + 36, BASE_PANEL_Y + 36, 36, 36, "share/UI/redbase.png");
+	addBlueBaseButton = new Fl_ImageButton( BASE_PANEL_X, BASE_PANEL_Y, 36, 36, "share/UI/bluebase.png");
+	addGreenBaseButton = new Fl_ImageButton( BASE_PANEL_X + 36, BASE_PANEL_Y, 36, 36, "share/UI/greenbase.png");
+	addPurpleBaseButton = new Fl_ImageButton( BASE_PANEL_X, BASE_PANEL_Y + 36, 36, 36, "share/UI/purplebase.png");
+	addRedBaseButton = new Fl_ImageButton( BASE_PANEL_X + 36, BASE_PANEL_Y + 36, 36, 36, "share/UI/redbase.png");
 	
 	// assign the base buttons callbacks
-	this->addBlueBaseButton->callback( addBlueBaseCallback, this );
-	this->addGreenBaseButton->callback( addGreenBaseCallback, this );
-	this->addPurpleBaseButton->callback( addPurpleBaseCallback, this );
-	this->addRedBaseButton->callback( addRedBaseCallback, this );
+	addBlueBaseButton->callback( addBlueBaseCallback, this );
+	addGreenBaseButton->callback( addGreenBaseCallback, this );
+	addPurpleBaseButton->callback( addPurpleBaseCallback, this );
+	addRedBaseButton->callback( addRedBaseCallback, this );
 	
 	// add them to the group
-	this->baseButtonGroup->add( addBlueBaseButton );
-	this->baseButtonGroup->add( addGreenBaseButton );
-	this->baseButtonGroup->add( addPurpleBaseButton );
-	this->baseButtonGroup->add( addRedBaseButton );
+	baseButtonGroup->add( addBlueBaseButton );
+	baseButtonGroup->add( addGreenBaseButton );
+	baseButtonGroup->add( addPurpleBaseButton );
+	baseButtonGroup->add( addRedBaseButton );
 	
 	// add the groups
-	this->add( objectButtonGroup );
-	this->add( baseButtonGroup );
+	add( objectButtonGroup );
+	add( baseButtonGroup );
 	
 	// make the configuration button
-	this->configureButton = new Fl_Button( RENDER_WINDOW_X, RENDER_WINDOW_Y + RENDER_WINDOW_HEIGHT, 80, DEFAULT_TEXTSIZE + 6, "Configure" );
-	this->configureButton->callback( configureCallback, this );
-	this->add( configureButton );
+	configureButton = new Fl_Button( RENDER_WINDOW_X, RENDER_WINDOW_Y + RENDER_WINDOW_HEIGHT, 80, DEFAULT_TEXTSIZE + 6, "Configure" );
+	configureButton->callback( configureCallback, this );
+	add( configureButton );
 }
 
 // default constructor
 MainWindow::MainWindow() :
 	Fl_Window(DEFAULT_WIDTH, DEFAULT_HEIGHT, "BZWorkbench") {
 	
-	this->end();
+	end();
 	
-	this->model = new Model();
-	this->view = new View(model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	model = new Model();
+	view = new View(model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
 	view->end();
-	this->add(view);
+	add(view);
 	
-	this->configurationMenu = new ConfigurationMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
-	this->add(configurationMenu);
+	configurationMenu = new ConfigurationMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
+	add(configurationMenu);
 	
-	// this->mainMenu = new MainMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
-	// this->add(mainMenu);
+	// mainMenu = new MainMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
+	// add(mainMenu);
 	
-	this->menuBar = new MenuBar( this );
-	this->add(menuBar);
+	menuBar = new MenuBar( this );
+	add(menuBar);
 	
 	initialized = true;
    
@@ -96,7 +96,7 @@ MainWindow::MainWindow() :
    model->addObserver( view );
    
    // build the button panel
-   this->buildButtonPanel();
+   buildButtonPanel();
 }
 
 // construct from a model
@@ -104,24 +104,24 @@ MainWindow::MainWindow(Model* model) :
 	Fl_Window(DEFAULT_WIDTH, DEFAULT_HEIGHT, "BZWorkbench") {
 	
 	
-	this->end();
+	end();
 	
-	this->model = model;
+	model = model;
 	
-	this->view = new View(model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	view = new View(model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
 	view->end();
 	
-	this->add(view);
+	add(view);
 	
 	
-	this->configurationMenu = new ConfigurationMenu(this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
-	this->add(configurationMenu);
+	configurationMenu = new ConfigurationMenu(this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	add(configurationMenu);
 	
-	// this->mainMenu = new MainMenu(this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
-	// this->add(mainMenu);
+	// mainMenu = new MainMenu(this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	// add(mainMenu);
 	
-	this->menuBar = new MenuBar( this );
-	this->add(menuBar);
+	menuBar = new MenuBar( this );
+	add(menuBar);
 	
 	initialized = true;
    
@@ -129,7 +129,7 @@ MainWindow::MainWindow(Model* model) :
    model->addObserver( view );
    
    // build the button panel
-   this->buildButtonPanel();
+   buildButtonPanel();
 	
 }
 
@@ -152,7 +152,7 @@ int MainWindow::handle(int event) {
 					return Fl_Window::handle( event );
 				}
 				else {
-					return Fl::handle( event, this->view );
+					return Fl::handle( event, view );
 				}
 			}
 			return Fl_Window::handle( event );
@@ -169,8 +169,8 @@ int MainWindow::handle(int event) {
 
 // configure an object
 void MainWindow::configure( bz2object* obj ) {
-	this->configurationMenu->setObject( obj );
-	// this->configurationMenu->popup();
+	configurationMenu->setObject( obj );
+	// configurationMenu->popup();
 }
 
 // throw an error
@@ -182,7 +182,7 @@ void MainWindow::error(const char* errorText) {
 // launch a MasterConfigurationDialog with the configure button
 void MainWindow::configureCallback_real( Fl_Widget* w ) {
 	
-	Model::objRefList selection = this->model->getSelection();
+	Model::objRefList selection = model->getSelection();
 	if( selection.size() > 1 || selection.size() == 0 )
 		return;
 	
@@ -190,6 +190,6 @@ void MainWindow::configureCallback_real( Fl_Widget* w ) {
 	MasterConfigurationDialog* mcd = new MasterConfigurationDialog( obj );
 	mcd->show();
 	
-	if( this->model->_hasInitializer( obj ) )
-		mcd->setAdditionalConfiguration( this->model->_configureObject( obj ) );
+	if( model->_hasInitializer( obj ) )
+		mcd->setAdditionalConfiguration( model->_configureObject( obj ) );
 }

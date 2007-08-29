@@ -79,12 +79,12 @@ public:
 	bool usesGroupAlpha() { return groupAlpha; }
 	bool usesOccluder() { return occluder; }
 	
-	void setName( const string& name ) { this->name = name; }
-	void setDynamicColor( dynamicColor* dynCol ) { this->dynCol = dynCol; }
-	void setTextureMatrix( texturematrix* texmat ) { this->textureMatrix = texmat; }
+	void setName( const string& _name ) { name = _name; }
+	void setDynamicColor( dynamicColor* _dynCol ) { dynCol = _dynCol; }
+	void setTextureMatrix( texturematrix* texmat ) { textureMatrix = texmat; }
 	
 	void setMaterials( vector< osg::ref_ptr< material > >& mats ) {
-		this->materials.clear();
+		materials.clear();
 		
 		if( mats.size() > 0 ) {
 			for( vector< osg::ref_ptr< material > >::iterator i = mats.begin(); i != mats.end(); i++ ) {
@@ -97,7 +97,7 @@ public:
 	}
 	
 	void setTextures( vector< osg::ref_ptr< osg::Texture2D > >& texs ) {
-		this->textures.clear();
+		textures.clear();
 		
 		if( texs.size() > 0 ) {
 			for( vector< osg::ref_ptr< osg::Texture2D > >::iterator i = texs.begin(); i != texs.end(); i++ ) {
@@ -114,22 +114,22 @@ public:
 	void setSpecular( const osg::Vec4& rgba ) { getCurrentMaterial()->setSpecular( osg::Material::FRONT, rgba ); }
 	void setEmissive( const osg::Vec4& rgba ) { getCurrentMaterial()->setEmission( osg::Material::FRONT, rgba ); }
 	// setters with RGBA values
-	void setAmbient( const RGBA& rgba ) { this->setAmbient( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
-	void setDiffuse( const RGBA& rgba ) { this->setDiffuse( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
-	void setSpecular( const RGBA& rgba ) { this->setSpecular( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
-	void setEmissive( const RGBA& rgba ) { this->setEmissive( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
+	void setAmbient( const RGBA& rgba ) { setAmbient( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
+	void setDiffuse( const RGBA& rgba ) { setDiffuse( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
+	void setSpecular( const RGBA& rgba ) { setSpecular( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
+	void setEmissive( const RGBA& rgba ) { setEmissive( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
 	
 	void setShininess( float shininess ) { getCurrentMaterial()->setShininess( osg::Material::FRONT, shininess );  }
 	
-	void setAlphaThreshold( float alphaThreshold ) { this->alphaThreshold = alphaThreshold; }
-	void useTextures( bool value ) { this->noTextures = !value; }
-	void useTexColor( bool value ) { this->noTexColor = !value; }
-	void useSphereMap( bool value ) { this->spheremap = value; }
-	void useShadows( bool value ) { this->noShadow = !value; }
-	void useCulling( bool value ) { this->noCulling = !value; }
-	void useRadar( bool value ) { this->noRadar = !value; }
-	void useGroupAlpha( bool value ) { this->groupAlpha = value; }
-	void useOccluder( bool value ) { this->occluder = value; }
+	void setAlphaThreshold( float alphaThreshold ) { alphaThreshold = alphaThreshold; }
+	void useTextures( bool value ) { noTextures = !value; }
+	void useTexColor( bool value ) { noTexColor = !value; }
+	void useSphereMap( bool value ) { spheremap = value; }
+	void useShadows( bool value ) { noShadow = !value; }
+	void useCulling( bool value ) { noCulling = !value; }
+	void useRadar( bool value ) { noRadar = !value; }
+	void useGroupAlpha( bool value ) { groupAlpha = value; }
+	void useOccluder( bool value ) { occluder = value; }
 	
 	// use this to compute the osg stateset to apply
 	// this entails merging parts of other materials

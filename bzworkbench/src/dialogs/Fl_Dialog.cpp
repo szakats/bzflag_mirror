@@ -17,10 +17,10 @@ void Fl_Dialog::doConstructor(int width, int height) {
 	defaultGroup = new Fl_Group(DEFAULT_GROUP_X, height - DEFAULT_GROUP_HEIGHT, width, DEFAULT_GROUP_HEIGHT);
 	
 	defaultGroup->end();
-	this->end();
+	end();
 	
-	this->OK_button = NULL;
-	this->CANCEL_button = NULL;
+	OK_button = NULL;
+	CANCEL_button = NULL;
 }
 
 // default constructor--just the title is needed; default values used for everything else
@@ -55,7 +55,7 @@ Fl_Dialog::Fl_Dialog(const char* title, int width, int height, unsigned long fla
 
 // called at the end of each constructor, this mearly sets the window as resizable and highlights the box around the defaultGroup
 void Fl_Dialog::finishConstructor(void) {
-	this->resizable(this);
+	resizable(this);
 	defaultGroup->box(FL_UP_BOX);
 }
 
@@ -123,11 +123,11 @@ Fl_Dialog::~Fl_Dialog() {
 // Returns true if the handler is assigned; false if the OK button is uninitialized
 bool Fl_Dialog::setOKEventHandler(void (*handler)(Fl_Widget* w, void* data), void* data) {
 	
-	if(this->OK_button == NULL)
+	if(OK_button == NULL)
 		return false;
 		
-	this->OK_button->callback(handler, data);
-	this->OK_button->when(FL_WHEN_RELEASE);
+	OK_button->callback(handler, data);
+	OK_button->when(FL_WHEN_RELEASE);
 	
 	return true;
 }
@@ -136,11 +136,11 @@ bool Fl_Dialog::setOKEventHandler(void (*handler)(Fl_Widget* w, void* data), voi
 // Returns true if the handler is assigned; false if the CANCEL button is uninitialized
 bool Fl_Dialog::setCancelEventHandler(void (*handler)(Fl_Widget* w, void* data), void* data) {
 	
-	if(this->CANCEL_button == NULL)
+	if(CANCEL_button == NULL)
 		return false;
 		
-	this->CANCEL_button->callback(handler, data);
-	this->CANCEL_button->when(FL_WHEN_RELEASE);
+	CANCEL_button->callback(handler, data);
+	CANCEL_button->when(FL_WHEN_RELEASE);
 	
 	return true;	
 }

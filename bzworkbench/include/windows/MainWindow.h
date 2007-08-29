@@ -85,7 +85,7 @@ public:
 	View* getView() { return view; }
 	
 	// get the model
-	Model* getModel() { return this->model; }
+	Model* getModel() { return model; }
 	
 	// configure an object
 	void configure( bz2object* obj );
@@ -97,8 +97,8 @@ public:
 	virtual int handle(int event);
 	
 	//get/set world name (as an absolute path)
-	string getWorldName() { return this->worldName; }
-	void setWorldName(const char* name) { this->worldName = name; }
+	string getWorldName() { return worldName; }
+	void setWorldName(const char* name) { worldName = name; }
 	
 	// static callbacks for buttons
 	static void addBoxCallback(Fl_Widget* w, void* data) {

@@ -14,21 +14,21 @@
 
 // default constructor
 options::options() : DataEntry("options", "") {
-	this->optionsString = string("");
+	optionsString = string("");
 }
 
 // constructor with data
-options::options(string& data) : DataEntry("options", "", data.c_str()) { this->update(data); }
+options::options(string& data) : DataEntry("options", "", data.c_str()) { update(data); }
 
 // get method
 string options::get(void) {
-	return this->toString();
+	return toString();
 }
 
 // update method
 int options::update(string& data) {
 	
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	// get options objects
 	vector<string> optionses = BZWParser::getSectionsByHeader(header, data.c_str());
 	
@@ -44,10 +44,10 @@ int options::update(string& data) {
 	vector<string> options = BZWParser::getLines(header, opts);
 	
 	// concat the lines
-	this->optionsString.clear();
+	optionsString.clear();
 	
 	for(vector<string>::iterator i = options.begin(); i != options.end(); i++) {
-		this->optionsString += *i + " ";
+		optionsString += *i + " ";
 	}
 	
 	return (DataEntry::update(data));
@@ -58,6 +58,6 @@ int options::update(string& data) {
 string options::toString(void) {
 	return string(string("options\n") +
 						"  " + optionsString + "\n" + 
-						this->getUnusedText() + 
+						getUnusedText() + 
 						"end\n");
 }

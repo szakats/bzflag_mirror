@@ -15,34 +15,34 @@
 // default constructor
 weapon::weapon() : 
 	bz2object("weapon", "<name><rotation><position><color><tilt><initdelay><delay><type><trigger><eventteam>") {
-	this->type = string("");
-	this->trigger = string("");
-	this->eventTeam = string("");
-	this->tilt = 0.0f;
-	this->initdelay = 0.0f;
-	this->delay = vector<float>();
-	this->team = 0;
+	type = string("");
+	trigger = string("");
+	eventTeam = string("");
+	tilt = 0.0f;
+	initdelay = 0.0f;
+	delay = vector<float>();
+	team = 0;
 }
 
 // constructor with data
 weapon::weapon(string& data) :
 	bz2object("weapon", "<name><rotation><position><color><tilt><initdelay><delay><type><trigger><eventteam>", data.c_str()) {
-	this->type = string("");
-	this->trigger = string("");
-	this->eventTeam = string("");
-	this->tilt = 0.0f;
-	this->initdelay = 0.0f;
-	this->delay = vector<float>();
-	this->team = 0;
-	this->update(data);
+	type = string("");
+	trigger = string("");
+	eventTeam = string("");
+	tilt = 0.0f;
+	initdelay = 0.0f;
+	delay = vector<float>();
+	team = 0;
+	update(data);
 }
 
 // getter
-string weapon::get(void) { return this->toString(); }
+string weapon::get(void) { return toString(); }
 
 // setter
 int weapon::update(string& data) {
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get the chunk of data
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -142,22 +142,22 @@ int weapon::update(string& data) {
 		
 	// load the data in
 	
-	this->delay.clear();
+	delay.clear();
 	for(vector<string>::iterator i = delayElements.begin(); i != delayElements.end(); i++) {
 		float val = atof( i->c_str() );
 		if(val < 0) {
 			printf("weapon::update(): Error! Delay value %f is negative...\n", val);
 			return 0;
 		}
-		this->delay.push_back(val);
+		delay.push_back(val);
 	}
 	
-	this->type = typeVals[0];
-	this->trigger = (triggerVals.size() != 0 ? triggerVals[0] : string(""));
-	this->eventTeam = (eventTeamVals.size() > 0 ? eventTeamVals[0] : "");
-	this->initdelay = atof( initDelayVals[0].c_str() );
-	this->tilt = (tiltVals.size() != 0 ? atof( tiltVals[0].c_str() ) : 0.0f);
-	this->team = (colorVals.size() > 0 ? atoi( colorVals[0].c_str() ) : 0);
+	type = typeVals[0];
+	trigger = (triggerVals.size() != 0 ? triggerVals[0] : string(""));
+	eventTeam = (eventTeamVals.size() > 0 ? eventTeamVals[0] : "");
+	initdelay = atof( initDelayVals[0].c_str() );
+	tilt = (tiltVals.size() != 0 ? atof( tiltVals[0].c_str() ) : 0.0f);
+	team = (colorVals.size() > 0 ? atoi( colorVals[0].c_str() ) : 0);
 	
 	return 1;
 }
@@ -174,13 +174,13 @@ string weapon::toString(void) {
 	}
 	
 	return string("weapon\n") +
-				  this->BZWLines() +
-				  (this->type.length() == 0 ? "# type\n" : "  type " + this->type + "\n") +
-				  (this->trigger.length() == 0 ? "# trigger\n" : "  trigger " + this->trigger + "\n") +
-				  (this->eventTeam.length() == 0 ? "# eventteam\n" : "  eventteam " + this->eventTeam + "\n") +
-				  "  initdelay " + string(ftoa(this->initdelay)) + "\n" +
-				  "  tilt " + string(ftoa(this->tilt)) + "\n" +
-				  "  color " + string(ftoa(this->team)) + "\n" +
+				  BZWLines() +
+				  (type.length() == 0 ? "# type\n" : "  type " + type + "\n") +
+				  (trigger.length() == 0 ? "# trigger\n" : "  trigger " + trigger + "\n") +
+				  (eventTeam.length() == 0 ? "# eventteam\n" : "  eventteam " + eventTeam + "\n") +
+				  "  initdelay " + string(ftoa(initdelay)) + "\n" +
+				  "  tilt " + string(ftoa(tilt)) + "\n" +
+				  "  color " + string(ftoa(team)) + "\n" +
 				  (delayString.length() == 0 ? "# delay\n" : "  delay " + delayString) +
 				  "end\n";
 }

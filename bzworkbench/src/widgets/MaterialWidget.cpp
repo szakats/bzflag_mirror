@@ -13,21 +13,21 @@
 #include "widgets/MaterialWidget.h"
 
 // copy constructor (does nothing )
-MaterialWidget::MaterialWidget( const MaterialWidget& mat ) : Fl_Group( 0, 0, 0, 0 ) { this->end(); }
+MaterialWidget::MaterialWidget( const MaterialWidget& mat ) : Fl_Group( 0, 0, 0, 0 ) { end(); }
 
 // main constructor
 MaterialWidget::MaterialWidget( int x, int y, int width, int height, vector< string > materialChoices ) :
 	Fl_Group( x, y, width, height ) {
 		
-	this->end();
+	end();
 	
-	this->activeButton = new Fl_Check_Button(x, y, DEFAULT_TEXTSIZE + 6, DEFAULT_TEXTSIZE + 6);
-	this->materialMenu = new Fl_Menu_Button(x + 30, y, width - 50, DEFAULT_TEXTSIZE + 12);
+	activeButton = new Fl_Check_Button(x, y, DEFAULT_TEXTSIZE + 6, DEFAULT_TEXTSIZE + 6);
+	materialMenu = new Fl_Menu_Button(x + 30, y, width - 50, DEFAULT_TEXTSIZE + 12);
 	
-	this->setMaterials( materialChoices );
+	setMaterials( materialChoices );
 	
-	this->add( activeButton );
-	this->add( materialMenu );
+	add( activeButton );
+	add( materialMenu );
 }
 
 // set the current material
@@ -38,7 +38,7 @@ void MaterialWidget::setSelectedMaterial( const string& material ) {
 			if( *itr == material ) {
 				const Fl_Menu_Item* menu = materialMenu->menu();
 				materialMenu->label( menu[ i ].label() );
-				this->materialMenu->redraw();
+				materialMenu->redraw();
 				return;
 			}
 		}
@@ -51,7 +51,7 @@ void MaterialWidget::setSelectedMaterial( const string& material ) {
 // set materials
 void MaterialWidget::setMaterials( vector< string >& materialChoices ) {
 	// set the new material array, making sure to add "(none)" as an option
-	this->materials = materialChoices;
+	materials = materialChoices;
 	materials.push_back( MaterialWidget_NONE );
 	
 	// erase the current menu

@@ -70,32 +70,32 @@ class bz2object : public Renderable, public DataEntry {
 		string BZWLines(void);
 		
 		// data getters (makes MasterConfigurationDialog code easier)
-		osg::ref_ptr<physics> getPhyDrv() { return this->physicsDriver; }
-		vector< osg::ref_ptr<BZTransform> >& getTransformations() { return this->transformations; }
-		vector< osg::ref_ptr<material> >& getMaterials() { return this->materials; }
-		bool isSelected() { return this->selected; }
+		osg::ref_ptr<physics> getPhyDrv() { return physicsDriver; }
+		vector< osg::ref_ptr<BZTransform> >& getTransformations() { return transformations; }
+		vector< osg::ref_ptr<material> >& getMaterials() { return materials; }
+		bool isSelected() { return selected; }
 		
 		// use this instead of getPosition()
-		virtual osg::Vec3 getPos() { return this->getPosition(); }
+		virtual osg::Vec3 getPos() { return getPosition(); }
 		
 		// use this instead of getScale()
-		virtual osg::Vec3 getSize() { return this->getScale(); }
+		virtual osg::Vec3 getSize() { return getScale(); }
 		
 		// use this instead of getAttitude()
-		virtual osg::Quat getRot() { return this->getAttitude(); }
+		virtual osg::Quat getRot() { return getAttitude(); }
 		
 		// use this instead of setPosition()
 		virtual void setPos( const osg::Vec3d& newPos ) { 
-			this->startShift->setData( -newPos );
-			this->setPosition( newPos );
-			this->endShift->setData( newPos );
+			startShift->setData( -newPos );
+			setPosition( newPos );
+			endShift->setData( newPos );
 		}
 		
 		// use this instead of setScale()
-		virtual void setSize( const osg::Vec3d& newSize ) { this->setScale( newSize ); }
+		virtual void setSize( const osg::Vec3d& newSize ) { setScale( newSize ); }
 		
 		// use this instead of setAttitude()
-		virtual void setRot( const osg::Quat& newRot ) { this->setAttitude( newRot ); }
+		virtual void setRot( const osg::Quat& newRot ) { setAttitude( newRot ); }
 		
 		// override Renderable's setRotationX() method
 		virtual void setRotationX( float x ) {
@@ -120,7 +120,7 @@ class bz2object : public Renderable, public DataEntry {
 		// override Renderable's setRotationZ() method
 		virtual void setRotationZ( float z ) {
 			Renderable::setRotationZ( z );
-			// this->rotation.set( rotation.x(), rotation.y(), z );
+			// rotation.set( rotation.x(), rotation.y(), z );
 			
 			vector<float> spinData;
 			spinData.push_back( z );	spinData.push_back(0.0);	spinData.push_back(0.0);	spinData.push_back(1.0);
@@ -131,7 +131,7 @@ class bz2object : public Renderable, public DataEntry {
 		// override Renderable's setRotation() method
 		virtual void setRotation( float x, float y, float z ) {
 			Renderable::setRotation( x, y, z );
-			// this->rotation.set( x, y, z );
+			// rotation.set( x, y, z );
 			
 			vector<float> spinData_x, spinData_y, spinData_z;
 			spinData_x.push_back(x);	spinData_x.push_back(1.0);	spinData_x.push_back(0.0);	spinData_x.push_back(0.0);
@@ -142,23 +142,23 @@ class bz2object : public Renderable, public DataEntry {
 			spin_y->setData( spinData_y );
 			spin_z->setData( spinData_z );
 		}
-		virtual void setRotation( const osg::Vec3& rot ) { this->setRotation( rot.x(), rot.y(), rot.z() ); }
+		virtual void setRotation( const osg::Vec3& rot ) { setRotation( rot.x(), rot.y(), rot.z() ); }
 		
 		// data setters (makes MasterConfigurationDialog code easier)
-		void setPhyDrv( physics* phydrv ) { this->physicsDriver = phydrv; }
-		void setTransforms( vector< osg::ref_ptr<BZTransform> >& transformations ) { this->transformations = transformations; }
-		void setMaterials( vector< osg::ref_ptr< material > >& materials ) { this->materials = materials; }
-		void setSelected( bool value ) { this->selected = value; }
+		void setPhyDrv( physics* phydrv ) { physicsDriver = phydrv; }
+		void setTransforms( vector< osg::ref_ptr<BZTransform> >& transformations ) { transformations = transformations; }
+		void setMaterials( vector< osg::ref_ptr< material > >& materials ) { materials = materials; }
+		void setSelected( bool value ) { selected = value; }
 		
 		// use this instead of setScale();
-		virtual void setSize( osg::Vec3 newSize ) { this->setScale( newSize ); }
+		virtual void setSize( osg::Vec3 newSize ) { setScale( newSize ); }
 		
 		// set/set the thisNode
-		osg::Node* getThisNode() { return this->thisNode.get(); }
+		osg::Node* getThisNode() { return thisNode.get(); }
 		void setThisNode( osg::Node* node ) { 
-			this->endShift->removeChild( thisNode.get() );
-			this->thisNode = node;
-			this->endShift->addChild( thisNode.get() );
+			endShift->removeChild( thisNode.get() );
+			thisNode = node;
+			endShift->addChild( thisNode.get() );
 		}
 		
 		// make this public

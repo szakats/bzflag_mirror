@@ -54,16 +54,16 @@ physics::physics(string& data) :
 	linear = Point3D(0.0f, 0.0f, 0.0f);
 	angular = Point3D(0.0f, 0.0f, 0.0f);
 	
-	this->update(data);	
+	update(data);	
 }
 
 // getter
-string physics::get(void) { return this->toString(); }
+string physics::get(void) { return toString(); }
 
 // setter
 int physics::update(string& data) {
 	
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get the chunk of string we need
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -96,13 +96,13 @@ int physics::update(string& data) {
 	// load the data in
 	if(!DataEntry::update(data))
 		return 0;
-	this->name = names[0];
-	this->linear = (linearVelocities.size() != 0 ? Point3D( linearVelocities[0].c_str() ) : Point3D( 0.0f, 0.0f, 0.0f ));
-	this->angular = (angularVelocities.size() != 0 ? Point3D( angularVelocities[0].c_str() ): Point3D( 0.0f, 0.0f, 0.0f));
-	this->slide = (slides.size() != 0 ? atof( slides[0].c_str() ) : 0.0f);
+	name = names[0];
+	linear = (linearVelocities.size() != 0 ? Point3D( linearVelocities[0].c_str() ) : Point3D( 0.0f, 0.0f, 0.0f ));
+	angular = (angularVelocities.size() != 0 ? Point3D( angularVelocities[0].c_str() ): Point3D( 0.0f, 0.0f, 0.0f));
+	slide = (slides.size() != 0 ? atof( slides[0].c_str() ) : 0.0f);
 	
 	if(deathMessages.size() >= 1)
-		this->deathMessage = deathMessages[0];
+		deathMessage = deathMessages[0];
 		
 	return 1;
 }
@@ -115,7 +115,7 @@ string physics::toString(void) {
 				  "  angular " + angular.toString() +
 				  "  slide " + string(ftoa(slide)) + "\n" +
 				  (deathMessage.length() != 0 ? "  death " : "# death") + deathMessage + "\n" +
-				  this->getUnusedText() + 
+				  getUnusedText() + 
 				  "end\n";
 }
 

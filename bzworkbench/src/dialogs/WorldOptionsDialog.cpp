@@ -27,9 +27,9 @@ WorldOptionsDialog::WorldOptionsDialog( world* theWorld, options* theOptions, wa
 	Fl_Dialog("World Options", WIDTH, HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL) {
 	
 	// initialize the variables
-	this->worldData 		= theWorld;
-	this->optionsData 		= theOptions;
-	this->waterLevelData 	= theWaterLevel;
+	worldData 		= theWorld;
+	optionsData 		= theOptions;
+	waterLevelData 	= theWaterLevel;
 	
 	// parse the values
 	string nameStr = worldData->getName();
@@ -73,29 +73,29 @@ WorldOptionsDialog::WorldOptionsDialog( world* theWorld, options* theOptions, wa
 	noWallsCheckButton->value(noWalls);
 	
 	// add widgets
-	this->add(worldNameLabel);
-	this->add(worldNameField);
+	add(worldNameLabel);
+	add(worldNameField);
 	
-	this->add(worldSizeLabel);
-	this->add(worldSizeField);
+	add(worldSizeLabel);
+	add(worldSizeField);
 	
-	this->add(flagHeightLabel);
-	this->add(flagHeightField);
+	add(flagHeightLabel);
+	add(flagHeightField);
 	
-	this->add(waterCheckButton);
-	this->add(waterLevelField);
+	add(waterCheckButton);
+	add(waterLevelField);
 	
-	this->add(worldOptionsLabel);
-	this->add(worldOptionsField);
+	add(worldOptionsLabel);
+	add(worldOptionsField);
 	
-	this->add(waterTextureLabel);
-	this->add(waterTextureField);
+	add(waterTextureLabel);
+	add(waterTextureField);
 	
-	this->add(noWallsCheckButton);
+	add(noWallsCheckButton);
 	
 	// set event handlers
-	this->setOKEventHandler(OKButtonCallback, this);
-	this->setCancelEventHandler(CancelButtonCallback, this);
+	setOKEventHandler(OKButtonCallback, this);
+	setCancelEventHandler(CancelButtonCallback, this);
 }
 
 WorldOptionsDialog::~WorldOptionsDialog() { 
@@ -113,15 +113,15 @@ void WorldOptionsDialog::OKButtonCallback_real(Fl_Widget* w) {
 	else
 		waterLevel = waterLevelField->value();
 		
-	float flagHeight = this->flagHeightField->value();
+	float flagHeight = flagHeightField->value();
 	
-	string worldName = string(this->worldNameField->value());
+	string worldName = string(worldNameField->value());
 	
-	string optionsString = string(this->worldOptionsField->value());
+	string optionsString = string(worldOptionsField->value());
 	
-	string waterMaterialString = string(this->waterTextureField->value());
+	string waterMaterialString = string(waterTextureField->value());
 	
-	float size = this->worldSizeField->value();
+	float size = worldSizeField->value();
 	
 	bool noWalls = (noWallsCheckButton->value() != 0);
 	

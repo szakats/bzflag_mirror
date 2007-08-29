@@ -13,28 +13,28 @@
 #include "objects/waterLevel.h"
 
 waterLevel::waterLevel() : DataEntry("waterLevel", "<name><height><matref>") {
-	this->name = string("");
-	this->material = string("");
+	name = string("");
+	material = string("");
 	height = -1.0f;
 }
 
 waterLevel::waterLevel(string& data) : DataEntry("waterLevel", "<name><height><matref>", data.c_str()) {
-	this->name = string("");
-	this->material = string("");
+	name = string("");
+	material = string("");
 	height = -1.0f;
 	
-	this->update(data);
+	update(data);
 }
 
 // get method
 string waterLevel::get(void) {
-	return this->toString();
+	return toString();
 }
 
 // update method
 int waterLevel::update(string& data) {
 	
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	// make sure there's only one of these
 	vector<string> waterLevelObjs = BZWParser::getSectionsByHeader(header, data.c_str());
 	
@@ -69,9 +69,9 @@ int waterLevel::update(string& data) {
 	// load the data
 	if(!DataEntry::update(data))
 		return 0;
-	this->name = names[0];
-	this->material = matNames[0];
-	this->height = atof( heights[0].c_str() );
+	name = names[0];
+	material = matNames[0];
+	height = atof( heights[0].c_str() );
 	
 	return 1;
 	
@@ -87,7 +87,7 @@ string waterLevel::toString(void) {
 						 "  name " + name + "\n" +
 						 "  height " + waterLevelStr + "\n" +
 						 materialString +
-						 this->getUnusedText() + 
+						 getUnusedText() + 
 						 "end\n");
 }
 

@@ -33,8 +33,8 @@ public:
 	
 		// simple construtor
 		FlagElement(string flag, int qty) {
-			this->flag = flag;
-			this->qty = qty;
+			flag = flag;
+			qty = qty;
 		}
 		
 		// self-parser toString() method

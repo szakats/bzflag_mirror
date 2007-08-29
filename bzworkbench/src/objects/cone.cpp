@@ -17,19 +17,19 @@ cone::cone() :
 	bz2object("cone", "<position><rotation><size><angle><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
 	
 	// define some basic values
-	this->divisions = 16;
-	this->setName( SceneBuilder::makeUniqueName("default_cone"));
-	this->physicsDriver = NULL;
+	divisions = 16;
+	setName( SceneBuilder::makeUniqueName("default_cone"));
+	physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	
 	sweepAngle = 360.0f;
 	
 	// default size is 10x10x10
-	this->setSize( osg::Vec3( 10, 10, 10 ) );
+	setSize( osg::Vec3( 10, 10, 10 ) );
 	
 	// build the geometry
-	this->buildGeometry();
+	buildGeometry();
 	
 }
 
@@ -38,31 +38,31 @@ cone::cone(string& data) :
 	bz2object("cone", "<position><rotation><size><angle><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
 	
 	// define some basic values
-	this->divisions = -1;	// bogus value (fixed by update)
-	this->setName(SceneBuilder::makeUniqueName("default_cone"));
-	this->physicsDriver = NULL;
+	divisions = -1;	// bogus value (fixed by update)
+	setName(SceneBuilder::makeUniqueName("default_cone"));
+	physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	
 	sweepAngle = 0.0f;		// bogus value (fixed by update)
 	
 	// default size is 10x10x10
-	this->setSize( osg::Vec3( 10, 10, 10 ) );
+	setSize( osg::Vec3( 10, 10, 10 ) );
 	
-	if( this->update(data) == 0 ) {
+	if( update(data) == 0 ) {
 		// if the update failed, just add a default cone
-		this->divisions = 16;
-		this->sweepAngle = 360.0f;
-		this->buildGeometry();
+		divisions = 16;
+		sweepAngle = 360.0f;
+		buildGeometry();
 	}
 }
 
 // getter
-string cone::get(void) { return this->toString(); }
+string cone::get(void) { return toString(); }
 
 // setter
 int cone::update(string& data) {
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	// get the chunk we need
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str(), "end");
 	
@@ -117,28 +117,28 @@ int cone::update(string& data) {
 		return 0;
 	
 	// set the data
-	this->setName( names[0] );
+	setName( names[0] );
 	
 	// see if the divisions changed (if so, then update the geometry)
-	int oldDivisions = this->divisions;
-	this->divisions = atoi( vDivisions[0].c_str() );
+	int oldDivisions = divisions;
+	divisions = atoi( vDivisions[0].c_str() );
 	
-	float oldSweepAngle = this->sweepAngle;
-	this->sweepAngle = atof( sweepAngles[0].c_str() );
+	float oldSweepAngle = sweepAngle;
+	sweepAngle = atof( sweepAngles[0].c_str() );
 	
 	// if the number of divisions changed or the sweep angle changed, rebuild the geometry
-	if( this->divisions != oldDivisions || this->sweepAngle != oldSweepAngle ) {
+	if( divisions != oldDivisions || sweepAngle != oldSweepAngle ) {
 		if( theCone.get() != NULL ) {
 			theCone->removeChild( coneNode.get() );
 			theCone->removeChild( baseNode.get() );
 		}
-		this->buildGeometry();
+		buildGeometry();
 	}
 	
-	this->flatShading = (flatShadings.size() == 0 ? false : true);
-	this->updateShadeModel();		// update the shade model
+	flatShading = (flatShadings.size() == 0 ? false : true);
+	updateShadeModel();		// update the shade model
 	
-	this->smoothbounce = (smoothBounces.size() == 0 ? false : true);
+	smoothbounce = (smoothBounces.size() == 0 ? false : true);
 	
 	return 1;
 }
@@ -151,27 +151,27 @@ int cone::update( UpdateMessage& message ) {
 	
 	switch( message.type ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
-			this->setPos( *(message.getAsPosition()) );
+			setPos( *(message.getAsPosition()) );
 			break;
 			
 		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
-			this->setPos( this->getPos() + *(message.getAsPositionFactor()) );
+			setPos( getPos() + *(message.getAsPositionFactor()) );
 			break;
 			
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
-			this->setRotation( *(message.getAsRotation()) );
+			setRotation( *(message.getAsRotation()) );
 			break;
 			
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
-			this->setRotation( this->getRotation() + *(message.getAsRotationFactor()) );
+			setRotation( getRotation() + *(message.getAsRotationFactor()) );
 			break;
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
-			this->setSize( *(message.getAsScale()) );
+			setSize( *(message.getAsScale()) );
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
-			this->setSize( this->getSize() + *(message.getAsScaleFactor()) );
+			setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
 			
 		default:	// unknown event; don't handle
@@ -185,7 +185,7 @@ int cone::update( UpdateMessage& message ) {
 // toString
 string cone::toString(void) {
 	return string("cone\n") +
-				  this->BZWLines() +
+				  BZWLines() +
 				  "  divisions " + string(itoa(divisions)) + "\n" +
 				  (flatShading == true ? "  flatshading\n" : "") +
 				  (smoothbounce == true ? "  smoothbounce\n" : "") + 
@@ -196,7 +196,7 @@ string cone::toString(void) {
 // build the cone geometry
 void cone::buildGeometry() {
 	// make the group
-	this->theCone = new osg::Group();
+	theCone = new osg::Group();
    	
 	// geometry data for the conical component
 	osg::Vec3Array* points = new osg::Vec3Array();
@@ -313,19 +313,19 @@ void cone::buildGeometry() {
 	   	crossSectionTexCoords->push_back( osg::Vec2( 0.0, 0.0 ) );
 	   	
 	   	// make the crossSection geode
-	   	this->crossSectionNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("coneCrossSection").c_str(), points, crossSectionIndices, crossSectionTexCoords, "share/wall.png" );
+	   	crossSectionNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("coneCrossSection").c_str(), points, crossSectionIndices, crossSectionTexCoords, "share/wall.png" );
 	   	theCone->addChild( crossSectionNode.get() );
    	}
    	
    	// build the geodes
-   	this->coneNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("cone").c_str(), points, indices, texCoords, "share/boxwall.png", osg::StateAttribute::ON );
-   	this->baseNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("coneBase").c_str(), points, baseIndices, baseTexCoords, "share/roof.png", osg::StateAttribute::ON );
+   	coneNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("cone").c_str(), points, indices, texCoords, "share/boxwall.png", osg::StateAttribute::ON );
+   	baseNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("coneBase").c_str(), points, baseIndices, baseTexCoords, "share/roof.png", osg::StateAttribute::ON );
    	
    	// add the geodes to the Renderable
    	theCone->addChild( coneNode.get() );
    	theCone->addChild( baseNode.get() );
     	
-   	this->setThisNode( theCone.get() );
+   	setThisNode( theCone.get() );
    	
    	// enable texturing
    	osg::StateSet* stateSet = theCone->getOrCreateStateSet();
@@ -335,7 +335,7 @@ void cone::buildGeometry() {
 // set the shade model based on the value of flatShading
 void cone::updateShadeModel() {
 	// get state set
-	osg::StateSet* states = this->getOrCreateStateSet();
+	osg::StateSet* states = getOrCreateStateSet();
 	
 	// get the shade model
 	osg::ShadeModel* shadeModel = dynamic_cast< osg::ShadeModel* >( states->getAttribute( osg::StateAttribute::SHADEMODEL ) );

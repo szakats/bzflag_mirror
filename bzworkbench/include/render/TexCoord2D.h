@@ -31,24 +31,24 @@ class TexCoord2D {
 		vector<string> vals = BZWParser::getLineElements(data);
 		
 		if(vals.size() == 2) {
-			this->u = atof( vals[0].c_str() );
-			this->v = atof( vals[1].c_str() );	
+			u = atof( vals[0].c_str() );
+			v = atof( vals[1].c_str() );	
 		}
 		else {
-			this->u = this->v = 0.0f;	
+			u = v = 0.0f;	
 		}
 	}
 	
 	TexCoord2D(float u, float v) {
-		this->u = u; this->v = v;
+		u = u; v = v;
 	}
 	
 	TexCoord2D(double u, double v) {
-		this->u = (float)u; this->v = (float)v;
+		u = (float)u; v = (float)v;
 	}
 	
 	string toString(void) {
-		return string(ftoa(this->u)) + " " + string(ftoa(this->v));	
+		return string(ftoa(u)) + " " + string(ftoa(v));	
 	}
 };
 

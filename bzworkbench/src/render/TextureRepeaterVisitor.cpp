@@ -25,14 +25,14 @@ void TextureRepeaterVisitor::apply( osg::Node& node ) {
 	// see if this is a group
 	osg::Group* group = dynamic_cast< osg::Group* >( &node );
 	if( group ) {
-		this->apply( *group );
+		apply( *group );
 		return;
 	}
 	
 	// see if this is a geode
 	osg::Geode* geode = dynamic_cast< osg::Geode* >( &node );
 	if( geode ) {
-		this->apply( *geode );
+		apply( *geode );
 		return;
 	}
 	
@@ -86,7 +86,7 @@ void TextureRepeaterVisitor::apply( osg::Group& group ) {
 	if( group.getNumChildren() > 0 ) {
 		for( unsigned int i = 0; i < group.getNumChildren(); i++) {
 			osg::Node* node = group.getChild( i );
-			this->apply( *node );
+			apply( *node );
 		}
 	}
 }

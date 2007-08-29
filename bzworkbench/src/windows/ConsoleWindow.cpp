@@ -19,10 +19,10 @@ bool ConsoleWindow::initialized = false;
 ConsoleWindow::ConsoleWindow(int lineLimit) :
 	Fl_Window(DEFAULT_WIDTH, DEFAULT_HEIGHT, "BZWorkbench Messages") {
 		
-	this->end();
+	end();
 	
 	console = new Console(10, 10, DEFAULT_WIDTH - 20, DEFAULT_HEIGHT - 20);
-	this->add(console);
+	add(console);
 	
 	initialized = true;
 	

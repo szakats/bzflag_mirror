@@ -25,15 +25,15 @@ Tlink::Tlink(string& data) : bz2object("link", "<name><from><to>") {
 	from = NULL;
 	to = NULL;
 	
-	this->update(data);	
+	update(data);	
 }
 
 // getter
-string Tlink::get(void) { return this->toString(); }
+string Tlink::get(void) { return toString(); }
 
 // setter
 int Tlink::update(string& data) {
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get the data chunks
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -69,16 +69,16 @@ int Tlink::update(string& data) {
 		return 0;
 	
 	// load in the data
-	this->name = (names.size() != 0 ? names[0] : "");
+	name = (names.size() != 0 ? names[0] : "");
 	
 	teleporter* prevFrom = from;
 	teleporter* prevTo = to;
 	
-	this->from = dynamic_cast< teleporter* > (Model::command( MODEL_GET, "teleporter", froms[0] ));
-	this->to = dynamic_cast< teleporter* > (Model::command( MODEL_GET, "teleporter", tos[0] ));
+	from = dynamic_cast< teleporter* > (Model::command( MODEL_GET, "teleporter", froms[0] ));
+	to = dynamic_cast< teleporter* > (Model::command( MODEL_GET, "teleporter", tos[0] ));
 	
 	if( from && to && (prevFrom != from || prevTo != to) )
-		this->buildGeometry();
+		buildGeometry();
 	
 	return 1;
 }

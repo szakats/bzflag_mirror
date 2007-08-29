@@ -44,7 +44,7 @@ class Vector3D : public Point3D
 	}
 	
 	double magnitude() {
-		return this->length();
+		return length();
 	}
 	
 };

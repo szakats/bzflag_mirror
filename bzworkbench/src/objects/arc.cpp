@@ -17,11 +17,11 @@ arc::arc() :
 	bz2object("arc", "<position><rotation><size><flatshading><angle><ratio><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
 	
 	// define some basic values
-	this->ratio = 1.0f;
-	this->divisions = 16;
-	this->angle = 180.0f;
-	this->setName("default_arc");
-	this->physicsDriver = NULL;
+	ratio = 1.0f;
+	divisions = 16;
+	angle = 180.0f;
+	setName("default_arc");
+	physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	
@@ -32,24 +32,24 @@ arc::arc(string& data) :
 	bz2object("arc", "<position><rotation><size><flatshading><angle><ratio><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>", data.c_str()) {
 	
 	// define some basic values
-	this->ratio = 1.0f;
-	this->divisions = 16;
-	this->angle = 180.0f;
-	this->setName("default_arc");
-	this->physicsDriver = NULL;
+	ratio = 1.0f;
+	divisions = 16;
+	angle = 180.0f;
+	setName("default_arc");
+	physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 	
-	this->update(data);	
+	update(data);	
 }
 
 
 // getter
-string arc::get(void) { return this->toString(); }
+string arc::get(void) { return toString(); }
 
 // setter
 int arc::update(string& data) {
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	// get the chunk we need
 	
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -94,12 +94,12 @@ int arc::update(string& data) {
 		return 0;
 	
 	// set the data
-	this->setName( names[0] );
-	this->angle = atof( angles[0].c_str() );
-	this->divisions = atoi( vDivisions[0].c_str() );
-	this->ratio = atof( ratios[0].c_str() );
-	this->flatShading = (flatShadings.size() == 0 ? false : true);
-	this->smoothbounce = (smoothBounces.size() == 0 ? false : true);
+	setName( names[0] );
+	angle = atof( angles[0].c_str() );
+	divisions = atoi( vDivisions[0].c_str() );
+	ratio = atof( ratios[0].c_str() );
+	flatShading = (flatShadings.size() == 0 ? false : true);
+	smoothbounce = (smoothBounces.size() == 0 ? false : true);
 	
 	return 1;	
 }
@@ -107,12 +107,12 @@ int arc::update(string& data) {
 // toString
 string arc::toString(void) {
 	return string("arc\n") +
-				  this->BZWLines() +
-				  "  angle " + string(ftoa(this->angle)) + "\n" +
-				  "  ratio " + string(ftoa(this->ratio)) + "\n" +
-				  "  divisions " + string(itoa(this->divisions)) + "\n" +
-				  (this->flatShading == true ? "  flatshading\n" : "") +
-				  (this->smoothbounce == true ? "  smoothbounce\n" : "") + 
+				  BZWLines() +
+				  "  angle " + string(ftoa(angle)) + "\n" +
+				  "  ratio " + string(ftoa(ratio)) + "\n" +
+				  "  divisions " + string(itoa(divisions)) + "\n" +
+				  (flatShading == true ? "  flatshading\n" : "") +
+				  (smoothbounce == true ? "  smoothbounce\n" : "") + 
 				  "end\n";	
 }
 

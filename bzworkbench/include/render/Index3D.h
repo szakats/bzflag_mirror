@@ -28,21 +28,21 @@ class Index3D {
 	}
 	
 	Index3D(int a, int b, int c) {
-		this->a = a;
-		this->b = b;
-		this->c = c;
-		this->t1 = a;
-		this->t2 = b;
-		this->t3 = c;
+		a = a;
+		b = b;
+		c = c;
+		t1 = a;
+		t2 = b;
+		t3 = c;
 	}
 	
 	Index3D(int a, int b, int c, int t1, int t2, int t3) {
-		this->a = a;
-		this->b = b;
-		this->c = c;
-		this->t1 = t1;
-		this->t2 = t2;
-		this->t3 = t3;
+		a = a;
+		b = b;
+		c = c;
+		t1 = t1;
+		t2 = t2;
+		t3 = t3;
 	}
 	
 	Index3D(const char* description) {
@@ -50,17 +50,17 @@ class Index3D {
 		
 		// only initialize from the string if there are at least 3 elements
 		if(points.size() == 3) {
-			this->a = atoi( points[0].c_str() );
-			this->b = atoi( points[1].c_str() );
-			this->c = atoi( points[2].c_str() );
+			a = atoi( points[0].c_str() );
+			b = atoi( points[1].c_str() );
+			c = atoi( points[2].c_str() );
 		}
 		else if(points.size() == 6) {
-			this->a = atoi( points[0].c_str() );
-			this->b = atoi( points[1].c_str() );
-			this->c = atoi( points[2].c_str() );
-			this->t1 = atoi( points[3].c_str() );
-			this->t2 = atoi( points[4].c_str() );
-			this->t3 = atoi( points[5].c_str() );
+			a = atoi( points[0].c_str() );
+			b = atoi( points[1].c_str() );
+			c = atoi( points[2].c_str() );
+			t1 = atoi( points[3].c_str() );
+			t2 = atoi( points[4].c_str() );
+			t3 = atoi( points[5].c_str() );
 		}
 		else {
 			a = b = c = 0;

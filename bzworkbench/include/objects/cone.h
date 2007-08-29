@@ -54,32 +54,32 @@ public:
 	int getDivisions() { return divisions; }
 	
 	void setFlatShading(bool value) {
-		this->flatShading = value;
-		this->updateShadeModel();
+		flatShading = value;
+		updateShadeModel();
 	}
 	
-	void setSmoothBounce(bool value) { this->smoothbounce = value; }
+	void setSmoothBounce(bool value) { smoothbounce = value; }
 	
 	void setSweepAngle(float value) {
-		if( value != this->sweepAngle ) {		// refresh the geometry
+		if( value != sweepAngle ) {		// refresh the geometry
 			theCone->removeChild( coneNode.get() );
 			theCone->removeChild( baseNode.get() );
 			
-			this->buildGeometry();
+			buildGeometry();
 		}
 		
-		this->sweepAngle = value;
+		sweepAngle = value;
 	}
 	
 	void setDivisions(int value) {
-		if( value != this->divisions ) {	// refresh the geometry
+		if( value != divisions ) {	// refresh the geometry
 			theCone->removeChild( coneNode.get() );
 			theCone->removeChild( baseNode.get() );
 			
-			this->buildGeometry();
+			buildGeometry();
 		}
 		
-		this->divisions = value;
+		divisions = value;
 	}
 	
 private:

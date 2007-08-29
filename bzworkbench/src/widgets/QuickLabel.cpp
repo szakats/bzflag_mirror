@@ -17,8 +17,8 @@
 QuickLabel::QuickLabel(const char* labelText, int x, int y) : 
 	Fl_Box(FL_UP_BOX, x - 3, y, 0, DEFAULT_TEXTSIZE, labelText) {
 	
-	this->align(FL_ALIGN_RIGHT);
-	this->labelsize(DEFAULT_TEXTSIZE);
+	align(FL_ALIGN_RIGHT);
+	labelsize(DEFAULT_TEXTSIZE);
 }
 
 // does nothing

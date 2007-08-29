@@ -23,15 +23,15 @@ tetra::tetra(string& data) : bz2object("tetra", "<name><vertex><scale><shift><sh
 	for(int i = 0; i < 4; i++)
 		vertexes[i] = Point3D(0.0f, 0.0f, 0.0f);
 		
-	this->update(data);
+	update(data);
 }
 
 // getter
-string tetra::get(void) { return this->toString(); }
+string tetra::get(void) { return toString(); }
 
 // setter
 int tetra::update(string& data) {
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get the sections
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -68,7 +68,7 @@ int tetra::update(string& data) {
 // tostring
 string tetra::toString(void) {
 	return string("tetra\n") +
-				  this->BZWLines() +
+				  BZWLines() +
 				  "  vertex " + vertexes[0].toString() + 
 				  "  vertex " + vertexes[1].toString() +
 				  "  vertex " + vertexes[2].toString() +

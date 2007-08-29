@@ -45,9 +45,9 @@ Model::Model() : Observable()
 	
 	cmap = map<string, DataEntry* (*)(string&)>();
 	
-	this->supportedObjects = string("");
-	this->objectHierarchy = string("");
-	this->objectTerminators = string("");
+	supportedObjects = string("");
+	objectHierarchy = string("");
+	objectTerminators = string("");
 	
 	unusedData = vector<string>();
 	
@@ -82,9 +82,9 @@ Model::Model(const char* supportedObjects, const char* objectHierarchy, const ch
 	
 	cmap = map<string, DataEntry* (*)(string&)>();
 	
-	this->supportedObjects = supportedObjects;
-	this->objectHierarchy = objectHierarchy;
-	this->objectTerminators = objectTerminators;
+	supportedObjects = supportedObjects;
+	objectHierarchy = objectHierarchy;
+	objectTerminators = objectTerminators;
 	
 	unusedData = vector<string>();
 	
@@ -133,13 +133,13 @@ Model::~Model()
 
 // getters specific to the model
 const string Model::getSupportedObjects() { return modelRef->_getSupportedObjects(); }
-const string Model::_getSupportedObjects() { return this->supportedObjects; }
+const string Model::_getSupportedObjects() { return supportedObjects; }
 
 const string Model::getSupportedHierarchies() { return modelRef->_getSupportedHierarchies(); }
-const string Model::_getSupportedHierarchies() { return this->objectHierarchy; }
+const string Model::_getSupportedHierarchies() { return objectHierarchy; }
 
 const string Model::getSupportedTerminators() { return modelRef->_getSupportedTerminators(); }
-const string Model::_getSupportedTerminators() { return this->objectTerminators; }
+const string Model::_getSupportedTerminators() { return objectTerminators; }
 
 // the query method
 DataEntry* Model::command(const string& command, const string& object, const string& name, const string& data) { 
@@ -185,7 +185,7 @@ DataEntry* Model::_command(const string& command, const string& object, const st
 		
 		// handle all other objects
 		else {
-			for( objRefList::iterator i = this->objects.begin(); i != this->objects.end(); i++) {
+			for( objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
 				if( (*i)->getName() == name )
 					return i->get();
 			}
@@ -206,25 +206,25 @@ bool Model::_build(vector<string>& bzworld) {
 		return false;
 	
 	// clear out the previous objects
-	this->materials.clear();
-	this->phys.clear();
-	this->dynamicColors.clear();
-	this->links.clear();
-	this->textureMatrices.clear();
-	this->_unselectAll();
-	if( this->objects.size() > 0 ) {
+	materials.clear();
+	phys.clear();
+	dynamicColors.clear();
+	links.clear();
+	textureMatrices.clear();
+	_unselectAll();
+	if( objects.size() > 0 ) {
 		objRefList::iterator itr = objects.begin();
 		while( itr != objects.end() ) {
 			
 			ObserverMessage obs( ObserverMessage::REMOVE_OBJECT, itr->get() );
 			notifyObservers( &obs );
 			
-			this->objects.erase( itr );
+			objects.erase( itr );
 			itr = objects.begin();
 			
 		}
 	}
-	this->objects.clear();
+	objects.clear();
 	notifyObservers( NULL );
 	
 	// load the data in
@@ -233,10 +233,10 @@ bool Model::_build(vector<string>& bzworld) {
 		string header = BZWParser::headerOf(i->c_str());
 		if(header == "world") {
 			if(cmap[header] != NULL) {
-				this->worldData->update(*i);
+				worldData->update(*i);
 				foundWorld = true;		// there must be a world
 				// tell the observers we have a different world
-				ObserverMessage obs( ObserverMessage::UPDATE_WORLD, this->worldData );
+				ObserverMessage obs( ObserverMessage::UPDATE_WORLD, worldData );
 				notifyObservers( &obs );
 				continue;
 			}
@@ -249,7 +249,7 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse waterLevel
 		else if(header == "waterLevel") {
 			if(cmap[header] != NULL) {
-				this->waterLevelData->update(*i);	
+				waterLevelData->update(*i);	
 				continue;
 			}
 			else {
@@ -261,7 +261,7 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse options
 		else if(header == "options") {
 			if(cmap[header] != NULL) {
-				this->optionsData->update(*i);	
+				optionsData->update(*i);	
 				continue;
 			}
 			else {
@@ -357,7 +357,7 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse all other objects
 		else {
 			if(cmap[header] != NULL) {
-				this->_addObject((bz2object*)cmap[header](*i));
+				_addObject((bz2object*)cmap[header](*i));
 			}
 			else {
 				printf("Model::build(): Skipping undefined object \"%s\"\n", header.c_str());
@@ -390,7 +390,7 @@ bool Model::registerObject(const char* name, const char* hierarchy, const char* 
 	{ return modelRef->_registerObject(name, hierarchy, terminator, init, config); }
 	
 bool Model::_registerObject(string& name, DataEntry* (*init)(string&)) {
-	return this->_registerObject( name.c_str(), "", "end", init, NULL);
+	return _registerObject( name.c_str(), "", "end", init, NULL);
 }
 
 bool Model::_registerObject(const char* _name, const char* _hierarchy, const char* _terminator, DataEntry* (*init)(string&), ConfigurationDialog* (*config)(DataEntry*)) {
@@ -405,21 +405,21 @@ bool Model::_registerObject(const char* _name, const char* _hierarchy, const cha
 	string terminator = _terminator;
 	
 	// add support for this object
-	if(!this->addObjectSupport( _name ))
+	if(!addObjectSupport( _name ))
 		return false;
 		
 	// add support for this terminator
-	if(!this->addTerminatorSupport( _name, _terminator ))
+	if(!addTerminatorSupport( _name, _terminator ))
 		return false;
 	
 	// add support for this hierarchy
-	this->addSupportedHierarchy( _hierarchy );
+	addSupportedHierarchy( _hierarchy );
 	
 	// add the initializer for this object
-	this->cmap[ name ] = init;
+	cmap[ name ] = init;
 	
 	// add the configuration dialog for this object
-	this->configMap[ name ] = config;
+	configMap[ name ] = config;
 	
 	return true;
 		
@@ -431,7 +431,7 @@ bool Model::_isSupportedObject( const char* name ) {
 	if( name == NULL || strlen(name) == 0)
 		return false;
 		
-	return (this->supportedObjects.find( string("<") + name + ">", 0 ) != string::npos);	
+	return (supportedObjects.find( string("<") + name + ">", 0 ) != string::npos);	
 }
 
 // is the terminator supported?
@@ -440,7 +440,7 @@ bool Model::_isSupportedTerminator( const char* name, const char* end ) {
 	if((name == NULL || strlen(name) == 0) || (end == NULL || strlen(end) == 0))
 		return false;
 		
-	return (this->objectTerminators.find( string("<") + name + "|" + end + ">", 0 ) != string::npos);	
+	return (objectTerminators.find( string("<") + name + "|" + end + ">", 0 ) != string::npos);	
 }
 
 // is the hierarchy supported?
@@ -449,7 +449,7 @@ bool Model::_isSupportedHierarchy( const char* name ) {
 	if(name == NULL || strlen(name) == 0)
 		return false;
 		
-	return (this->objectHierarchy.find( name, 0 ) != string::npos);	
+	return (objectHierarchy.find( name, 0 ) != string::npos);	
 }
 
 /**************************
@@ -461,17 +461,17 @@ bool Model::_isSupportedHierarchy( const char* name ) {
 // add the name of an object to the list of supported objects; return false if it's already there
 bool Model::addObjectSupport(const char* name) { return modelRef->_addObjectSupport(name); }
 bool Model::_addObjectSupport(const char* name) {
-	if(name == NULL || this->_isSupportedObject( name ))
+	if(name == NULL || _isSupportedObject( name ))
 		return false;
 		
-	this->supportedObjects += string("<") + name + ">";
+	supportedObjects += string("<") + name + ">";
 	return true;
 }
 
 // remove the name of an object from the list of supported objects; return false if not found
 bool Model::removeObjectSupport(const char* name) { return modelRef->_removeObjectSupport(name); }
 bool Model::_removeObjectSupport(const char* name) {
-	if(!this->_isSupportedObject( name ))
+	if(!_isSupportedObject( name ))
 		return false;
 		
 	// get the start of the object
@@ -499,17 +499,17 @@ bool Model::_removeObjectSupport(const char* name) {
 // add support for an object hierarchy
 bool Model::addSupportedHierarchy(const char* name) { return modelRef->_addSupportedHierarchy(name); }
 bool Model::_addSupportedHierarchy(const char* name) {
-	if(name == NULL || this->_isSupportedHierarchy( name ))
+	if(name == NULL || _isSupportedHierarchy( name ))
 		return false;
 	
-	this->objectHierarchy += name;
+	objectHierarchy += name;
 	return true;
 }
 
 // remove support for an object hierarchy
 bool Model::removeSupportedHierarchy(const char* name) { return modelRef->_removeSupportedHierarchy(name); }
 bool Model::_removeSupportedHierarchy(const char* name) {
-	if(!this->_isSupportedHierarchy( name ))
+	if(!_isSupportedHierarchy( name ))
 		return false;
 		
 	// get the start of the hierarchy
@@ -537,17 +537,17 @@ bool Model::_removeSupportedHierarchy(const char* name) {
 // add support for an object terminator
 bool Model::addTerminatorSupport(const char* name, const char* end) { return modelRef->_addTerminatorSupport(name, end); }
 bool Model::_addTerminatorSupport(const char* name, const char* end) {
-	if(name == NULL || this->_isSupportedTerminator( name, end ))
+	if(name == NULL || _isSupportedTerminator( name, end ))
 		return false;
 		
-	this->objectTerminators += string("<") + name + "|" + end + ">";
+	objectTerminators += string("<") + name + "|" + end + ">";
 	return true;
 }
 
 // remove support for an object terminator
 bool Model::removeTerminatorSupport(const char* name, const char* end) { return modelRef->_removeTerminatorSupport(name, end); }
 bool Model::_removeTerminatorSupport(const char* name, const char* end) {
-	if(!this->_isSupportedTerminator(name, end))
+	if(!_isSupportedTerminator(name, end))
 		return false;
 		
 	string term = string(name) + "|" + string(end);
@@ -675,7 +675,7 @@ void Model::_addObject( bz2object* obj ) {
 	if( obj == NULL )
 		return;
 		
-	this->objects.push_back( obj );
+	objects.push_back( obj );
 	
 	// tell all observers
 	ObserverMessage obs( ObserverMessage::ADD_OBJECT, obj );
@@ -684,16 +684,16 @@ void Model::_addObject( bz2object* obj ) {
 
 // remove an object by instance
 void Model::_removeObject( bz2object* obj ) {
-	if(this->objects.size() <= 0)
+	if(objects.size() <= 0)
 		return;
 	
 	objRefList::iterator itr = objects.begin();
-	for(unsigned int i = 0; i < this->objects.size() && itr != this->objects.end(); i++, itr++) {
+	for(unsigned int i = 0; i < objects.size() && itr != objects.end(); i++, itr++) {
 		if( objects[i] == obj ) {
 			
 			ObserverMessage obs( ObserverMessage::REMOVE_OBJECT, obj );
 			notifyObservers( &obs );
-			this->objects.erase( itr );
+			objects.erase( itr );
 			
 			break;
 		}
@@ -702,10 +702,10 @@ void Model::_removeObject( bz2object* obj ) {
 
 // set an object as selected and update it
 void Model::_setSelected( bz2object* obj ) {
-	if( this->selectedObjects.size() < 0 )
+	if( selectedObjects.size() < 0 )
 		return;
 		
-	for(objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for(objRefList::iterator i = selectedObjects.begin(); i != selectedObjects.end(); i++) {
 		if( *i == obj ) {
 			return;		// this object is already selected.
 		}	
@@ -714,24 +714,24 @@ void Model::_setSelected( bz2object* obj ) {
 	obj->setSelected( true );
 	obj->setChanged( true );
 	
-	this->selectedObjects.push_back( obj );	
+	selectedObjects.push_back( obj );	
 	
 	// tell the view to mark this object as selected
 	ObserverMessage obs_msg( ObserverMessage::UPDATE_OBJECT, obj );
 	
-	this->notifyObservers( &obs_msg );
+	notifyObservers( &obs_msg );
 }
 
 // set an object as unselected and update it
 void Model::_setUnselected( bz2object* obj ) {
-	if( this->selectedObjects.size() < 0)
+	if( selectedObjects.size() < 0)
 		return;
 		
-	for(objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for(objRefList::iterator i = selectedObjects.begin(); i != selectedObjects.end(); i++) {
 		if( *i == obj ) {
 			obj->setSelected( false );
 			obj->setChanged( true );
-			this->selectedObjects.erase(i);
+			selectedObjects.erase(i);
 			break;
 		}	
 	}
@@ -739,18 +739,18 @@ void Model::_setUnselected( bz2object* obj ) {
 	// tell the view to mark this object as unselected
 	ObserverMessage obs_msg( ObserverMessage::UPDATE_OBJECT, obj );
 	
-	this->notifyObservers( &obs_msg );
+	notifyObservers( &obs_msg );
 }
 
 // determine whether or not an object is selected
 bool Model::_isSelected( bz2object* obj ) {
-	if( this->selectedObjects.size() < 0)
+	if( selectedObjects.size() < 0)
 		return false;
 	
 	if(obj == NULL)
 		return false;
 	
-	for(objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for(objRefList::iterator i = selectedObjects.begin(); i != selectedObjects.end(); i++) {
 		if( *i == obj ) {
 			return true;
 		}	
@@ -761,19 +761,19 @@ bool Model::_isSelected( bz2object* obj ) {
 
 // unselect all objects
 void Model::_unselectAll() {
-	if( this->selectedObjects.size() <= 0)
+	if( selectedObjects.size() <= 0)
 		return;
 		
-	for(objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
+	for(objRefList::iterator i = selectedObjects.begin(); i != selectedObjects.end(); i++) {
 		(*i)->setSelected( false );
 		(*i)->setChanged( true );
 		// tell the view to mark this object as unselected
 		ObserverMessage obs_msg( ObserverMessage::UPDATE_OBJECT, i->get() );
-		this->notifyObservers( &obs_msg );
+		notifyObservers( &obs_msg );
 	}
 	
 	selectedObjects.clear();
-	this->notifyObservers( NULL );
+	notifyObservers( NULL );
 	
 }
 
@@ -785,7 +785,7 @@ DataEntry* Model::buildObject( const char* header ) { return modelRef->_buildObj
 DataEntry* Model::_buildObject( const char* header ) {
 	string name = string(header);
 	
-	if( this->cmap.count( name ) <= 0 )
+	if( cmap.count( name ) <= 0 )
 		return NULL;
 		
 	string blank = "";
@@ -795,21 +795,21 @@ DataEntry* Model::_buildObject( const char* header ) {
 // cut objects from the scene
 bool Model::cutSelection() { return modelRef->_cutSelection(); }
 bool Model::_cutSelection() {
-	if( this->selectedObjects.size() <= 0)
+	if( selectedObjects.size() <= 0)
 		return false;
 	
-	this->objectBuffer.clear();
+	objectBuffer.clear();
 	
 	// remove objects from the scene, but move them into the cut/copy buffer first so they're still referenced
-	for( objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
-		this->objectBuffer.push_back( *i );
+	for( objRefList::iterator i = selectedObjects.begin(); i != selectedObjects.end(); i++) {
+		objectBuffer.push_back( *i );
 	}
-	for( objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
-		this->_removeObject( i->get() );
+	for( objRefList::iterator i = selectedObjects.begin(); i != selectedObjects.end(); i++) {
+		_removeObject( i->get() );
 	}
 	
-	this->selectedObjects.clear();
-	this->notifyObservers( NULL );
+	selectedObjects.clear();
+	notifyObservers( NULL );
 	
 	return true;
 }
@@ -817,14 +817,14 @@ bool Model::_cutSelection() {
 // copy objects from the scene
 bool Model::copySelection() { return modelRef->_copySelection(); }
 bool Model::_copySelection() {
-	if( this->selectedObjects.size() <= 0)
+	if( selectedObjects.size() <= 0)
 		return false;
 	
-	this->objectBuffer.clear();
+	objectBuffer.clear();
 	
 	// copy objects into the object buffer.
-	for( objRefList::iterator i = this->selectedObjects.begin(); i != this->selectedObjects.end(); i++) {
-		this->objectBuffer.push_back( *i );
+	for( objRefList::iterator i = selectedObjects.begin(); i != selectedObjects.end(); i++) {
+		objectBuffer.push_back( *i );
 	}
 	
 	return true;
@@ -833,16 +833,16 @@ bool Model::_copySelection() {
 // paste the objectBuffer to the scene
 bool Model::pasteSelection() { return modelRef->_pasteSelection(); }
 bool Model::_pasteSelection() {
-	if( this->objectBuffer.size() <= 0)
+	if( objectBuffer.size() <= 0)
 		return false;
 	
 	
-	this->_unselectAll();
+	_unselectAll();
 	
 	// paste objects into the scene
 	// create new instances; don't pass references
-	for( vector< osg::ref_ptr<bz2object> >::iterator i = this->objectBuffer.begin(); i != this->objectBuffer.end(); i++) {
-		bz2object* obj = dynamic_cast< bz2object* > (this->_buildObject( (*i)->getHeader().c_str() ));
+	for( vector< osg::ref_ptr<bz2object> >::iterator i = objectBuffer.begin(); i != objectBuffer.end(); i++) {
+		bz2object* obj = dynamic_cast< bz2object* > (_buildObject( (*i)->getHeader().c_str() ));
 		if(!obj) {
 			printf("error! could not create new instance of \"%s\"\n", (*i)->getHeader().c_str() );
 			continue;
@@ -852,11 +852,11 @@ bool Model::_pasteSelection() {
 		obj->update( data );
 		obj->setPos( obj->getPos() + osg::Vec3(10.0, 10.0, 0.0) );
 		
-		this->_addObject( obj );
-		this->_setSelected( obj );
+		_addObject( obj );
+		_setSelected( obj );
 	}
 	
-	this->notifyObservers(NULL);
+	notifyObservers(NULL);
 	
 	return true;
 }
@@ -864,22 +864,22 @@ bool Model::_pasteSelection() {
 // delete a selection
 bool Model::deleteSelection() { return modelRef->_deleteSelection(); }
 bool Model::_deleteSelection() {
-	if( this->selectedObjects.size() <= 0)
+	if( selectedObjects.size() <= 0)
 		return false;
 	
 	// remove objects from the scene WITHOUT first referencing it (i.e. this will ensure it gets deleted)
 	Model::objRefList::iterator itr = selectedObjects.begin();
 	for(; itr != selectedObjects.end(); ) {
 		bz2object* obj = itr->get();
-		this->_removeObject( obj );
+		_removeObject( obj );
 		
 		selectedObjects.erase( itr );
 		itr = selectedObjects.begin();
 	}
 	
-	this->selectedObjects.clear();
+	selectedObjects.clear();
 	
-	this->notifyObservers(NULL);
+	notifyObservers(NULL);
 	
 	return true;
 }
@@ -899,7 +899,7 @@ bool Model::_newWorld() {
 	theNewWorld.push_back( newWorld.toString() );
 	
 	// build a blank world
-	this->_build( theNewWorld );
+	_build( theNewWorld );
 	
 	return true;
 }
@@ -1053,7 +1053,7 @@ void Model::_ungroupObjects( group* g ) {
 	// see if we need to remove the associated define
 	bool noRefs = true;	// set to false if other groups are referencing this group's "define"
 	string defName = g->getDefine()->getName();
-	for( vector< osg::ref_ptr< bz2object > >::iterator i = this->objects.begin(); i != this->objects.end(); i++ ) {
+	for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
 		group* grp = dynamic_cast< group* > ( i->get() );
 		if( !grp )
 			continue;
@@ -1070,7 +1070,7 @@ void Model::_ungroupObjects( group* g ) {
 	
 	// if no references to the define were found, then remove this define
 	if( noRefs ) {
-		this->groups.erase( defName );
+		groups.erase( defName );
 	}
 	
 }

@@ -49,11 +49,11 @@ public:
 			r = g = b = a = 0;	
 		}
 		
-		this->set( r, g, b, a );
+		set( r, g, b, a );
 	}
 	
 	string toString(void) {
-		return string(ftoa(this->r())) + " " + string(ftoa(this->g())) + " " + string(ftoa(this->b())) + " " + string(ftoa(this->a())) + "\n";
+		return string(ftoa(r())) + " " + string(ftoa(g())) + " " + string(ftoa(b())) + " " + string(ftoa(a())) + "\n";
 	}
 };
 #endif /*RGBA_H_*/

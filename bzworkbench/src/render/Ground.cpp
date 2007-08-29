@@ -18,7 +18,7 @@ const float Ground::DEFAULT_SIZE = 400.0f;
 // make the ground geode
 Ground::Ground( float size, float waterLevel ) : Renderable("ground") {
 	 
-	this->size = size;
+	size = size;
 	
 	// make the geode
 	
@@ -48,13 +48,13 @@ Ground::Ground( float size, float waterLevel ) : Renderable("ground") {
    osg::Geode* groundGeode = SceneBuilder::buildGeode( "ground", groundPoints, groundIndexes, groundTexCoords, "share/world/std_ground.png" );
    
    // add it
-   this->addChild( groundGeode );
+   addChild( groundGeode );
    
    // translate the ground down a bit
-   this->setPosition( osg::Vec3( 0.0, 0.0, -0.1) );
+   setPosition( osg::Vec3( 0.0, 0.0, -0.1) );
    
    // make the grid
-   this->grid = this->buildGrid( this->size, 10.0f );
+   grid = buildGrid( size, 10.0f );
    
    // make the grid a gray-ish color
    SceneBuilder::assignMaterial( osg::Vec4( 0.05, 0.05, 0.05, 0.2 ),
@@ -63,7 +63,7 @@ Ground::Ground( float size, float waterLevel ) : Renderable("ground") {
    								 osg::Vec4( 0.0, 0.0, 0.0, 0.0 ),
    								 0.0f,
    								 1.0f,
-   								 this->grid.get(),
+   								 grid.get(),
    								 osg::StateAttribute::OVERRIDE );
    								 
    // disable Z-buffering (since the BZFlag client doesn't clip against the ground)
@@ -110,12 +110,12 @@ Ground::Ground( float size, float waterLevel ) : Renderable("ground") {
 									   1.0,
 									   waterGeode );
 	   // add it
-	   this->addChild( waterGeode );
+	   addChild( waterGeode );
 	   
    }
    
    // add the grid
-   this->addChild( grid.get() );
+   addChild( grid.get() );
    
 }
 
@@ -154,7 +154,7 @@ osg::ref_ptr< Renderable > Ground::buildGrid( float size, float unit ) {
 Ground::~Ground() { };
 
 // get the size
-float Ground::getSize() { return this->size; }
+float Ground::getSize() { return size; }
 
 // set the size and update the ground
 void Ground::setSize( float newSize ) {
@@ -162,7 +162,7 @@ void Ground::setSize( float newSize ) {
 		return;
 		
 	float scaleFactor = Ground::DEFAULT_SIZE / newSize;
-	this->setScale( osg::Vec3d( scaleFactor, scaleFactor, scaleFactor ) );
+	setScale( osg::Vec3d( scaleFactor, scaleFactor, scaleFactor ) );
 	
-	this->size = size;
+	size = size;
 }

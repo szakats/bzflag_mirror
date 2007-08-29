@@ -14,23 +14,23 @@
 
 // constructors
 box::box() : bz2object("box", "<name><position><rotation><size>", SceneBuilder::buildNode( "share/box/box.obj" )) {
-	this->setName( SceneBuilder::nameNode("box") );
+	setName( SceneBuilder::nameNode("box") );
 	
-	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	this->setSize( osg::Vec3(10.0, 10.0, 10.0) );
+	setPos( osg::Vec3(0.0, 0.0, 0.0) );
+	setSize( osg::Vec3(10.0, 10.0, 10.0) );
 	SceneBuilder::markUnselected( this );
 	
 }
 
 box::box(string& data) : bz2object("box", "<name><position><rotation><size>", SceneBuilder::buildNode( "share/box/box.obj" )) {
-	this->setName( SceneBuilder::nameNode("box") );
+	setName( SceneBuilder::nameNode("box") );
 	
-	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	this->setSize( osg::Vec3( 10.0, 10.0, 10.0 ) );
+	setPos( osg::Vec3(0.0, 0.0, 0.0) );
+	setSize( osg::Vec3( 10.0, 10.0, 10.0 ) );
 	
 	SceneBuilder::markUnselected( this );
 	
-	this->update( data );
+	update( data );
 }
 
 // nothing to destroy...
@@ -38,22 +38,22 @@ box::~box() { }
 
 // getter
 string box::get(void) {
-	return this->toString();
+	return toString();
 }
 
 // setter (string data)
 int box::update(string& data) {
-	osg::Vec3 size = this->getSize();
+	osg::Vec3 size = getSize();
 	
 	int result = bz2object::update( data );
 	if( result == 0 )
 		return result;
 	
-	if( this->getSize() != size ) {
-		size = this->getSize() - size;
+	if( getSize() != size ) {
+		size = getSize() - size;
 		
 		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &size );
-		this->updateGeometry( msg );
+		updateGeometry( msg );
 		
 	}
 	
@@ -68,23 +68,23 @@ int box::update(UpdateMessage& message) {
 	
 	switch( message.type ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
-			this->setPos( *(message.getAsPosition()) );
+			setPos( *(message.getAsPosition()) );
 			break;
 			
 		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
-			this->setPos( this->getPos() + *(message.getAsPositionFactor()) );
+			setPos( getPos() + *(message.getAsPositionFactor()) );
 			break;
 			
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
-			this->setRotationZ( message.getAsRotation()->z() );
+			setRotationZ( message.getAsRotation()->z() );
 			break;
 			
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
-			this->setRotationZ( this->getRotation().z() + message.getAsRotationFactor()->z() );
+			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
 			break;
 			
 		case UpdateMessage::SET_SCALE: {	// handle a new scale (only scale one axis at a time)
-			osg::Vec3 scale = *(message.getAsScale()) - this->getSize();
+			osg::Vec3 scale = *(message.getAsScale()) - getSize();
 			
 			osg::Vec3 scale_x = osg::Vec3( scale.x(), 0, 0 );
 			osg::Vec3 scale_y = osg::Vec3( 0, scale.y(), 0 );
@@ -94,11 +94,11 @@ int box::update(UpdateMessage& message) {
 			UpdateMessage scaleY( UpdateMessage::SET_SCALE_FACTOR, &scale_y );
 			UpdateMessage scaleZ( UpdateMessage::SET_SCALE_FACTOR, &scale_z );
 			
-			this->updateGeometry( scaleX );
-			this->updateGeometry( scaleY );
-			this->updateGeometry( scaleZ );
+			updateGeometry( scaleX );
+			updateGeometry( scaleY );
+			updateGeometry( scaleZ );
 			
-			this->setSize( *(message.getAsScale()) );
+			setSize( *(message.getAsScale()) );
 			break;
 		}
 		
@@ -113,11 +113,11 @@ int box::update(UpdateMessage& message) {
 			UpdateMessage scaleY( UpdateMessage::SET_SCALE_FACTOR, &scale_y );
 			UpdateMessage scaleZ( UpdateMessage::SET_SCALE_FACTOR, &scale_z );
 			
-			this->updateGeometry( scaleX );
-			this->updateGeometry( scaleY );
-			this->updateGeometry( scaleZ );
+			updateGeometry( scaleX );
+			updateGeometry( scaleY );
+			updateGeometry( scaleZ );
 			
-			this->setSize( this->getSize() + *(message.getAsScaleFactor()) );
+			setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
 		}
 		default:	// unknown event; don't handle
@@ -130,7 +130,7 @@ int box::update(UpdateMessage& message) {
 // toString
 string box::toString(void) {
 	return string("box\n") +
-				  this->BZWLines() +
+				  BZWLines() +
 				  "end\n";
 }
 
@@ -145,7 +145,7 @@ void box::updateGeometry( UpdateMessage& message ) {
 		osg::Vec3* scaleFactor = message.getAsScaleFactor();
 			
 		// get the geometries from the box mesh
-		GeometryExtractorVisitor geoExtractor = GeometryExtractorVisitor( this->getThisNode() );
+		GeometryExtractorVisitor geoExtractor = GeometryExtractorVisitor( getThisNode() );
 		vector< osg::Geometry* > geos = geoExtractor.getGeometries();
 		
 		// there should be 2 geometries (One Geometry makes up the walls, the other the floor/ceiling combo.)
@@ -612,7 +612,7 @@ void box::updateGeometry( UpdateMessage& message ) {
 		osg::Vec3* scaleFactor = message.getAsScale();
 			
 		// get the geometries from the box mesh
-		GeometryExtractorVisitor geoExtractor = GeometryExtractorVisitor( this->getThisNode() );
+		GeometryExtractorVisitor geoExtractor = GeometryExtractorVisitor( getThisNode() );
 		vector< osg::Geometry* > geos = geoExtractor.getGeometries();
 		
 		// there should be 2 geometries (One Geometry makes up the walls, the other the floor/ceiling combo.)

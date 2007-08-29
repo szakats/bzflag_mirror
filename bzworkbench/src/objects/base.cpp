@@ -19,15 +19,15 @@ base::base() :
 	team = 0;
 	weapon = "";
 	
-	string meshname = this->getBaseMesh( this->team );
+	string meshname = getBaseMesh( team );
 	
-	this->baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
-	this->addChild( baseNode.get() );
+	baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
+	addChild( baseNode.get() );
 	
-	this->setName( SceneBuilder::nameNode( meshname.c_str() ) );
+	setName( SceneBuilder::nameNode( meshname.c_str() ) );
 	
-	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	this->setSize( osg::Vec3(10.0, 10.0, 1.0) );
+	setPos( osg::Vec3(0.0, 0.0, 0.0) );
+	setSize( osg::Vec3(10.0, 10.0, 1.0) );
 	SceneBuilder::markUnselected( this );
 }
 
@@ -36,16 +36,16 @@ base::base(string& data) :
 	bz2object("base", "<position><rotation><size><color><oncap>", data.c_str()) {
 		
 	weapon = "";
-	this->team = 0;
+	team = 0;
 	
-	this->update(data);
+	update(data);
 	
-	string meshname = this->getBaseMesh( this->team );
+	string meshname = getBaseMesh( team );
 	
-	this->baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
-	this->addChild( baseNode.get() );
+	baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
+	addChild( baseNode.get() );
 	
-	this->setName( SceneBuilder::nameNode( meshname.c_str() ) );
+	setName( SceneBuilder::nameNode( meshname.c_str() ) );
 	
 	SceneBuilder::markUnselected( this );	
 }
@@ -54,29 +54,29 @@ base::base(string& data) :
 base::base( osg::Vec3 position, float rotation, osg::Vec3 size, int team, string weapon ) :
 	bz2object("base", "<position><rotation><size><color><oncap>") {
 	
-	this->weapon = weapon;
-	this->team = team;
+	weapon = weapon;
+	team = team;
 	
-	string meshname = this->getBaseMesh( this->team );
+	string meshname = getBaseMesh( team );
 	
-	this->baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
-	this->addChild( baseNode.get() );
+	baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
+	addChild( baseNode.get() );
 	
-	this->setName( SceneBuilder::nameNode( meshname.c_str() ) );
+	setName( SceneBuilder::nameNode( meshname.c_str() ) );
 	
-	this->setPos( position );
-	this->setRotationZ( rotation );
-	this->setSize( size );
+	setPos( position );
+	setRotationZ( rotation );
+	setSize( size );
 }
 
 
 // getter
-string base::get(void) { return this->toString(); }
+string base::get(void) { return toString(); }
 
 // setter
 int base::update(string& data) {
 	// get the header
-	const char* header = this->getHeader().c_str();
+	const char* header = getHeader().c_str();
 	
 	// get the section
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -117,8 +117,8 @@ int base::update(string& data) {
 		return 0;
 	
 	// load in the data
-	this->team = t;
-	this->weapon = (weapons.size() > 0 ? weapons[0] : string(""));
+	team = t;
+	weapon = (weapons.size() > 0 ? weapons[0] : string(""));
 	
 	return 1;
 }
@@ -126,7 +126,7 @@ int base::update(string& data) {
 // tostring
 string base::toString() {
 	return string("base\n") +
-				  this->BZWLines() +
+				  BZWLines() +
 				  "  color " + string(itoa(team)) + "\n" +
 				  (weapon.length() != 0 ? "  oncap " + weapon + "\n" : "") +
 				  "end\n";	
@@ -156,20 +156,20 @@ string base::getBaseMesh( int t ) {
 // set the current team
 void base::setTeam( int t ) {
 	// get rid of the previous base node
-	this->removeChild( baseNode.get() );
+	removeChild( baseNode.get() );
 	
 	// get the new base mesh name
-	string name = this->getBaseMesh( t );
+	string name = getBaseMesh( t );
 	
 	// build the node and add it
-	this->baseNode = SceneBuilder::buildNode( name.c_str() ); 
-	this->addChild( baseNode.get() );
+	baseNode = SceneBuilder::buildNode( name.c_str() ); 
+	addChild( baseNode.get() );
 	
 	// set the team
-	this->team = t;
+	team = t;
 	
 	// set the node name
-	this->setName( SceneBuilder::nameNode( name.c_str()) );
+	setName( SceneBuilder::nameNode( name.c_str()) );
 }
 
 // setter (with binary data)
@@ -178,27 +178,27 @@ int base::update(UpdateMessage& message) {
 	
 	switch( message.type ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
-			this->setPos( *(message.getAsPosition()) );
+			setPos( *(message.getAsPosition()) );
 			break;
 			
 		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
-			this->setPos( this->getPos() + *(message.getAsPositionFactor()) );
+			setPos( getPos() + *(message.getAsPositionFactor()) );
 			break;
 			
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
-			this->setRotationZ( message.getAsRotation()->z() );
+			setRotationZ( message.getAsRotation()->z() );
 			break;
 			
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
-			this->setRotationZ( this->getRotation().z() + message.getAsRotationFactor()->z() );
+			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
 			break;
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
-			this->setSize( *(message.getAsScale()) );
+			setSize( *(message.getAsScale()) );
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
-			this->setSize( this->getSize() + *(message.getAsScaleFactor()) );
+			setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
 			
 		default:	// unknown event; don't handle

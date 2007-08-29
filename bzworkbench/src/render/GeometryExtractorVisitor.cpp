@@ -16,7 +16,7 @@
 GeometryExtractorVisitor::GeometryExtractorVisitor( osg::Node* node ) :
 	osg::NodeVisitor( osg::NodeVisitor::NODE_VISITOR, osg::NodeVisitor::TRAVERSE_ALL_CHILDREN ) {
 	
-	this->geometries = vector< osg::Geometry* >();
+	geometries = vector< osg::Geometry* >();
 	
 	// tell the Renderable to accept this visitor
 	if( node != NULL )
@@ -29,7 +29,7 @@ void GeometryExtractorVisitor::apply( osg::Node& node ) {
 	osg::Group* group = dynamic_cast< osg::Group* >( &node );
 	if( group ) {
 		// if so, call the apply method for groups
-		this->apply( *group );
+		apply( *group );
 		return;
 	}
 	
@@ -37,7 +37,7 @@ void GeometryExtractorVisitor::apply( osg::Node& node ) {
 	osg::Geode* geode = dynamic_cast< osg::Geode* >( &node );
 	if( geode ) {
 		// if so, call the apply method for geodes
-		this->apply( *geode );
+		apply( *geode );
 		return;
 	}
 	
@@ -52,7 +52,7 @@ void GeometryExtractorVisitor::apply( osg::Group& group ) {
 	if( group.getNumChildren() > 0 ) {
 		for( unsigned int i = 0; i < group.getNumChildren(); i++) {
 			osg::Node* node = group.getChild( i );
-			this->apply( *node );
+			apply( *node );
 		}
 	}
 }
@@ -76,6 +76,6 @@ void GeometryExtractorVisitor::apply( osg::Geode& geode ) {
 		}
 		
 		// if the cast worked, save it to the cache
-		this->geometries.push_back( geo );
+		geometries.push_back( geo );
 	}
 }
