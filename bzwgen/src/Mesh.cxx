@@ -214,6 +214,13 @@ Vertex Mesh::faceNormal(int fid) {
   return r / length;
 }
 
+IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
+  double len = horizontal ? faceH(fid) : faceV(fid);
+  len = refinesnap(snap,len);
+  return subdivdeFace(fid,int(len/snap),horizontal);
+}
+
+
 IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal, double ssnap) {
   IntVector* cnr = f[fid]->vtx;
   Vertex stepA, stepB;

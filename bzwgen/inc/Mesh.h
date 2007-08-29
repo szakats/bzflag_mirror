@@ -38,6 +38,7 @@ public:
   void expandFace(int fid, double amount);
   Vertex faceNormal(int fid);
   Vertex faceCenter(int fid);
+  IntVector* repeatSubdivdeFace(int fid, double snap, bool horizontal);
   IntVector* subdivdeFace(int fid, int count, bool horizontal, double ssnap = 0.0);
   int partitionFace(int fid, double amount, bool horizontal);
   void chamferFace(int fid, double amount);
