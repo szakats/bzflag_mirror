@@ -33,7 +33,7 @@ bool getStdFileOpen ( trStandardFileOpen &data )
 	memset(&ofn,0,sizeof(OPENFILENAME));
 	ofn.lStructSize = sizeof(OPENFILENAME);
 	ofn.hwndOwner = theAppWindow;
-	ofn.hInstance = theInstance;
+	ofn.hInstance = NULL;
 
 	char filter[1024] = {0};
 
@@ -91,6 +91,8 @@ bool getStdFileOpen ( trStandardFileOpen &data )
 	else
 	{
 		DWORD err = CommDlgExtendedError();
+		printf("open dialog err %d",err);
+		//CDERR_DIALOGFAILURE
 	}
 
 	return good;
@@ -117,19 +119,12 @@ public:
 
 		openData.extensions.push_back(realExtension);
 		openData.extension = 0;
-		openData.filename = path;
-		//openData.title = description;
-
-/*		CWnd *mainWindow = CWnd::FromHandle(theAppWindow);
-		mainWindow->MessageBox("open dialgog");
-
-		CFileDialog oFileDialog(true,realExtension.c_str(),path.c_str(),OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter, mainWindow);
-
-		if (oFileDialog.DoModal() == IDOK ) */
+		openData.filename = file;
+		openData.title = description;
 		if (getStdFileOpen(openData))
 		{
 			file = openData.filename;
-			sucsessful = false;
+			sucsessful = true;
 		}
 		else
 			sucsessful = false;
