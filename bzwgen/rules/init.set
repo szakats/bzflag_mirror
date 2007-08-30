@@ -16,6 +16,7 @@ initialize ->
   loadmaterial(MATROOF,roof)
   loadmaterial(MATROOFT,rooft)
   loadmaterial(MATGLASS,glass)
+  loadmaterial(MATGLASS2,glass2)
   loadmaterial(MATGRASS,grass)
   loadmaterial(MATDOORW,doorw)
   loadmaterial(MATDOORR,doorr)
@@ -25,9 +26,10 @@ initialize ->
   assign(TEXTILE = 0.5)
   assign(TYPE = 0)
   assign(TYPE_SKY = 1)
-  assign(TYPE_RED = 2)
-  assign(TYPE_WHITE = 3)
-  assign(TYPE_NGON = 4)
+  assign(TYPE_SKY2 = 2)
+  assign(TYPE_RED = 3)
+  assign(TYPE_WHITE = 4)
+  assign(TYPE_NGON = 5)
 ;
 
 # ------------------------------------------------------------------------

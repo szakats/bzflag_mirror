@@ -15,6 +15,7 @@ mat_mesh  -> material($MATMESH);
 mat_roof  -> material($MATROOF);
 mat_rooft -> material($MATROOFT);
 mat_glass -> material($MATGLASS);
+mat_glass2-> material($MATGLASS2);
 mat_grass -> material($MATGRASS);
 mat_doorw -> material($MATDOORW);
 mat_doorr -> material($MATDOORR);

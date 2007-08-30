@@ -3,21 +3,29 @@
 #  sky.set -- generation of skyscrapers
 # ------------------------------------------------------------------------
 
-sky_run -> assign (TYPE = $TYPE_SKY) assign(TEXSNAP = 8) assign(TEXTILE = 1) sky_roll ;
-
-sky_roll 
-  -> 0.2 : mat_glass chamfer(3.0) extrudet(random(16.0,80.0,8.0)) roof_run
-  -> 0.2 : mat_glass extrude(random(16.0,80.0,8.0)) [ @sky_inset ] roof_run 
-  -> 0.3 : (face(h)/face(v) < 1.5 & face(v)/face(h) < 1.5) mat_glass extrude(random(24.0,64.0,8.0)) taper(0.6) roof_run
-  -> mat_glass extrudet(16.0) sky_continue 
+sky_run 
+  -> 0.5 : assign (TYPE = $TYPE_SKY) assign(TEXSNAP = 8) assign(TEXTILE = 1) sky_roll 
+  -> 0.5 : assign (TYPE = $TYPE_SKY2) assign(TEXSNAP = 16) assign(TEXTILE = 0.25) sky_roll 
 ;
 
-sky_inset -> mat_glass subdivideh(3) [ common_texture sky_inset5 common_texture ] ;
+sky_mat 
+  -> ($TYPE = $TYPE_SKY) mat_glass
+  -> mat_glass2
+;
+
+sky_roll 
+  -> 0.2 : sky_mat chamfer(3.0) extrudet(random(16.0,80.0,8.0)) roof_run
+  -> 0.2 : sky_mat extrude(random(16.0,80.0,8.0)) [ @sky_inset ] roof_run 
+  -> 0.3 : (face(h)/face(v) < 1.5 & face(v)/face(h) < 1.5) sky_mat extrude(random(24.0,64.0,8.0)) taper(0.6) roof_run
+  -> sky_mat extrudet(16.0) sky_continue 
+;
+
+sky_inset -> sky_mat subdivideh(3) [ common_texture sky_inset5 common_texture ] ;
 
 sky_continue
-  -> 0.3 : common_ledge mat_glass extrudet(16.0) sky_continue
-  -> 0.2 : common_ledge sky_part mat_glass extrudet(16.0) sky_continue
-  -> 0.2 : common_ledge sky_parti mat_glass extrudet(16.0) sky_continue
+  -> 0.3 : common_ledge sky_mat extrudet(16.0) sky_continue
+  -> 0.2 : common_ledge sky_part sky_mat extrudet(16.0) sky_continue
+  -> 0.2 : common_ledge sky_parti sky_mat extrudet(16.0) sky_continue
   -> 0.3 : roof_run
 ;
 
