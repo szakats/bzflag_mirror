@@ -147,6 +147,18 @@ int OperationSubdivide::runMesh(Mesh* mesh,int face) {
   return face; 
 }
 
+int OperationSplitFace::runMesh(Mesh* mesh,int face) { 
+  if (mesh == NULL) return 0;
+  faces = mesh->splitFace(face,splits,horiz);
+  if (facerules == NULL) {
+    delete faces;
+    faces = NULL;
+  } else {
+    OperationMultifaces::runMesh(mesh,face);
+  }
+  return face; 
+}
+
 int OperationRepeat::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
   flatten(mesh,face);
