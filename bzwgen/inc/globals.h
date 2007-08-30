@@ -144,6 +144,7 @@ struct ID4 {
 typedef std::vector<int> IntVector;
 typedef std::vector<std::string> StringVector;
 typedef std::vector<bool> BoolVector;
+typedef std::vector<double> DoubleVector;
 typedef std::map<std::string,double> AttributeMap;
 
 struct DiscreetMapNode {

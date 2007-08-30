@@ -220,10 +220,25 @@ IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
   return subdivdeFace(fid,int(len/snap),horizontal);
 }
 
-IntVector* Mesh::splitFace(int fid, IntVector* splitData, bool horizontal) {
+IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal) {
   IntVector* cnr = f[fid]->vtx;
   Vertex stepA, stepB;
   int splits = splitData->size()-1;
+
+  double length = horizontal ? faceH(fid) : faceV(fid);
+  double relsum = 0.0;
+  double lsum = 0.0;
+  for (int i = 0; i < splits+1; i++) {
+    double value = splitData->at(i);
+    if (value >= 0.0) lsum += value; else relsum += -value;
+  }
+  if (relsum > 0) {
+    double relperunit = ( length-lsum ) / relsum;
+    for (int i = 0; i < splits+1; i++) {
+      double value = splitData->at(i);
+      if (value < 0.0) (*splitData)[i] = -value*relperunit;
+    }
+  }  
 
   stepA = (v[cnr->at(2)]-v[cnr->at(3)]).norm();
   stepB = (v[cnr->at(1)]-v[cnr->at(0)]).norm();
