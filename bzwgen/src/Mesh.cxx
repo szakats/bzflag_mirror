@@ -220,6 +220,62 @@ IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
   return subdivdeFace(fid,int(len/snap),horizontal);
 }
 
+IntVector* Mesh::splitFace(int fid, IntVector* splitData, bool horizontal) {
+  IntVector* cnr = f[fid]->vtx;
+  Vertex stepA, stepB;
+  int splits = splitData->size()-1;
+
+  stepA = (v[cnr->at(2)]-v[cnr->at(3)]).norm();
+  stepB = (v[cnr->at(1)]-v[cnr->at(0)]).norm();
+
+  IntVector* result = new IntVector();
+
+  int mat = f[fid]->mat;
+  
+  int ai = 0 , bi = 0;
+  int pai = 0, pbi = 0;
+  int as = 0, bs = 0;
+
+  if (horizontal) {
+    as = cnr->at(3);
+    bs = cnr->at(0);
+  } else {
+    as = cnr->at(0);
+    bs = cnr->at(1);
+  }
+  pai = as;
+  pbi = bs;
+
+  Vertex a = v[as];
+  Vertex b = v[bs];
+
+  for (int i = 0; i < splits; i++) {
+    a = a + stepA*splitData->at(i);
+    b = b + stepB*splitData->at(i);
+
+    ai = addVertex(a);
+    bi = addVertex(b);
+
+    if (horizontal) {
+      result->push_back(addFace(new Face(ID4(pbi,bi,ai,pai),mat)));
+    } else {
+      result->push_back(addFace(new Face(ID4(pai,pbi,bi,ai),mat)));
+    }
+
+    pai = ai;
+    pbi = bi;
+  }
+
+  result->push_back(fid);
+
+  if (horizontal) {
+    f[fid]->setID4(ID4(bi,cnr->at(1),cnr->at(2),ai));
+  } else {
+    f[fid]->setID4(ID4(ai,bi,cnr->at(2),cnr->at(3)));
+  }
+  return result;
+}
+
 
 IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal, double ssnap) {
   IntVector* cnr = f[fid]->vtx;
