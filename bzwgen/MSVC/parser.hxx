@@ -62,16 +62,18 @@
      PARTITIONV = 288,
      PARTITIONHI = 289,
      PARTITIONVI = 290,
-     MULTIFACE = 291,
-     FREE = 292,
-     NGON = 293,
-     REMOVE = 294,
-     ADDFACE = 295,
-     DETACHFACE = 296,
-     DRIVETHROUGH = 297,
-     NUMBER = 298,
-     NONTERM = 299,
-     ATTRIBUTE = 300
+     SPLITV = 291,
+     SPLITH = 292,
+     MULTIFACE = 293,
+     FREE = 294,
+     NGON = 295,
+     REMOVE = 296,
+     ADDFACE = 297,
+     DETACHFACE = 298,
+     DRIVETHROUGH = 299,
+     NUMBER = 300,
+     NONTERM = 301,
+     ATTRIBUTE = 302
    };
 #endif
 /* Tokens.  */
@@ -108,16 +110,18 @@
 #define PARTITIONV 288
 #define PARTITIONHI 289
 #define PARTITIONVI 290
-#define MULTIFACE 291
-#define FREE 292
-#define NGON 293
-#define REMOVE 294
-#define ADDFACE 295
-#define DETACHFACE 296
-#define DRIVETHROUGH 297
-#define NUMBER 298
-#define NONTERM 299
-#define ATTRIBUTE 300
+#define SPLITV 291
+#define SPLITH 292
+#define MULTIFACE 293
+#define FREE 294
+#define NGON 295
+#define REMOVE 296
+#define ADDFACE 297
+#define DETACHFACE 298
+#define DRIVETHROUGH 299
+#define NUMBER 300
+#define NONTERM 301
+#define ATTRIBUTE 302
 
 
 
@@ -131,11 +135,12 @@ typedef union _YYSTYPE {
   Product* p;
   OperationVector* ov;
   StringVector* ids;
+  DoubleVector* dv;
   Operation* o;
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 139 "..\\parser.hxx"
+#line 144 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

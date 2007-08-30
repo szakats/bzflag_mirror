@@ -45,6 +45,8 @@ loadmaterial          { return(LOADMATERIAL);   }
 multiface             { return(MULTIFACE); }
 repeath				  { return(REPEATH);}
 repeatv               { return(REPEATV);}
+splith				  { return(SPLITH);}
+splitv                { return(SPLITV);}
 subdivideh            { return(SUBDIVIDEH);}
 subdividev            { return(SUBDIVIDEV);}
 partitionh            { return(PARTITIONH);}

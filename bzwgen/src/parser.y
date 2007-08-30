@@ -20,6 +20,7 @@ void yyunput(int, char*);
   Product* p;
   OperationVector* ov;
   StringVector* ids;
+  DoubleVector* dv;
   Operation* o;
   Expression* e;
 }
@@ -27,8 +28,8 @@ void yyunput(int, char*);
 %token TRANSLATER TRANSLATE SCALE TEST ROUND NEG ASSERTION FACE TAPER SPAWN CHAMFER 
 %token TEXTURE TEXTUREFULL TEXTUREQUAD TEXTURECLEAR MATERIAL LOADMATERIAL
 %token SPAWNNGON UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXTRUDET EXPAND RANDOM 
-%token REPEATH REPEATV SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI 
-%token MULTIFACE FREE NGON REMOVE ADDFACE DETACHFACE
+%token REPEATH REPEATV SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI SPLITV SPLITH
+%token MULTIFACE FREE NGON REMOVE ADDFACE DETACHFACE 
 %token DRIVETHROUGH
 %token <fl> NUMBER
 %token <id> NONTERM ATTRIBUTE
@@ -42,6 +43,7 @@ void yyunput(int, char*);
 %type <o> op
 %type <e> expr cond
 %type <ids> faces faceparam singleface
+%type <dv> splitparams
 %%
 ruleset : /* empty */
   | ruleset NONTERM products ';' { 
@@ -73,6 +75,9 @@ singleface : /* empty */ { $$ = NULL; }
 ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }
 ;
+splitparams : /* empty */ { $$ = new DoubleVector(); }
+  | splitparams NUMBER    { $$->push_back($2); }
+;
 op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); }
   | EXTRUDET '(' expr ')' faceparam { $$ = new OperationExtrudeT(ruleset,$3,$5); }
   | EXPAND '(' expr ')' { $$ = new OperationExpand(ruleset,$3); }
@@ -85,6 +90,8 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | TEXTUREFULL '(' ')' { $$ = new OperationTextureFull(ruleset); }
   | TEXTURECLEAR '(' ')' { $$ = new OperationTextureClear(ruleset); }
   | TEXTUREQUAD '(' expr ',' expr ',' expr ',' expr ')' { $$ = new OperationTextureQuad(ruleset,$3,$5,$7,$9); }
+  | SPLITH '(' splitparams ')' faceparam { $$ = new OperationSplitFace(ruleset,true,$5,$3); }
+  | SPLITV '(' splitparams ')' faceparam { $$ = new OperationSplitFace(ruleset,false,$5,$3); }
   | REPEATH '(' expr ')' faceparam { $$ = new OperationRepeat(ruleset,$3,true,$5); }
   | REPEATV '(' expr ')' faceparam { $$ = new OperationRepeat(ruleset,$3,false,$5); }
   | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,true,$5); }
