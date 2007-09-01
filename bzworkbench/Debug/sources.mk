@@ -26,13 +26,14 @@ SUBDIRS := \
 src/windows/eventHandlers \
 src/windows \
 src/widgets \
-src/share/teleporter \
-src/share/pyramid \
-src/share/box \
-src/share/base \
 src/render \
 src/objects \
 src/model \
-src/ \
+src \
 src/dialogs \
+share/teleporter \
+share/pyramid \
+share/box \
+share/base \
+plugins/Win32CommonControls \
 

@@ -9,17 +9,19 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir.mk
--include windows/eventHandlers/subdir.mk
--include windows/subdir.mk
--include widgets/subdir.mk
+-include src/windows/eventHandlers/subdir.mk
+-include src/windows/subdir.mk
+-include src/widgets/subdir.mk
+-include src/render/subdir.mk
+-include src/objects/subdir.mk
+-include src/model/subdir.mk
+-include src/subdir.mk
+-include src/dialogs/subdir.mk
 -include share/teleporter/subdir.mk
 -include share/pyramid/subdir.mk
 -include share/box/subdir.mk
 -include share/base/subdir.mk
--include render/subdir.mk
--include objects/subdir.mk
--include model/subdir.mk
--include dialogs/subdir.mk
+-include plugins/Win32CommonControls/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
