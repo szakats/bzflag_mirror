@@ -32,9 +32,9 @@ public:
 	public:
 	
 		// simple construtor
-		FlagElement(string flag, int qty) {
-			flag = flag;
-			qty = qty;
+		FlagElement(string _flag, int _qty) {
+			flag = _flag;
+			qty = _qty;
 		}
 		
 		// self-parser toString() method

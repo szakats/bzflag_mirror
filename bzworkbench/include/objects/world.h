@@ -49,7 +49,7 @@ class world : public DataEntry {
 		bool hasWalls() { return !noWalls; }
 		
 		void setName( const char* name ) { worldName = name; }
-		void setSize( float size ) { size = size; }
+		void setSize( float _size ) { size = _size; }
 		void setFlagHeight( float height ) { flagHeight = height; }
 		void setWalls( bool value ) { noWalls = !value; }
 		

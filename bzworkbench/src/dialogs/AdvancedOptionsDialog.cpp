@@ -13,10 +13,10 @@
 #include "dialogs/AdvancedOptionsDialog.h"
 
 // main constructor
-AdvancedOptionsDialog::AdvancedOptionsDialog( bz2object* obj ) :
-	ConfigurationDialog( obj, "Advanced Options", DEFAULT_WIDTH, DEFAULT_HEIGHT ) {
+AdvancedOptionsDialog::AdvancedOptionsDialog( bz2object* _obj ) :
+	ConfigurationDialog( _obj, "Advanced Options", DEFAULT_WIDTH, DEFAULT_HEIGHT ) {
 	
-	obj = obj;
+	obj = _obj;
 	
 	begin();
 	

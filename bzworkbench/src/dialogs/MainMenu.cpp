@@ -56,14 +56,14 @@ void MainMenu::buildMenu(void) {
 
 
 // construct a menu at a given point
-MainMenu::MainMenu(MainWindow* parent, int x, int y, int width, int height) :
+MainMenu::MainMenu(MainWindow* _parent, int x, int y, int width, int height) :
 	Fl_Menu_Button(x, y, width, height) {
 	
 	buildMenu();
 	
 	type(Fl_Menu_Button::POPUP3);
 	
-	parent = parent;
+	parent = _parent;
 }
 
 // main destructor

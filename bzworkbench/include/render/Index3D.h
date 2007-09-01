@@ -1,4 +1,4 @@
-/* BZWorkbench
+ndex/* BZWorkbench
  * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
@@ -27,22 +27,22 @@ class Index3D {
 		t1 = t2 = t3 = -1;	
 	}
 	
-	Index3D(int a, int b, int c) {
-		a = a;
-		b = b;
-		c = c;
-		t1 = a;
-		t2 = b;
-		t3 = c;
+	Index3D(int _a, int _b, int _c) {
+		a = _a;
+		b = _b;
+		c = _c;
+		t1 = _a;
+		t2 = _b;
+		t3 = _c;
 	}
 	
-	Index3D(int a, int b, int c, int t1, int t2, int t3) {
-		a = a;
-		b = b;
-		c = c;
-		t1 = t1;
-		t2 = t2;
-		t3 = t3;
+	Index3D(int _a, int _b, int _c, int _t1, int _t2, int _t3) {
+		a = _a;
+		b = _b;
+		c = _c;
+		t1 = _t1;
+		t2 = _t2;
+		t3 = _t3;
 	}
 	
 	Index3D(const char* description) {

@@ -13,11 +13,11 @@
 #include "dialogs/ConeConfigurationDialog.h"
 
 // constructor
-ConeConfigurationDialog::ConeConfigurationDialog( cone* theCone ) :
-	ConfigurationDialog( theCone, "Cone Options", DEFAULT_WIDTH, DEFAULT_HEIGHT ) {
+ConeConfigurationDialog::ConeConfigurationDialog( cone* _theCone ) :
+	ConfigurationDialog( _theCone, "Cone Options", DEFAULT_WIDTH, DEFAULT_HEIGHT ) {
 	begin();
 	
-	theCone = theCone;
+	theCone = _theCone;
 	
 	// set up the dialog
 	nameLabel = new QuickLabel( "Name: ", 5, 5);

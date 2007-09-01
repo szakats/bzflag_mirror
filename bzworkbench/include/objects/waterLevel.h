@@ -44,9 +44,9 @@ public:
 	string getMaterial() { return material; }
 	float getHeight() { return height; }
 	
-	void setName( string name ) { name = name; }
-	void setMaterial( string material ) { material = material; }
-	void setHeight( float height ) { height = height; }
+	void setName( string _name ) { name = _name; }
+	void setMaterial( string _material ) { material = _material; }
+	void setHeight( float _height ) { height = _height; }
 	
 	virtual ~waterLevel();
 	

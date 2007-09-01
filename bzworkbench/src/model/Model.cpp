@@ -54,7 +54,7 @@ Model::Model() : Observable()
 }
 
 // constructor that takes information about which objects to support
-Model::Model(const char* supportedObjects, const char* objectHierarchy, const char* objectTerminators) : Observable() {
+Model::Model(const char* _supportedObjects, const char* _objectHierarchy, const char* _objectTerminators) : Observable() {
 	worldData = new world();
 	optionsData = new options();
 	waterLevelData = new waterLevel();
@@ -82,13 +82,13 @@ Model::Model(const char* supportedObjects, const char* objectHierarchy, const ch
 	
 	cmap = map<string, DataEntry* (*)(string&)>();
 	
-	supportedObjects = supportedObjects;
-	objectHierarchy = objectHierarchy;
-	objectTerminators = objectTerminators;
+	supportedObjects = _supportedObjects;
+	objectHierarchy = _objectHierarchy;
+	objectTerminators = _objectTerminators;
 	
 	unusedData = vector<string>();
-	
 }
+
 
 Model::~Model()
 {

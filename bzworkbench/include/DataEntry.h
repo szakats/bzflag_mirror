@@ -41,9 +41,9 @@ public:
 	}
 	
 	// initialize the header and keys
-	DataEntry(const char* header, const char* keys) {
-		header = header;
-		keys = keys;
+	DataEntry(const char* _header, const char* _keys) {
+		header = _header;
+		keys = _keys;
 		text = "";
 		setChanged();
 	}
