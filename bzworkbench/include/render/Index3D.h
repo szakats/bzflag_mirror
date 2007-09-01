@@ -1,4 +1,4 @@
-ndex/* BZWorkbench
+/* BZWorkbench
  * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
