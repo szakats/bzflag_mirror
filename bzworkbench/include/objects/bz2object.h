@@ -32,8 +32,8 @@ using namespace std;
  * but simply do not support transformations
  */
 
-class bz2object : public Renderable, public DataEntry {
-	
+class bz2object : public Renderable, public DataEntry
+{
 	// allow SceneBuilder to modify bz2objects
 	friend class SceneBuilder;
 	

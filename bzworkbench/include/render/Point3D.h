@@ -35,30 +35,28 @@ class Point3D : public osg::Vec3
 	Point3D( osg::Vec3 pt ) : osg::Vec3( pt ) { }
 	
 	Point3D(const char* description) {
-		vector<string> points = BZWParser::getLineElements(description);
-		
-		// only initialize from the string if there are at least 3 elements
-		if(points.size() >= 3) {
+	  vector<string> points = BZWParser::getLineElements(description);
+	  
+	  // only initialize from the string if there are at least 3 elements
+	  if(points.size() >= 3) {
 			set( atof( points[0].c_str() ),
-					   atof( points[1].c_str() ),
-					   atof( points[2].c_str() ));
-		}
-		else {
-			set(0,0,0);
-		}
+			     atof( points[1].c_str() ),
+			     atof( points[2].c_str() ));
+	  } else {
+	    set(0,0,0);
+	  }
 	}
 	
 	Point3D( string desc ) { Point3D( desc.c_str() ); }
 	
 	string toString(void) {
-		return string("") + string(ftoa(x())) + " " + string(ftoa(y())) + " " + string(ftoa(z())) + "\n";
+	  return string("") + string(ftoa(x())) + " " + string(ftoa(y())) + " " + string(ftoa(z())) + "\n";
 	}
 	
 	virtual ~Point3D() { }
 	
 	// convert to an osg::Vec3
 	osg::Vec3 asVec3() { return osg::Vec3( x(), y(), z() ); }
-	
 };
 
 #endif /*POINT3D_H_*/

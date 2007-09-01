@@ -15,8 +15,8 @@
 // default constructor
 bz2object::bz2object(const char* name, const char* keys):
 	Renderable(),
-	DataEntry(name, keys) {
-		
+	DataEntry(name, keys)
+{
 	thisNode = NULL;
 		
 	transformations = vector< osg::ref_ptr<BZTransform> >();
@@ -57,7 +57,7 @@ bz2object::bz2object(const char* name, const char* keys):
 bz2object::bz2object(const char* name, const char* keys, const char* data):
 	Renderable(),
 	DataEntry(name, keys, data)
-	{
+{
 	
 	thisNode = NULL;
 	
@@ -100,7 +100,8 @@ bz2object::bz2object(const char* name, const char* keys, const char* data):
 // constructor with node data
 bz2object::bz2object(const char* name, const char* keys, osg::Node* node ):
 	Renderable( node ),
-	DataEntry(name, keys) {
+	DataEntry(name, keys)
+{
 	
 	thisNode = node;
 	
@@ -142,8 +143,8 @@ bz2object::bz2object(const char* name, const char* keys, osg::Node* node ):
 // constructor with node and string data
 bz2object::bz2object( const char* name, const char* keys, const char* data, osg::Node* node ):
 	Renderable( node ),
-	DataEntry( name, keys, data ) {
-	
+	DataEntry( name, keys, data )
+{
 	thisNode = node;
 	
 	transformations = vector< osg::ref_ptr<BZTransform> >();
@@ -184,11 +185,14 @@ bz2object::bz2object( const char* name, const char* keys, const char* data, osg:
 }
 	
 // getter
-string bz2object::get(void) { return toString(); }
+string bz2object::get(void) 
+{
+  return toString();
+}
 
 // setter
-int bz2object::update(string& data) {
-	
+int bz2object::update(string& data)
+{
 	// find the first occurence of the section in the data
 	const char* header = getHeader().c_str();
 
@@ -418,12 +422,14 @@ int bz2object::update(string& data) {
 }
 
 // toString
-string bz2object::toString(void) {
+string bz2object::toString(void)
+{
 	return getHeader() + "\n" + BZWLines() + "end\n";
 }
 
 // this method only returns the (indented) lines in the BZW text and is meant to be called by derived classes
-string bz2object::BZWLines(void) {
+string bz2object::BZWLines(void)
+{
 	string ret = string("");
 	
 	// add name key/value to the string if supported
@@ -489,7 +495,8 @@ string bz2object::BZWLines(void) {
 }
 
 // event handler
-int bz2object::update( UpdateMessage& message ) {
+int bz2object::update( UpdateMessage& message )
+{
 	switch( message.type ) {
 		case UpdateMessage::SET_TRANSFORMATIONS: {		// update the transformation stack
 			if( !( isKey("spin") || isKey("shift") || isKey("shear") || isKey("scale") ) )
@@ -563,7 +570,8 @@ int bz2object::update( UpdateMessage& message ) {
 }
 
 // update the transformation stack with new ones
-void bz2object::recomputeTransformations( vector< osg::ref_ptr< BZTransform > >* newTransformations ) {
+void bz2object::recomputeTransformations( vector< osg::ref_ptr< BZTransform > >* newTransformations )
+{
 	
 	// see if we have start/end/ shifts and spins
 	if( startShift.get() == NULL || endShift.get() == NULL || spin_x.get() == NULL || spin_y.get() == NULL || spin_z.get() == NULL)
@@ -574,9 +582,10 @@ void bz2object::recomputeTransformations( vector< osg::ref_ptr< BZTransform > >*
 		startShift->removeChild( transformations[0].get() );
 		transformations[ transformations.size() - 1 ]->removeChild( endShift.get() );
 		transformations.clear();
+	} else {
+	  // if there are no current transformations, then try to remove the endShift from the startShift
+	  startShift->removeChild( endShift.get() );
 	}
-	else		// if there are no current transformations, then try to remove the endShift from the startShift
-		startShift->removeChild( endShift.get() );
 	
 	transformations = *newTransformations;	// copy the array over
 	
@@ -590,8 +599,7 @@ void bz2object::recomputeTransformations( vector< osg::ref_ptr< BZTransform > >*
 		}
 		
 		transformations[ transformations.size() - 1 ]->addChild( endShift.get() );
-	}
-	else {
+	} else {
 		startShift->addChild( endShift.get() );	// connect the start and end shifts if there are no transformations in between
 	}
 }
@@ -605,14 +613,14 @@ void bz2object::addMaterial( material* mat ) {
 }
 
 // insert a material
-void bz2object::insertMaterial( unsigned int index, material* mat ) {
+void bz2object::insertMaterial( unsigned int index, material* mat )
+{
 	if( index > materials.size() - 1 )
 		return;
 		
 	if( materials.size() == 0 ) {
 		materials.push_back( mat );
-	}
-	else {
+	} else {
 		vector< osg::ref_ptr< material > >::iterator itr = materials.begin();
 		for( unsigned int i = 0; i < materials.size(); i++, itr++ ) {
 			if( i == index ) {
@@ -626,7 +634,8 @@ void bz2object::insertMaterial( unsigned int index, material* mat ) {
 }
 
 // remove a material
-void bz2object::removeMaterial( material* mat ) {
+void bz2object::removeMaterial( material* mat )
+{
 	if( materials.size() == 0 || mat == NULL )
 		return;
 	
@@ -641,7 +650,8 @@ void bz2object::removeMaterial( material* mat ) {
 }
 
 // remove a material by index
-void bz2object::removeMaterial( unsigned int index ) {
+void bz2object::removeMaterial( unsigned int index )
+{
 	if( index >= materials.size() || index < 0 ) 
 		return;
 	
@@ -657,7 +667,8 @@ void bz2object::removeMaterial( unsigned int index ) {
 }
 
 // recompute the material
-void bz2object::refreshMaterial() {
+void bz2object::refreshMaterial()
+{
 	material* mat = material::computeFinalMaterial( materials );
 	SceneBuilder::assignBZMaterial( mat, this );
 }
