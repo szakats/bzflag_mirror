@@ -76,8 +76,7 @@ ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }
 ;
 splitparams : /* empty */  { $$ = new DoubleVector(); }
-  | splitparams ',' NUMBER { $$->push_back($3); }
-  | NUMBER                 { $$ = new DoubleVector(); $$->push_back($1); }
+  | splitparams NUMBER { $$->push_back($2); }
 ;
 op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); }
   | EXTRUDET '(' expr ')' faceparam { $$ = new OperationExtrudeT(ruleset,$3,$5); }
@@ -93,6 +92,8 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | TEXTUREQUAD '(' expr ',' expr ',' expr ',' expr ')' { $$ = new OperationTextureQuad(ruleset,$3,$5,$7,$9); }
   | SPLITH '(' splitparams ')' faceparam { $$ = new OperationSplitFace(ruleset,true,$5,$3); }
   | SPLITV '(' splitparams ')' faceparam { $$ = new OperationSplitFace(ruleset,false,$5,$3); }
+  | SPLITH '(' splitparams ',' expr ')' faceparam { $$ = new OperationSplitFace(ruleset,true,$7,$3,$5); }
+  | SPLITV '(' splitparams ',' expr ')' faceparam { $$ = new OperationSplitFace(ruleset,false,$7,$3,$5); }
   | REPEATH '(' expr ')' faceparam { $$ = new OperationRepeat(ruleset,$3,true,$5); }
   | REPEATV '(' expr ')' faceparam { $$ = new OperationRepeat(ruleset,$3,false,$5); }
   | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,true,$5); }
