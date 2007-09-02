@@ -220,10 +220,11 @@ IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
   return subdivdeFace(fid,int(len/snap),horizontal);
 }
 
-IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal) {
+IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, double ssnap) {
   IntVector* cnr = f[fid]->vtx;
   Vertex stepA, stepB;
-  DoubleVector* sdata(splitData->size());
+
+  DoubleVector* sdata = new DoubleVector(splitData->size());
   int splits = splitData->size()-1;
 
   double length = horizontal ? faceH(fid) : faceV(fid);
@@ -242,8 +243,16 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal) {
     }
   }  
 
-  stepA = (v[cnr->at(2)]-v[cnr->at(3)]).norm();
-  stepB = (v[cnr->at(1)]-v[cnr->at(0)]).norm();
+  double s = ssnap;
+  if (ssnap > EPSILON) s = refinesnap(ssnap,length);
+
+  if (horizontal) {
+    stepA = (v[cnr->at(2)]-v[cnr->at(3)]).norm();
+    stepB = (v[cnr->at(1)]-v[cnr->at(0)]).norm();
+  } else {
+    stepA = (v[cnr->at(3)]-v[cnr->at(0)]).norm();
+    stepB = (v[cnr->at(2)]-v[cnr->at(1)]).norm();
+  }
 
   IntVector* result = new IntVector();
 
@@ -270,8 +279,22 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal) {
     a = a + stepA*sdata->at(i);
     b = b + stepB*sdata->at(i);
 
-    ai = addVertex(a);
-    bi = addVertex(b);
+    if (ssnap > EPSILON) {
+      Vertex A = v[as]-a;
+      Vertex B = v[bs]-b;
+
+      double la = A.length();
+      double lb = B.length();
+
+      Vertex sa = v[as]-(A.norm()*snap(la,s));
+      Vertex sb = v[bs]-(B.norm()*snap(lb,s));
+
+      ai = addVertex(sa);
+      bi = addVertex(sb);
+    } else {
+      ai = addVertex(a);
+      bi = addVertex(b);
+    }
 
     if (horizontal) {
       result->push_back(addFace(new Face(ID4(pbi,bi,ai,pai),mat)));

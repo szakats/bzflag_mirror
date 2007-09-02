@@ -35,7 +35,7 @@ public:
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord ta, TexCoord tb, TexCoord tc, TexCoord td, int mat = 0);
   void extrudeFace(int fid, double amount, int mat = 0);
   IntVector* extrudeFaceR(int fid, double amount, int mat = 0);
-  IntVector* splitFace(int fid, DoubleVector* splitData, bool horizontal);
+  IntVector* splitFace(int fid, DoubleVector* splitData, bool horizontal, double ssnap = 0.0);
   void expandFace(int fid, double amount);
   Vertex faceNormal(int fid);
   Vertex faceCenter(int fid);
