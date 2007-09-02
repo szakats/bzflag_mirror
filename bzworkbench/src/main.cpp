@@ -128,8 +128,8 @@ int main(int argc, char** argv) {
 	mw->show();
 	
 	// load any plugins
-//	the_mainWindow = mw;
-//	initPlugins();
+	the_mainWindow = mw;
+	initPlugins();
 	
 	// run the program
 	return Fl::run();

@@ -13,8 +13,7 @@
 #include "model/Model.h"
 #include "windows/View.h"
 
-// global reference to the model so the static call will work
-Model* modelRef;
+Model* Model::modRef;
 
 Model::Model() : Observable()
 {
@@ -41,7 +40,7 @@ Model::Model() : Observable()
 	this->defaultMaterial->setTextures( defaultTextures );
 	
 	this->objects = objRefList();
-	modelRef = this;
+	modRef = this;
 	
 	this->cmap = map<string, DataEntry* (*)(string&)>();
 	
@@ -78,7 +77,7 @@ Model::Model(const char* _supportedObjects, const char* _objectHierarchy, const 
 	this->defaultMaterial->setTextures( defaultTextures );
 	
 	this->objects = objRefList();
-	modelRef = this;
+	modRef = this;
 	
 	this->cmap = map<string, DataEntry* (*)(string&)>();
 	
@@ -132,18 +131,18 @@ Model::~Model()
 }
 
 // getters specific to the model
-const string Model::getSupportedObjects() { return modelRef->_getSupportedObjects(); }
+const string Model::getSupportedObjects() { return modRef->_getSupportedObjects(); }
 const string Model::_getSupportedObjects() { return supportedObjects; }
 
-const string Model::getSupportedHierarchies() { return modelRef->_getSupportedHierarchies(); }
+const string Model::getSupportedHierarchies() { return modRef->_getSupportedHierarchies(); }
 const string Model::_getSupportedHierarchies() { return objectHierarchy; }
 
-const string Model::getSupportedTerminators() { return modelRef->_getSupportedTerminators(); }
+const string Model::getSupportedTerminators() { return modRef->_getSupportedTerminators(); }
 const string Model::_getSupportedTerminators() { return objectTerminators; }
 
 // the query method
 DataEntry* Model::command(const string& command, const string& object, const string& name, const string& data) { 
-	return modelRef->_command(command, object, name, data);
+	return modRef->_command(command, object, name, data);
 }
 
 // the *real* query method
@@ -196,7 +195,7 @@ DataEntry* Model::_command(const string& command, const string& object, const st
 }
 
 // the static build method
-bool Model::build(vector<string>& bzworld) { return modelRef->_build(bzworld); }
+bool Model::build(vector<string>& bzworld) { return modRef->_build(bzworld); }
 
 // the real build method
 bool Model::_build(vector<string>& bzworld) {
@@ -374,9 +373,9 @@ bool Model::_build(vector<string>& bzworld) {
 }
 
 // BZWB-specific API
-world* Model::getWorldData() { return modelRef->_getWorldData(); }
-options* Model::getOptionsData() { return modelRef->_getOptionsData(); }
-waterLevel* Model::getWaterLevelData() { return modelRef->_getWaterLevelData(); }
+world* Model::getWorldData() { return modRef->_getWorldData(); }
+options* Model::getOptionsData() { return modRef->_getOptionsData(); }
+waterLevel* Model::getWaterLevelData() { return modRef->_getWaterLevelData(); }
 
 // plug-in specific API
 
@@ -385,9 +384,9 @@ waterLevel* Model::getWaterLevelData() { return modelRef->_getWaterLevelData(); 
  * (usually, this is the static init() method in the built-in objects).
  * Returns true of the object was added; false if there's something already registered with that name
  */
-bool Model::registerObject(string& name, DataEntry* (*init)(string&)) { return modelRef->_registerObject(name, init); }
+bool Model::registerObject(string& name, DataEntry* (*init)(string&)) { return modRef->_registerObject(name, init); }
 bool Model::registerObject(const char* name, const char* hierarchy, const char* terminator, DataEntry* (*init)(string&), ConfigurationDialog* (*config)(DataEntry*))
-	{ return modelRef->_registerObject(name, hierarchy, terminator, init, config); }
+	{ return modRef->_registerObject(name, hierarchy, terminator, init, config); }
 	
 bool Model::_registerObject(string& name, DataEntry* (*init)(string&)) {
 	return this->_registerObject( name.c_str(), "", "end", init, NULL);
@@ -426,7 +425,7 @@ bool Model::_registerObject(const char* _name, const char* _hierarchy, const cha
 }
 
 // is an object supported?
-bool Model::isSupportedObject(const char* name) { return modelRef->_isSupportedObject(name); }
+bool Model::isSupportedObject(const char* name) { return modRef->_isSupportedObject(name); }
 bool Model::_isSupportedObject( const char* name ) {
 	if( name == NULL || strlen(name) == 0)
 		return false;
@@ -435,7 +434,7 @@ bool Model::_isSupportedObject( const char* name ) {
 }
 
 // is the terminator supported?
-bool Model::isSupportedTerminator(const char* name, const char* end) { return modelRef->_isSupportedTerminator(name, end); }
+bool Model::isSupportedTerminator(const char* name, const char* end) { return modRef->_isSupportedTerminator(name, end); }
 bool Model::_isSupportedTerminator( const char* name, const char* end ) {
 	if((name == NULL || strlen(name) == 0) || (end == NULL || strlen(end) == 0))
 		return false;
@@ -444,7 +443,7 @@ bool Model::_isSupportedTerminator( const char* name, const char* end ) {
 }
 
 // is the hierarchy supported?
-bool Model::isSupportedHierarchy(const char* name) { return modelRef->_isSupportedHierarchy(name); }
+bool Model::isSupportedHierarchy(const char* name) { return modRef->_isSupportedHierarchy(name); }
 bool Model::_isSupportedHierarchy( const char* name ) {
 	if(name == NULL || strlen(name) == 0)
 		return false;
@@ -459,7 +458,7 @@ bool Model::_isSupportedHierarchy( const char* name ) {
  **************************/
  
 // add the name of an object to the list of supported objects; return false if it's already there
-bool Model::addObjectSupport(const char* name) { return modelRef->_addObjectSupport(name); }
+bool Model::addObjectSupport(const char* name) { return modRef->_addObjectSupport(name); }
 bool Model::_addObjectSupport(const char* name) {
 	if(name == NULL || this->_isSupportedObject( name ))
 		return false;
@@ -469,7 +468,7 @@ bool Model::_addObjectSupport(const char* name) {
 }
 
 // remove the name of an object from the list of supported objects; return false if not found
-bool Model::removeObjectSupport(const char* name) { return modelRef->_removeObjectSupport(name); }
+bool Model::removeObjectSupport(const char* name) { return modRef->_removeObjectSupport(name); }
 bool Model::_removeObjectSupport(const char* name) {
 	if(!this->_isSupportedObject( name ))
 		return false;
@@ -497,7 +496,7 @@ bool Model::_removeObjectSupport(const char* name) {
 }
 
 // add support for an object hierarchy
-bool Model::addSupportedHierarchy(const char* name) { return modelRef->_addSupportedHierarchy(name); }
+bool Model::addSupportedHierarchy(const char* name) { return modRef->_addSupportedHierarchy(name); }
 bool Model::_addSupportedHierarchy(const char* name) {
 	if(name == NULL || _isSupportedHierarchy( name ))
 		return false;
@@ -507,7 +506,7 @@ bool Model::_addSupportedHierarchy(const char* name) {
 }
 
 // remove support for an object hierarchy
-bool Model::removeSupportedHierarchy(const char* name) { return modelRef->_removeSupportedHierarchy(name); }
+bool Model::removeSupportedHierarchy(const char* name) { return modRef->_removeSupportedHierarchy(name); }
 bool Model::_removeSupportedHierarchy(const char* name) {
 	if(!this->_isSupportedHierarchy( name ))
 		return false;
@@ -535,7 +534,7 @@ bool Model::_removeSupportedHierarchy(const char* name) {
 
 
 // add support for an object terminator
-bool Model::addTerminatorSupport(const char* name, const char* end) { return modelRef->_addTerminatorSupport(name, end); }
+bool Model::addTerminatorSupport(const char* name, const char* end) { return modRef->_addTerminatorSupport(name, end); }
 bool Model::_addTerminatorSupport(const char* name, const char* end) {
 	if(name == NULL || this->_isSupportedTerminator( name, end ))
 		return false;
@@ -545,7 +544,7 @@ bool Model::_addTerminatorSupport(const char* name, const char* end) {
 }
 
 // remove support for an object terminator
-bool Model::removeTerminatorSupport(const char* name, const char* end) { return modelRef->_removeTerminatorSupport(name, end); }
+bool Model::removeTerminatorSupport(const char* name, const char* end) { return modRef->_removeTerminatorSupport(name, end); }
 bool Model::_removeTerminatorSupport(const char* name, const char* end) {
 	if(!this->_isSupportedTerminator(name, end))
 		return false;
@@ -574,7 +573,7 @@ bool Model::_removeTerminatorSupport(const char* name, const char* end) {
 }
 
 // the universal getter--returns the entire working model as a string of BZW-formatted text
-string& Model::toString() { return modelRef->_toString(); }
+string& Model::toString() { return modRef->_toString(); }
 string& Model::_toString() {
 	// iterate through all objects and have them print themselves out in string format
 	static string ret = "";
@@ -657,18 +656,18 @@ string& Model::_toString() {
 }
 
 // BZWB-specific API
-Model::objRefList& 				Model::getObjects() 		{ return modelRef->_getObjects(); }
-map< string, material* >& 		Model::getMaterials() 		{ return modelRef->_getMaterials(); }
-map< string, texturematrix* >&	Model::getTextureMatrices() { return modelRef->_getTextureMatrices(); }
-map< string, physics* >& 		Model::getPhysicsDrivers() 	{ return modelRef->_getPhysicsDrivers(); }
-map< string, Tlink* >&		 	Model::getTeleporterLinks() { return modelRef->_getTeleporterLinks(); }
-map< string, define* >&			Model::getGroups() 			{ return modelRef->_getGroups(); }
-void					Model::addObject( bz2object* obj ) { modelRef->_addObject( obj ); }
-void					Model::removeObject( bz2object* obj ) { modelRef->_removeObject( obj ); }
-void					Model::setSelected( bz2object* obj ) { modelRef->_setSelected( obj ); }
-void					Model::setUnselected( bz2object* obj ) { modelRef->_setUnselected( obj ); }
-void					Model::unselectAll() { modelRef->_unselectAll(); }
-bool					Model::isSelected( bz2object* obj ) { return modelRef->_isSelected( obj ); }
+Model::objRefList& 				Model::getObjects() 		{ return modRef->_getObjects(); }
+map< string, material* >& 		Model::getMaterials() 		{ return modRef->_getMaterials(); }
+map< string, texturematrix* >&	Model::getTextureMatrices() { return modRef->_getTextureMatrices(); }
+map< string, physics* >& 		Model::getPhysicsDrivers() 	{ return modRef->_getPhysicsDrivers(); }
+map< string, Tlink* >&		 	Model::getTeleporterLinks() { return modRef->_getTeleporterLinks(); }
+map< string, define* >&			Model::getGroups() 			{ return modRef->_getGroups(); }
+void					Model::addObject( bz2object* obj ) { modRef->_addObject( obj ); }
+void					Model::removeObject( bz2object* obj ) { modRef->_removeObject( obj ); }
+void					Model::setSelected( bz2object* obj ) { modRef->_setSelected( obj ); }
+void					Model::setUnselected( bz2object* obj ) { modRef->_setUnselected( obj ); }
+void					Model::unselectAll() { modRef->_unselectAll(); }
+bool					Model::isSelected( bz2object* obj ) { return modRef->_isSelected( obj ); }
 
 // add an object to the Model
 void Model::_addObject( bz2object* obj ) {
@@ -778,10 +777,10 @@ void Model::_unselectAll() {
 }
 
 // get selection
-Model::objRefList& Model::getSelection() { return modelRef->_getSelection(); }
+Model::objRefList& Model::getSelection() { return modRef->_getSelection(); }
 
 // build an object from the object registry
-DataEntry* Model::buildObject( const char* header ) { return modelRef->_buildObject( header ); }
+DataEntry* Model::buildObject( const char* header ) { return modRef->_buildObject( header ); }
 DataEntry* Model::_buildObject( const char* header ) {
 	string name = string(header);
 	
@@ -793,7 +792,7 @@ DataEntry* Model::_buildObject( const char* header ) {
 }
 
 // cut objects from the scene
-bool Model::cutSelection() { return modelRef->_cutSelection(); }
+bool Model::cutSelection() { return modRef->_cutSelection(); }
 bool Model::_cutSelection() {
 	if( this->selectedObjects.size() <= 0)
 		return false;
@@ -815,7 +814,7 @@ bool Model::_cutSelection() {
 }
 
 // copy objects from the scene
-bool Model::copySelection() { return modelRef->_copySelection(); }
+bool Model::copySelection() { return modRef->_copySelection(); }
 bool Model::_copySelection() {
 	if( this->selectedObjects.size() <= 0)
 		return false;
@@ -831,7 +830,7 @@ bool Model::_copySelection() {
 }
 
 // paste the objectBuffer to the scene
-bool Model::pasteSelection() { return modelRef->_pasteSelection(); }
+bool Model::pasteSelection() { return modRef->_pasteSelection(); }
 bool Model::_pasteSelection() {
 	if( this->objectBuffer.size() <= 0)
 		return false;
@@ -862,7 +861,7 @@ bool Model::_pasteSelection() {
 }
 
 // delete a selection
-bool Model::deleteSelection() { return modelRef->_deleteSelection(); }
+bool Model::deleteSelection() { return modRef->_deleteSelection(); }
 bool Model::_deleteSelection() {
 	if( this->selectedObjects.size() <= 0)
 		return false;
@@ -885,7 +884,7 @@ bool Model::_deleteSelection() {
 }
 
 // make a new world
-bool Model::newWorld() { return modelRef->_newWorld(); }
+bool Model::newWorld() { return modRef->_newWorld(); }
 bool Model::_newWorld() {
 	// make a fake list of world objects (to be fed to Model::build() )
 	vector< string > theNewWorld = vector< string >();
@@ -905,8 +904,8 @@ bool Model::_newWorld() {
 }
 
 // assign a material and make sure the Model has a reference to it
-void Model::assignMaterial( const string& matref, bz2object* obj ) { modelRef->_assignMaterial( matref, obj ); }
-void Model::assignMaterial( material* matref, bz2object* obj ) { modelRef->_assignMaterial( matref, obj ); }
+void Model::assignMaterial( const string& matref, bz2object* obj ) { modRef->_assignMaterial( matref, obj ); }
+void Model::assignMaterial( material* matref, bz2object* obj ) { modRef->_assignMaterial( matref, obj ); }
 
 void Model::_assignMaterial( const string& matref, bz2object* obj ) {
 	material* mat;
@@ -943,7 +942,7 @@ void Model::_assignMaterial( material* matref, bz2object* obj ) {
 // link two teleporters together if they are not explicitly linked
 // return TRUE if a new link was created; FALSE if it already exists
 bool Model::linkTeleporters( teleporter* from, teleporter* to ) {
-	return modelRef->_linkTeleporters( from, to );
+	return modRef->_linkTeleporters( from, to );
 }
 
 bool Model::_linkTeleporters( teleporter* from, teleporter* to ) {
@@ -976,7 +975,7 @@ bool Model::_linkTeleporters( teleporter* from, teleporter* to ) {
 	return true;
 }
 
-ConfigurationDialog* Model::configureObject( DataEntry* d) { return modelRef->_configureObject( d ); }
+ConfigurationDialog* Model::configureObject( DataEntry* d) { return modRef->_configureObject( d ); }
 // configure an object
 ConfigurationDialog* Model::_configureObject( DataEntry* d ) {
 	if( d == NULL )
@@ -992,7 +991,7 @@ ConfigurationDialog* Model::_configureObject( DataEntry* d ) {
 }
 
 // group objects together
-void Model::groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) { modelRef->_groupObjects( objects ); }
+void Model::groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) { modRef->_groupObjects( objects ); }
 void Model::_groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) {
 	// create a "define" object for these objects if one does not exist yet
 	define* def = new define();
@@ -1034,7 +1033,7 @@ void Model::_groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) {
 }
 
 // ungroup objects
-void Model::ungroupObjects( group* g ) { modelRef->_ungroupObjects( g ); }
+void Model::ungroupObjects( group* g ) { modRef->_ungroupObjects( g ); }
 void Model::_ungroupObjects( group* g ) {
 	// get the objects from the group
 	vector< osg::ref_ptr< bz2object > > objs = g->getDefine()->getObjects();

@@ -250,6 +250,8 @@ private:
 	
 // cut/copy buffer
 	objRefList objectBuffer;
+	
+	static Model* modRef;
 };
 
 #include "BZWParser.h"
