@@ -89,6 +89,7 @@ public:
   void removeVertex(int index) {
     vtx->erase(vtx->begin()+index);
   }
+  std::string toStringIDs() { char buffer[80]; sprintf(buffer, "(%d,%d,%d,%d)",vertex(0),vertex(1),vertex(2),vertex(3)); return std::string(buffer); }
   int size() { return vtx->size(); }
   virtual bool isMultiFace() { return false; }
   virtual ~Face() {

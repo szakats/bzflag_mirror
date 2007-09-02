@@ -53,7 +53,7 @@ int OperationAssign::runMesh(Mesh* mesh, int face) {
 }
 
 OperationMultifaces::OperationMultifaces(RuleSet* _ruleset, Expression* _exp, StringVector* _facerules) 
-: OperationSingle(_ruleset, _exp), facerules(_facerules), faces(NULL), allsame(false) {
+: OperationSingle(_ruleset, _exp), facerules(_facerules), allsame(false) {
   if (facerules != NULL) {
     if (facerules->size() == 0) {
       delete facerules; 
@@ -72,16 +72,16 @@ int OperationDetachFace::runMesh(Mesh* mesh,int face) {
     return face;
   }
   flatten(mesh,face);
-  faces = ((MultiFace*)mesh->f[face])->detachFace(roundToInt(value));
+  IntVector* faces = ((MultiFace*)mesh->f[face])->detachFace(roundToInt(value));
   if (faces != NULL) {
-    OperationMultifaces::runMesh(mesh,face);
+    OperationMultifaces::runMesh(mesh,face,faces);
     delete faces;
   }
   return face;
 }
 
 
-int OperationMultifaces::runMesh(Mesh* mesh,int) {
+int OperationMultifaces::runMesh(Mesh* mesh,int,IntVector* faces) {
   if (mesh == NULL) return 0;
   if (allsame) {
     for (size_t i = 0; i < faces->size(); i++)
@@ -103,8 +103,9 @@ int OperationExtrude::runMesh(Mesh* mesh,int face) {
   if (mesh == NULL) return 0;
   flatten(mesh,face);
   if (facerules != NULL) {
-    faces = mesh->extrudeFaceR(face,value,mesh->f[face]->mat);
-    OperationMultifaces::runMesh(mesh,face);
+    IntVector* faces = mesh->extrudeFaceR(face,value,mesh->f[face]->mat);
+    OperationMultifaces::runMesh(mesh,face,faces);
+    delete faces;
   } else {
     mesh->extrudeFace(face,value,mesh->f[face]->mat);
   }
@@ -114,15 +115,16 @@ int OperationExtrude::runMesh(Mesh* mesh,int face) {
 int OperationExtrudeT::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
   flatten(mesh,face);
-  faces = mesh->extrudeFaceR(face,value,mesh->f[face]->mat);\
+  IntVector* faces = mesh->extrudeFaceR(face,value,mesh->f[face]->mat);\
   double snap = ruleset->getAttr("SNAP");
   double textile = ruleset->getAttr("TEXTILE");
   for (size_t i = 0; i < faces->size(); i++) {
     mesh->textureFace(faces->at(i),snap,textile);
   }
   if (facerules != NULL) {
-    OperationMultifaces::runMesh(mesh,face);
+    OperationMultifaces::runMesh(mesh,face,faces);
   }
+  delete faces;
   return face; 
 }
 
@@ -137,13 +139,13 @@ int OperationSubdivide::runMesh(Mesh* mesh,int face) {
   flatten(mesh,face);
   double snap = 0.0;
   if (esnap != NULL) snap = esnap->calculate(mesh,face);
-  faces = mesh->subdivdeFace(face,roundToInt(value),horiz,snap);
+  IntVector* faces = mesh->subdivdeFace(face,roundToInt(value),horiz,snap);
   if (facerules == NULL) {
-    delete faces;
-    faces = NULL;
   } else {
-    OperationMultifaces::runMesh(mesh,face);
+    OperationMultifaces::runMesh(mesh,face,faces);
   }
+  delete faces;
+  faces = NULL;
   return face; 
 }
 
@@ -154,16 +156,15 @@ int OperationSplitFace::runMesh(Mesh* mesh,int face) {
   for (size_t i = 0; i < splits->size(); i++) 
     (*dv)[i] = splits->at(i)->calculate(mesh,face);
 
+  IntVector* faces;
   if (exp != NULL)
     faces = mesh->splitFace(face,dv,horiz,exp->calculate(mesh,face));
   else
     faces = mesh->splitFace(face,dv,horiz);
-  if (facerules == NULL) {
-    delete faces;
-    faces = NULL;
-  } else {
-    OperationMultifaces::runMesh(mesh,face);
+  if (facerules != NULL) {
+    OperationMultifaces::runMesh(mesh,face,faces);
   }
+  delete faces;
   delete dv;
   return face; 
 }
@@ -171,13 +172,11 @@ int OperationSplitFace::runMesh(Mesh* mesh,int face) {
 int OperationRepeat::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
   flatten(mesh,face);
-  faces = mesh->repeatSubdivdeFace(face,value,horiz);
-  if (facerules == NULL) {
-    delete faces;
-    faces = NULL;
-  } else {
-    OperationMultifaces::runMesh(mesh,face);
+  IntVector* faces = mesh->repeatSubdivdeFace(face,value,horiz);
+  if (facerules != NULL) {
+    OperationMultifaces::runMesh(mesh,face,faces);
   }
+  delete faces;
   return face; 
 }
 
@@ -193,10 +192,11 @@ int OperationPartition::runMesh(Mesh* mesh,int face) {
   if (facerules == NULL) {
     other = mesh->partitionFace(face,value,horiz);
   } else {
-    faces = new IntVector();
+    IntVector* faces = new IntVector();
     other = mesh->partitionFace(face,value,horiz);
     faces->push_back(inverse ? face : other);
-    OperationMultifaces::runMesh(mesh,face);
+    OperationMultifaces::runMesh(mesh,face,faces);
+    delete faces;
   }
   return inverse ? other : face;
 }

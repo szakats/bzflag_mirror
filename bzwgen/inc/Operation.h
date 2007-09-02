@@ -282,14 +282,12 @@ public:
 class OperationMultifaces : public OperationSingle {
 protected:
   StringVector* facerules;
-  IntVector* faces;
   bool allsame;
 public:
   OperationMultifaces(RuleSet* _ruleset, Expression* _exp, StringVector* _facerules);
-  int runMesh(Mesh* mesh,int);
+  int runMesh(Mesh* mesh,int, IntVector* faces);
   ~OperationMultifaces() {
     if (facerules != NULL) delete facerules;
-    if (faces != NULL) delete faces;
   }  
 };
 
