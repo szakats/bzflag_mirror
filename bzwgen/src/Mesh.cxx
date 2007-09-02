@@ -217,7 +217,65 @@ Vertex Mesh::faceNormal(int fid) {
 IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
   double len = horizontal ? faceH(fid) : faceV(fid);
   snap = refinesnap(snap,len);
-  return subdivdeFace(fid,roundToInt(len/snap),horizontal);
+  int count = roundToInt(len/snap);
+
+  IntVector* cnr = f[fid]->vtx;
+  Vertex stepA, stepB;
+
+  if (horizontal) {
+    stepA = (v[cnr->at(2)]-v[cnr->at(3)]) / double(count);
+    stepB = (v[cnr->at(1)]-v[cnr->at(0)]) / double(count);
+  } else {
+    stepA = (v[cnr->at(3)]-v[cnr->at(0)]) / double(count);
+    stepB = (v[cnr->at(2)]-v[cnr->at(1)]) / double(count);
+  }
+
+  IntVector* result = new IntVector();
+
+  int mat = f[fid]->mat;
+  
+  int ai = 0 , bi = 0;
+  int pai = 0, pbi = 0;
+  int as = 0, bs = 0;
+
+  if (horizontal) {
+    as = cnr->at(3);
+    bs = cnr->at(0);
+  } else {
+    as = cnr->at(0);
+    bs = cnr->at(1);
+  }
+  pai = as;
+  pbi = bs;
+
+  Vertex a = v[as];
+  Vertex b = v[bs];
+
+  for (int i = 0; i < count-1; i++) {
+    a = a + stepA;
+    b = b + stepB;
+
+    ai = addVertex(a);
+    bi = addVertex(b);
+
+    if (horizontal) {
+      result->push_back(addFace(new Face(ID4(pbi,bi,ai,pai),mat)));
+    } else {
+      result->push_back(addFace(new Face(ID4(pai,pbi,bi,ai),mat)));
+    }
+
+    pai = ai;
+    pbi = bi;
+  }
+
+  result->push_back(fid);
+
+  if (horizontal) {
+    f[fid]->setID4(ID4(bi,cnr->at(1),cnr->at(2),ai));
+  } else {
+    f[fid]->setID4(ID4(ai,bi,cnr->at(2),cnr->at(3)));
+  }
+  return result;
 }
 
 IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, double ssnap) {
@@ -316,125 +374,6 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
   delete sdata;
   return result;
 }
-
-
-IntVector* Mesh::subdivdeFace(int fid, int count, bool horizontal, double ssnap) {
-  IntVector* cnr = f[fid]->vtx;
-  Vertex stepA, stepB;
-
-  double s = ssnap;
-  if (horizontal) {
-    stepA = (v[cnr->at(2)]-v[cnr->at(3)]) / double(count);
-    stepB = (v[cnr->at(1)]-v[cnr->at(0)]) / double(count);
-    if (ssnap > EPSILON) s = refinesnap(ssnap,faceH(fid));
-  } else {
-    stepA = (v[cnr->at(3)]-v[cnr->at(0)]) / double(count);
-    stepB = (v[cnr->at(2)]-v[cnr->at(1)]) / double(count);
-    if (ssnap > EPSILON) s = refinesnap(ssnap,faceV(fid));
-  }
-
-  IntVector* result = new IntVector();
-
-  int mat = f[fid]->mat;
-  
-  int ai = 0 , bi = 0;
-  int pai = 0, pbi = 0;
-  int as = 0, bs = 0;
-
-  if (horizontal) {
-    as = cnr->at(3);
-    bs = cnr->at(0);
-  } else {
-    as = cnr->at(0);
-    bs = cnr->at(1);
-  }
-  pai = as;
-  pbi = bs;
-
-  Vertex a = v[as];
-  Vertex b = v[bs];
-
-  for (int i = 0; i < count-1; i++) {
-    a = a + stepA;
-    b = b + stepB;
-
-    if (ssnap > EPSILON) {
-      Vertex A = v[as]-a;
-      Vertex B = v[bs]-b;
-
-      double la = A.length();
-      double lb = B.length();
-
-      Vertex sa = v[as]-(A.norm()*snap(la,s));
-      Vertex sb = v[bs]-(B.norm()*snap(lb,s));
-
-      ai = addVertex(sa);
-      bi = addVertex(sb);
-    } else {
-      ai = addVertex(a);
-      bi = addVertex(b);
-    }
-
-    if (horizontal) {
-      result->push_back(addFace(new Face(ID4(pbi,bi,ai,pai),mat)));
-    } else {
-      result->push_back(addFace(new Face(ID4(pai,pbi,bi,ai),mat)));
-    }
-
-    pai = ai;
-    pbi = bi;
-  }
-
-  result->push_back(fid);
-
-  if (horizontal) {
-    f[fid]->setID4(ID4(bi,cnr->at(1),cnr->at(2),ai));
-  } else {
-    f[fid]->setID4(ID4(ai,bi,cnr->at(2),cnr->at(3)));
-  }
-  return result;
-
-}
-
-int Mesh::partitionFace(int fid, double amount, bool horizontal) {
-  IntVector* cnr = f[fid]->vtx;
-  Vertex A, B;
-
-  if (horizontal) {
-    A = (v[cnr->at(2)]-v[cnr->at(3)]);
-    B = (v[cnr->at(1)]-v[cnr->at(0)]);
-  } else {
-    A = (v[cnr->at(3)]-v[cnr->at(0)]);
-    B = (v[cnr->at(2)]-v[cnr->at(1)]);
-  }
-
-  A = A * (amount / A.length());
-  B = B * (amount / B.length());
-
-  int pai = 0, pbi = 0;
-
-  if (horizontal) {
-    pai = cnr->at(3);
-    pbi = cnr->at(0);
-  } else {
-    pai = cnr->at(0);
-    pbi = cnr->at(1);
-  }
-
-  int ai = addVertex(v[pai]+A);
-  int bi = addVertex(v[pbi]+B);
-
-  int result;
-  if (horizontal) {
-    result = addFace(new Face(ID4(pbi,bi,ai,pai),f[fid]->mat));
-    f[fid]->setID4(ID4(bi,cnr->at(1),cnr->at(2),ai));
-  } else {
-    result = addFace(new Face(ID4(pai,pbi,bi,ai),f[fid]->mat));
-    f[fid]->setID4(ID4(ai,bi,cnr->at(2),cnr->at(3)));
-  }
-  return result;
-}
-
 
 void Mesh::output(Output& out, int materialCount) {
   out.line("mesh");
