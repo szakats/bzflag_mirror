@@ -78,7 +78,12 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
    
    // give the View a trackball manipulator
    osgGA::TrackballManipulator* cameraManipulator = new osgGA::TrackballManipulator();
-   setCameraManipulator(cameraManipulator);
+   
+   // make sure that the center of the trackball doesn't move if we zoom in too close
+   cameraManipulator->setMinimumZoomScale( 0.0 );
+   
+   this->setCameraManipulator(cameraManipulator);
+   this->cameraManipulatorRef = cameraManipulator;
    
    // make an event handler collection
    eventHandlers = new EventHandlerCollection( this );
@@ -118,6 +123,11 @@ void View::draw(void) {
 	frame();
 }
 
+// scale the selection based on the distance from the camera to the center to ensure it stays the same size
+void View::updateSelection( float newDistance ) {
+	this->selection->setScale( osg::Vec3( 0.4 * newDistance, 0.4 * newDistance, 0.4 * newDistance ) );
+}
+
 // handle events
 int View::handle(int event) {
 	// whatever the event was, we need to regenerate the modifier keys
@@ -149,10 +159,15 @@ int View::handle(int event) {
             redraw();
             return 1;
           
-        case FL_DRAG:
+        case FL_DRAG: {
         	_gw->getEventQueue()->mouseMotion(Fl::event_x(), Fl::event_y());
+        	// get the distance from the eyepoint to the center of the trackball
+    		float dist = this->cameraManipulatorRef->getDistance();
+    		this->updateSelection( dist );
+    		// refresh
         	redraw();
 			return 1;
+        }
         case FL_RELEASE:
             _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), Fl::event_button() );
         	redraw();    

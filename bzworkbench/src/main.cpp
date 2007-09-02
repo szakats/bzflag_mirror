@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
 	
 	// init the SceneBuilder
 	SceneBuilder::init();
-	
+
 	// load the main window
 	MainWindow* mw = new MainWindow(model);
 	mw->resizable(mw);
@@ -128,8 +128,8 @@ int main(int argc, char** argv) {
 	mw->show();
 	
 	// load any plugins
-	the_mainWindow = mw;
-	initPlugins();
+//	the_mainWindow = mw;
+//	initPlugins();
 	
 	// run the program
 	return Fl::run();

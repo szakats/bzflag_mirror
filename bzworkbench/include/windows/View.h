@@ -137,6 +137,9 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		
 		// the currently pressed mouse button
 		unsigned int buttondown;
+		
+		// pointer to the trackball matrix manipulator
+		osg::ref_ptr< osgGA::TrackballManipulator > cameraManipulatorRef;
 	
 	private:
 		
@@ -152,6 +155,8 @@ class View : public osgViewer::Viewer, public RenderWindow, public Observer
 		// build the mouse button map
 		void buildMouseButtonMap();
 		
+		// update the selection's axes
+		void updateSelection( float distance );
 };
 
 

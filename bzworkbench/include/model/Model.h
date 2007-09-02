@@ -189,8 +189,8 @@ public:
 	const string _getSupportedObjects();
 	const string _getSupportedHierarchies();
 	const string _getSupportedTerminators();
-	bool _hasInitializer( DataEntry* d ) { return ( cmap.count( d->getHeader() ) == 0 || cmap[ d->getHeader() ] == NULL ) ? false : true; }
-	bool _hasConfigurationDialog( DataEntry* d ) { return ( configMap.count( d->getHeader() ) == 0 || configMap[ d->getHeader() ] == NULL ) ? false : true; }
+	bool _hasInitializer( DataEntry* d ) { return ( cmap.count( d->getHeader() ) == 0 || cmap[ string(d->getHeader()) ] == NULL ) ? false : true; }
+	bool _hasConfigurationDialog( DataEntry* d ) { return ( configMap.count( d->getHeader() ) == 0 || configMap[ string(d->getHeader()) ] == NULL ) ? false : true; }
 	
 private:
 

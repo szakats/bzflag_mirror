@@ -14,23 +14,23 @@
 
 // constructors
 box::box() : bz2object("box", "<name><position><rotation><size>", SceneBuilder::buildNode( "share/box/box.obj" )) {
-	setName( SceneBuilder::nameNode("box") );
+	this->setName( SceneBuilder::nameNode("box") );
 	
-	setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	setSize( osg::Vec3(10.0, 10.0, 10.0) );
+	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
+	this->setSize( osg::Vec3(10.0, 10.0, 10.0) );
 	SceneBuilder::markUnselected( this );
 	
 }
 
 box::box(string& data) : bz2object("box", "<name><position><rotation><size>", SceneBuilder::buildNode( "share/box/box.obj" )) {
-	setName( SceneBuilder::nameNode("box") );
+	this->setName( SceneBuilder::nameNode("box") );
 	
-	setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	setSize( osg::Vec3( 10.0, 10.0, 10.0 ) );
+	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
+	this->setSize( osg::Vec3( 10.0, 10.0, 10.0 ) );
 	
 	SceneBuilder::markUnselected( this );
 	
-	update( data );
+	this->update( data );
 }
 
 // nothing to destroy...
@@ -38,7 +38,7 @@ box::~box() { }
 
 // getter
 string box::get(void) {
-	return toString();
+	return this->toString();
 }
 
 // setter (string data)
@@ -53,7 +53,7 @@ int box::update(string& data) {
 		size = getSize() - size;
 		
 		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE_FACTOR, &size );
-		updateGeometry( msg );
+		this->updateGeometry( msg );
 		
 	}
 	
@@ -68,19 +68,19 @@ int box::update(UpdateMessage& message) {
 	
 	switch( message.type ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
-			setPos( *(message.getAsPosition()) );
+			this->setPos( *(message.getAsPosition()) );
 			break;
 			
 		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
-			setPos( getPos() + *(message.getAsPositionFactor()) );
+			this->setPos( getPos() + *(message.getAsPositionFactor()) );
 			break;
 			
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
-			setRotationZ( message.getAsRotation()->z() );
+			this->setRotationZ( message.getAsRotation()->z() );
 			break;
 			
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
-			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
+			this->setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
 			break;
 			
 		case UpdateMessage::SET_SCALE: {	// handle a new scale (only scale one axis at a time)
@@ -94,11 +94,11 @@ int box::update(UpdateMessage& message) {
 			UpdateMessage scaleY( UpdateMessage::SET_SCALE_FACTOR, &scale_y );
 			UpdateMessage scaleZ( UpdateMessage::SET_SCALE_FACTOR, &scale_z );
 			
-			updateGeometry( scaleX );
-			updateGeometry( scaleY );
-			updateGeometry( scaleZ );
+			this->updateGeometry( scaleX );
+			this->updateGeometry( scaleY );
+			this->updateGeometry( scaleZ );
 			
-			setSize( *(message.getAsScale()) );
+			this->setSize( *(message.getAsScale()) );
 			break;
 		}
 		
@@ -113,11 +113,11 @@ int box::update(UpdateMessage& message) {
 			UpdateMessage scaleY( UpdateMessage::SET_SCALE_FACTOR, &scale_y );
 			UpdateMessage scaleZ( UpdateMessage::SET_SCALE_FACTOR, &scale_z );
 			
-			updateGeometry( scaleX );
-			updateGeometry( scaleY );
-			updateGeometry( scaleZ );
+			this->updateGeometry( scaleX );
+			this->updateGeometry( scaleY );
+			this->updateGeometry( scaleZ );
 			
-			setSize( getSize() + *(message.getAsScaleFactor()) );
+			this->setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
 		}
 		default:	// unknown event; don't handle

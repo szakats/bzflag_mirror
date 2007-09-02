@@ -83,6 +83,9 @@ public:
 	SelectionState setState( SelectionState state );
 	SelectionState setStateByKey( unsigned char c );
 	
+	// set the scale
+	void setScale( const osg::Vec3& scale ) { this->selectionNode->setScale( scale ); }
+	
 private:
 
 	// some constants defining the shape and color of the axes
