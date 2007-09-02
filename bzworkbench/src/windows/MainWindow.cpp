@@ -130,6 +130,8 @@ MainWindow::MainWindow(Model* model) :
    
    // build the button panel
    this->buildButtonPanel();
+   
+   this->resizable(NULL);
 	
 }
 

@@ -144,7 +144,7 @@ public:
 private:
 	
 	// reference to the main menu
-	MainMenu* mainMenu;
+	// MainMenu* mainMenu;
 	
 	// reference to the configuration menu
 	ConfigurationMenu* configurationMenu;
