@@ -134,21 +134,6 @@ int OperationTexture::runMesh(Mesh* mesh, int face) {
 }
 
 
-int OperationSubdivide::runMesh(Mesh* mesh,int face) { 
-  if (mesh == NULL) return 0;
-  flatten(mesh,face);
-  double snap = 0.0;
-  if (esnap != NULL) snap = esnap->calculate(mesh,face);
-  IntVector* faces = mesh->subdivdeFace(face,roundToInt(value),horiz,snap);
-  if (facerules == NULL) {
-  } else {
-    OperationMultifaces::runMesh(mesh,face,faces);
-  }
-  delete faces;
-  faces = NULL;
-  return face; 
-}
-
 int OperationSplitFace::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
 
@@ -178,27 +163,6 @@ int OperationRepeat::runMesh(Mesh* mesh,int face) {
   }
   delete faces;
   return face; 
-}
-
-int OperationPartition::runMesh(Mesh* mesh,int face) { 
-  if (mesh == NULL) return 0;
-  flatten(mesh,face);
-  if (esnap != NULL) {
-    double l = horiz ? mesh->faceH(face) : mesh->faceV(face);
-    double s = refinesnap(esnap->calculate(mesh,face),l);
-    value = snap(value,s);
-  }
-  int other;
-  if (facerules == NULL) {
-    other = mesh->partitionFace(face,value,horiz);
-  } else {
-    IntVector* faces = new IntVector();
-    other = mesh->partitionFace(face,value,horiz);
-    faces->push_back(inverse ? face : other);
-    OperationMultifaces::runMesh(mesh,face,faces);
-    delete faces;
-  }
-  return inverse ? other : face;
 }
 
 int OperationTest::runMesh(Mesh* mesh, int face) {

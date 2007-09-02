@@ -310,14 +310,6 @@ public:
   int runMesh(Mesh* mesh,int face);
 };
 
-class OperationSubdivide : public OperationMultifaces {
-  bool horiz;
-  Expression* esnap;
-public:
-  OperationSubdivide(RuleSet* _ruleset, Expression* _exp, bool _horiz, StringVector* facerules, Expression* _esnap = NULL) : OperationMultifaces(_ruleset,_exp,facerules), horiz(_horiz), esnap(_esnap) {}
-  int runMesh(Mesh* mesh,int face);
-};
-
 class OperationSplitFace : public OperationMultifaces {
   bool horiz;
   ExpressionVector* splits;
@@ -330,15 +322,6 @@ class OperationRepeat : public OperationMultifaces {
   bool horiz;
 public:
   OperationRepeat(RuleSet* _ruleset, Expression* _exp, bool _horiz, StringVector* facerules) : OperationMultifaces(_ruleset,_exp,facerules), horiz(_horiz) {}
-  int runMesh(Mesh* mesh,int face);
-};
-
-class OperationPartition : public OperationMultifaces {
-  bool horiz;
-  bool inverse;
-  Expression* esnap;
-public:
-  OperationPartition(RuleSet* _ruleset, Expression* _exp, bool _horiz, StringVector* facerules, bool _inverse = false, Expression* _esnap = NULL) : OperationMultifaces(_ruleset,_exp,facerules), horiz(_horiz), inverse(_inverse), esnap(_esnap) {}
   int runMesh(Mesh* mesh,int face);
 };
 
