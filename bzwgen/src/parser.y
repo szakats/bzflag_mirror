@@ -75,8 +75,9 @@ singleface : /* empty */ { $$ = NULL; }
 ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }
 ;
-splitparams : /* empty */ { $$ = new DoubleVector(); }
-  | splitparams NUMBER    { $$->push_back($2); }
+splitparams : /* empty */  { $$ = new DoubleVector(); }
+  | splitparams ',' NUMBER { $$->push_back($3); }
+  | NUMBER                 { $$ = new DoubleVector(); $$->push_back($1); }
 ;
 op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); }
   | EXTRUDET '(' expr ')' faceparam { $$ = new OperationExtrudeT(ruleset,$3,$5); }
