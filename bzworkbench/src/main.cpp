@@ -119,7 +119,9 @@ int main(int argc, char** argv) {
 	
 	// init the SceneBuilder
 	SceneBuilder::init();
-
+	
+	printf("model addr: %x\n", model);
+	
 	// load the main window
 	MainWindow* mw = new MainWindow(model);
 	mw->resizable(mw);

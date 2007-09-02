@@ -82,10 +82,10 @@ public:
 	virtual ~MainWindow();
 	
 	// get the view
-	View* getView() { return view; }
+	View* getView() { return this->view; }
 	
 	// get the model
-	Model* getModel() { return model; }
+	Model* getModel() { return this->model; }
 	
 	// configure an object
 	void configure( bz2object* obj );

@@ -70,26 +70,28 @@ void MenuBar::buildMenu(void) {
 
 // constructor
 MenuBar::MenuBar( MainWindow* mw ) : Fl_Menu_Bar(0, 0, mw->w(), 30) {
-	parent = mw;
-	
-	buildMenu();	
+	this->parent = mw;
+	printf("MenuBar: parent mw addr: %x\n", parent);
+	printf("MenuBar: parent mw model addr: %x\n", parent->getModel());
+	this->buildMenu();	
 }
 
 void MenuBar::new_world_real( Fl_Widget* w ) {
-	parent->getModel()->_newWorld();
+	Model* model = this->parent->getModel();
+	model->_newWorld();
 	
 	// configure the new world
-	WorldOptionsDialog* wod = new WorldOptionsDialog( parent->getModel()->_getWorldData(),
-													  parent->getModel()->_getOptionsData(),
-													  parent->getModel()->_getWaterLevelData());
+	WorldOptionsDialog* wod = new WorldOptionsDialog( model->_getWorldData(),
+													  model->_getOptionsData(),
+													  model->_getWaterLevelData());
 	wod->show();
 	
 	// wait for configuration to end
 	while( wod->shown() ) { Fl::wait(); }
 	
 	// reset the world
-	ObserverMessage obs(ObserverMessage::UPDATE_WORLD, parent->getModel()->_getWorldData() );
-	parent->getModel()->notifyObservers( &obs );
+	ObserverMessage obs(ObserverMessage::UPDATE_WORLD, model->_getWorldData() );
+	model->notifyObservers( &obs );
 }
 
 void MenuBar::open_world_real( Fl_Widget* w ) {
@@ -213,7 +215,8 @@ void MenuBar::unselect_all_real( Fl_Widget* w ) {
 // add a box
 void MenuBar::addBoxCallback_real(Fl_Widget* w) {
 	// we're breaking the Law of Demeter here...
-	
+	printf("adding a box\n");
+	printf("model addr: %x\n", this->parent->getModel());
 	// make a new box using the Model's object registry
 	DataEntry* newBox = this->parent->getModel()->_buildObject( "box" );
 	
@@ -240,7 +243,7 @@ void MenuBar::addBoxCallback_real(Fl_Widget* w) {
 // add a pyramid
 void MenuBar::addPyramidCallback_real(Fl_Widget* w) {
 	// make a new pyramid using the Model's object registry
-	DataEntry* newPyr = parent->getModel()->_buildObject( "pyramid" );
+	DataEntry* newPyr = this->parent->getModel()->_buildObject( "pyramid" );
 	
 	// make it into a bz2object
 	bz2object* newObj = dynamic_cast< bz2object* >( newPyr );
@@ -276,7 +279,7 @@ void MenuBar::addMeshpyrCallback_real(Fl_Widget* w) {
 // add a teleporter
 void MenuBar::addTeleporterCallback_real(Fl_Widget* w) {
 	// make a new box using the Model's object registry
-	DataEntry* newTeleporter = parent->getModel()->_buildObject( "teleporter" );
+	DataEntry* newTeleporter = this->parent->getModel()->_buildObject( "teleporter" );
 	
 	// make it into a bz2object
 	bz2object* newObj = dynamic_cast< bz2object* >( newTeleporter );
@@ -335,7 +338,7 @@ void MenuBar::addTorusCallback_real(Fl_Widget* w) {
 // add a cone
 void MenuBar::addConeCallback_real(Fl_Widget* w) {
 	// make a new box using the Model's object registry
-	DataEntry* newCone = parent->getModel()->_buildObject( "cone" );
+	DataEntry* newCone = this->parent->getModel()->_buildObject( "cone" );
 	
 	// make it into a bz2object
 	bz2object* newObj = dynamic_cast< bz2object* >( newCone );
@@ -371,7 +374,7 @@ void MenuBar::importObjectCallback_real(Fl_Widget* w) {
 void MenuBar::addPurpleBaseCallback_real(Fl_Widget* w) {
 	
 	// get the objects and see that we don't have any other bases
-	Model::objRefList objects = parent->getModel()->_getObjects();
+	Model::objRefList objects = this->parent->getModel()->_getObjects();
 	if( objects.size() > 0 ) {
 		base* b;
 		// find all bases
@@ -411,7 +414,7 @@ void MenuBar::addPurpleBaseCallback_real(Fl_Widget* w) {
 // add base 2
 void MenuBar::addRedBaseCallback_real(Fl_Widget* w) {
 	// get the objects and see that we don't have any other bases
-	Model::objRefList objects = parent->getModel()->_getObjects();
+	Model::objRefList objects = this->parent->getModel()->_getObjects();
 	if( objects.size() > 0 ) {
 		base* b;
 		// find all bases
@@ -451,7 +454,7 @@ void MenuBar::addRedBaseCallback_real(Fl_Widget* w) {
 // add base 3
 void MenuBar::addGreenBaseCallback_real(Fl_Widget* w) {
 	// get the objects and see that we don't have any other bases
-	Model::objRefList objects = parent->getModel()->_getObjects();
+	Model::objRefList objects = this->parent->getModel()->_getObjects();
 	if( objects.size() > 0 ) {
 		base* b;
 		// find all bases
@@ -488,7 +491,7 @@ void MenuBar::addGreenBaseCallback_real(Fl_Widget* w) {
 // add base 4
 void MenuBar::addBlueBaseCallback_real(Fl_Widget* w) {
 	// get the objects and see that we don't have any other bases
-	Model::objRefList objects = parent->getModel()->_getObjects();
+	Model::objRefList objects = this->parent->getModel()->_getObjects();
 	if( objects.size() > 0 ) {
 		base* b;
 		// find all bases
@@ -541,7 +544,7 @@ void MenuBar::delete_real(Fl_Widget* w) {
 // handle (un)grouping
 void MenuBar::groupCallback_real(Fl_Widget* w) {
 	// get the selection
-	Model::objRefList objects = parent->getModel()->_getSelection();
+	Model::objRefList objects = this->parent->getModel()->_getSelection();
 	
 	if( objects.size() < 0 )
 		return;
@@ -600,7 +603,7 @@ void MenuBar::configureObjectCallback_real(Fl_Widget* w) {
 // handle teleporter linking
 void MenuBar::linkCallback_real(Fl_Widget* w) {
 	// get all selected objects
-	Model::objRefList selection = parent->getModel()->_getSelection(); 
+	Model::objRefList selection = this->parent->getModel()->_getSelection(); 
 	if( selection.size() <= 0 )
 		return;
 		

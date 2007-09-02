@@ -19,19 +19,19 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
 	RenderWindow(x,y,w,h) {
 	
 	// set OSG viewport
-    getCamera()->setViewport(new osg::Viewport(0,0,w,h));
+    this->getCamera()->setViewport(new osg::Viewport(0,0,w,h));
     
     // get the graphics context
-    getCamera()->setGraphicsContext(getGraphicsWindow());
+    this->getCamera()->setGraphicsContext(getGraphicsWindow());
     
     // do single-threaded view
-   setThreadingModel(osgViewer::Viewer::SingleThreaded);
+  this->setThreadingModel(osgViewer::Viewer::SingleThreaded);
    
    // set the model
-   model = m;
+   this->model = m;
    
    // initialize the root node
-   root = new osg::Group();
+   this->root = new osg::Group();
    
    // configure the stateset of the root node
    osg::StateSet* stateSet = root->getOrCreateStateSet();
@@ -45,17 +45,17 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
    stateSet->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::ON );
    
    // initialize the ground
-   ground = new Ground( 400.0f );
+   this->ground = new Ground( 400.0f );
    
    // add the ground to the root node
-   root->addChild( ground );
+   this->root->addChild( ground );
 	
 	// set the key modifiers to false
-   modifiers = map< int, bool >();
-   modifiers[ FL_SHIFT ] = false;
-   modifiers[ FL_CTRL ] = false;
-   modifiers[ FL_ALT ] = false;
-   modifiers[ FL_META ] = false;
+   this->modifiers = map< int, bool >();
+   this->modifiers[ FL_SHIFT ] = false;
+   this->modifiers[ FL_CTRL ] = false;
+   this->modifiers[ FL_ALT ] = false;
+   this->modifiers[ FL_META ] = false;
    
 	// build the scene from the model
 	Model::objRefList objects = model->getObjects();
@@ -67,14 +67,14 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
 	
 	
    // make a new selection object
-   selection = new Selection();
+   this->selection = new Selection();
    
    // add the selection
    // NOTE: this has to be the LAST child on the list, because it doesn't have Z-bufferring enabled!
-   root->addChild( selection );
+   this->root->addChild( selection );
    
 	// add the root node to the scene
-   setSceneData( root );
+   this->setSceneData( root );
    
    // give the View a trackball manipulator
    osgGA::TrackballManipulator* cameraManipulator = new osgGA::TrackballManipulator();
@@ -86,19 +86,19 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
    this->cameraManipulatorRef = cameraManipulator;
    
    // make an event handler collection
-   eventHandlers = new EventHandlerCollection( this );
+   this->eventHandlers = new EventHandlerCollection( this );
    
    // add the selectHandler
-   eventHandlers->addEventHandler( selectHandler::getName().c_str(), new selectHandler( this, cameraManipulator ) );
+   this->eventHandlers->addEventHandler( selectHandler::getName().c_str(), new selectHandler( this, cameraManipulator ) );
    
    // add the scene picker event handler
-   addEventHandler(eventHandlers);
+   this->addEventHandler(eventHandlers);
    
    // assign the parent reference
-   mw = mw;
+   this->mw = mw;
    
    // build the mouse button map
-   buildMouseButtonMap();
+   this->buildMouseButtonMap();
 }
 
 // build the mouse button map

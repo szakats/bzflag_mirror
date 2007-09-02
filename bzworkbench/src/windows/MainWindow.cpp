@@ -97,22 +97,25 @@ MainWindow::MainWindow() :
    
    // build the button panel
    this->buildButtonPanel();
+   
+   this->resizable(NULL);
 }
 
 // construct from a model
-MainWindow::MainWindow(Model* model) :
+MainWindow::MainWindow(Model* m) :
 	Fl_Window(DEFAULT_WIDTH, DEFAULT_HEIGHT, "BZWorkbench") {
 	
 	
 	this->end();
 	
-	this->model = model;
+	this->model = m;
+	
+	printf("MainWindow: model addr: %x\n", this->getModel());
 	
 	this->view = new View(this->model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
 	this->view->end();
 	
 	this->add(view);
-	
 	
 	this->configurationMenu = new ConfigurationMenu(this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
 	this->add(configurationMenu);
@@ -120,6 +123,7 @@ MainWindow::MainWindow(Model* model) :
 	// mainMenu = new MainMenu(this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
 	// add(mainMenu);
 	
+	printf("MainWindow addr: %x\n", this );
 	this->menuBar = new MenuBar( this );
 	this->add(menuBar);
 	
