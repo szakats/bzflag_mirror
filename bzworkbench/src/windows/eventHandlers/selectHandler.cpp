@@ -140,7 +140,7 @@ bool selectHandler::pickObject(View* viewer, const osgGA::GUIEventAdapter& ea) {
             		
 					if(!viewer->isSelected( obj )) {
 						viewer->setSelected( obj );
-						viewer->requestMainWindow()->configure( obj ); 
+						// viewer->requestMainWindow()->configure( obj ); 
 					}
 					else {
 						viewer->setUnselected( obj );

@@ -76,7 +76,7 @@ void MainMenu::addBoxCallback_real(Fl_Widget* w) {
 	// we're breaking the Law of Demeter here...
 	
 	// make a new box using the Model's object registry
-	DataEntry* newBox = Model::buildObject( "box" );
+	DataEntry* newBox = this->parent->getModel()->buildObject( "box" );
 	
 	// make it into a bz2object
 	bz2object* newObj = dynamic_cast< bz2object* >( newBox );

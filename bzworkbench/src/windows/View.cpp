@@ -125,7 +125,7 @@ void View::draw(void) {
 
 // scale the selection based on the distance from the camera to the center to ensure it stays the same size
 void View::updateSelection( float newDistance ) {
-	this->selection->setScale( osg::Vec3( 0.4 * newDistance, 0.4 * newDistance, 0.4 * newDistance ) );
+	this->selection->setScale( osg::Vec3( 0.01 * newDistance, 0.01 * newDistance, 0.01 * newDistance ) );
 }
 
 // handle events
@@ -256,13 +256,13 @@ bool View::isPressed( int value ) {
 	return modifiers[ value ];
 }
 
-bool View::isSelected( bz2object* obj ) { return model->isSelected( obj ); }
+bool View::isSelected( bz2object* obj ) { return this->model->isSelected( obj ); }
 /**
  * Tell the model to select an object
  */
 void View::setSelected( bz2object* object ) {
 	
-	model->_setSelected( object );
+	this->model->_setSelected( object );
 }
 
 /**
@@ -270,7 +270,7 @@ void View::setSelected( bz2object* object ) {
  */
 void View::setUnselected( bz2object* object ) {
 	
-	model->_setUnselected( object );
+	this->model->_setUnselected( object );
 }
 
 
@@ -279,6 +279,6 @@ void View::setUnselected( bz2object* object ) {
  */
 void View::unselectAll() {
 	
-	model->_unselectAll();
+	this->model->_unselectAll();
 }
 

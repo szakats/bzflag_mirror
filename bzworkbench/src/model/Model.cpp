@@ -42,7 +42,7 @@ Model::Model() : Observable()
 	this->objects = objRefList();
 	modRef = this;
 	
-	this->cmap = map<string, DataEntry* (*)(string&)>();
+	// this->cmap = map<string, DataEntry* (*)(string&)>();
 	
 	this->supportedObjects = string("");
 	this->objectHierarchy = string("");
@@ -79,7 +79,7 @@ Model::Model(const char* _supportedObjects, const char* _objectHierarchy, const 
 	this->objects = objRefList();
 	modRef = this;
 	
-	this->cmap = map<string, DataEntry* (*)(string&)>();
+	// this->cmap = map<string, DataEntry* (*)(string&)>();
 	
 	this->supportedObjects = _supportedObjects;
 	this->objectHierarchy = _objectHierarchy;
@@ -784,7 +784,7 @@ DataEntry* Model::buildObject( const char* header ) { return modRef->_buildObjec
 DataEntry* Model::_buildObject( const char* header ) {
 	string name = string(header);
 	
-	if( this->cmap.count( name ) <= 0 )
+	if( this->cmap.find( name ) == this->cmap.end() )
 		return NULL;
 		
 	string blank = "";

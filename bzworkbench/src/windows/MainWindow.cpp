@@ -74,29 +74,29 @@ void MainWindow::buildButtonPanel() {
 MainWindow::MainWindow() :
 	Fl_Window(DEFAULT_WIDTH, DEFAULT_HEIGHT, "BZWorkbench") {
 	
-	end();
+	this->end();
 	
-	model = new Model();
-	view = new View(model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
-	view->end();
-	add(view);
+	this->model = new Model();
+	this->view = new View(model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	this->view->end();
+	this->add(view);
 	
-	configurationMenu = new ConfigurationMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
-	add(configurationMenu);
+	this->configurationMenu = new ConfigurationMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
+	this->add(configurationMenu);
 	
 	// mainMenu = new MainMenu(this, MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT);
 	// add(mainMenu);
 	
-	menuBar = new MenuBar( this );
-	add(menuBar);
+	this->menuBar = new MenuBar( this );
+	this->add(menuBar);
 	
 	initialized = true;
    
    // add the View as an observer to the Model
-   model->addObserver( view );
+   this->model->addObserver( view );
    
    // build the button panel
-   buildButtonPanel();
+   this->buildButtonPanel();
 }
 
 // construct from a model
@@ -104,32 +104,32 @@ MainWindow::MainWindow(Model* model) :
 	Fl_Window(DEFAULT_WIDTH, DEFAULT_HEIGHT, "BZWorkbench") {
 	
 	
-	end();
+	this->end();
 	
-	model = model;
+	this->model = model;
 	
-	view = new View(model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
-	view->end();
+	this->view = new View(this->model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	this->view->end();
 	
-	add(view);
+	this->add(view);
 	
 	
-	configurationMenu = new ConfigurationMenu(this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
-	add(configurationMenu);
+	this->configurationMenu = new ConfigurationMenu(this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
+	this->add(configurationMenu);
 	
 	// mainMenu = new MainMenu(this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
 	// add(mainMenu);
 	
-	menuBar = new MenuBar( this );
-	add(menuBar);
+	this->menuBar = new MenuBar( this );
+	this->add(menuBar);
 	
 	initialized = true;
    
    // add the View as an observer to the Model
-   model->addObserver( view );
+   this->model->addObserver( view );
    
    // build the button panel
-   buildButtonPanel();
+   this->buildButtonPanel();
 	
 }
 
