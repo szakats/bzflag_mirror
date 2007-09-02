@@ -14,14 +14,14 @@
 #define MESH_H_
 
 #include "bz2object.h"
-#include "../render/Point3D.h"
-#include "../render/Index3D.h"
-#include "../render/TexCoord2D.h"
-#include "../render/Vector3D.h"
-#include "../MeshFace.h"
-#include "../LOD.h"
-#include "../LODCommand.h"
-#include "../DrawInfo.h"
+#include "render/Point3D.h"
+#include "render/Index3D.h"
+#include "render/TexCoord2D.h"
+#include "render/Vector3D.h"
+#include "MeshFace.h"
+#include "LOD.h"
+#include "LODCommand.h"
+#include "DrawInfo.h"
 
 #include <map>
 

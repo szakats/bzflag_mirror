@@ -13,7 +13,7 @@
 #include "dialogs/Fl_Tweak.h"
 
 // constructor function
-Fl_Tweak::Fl_Tweak( bz2object* _obj, TweakOp )op ) : Fl_Dialog( "Configure", DEFAULT_WIDTH, DEFAULT_HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL ) {
+Fl_Tweak::Fl_Tweak( bz2object* _obj, TweakOp _op ) : Fl_Dialog( "Configure", DEFAULT_WIDTH, DEFAULT_HEIGHT, Fl_Dialog::Fl_OK | Fl_Dialog::Fl_CANCEL ) {
 	obj = _obj;
 	setOKEventHandler( Fl_Tweak::tweak_callback, this );
 	

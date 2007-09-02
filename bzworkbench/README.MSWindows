@@ -12,10 +12,10 @@ The build projects for windows (VC7.1) assume you have 2 environment variables s
 
 OSG_ROOT and FLTK_ROOT
 
-they should each point to the root dir that contains the apropriate library.
+they should each point to the root dir that contains the appropriate library.
 
-You will need to compile the librarys in ether release or debug mode, depending on how you want to build BZWB, they must match.
+You will need to compile the libraries in ether release or debug mode, depending on how you want to build BZWB, they must match.
 
-WHen building OSG, make sure that you also include their own 3rd party libs, and set the PNG include and library paths, so OSG builds the PNG reader that is used for textures.
+When building OSG, make sure that you also include their own 3rd party libs, and set the PNG include and library paths, so OSG builds the PNG reader that is used for textures.
 
 Once you have these libraries build and the environment variables set, the BZWB build system will copy all needed exe and dll files to the root level of the source tree for ease of use.

@@ -28,8 +28,8 @@
 #endif
 #endif
 #else
-#define BZEB_API
-#define BZEB_PLUGIN_CALL extern "C"
+#define BZWB_API
+#define BZWB_PLUGIN_CALL extern "C"
 #endif
 
 #include <string>
@@ -44,13 +44,18 @@ public:
 	virtual ~bzwb_APIPluginHandler(){};
 	virtual bool handle ( const char* plugin, const char* param ) = 0;
 };
+
+#ifdef BZWB_API
 // custom pluginHandler
+
 BZWB_API bool bzwb_registerCustomPluginHandler ( const char* extension, bzwb_APIPluginHandler * handler );
 BZWB_API bool bzwb_removeCustomPluginHandler ( const char* extension, bzwb_APIPluginHandler * handler );
 
 // OS common controlls
 BZWB_API unsigned int bzwb_getOSMainWindowHandle ( void );
 BZWB_API unsigned int bzwb_getOSWindowHandle ( unsigned int window );
+
+#endif
 
 typedef enum
 {
@@ -104,9 +109,10 @@ public:
 
 };
 
-
+#ifdef BZWB_API
 BZWB_API bool bzwb_registerCommonControlHandler ( bzwb_eCommonControlType type, bzwb_BaseCommonControlHandler * handler );
 BZWB_API bool bzwb_removeCommonControlHandlerr ( bzwb_eCommonControlType type, bzwb_BaseCommonControlHandler * handler );
-
+#endif
 
 #endif /*BZWB_API_H_*/
+

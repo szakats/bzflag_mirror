@@ -14,8 +14,8 @@
 #define SELECTHANDLER_H_
 
 #include "BZEventHandler.h"
-#include "../../render/Selection.h"
-#include "../MainWindow.h"
+#include "render/Selection.h"
+#include "windows/MainWindow.h"
 
 #include <osgViewer/Viewer>
 #include <osgGA/MatrixManipulator>

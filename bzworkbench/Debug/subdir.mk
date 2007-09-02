@@ -1,10 +1,11 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
 ################################################################################
+
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/main.cpp \ 
-../src/TextUtils.cpp
+../src/TextUtils.cpp 
 
 OBJS += \
 ./src/main.o \

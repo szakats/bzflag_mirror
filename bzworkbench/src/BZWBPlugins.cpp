@@ -183,7 +183,7 @@ int getPluginVersion ( void* hLib )
 {
 	int (*lpProc)(void);
 
-	lpProc = force_cast<int (*)(void)>(dlsym(hLib,"bzwb_GetVersion"));
+	lpProc = reinterpret_cast<int (*)(void)>(dlsym(hLib,"bzwb_GetVersion"));
 	if (lpProc)
 		return (*lpProc)();
 	return 0;
@@ -219,7 +219,7 @@ PluginLoadReturn load1Plugin ( std::string plugin, std::string config )
 		}
 		else
 		{
-			lpProc = force_cast<int (*)(const char*,void*)>(dlsym(hLib,"bzwb_Load"));
+			lpProc = reinterpret_cast<int (*)(const char*,void*)>(dlsym(hLib,"bzwb_Load"));
 			if (lpProc)
 			{
 				(*lpProc)(config.c_str(),hLib);
@@ -238,7 +238,7 @@ PluginLoadReturn load1Plugin ( std::string plugin, std::string config )
 		return eLoadFailedError;
 	}
 
-	printf(,"If you see this, there is something terribly wrong.\n");
+	printf("If you see this, there is something terribly wrong.\n");
 	return eLoadFailedError;
 }
 
@@ -250,7 +250,7 @@ void unload1Plugin ( int iPluginID )
 	if(!plugin.handle)
 		return;
 
-	lpProc = force_cast<int (*)(void)>(dlsym(plugin.handle, "bzwb_Unload"));
+	lpProc = reinterpret_cast<int (*)(void)>(dlsym(plugin.handle, "bzwb_Unload"));
 	if (lpProc)
 		(*lpProc)();
 	else

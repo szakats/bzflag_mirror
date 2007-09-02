@@ -355,3 +355,29 @@ void group::computeChildren() {
 	if( !containsNode( container.get() ) )
 		addChild( container.get() );
 }
+
+// rotate children manually because rotating BZW 1.x objects doesn't translate to "spin" transformations
+// (i.e. said objects can only be spun around Z)
+void group::setChildrenRotation( const osg::Vec3& rot ) {
+       if( def == NULL ) {
+               return;
+       }
+
+       // get objects
+       Model::objRefList objects = this->def->getObjects();
+
+       // don't bother with empty lists
+       if( objects.size() <= 0 ) {
+               return;
+       }
+
+       // iterate over the objects
+       for( Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++ ) {
+               if(! (*i)->isKey("spin") && (*i)->isKey("rotation") ) {
+                       // "unspin" the object around x and y if "spin" isn't supported
+                       (*i)->setRotationX( (*i)->getRotation().x() - rot.x() );
+                       (*i)->setRotationY( (*i)->getRotation().y() - rot.y() );
+               }
+       }
+}
+

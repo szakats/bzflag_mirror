@@ -1,6 +1,7 @@
 // Win32CommonControls.cpp : Defines the initialization routines for the DLL.
 //
 
+#ifdef _WIN32
 
 // Windows Header Files:
 #define _WIN32_WINNT 0x0500
@@ -264,3 +265,4 @@ BZWB_PLUGIN_CALL int bzwb_Unload (void)
 	return 0;
 }
 
+#endif

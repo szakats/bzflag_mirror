@@ -12,9 +12,10 @@
 
 #include "BZWBAPI.h"
 #include "BZWBPlugins.h"
-#include "FL/x.h"
+#include "FL/x.H"
 #include "commonControls.h"
 
+#ifdef BZWB_API
 // custom pluginHandler
 BZWB_API bool bzwb_registerCustomPluginHandler(const char *extension, bzwb_APIPluginHandler *handler)
 {
@@ -67,4 +68,4 @@ BZWB_API bool bzwb_removeCommonControlHandlerr ( bzwb_eCommonControlType type, b
 	removeControlHandler ( type, handler );
 	return true;
 }
-
+#endif

@@ -17,7 +17,7 @@ Fl_ImageButton::Fl_ImageButton( int x, int y, int width, int height, const char*
 	Fl_Button( x, y, width, height ) {
 		
 	Fl_PNG_Image* tempImage = new Fl_PNG_Image( imageFile );
-	if( image == NULL ) {
+	if( tempImage == NULL ) {
 		copy_label( imageFile );	
 	}
 	else {

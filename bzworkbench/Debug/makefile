@@ -8,7 +8,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include subdir.mk
+# -include subdir.mk
 -include src/windows/eventHandlers/subdir.mk
 -include src/windows/subdir.mk
 -include src/widgets/subdir.mk

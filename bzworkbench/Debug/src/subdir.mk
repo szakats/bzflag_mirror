@@ -6,30 +6,30 @@
 CPP_SRCS += \
 ../src/BZWBAPI.cpp \
 ../src/BZWBPlugins.cpp \
-../src/commonControls.cpp \
-../src/main.cpp 
+../src/TextUtils.cpp \
+../src/main.cpp \
+../src/commonControls.cpp 
 
 CXX_SRCS += \
-../src/OSFile.cxx \
-../src/TextUtils.cxx 
+../src/OSFile.cxx 
 
 OBJS += \
 ./src/BZWBAPI.o \
 ./src/BZWBPlugins.o \
 ./src/OSFile.o \
 ./src/TextUtils.o \
-./src/commonControls.o \
-./src/main.o 
+./src/main.o \
+./src/commonControls.o 
 
 CPP_DEPS += \
 ./src/BZWBAPI.d \
 ./src/BZWBPlugins.d \
-./src/commonControls.d \
-./src/main.d 
+./src/TextUtils.d \
+./src/main.d \
+./src/commonControls.d 
 
 CXX_DEPS += \
-./src/OSFile.d \
-./src/TextUtils.d 
+./src/OSFile.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

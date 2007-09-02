@@ -34,7 +34,7 @@ class BZWParser {
 	
   // init method to get Model reference
   // this MUST be called BEFORE any other method
-  static void init( Model* model ) { _modelRef = model; }
+  static void init( Model* model ) { BZWParser::_modelRef = model; }
 	
   // simplest method:  get a value from a non-repeatable key in a line
   static string value(const char* key, const char* text);

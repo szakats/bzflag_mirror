@@ -80,6 +80,9 @@ class group : public bz2object {
 		
 		// the container node
 		osg::ref_ptr< osg::Geode > geoRing;
+		
+		// set the chidren rotation
+		void setChildrenRotation( const osg::Vec3& vec );
 };
 
 #include "define.h"

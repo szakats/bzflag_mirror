@@ -8,6 +8,7 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.904830375" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
 <option id="gnu.cpp.compiler.option.include.paths.1216513372" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="/usr/include/"/>
+<listOptionValue builtIn="false" value="../include/"/>
 </option>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1602135080" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug"/>
