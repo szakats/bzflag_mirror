@@ -39,7 +39,7 @@ roof_antenna2 ->
   mat_roof
   scale(1,0.5)
   extrude(0.8)
-  subdividev(2) [ @roof_antenna2_add ]
+  splitv(1r 1r) [ @roof_antenna2_add ]
 ;
 
 

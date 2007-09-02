@@ -20,23 +20,25 @@ sky_roll
   -> sky_mat extrudet(16.0) sky_continue 
 ;
 
-sky_inset -> sky_mat subdivideh(3) [ common_texture sky_inset5 common_texture ] ;
+sky_inset -> sky_mat splith(1r 1r 1r) [ common_texture sky_inset5 common_texture ] ;
 
 sky_continue
   -> 0.3 : common_ledge sky_mat extrudet(16.0) sky_continue
-  -> 0.2 : common_ledge sky_part sky_mat extrudet(16.0) sky_continue
-  -> 0.2 : common_ledge sky_parti sky_mat extrudet(16.0) sky_continue
+  -> 0.2 : common_ledge sky_part 
+  -> 0.2 : common_ledge sky_parti 
   -> 0.3 : roof_run
 ;
 
+sky_parted -> sky_mat extrudet(16.0) sky_continue;
+
 sky_part
-  -> (face(h) > face(v)) assert(face(h) > 6.0) partitionh(face(h)/3,4) 
-  -> assert(face(v) > 6.0) partitionv(face(v)/3,4) 
+  -> (face(h) > face(v)) assert(face(h) > 6.0) splith(face(h)/3 1r,4) [ * sky_parted ]
+  -> assert(face(v) > 6.0) splitv((face(v)/3) 1r,4) [ * sky_parted ]
 ;
 
 sky_parti
-  -> (face(h) > face(v)) assert(face(h) > 6.0) partitionhi(2*face(h)/3,4) 
-  -> assert(face(v) > 6.0) partitionvi(2*face(v)/3,4) 
+  -> (face(h) > face(v)) assert(face(h) > 6.0) splith((2*face(h)/3) 1r,4) [ sky_parted * ]
+  -> assert(face(v) > 6.0) splitv((2*face(v)/3) 1r,4) [ sky_parted * ]
 ;
 
 sky_inset5 -> extrudet(-5) [ common_remove * * * ] texture() ;
