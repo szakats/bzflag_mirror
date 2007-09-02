@@ -1,1 +1,1 @@
-Same as BZFlag's DEVINFO, with one exception:  always, Always, ALWAYS use "this->" to distinguish between class members and non-class members.
+Same as BZFlag's DEVINFO.
