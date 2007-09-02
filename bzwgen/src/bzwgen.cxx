@@ -24,7 +24,7 @@
 
 #define MajorVersion "0"
 #define MinorVersion "1"
-#define Revision     "2"
+#define Revision     "3"
 #define BuildState "development"
 
 extern int yyparse(RuleSet*);
