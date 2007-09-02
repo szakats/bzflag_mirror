@@ -231,7 +231,7 @@ bool Model::_build(vector<string>& bzworld) {
 	for(vector<string>::iterator i = bzworld.begin(); i != bzworld.end(); i++) {
 		string header = BZWParser::headerOf(i->c_str());
 		if(header == "world") {
-			if(this->cmap[header] != NULL) {
+			if(this->cmap.count(header) > 0) {
 				this->worldData->update(*i);
 				foundWorld = true;		// there must be a world
 				// tell the observers we have a different world
@@ -247,7 +247,7 @@ bool Model::_build(vector<string>& bzworld) {
 		
 		// parse waterLevel
 		else if(header == "waterLevel") {
-			if(this->cmap[header] != NULL) {
+			if(this->cmap.count(header) > 0) {
 				this->waterLevelData->update(*i);	
 				continue;
 			}
@@ -259,7 +259,7 @@ bool Model::_build(vector<string>& bzworld) {
 		
 		// parse options
 		else if(header == "options") {
-			if(this->cmap[header] != NULL) {
+			if(this->cmap.count(header) > 0) {
 				this->optionsData->update(*i);	
 				continue;
 			}
@@ -271,7 +271,7 @@ bool Model::_build(vector<string>& bzworld) {
 		
 		// parse materials
 		else if(header == "material") {
-			if(this->cmap[header] != NULL) {
+			if(this->cmap.count(header) > 0) {
 				material* mat = ((material*)this->cmap[header](*i));
 				if( mat ) {
 					this->materials[ mat->getName() ] = mat;
@@ -285,7 +285,7 @@ bool Model::_build(vector<string>& bzworld) {
 		
 		// parse physics
 		else if(header == "physics") {
-			if(this->cmap[header] != NULL) {
+			if(this->cmap.count(header) > 0) {
 				physics* p = (physics*)this->cmap[header](*i);
 				if( p ) {
 					this->phys[ p->getName() ] = p;
@@ -299,7 +299,7 @@ bool Model::_build(vector<string>& bzworld) {
 		
 		// parse dynamicColors
 		else if(header == "dynamicColor") {
-			if(this->cmap[header] != NULL) {
+			if(this->cmap.count(header) > 0) {
 				dynamicColor* dynCol = (dynamicColor*)this->cmap[header](*i);
 				if( dynCol ) {
 					this->dynamicColors[ dynCol->getName() ] = dynCol;
@@ -313,7 +313,7 @@ bool Model::_build(vector<string>& bzworld) {
 		
 		// parse group definitions
 		else if(header == "define") {
-			if(this->cmap[header] != NULL) {
+			if(this->cmap.count(header) > 0) {
 				define* def = (define*)this->cmap[header](*i);
 				if( def ) {
 					this->groups[ def->getName() ] = def;
@@ -327,7 +327,7 @@ bool Model::_build(vector<string>& bzworld) {
 		
 		// parse links
 		else if(header == "link") {
-			if(this->cmap[header] != NULL) {
+			if(this->cmap.count(header) > 0) {
 				Tlink* link = (Tlink*)this->cmap[header](*i);
 				if( link ) {
 					this->links[ link->getName() ] = link;
@@ -341,7 +341,7 @@ bool Model::_build(vector<string>& bzworld) {
 		
 		// parse texturematrices
 		else if(header == "texturematrix") {
-			if(this->cmap[header] != NULL) {
+			if(this->cmap.count(header) > 0) {
 				texturematrix* tm = (texturematrix*)this->cmap[header](*i);
 				if( tm ) {
 					this->textureMatrices[ tm->getName() ] = tm;
@@ -355,7 +355,7 @@ bool Model::_build(vector<string>& bzworld) {
 		
 		// parse all other objects
 		else {
-			if(this->cmap[header] != NULL) {
+			if(this->cmap.count(header) > 0) {
 				this->_addObject((bz2object*)cmap[header](*i));
 			}
 			else {
