@@ -28,7 +28,7 @@ void yyunput(int, char*);
 %token TRANSLATER TRANSLATE SCALE TEST ROUND NEG ASSERTION FACE TAPER SPAWN CHAMFER 
 %token TEXTURE TEXTUREFULL TEXTUREQUAD TEXTURECLEAR MATERIAL LOADMATERIAL
 %token SPAWNNGON UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXTRUDET EXPAND RANDOM 
-%token REPEATH REPEATV SUBDIVIDEH SUBDIVIDEV PARTITIONH PARTITIONV PARTITIONHI PARTITIONVI SPLITV SPLITH
+%token REPEATH REPEATV SPLITV SPLITH
 %token MULTIFACE FREE NGON REMOVE ADDFACE DETACHFACE 
 %token DRIVETHROUGH
 %token <fl> NUMBER
@@ -42,7 +42,7 @@ void yyunput(int, char*);
 %type <ov> ops
 %type <o> op
 %type <e> expr cond
-%type <ids> faces faceparam singleface
+%type <ids> faces faceparam 
 %type <ev> splitparams
 %%
 ruleset : /* empty */
@@ -68,10 +68,6 @@ faceparam : /* empty */ { $$ = NULL; }
   | '[' '@' NONTERM ']' { std::string name = '@'+std::string($3); $$ = new StringVector(); $$->push_back(name); }
   | '[' faces ']' { $$ = $2; }
 ;
-singleface : /* empty */ { $$ = NULL; }
-  | '[' '@' NONTERM ']' { std::string name = std::string($3); $$ = new StringVector(); $$->push_back(name); }
-  | '[' NONTERM ']' { std::string name = std::string($2); $$ = new StringVector(); $$->push_back(name); }
-  ;
 ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }
 ;
@@ -96,18 +92,6 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | SPLITV '(' splitparams ',' expr ')' faceparam { $$ = new OperationSplitFace(ruleset,false,$7,$3,$5); }
   | REPEATH '(' expr ')' faceparam { $$ = new OperationRepeat(ruleset,$3,true,$5); }
   | REPEATV '(' expr ')' faceparam { $$ = new OperationRepeat(ruleset,$3,false,$5); }
-  | SUBDIVIDEH '(' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,true,$5); }
-  | SUBDIVIDEV '(' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,false,$5); }
-  | SUBDIVIDEH '(' expr ',' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,true,$7,$5); }
-  | SUBDIVIDEV '(' expr ',' expr ')' faceparam { $$ = new OperationSubdivide(ruleset,$3,false,$7,$5); }
-  | PARTITIONH '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$5); }
-  | PARTITIONV '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$5); }
-  | PARTITIONHI '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$5,true); }
-  | PARTITIONVI '(' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$5,true); }
-  | PARTITIONH '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$7,false,$5); }
-  | PARTITIONV '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$7,false,$5); }
-  | PARTITIONHI '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,true,$7,true,$5); }
-  | PARTITIONVI '(' expr ',' expr ')' singleface { $$ = new OperationPartition(ruleset,$3,false,$7,true,$5); }
   | SCALE '(' expr ',' expr ')' { $$ = new OperationScale(ruleset,$3,$5); }
   | TRANSLATE '(' expr ',' expr ',' expr ')' { $$ = new OperationTranslate(ruleset,$3,$5,$7); }
   | TRANSLATER '(' expr ',' expr ',' expr ')' { $$ = new OperationTranslateR(ruleset,$3,$5,$7); }

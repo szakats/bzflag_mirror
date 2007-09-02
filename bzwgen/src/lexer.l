@@ -47,12 +47,6 @@ repeath				  { return(REPEATH);}
 repeatv               { return(REPEATV);}
 splith				  { return(SPLITH);}
 splitv                { return(SPLITV);}
-subdivideh            { return(SUBDIVIDEH);}
-subdividev            { return(SUBDIVIDEV);}
-partitionh            { return(PARTITIONH);}
-partitionv            { return(PARTITIONV);}
-partitionhi           { return(PARTITIONHI);}
-partitionvi           { return(PARTITIONVI);}
 face                  { return(FACE); }
 addface               { return(ADDFACE); }
 detachface            { return(DETACHFACE); }

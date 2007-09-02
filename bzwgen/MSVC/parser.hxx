@@ -56,24 +56,18 @@
      RANDOM = 282,
      REPEATH = 283,
      REPEATV = 284,
-     SUBDIVIDEH = 285,
-     SUBDIVIDEV = 286,
-     PARTITIONH = 287,
-     PARTITIONV = 288,
-     PARTITIONHI = 289,
-     PARTITIONVI = 290,
-     SPLITV = 291,
-     SPLITH = 292,
-     MULTIFACE = 293,
-     FREE = 294,
-     NGON = 295,
-     REMOVE = 296,
-     ADDFACE = 297,
-     DETACHFACE = 298,
-     DRIVETHROUGH = 299,
-     NUMBER = 300,
-     NONTERM = 301,
-     ATTRIBUTE = 302
+     SPLITV = 285,
+     SPLITH = 286,
+     MULTIFACE = 287,
+     FREE = 288,
+     NGON = 289,
+     REMOVE = 290,
+     ADDFACE = 291,
+     DETACHFACE = 292,
+     DRIVETHROUGH = 293,
+     NUMBER = 294,
+     NONTERM = 295,
+     ATTRIBUTE = 296
    };
 #endif
 /* Tokens.  */
@@ -104,24 +98,18 @@
 #define RANDOM 282
 #define REPEATH 283
 #define REPEATV 284
-#define SUBDIVIDEH 285
-#define SUBDIVIDEV 286
-#define PARTITIONH 287
-#define PARTITIONV 288
-#define PARTITIONHI 289
-#define PARTITIONVI 290
-#define SPLITV 291
-#define SPLITH 292
-#define MULTIFACE 293
-#define FREE 294
-#define NGON 295
-#define REMOVE 296
-#define ADDFACE 297
-#define DETACHFACE 298
-#define DRIVETHROUGH 299
-#define NUMBER 300
-#define NONTERM 301
-#define ATTRIBUTE 302
+#define SPLITV 285
+#define SPLITH 286
+#define MULTIFACE 287
+#define FREE 288
+#define NGON 289
+#define REMOVE 290
+#define ADDFACE 291
+#define DETACHFACE 292
+#define DRIVETHROUGH 293
+#define NUMBER 294
+#define NONTERM 295
+#define ATTRIBUTE 296
 
 
 
@@ -140,7 +128,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 144 "..\\parser.hxx"
+#line 132 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
