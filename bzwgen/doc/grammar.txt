@@ -1,4 +1,4 @@
-Quick introduction to BZWGen grammar (as for v.0.1.2)
+Quick introduction to BZWGen grammar (as for v.0.1.3)
 (to be expanded into a full documentation)
 ------------------------------------------------------
 
@@ -59,13 +59,15 @@ Operations are usualy geometric operations done on the passed to them face. Some
 
    operation_name ( paramters ) [ branch_rules ]
 
-Parameters are seperated by commas (,) branch rules by spaces. Parameters are either a constant number (float) or an Expression (see below). Branch rules list a sequence of rulenames. Branch rules are always optional. They are matched in sequence with the additonal faces that the given operation produces. 
+Parameters are seperated by commas (,) branch rules by spaces. Parameters are either a constant number (float) or an Expression (see below). Branch rules list a sequence of rulenames. Branch rules are always optional. They are matched in sequence with the faces that the given operation produces. Additionaly the last face produced is "returned".
 
-Example : we run "subdivide(3)" then we will have 2 additional faces (the last one is passed back into the grammar), so we can write "subdivide(3) [ rule1 rule2 ] rule3" which will direct the first face to rule1, the second to rule2 and the third to rule3.
+A parameter may be also a split rule. These are expressions seperated by spaces.
+
+Example : we run "splith(1r 1r 1r)" then we will have 3 faces (the last one is additionaly passed back into the grammar), so we can write "splith(1r 1r 1r) [ rule1 rule2 ] rule3" which will direct the first face to rule1, the second to rule2 and the third to rule3. This is however the same as "splith(1r 1r 1r) [ rule1 rule2 rule3 ]"
 
 If we don't care about a particular face, we can write "*" instead, it then will be skipped, but the order will be preserved.
 
-Example : "subdivide(5) [ * * door ] " means that we only care about the central face of subdivision - ignore the first, ignore the second, send the third to "door" and ignore the rest.
+Example : "splith(1r 1r 1r) [ * door ] " means that we only care about the central face of subdivision - ignore the first, send the second to "door" and ignore the rest.
 
 If we want ALL of the faces to follow the same rule then we pass the rulename with a "@" sign before it.
 
@@ -142,17 +144,13 @@ Note : "snap" argument is always optional, and allows the divisions to snap to n
 
 extrude ( amount ) [ list ] -- probably the most important operation. Extrudes the face by 'amount' in the direction of it's normal, producing a amount of additional faces equal to the amount of face sides. The faces are returned in the branch list. The original extruded face is returned.
 
-subdivideh ( number , snap ) [ list ] -- subdivides the current face into 'number' segments horizontaly. The segments are returned in the branch list, the last one is returned as result.
+repeath ( snap ) [ list ] -- subdivides the current face into a number of segments horizontaly. The number of segments is the amount that can fill the face horizontally with segments of length snap. The segments are returned in the branch list, the last one is also returned as result.
 
-subdividev ( number , snap ) [ list ] -- subdivides the current face into 'number' segments vertically. The segments are returned in the branch list, the last one is returned as result.
+repeatv ( snap ) [ list ] -- subdivides the current face into a number of segments verticaly. The number of segments is the amount that can fill the face verticaly with segments of length snap. The segments are returned in the branch list, the last one is also returned as result.
 
-partitionh ( position , snap ) [ single ] -- divides the current face into two faces horizontally, using 'position' as the split position. The first face (the one with length equal to position) is returned in the branch list, the remainder is returned as result.
+splith ( splitrules , snap ) [ list ] -- snap parameter is optional. Divides the current face into several faces  horizontaly, using 'splitrules' to determinate split position. The faces are returned in the branch list, the last one is also returned as result.
 
-partitionv ( position , snap ) [ single ] -- divides the current face into two faces vertically, using 'position' as the split position. The first face (the one with length equal to position) is returned in the branch list, the remainder is returned as result.
-
-partitionhi ( position , snap ) [ single ] -- same as partitionh, only the face returned as a value, and as the branch rule are swapped.
-
-partitionvi ( position , snap ) [ single ] -- same as partitionv, only the face returned as a value, and as the branch rule are swapped.
+splitv ( splitrules , snap ) [ list ] -- snap parameter is optional. Divides the current face into several faces  verticaly, using 'splitrules' to determinate split position. The faces are returned in the branch list, the last one is also returned as result.
 
 
 Control
