@@ -10,6 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// this class is currently unused
+#if 0
 #include "dialogs/MainMenu.h"
 #include "windows/MainWindow.h"
 
@@ -504,3 +506,5 @@ void MainMenu::linkCallback_real(Fl_Widget* w) {
 	
 	value(0);
 }
+
+#endif

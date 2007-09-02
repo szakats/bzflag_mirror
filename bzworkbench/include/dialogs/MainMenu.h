@@ -10,6 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// this class is currently unused
+#if 0
 #ifndef MAINMENU_H_
 #define MAINMENU_H_
 
@@ -228,3 +230,4 @@ private:
 };
 
 #endif /*MAINMENU_H_*/
+#endif
