@@ -38,12 +38,10 @@ initialize
 
 The language has currently one special rule : "initialize", this one usualy is in the init.set file, and is executed once, right after all the rules have been read. DO NOT include any geometry code because it will crash badly. This rule is mainly for initalizeing constant values (currently initializes material constants).
 
-Current generator
-------------------
+start
+------
 
-Current generator calls only one rule from the start.set:
-
-* start -- is a rule to generate both buildings and sidewalks on the passed face
+This is the entry point into the grammar. For each building lot, the generator creates a face and calls the rule "start" passing that initial face to it.
 
 
 Products
@@ -59,9 +57,15 @@ Operations are usualy geometric operations done on the passed to them face. Some
 
    operation_name ( paramters ) [ branch_rules ]
 
-Parameters are seperated by commas (,) branch rules by spaces. Parameters are either a constant number (float) or an Expression (see below). Branch rules list a sequence of rulenames. Branch rules are always optional. They are matched in sequence with the faces that the given operation produces. Additionaly the last face produced is "returned".
+Parameters are seperated by commas (,) branch rules by spaces. Parameters are either a constant number (float) or an Expression (see below). 
 
 A parameter may be also a split rule. These are expressions seperated by spaces.
+
+
+Branch rules
+-------------
+
+Branch rules list a sequence of rulenames.  Branch rules are always optional. They are matched in sequence with the faces that the given operation produces. Additionaly the last face produced is "returned".
 
 Example : we run "splith(1r 1r 1r)" then we will have 3 faces (the last one is additionaly passed back into the grammar), so we can write "splith(1r 1r 1r) [ rule1 rule2 ] rule3" which will direct the first face to rule1, the second to rule2 and the third to rule3. This is however the same as "splith(1r 1r 1r) [ rule1 rule2 rule3 ]"
 
@@ -71,6 +75,12 @@ Example : "splith(1r 1r 1r) [ * door ] " means that we only care about the centr
 
 If we want ALL of the faces to follow the same rule then we pass the rulename with a "@" sign before it.
 
+Split rules
+------------
+
+Split rules are used by splitv and splith to define the subdivision of a face. They constitute of a sequence of numbers, that are subsequent lengths of splitted faces. Numbers may also be appended fith a "r" indicating that they are relative values. Relative values are calculated by substracting non-relative lenghts from overall length and dividing the rest by the value of the relative number.
+
+Example : "splith( 1r 4.0 2r )" will divide the given face into three, with the middle one having size 4 horizontaly, the first one having one third of the rest, and the second one two-thirds. So, assuming that the face had length 22.0, we will have three faces, of horizontal lengths  6.0, 4.0 and 12.0 respectively.
 
 Expressions
 ============ 
@@ -132,9 +142,11 @@ scale ( amount x, amount y ) -- taperizes the face with different values dependi
 
 translate ( x, y, z ) -- translates the face using the given coordinates. Note that all the face's vertices are translated!
 
+translater ( x, y, z ) -- same as above but uses relative values for x and y (relative to face height and width).
+
 chamfer ( amount ) -- chamfer substitutes all vertices of the face with two, and performes a chamfer on them, meaning that the new points will be in distance 'amount' from the original one, along the face edges. Warning: this operation should be only applied to a new, not yet connected face, for it doesn't refine the rest of the geometry.
 
-unchamfer ( ) -- operation to undo the previous one. It welds pairs of vertices in the face. Unfortunately this operation is suboptimal, for it leaves 4 unused vertices in the mesh.
+unchamfer ( ) -- operation to undo the previous one. It welds pairs of vertices in the face. 
 
 
 Generative
@@ -144,13 +156,15 @@ Note : "snap" argument is always optional, and allows the divisions to snap to n
 
 extrude ( amount ) [ list ] -- probably the most important operation. Extrudes the face by 'amount' in the direction of it's normal, producing a amount of additional faces equal to the amount of face sides. The faces are returned in the branch list. The original extruded face is returned.
 
+extrudet ( amount ) [ list ] -- the same as above, but also runs snap based texturing on all the faces.
+
 repeath ( snap ) [ list ] -- subdivides the current face into a number of segments horizontaly. The number of segments is the amount that can fill the face horizontally with segments of length snap. The segments are returned in the branch list, the last one is also returned as result.
 
-repeatv ( snap ) [ list ] -- subdivides the current face into a number of segments verticaly. The number of segments is the amount that can fill the face verticaly with segments of length snap. The segments are returned in the branch list, the last one is also returned as result.
+repeatv ( snap ) [ list ] -- the same as repeath, only verticaly.
 
-splith ( splitrules , snap ) [ list ] -- snap parameter is optional. Divides the current face into several faces  horizontaly, using 'splitrules' to determinate split position. The faces are returned in the branch list, the last one is also returned as result.
+splith ( splitrules , snap ) [ list ] -- Divides the current face into several faces  horizontaly, using 'splitrules' to determinate split position. The faces are returned in the branch list, the last one is also returned as result. Snap parameter is optional, and allows the divisions to snap to nearest snap line as defined by the argument. The argument is refined to the closest value that fills the lenght perfectly. 
 
-splitv ( splitrules , snap ) [ list ] -- snap parameter is optional. Divides the current face into several faces  verticaly, using 'splitrules' to determinate split position. The faces are returned in the branch list, the last one is also returned as result.
+splitv ( splitrules , snap ) [ list ] -- the same as splith only verticaly.
 
 
 Control
@@ -162,8 +176,9 @@ assign ( name = value ) -- assigns attribute 'name' with the 'value'.
 
 material ( number ) -- assignes the current and future faces produced from this point on material with the id 'number'.
 
-spawn ( rulename ) -- duplicates the current face, and uses it as a base to produce a NEW mesh, starting with the rule 'rulename'.
+loadmaterial ( name , file ) -- loads a texture for further use. Name is the attribute name it will be assigned, and file is the filename (in the media folder, and without the .png extension).
 
+spawn ( rulename ) -- duplicates the current face, and uses it as a base to produce a NEW mesh, starting with the rule 'rulename'.
 
 Texture
 --------
@@ -175,3 +190,23 @@ texturefull () -- textures the face fully using 1 and 0 values
 texturequad ( au, av, bu, bv ) -- textures the quad using the provided float values
 
 textureclear () -- clears the texcoords on the given face
+
+
+Multi-face
+-----------
+
+addface ( rulename ) -- this operation can be done only on multifaces. It runs rule "rulename" and adds the resulting shape to the current multiface. As it modifies the underlying face, this operation should be only done at ground level, before any generation is done. Also, "rulename" should generate a pure face, no geometry.
+
+detachface ( id ) -- this operation can be done only on multifaces. It substracts the face from the multiface, and returns the substracted parts in the branch list. Note that the substraction happens only at those parts that are unique to the detached face.
+
+multiface ( ) -- marks the current face as multiface. As it destroys the underlying face, this operation should be only done at ground level, before any generation is done. 
+
+
+Other
+------
+
+ngon ( sides , size ) -- creates an n-sided polygon in the center of the given face. This one renders the face it was created upon INVALID, so it should be only used at the start of generation work. Optional size parameter may be used to specify it's radius, otherwise a maximum radius within the borders of the given face is used.
+
+remove ( ) -- removes the face, or more precisely renders it "invisible".
+
+free ( ) -- removes the face completely and marks all vertices used by it for reusage. 
