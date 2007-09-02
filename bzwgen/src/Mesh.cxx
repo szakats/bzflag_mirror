@@ -216,8 +216,8 @@ Vertex Mesh::faceNormal(int fid) {
 
 IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
   double len = horizontal ? faceH(fid) : faceV(fid);
-  len = refinesnap(snap,len);
-  return subdivdeFace(fid,int(len/snap),horizontal);
+  snap = refinesnap(snap,len);
+  return subdivdeFace(fid,roundToInt(len/snap),horizontal);
 }
 
 IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, double ssnap) {
