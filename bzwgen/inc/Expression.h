@@ -30,6 +30,8 @@ public:
   virtual ~Expression() {};
 };
 
+typedef std::vector<Expression*> ExpressionVector;
+
 class ExpressionConst : public Expression {
   double value;
 public:
@@ -146,8 +148,6 @@ public:
   ExpressionOr(Expression* _a, Expression* _b) : ExpressionDouble(_a,_b) {}
   double calc(double av, double bv) { if (av >= 0.0 || bv >= 0.0)return 1.0; else return -1.0; }
 };
-
-
 
 #endif /* __EXPRESSION_H__ */
 

@@ -280,14 +280,14 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
     b = b + stepB*sdata->at(i);
 
     if (ssnap > EPSILON) {
-      Vertex A = v[as]-a;
-      Vertex B = v[bs]-b;
+      Vertex A = a-v[as];
+      Vertex B = b-v[bs];
 
       double la = A.length();
       double lb = B.length();
 
-      Vertex sa = v[as]-(A.norm()*snap(la,s));
-      Vertex sb = v[bs]-(B.norm()*snap(lb,s));
+      Vertex sa = v[as]+(A.norm()*snap(la,s));
+      Vertex sb = v[bs]+(B.norm()*snap(lb,s));
 
       ai = addVertex(sa);
       bi = addVertex(sb);

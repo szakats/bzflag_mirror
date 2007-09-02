@@ -322,9 +322,9 @@ public:
 
 class OperationSplitFace : public OperationMultifaces {
   bool horiz;
-  DoubleVector* splits;
+  ExpressionVector* splits;
 public:
-  OperationSplitFace(RuleSet* _ruleset, bool _horiz, StringVector* facerules, DoubleVector* _splits, Expression* _esnap = NULL) : OperationMultifaces(_ruleset,_esnap,facerules), horiz(_horiz), splits(_splits) {}
+  OperationSplitFace(RuleSet* _ruleset, bool _horiz, StringVector* facerules, ExpressionVector* _splits, Expression* _esnap = NULL) : OperationMultifaces(_ruleset,_esnap,facerules), horiz(_horiz), splits(_splits) {}
   int runMesh(Mesh* mesh,int face);
 };
 

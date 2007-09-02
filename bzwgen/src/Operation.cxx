@@ -149,16 +149,22 @@ int OperationSubdivide::runMesh(Mesh* mesh,int face) {
 
 int OperationSplitFace::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
+
+  DoubleVector* dv = new DoubleVector(splits->size());
+  for (size_t i = 0; i < splits->size(); i++) 
+    (*dv)[i] = splits->at(i)->calculate(mesh,face);
+
   if (exp != NULL)
-    faces = mesh->splitFace(face,splits,horiz,exp->calculate(mesh,face));
+    faces = mesh->splitFace(face,dv,horiz,exp->calculate(mesh,face));
   else
-    faces = mesh->splitFace(face,splits,horiz);
+    faces = mesh->splitFace(face,dv,horiz);
   if (facerules == NULL) {
     delete faces;
     faces = NULL;
   } else {
     OperationMultifaces::runMesh(mesh,face);
   }
+  delete dv;
   return face; 
 }
 

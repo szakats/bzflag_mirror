@@ -20,7 +20,7 @@ void yyunput(int, char*);
   Product* p;
   OperationVector* ov;
   StringVector* ids;
-  DoubleVector* dv;
+  ExpressionVector* ev;
   Operation* o;
   Expression* e;
 }
@@ -43,7 +43,7 @@ void yyunput(int, char*);
 %type <o> op
 %type <e> expr cond
 %type <ids> faces faceparam singleface
-%type <dv> splitparams
+%type <ev> splitparams
 %%
 ruleset : /* empty */
   | ruleset NONTERM products ';' { 
@@ -75,8 +75,8 @@ singleface : /* empty */ { $$ = NULL; }
 ops : /* empty */ { $$ = new OperationVector(); }
   | ops op { $$ = $1; $$->push_back($2); }
 ;
-splitparams : /* empty */  { $$ = new DoubleVector(); }
-  | splitparams NUMBER { $$->push_back($2); }
+splitparams : /* empty */  { $$ = new ExpressionVector(); }
+  | splitparams expr { $$->push_back($2); }
 ;
 op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); }
   | EXTRUDET '(' expr ')' faceparam { $$ = new OperationExtrudeT(ruleset,$3,$5); }

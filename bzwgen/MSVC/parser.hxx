@@ -135,7 +135,7 @@ typedef union _YYSTYPE {
   Product* p;
   OperationVector* ov;
   StringVector* ids;
-  DoubleVector* dv;
+  ExpressionVector* ev;
   Operation* o;
   Expression* e;
 } YYSTYPE;
