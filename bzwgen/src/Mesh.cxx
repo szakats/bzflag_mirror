@@ -223,6 +223,7 @@ IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
 IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal) {
   IntVector* cnr = f[fid]->vtx;
   Vertex stepA, stepB;
+  DoubleVector* sdata(splitData->size());
   int splits = splitData->size()-1;
 
   double length = horizontal ? faceH(fid) : faceV(fid);
@@ -230,13 +231,14 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal) {
   double lsum = 0.0;
   for (int i = 0; i < splits+1; i++) {
     double value = splitData->at(i);
+    (*sdata)[i] = value;
     if (value >= 0.0) lsum += value; else relsum += -value;
   }
   if (relsum > 0) {
     double relperunit = ( length-lsum ) / relsum;
     for (int i = 0; i < splits+1; i++) {
-      double value = splitData->at(i);
-      if (value < 0.0) (*splitData)[i] = -value*relperunit;
+      double value = sdata->at(i);
+      if (value < 0.0) (*sdata)[i] = -value*relperunit;
     }
   }  
 
@@ -265,8 +267,8 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal) {
   Vertex b = v[bs];
 
   for (int i = 0; i < splits; i++) {
-    a = a + stepA*splitData->at(i);
-    b = b + stepB*splitData->at(i);
+    a = a + stepA*sdata->at(i);
+    b = b + stepB*sdata->at(i);
 
     ai = addVertex(a);
     bi = addVertex(b);
@@ -288,6 +290,7 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal) {
   } else {
     f[fid]->setID4(ID4(ai,bi,cnr->at(2),cnr->at(3)));
   }
+  delete sdata;
   return result;
 }
 
