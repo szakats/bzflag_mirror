@@ -33,7 +33,7 @@ public:
 	ObserverMessageType type;
 	void* data;
 	
-	ObserverMessage(ObserverMessageType type, void* data) { this->type = type; this->data = data; }
+	ObserverMessage(ObserverMessageType _type, void* _data) { this->type = _type; this->data = _data; }
 	
 };
 

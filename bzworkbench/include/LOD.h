@@ -45,22 +45,22 @@ public:
 	
 	// setter
 	int update(string& data) {
-		const char* header = this->getHeader().c_str();
+		const char* _header = this->getHeader().c_str();
 		
 		// get the data
-		vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
+		vector<string> lines = BZWParser::getSectionsByHeader(_header, data.c_str());
 		
 		// make sure we only have one
 		if(lines[0] == BZW_NOT_FOUND)
 			return 0;
-		if(!hasOnlyOne(lines, header))
+		if(!hasOnlyOne(lines, _header))
 			return 0;
 			
 		// get the data
 		const char* lodData = lines[0].c_str();
 		
 		// get the lengthPerPixel values
-		vector<string> lppVals = BZWParser::getValuesByKey("lengthPerPixel", header, lodData);
+		vector<string> lppVals = BZWParser::getValuesByKey("lengthPerPixel", _header, lodData);
 			
 		// get the sections beginning with matref and create LODCommand lists from them
 		vector<string> matrefSections = BZWParser::getSectionsByHeader("matref", lodData);

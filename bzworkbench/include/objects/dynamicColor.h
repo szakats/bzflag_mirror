@@ -49,7 +49,7 @@ public:
 	vector<ColorCommand>& getAlphaCommands() { return this->alphaCommands; }
 	
 	// setters
-	void setName( const string& name ) { this->name = name; }
+	void setName( const string& _name ) { this->name = _name; }
 	void setRedCommands( const vector<ColorCommand>& commands ) { this->redCommands = commands; }
 	void setGreenCommands( const vector<ColorCommand>& commands ) { this->greenCommands = commands; }
 	void setBlueCommands( const vector<ColorCommand>& commands ) { this->blueCommands = commands; }

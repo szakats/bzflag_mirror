@@ -68,34 +68,34 @@ public:
 		this->data = data;
 	}
 	*/
-	UpdateMessage( int type, osg::Vec3* data ) {
-		this->type = type;
-		this->data.vec = data;
+	UpdateMessage( int _type, osg::Vec3* _data ) {
+		this->type = _type;
+		this->data.vec = _data;
 	}
 	
-	UpdateMessage( int type, osg::Quat* data ) {
-		this->type = type;
-		this->data.quat = data;
+	UpdateMessage( int _type, osg::Quat* _data ) {
+		this->type = _type;
+		this->data.quat = _data;
 	}
 	
-	UpdateMessage( int type, BZTransform* data ) {
-		this->type = type;
-		this->data.transform = data;
+	UpdateMessage( int _type, BZTransform* _data ) {
+		this->type = _type;
+		this->data.transform = _data;
 	}
 	
-	UpdateMessage( int type, vector< osg::ref_ptr<BZTransform> >* data) {
-		this->type = type;
-		this->data.transforms = data;
+	UpdateMessage( int _type, vector< osg::ref_ptr<BZTransform> >* _data) {
+		this->type = _type;
+		this->data.transforms = _data;
 	}
 	
-	UpdateMessage( int type, material* data ) {
-		this->type = type;
-		this->data.mat = data;
+	UpdateMessage( int _type, material* _data ) {
+		this->type = _type;
+		this->data.mat = _data;
 	}
 	
-	UpdateMessage( int type, vector< osg::ref_ptr<material> >* data ) {
-		this->type = type;
-		this->data.materials = data;
+	UpdateMessage( int _type, vector< osg::ref_ptr<material> >* _data ) {
+		this->type = _type;
+		this->data.materials = _data;
 	}
 	
 	// message-specific getters (ensure type-safety)

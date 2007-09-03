@@ -28,9 +28,9 @@ class Point3D : public osg::Vec3
 	
 	Point3D() : osg::Vec3( 0, 0, 0 ) { }
 	
-	Point3D(float x, float y, float z) : osg::Vec3( x, y, z ) { }
+	Point3D(float _x, float _y, float _z) : osg::Vec3( _x, _y, _z ) { }
 	
-	Point3D(double x, double y, double z) : osg::Vec3( x, y, z ) { }
+	Point3D(double _x, double _y, double _z) : osg::Vec3( _x, _y, _z ) { }
 	
 	Point3D( osg::Vec3 pt ) : osg::Vec3( pt ) { }
 	

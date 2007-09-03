@@ -147,9 +147,9 @@ DataEntry* Model::command(const string& command, const string& object, const str
 
 // the *real* query method
 // TODO: add more features
-DataEntry* Model::_command(const string& command, const string& object, const string& name, const string& data) {
+DataEntry* Model::_command(const string& _command, const string& object, const string& name, const string& _data) {
 	// see if this is a "get" command
-	if( command == MODEL_GET ) {
+	if( _command == MODEL_GET ) {
 		// determine which type of object
 		
 		// handle dynamicColor
@@ -847,8 +847,8 @@ bool Model::_pasteSelection() {
 			continue;
 		}
 		
-		string data = (*i)->toString();
-		obj->update( data );
+		string _data = (*i)->toString();
+		obj->update( _data );
 		obj->setPos( obj->getPos() + osg::Vec3(10.0, 10.0, 0.0) );
 		
 		this->_addObject( obj );
@@ -894,8 +894,8 @@ bool Model::_newWorld() {
 	theNewWorld.push_back( newOptions.toString() );
 	
 	// add a default new "world" object
-	world newWorld = world();
-	theNewWorld.push_back( newWorld.toString() );
+	world _newWorld = world();
+	theNewWorld.push_back( _newWorld.toString() );
 	
 	// build a blank world
 	this->_build( theNewWorld );
@@ -991,22 +991,22 @@ ConfigurationDialog* Model::_configureObject( DataEntry* d ) {
 }
 
 // group objects together
-void Model::groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) { modRef->_groupObjects( objects ); }
-void Model::_groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) {
+void Model::groupObjects( vector< osg::ref_ptr< bz2object > >& _objects ) { modRef->_groupObjects( _objects ); }
+void Model::_groupObjects( vector< osg::ref_ptr< bz2object > >& _objects ) {
 	// create a "define" object for these objects if one does not exist yet
 	define* def = new define();
-	if( !def || objects.size() == 0 )
+	if( !def || _objects.size() == 0 )
 		return;
 		
 	// unselect all objects
-	for( vector< osg::ref_ptr< bz2object > >::iterator i = this->objects.begin(); i != this->objects.end(); i++) {
+	for( vector< osg::ref_ptr< bz2object > >::iterator i = _objects.begin(); i != _objects.end(); i++) {
 		this->_setUnselected( i->get() );
 	}
 	
 	string defName = SceneBuilder::makeUniqueName("define");
 	
 	// assign the objects
-	def->setObjects( objects );
+	def->setObjects( _objects );
 	
 	// set the name
 	def->setName( defName );
@@ -1024,7 +1024,7 @@ void Model::_groupObjects( vector< osg::ref_ptr< bz2object > >& objects ) {
 	groups[ defName ] = def;
 	
 	// remove all the objects within the passed vector (they are now part of the define)
-	for( vector< osg::ref_ptr< bz2object > >::iterator i = this->objects.begin(); i != this->objects.end(); i++ ) {
+	for( vector< osg::ref_ptr< bz2object > >::iterator i = _objects.begin(); i != _objects.end(); i++ ) {
 		this->_removeObject( i->get() );
 	}
 	

@@ -61,7 +61,7 @@ public:
 	string& getWeapon() { return weapon; }
 	
 	void setTeam( int team );
-	void setWeapon( const char* weapon ) { weapon = weapon; }
+	void setWeapon( const char* weapon ) { this->weapon = weapon; }
 	
 private:
 	int team;

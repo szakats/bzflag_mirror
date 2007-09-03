@@ -56,24 +56,24 @@ public:
 	
 	// setter
 	int update(string& data) {
-		const char* header = this->getHeader().c_str();
+		const char* _header = this->getHeader().c_str();
 		
 		// get the chunk
-		vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str(), "endface");
+		vector<string> lines = BZWParser::getSectionsByHeader(_header, data.c_str(), "endface");
 		
 		// break if there are none
 		if(lines[0] == BZW_NOT_FOUND)
 			return 0;
 			
 		// break if we have more than one
-		if(!hasOnlyOne(lines, header))
+		if(!hasOnlyOne(lines, _header))
 			return 0;
 			
 		// get the data
 		const char* faceData = lines[0].c_str();
 		
 		// get the vertices
-		vector<string> vertexVals = BZWParser::getValuesByKey("vertices", header, faceData);
+		vector<string> vertexVals = BZWParser::getValuesByKey("vertices", _header, faceData);
 		if(!hasOnlyOne(vertexVals, "vertices"))
 			return 0;
 		if(vertexVals.size() > 0 && BZWParser::getLineElements( vertexVals[0].c_str() ).size() < 3) {
@@ -82,36 +82,36 @@ public:
 		}
 			
 		// get the texcoords
-		vector<string> texCoordVals = BZWParser::getValuesByKey("texcoords", header, faceData);
+		vector<string> texCoordVals = BZWParser::getValuesByKey("texcoords", _header, faceData);
 		if(texCoordVals.size() > 1) {
 			printf("mesh::face::update(): Error! Defined \"texcoord\" %d times!\n", texCoordVals.size());
 			return 0;	
 		}
 		
 		// get the normals
-		vector<string> normalVals = BZWParser::getValuesByKey("normals", header, faceData);
+		vector<string> normalVals = BZWParser::getValuesByKey("normals", _header, faceData);
 		if(normalVals.size() > 1) {
 			printf("mesh::face::update(): Error! Defined \"normal\" %d times!\n", normalVals.size());
 			return 0;	
 		}
 		
 		// get the physics driver
-		vector<string> physicsDriverVals = BZWParser::getValuesByKey("phydrv", header, faceData);
+		vector<string> physicsDriverVals = BZWParser::getValuesByKey("phydrv", _header, faceData);
 		if(physicsDriverVals.size() > 1) {
 			printf("mesh::face::update(): Error! Defined \"phydrv\" %d times!\n", physicsDriverVals.size());
 		}
 		
 		// get the materials
-		vector<string> matrefVals = BZWParser::getValuesByKey("matref", header, faceData);
+		vector<string> matrefVals = BZWParser::getValuesByKey("matref", _header, faceData);
 		
 		// get passable
-		vector<string> passableVals = BZWParser::getValuesByKey("passable", header, faceData);
+		vector<string> passableVals = BZWParser::getValuesByKey("passable", _header, faceData);
 		
 		// get drivethrough
-		vector<string> driveThroughVals = BZWParser::getValuesByKey("drivethrough", header, faceData);
+		vector<string> driveThroughVals = BZWParser::getValuesByKey("drivethrough", _header, faceData);
 		
 		// get shootthrough
-		vector<string> shootThroughVals = BZWParser::getValuesByKey("shootthrough", header, faceData);
+		vector<string> shootThroughVals = BZWParser::getValuesByKey("shootthrough", _header, faceData);
 		
 		// do base-class update
 		if(!DataEntry::update(data))

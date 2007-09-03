@@ -46,7 +46,7 @@ public:
 	string& getName() { return this->name; }
 	
 	// setters
-	void setName( const string& name ) { this->name = name; }
+	void setName( const string& _name ) { this->name = _name; }
 	
 private:
 

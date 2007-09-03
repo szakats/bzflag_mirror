@@ -40,11 +40,11 @@ class TexCoord2D {
 	}
 	
 	TexCoord2D(float u, float v) {
-		u = u; v = v;
+		this->u = u; this->v = v;
 	}
 	
 	TexCoord2D(double u, double v) {
-		u = (float)u; v = (float)v;
+		this->u = (float)u; this->v = (float)v;
 	}
 	
 	string toString(void) {

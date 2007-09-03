@@ -23,43 +23,43 @@ bool EventHandlerCollection::addEventHandler( const char* _name, BZEventHandler*
 }
 
 // remove an event handler
-bool EventHandlerCollection::removeEventHandler( const char* _name ) {
-	string name = string(_name);
-	if( eventHandlers.count( name ) <= 0)
+bool EventHandlerCollection::removeEventHandler( const char* n ) {
+	string _name = string(n);
+	if( eventHandlers.count( _name ) <= 0)
 		return false;
 	
-	eventHandlers.erase( name );
+	eventHandlers.erase( _name );
 	return true;
 }
 
 // get an event handler
-osg::ref_ptr< BZEventHandler > EventHandlerCollection::getEventHandler( const char* name ) {
-	return eventHandlers[ string(name) ];
+osg::ref_ptr< BZEventHandler > EventHandlerCollection::getEventHandler( const char* _name ) {
+	return eventHandlers[ string(_name) ];
 }
 
 // set an event handler
-osg::ref_ptr< BZEventHandler > EventHandlerCollection::setEventHandler( const char* _name, BZEventHandler* eventHandler ) {
+osg::ref_ptr< BZEventHandler > EventHandlerCollection::setEventHandler( const char* _n, BZEventHandler* eventHandler ) {
 	osg::ref_ptr< BZEventHandler > prevHandler = NULL;
-	string name = string(_name);
+	string _name = string(_n);
 	
-	if( eventHandlers.count( name ) > 0 )	
-		prevHandler = eventHandlers[ name ];
+	if( eventHandlers.count( _name ) > 0 )	
+		prevHandler = eventHandlers[ _name ];
 		
-	eventHandlers[name] = osg::ref_ptr< BZEventHandler >( eventHandler );
+	eventHandlers[_name] = osg::ref_ptr< BZEventHandler >( eventHandler );
 	
 	return prevHandler;
 }
 
 // assign a current event handler
-void EventHandlerCollection::makeCurrentHandler( const char* _name )  {
-	if(_name == NULL) {
+void EventHandlerCollection::makeCurrentHandler( const char* _n )  {
+	if(_n == NULL) {
 		currentEventHandler = NULL;
 		return;	
 	}
 	
-	string name = string(_name);
-	if( eventHandlers.count( name ) > 0 ) {
-		currentEventHandler = eventHandlers[ name ].get();
+	string _name = string(_n);
+	if( eventHandlers.count( _name ) > 0 ) {
+		currentEventHandler = eventHandlers[ _name ].get();
 	}
 }
 

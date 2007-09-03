@@ -54,7 +54,7 @@ public:
 	teleporter* getTo() { return to; }
 	
 	// setters
-	void setName( const string& _name ) { name = _name; }
+	void setName( const string& _name ) { this->name = _name; }
 	void setFrom( teleporter* _from ) { from = _from; }
 	void setTo( teleporter* _to ) { to = _to; }
 	

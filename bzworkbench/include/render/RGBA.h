@@ -31,25 +31,25 @@ public:
 	
 	RGBA() : osg::Vec4( 0.0, 0.0, 0.0, 0.0 ) { }
 	
-	RGBA(float r, float g, float b, float a) : osg::Vec4( r, g, b, a ) { }
+	RGBA(float _r, float _g, float _b, float _a) : osg::Vec4( _r, _g, _b, _a ) { }
 	
 	RGBA( const osg::Vec4d& vec ) : osg::Vec4( vec ) { }
 	
 	RGBA(const char* description) {
 		vector<string> points = BZWParser::getLineElements(description);
-		float r, g, b, a;
+		float _r, _g, _b, _a;
 		// only initialize from the string if there are at least 4 elements
 		if(points.size() >= 4) {
-			r = atof( points[0].c_str() );
-			g = atof( points[1].c_str() );
-			b = atof( points[2].c_str() );
-			a = atof( points[3].c_str() );
+			_r = atof( points[0].c_str() );
+			_g = atof( points[1].c_str() );
+			_b = atof( points[2].c_str() );
+			_a = atof( points[3].c_str() );
 		}
 		else {
-			r = g = b = a = 0;	
+			_r = _g = _b = _a = 0;	
 		}
 		
-		set( r, g, b, a );
+		this->set( _r, _g, _b, _a );
 	}
 	
 	string toString(void) {

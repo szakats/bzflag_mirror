@@ -72,10 +72,10 @@ public:
 	// does a line have a key?
 	bool hasKey(const string& line) {
 		// get the keys
-		vector<string> keys = getKeys();
+		vector<string> _keys = getKeys();
 		
 		// determine whether or not the line starts with one of them
-		for(vector<string>::iterator i = keys.begin(); i != keys.end(); i++) {
+		for(vector<string>::iterator i = _keys.begin(); i != _keys.end(); i++) {
 			if(line.find(*i) == 0)
 				return true;	
 		}
@@ -148,28 +148,28 @@ public:
 		vector<string> ret = vector<string>();
 		
 		// get the string
-		string keys = getKeyString();
+		string _keys = getKeyString();
 		
 		// parse the string
 		while(true) {
 			// find a <
-			string::size_type start = keys.find("<", 0);
+			string::size_type start = _keys.find("<", 0);
 			
 			// find a >
-			string::size_type end = keys.find(">", 0);
+			string::size_type end = _keys.find(">", 0);
 			
 			// get the stuff in between
-			string key = keys.substr(start+1, end - (start+1));
+			string key = _keys.substr(start+1, end - (start+1));
 			
 			// add it
 			ret.push_back(key);
 			
 			// break if we're out of keys
-			if(keys.find("<", end) == string::npos)
+			if(_keys.find("<", end) == string::npos)
 				break;
 			
 			// remove the key from keys
-			keys = keys.substr(end + 1);
+			_keys = _keys.substr(end + 1);
 			
 		}
 		

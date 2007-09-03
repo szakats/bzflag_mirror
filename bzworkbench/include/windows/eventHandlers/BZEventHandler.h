@@ -30,7 +30,7 @@ class BZEventHandler : public osgGA::GUIEventHandler {
 	
 public:
 
-	BZEventHandler( View* view ) { this->view = view; }
+	BZEventHandler( View* _view ) { this->view = _view; }
 	~BZEventHandler() {}
 	
 	// the handler

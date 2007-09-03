@@ -23,9 +23,9 @@ class Vector3D : public Point3D
 	// constructors
 	Vector3D() : Point3D() { }
 	
-	Vector3D(float x, float y, float z) : Point3D(x, y, z) { }
+	Vector3D(float _x, float _y, float _z) : Point3D(_x, _y, _z) { }
 	
-	Vector3D(double x, double y, double z) : Point3D((float)x, (float)y, (float)z) { }
+	Vector3D(double _x, double _y, double _z) : Point3D((float)_x, (float)_y, (float)_z) { }
 	
 	Vector3D(const char* data) : Point3D(data) { }
 	

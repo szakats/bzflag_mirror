@@ -79,7 +79,7 @@ public:
 	bool usesGroupAlpha() { return groupAlpha; }
 	bool usesOccluder() { return occluder; }
 	
-	void setName( const string& _name ) { name = _name; }
+	void setName( const string& _name ) { this->name = _name; }
 	void setDynamicColor( dynamicColor* _dynCol ) { dynCol = _dynCol; }
 	void setTextureMatrix( texturematrix* texmat ) { textureMatrix = texmat; }
 	
@@ -121,7 +121,7 @@ public:
 	
 	void setShininess( float shininess ) { getCurrentMaterial()->setShininess( osg::Material::FRONT, shininess );  }
 	
-	void setAlphaThreshold( float alphaThreshold ) { alphaThreshold = alphaThreshold; }
+	void setAlphaThreshold( float alphaThreshold ) { this->alphaThreshold = alphaThreshold; }
 	void useTextures( bool value ) { noTextures = !value; }
 	void useTexColor( bool value ) { noTexColor = !value; }
 	void useSphereMap( bool value ) { spheremap = value; }

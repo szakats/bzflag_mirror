@@ -77,39 +77,39 @@ public:
 		
 	// setter
 	int update(string& data) {
-		const char* header = this->getHeader().c_str();
+		const char* _header = this->getHeader().c_str();
 		
 		// get the section
-		vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
+		vector<string> lines = BZWParser::getSectionsByHeader(_header, data.c_str());
 		
 		// break if there's no section
 		if(lines[0] == BZW_NOT_FOUND)
 			return 0;
 			
 		// break if there's too many
-		if(!hasOnlyOne(lines, header))
+		if(!hasOnlyOne(lines, _header))
 			return 0;
 			
 		// get the data
 		const char* drawInfoData = lines[0].c_str();
 		
 		// get the vertices
-		vector<string> vertexVals = BZWParser::getValuesByKey("vertex", header, drawInfoData);
+		vector<string> vertexVals = BZWParser::getValuesByKey("vertex", _header, drawInfoData);
 		
 		// get the texcoords
-		vector<string> texCoordVals = BZWParser::getValuesByKey("texcoord", header, drawInfoData);
+		vector<string> texCoordVals = BZWParser::getValuesByKey("texcoord", _header, drawInfoData);
 		
 		// get the normals
-		vector<string> normalVals = BZWParser::getValuesByKey("normal", header, drawInfoData);
+		vector<string> normalVals = BZWParser::getValuesByKey("normal", _header, drawInfoData);
 		
 		// get the dlist
-		vector<string> dlistVals = BZWParser::getValuesByKey("dlist", header, drawInfoData);
+		vector<string> dlistVals = BZWParser::getValuesByKey("dlist", _header, drawInfoData);
 		
 		// get the decorative
-		vector<string> decorativeVals = BZWParser::getValuesByKey("decorative", header, drawInfoData);
+		vector<string> decorativeVals = BZWParser::getValuesByKey("decorative", _header, drawInfoData);
 		
 		// get angvel
-		vector<string> angvelVals = BZWParser::getValuesByKey("angvel", header, drawInfoData);
+		vector<string> angvelVals = BZWParser::getValuesByKey("angvel", _header, drawInfoData);
 		if(angvelVals.size() > 1) {
 			printf("mesh::DrawInfo::update(): Error! Defined \"angvel\" %d times!\n", angvelVals.size());
 			return 0;	
@@ -118,10 +118,10 @@ public:
 			return 0;
 		
 		// get corners
-		vector<string> cornerVals = BZWParser::getValuesByKey("corner", header, drawInfoData);
+		vector<string> cornerVals = BZWParser::getValuesByKey("corner", _header, drawInfoData);
 		
 		// get spheres
-		vector<string> sphereVals = BZWParser::getValuesByKey("sphere", header, drawInfoData);
+		vector<string> sphereVals = BZWParser::getValuesByKey("sphere", _header, drawInfoData);
 		if(sphereVals.size() > 1) {
 			printf("mesh::DrawInfo::update(): Error! Defined \"sphere\" %d times!\n", sphereVals.size());
 			return 0;	
@@ -130,7 +130,7 @@ public:
 			return 0;
 		
 		// get extends
-		vector<string> extendsVals = BZWParser::getValuesByKey("extends", header, drawInfoData);
+		vector<string> extendsVals = BZWParser::getValuesByKey("extends", _header, drawInfoData);
 		if(extendsVals.size() > 1) {
 			printf("mesh::DrawInfo::update(): Error! Defined \"extends\" %d times!\n", sphereVals.size());
 			return 0;	

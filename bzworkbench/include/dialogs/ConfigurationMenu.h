@@ -37,7 +37,7 @@ public:
 	virtual ~ConfigurationMenu() { }
 	
 	// update the object
-	void setObject( bz2object* obj ) {this->obj = obj; this->buildMenu(); }
+	void setObject( bz2object* _obj ) {this->obj = _obj; this->buildMenu(); }
 	
 	// static callbacks
 	static void translate_x(Fl_Widget* w, void* data) {

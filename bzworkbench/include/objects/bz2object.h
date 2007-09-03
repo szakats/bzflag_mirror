@@ -146,8 +146,8 @@ class bz2object : public Renderable, public DataEntry
 		
 		// data setters (makes MasterConfigurationDialog code easier)
 		void setPhyDrv( physics* phydrv ) { physicsDriver = phydrv; }
-		void setTransforms( vector< osg::ref_ptr<BZTransform> >& transformations ) { transformations = transformations; }
-		void setMaterials( vector< osg::ref_ptr< material > >& materials ) { materials = materials; }
+		void setTransforms( vector< osg::ref_ptr<BZTransform> >& _transformations ) { this->transformations = _transformations; }
+		void setMaterials( vector< osg::ref_ptr< material > >& _materials ) { this->materials = _materials; }
 		void setSelected( bool value ) { selected = value; }
 		
 		// use this instead of setScale();

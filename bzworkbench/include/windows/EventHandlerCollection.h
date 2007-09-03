@@ -51,7 +51,7 @@ using namespace std;
 class EventHandlerCollection : public osgGA::GUIEventHandler {
 public: 
 
-    EventHandlerCollection( const View* view ) { view = view; currentEventHandler = NULL; }
+    EventHandlerCollection( const View* _view ) { this->view = _view; currentEventHandler = NULL; }
     ~EventHandlerCollection() {}
     
     // handle an event

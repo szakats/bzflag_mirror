@@ -186,7 +186,7 @@ void MainWindow::error(const char* errorText) {
 }
 
 // launch a MasterConfigurationDialog with the configure button
-void MainWindow::configureCallback_real( Fl_Widget* w ) {
+void MainWindow::configureCallback_real( Fl_Widget* _w ) {
 	
 	Model::objRefList selection = model->getSelection();
 	if( selection.size() > 1 || selection.size() == 0 )

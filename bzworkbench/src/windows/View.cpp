@@ -15,11 +15,11 @@
 const double View::DEFAULT_ZOOM = 75.0;
 
 // view constructor
-View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *label) :
-	RenderWindow(x,y,w,h) {
+View::View(Model* m, MainWindow* _mw, int _x, int _y, int _w, int _h, const char *_label) :
+	RenderWindow(_x,_y,_w,_h) {
 	
 	// set OSG viewport
-    this->getCamera()->setViewport(new osg::Viewport(0,0,w,h));
+    this->getCamera()->setViewport(new osg::Viewport(0,0,_w,_h));
     
     // get the graphics context
     this->getCamera()->setGraphicsContext(getGraphicsWindow());
@@ -60,8 +60,8 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
 	// build the scene from the model
 	Model::objRefList objects = model->getObjects();
 	if(objects.size() > 0) {
-		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
-			root->addChild( i->get() );
+		for(Model::objRefList::iterator _i = objects.begin(); _i != objects.end(); _i++) {
+			root->addChild( _i->get() );
 		}
 	}
 	
@@ -95,7 +95,7 @@ View::View(Model* m, MainWindow* mw, int x, int y, int w, int h, const char *lab
    this->addEventHandler(eventHandlers);
    
    // assign the parent reference
-   this->mw = mw;
+   this->mw = _mw;
    
    // build the mouse button map
    this->buildMouseButtonMap();

@@ -41,19 +41,19 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		}
 		
 		BZTransform( string _name, vector<float> _data ) : DataEntry("", ""), osg::MatrixTransform() {
-			name = _name;
-			data = _data;
-			refreshMatrix();
+			this->name = _name;
+			this->data = _data;
+			this->refreshMatrix();
 		} 
 		
 		BZTransform( string _name, float n1, float n2, float n3, float n4 ) : DataEntry("", ""), osg::MatrixTransform() {
-			name = _name;
-			data = vector<float>();
-			data.push_back(n1);
-			data.push_back(n2);
-			data.push_back(n3);
-			data.push_back(n4);
-			refreshMatrix();
+			this->name = _name;
+			this->data = vector<float>();
+			this->data.push_back(n1);
+			this->data.push_back(n2);
+			this->data.push_back(n3);
+			this->data.push_back(n4);
+			this->refreshMatrix();
 		}
 		
 		// getter
