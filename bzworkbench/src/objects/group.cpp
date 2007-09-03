@@ -15,38 +15,38 @@
 // constructor
 group::group() : 
 	bz2object("group", "<shift><shear><scale><spin><team><tint><drivethrough><shootthrough><phydrv><matref>") {
-	team = 0;
-	def = NULL;
-	tintColor = RGBA(1, 1, 1, 1);
-	driveThrough = false;
-	shootThrough = false;
-	setName("");
-	setPos( osg::Vec3( 0.0, 0.0, 0.0 ) );
+	this->team = 0;
+	this->def = NULL;
+	this->tintColor = RGBA(1, 1, 1, 1);
+	this->driveThrough = false;
+	this->shootThrough = false;
+	this->setName("");
+	this->setPos( osg::Vec3( 0.0, 0.0, 0.0 ) );
 	
-	container = new Renderable();
-	geoRing = NULL;
+	this->container = new Renderable();
+	this->geoRing = NULL;
 }
 
 // constructor with data
 group::group(string& data) : 
 	bz2object("group", "<shift><shear><scale><spin><team><tint><drivethrough><shootthrough><phydrv><matref>", data.c_str()) {
-	team = 0;
-	def = NULL;
-	tintColor = RGBA(1, 1, 1, 1);
-	driveThrough = false;
-	shootThrough = false;
-	setName("");
-	setPos( osg::Vec3( 0.0, 0.0, 0.0 ) );
+	this->team = 0;
+	this->def = NULL;
+	this->tintColor = RGBA(1, 1, 1, 1);
+	this->driveThrough = false;
+	this->shootThrough = false;
+	this->setName("");
+	this->setPos( osg::Vec3( 0.0, 0.0, 0.0 ) );
 	
-	container = new Renderable();
-	geoRing = NULL;
+	this->container = new Renderable();
+	this->geoRing = NULL;
 	
-	update(data);
+	this->update(data);
 }
 
 // getter
 string group::get(void) {
-	return toString(); 
+	return this->toString(); 
 }
 
 // setter
@@ -124,47 +124,47 @@ int group::update( UpdateMessage& message ) {
 	// make sure we keep the Euler "spin" transformations 0 in the group
 	// and forward any existing ones to the container node
 	osg::Vec3 rot = getRotation();
-	if( container.get() != NULL )
-		container->setRotation( rot );
+	if( this->container.get() != NULL )
+		this->container->setRotation( rot );
 		
-	setRotation( osg::Vec3( 0, 0, 0 ) );
+	this->setRotation( osg::Vec3( 0, 0, 0 ) );
 	
 	// NOW handle the messages
 	switch( message.type ) {
 		
 		case UpdateMessage::SET_POSITION: {
-			setPos( *(message.getAsPosition()) );
+			this->setPos( *(message.getAsPosition()) );
 			
 			break;
 		}
 			
 		case UpdateMessage::SET_POSITION_FACTOR: {	// handle a translation
-			setPos( getPos() + *(message.getAsPositionFactor()) );
+			this->setPos( this->getPos() + *(message.getAsPositionFactor()) );
 			
 			break;
 		}
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
 			// propogate rotation events to the children objects
-			container->setRotation( *(message.getAsRotation()) );
-			buildGeometry();
+			this->container->setRotation( *(message.getAsRotation()) );
+			this->buildGeometry();
 			
 			break;
 			
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
-			container->setRotation( *(message.getAsRotationFactor()) + container->getRotation()  );
-			buildGeometry();
+			this->container->setRotation( *(message.getAsRotationFactor()) + this->container->getRotation()  );
+			this->buildGeometry();
 			
 			break;
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
-			container->setScale( *(message.getAsScale()) );
-			buildGeometry();
+			this->container->setScale( *(message.getAsScale()) );
+			this->buildGeometry();
 			
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
-			container->setScale( *(message.getAsScaleFactor()) + container->getScale() );
-			buildGeometry();
+			this->container->setScale( *(message.getAsScaleFactor()) + this->container->getScale() );
+			this->buildGeometry();
 			
 			break;
 			
@@ -208,10 +208,10 @@ void group::buildGeometry() {
 	// compute the maximum radius outside the center
 	float maxRadius2 = 25.0f;	// radius squared (saves sqrt() calls)
 	float maxDim = 0.0f;
-	if( container->getNumChildren() > 0 ) {
+	if( this->container->getNumChildren() > 0 ) {
 		// get each child
-		for( unsigned int i = 0; i < container->getNumChildren(); i++ ) {
-			osg::Node* child = container->getChild( i );
+		for( unsigned int i = 0; i < this->container->getNumChildren(); i++ ) {
+			osg::Node* child = this->container->getChild( i );
 			bz2object* obj = dynamic_cast< bz2object* >(child);
 			if( obj ) {
 				// only count bz2object instances
@@ -261,7 +261,7 @@ void group::buildGeometry() {
 	primitives->push_back( 1 );
 	
 	// the geometry node
-	geoRing = new osg::Geode();
+	this->geoRing = new osg::Geode();
 	
 	// build that geode!
 	osg::Geometry* geometry = new osg::Geometry();
@@ -283,20 +283,20 @@ void group::buildGeometry() {
 								  osg::StateAttribute::OVERRIDE );
 	
 	// remove it if it already exists
-	if( containsNode( geoRing.get() ) && geoRing.get() != NULL )
-		removeChild( geoRing.get() );
+	if( this->containsNode( geoRing.get() ) && this->geoRing.get() != NULL )
+		this->removeChild( geoRing.get() );
 	
-	addChild( geoRing.get() );
+	this->addChild( geoRing.get() );
 }
 
 // re-compute the list of objects contained in the group
 void group::updateObjects() {
 	
 	// get the "define" reference
-	define* def = dynamic_cast< define* >(Model::command( MODEL_GET, "define", getName() ));
+	define* _def = dynamic_cast< define* >(Model::command( MODEL_GET, "define", getName() ));
 	
 	// reload the children
-	setDefine( def );
+	setDefine( _def );
 	
 	// update the geometry
 	buildGeometry();
@@ -304,27 +304,27 @@ void group::updateObjects() {
 
 // set the associated definition
 void group::setDefine( define* def ) {
-	def = def;
-	setName( def->getName() ); 
+	this->def = def;
+	this->setName( def->getName() ); 
 	
 	// reload the children
-	computeChildren();
+	this->computeChildren();
 	
 	// recompute the geometry
-	buildGeometry();
+	this->buildGeometry();
 }
 
 // set the children
 void group::computeChildren() {
 	// remove all current objects
-	if( container->getNumChildren() > 0 )
-		container->removeChildren(0, container->getNumChildren());
+	if( this->container->getNumChildren() > 0 )
+		this->container->removeChildren(0, this->container->getNumChildren());
 	
 	// if the def is valid, add the objects
 	if( def != NULL ) {
 		def = def;
 		// get the objects
-		vector< osg::ref_ptr< bz2object > > objects = def->getObjects();
+		vector< osg::ref_ptr< bz2object > > objects = this->def->getObjects();
 		// put each object inside a PositionAttitudeTransform
 		// add them as children of this object
 		if( objects.size() > 0 ) {	
@@ -344,7 +344,7 @@ void group::computeChildren() {
 			setPos( position );
 			
 			for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
-				container->addChild( i->get() );
+				this->container->addChild( i->get() );
 				i->get()->setPos( i->get()->getPos() - position );
 				
 				printf(" added %s\n", (*i)->getName().c_str() );
@@ -352,8 +352,8 @@ void group::computeChildren() {
 		}
 	}
 	
-	if( !containsNode( container.get() ) )
-		addChild( container.get() );
+	if( !this->containsNode( this->container.get() ) )
+		this->addChild( container.get() );
 }
 
 // rotate children manually because rotating BZW 1.x objects doesn't translate to "spin" transformations

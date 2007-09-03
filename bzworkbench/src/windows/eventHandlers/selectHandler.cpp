@@ -12,7 +12,7 @@
 
 #include "windows/eventHandlers/selectHandler.h"
 
-selectHandler::selectHandler( View* view, osgGA::MatrixManipulator* manipulator ) : BZEventHandler( view ) {
+selectHandler::selectHandler( View* _view, osgGA::MatrixManipulator* manipulator ) : BZEventHandler( _view ) {
 	lastSelected = NULL;
 	lastSelectedData = NULL;
 	dx = dy = prev_x = prev_y = 0.0;
@@ -299,10 +299,10 @@ bool selectHandler::dragSelector( View* viewer, const osgGA::GUIEventAdapter& ea
 		
 		// transform them
 		if(selected.size() > 0) {
-			osg::Vec3 dPosition = position - selection->getPosition();
+			osg::Vec3 _dPosition = position - selection->getPosition();
 			osg::Vec3 tmp;
 			for(Model::objRefList::iterator i = selected.begin(); i != selected.end(); i++) {
-				tmp = (*i)->getPos() + dPosition;
+				tmp = (*i)->getPos() + _dPosition;
 				
 				// tell the object it got updated (i.e. so it can handle any changes specific to itself)
 				UpdateMessage msg = UpdateMessage( UpdateMessage::SET_POSITION, &tmp );
