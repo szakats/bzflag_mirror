@@ -20,15 +20,15 @@ build_2
   -> 0.3 : mat_glass extrudet(4.0) [ build_entry * build_entry * ] build_cont
   -> 0.3 : mat_glass extrudet(4.0) [ * build_entry * build_entry ] build_cont
   -> 0.2 : mat_wall2 extrudet(3.7) [ * build_entry * build_entry ] extrude(0) expand(1.0) build_cont
-  -> 0.1 : mat_wall2 extrudet(random(12.0,40.0,4.0)) [ * build_insetwall * build_insetwall ] roof_run
-  -> 0.1 : mat_wall2 extrudet(random(12.0,40.0,4.0)) [ build_insetwall * build_insetwall ] roof_run
+  -> 0.1 : mat_wall2 extrudet(random(12.0,40.0,4.0)) [ * build_fullinsetwall * build_fullinsetwall ] roof_run
+  -> 0.1 : mat_wall2 extrudet(random(12.0,40.0,4.0)) [ build_fullinsetwall * build_fullinsetwall ] roof_run
 ;
 
 build_1
   -> 0.3 : mat_wall extrudet(4.0) [ build_entry * build_entry * ] build_cont
   -> 0.3 : mat_wall extrudet(4.0) [ * build_entry * build_entry ] build_cont
-  -> 0.2 : mat_wall extrudet(random(12.0,40.0,4.0)) [ * build_insetwall * build_insetwall ] build_roof 
-  -> 0.2 : mat_wall extrudet(random(12.0,40.0,4.0)) [ build_insetwall * build_insetwall * ] build_roof 
+  -> 0.2 : mat_wall extrudet(random(12.0,40.0,4.0)) [ * build_fullinsetwall * build_fullinsetwall ] build_roof 
+  -> 0.2 : mat_wall extrudet(random(12.0,40.0,4.0)) [ build_fullinsetwall * build_fullinsetwall * ] build_roof 
 ;
 
 build_entry -> splith(1r 4.0 1r) [ common_texture build_entrydoor common_texture ] ;
@@ -67,17 +67,30 @@ build_partv
 
 build_insetwall -> splith(1r 1r 1r,4) [ build_detail build_inset build_detail ] ;
 
+build_fullinsetwall -> splith(1r 1r 1r,4) [ build_insetdetail build_inset build_insetdetail ] ;
+
 build_inset 
   -> 0.8 : material($BUILD_MAT) extrudet(-3.0) [ @mat_roof ] texture() mat_glass
   -> 0.2 : material($BUILD_MAT) extrudet(-3.0) [ @mat_roof ] texture()
 ;
 
 build_detail 
-  -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) mat_wall2 textureclear() repeath(4.0) [ @build_window ]
+  -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) mat_white textureclear() repeath(4.0) [ @build_window ]
   -> material($BUILD_MAT) texture()
 ;
 
-build_window -> extrude(0) expand(-0.4) extrude(-0.2);
+build_insetdetail 
+  -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) mat_white textureclear() repeath(4.0) [ @build_fullwindow ]
+  -> material($BUILD_MAT) texture()
+;
+
+build_fullwindow -> extrude(0) expand(-0.2) extrude(-0.15) texture() mat_glass;
+
+
+build_window 
+  -> 0.5 : extrude(0) expand(-0.2) scale(1,0.6) translate(0,0,0.4) extrude(-0.15) texturefull() mat_win31
+  -> 0.5 : extrude(0) expand(-0.2) scale(1,0.6) translate(0,0,0.4) extrude(-0.15) texturefull() mat_win32
+;
 
   
 # ------------------------------------------------------------------------

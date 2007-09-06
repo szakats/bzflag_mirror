@@ -19,7 +19,9 @@ mat_glass2-> material($MATGLASS2);
 mat_grass -> material($MATGRASS);
 mat_doorw -> material($MATDOORW);
 mat_doorr -> material($MATDOORR);
-
+mat_white -> material($MATWHITE);
+mat_win31 -> material($MATW31);
+mat_win32 -> material($MATW32);
 
 # -- Building primitives --
 
