@@ -122,9 +122,6 @@ void GridGenerator::run() {
   if (debugLevel > 1) printf("Pushing zones...\n");
   map.pushZones();
   
-  if (debugLevel > 1) printf("Registering materials...\n");
-  mats.push_back(new Material(MATROAD,"road",true));
-  mats.push_back(new Material(MATROADX,"roadx",true));
 }
 
 void GridGenerator::output(Output& out) { 

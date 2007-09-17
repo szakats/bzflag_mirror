@@ -16,9 +16,6 @@
 #define CELLROAD  1
 #define CELLROADX 2
 #define CELLBASE  3
-#define MATROAD   0
-#define MATROADX  1
-#define RESERVEDMATERIALS 3
 
 #define EPSILON 0.001
 #ifdef _MSC_VER

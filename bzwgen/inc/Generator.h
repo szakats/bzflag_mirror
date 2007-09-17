@@ -27,9 +27,14 @@ protected:
   MaterialVector mats;
   int bases;
 public:
+  int roadid;
+  int roadxid;
   bool ctfSafe;
 
-  Generator(RuleSet* _ruleset) : ruleset(_ruleset) {}
+  Generator(RuleSet* _ruleset) : ruleset(_ruleset) {
+    roadid  = roundToInt(ruleset->getAttr("MATROAD"));
+    roadxid = roundToInt(ruleset->getAttr("MATROADX"));
+  }
   virtual void parseOptions(CCommandLineArgs* opt);
   virtual void run();
   inline int getSize() { return size; }

@@ -43,7 +43,7 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
 void BuildZone::output(Output& out) {
   if (meshes == NULL) return;
   MeshVectIter itr; 
-  for (itr = meshes->begin(); itr!= meshes->end(); ++itr) (*itr)->output(out,generator->getRuleSet()->materialsCount()+RESERVEDMATERIALS);
+  for (itr = meshes->begin(); itr!= meshes->end(); ++itr) (*itr)->output(out,generator->getRuleSet()->materialsCount());
 }
 
 BuildZone::~BuildZone () { 

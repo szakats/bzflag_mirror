@@ -75,7 +75,7 @@ int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename) {
 }
 
 void RuleSet::loadMaterial(std::string& id, std::string& name) {
-  int matid = RESERVEDMATERIALS+materials.size();
+  int matid = materials.size();
   addAttr(id,double(matid));
   materials.push_back(new Material(matid,name));
 }
