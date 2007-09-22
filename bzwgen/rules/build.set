@@ -13,8 +13,8 @@ build_run
   -> 0.2 : (face(s) < 20000) sky_run
   -> 0.3 : assign(TYPE = $TYPE_RED) assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL)  build_1
   -> 0.3 : assign(TYPE = $TYPE_WHITE) assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL2) build_2
-  -> 0.3 : assign(TYPE = $TYPE_WHITE) assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL2) facade_run
-  -> 0.1 : sky_run
+  -> 0.3 : (face(h) > 30 & face(v) > 30) assign(TYPE = $TYPE_WHITE) assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL2) facade_run
+  -> 0.2 : sky_run
 ;
 
 build_2 
