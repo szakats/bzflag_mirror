@@ -35,7 +35,7 @@ facade_4 -> repeath(20.0) [ @facade_4_block ];
 
 facade_4_block -> splith(1r 4 1r) [ facade_windows facade_4_inset facade_windows ];
 
-facade_4_inset -> extrudet(-2) [ @mat_white ] texture() mat_glass;
+facade_4_inset -> extrudet(-1) [ @mat_white ] texture() mat_glass;
 
 
 # ------------------------------------------------------------------------
