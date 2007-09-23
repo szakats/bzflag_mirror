@@ -51,7 +51,7 @@ string group::get(void) {
 
 // setter
 int group::update(string& data) {
-	const char* header = getHeader().c_str();
+	const char* header = this->getHeader().c_str();
 	
 	// get the section from the data
 	const vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
@@ -93,18 +93,18 @@ int group::update(string& data) {
 		
 	// the superclass bz2object will apply "spin" transformations if present.  These need to be forewarded
 	// to the container object, and removed from the group for correct rendering
-	osg::Vec3 rot = getRotation();
-	if( container.get() != NULL )
-		container->setRotation( rot );
+	osg::Vec3 rot = this->getRotation();
+	if( this->container.get() != NULL )
+		this->container->setRotation( rot );
 		
-	setRotation( osg::Vec3( 0, 0, 0 ) );
+	this->setRotation( osg::Vec3( 0, 0, 0 ) );
 	
 	// assign data
 	// see if the name changed (if so, recompute the object list)
-	string oldName = getName();
-	setName( headers[0] );
-	if( oldName != getName() )
-		updateObjects();
+	string oldName = this->getName();
+	this->setName( headers[0] );
+	if( oldName != this->getName() )
+		this->updateObjects();
 		
 	tintColor = (tints.size() > 0 ? RGBA( tints[0].c_str() ) : RGBA(-1, -1, -1, -1));
 	team = (teams.size() > 0 ? (int)(atof( teams[0].c_str() )) : -1);
@@ -123,7 +123,7 @@ int group::update( UpdateMessage& message ) {
 	
 	// make sure we keep the Euler "spin" transformations 0 in the group
 	// and forward any existing ones to the container node
-	osg::Vec3 rot = getRotation();
+	osg::Vec3 rot = this->getRotation();
 	if( this->container.get() != NULL )
 		this->container->setRotation( rot );
 		
@@ -146,24 +146,25 @@ int group::update( UpdateMessage& message ) {
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
 			// propogate rotation events to the children objects
 			this->container->setRotation( *(message.getAsRotation()) );
-			this->buildGeometry();
 			
 			break;
 			
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
 			this->container->setRotation( *(message.getAsRotationFactor()) + this->container->getRotation()  );
-			this->buildGeometry();
 			
 			break;
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
-			this->container->setScale( *(message.getAsScale()) );
+			// set the scale value of the container
+			// this->container->setScale( *(message.getAsScale()) );
+			this->propogateEventToChildren( message );
 			this->buildGeometry();
 			
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
-			this->container->setScale( *(message.getAsScaleFactor()) + this->container->getScale() );
+			// this->container->setScale( *(message.getAsScaleFactor()) + this->container->getScale() );
+			this->propogateEventToChildren( message );
 			this->buildGeometry();
 			
 			break;
@@ -177,7 +178,7 @@ int group::update( UpdateMessage& message ) {
 
 // toString
 string group::toString(void) {
-	osg::Vec3 p = getPos();
+	osg::Vec3 p = this->getPos();
 	string tintString = string(""), teamString = string("");
 	if(tintColor.r() > 0 && tintColor.g() > 0 && tintColor.b() > 0 && tintColor.a() > 0)
 		tintString = "  tint " + tintColor.toString();
@@ -186,18 +187,18 @@ string group::toString(void) {
 	
 	// temporarily set the rotation of the root group node from the container child so BZWLines() translates
 	// the rotation values into "spin" lines
-	setRotation( container->getRotation() );
+	this->setRotation( container->getRotation() );
 	
-	string ret = string("group ") + getName() + "\n" +
+	string ret = string("group ") + this->getName() + "\n" +
 				  tintString + 
 				  teamString +
 				  (driveThrough == true ? "  drivethrough\n" : "") +
 				  (shootThrough == true ? "  shootThrough\n" : "") +
-				  BZWLines() +
+				  this->BZWLines() +
 				  "end\n";
 				  
 	// reset the rotation to 0 (so only the container has the spin transformations)
-	setRotation( osg::Vec3( 0.0, 0.0, 0.0 ) );
+	this->setRotation( osg::Vec3( 0.0, 0.0, 0.0 ) );
 	
 	// return the string data
 	return ret;
@@ -260,17 +261,21 @@ void group::buildGeometry() {
 	primitives->push_back( 0 );
 	primitives->push_back( 1 );
 	
-	// the geometry node
+	// remove the pink ring if it already exists
+	if( this->containsNode( geoRing.get() ) && this->geoRing.get() != NULL )
+		this->removeChild( geoRing.get() );
+	
+	// make a new pink ring node
 	this->geoRing = new osg::Geode();
 	
 	// build that geode!
 	osg::Geometry* geometry = new osg::Geometry();
 	geometry->setVertexArray( points );
 	geometry->addPrimitiveSet( primitives );
-	geoRing->addDrawable( geometry );
+	this->geoRing->addDrawable( geometry );
 	
 	// just name it
-	geoRing->setName("group_container");
+	this->geoRing->setName("group_container");
 	
 	// make it fushia
 	SceneBuilder::assignMaterial( osg::Vec4( 1.0, 0.0, 1.0, 1.0 ),
@@ -279,14 +284,10 @@ void group::buildGeometry() {
 								  osg::Vec4( 0.0, 0.0, 0.0, 0.0 ),
 								  0.0,
 								  1.0,
-								  geoRing.get(),
+								  this->geoRing.get(),
 								  osg::StateAttribute::OVERRIDE );
 	
-	// remove it if it already exists
-	if( this->containsNode( geoRing.get() ) && this->geoRing.get() != NULL )
-		this->removeChild( geoRing.get() );
-	
-	this->addChild( geoRing.get() );
+	this->addChild( this->geoRing.get() );
 }
 
 // re-compute the list of objects contained in the group
@@ -340,11 +341,21 @@ void group::computeChildren() {
 			y /= objects.size();
 			z /= objects.size();
 			
+			// set its position from the average positions of its children
 			osg::Vec3 position = osg::Vec3( x, y, z );
-			setPos( position );
+			this->setPos( position );
 			
+			// add the children to the container node, but offset their positions by the group's position
+			// (i.e. apply a SHIFT transformation
 			for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
+				
+				// get the transformation list
+				// vector< osg::ref_ptr< BZTransform > > transforms = (*i)->getTransformations();
+				
+				
+				// add the object to the container
 				this->container->addChild( i->get() );
+				
 				i->get()->setPos( i->get()->getPos() - position );
 				
 				printf(" added %s\n", (*i)->getName().c_str() );
@@ -356,28 +367,22 @@ void group::computeChildren() {
 		this->addChild( container.get() );
 }
 
-// rotate children manually because rotating BZW 1.x objects doesn't translate to "spin" transformations
-// (i.e. said objects can only be spun around Z)
-void group::setChildrenRotation( const osg::Vec3& rot ) {
-       if( def == NULL ) {
-               return;
-       }
-
-       // get objects
-       Model::objRefList objects = this->def->getObjects();
-
-       // don't bother with empty lists
-       if( objects.size() <= 0 ) {
-               return;
-       }
-
-       // iterate over the objects
-       for( Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++ ) {
-               if(! (*i)->isKey("spin") && (*i)->isKey("rotation") ) {
-                       // "unspin" the object around x and y if "spin" isn't supported
-                       (*i)->setRotationX( (*i)->getRotation().x() - rot.x() );
-                       (*i)->setRotationY( (*i)->getRotation().y() - rot.y() );
-               }
-       }
+// propogate messages to child objects when appropriate
+void group::propogateEventToChildren( UpdateMessage& message ) {
+	// don't do anything if there isn't a container node
+	if( !this->container.get() )
+		return;
+		
+	// iterate over the children
+	for( unsigned int i = 0; i < this->container->getNumChildren(); i++ ) {
+		// get an object
+		bz2object* obj = dynamic_cast< bz2object* >( this->container->getChild( i ) );
+		if( !obj )
+			continue;
+			
+		// send it the event
+		obj->update( message );
+	}
 }
+
 

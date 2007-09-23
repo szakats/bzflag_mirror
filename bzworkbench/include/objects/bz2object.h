@@ -169,13 +169,10 @@ class bz2object : public Renderable, public DataEntry
 		}
 		
 		// some basic control methods for transformations
-		// TODO: to be implemented if needed
-		/*
 		void addTransformation( BZTransform* t );
 		void insertTransformation( unsigned int index, BZTransform* t );
 		void removeTransformation( BZTransform* t );
 		void removeTransformation( unsigned int index );
-		*/
 		
 		// some basic control methods for materials
 		void addMaterial( material* mat );

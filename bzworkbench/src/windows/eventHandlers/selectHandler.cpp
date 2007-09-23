@@ -367,15 +367,11 @@ bool selectHandler::rotateSelector( View* viewer, const osgGA::GUIEventAdapter& 
 		
 		// transform them
 		if(selected.size() > 0) {
-			osg::Vec3 dp = osg::Vec3( 0.0, 0.0, 0.0 );
-			osg::Vec3 dr = osg::Vec3( 0.0, 0.0, 0.0 );
+			osg::Vec3 dr = osg::Vec3( a_x, a_y, a_z );
 			for(Model::objRefList::iterator i = selected.begin(); i != selected.end(); i++) {
-				// sort out objects by their rotation technique
-				dp = (*i)->getRotation();
-				dr.set( dr.x() + a_x, dr.y() + a_y, dr.z() + a_z );
-				
 				// tell the object it got updated (i.e. so it can handle any changes specific to itself)
 				UpdateMessage msg = UpdateMessage( UpdateMessage::SET_ROTATION_FACTOR, &dr );
+				
 				(*i)->update( msg );
 			}
 			

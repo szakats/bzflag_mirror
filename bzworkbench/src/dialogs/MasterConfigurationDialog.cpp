@@ -148,13 +148,17 @@ MasterConfigurationDialog::MasterConfigurationDialog(DataEntry* obj) :
 		
 		// add the transforms
 		for(vector< osg::ref_ptr<BZTransform> >::iterator i = transforms.end() - 1; i != transforms.begin() - 1; i--) {
+			// don't include transformations that won't be written
+			if( !(*i)->isApplied() )
+				continue;
+			
 			// next transform widget (the dimensions of which shall be calculated in the addTransformCallback_real method
 			TransformWidget* nextTransform = new TransformWidget(0, 0, transformationScrollArea->w(), 3*DEFAULT_TEXTSIZE, transformationFormat.c_str(), false);
 			
 			nextTransform->setTransformationType( (*i)->getName().c_str() );
 			nextTransform->setFields( (*i)->getData() );
 			
-			addTransformCallback_real(nextTransform);	
+			this->addTransformCallback_real(nextTransform);	
 		}
 	}
 	

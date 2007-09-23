@@ -30,24 +30,28 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 	public:
 	
 		BZTransform() : DataEntry("", ""), osg::MatrixTransform() {
-			name = string("");
-			data = vector<float>();
+			this->name = string("");
+			this->data = vector<float>();
+			this->useThis = true;
 		}
 		
 		BZTransform(string& _data) : DataEntry("", ""), osg::MatrixTransform() {
-			name = string("");
-			data = vector<float>();
-			update(_data);
+			this->name = string("");
+			this->data = vector<float>();
+			this->useThis = true;
+			this->update(_data);
 		}
 		
 		BZTransform( string _name, vector<float> _data ) : DataEntry("", ""), osg::MatrixTransform() {
 			this->name = _name;
 			this->data = _data;
+			this->useThis = true;
 			this->refreshMatrix();
 		} 
 		
 		BZTransform( string _name, float n1, float n2, float n3, float n4 ) : DataEntry("", ""), osg::MatrixTransform() {
 			this->name = _name;
+			this->useThis = true;
 			this->data = vector<float>();
 			this->data.push_back(n1);
 			this->data.push_back(n2);
@@ -119,12 +123,18 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 			refreshMatrix();
 		}
 		
-		// make this public
+		// make this operator public
 		BZTransform operator =( const BZTransform& obj ) { 
 			BZTransform newObj = BZTransform();
 			memcpy(&newObj, &obj, sizeof(BZTransform));
 			return newObj;
 		}
+		
+		// should this transform be written to the file, or is it just for BZWB's use?
+		bool isApplied() { return this->useThis; }
+		
+		// set the transformation to be used or not used by BZFlag (BZWB uses all transformations)
+		void setApplied( bool value ) { this->useThis = value; }
 		
 	private:
 	
@@ -170,9 +180,13 @@ class BZTransform : public DataEntry, public osg::MatrixTransform {
 		}
 		
 		
+		// member data
 		string name;
 		vector<float> data;
 		vector<string> transformationFormats;
+		
+		// set to true if this transformation is to be used
+		bool useThis;
 		
 		void refreshMatrix() {
 			if( name == "shift" )

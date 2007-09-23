@@ -286,32 +286,32 @@ int bz2object::update(string& data)
 	
 	// load in the simpler data
 	if(isKey("name") && names.size() > 0)
-		setName( names[0] );
+		this->setName( names[0] );
 	if(isKey("position") && positions.size() > 0)
-		setPosition( Point3D( positions[0].c_str() ) );
+		this->setPosition( Point3D( positions[0].c_str() ) );
 	if(isKey("rotation") && rotations.size() > 0)
 		Renderable::setRotationZ( atof( rotations[0].c_str() ) );
 	if(isKey("size") && sizes.size() > 0)
-		setSize( Point3D( sizes[0].c_str() ) );
+		this->setSize( Point3D( sizes[0].c_str() ) );
 	
 	// query the model for a physics driver
 	if(isKey("phydrv") && physicsDrivers.size() > 0) {
 		physics* phys = (physics*)Model::command( MODEL_GET, "phydrv", physicsDrivers[0] );
-		physicsDriver = phys;
+		this->physicsDriver = phys;
 	}
 	
 	if(isKey("matref") && matrefs.size() > 0) {
 		// erase previous materials
-		materials.clear();
+		this->materials.clear();
 		// use the model to resolve the references into material pointers
 		for( vector<string>::iterator i = matrefs.begin(); i != matrefs.end(); i++ ) {
 			material* mat = (material*)Model::command( MODEL_GET, "material", *i );
 			if( mat )
-				materials.push_back( mat );
+				this->materials.push_back( mat );
 		}
 		
 		// assign the material
-		setStateSet( material::computeFinalMaterial(materials) );
+		this->setStateSet( material::computeFinalMaterial(materials) );
 	}
 	
 	
@@ -346,19 +346,19 @@ int bz2object::update(string& data)
 			
 			// update the first shift
 			vector<float> startShiftData;
-			startShiftData.push_back( -getPosition().x() );
-			startShiftData.push_back( -getPosition().y() );
-			startShiftData.push_back( -getPosition().z() );
+			startShiftData.push_back( -this->getPosition().x() );
+			startShiftData.push_back( -this->getPosition().y() );
+			startShiftData.push_back( -this->getPosition().z() );
 			
-			startShift->setData( startShiftData );
+			this->startShift->setData( startShiftData );
 			
 			// update the last shift
 			vector<float> endShiftData;
-			endShiftData.push_back( getPosition().x() );
-			endShiftData.push_back( getPosition().y() );
-			endShiftData.push_back( getPosition().z() );
+			endShiftData.push_back( this->getPosition().x() );
+			endShiftData.push_back( this->getPosition().y() );
+			endShiftData.push_back( this->getPosition().z() );
 			
-			endShift->setData( endShiftData );
+			this->endShift->setData( endShiftData );
 			
 			// update rotations (find any occurrences of an angular rotation about cartesian axes )
 			
@@ -368,8 +368,8 @@ int bz2object::update(string& data)
 					BZTransform t = BZTransform( *i );
 					if( t.getData()[1] == 1.0f && t.getData()[2] == 0.0f && t.getData()[3] == 0.0f ) {
 						// this must be the rotation around x
-						spin_x->setData( t.getData() );
-						setRotationX( t.getData()[0] );	// change the spin appearance as well
+						this->spin_x->setData( t.getData() );
+						this->setRotationX( t.getData()[0] );	// change the spin appearance as well
 						transforms.erase(i);		// don't duplicate it later on
 						break;
 					}
@@ -382,8 +382,8 @@ int bz2object::update(string& data)
 					BZTransform t = BZTransform( *i );
 					if( t.getData()[1] == 0.0f && t.getData()[2] == 1.0f && t.getData()[3] == 0.0f ) {
 						// this must be the rotation around y
-						spin_y->setData( t.getData() );
-						setRotationY( t.getData()[0] );	// change the spin appearance as well
+						this->spin_y->setData( t.getData() );
+						this->setRotationY( t.getData()[0] );	// change the spin appearance as well
 						transforms.erase(i);		// don't duplicate it later on
 						break;
 					}
@@ -396,8 +396,8 @@ int bz2object::update(string& data)
 					BZTransform t = BZTransform( *i );
 					if( t.getData()[1] == 0.0f && t.getData()[2] == 0.0f && t.getData()[3] == 1.0f ) {
 						// this must be the rotation around z
-						spin_z->setData( t.getData() );
-						setRotationZ( t.getData()[0] );	// change the spin appearance as well
+						this->spin_z->setData( t.getData() );
+						this->setRotationZ( t.getData()[0] );	// change the spin appearance as well
 						transforms.erase(i);		// don't duplicate it later on
 						break;
 					}
@@ -409,11 +409,11 @@ int bz2object::update(string& data)
 			vector< osg::ref_ptr< BZTransform > > newTransformations = vector< osg::ref_ptr< BZTransform > >();
 			
 			for( vector<string>::iterator i = transforms.begin(); i != transforms.end(); i++ ) {
-				transformations.push_back( new BZTransform( *i ) );
+				this->transformations.push_back( new BZTransform( *i ) );
 			}
 			
 			// update the transformation stack
-			recomputeTransformations( &newTransformations );
+			this->recomputeTransformations( &newTransformations );
 		}
 		
 	}
@@ -458,7 +458,7 @@ string bz2object::BZWLines(void)
 	
 	// add all transformations to the string if they are supported
 	for(vector< osg::ref_ptr<BZTransform> >::iterator i = transformations.begin(); i != transformations.end(); i++) {
-		if(isKey((*i)->getHeader().c_str()))
+		if(isKey((*i)->getHeader().c_str()) && (*i)->isApplied())
 			ret += "  " + (*i)->toString();
 	}
 	
@@ -574,23 +574,27 @@ void bz2object::recomputeTransformations( vector< osg::ref_ptr< BZTransform > >*
 {
 	
 	// see if we have start/end/ shifts and spins
-	if( startShift.get() == NULL || endShift.get() == NULL || spin_x.get() == NULL || spin_y.get() == NULL || spin_z.get() == NULL)
-		return;			// something seriously wrong here
+	if( this->startShift.get() == NULL || 
+	    this->endShift.get() == NULL || 
+	    this->spin_x.get() == NULL || 
+	    this->spin_y.get() == NULL || 
+	    this->spin_z.get() == NULL)
+			return;			// something seriously wrong here
 	
 	// clear all current transformations
-	if( transformations.size() > 0 ) {
-		startShift->removeChild( transformations[0].get() );
-		transformations[ transformations.size() - 1 ]->removeChild( endShift.get() );
-		transformations.clear();
+	if( this->transformations.size() > 0 ) {
+		this->startShift->removeChild( transformations[0].get() );
+		this->transformations[ this->transformations.size() - 1 ]->removeChild( endShift.get() );
+		this->transformations.clear();
 	} else {
 	  // if there are no current transformations, then try to remove the endShift from the startShift
-	  startShift->removeChild( endShift.get() );
+	  this->startShift->removeChild( this->endShift.get() );
 	}
 	
-	transformations = *newTransformations;	// copy the array over
+	this->transformations = *newTransformations;	// copy the array over
 	
 	// add the new transformations
-	if( transformations.size() > 0 ) {
+	if( this->transformations.size() > 0 ) {
 		// add each transformation to the next
 		startShift->addChild( transformations[0].get() );
 		
