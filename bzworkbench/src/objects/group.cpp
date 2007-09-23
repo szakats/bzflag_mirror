@@ -91,7 +91,7 @@ int group::update(string& data) {
 	if(!bz2object::update(data))
 		return 0;
 		
-	// the superclass bz2object will apply "spin" transformations if present.  These need to be forewarded
+	// the superclass bz2object will apply "spin" transformations if present.  These need to be forwarded
 	// to the container object, and removed from the group for correct rendering
 	osg::Vec3 rot = this->getRotation();
 	if( this->container.get() != NULL )
@@ -156,15 +156,15 @@ int group::update( UpdateMessage& message ) {
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
 			// set the scale value of the container
-			// this->container->setScale( *(message.getAsScale()) );
-			this->propogateEventToChildren( message );
+			this->container->setScale( *(message.getAsScale()) );
+			// this->propogateEventToChildren( message );
 			this->buildGeometry();
 			
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
-			// this->container->setScale( *(message.getAsScaleFactor()) + this->container->getScale() );
-			this->propogateEventToChildren( message );
+			this->container->setScale( *(message.getAsScaleFactor()) + this->container->getScale() );
+			// this->propogateEventToChildren( message );
 			this->buildGeometry();
 			
 			break;
