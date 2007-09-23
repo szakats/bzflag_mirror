@@ -23,8 +23,6 @@
 #include <map>
 #include <string>
 
-// #include <GL/gl.h>
-
 #include "Point3D.h"
 #include "../objects/bz2object.h"
 #include "../model/SceneBuilder.h"
