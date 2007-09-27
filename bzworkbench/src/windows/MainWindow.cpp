@@ -110,7 +110,7 @@ MainWindow::MainWindow(Model* m) :
 	
 	this->model = m;
 	
-	printf("MainWindow: model addr: %x\n", this->getModel());
+	printf("MainWindow: model addr: %p\n", this->getModel());
 	
 	this->view = new View(this->model, this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
 	this->view->end();
@@ -123,7 +123,7 @@ MainWindow::MainWindow(Model* m) :
 	// mainMenu = new MainMenu(this, RENDER_WINDOW_X, RENDER_WINDOW_Y, RENDER_WINDOW_WIDTH, RENDER_WINDOW_HEIGHT);
 	// add(mainMenu);
 	
-	printf("MainWindow addr: %x\n", this );
+	printf("MainWindow addr: %p\n", this );
 	this->menuBar = new MenuBar( this );
 	this->add(menuBar);
 	
