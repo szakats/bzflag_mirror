@@ -71,8 +71,8 @@ void MenuBar::buildMenu(void) {
 // constructor
 MenuBar::MenuBar( MainWindow* mw ) : Fl_Menu_Bar(0, 0, mw->w(), 30) {
 	this->parent = mw;
-	printf("MenuBar: parent mw addr: %x\n", parent);
-	printf("MenuBar: parent mw model addr: %x\n", parent->getModel());
+	printf("MenuBar: parent mw addr: %p\n", parent);
+	printf("MenuBar: parent mw model addr: %p\n", parent->getModel());
 	this->buildMenu();	
 }
 
@@ -216,7 +216,7 @@ void MenuBar::unselect_all_real( Fl_Widget* w ) {
 void MenuBar::addBoxCallback_real(Fl_Widget* w) {
 	// we're breaking the Law of Demeter here...
 	printf("adding a box\n");
-	printf("model addr: %x\n", this->parent->getModel());
+	printf("model addr: %p\n", this->parent->getModel());
 	// make a new box using the Model's object registry
 	DataEntry* newBox = this->parent->getModel()->_buildObject( "box" );
 	
