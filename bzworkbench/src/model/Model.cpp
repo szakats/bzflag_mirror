@@ -120,6 +120,13 @@ Model::~Model()
 			if((i->get())) {
 				*i = NULL;	// this will deref the object, calling a destructor
 			}
+
+	if(links.size() > 0)
+		for(map<string, Tlink*>::iterator i = links.begin(); i != links.end(); ++i)
+			if((i->second)) {
+				delete i->second;
+				i->second = NULL;
+			}
 	
 	if(groups.size() > 0)
 		for(map<string, define*>::iterator i = groups.begin(); i != groups.end(); i++)
