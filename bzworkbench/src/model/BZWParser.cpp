@@ -68,16 +68,22 @@ bool hasLine(string text) {
  */
  bool isKey(string key, string line) {
  	line = cutWhiteSpace(line);
- 	string::size_type index = line.find(key + " ", 0);
- 	if(index == 0) 
- 		return true;
- 		
- 	// sometimes the key IS the line, so there won't be a trailing space
- 	index = line.find(key, 0);
- 	if( index == 0)
- 		return true;
- 		
- 	return false;
+
+	string::size_type index = line.find(key);
+	if (index == 0) {
+ 		// sometimes the key IS the line, so there won't be a trailing space
+ 		if (line.size() == key.size())
+ 			return true;
+
+		// ...but normally a key must be followed by whitespace
+		string::size_type nextchar = index + key.size();
+ 		if (line[nextchar] == " ") 
+ 			return true;
+		else if (line[nextchar] == "\t")
+ 			return true;
+	}
+
+	return false;
  }
 
 /**
