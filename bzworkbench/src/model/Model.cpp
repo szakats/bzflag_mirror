@@ -102,21 +102,21 @@ Model::~Model()
 		delete waterLevelData;
 		
 	if(phys.size() > 0)
-		for(map<string, physics*>::iterator i = phys.begin(); i != phys.end(); i++)
+		for(map<string, physics*>::iterator i = phys.begin(); i != phys.end(); ++i)
 			if((i->second)) {
 				delete i->second;
 				i->second = NULL;	
 			}
 			
 	if(materials.size() > 0)
-		for(map<string, material*>::iterator i = materials.begin(); i != materials.end(); i++)
+		for(map<string, material*>::iterator i = materials.begin(); i != materials.end(); ++i)
 			if((i->second)) {
 				delete i->second;
 				i->second = NULL;	
 			}
 			
 	if(objects.size() > 0)
-		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++)
+		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); ++i)
 			if((i->get())) {
 				*i = NULL;	// this will deref the object, calling a destructor
 			}
@@ -129,7 +129,7 @@ Model::~Model()
 			}
 	
 	if(groups.size() > 0)
-		for(map<string, define*>::iterator i = groups.begin(); i != groups.end(); i++)
+		for(map<string, define*>::iterator i = groups.begin(); i != groups.end(); ++i)
 			if((i->second)) {
 				delete i->second;
 				i->second = NULL;	
