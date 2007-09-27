@@ -77,9 +77,9 @@ bool hasLine(string text) {
 
 		// ...but normally a key must be followed by whitespace
 		string::size_type nextchar = index + key.size();
- 		if (line[nextchar] == " ") 
+ 		if (line[nextchar] == ' ') 
  			return true;
-		else if (line[nextchar] == "\t")
+		else if (line[nextchar] == '\t')
  			return true;
 	}
 
