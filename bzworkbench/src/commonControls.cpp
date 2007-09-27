@@ -85,11 +85,15 @@ bool callOpenFileDialog ( std::string  &result, const char* file, const char *di
 	// wait for a value
 	while( fc->shown() ) { Fl::wait(); }
 
+	// fcStaticBuffer is still safe to use after fc is deleted, see FLTK docs
+	const char* fcStaticBuffer = fc->value();
+	delete fc;
+
 	// get a value (the selected filename )
-	if(fc->value() == NULL)
+	if(fcStaticBuffer == NULL)
 		return false;
 
-	result = fc->value();
+	result = fcStaticBuffer;
 	return true;
 }
 
