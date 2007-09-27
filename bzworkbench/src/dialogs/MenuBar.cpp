@@ -177,7 +177,8 @@ void MenuBar::save_selection_real( Fl_Widget* w ) {
 }
 
 void MenuBar::exit_bzwb_real( Fl_Widget* w ) {
-	
+	while (Fl::first_window())
+		Fl::first_window()->hide();	
 }
 
 void MenuBar::undo_real( Fl_Widget* w ) {
