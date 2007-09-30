@@ -36,6 +36,17 @@ class UpdateMessage {
 	
 public:
 
+	// built-in types for complex message structures
+	typedef struct {
+		BZTransform* transform;
+		unsigned int index;	
+	} IndexedTransform;	// transformation to be inserted
+	
+	typedef struct {
+		material* mat;
+		unsigned int index;
+	} IndexedMaterial;	// material to be inserted
+
 	// some common message types
 	enum UpdateMessageType {
 		SET_POSITION,				// i.e. use this to indicate a new position
@@ -48,11 +59,13 @@ public:
 		ADD_TRANSFOMRATION,			// i.e. push a transformation
 		REMOVE_TRANSFORMATION,		// i.e. pop a transformation
 		UPDATE_TRANSFORMATION,		// i.e. change a transformation
+		INSERT_TRANSFORMATION,		// i.e. insert a transformation at a given index
 		SET_TRANSFORMATIONS,		// i.e. use this along with a vector of BZTransforms to set the transformation stack
 		
 		ADD_MATERIAL,				// i.e. push a material to the object's material list
 		REMOVE_MATERIAL,			// i.e. pop a material from the object's material list
 		UPDATE_MATERIAL,			// i.e. change a material
+		INSERT_MATERIAL,			// i.e. insert a material at a given index
 		SET_MATERIALS,				// i.e. set the entire list of materials
 		
 		SET_PHYDRV,					// i.e. set the physics driver
@@ -83,6 +96,16 @@ public:
 		this->data.transform = _data;
 	}
 	
+	UpdateMessage( int _type, IndexedTransform* _data ) {
+		this->type = _type;
+		this->data.indexedTransformation = _data;	
+	}
+	
+	UpdateMessage( int _type, IndexedMaterial* _data ) {
+		this->type = _type;
+		this->data.indexedMaterial = _data;	
+	}
+	
 	UpdateMessage( int _type, vector< osg::ref_ptr<BZTransform> >* _data) {
 		this->type = _type;
 		this->data.transforms = _data;
@@ -109,10 +132,12 @@ public:
 	
 	BZTransform* getAsTransformation() { return data.transform; }
 	vector< osg::ref_ptr<BZTransform> >* getAsTransformationStack() { return data.transforms; }
+	IndexedTransform* getAsIndexedTransform() { return data.indexedTransformation; }
 	
 	material* getAsMaterial() { return data.mat; }
 	vector< osg::ref_ptr<material> >* getAsMaterialList() { return data.materials; }
-
+	IndexedMaterial* getAsIndexedMaterial() { return data.indexedMaterial; }
+	
 private:
 	
 	union {
@@ -120,10 +145,15 @@ private:
 		osg::Quat* quat;	// rotation (factor) data
 		
 		BZTransform* transform;		// transformation to be pushed/popped
+		
+		IndexedTransform* indexedTransformation;	// transformation to be inserted
+		
 		vector< osg::ref_ptr<BZTransform> >* transforms;	// transformations
 		
 		material* mat;			// a material to be pushed/popped
 		vector< osg::ref_ptr< material > >* materials;		// material stack
+		
+		IndexedMaterial* indexedMaterial; 		// material to be inserted
 		
 	} data;
 	
