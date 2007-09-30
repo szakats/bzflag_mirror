@@ -1,0 +1,27 @@
+world
+	name test
+	size 400
+	flagHeight 10
+end
+
+define group_1
+	box
+		position 10 10 0
+		size 10 10 10
+	end
+
+	pyramid
+		position -10 10 0
+		size 10 10 10
+	end
+enddef
+
+group group_1
+	position 100 100 0
+end
+
+group group_1
+	position -100 100 0
+	scale 2 2 2
+end
+

@@ -676,3 +676,6 @@ void bz2object::refreshMaterial()
 	material* mat = material::computeFinalMaterial( materials );
 	SceneBuilder::assignBZMaterial( mat, this );
 }
+
+
+// add a transformation 

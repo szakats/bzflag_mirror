@@ -24,6 +24,7 @@ group::group() :
 	this->setPos( osg::Vec3( 0.0, 0.0, 0.0 ) );
 	
 	this->container = new Renderable();
+	this->bzw1_containers = map< osg::ref_ptr< bz2object >, osg::ref_ptr< Renderable > >();
 	this->geoRing = NULL;
 }
 
@@ -124,7 +125,7 @@ int group::update( UpdateMessage& message ) {
 	// make sure we keep the Euler "spin" transformations 0 in the group
 	// and forward any existing ones to the container node
 	osg::Vec3 rot = this->getRotation();
-	if( this->container.get() != NULL )
+	if( this->container.get() != NULL && rot.x() != 0 && rot.y() != 0 && rot.z() != 0 )
 		this->container->setRotation( rot );
 		
 	this->setRotation( osg::Vec3( 0, 0, 0 ) );
@@ -150,8 +151,7 @@ int group::update( UpdateMessage& message ) {
 			break;
 			
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
-			this->container->setRotation( *(message.getAsRotationFactor()) + this->container->getRotation()  );
-			
+			this->container->setRotation( this->container->getRotation() + *(message.getAsRotationFactor()) );
 			break;
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
@@ -214,8 +214,11 @@ void group::buildGeometry() {
 		for( unsigned int i = 0; i < this->container->getNumChildren(); i++ ) {
 			osg::Node* child = this->container->getChild( i );
 			bz2object* obj = dynamic_cast< bz2object* >(child);
+			
+			// this cast will only work, literally, for BZW2 objects (BZW1 objects are contained within separate
+			// transformation containers of type Renderable.)
 			if( obj ) {
-				// only count bz2object instances
+				// get position and size
 				osg::Vec3 p = obj->getPos();
 				osg::Vec3 size = obj->getSize();
 				
@@ -229,6 +232,32 @@ void group::buildGeometry() {
 				// see if it's bigger than the maximum radius
 				if( len2 > maxRadius2 ) {
 					maxRadius2 = len2;
+				}
+			}
+			// see if this is a BZW1 object
+			else {
+				Renderable* r = dynamic_cast< Renderable* >(child);
+				// if this is a container node, then it should have a child that is a bz2object.
+				if( r && r->getName() == BZW1_CONTAINER_NAME ) {
+					bz2object* obj = dynamic_cast< bz2object* >( r->getChild(0) );
+					// if this cast worked, then try to get its position and size
+					if( obj ) {
+						// get position and size
+						osg::Vec3 p = obj->getPos();
+						osg::Vec3 size = obj->getSize();
+						
+						// compute the largest dimension
+						float maxSizeDim = max( size.x(), max( size.y(), size.z() ) );
+						maxDim = max( maxSizeDim, maxDim );
+						
+						// the group's position relative to the objects is (0,0,0), so just square the position and take the length
+						float len2 = p.x()*p.x() + p.y()*p.y() + p.z()*p.z();
+						
+						// see if it's bigger than the maximum radius
+						if( len2 > maxRadius2 ) {
+							maxRadius2 = len2;
+						}
+					}
 				}
 			}
 		}
@@ -320,6 +349,17 @@ void group::computeChildren() {
 	// remove all current objects
 	if( this->container->getNumChildren() > 0 )
 		this->container->removeChildren(0, this->container->getNumChildren());
+		
+	// remove all bzw1 objects (and de-alloc them)
+	if( this->bzw1_containers.size() > 0 ) {
+		for( map< osg::ref_ptr< bz2object >, osg::ref_ptr< Renderable > >::iterator i = this->bzw1_containers.begin(); i != this->bzw1_containers.end(); ++i) {
+			if( i->second != NULL )
+				i->second->removeChildren( 0, i->second->getNumChildren());
+		}
+		
+		// clear the map
+		this->bzw1_containers.clear();
+	}
 	
 	// if the def is valid, add the objects
 	if( def != NULL ) {
@@ -348,14 +388,31 @@ void group::computeChildren() {
 			// add the children to the container node, but offset their positions by the group's position
 			// (i.e. apply a SHIFT transformation
 			for( vector< osg::ref_ptr< bz2object > >::iterator i = objects.begin(); i != objects.end(); i++ ) {
+				// if this is a bzw2 object, then just add it to the container
+				if( (*i)->isKey("spin") || (*i)->isKey("shift") || (*i)->isKey("scale") || (*i)->isKey("shear") )
+					// add the object to the container
+					this->container->addChild( i->get() );
+					
+				// otherwise, create a bzw1 container (i.e. a transformation node that has the inverse
+				// transformation of the container, because bzw1 objects do NOT share all of the group's transformations.
+				// This is for cosmetic purposes only.
+				else {
+					// make a new node
+					Renderable* r = new Renderable( i->get() );
+					// name it as such
+					r->setName( BZW1_CONTAINER_NAME );
+					
+					// add the current node as a child
+					r->addChild( i->get() );
+					
+					// map the child to this node
+					this->bzw1_containers[ i->get() ] = r;
+					
+					// add the bzw1 container to the main container.
+					this->container->addChild( r );
+				}
 				
-				// get the transformation list
-				// vector< osg::ref_ptr< BZTransform > > transforms = (*i)->getTransformations();
-				
-				
-				// add the object to the container
-				this->container->addChild( i->get() );
-				
+				// set the position of this object relative to the center of the group
 				i->get()->setPos( i->get()->getPos() - position );
 				
 				printf(" added %s\n", (*i)->getName().c_str() );
