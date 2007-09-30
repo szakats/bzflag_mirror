@@ -679,3 +679,102 @@ void bz2object::refreshMaterial()
 
 
 // add a transformation 
+void bz2object::addTransformation( BZTransform* t ) {
+	if( t != NULL ) {
+		
+		if( this->transformations.size() > 0 ) {
+			// if we actually have othet transformations, we'll need to insert the transformation between
+			// endShift and the last transformation
+			t->addChild( this->endShift.get() );
+			this->transformations[ this->transformations.size() - 1 ]->removeChild( this->endShift.get() );
+			this->transformations.push_back( t );
+		}
+		else {
+			// if there are no transformations, then insert this one betweens startShift and endShift
+			t->addChild( this->endShift.get() );
+			this->startShift->removeChild( this->endShift.get() );
+			this->startShift->addChild( t );
+			this->transformations.push_back( t );	
+		}
+	}	
+}
+
+// insert a transformation
+void bz2object::insertTransformation( unsigned int index, BZTransform* t ) {
+	if( t == NULL )
+		return;		// don't deal with NULL transformations
+		
+	// don't deal with out-of-bounds indexes when there are already transformations defined.
+	if( this->transformations.size() >= index )
+		return;
+		
+	// if there are no transformations, then insert the transformation between startShift and endShift
+	if( this->transformations.size() == 0 ) {
+		t->addChild( this->endShift.get() );
+		this->startShift->removeChild( this->endShift.get() );
+		this->startShift->addChild( t );
+		this->transformations.push_back( t );	
+	}
+	// otherwise...
+	else {
+		// if the index is 0, then insert it between startShift and the start of the transformation list
+		if( index == 0 ) {
+			osg::ref_ptr< BZTransform > t_ref = osg::ref_ptr< BZTransform >( t );
+			// remove the head of the list from startShift
+			this->startShift->removeChild( this->transformations[0].get() );
+			// insert the transformation to the head of the list
+			this->transformations.insert( this->transformations.begin(), t );
+			// add the transformation as a child of startShift
+			this->startShift->addChild( t_ref.get() );
+		}
+		// if the index is the last one...
+		else if( index == transformations.size()-1 ) {
+			// just invoke the addTransformation() method, since it appends transformations
+			this->addTransformation( t );
+		}
+		// otherwise, the index is somewhere in between, so we need to advance an iterator over to that spot
+		// and insert it
+		else {
+			// count over to the point of insertion
+			vector< osg::ref_ptr< BZTransform > >::iterator itr = this->transformations.begin();
+			unsigned int i = 0;
+			// increment the iterator
+			for(; i < index; i++, ++itr );
+			// now insert the transformation
+			this->transformations[i]->removeChild( this->transformations[i+1].get() );
+			this->transformations.insert( itr, t );
+			// now, transformations[i+1] is the transformation we just added
+			this->transformations[i]->addChild( this->transformations[i+1].get() );
+			this->transformations[i+1]->addChild( this->transformations[i+2].get() );
+		}
+	}
+}
+
+// remove a transformation by pointer (NOTE: removes only the 1st occurence)
+void bz2object::removeTransformation( BZTransform* t ) {
+	if( this->transformations.size() == 0 )
+		return;
+	
+	// iterate over the vector and pull the first occurence
+	for( vector< osg::ref_ptr< BZTransform > >::iterator i = this->transformations.begin(); i != this->transformations.end(); ++i ) {
+		if( i->get() == t ) {
+			this->transformations.erase( i );
+			return;
+		}
+	}
+	
+}
+
+// remove a transformation by index
+void bz2object::removeTransformation( unsigned int index ) {
+	if( this->transformations.size() == 0 )
+		return;
+	
+	// iterate over the vector to find the index
+	unsigned int i = 0;
+	vector< osg::ref_ptr< BZTransform > >::iterator itr = this->transformations.begin();
+	for(; i < index; i++, ++itr );
+	
+	// remove the transformation at itr
+	this->transformations.erase( itr );
+}

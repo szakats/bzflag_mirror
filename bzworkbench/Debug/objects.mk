@@ -4,4 +4,4 @@
 
 USER_OBJS :=
 
-LIBS := -lfltk -lfltk_images -lfltk_png -losg -lz -losgViewer -lfltk_gl -lGL -lGLU
+LIBS := -lfltk -lfltk_images -losg -lz -losgViewer -lfltk_gl -lGL -lGLU
