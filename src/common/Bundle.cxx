@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -136,7 +136,7 @@ std::string Bundle::getLocalString(const std::string &key) const
 	unmapped.insert( key );
     std::string stripped = stripAnsiCodes (key);
 	std::string debugStr = "Unmapped Locale String: " + stripped + "\n";
-	DEBUG1("%s", debugStr.c_str());
+	logDebugMessage(1,"%s", debugStr.c_str());
       }
     }
     return key;

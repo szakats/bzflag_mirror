@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -38,12 +38,15 @@ const struct GlobalDBItem globalDBItems[] = {
   { "_cullElements",		"16",				false, StateDatabase::Locked},
   { "_cullOccluders",		"0",				false, StateDatabase::Locked},
   { "_disableBots",		"0",				false, StateDatabase::Locked},
+  { "_disableSpeedChecks",	"0",				false, StateDatabase::Locked},
+  { "_disableHeightChecks",	"0",				false, StateDatabase::Locked},
   { "_drawCelestial",		"1",				false, StateDatabase::Locked},
   { "_drawClouds",		"1",				false, StateDatabase::Locked},
   { "_drawGround",		"1",				false, StateDatabase::Locked},
   { "_drawGroundLights",	"1",				false, StateDatabase::Locked},
   { "_drawMountains",		"1",				false, StateDatabase::Locked},
   { "_drawSky",			"1",				false, StateDatabase::Locked},
+  { "_enableDistanceCheck",	"0",				false, StateDatabase::Locked},
   { "_endShotDetection",	"5",				false, StateDatabase::Locked},
   { "_explodeTime",		"5.0",				false, StateDatabase::Locked},
   { "_flagAltitude",		"11.0",				false, StateDatabase::Locked},
@@ -133,6 +136,7 @@ const struct GlobalDBItem globalDBItems[] = {
   { "_spawnSafeRadMod",		"20",				false, StateDatabase::Locked},
   { "_spawnSafeSRMod",		"3",				false, StateDatabase::Locked},
   { "_spawnSafeSWMod",		"1.5",				false, StateDatabase::Locked},
+  { "_speedChecksLogOnly",	"0",				false, StateDatabase::Locked},
   { "_srRadiusMult",		"2.0",				false, StateDatabase::Locked},
   { "_squishFactor",		"1.0",				false, StateDatabase::Locked},
   { "_squishTime",		"1.0",				false, StateDatabase::Locked},

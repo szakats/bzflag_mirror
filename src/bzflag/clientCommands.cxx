@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -227,7 +227,9 @@ static std::string cmdIconify(const std::string&,
 {
   if (args.size() != 0)
     return "usage: iconify";
-  mainWindow->iconify();
+
+  if (!BZDB.isTrue("Win32NoMin"))
+	 mainWindow->iconify();
   return std::string();
 }
 
@@ -432,12 +434,21 @@ static std::string cmdAutoPilot(const std::string&,
   if (args.size() != 0)
     return "usage: autopilot";
 
-  if (BZDB.isTrue(StateDatabase::BZDB_DISABLEBOTS)) {
+  // don't enable autopilot until we've fully joined and checked the value
+  // of the server-side _disableBots
+  if (! BZDB.isSet(StateDatabase::BZDB_DISABLEBOTS))
+    return std::string();
+
+  LocalPlayer *myTank = LocalPlayer::getMyTank();
+
+  if (!BZDB.isTrue(StateDatabase::BZDB_TANKWIDTH))
+    return std::string();
+
+  if (BZDB.isTrue(StateDatabase::BZDB_DISABLEBOTS) && ! myTank->isAutoPilot()) {
     hud->setAlert(0, "autopilot not allowed on this server", 1.0f, true);
     return std::string();
   }
 
-  LocalPlayer *myTank = LocalPlayer::getMyTank();
   if (myTank != NULL && myTank->getTeam() != ObserverTeam) {
     if (myTank->isAutoPilot()) {
 

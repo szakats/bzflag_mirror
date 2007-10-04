@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -54,6 +54,8 @@ ScoreboardRenderer::ScoreboardRenderer() :
 				huntPositionEvent(0),
 				huntState(HUNT_NONE),
 	huntAddMode(false),
+	teamScoreYVal(0.0f),
+	roaming(false),
 	numHunted(0)
 {
   // initialize message color (white)
@@ -307,6 +309,9 @@ void			ScoreboardRenderer::renderTeamScores (float x, float y, float dy){
   int i;
   float xn, xl;
   std::string label;
+
+  if (teamScoreYVal > 0.0)
+	  y = teamScoreYVal;
 
   if (World::getWorld()->allowRabbit())
     return;
@@ -598,8 +603,29 @@ void			ScoreboardRenderer::drawPlayerScore(const Player* player,
     playerInfo += slot;
     playerInfo += " - ";
   }
+  if (roaming && BZDB.isTrue("showVelocities"))
+  {
+	  float vel[3] = {0};
+	  memcpy(vel,player->getVelocity(),sizeof(float)*3);
+
+	  float linSpeed = sqrt(vel[0]*vel[0]+vel[1]*vel[1]);
+
+	  float badFactor = 1.5f;
+	  if (linSpeed > player->getMaxSpeed()*badFactor)
+		  playerInfo += ColorStrings[RedColor];
+	  if (linSpeed > player->getMaxSpeed())
+		  playerInfo += ColorStrings[YellowColor];
+	  else if (linSpeed < 0.0001f)
+		  playerInfo += ColorStrings[GreyColor];
+	  else
+		  playerInfo += ColorStrings[WhiteColor];
+	  playerInfo += TextUtils::format("%5.2f ",linSpeed);
+	  playerInfo += teamColor;
+
+  }
   // callsign
   playerInfo += player->getCallSign();
+
   // email in parenthesis
   if (player->getEmailAddress()[0] != '\0' && emailLen>0) {
     playerInfo += " (";
@@ -685,6 +711,8 @@ void			ScoreboardRenderer::drawPlayerScore(const Player* player,
     fm.drawString(xs - huntPlusesWidth, y, 0, minorFontFace, minorFontSize,
 		  huntStr.c_str());
   }
+
+ 
 }
 
 

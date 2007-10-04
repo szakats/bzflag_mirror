@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -566,7 +566,7 @@ void MeshSceneNode::makeXFormList()
       }
       errCount++; // avoid a possible spin-lock?
       if (errCount > 666) {
-	DEBUG0("ERROR: MeshSceneNode::makeXFormList() glError: %i\n", error);
+	logDebugMessage(0,"ERROR: MeshSceneNode::makeXFormList() glError: %i\n", error);
 	return; // don't make the list, something is borked
       }
     };
@@ -588,7 +588,7 @@ void MeshSceneNode::makeXFormList()
 
     error = glGetError();
     if (error != GL_NO_ERROR) {
-      DEBUG0("ERROR: MeshSceneNode::makeXFormList() failed: %i\n", error);
+      logDebugMessage(0,"ERROR: MeshSceneNode::makeXFormList() failed: %i\n", error);
       xformList = INVALID_GL_LIST_ID;
     }
   }

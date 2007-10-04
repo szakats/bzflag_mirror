@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -430,8 +430,8 @@ void GuidedMissileStrategy::expire()
 void GuidedMissileStrategy::radarRender() const
 {
   const float *orig = getPath().getPosition();
-  const int length = BZDBCache::linedRadarShots;
-  const int size   = BZDBCache::sizedRadarShots;
+  const int length = (int)BZDBCache::linedRadarShots;
+  const int size   = (int)BZDBCache::sizedRadarShots;
 
   float shotTailLength = BZDB.eval(StateDatabase::BZDB_SHOTTAILLENGTH);
   // Display leading lines

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -207,7 +207,7 @@ bool OpenGLTexture::setupImage(const GLubyte* pixels)
     delete[] unaligned;
     unaligned = unalignedScaled;
     aligned = alignedScaled;
-    DEBUG1("Scaling texture from %ix%i to %ix%i\n",
+    logDebugMessage(1,"Scaling texture from %ix%i to %ix%i\n",
 	   width, height, scaledWidth, scaledHeight);
   }
 

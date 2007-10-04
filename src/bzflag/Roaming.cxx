@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -70,7 +70,7 @@ void Roaming::changeTarget(Roaming::RoamingTarget target, int explicitIndex) {
 
   World* world = World::getWorld();
   if (!world) {
-    DEBUG4("Roaming::changeTarget() no world, switching to free roaming\n");
+    logDebugMessage(4,"Roaming::changeTarget() no world, switching to free roaming\n");
     view = roamViewFree;
     buildRoamingLabel();
     return;
@@ -89,7 +89,7 @@ void Roaming::changeTarget(Roaming::RoamingTarget target, int explicitIndex) {
       for (i = 1; i < maxFlags; ++i) {
 	if (target == next) {
 	  j = (targetFlag + i) % maxFlags;
-	} else if (target == previous) {
+	} else {
 	  j = (targetFlag - i + maxFlags) % maxFlags;
 	}
 	const Flag& flag = world->getFlag(j);
@@ -109,7 +109,7 @@ void Roaming::changeTarget(Roaming::RoamingTarget target, int explicitIndex) {
       for (i = 0; i < world->getCurMaxPlayers(); ++i) {
 	if (target == next) {
 	  j = (targetManual + i + 2) % (world->getCurMaxPlayers() + 1) - 1;
-	} else if (target == previous) {
+	} else {
 	  j = (targetManual - i + world->getCurMaxPlayers() + 1) % (world->getCurMaxPlayers() + 1) - 1;
 	}
 	if ((j == -1) ||
@@ -126,6 +126,18 @@ void Roaming::changeTarget(Roaming::RoamingTarget target, int explicitIndex) {
     view = roamViewFree;
 
   buildRoamingLabel();
+
+  Player* tracked = NULL;
+  if (!devDriving) {
+    if (world) {
+      tracked = world->getPlayer(targetWinner);
+    }
+  } else {
+    tracked = LocalPlayer::getMyTank();
+  }
+
+  if (tracked)
+    tracked->reportedHits = tracked->computedHits = 0;
 }
 
 void Roaming::buildRoamingLabel(void) {

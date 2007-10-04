@@ -1,3 +1,5 @@
+include $(top_srcdir)/Makefile.common
+
 noinst_LTLIBRARIES = libNet.la
 
 if BUGGY_MIPSPRO
@@ -6,9 +8,7 @@ else
 MIPSPRO_CXXFLAGS = @CXXFLAGS@
 endif
 
-AM_CXXFLAGS = $(MIPSPRO_CXXFLAGS)
-
-AM_CPPFLAGS = -I$(top_srcdir)/include
+libNet_la_CXXFLAGS = $(AM_CXXFLAGS) $(MIPSPRO_CXXFLAGS)
 
 MAINTAINERCLEANFILES = \
 	Makefile.in

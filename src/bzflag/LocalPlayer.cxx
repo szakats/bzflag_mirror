@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -112,10 +112,10 @@ void			LocalPlayer::doUpdate(float dt)
 
     // if we've been paused for a long time, drop our flag
     if (!wasPaused) {
-      pauseTime = TimeKeeper::getCurrent();
+      pauseTime = TimeKeeper::getTick();
       wasPaused = true;
     }
-    if (TimeKeeper::getCurrent() -  pauseTime > BZDB.eval(StateDatabase::BZDB_PAUSEDROPTIME)) {
+    if (TimeKeeper::getTick() -  pauseTime > BZDB.eval(StateDatabase::BZDB_PAUSEDROPTIME)) {
       server->sendDropFlag(getPosition());
       setStatus(getStatus() & ~PlayerState::FlagActive);
       pauseTime = TimeKeeper::getSunExplodeTime();
@@ -178,14 +178,7 @@ void LocalPlayer::doSlideMotion(float dt, float slideTime,
   nv[1] = ov[1] + (sin_val * speedAdj);
   const float newSpeed = sqrtf((nv[0] * nv[0]) + (nv[1] * nv[1]));
 
-  // BURROW and AGILITY will not be taken into account
-  const FlagType* flag = getFlag();
-  float maxSpeed = BZDB.eval(StateDatabase::BZDB_TANKSPEED);
-  if (flag == Flags::Velocity) {
-    maxSpeed *= BZDB.eval(StateDatabase::BZDB_VELOCITYAD);
-  } else if (flag == Flags::Thief) {
-    maxSpeed *= BZDB.eval(StateDatabase::BZDB_THIEFVELAD);
-  }
+  float maxSpeed = getMaxSpeed();
 
   if (newSpeed > maxSpeed) {
     float adjSpeed;
@@ -258,7 +251,7 @@ void			LocalPlayer::doUpdateMotion(float dt)
 
   // if was teleporting and exceeded teleport time then not teleporting anymore
   if (isTeleporting() &&
-      ((getTeleportTime() - lastTime) >= BZDB.eval(StateDatabase::BZDB_TELEPORTTIME)))
+      ((lastTime - getTeleportTime()) >= BZDB.eval(StateDatabase::BZDB_TELEPORTTIME)))
     setStatus(getStatus() & ~short(PlayerState::Teleporting));
 
   // phased means we can pass through buildings
@@ -465,6 +458,10 @@ void			LocalPlayer::doUpdateMotion(float dt)
     }
   }
 
+  float nominalPlanarSpeed2
+    = newVelocity[0] * newVelocity[0]
+    + newVelocity[1] * newVelocity[1];
+
   for (int numSteps = 0; numSteps < MaxSteps; numSteps++) {
     // record position at beginning of time step
     float tmpPos[3], tmpAzimuth;
@@ -660,6 +657,15 @@ void			LocalPlayer::doUpdateMotion(float dt)
     newVelocity[0] = (newPos[0] - oldPosition[0]) * oodt;
     newVelocity[1] = (newPos[1] - oldPosition[1]) * oodt;
     newVelocity[2] = (newPos[2] - oldPosition[2]) * oodt;
+
+    float newPlanarSpeed2 = newVelocity[0] * newVelocity[0]
+      + newVelocity[1] * newVelocity[1];
+    float scaling = newPlanarSpeed2 / nominalPlanarSpeed2;
+    if (scaling > 1.0f) {
+      scaling = sqrtf(scaling);
+      newVelocity[0] /= scaling;
+      newVelocity[1] /= scaling;
+    }
   }
 
   // see if we teleported
@@ -823,12 +829,12 @@ void			LocalPlayer::doUpdateMotion(float dt)
 
   if ((getFlag() == Flags::Bouncy) && ((location == OnGround) || (location == OnBuilding))) {
     if (oldLocation != InAir) {
-      if ((TimeKeeper::getCurrent() - bounceTime) > 0) {
+      if ((TimeKeeper::getTick() - bounceTime) > 0) {
 	doJump();
       }
     }
     else {
-      bounceTime = TimeKeeper::getCurrent();
+      bounceTime = TimeKeeper::getTick();
       bounceTime += 0.2f;
     }
   }
@@ -968,44 +974,6 @@ void LocalPlayer::collectInsideBuildings()
 }
 
 
-float			LocalPlayer::getReloadTime() const
-{
-  const int numShots = World::getWorld()->getMaxShots();
-  if (numShots <= 0) {
-    return 0.0f;
-  }
-
-  float time = float(jamTime - TimeKeeper::getCurrent());
-  if (time > 0.0f) {
-    return time;
-  }
-
-  // look for an empty slot
-  int i;
-  for (i = 0; i < numShots; i++) {
-    if (!shots[i]) {
-      return 0.0f;
-    }
-  }
-
-  // look for the shot fired least recently
-  float minTime = float(shots[0]->getReloadTime() -
-    (shots[0]->getCurrentTime() - shots[0]->getStartTime()));
-  for (i = 1; i < numShots; i++) {
-    const float t = float(shots[i]->getReloadTime() -
-      (shots[i]->getCurrentTime() - shots[i]->getStartTime()));
-    if (t < minTime) {
-      minTime = t;
-    }
-  }
-
-  if (minTime < 0.0f) {
-    minTime = 0.0f;
-  }
-
-  return minTime;
-}
-
 float			LocalPlayer::getFlagShakingTime() const
 {
   return flagShakingTime;
@@ -1106,7 +1074,7 @@ void			LocalPlayer::setDesiredSpeed(float fracOfMaxSpeed)
   } else if ((flag == Flags::ReverseOnly) && (fracOfMaxSpeed > 0.0)) {
     fracOfMaxSpeed = 0.0f;
   } else if (flag == Flags::Agility) {
-    if ((TimeKeeper::getCurrent() - agilityTime) < BZDB.eval(StateDatabase::BZDB_AGILITYTIMEWINDOW)) {
+    if ((TimeKeeper::getTick() - agilityTime) < BZDB.eval(StateDatabase::BZDB_AGILITYTIMEWINDOW)) {
       fracOfMaxSpeed *= BZDB.eval(StateDatabase::BZDB_AGILITYADVEL);
     } else {
       float oldFrac = desiredSpeed / BZDBCache::tankSpeed;
@@ -1119,7 +1087,7 @@ void			LocalPlayer::setDesiredSpeed(float fracOfMaxSpeed)
 	limit /= 2.0f;
       if (fabs(fracOfMaxSpeed - oldFrac) > limit) {
 	fracOfMaxSpeed *= BZDB.eval(StateDatabase::BZDB_AGILITYADVEL);
-	agilityTime = TimeKeeper::getCurrent();
+	agilityTime = TimeKeeper::getTick();
       }
     }
   }
@@ -1248,6 +1216,7 @@ bool			LocalPlayer::fireShot()
   shots[i] = new LocalShotPath(firingInfo);
 
   // Insert timestamp, useful for dead reckoning jitter fixing
+  // TODO should maybe use getTick() instead? must double check
   const float timeStamp = float(TimeKeeper::getCurrent() - TimeKeeper::getNullTime());
   firingInfo.timeSent = timeStamp;
 
@@ -1279,7 +1248,7 @@ bool			LocalPlayer::fireShot()
     }
   }
 
-  shotStatistics.recordFire(firingInfo.flagType);
+  shotStatistics.recordFire(firingInfo.flagType,getForward(),firingInfo.shot.vel);
 
   if (getFlag() == Flags::TriggerHappy) {
     // make sure all the shots don't go off at once
@@ -1288,13 +1257,43 @@ bool			LocalPlayer::fireShot()
   return true;
 }
 
-
-void LocalPlayer::forceReload(float time)
+float			LocalPlayer::getReloadTime() const
 {
-  jamTime = TimeKeeper::getCurrent();
-  jamTime+= time;
-}
+	const int numShots = World::getWorld()->getMaxShots();
+	if (numShots <= 0) {
+		return 0.0f;
+	}
 
+	float time = float(jamTime - TimeKeeper::getTick());
+	if (time > 0.0f) {
+		return time;
+	}
+
+	// look for an empty slot
+	int i;
+	for (i = 0; i < numShots; i++) {
+		if (!shots[i]) {
+			return 0.0f;
+		}
+	}
+
+	// look for the shot fired least recently
+	float minTime = float(shots[0]->getReloadTime() -
+		(shots[0]->getCurrentTime() - shots[0]->getStartTime()));
+	for (i = 1; i < numShots; i++) {
+		const float t = float(shots[i]->getReloadTime() -
+			(shots[i]->getCurrentTime() - shots[i]->getStartTime()));
+		if (t < minTime) {
+			minTime = t;
+		}
+	}
+
+	if (minTime < 0.0f) {
+		minTime = 0.0f;
+	}
+
+	return minTime;
+}
 
 bool LocalPlayer::doEndShot(int ident, bool isHit, float* pos)
 {

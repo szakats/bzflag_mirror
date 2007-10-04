@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -46,6 +46,7 @@ int		Player::tankTexture = -1;
 Player::Player(const PlayerId& _id, TeamColor _team,
 	       const char* name, const char* _email, const PlayerType _type) :
   lastObstacle(NULL),
+  pauseMessageState(false),
   notResponding(false),
   hunted(false),
   id(_id),
@@ -82,6 +83,12 @@ Player::Player(const PlayerId& _id, TeamColor _team,
   setRelativeMotion();
   setUserSpeed(0.0f);
   setUserAngVel(0.0f);
+
+  apparentVelocity[0] = apparentVelocity[1] = apparentVelocity[2] = 0.0f;
+  inputTimestamp = 0.0f;
+
+  reportedHits = 0;
+  computedHits = 0;
 
   // set call sign
   ::strncpy(callSign, name, CallSignLen);
@@ -123,9 +130,9 @@ Player::Player(const PlayerId& _id, TeamColor _team,
   teleAlpha = 1.0f;
 
   haveIpAddr = false; // no IP address yet
-  lastTrackDraw = TimeKeeper::getCurrent();
+  lastTrackDraw = TimeKeeper::getTick();
 
-  spawnTime = TimeKeeper::getCurrent();
+  spawnTime = TimeKeeper::getTick();
 
   return;
 }
@@ -188,6 +195,18 @@ float Player::getRadius() const
   return (dimensionsScale[0] * BZDBCache::tankRadius);
 }
 
+float Player::getMaxSpeed ( void ) const
+{
+	// BURROW and AGILITY will not be taken into account
+	const FlagType* flag = getFlag();
+	float maxSpeed = BZDBCache::tankSpeed;
+	if (flag == Flags::Velocity) {
+		maxSpeed *= BZDB.eval(StateDatabase::BZDB_VELOCITYAD);
+	} else if (flag == Flags::Thief) {
+		maxSpeed *= BZDB.eval(StateDatabase::BZDB_THIEFVELAD);
+	}
+	return maxSpeed;
+}
 
 void Player::getMuzzle(float* m) const
 {
@@ -214,6 +233,11 @@ float Player::getMuzzleHeight() const
   return (dimensionsScale[2] * BZDB.eval(StateDatabase::BZDB_MUZZLEHEIGHT));
 }
 
+void Player::forceReload(float time)
+{
+  jamTime  = TimeKeeper::getTick();
+  jamTime += time;
+}
 
 void Player::move(const float* _pos, float _azimuth)
 {
@@ -410,7 +434,7 @@ void Player::updateTrackMarks()
   const float minSpeed = 0.1f; // relative speed slop
 
   if (isAlive() && !isFalling() && !isPhantomZoned()) {
-    const float lifeTime = float(TimeKeeper::getCurrent() - lastTrackDraw);
+    const float lifeTime = float(TimeKeeper::getTick() - lastTrackDraw);
     if (lifeTime > TrackMarks::updateTime) {
       bool drawMark = true;
       float markPos[3];
@@ -436,7 +460,7 @@ void Player::updateTrackMarks()
       if (drawMark) {
 	TrackMarks::addMark(markPos, dimensionsScale[1],
 			    state.azimuth, state.phydrv);
-	lastTrackDraw = TimeKeeper::getCurrent();
+	lastTrackDraw = TimeKeeper::getTick();
       }
     }
   }
@@ -980,7 +1004,7 @@ void Player::spawnEffect()
       dimensionsScale[i] = 0.01f;
     }
   }
-  spawnTime = TimeKeeper::getCurrent();
+  spawnTime = TimeKeeper::getTick();
   return;
 }
 
@@ -1208,7 +1232,7 @@ bool Player::isDeadReckoningWrong() const
 
   float angleTolerance = BZDB.eval(StateDatabase::BZDB_ANGLETOLERANCE);
   if (fabsf(state.azimuth - predictedAzimuth) > angleTolerance) {
-    DEBUG4 ("state.azimuth = %f, predictedAzimuth = %f\n",
+    logDebugMessage(4,"state.azimuth = %f, predictedAzimuth = %f\n",
 	    state.azimuth, predictedAzimuth);
     return true;
   }
@@ -1312,14 +1336,22 @@ void Player::doDeadReckoning()
 const int   DRStateStable      = 100;
 const float maxToleratedJitter = 1.0f;
 
-void Player::setDeadReckoning(float)
+void Player::setDeadReckoning(float timestamp)
 {
+  // calculate apparent speed
+  //  const float timeelapsed = TimeKeeper::getTick() - inputTime;
+  const float dt = timestamp - inputTimestamp;
+  inputTimestamp = timestamp;
+  if (dt > 0.0f && dt < MaxUpdateTime * 1.5f) {
+    apparentVelocity[0] = (inputPos[0] - state.pos[0]) / dt;
+    apparentVelocity[1] = (inputPos[1] - state.pos[1]) / dt;
+    apparentVelocity[2] = (inputPos[2] - state.pos[2]) / dt;
+  }
+
   // set the current state
   setDeadReckoning();
 
   setRelativeMotion();
-
-  return;
 }
 
 

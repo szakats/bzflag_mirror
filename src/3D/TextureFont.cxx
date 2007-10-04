@@ -1,5 +1,5 @@
 /* bzflag
-* Copyright (c) 1993 - 2006 Tim Riker
+* Copyright (c) 1993 - 2007 Tim Riker
 *
 * This package is free software;  you can redistribute it and/or
 * modify it under the terms of the license found in the file
@@ -56,7 +56,7 @@ void TextureFont::build(void)
 void TextureFont::preLoadLists()
 {
   if (texture.size() < 1) {
-    DEBUG2("Font %s does not have an associated texture name, not loading\n", texture.c_str());
+    logDebugMessage(2,"Font %s does not have an associated texture name, not loading\n", texture.c_str());
     return;
   }
 
@@ -66,10 +66,10 @@ void TextureFont::preLoadLists()
   textureID = tm.getTextureID(textureAndDir.c_str());
 
   if (textureID == -1) {
-    DEBUG2("Font texture %s has invalid ID\n", texture.c_str());
+    logDebugMessage(2,"Font texture %s has invalid ID\n", texture.c_str());
     return;
   }
-  DEBUG4("Font %s (face %s) has texture ID %d\n", texture.c_str(), faceName.c_str(), textureID);
+  logDebugMessage(4,"Font %s (face %s) has texture ID %d\n", texture.c_str(), faceName.c_str(), textureID);
 
   // fonts are usually pixel aligned
   tm.setTextureFilter(textureID, OpenGLTexture::Nearest);

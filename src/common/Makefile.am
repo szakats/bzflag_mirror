@@ -1,14 +1,15 @@
+include $(top_srcdir)/Makefile.common
+
 noinst_LTLIBRARIES = libCommon.la
 
-AM_CFLAGS = -D_XOPEN_SOURCE
-
-AM_CPPFLAGS = -I$(top_srcdir)/include $(CURL_CFLAGS)
+libNet_la_CXXFLAGS = $(AM_CXXFLAGS) -D_XOPEN_SOURCE
 
 libCommon_la_LDFLAGS = -static
 libCommon_la_SOURCES  =			\
 	AccessList.cxx			\
 	AutoCompleter.cxx		\
 	BZDBCache.cxx			\
+	BZDBLocal.cxx			\
 	Bundle.cxx			\
 	BundleMgr.cxx			\
 	CommandManager.cxx		\

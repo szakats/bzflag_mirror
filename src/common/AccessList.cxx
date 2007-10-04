@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -22,6 +22,7 @@
 // common headers
 #include "bzfio.h"
 #include "bzglob.h"
+#include "TextUtils.h"
 #include "FileManager.h"
 #include "DirectoryNames.h"
 
@@ -120,14 +121,14 @@ bool AccessList::reload()
       c = c + 4;
     }
     else {
-      DEBUG1("%s: malformed line (%s)\n", filename.c_str(), buf);
+      logDebugMessage(1,"%s: malformed line (%s)\n", filename.c_str(), buf);
       continue; // ignore this line
     }
 
     c = eatWhite(c);
 
     if (*c == '\0') {
-      DEBUG1("%s: missing pattern (%s)\n", filename.c_str(), buf);
+      logDebugMessage(1,"%s: missing pattern (%s)\n", filename.c_str(), buf);
       continue; // ignore this line
     }
 
@@ -140,7 +141,7 @@ bool AccessList::reload()
     pattern.pattern = c;
     patterns.push_back(pattern);
 
-    DEBUG4("AccessList(%s):  added  (%i: %s)\n", filename.c_str(), type, c);
+    logDebugMessage(4,"AccessList(%s):  added  (%i: %s)\n", filename.c_str(), type, c);
   }
 
   fclose(file);
@@ -176,7 +177,9 @@ bool AccessList::authorized(const std::vector<std::string>& strings) const
     if ((p.type == allow) || (p.type == deny)) {
       // simple globbing
       for (unsigned int s = 0; s < strings.size(); s++) {
-	if (glob_match(p.pattern, strings[s])) {
+        const std::string upperString = TextUtils::toupper(strings[s]);
+        const std::string upperPattern = TextUtils::toupper(p.pattern);
+        if (glob_match(upperPattern, upperString)) {
 	  if (p.type == allow) {
 	    return true;
 	  }

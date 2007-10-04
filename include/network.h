@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -64,7 +64,7 @@
 #  define AddrLen		unsigned int
 /* setsockopt incorrectly prototypes the 4th arg without const. */
 #  define SSOType		void*
-#elif defined(BSD) || defined(sun)
+#elif defined(BSD) || defined(sun) || defined(__GLIBC__)
 #  define AddrLen		socklen_t
 #elif defined (__APPLE__)
 #  include <AvailabilityMacros.h>

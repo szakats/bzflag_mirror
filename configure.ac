@@ -1,6 +1,6 @@
 dnl                   C O N F I G U R E . A C
 dnl BZFlag
-dnl Copyright (c) 1993 - 2006 Tim Riker
+dnl Copyright (c) 1993 - 2007 Tim Riker
 dnl
 dnl This package is free software;  you can redistribute it and/or
 dnl modify it under the terms of the license found in the file
@@ -11,7 +11,7 @@ dnl IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 dnl WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 dnl
 
-AC_INIT
+AC_INIT([BZFlag], [2.0.10rc3], [http://BZFlag.org/], [bzflag])
 AC_CONFIG_SRCDIR(src/bzflag/bzflag.cxx)
 AC_REVISION($Revision $)
 
@@ -26,8 +26,8 @@ CONF_DATE=`date -u +%Y%m%d`
 BZFLAG_DATE=`date -u +%Y-%m-%d`
 BZFLAG_VERSION="$MAJOR_VERSION.$MINOR_VERSION.$REV"
 echo "BZFlag-$BZFLAG_VERSION.$CONF_DATE"
-AC_CANONICAL_TARGET
-AM_INIT_AUTOMAKE(bzflag, $BZFLAG_VERSION)
+AC_CANONICAL_HOST
+AM_INIT_AUTOMAKE([1.6])
 AM_CONFIG_HEADER(include/config.h)
 
 AC_SUBST(MAJOR_VERSION)
@@ -68,16 +68,25 @@ if test "x$LD" != "x" ; then
 	AC_MSG_WARN([LD cannot be set directly yet it seems to be set ($LD)])
 fi
 
+#Do not play with CFLAGS and CXXFLAGS if they are set by user
+bzflag_test_CFLAGS=${CFLAGS+set}
+bzflag_test_CXXFLAGS=${CXXFLAGS+set}
+
 #Checks for programs.
 AC_PROG_MAKE_SET
 AC_PROG_CC
 AC_PROG_CXX
 
-AC_PATH_PROG(CCACHE, ccache)
+AM_CONDITIONAL([GNU_GCC], [test "$GCC" = yes])
+
+AC_ARG_ENABLE(ccachetest, [  --disable-ccachetest    don't try to use ccache])
+if test x$enable_ccachetest != xno; then
+  AC_PATH_PROG(CCACHE, ccache)
+fi
 if test "$CCACHE"
 then
-  CC="ccache $CC"
-  CXX="ccache $CXX"
+  CC="$CCACHE $CC"
+  CXX="$CCACHE $CXX"
 fi
 
 AC_CHECK_TOOL(WINDRES, windres, :)
@@ -96,7 +105,6 @@ int main() { return 0; }
 fi
 
 AC_PROG_LN_S
-AC_PROG_RANLIB
 
 # disabled shared libraries in order to prevent double-compilation
 # FIXME: necessary until the flags are used properly.
@@ -128,27 +136,10 @@ AC_SUBST(AR_FLAGS)
 AC_CHECK_LIB(z, compress, BUILDZLIB=no, BUILDZLIB=yes)
 AM_CONDITIONAL(BUILDZLIB, test $BUILDZLIB = yes)
 
-  #checking for libcurl library
-  MY_CURL
-  if test $my_cv_curl_vers != NONE; then
-    CURL_CFLAGS=`curl-config --cflags`
-    CURL_LIBS=`curl-config --libs`
-    if test "x$build_vendor" = "xapple" ; then
-      if test -f /usr/bin/libcurl.a ; then
-        # prefer to link static
-        CURL_LIBS=/usr/bin/libcurl.a
-      else
-        # mac os x curl-config outputs erroneous -arch i386 in libs
-        CURL_LIBS="`echo $CURL_LIBS | sed 's/-arch i386//'`"
-      fi
-    fi
-  else
-    AC_MSG_ERROR([libcurl is required. You must install it. \
-See http://curl.haxx.se/])
-  fi
-  AC_SUBST(CURL_CFLAGS)
-
-LIBS="$CURL_LIBS $LIBS"
+#checking for libcurl library
+LIBCURL_CHECK_CONFIG(, , ,
+  [AC_MSG_ERROR([libcurl is required. You must install it. \
+See http://curl.haxx.se/])])
 
 # Testing if kerberos 5 is in the system
 KRB5_CONFIG=no
@@ -187,6 +178,7 @@ AC_CHECK_HEADERS( \
 	SDL/SDL.h \
 	X11/Xlib.h \
 	bstring.h \
+	arpa/nameser_compat.h \
 	linux/input.h \
 	stdint.h \
 	sys/param.h \
@@ -194,6 +186,7 @@ AC_CHECK_HEADERS( \
 	values.h \
 	dsound.h \
 )
+# nameser_compat.h used by src/c-ares
 
 #Checks for types
 #AM_CHECK_TYPES(socklen_t)
@@ -234,7 +227,7 @@ fi
 AC_MSG_RESULT([$ac_ff_effect_directional]) 
 
 case $host_os in
-     linux*|freebsd*|netbsd*|dragonfly*) linux=true;;
+     linux*|kfreebsd*|freebsd*|netbsd*|dragonfly*) linux=true;;
      *) linux=false;;
 esac
 AM_CONDITIONAL(LINUX, $linux)
@@ -281,7 +274,6 @@ case $host_os in
 esac
 
 AC_PATH_XTRA
-CPPFLAGS="$CPPFLAGS $X_CFLAGS" 
 LDFLAGS="$LDFLAGS $X_LIBS"
 
 case $host_os in
@@ -463,10 +455,6 @@ esac
 if test $prefix = NONE; then
 	prefix=$ac_default_prefix
 fi
-INSTALL_DATA_DIR=`eval echo $datadir/bzflag`
-AC_SUBST(INSTALL_DATA_DIR)
-desktopdir=`eval echo $datadir/applications`
-AC_SUBST(desktopdir)
 
 AC_ARG_ENABLE(threads, [  --enable-threads        build with thread])
 if test x$enable_threads = xyes; then
@@ -584,8 +572,6 @@ if test x$enable_snapping != xno; then
   AC_DEFINE(SNAPPING, 1, [Enabling Snapping])
 fi
 
-AC_DEFINE_UNQUOTED(INSTALL_DATA_DIR, "$INSTALL_DATA_DIR",
-[Data file directory])
 case $host_os in
      linux*)
 	AC_DEFINE(HALF_RATE_AUDIO, 1, [Half rate Audio])
@@ -594,24 +580,22 @@ case $host_os in
 	#if test x$no_sdl = xyes; then
 	#AC_DEFINE(XIJOYSTICK, 1, [XInput Joystick Handling])
 	#fi
-	#CPPFLAGS="$CPPFLAGS -Wall -W -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wconversion -Wredundant-decls"
-	CPPFLAGS="$CPPFLAGS -Wall -W -Wshadow"
+	#FLAGS="$FLAGS -Wall -W -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wconversion -Wredundant-decls"
+	FLAGS="$FLAGS -Wall -W"
 	case $host_vendor in
 	     pc)
 	       if expr `$CC -dumpversion` \>= "3.4" > /dev/null ; then
-	         # silly hack, should be a proper configure compiler option test
-	         if test x$host_cpu = xx86_64; then
-		   CPPFLAGS="$CPPFLAGS -mtune=k8";
-		 fi		    
-	         CPPFLAGS="$CPPFLAGS -mtune=$host_cpu";
+		 FLAGS="$FLAGS -mtune"
 	       else
-	         # silly hack, should be a proper configure compiler option test
-	         if test x$host_cpu = xx86_64; then
-		   CPPFLAGS="$CPPFLAGS -mcpu=k8";
-		 fi		    
-	         CPPFLAGS="$CPPFLAGS -mcpu=$host_cpu";
+		 FLAGS="$FLAGS -mcpu"
+	       fi
+	       # silly hack, should be a proper configure compiler option test
+	       if test x$host_cpu = xx86_64; then
+		 FLAGS="$FLAGS=k8"
+	       else
+		 FLAGS="$FLAGS=$host_cpu"
 	       fi;;
-	     ppc) CPPFLAGS="$CPPFLAGS -mcpu=$host_cpu";;
+	     ppc) FLAGS="$FLAGS -mcpu=$host_cpu";;
 	esac;;
      cygwin)
 	AC_DEFINE(HALF_RATE_AUDIO, 1, [Half rate Audio])
@@ -619,36 +603,35 @@ case $host_os in
 	#if test x$no_sdl = xyes; then
 	#AC_DEFINE(XIJOYSTICK, 1, [XInput Joystick Handling])
 	#fi
-	CPPFLAGS="$CPPFLAGS -Wall -W -mcpu=$host_cpu";;
+	FLAGS="$FLAGS -Wall -W -mcpu=$host_cpu";;
      mingw32*)
 	WINPORT=windows_port.o
 	AC_SUBST(WINPORT)
 	AC_DEFINE(HALF_RATE_AUDIO, 1, [Half rate Audio])
-	CPPFLAGS="$CPPFLAGS -Wall -W"
+	FLAGS="$FLAGS -Wall -W"
 	if expr `$CC -dumpversion` \>= "3.4" > /dev/null ; then
-	  CPPFLAGS="$CPPFLAGS -mtune=$host_cpu";
+	  FLAGS="$FLAGS -mtune=$host_cpu";
 	else
-	  CPPFLAGS="$CPPFLAGS -mcpu=$host_cpu";
+	  FLAGS="$FLAGS -mcpu=$host_cpu";
 	fi;;
      solaris*)
 	AC_DEFINE(ETC_INET, [], [hosts is in /etc/inet/])
 	AC_DEFINE(SUN_OGL_NO_VERTEX_MACROS, [], [Sun OpenGL No Macro Vertex])
 	if $sun_wspro; then
-	   CPPFLAGS="$CPPFLAGS -KPIC"
+	   FLAGS="$FLAGS -KPIC"
 	elif $sun_cc; then
-	   CPPFLAGS="$CPPFLAGS -fast"
+	   FLAGS="$FLAGS -fast"
 	elif $sun_gcc; then
-	   CPPFLAGS="$CPPFLAGS -fpermissive"
+	   FLAGS="$FLAGS -fpermissive"
 	fi;;
      macos|darwin*)
-	CPPFLAGS="$CPPFLAGS -pipe -pedantic -fno-exceptions -W -Wall -Wundef -Wno-import";
-	CFLAGS="$CFLAGS -pipe -pedantic -fno-exceptions -W -Wall -Wundef -Wno-import";;
+	FLAGS="$FLAGS -pipe -pedantic -fno-exceptions -W -Wall -Wundef -Wno-import";;
      irix)
-	CPPFLAGS="$CPPFLAGS -Wall";
+	FLAGS="$FLAGS -Wall";
 	if test x$host_cpu = xmips64; then
-	   CPPFLAGS="CPPFLAGS -march=mips3";
+	   FLAGS="FLAGS -march=mips3";
 	else
-	   CPPFLAGS="CPPFLAGS -march=mips2";
+	   FLAGS="FLAGS -march=mips2";
 	fi;;
      beos*)
 	AC_DEFINE(HAVE_DEFINED_TOLOWER, 1, [tolower and toupper are not functions])
@@ -659,58 +642,54 @@ esac
 # CXXFLAGS="$CXXFLAGS -DBZ_BUILD_DATE=$CONF_DATE"
 
 if test x$enable_debug = xyes; then
-   CFLAGS="$CFLAGS -O0";
-   CXXFLAGS="$CXXFLAGS -O0";
+   FLAGS="$FLAGS -O0"
    case $host_os in
      linux*|cygwin|mingw32*)
-	CPPFLAGS="$CPPFLAGS -Werror";
-	CXXFLAGS="$CXXFLAGS -Wno-deprecated -fsigned-char";
+	FLAGS="$FLAGS -Werror -Wshadow"
 	if test x$enable_profiling = xyes; then
-	  CFLAGS="$CFLAGS -pg";
-	  CXXFLAGS="$CXXFLAGS -pg";
+	  FLAGS="$FLAGS -pg"
 	fi;;
      macos|darwin*)
 	if test x$enable_profiling = xyes; then
-	  CFLAGS="$CFLAGS -pg";
-	  CXXFLAGS="$CXXFLAGS -pg";
+	  FLAGS="$FLAGS -pg"
 	fi;;
      beos)
-	CPPFLAGS="$CPPFLAGS -Werror";;
+	FLAGS="$FLAGS -Werror";;
     esac;
     AC_DEFINE(DEBUG, 1, [Debugging enabled])
 else
     case $host_os in
 	 linux*|cygwin|mingw32*)
-		CXXFLAGS="$CXXFLAGS -ffast-math -fno-exceptions -fsigned-char";;
+		FLAGS="$FLAGS -ffast-math -fno-exceptions";;
 	 solaris*)
-		CFLAGS="$CFLAGS -O";
-		CXXFLAGS="$CXXFLAGS -O";;
+		FLAGS="$FLAGS -O";;
 	 macos|darwin*)
-		CFLAGS="$CFLAGS -O3";
-		CXXFLAGS="$CXXFLAGS -O3";
-		CXXFLAGS="$CXXFLAGS -ffast-math -fomit-frame-pointer";
-		CXXFLAGS="$CXXFLAGS -fexpensive-optimizations -fno-exceptions";
+		FLAGS="$FLAGS -O3 -ffast-math -fomit-frame-pointer"
+		FLAGS="$FLAGS -fexpensive-optimizations -fno-exceptions"
 		if test x$enable_profiling = xyes; then
-			CFLAGS="$CFLAGS -pg";
-			CXXFLAGS="$CXXFLAGS -pg";
+			FLAGS="$FLAGS -pg"
 		fi;;
 	 irix)
 		if test x$host_cpu = xmips64; then
-		   CFLAGS="$CFLAGS -O3";
-		   CXXFLAGS="$CXXFLAGS -O3";
-		   CPPFLAGS="$CPPFLAGS -ffast-math -fomit-frame-pointer";
-		   CPPFLAGS="$CPPFLAGS -fexpensive-optimizations -fno-exceptions";
+		   FLAGS="$FLAGS -O3 -ffast-math -fomit-frame-pointer"
+		   FLAGS="$FLAGS -fexpensive-optimizations -fno-exceptions"
 		else
-		   CFLAGS="$CFLAGS -O2";
-		   CXXFLAGS="$CXXFLAGS -O2";
+		   FLAGS="$FLAGS -O2"
 		fi;;
 	 beos)
-		CFLAGS="$CFLAGS -O2";
-		CXXFLAGS="$CXXFLAGS -O2";
-		CXXFLAGS="$CXXFLAGS -ffast-math -fomit-frame-pointer -fno-exceptions";;
+		FLAGS="$FLAGS -O2 -ffast-math -fomit-frame-pointer"
+		FLAGS="$FLAGS -fno-exceptions";;
      esac;
      AC_DEFINE(NDEBUG, 1, [Debugging disabled])
-fi;
+fi
+
+#Do not play with CFLAGS and CXXFLAGS if they are set by user
+if test "$bzflag_test_CFLAGS" != set; then
+  CFLAGS="$CFLAGS $FLAGS"
+fi
+if test "$bzflag_test_CXXFLAGS" != set; then
+  CXXFLAGS="$CXXFLAGS $FLAGS"
+fi
 
 dnl check for -search_paths_first linker flag when making dynamic libraries
 search_paths_first_flag="-Wl,-search_paths_first -mdynamic-no-pic"
@@ -743,6 +722,9 @@ AC_CHECK_FUNCS(\
 	vsnprintf \
 	wglGetCurrentContext \
 )
+
+dnl test for isnan() presence
+BZ_FUNC_ISNAN
 
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <algorithm>
@@ -812,10 +794,6 @@ AC_CONFIG_FILES(bzflag.info
 	include/Makefile
 	m4/Makefile
 	man/Makefile
-	man/bzadmin.6
-	man/bzflag.6
-	man/bzfs.6
-	man/bzw.5
 	misc/Makefile
 	package/Makefile
 	package/irix/Makefile
@@ -824,19 +802,34 @@ AC_CONFIG_FILES(bzflag.info
 	package/win32/Makefile
 	package/win32/nsis/Makefile
 	plugins/Makefile
+    	plugins/plugin_utils/Makefile
+	plugins/plugin_utils/VC71/Makefile
+	plugins/HoldTheFlag/Makefile
 	plugins/RogueGenocide/Makefile
 	plugins/SAMPLE_PLUGIN/Makefile
 	plugins/airspawn/Makefile
 	plugins/chathistory/Makefile
+	plugins/flagStay/Makefile
 	plugins/hiddenAdmin/Makefile
+	plugins/keepaway/Makefile
 	plugins/killall/Makefile
+	plugins/koth/Makefile
 	plugins/logDetail/Makefile
+	plugins/nagware/Makefile
 	plugins/playHistoryTracker/Makefile
 	plugins/python/Makefile
+	plugins/rabbitTimer/Makefile
+	plugins/rabidRabbit/Makefile
+	plugins/recordmatch/Makefile
+	plugins/regFlag/Makefile
+	plugins/serverControl/Makefile
 	plugins/shockwaveDeath/Makefile
+	plugins/teamflagreset/Makefile
+	plugins/timedctf/Makefile
+	plugins/torBlock/Makefile
 	plugins/vocaliser/Makefile
-	plugins/HoldTheFlag/Makefile
-	plugins/nagware/Makefile
+    	plugins/Phoenix/Makefile
+        plugins/wwzones/Makefile
 	plugins/doc/Makefile
 	plugins/vc71/Makefile
 	src/3D/Makefile
@@ -872,11 +865,40 @@ AC_CONFIG_FILES(bzflag.info
 	win32/VC8/Makefile)
 AC_OUTPUT
 
+
+#################
+# patch libtool #
+#################
+case $host_os in
+    darwin*)
+	for script in $ac_top_builddir $ac_abs_builddir $ac_builddir . ; do
+	    if test "x$script" = "x" ; then
+		libtoolscript="libtool"
+	    else
+		libtoolscript="${script}/libtool"
+	    fi
+	    if test -f ${libtoolscript} ; then
+		if test -w ${libtoolscript} ; then
+		    # remove any -all_load option.
+		    # provokes libtool linker bug with noinst C++ libraries.
+		    sed 's/-all_load.*convenience//g' < $libtoolscript > ${libtoolscript}.sed
+		    if test ! "x`cat ${libtoolscript}`" = "x`cat ${libtoolscript}.sed`" ; then
+			AC_MSG_RESULT([Found -all_load in libtool script, removing])
+			cp ${libtoolscript}.sed ${libtoolscript}
+		    fi
+		    rm -f ${libtoolscript}.sed
+		else
+		    AC_MSG_WARN([libtool script exists but is not writable so not attempting to edit])
+		fi
+	    fi
+	done
+	;;
+esac
+
 # use AC_MSG_RESULT instead of AC_MSG_NOTIFY to support old autoconf
 
 echo "CFLAGS are $CFLAGS"
 echo "LDFLAGS are $LDFLAGS"
-echo "CPPFLAGS are $CPPFLAGS"
 echo "LIBS are $LIBS"
 
 AC_MSG_RESULT([])

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -100,6 +100,7 @@ SceneRenderer::SceneRenderer() :
 				useDepthComplexityOn(false),
 				useWireframeOn(false),
 				useHiddenLineOn(false),
+				panelOpacity(0.3f),
 				radarSize(4),
 				maxMotionFactor(5),
 				useFogHack(false),
@@ -602,8 +603,7 @@ void SceneRenderer::setTimeOfDay(double julianDay)
 
   getSunPosition(julianDay, latitude, longitude, sunDir);
   getMoonPosition(julianDay, latitude, longitude, moonDir);
-  ::getCelestialTransform(julianDay, latitude, longitude,
-				(float(*)[4])celestialTransform);
+  ::getCelestialTransform(julianDay, latitude, longitude, celestialTransform);
 
   // set sun position
   if (sunDir[2] >= -0.009f) {

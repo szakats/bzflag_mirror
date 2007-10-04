@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -60,11 +60,15 @@ void			RemotePlayer::addShot(const FiringInfo& info)
     newpos[1] = info.shot.pos[1] - (front * f[1]);
     newpos[2] = info.shot.pos[2] - BZDB.eval(StateDatabase::BZDB_MUZZLEHEIGHT);
   }
-  shotStatistics.recordFire(info.flagType);
+  shotStatistics.recordFire(info.flagType,f,info.shot.vel);
   // FIXME - with dynamic dimensions, this may not be a good idea
   //	 (flag each shot with a 'default dimensions' state?)
   move(newpos, getAngle());
-  setDeadReckoning(info.timeSent);
+  // FIXME - timestamp of shots are handled slightly different than for
+  //         tank position updates, better so ignore them for now
+  //         detail: settick | shot: current() | move | draw | tankpos: tick()
+  //setDeadReckoning(info.timeSent);
+  setDeadReckoning(-1.0f);
 }
 
 ShotPath*		RemotePlayer::getShot(int index) const

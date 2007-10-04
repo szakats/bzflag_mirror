@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -66,8 +66,9 @@ struct CmdLineOptions
     maxShots(1), maxTeamScore(0), maxPlayerScore(0),
     numExtraFlags(0), teamKillerKickRatio(0),
     numAllowedFlags(0), shakeWins(0), shakeTimeout(0),
-    teamFlagTimeout(30), maxlagwarn(10000), lagwarnthresh(-1.0),
-    idlekickthresh(-1.0), timeLimit(0.0f), timeElapsed(0.0f),
+    teamFlagTimeout(30), maxlagwarn(10000), maxjitterwarn(10000), maxpacketlosswarn(10000),
+    adminlagannounce(-1.0), lagannounce(-1.0), lagwarnthresh(-1.0), jitterwarnthresh(-1.0),
+    idlekickthresh(-1.0), timeLimit(0.0f), timeElapsed(0.0f), addedTime(0.0f),
     linearAcceleration(_DEFAULT_LIN_ACCEL), angularAcceleration(_DEFAULT_ANGLE_ACCELL), useGivenPort(false),
     useFallbackPort(false), requireUDP(false), randomBoxes(false),
     randomCTF(false), flagsOnBuildings(false), respawnOnBuildings(false),
@@ -78,7 +79,7 @@ struct CmdLineOptions
     filterFilename(""), filterCallsigns(false), filterChat(false), filterSimple(false),
     banTime(300), voteTime(60), vetoTime(2), votesRequired(2),
     votePercentage(50.1f), voteRepeatTime(300),
-    autoTeam(false), citySize(5), cacheURL(""), cacheOut("")
+    autoTeam(false), citySize(5), cacheURL(""), cacheOut(""), tkAnnounce(false), wallSides(4)
   {
     int i;
     for (FlagTypeMap::iterator it = FlagType::getFlagMap().begin();
@@ -130,12 +131,18 @@ struct CmdLineOptions
   uint16_t		shakeTimeout;
   int			teamFlagTimeout;
   int			maxlagwarn;
+  int			maxjitterwarn;
+  int			maxpacketlosswarn;
 
-
+  float			adminlagannounce;
+  float			lagannounce;
   float			lagwarnthresh;
+  float			jitterwarnthresh;
+  float			packetlosswarnthresh;
   float			idlekickthresh;
   float			timeLimit;
   float			timeElapsed;
+  float                 addedTime;
   float			linearAcceleration;
   float			angularAcceleration;
 
@@ -196,6 +203,9 @@ struct CmdLineOptions
 
   std::string	   cacheURL;
   std::string	   cacheOut;
+
+  bool			tkAnnounce;
+  int			wallSides;
 
   // plugins
   typedef struct

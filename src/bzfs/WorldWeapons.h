@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -90,6 +90,7 @@ protected:
 
 int fireWorldWep ( FlagType* type, float lifetime, PlayerId player, float *pos, float tilt, float direction, int shotID, float dt );
 
+int fireWorldGM(FlagType* type, PlayerId targetPlayerID, float lifetime, PlayerId player, float *pos, float tilt, float direction, int shotID, float dt);
 #endif
 
 // Local Variables: ***

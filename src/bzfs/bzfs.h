@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -43,6 +43,8 @@
 #include "GameKeeper.h"
 #include "FlagInfo.h"
 #include "WorldInfo.h"
+#include "VotingArbiter.h"
+
 
 extern void sendMessage(int	 playerIndex,
 			PlayerId    dstPlayer,
@@ -79,6 +81,10 @@ extern void       resetFlag(FlagInfo &flag);
 extern void       dropFlag(FlagInfo& flag, const float dropPos[3]);
 extern void       publicize();
 extern TeamColor  whoseBase(float x, float y, float z);
+bool defineWorld ( void );
+bool saveWorldCache( const char* file = NULL );
+
+void rescanForBans ( bool isOperator = true, const char* callsign = NULL, int playerID = -1 );
 
 // initialize permission groups
 extern void initGroups();
@@ -107,12 +113,16 @@ extern float	   pluginWorldSize;
 extern float	   pluginWorldHeight;
 extern float	   pluginMaxWait;
 
+extern bool		  publiclyDisconected;
+
+extern VotingArbiter *votingarbiter;
 
 void pauseCountdown ( const char *pausedBy );
 void resumeCountdown ( const char *resumedBy );
 void resetTeamScores ( void );
 void startCountdown ( int delay, float limit, const char *buyWho );
 
+void makeWalls ( void );
 #endif
 
 // Local Variables: ***

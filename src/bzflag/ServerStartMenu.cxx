@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -280,11 +280,11 @@ void ServerStartMenu::scanWorldFiles (const std::string& searchDir,
     HANDLE h = FindFirstFile(pattern[i].c_str(), &findData);
     if (h != INVALID_HANDLE_VALUE) {
       std::string file;
-      while (FindNextFile(h, &findData)) {
+      do {
 	file = findData.cFileName;
 	worldFiles[file] = searchDir + file;
 	items->push_back(file);
-      }
+      } while (FindNextFile(h, &findData));
     }
   }
 #else
@@ -507,7 +507,7 @@ void ServerStartMenu::execute()
 	setStatus("Failed... server program is not executable.");
       else
 	setStatus(TextUtils::format("Failed... unknown error (%d).", errno, serverCmd).c_str());
-      DEBUG1("Failed to start server (%s) - error %d.\n", serverCmd, errno);
+      logDebugMessage(1,"Failed to start server (%s) - error %d.\n", serverCmd, errno);
     }
     else {
       setStatus("Server started.");

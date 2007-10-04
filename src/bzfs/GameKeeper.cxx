@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -64,6 +64,7 @@ GameKeeper::Player::Player(int _playerIndex,
 #endif
   _LSAState = start;
   bzIdentifier = "";
+  isParting = false;
 }
 
 GameKeeper::Player::~Player()
@@ -342,6 +343,7 @@ void GameKeeper::Player::handleTcpPacket(fd_set *set)
 
 void GameKeeper::Player::setPlayerState(float pos[3], float azimuth)
 {
+  serverTimeStamp = (float)TimeKeeper::getCurrent().getSeconds();
   memcpy(lastState.pos, pos, sizeof(float) * 3);
   lastState.azimuth = azimuth;
   // Set Speeds to 0 too
@@ -360,6 +362,7 @@ void GameKeeper::Player::setPlayerState(PlayerState state, float timestamp)
   player.updateIdleTime();
   lastState      = state;
   stateTimeStamp = timestamp;
+  serverTimeStamp = (float)TimeKeeper::getCurrent().getSeconds();
 }
 
 void GameKeeper::Player::getPlayerState(float pos[3], float &azimuth)

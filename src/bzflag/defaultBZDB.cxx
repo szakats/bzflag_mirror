@@ -1,5 +1,5 @@
 /* bzflag
-* Copyright (c) 1993 - 2006 Tim Riker
+* Copyright (c) 1993 - 2007 Tim Riker
 *
 * This package is free software;  you can redistribute it and/or
 * modify it under the terms of the license found in the file
@@ -47,6 +47,7 @@ DefaultDBItem	defaultDBItems[] = {
   { "tkwarnratio",		"0.0",			true,   StateDatabase::ReadWrite,	NULL },
   { "showtabs",			"2",			true,   StateDatabase::ReadWrite,	NULL },
   { "underlineColor",		"cyan",			true,	StateDatabase::ReadWrite,	NULL },
+  { "useMeshForRadar",			"0",			true,	StateDatabase::ReadWrite,	NULL },
   { "zbuffer",			"1",			true,	StateDatabase::ReadWrite,	NULL },
   { "highlightPattern",		"",			true,	StateDatabase::ReadWrite,	NULL },
   { "killerhighlight",		"1",			true,	StateDatabase::ReadWrite,	NULL },
@@ -88,6 +89,7 @@ DefaultDBItem	defaultDBItems[] = {
   { "showCollisionGrid",	"0",			true,	StateDatabase::ReadWrite,	NULL },
   { "showCullingGrid",		"0",			true,	StateDatabase::ReadWrite,	NULL },
   { "showCoordinates",		"0",			true,	StateDatabase::ReadWrite,	NULL },
+  { "showVelocities",		"0",			true,	StateDatabase::ReadWrite,	NULL },
   { "jumpTyping",		"1",			true,	StateDatabase::ReadWrite,	NULL },
   { "maxCacheMB",		"32",			true,	StateDatabase::ReadWrite,	NULL },
   { "doDownloads",		"1",			true,	StateDatabase::ReadWrite,	NULL },

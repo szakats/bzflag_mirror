@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -288,8 +288,13 @@ bool SilenceCommand::operator() (const char *commandLine)
 {
   Player *loudmouth = getPlayerByName(commandLine + 9);
   if (loudmouth) {
-    silencePlayers.push_back(commandLine + 8);
-    std::string silenceMessage = "Silenced ";
+    silencePlayers.push_back(commandLine + 9);
+    std::string silenceMessage = "Silenced";
+    silenceMessage += (commandLine + 8);
+    addMessage(NULL, silenceMessage);
+  }
+  else {
+    std::string silenceMessage = "no such callsign:";
     silenceMessage += (commandLine + 8);
     addMessage(NULL, silenceMessage);
   }
@@ -378,7 +383,7 @@ static float parseFloatExpr(const std::string& str, bool zeroNan)
   if (!zeroNan) {
     return value;
   } else {
-    if (!std::isnan(value)) {
+    if (!isnan(value)) {
       return value;
     } else {
       return 0.0f;
@@ -398,8 +403,8 @@ static bool varIsEqual(const std::string& name)
   const std::string defexp = BZDB.getDefault(name);
   const float val = BZDB.eval(name);
   const float defval = parseFloatExpr(defexp, false);
-  const bool valNaN = (std::isnan(val) != 0);
-  const bool defNaN = (std::isnan(defval) != 0);
+  const bool valNaN = (isnan(val) != 0);
+  const bool defNaN = (isnan(defval) != 0);
 
   if (valNaN != defNaN) {
     return false;
@@ -590,7 +595,7 @@ bool RoamPosCommand::operator() (const char *commandLine)
       ROAM.resetCamera();
     } else if (TextUtils::tolower(tokens[0]) == "send") {
       LocalPlayer* myTank = LocalPlayer::getMyTank();
-      if (myTank != NULL) {
+      if ((myTank != NULL) && (myTank->getTeam() == ObserverTeam)) {
 	const Roaming::RoamingCamera* camPtr = ROAM.getCamera();
 	float fakeVel[3] = { camPtr->theta, camPtr->phi, camPtr->zoom };
 	myTank->move(camPtr->pos, camPtr->theta);

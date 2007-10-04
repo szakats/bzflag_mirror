@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -728,7 +728,12 @@ bool BzMaterial::addAlias(const std::string& alias)
     return false;
   }
   else {
-    aliases.push_back(alias);
+	for ( unsigned int i = 0; i < (unsigned int)aliases.size(); i++)
+	{
+		if ( aliases[i] == alias )
+			return true;
+	}
+	aliases.push_back(alias); // only add it if it's new
   }
   return true;
 }

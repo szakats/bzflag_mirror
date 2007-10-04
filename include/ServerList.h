@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -47,7 +47,8 @@ public:
   void finalization(char *data, unsigned int length, bool good);
 
 public:
-  void addToList(ServerItem&, bool doCache=false);
+  void addToList(ServerItem, bool doCache=false);
+  void markFav(const std::string &, bool);
   void clear();
 
 private:

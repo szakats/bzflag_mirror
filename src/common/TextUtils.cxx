@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -281,9 +281,7 @@ namespace TextUtils
       if (c == escaper) {
 	if (i < len - 1)
 	  destination += text[++i];
-	else
-	  // Should print an error
-	  ;
+	// Should print an error otherwise
       } else {
 	destination += c;
       }

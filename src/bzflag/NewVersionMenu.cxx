@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -176,7 +176,7 @@ void NewVersionMenu::finalization(char *data, unsigned int length, bool good)
 	  ((HUDuiLabel*)status)->setString("Failed... installer is not executable.");
 	else
 	  ((HUDuiLabel*)status)->setString(TextUtils::format("Failed... unknown error (%d).", errno).c_str());
-	DEBUG1("Failed to start upgrade installer (%s) - error %d.\n", tempfile, errno);
+	logDebugMessage(1,"Failed to start upgrade installer (%s) - error %d.\n", tempfile, errno);
       } else {
 	((HUDuiLabel*)status)->setString("Installer started.");
 	CommandsStandard::quit();

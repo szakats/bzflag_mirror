@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -294,6 +294,7 @@ public:
   static const std::string	BZDB_SHOTSKEEPVERTICALV;
   static const std::string	BZDB_SQUISHFACTOR;
   static const std::string	BZDB_SQUISHTIME;
+  static const std::string	BZDB_SPEEDCHECKSLOGONLY;
   static const std::string	BZDB_SRRADIUSMULT;
   static const std::string	BZDB_SYNCLOCATION;
   static const std::string	BZDB_SYNCTIME;

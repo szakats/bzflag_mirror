@@ -9,10 +9,6 @@ recent bugs
 - ANSI codes can be used in the server -public messages
   The best solution is probably to strip the codes at the listserver
 
-- at high frame rates (approx. > 500), isDeadReckoningWrong() often returns true
-  when tank is moving at constant speed. This leads to many unnecessary
-  MsgPlayerUpdate packets to be sent. Maybe floating point inaccuracies?
-
 - some ATI cards get font rendering to have variable alpha values
   on each letter. The gl restate was removed from the font manager.
   It should be put in and tied to a config option that defaults to
@@ -45,8 +41,6 @@ recent bugs
 - Bad BZDB: some BZDB variables are not range checked:
   "/set _syncTime -" goes boom on the client side.
   (StateDatabase::ExpressionToken::operator=, StateDatabase.cxx:890)
- "/set _tankSpeed foo" if you set the tank speed to something
-  non numeric the server and clients crash.
 
 - Material properties for mesh containers are not adjusted by
   ObstacleModifier, and will not save correctly if using saveFlatFile.

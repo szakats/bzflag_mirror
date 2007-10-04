@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -312,7 +312,7 @@ bool BZWReader::readWorldStream(std::vector<WorldFileObject*>& wlist,
 	// FIXME - check for recursion
 	//       - better filename handling ("", spaces, and / vs. \\)
 	//       - make relative names work from the base file location
-	DEBUG1 ("%s: (line %i): including \"%s\"\n",
+	logDebugMessage(1,"%s: (line %i): including \"%s\"\n",
 		location.c_str(), line, incName.c_str());
 	BZWReader incFile(incName);
 	std::vector<WorldFileObject*> incWlist;
@@ -363,6 +363,8 @@ bool BZWReader::readWorldStream(std::vector<WorldFileObject*>& wlist,
 	  thisline += buffer;
 	}
 
+	thisline = TextUtils::replace_all(thisline,std::string("\r"),std::string(""));
+	thisline = TextUtils::replace_all(thisline,std::string("\n"),std::string(""));
 	customLines.push_back(thisline);
       }
 
@@ -427,19 +429,8 @@ WorldInfo* BZWReader::defineWorldFromFile()
     return NULL;
   }
 
-  if (!BZDB.isTrue("noWalls")) {
-    // make walls
-    float wallHeight = BZDB.eval(StateDatabase::BZDB_WALLHEIGHT);
-    float worldSize = BZDBCache::worldSize;
-    myWorld->addWall(0.0f, 0.5f * worldSize, 0.0f, (float)(1.5 * M_PI),
-		     0.5f * worldSize, wallHeight);
-    myWorld->addWall(0.5f * worldSize, 0.0f, 0.0f, (float)M_PI, 0.5f * worldSize,
-		     wallHeight);
-    myWorld->addWall(0.0f, -0.5f * worldSize, 0.0f, (float)(0.5 * M_PI),
-		     0.5f * worldSize, wallHeight);
-    myWorld->addWall(-0.5f * worldSize, 0.0f, 0.0f, 0.0f, 0.5f * worldSize,
-		     wallHeight);
-  }
+  if (!BZDB.isTrue("noWalls")) 
+    makeWalls();
 
   // generate group instances
   OBSTACLEMGR.makeWorld();

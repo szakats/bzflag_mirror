@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -90,9 +90,6 @@ World::~World()
   TRANSFORMMGR.clear();
   OBSTACLEMGR.clear();
   COLLISIONMGR.clear();
-
-  // revert the forced BZDB vars
-  restoreRequiredGraphics();
 
   return;
 }
@@ -1257,37 +1254,6 @@ RemotePlayer* World::getCurrentRabbit() const
     }
   }
   return NULL;
-}
-
-
-void World::setupRequiredGraphics()
-{
-  oldFogEffect = BZDB.evalInt("fogEffect");
-  oldUseDrawInfo = BZDB.isTrue("useDrawInfo");
-  enforceRequiredGraphics();
-  return;
-}
-
-
-void World::restoreRequiredGraphics()
-{
-  if ((gameStyle & RequireGraphics) != 0) {
-    BZDB.setInt("fogEffect", oldFogEffect);
-    BZDB.setBool("useDrawInfo", oldUseDrawInfo);
-  }
-  return;
-}
-
-
-void World::enforceRequiredGraphics()
-{
-  if ((gameStyle & RequireGraphics) != 0) {
-    if (BZDB.evalInt("fogEffect") < 1) {
-      BZDB.set("fogEffect", "1");
-    }
-    BZDB.set("useDrawInfo", "1");
-  }
-  return;
 }
 
 

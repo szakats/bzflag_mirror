@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -64,7 +64,7 @@ void	_debugLookups(const std::string &name)
     for (std::multimap<int,std::string>::iterator it2 = order.begin(); it2 != order.end(); ++it2) {
       if (-it2->first / interval < 1.0f)
 	break;
-      DEBUG1("%-25s = %.2f acc/sec\n", it2->second.c_str(), -it2->first / interval);
+      logDebugMessage(1,"%-25s = %.2f acc/sec\n", it2->second.c_str(), -it2->first / interval);
     }
     last = now;
   }
@@ -172,6 +172,7 @@ const std::string StateDatabase::BZDB_SHOTRANGE		= std::string("_shotRange");
 const std::string StateDatabase::BZDB_SHOTSPEED		= std::string("_shotSpeed");
 const std::string StateDatabase::BZDB_SHOTTAILLENGTH	= std::string("_shotTailLength");
 const std::string StateDatabase::BZDB_SHOTSKEEPVERTICALV= std::string("_shotsKeepVerticalVelocity");
+const std::string StateDatabase::BZDB_SPEEDCHECKSLOGONLY= std::string("_speedChecksLogOnly");
 const std::string StateDatabase::BZDB_SRRADIUSMULT	= std::string("_srRadiusMult");
 const std::string StateDatabase::BZDB_SQUISHFACTOR	= std::string("_squishFactor");
 const std::string StateDatabase::BZDB_SQUISHTIME	= std::string("_squishTime");
@@ -246,14 +247,12 @@ void			StateDatabase::set(const std::string& name,
   if (access >= index->second.permission) {
     index->second.value  = value;
     index->second.isSet  = true;
-    index->second.isTrue = (index->second.value != "0" &&
-			    index->second.value != "False" &&
-			    index->second.value != "false" &&
-			    index->second.value != "FALSE" &&
-			    index->second.value != "no" &&
-			    index->second.value != "No" &&
-			    index->second.value != "NO" &&
-			    index->second.value != "disable");
+    std::string valuelow = TextUtils::tolower(value);
+    index->second.isTrue = (valuelow != "0" &&
+			    valuelow != "off" &&
+			    valuelow != "false" &&
+			    valuelow != "no" &&
+			    valuelow != "disable");
 
 	if (saveDefault)
 		index->second.defValue = value;
@@ -424,6 +423,8 @@ float			StateDatabase::eval(const std::string& name)
   }
   Expression pre, inf;
   std::string value = index->second.value;
+  if (!value.size())
+	  return NaN;
   value >> inf;
   pre = infixToPrefix(inf);
   float retn = evaluate(pre);
@@ -880,11 +881,12 @@ StateDatabase::Expression StateDatabase::infixToPrefix(const Expression &infix)
 	operators.push(*i);
       } else if (i->getOperator() == ExpressionToken::rparen) {
 	// unstack operators until a matching ( is found
-	while(operators.top().getOperator() != ExpressionToken::lparen) {
+	while((operators.size() > 0) && (operators.top().getOperator() != ExpressionToken::lparen)) {
 	  postfix.push_back(operators.top()); operators.pop();
 	}
 	// discard (
-	operators.pop();
+	if (operators.size() > 0) // handle extra-rparen case
+	  operators.pop();
       } else {
 	while((operators.size() > 0) && (operators.top().getPrecedence() < i->getPrecedence()) && (operators.top().getOperator() != ExpressionToken::lparen)) {
 	  postfix.push_back(operators.top()); operators.pop();
@@ -920,6 +922,10 @@ float StateDatabase::evaluate(Expression e) const
 	evaluationStack.push(tok);
 	break;
       case ExpressionToken::oper:
+	if ((i->getOperator() == ExpressionToken::lparen) ||
+	    (i->getOperator() == ExpressionToken::rparen)) {
+	    break;  // should not have any parens here, skip them
+	}
 	if (evaluationStack.size() == 0) {
 	  // syntax error
 	}
@@ -963,6 +969,9 @@ float StateDatabase::evaluate(Expression e) const
 	break;
     }
   }
+  if (!evaluationStack.size())
+    return 0; // yeah we are screwed. TODO, don't let us get this far
+
   return (float)evaluationStack.top().getNumber();
 }
 

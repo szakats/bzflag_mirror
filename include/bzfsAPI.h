@@ -1,5 +1,5 @@
 /* bzflag
-* Copyright (c) 1993 - 2006 Tim Riker
+* Copyright (c) 1993 - 2007 Tim Riker
 *
 * This package is free software;  you can redistribute it and/or
 * modify it under the terms of the license found in the file
@@ -19,6 +19,9 @@
 #include <string>
 #include <vector>
 
+/* DO NOT INCLUDE ANY OTHER HEADERS IN THIS FILE */
+/* PLUGINS NEED TO BE BUILT WITHOUT THE BZ SOURCE TREE */
+/* JUST THIS ONE FILE */
 
 #ifdef _WIN32
 	#ifdef INSIDE_BZ
@@ -35,7 +38,7 @@
 	#define BZF_PLUGIN_CALL extern "C"
 #endif
 
-#define BZ_API_VERSION	15
+#define BZ_API_VERSION	16
 
 #define BZ_GET_PLUGIN_VERSION BZF_PLUGIN_CALL int bz_GetVersion ( void ) { return BZ_API_VERSION;}
 
@@ -60,7 +63,7 @@ typedef enum
 	bz_eGetAutoTeamEvent,
 	bz_eAllowPlayer,
 	bz_eTickEvent,
-	bz_eGenerateWorldEvent,
+	bz_eGetWorldEvent,
 	bz_eGetPlayerInfoEvent,
 	bz_eAllowSpawn,
 	bz_eListServerUpdateEvent,
@@ -69,13 +72,23 @@ typedef enum
 	bz_eKickEvent,
 	bz_eKillEvent,
 	bz_ePlayerPausedEvent,
-	bz_eMessagFilteredEvent,
+	bz_eMessageFilteredEvent,
 	bz_eGameStartEvent,
 	bz_eGameEndEvent,
 	bz_eSlashCommandEvent,
 	bz_ePlayerAuthEvent,
 	bz_eServerMsgEvent,
 	bz_eShotFiredEvent,
+	bz_ePlayerUpdateEvent,
+	bz_eNetDataSendEvent,
+	bz_eNetDataReceveEvent,
+	bz_eLogingEvent,
+	bz_eShotEndedEvent,
+	bz_eFlagTransferredEvent,
+	bz_eFlagGrabbedEvent,
+	bz_eFlagDroppedEvent,
+	bz_eFlagResetEvent,
+	bz_eAllowCTFCapEvent,
 	bz_eLastEvent    //this is never used as an event, just show it's the last one
 }bz_eEventType;
 
@@ -163,6 +176,13 @@ typedef enum
 #define BZ_BZDBPERM_SERVER	2
 #define BZ_BZDBPERM_CLIENT	3
 
+typedef enum
+{
+	eFFAGame= 0,
+	eCTFGame,
+	eRabbitGame
+}bz_eGameType;
+
 //utility classes
 class BZF_API bzApiString
 {
@@ -196,6 +216,7 @@ public:
 
 	void tolower ( void );
 	void toupper ( void );
+	void urlEncode ( void );
 
 protected:
 	class dataBlob;
@@ -302,22 +323,22 @@ public:
 class bz_CTFCaptureEventData : public bz_EventData
 {
 public:
-	bz_CTFCaptureEventData()
-	{
-		eventType = bz_eCaptureEvent;
-		teamCapped = eNoTeam;
-		teamCapping = eNoTeam;
-		playerCapping = -1;
-	}
-	virtual ~bz_CTFCaptureEventData(){};
+  bz_CTFCaptureEventData()
+  {
+    eventType = bz_eCaptureEvent;
+    teamCapped = eNoTeam;
+    teamCapping = eNoTeam;
+    playerCapping = -1;
+  }
+  virtual ~bz_CTFCaptureEventData(){};
 
-	bz_eTeamType teamCapped;
-	bz_eTeamType teamCapping;
-	int playerCapping;
+  bz_eTeamType teamCapped;
+  bz_eTeamType teamCapping;
+  int playerCapping;
 
-	float pos[3];
-	float rot;
-	double time;
+  float pos[3];
+  float rot;
+  double time;
 };
 
 class bz_PlayerDieEventData : public bz_EventData
@@ -342,6 +363,7 @@ public:
 	int killerID;
 	bz_eTeamType killerTeam;
 	bzApiString flagKilledWith;
+        int shotID;
 
 	float pos[3];
 	float rot;
@@ -512,17 +534,22 @@ class bz_GenerateWorldEventData : public bz_EventData
 public:
 	bz_GenerateWorldEventData()
 	{
-		eventType = bz_eGenerateWorldEvent;
-		handled = false;
-		ctf = false;
-		time = 0.0;
+		eventType = bz_eGetWorldEvent;
+		generated = false;
+		openFFA = rabbit = ctf = false;
+		eventTime = 0.0;
+
 	}
 	virtual ~bz_GenerateWorldEventData(){};
-
-	bool handled;
+	
+	bool generated;
 	bool ctf;
+	bool rabbit;
+	bool openFFA;
 
-	double time;
+	bzApiString	worldFile;
+
+	double eventTime;
 };
 
 class bz_GetPlayerInfoEventData : public bz_EventData
@@ -692,11 +719,13 @@ public:
 		eventType = bz_ePlayerPausedEvent;
 		player = -1;
 		time = 0.0;
+		pause = false;
 	}
 	virtual ~bz_PlayerPausedEventData(){};
 
 	int player;
 	double time;
+	bool pause;
 };
 
 class bz_MessageFilteredEventData : public bz_EventData
@@ -704,7 +733,7 @@ class bz_MessageFilteredEventData : public bz_EventData
 public:
 	bz_MessageFilteredEventData()
 	{
-		eventType = bz_eMessagFilteredEvent;
+		eventType = bz_eMessageFilteredEvent;
 		player = -1;
 		time = 0.0;
 	}
@@ -795,6 +824,7 @@ public:
 		eventType = bz_eShotFiredEvent;
 		pos[0] = pos[1] = pos[2] = 0;
 		changed = false;
+		playerID = -1;
 	}
 
 	virtual ~bz_ShotFiredEventData(){};
@@ -802,6 +832,209 @@ public:
 	bool		changed;
 	float		pos[3];
 	bzApiString	type;
+	int		playerID;
+};
+
+class bz_PlayerUpdateEventData : public bz_EventData
+{
+public:
+	bz_PlayerUpdateEventData()
+	{
+		eventType = bz_ePlayerUpdateEvent;
+		pos[0] = pos[1] = pos[2] = 0;
+		velocity[0] = velocity[1] = velocity[2] = 0;
+		azimuth = angVel = 0.0f;
+		phydrv = 0;
+		time = 0;
+		playerID = -1;
+	}
+
+	virtual ~bz_PlayerUpdateEventData(){};
+
+	float	pos[3];
+	float	velocity[3];
+	float	azimuth;	
+	float	angVel;
+	int	phydrv;		
+	int	playerID;
+
+	double time;
+};
+
+class bz_NetTransferEventData : public bz_EventData
+{
+public:
+	bz_NetTransferEventData()
+	{
+		eventType = bz_eNetDataReceveEvent;
+		send = false;
+		udp = false;
+		iSize = 0;
+		data = NULL;
+
+		time = 0;
+	}
+
+	virtual ~bz_NetTransferEventData(){};
+
+	bool send;
+	bool udp;
+	unsigned int iSize;
+
+	double time;
+
+	// DON'T CHANGE THIS!!!
+	unsigned char* data;
+};
+
+class bz_LogingEventData : public bz_EventData
+{
+public:
+	bz_LogingEventData()
+	{
+		eventType = bz_eLogingEvent;
+		level = 0;
+		time = 0;
+	}
+
+	virtual ~bz_LogingEventData(){};
+
+	double time;
+	int level;
+	bzApiString message;
+};
+
+class bz_ShotEndedEventData : public bz_EventData
+{
+public:
+
+	bz_ShotEndedEventData()
+	{
+		eventType = bz_eShotEndedEvent;
+		playerID = -1;
+		shotID = -1;
+		explode = false;
+	}
+
+	virtual ~bz_ShotEndedEventData(){};
+
+	int playerID;
+	int shotID;
+	bool explode;
+};
+
+
+class bz_FlagTransferredEventData : public bz_EventData
+{
+public:
+  enum Action {
+    ContinueSteal = 0,
+    CancelSteal = 1,
+    DropThief = 2 
+  };
+
+  bz_FlagTransferredEventData()
+  {
+    eventType = bz_eFlagTransferredEvent;
+    fromPlayerID = 0;
+    toPlayerID = 0;
+    flagType = NULL;
+    action = ContinueSteal;
+  }
+  
+  virtual ~bz_FlagTransferredEventData(){};
+
+  int fromPlayerID;
+  int toPlayerID;
+  const char *flagType;
+  enum Action action;
+};
+
+class bz_FlagGrabbedEventData : public bz_EventData
+{
+public:
+
+	bz_FlagGrabbedEventData()
+	{
+		eventType = bz_eFlagGrabbedEvent;
+		playerID = -1;
+		flagID = -1;
+		pos[0] = pos[1] = pos[2] = 0;
+	}
+
+	virtual ~bz_FlagGrabbedEventData(){};
+
+	int playerID;
+	int flagID;
+
+	const char *flagType;
+	float	pos[3];
+};
+
+class bz_FlagDroppedEventData : public bz_EventData
+{
+public:
+
+	bz_FlagDroppedEventData()
+	{
+	  eventType = bz_eFlagDroppedEvent;
+	  playerID = -1;
+	  flagID = -1;
+	  pos[0] = pos[1] = pos[2] = 0;
+	}
+
+	virtual ~bz_FlagDroppedEventData(){};
+
+	int playerID;
+	int flagID;
+
+	const char *flagType;
+	float	pos[3];
+};
+
+class bz_FlagResetEventData : public bz_EventData
+{
+public:
+  bz_FlagResetEventData()
+  {
+    eventType = bz_eFlagResetEvent;
+    flagID = -1;
+    pos[0] = pos[1] = pos[2] = 0;
+    changed = false;
+    teamIsEmpty = false;
+  }
+
+  virtual ~bz_FlagResetEventData(){};
+
+  int flagID;
+  bool teamIsEmpty;
+  const char *flagType;
+  bool	changed;
+  float	pos[3];
+};
+
+class bz_AllowCTFCapEventData : public bz_EventData
+{
+public:
+  bz_AllowCTFCapEventData()
+  {
+    eventType = bz_eAllowCTFCapEvent;
+    teamCapped = eNoTeam;
+    teamCapping = eNoTeam;
+    playerCapping = -1;
+    allow = false;
+  }
+  virtual ~bz_AllowCTFCapEventData(){};
+
+  bz_eTeamType teamCapped;
+  bz_eTeamType teamCapping;
+  int playerCapping;
+
+  float	    pos[3];
+  float	    rot;
+  double    time;
+  
+  bool	    allow;
 };
 
 
@@ -829,6 +1062,15 @@ BZF_API bool bz_grantPerm ( int playerID, const char* perm );
 BZF_API bool bz_revokePerm ( int playerID, const char* perm );
 BZF_API bool bz_freePlayerRecord ( bz_PlayerRecord *playerRecord );
 
+BZF_API const char* bz_getPlayerFlag( int playerID );
+
+BZF_API bool bz_isPlayerPaused( int playerID );
+
+// player lag info
+BZF_API int bz_getPlayerLag( int playerId );
+BZF_API int bz_getPlayerJitter( int playerId );
+BZF_API float bz_getPlayerPacketloss( int playerId );
+
 class bz_PlayerRecord
 {
 public:
@@ -850,6 +1092,7 @@ public:
 
 		wins = 0;
 		losses = 0;
+		bzID = "";
 	}
 
 	~bz_PlayerRecord(){};
@@ -877,6 +1120,7 @@ public:
 	bool spawned;
 	bool verified;
 	bool globalUser;
+        bzApiString bzID;
 	bool admin;
 	bool op;
 	bzAPIStringList groups;
@@ -888,7 +1132,10 @@ public:
 	int teamKills;
 };
 
-BZF_API bool bz_setPlayerOperator (int playerId);
+BZF_API bool bz_setPlayerOperator ( int playerId );
+
+// team info
+BZF_API unsigned int bz_getTeamPlayerLimit ( bz_eTeamType team );
 
 // groups API
 BZF_API bzAPIStringList* bz_getGroupList ( void );
@@ -904,11 +1151,12 @@ BZF_API bool bz_sentFetchResMessage ( int playerID,  const char* URL );
 
 // world weapons
 BZF_API bool bz_fireWorldWep ( const char* flagType, float lifetime, int fromPlayer, float *pos, float tilt, float direction, int shotID , float dt );
+BZF_API int bz_fireWorldGM ( int targetPlayerID, float lifetime, float *pos, float tilt, float direction, float dt);
 
 // time API
 BZF_API double bz_getCurrentTime ( void );
 BZF_API float bz_getMaxWaitTime ( void );
-BZF_API void bz_setMaxWaitTime ( float time );
+BZF_API void bz_setMaxWaitTime ( float maxTime );
 
 typedef struct
 {
@@ -940,6 +1188,8 @@ BZF_API bool bz_setBZDBInt( const char* variable, int val, int perms = 0, bool p
 
 BZF_API int bz_getBZDBVarList( bzAPIStringList	*varList );
 
+BZF_API void bz_resetBZDBVar( const char* variable );
+BZF_API void bz_resetALLBZDBVars( void );
 
 // logging
 BZF_API void bz_debugMessage ( int debugLevel, const char* message );
@@ -950,18 +1200,27 @@ BZF_API int bz_getDebugLevel ( void );
 BZF_API bool bz_kickUser ( int playerIndex, const char* reason, bool notify );
 BZF_API bool bz_IPBanUser ( int playerIndex, const char* ip, int time, const char* reason );
 BZF_API bool bz_IPUnbanUser ( const char* ip );
-BZF_API std::vector<std::string> bz_getReports( void );
+BZF_API  bzAPIStringList *bz_getReports( void );
 
 // lagwarn
 BZF_API int bz_getLagWarn( void );
 BZF_API bool bz_setLagWarn( int lagwarn );
 
+// timelimit
+BZF_API bool bz_setTimeLimit( float timeLimit );
+BZF_API float bz_getTimeLimit( void );
+BZF_API bool bz_isTimeManualStart( void );
+
+// countdown
+BZF_API bool bz_isCountDownActive( void );
+BZF_API bool bz_isCountDownInProgress( void );
+
 // polls
 BZF_API bool bz_pollVeto( void );
 
 // help
-BZF_API const std::vector<std::string> &bz_getHelpTopics( void );
-BZF_API const std::vector<std::string> *bz_getHelpTopic( std::string name );
+BZF_API bzAPIStringList *bz_getHelpTopics( void );
+BZF_API bzAPIStringList *bz_getHelpTopic( std::string name );
 
 // custom commands
 
@@ -977,15 +1236,22 @@ BZF_API bool bz_registerCustomSlashCommand ( const char* command, bz_CustomSlash
 BZF_API bool bz_removeCustomSlashCommand ( const char* command );
 
 // spawning
-BZF_API bool bz_getStandardSpawn ( int playeID, float pos[3], float *rot );
+BZF_API bool bz_getStandardSpawn ( int playerID, float pos[3], float *rot );
 
 // dying
-BZF_API bool bz_killPlayer ( int playeID, bool spawnOnBase, int killerID = -1, const char* flagID = NULL );
+BZF_API bool bz_killPlayer ( int playerID, bool spawnOnBase, int killerID = -1, const char* flagID = NULL );
 
 // flags
-BZF_API bool bz_givePlayerFlag ( int playeID, const char* flagType, bool force );
-BZF_API bool bz_removePlayerFlag ( int playeID );
+BZF_API bool bz_givePlayerFlag ( int playerID, const char* flagType, bool force );
+BZF_API bool bz_removePlayerFlag ( int playerID );
 BZF_API void bz_resetFlags ( bool onlyUnused );
+
+BZF_API unsigned int bz_getNumFlags( void );
+BZF_API const bzApiString bz_getName( int flag );
+BZF_API bool bz_resetFlag ( int flag );
+BZF_API bool bz_moveFlag ( int flag, float pos[3] );
+BZF_API int bz_flagPlayer ( int flag );
+BZF_API bool bz_getFlagPosition ( int flag, float* pos );
 
 // world
 typedef struct
@@ -1055,6 +1321,10 @@ BZF_API bool bz_addWorldWaterLevel( float level, bz_MaterialInfo *material );
 BZF_API bool bz_addWorldWeapon( const char* flagType, float *pos, float rot, float tilt, float initDelay, bzAPIFloatList &delays );
 
 BZF_API bool bz_setWorldSize( float size, float wallHeight = -1.0 );
+BZF_API void bz_setClientWorldDownloadURL( const char* URL );
+BZF_API const bzApiString bz_getClientWorldDownloadURL( void );
+BZF_API bool bz_saveWorldCacheFile( const char* file );
+
 
 // custom map objects
 
@@ -1133,30 +1403,55 @@ BZF_API bool bz_setclipFieldString ( const char *name, const char* data );
 BZF_API bool bz_setclipFieldFloat ( const char *name, float data );
 BZF_API bool bz_setclipFieldInt( const char *name, int data );
 
+class bz_ClipFiledNotifier
+{
+public:
+  virtual ~bz_ClipFiledNotifier(){};
+  virtual void fieldChange ( const char* /*field*/) = 0;
+};
+
+BZF_API bool bz_addClipFieldNotifier ( const char *name, bz_ClipFiledNotifier *cb );
+BZF_API bool bz_removeClipFieldNotifier ( const char *name, bz_ClipFiledNotifier *cb );
+
 // path checks
 BZF_API bzApiString bz_filterPath ( const char* path );
 
 // Record-Replay
-BZF_API bool bz_saveRecBuf( const char * _filename, int seconds);
+BZF_API bool bz_saveRecBuf( const char * _filename, int seconds  = 0);
+BZF_API bool bz_startRecBuf( void );
+BZF_API bool bz_stopRecBuf( void );
 
 // cheap Text Utils
 BZF_API const char *bz_format(const char* fmt, ...);
 BZF_API const char *bz_toupper(const char* val );
 BZF_API const char *bz_tolower(const char* val );
+BZF_API const char *bz_urlEncode(const char* val );
 
 // game countdown
 BZF_API void bz_pauseCountdown ( const char *pausedBy );
 BZF_API void bz_resumeCountdown ( const char *resumedBy );
 BZF_API void bz_startCountdown ( int delay, float limit, const char *byWho );
 
-
 // server control
 BZF_API void bz_shutdown();
 BZF_API void bz_superkill();
-BZF_API void bz_gameOver(int,int = -1);
+BZF_API void bz_gameOver(int playerID, bz_eTeamType team = eNoTeam);
+BZF_API bool bz_restart ( void );
+
+BZF_API void bz_reloadLocalBans();
+BZF_API void bz_reloadMasterBans();
+BZF_API void bz_reloadGroups();
+BZF_API void bz_reloadUsers();
+BZF_API void bz_reloadHelp();
 
 // info about the world
 BZF_API bz_eTeamType bz_checkBaseAtPoint ( float pos[3] );
+
+bz_eTeamType convertTeam ( int team );
+int convertTeam( bz_eTeamType team );
+
+// game type info
+BZF_API	bz_eGameType bz_getGameType ( void  );
 
 #endif //_BZFS_API_H_
 

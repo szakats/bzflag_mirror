@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -30,6 +30,7 @@
 #include "Protocol.h"
 #include "TextUtils.h"
 
+#include "bzfs.h"
 
 PlayerAccessMap	groupAccess;
 PlayerAccessMap	userDatabase;
@@ -63,7 +64,7 @@ void PlayerAccessInfo::setName(const char* callSign) {
 bool PlayerAccessInfo::gotAccessFailure() {
   bool accessFailure = loginAttempts >= 5;
   if (accessFailure)
-    DEBUG1("Too Many Identifys %s\n", getName().c_str());
+    logDebugMessage(1,"Too Many Identifys %s\n", getName().c_str());
   return accessFailure;
 }
 
@@ -78,7 +79,7 @@ void PlayerAccessInfo::setPermissionRights() {
   explicitAllows = _info.explicitAllows;
   explicitDenys = _info.explicitDenys;
   groups = _info.groups;
-  DEBUG1("Identify %s\n", regName.c_str());
+  logDebugMessage(1,"Identify %s\n", regName.c_str());
 }
 
 void PlayerAccessInfo::reloadInfo() {
@@ -158,11 +159,11 @@ void PlayerAccessInfo::storeInfo(const char* pwd) {
     // since they either already have it, or there's no existing local account.
     _info.addGroup("LOCAL.GLOBAL");
     setUserPassword(regName.c_str(), "");
-    DEBUG1("Global Temp Register %s\n", regName.c_str());
+    logDebugMessage(1,"Global Temp Register %s\n", regName.c_str());
   } else {
     std::string pass = pwd;
     setUserPassword(regName.c_str(), pass.c_str());
-    DEBUG1("Register %s %s\n", regName.c_str(), pwd);
+    logDebugMessage(1,"Register %s %s\n", regName.c_str(), pwd);
   }
   userDatabase[regName] = _info;
   updateDatabases();
@@ -242,6 +243,17 @@ bool PlayerAccessInfo::hasPerm(PlayerAccessInfo::AccessPerm right) const
 	isAllowed = true;
     }
   }
+  if (publiclyDisconected)
+  {
+	  PlayerAccessMap::iterator group = groupAccess.find(std::string("DISCONNECTED"));
+		if (group != groupAccess.end())
+		{
+			if (group->second.explicitDenys.test(right))
+				return false;
+			else if (group->second.explicitAllows.test(right))
+				isAllowed = true;
+		}
+  }
   return isAllowed;
 }
 
@@ -270,6 +282,19 @@ bool	PlayerAccessInfo::hasCustomPerm(const char* right) const
 	for (std::vector<std::string>::const_iterator itr=groups.begin(); itr!=groups.end(); ++itr)
 	{
 		PlayerAccessMap::iterator group = groupAccess.find(*itr);
+		if (group != groupAccess.end())
+		{
+			for(unsigned int i = 0; i < group->second.customPerms.size(); i++)
+			{
+				if ( perm == TextUtils::toupper(group->second.customPerms[i]) )
+					return true;
+			}
+		}
+	}
+
+	if (publiclyDisconected)
+	{
+		PlayerAccessMap::iterator group = groupAccess.find(std::string("DISCONNECTED"));
 		if (group != groupAccess.end())
 		{
 			for(unsigned int i = 0; i < group->second.customPerms.size(); i++)
@@ -371,9 +396,12 @@ std::string nameFromPerm(PlayerAccessInfo::AccessPerm perm)
     case PlayerAccessInfo::kill: return "kill";
     case PlayerAccessInfo::lagStats: return "lagStats";
     case PlayerAccessInfo::lagwarn: return "lagwarn";
+    case PlayerAccessInfo::jitterwarn: return "jitterwarn";
     case PlayerAccessInfo::listPerms: return "listPerms";
     case PlayerAccessInfo::masterBan: return "masterban";
+    case PlayerAccessInfo::modCount: return "modCount";
     case PlayerAccessInfo::mute: return "mute";
+    case PlayerAccessInfo::packetlosswarn: return "packetlosswarn";
     case PlayerAccessInfo::playerList: return "playerList";
     case PlayerAccessInfo::poll: return "poll";
     case PlayerAccessInfo::pollBan: return "pollBan";
@@ -436,9 +464,12 @@ PlayerAccessInfo::AccessPerm permFromName(const std::string &name)
   if (name == "KILL") return PlayerAccessInfo::kill;
   if (name == "LAGSTATS") return PlayerAccessInfo::lagStats;
   if (name == "LAGWARN") return PlayerAccessInfo::lagwarn;
+  if (name == "JITTERWARN") return PlayerAccessInfo::jitterwarn;
   if (name == "LISTPERMS") return PlayerAccessInfo::listPerms;
   if (name == "MASTERBAN") return PlayerAccessInfo::masterBan;
+  if (name == "MODCOUNT") return PlayerAccessInfo::modCount;
   if (name == "MUTE") return PlayerAccessInfo::mute;
+  if (name == "PACKETLOSSWARN") return PlayerAccessInfo::packetlosswarn;
   if (name == "PLAYERLIST") return PlayerAccessInfo::playerList;
   if (name == "POLL") return PlayerAccessInfo::poll;
   if (name == "POLLBAN") return PlayerAccessInfo::pollBan;
@@ -484,21 +515,21 @@ void parsePermissionString(const std::string &permissionString, PlayerAccessInfo
     makeupper(word);
 
     // do we have an operator? check for a leading, non alphabetic character
-    char first = NULL;
+    char first = '\0';
     if (!TextUtils::isAlphabetic(word[0])) {
       first = word[0];
       word.erase(0,1);
     }
 
     // Operators are not allowed for userdb
-    if (!info.groupState.test(PlayerAccessInfo::isGroup) && first != NULL){
-      DEBUG1("userdb: illegal permission string, operators are not allowed in userdb\n");
+    if (!info.groupState.test(PlayerAccessInfo::isGroup) && first != '\0'){
+      logDebugMessage(1,"userdb: illegal permission string, operators are not allowed in userdb\n");
       return;
     }
 
     // if we have an operator, lets handle it
     // operators are only allowed for groups, they make no sense for userdb
-    if (info.groupState.test(PlayerAccessInfo::isGroup) && first != NULL) {
+    if (info.groupState.test(PlayerAccessInfo::isGroup) && first != '\0') {
       switch (first) {
 	case '*': {
 	  // referenced group
@@ -510,7 +541,7 @@ void parsePermissionString(const std::string &permissionString, PlayerAccessInfo
 	    info.explicitDenys |= refgroup->second.explicitDenys;
 	    refgroup->second.groupState.set(PlayerAccessInfo::isReferenced);
 	  } else {
-	    DEBUG1("groupdb: unknown group \"%s\" was referenced\n", word.c_str());
+	    logDebugMessage(1,"groupdb: unknown group \"%s\" was referenced\n", word.c_str());
 	  }
 
 	  continue;
@@ -526,7 +557,7 @@ void parsePermissionString(const std::string &permissionString, PlayerAccessInfo
             info.explicitDenys.set();
             info.explicitDenys[PlayerAccessInfo::lastPerm] = false;
           } else {
-            DEBUG1("groupdb: Cannot forbid unknown permission %s\n", word.c_str());
+            logDebugMessage(1,"groupdb: Cannot forbid unknown permission %s\n", word.c_str());
           }
         }
 
@@ -542,7 +573,7 @@ void parsePermissionString(const std::string &permissionString, PlayerAccessInfo
 	  if (word == "ALL")
 	    info.explicitAllows.reset();
 	  else
-	    DEBUG1("groupdb: Cannot remove unknown permission %s\n", word.c_str());
+	    logDebugMessage(1,"groupdb: Cannot remove unknown permission %s\n", word.c_str());
 	}
 
 	continue;
@@ -552,7 +583,7 @@ void parsePermissionString(const std::string &permissionString, PlayerAccessInfo
       case '+': break;
 
       default:
-	DEBUG1("groupdb: ignoring unknown operator type %c\n", first);
+	logDebugMessage(1,"groupdb: ignoring unknown operator type %c\n", first);
       }
     }
 
@@ -565,7 +596,7 @@ void parsePermissionString(const std::string &permissionString, PlayerAccessInfo
 	info.explicitAllows.set();
 	info.explicitAllows[PlayerAccessInfo::lastPerm] = false;
       } else {
-	//DEBUG1("groupdb: Cannot set unknown permission %s\n", word.c_str());
+	//logDebugMessage(1,"groupdb: Cannot set unknown permission %s\n", word.c_str());
 				info.customPerms.push_back(word);
       }
     }
@@ -654,14 +685,14 @@ bool PlayerAccessInfo::readGroupsFile(const std::string &filename)
       // don't allow changing permissions for a group
       // that was used as a reference before
       if (info.groupState.test(isReferenced)) {
-	DEBUG1("groupdb: skipping groupdb line (%i), group was used as reference before\n", linenum);
+	logDebugMessage(1,"groupdb: skipping groupdb line (%i), group was used as reference before\n", linenum);
 	continue;
       }
       parsePermissionString(perm, info);
       info.verified = true;
       groupAccess[name] = info;
     } else {
-      DEBUG1("WARNING: bad groupdb line (%i)\n", linenum);
+      logDebugMessage(1,"WARNING: bad groupdb line (%i)\n", linenum);
     }
 
   }

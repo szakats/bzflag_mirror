@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -188,7 +188,7 @@ bool CacheManager::loadIndex()
     std::string line = buffer;
     std::vector<std::string> tokens = TextUtils::tokenize(line, " ");
     if (tokens.size() != 4) {
-      DEBUG1("loadCacheIndex (bad line): %s\n", buffer);
+      logDebugMessage(1,"loadCacheIndex (bad line): %s\n", buffer);
       continue;
     }
     rec.size = strtoul(tokens[0].c_str(), NULL, 10);

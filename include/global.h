@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -25,7 +25,6 @@
 /* common headers */
 #include "StateDatabase.h"
 
-#include "bzfsAPI.h"
 
 // values affecting struct and class layout
 const int		CallSignLen = 32;	// including terminating NUL
@@ -86,9 +85,7 @@ enum GameStyle {
   ShakableGameStyle =	 0x0040, // can drop bad flags
   AntidoteGameStyle =	 0x0080, // anti-bad flags
   HandicapGameStyle =	 0x0100, // handicap players based on score (eek! was TimeSyncGameStyle)
-  RabbitChaseGameStyle = 0x0200, // rabbit chase
-  RequireGraphics =	 0x0400, // force the use of fancy gfx  (currently drawInfo and fog)
-  RequireRegistration =	 0x0800  // registration required to play
+  RabbitChaseGameStyle = 0x0200  // rabbit chase
   // add here before reusing old ones above
 };
 
@@ -108,9 +105,6 @@ struct GlobalDBItem {
 };
 extern const unsigned int numGlobalDBItems;
 extern const struct GlobalDBItem globalDBItems[];
-
-bz_eTeamType convertTeam ( TeamColor team );
-TeamColor convertTeam( bz_eTeamType team );
 
 #endif // BZF_GLOBAL_H
 

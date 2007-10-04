@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -27,10 +27,12 @@
 class ServerItem {
 
 public:
+  ServerItem();
   void		writeToFile(std::ostream& out) const; // serialize out
-  bool		readFromFile(std::istream& in); // serialize in
+  bool		readFromFile(std::istream& in, int subrevision); // serialize in
   void		setUpdateTime(); // set last updated to now
   int		getPlayerCount() const;
+  std::string	getAddrName() const;
   time_t	getAgeMinutes() const;
   time_t	getAgeSeconds() const;
   std::string	getAgeString() const; // nifty formated age string
@@ -42,8 +44,9 @@ public:
   std::string	name;
   std::string	description;
   PingPacket	ping;
-  bool		cached; // was I cached ?
   time_t	updateTime; // last time I was updated
+  bool		cached;     // was I cached ?
+  bool		favorite;   // favorite server, user selection
 };
 
 #endif /* __SERVERITEM_H__ */

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -256,8 +256,11 @@ void			XWindow::setMinSize(int width, int height)
   XSetWMNormalHints(display->getDisplay(), window, xsh);
 }
 
-void			XWindow::setFullscreen()
+void			XWindow::setFullscreen(bool on)
 {
+  // FIXME: support toggle back to windowed mode
+  if (!on) return;
+
   // see if a motif based window manager is running.  do this by
   // getting the _MOTIF_WM_INFO property on the root window.  if
   // it exists then make sure the window it refers to also exists.

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -75,6 +75,7 @@ public:
   float		getAngle() const;
   const float*	getForward() const;
   const float*	getVelocity() const;
+  
   float		getAngularVelocity() const;
   int		getPhysicsDriver() const;
   int		getDeathPhysicsDriver() const;
@@ -89,6 +90,8 @@ public:
   float		getLocalNormalizedScore() const;
   short		getScore() const;
   const float*	getDimensions() const;
+
+  const float*	getApparentVelocity() const;
 
 #ifndef BUILDING_BZADMIN
   inline const float*	getColor() const
@@ -145,6 +148,9 @@ public:
   bool		hasPlayerList() const;
   void		setPlayerList(bool = true);
 
+  bool		getPausedMessageState ( void ) const;
+  void		setPausedMessageState ( bool set ) { pauseMessageState = set;}
+
   bool		validTeamTarget(const Player *possibleTarget) const;
 
   // returns true iff dead reckoning is too different from the
@@ -184,6 +190,13 @@ public:
 
   void setZpos (float z);
 
+  float getMaxSpeed ( void ) const;
+
+  void forceReload(float time);
+
+  int reportedHits;
+  int computedHits;
+  std::map<int,bool>	hitMap;
 protected:
   void	  clearRemoteSounds();
   void	  addRemoteSound(int sound);
@@ -192,6 +205,10 @@ protected:
   // shot statistics
   ShotStatistics	shotStatistics;
   const Obstacle* lastObstacle; // last obstacle touched
+  TimeKeeper	jamTime;
+
+  // pause message
+  bool pauseMessageState;
 
 private:
   // return true if the shot had to be terminated or false if it
@@ -210,6 +227,7 @@ private:
   void updateJumpJets(float dt);
   void updateTrackMarks();
   bool hitObstacleResizing();
+
 
 private:
   // data not communicated with other players
@@ -284,8 +302,11 @@ private:
   float			relativeSpeed;		// relative speed
   float			relativeAngVel;		// relative angular velocity
 
+  float			apparentVelocity[3];	// velocity of tank as derived from it's last positional update
+
   // dead reckoning stuff
   TimeKeeper inputTime;		// time of input
+  float inputTimestamp;         // input timestamp of sender
   int	inputStatus;		// tank status
   float	inputPos[3];		// tank position
   float	inputVel[3];		// tank velocity
@@ -390,6 +411,11 @@ inline const float*	Player::getVelocity() const
   return state.velocity;
 }
 
+inline const float*	Player::getApparentVelocity() const
+{
+  return apparentVelocity;
+}
+
 inline float		Player::getAngularVelocity() const
 {
   return state.angVel;
@@ -473,6 +499,11 @@ inline bool		Player::isAlive() const
 inline bool		Player::isPaused() const
 {
   return (state.status & short(PlayerState::Paused)) != 0;
+}
+
+inline bool Player::getPausedMessageState ( void ) const
+{ 
+	return pauseMessageState;
 }
 
 inline bool		Player::isAutoPilot() const

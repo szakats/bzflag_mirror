@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -91,6 +91,19 @@ GUIOptionsMenu::GUIOptionsMenu()
   options = &option->getList();
   options->push_back(std::string("Auto"));
   option->createSlider(4);
+  option->update();
+  listHUD.push_back(option);
+
+  // set observer info 
+  option = new HUDuiList;
+  option->setFontFace(fontFace);
+  option->setLabel("Extended Observer Info:");
+  option->setCallback(callback, (void*)"O");
+  options = &option->getList();
+  options->push_back(std::string("Off"));
+  options->push_back(std::string("On"));
+  options->push_back(std::string("On With Apparent Speeds"));
+  options->push_back(std::string("Full"));
   option->update();
   listHUD.push_back(option);
 
@@ -332,7 +345,9 @@ void			GUIOptionsMenu::resize(int _width, int _height)
 							  ("scorefontsize")));
     ((HUDuiList*)listHUD[i++])->setIndex(static_cast<int>(BZDB.eval
 							  ("cpanelfontsize")));
-    ((HUDuiList*)listHUD[i++])->setIndex((int)(10.0f * renderer
+	((HUDuiList*)listHUD[i++])->setIndex(static_cast<int>(BZDB.eval
+		("showVelocities")));
+   ((HUDuiList*)listHUD[i++])->setIndex((int)(10.0f * renderer
 					       ->getPanelOpacity() + 0.5));
     ((HUDuiList*)listHUD[i++])->setIndex(BZDB.isTrue("coloredradarshots") ? 1
 					 : 0);
@@ -400,6 +415,13 @@ void			GUIOptionsMenu::callback(HUDuiControl* w, void* data)
 	getMainWindow()->getWindow()->callResizeCallbacks();
 	break;
       }
+
+	case 'O':
+	{
+		BZDB.setInt("showVelocities", list->getIndex());
+		getMainWindow()->getWindow()->callResizeCallbacks();
+		break;
+	}
 
     case 'y':
       {

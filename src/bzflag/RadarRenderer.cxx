@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -509,14 +509,17 @@ void RadarRenderer::render(SceneRenderer& renderer, bool blank, bool observer)
 
     // draw the view angle below stuff
     // view frustum edges
-    glColor3f(1.0f, 0.625f, 0.125f);
-    const float fovx = renderer.getViewFrustum().getFOVx();
-    const float viewWidth = radarRange * tanf(0.5f * fovx);
-    glBegin(GL_LINE_STRIP);
-    glVertex2f(-viewWidth, radarRange);
-    glVertex2f(0.0f, 0.0f);
-    glVertex2f(viewWidth, radarRange);
-    glEnd();
+	if (!BZDB.isTrue("hideRadarViewLines"))
+	{
+		glColor3f(1.0f, 0.625f, 0.125f);
+		const float fovx = renderer.getViewFrustum().getFOVx();
+		const float viewWidth = radarRange * tanf(0.5f * fovx);
+		glBegin(GL_LINE_STRIP);
+		glVertex2f(-viewWidth, radarRange);
+		glVertex2f(0.0f, 0.0f);
+		glVertex2f(viewWidth, radarRange);
+		glEnd();
+	}
 
     // transform to the observer's viewpoint
     glPushMatrix();
@@ -1027,8 +1030,15 @@ void RadarRenderer::renderBoxPyrMesh()
 	  continue;
 	}
       }
-      const float z = face->getPosition()[2];
-      const float bh = face->getHeight();
+      float z = face->getPosition()[2];
+      float bh = face->getSize()[2];
+
+	  if (BZDBCache::useMeshForRadar)
+	  {
+		z = mesh->getPosition()[2];
+		bh = mesh->getSize()[2];
+	  }
+
       const float cs = colorScale(z, bh);
       // draw death faces with a soupcon of red
       const PhysicsDriver* phydrv = PHYDRVMGR.getDriver(face->getPhysicsDriver());

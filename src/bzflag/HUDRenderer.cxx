@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -28,6 +28,7 @@
 #include "HUDui.h"
 #include "Roaming.h"
 #include "playing.h"
+#include "TextUtils.h"
 
 
 //
@@ -457,7 +458,7 @@ void			HUDRenderer::setCracks(bool _showCracks)
 {
   if ((showCracks != _showCracks) && _showCracks) {
     initCracks();
-    crackStartTime = TimeKeeper::getCurrent();
+    crackStartTime = TimeKeeper::getTick();
   }
   showCracks = _showCracks;
 }
@@ -760,6 +761,90 @@ void			HUDRenderer::renderStatus(void)
     y += float(1.5*h);
   }
 
+  if (roaming && BZDB.isTrue("showVelocities"))
+  {
+    Player *target = ROAM.getTargetTank();
+    if (target) {
+      float vel[3] = {0};
+      memcpy(vel,target->getVelocity(),sizeof(float)*3);
+  
+      float apparentVel[3] = {0};
+      memcpy(apparentVel,target->getApparentVelocity(),sizeof(float)*3);
+  
+      float linSpeed = sqrt(vel[0]*vel[0]+vel[1]*vel[1]);
+      float vertSpeed = vel[2];
+      float rotSpeed = fabs(target->getAngularVelocity());
+      float apparentLinSpeed = sqrt(apparentVel[0]*apparentVel[0]+apparentVel[1]*apparentVel[1]);
+
+      // calc maximum apparent velocity value for each 0.5s interval
+      static float maxApparentLinSpeed = 0.0f;
+      static TimeKeeper maxApparentLinTime = TimeKeeper::getStartTime();
+
+      if (maxApparentLinSpeed > apparentLinSpeed &&
+          TimeKeeper::getTick() - maxApparentLinTime < 0.5f) {
+        apparentLinSpeed = maxApparentLinSpeed;
+      }
+      else {
+        maxApparentLinSpeed = apparentLinSpeed;
+        maxApparentLinTime = TimeKeeper::getTick();
+      }
+  
+      float smallZHeight = fm.getStrHeight(minorFontFace,minorFontSize,std::string("X"))*1.125f;
+      float drawY = y - smallZHeight;
+      // draw header
+      x = (float)window.getWidth() - 0.25f * h - fm.getStrLength(minorFontFace, minorFontSize, "Target Info");
+      fm.drawString(x, drawY, 0, minorFontFace, minorFontSize, "Target Info");
+  
+      std::string label = "Linear Speed:";
+      if ( linSpeed > target->getMaxSpeed() )
+        label += "!";
+  
+      sprintf(buffer,"%s%5.2f",label.c_str(),linSpeed);
+      if (BZDB.evalInt("showVelocities") > 1)
+        sprintf(buffer,"%s%5.2f(%5.2f)",label.c_str(),linSpeed,apparentLinSpeed);
+  
+      x = (float)window.getWidth() - 0.25f * h - fm.getStrLength(minorFontFace, minorFontSize,buffer);
+      fm.drawString(x,drawY-smallZHeight, 0, minorFontFace, minorFontSize, buffer);
+  
+      sprintf(buffer,"Vertical Speed:%5.2f",vertSpeed);
+      if (BZDB.evalInt("showVelocities") > 1)
+        sprintf(buffer,"Vertical Speed:%5.2f(%5.2f)",vertSpeed,apparentVel[2]);
+  
+      x = (float)window.getWidth() - 0.25f * h - fm.getStrLength(minorFontFace, minorFontSize,buffer);
+      fm.drawString(x, drawY-smallZHeight*2.0f, 0, minorFontFace, minorFontSize, buffer);
+  
+      label = "Angular Speed:";
+      if (rotSpeed > BZDB.eval(StateDatabase::BZDB_TANKANGVEL))
+        label += "!";
+      sprintf(buffer,"%s%5.2f",label.c_str(),rotSpeed);
+      x = (float)window.getWidth() - 0.25f * h - fm.getStrLength(minorFontFace, minorFontSize,buffer);
+      fm.drawString(x,drawY-smallZHeight*3.0f, 0, minorFontFace, minorFontSize, buffer);
+  
+      float shotTime = (float)target->getShotStatistics()->getLastShotTimeDelta();
+      float shotDeviation = (float)target->getShotStatistics()->getLastShotDeviation();
+  
+      sprintf(buffer,"Last Shot Info  Time:%6.4f  Deviation:%6.3f", shotTime, shotDeviation);
+      x = (float)window.getWidth() - 0.25f * h - fm.getStrLength(minorFontFace, minorFontSize,buffer);
+      fm.drawString(x,drawY-smallZHeight*4.0f, 0, minorFontFace, minorFontSize, buffer);
+  
+      float offset = 4.0f;
+      if (BZDB.evalInt("showVelocities") > 2) {
+        offset += 1.0f;
+        sprintf(buffer,"ReportedHits %d ComputedHits %d ratio %f", target->reportedHits, target->computedHits,(float)target->reportedHits/(float)target->computedHits);
+        x = (float)window.getWidth() - 0.25f * h - fm.getStrLength(minorFontFace, minorFontSize,buffer);
+        fm.drawString(x,drawY-smallZHeight*offset, 0, minorFontFace, minorFontSize, buffer);
+      }
+  
+      offset += 1.5f;
+      scoreboard->setTeamScoreY(drawY - smallZHeight*offset);
+    }
+    else
+      scoreboard->setTeamScoreY(0);
+  }
+  else
+    scoreboard->setTeamScoreY(0);
+
+
   // print status top-center
   static const GLfloat redColor[3] = { 1.0f, 0.0f, 0.0f };
   static const GLfloat yellowColor[3] = { 1.0f, 1.0f, 0.0f };
@@ -870,7 +955,7 @@ void			HUDRenderer::renderTankLabels(SceneRenderer& renderer)
       double x, y, z;
       hudSColor3fv(Team::getRadarColor(pl->getTeam(), World::getWorld()->allowRabbit()));
       gluProject(pl->getPosition()[0], pl->getPosition()[1],
-		 pl->getPosition()[2], model, proj, view, &x, &y, &z);
+		 pl->getPosition()[2]/*+BZDB.eval(StateDatabase::BZDB_MUZZLEHEIGHT)*3.0f*/, model, proj, view, &x, &y, &z);
       if (z >= 0.0 && z <= 1.0) {
 	FontManager &fm = FontManager::instance();
 	fm.drawString(float(x) - fm.getStrLength(labelsFontFace, labelsFontSize, name) / 2.0f,
@@ -887,14 +972,25 @@ void			HUDRenderer::renderTankLabels(SceneRenderer& renderer)
 			(2.0f * fm.getStrHeight(labelsFontFace, labelsFontSize, fname)),
 			0, labelsFontFace, labelsFontSize, fname);
 	}
-      }
+
+		if (roaming && BZDB.isTrue("showVelocities")) 
+		{
+			float vel[3] = {0};
+			memcpy(vel,pl->getVelocity(),sizeof(float)*3);
+			std::string speedStr = TextUtils::format("[%5.2f]",sqrt(vel[0]*vel[0]+vel[1]*vel[1]));
+			fm.drawString(float(x) - fm.getStrLength(labelsFontFace, labelsFontSize, speedStr.c_str()) / 2.0f,
+				float(y) + offset -
+				(3.0f * fm.getStrHeight(labelsFontFace, labelsFontSize, speedStr.c_str())),
+				0, labelsFontFace, labelsFontSize, speedStr.c_str());
+		}
+	  }
     }
   }
 }
 
 void			HUDRenderer::renderCracks()
 {
-  double delta = (TimeKeeper::getCurrent() - crackStartTime) * 5.0;
+  double delta = (TimeKeeper::getTick() - crackStartTime) * 5.0;
   if (delta > 1.0)
     delta = 1.0;
   int maxLevels = (int) (HUDCrackLevels * delta);
@@ -1252,6 +1348,7 @@ void			HUDRenderer::renderPlaying(SceneRenderer& renderer)
   renderAlerts();
 
   // show player scoreboard
+  scoreboard->setRoaming(roaming);
   scoreboard->render(false);
 
   // draw flag help
@@ -1325,6 +1422,7 @@ void			HUDRenderer::renderNotPlaying(SceneRenderer& renderer)
   renderAlerts();
 
   // show player scoreboard
+  scoreboard->setRoaming(roaming);
   scoreboard->render(true);
 
   // draw times
@@ -1397,6 +1495,7 @@ void			HUDRenderer::renderRoaming(SceneRenderer& renderer)
   renderAlerts();
 
   // show player scoreboard
+  scoreboard->setRoaming(roaming);
   scoreboard->render(false);
 
   // show tank labels

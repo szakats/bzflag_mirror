@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -18,8 +18,6 @@
 #include <string>
 
 /* implementation common headers */
-#include "MathUtils.h"
-
 
 /* private */
 
@@ -328,7 +326,7 @@ double PositionTracker::distanceBetween(unsigned short int fromToken, unsigned s
 			    ((fromSet[fromToken]->position[2] - toSet[toToken]->position[2]) *
 			     (fromSet[fromToken]->position[2] - toSet[toToken]->position[2])));
 
-  return math_util::fastsqrt((float)distanceSquared);
+  return sqrtf((float)distanceSquared);
 }
 
 

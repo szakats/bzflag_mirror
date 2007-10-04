@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -35,7 +35,7 @@ void			getMoonPosition(double julianDay, float latitude,
 // transform a direction from the celestial coordinate system
 void			getCelestialTransform(double julianDay,
 					float latitude, float longitude,
-					float xform[4][4]);
+					GLfloat (&xform)[4][4]);
 
 // sets color of sun.  if it's nighttime, the sun is actually the moon.
 void			getSunColor(const float sunDir[3], GLfloat color[3],

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -45,7 +45,17 @@ std::string configDir(bool set, const char *str)
 
 void			setCustomConfigDir(const char *str)
 {
-  configDir(1, str);
+	std::string dir = str;
+	if (dir.size() > 2)
+	{
+		if (*dir.begin() == '"')
+			dir.erase(dir.begin());
+
+		if (*(dir.end()-1) == '"')
+			dir.erase(dir.end()-1);
+
+	}
+  configDir(1, dir.c_str());
 }
 
 

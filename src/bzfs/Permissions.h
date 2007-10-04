@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -29,6 +29,7 @@
 #include <map>
 #include <algorithm>
 #include <string>
+#include <cctype>
 
 /* common interface headers */
 #include "TimeKeeper.h"
@@ -68,9 +69,12 @@ public:
       kill,
       lagStats,
       lagwarn,
+      jitterwarn,
       listPerms,
       masterBan,
+      modCount,
       mute,
+      packetlosswarn,
       playerList,
       poll,
       pollBan,

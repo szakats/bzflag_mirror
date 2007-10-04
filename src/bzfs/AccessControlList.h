@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -268,6 +268,14 @@ private:
   /** This function checks all bans to see if any of them have expired,
       and removes those who have. */
   void expire();
+
+  /** This function removes bans dependent on their origin
+      (local or from master list) **/
+  void purge(bool master);
+
+  /** This function purges all local bans
+      so the local banfile can be reloaded **/
+  void purgeLocals(void);
 
   typedef std::vector<BanInfo> banList_t;
   banList_t banList;

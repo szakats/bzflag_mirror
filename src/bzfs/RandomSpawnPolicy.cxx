@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -104,7 +104,7 @@ void RandomSpawnPolicy::getPosition(float pos[3], int playerId, bool onGroundOnl
 	tries = 0;
 	if (TimeKeeper::getCurrent() - start > BZDB.eval("_spawnMaxCompTime")) {
 	  //Just drop the sucka in, and pray
-	  DEBUG1("Warning: RandomSpawnPolicy ran out of time, just dropping the sucker in\n");
+	  logDebugMessage(1,"Warning: RandomSpawnPolicy ran out of time, just dropping the sucker in\n");
 	  break;
 	}
       }

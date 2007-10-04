@@ -1,6 +1,6 @@
 
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -88,6 +88,7 @@
 #include "World.h"
 #include "WorldBuilder.h"
 #include "HUDui.h"
+#include <sstream>
 
 //#include "messages.h"
 
@@ -146,6 +147,8 @@ static MessageOfTheDay		*motd = NULL;
 DefaultCompleter	completer;
 
 char			messageMessage[PlayerIdPLen + MessageLen];
+
+double			lastObserverUpdateTime = -1;
 
 static void		setHuntTarget();
 static void		setTankFlags();
@@ -368,9 +371,9 @@ inline bool isViewTank(Player* tank)
 {
   return ((tank != NULL) &&
 	  (tank == LocalPlayer::getMyTank()) ||
-	   (ROAM.isRoaming()
-	    && (ROAM.getMode() == Roaming::roamViewFP)
-	    && (ROAM.getTargetTank() == tank)));
+	  (ROAM.isRoaming()
+	   && (ROAM.getMode() == Roaming::roamViewFP)
+	   && (ROAM.getTargetTank() == tank)));
 }
 
 
@@ -403,9 +406,9 @@ void			setSceneDatabase()
 
   // print debugging info
   if (BZDBCache::zbuffer) {
-    DEBUG2("ZSceneDatabase processed in %.3f seconds.\n", elapsed);
+    logDebugMessage(2,"ZSceneDatabase processed in %.3f seconds.\n", elapsed);
   } else {
-    DEBUG2("BSPSceneDatabase processed in %.3f seconds.\n", elapsed);
+    logDebugMessage(2,"BSPSceneDatabase processed in %.3f seconds.\n", elapsed);
   }
 
   // set the scene
@@ -652,7 +655,7 @@ static bool		doKeyCommon(const BzfKeyEvent& key, bool pressed)
 	}
 	return true;
 
-      // for testing forced recreation of OpenGL context
+	// for testing forced recreation of OpenGL context
 #if defined(DEBUG_RENDERING)
       case 'X':
 	if (pressed && ((shiftKeyStatus & BzfKeyEvent::AltKey) != 0)) {
@@ -843,7 +846,7 @@ static void		doMotion()
     }
   } else { // both mouse and joystick
 
-      // calculate desired rotation
+    // calculate desired rotation
     if (keyboardRotation && !devDriving) {
       rotation = float(keyboardRotation);
       rotation *= BZDB.eval("displayFOV") / 60.0f;
@@ -851,11 +854,11 @@ static void		doMotion()
 	rotation *= 0.5f;
       }
     } else if (mx < -noMotionSize) {
-      rotation = float(-mx - noMotionSize) / float(maxMotionSize);
+      rotation = float(-mx - noMotionSize) / float(maxMotionSize - noMotionSize);
       if (rotation > 1.0f)
 	rotation = 1.0f;
     } else if (mx > noMotionSize) {
-      rotation = -float(mx - noMotionSize) / float(maxMotionSize);
+      rotation = -float(mx - noMotionSize) / float(maxMotionSize - noMotionSize);
       if (rotation < -1.0f)
 	rotation = -1.0f;
     }
@@ -870,11 +873,11 @@ static void		doMotion()
 	speed *= 0.5f;
       }
     } else if (my < -noMotionSize) {
-      speed = float(-my - noMotionSize) / float(maxMotionSize);
+      speed = float(-my - noMotionSize) / float(maxMotionSize - noMotionSize);
       if (speed > 1.0f)
 	speed = 1.0f;
     } else if (my > noMotionSize) {
-      speed = -float(my - noMotionSize) / float(maxMotionSize);
+      speed = -float(my - noMotionSize) / float(maxMotionSize - noMotionSize);
       if (speed < -0.5f)
 	speed = -0.5f;
     } else {
@@ -1220,9 +1223,9 @@ static Player*		addPlayer(PlayerId id, void* msg, int showMessage)
   if (i < 0) {
     printError (TextUtils::format ("Invalid player identification (%d)", i));
     std::
-	cerr <<
-	"WARNING: invalid player identification when adding player with id "
-	<< i << std::endl;
+      cerr <<
+      "WARNING: invalid player identification when adding player with id "
+	   << i << std::endl;
     return NULL;
   }
 
@@ -1506,6 +1509,10 @@ static void loadCachedWorld()
   // make world
   HUDDialogStack::get()->setFailedMessage("Preparing world...");
   drawFrame(0.0f);
+  if (world) {
+    delete world;
+    world = NULL;
+  }
   if (!worldBuilder->unpack(localWorldDatabase)) {
     // world didn't make for some reason
     if (worldBuilder)
@@ -1634,8 +1641,8 @@ static bool processWorldChunk(void *buf, uint16_t len, int bytesLeft)
     cacheOut->write((char *)buf, len);
   HUDDialogStack::get()->setFailedMessage
     (TextUtils::format
-		  ("Downloading World (%2d%% complete/%d kb remaining)...",
-		   (100 * doneSize / totalSize), bytesLeft / 1024).c_str());
+     ("Downloading World (%2d%% complete/%d kb remaining)...",
+      (100 * doneSize / totalSize), bytesLeft / 1024).c_str());
   return bytesLeft == 0;
 }
 
@@ -1675,9 +1682,9 @@ static void		handleServerMessage(bool human, uint16_t code,
 	  buffer[stringLen] = '\0';
 	  item.URL = buffer;
 
-	  item.filePath = PlatformFactory::getMedia ()->getMediaDirectory ();
+	  item.filePath = PlatformFactory::getMedia ()->getMediaDirectory() + DirectorySeparator;
 	  std::vector < std::string > temp =
-	      TextUtils::tokenize (item.URL, std::string ("/"));
+	    TextUtils::tokenize (item.URL, std::string ("/"));
 
 	  item.fileName = temp[temp.size () - 1];
 	  item.filePath += item.fileName;
@@ -1966,8 +1973,9 @@ static void		handleServerMessage(bool human, uint16_t code,
 	       && ((ROAM.getMode() != Roaming::roamViewFP)
 		   || (tank != ROAM.getTargetTank())))
 	      || BZDB.isTrue("enableLocalSpawnEffect")) {
-	    if (myTank->getFlag() != Flags::Colorblindness) {
-	      EFFECTS.addSpawnEffect(tank->getColor(), pos);
+	    if (myTank->getFlag() == Flags::Colorblindness) {
+			static float cbColor[4] = {1,1,1,1};
+	      EFFECTS.addSpawnEffect(cbColor, pos);
 	    } else {
 	      EFFECTS.addSpawnEffect(tank->getColor(), pos);
 	    }
@@ -2000,6 +2008,19 @@ static void		handleServerMessage(bool human, uint16_t code,
       break;
     }
 
+	case MsgPause: {
+		PlayerId id;
+		msg = nboUnpackUByte(msg, id);
+		uint8_t Pause;
+		nboUnpackUByte(msg, Pause);
+		Player* tank = lookupPlayer(id);
+		if (!tank)
+			break;
+
+		tank->setPausedMessageState(Pause == 0);
+		addMessage(tank, Pause ? "has paused" : "has unpaused" );
+		break;
+	}
 
     case MsgKilled: {
       PlayerId victim, killer;
@@ -2020,6 +2041,9 @@ static void		handleServerMessage(bool human, uint16_t code,
       BaseLocalPlayer* killerLocal = getLocalPlayer(killer);
       Player* victimPlayer = lookupPlayer(victim);
       Player* killerPlayer = lookupPlayer(killer);
+
+	  if (victimPlayer)
+		  victimPlayer->reportedHits++;
 #ifdef ROBOT
       if (victimPlayer == myTank) {
 	// uh oh, i'm dead
@@ -2699,9 +2723,9 @@ static void		handleServerMessage(bool human, uint16_t code,
 
 	      // play a sound on a private message not from self or server
 
-		  bool playSound = !fromServer;
-		  if (BZDB.isSet("beepOnServerMsg") && BZDB.isTrue("beepOnServerMsg"))
-			  playSound = true;
+	      bool playSound = !fromServer;
+	      if (BZDB.isSet("beepOnServerMsg") && BZDB.isTrue("beepOnServerMsg"))
+		playSound = true;
 
 	      if (playSound) {
 		static TimeKeeper lastMsg = TimeKeeper::getSunGenesisTime();
@@ -2956,7 +2980,7 @@ static void		handlePlayerMessage(uint16_t code, uint16_t,
       break;
     }
 
-    // just echo lag ping message
+      // just echo lag ping message
     case MsgLagPing:
       serverLink->send(MsgLagPing,2,msg);
       break;
@@ -3295,7 +3319,7 @@ static bool		gotBlowedUp(BaseLocalPlayer* tank,
     tank->explodeTank();
     EFFECTS.addDeathEffect(tank->getColor(), tank->getPosition(), tank->getAngle());
 
-   if (isViewTank(tank)) {
+    if (isViewTank(tank)) {
       if (reason == GotRunOver) {
 	playLocalSound(SFX_RUNOVER);
       } else {
@@ -3403,7 +3427,51 @@ static bool		gotBlowedUp(BaseLocalPlayer* tank,
 
 static void		checkEnvironment()
 {
-  if (!myTank || myTank->getTeam() == ObserverTeam) return;
+  if (!myTank) return;
+  if (myTank->getTeam() == ObserverTeam ) {
+    if (BZDB.evalInt("showVelocities") > 2)
+	{
+		// Check for an observed tanks hit.
+		Player *target = ROAM.getTargetTank();
+		const ShotPath* hit = NULL;
+		FlagType* flagd;
+		float minTime = Infinity;
+		int i;
+
+		if (BZDB.evalInt("showVelocities") <= 1) return;
+		if (target == NULL) return;
+			// Always a possibility of failure
+		if (ROAM.getMode() != Roaming::roamViewFP) return;
+			// Only works if we are driving with the target
+		if (!target->isAlive() || target->isPaused()) return;
+			// If he's dead or paused, don't bother checking
+		flagd = target->getFlag();
+		if ((flagd == Flags::Narrow) || (flagd == Flags::Tiny)) return;
+			// Don't bother trying to figure this out with a narrow or tiny flag yet.
+		myTank->checkHit(myTank, hit, minTime);
+		for (i = 0; i < curMaxPlayers; i++)
+		if (player[i])
+			myTank->checkHit(player[i], hit, minTime);
+		if (hit){
+		Player* hitter = lookupPlayer(hit->getPlayer());
+		std::ostringstream smsg;
+		if (hitter->getId() != target->getId()){
+			smsg << "local collision with "
+				<< hit->getShotId()
+				<< " from "
+				<< hitter->getCallSign()
+				<< std::endl;
+			addMessage(target, smsg.str());
+
+			if (target && target->hitMap.find(hit->getShotId()) == target->hitMap.end())
+				target->computedHits++;
+
+			target->hitMap[hit->getShotId()] = true;
+		}
+		}
+	}
+    return;
+  }
 
   // skip this if i'm dead or paused
   if (!myTank->isAlive() || myTank->isPaused()) return;
@@ -3588,7 +3656,7 @@ void setTarget()
     // see if it's inside lock-on angle (if we're trying to lock-on)
     if (a < BZDB.eval(StateDatabase::BZDB_LOCKONANGLE) &&	// about 8.5 degrees
 	((myTank->getFlag() == Flags::GuidedMissile) ||		// am i locking on?
-	  tankHasShotType(myTank, Flags::GuidedMissile)) &&
+	 tankHasShotType(myTank, Flags::GuidedMissile)) &&
 	player[i]->getFlag() != Flags::Stealth &&		// can't lock on stealth
 	!player[i]->isPaused() &&				// can't lock on paused
 	!player[i]->isNotResponding() &&			// can't lock on not responding
@@ -4173,7 +4241,7 @@ static void enteringServer(void *buf)
 
   if ((myTank->getTeam() == ObserverTeam) || devDriving) {
     ROAM.setMode(Roaming::roamViewFP);
-//    ROAM.resetCamera();
+    //    ROAM.resetCamera();
   } else {
     ROAM.setMode(Roaming::roamViewDisabled);
   }
@@ -4272,7 +4340,7 @@ static void cleanWorldCache()
     if (directory) {
       struct dirent* contents;
       struct stat statbuf;
-      time_t oldestTime;
+      time_t oldestTime = 0;
       while ((contents = readdir(directory))) {
 	const std::string filename = contents->d_name;
 	const std::string fullname = worldPath + filename;
@@ -4309,7 +4377,7 @@ static void cleanWorldCache()
     }
 
     // remove the oldest file
-    DEBUG1("cleanWorldCache: removed %s\n", oldestFile);
+    logDebugMessage(1,"cleanWorldCache: removed %s\n", oldestFile);
     remove((worldPath + oldestFile).c_str());
     free(oldestFile);
     totalSize -= oldestSize;
@@ -4421,8 +4489,8 @@ void		leaveGame()
 
   //  controlPanel->setRadarRenderer(NULL);
   /*
-  delete radar;
-  radar = NULL;
+    delete radar;
+    radar = NULL;
   */
 
 #if defined(ROBOT)
@@ -4788,7 +4856,7 @@ static void drawUI()
   }
 
   // update the HUD (player list, alerts)
-  if (hud) {
+  if (World::getWorld() && hud) {
     hud->render(*sceneRenderer);
   }
 
@@ -4828,7 +4896,7 @@ static bool trackPlayerShot(Player* target,
       const ShotPath* spTmp = target->getShot(s);
       if (spTmp != NULL) {
 	const float t = float(spTmp->getReloadTime() -
-	  (spTmp->getCurrentTime() - spTmp->getStartTime()));
+			      (spTmp->getCurrentTime() - spTmp->getStartTime()));
 	if ((t > 0.0f) && (t < remaining)) {
 	  sp = spTmp;
 	  remaining = t;
@@ -4904,7 +4972,7 @@ static void setupFarPlane()
   FarDeepPlane = FarPlane * FarDeepPlaneScale;
 
   const bool mapFog = (BZDB.get(StateDatabase::BZDB_FOGMODE) != "none") &&
-		      BZDB.isTrue("fogEffect");
+    BZDB.isTrue("fogEffect");
 
   float farDist = FarPlane;
 
@@ -4929,7 +4997,7 @@ static void setupFarPlane()
     }
   } else {
     const float dist = BZDB.eval("_cullDist");
-    if (!std::isnan(dist) && (dist > 0.0f)) {
+    if (!isnan(dist) && (dist > 0.0f)) {
       farDist = dist;
     } else {
       // default far plane
@@ -5031,7 +5099,7 @@ void drawFrame(const float dt)
 	  targetPoint[0] = target->getPosition()[0];
 	  targetPoint[1] = target->getPosition()[1];
 	  targetPoint[2] = target->getPosition()[2] +
-			   target->getMuzzleHeight();
+	    target->getMuzzleHeight();
 	}
 	// camera following target
 	else if (ROAM.getMode() == Roaming::roamViewFollow) {
@@ -5126,7 +5194,7 @@ void drawFrame(const float dt)
       // add my tank if required
       const bool inCockpit = (!devDriving || (ROAM.getMode() == Roaming::roamViewFP));
       const bool showMyTreads = showTreads ||
-				(devDriving && (ROAM.getMode() != Roaming::roamViewFP));
+	(devDriving && (ROAM.getMode() != Roaming::roamViewFP));
       myTank->addToScene(scene, myTank->getTeam(),
 			 inCockpit, seerView,
 			 showMyTreads, showMyTreads /*showIDL*/);
@@ -5165,9 +5233,9 @@ void drawFrame(const float dt)
 	  }
 
 	  const bool inCockpt  = ROAM.isRoaming() && !devDriving &&
-				 (ROAM.getMode() == Roaming::roamViewFP) &&
-				 ROAM.getTargetTank() &&
-				 (ROAM.getTargetTank()->getId() == i);
+	    (ROAM.getMode() == Roaming::roamViewFP) &&
+	    ROAM.getTargetTank() &&
+	    (ROAM.getTargetTank()->getId() == i);
 	  const bool showPlayer = !inCockpt || showTreads;
 
 	  // add player tank if required
@@ -5216,7 +5284,7 @@ void drawFrame(const float dt)
     }
     sceneRenderer->setDim(HUDDialogStack::get()->isActive() || insideDim ||
 			  (myTank && !ROAM.isRoaming() && !devDriving) &&
-			   !myTank->isAlive() && !myTank->isExploding());
+			  !myTank->isAlive() && !myTank->isExploding());
 
     // turn on panel dimming when showing the menu (both radar and chat)
     if (HUDDialogStack::get()->isActive()) {
@@ -5781,10 +5849,6 @@ static void		playingLoop()
   while (!CommandsStandard::isQuit()) {
 
     BZDBCache::update();
-    if (world) {
-      // make sure there are no adjustments
-      world->enforceRequiredGraphics();
-    }
 
     // set this step game time
     GameTime::setStepTime();
@@ -5966,7 +6030,7 @@ static void		playingLoop()
     // notify if input changed
     if ((myTank != NULL) && (myTank->queryInputChange() == true)) {
       controlPanel->addMessage(
-	LocalPlayer::getInputMethodName(myTank->getInputMethod()) + " movement");
+			       LocalPlayer::getInputMethodName(myTank->getInputMethod()) + " movement");
     }
 
     // update other tank's shots
@@ -6063,9 +6127,25 @@ static void		playingLoop()
     // play the sounds
     updateSound();
 
+
+    double heartbeatTime = 30.0f;
+    bool sendUpdate = myTank && myTank->isDeadReckoningWrong();
+    if (myTank && myTank->getTeam() == ObserverTeam) {
+      if (BZDB.isTrue("sendObserverHeartbeat")) {
+        if (BZDB.isSet("observerHeartbeat"))
+                heartbeatTime = BZDB.eval("observerHeartbeat");
+        if (lastObserverUpdateTime + heartbeatTime < TimeKeeper::getTick().getSeconds()) {
+          lastObserverUpdateTime = TimeKeeper::getTick().getSeconds();
+          sendUpdate = true;
+        }
+        else
+          sendUpdate = false;
+      }
+      else
+        sendUpdate = false;
+    }
     // send my data
-    if (myTank && myTank->isDeadReckoningWrong() &&
-	(myTank->getTeam() != ObserverTeam)) {
+    if ( sendUpdate) {
       // also calls setDeadReckoning()
       serverLink->sendPlayerUpdate(myTank);
     }
@@ -6096,7 +6176,7 @@ static void		playingLoop()
     if (BZDB.isTrue("saveEnergy")) {
       static TimeKeeper lastTime = TimeKeeper::getCurrent();
       const float fpsLimit = BZDB.eval("fpsLimit");
-      if ((fpsLimit >= 1.0f) && !std::isnan(fpsLimit)) {
+      if ((fpsLimit >= 1.0f) && !isnan(fpsLimit)) {
 	const float elapsed = float(TimeKeeper::getCurrent() - lastTime);
 	if (elapsed > 0.0f) {
 	  const float period = (1.0f / fpsLimit);
@@ -6145,7 +6225,7 @@ static float		timeConfiguration(bool useZBuffer)
   TimeKeeper startTime = TimeKeeper::getCurrent();
   sceneRenderer->setExposed();
   sceneRenderer->render();
- // glFinish();
+  // glFinish();
   TimeKeeper endTime = TimeKeeper::getCurrent();
 
   // turn off depth buffer
@@ -6372,6 +6452,8 @@ void			startPlaying(BzfDisplay* _display,
   display = _display;
   sceneRenderer = &renderer;
   mainWindow = &sceneRenderer->getWindow();
+
+  lastObserverUpdateTime = TimeKeeper::getTick().getSeconds();
 
   // register some commands
   for (unsigned int c = 0; c < countof(commandList); ++c) {
@@ -6606,20 +6688,20 @@ void			startPlaying(BzfDisplay* _display,
   // print debugging info
   {
     // Application version
-    DEBUG1("BZFlag version:   %s\n", getAppVersion());
+    logDebugMessage(1,"BZFlag version:   %s\n", getAppVersion());
 
     // Protocol version
-    DEBUG1("BZFlag protocol:  %s\n", getProtocolVersion());
+    logDebugMessage(1,"BZFlag protocol:  %s\n", getProtocolVersion());
 
     // OpenGL Driver Information
-    DEBUG1("OpenGL vendor:    %s\n", (const char*)glGetString(GL_VENDOR));
-    DEBUG1("OpenGL version:   %s\n", (const char*)glGetString(GL_VERSION));
-    DEBUG1("OpenGL renderer:  %s\n", (const char*)glGetString(GL_RENDERER));
+    logDebugMessage(1,"OpenGL vendor:    %s\n", (const char*)glGetString(GL_VENDOR));
+    logDebugMessage(1,"OpenGL version:   %s\n", (const char*)glGetString(GL_VERSION));
+    logDebugMessage(1,"OpenGL renderer:  %s\n", (const char*)glGetString(GL_RENDERER));
 
     // Depth Buffer bitplanes
     GLint zDepth;
     glGetIntegerv(GL_DEPTH_BITS, &zDepth);
-    DEBUG1("Depth Buffer:     %i bitplanes\n", zDepth);
+    logDebugMessage(1,"Depth Buffer:     %i bitplanes\n", zDepth);
   }
 
   // windows version can be very helpful in debug logs
@@ -6629,10 +6711,10 @@ void			startPlaying(BzfDisplay* _display,
     ZeroMemory(&info, sizeof(OSVERSIONINFO));
     info.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
     GetVersionEx(&info);
-    DEBUG1("Running on Windows %s%d.%d %s\n",
-      (info.dwPlatformId == VER_PLATFORM_WIN32_NT) ? "NT " : "",
-      info.dwMajorVersion, info.dwMinorVersion,
-      info.szCSDVersion);
+    logDebugMessage(1,"Running on Windows %s%d.%d %s\n",
+	   (info.dwPlatformId == VER_PLATFORM_WIN32_NT) ? "NT " : "",
+	   info.dwMajorVersion, info.dwMinorVersion,
+	   info.szCSDVersion);
   }
 #endif
 
@@ -6660,6 +6742,10 @@ void			startPlaying(BzfDisplay* _display,
     // print copyright
     tmpString = ColorStrings[YellowColor];
     tmpString += bzfcopyright;
+    controlPanel->addMessage(tmpString);
+    // print license
+    tmpString = ColorStrings[CyanColor];
+    tmpString += "Distributed under the terms of the LGPL";
     controlPanel->addMessage(tmpString);
     // print author
     tmpString = ColorStrings[GreenColor];

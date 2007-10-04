@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -38,6 +38,7 @@
 /* common headers */
 #include "Address.h"
 #include "BZDBCache.h"
+#include "BZDBLocal.h"
 #include "BundleMgr.h"
 #include "BzfMedia.h"
 #include "BzfVisual.h"
@@ -654,6 +655,33 @@ int			main(int argc, char** argv)
     exit(0);
   }
 
+#if defined(_WIN32)
+  {
+    /* write HKEY_CURRENT_USER\Software\BZFlag\CurrentRunningPath with the
+     * current path.  this lets Xfire know that this bzflag.exe running from
+     * here really is bzflag, not some imposter.
+     * since it may be useful to someone else, it's not protected by USE_XFIRE
+     */
+
+    // get our path
+    char temppath[MAX_PATH], temppath2[MAX_PATH];
+    char tempdrive[10];
+    GetModuleFileName(NULL, temppath, MAX_PATH);
+    // strip filename/extension
+    _splitpath(temppath, tempdrive, temppath2, NULL, NULL);
+    _makepath(temppath, tempdrive, temppath2, NULL, NULL);
+
+    // write the registry key in question
+    HKEY key = NULL;
+    if (RegCreateKeyEx(HKEY_CURRENT_USER, "Software\\BZFlag", 
+        0, NULL, REG_OPTION_VOLATILE, KEY_ALL_ACCESS, NULL, 
+	&key, NULL) == ERROR_SUCCESS) {
+      RegSetValueEx(key, "CurrentRunningPath", 0, REG_SZ, (LPBYTE)temppath,
+		   (DWORD)strlen(temppath));
+    }
+  }
+#endif
+
   createCacheSignature();
 
   // initialize global objects and classes
@@ -669,8 +697,10 @@ int			main(int argc, char** argv)
     BZDB.setPersistent(globalDBItems[gi].name, globalDBItems[gi].persistent);
     BZDB.setPermission(globalDBItems[gi].name, globalDBItems[gi].permission);
   }
-
+  
   BZDBCache::init();
+  BZDBLOCAL.init();
+  
   Flags::init();
 
   if (getenv("BZFLAGID")) {
@@ -1025,8 +1055,10 @@ int			main(int argc, char** argv)
   // the resolution to use)
   const bool useFullscreen = needsFullscreen();
   if (useFullscreen) {
+#ifndef HAVE_SDL
     // tell window to be fullscreen
-    window->setFullscreen();
+    window->setFullscreen(true);
+#endif
 
     // set the size if one was requested.  this overrides the default
     // size (which is the display or passthrough size).
@@ -1309,6 +1341,18 @@ int			main(int argc, char** argv)
   delete platformFactory;
   delete bm;
   Flags::kill();
+
+#if defined(_WIN32)
+  {
+    /* clear HKEY_CURRENT_USER\Software\BZFlag\CurrentRunningPath if it 
+     * exists */
+    HKEY key = NULL;
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\BZFlag", 
+	0, KEY_ALL_ACCESS, &key) == ERROR_SUCCESS) {
+      RegSetValueEx(key, "CurrentRunningPath", 0, REG_SZ, (LPBYTE)"\0", 1);
+    }
+  }
+#endif
 
 #ifdef _WIN32
   // clean up

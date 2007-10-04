@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -52,8 +52,9 @@ using TextUtils::compare_nocase;
 
 const char *usageString =
 "[-a <vel> <rot>] "
+"[-adminlagannounce <time/ms>] "
 "[-admsg <text>] "
-"[-advertise <group,group...>]"
+"[-advertise <group,group...>] "
 "[-autoTeam] "
 "[-b] "
 "[-badwords <filename>] "
@@ -81,22 +82,27 @@ const char *usageString =
 "[-helpmsg <file> <name>] "
 "[-i interface] "
 "[-j] "
+"[-jitterdrop <num>] "
+"[-jitterwarn <time/ms>] "
+"[-lagannounce <time/ms>] "
 "[-lagdrop <num>] "
 "[-lagwarn <time/ms>] "
 "[-loadplugin <pluginname,commandline>] "
-"[-masterBanURL <URL>]"
+"[-masterBanURL <URL>] "
 "[-maxidle <time/s>] "
 "[-mp {<count>|[<count>][,<count>][,<count>][,<count>][,<count>][,<count>]}] "
 "[-mps <score>] "
 "[-ms <shots>] "
 "[-mts <score>] "
-"[-noMasterBanlist]"
-"[-noradar]"
+"[-noMasterBanlist] "
+"[-noradar] "
 "[-p <port>] "
+"[-packetlossdrop <num>] "
+"[-packetlosswarn <%>] "
 "[-passdb <password file>] "
 "[-passwd <password>] "
 "[-pidfile <filename>] "
-"[-poll <variable>=<value>]"
+"[-poll <variable>=<value>] "
 #ifdef PRINTSCORE
 "[-printscore] "
 #endif
@@ -113,8 +119,6 @@ const char *usageString =
 "[-reportfile <filename>] "
 "[-reportpipe <filename>] "
 "[-requireudp] "
-"[-reqgfx] "
-"[-reqreg] "
 "[+s <flag-count>] "
 "[-s <flag-count>] "
 "[-sa] "
@@ -135,24 +139,27 @@ const char *usageString =
 "[-time <seconds>] "
 "[-timemanual] "
 "[-tk] "
+"[-tkannounce] "
 "[-tkkr <percent>] "
 "[-ts [micros]] "
 "[-userdb <user permissions file>] "
 "[-vars <filename>] "
 "[-version] "
 "[-world <filename>] "
-"[-worldsize <world size>] ";
+"[-worldsize <world size>] "
+"[-ws <number of wall sides>] ";
 
 const char *extraUsageString =
 "\n"
 "BZFS Option Descriptions\n"
 "\n"
 "\t-a: maximum acceleration settings\n"
+"\t-adminlagannounce: lag announcement threshhold time [ms]\n"
 "\t-admsg: specify a <msg> which will be broadcast every 15 minutes\n"
 "\t-advertise: specify which groups to advertise to (list server)\n"
 "\t-autoTeam: automatically assign players to teams when they join\n"
 "\t-b: randomly oriented buildings\n"
-"\t-badwords: bad-world file\n"
+"\t-badwords: bad-word file\n"
 "\t-ban ip{,ip}*: ban players based on ip address\n"
 "\t-banfile: specify a file to load and store the banlist in\n"
 "\t-c: capture-the-flag style game,\n"
@@ -177,6 +184,9 @@ const char *extraUsageString =
 "\t-helpmsg: show the lines in <file> on command /help <name>\n"
 "\t-i: listen on <interface>\n"
 "\t-j: allow jumping\n"
+"\t-jitterdrop: drop player after this many jitter warnings\n"
+"\t-jitterwarn: jitter warning threshhold time [ms]\n"
+"\t-lagannounce: lag announcement threshhold time [ms]\n"
 "\t-lagdrop: drop player after this many lag warnings\n"
 "\t-lagwarn: lag warning threshhold time [ms]\n"
 "\t-loadplugin: load the specified plugin with the specified commandline\n"
@@ -190,6 +200,8 @@ const char *extraUsageString =
 "\t-noMasterBanlist: has public servers ignore the master ban list\n"
 "\t-noradar: disallow the use of radar\n"
 "\t-p: use alternative port (default=5154)\n"
+"\t-packetlossdrop: drop player after this many packetloss warnings\n"
+"\t-packetlosswarn: packetloss warning threshold [%]\n"
 "\t-passdb: file to read for user passwords\n"
 "\t-passwd: specify a <password> for operator commands\n"
 "\t-pidfile: write the process id into <filename> on startup\n"
@@ -210,8 +222,6 @@ const char *extraUsageString =
 "\t-reportfile <filename>: the file to store reports in\n"
 "\t-reportpipe <filename>: the program to pipe reports through\n"
 "\t-requireudp: require clients to use udp\n"
-"\t-reqgfx: required that the clients use advanced graphics mode\n"
-"\t-reqreg: required that the clients are registered to spawn and talk\n"
 "\t+s: always have <num> super flags (default=16)\n"
 "\t-s: allow up to <num> super flags (default=16)\n"
 "\t-sa: insert antidote superflags\n"
@@ -236,6 +246,7 @@ const char *extraUsageString =
 "\t-time: set time limit on each game\n"
 "\t-timemanual: countdown for timed games is started with /countdown\n"
 "\t-tk: player does not die when killing a teammate\n"
+"\t-tkannounce: announces team kills to the admin channel\n"
 "\t-tkkr: team-kills-to-wins percentage (1-100) for kicking tk-ing players\n"
 "\t-ts [micros]: timestamp all console output, [micros] to include\n"
 "\t\tmicroseconds\n"
@@ -244,6 +255,7 @@ const char *extraUsageString =
 "\t-version: print version and exit\n"
 "\t-world: world file to load\n"
 "\t-worldsize: numeric value for the size of the world (default=400)\n"
+"\t-ws: numeric value for the number off outer walls (default=4)\n"
 "\n"
 "Poll Variables:  (see -poll)\n"
 "\n"
@@ -557,6 +569,9 @@ void parse(int argc, char **argv, CmdLineOptions &options, bool fromWorldFile)
 	options.linearAcceleration = 0.0f;
       if (options.angularAcceleration < 0.0f)
 	options.angularAcceleration = 0.0f;
+    } else if (strcmp(argv[i], "-adminlagannounce") == 0) {
+      checkArgc(1, i, argc, argv[i]);
+      options.adminlagannounce = atoi(argv[i])/1000.0f;
     } else if (strcmp(argv[i], "-admsg") == 0) {
       checkArgc(1, i, argc, argv[i]);
       if ((options.advertisemsg != "") || (strlen (argv[i]) == 0)) {
@@ -744,6 +759,15 @@ void parse(int argc, char **argv, CmdLineOptions &options, bool fromWorldFile)
     } else if (strcmp(argv[i], "-handicap") == 0) {
       // allow handicap advantage
       options.gameStyle |= int(HandicapGameStyle);
+    } else if (strcmp(argv[i], "-jitterdrop") == 0) {
+      checkArgc(1, i, argc, argv[i]);
+      options.maxjitterwarn = atoi(argv[i]);        
+    } else if (strcmp(argv[i], "-jitterwarn") == 0) {
+      checkArgc(1, i, argc, argv[i]);
+      options.jitterwarnthresh = atoi(argv[i])/1000.0f;
+    } else if (strcmp(argv[i], "-lagannounce") == 0) {
+      checkArgc(1, i, argc, argv[i]);
+      options.lagannounce = atoi(argv[i])/1000.0f;
     } else if (strcmp(argv[i], "-lagdrop") == 0) {
       checkArgc(1, i, argc, argv[i]);
       options.maxlagwarn = atoi(argv[i]);
@@ -824,6 +848,12 @@ void parse(int argc, char **argv, CmdLineOptions &options, bool fromWorldFile)
 	options.wksPort = ServerPort;
       else
 	options.useGivenPort = true;
+    } else if (strcmp(argv[i], "-packetlossdrop") == 0) {
+      checkArgc(1, i, argc, argv[i]);
+      options.maxpacketlosswarn = atoi(argv[i]);
+    } else if (strcmp(argv[i], "-packetlosswarn") == 0) {
+      checkArgc(1, i, argc, argv[i]);
+      options.packetlosswarnthresh = atoi(argv[i])/1000.0f;
     } else if (strcmp(argv[i], "-passdb") == 0) {
       checkFromWorldFile(argv[i], fromWorldFile);
       checkArgc(1, i, argc, argv[i]);
@@ -955,10 +985,8 @@ void parse(int argc, char **argv, CmdLineOptions &options, bool fromWorldFile)
     } else if (strcmp(argv[i], "-reportpipe") == 0) {
       checkArgc(1, i, argc, argv[i]);
       options.reportPipe = argv[i];
-    } else if (strcmp(argv[i], "-reqgfx") == 0) {
-      options.gameStyle |= int(RequireGraphics);
-    } else if (strcmp(argv[i], "-reqreg") == 0) {
-      options.gameStyle |= int(RequireRegistration);
+    } else if (strcmp(argv[i], "-tkannounce") == 0) {
+      options.tkAnnounce = true;
     } else if (strcmp(argv[i], "-requireudp") == 0) {
       std::cerr << "require UDP clients!" << std::endl;
       options.requireUDP = true;
@@ -990,7 +1018,7 @@ void parse(int argc, char **argv, CmdLineOptions &options, bool fromWorldFile)
       i++;
       value = argv[i];
       BZDB.set(name, value);
-      DEBUG1 ("set variable: %s = %s\n", name, BZDB.get(name).c_str());
+      logDebugMessage(1,"set variable: %s = %s\n", name, BZDB.get(name).c_str());
     } else if (strcmp(argv[i], "-setforced") == 0) {
       const char *name, *value;
       checkArgc(2, i, argc, argv[i]);
@@ -998,7 +1026,7 @@ void parse(int argc, char **argv, CmdLineOptions &options, bool fromWorldFile)
       i++;
       value = argv[i];
       BZDB.set(name, value);
-      DEBUG1 ("set variable: %s = %s\n", name, BZDB.get(name).c_str());
+      logDebugMessage(1,"set variable: %s = %s\n", name, BZDB.get(name).c_str());
     } else if (strcmp(argv[i], "-sl") == 0) {
       // add required flag
       checkArgc(2, i, argc, argv[i]);
@@ -1146,7 +1174,14 @@ void parse(int argc, char **argv, CmdLineOptions &options, bool fromWorldFile)
       checkArgc(1, i, argc, argv[i]);
       BZDB.set(StateDatabase::BZDB_WORLDSIZE, TextUtils::format("%d",atoi(argv[i])*2));
       std::cerr << "using world size of \"" << BZDBCache::worldSize << "\"" << std::endl;
-    } else {
+    }  
+    else if (strcmp(argv[i], "-ws") == 0) {
+      checkArgc(1, i, argc, argv[i]);
+      int sides = atoi(argv[i]);
+      if (sides > 2)
+	options.wallSides = sides;
+    } 
+    else {
       std::cerr << "bad argument \"" << argv[i] << "\"" << std::endl;
       usage(argv[0]);
     }
@@ -1456,22 +1491,22 @@ void finalizeParsing(int /*argc*/, char **argv,
 
 
   // debugging
-  DEBUG1("style: %x\n", options.gameStyle);
+  logDebugMessage(1,"style: %x\n", options.gameStyle);
   if (options.gameStyle & int(TeamFlagGameStyle))
-    DEBUG1("  capture the flag\n");
+    logDebugMessage(1,"  capture the flag\n");
   if (options.gameStyle & int(RabbitChaseGameStyle))
-    DEBUG1("  rabbit chase\n");
+    logDebugMessage(1,"  rabbit chase\n");
   if (options.gameStyle & int(SuperFlagGameStyle))
-    DEBUG1("  super flags allowed\n");
+    logDebugMessage(1,"  super flags allowed\n");
   if (options.gameStyle & int(JumpingGameStyle))
-    DEBUG1("  jumping allowed\n");
+    logDebugMessage(1,"  jumping allowed\n");
   if (options.gameStyle & int(RicochetGameStyle))
-    DEBUG1("  all shots ricochet\n");
+    logDebugMessage(1,"  all shots ricochet\n");
   if (options.gameStyle & int(ShakableGameStyle))
-    DEBUG1("  shakable bad flags: timeout=%f, wins=%i\n",
+    logDebugMessage(1,"  shakable bad flags: timeout=%f, wins=%i\n",
 	   0.1f * float(options.shakeTimeout), options.shakeWins);
   if (options.gameStyle & int(AntidoteGameStyle))
-    DEBUG1("  antidote flags\n");
+    logDebugMessage(1,"  antidote flags\n");
 
   return;
 }

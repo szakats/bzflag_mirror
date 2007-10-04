@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -67,6 +67,7 @@ public:
   float*		mono;		/* avg of channels for world sfx */
   float*		monoRaw;	/* mono with silence before & after */
   double		duration;	/* time to play sound */
+  std::string	file;
 };
 
 
@@ -110,6 +111,7 @@ AudioSamples& AudioSamples::operator = ( const AudioSamples& r)
 	duration = r.duration;
 
 	mono = monoRaw + (r.mono-r.monoRaw);
+  	file = r.file;
 	return *this;
 }
 
@@ -121,11 +123,11 @@ AudioSamples::AudioSamples ( const AudioSamples& r)
 	rmlength = r.rmlength;
 	data = new float[length];
 	memcpy(data,r.data,sizeof(float)*length);
-	mono = new float[mlength];
-	memcpy(mono,r.mono,sizeof(float)*mlength);
 	monoRaw = new float[rmlength];
 	memcpy(monoRaw,r.monoRaw,sizeof(float)*rmlength);
+	mono = monoRaw + (r.mono-r.monoRaw);
 	duration = r.duration;
+  	file = r.file;
 }
 
 /*
@@ -137,7 +139,7 @@ static void		audioLoop(void*);
 static bool		allocAudioSamples();
 static void		freeAudioSamples(void);
 static int		resampleAudio(const float* in,
-				int frames, int rate, AudioSamples* out);
+				int frames, int rate, AudioSamples* out, const char *name);
 
 
 /*
@@ -338,7 +340,7 @@ static bool		allocAudioSamples()
     int numFrames, rate;
     float* samples = PlatformFactory::getMedia()->readSound(soundFiles[i], numFrames, rate);
 		AudioSamples newSample;
-    if (samples && resampleAudio(samples, numFrames, rate, &newSample))
+    if (samples && resampleAudio(samples, numFrames, rate, &newSample,soundFiles[i]))
       anyFile = true;
 		soundSamples.push_back(newSample);
     delete[] samples;
@@ -354,7 +356,7 @@ static void		freeAudioSamples(void)
 }
 
 static int		resampleAudio(const float* in,
-				int frames, int rate, AudioSamples* out)
+				int frames, int rate, AudioSamples* out, const char* name)
 {
   // attenuation on all sounds
   static const float GlobalAtten = 0.5f;
@@ -377,13 +379,15 @@ static int		resampleAudio(const float* in,
 		   (float)PlatformFactory::getMedia()->getAudioOutputRate());
 
   // fill in samples structure
+  out->file = name;
   out->length = 2 * frames;
   out->mlength = out->length >> 1;
+  out->rmlength = out->mlength + 2 * safetyMargin;
   out->dmlength = double(out->mlength - 1);
   out->duration = (float)out->mlength /
 		  (float)PlatformFactory::getMedia()->getAudioOutputRate();
   out->data = new float[out->length];
-  out->monoRaw = new float[out->mlength + 2 * safetyMargin];
+  out->monoRaw = new float[out->rmlength];
   out->mono = out->monoRaw + safetyMargin;
   if (!out->data || !out->monoRaw) {
     delete[] out->data;
@@ -499,7 +503,7 @@ void			playLocalSound(std::string sound)
 		int numFrames, rate;
 		float* samples = PlatformFactory::getMedia()->readSound(TextUtils::tolower(sound).c_str(), numFrames, rate);
 		AudioSamples newSample;
-		if (samples && resampleAudio(samples, numFrames, rate, &newSample))
+		if (samples && resampleAudio(samples, numFrames, rate, &newSample,sound.c_str()))
 		{
 			soundSamples.push_back(newSample);
 			soundCode = (int)soundSamples.size()-1;

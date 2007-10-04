@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -108,7 +108,12 @@ inline std::string Roaming::getRoamingLabel(void) const {
 }
 
 inline Player* Roaming::getTargetTank() const {
-  return getPlayerByIndex(targetWinner);
+	if ((getMode() == roamViewFollow)
+		|| (getMode() == roamViewFP)
+		|| (getMode() == roamViewTrack))
+		return getPlayerByIndex(targetWinner);
+	else
+		return NULL;
 }
 
 inline Flag* Roaming::getTargetFlag() const {

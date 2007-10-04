@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -40,15 +40,15 @@
 #endif
 
 #ifndef BZ_REV
-#  define BZ_REV		5
+#  define BZ_REV		10
 #endif
 
-// DEVEL | STABLE | MAINT
+// DEVEL | RC# | STABLE | MAINT
 #ifndef BZ_BUILD_TYPE
-#  define BZ_BUILD_TYPE		"DEVEL"
+#  define BZ_BUILD_TYPE		"RC3"
 #endif
 
-const char *bzfcopyright = "Copyright (c) 1993 - 2006 Tim Riker";
+const char *bzfcopyright = "Copyright (c) 1993 - 2007 Tim Riker";
 
 
 //

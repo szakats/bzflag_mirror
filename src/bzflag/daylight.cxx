@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -64,7 +64,7 @@ static void		gettruePosition(double julianDay,
 
 void			getCelestialTransform(double julianDay,
 					float latitude, float longitude,
-					float xform[4][4])
+					GLfloat (&xform)[4][4])
 {
   // get local sidereal time
   const float localSidereal = (float)(getGreenwichSideral(julianDay) -

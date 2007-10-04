@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -197,7 +197,7 @@ void CustomMesh::writeToGroupDef(GroupDefinition *groupdef) const
     if (decorative) {
       vert[0] = vert[1] = vert[2] = (Obstacle::maxExtent * 2.0f);
       if ((faces.size() > 0) && !(driveThrough && shootThrough)) {
-	DEBUG0("WARNING: mesh is supposed to be decorative, setting to passable\n");
+	logDebugMessage(0,"WARNING: mesh is supposed to be decorative, setting to passable\n");
 	forcePassable = true;
       }
     } else {

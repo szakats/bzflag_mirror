@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -16,7 +16,35 @@
 // system headers
 #include <errno.h>
 
+#include "bzfsAPI.h"
+
 const int udpBufSize = 128000;
+
+std::vector<NetworkDataLogCallback*> logCallbacks;
+
+void addNetworkLogCallback(NetworkDataLogCallback * cb )
+{
+  if (cb)
+    logCallbacks.push_back(cb);
+}
+
+void removeNetworkLogCallback(NetworkDataLogCallback * cb )
+{
+  for ( unsigned int i = 0; i < (unsigned int)logCallbacks.size(); i++)
+  {
+    if ( logCallbacks[i] == cb )
+    {
+      logCallbacks.erase(logCallbacks.begin()+i);
+      return;
+    }
+  }
+}
+
+void callNetworkDataLog ( bool send, bool udp,  const unsigned char *data, unsigned int size )
+{
+  for ( unsigned int i = 0; i < (unsigned int)logCallbacks.size(); i++)
+    logCallbacks[i]->networkDataLog(send,udp,data,size);
+}
 
 bool NetHandler::pendingUDP = false;
 bool NetHandler::initHandlers(struct sockaddr_in addr) {
@@ -141,14 +169,13 @@ int NetHandler::udpReceive(char *buffer, struct sockaddr_in *uaddr,
 	  netPlayer[index]->uaddr.sin_port = uaddr->sin_port;
 	netPlayer[index]->udpin = true;
 	udpLinkRequest = true;
-	DEBUG2("Player %s [%d] inbound UDP up %s:%d actual %d\n",
+	logDebugMessage(2,"Player %s [%d] inbound UDP up %s:%d actual %d\n",
 	       netPlayer[index]->info->getCallSign(), index,
 	       inet_ntoa(uaddr->sin_addr),
 	       ntohs(netPlayer[index]->uaddr.sin_port),
 	       ntohs(uaddr->sin_port));
       } else {
-	DEBUG2
-	  ("Player %s [%d] inbound UDP rejected %s:%d different IP \
+	logDebugMessage(2,"Player %s [%d] inbound UDP rejected %s:%d different IP \
 than %s:%d\n",
 	   netPlayer[index]->info->getCallSign(), index,
 	   inet_ntoa(netPlayer[index]->uaddr.sin_addr),
@@ -159,18 +186,18 @@ than %s:%d\n",
 
   if (id == -1) {
     // no match, discard packet
-    DEBUG2("uread() discard packet! %s:%d choices p(l) h:p",
+    logDebugMessage(2,"uread() discard packet! %s:%d choices p(l) h:p",
 	   inet_ntoa(uaddr->sin_addr), ntohs(uaddr->sin_port));
     for (pi = 0; pi < maxHandlers; pi++) {
       if (netPlayer[pi] && !netPlayer[pi]->closed)
-	DEBUG3(" %d(%d-%d) %s:%d", pi, netPlayer[pi]->udpin,
+	logDebugMessage(3," %d(%d-%d) %s:%d", pi, netPlayer[pi]->udpin,
 	       netPlayer[pi]->udpout,
 	       inet_ntoa(netPlayer[pi]->uaddr.sin_addr),
 	       ntohs(netPlayer[pi]->uaddr.sin_port));
     }
-    DEBUG2("\n");
+    logDebugMessage(2,"\n");
   } else {
-    DEBUG4("Player %s [%d] uread() %s:%d len %d from %s:%d on %i\n",
+    logDebugMessage(4,"Player %s [%d] uread() %s:%d len %d from %s:%d on %i\n",
 	   netPlayer[id]->info->getCallSign(), id,
 	   inet_ntoa(netPlayer[id]->uaddr.sin_addr),
 	   ntohs(netPlayer[id]->uaddr.sin_port), n,
@@ -179,10 +206,13 @@ than %s:%d\n",
 #ifdef NETWORK_STATS
     netPlayer[id]->countMessage(code, len, 0);
 #endif
+
+    callNetworkDataLog (false, true, (const unsigned char*)buf,len);
+
     if (code == MsgUDPLinkEstablished) {
       netPlayer[id]->udpout = true;
-      DEBUG2("Player %s [%d] outbound UDP up\n",
-	     netPlayer[id]->info->getCallSign(), id);
+      logDebugMessage(2,"Player %s [%d] outbound UDP up\n",
+	      netPlayer[id]->info->getCallSign(), id);
     }
   }
   return id;
@@ -330,7 +360,7 @@ int NetHandler::bufferedSend(const void *buffer, size_t length) {
       // are the network is down or too unreliable to that player.
       // FIXME -- is 20kB too big?  too small?
       if (newCapacity >= 20 * 1024) {
-	DEBUG2("Player %s [%d] drop, unresponsive with %d bytes queued\n",
+	logDebugMessage(2,"Player %s [%d] drop, unresponsive with %d bytes queued\n",
 	       info->getCallSign(), playerIndex, outmsgSize + length);
 	toBeKicked = true;
 	toBeKickedReason = "send queue too big";
@@ -387,6 +417,8 @@ int NetHandler::pwrite(const void *b, int l) {
   countMessage(code, len, 1);
 #endif
 
+  bool useUDP = false;
+
   // Check if UDP Link is used instead of TCP, if so jump into udpSend
   if (udpout) {
     // only send bulk messages by UDP
@@ -398,13 +430,15 @@ int NetHandler::pwrite(const void *b, int l) {
     case MsgGMUpdate:
     case MsgLagPing:
     case MsgGameTime:
-      udpSend(b, l);
-      return 0;
+		useUDP = true;
+		break;
     }
   }
 
-  // always sent MsgUDPLinkRequest over udp with udpSend
-  if (code == MsgUDPLinkRequest) {
+  callNetworkDataLog (true, useUDP, (const unsigned char*)b,len);
+
+  // always sent UDP messages and MsgUDPLinkRequest over udp with udpSend
+  if (useUDP || code == MsgUDPLinkRequest) {
     udpSend(b, l);
     return 0;
   }
@@ -440,7 +474,7 @@ RxStatus NetHandler::tcpReceive() {
   buf = nboUnpackUShort(buf, len);
   buf = nboUnpackUShort(buf, code);
   if (len > MaxPacketLen) {
-    DEBUG1("Player [%d] sent huge packet length (len=%d), possible attack\n",
+    logDebugMessage(1,"Player [%d] sent huge packet length (len=%d), possible attack\n",
 	   playerIndex, len);
     return ReadHuge;
   }
@@ -454,9 +488,12 @@ RxStatus NetHandler::tcpReceive() {
 #ifdef NETWORK_STATS
   countMessage(code, len, 0);
 #endif
+
+  callNetworkDataLog (false, false, (const unsigned char*)buf,len);
+
   if (code == MsgUDPLinkEstablished) {
     udpout = true;
-    DEBUG2("Player %s [%d] outbound UDP up\n", info->getCallSign(),
+    logDebugMessage(2,"Player %s [%d] outbound UDP up\n", info->getCallSign(),
 	   playerIndex);
   }
   return ReadAll;
@@ -567,21 +604,21 @@ void NetHandler::dumpMessageStats() {
   int total;
   int direction;
 
-  DEBUG1("Player connect time: %f\n", info->now - time);
+  logDebugMessage(1,"Player connect time: %f\n", info->now - time);
 
   for (direction = 0; direction <= 1; direction++) {
     total = 0;
-    DEBUG1("Player messages %s:", direction ? "out" : "in");
+    logDebugMessage(1,"Player messages %s:", direction ? "out" : "in");
 
     for (MessageCountMap::iterator i = msg[direction].begin();
 	 i != msg[direction].end(); i++) {
-      DEBUG1(" %c%c:%u(%u)", i->first >> 8, i->first & 0xff,
+      logDebugMessage(1," %c%c:%u(%u)", i->first >> 8, i->first & 0xff,
 	     i->second.count, i->second.maxSize);
       total += i->second.count;
     }
 
-    DEBUG1(" total:%u(%u) ", total, msgBytes[direction]);
-    DEBUG1("max msgs/bytes per second: %u/%u\n",
+    logDebugMessage(1," total:%u(%u) ", total, msgBytes[direction]);
+    logDebugMessage(1,"max msgs/bytes per second: %u/%u\n",
 	perSecondMaxMsg[direction],
 	perSecondMaxBytes[direction]);
   }
@@ -592,7 +629,7 @@ void NetHandler::dumpMessageStats() {
 void NetHandler::udpSend(const void *b, size_t l) {
 #ifdef TESTLINK
   if ((random()%LINKQUALITY) == 0) {
-    DEBUG1("Drop Packet due to Test\n");
+    logDebugMessage(1,"Drop Packet due to Test\n");
     return;
   }
 #endif

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -13,13 +13,21 @@
 /* interface header */
 #include "LagInfo.h"
 
+float LagInfo::adminlagannouncetresh = 0.0;
+float LagInfo::lagannouncetresh = 0.0;
 float LagInfo::threshold = 0.0;
+float LagInfo::jitterthreshold = 0.0;
+float LagInfo::lossthreshold = 0.0;
 float LagInfo::max       = 0.0;
+float LagInfo::jittermax       = 0.0;
+float LagInfo::lossmax       = 0.0;
 
 LagInfo::LagInfo(PlayerInfo *_info)
   : info(_info), lagavg(0), jitteravg(0), lostavg(0), lagalpha(1),
     jitteralpha(1), lostalpha(1), lagcount(0), laglastwarn(0), lagwarncount(0),
-    pingpending(false), pingseqno(0), pingssent(0), lasttimestamp(0.0f) {
+    jittercount(0), jitterlastwarn(0), jitterwarncount(0), losscount(0),
+    losslastwarn(0), losswarncount(0), pingpending(false), pingseqno(0),
+    pingssent(0), lasttimestamp(0.0f), alagannouncecount(0), lagannouncecount(0) {
 }
 
 void LagInfo::reset()
@@ -32,6 +40,16 @@ void LagInfo::reset()
 int LagInfo::getLag() const
 {
   return int(lagavg * 1000);
+}
+
+int LagInfo::getJitter() const
+{
+  return int(jitteravg * 1000);
+}
+
+int LagInfo::getLoss() const
+{
+	return int(lostavg * 100);
 }
 
 float LagInfo::getLagAvg() const
@@ -56,10 +74,10 @@ void LagInfo::getLagStats(char* msg, bool isAdmin) const
 
   int numchars;
   if (isAdmin)
-    numchars = sprintf(msg, "[%3d] %24.24s: %3d", info->getPlayerIndex(), 
+    numchars = sprintf(msg, "[%3d] %-24.24s: %3d", info->getPlayerIndex(), 
           TextUtils::str_trunc_continued (info->getCallSign(), 22).c_str(), lag);
   else
-    numchars = sprintf(msg, "%24.24s: %3d", 
+    numchars = sprintf(msg, "%-24.24s: %3d", 
           TextUtils::str_trunc_continued (info->getCallSign(), 22).c_str(), lag);
 
   if (info->isObserver()) {
@@ -72,21 +90,58 @@ void LagInfo::getLagStats(char* msg, bool isAdmin) const
 }
 
 // update absolute latency based on LagPing messages
-int LagInfo::updatePingLag(void *buf, bool &warn, bool &kick) {
+void LagInfo::updatePingLag(void *buf, bool &warn, bool &kick, bool &jittwarn,
+			    bool &jittkick, bool &plosswarn, bool &plosskick,
+			    bool &alagannouncewarn, bool &lagannouncewarn) {
   uint16_t _pingseqno;
-  int lag = 0;
   nboUnpackUShort(buf, _pingseqno);
   if (pingseqno == _pingseqno) {
     float timepassed = float(info->now - lastping);
     // time is smoothed exponentially using a dynamic smoothing factor
     lagavg   = lagavg * (1 - lagalpha) + lagalpha * timepassed;
     lagalpha = lagalpha / (0.9f + lagalpha);
-    lag      = int(lagavg * 1000);
+    alagcount++;
     lagcount++;
+    jittercount++;
+    losscount++;
 
     // if lag has been good for some time, forget old warnings
     if (lagavg < threshold && lagcount - laglastwarn >= 20)
       lagwarncount = 0;
+    if (lagavg < adminlagannouncetresh && alagcount - alaglastannounce >= 20)
+      alagannouncecount = 0;
+    if (lagavg < lagannouncetresh && ((TimeKeeper::getCurrent() - laglastannounce) > 10.0f))
+      lagannouncecount = 0;
+
+    // if jitter has been good for some time, forget old warnings
+    if (jitteravg < jitterthreshold && jittercount - jitterlastwarn >= 20)
+      jitterwarncount = 0;
+
+    // if loss has been good for some time, forget old warnings
+    if (lostavg < lossthreshold && losscount - losslastwarn >=20)
+      losswarncount = 0;
+
+    // announce players from time to time whose lag is > threshold (-lagwarn)
+    if (!info->isObserver() && (adminlagannouncetresh > 0) && lagavg > adminlagannouncetresh
+	&& alagcount - alaglastannounce > 2 * alagannouncecount) {
+      alaglastannounce = alagcount;
+      alagannouncewarn = true;
+    } else {
+      alagannouncewarn = false;
+    }
+
+    if (!info->isObserver() && (lagannouncetresh > 0) && lagavg > lagannouncetresh
+	&& (
+	(lagannouncecount == 0) ||
+	(lagannouncecount == 1 && ((TimeKeeper::getCurrent() - laglastannounce) > 5.0f)) ||
+	(lagannouncecount == 2 && ((TimeKeeper::getCurrent() - laglastannounce) > 10.0f)) ||
+	(lagannouncecount > 2 && ((TimeKeeper::getCurrent() - laglastannounce) > 180.0f)))) {
+        laglastannounce = TimeKeeper::getCurrent();
+	lagannouncecount++;
+        lagannouncewarn = true;
+    } else {
+      lagannouncewarn = false;
+    }
 
     // warn players from time to time whose lag is > threshold (-lagwarn)
     if (!info->isObserver() && (threshold > 0) && lagavg > threshold
@@ -98,14 +153,44 @@ int LagInfo::updatePingLag(void *buf, bool &warn, bool &kick) {
       warn = false;
       kick = false;
     }
+
+    // warn players from time to time whose jitter is > jitterthreshold
+    if (!info->isObserver() && (jitterthreshold > 0)
+	&& jitteravg > jitterthreshold
+	&& jittercount - jitterlastwarn > 2 * jitterwarncount) {
+      jitterlastwarn = jittercount;
+      jittwarn = true;
+      jittkick = (jitterwarncount++ > jittermax);
+    } else {
+      jittwarn = false;
+      jittkick = false;
+    }
+
+    // warn players from time to time whose packetloss is > lossthreshold (-packetlosswarn)
+    if (!info->isObserver() && (lossthreshold > 0)
+	&& lostavg > lossthreshold
+	&& losscount - losslastwarn > 2 * losswarncount) {
+      losslastwarn = losscount;
+      plosswarn = true;
+      plosskick = (losswarncount++ > lossmax);
+    } else {
+      plosswarn = false;
+      plosskick = false;
+    }
+
     lostavg     = lostavg * (1 - lostalpha);
     lostalpha   = lostalpha / (0.99f + lostalpha);
     pingpending = false;
   } else {
     warn = false;
     kick = false;
+    jittwarn = false;
+    jittkick = false;
+    plosswarn = false;
+    plosskick = false;
+    alagannouncewarn = false;
+    lagannouncewarn = false;
   }
-  return lag;
 }
 
 void LagInfo::updateLag(float timestamp, bool ooo) {
@@ -165,9 +250,27 @@ void LagInfo::updateLatency(float &waitTime) {
     waitTime  = delta;
 }
 
+void LagInfo::setAdminLagAnnounceThreshold(float _adminlagannouncetresh) {
+  adminlagannouncetresh = _adminlagannouncetresh;
+}
+
+void LagInfo::setLagAnnounceThreshold(float _lagannouncetresh) {
+  lagannouncetresh = _lagannouncetresh;
+}
+
 void LagInfo::setThreshold(float _threshold, float _max) {
   threshold = _threshold;
   max       = _max;
+}
+
+void LagInfo::setJitterThreshold(float _jitterthreshold, float _jittermax) {
+  jitterthreshold = _jitterthreshold;
+  jittermax       = _jittermax;
+}
+
+void LagInfo::setPacketLossThreshold(float _lossthreshold, float _lossmax) {
+  lossthreshold = _lossthreshold * 10;
+  lossmax       = _lossmax;
 }
 
 // Local Variables: ***

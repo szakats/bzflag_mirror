@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -25,8 +25,7 @@
 #include "DropGeometry.h"
 
 
-SpawnPolicy::SpawnPolicy() :
-  curMaxPlayers(getCurMaxPlayers())
+SpawnPolicy::SpawnPolicy()
 {
 }
 
@@ -129,7 +128,7 @@ void SpawnPolicy::getPosition(float pos[3], int playerId, bool onGroundOnly, boo
 	    pos[0] = testPos[0];
 	    pos[1] = testPos[1];
 	    pos[2] = maxHeight;
-	    DEBUG1("Warning: SpawnPolicy ran out of time, just dropping the sucker in\n");
+	    logDebugMessage(1,"Warning: SpawnPolicy ran out of time, just dropping the sucker in\n");
 	  }
 	  break;
 	}
@@ -201,7 +200,8 @@ bool SpawnPolicy::isImminentlyDangerous() const
 {
   GameKeeper::Player *playerData;
   float twentyDegrees = (float)(M_PI / 9.0); /* +- 10 degrees, i.e. 20 degree arc */
-  for (int i = 0; i < curMaxPlayers; i++) {
+  int curmax = getCurMaxPlayers();
+  for (int i = 0; i < curmax; i++) {
     playerData = GameKeeper::Player::getPlayerByIndex(i);
     if (!playerData)
       continue;
@@ -247,8 +247,8 @@ float SpawnPolicy::enemyProximityCheck(float &enemyAngle) const
   GameKeeper::Player *playerData;
   float worstDist = 1e12f; // huge number
   bool noEnemy    = true;
-
-  for (int i = 0; i < curMaxPlayers; i++) {
+  int curmax = getCurMaxPlayers();
+  for (int i = 0; i < curmax; i++) {
     playerData = GameKeeper::Player::getPlayerByIndex(i);
     if (!playerData)
       continue;

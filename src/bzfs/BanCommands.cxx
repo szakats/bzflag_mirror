@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -386,15 +386,25 @@ bool KillCommand::operator() (const char	 *message,
 
   i = GameKeeper::Player::getPlayerIDByName(argv[1]);
 
+  // Don't kill players who aren't alive
+  GameKeeper::Player *p
+    = GameKeeper::Player::getPlayerByIndex(i);
+  if (p != NULL && !p->player.isAlive()) {
+    char buffer[MessageLen];
+    snprintf(buffer, MessageLen,
+	     "%s is not alive.",
+	     p->player.getCallSign());
+    sendMessage(ServerPlayer, t, buffer);
+    return true;
+  }
+
   if (i >= 0) {
-    // call any plugin events registered for /kick
+    // call any plugin events registered for /kill
     bz_KillEventData killEvent;
     killEvent.killerID = t;
     killEvent.killedID = i;
     if (argv.size() > 2)
       killEvent.reason = argv[2].c_str();
-
-    worldEventManager.callEvents(bz_eKillEvent,&killEvent);
 
     // need to update playerIndex ?
     if (t != killEvent.killerID) {
@@ -408,12 +418,11 @@ bool KillCommand::operator() (const char	 *message,
     // operators can override antiperms
     if (!playerData->accessInfo.isOperator()) {
       // otherwise make sure the player is not protected with an antiperm
-      GameKeeper::Player *p
-	= GameKeeper::Player::getPlayerByIndex(killEvent.killedID);
+      p = GameKeeper::Player::getPlayerByIndex(killEvent.killedID);
       if ((p != NULL) && (p->accessInfo.hasPerm(PlayerAccessInfo::antikill))) {
 	snprintf(killmessage, MessageLen, "%s is protected from being killed.",
 		 p->player.getCallSign());
-	sendMessage(ServerPlayer, i, killmessage);
+	sendMessage(ServerPlayer, t, killmessage);
 	return true;
       }
     }
@@ -426,6 +435,10 @@ bool KillCommand::operator() (const char	 *message,
 	       killEvent.reason.c_str());
       sendMessage(ServerPlayer, killEvent.killedID, killmessage);
     }
+
+    // call the event
+    worldEventManager.callEvents(bz_eKillEvent,&killEvent);
+
     // kill the player
     playerKilled(killEvent.killedID, ServerPlayer, 0, -1, Flags::Null, -1);
 
@@ -998,7 +1011,7 @@ bool MasterBanCommand::operator() (const char	 *message,
   int t = playerData->getIndex();
   std::string callsign = std::string(playerData->player.getCallSign());
 
-  DEBUG2("\"%s\" has requested masterban: %s\n", callsign.c_str(), message);
+  logDebugMessage(2,"\"%s\" has requested masterban: %s\n", callsign.c_str(), message);
 
   if (!playerData->accessInfo.hasPerm(PlayerAccessInfo::masterBan)) {
     sendMessage(ServerPlayer, t,
@@ -1007,7 +1020,7 @@ bool MasterBanCommand::operator() (const char	 *message,
     return true;
   }
 
-  DEBUG3("Player has permission to run /masterban\n");
+  logDebugMessage(3,"Player has permission to run /masterban\n");
 
   if (!clOptions->publicizeServer) {
     sendMessage(ServerPlayer, t,
@@ -1053,23 +1066,9 @@ bool MasterBanCommand::operator() (const char	 *message,
 
     if (clOptions->publicizeServer && !clOptions->suppressMasterBanList) {
       MasterBanList	banList;
-      int	       banCount;
 
-      clOptions->acl.purgeMasters();
-      sendMessage(ServerPlayer, t,
-		  "Previous master ban list entries have been flushed.");
-
-      for (std::vector<std::string>::const_iterator i
-	     = clOptions->masterBanListURL.begin();
-	   i != clOptions->masterBanListURL.end(); i++) {
-	banCount = clOptions->acl.merge(banList.get(i->c_str()));
-	std::string reloadmsg
-	  = TextUtils::format("Loaded %d master bans from %s", banCount,
-			      i->c_str());
-	DEBUG1("%s\n", reloadmsg.c_str());
-	sendMessage(ServerPlayer, t, reloadmsg.c_str());
-      }
-
+	  sendMessage(ServerPlayer, t, "Previous master ban list entries have been flushed, reloading in background");
+	  bz_reloadMasterBans();
     } else {
       sendMessage(ServerPlayer, t, "No action taken.");
     }

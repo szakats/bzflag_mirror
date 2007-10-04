@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -66,26 +66,29 @@ public:
   static const int SORT_MYRATIO = 6;
   static const int SORT_MAXNUM = SORT_MYRATIO;
 
+  void setTeamScoreY ( float val ){teamScoreYVal = val;}
+  void setRoaming ( bool val ){roaming = val;}
+
 protected:
-  void		hudColor3fv(const GLfloat*);
-  void		renderTeamScores (float y, float x, float dy);
-  void		renderScoreboard(void);
-  void          renderCtfFlags (void);
-  void		drawPlayerScore(const Player*,
-		    float x1, float x2, float x3, float xs, float y, int emailLen, bool huntInd);
+  void hudColor3fv(const GLfloat*);
+  void renderTeamScores (float y, float x, float dy);
+  void renderScoreboard(void);
+  void renderCtfFlags (void);
+  void drawPlayerScore(const Player*,
+		float x1, float x2, float x3, float xs, float y, int emailLen, bool huntInd);
   static const char *sortLabels[SORT_MAXNUM+2];
-  static int  sortMode;
+  static int sortMode;
   static bool alwaysShowTeamScore;
   void   stringAppendNormalized (std::string *s, float n);
 
 private:
-  void		setMinorFontSize(float height);
-  void		setLabelsFontSize(float height);
-  static int	teamScoreCompare(const void* _a, const void* _b);
-  static int  sortCompareCp(const void* _a, const void* _b);
-  static int  sortCompareI2(const void* _a, const void* _b);
-  static Player** newSortedList (int sortType, bool obsLast, int *_numPlayers=NULL);
-  void	  exitSelectState (void);
+  void setMinorFontSize(float height);
+  void setLabelsFontSize(float height);
+  static int teamScoreCompare(const void* _a, const void* _b);
+  static int sortCompareCp(const void* _a, const void* _b);
+  static int sortCompareI2(const void* _a, const void* _b);
+  static Player** newSortedList(int sortType, bool obsLast, int *_numPlayers=NULL);
+  void exitSelectState (void);
 
 private:
   float winX;
@@ -93,36 +96,39 @@ private:
   float winWidth;
   float winHeight;
 
-  GLfloat	messageColor[3];
-  int		  minorFontFace;
-  float		minorFontSize;
-  int		  labelsFontFace;
-  float		labelsFontSize;
+  bool dim;
+  bool huntIndicator;
+  int huntPosition;
+  bool huntSelectEvent;
+  int huntPositionEvent;
+  int huntState;
+  bool huntAddMode;    // valid only if state == SELECTING
+  float teamScoreYVal;
+  bool roaming;
 
-  bool		dim;
-  float		scoreLabelWidth;
-  float		killsLabelWidth;
-  float		teamScoreLabelWidth;
-  float		teamCountLabelWidth;
-  float		huntArrowWidth;
-  float		huntPlusesWidth;
-  float		huntedArrowWidth;
-  float		tkWarnRatio;
+  GLfloat messageColor[3];
+  int minorFontFace;
+  float minorFontSize;
+  int labelsFontFace;
+  float labelsFontSize;
 
-  static std::string	scoreSpacingLabel;
-  static std::string	scoreLabel;
-  static std::string	killSpacingLabel;
-  static std::string	killLabel;
-  static std::string	teamScoreSpacingLabel;
-  static std::string	playerLabel;
-  static std::string	teamCountSpacingLabel;
-  bool		huntIndicator;
-  int			huntPosition;
-  bool		huntSelectEvent;
-  int		huntPositionEvent;
-  int     huntState;
-  bool    huntAddMode;    // valid only if state == SELECTING
-  int     numHunted;
+  float scoreLabelWidth;
+  float killsLabelWidth;
+  float teamScoreLabelWidth;
+  float teamCountLabelWidth;
+  float huntArrowWidth;
+  float huntPlusesWidth;
+  float huntedArrowWidth;
+  float tkWarnRatio;
+
+  static std::string scoreSpacingLabel;
+  static std::string scoreLabel;
+  static std::string killSpacingLabel;
+  static std::string killLabel;
+  static std::string teamScoreSpacingLabel;
+  static std::string playerLabel;
+  static std::string teamCountSpacingLabel;
+  int numHunted;
 };
 
 

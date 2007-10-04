@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -30,6 +30,12 @@ public:
   /** Getting lag value (in milliseconds)
   */
   int	getLag() const;
+  /** Getting jitter value (in milliseconds)
+  */
+  int	getJitter() const;
+  /** Getting packetloss value (in percent)
+  */
+  int	getLoss() const;
   /** Get the floating point value of the lag (in seconds)
   */
   float	getLagAvg() const;
@@ -38,7 +44,10 @@ public:
   void	getLagStats(char* msg, bool isAdmin) const;
   /** functions to be called whenever a playerUpdate or ping message arrives
    */
-  int	updatePingLag(void *buf, bool &warn, bool &kick);
+  void	updatePingLag(void *buf, bool &warn, bool &kick,
+		      bool &jittwarn, bool &jittkick,
+		      bool &plosswarn, bool &plosskick,
+		      bool &alagannouncewarn, bool &lagannouncewarn);
   void	updateLag(float timestamp, bool ooo);
   /** get the ping seqno, if need to send one now!
    */
@@ -48,7 +57,11 @@ public:
   void	updateLatency(float &waitTime);
   /** set the threshold for warning/kicking
    */
+  static void setAdminLagAnnounceThreshold(float _adminlagannouncetresh);
+  static void setLagAnnounceThreshold(float _lagannouncetresh);
   static void setThreshold(float _threshold, float _max);
+  static void setJitterThreshold(float _jitterthreshold, float _max);
+  static void setPacketLossThreshold(float _packetlossthreshold, float _max);
 private:
   PlayerInfo *info;
   // lag measurement
@@ -61,6 +74,12 @@ private:
   int	 lagcount;
   int	 laglastwarn;
   int	 lagwarncount;
+  int	 jittercount;
+  int	 jitterlastwarn;
+  int	 jitterwarncount;
+  int    losscount;
+  int    losslastwarn;
+  int    losswarncount;
   bool	pingpending;
   TimeKeeper  nextping;
   TimeKeeper  lastping;
@@ -70,8 +89,23 @@ private:
   // jitter measurement
   float       lasttimestamp;
 
+  // announcements
+  static float adminlagannouncetresh;
+  int	 alagcount;
+  int	 alaglastannounce;
+  int	 alagannouncecount;
+  static float lagannouncetresh;
+  int	 lagannouncecount;
+  TimeKeeper laglastannounce;
+
+
+  // kicks
   static float threshold;
+  static float jitterthreshold;
+  static float lossthreshold;
   static float max;
+  static float jittermax;
+  static float lossmax;
 };
 
 #endif

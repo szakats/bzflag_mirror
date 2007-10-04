@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -43,7 +43,7 @@ public:
   virtual void		setPosition(int x, int y);
   virtual void		setSize(int width, int height);
   virtual void		setMinSize(int width, int height);
-  virtual void		setFullscreen();
+  virtual void		setFullscreen(bool on);
 
   virtual void		warpMouse(int x, int y);
   virtual void		getMouse(int& x, int& y) const;

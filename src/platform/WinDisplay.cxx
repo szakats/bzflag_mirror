@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -17,6 +17,7 @@
 #include "BzfEvent.h"
 #include <stdio.h>
 #include <string.h>
+#include "StateDatabase.h"
 
 class Resolution {
   public:
@@ -116,6 +117,8 @@ LONG WINAPI		WinDisplay::Rep::windowProc(HWND hwnd, UINT msg,
       return 0;
 
     case WM_ACTIVATE: {
+		if (BZDB.isTrue("Win32NoMin"))
+			break;
       WinWindow* window = WinWindow::lookupWindow(hwnd);
       if (window) {
 	if (LOWORD(wparam) == WA_INACTIVE) {
@@ -414,7 +417,7 @@ bool			WinDisplay::isNastyKey(const MSG& msg) const
   return false;
 }
 
-bool			WinDisplay::setDefaultResolution()
+bool			WinDisplay::setDefaultResolution() const
 {
   ChangeDisplaySettings(0, 0);
   return true;

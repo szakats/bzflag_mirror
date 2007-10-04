@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -47,8 +47,7 @@ class BzfWindow {
     virtual void	setPosition(int x, int y) = 0;
     virtual void	setSize(int width, int height) = 0;
     virtual void	setMinSize(int width, int height) = 0;
-    virtual void	setFullscreen() {;};
-    virtual void	setFullscreen(bool);
+    virtual void	setFullscreen(bool) = 0;
     virtual void	iconify(void) {;};
     virtual bool	create(void) {return true;};
 

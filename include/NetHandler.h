@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -33,6 +33,17 @@ enum RxStatus {
   ReadError,
   ReadDiscon
 };
+
+class NetworkDataLogCallback
+{
+public:
+  virtual ~NetworkDataLogCallback(){};
+
+  virtual void networkDataLog ( bool send, bool udp, const unsigned char *data, unsigned int size ) = 0;
+};
+
+void addNetworkLogCallback(NetworkDataLogCallback * cb );
+void removeNetworkLogCallback(NetworkDataLogCallback * cb );
 
 const int maxHandlers = LastRealPlayer;
 

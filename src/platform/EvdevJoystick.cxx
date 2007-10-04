@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -34,10 +34,10 @@
 #include "ErrorHandler.h"
 #include "bzfio.h"
 
-#define test_bit(nr, addr) \
-	(((1UL << ((nr) & 31)) & (((const unsigned int *) addr)[(nr) >> 5])) != 0)
-
-
+static inline int test_bit (int nr, const volatile void *addr)
+{
+  return 1 & (((const volatile __u32 *) addr)[nr >> 5] >> (nr & 31));
+}
 
 bool	     EvdevJoystick::isEvdevAvailable()
 {
@@ -61,7 +61,11 @@ EvdevJoystick::EvdevJoystick()
 {
   joystickfd = 0;
   currentJoystick = NULL;
+#if defined(HAVE_FF_EFFECT_DIRECTIONAL) || defined(HAVE_FF_EFFECT_RUMBLE)
   ff_rumble = new struct ff_effect;
+#else
+  ff_rumble = NULL;
+#endif
   scanForJoysticks(joysticks);
 }
 
@@ -95,19 +99,19 @@ void	     EvdevJoystick::scanForJoysticks(std::map<std::string,
     /* if we can't open read/write, try just read...if it's not ff it'll work anyhow */
     if (!fd) {
       fd = open(info.filename.c_str(), O_RDONLY);
-      if (fd) DEBUG4("Opened event device %s as read-only.\n", info.filename.c_str());
+      if (fd) logDebugMessage(4,"Opened event device %s as read-only.\n", info.filename.c_str());
     } else {
-      DEBUG4("Opened event device %s as read-write.\n", info.filename.c_str());
+      logDebugMessage(4,"Opened event device %s as read-write.\n", info.filename.c_str());
     }
     /* no good, can't open it */
     if (!fd) {
-      DEBUG4("Can't open event device %s.  Check permissions.\n", info.filename.c_str());
+      logDebugMessage(4,"Can't open event device %s.  Check permissions.\n", info.filename.c_str());
       continue;
     }
 
     /* Does it look like a joystick? */
     if (!(collectJoystickBits(fd, info) && isJoystick(info))) {
-      DEBUG4("Device %s doesn't seem to be a joystick.  Skipping.\n", info.filename.c_str());
+      logDebugMessage(4,"Device %s doesn't seem to be a joystick.  Skipping.\n", info.filename.c_str());
       close(fd);
       continue;
     }
@@ -146,8 +150,10 @@ bool		    EvdevJoystick::collectJoystickBits(int fd, struct EvdevJoystickInfo &i
     return false;
   if (ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(info.absbit)), info.absbit) < 0)
     return false;
+#if defined(HAVE_FF_EFFECT_DIRECTIONAL) || defined(HAVE_FF_EFFECT_RUMBLE)
   if (ioctl(fd, EVIOCGBIT(EV_FF, sizeof(info.ffbit)), info.ffbit) < 0)
     return false;
+#endif
 
   /* Collect information about our absolute axes */
   int axis;

@@ -1,5 +1,5 @@
 /* bzflag
-* Copyright (c) 1993 - 2006 Tim Riker
+* Copyright (c) 1993 - 2007 Tim Riker
 *
 * This package is free software;  you can redistribute it and/or
 * modify it under the terms of the license found in the file
@@ -88,7 +88,7 @@ tvEventList WorldEventManager::getEventList ( bz_eEventType eventType)
 
 void WorldEventManager::callEvents ( bz_eEventType eventType, bz_EventData	*eventData )
 {
-	if (!eventData)
+	if (!eventData || getEventCount(eventType)==0 )
 		return;
 
 	tvEventList	eList = getEventList(eventType);
@@ -97,7 +97,7 @@ void WorldEventManager::callEvents ( bz_eEventType eventType, bz_EventData	*even
 		eList[i]->process(eventData);
 }
 
-int WorldEventManager::getEventCount ( bz_eEventType eventType)
+int WorldEventManager::getEventCount ( bz_eEventType eventType )
 {
 	return (int)getEventList(eventType).size();
 }

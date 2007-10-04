@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\"
+				AdditionalIncludeDirectories="..\..\include,..\..\win32,.\;$(LIBCURL)\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_VC_NET"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -526,6 +526,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\common\BZDBLocal.cxx">
 			</File>
 			<File
 				RelativePath="..\..\src\common\bzfio.cxx">
@@ -1491,6 +1494,9 @@
 			</File>
 			<File
 				RelativePath="..\..\include\BZDBCache.h">
+			</File>
+			<File
+				RelativePath="..\..\include\BZDBLocal.h">
 			</File>
 			<File
 				RelativePath="..\..\include\bzfio.h">

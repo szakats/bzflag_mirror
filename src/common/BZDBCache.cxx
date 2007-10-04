@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -13,53 +13,81 @@
 #ifdef _MSC_VER
 #pragma warning(4: 4786)
 #endif
+#include "common.h"
+#include <cmath>
 
 // interface header
 #include "BZDBCache.h"
 
-bool  BZDBCache::displayMainFlags;
-bool  BZDBCache::blend;
-bool  BZDBCache::texture;
-bool  BZDBCache::shadows;
-bool  BZDBCache::stencilShadows;
-bool  BZDBCache::zbuffer;
-bool  BZDBCache::tesselation;
-bool  BZDBCache::lighting;
-bool  BZDBCache::smooth;
-bool  BZDBCache::colorful;
-bool  BZDBCache::animatedTreads;
-bool  BZDBCache::leadingShotLine;
-int   BZDBCache::radarStyle;
-float BZDBCache::radarTankPixels;
-int   BZDBCache::linedRadarShots;
-int   BZDBCache::sizedRadarShots;
-int   BZDBCache::flagChunks;
-float BZDBCache::pulseRate;
-float BZDBCache::pulseDepth;
-bool  BZDBCache::showCollisionGrid;
-bool  BZDBCache::showCullingGrid;
+BZDBCache::Bool  BZDBCache::displayMainFlags;
+BZDBCache::Bool  BZDBCache::blend;
+BZDBCache::Bool  BZDBCache::texture;
+BZDBCache::Bool  BZDBCache::shadows;
+BZDBCache::Bool  BZDBCache::stencilShadows;
+BZDBCache::Bool  BZDBCache::zbuffer;
+BZDBCache::Bool  BZDBCache::useMeshForRadar;
+BZDBCache::Bool  BZDBCache::tesselation;
+BZDBCache::Bool  BZDBCache::lighting;
+BZDBCache::Bool  BZDBCache::smooth;
+BZDBCache::Bool  BZDBCache::colorful;
+BZDBCache::Bool  BZDBCache::animatedTreads;
+BZDBCache::Bool  BZDBCache::leadingShotLine;
+BZDBCache::Int   BZDBCache::radarStyle;
+BZDBCache::Float BZDBCache::radarTankPixels;
+BZDBCache::Float BZDBCache::linedRadarShots;
+BZDBCache::Float BZDBCache::sizedRadarShots;
+BZDBCache::Int   BZDBCache::flagChunks;
+BZDBCache::Float BZDBCache::pulseRate;
+BZDBCache::Float BZDBCache::pulseDepth;
+BZDBCache::Bool  BZDBCache::showCollisionGrid;
+BZDBCache::Bool  BZDBCache::showCullingGrid;
 
-bool BZDBCache::drawCelestial;
-bool BZDBCache::drawClouds;
-bool BZDBCache::drawGround;
-bool BZDBCache::drawGroundLights;
-bool BZDBCache::drawMountains;
-bool BZDBCache::drawSky;
+BZDBCache::Bool  BZDBCache::drawCelestial;
+BZDBCache::Bool  BZDBCache::drawClouds;
+BZDBCache::Bool  BZDBCache::drawGround;
+BZDBCache::Bool  BZDBCache::drawGroundLights;
+BZDBCache::Bool  BZDBCache::drawMountains;
+BZDBCache::Bool  BZDBCache::drawSky;
 
-float BZDBCache::worldSize;
-float BZDBCache::radarLimit;
-float BZDBCache::gravity;
-float BZDBCache::tankWidth;
-float BZDBCache::tankLength;
-float BZDBCache::tankHeight;
-float BZDBCache::tankSpeed;
-float BZDBCache::tankRadius;
-float BZDBCache::flagRadius;
-float BZDBCache::flagPoleSize;
-float BZDBCache::flagPoleWidth;
-float BZDBCache::maxLOD;
+BZDBCache::Float BZDBCache::worldSize;
+BZDBCache::Float BZDBCache::radarLimit;
+BZDBCache::Float BZDBCache::gravity;
+BZDBCache::Float BZDBCache::tankWidth;
+BZDBCache::Float BZDBCache::tankLength;
+BZDBCache::Float BZDBCache::tankHeight;
+BZDBCache::Float BZDBCache::tankSpeed;
+BZDBCache::Float BZDBCache::tankRadius;
+BZDBCache::Float BZDBCache::flagRadius;
+BZDBCache::Float BZDBCache::flagPoleSize;
+BZDBCache::Float BZDBCache::flagPoleWidth;
+BZDBCache::Float BZDBCache::maxLOD;
 
-float BZDBCache::hudGUIBorderOpacityFactor;
+BZDBCache::Float BZDBCache::hudGUIBorderOpacityFactor;
+
+
+static float getGoodPosValue(float oldVal, const std::string var)
+{
+  float newVal = BZDB.eval(var);
+  if (isnan(newVal) || newVal <= 0.0f)  // it's bad
+  {
+    BZDB.setFloat(var, oldVal, BZDB.getPermission(var));
+    return oldVal;
+  }
+  return newVal;
+}
+
+
+static float getGoodNonZeroValue(float oldVal, const std::string var)
+{
+  float newVal = BZDB.eval(var);
+  if (isnan(newVal) || newVal == 0.0f)  // it's bad
+  {
+    BZDB.setFloat(var, oldVal, BZDB.getPermission(var));
+    return oldVal;
+  }
+  return newVal;
+}
+
 
 void BZDBCache::init()
 {
@@ -72,6 +100,7 @@ void BZDBCache::init()
   BZDB.addCallback("shadows", clientCallback, NULL);
   BZDB.addCallback("stencilShadows", clientCallback, NULL);
   BZDB.addCallback("zbuffer", clientCallback, NULL);
+  BZDB.addCallback("useMeshForRadar", clientCallback, NULL);
   BZDB.addCallback("tesselation", clientCallback, NULL);
   BZDB.addCallback("lighting", clientCallback, NULL);
   BZDB.addCallback("smooth", clientCallback, NULL);
@@ -112,20 +141,21 @@ void BZDBCache::init()
   drawSky = BZDB.isTrue(StateDatabase::BZDB_DRAWSKY);
 
   maxLOD = BZDB.eval(StateDatabase::BZDB_MAXLOD);
-  worldSize = BZDB.eval(StateDatabase::BZDB_WORLDSIZE);
+  worldSize = getGoodPosValue(worldSize,StateDatabase::BZDB_WORLDSIZE);
   radarLimit = BZDB.eval(StateDatabase::BZDB_RADARLIMIT);
-  gravity = BZDB.eval(StateDatabase::BZDB_GRAVITY);
-  tankWidth = BZDB.eval(StateDatabase::BZDB_TANKWIDTH);
-  tankLength = BZDB.eval(StateDatabase::BZDB_TANKLENGTH);
-  tankHeight = BZDB.eval(StateDatabase::BZDB_TANKHEIGHT);
-  tankSpeed = BZDB.eval(StateDatabase::BZDB_TANKSPEED);
-  tankRadius = BZDB.eval(StateDatabase::BZDB_TANKRADIUS);
-  flagRadius = BZDB.eval(StateDatabase::BZDB_FLAGRADIUS);
-  flagPoleSize = BZDB.eval(StateDatabase::BZDB_FLAGPOLESIZE);
-  flagPoleWidth = BZDB.eval(StateDatabase::BZDB_FLAGPOLEWIDTH);
+  gravity = getGoodNonZeroValue(gravity,StateDatabase::BZDB_GRAVITY);
+  tankWidth = getGoodPosValue(tankWidth,StateDatabase::BZDB_TANKWIDTH);
+  tankLength = getGoodPosValue(tankLength,StateDatabase::BZDB_TANKLENGTH);
+  tankHeight = getGoodPosValue(tankHeight,StateDatabase::BZDB_TANKHEIGHT);
+  tankSpeed = getGoodPosValue(tankSpeed,StateDatabase::BZDB_TANKSPEED);
+  tankRadius = getGoodPosValue(tankRadius,StateDatabase::BZDB_TANKRADIUS);
+  flagRadius = getGoodPosValue(flagRadius,StateDatabase::BZDB_FLAGRADIUS);
+  flagPoleSize = getGoodPosValue(flagPoleSize,StateDatabase::BZDB_FLAGPOLESIZE);
+  flagPoleWidth = getGoodPosValue(flagPoleWidth,StateDatabase::BZDB_FLAGPOLEWIDTH);
 
   update();
 }
+
 
 void BZDBCache::clientCallback(const std::string& name, void *)
 {
@@ -141,6 +171,8 @@ void BZDBCache::clientCallback(const std::string& name, void *)
     stencilShadows = BZDB.isTrue("stencilShadows");
   else if (name == "zbuffer")
     zbuffer = BZDB.isTrue("zbuffer");
+  else if (name == "useMeshForRadar")
+    useMeshForRadar = BZDB.isTrue("useMeshForRadar");
   else if (name == "tesselation")
     tesselation = BZDB.isTrue("tesselation");
   else if (name == "lighting")
@@ -168,8 +200,9 @@ void BZDBCache::clientCallback(const std::string& name, void *)
   else if (name == "showCullingGrid")
     showCullingGrid = BZDB.isTrue("showCullingGrid");
   else if (name == "hudGUIBorderOpacityFactor")
-	hudGUIBorderOpacityFactor = BZDB.eval("hudGUIBorderOpacityFactor");
+    hudGUIBorderOpacityFactor = BZDB.eval("hudGUIBorderOpacityFactor");
 }
+
 
 void BZDBCache::serverCallback(const std::string& name, void *)
 {
@@ -195,42 +228,44 @@ void BZDBCache::serverCallback(const std::string& name, void *)
     maxLOD = BZDB.eval(StateDatabase::BZDB_MAXLOD);
   }
   else if (name == StateDatabase::BZDB_WORLDSIZE) {
-    worldSize = BZDB.eval(StateDatabase::BZDB_WORLDSIZE);
+    worldSize = getGoodPosValue(worldSize,StateDatabase::BZDB_WORLDSIZE);
   }
   else if (name == StateDatabase::BZDB_RADARLIMIT) {
     radarLimit = BZDB.eval(StateDatabase::BZDB_RADARLIMIT);
   }
   else if (name == StateDatabase::BZDB_GRAVITY) {
-    gravity = BZDB.eval(StateDatabase::BZDB_GRAVITY);
+    gravity = getGoodNonZeroValue(gravity,StateDatabase::BZDB_GRAVITY);
   }
   else if (name == StateDatabase::BZDB_TANKWIDTH) {
-    tankWidth = BZDB.eval(StateDatabase::BZDB_TANKWIDTH);
+    tankWidth = getGoodPosValue(tankWidth,StateDatabase::BZDB_TANKWIDTH);
   }
   else if (name == StateDatabase::BZDB_TANKLENGTH) {
-    tankLength = BZDB.eval(StateDatabase::BZDB_TANKLENGTH);
+    tankLength = getGoodPosValue(tankLength,StateDatabase::BZDB_TANKLENGTH);
   }
   else if (name == StateDatabase::BZDB_TANKHEIGHT) {
-    tankHeight = BZDB.eval(StateDatabase::BZDB_TANKHEIGHT);
+    tankHeight = getGoodPosValue(tankHeight,StateDatabase::BZDB_TANKHEIGHT);
   }
   else if (name == StateDatabase::BZDB_TANKSPEED) {
-    tankSpeed = BZDB.eval(StateDatabase::BZDB_TANKSPEED);
+    tankSpeed = getGoodPosValue(tankSpeed,StateDatabase::BZDB_TANKSPEED);
   }
 // Why only in update() ?
 //  else if (name == StateDatabase::BZDB_FLAGRADIUS) {
 //    flagRadius = BZDB.eval(StateDatabase::BZDB_FLAGRADIUS);
 //  }
   else if (name == StateDatabase::BZDB_FLAGPOLESIZE) {
-    flagPoleSize = BZDB.eval(StateDatabase::BZDB_FLAGPOLESIZE);
+    flagPoleSize = getGoodPosValue(flagPoleSize,StateDatabase::BZDB_FLAGPOLESIZE);
   }
   else if (name == StateDatabase::BZDB_FLAGPOLEWIDTH) {
-    flagPoleWidth = BZDB.eval(StateDatabase::BZDB_FLAGPOLEWIDTH);
+    flagPoleWidth = getGoodPosValue(flagPoleWidth,StateDatabase::BZDB_FLAGPOLEWIDTH);
   }
 }
 
-void BZDBCache::update() {
+
+void BZDBCache::update()
+{
   tankRadius = BZDB.eval(StateDatabase::BZDB_TANKRADIUS);
-  linedRadarShots = static_cast<int>(BZDB.eval("linedradarshots"));
-  sizedRadarShots = static_cast<int>(BZDB.eval("sizedradarshots"));
+  linedRadarShots = BZDB.eval("linedradarshots");
+  sizedRadarShots = BZDB.eval("sizedradarshots");
 }
 
 

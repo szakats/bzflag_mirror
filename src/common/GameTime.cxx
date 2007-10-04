@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -167,13 +167,13 @@ void GameTime::update()
     const s64 diffTime = stepTime - tr.netTime;
     if ((diffTime < -maxTime) || (diffTime > +maxTime) ||
 	(avgRate < minRate) || (avgRate > maxRate)) {
-      DEBUG4("GameTime: discontinuity: usecs = %lli, rate = %f\n",
+      logDebugMessage(4,"GameTime: discontinuity: usecs = %lli, rate = %f\n",
 	     diffTime, avgRate);
       resetToRecord(tr);
     }
   }
 
-  DEBUG4("GameTime: count = %i, rate = %f\n", timeRecs.size(), avgRate);
+  logDebugMessage(4,"GameTime: count = %i, rate = %f\n", timeRecs.size(), avgRate);
 
   return;
 }

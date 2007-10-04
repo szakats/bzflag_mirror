@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -42,8 +42,6 @@ WorldBuilder::~WorldBuilder()
 
 void* WorldBuilder::unpack(void* buf)
 {
-  world->setupRequiredGraphics();
-
   TimeKeeper start = TimeKeeper::getCurrent();
 
   // unpack world database from network transfer
@@ -57,7 +55,7 @@ void* WorldBuilder::unpack(void* buf)
   uint16_t serverMapVersion;
   buf = nboUnpackUShort(buf, serverMapVersion);
   if (serverMapVersion != mapVersion) {
-    DEBUG1 ("WorldBuilder::unpack() bad map version\n");
+    logDebugMessage(1,"WorldBuilder::unpack() bad map version\n");
     return NULL;
   }
 
@@ -72,7 +70,7 @@ void* WorldBuilder::unpack(void* buf)
   if (uncompress ((Bytef*)uncompressedWorld, &destLen,
 		  (Bytef*)compressedWorld, compressedSize) != Z_OK) {
     delete[] uncompressedWorld;
-    DEBUG1 ("WorldBuilder::unpack() could not decompress\n");
+    logDebugMessage(1,"WorldBuilder::unpack() could not decompress\n");
     return NULL;
   }
   char* uncompressedEnd = uncompressedWorld + uncompressedSize;;
@@ -142,12 +140,12 @@ void* WorldBuilder::unpack(void* buf)
   nboUseErrorChecking(false);
   if (nboGetBufferError()) {
     delete[] uncompressedWorld;
-    DEBUG1 ("WorldBuilder::unpack() overrun\n");
+    logDebugMessage(1,"WorldBuilder::unpack() overrun\n");
     return NULL;
   }
   if ((char*)buf != uncompressedEnd) {
     delete[] uncompressedWorld;
-    DEBUG1 ("WorldBuilder::unpack() ending mismatch (%i)\n",
+    logDebugMessage(1,"WorldBuilder::unpack() ending mismatch (%i)\n",
 	    (char*)buf - uncompressedEnd);
     return NULL;
   }
@@ -158,7 +156,7 @@ void* WorldBuilder::unpack(void* buf)
   buf = nboUnpackUShort(buf, code);
   if ((code != WorldCodeEnd) || (len != WorldCodeEndSize)) {
     delete[] uncompressedWorld;
-    DEBUG1 ("WorldBuilder::unpack() bad ending\n");
+    logDebugMessage(1,"WorldBuilder::unpack() bad ending\n");
     return NULL;
   }
 
@@ -195,7 +193,7 @@ void* WorldBuilder::unpack(void* buf)
   if (debugLevel >= 3) {
     TimeKeeper end = TimeKeeper::getCurrent();
     const float elapsed = (float)(end - start);
-    DEBUG0("WorldBuilder::unpack() processed in %f seconds.\n", elapsed);
+    logDebugMessage(0,"WorldBuilder::unpack() processed in %f seconds.\n", elapsed);
   }
 
   return buf;
@@ -227,8 +225,6 @@ void* WorldBuilder::unpackGameSettings(void* buf)
   setShakeWins(shakeWins);
   uint32_t UsedToBeSyncTime; // FIXME
   buf = nboUnpackUInt(buf, UsedToBeSyncTime);
-
-  world->setupRequiredGraphics();
 
   return buf;
 }

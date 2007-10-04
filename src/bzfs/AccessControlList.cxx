@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2006 Tim Riker
+ * Copyright (c) 1993 - 2007 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -449,6 +449,9 @@ void AccessControlList::sendIdBans(PlayerId id, const char* pattern)
 
 bool AccessControlList::load() {
 
+  // clear all local bans
+  purgeLocals();
+
   if (banFile.size() == 0)
     return true;
 
@@ -457,9 +460,6 @@ bool AccessControlList::load() {
   if (!is.good())
     // file does not exist, but that's OK, we'll create it later if needed
     return true;
-
-  // clear all current bans
-  banList.clear();
 
   // try to read ban entries
   std::string ipAddress, hostpat, bzId, bannedBy, reason, tmp;
@@ -475,7 +475,7 @@ bool AccessControlList::load() {
     }
     is >> tmp;
     if (tmp != "end:") {
-      DEBUG3("Banfile: bad 'end:' line\n");
+      logDebugMessage(3,"Banfile: bad 'end:' line\n");
       return false;
     }
     is >> banEnd;
@@ -488,14 +488,14 @@ bool AccessControlList::load() {
     }
     is >> tmp;
     if (tmp != "banner:") {
-      DEBUG3("Banfile: bad 'banner:' line\n");
+      logDebugMessage(3,"Banfile: bad 'banner:' line\n");
       return false;
     }
     is.ignore(1);
     std::getline(is, bannedBy);
     is >> tmp;
     if (tmp != "reason:") {
-      DEBUG3("Banfile: bad 'reason:' line\n");
+      logDebugMessage(3,"Banfile: bad 'reason:' line\n");
       return false;
     }
     is.ignore(1);
@@ -515,7 +515,7 @@ bool AccessControlList::load() {
       }
       if (!ban(ipAddress, (bannedBy.size() ? bannedBy.c_str(): NULL), banEnd,
 	       (reason.size() > 0 ? reason.c_str() : NULL))) {
-	DEBUG3("Banfile: bad ban\n");
+	logDebugMessage(3,"Banfile: bad ban\n");
 	return false;
       }
     }
@@ -545,7 +545,7 @@ int AccessControlList::merge(const std::string& banData) {
     }
     is >> tmp;
     if (tmp != "end:") {
-      DEBUG3("Banfile: bad 'end:' line\n");
+      logDebugMessage(3,"Banfile: bad 'end:' line\n");
       return bansAdded;
     }
     is >> banEnd;
@@ -557,14 +557,14 @@ int AccessControlList::merge(const std::string& banData) {
     }
     is >> tmp;
     if (tmp != "banner:") {
-      DEBUG3("Banfile: bad 'banner:' line\n");
+      logDebugMessage(3,"Banfile: bad 'banner:' line\n");
       return bansAdded;
     }
     is.ignore(1);
     std::getline(is, bannedBy);
     is >> tmp;
     if (tmp != "reason:") {
-      DEBUG3("Banfile: bad 'reason:' line\n");
+      logDebugMessage(3,"Banfile: bad 'reason:' line\n");
       return bansAdded;
     }
     is.ignore(1);
@@ -586,7 +586,7 @@ int AccessControlList::merge(const std::string& banData) {
       }
       if (!ban(ipAddress, (bannedBy.size() ? bannedBy.c_str(): NULL), banEnd,
 	  (reason.size() > 0 ? reason.c_str() : NULL),true)) {
-	DEBUG3("Banfile: bad ban\n");
+	logDebugMessage(3,"Banfile: bad ban\n");
 	return bansAdded;
       }
       bansAdded++;
@@ -673,30 +673,43 @@ void AccessControlList::save() {
 }
 
 
-void AccessControlList::purgeMasters(void) {
-  // remove any bans from the master server
+void AccessControlList::purge(bool master) {
+  // selectively remove bans, depending on their origin
+  // (local or from master list)
   banList_t::iterator	bItr = banList.begin();
   while (bItr != banList.end()){
-    if (bItr->fromMaster)
+    if (bItr->fromMaster == master)
       bItr = banList.erase(bItr);
     else
       bItr++;
   }
   hostBanList_t::iterator	hItr = hostBanList.begin();
   while (hItr != hostBanList.end()) {
-    if (hItr->fromMaster)
+    if (hItr->fromMaster == master)
       hItr = hostBanList.erase(hItr);
     else
       hItr++;
   }
   idBanList_t::iterator	iItr = idBanList.begin();
   while (iItr != idBanList.end()) {
-    if (iItr->fromMaster) {
+    if (iItr->fromMaster == master) {
       iItr = idBanList.erase(iItr);
     } else {
       iItr++;
     }
   }
+}
+
+
+void AccessControlList::purgeLocals(void) {
+  // remove any local bans
+  AccessControlList::purge(false);
+}
+
+
+void AccessControlList::purgeMasters(void) {
+  // remove any bans from the master server
+  AccessControlList::purge(true);
 }
 
 
