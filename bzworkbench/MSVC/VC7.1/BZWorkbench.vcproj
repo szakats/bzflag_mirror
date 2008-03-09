@@ -152,7 +152,7 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_obj.dll ..\..\osgdb_obj.dll
 				RelativePath="..\..\src\OSFile.cxx">
 			</File>
 			<File
-				RelativePath="..\..\src\TextUtils.cxx">
+				RelativePath="..\..\src\TextUtils.cpp">
 			</File>
 			<Filter
 				Name="Dialogs">
@@ -380,7 +380,7 @@ copy $(OSG_ROOT)\lib\osgPlugins-2.0.0\release\osgdb_obj.dll ..\..\osgdb_obj.dll
 				RelativePath="..\..\include\MasterConfigurationDialog.h">
 			</File>
 			<File
-				RelativePath="..\..\include\Model.h">
+				RelativePath="..\..\include\model\Model.h">
 			</File>
 			<File
 				RelativePath="..\..\include\OSFile.h">

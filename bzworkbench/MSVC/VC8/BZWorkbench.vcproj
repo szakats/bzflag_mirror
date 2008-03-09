@@ -183,7 +183,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\TextUtils.cxx"
+				RelativePath="..\..\src\TextUtils.cpp"
 				>
 			</File>
 			<Filter
@@ -465,7 +465,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Model.h"
+				RelativePath="..\..\include\model\Model.h"
 				>
 			</File>
 			<File
