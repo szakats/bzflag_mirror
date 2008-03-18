@@ -45,7 +45,7 @@ int define::update(string& data) {
 		return 0;
 	
 	if(lines.size() > 1) {
-		printf("define::update(): Error! Defined \"define\" %d times!\n", lines.size());
+		printf("define::update(): Error! Defined \"define\" %d times!\n", (int)lines.size());
 		return 0;	
 	}
 	

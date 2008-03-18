@@ -45,7 +45,7 @@ int waterLevel::update(string& data) {
 		return 0;
 		
 	if(waterLevelObjs.size() >= 2) {
-		printf("waterLevel::update():  Error! waterLevel defined %d times!\n", waterLevelObjs.size());
+		printf("waterLevel::update():  Error! waterLevel defined %d times!\n", (int)waterLevelObjs.size());
 		return 0;
 	}
 	
@@ -54,7 +54,7 @@ int waterLevel::update(string& data) {
 	// get the names, but only choose the first
 	vector<string> names = BZWParser::getValuesByKey("name", header, waterData);
 	if(names.size() > 1) {
-		printf("waterLevel::update(): error! defined \"name\" %d times!\n", names.size());
+		printf("waterLevel::update(): error! defined \"name\" %d times!\n", (int)names.size());
 		return 0;
 	}
 	

@@ -118,14 +118,14 @@ int material::update(string& data) {
 	// get the dynamic color
 	vector<string> dyncols = BZWParser::getValuesByKey("dyncol", header, materialData);
 	if(dyncols.size() > 1) {
-		printf("material::update(): Error! Defined \"dyncol\" %d times!\n", dyncols.size());
+		printf("material::update(): Error! Defined \"dyncol\" %d times!\n", (int)dyncols.size());
 		return 0;
 	}
 		
 	// get the texture matrix
 	vector<string> texmats = BZWParser::getValuesByKey("texmat", header, materialData);
 	if(texmats.size() > 1) {
-		printf("material::update(): Error! Defined \"texmat\" %d times!\n", texmats.size());
+		printf("material::update(): Error! Defined \"texmat\" %d times!\n", (int)texmats.size());
 		return 0;
 	}
 		
@@ -191,14 +191,14 @@ int material::update(string& data) {
 	// get shininess
 	vector<string> shininesses = BZWParser::getValuesByKey("shininess", header, materialData);
 	if(shininesses.size() > 1) {
-		printf("material::update(): Error! Defined \"shininess\" %d times!\n", shininesses.size());
+		printf("material::update(): Error! Defined \"shininess\" %d times!\n", (int)shininesses.size());
 		return 0;
 	}
 		
 	// get alpha threshold
 	vector<string> alphathresholds = BZWParser::getValuesByKey("alphathresh", header, materialData);
 	if(alphathresholds.size() > 1) {
-		printf("material::update(): Error! Defined \"alphathresh\" %d times!\n", alphathresholds.size());
+		printf("material::update(): Error! Defined \"alphathresh\" %d times!\n", (int)alphathresholds.size());
 		return 0;
 	}
 		

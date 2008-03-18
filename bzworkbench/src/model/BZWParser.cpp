@@ -19,6 +19,10 @@ Model* BZWParser::_modelRef = NULL;
  * Helper method:  eliminate the whitespace on the ends of the line
  */
 string cutWhiteSpace(string line) {
+	// don't bother with empty strings
+	if( line.length() <= 0 )
+		return line;
+	
 	const char* text = line.c_str();
 	unsigned long len = line.length();
 	unsigned int startIndex = 0, endIndex = len - 1;
@@ -26,11 +30,12 @@ string cutWhiteSpace(string line) {
 	// cut any comments
 	string::size_type commentIndex = line.find("#", 0);
 	if(commentIndex != string::npos) {
-		line = line.substr(0, commentIndex);	
+		line = line.substr(0, commentIndex);
+		endIndex = line.length() - 1;
 	}
 	
 	// move the indexes into the string by skipping outside spacess
-	while(startIndex < len && (text[startIndex] == ' ' || text[startIndex] == 9 || text[startIndex] == '\r')) { startIndex++; }
+	while(startIndex < len && (text[startIndex] == ' ' || text[startIndex] == 9 || text[startIndex] == '\n' || text[startIndex] == '\r')) { startIndex++; }
 	while(endIndex > startIndex && (text[endIndex] == ' ' || text[endIndex] == 9 || text[endIndex] == '\n' || text[endIndex] == '\r')) { endIndex--; }
 	
 	// return the line if there was no white space to cut
@@ -93,7 +98,7 @@ string BZWParser::value(const char* _key, const char* _text) {
 	string line = cutWhiteSpace(string(_text));
 	string key = string(_key);
 	
-	unsigned int startIndex = line.find(key, 0);
+	size_t startIndex = line.find(key, 0);
 	
 	// stop if we didn't find the key
 	if(startIndex == string::npos)

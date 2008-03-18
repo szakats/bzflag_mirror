@@ -51,7 +51,7 @@ int world::update(string& data) {
 	// get the names, but only choose one
 	vector<string> names = BZWParser::getValuesByKey("name", header, worldData);
 	if(names.size() > 1) {
-		printf("world::update(): Error! Defined \"name\" %d times!\n", names.size());
+		printf("world::update(): Error! Defined \"name\" %d times!\n", (int)names.size());
 		return 0;
 	}
 	
@@ -63,7 +63,7 @@ int world::update(string& data) {
 	// get the flagHeights, but only choose one
 	vector<string> flagHeights = BZWParser::getValuesByKey("flagHeight", header, worldData);
 	if(flagHeights.size() > 1) {
-		printf("world::update(): Error! Defined \"flagHeight\" %d times!\n", flagHeights.size());
+		printf("world::update(): Error! Defined \"flagHeight\" %d times!\n", (int)flagHeights.size());
 		return 0;	
 	}
 	

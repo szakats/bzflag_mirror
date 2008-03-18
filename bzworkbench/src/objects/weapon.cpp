@@ -81,7 +81,7 @@ int weapon::update(string& data) {
 	// get tilt
 	vector<string> tiltVals = BZWParser::getValuesByKey("tilt", header, weaponData);
 	if(tiltVals.size() > 1) {
-		printf("weapon::update(): Error! Defined \"tilt\" %d times\n", tiltVals.size());
+		printf("weapon::update(): Error! Defined \"tilt\" %d times\n", (int)tiltVals.size());
 		return 0;
 	}
 		
@@ -97,7 +97,7 @@ int weapon::update(string& data) {
 	// get trigger
 	vector<string> triggerVals = BZWParser::getValuesByKey("trigger", header, weaponData);
 	if(triggerVals.size() > 1) {
-		printf("weapon::update(): Error! Defined \"trigger\" %d times\n", tiltVals.size());
+		printf("weapon::update(): Error! Defined \"trigger\" %d times\n", (int)tiltVals.size());
 		return 0;
 	}
 	
@@ -112,7 +112,7 @@ int weapon::update(string& data) {
 	// get event team
 	vector<string> eventTeamVals = BZWParser::getValuesByKey("eventteam", header, weaponData);
 	if(eventTeamVals.size() > 1) {
-		printf("weapon::update(): Error: Defined \"eventteam\" %d times!\n", eventTeamVals.size());
+		printf("weapon::update(): Error: Defined \"eventteam\" %d times!\n", (int)eventTeamVals.size());
 		return 0;
 	}
 	if(eventTeamVals.size() > 0) {
@@ -125,7 +125,7 @@ int weapon::update(string& data) {
 	// get the color
 	vector<string> colorVals = BZWParser::getValuesByKey("color", header, weaponData);
 	if(colorVals.size() > 1) {
-		printf("weapon::update(): Error! Defined \"color\" %d times!\n", colorVals.size());	
+		printf("weapon::update(): Error! Defined \"color\" %d times!\n", (int)colorVals.size());	
 		return 0;
 	}
 	

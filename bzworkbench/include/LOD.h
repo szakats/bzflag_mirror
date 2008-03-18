@@ -65,7 +65,7 @@ public:
 		// get the sections beginning with matref and create LODCommand lists from them
 		vector<string> matrefSections = BZWParser::getSectionsByHeader("matref", lodData);
 		if(matrefSections.size() > 1) {
-			printf("mesh::LOD::update(): Error! Defined \"matref\" %d times!\n", matrefSections.size());
+			printf("mesh::LOD::update(): Error! Defined \"matref\" %d times!\n", (int)matrefSections.size());
 			return 0;	
 		}
 		

@@ -111,7 +111,7 @@ public:
 		// get angvel
 		vector<string> angvelVals = BZWParser::getValuesByKey("angvel", _header, drawInfoData);
 		if(angvelVals.size() > 1) {
-			printf("mesh::DrawInfo::update(): Error! Defined \"angvel\" %d times!\n", angvelVals.size());
+			printf("mesh::DrawInfo::update(): Error! Defined \"angvel\" %d times!\n", (int)angvelVals.size());
 			return 0;	
 		}
 		if(angvelVals.size() > 0 && !hasNumElements(angvelVals[0], 1))
@@ -123,7 +123,7 @@ public:
 		// get spheres
 		vector<string> sphereVals = BZWParser::getValuesByKey("sphere", _header, drawInfoData);
 		if(sphereVals.size() > 1) {
-			printf("mesh::DrawInfo::update(): Error! Defined \"sphere\" %d times!\n", sphereVals.size());
+			printf("mesh::DrawInfo::update(): Error! Defined \"sphere\" %d times!\n", (int)sphereVals.size());
 			return 0;	
 		}
 		if(sphereVals.size() > 0 && !hasNumElements(sphereVals[0], 4))
@@ -132,7 +132,7 @@ public:
 		// get extends
 		vector<string> extendsVals = BZWParser::getValuesByKey("extends", _header, drawInfoData);
 		if(extendsVals.size() > 1) {
-			printf("mesh::DrawInfo::update(): Error! Defined \"extends\" %d times!\n", sphereVals.size());
+			printf("mesh::DrawInfo::update(): Error! Defined \"extends\" %d times!\n", (int)sphereVals.size());
 			return 0;	
 		}
 		if(extendsVals.size() > 0 && !hasNumElements(extendsVals[0], 6))

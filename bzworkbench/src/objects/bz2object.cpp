@@ -219,7 +219,7 @@ int bz2object::update(string& data)
 	if(isKey("name")) {
 		names = BZWParser::getValuesByKey("name", header, objData);
 		if(names.size() > 1) {
-			printf("%s::update():  Error! Defined \"name\" %d times!\n", header, names.size());
+			printf("%s::update():  Error! Defined \"name\" %d times!\n", header, (int)names.size());
 			return 0;	
 		}
 	}
@@ -230,7 +230,7 @@ int bz2object::update(string& data)
 		
 		// just go with the first position (only one should be defined)
 		if(positions.size() > 1) {
-			printf("%s::update(): Error! Defined \"position\" %d times!\n", header, positions.size());
+			printf("%s::update(): Error! Defined \"position\" %d times!\n", header, (int)positions.size());
 			return 0;
 		}
 		if(positions.size() == 0) {
@@ -245,7 +245,7 @@ int bz2object::update(string& data)
 		
 		// just go with the first rotation
 		if(rotations.size() > 1) {
-			printf("%s::update(): Error! Defined \"rotation\" %d times!\n", header, rotations.size());
+			printf("%s::update(): Error! Defined \"rotation\" %d times!\n", header, (int)rotations.size());
 			return 0;
 		}
 		if(rotations.size() == 0) {
@@ -261,7 +261,7 @@ int bz2object::update(string& data)
 		
 		// just go with the first size (only one should be defined)
 		if(sizes.size() > 1) {
-			printf("%s::update(): Error! Defined \"size\" %d times!\n", header, sizes.size());
+			printf("%s::update(): Error! Defined \"size\" %d times!\n", header, (int)sizes.size());
 			return 0;
 		}
 		if(sizes.size() == 0) {
@@ -274,7 +274,7 @@ int bz2object::update(string& data)
 	if(isKey("phydrv")) {
 		physicsDrivers = BZWParser::getValuesByKey("phydrv", header, objData);
 		if(physicsDrivers.size() > 1) {
-			printf("%s::update(): Error! Defined \"phydrv\" %d times!\n", header, physicsDrivers.size());
+			printf("%s::update(): Error! Defined \"phydrv\" %d times!\n", header, (int)physicsDrivers.size());
 			return 0;
 		}
 	}

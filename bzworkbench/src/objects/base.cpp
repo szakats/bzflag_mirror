@@ -93,7 +93,7 @@ int base::update(string& data) {
 	// get the team
 	vector<string> teams = BZWParser::getValuesByKey("color", header, baseData);
 	if(teams.size() > 1) {
-		printf("base::update():  Error! Defined \"color\" %d times!\n", teams.size());
+		printf("base::update():  Error! Defined \"color\" %d times!\n", (int)teams.size());
 		return 0;
 	}
 	if( teams.size() == 0 )
@@ -102,7 +102,7 @@ int base::update(string& data) {
 	// get the weapon
 	vector<string> weapons = BZWParser::getValuesByKey("oncap", header, baseData);
 	if(weapons.size() > 1) {
-		printf("base::update():  Error! Defined \"oncap\" %d times!\n", weapons.size());
+		printf("base::update():  Error! Defined \"oncap\" %d times!\n", (int)weapons.size());
 		return 0;
 	}
 		

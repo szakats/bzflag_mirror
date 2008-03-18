@@ -84,21 +84,21 @@ public:
 		// get the texcoords
 		vector<string> texCoordVals = BZWParser::getValuesByKey("texcoords", _header, faceData);
 		if(texCoordVals.size() > 1) {
-			printf("mesh::face::update(): Error! Defined \"texcoord\" %d times!\n", texCoordVals.size());
+			printf("mesh::face::update(): Error! Defined \"texcoord\" %d times!\n", (int)texCoordVals.size());
 			return 0;	
 		}
 		
 		// get the normals
 		vector<string> normalVals = BZWParser::getValuesByKey("normals", _header, faceData);
 		if(normalVals.size() > 1) {
-			printf("mesh::face::update(): Error! Defined \"normal\" %d times!\n", normalVals.size());
+			printf("mesh::face::update(): Error! Defined \"normal\" %d times!\n", (int)normalVals.size());
 			return 0;	
 		}
 		
 		// get the physics driver
 		vector<string> physicsDriverVals = BZWParser::getValuesByKey("phydrv", _header, faceData);
 		if(physicsDriverVals.size() > 1) {
-			printf("mesh::face::update(): Error! Defined \"phydrv\" %d times!\n", physicsDriverVals.size());
+			printf("mesh::face::update(): Error! Defined \"phydrv\" %d times!\n", (int)physicsDriverVals.size());
 		}
 		
 		// get the materials
@@ -134,11 +134,11 @@ public:
 			vertexParams.size() != normalParams.size() ||
 			normalParams.size() != texCoordParams.size())) {
 				printf("mesh::face::update(): Error! unequal numbers of referenced vertices, normals, and texture coordinates in face! {\n");
-				printf("  vertices %s # %d\n", vertexVals[0].c_str(), vertexParams.size());
+				printf("  vertices %s # %d\n", vertexVals[0].c_str(), (int)vertexParams.size());
 				if(texCoordVals.size() > 0)
-					printf("  texcoords %s # %d\n", texCoordVals[0].c_str(), texCoordParams.size());
+					printf("  texcoords %s # %d\n", texCoordVals[0].c_str(), (int)texCoordParams.size());
 				if(normalVals.size() > 0)
-					printf("  normals %s # %d\n", normalVals[0].c_str() , normalParams.size());
+					printf("  normals %s # %d\n", normalVals[0].c_str() , (int)normalParams.size());
 				printf("}\n");
 				
 				return 0;

@@ -50,7 +50,7 @@ int Tlink::update(string& data) {
 	// get the name
 	vector<string> names = BZWParser::getValuesByKey("name", header, linkData);
 	if(names.size() > 1) {
-		printf("link::update(): Error! Defined \"name\" %d times!\n", names.size());
+		printf("link::update(): Error! Defined \"name\" %d times!\n", (int)names.size());
 		return 0;
 	}
 		

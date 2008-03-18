@@ -82,7 +82,7 @@ int cone::update(string& data) {
 	// get the name
 	vector<string> names = BZWParser::getValuesByKey("name", header, coneData);
 	if(names.size() > 1) {
-		printf("cone::update(): error! defined \"name\" %d times\n", names.size() );
+		printf("cone::update(): error! defined \"name\" %d times\n", (int)names.size() );
 		return 0;
 	}
 	if( names.size() == 0 )
@@ -91,7 +91,7 @@ int cone::update(string& data) {
 	// get the divisions
 	vector<string> vDivisions = BZWParser::getValuesByKey("divisions", header, coneData);
 	if( vDivisions.size() > 1 ) {
-		printf("cone::update(): error! defined \"divisions\" %d times\n", vDivisions.size() );
+		printf("cone::update(): error! defined \"divisions\" %d times\n", (int)vDivisions.size() );
 		return 0;
 	}
 	if( vDivisions.size() == 0 )
@@ -100,7 +100,7 @@ int cone::update(string& data) {
 	// get the sweep angle
 	vector<string> sweepAngles = BZWParser::getValuesByKey("angle", header, coneData);
 	if( sweepAngles.size() > 1 ) {
-		printf("cone::update(): error! defined \"divisions\" %d times\n", sweepAngles.size() );
+		printf("cone::update(): error! defined \"divisions\" %d times\n", (int)sweepAngles.size() );
 		return 0;
 	}
 	if( sweepAngles.size() == 0 )

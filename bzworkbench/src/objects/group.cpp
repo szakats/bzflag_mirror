@@ -71,14 +71,14 @@ int group::update(string& data) {
 	// get tint
 	vector<string> tints = BZWParser::getValuesByKey("tint", header, groupData);
 	if(tints.size() > 1) {
-		printf("group::update(): Error! Defined \"tint\" %d times\n", tints.size());
+		printf("group::update(): Error! Defined \"tint\" %d times\n", (int)tints.size());
 		return 0;	
 	}
 	
 	// get team
 	vector<string> teams = BZWParser::getValuesByKey("team", header, groupData);
 	if(teams.size() > 1) {
-		printf("group::update(): Error! Defined \"team\" %d times\n", tints.size());
+		printf("group::update(): Error! Defined \"team\" %d times\n", (int)tints.size());
 		return 0;	
 	}
 	

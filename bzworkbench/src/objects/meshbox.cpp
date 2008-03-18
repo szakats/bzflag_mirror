@@ -48,7 +48,7 @@ int meshbox::update(string& data) {
 	
 	// quit if there are multiple ones
 	if(lines.size() > 1) {
-		printf("meshbox::update(): Error! Defined %d meshboxes!\n", lines.size());
+		printf("meshbox::update(): Error! Defined %d meshboxes!\n", (int)lines.size());
 		return 0;
 	}
 	

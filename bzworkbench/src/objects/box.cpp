@@ -151,7 +151,7 @@ void box::updateGeometry( UpdateMessage& message ) {
 		// there should be 2 geometries (One Geometry makes up the walls, the other the floor/ceiling combo.)
 		// if there isn't, then bail
 		if( geos.size() != 2 ) {
-			printf(" error! %d geometries (expected 2)\n", geos.size());
+			printf(" error! %d geometries (expected 2)\n", (int)geos.size());
 			return;
 		}
 		

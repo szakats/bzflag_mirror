@@ -140,7 +140,7 @@ int teleporter::update(string& data) {
 	// get the border
 	vector<string> borders = BZWParser::getValuesByKey("border", header, teleporterData);
 	if(borders.size() > 1) {
-		printf("teleporter::update(): Error! Defined \"border\" %d times!\n", borders.size());
+		printf("teleporter::update(): Error! Defined \"border\" %d times!\n", (int)borders.size());
 	}	
 	
 	if(!bz2object::update(data))

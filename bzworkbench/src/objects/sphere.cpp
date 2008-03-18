@@ -58,21 +58,21 @@ int sphere::update(string& data) {
 	// get the name
 	vector<string> names = BZWParser::getValuesByKey("name", header, sphereData);
 	if(names.size() > 1) {
-		printf("sphere::update(): Error! Defined \"name\" %d times!\n", names.size());
+		printf("sphere::update(): Error! Defined \"name\" %d times!\n", (int)names.size());
 		return 0;	
 	}
 		
 	// get the divisions
 	vector<string> vDivisions = BZWParser::getValuesByKey("divisions", header, sphereData);
 	if(vDivisions.size() > 1) {
-		printf("sphere::update(): Error! Defined \"divisions\" %d times!\n", names.size());
+		printf("sphere::update(): Error! Defined \"divisions\" %d times!\n", (int)names.size());
 		return 0;
 	}
 		
 	// get the radius
 	vector<string> radii = BZWParser::getValuesByKey("radius", header, sphereData);
 	if(radii.size() > 1) {
-		printf("sphere::update(): Error! Defined \"radius\" %d times!\n", radii.size());
+		printf("sphere::update(): Error! Defined \"radius\" %d times!\n", (int)radii.size());
 		return 0;
 	}
 		

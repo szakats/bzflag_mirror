@@ -86,7 +86,7 @@ public:
 	// helper method:  ensures that a key occurs only once (useful for calling from update())
 	bool hasOnlyOne(vector<string> lines, const char* key) {
 		if( lines.size() != 1) {
-			printf("%s::update():  Error!  Defined \"%s\" %d times!\n", header.c_str(), key, lines.size());
+			printf("%s::update():  Error!  Defined \"%s\" %d times!\n", header.c_str(), key, (int)lines.size());
 			return false;	
 		}
 		return true;

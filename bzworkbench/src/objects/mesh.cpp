@@ -117,7 +117,7 @@ int mesh::update(string& data) {
 	// get drawinfo
 	vector<string> drawInfoVals = BZWParser::getSectionsByHeader("drawinfo", meshData);
 	if(drawInfoVals.size() > 1) {
-		printf("mesh::update(): Error! Defined \"drawinfo\" %d times\n", drawInfoVals.size());
+		printf("mesh::update(): Error! Defined \"drawinfo\" %d times\n", (int)drawInfoVals.size());
 		return 0;
 	}
 		
