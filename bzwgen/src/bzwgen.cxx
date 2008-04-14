@@ -12,6 +12,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include "time.h"
 
 #include "Output.h"
@@ -21,7 +22,7 @@
 #include "commandArgs.h"
 #include "Zone.h"
 #include "RuleSet.h"
-#if 0
+#if 1
 #include "bzfsAPI.h"
 #include "plugin_utils.h"
 #endif
@@ -34,9 +35,21 @@
 int debugLevel = 2;
 CCommandLineArgs  cmd;
 COSDir ruledir;
+RuleSet* ruleset;
 std::string texturepath;
+std::ostream* outstream;
 
-#if 0
+int setup();
+
+#if 1
+
+class BZWGenEvent : public bz_EventHandler {
+  public:
+  virtual void process(bz_EventData * eventData);
+};
+
+BZWGenEvent bzwGenEvent;
+
 
 BZ_GET_PLUGIN_VERSION
 
@@ -47,6 +60,11 @@ BZF_PLUGIN_CALL int bz_Load ( const char* commandLine )
     cmd.Set(COSFile(commandLine));
     bz_debugMessage(4,"config file loaded");
   }
+  bz_registerEvent(bz_eGetWorldEvent, &bzwGenEvent);
+  bz_registerEvent(bz_eWorldFinalized, &bzwGenEvent);
+  
+  setup();
+
   return 0;
 }
 
@@ -54,6 +72,32 @@ BZF_PLUGIN_CALL int bz_Unload ( void )
 {
   bz_debugMessage(4,"bzwgen plugin unloaded");
   return 0;
+}
+
+void BZWGenEvent::process(bz_EventData *eventData) {
+  if (eventData->eventType == bz_eWorldFinalized) {
+    delete outstream;
+    return;
+  }
+
+  if (eventData->eventType != bz_eGetWorldEvent) 
+    return;
+
+  GridGenerator gen(ruleset);
+  gen.parseOptions(&cmd);
+  gen.run();
+
+  outstream = new std::ostringstream(std::ostringstream::out);
+  Output os(outstream);
+  os.info(MajorVersion,MinorVersion,Revision);
+  gen.output(os);
+  os.footer();
+
+  bz_GetWorldEventData_V1 *getWorldData = (bz_GetWorldEventData_V1 *) eventData;
+  char* cstr = new char [((std::ostringstream*)(outstream))->str().size()+1];
+  strcpy (cstr, ((std::ostringstream*)(outstream))->str().c_str());
+  getWorldData->worldBlob = cstr;
+  //getWorldData->worldBlob = const_cast<char*>((reinterpret_cast<std::ostringstream*>(outstream))->str().c_str());
 }
 
 #endif
@@ -200,30 +244,20 @@ bool getOptionS ( std::string &val, char* shortName, char* longName )
   return false;
 }
 
-int main (int argc, char* argv[]) {
-
-  cmd.SetDelimnator(argumentDeliminator);
-  cmd.Set(argc,argv);
-
-  if (cmd.Exists("h") || cmd.Exists("help"))	  { printHelp(); return 0; }
-
-  if (cmd.Exists("c"))		    cmd.Set(COSFile(cmd.GetDataS("c")));
-  else if (cmd.Exists("config"))    cmd.Set(COSFile(cmd.GetDataS("config")));
-
+int setup() {
   ruledir .SetStdDir("./rules");
-  std::string temp,outname = "map.bzw";
+  std::string temp;
 
   int detail = 3;
 
   getOptionI(debugLevel,"d","debug");
-  getOptionS(outname,"o","output");
   getOptionI(detail,"l","detail");
   getOptionS(texturepath,"t","texture");
   if(getOptionS(temp,"r","rulesdir"))
     ruledir.SetOSDir(temp.c_str());
   
   COSFile file;
-  RuleSet* ruleset = new RuleSet();
+  ruleset = new RuleSet();
   
   while (ruledir.GetNextFile(file,"*.set",false)) {
     std::cout << "Loading " << file.GetOSName() << "... ";
@@ -250,6 +284,24 @@ int main (int argc, char* argv[]) {
 
   srand((unsigned int)time(NULL));
 
+  return 0;
+}
+
+int main (int argc, char* argv[]) {
+
+  cmd.SetDelimnator(argumentDeliminator);
+  cmd.Set(argc,argv);
+
+  if (cmd.Exists("h") || cmd.Exists("help"))	  { printHelp(); return 0; }
+
+  if (cmd.Exists("c"))		    cmd.Set(COSFile(cmd.GetDataS("c")));
+  else if (cmd.Exists("config"))    cmd.Set(COSFile(cmd.GetDataS("config")));
+
+  std::string outname = "map.bzw";
+  getOptionS(outname,"o","output");
+
+  if (setup()) return 1;
+
   std::cout << "Initializing... ";
   GridGenerator gen(ruleset);
   std::cout << "done.\n";
@@ -262,7 +314,7 @@ int main (int argc, char* argv[]) {
   gen.run();
   std::cout << "done.\n";
 
-  std::ofstream* outstream = new std::ofstream(outname.c_str());
+  outstream = new std::ofstream(outname.c_str());
   Output os(outstream);
   std::cout << "Outputing... ";
   os.info(MajorVersion,MinorVersion,Revision);
