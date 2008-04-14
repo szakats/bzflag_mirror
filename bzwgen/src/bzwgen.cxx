@@ -262,11 +262,13 @@ int main (int argc, char* argv[]) {
   gen.run();
   std::cout << "done.\n";
 
-  Output os(outname.c_str());
+  std::ofstream* outstream = new std::ofstream(outname.c_str());
+  Output os(outstream);
   std::cout << "Outputing... ";
   os.info(MajorVersion,MinorVersion,Revision);
   gen.output(os);
   os.footer();
+  delete outstream;
   std::cout << "done.\n";
   std::cout << "\n" << os.vertices << " vertices, " << os.texcoords << " texcoords and " << os.faces << " faces generated.\n";
 

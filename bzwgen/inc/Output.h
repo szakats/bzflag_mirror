@@ -20,102 +20,97 @@
 
 
 class Output {
-  std::ofstream* file;
+  std::ostream* outstream;
 public:
   int vertices;
   int texcoords;
   int faces;
-  Output(const char* filename) : vertices(0), texcoords(0), faces(0) {
-    file = new std::ofstream(filename);
-  }
+  Output(std::ostream* _outstream) : vertices(0), texcoords(0), faces(0), outstream(_outstream) {}
   void vertex(Vertex v) { 
     vertices++;
-    (*file) << "  vertex " << v.x << " " << v.y << " " << v.z << "\n"; 
+    (*outstream) << "  vertex " << v.x << " " << v.y << " " << v.z << "\n"; 
   }
   void vertex(Vertex v, const char* name) { 
     vertices++;
-    (*file) << "  " << name << " " << v.x << " " << v.y << " " << v.z << "\n"; 
+    (*outstream) << "  " << name << " " << v.x << " " << v.y << " " << v.z << "\n"; 
   }
   void texcoord(TexCoord tc) { 
     texcoords++;
-    (*file) << "  texcoord " << tc.s << " " << tc.t << "\n"; 
+    (*outstream) << "  texcoord " << tc.s << " " << tc.t << "\n"; 
   }
   void face(Face* f, int lastmat = -1) { 
     if (!f->output) return;
     faces++;
-    (*file) << "  face\n";
+    (*outstream) << "  face\n";
 
     if (lastmat >= 0) {
       if (f->mat != lastmat) matref(f->mat);
     }
 
-    (*file) << "    vertices ";
+    (*outstream) << "    vertices ";
     for (size_t i = 0; i < f->vtx->size(); i++) {
-      (*file) << f->vtx->at(i) << " ";
+      (*outstream) << f->vtx->at(i) << " ";
     }
-    (*file) << "\n";
+    (*outstream) << "\n";
 
     if (f->texcoords && f->tcd->size() > 0) {
-      (*file) << "    texcoords ";
+      (*outstream) << "    texcoords ";
       for (size_t i = 0; i < f->tcd->size(); i++) {
-        (*file) << f->tcd->at(i) << " ";
+        (*outstream) << f->tcd->at(i) << " ";
       }
-      (*file) << "\n";
+      (*outstream) << "\n";
     }
 
-    (*file) << "  endface\n";
+    (*outstream) << "  endface\n";
   }
   void line(const char* textline) { 
-    (*file) << textline << "\n";
+    (*outstream) << textline << "\n";
   }
   void matref(int matref) { 
-    (*file) << "  matref mat" << matref << "\n";
+    (*outstream) << "  matref mat" << matref << "\n";
   }
   void footer() {
-    (*file) << "\n\n# end of world\n";
-    (*file) << "# " << vertices <<" vertices\n";
-    (*file) << "# " << texcoords <<" texcoords\n";
-    (*file) << "# " << faces <<" faces\n\n";
+    (*outstream) << "\n\n# end of world\n";
+    (*outstream) << "# " << vertices <<" vertices\n";
+    (*outstream) << "# " << texcoords <<" texcoords\n";
+    (*outstream) << "# " << faces <<" faces\n\n";
   }
   void material(int matref, std::string& filename, bool noradar) { 
-    (*file) << "material\n";
-    (*file) << "  name mat" << matref << "\n";
-    (*file) << "  texture " << texturepath << filename;
-    if (texturepath.size() > 0) { (*file) << ".png"; }
-    (*file)  << "\n";
-    if (noradar) (*file) << "  noradar\n";
-    (*file) << "end\n\n";
+    (*outstream) << "material\n";
+    (*outstream) << "  name mat" << matref << "\n";
+    (*outstream) << "  texture " << texturepath << filename;
+    if (texturepath.size() > 0) { (*outstream) << ".png"; }
+    (*outstream)  << "\n";
+    if (noradar) (*outstream) << "  noradar\n";
+    (*outstream) << "end\n\n";
   }
   void basezone(Coord2D A, Coord2D B, int color, bool ctfSafe) { 
-    (*file) << "base\n";
-    (*file) << "  position " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 0\n";
-    (*file) << "  size " << abs(A.x-B.x)/2 << " " << abs(A.y-B.y)/2 << " 0\n";
-    (*file) << "  color " << color << "\n";
-    (*file) << "end\n\n";
+    (*outstream) << "base\n";
+    (*outstream) << "  position " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 0\n";
+    (*outstream) << "  size " << abs(A.x-B.x)/2 << " " << abs(A.y-B.y)/2 << " 0\n";
+    (*outstream) << "  color " << color << "\n";
+    (*outstream) << "end\n\n";
 
     if( ctfSafe ) {
-      (*file) << "zone\n";
-      (*file) << "  position " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 0\n";
-      (*file) << "  size " << abs(A.x-B.x)/2 << " " << abs(A.y-B.y)/2 << " 0\n";
-      (*file) << "  safety " << color << "\n";
-      (*file) << "end\n\n";
+      (*outstream) << "zone\n";
+      (*outstream) << "  position " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 0\n";
+      (*outstream) << "  size " << abs(A.x-B.x)/2 << " " << abs(A.y-B.y)/2 << " 0\n";
+      (*outstream) << "  safety " << color << "\n";
+      (*outstream) << "end\n\n";
     }
   }
   void header(int size) { 
-    (*file) << "world\n";
-    (*file) << "  name BZWGen Generated City\n";
-    (*file) << "  size " << int(size / 2) << "\n";
-    (*file) << "end\n\n";
+    (*outstream) << "world\n";
+    (*outstream) << "  name BZWGen Generated City\n";
+    (*outstream) << "  size " << int(size / 2) << "\n";
+    (*outstream) << "end\n\n";
   }
   void info(int major, int minor, int revision) { 
-    (*file) << "#\n# BZWGen (" << major << "." << minor << "." << revision << ") generated map file\n#\n\n";  
-  }
-  ~Output() {
-    delete file;
+    (*outstream) << "#\n# BZWGen (" << major << "." << minor << "." << revision << ") generated map file\n#\n\n";  
   }
 };
 
-#endif /* __(*file)PUT_H__ */
+#endif /* __(*outstream)PUT_H__ */
 
 // Local Variables: ***
 // mode:C++ ***
