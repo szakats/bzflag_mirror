@@ -29,11 +29,20 @@
 #define Revision     "3"
 #define BuildState "development"
 
+int debugLevel = 2;
+CCommandLineArgs  cmd;
+COSDir ruledir;
+std::string texturepath;
+
 BZ_GET_PLUGIN_VERSION
 
-BZF_PLUGIN_CALL int bz_Load ( const char* /*commandLine*/ )
+BZF_PLUGIN_CALL int bz_Load ( const char* commandLine )
 {
   bz_debugMessage(4,"bzwgen plugin loaded");
+  if (strlen(commandLine) > 4) {
+    cmd.Set(COSFile(commandLine));
+    bz_debugMessage(4,"config file loaded");
+  }
   return 0;
 }
 
@@ -46,11 +55,6 @@ BZF_PLUGIN_CALL int bz_Unload ( void )
 extern int yyparse(RuleSet*);
 extern int yylineno;
 extern FILE* yyin;
-
-int debugLevel = 2;
-CCommandLineArgs  cmd;
-COSDir ruledir;
-std::string texturepath;
 
 #ifdef _USE_GNU_DELIMS
 std::string argumentDeliminator = "--";
@@ -76,7 +80,7 @@ void printHelpCommand ( const char* shortName, const char* longName, const char*
 
 void printHelp() {
   std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n";
-  printf("Version %s.%s.%s(%s)\ncopyright 2007 BZFlag Project and Tim Rikker\n\n",MajorVersion,MinorVersion,Revision,BuildState);
+  printf("Version %s.%s.%s(%s)\ncopyright 2007 BZFlag Project and Tim Riker\n\n",MajorVersion,MinorVersion,Revision,BuildState);
   std::cout << "Command line arguments:\n";
   printHelpCommand("h","help","                shows help");
   printHelpCommand("d","debug","integer        sets debug level (0-4)(default: 2)");
