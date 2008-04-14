@@ -34,20 +34,7 @@ public:
   };
   void setColor(int _color) { color = _color; }
   virtual void output(Output& out) {
-    out << "base\n";
-    out << "  position " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 0\n";
-    out << "  size " << abs(A.x-B.x)/2 << " " << abs(A.y-B.y)/2 << " 0\n";
-    out << "  color " << color << "\n";
-    out << "end\n\n";
-
-    if( ctfSafe ) {
-      out << "zone\n";
-      out << "  position " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 0\n";
-      out << "  size " << abs(A.x-B.x)/2 << " " << abs(A.y-B.y)/2 << " 0\n";
-      out << "  safety " << color << "\n";
-      out << "end\n\n";
-    }
-
+    out.basezone(A,B,color,ctfSafe);
     color++;
   }
 };

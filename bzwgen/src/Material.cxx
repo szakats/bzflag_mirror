@@ -14,13 +14,7 @@
 #include "globals.h"
 
 void Material::output(Output& out) {
-  out << "material\n";
-  out << "  name mat" << name << "\n";
-  out << "  texture " << texturepath << file;
-  if (texturepath.size() > 0) { out << ".png"; }
-  out  << "\n";
-  if (noradar) out << "  noradar\n";
-  out << "end\n\n";
+  out.material(name,file,noradar);
 }
 
 // Local Variables: ***

@@ -21,18 +21,22 @@
 #include "commandArgs.h"
 #include "Zone.h"
 #include "RuleSet.h"
+#if 0
 #include "bzfsAPI.h"
 #include "plugin_utils.h"
+#endif
 
-#define MajorVersion "0"
-#define MinorVersion "1"
-#define Revision     "3"
+#define MajorVersion 0
+#define MinorVersion 1
+#define Revision     3
 #define BuildState "development"
 
 int debugLevel = 2;
 CCommandLineArgs  cmd;
 COSDir ruledir;
 std::string texturepath;
+
+#if 0
 
 BZ_GET_PLUGIN_VERSION
 
@@ -51,6 +55,9 @@ BZF_PLUGIN_CALL int bz_Unload ( void )
   bz_debugMessage(4,"bzwgen plugin unloaded");
   return 0;
 }
+
+#endif
+
 
 extern int yyparse(RuleSet*);
 extern int yylineno;
@@ -257,7 +264,7 @@ int main (int argc, char* argv[]) {
 
   Output os(outname.c_str());
   std::cout << "Outputing... ";
-  os << "#\n# BZWGen (" << MajorVersion << "." << MinorVersion << "." Revision << ") generated map file\n#\n\n";
+  os.info(MajorVersion,MinorVersion,Revision);
   gen.output(os);
   os.footer();
   std::cout << "done.\n";

@@ -31,10 +31,7 @@ void Generator::run() {
 }
 
 void Generator::output(Output& out) {
-  out << "world\n";
-  out << "  name BZWGen Generated City\n";
-  out << "  size " << int(size / 2) << "\n";
-  out << "end\n\n";
+  out.header(size);
 
   for (MaterialVectIter iter = mats.begin(); iter != mats.end(); ++iter) (*iter)->output(out);
   if (ruleset != NULL) ruleset->output(out);
