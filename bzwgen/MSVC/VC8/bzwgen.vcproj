@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="windows-1250"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="bzwgen"
 	ProjectGUID="{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}"
 	>
@@ -17,7 +17,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -37,7 +37,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\inc\;..\"
+				AdditionalIncludeDirectories="..\..\inc\;..\;..\..\..\bzflag\MSVC\VC8;..\..\..\bzflag\include;..\..\..\bzflag\plugins\plugin_utils"
+				PreprocessorDefinitions="bzwgen_EXPORTS"
 				WarningLevel="4"
 				WarnAsError="true"
 			/>
@@ -52,6 +53,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="bzfs.lib"
+				AdditionalLibraryDirectories="..\..\..\bzflag"
+				ModuleDefinitionFile="../../bzwgen.def"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -345,6 +349,26 @@
 				</File>
 				<File
 					RelativePath="..\..\inc\RuleSet.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="bzfs"
+				>
+				<File
+					RelativePath="..\..\..\bzflag\include\bzfsAPI.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\bzflag\include\common.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\bzflag\MSVC\VC8\config.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\bzflag\plugins\plugin_utils\plugin_utils.h"
 					>
 				</File>
 			</Filter>

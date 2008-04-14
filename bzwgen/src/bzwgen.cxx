@@ -21,11 +21,27 @@
 #include "commandArgs.h"
 #include "Zone.h"
 #include "RuleSet.h"
+#include "bzfsAPI.h"
+#include "plugin_utils.h"
 
 #define MajorVersion "0"
 #define MinorVersion "1"
 #define Revision     "3"
 #define BuildState "development"
+
+BZ_GET_PLUGIN_VERSION
+
+BZF_PLUGIN_CALL int bz_Load ( const char* /*commandLine*/ )
+{
+  bz_debugMessage(4,"bzwgen plugin loaded");
+  return 0;
+}
+
+BZF_PLUGIN_CALL int bz_Unload ( void )
+{
+  bz_debugMessage(4,"bzwgen plugin unloaded");
+  return 0;
+}
 
 extern int yyparse(RuleSet*);
 extern int yylineno;
