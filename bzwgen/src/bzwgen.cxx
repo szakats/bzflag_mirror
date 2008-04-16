@@ -37,7 +37,6 @@ CCommandLineArgs  cmd;
 COSDir ruledir;
 RuleSet* ruleset;
 std::string texturepath;
-std::ostream* outstream;
 
 int setup();
 
@@ -46,6 +45,8 @@ int setup();
 class BZWGenEvent : public bz_EventHandler {
   public:
   virtual void process(bz_EventData * eventData);
+  private:
+  std::string strout;
 };
 
 BZWGenEvent bzwGenEvent;
@@ -76,7 +77,7 @@ BZF_PLUGIN_CALL int bz_Unload ( void )
 
 void BZWGenEvent::process(bz_EventData *eventData) {
   if (eventData->eventType == bz_eWorldFinalized) {
-    delete outstream;
+    strout.clear();
     return;
   }
 
@@ -87,17 +88,16 @@ void BZWGenEvent::process(bz_EventData *eventData) {
   gen.parseOptions(&cmd);
   gen.run();
 
-  outstream = new std::ostringstream(std::ostringstream::out);
+  std::ostringstream* outstream = new std::ostringstream(std::ostringstream::out);
   Output os(outstream);
   os.info(MajorVersion,MinorVersion,Revision);
   gen.output(os);
   os.footer();
 
   bz_GetWorldEventData_V1 *getWorldData = (bz_GetWorldEventData_V1 *) eventData;
-  char* cstr = new char [((std::ostringstream*)(outstream))->str().size()+1];
-  strcpy (cstr, ((std::ostringstream*)(outstream))->str().c_str());
-  getWorldData->worldBlob = cstr;
-  //getWorldData->worldBlob = const_cast<char*>((reinterpret_cast<std::ostringstream*>(outstream))->str().c_str());
+  strout = outstream->str();
+  delete outstream; outstream = NULL;
+  getWorldData->worldBlob = const_cast<char*>(strout.c_str());
 }
 
 #endif
@@ -314,7 +314,7 @@ int main (int argc, char* argv[]) {
   gen.run();
   std::cout << "done.\n";
 
-  outstream = new std::ofstream(outname.c_str());
+  std::ofstream* outstream = new std::ofstream(outname.c_str());
   Output os(outstream);
   std::cout << "Outputing... ";
   os.info(MajorVersion,MinorVersion,Revision);
