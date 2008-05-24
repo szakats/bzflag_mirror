@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* TriWallSceneNode:
@@ -34,6 +34,16 @@ class TriWallSceneNode : public WallSceneNode {
 
     void		addRenderNodes(SceneRenderer&);
     void		addShadowNodes(SceneRenderer&);
+    void		renderRadar();
+
+    bool		inAxisBox (const Extents& exts) const;
+
+    int			getVertexCount () const;
+    const		GLfloat* getVertex (int vertex) const;
+
+    bool		cull(const ViewFrustum&) const;
+
+    void		getRenderNodes(std::vector<RenderSet>& rnodes);
 
   protected:
     class Geometry : public RenderNode {
@@ -48,7 +58,9 @@ class TriWallSceneNode : public WallSceneNode {
 			~Geometry();
 	void		setStyle(int _style) { style = _style; }
 	void		render();
-	const GLfloat*	getPosition() { return wall->getSphere(); }
+	void		renderShadow();
+	const GLfloat*  getVertex(int i) const;
+	const GLfloat*	getPosition() const { return wall->getSphere(); }
       private:
 	void		drawV() const;
 	void		drawVT() const;
@@ -60,6 +72,7 @@ class TriWallSceneNode : public WallSceneNode {
       public:
 	GLfloat3Array	vertex;
 	GLfloat2Array	uv;
+	int	     triangles;
     };
 
   private:
@@ -69,11 +82,10 @@ class TriWallSceneNode : public WallSceneNode {
 
 #endif // BZF_TRI_WALL_SCENE_NODE_H
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

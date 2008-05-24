@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* PolyWallSceneNode:
@@ -31,6 +31,9 @@ class PolyWallSceneNode : public WallSceneNode {
 
     void		addRenderNodes(SceneRenderer&);
     void		addShadowNodes(SceneRenderer&);
+    void		renderRadar();
+
+    void		getRenderNodes(std::vector<RenderSet>& rnodes);
 
   protected:
     class Geometry : public RenderNode {
@@ -42,7 +45,7 @@ class PolyWallSceneNode : public WallSceneNode {
 			~Geometry();
 	void		setStyle(int _style) { style = _style; }
 	void		render();
-	const GLfloat*	getPosition() { return wall->getSphere(); }
+	const GLfloat*	getPosition() const { return wall->getSphere(); }
       private:
 	void		drawV() const;
 	void		drawVT() const;
@@ -62,11 +65,10 @@ class PolyWallSceneNode : public WallSceneNode {
 
 #endif // BZF_POLY_WALL_SCENE_NODE_H
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

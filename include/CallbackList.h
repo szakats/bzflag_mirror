@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,15 +7,19 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef BZF_CALLBACK_LIST_H
 #define BZF_CALLBACK_LIST_H
 
 #include "common.h"
+
+// system headers
+#include <utility>
 #include <list>
 #include <map>
+
 
 template <class F>
 class CallbackList {
@@ -113,7 +117,7 @@ void			CallbackList<F>::doIterate(Callback callback,
     // stop if a callback returns false.
     if (index->first != NULL)
       if (!callback(index->first, index->second, userData))
-        break;
+	break;
   }
 
   // now remove the dummy item
@@ -122,11 +126,10 @@ void			CallbackList<F>::doIterate(Callback callback,
 
 #endif
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -18,10 +18,14 @@
 #define	BZF_SERVER_LINK_H
 
 #include "common.h"
+
+#include <string>
 #include "global.h"
 #include "Address.h"
 #include "Protocol.h"
 #include "ShotPath.h"
+#include "Flag.h"
+#include "BufferedNetworkMessage.h"
 
 class ServerLink {
   public:
@@ -31,7 +35,8 @@ class ServerLink {
 			Rejected = 2,
 			BadVersion = 3,
 			Hungup = 4,		// only used by Winsock
-			CrippledVersion = 5
+			CrippledVersion = 5,
+			Refused = 6
     };
 
     enum Abilities {
@@ -43,39 +48,68 @@ class ServerLink {
     };
 
 			ServerLink(const Address& serverAddress,
-					int port = ServerPort, int number = 0);
+					int port = ServerPort);
 			~ServerLink();
 
     State		getState() const;
+    const std::string&	getRejectionMessage() { return rejectionMessage; }
     int			getSocket() const;	// file descriptor actually
     const PlayerId&	getId() const;
     const char*		getVersion() const;
 
     void		send(uint16_t code, uint16_t len, const void* msg);
     // if millisecondsToBlock < 0 then block forever
-    int			read(uint16_t& code, uint16_t& len, void* msg,
-						int millisecondsToBlock = 0);
+    int			read(uint16_t& code, uint16_t& len, void* msg, int millisecondsToBlock = 0);
+    int			read(BufferedNetworkMessage *msg, int millisecondsToBlock = 0);
 
-    void		sendEnter(PlayerType, TeamColor,
-					const char* name, const char* email);
+	void		sendCaps(PlayerId id, bool downloads, bool sounds );
+    void		sendEnter(PlayerId, PlayerType, TeamColor,
+				  const char* name, const char* token);
+    bool		readEnter(std::string& reason,
+				  uint16_t& code, uint16_t& rejcode);
+
     void		sendCaptureFlag(TeamColor);
     void		sendGrabFlag(int flagIndex);
     void		sendDropFlag(const float* position);
-    void		sendKilled(const PlayerId&, int reason, int shotId);
+    void		sendKilled(const PlayerId victim,
+				   const PlayerId shooter,
+				   int reason, int shotId,
+				   const FlagType* flag, int phydrv);
+  // FIXME -- This is very ugly, but required to build bzadmin with gcc 2.9.5.
+  //	  It should be changed to something cleaner.
+#ifndef BUILDING_BZADMIN
     void		sendPlayerUpdate(Player*);
     void		sendBeginShot(const FiringInfo&);
+#endif
     void		sendEndShot(const PlayerId&, int shotId, int reason);
-    void		sendAlive(const float* pos, const float* fwd);
+
+  void sendHit(const PlayerId &source, const PlayerId &shooter, int shotId);
+  void sendVarRequest();
+
+    void		sendAlive(const PlayerId playerId);
     void		sendTeleport(int from, int to);
     void		sendTransferFlag(const PlayerId&, const PlayerId&);
     void		sendNewRabbit();
     void		sendPaused(bool paused);
+    void		sendNewPlayer();
+    void		sendCollide(const PlayerId playerId,
+				    const PlayerId otherId, const float *pos);
+
+    void		sendExit();
+    void		sendAutoPilot(bool autopilot);
+    void		sendMessage(const PlayerId& to,
+				    char message[MessageLen]);
+    void		sendLagPing(char pingRequest[]);
     void		sendUDPlinkRequest();
+
+	void		sendWhatTimeIsIt ( unsigned char tag );
 
     static ServerLink*	getServer(); // const
     static void		setServer(ServerLink*);
     void		enableOutboundUDP();
     void		confirmIncomingUDP();
+
+  void flush();
 
   private:
     State		state;
@@ -90,6 +124,17 @@ class ServerLink {
     char		version[9];
     static ServerLink*	server;
     int			server_abilities;
+
+    std::string	 rejectionMessage;
+
+    int		 udpLength;
+    char	       *udpBufferPtr;
+    char		ubuf[MaxPacketLen];
+
+  bool oldNeedForSpeed;
+  unsigned int  previousFill;
+  char txbuf[MaxPacketLen];
+
 };
 
 #define SEND 1
@@ -121,11 +166,10 @@ inline const char*	ServerLink::getVersion() const
 
 #endif // BZF_SERVER_LINK_H
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,17 +1,13 @@
+#include "common.h"
+
+#include <iostream>
 #include <sys/time.h>
 
 #include "MacWindow.h"
 
-#ifdef __cplusplus
-#  define EXTERN_C_BEGIN extern "C" {
-#  define EXTERN_C_END   }
-#endif
-
-#include <iostream>
-
-EXTERN_C_BEGIN
+__BEGIN_DECLS
 extern WindowRef GetWindowRefFromNativeWindow(void * nativeWindow);
-EXTERN_C_END
+__END_DECLS
 
 struct Settings
 {
@@ -33,7 +29,7 @@ struct Settings
   CGGammaValue blueMax;
   CGGammaValue blueGamma;
   double gamma;
-  
+
   Settings() {
     Use_Main_Display = true;
     Capture_Display = true;
@@ -69,7 +65,7 @@ bool gMouseGrabbed;
 class GLContext
 {
   const CGLPixelFormatAttribute* GetPixelFormat(u_int32_t display_id = 0x01,
-      int color = settings.depth, int depth = 0, int stencil = 0) {
+      int color = settings.depth, int depth = 16, int stencil = 0) {
     static CGLPixelFormatAttribute attribs[32];
 
     CGLPixelFormatAttribute* attrib = attribs;
@@ -103,7 +99,7 @@ class GLContext
 
     bool Init(u_int32_t display_id, const CGRect& display_rect) {
       CGLPixelFormatObj pixel_format;
-      long num_pixel_formats;
+      GLint num_pixel_formats;
 
       CGLError err = CGLChoosePixelFormat(GetPixelFormat(display_id, 24),
 	  &pixel_format, &num_pixel_formats);
@@ -142,11 +138,11 @@ class GLContext
       fprintf(stderr, "Extensions:\n");
       const GLubyte * extensions = glGetString(GL_EXTENSIONS);
       char * tmp = new char[strlen((const char *)extensions)+2];
-      strcpy(tmp, (const char *)extensions);
+      strncpy(tmp, (const char *)extensions, strlen((const char *)extensions)+1);
       char * word;
       char * sep = " \t";
       for(word = strtok(tmp, sep); word != NULL; word = strtok(NULL, sep)) {
-        fprintf(stderr, "\t%s\n", word);
+	fprintf(stderr, "\t%s\n", word);
       }
       delete [] tmp;
       tmp = NULL;
@@ -185,7 +181,7 @@ class GLContext
     }
 
     void SetVBLSynch(bool synch) {
-      long params[] = { synch ? 1 : 0 };
+      GLint params[] = { synch ? 1 : 0 };
       CGLSetParameter(cgl_context, kCGLCPSwapInterval, params);
 
       settings.VBL_Synch = synch;
@@ -377,7 +373,7 @@ public:
 
 void Display(void)
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 MacWindow::MacWindow(const MacDisplay *display, MacVisual *visual) :
@@ -387,30 +383,12 @@ MacWindow::MacWindow(const MacDisplay *display, MacVisual *visual) :
 //  int argc = 0;
 //  char **argv = {NULL};
 
-  int num_displays = displays.Init();
+  /* set the size of the window to the default (existing resolution). this
+   * includes initializing the opengl context to the correct aspect ratio.
+   */
+  setSize((int)settings.Window_Size.width, (int)settings.Window_Size.height);
 
-  if (num_displays == 0)
-    return;
-
-  int display_index = settings.Use_Main_Display ? 0 : num_displays-1;
-
-  u_int32_t display_id = displays.GetOpenGLDisplayID(display_index);
-
-
-  if (settings.Capture_Display)
-    displays.Capture(display_index);
-
-  if (settings.Switch_Display)
-    if (displays.SetDisplayMode(display_index, settings.Window_Size, settings.depth, settings.Display_Hz))
-      displays.DumpCurrentDisplayMode(display_index);
-
-  CGRect window_rect = CGRectMake(0,0, settings.Window_Size.width, settings.Window_Size.height);
-
-  if (!settings.Switch_Display)
-    window_rect.origin = CGPointMake(32,32);
-
-  if (!gl_context.Init(display_id, window_rect))
-    return;
+  display->setContext(gl_context.GetGLContext());
 
 #ifdef USE_DSP
   display->setWindow(window);
@@ -428,8 +406,6 @@ MacWindow::MacWindow(const MacDisplay *display, MacVisual *visual) :
 
   visual->build();
 
-  display->setContext(gl_context.GetGLContext());
-
   makeCurrent();
 
   CGGetDisplayTransferByFormula(kCGDirectMainDisplay,
@@ -438,10 +414,10 @@ MacWindow::MacWindow(const MacDisplay *display, MacVisual *visual) :
 			       &settings.blueMin, &settings.blueMax, &settings.blueGamma);
   settings.gamma = (settings.redGamma + settings.greenGamma + settings.blueGamma) / 3.0;
 
-#if DEBUG
+#ifdef DEBUG
   std::cout << "Initial gamma settings: " << settings.gamma << " for (" << settings.redGamma << "," << settings.greenGamma << "," <<settings.blueGamma << std::endl;
 #endif
-  
+
   //hideMouse();
 }
 
@@ -452,12 +428,12 @@ MacWindow::~MacWindow() {
   showMouse();
   gl_context.Reset();
   displays.Release();
-  CGDisplayRestoreColorSyncSettings(); 
+  CGDisplayRestoreColorSyncSettings();
 }
 
 bool MacWindow::isValid() const { return true; }
 
-void MacWindow::showWindow(bool show) { }
+void MacWindow::showWindow(bool) {}
 
 void MacWindow::getPosition(int &x, int &y) { x = 0, y = 0; }
 
@@ -465,13 +441,48 @@ void MacWindow::getSize(int &width, int &height) const {
 
   width = CGDisplayPixelsWide(kCGDirectMainDisplay);
   height = CGDisplayPixelsHigh(kCGDirectMainDisplay);
+  // width = settings.Window_Size.width;
+  // width = settings.Window_Size.height;
 }
 
-void MacWindow::setTitle(const char *title) {}
-void MacWindow::setPosition(int x, int y) {}
-void MacWindow::setSize(int width, int height) {}
+void MacWindow::setTitle(const char *) {}
+void MacWindow::setPosition(int, int) {}
+void MacWindow::setSize(int width, int height)
+{
+  settings.Window_Size.width = width;
+  settings.Window_Size.height = height;
 
-void MacWindow::setMinSize(int width, int height) {
+  std::cout << "setSize was called with " << width << " x " << height << std::endl;
+
+  int num_displays = displays.Init();
+  if (num_displays == 0) {
+    return;
+  }
+  int display_index = settings.Use_Main_Display ? 0 : num_displays-1;
+  u_int32_t display_id = displays.GetOpenGLDisplayID(display_index);
+
+  if (settings.Capture_Display) {
+    displays.Capture(display_index);
+  }
+
+  if (settings.Switch_Display) {
+    if (displays.SetDisplayMode(display_index, settings.Window_Size, settings.depth, settings.Display_Hz)) {
+      displays.DumpCurrentDisplayMode(display_index);
+    }
+  }
+
+  CGRect window_rect = CGRectMake(0,0, settings.Window_Size.width, settings.Window_Size.height);
+  if (!settings.Switch_Display) {
+    window_rect.origin = CGPointMake(32,32);
+  }
+
+  if (!gl_context.Init(display_id, window_rect)) {
+    return;
+  }
+
+}
+
+void MacWindow::setMinSize(int, int) {
 #ifndef USE_DSP
   if (window == NULL) return;
 
@@ -519,13 +530,13 @@ void MacWindow::ungrabMouse()
 void MacWindow::showMouse() { ShowCursor(); }
 void MacWindow::hideMouse() { HideCursor(); }
 
-void MacWindow::setGamma(float value)  
+void MacWindow::setGamma(float value)
 {
   CGDisplayErr err;
 
   settings.gamma = value;
 
-#if DEBUG
+#ifdef DEBUG
   std::cout << "Setting Gamma to " << value << std::endl;
 #endif
   err = CGSetDisplayTransferByFormula( kCGDirectMainDisplay,
@@ -533,7 +544,7 @@ void MacWindow::setGamma(float value)
 				       settings.greenMin, settings.greenMax, 1.0 / value, //green
 				       settings.blueMin, settings.blueMax, 1.0 / value); //blue
 }
-float MacWindow::getGamma()        const { return settings.gamma;   }
+float MacWindow::getGamma()	const { return settings.gamma;   }
 bool MacWindow::hasGammaControl() const { return true; }
 
 void MacWindow::makeContext() {}
@@ -544,8 +555,8 @@ void MacWindow::swapBuffers() {
   gl_context.Flush();
 }
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

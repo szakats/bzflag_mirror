@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -17,372 +17,364 @@
 #ifndef __TEXTUTILS_H__
 #define	__TEXTUTILS_H__
 
-#if (_WIN32)
-// turn off bogus `this used in base member initialization list'
-	#pragma warning(disable: 4786)
-	#pragma warning(disable: 4503)
-	#pragma warning(disable: 4355)
+#include "common.h"
+
+/* system interface headers */
+#include <algorithm>
+#include <ctype.h>
+#ifdef HAVE_DEFINED_TOLOWER
+#undef tolower
+#undef toupper
 #endif
-
-#include <config.h>
-
 #include <string>
-#include <sstream>
-#include <vector>
-#include <stdio.h>
 #include <stdarg.h>
+#include <vector>
 
-/** The string utility class provides basic functionality to parse and
+/** This namespace provides basic functionality to parse and
  * format strings
  */
-class string_util {
-  public:
-    static std::string string_util::vformat(const char* fmt, va_list args) {
-      // FIXME -- should prevent buffer overflow in all cases
-      // not all platforms support vsnprintf so we'll use vsprintf and a
-      // big temporary buffer and hope for the best.
-      char buffer[8192];
-      vsprintf(buffer, fmt, args);
-      return std::string(buffer);
-    }
-    static std::string string_util::format(const char* fmt, ...) {
-      va_list args;
-      va_start(args, fmt);
-      std::string result = vformat(fmt, args);
-      va_end(args);
-      return result;
-    }
-    // get a vector of strings from a string, using all of chars of the delims
-    // string as separators. If maxTokens > 0, then the last 'token' may contain delimiters
-    // as it just returns the rest of the line
-    static std::vector<std::string> string_util::tokenize(std::string& in, std::string delims, int maxTokens = 0){
-      std::vector<std::string> out;
-      int numTokens = 0;
+namespace TextUtils {
+  std::string vformat(const char* fmt, va_list args);
+  std::string format(const char* fmt, ...) BZ_ATTR_12;
 
-      unsigned int startPos = in.find_first_not_of(delims);
-      while (startPos != std::string::npos){
-	unsigned int endPos;
-	
-	if (maxTokens && (numTokens >= (maxTokens-1)))
-	  endPos = std::string::npos;
-	else
-	  endPos = in.find_first_of(delims,startPos);
+  // converts a string to it's unicode version
+  std::wstring convert_to_wide(const std::string& string);
 
-	if (endPos == std::string::npos) {
-	  out.push_back(in.substr(startPos));
-	  break;
-	}
-	else
-	  out.push_back(in.substr(startPos,endPos-startPos));
-	numTokens++;
+  /** returns a string converted to lowercase
+   */
+  inline std::string tolower(const std::string& s)
+  {
+    std::string trans = s;
 
-	startPos = in.find_first_not_of(delims,endPos);
+    for (std::string::iterator i=trans.begin(), end=trans.end(); i!=end; ++i)
+      *i = ::tolower(*i);
+    return trans;
+  }
+
+  /** returns a string converted to uppercase
+   */
+  inline std::string toupper(const std::string& s)
+  {
+    std::string trans = s;
+    for (std::string::iterator i=trans.begin(), end=trans.end(); i!=end; ++i)
+      *i = ::toupper(*i);
+    return trans;
+  }
+
+  /** replace all of in in replaceMe with withMe
+   */
+  std::string replace_all(const std::string& in, const std::string& replaceMe, const std::string& withMe);
+
+  /** return copy of string with all whitespace stripped
+   */
+  std::string no_whitespace(const std::string &s);
+
+  /**
+   * Get a vector of strings from a string, using all of chars of thedelims
+   * string as separators. If maxTokens > 0, then the last 'token' maycontain delimiters
+   * as it just returns the rest of the line
+   * if you specify use quotes then tokens can be grouped in quotes and delimeters
+   * inside quotes are ignored.
+   * Hence /ban "Mr Blahblah" isajerk parses to "/ban", "Mr Blahlah" and "isajerk"
+   * but so does "Mr Blahblah" "isajerk", so if you want 3 tokens and a delimeter
+   * is in one of the tokens, by puting quotes around it you can get the correct
+   * parsing. When use quotes is enabled, \'s and "'s should\can be escaped with \
+   * escaping is not currently done for any other character.
+   * Should not have " as a delimeter if you want to use quotes
+   */
+  std::vector<std::string> tokenize(const std::string& in, const std::string &delims, const int maxTokens = 0, const bool useQuotes = false);
+
+  /** convert a string representation of some duration into minutes
+   *  example: "1d2h16m" -> 1500
+   *  return true if the string can be parsed
+   */
+  bool parseDuration(const char *duration, int &durationInt);
+
+  // C h a r a c t e r  c o m p a r i s o n
+
+  /** compare_nocase is strait from Stroustrup.  This implementation uses
+   * strings instead of char arrays and includes a maxlength bounds check.
+   * It compares two strings and returns 0 if equal, <0 if s1 is less than
+   * s2, and >0 if s1 is greater than s2.
+   */
+  inline int compare_nocase(const std::string& s1, const std::string &s2, int maxlength=4096)
+  {
+    std::string::const_iterator p1 = s1.begin();
+    std::string::const_iterator p2 = s2.begin();
+    int i=0;
+    while (p1 != s1.end() && p2 != s2.end()) {
+      if (i >= maxlength) {
+	return 0;
       }
-      return out;
+      if (::tolower(*p1) != ::tolower(*p2)) {
+	return (::tolower(*p1) < ::tolower(*p2)) ? -1 : 1;
+      }
+      ++p1;
+      ++p2;
+      ++i;
     }
+    return (s2.size() == s1.size()) ? 0 : (s1.size() < s2.size()) ? -1 : 1; // size is unsigned
+  }
 
-    static int string_util::parseDuration(std::string &duration)
-    {
-      int durationInt = 0;
-      int t = 0;
 
-      int len = duration.length();
-      for(int i=0; i < len; i++) {
-	if( isdigit(duration[i]) ) {
-	  t = t * 10 + (duration[i] - '0');
-	}
-        else if(duration[i] == 'h' || duration[i] == 'H') { 
-	  durationInt += (t * 60); 
-	  t = 0;
-	}
-        else if(duration[i] == 'd' || duration[i] == 'D') {
-	  durationInt += (t * 1440);
-	  t = 0;
-	}
-        else if(duration[i] == 'w' || duration[i] == 'w') {
-	  durationInt += (t * 10080);
-	  t = 0;
-	}
-      } 
-      durationInt += t;
-      return durationInt;
+  /** utility function returns truthfully whether
+   * given character is a letter.
+   */
+  inline bool isAlphabetic(const char c)
+  {
+    if (( c > 64 && c < 91) ||
+	( c > 96 && c < 123)) {
+      return true;
     }
-};
-
-
-// C h a r a c t e r  c o m p a r i s o n
-
-/** compare_nocase is strait from Stroustrup.  This implementation uses
- * strings instead of char arrays and includes a maxlength bounds check.
- * It compares two strings and returns 0 if equal, <0 if s1 is less than
- * s2, and >0 if s1 is greater than s2. 
- */
-inline static int compare_nocase(const std::string& s1, const std::string &s2, int maxlength=4096)
-{
-std::string::const_iterator p1 = s1.begin();
-std::string::const_iterator p2 = s2.begin();
-  int i=0;
-  while (p1 != s1.end() && p2 != s2.end()) {
-    if (i >= maxlength) {
-      return 0;
-    }
-    if (tolower(*p1) != tolower(*p2)) {
-      return (tolower(*p1) < tolower(*p2)) ? -1 : 1;
-    }
-    ++p1;
-    ++p2;
-    ++i;
-  }
-  return (s2.size() == s1.size()) ? 0 : (s1.size() < s2.size()) ? -1 : 1; // size is unsigned
-}
-
-
-
-/** utility function returns truthfully whether
- * given character is a letter.
- */
-inline bool isAlphabetic(const char c)
-{
-  if (( c > 64 && c < 91) ||
-      ( c > 96 && c < 123)) {
-    return true;
-  }
-  return false;
-}
-
-
-/** utility function returns truthfully whether
- * given character is a number.
- */
-inline bool isNumeric(const char c)
-{
-  if (( c > 47 && c < 58)) {
-    return true;
-  }
-  return false;
-}
-
-
-/** utility function returns truthfully whether
- * a given character is printable whitespace.
- * this includes newline, carriage returns, tabs
- * and spaces.
- */
-inline bool isWhitespace(const char c)
-{
-  if ((( c >= 9 ) && ( c <= 13 )) ||
-      (c == 32)) {
-    return true;
-  }
-  return false;
-}
-
-
-/** utility function returns truthfully whether
- * a given character is punctuation.
- */
-inline bool isPunctuation(const char c)
-{
-  if (( c > 32 && c < 48) ||
-      ( c > 57 && c < 65) ||
-      ( c > 90 && c < 97) ||
-      ( c > 122 && c < 127)) {
-    return true;
-  }
-  return false;
-}
-
-
-/** utility function returns truthfully whether
- * given character is an alphanumeric.  this is
- * strictly letters and numbers.
- */
-inline bool isAlphanumeric(const char c)
-{
-  if ( isAlphabetic(c) || isNumeric(c) ) {
-    return true;
-  }
-  return false;
-}
-
-
-/** utility function returns truthfully whether
-* given character is printable.  this includes
-* letters, numbers, and punctuation.
-* (but NOT whitespace)
-*/
-inline bool isVisible(const char c)
-{
-  if ( isAlphanumeric(c) || isPunctuation(c) ) {
-    return true;
-  }
-  return false;
-}
-
-
-/** utility function returns truthfully whether
- * given character is printable.  this includes
- * letters, numbers, punctuation, and whitespace
- */
-inline bool isPrintable(const char c)
-{
-  if ( isVisible(c) || isWhitespace(c) ) {
     return false;
   }
-  return true;
-}
 
 
-
-// S t r i n g  i t e r a t i o n
-
-/** utility method that returns the position of the
- * first alphanumeric character from a string
- */
-inline int firstAlphanumeric(const std::string &input, unsigned short int max=4096)
-{
-  if (input.size() == 0) {
-    return -1;
-
+  /** utility function returns truthfully whether
+   * given character is a number.
+   */
+  inline bool isNumeric(const char c)
+  {
+    if (( c > 47 && c < 58)) {
+      return true;
+    }
+    return false;
   }
 
-  int i = 0;
-  while (!isAlphanumeric(input[i]) && (i < max)) {
-    i++;
-  }
-  return i;
-}
 
-
-/** utility method that returns the position of the
- * first non-alphanumeric character from a string
- */
-inline int firstNonalphanumeric(const std::string &input, unsigned short int max=4096)
-{
-  if (input.size() == 0) {
-    return -1;
+  /** utility function returns truthfully whether
+   * a given character is printable whitespace.
+   * this includes newline, carriage returns, tabs
+   * and spaces.
+   */
+  inline bool isWhitespace(const char c)
+  {
+    if ((( c >= 9 ) && ( c <= 13 )) ||
+	(c == 32)) {
+      return true;
+    }
+    return false;
   }
 
-  int i = 0;
-  while (isAlphanumeric(input[i]) && (i < max)) {
-    i++;
-  }
-  return i;
-}
 
-
-/** utility method that returns the position of the
- * first printable character from a string
- */
-inline int firstPrintable(const std::string &input, unsigned short int max=4096)
-{
-  if (input.size() == 0) {
-    return -1;
+  /** utility function returns truthfully whether
+   * a given character is punctuation.
+   */
+  inline bool isPunctuation(const char c)
+  {
+    if (( c > 32 && c < 48) ||
+	( c > 57 && c < 65) ||
+	( c > 90 && c < 97) ||
+	( c > 122 && c < 127)) {
+      return true;
+    }
+    return false;
   }
 
-  int i = 0;
-  while (!isPrintable(input[i]) && (i < max)) {
-    i++;
-  }
-  return i;
-}
 
-
-/** utility method that returns the position of the
- * first non-printable character from a string
- */
-inline int firstNonprintable(const std::string &input, unsigned short int max=4096)
-{
-  if (input.size() == 0) {
-    return -1;
+  /** utility function returns truthfully whether
+   * given character is an alphanumeric.  this is
+   * strictly letters and numbers.
+   */
+  inline bool isAlphanumeric(const char c)
+  {
+    if (isAlphabetic(c) || isNumeric(c)) {
+      return true;
+    }
+    return false;
   }
 
-  int i = 0;
-  while (isPrintable(input[i]) && (i < max)) {
-    i++;
-  }
-  return i;
-}
 
-
-/** utility method that returns the position of the
- * first visible character from a string
- */
-inline int firstVisible(const std::string &input, unsigned short int max=4096)
-{
-  if (input.size() == 0) {
-    return -1;
+  /** utility function returns truthfully whether
+   * given character is printable.  this includes
+   * letters, numbers, and punctuation.
+   * (but NOT whitespace)
+   */
+  inline bool isVisible(const char c)
+  {
+    if (isAlphanumeric(c) || isPunctuation(c)) {
+      return true;
+    }
+    return false;
   }
 
-  int i = 0;
-  while (isVisible(input[i]) && (i < max)) {
-    i++;
-  }
-  return i;
-}
 
-
-/** utility method that returns the position of the
- * first non visible character from a string (control
- * codes or whitespace
- */
-inline int firstNonvisible(const std::string &input, unsigned short int max=4096)
-{
-  if (input.size() == 0) {
-    return -1;
+  /** utility function returns truthfully whether
+   * given character is printable.  this includes
+   * letters, numbers, punctuation, and whitespace
+   */
+  inline bool isPrintable(const char c)
+  {
+    if (isVisible(c) || isWhitespace(c)) {
+      return false;
+    }
+    return true;
   }
 
-  int i = 0;
-  while (!isVisible(input[i]) && (i < max)) {
-    i++;
-  }
-	 return i;
-}
 
+  // S t r i n g  i t e r a t i o n
 
-/** utility method that returns the position of the
-* first alphabetic character from a string
-*/
-inline int firstAlphabetic(const std::string &input, unsigned short int max=4096)
-{
-  if (input.size() == 0) {
-    return -1;
+  /** utility method that returns the position of the
+   * first alphanumeric character from a string
+   */
+  inline int firstAlphanumeric(const std::string &input, unsigned short int max=4096)
+  {
 
-  }
+    if (max > input.length())
+      max = (unsigned short)input.length();
 
-  int i = 0;
-  while (!isAlphabetic(input[i]) && (i < max)) {
-    i++;
-  }
-  return i;
-}
+    for (unsigned short i = 0; i < max; i++)
+      if (isAlphanumeric(input[i]))
+	return i;
 
-
-/** utility method that returns the position of the
-* first printable character from a string
-*/
-inline int firstNonalphabetic(const std::string &input, unsigned short int max=4096)
-{
-  if (input.size() == 0) {
     return -1;
   }
 
-  int i = 0;
-  while (isAlphabetic(input[i]) && (i < max)) {
-    i++;
-  }
-  return i;
-}
 
+  /** utility method that returns the position of the
+   * first non-alphanumeric character from a string
+   */
+  inline int firstNonalphanumeric(const std::string &input, unsigned short int max=4096)
+  {
+
+    if (max > input.length())
+      max = (unsigned short)input.length();
+
+    for (unsigned short i = 0; i < max; i++)
+      if (!isAlphanumeric(input[i]))
+	return i;
+
+    return -1;
+  }
+
+
+  /** utility method that returns the position of the
+   * first printable character from a string
+   */
+  inline int firstPrintable(const std::string &input, unsigned short int max=4096)
+  {
+
+    if (max > input.length())
+      max = (unsigned short)input.length();
+
+    for (unsigned short i = 0; i < max; i++)
+      if (isPrintable(input[i]))
+	return i;
+
+    return -1;
+  }
+
+
+  /** utility method that returns the position of the
+   * first non-printable character from a string
+   */
+  inline int firstNonprintable(const std::string &input, unsigned short int max=4096)
+  {
+    if (max > input.length())
+      max = (unsigned short)input.length();
+
+    for (unsigned short i = 0; i < max; i++)
+      if (!isPrintable(input[i]))
+	return i;
+
+    return -1;
+  }
+
+
+  /** utility method that returns the position of the
+   * first visible character from a string
+   */
+  inline int firstVisible(const std::string &input, unsigned short int max=4096)
+  {
+
+    if (max > input.length())
+      max = (unsigned short)input.length();
+
+    for (unsigned short i = 0; i < max; i++)
+      if (isVisible(input[i]))
+	return i;
+
+    return -1;
+  }
+
+
+  /** utility method that returns the position of the
+   * first non visible character from a string (control
+   * codes or whitespace
+   */
+  inline int firstNonvisible(const std::string &input, unsigned short int max=4096)
+  {
+    if (max > input.length())
+      max = (unsigned short)input.length();
+
+    for (unsigned short i = 0; i < max; i++)
+      if (!isVisible(input[i]))
+	return i;
+
+    return -1;
+ }
+
+
+  /** utility method that returns the position of the
+   * first alphabetic character from a string
+   */
+  inline int firstAlphabetic(const std::string &input, unsigned short int max=4096)
+  {
+    if (max > input.length())
+      max = (unsigned short)input.length();
+
+    for (unsigned short i = 0; i < max; i++)
+      if (isAlphabetic(input[i]))
+	return i;
+
+    return -1;
+  }
+
+
+  /** utility method that returns the position of the
+   * first printable character from a string
+   */
+  inline int firstNonalphabetic(const std::string &input, unsigned short int max=4096)
+  {
+    if (max > input.length())
+      max = (unsigned short)input.length();
+
+    for (unsigned short i = 0; i < max; i++)
+      if (!isAlphabetic(input[i]))
+	return i;
+
+    return -1;
+  }
+
+  /** url-encodes a string
+   */
+  std::string url_encode(const std::string &text);
+
+  /** escape a string
+   */
+  std::string escape(const std::string &text, char escaper);
+
+  /** un-escape a string
+   */
+  std::string unescape(const std::string &text, char escaper);
+
+  /** lookup for an un-escaped separator
+   */
+  int unescape_lookup(const std::string &text, char escaper, char sep);
+
+  /** return a copy of a string, truncated to specified length,
+   *  make last char a '~' if truncation took place
+   */
+  std::string str_trunc_continued (const std::string &text, int len);
+}
 
 #endif // __TEXTUTILS_H__
 
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,15 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// interface header
 #include "FileManager.h"
-#include "string"
-#include "StateDatabase.h"
+
+// system headers
+#include <string>
 #include <ctype.h>
 #include <fstream>
-
 #include <sys/stat.h>
 #ifndef _WIN32
 #include <sys/types.h>
@@ -23,11 +24,16 @@
 #include <direct.h>
 #endif
 
+// local implementation headers
+#include "StateDatabase.h"
+
 //
 // FileManager
 //
 
-FileManager*			FileManager::mgr = NULL;
+// initialize the singleton
+template <>
+FileManager* Singleton<FileManager>::_instance = (FileManager*)0;
 
 FileManager::FileManager()
 {
@@ -36,14 +42,6 @@ FileManager::FileManager()
 
 FileManager::~FileManager()
 {
-  mgr = NULL;
-}
-
-FileManager*			FileManager::getInstance()
-{
-  if (mgr == NULL)
-    mgr = new FileManager;
-  return mgr;
 }
 
 std::istream*			FileManager::createDataInStream(
@@ -58,11 +56,11 @@ std::istream*			FileManager::createDataInStream(
   const bool relative = !isAbsolute(filename);
   if (relative) {
     // try directory stored in DB
-    if (BZDB->isSet("directory")) {
-      std::ifstream* stream = new std::ifstream(catPath(BZDB->get("directory"),
+    if (BZDB.isSet("directory")) {
+      std::ifstream* stream = new std::ifstream(catPath(BZDB.get("directory"),
 						filename).c_str(), mode);
       if (stream && *stream)
-        return stream;
+	return stream;
       delete stream;
     }
 
@@ -70,7 +68,7 @@ std::istream*			FileManager::createDataInStream(
     {
       std::ifstream* stream = new std::ifstream(catPath("data", filename).c_str(), mode);
       if (stream && *stream)
-        return stream;
+	return stream;
       delete stream;
     }
   }
@@ -84,9 +82,9 @@ std::istream*			FileManager::createDataInStream(
   }
 
   // try install directory
-#if defined(INSTALL_DATA_DIR)
+#if defined(BZFLAG_DATA)
   if (relative) {
-    std::ifstream* stream = new std::ifstream(catPath(INSTALL_DATA_DIR,
+    std::ifstream* stream = new std::ifstream(catPath(BZFLAG_DATA,
 					      filename).c_str(), mode);
     if (stream && *stream)
       return stream;
@@ -112,25 +110,24 @@ std::ostream*			FileManager::createDataOutStream(
   const bool relative = !isAbsolute(filename);
   if (relative) {
     // try directory stored in DB
-    if (BZDB->isSet("directory")) {
-      std::ofstream* stream = new std::ofstream(catPath(BZDB->get("directory"),
+    if (BZDB.isSet("directory")) {
+      std::ofstream* stream = new std::ofstream(catPath(BZDB.get("directory"),
 						filename).c_str(), mode);
       if (stream && *stream)
-        return stream;
+	return stream;
       delete stream;
-      return NULL;
     }
 
     // try data directory
     {
       std::ofstream* stream = new std::ofstream(catPath("data", filename).c_str(), mode);
       if (stream && *stream)
-        return stream;
+	return stream;
       delete stream;
-      return NULL;
     }
   } else {
     // try absolute path
+    int successMkdir = 0;
     int i = 0;
 #ifndef _WIN32
     // create all directories above the file
@@ -138,26 +135,43 @@ std::ostream*			FileManager::createDataOutStream(
       struct stat statbuf;
       if (!(stat(filename.substr(0, i).c_str(), &statbuf) == 0 &&
 	    (S_ISDIR(statbuf.st_mode)))) {
-	mkdir(filename.substr(0, i).c_str(), 0777);
+	successMkdir = mkdir(filename.substr(0, i).c_str(), 0777);
+	if (successMkdir != 0) {
+	  perror("Unable to make directory");
+	  return NULL;
+	}
       }
     }
-#else
-    // create all directories above the file
-    while ((i = filename.find('\\', i+1)) != -1) {
-      struct stat statbuf;
-      if (!(stat(filename.substr(0, i).c_str(), &statbuf) == 0 &&
-	    (_S_IFDIR & statbuf.st_mode))) {
-		_mkdir(filename.substr(0, i).c_str());
-      }
-    }
-
-#endif
     std::ofstream* stream = new std::ofstream(filename.c_str(), mode);
     if (stream && *stream)
       return stream;
+#else
+    // create all directories above the file
+    i = 2; // don't stat on a drive, it will fail
+    while ((i = filename.find('\\', i+1)) != -1)
+    {
+      struct stat statbuf;
+      std::string subDir = filename.substr(0, i);
+
+      if (!(stat(subDir.c_str(), &statbuf) == 0 && (_S_IFDIR & statbuf.st_mode)))
+      {
+	successMkdir = _mkdir(subDir.c_str());
+
+	/*if (successMkdir != 0)
+	{
+	  perror("Unable to make directory");
+	  return NULL;
+	} */
+      }
+    }
+    std::ofstream* stream = new std::ofstream(filename.c_str(), mode);
+    if (stream)
+      return stream;
+#endif
     delete stream;
-    return NULL;
   }
+
+  return NULL;
 }
 
 bool				FileManager::isAbsolute(const std::string& path) const
@@ -172,8 +186,6 @@ bool				FileManager::isAbsolute(const std::string& path) const
   if (path.size() >= 3 && isalpha(cpath[0]) && cpath[1] == ':' &&
       (cpath[2] == '\\' || cpath[2] == '/'))
     return true;
-#elif defined(macintosh)
-#error FIXME -- what indicates an absolute path on mac?
 #else
   if (path.c_str()[0] == '/')
     return true;
@@ -192,28 +204,21 @@ std::string			FileManager::catPath(
   if (b.empty())
     return a;
 
+  std::string c = a;
 #if defined(_WIN32)
-  std::string c = a;
   c += "\\";
-  c += b;
-  return c;
-#elif defined(macintosh)
-  std::string c = a;
-  c += ':';
-  c += b;
 #else
-  std::string c = a;
   c += "/";
+#endif
   c += b;
   return c;
-#endif
 }
 
-// Local variables: ***
-// mode:C++ ***
+
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

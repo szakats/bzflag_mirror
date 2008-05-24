@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* ZSceneDatabase:
@@ -26,14 +26,29 @@ class ZSceneDatabase : public SceneDatabase {
 			ZSceneDatabase();
 			~ZSceneDatabase();
 
-    void		addStaticNode(SceneNode*);
+    // returns true if the node would have been deleted
+    bool		addStaticNode(SceneNode*, bool dontFree);
     void		addDynamicNode(SceneNode*);
     void		addDynamicSphere(SphereSceneNode*);
+    void		finalizeStatics();
     void		removeDynamicNodes();
     void		removeAllNodes();
     bool		isOrdered();
 
-    SceneIterator*	getRenderIterator();
+    void		updateNodeStyles();
+    void		addLights(SceneRenderer& renderer);
+    void		addShadowNodes(SceneRenderer &renderer);
+    void		addRenderNodes(SceneRenderer& renderer);
+    void		renderRadarNodes(const ViewFrustum&);
+
+    void		drawCuller();
+    void		setOccluderManager(int);
+
+    const Extents*	getVisualExtents() const;
+
+  private:
+    void		setupCullList();
+    void		makeCuller();
 
   private:
     int			staticCount;
@@ -43,30 +58,23 @@ class ZSceneDatabase : public SceneDatabase {
     int			dynamicCount;
     int			dynamicSize;
     SceneNode**		dynamicList;
+
+    int			culledCount;
+    SceneNode**	 culledList;
+
+    class Octree*       octree;
+    int			cullDepth;
+    int			cullElements;
+
 };
 
-class ZSceneIterator : public SceneIterator {
-  public:
-			ZSceneIterator(const ZSceneDatabase*);
-    virtual		~ZSceneIterator();
-
-    virtual void	resetFrustum(const ViewFrustum*);
-    virtual void	reset();
-    virtual SceneNode*	getNext();
-
-  private:
-    const ZSceneDatabase* db;
-    bool		staticDone, dynamicDone;
-    int			staticIndex, dynamicIndex;
-};
 
 #endif // BZF_Z_SCENE_DATABASE_H
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

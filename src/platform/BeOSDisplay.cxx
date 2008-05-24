@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "BeOSDisplay.h"
@@ -66,13 +66,18 @@ bool					BeOSDisplay::isEventPending() const
   if (beosWin && beosWin->currentOglContext == find_thread(NULL)) {
     beosWin->yieldCurrent();
   }
-//  snooze(10000);
+  //  snooze(10000);
   return (port_buffer_size_etc(eventPort, B_TIMEOUT, 0LL) > 0);
+}
+
+bool					BeOSDisplay::peekEvent(BzfEvent& event) const
+{
+  return false;
 }
 
 bool					BeOSDisplay::getEvent(BzfEvent& event) const
 {
-//printf("BeOSDisplay::getEvent()\n");
+  //printf("BeOSDisplay::getEvent()\n");
   bool is_current_ogl = false;
   status_t err;
   int32 what;
@@ -83,7 +88,7 @@ bool					BeOSDisplay::getEvent(BzfEvent& event) const
   err = read_port_etc(eventPort, &what, (void *)&event, sizeof(BzfEvent), B_TIMEOUT, 0LL);
   if (is_current_ogl)
     beosWin->makeCurrent();
-//printf("<BeOSDisplay::getEvent()\n");
+  //printf("<BeOSDisplay::getEvent()\n");
   return (err >= B_OK);
 }
 
@@ -107,11 +112,10 @@ bool					BeOSDisplay::doSetResolution(int index)
 }
 
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,21 +7,18 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef BZF_FILE_MANAGER_H
 #define BZF_FILE_MANAGER_H
 
-#ifdef _WIN32
-#pragma warning(4:4786)
-#endif
-
-#include <string>
 #include "common.h"
+#include <string>
 #include "bzfio.h"
+#include "Singleton.h"
 
-#define FILEMGR (FileManager::getInstance())
+#define FILEMGR (FileManager::instance())
 
 /**
  Simple file management.
@@ -29,10 +26,8 @@
  some platform independence for files requiring directory names.
 */
 
-class FileManager {
+class FileManager : public Singleton<FileManager> {
 public:
-  /** Destroy the FileManager */
-  ~FileManager();
 
   /** Open an input stream.
    create an input stream for a file in the data directory.
@@ -64,26 +59,19 @@ public:
   */
   std::string		catPath(const std::string& a, const std::string& b) const;
 
-  /** Get the singleton instance.
-   returns the existing singleton if available, if not, creates
-   an instance and returns it.
-  */
-  static FileManager*	getInstance();
-
-private:
+protected:
+  friend class Singleton<FileManager>;
   FileManager();
+  ~FileManager();
 
-private:
-  static FileManager*	mgr;
 };
 
 #endif
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -35,7 +35,7 @@ void			getMoonPosition(double julianDay, float latitude,
 // transform a direction from the celestial coordinate system
 void			getCelestialTransform(double julianDay,
 					float latitude, float longitude,
-					float xform[4][4]);
+					GLfloat (&xform)[4][4]);
 
 // sets color of sun.  if it's nighttime, the sun is actually the moon.
 void			getSunColor(const float sunDir[3], GLfloat color[3],
@@ -60,11 +60,10 @@ bool			getSunsetTop(const float sunDir[3], float& topAltitude);
 
 #endif // BZF_DAYLIGHT_H
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

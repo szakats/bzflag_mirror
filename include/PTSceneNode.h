@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* PhotonTorpedoSceneNode:
@@ -30,7 +30,7 @@ class PhotonTorpedoSceneNode : public ShotSceneNode {
     void		move(const GLfloat pos[3], const GLfloat forward[3]);
     void		addLight(SceneRenderer&);
 
-    void		notifyStyleChange(const SceneRenderer&);
+    void		notifyStyleChange();
     void		addRenderNodes(SceneRenderer&);
 
   protected:
@@ -39,7 +39,7 @@ class PhotonTorpedoSceneNode : public ShotSceneNode {
 			PTRenderNode(const PhotonTorpedoSceneNode*);
 			~PTRenderNode();
 	void		render();
-	const GLfloat*	getPosition() { return sceneNode->getSphere(); }
+	const GLfloat*	getPosition() const { return sceneNode->getSphere(); }
       private:
 	const PhotonTorpedoSceneNode* sceneNode;
 	int		numFlares;
@@ -53,7 +53,6 @@ class PhotonTorpedoSceneNode : public ShotSceneNode {
     friend class PTRenderNode;
 
   private:
-    bool		blending;
     OpenGLLight		light;
     OpenGLGState	gstate;
     PTRenderNode	renderNode;
@@ -65,11 +64,10 @@ class PhotonTorpedoSceneNode : public ShotSceneNode {
 
 #endif // BZF_PHOTON_TORPEDO_SCENE_NODE_H
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,11 +1,16 @@
-if CLIENT_INCLUDED
-noinst_LIBRARIES = libMediaFile.a
-endif
+noinst_LTLIBRARIES = libMediaFile.la
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
-libMediaFile_a_SOURCES =	\
+AM_CPPFLAGS = -I$(top_srcdir)/include @CONF_CPPFLAGS@
+AM_CXXFLAGS = @CONF_CXXFLAGS@
+
+libMediaFile_la_LDFLAGS = -static
+libMediaFile_la_SOURCES =	\
+	AudioFile.cxx		\
+	AudioFile.h		\
+	CacheManager.cxx	\
 	ImageFile.cxx		\
 	ImageFile.h		\
 	MediaFile.cxx		\
@@ -13,6 +18,10 @@ libMediaFile_a_SOURCES =	\
 	PNGImageFile.h		\
 	SGIImageFile.cxx	\
 	SGIImageFile.h		\
-	AudioFile.h		\
-	WaveAudioFile.h		\
-	WaveAudioFile.cxx
+	WaveAudioFile.cxx	\
+	WaveAudioFile.h
+
+EXTRA_DIST = \
+	OggAudioFile.cxx	\
+	OggAudioFile.h		\
+	README

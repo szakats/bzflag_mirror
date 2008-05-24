@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,51 +7,62 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef UIMAP_H
 #define UIMAP_H
 
+/* global interface headers */
+#include "common.h"
+
+/* system interface headers */
 #include <map>
 #include <string>
 
-#include <BZAdminUI.h>
+#include "BZAdminUI.h"
+#include "PlayerInfo.h"
+#include "Singleton.h"
 
-using namespace std;
+
+class BZAdminClient;
 
 
 /** The function type that creates interface objects. */
-typedef BZAdminUI* (*UICreator)(const map<PlayerId, string>& players,
-				PlayerId me);
+typedef BZAdminUI* (*UICreator)(BZAdminClient&);
 
 
 /** This class maps strings to BZAdmin interfaces (subclasses of
     BZAdminUI). New interface classes should register using the UIAdder
     class. */
-class UIMap : public map<string, UICreator> {
-private:
-  /** The constructor is private, this is a singleton. */
+class UIMap : public std::map<std::string, UICreator>,
+	      public Singleton<UIMap>
+{
+protected:
+  friend class Singleton<UIMap>;
+  /** The constructor is hidden, this is a singleton. */
   UIMap();
-
-public:
-
-  /** This function returns the single instance of this class. */
-  static UIMap& getInstance();
 
 };
 
 
-/** A helper class that can be used to add interfaces when the program loads.*/
+/** A helper class that can be used to add interfaces when the program loads.
+    To register the UI class @c MyBZAdminUI, you need a UICreator that returns
+    a pointer to a @c MyBZAdminUI (casted to a BZAdminUI *). Then you include
+    a static member variable of the type @c UIAdder in @c MyBZAdminUI, and
+    initialize it with the constructor call
+    <code>UIAdder MyBZAdminUI::myUIAdder("my_ui", &MyBZAdminUI::myCreator)
+    </code>. The constructor will then register @c myCreator in the UIMap with
+    the name "my_ui". */
 class UIAdder {
 public:
-  UIAdder(const string& name, UICreator creator);
+  UIAdder(const std::string& name, UICreator creator);
 };
 
 #endif
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

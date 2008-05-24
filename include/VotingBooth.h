@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,27 +7,20 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __VOTINGBOOTH_H__
 #define __VOTINGBOOTH_H__
 
+#include "common.h"
+
+/* system interface headers */
 #include <ctype.h>
 #include <map>
 #include <vector>
 #include <string>
 #include <algorithm>
-
-// work around an ugly STL bug in BeOS
-// FIXME someone test whether it is still needed
-#ifdef __BEOS__
-#define private public
-#endif
-#include <bitset>
-#ifdef __BEOS__
-#undef private
-#endif
 
 
 /** VotingBooth is a means to create and track a vote.  A single booth
@@ -37,11 +30,12 @@
  * two default results of any poll if unspecified.
  */
 class VotingBooth
-{	
+{
 private:
-  
+
   static const short int RETRACTED_VOTE;
-  
+  typedef std::map<std::string, short int> VoterResponseMap;
+
   /** question that is voted upon (optionally provided)
    */
   std::string _question;
@@ -53,7 +47,7 @@ private:
   /** collection of the voters and their response responses (index into the
    * choice vector)
    */
-  std::map<std::string, short int> _vote;
+  VoterResponseMap _vote;
 
 protected:
 
@@ -93,13 +87,13 @@ protected:
   /** returns the number of voters that have participated
    */
   inline unsigned long int getVoterCount(void) const {
-    return _vote.size();
+    return (unsigned long int)_vote.size();
   }
 
   /** returns the number of responses available
    */
   inline unsigned long int getResponseCount(void) const {
-    return _choice.size();
+    return (unsigned long int)_choice.size();
   }
 
   /** returns a string identifier for this poll
@@ -117,8 +111,8 @@ VotingBooth *YesNoVotingBooth(std::string question = "");
 class VotingBooth;
 #endif
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

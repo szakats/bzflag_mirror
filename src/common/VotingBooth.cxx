@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,15 +7,19 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning( 4:4786)
 #endif
 
+// interface header
 #include "VotingBooth.h"
 
+// system headers
+#include <string>
+#include <vector>
 
 const short int VotingBooth::RETRACTED_VOTE=-2;
 
@@ -102,7 +106,7 @@ bool VotingBooth::vote(std::string voterName, std::string response)
 
 bool VotingBooth::retractVote(const std::string voterName)
 {
-  std::map<std::string, short int>::iterator i = _vote.find(voterName);
+  VoterResponseMap::iterator i = _vote.find(voterName);
 
   /* if not found, then nothing to retract */
   if (i == _vote.end()) {
@@ -118,7 +122,7 @@ unsigned long int VotingBooth::getVoteCount(const std::string response) const
 {
   unsigned long int total=0;
 
-  for (std::map<std::string, short int>::const_iterator i = _vote.begin();
+  for (VoterResponseMap::const_iterator i = _vote.begin();
        i != _vote.end(); ++i) {
     /* negative indices indicate an uncounted vote (perhaps retracted) */
     if ( (i->second >= 0) && (_choice[i->second] == response) ) {
@@ -141,11 +145,10 @@ unsigned long int VotingBooth::getTotalVotes(void) const
 }
 
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

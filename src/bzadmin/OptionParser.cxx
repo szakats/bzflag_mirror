@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,31 +7,36 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#ifdef _MSC_VER
+#pragma warning( 4: 4786)
+#endif
+
+/* interface header */
 #include "OptionParser.h"
 
 
-OptionParser::OptionParser(const string& helpPrefix, 
-			   const string& usageSuffix)
+OptionParser::OptionParser(const std::string& helpPrefix,
+			   const std::string& usageSuffix)
   : helpPre(helpPrefix), usageSuf(usageSuffix) {
 
 }
 
 OptionParser::~OptionParser() {
-  std::map<string, Parser*>::iterator iter;
+  ParserMap::iterator iter;
   for (iter = parsers.begin(); iter != parsers.end(); ++iter)
     delete iter->second;
 }
 
 
-const string& OptionParser::getError() const {
+const std::string& OptionParser::getError() const {
   return error;
 }
 
 
-const vector<string>& OptionParser::getParameters() const {
+const std::vector<std::string>& OptionParser::getParameters() const {
   return parameters;
 }
 
@@ -39,15 +44,17 @@ const vector<string>& OptionParser::getParameters() const {
 bool OptionParser::parse(int argc, char** argv) {
   parameters.clear();
   error = "";
-  map<string, Parser*>::iterator iter;
+  ParserMap::iterator iter;
   for (int i = 1; i < argc; ++i) {
     if (!strcmp(argv[i], "-help")) {
-      printHelp(cout, argv[0]);
+      printHelp(std::cout, argv[0]);
       return false;
     }
-    if (argv[i][0] != '-')
+    if (argv[i][0] != '-') {
       parameters.push_back(argv[i]);
-    else {
+      // should just blank out the password, but we don't really parse it here
+      memset(argv[i], ' ', strlen(argv[i]));
+    } else {
       iter = parsers.find(&argv[i][1]);
       if (iter == parsers.end()) {
 	error = error + "Unknown option \"" + argv[i] + "\"";
@@ -57,36 +64,36 @@ bool OptionParser::parse(int argc, char** argv) {
     }
   }
   if (error.size() > 0) {
-    cerr<<error<<endl;
-    printUsage(cerr, argv[0]);
-    cerr<<endl;
+    std::cerr<<error<<std::endl;
+    printUsage(std::cerr, argv[0]);
+    std::cerr<<std::endl;
     return false;
   }
   return true;
 }
 
 
-void OptionParser::printHelp(ostream& os, const string& progName) const {
-  os<<helpPre<<endl<<endl;
+void OptionParser::printHelp(std::ostream& os, const std::string& progName) const {
+  os<<helpPre<<std::endl<<std::endl;
   printUsage(os, progName);
-  os<<endl<<endl;
-  map<string, Parser*>::const_iterator iter;
-  os<<"   -help: print this help message"<<endl;
+  os<<std::endl<<std::endl;
+  ParserMap::const_iterator iter;
+  os<<"   -help: print this help message"<<std::endl;
   for (iter = parsers.begin(); iter != parsers.end(); ++iter)
-    os<<"   -"<<iter->first<<": "<<iter->second->help<<endl;
+    os<<"   -"<<iter->first<<": "<<iter->second->help<<std::endl;
 }
 
 
-void OptionParser::printUsage(ostream& os, const string& progName) const {
-  map<string, Parser*>::const_iterator iter;
+void OptionParser::printUsage(std::ostream& os, const std::string& progName) const {
+  ParserMap::const_iterator iter;
   os<<"Usage: "<<progName<<" [-help] ";
   for (iter = parsers.begin(); iter != parsers.end(); ++iter)
     os<<iter->second->usage<<" ";
   os<<usageSuf;
 }
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

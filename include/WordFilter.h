@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,53 +7,37 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __WORDFILTER_H__
 #define __WORDFILTER_H__
 
-#ifdef _WIN32
-#  define HAVE_REGEX_H 0
-#else
-#  define HAVE_REGEX_H 1
-#endif
+#include "common.h"
 
+/* system interface headers */
 #include <string>
-#include <vector>
 #include <set>
 #include <algorithm>
 #include <string.h>
 
-// work around an ugly STL bug in BeOS
-// FIXME someone test whether it is still needed
-#ifdef __BEOS__
-#define private public
-#endif
-#include <bitset>
-#ifdef __BEOS__
-#undef private
-#endif
-
 #include <fstream>
 #include <iostream>
 
+#include <ctype.h>
 #include <sys/types.h>
 
-#if HAVE_REGEX_H
-#  include <regex.h>
-#else
-#  define regex_t void
-#endif
-
-#include "common.h"
+/* common interface headers */
+#include "bzregex.h"
 #include "TextUtils.h"
 
 
+
 /* words are stored by the index of their first letter of
-* UTF-8 format.
-*/
-static const unsigned short int MAX_FILTER_SETS = 256;
+ * UTF-8 format.  it would be nice to eventually support
+ * full indexing of
+ */
+#define MAX_FILTER_SETS 256
 
 
 /** WordFilter will load a list of words and phrases from a file or one at
@@ -106,6 +90,15 @@ static const unsigned short int MAX_FILTER_SETS = 256;
  */
 class WordFilter
 {
+ public:
+
+  /** structure for a single filter word, and a compiled regular expression
+   */
+  typedef struct filterStruct {
+    std::string word;
+    regex_t *compiled;
+  } filter_t;
+
 
  private:
 
@@ -115,13 +108,6 @@ class WordFilter
   /** set of characters used to replace filtered content */
   std::string filterChars;
 
-  /** structure for a single filter word, and a compiled regular expression
-   */
-  typedef struct filterStruct {
-    std::string word;
-    regex_t *compiled;
-  } filter_t;
-
   /** word expressions to be filtered including compiled regexp versions */
   struct expressionCompare {
     bool operator () (const filter_t& word1, const filter_t& word2) const {
@@ -129,6 +115,7 @@ class WordFilter
     }
   };
 
+  typedef std::set<filter_t, expressionCompare> ExpCompareSet;
 
   /** main collection of what to filter.  items are stored into
    * the array indexed by the first character of the filter word.
@@ -136,14 +123,14 @@ class WordFilter
    * minimal hashing and rather fast lookups.
    */
   // XXX consider making a numeric hash to avoid array overflows
-  std::set<filter_t, expressionCompare> filters[MAX_FILTER_SETS];
+  ExpCompareSet filters[MAX_FILTER_SETS];
 
 
   /** used by the agressive filter */
-  std::set<filter_t, expressionCompare> suffixes;
+  ExpCompareSet suffixes;
 
   /** used by the agressive filter */
-  std::set<filter_t, expressionCompare> prefixes;
+  ExpCompareSet prefixes;
 
 
   /** utility method performs an actual replacement of
@@ -156,6 +143,15 @@ class WordFilter
    * already in the string
    */
   inline void appendUniqueChar(std::string& string, char c) const;
+
+  /** utility method to add words to the prefix set
+   */
+  inline void addPrefix(const char *word);
+
+  /** utility method to add words to the suffix set
+   */
+  inline void addSuffix(const char *word);
+
 
  protected:
 
@@ -212,19 +208,14 @@ class WordFilter
   /** loads a set of bad words from a specified file */
   unsigned int loadFromFile(const std::string &fileName, bool verbose=false);
 
-  /** adds a new filter to the existing filter list, and
-   * optionally recursively adds all combinations of
-   * available suffixes and prefixes.
-   */
-  bool addToFilter(const std::string &word);
-  bool addToFilter(const std::string &word, bool append);
+  /** adds a new filter to the existing filter list */
   bool addToFilter(const std::string &word, const std::string &expression);
-  bool addToFilter(const std::string &word, const std::string &expression, bool append);
 
   /** given an input string, filter the input
    * using either the simple or agressive filter
    */
   bool filter(char *input, const bool simple=false) const;
+  bool filter(std::string &input, const bool simple=false) const;
 
   /** dump a list of words in the filter to stdout */
   void outputWords(void) const;
@@ -233,7 +224,6 @@ class WordFilter
   /** retuns a count of how many words are in the filter */
   unsigned long int wordCount(void) const;
 };
-
 
 
 /** utility method performs an actual replacement of
@@ -253,7 +243,7 @@ inline int WordFilter::filterCharacters(char *input, unsigned int start, size_t 
   }
 
   int randomCharPos, previousCharPos = -1;
-  int maxFilterChar = filterChars.size();
+  int maxFilterChar = (int)filterChars.size();
   int count=0;
   for (unsigned int j=0; j < (unsigned int)length; j++) {
     char c = input[start + j];
@@ -271,7 +261,7 @@ inline int WordFilter::filterCharacters(char *input, unsigned int start, size_t 
     if (filterSpaces) {
       input[start + j] = filterChars[randomCharPos];
       count++;
-    } else if (isAlphanumeric(c)) {
+    } else if (TextUtils::isAlphanumeric(c)) {
       input[start + j] = filterChars[randomCharPos];
       count++;
     } /* else it is non-letters so we can ignore */
@@ -283,22 +273,57 @@ inline int WordFilter::filterCharacters(char *input, unsigned int start, size_t 
 
 inline void WordFilter::appendUniqueChar(std::string& string, char c) const
 {
+#ifdef HAVE_STD__COUNT
+// ISO standard std::count
   if (std::count(string.begin(), string.end(), c) == 0) {
     string += c;
   }
+#else
+// old HP-style std::count (SunPRO for instance)
+  int n = 0;
+  std::count(string.begin(), string.end(), c, n);
+  if (n == 0) {
+    string += c;
+  }
+#endif
 }
 
+
+inline void WordFilter::addPrefix(const char *word)
+{
+  filter_t fix;
+  std::pair<ExpCompareSet::iterator, bool> result;
+  fix.word = std::string(word);
+  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
+  result = prefixes.insert(fix);
+  if (!result.second && fix.compiled) {
+    regfree(fix.compiled);
+    free(fix.compiled);
+  }
+}
+
+inline void WordFilter::addSuffix(const char *word)
+{
+  filter_t fix;
+  std::pair<ExpCompareSet::iterator, bool> result;
+  fix.word = std::string(word);
+  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
+  result = suffixes.insert(fix);
+  if (!result.second && fix.compiled) {
+    regfree(fix.compiled);
+    free(fix.compiled);
+  }
+}
 
 
 #else
 class WordFilter;
 #endif
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

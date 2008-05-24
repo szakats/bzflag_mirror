@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -20,11 +20,11 @@
 
 #include "common.h"
 #include "OpenGLMaterial.h"
-#include "OpenGLTexture.h"
 
 class SceneRenderer;
 class SceneDatabase;
 class WallObstacle;
+class MeshObstacle;
 class BoxBuilding;
 class PyramidBuilding;
 class BaseBuilding;
@@ -33,17 +33,19 @@ class World;
 
 class SceneDatabaseBuilder {
   public:
-			SceneDatabaseBuilder(const SceneRenderer*);
+			SceneDatabaseBuilder();
 			~SceneDatabaseBuilder();
 
     SceneDatabase*	make(const World*);
 
   protected:
     void		addWall(SceneDatabase*, const WallObstacle&);
-    void		addBox(SceneDatabase*, const BoxBuilding&);
-    void		addPyramid(SceneDatabase*, const PyramidBuilding&);
-    void		addBase(SceneDatabase*, const BaseBuilding&);
-    void		addTeleporter(SceneDatabase*, const Teleporter&);
+    void		addMesh(SceneDatabase*, MeshObstacle*);
+    void		addBox(SceneDatabase*, BoxBuilding&);
+    void		addPyramid(SceneDatabase*, PyramidBuilding&);
+    void		addBase(SceneDatabase*, BaseBuilding&);
+    void		addTeleporter(SceneDatabase*, const Teleporter&, const World*);
+    void		addWaterLevel(SceneDatabase*, const World*);
 
   private:
     // disallow duplication
@@ -51,27 +53,20 @@ class SceneDatabaseBuilder {
     SceneDatabaseBuilder& operator=(const SceneDatabaseBuilder&);
 
   private:
-    const SceneRenderer	*renderer;
-
     OpenGLMaterial	wallMaterial;
-    OpenGLTexture	wallTexture;
     float		wallTexWidth, wallTexHeight;
     bool		wallLOD;
 
     OpenGLMaterial	boxMaterial;
-    OpenGLTexture	boxTexture;
-    OpenGLTexture	boxTopTexture;
     float		boxTexWidth, boxTexHeight;
     bool		boxLOD;
 
     OpenGLMaterial	pyramidMaterial;
-    OpenGLTexture	pyramidTexture;
     bool		pyramidLOD;
 
     bool		baseLOD;
 
     OpenGLMaterial	teleporterMaterial;
-    OpenGLTexture	teleporterTexture;
     bool		teleporterLOD;
 
     static const GLfloat wallColors[4][4];
@@ -94,11 +89,10 @@ class SceneDatabaseBuilder {
 
 #endif // BZF_SCENE_BUILDER_H
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

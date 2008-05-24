@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,29 +7,40 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <iostream>
+#ifdef _MSC_VER
+#pragma warning( 4: 4786)
+#endif
 
+/* interface header */
 #include "StdOutUI.h"
+
+/* system implementation headers */
+#include <iostream>
 
 
 // add this UI to the map
 UIAdder StdOutUI::uiAdder("stdout", &StdOutUI::creator);
 
 
-void StdOutUI::outputMessage(const string& msg) {
-  cout<<msg<<endl;
+StdOutUI::StdOutUI(BZAdminClient& c) : BZAdminUI(c) {
+
 }
 
 
-BZAdminUI* StdOutUI::creator(const map<PlayerId, string>&, PlayerId) {
-  return new StdOutUI();
+void StdOutUI::outputMessage(const std::string& msg, ColorCode) {
+  std::cout<<msg<<std::endl;
 }
 
-// Local variables: ***
-// mode:C++ ***
+
+BZAdminUI* StdOutUI::creator(BZAdminClient& client) {
+  return new StdOutUI(client);
+}
+
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

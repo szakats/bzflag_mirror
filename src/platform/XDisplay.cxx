@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "XDisplay.h"
@@ -15,15 +15,6 @@
 #include "BzfEvent.h"
 #include <string.h>
 #include <X11/keysym.h>
-
-#ifdef XIJOYSTICK
-#include <stdlib.h>
-static int	ioErrorHandler(Display*)
-{
-  abort();
-  return 0;
-}
-#endif
 
 //
 // XDisplay::Rep
@@ -33,23 +24,10 @@ XDisplay::Rep::Rep(const char* displayName) :
 				refCount(1),
 				display(NULL),
 				screen(0)
-#ifdef XIJOYSTICK
-				,devices(NULL),
-				buttonPressType(0),
-				buttonReleaseType(0)
-#endif
 {
   // open display
   display = XOpenDisplay(displayName);
   if (!display) return;
-
-#ifdef XIJOYSTICK
-  int dummy;
-  if (XQueryExtension(display, "XInputExtension", &dummy, &dummy, &dummy)) {
-    devices = XListInputDevices(display, &ndevices);
-    XSetIOErrorHandler(ioErrorHandler);
-  }
-#endif
 
   // other initialization
   screen = DefaultScreen(display);
@@ -57,10 +35,6 @@ XDisplay::Rep::Rep(const char* displayName) :
 
 XDisplay::Rep::~Rep()
 {
-#ifdef XIJOYSTICK
-  if (devices)
-    XFreeDeviceList(devices);
-#endif
   if (display) XCloseDisplay(display);
 }
 
@@ -78,28 +52,6 @@ Window			XDisplay::Rep::getRootWindow() const
 {
   return display ? RootWindow(display, screen) : None;
 }
-
-#ifdef XIJOYSTICK
-int			XDisplay::Rep::mapButton(int button) const
-{
-  static const int map[] = { BzfKeyEvent::LeftMouse,
-				BzfKeyEvent::MiddleMouse,
-				BzfKeyEvent::RightMouse,
-				BzfKeyEvent::F1,
-				BzfKeyEvent::F2,
-				BzfKeyEvent::F3,
-				BzfKeyEvent::F4,
-				BzfKeyEvent::F5,
-				BzfKeyEvent::F6,
-				BzfKeyEvent::F7,
-				BzfKeyEvent::F8,
-				BzfKeyEvent::F9
-			};
-  if (button < 1 || button > 12)
-    return BzfKeyEvent::NoButton;
-  return map[button];
-}
-#endif
 
 //
 // XDisplay
@@ -153,11 +105,25 @@ bool			XDisplay::isEventPending() const
   return (XPending(rep->getDisplay()) != 0);
 }
 
-bool			XDisplay::getEvent(BzfEvent& event) const
+
+bool XDisplay::getEvent(BzfEvent& event) const
 {
   XEvent xevent;
   XNextEvent(rep->getDisplay(), &xevent);
+  return setupEvent(event, xevent);
+}
 
+
+bool XDisplay::peekEvent(BzfEvent& event) const
+{
+  XEvent xevent;
+  XPeekEvent(rep->getDisplay(), &xevent);
+  return setupEvent(event, xevent);
+}
+
+
+bool XDisplay::setupEvent(BzfEvent& event, const XEvent& xevent) const
+{
   switch (xevent.type) {
     case Expose:
     case ConfigureNotify:
@@ -174,11 +140,7 @@ bool			XDisplay::getEvent(BzfEvent& event) const
       break;
 
     default:
-#ifdef XIJOYSTICK
-      if ((xevent.type != rep->getButtonPressType()) &&
-	  (xevent.type != rep->getButtonReleaseType()))
-#endif
-	return false;
+      return false;
   }
 
   switch (xevent.type) {
@@ -261,31 +223,11 @@ bool			XDisplay::getEvent(BzfEvent& event) const
       }
       return false;
     }
-
-#ifdef XIJOYSTICK
-    default:
-      if (xevent.type == rep->getButtonPressType()) {
-	XDeviceButtonEvent *button = (XDeviceButtonEvent*) &xevent;
-	event.type = BzfEvent::KeyDown;
-	event.keyDown.ascii = 0;
-	event.keyDown.shift = 0;
-	event.keyDown.button = rep->mapButton(button->button);
-	if (event.keyDown.button == BzfKeyEvent::NoButton)
-	  return false;
-      } else if (xevent.type == rep->getButtonReleaseType()) {
-	XDeviceButtonEvent *button = (XDeviceButtonEvent*) &xevent;
-	event.type = BzfEvent::KeyUp;
-	event.keyUp.ascii = 0;
-	event.keyUp.shift = 0;
-	event.keyUp.button = rep->mapButton(button->button);
-	if (event.keyUp.button == BzfKeyEvent::NoButton)
-	  return false;
-      }
-#endif
   }
 
   return true;
 }
+
 
 bool			XDisplay::getKey(const XEvent& xevent,
 						BzfKeyEvent& key) const
@@ -379,11 +321,10 @@ bool			XDisplayMode::setDefault(int mode)
   return set(mode);
 }
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

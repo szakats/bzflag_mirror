@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,16 +7,16 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __BZFMEDIA_H__
 #define	__BZFMEDIA_H__
 
 #include "common.h"
+
 #include <string>
 #include <stdio.h>
-
 
 static const std::string	DEFAULT_MEDIA_DIR = "data";
 
@@ -45,7 +45,7 @@ class BzfMedia {
 
     // get and set default directory to look for media files in
     std::string		getMediaDirectory() const;
-    void		setMediaDirectory(const std::string&);
+    virtual void	setMediaDirectory(const std::string&);
 
     // images are stored RGBARGBA..., left to right, bottom to top.
     // depth indicates how many channels were in the stored image.
@@ -63,9 +63,6 @@ class BzfMedia {
     // sleep for given number of seconds
     virtual double	stopwatch(bool start);
 
-    // sleep for given number of seconds
-    virtual void	sleep(float timeInSeconds) = 0;
-
     // initialize the audio subsystem.  return true iff successful.
     virtual bool	openAudio() = 0;
 
@@ -82,6 +79,13 @@ class BzfMedia {
 
     // returns true if audio is running in a separate thread
     virtual bool	hasAudioThread() const = 0;
+
+    // register a callback for audio processing. The passed procedure will be
+    // called whenever audio needs to be filled
+    virtual void	startAudioCallback(bool (*)(void)) {};
+
+    // returns true if audio is running via callback
+    virtual bool	hasAudioCallback() const {return false;};
 
     // append a command to the sound effect command queue
     virtual void	writeSoundCommand(const void*, int length) = 0;
@@ -115,17 +119,21 @@ class BzfMedia {
     virtual void	audioSleep(bool checkLowWater,
 				double maxTime = -1.0) = 0;
 
+    virtual void	setDriver(std::string driverName);
+    virtual void	setDevice(std::string deviceName);
+    virtual void	audioDriver(std::string& driverName);
+
   protected:
     // return default extensions for image and sound files
     virtual std::string	getImageExtension() const;
     virtual std::string	getSoundExtension() const;
 
     // return NULL on failure
-    virtual unsigned char* doReadImage(const char* filename,
+    virtual unsigned char* doReadImage(const std::string& filename,
 				int& width, int& height, int& depth) const;
 
     // return NULL on failure
-    virtual float*	doReadSound(const char* filename,
+    virtual float*	doReadSound(const std::string& filename,
 				int& numFrames, int& rate) const;
 
     // concatenate directory to filename
@@ -140,26 +148,22 @@ class BzfMedia {
     // it cannot be found.
     virtual int		findExtension(const std::string& pathname) const;
 
+    std::string		mediaDir;
+
   private:
     static int16_t	getShort(const void*);
     static uint16_t	getUShort(const void*);
     static int32_t	getLong(const void*);
-    static bool		doReadVerbatim(FILE*, int, int, int,
-				unsigned char*);
-    static bool		doReadRLE(FILE*, int, int, int,
-				unsigned char*);
-
-  private:
-    std::string		mediaDir;
+    static bool		doReadVerbatim(FILE*, int, int, int, unsigned char*);
+    static bool		doReadRLE(FILE*, int, int, int, unsigned char*);
 };
 
 #endif // __BZFMEDIA_H__
 
-// Local variables: ***
-// mode:C++ ***
+// Local Variables: ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-
