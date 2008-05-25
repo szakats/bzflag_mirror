@@ -84,6 +84,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			>
@@ -117,6 +118,75 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DLL|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\inc\;..\;..\..\..\bzflag\MSVC\VC8;..\..\..\bzflag\include;..\..\..\bzflag\plugins\plugin_utils"
+				PreprocessorDefinitions="bzwgen_EXPORTS"
+				WarningLevel="4"
+				WarnAsError="true"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="bzfs.lib"
+				AdditionalLibraryDirectories="..\..\..\bzflag"
+				ModuleDefinitionFile="../../bzwgen.def"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -219,6 +289,15 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
+							WarningLevel="1"
+							WarnAsError="false"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DLL|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
 							WarningLevel="3"
 							WarnAsError="false"
 						/>
@@ -233,6 +312,15 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="1"
+							WarnAsError="false"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DLL|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -395,12 +483,32 @@
 						Outputs="$(InputName).cxx"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Running flex"
+						CommandLine="flex -o..\$(InputName).cxx ..\..\src\$(InputFileName)&#x0D;&#x0A;"
+						Outputs="$(InputName).cxx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\parser.y"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Running bison"
+						CommandLine="bison -d -o..\$(InputName).cxx ..\..\src\$(InputFileName)&#x0D;&#x0A;"
+						Outputs="$..\(InputName).cxx;$(InputName).hxx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"

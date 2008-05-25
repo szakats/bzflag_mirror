@@ -33,12 +33,32 @@
 #define BuildState "development"
 
 int debugLevel = 2;
-CCommandLineArgs  cmd;
-COSDir ruledir;
-RuleSet* ruleset;
 std::string texturepath;
 
-int setup();
+extern int yyparse(RuleSet*);
+extern int yylineno;
+extern FILE* yyin;
+
+class BZWGenerator {
+  CCommandLineArgs  cmd;
+  COSDir ruledir;
+  RuleSet* ruleset;
+public:
+  BZWGenerator() {}
+  int parseCommandLine(int argc, char* argv[]);
+  int setup();
+  ~BZWGenerator() {}
+  void generate(std::ostream* outstream);
+  void loadConfig(const char* configFile);
+  std::string outname;
+private:
+  bool getOptionI ( int &val, char* shortName, char* longName );
+  bool getOptionS ( std::string &val, char* shortName, char* longName );
+  void printHelp();
+  void printHelpCommand ( const char* shortName, const char* longName, const char* description );
+};
+
+BZWGenerator BZWGen; 
 
 #if 1
 
@@ -58,13 +78,13 @@ BZF_PLUGIN_CALL int bz_Load ( const char* commandLine )
 {
   bz_debugMessage(4,"bzwgen plugin loaded");
   if (strlen(commandLine) > 4) {
-    cmd.Set(COSFile(commandLine));
+    BZWGen.loadConfig(commandLine);
     bz_debugMessage(4,"config file loaded");
   }
   bz_registerEvent(bz_eGetWorldEvent, &bzwGenEvent);
   bz_registerEvent(bz_eWorldFinalized, &bzwGenEvent);
   
-  setup();
+  BZWGen.setup();
 
   return 0;
 }
@@ -84,28 +104,19 @@ void BZWGenEvent::process(bz_EventData *eventData) {
   if (eventData->eventType != bz_eGetWorldEvent) 
     return;
 
-  GridGenerator gen(ruleset);
-  gen.parseOptions(&cmd);
-  gen.run();
-
   std::ostringstream* outstream = new std::ostringstream(std::ostringstream::out);
-  Output os(outstream);
-  os.info(MajorVersion,MinorVersion,Revision);
-  gen.output(os);
-  os.footer();
+  BZWGen.generate(outstream);
 
   bz_GetWorldEventData_V1 *getWorldData = (bz_GetWorldEventData_V1 *) eventData;
-  strout = outstream->str();
-  delete outstream; outstream = NULL;
-  getWorldData->worldBlob = const_cast<char*>(strout.c_str());
+
+  char* cstr = new char [((std::ostringstream*)(outstream))->str().size()+1];
+  strcpy (cstr, ((std::ostringstream*)(outstream))->str().c_str());
+  getWorldData->worldBlob = cstr;
+
 }
 
 #endif
 
-
-extern int yyparse(RuleSet*);
-extern int yylineno;
-extern FILE* yyin;
 
 #ifdef _USE_GNU_DELIMS
 std::string argumentDeliminator = "--";
@@ -113,7 +124,12 @@ std::string argumentDeliminator = "--";
 std::string argumentDeliminator = "-";
 #endif //_USE_GNU_DELIMS
 
-void printHelpCommand ( const char* shortName, const char* longName, const char* description )
+void BZWGenerator::loadConfig(const char* configFile) {
+  cmd.Set(COSFile(configFile));
+}
+
+
+void BZWGenerator::printHelpCommand ( const char* shortName, const char* longName, const char* description )
 {
   if (shortName && strlen(shortName))
   {
@@ -129,7 +145,7 @@ void printHelpCommand ( const char* shortName, const char* longName, const char*
   std::cout << "\n";
 }
 
-void printHelp() {
+void BZWGenerator::printHelp() {
   std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n";
   printf("Version %s.%s.%s(%s)\ncopyright 2007 BZFlag Project and Tim Riker\n\n",MajorVersion,MinorVersion,Revision,BuildState);
   std::cout << "Command line arguments:\n";
@@ -149,9 +165,9 @@ void printHelp() {
   printHelpCommand("t","texture","URL          sets the URL for textures\n");
 }
 
+#ifdef _USE_LIB_RULES_
 std::vector<void*> handleList;
 
-#ifdef _USE_LIB_RULES_
 const char* getLibExtension ( void )
 {
 #ifdef _WIN32
@@ -212,7 +228,7 @@ void freePlugins ( void )
 #endif // _USE_LIB_RULES_
 }
 
-bool getOptionI ( int &val, char* shortName, char* longName )
+bool BZWGenerator::getOptionI ( int &val, char* shortName, char* longName )
 {
   if (cmd.Exists(shortName))
   {
@@ -228,7 +244,7 @@ bool getOptionI ( int &val, char* shortName, char* longName )
   return false;
 }
 
-bool getOptionS ( std::string &val, char* shortName, char* longName )
+bool BZWGenerator::getOptionS ( std::string &val, char* shortName, char* longName )
 {
   if (cmd.Exists(shortName))
   {
@@ -244,7 +260,7 @@ bool getOptionS ( std::string &val, char* shortName, char* longName )
   return false;
 }
 
-int setup() {
+int BZWGenerator::setup() {
   ruledir .SetStdDir("./rules");
   std::string temp;
 
@@ -287,21 +303,7 @@ int setup() {
   return 0;
 }
 
-int main (int argc, char* argv[]) {
-
-  cmd.SetDelimnator(argumentDeliminator);
-  cmd.Set(argc,argv);
-
-  if (cmd.Exists("h") || cmd.Exists("help"))	  { printHelp(); return 0; }
-
-  if (cmd.Exists("c"))		    cmd.Set(COSFile(cmd.GetDataS("c")));
-  else if (cmd.Exists("config"))    cmd.Set(COSFile(cmd.GetDataS("config")));
-
-  std::string outname = "map.bzw";
-  getOptionS(outname,"o","output");
-
-  if (setup()) return 1;
-
+void BZWGenerator::generate(std::ostream* outstream) {
   std::cout << "Initializing... ";
   GridGenerator gen(ruleset);
   std::cout << "done.\n";
@@ -314,16 +316,34 @@ int main (int argc, char* argv[]) {
   gen.run();
   std::cout << "done.\n";
 
-  std::ofstream* outstream = new std::ofstream(outname.c_str());
   Output os(outstream);
   std::cout << "Outputing... ";
   os.info(MajorVersion,MinorVersion,Revision);
   gen.output(os);
   os.footer();
-  delete outstream;
   std::cout << "done.\n";
-  std::cout << "\n" << os.vertices << " vertices, " << os.texcoords << " texcoords and " << os.faces << " faces generated.\n";
+}
 
+int BZWGenerator::parseCommandLine(int argc, char* argv[]) {
+  cmd.SetDelimnator(argumentDeliminator);
+  cmd.Set(argc,argv);
+  if (cmd.Exists("h") || cmd.Exists("help"))	  { BZWGen.printHelp(); return 1; }
+
+  if (cmd.Exists("c"))		    cmd.Set(COSFile(cmd.GetDataS("c")));
+  else if (cmd.Exists("config"))    cmd.Set(COSFile(cmd.GetDataS("config")));
+
+  outname = "map.bzw";
+  BZWGen.getOptionS(outname,"o","output");
+  return 0;
+}
+
+
+int main (int argc, char* argv[]) {
+  if (BZWGen.parseCommandLine(argc,argv)) return 0;
+  if (BZWGen.setup()) return 1;
+  std::ofstream* outstream = new std::ofstream(BZWGen.outname.c_str());
+  BZWGen.generate(outstream);
+  delete outstream;
 }
 
 	

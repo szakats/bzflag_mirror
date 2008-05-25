@@ -21,6 +21,7 @@
 
 class Output {
   std::ostream* outstream;
+
 public:
   int vertices;
   int texcoords;

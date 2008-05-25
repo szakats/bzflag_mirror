@@ -1,5 +1,4 @@
 LIBRARY	bzwgen
-DESCRIPTION  'bzwgen Windows Dynamic Link Library'
 
 EXPORTS
     ; Explicit exports can go here
