@@ -36,7 +36,6 @@
 #define BuildState "development"
 
 int debugLevel = 2;
-std::string texturepath;
 
 extern int yyparse(RuleSet*);
 extern int yylineno;
@@ -51,6 +50,7 @@ class BZWGenerator
   COSDir ruledir;
   RuleSet* ruleset;
   std::string strout;
+  std::string texturepath;
 public:
   BZWGenerator() {}
   int parseCommandLine(int argc, char* argv[]);
@@ -317,7 +317,7 @@ void BZWGenerator::generate(std::ostream* outstream) {
   gen.run();
   std::cout << "done.\n";
 
-  Output os(outstream);
+  Output os(outstream,texturepath);
   std::cout << "Outputing... ";
   os.info(MajorVersion,MinorVersion,Revision);
   gen.output(os);

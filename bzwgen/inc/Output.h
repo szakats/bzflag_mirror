@@ -21,12 +21,12 @@
 
 class Output {
   std::ostream* outstream;
-
+  std::string texturepath;
 public:
   int vertices;
   int texcoords;
   int faces;
-  Output(std::ostream* _outstream) : vertices(0), texcoords(0), faces(0), outstream(_outstream) {}
+  Output(std::ostream* _outstream, std::string _texturepath) : vertices(0), texcoords(0), faces(0), outstream(_outstream), texturepath(_texturepath) {}
   void vertex(Vertex v) { 
     vertices++;
     (*outstream) << "  vertex " << v.x << " " << v.y << " " << v.z << "\n"; 
