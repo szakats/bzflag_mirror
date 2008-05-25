@@ -15,6 +15,8 @@
 #include <sstream>
 #include "time.h"
 
+#define COMPILE_PLUGIN 1
+
 #include "Output.h"
 #include "Generator.h"
 #include "GridGenerator.h"
@@ -22,10 +24,11 @@
 #include "commandArgs.h"
 #include "Zone.h"
 #include "RuleSet.h"
-#if 1
+#if COMPILE_PLUGIN
 #include "bzfsAPI.h"
 #include "plugin_utils.h"
 #endif
+
 
 #define MajorVersion 0
 #define MinorVersion 1
@@ -39,10 +42,15 @@ extern int yyparse(RuleSet*);
 extern int yylineno;
 extern FILE* yyin;
 
-class BZWGenerator {
+class BZWGenerator 
+#if COMPILE_PLUGIN
+  : public bz_EventHandler 
+#endif
+{
   CCommandLineArgs  cmd;
   COSDir ruledir;
   RuleSet* ruleset;
+  std::string strout;
 public:
   BZWGenerator() {}
   int parseCommandLine(int argc, char* argv[]);
@@ -51,6 +59,9 @@ public:
   void generate(std::ostream* outstream);
   void loadConfig(const char* configFile);
   std::string outname;
+#if COMPILE_PLUGIN
+  virtual void process(bz_EventData * eventData);
+#endif
 private:
   bool getOptionI ( int &val, char* shortName, char* longName );
   bool getOptionS ( std::string &val, char* shortName, char* longName );
@@ -60,17 +71,7 @@ private:
 
 BZWGenerator BZWGen; 
 
-#if 1
-
-class BZWGenEvent : public bz_EventHandler {
-  public:
-  virtual void process(bz_EventData * eventData);
-  private:
-  std::string strout;
-};
-
-BZWGenEvent bzwGenEvent;
-
+#if COMPILE_PLUGIN
 
 BZ_GET_PLUGIN_VERSION
 
@@ -81,8 +82,8 @@ BZF_PLUGIN_CALL int bz_Load ( const char* commandLine )
     BZWGen.loadConfig(commandLine);
     bz_debugMessage(4,"config file loaded");
   }
-  bz_registerEvent(bz_eGetWorldEvent, &bzwGenEvent);
-  bz_registerEvent(bz_eWorldFinalized, &bzwGenEvent);
+  bz_registerEvent(bz_eGetWorldEvent, &BZWGen);
+  bz_registerEvent(bz_eWorldFinalized, &BZWGen);
   
   BZWGen.setup();
 
@@ -95,7 +96,7 @@ BZF_PLUGIN_CALL int bz_Unload ( void )
   return 0;
 }
 
-void BZWGenEvent::process(bz_EventData *eventData) {
+void BZWGenerator::process(bz_EventData *eventData) {
   if (eventData->eventType == bz_eWorldFinalized) {
     strout.clear();
     return;
