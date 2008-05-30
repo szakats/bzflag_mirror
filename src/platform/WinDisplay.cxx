@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,10 +7,12 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+#define _WIN32_WINDOWS 0x0500
 
-#define INITGUID
+// in this file at least, we want wide-character functionality
+#define UNICODE
 
 #include "WinDisplay.h"
 #include "WinWindow.h"
@@ -18,6 +20,7 @@
 #include "BzfEvent.h"
 #include <stdio.h>
 #include <string.h>
+#include "StateDatabase.h"
 
 class Resolution {
   public:
@@ -67,7 +70,7 @@ WinDisplay::Rep::Rep(const char*) : refCount(1),
   wc.hCursor		= LoadCursor(NULL, IDC_ARROW);
   wc.hbrBackground	= (HBRUSH)GetStockObject(NULL_BRUSH);
   wc.lpszMenuName	= NULL;
-  wc.lpszClassName	= "BZFLAG";
+  wc.lpszClassName	= L"BZFLAG";
   wc.hIconSm		= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_BZICON));
 
   if (RegisterClassEx(&wc) == 0)
@@ -161,7 +164,6 @@ LONG WINAPI		WinDisplay::Rep::windowProc(HWND hwnd, UINT msg,
 WinDisplay::WinDisplay(const char* displayName, const char*) :
 				rep(NULL),
 				hwnd(NULL),
-				using3Dfx(false),
 				fullWidth(0),
 				fullHeight(0),
 				resolutions(NULL),
@@ -169,14 +171,6 @@ WinDisplay::WinDisplay(const char* displayName, const char*) :
 				charCode(0)
 {
   rep = new Rep(displayName);
-
-  // see if we're using a 3Dfx card.  if so we'll skip the resolution
-  // picking later.
-  using3Dfx = (GetModuleHandle("glide2x.dll") != NULL);
-  if (using3Dfx) {
-    fullWidth = getPassthroughWidth();
-    fullHeight = getPassthroughHeight();
-  }
 
   // get resolutions
   if (isValid() && !isFullScreenOnly()) {
@@ -198,18 +192,26 @@ WinDisplay::WinDisplay(const char* displayName, const char*) :
     // register modes
     initResolutions(resInfo, numModes, currentMode);
   }
+
+  addFatalErrorCallback(this);
 }
 
 WinDisplay::~WinDisplay()
 {
+  removeFatalErrorCallback(this);
   setDefaultResolution();
   delete[] resolutions;
   rep->unref();
 }
 
+void WinDisplay::error ( const char* title, const char* message )
+{
+  MessageBoxA(hwnd,message,title,MB_OK | MB_ICONERROR | MB_TASKMODAL);
+}
+
 bool			WinDisplay::isFullScreenOnly() const
 {
-  return using3Dfx;
+  return false;
 }
 
 int			WinDisplay::getFullWidth() const
@@ -233,98 +235,143 @@ bool			WinDisplay::isEventPending() const
   return (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) != 0);
 }
 
-bool			WinDisplay::getEvent(BzfEvent& event) const
+bool WinDisplay::windowsEventToBZFEvent ( MSG &msg, BzfEvent& event ) const
 {
-  MSG msg;
-  if (GetMessage(&msg, NULL, 0, 0) == -1) return false;
-  event.window = WinWindow::lookupWindow(msg.hwnd);
-  switch (msg.message) {
-    case WM_CLOSE:
-    case WM_QUIT:
-      event.type = BzfEvent::Quit;
-      break;
+	event.window = WinWindow::lookupWindow(msg.hwnd);
+	switch (msg.message) {
+	case WM_CLOSE:
+	case WM_QUIT:
+	case WM_SYSCOMMAND:
+		if (msg.wParam != SC_CLOSE)
+			break;
+		event.type = BzfEvent::Quit;
+		break;
 
-    case WM_PAINT:
-      event.type = BzfEvent::Redraw;
-      ValidateRect(msg.hwnd, NULL);		// no more WM_PAINTs, please!
-      break;
+	case WM_PAINT:
+		event.type = BzfEvent::Redraw;
+		ValidateRect(msg.hwnd, NULL);		// no more WM_PAINTs, please!
+		break;
 
-    case WM_SIZE:
-      event.type = BzfEvent::Resize;
-      event.resize.width = LOWORD(msg.lParam);
-      event.resize.height = HIWORD(msg.lParam);
-      break;
+	case WM_SIZE:
+		event.type = BzfEvent::Resize;
+		event.resize.width = LOWORD(msg.lParam);
+		event.resize.height = HIWORD(msg.lParam);
+		break;
 
-    case WM_MOUSEMOVE:
-      event.type = BzfEvent::MouseMove;
-      event.mouseMove.x = LOWORD(msg.lParam);
-      event.mouseMove.y = HIWORD(msg.lParam);
-      break;
+	case WM_MOUSEMOVE:
+		event.type = BzfEvent::MouseMove;
+		event.mouseMove.x = LOWORD(msg.lParam);
+		event.mouseMove.y = HIWORD(msg.lParam);
+		break;
 
-    case WM_APP + 0:
-      event.type = BzfEvent::Map;
-      break;
+	case WM_APP + 0:
+		event.type = BzfEvent::Map;
+		break;
 
-    case WM_APP + 1:
-      event.type = BzfEvent::Unmap;
-      break;
+	case WM_APP + 1:
+		event.type = BzfEvent::Unmap;
+		break;
 
-    case WM_LBUTTONDOWN:
-    case WM_MBUTTONDOWN:
-    case WM_RBUTTONDOWN:
-      event.type = BzfEvent::KeyDown;
-      event.keyDown.ascii = 0;
-      event.keyDown.shift = 0;
-      switch (msg.message) {
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		event.type = BzfEvent::KeyDown;
+		event.keyDown.chr = 0;
+		event.keyDown.shift = 0;
+		switch (msg.message) {
 	case WM_LBUTTONDOWN:	event.keyDown.button = BzfKeyEvent::LeftMouse; break;
 	case WM_MBUTTONDOWN:	event.keyDown.button = BzfKeyEvent::MiddleMouse; break;
 	case WM_RBUTTONDOWN:	event.keyDown.button = BzfKeyEvent::RightMouse; break;
 	default:		return false;
-      }
-      break;
+		}
+		break;
 
-    case WM_LBUTTONUP:
-    case WM_MBUTTONUP:
-    case WM_RBUTTONUP:
-      event.type = BzfEvent::KeyUp;
-      event.keyUp.ascii = 0;
-      event.keyUp.shift = 0;
-      switch (msg.message) {
+	case WM_LBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_RBUTTONUP:
+		event.type = BzfEvent::KeyUp;
+		event.keyUp.chr = 0;
+		event.keyUp.shift = 0;
+		switch (msg.message) {
 	case WM_LBUTTONUP:	event.keyUp.button = BzfKeyEvent::LeftMouse; break;
 	case WM_MBUTTONUP:	event.keyUp.button = BzfKeyEvent::MiddleMouse; break;
 	case WM_RBUTTONUP:	event.keyUp.button = BzfKeyEvent::RightMouse; break;
 	default:		return false;
-      }
-      break;
+		}
+		break;
 
-    case WM_KEYDOWN:
-    case WM_SYSKEYDOWN:
-      ((WinDisplay*)this)->translated = (bool)(TranslateMessage(&msg) != 0);
-      if (!translated) ((WinDisplay*)this)->charCode = 0;
-      if (isNastyKey(msg)) return false;
-      DispatchMessage(&msg);
-      event.type = BzfEvent::KeyDown;
-      if (!getKey(msg, event.keyDown)) return false;
-      break;
+	case WM_MOUSEWHEEL:{
 
-    case WM_KEYUP:
-    case WM_SYSKEYUP: {
-      ((WinDisplay*)this)->translated = (bool)(TranslateMessage(&msg) != 0);
-      if (isNastyKey(msg)) return false;
-      DispatchMessage(&msg);
-      event.type = BzfEvent::KeyUp;
-      if (!getKey(msg, event.keyUp)) return false;
-      break;
-    }
+		event.type = BzfEvent::KeyDown;
+		event.keyDown.chr = 0;
+		event.keyDown.shift = 0;
 
-    default:
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
-      return false;
-  }
+		if (LOWORD(msg.wParam) == MK_SHIFT)
+			event.keyDown.shift |= BzfKeyEvent::ShiftKey;
+		if (LOWORD(msg.wParam) == MK_CONTROL)
+			event.keyDown.shift |= BzfKeyEvent::ControlKey;
+		if (LOWORD(msg.wParam) == MK_ALT)
+			event.keyDown.shift |= BzfKeyEvent::AltKey;
 
-  return true;
+		short field = HIWORD(msg.wParam);
+		if (field > 0)
+			event.keyDown.button  = BzfKeyEvent::WheelUp;
+		else
+			event.keyDown.button  = BzfKeyEvent::WheelDown;
+		 }
+		break;
+
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+		translated = (bool)(TranslateMessage(&msg) != 0);
+		if (!translated) ((WinDisplay*)this)->charCode = 0;
+		if (isNastyKey(msg)) return false;
+		DispatchMessage(&msg);
+		event.type = BzfEvent::KeyDown;
+		if (!getKey(msg, event.keyDown)) return false;
+		break;
+
+	case WM_KEYUP:
+	case WM_SYSKEYUP: {
+		translated = (bool)(TranslateMessage(&msg) != 0);
+		if (isNastyKey(msg)) return false;
+		DispatchMessage(&msg);
+		event.type = BzfEvent::KeyUp;
+		if (!getKey(msg, event.keyUp)) return false;
+		break;
+	}
+
+	default:
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+		return false;
+	}
+	return true;
 }
+
+bool			WinDisplay::peekEvent(BzfEvent& event) const
+{
+	MSG msg;
+	if (PeekMessage(&msg, NULL, 0, 0,0) == -1) return false;
+	return windowsEventToBZFEvent(msg,event);
+}
+
+bool			WinDisplay::getEvent(BzfEvent& event) const
+{
+  MSG msg;
+  if (GetMessage(&msg, NULL, 0, 0) == -1) return false;
+  return windowsEventToBZFEvent(msg,event);
+}
+
+void			WinDisplay::getModState(bool &shift, bool &ctrl, bool &alt) {
+  shift = (GetKeyState(VK_SHIFT) < 0);
+  ctrl  = (GetKeyState(VK_CONTROL) < 0);
+  alt   = (GetKeyState(VK_MENU) < 0);
+}
+
+#define UNICODE_IS_HIGH_SURROGATE(ch) ((ch) >= 0xD800 && (ch) <= 0xDBFF)
+#define UNICODE_IS_LOW_SURROGATE(ch) ((ch) >= 0xDC00 && (ch) <= 0xDFFF)
+#define UNICODE_SURROGATE_TO_UTF32(ch, cl) (((ch) - 0xD800) * 0x400 + ((cl) - 0xDC00) + 0x10000)
 
 bool			WinDisplay::getKey(const MSG& msg,
 					BzfKeyEvent& key) const
@@ -339,22 +386,20 @@ bool			WinDisplay::getKey(const MSG& msg,
     if (PeekMessage(&cmsg, NULL, 0, 0, PM_NOREMOVE) &&
 	(cmsg.message == WM_CHAR || cmsg.message == WM_SYSCHAR)) {
       GetMessage(&cmsg, NULL, 0, 0);
-      ((WinDisplay*)this)->charCode = (char)(TCHAR)cmsg.wParam;
+      // charCode is in UTF-16, so convert it to a codepoint
+      charCode = cmsg.wParam;
+      if (UNICODE_IS_HIGH_SURROGATE(charCode >> 16) && UNICODE_IS_LOW_SURROGATE(charCode & 0xFFFF))
+	charCode = UNICODE_SURROGATE_TO_UTF32(charCode >> 16, charCode & 0xFFFF);
     }
     else {
-      ((WinDisplay*)this)->charCode = 0;
+      charCode = 0;
     }
   }
 
-  if (charCode != 0)
-    key.ascii = charCode;
-  else if ((GetKeyState(VK_SHIFT) < 0) == (GetKeyState(VK_CAPITAL) < 0))
-    key.ascii = asciiMap[(int)msg.wParam];
-  else
-    key.ascii = asciiShiftMap[(int)msg.wParam];
+  key.chr = charCode;
   key.button = buttonMap[(int)msg.wParam];
-  if (key.button == BzfKeyEvent::Delete) key.ascii = 0;
-  return (key.ascii != 0 || key.button != 0);
+  if (key.button == BzfKeyEvent::Delete) key.chr = 0;
+  return (key.chr != 0 || key.button != 0);
 }
 
 bool			WinDisplay::isNastyKey(const MSG& msg) const
@@ -374,7 +419,7 @@ bool			WinDisplay::isNastyKey(const MSG& msg) const
   return false;
 }
 
-bool			WinDisplay::setDefaultResolution()
+bool			WinDisplay::setDefaultResolution() const
 {
   ChangeDisplaySettings(0, 0);
   return true;
@@ -386,12 +431,12 @@ bool			WinDisplay::doSetResolution(int index)
   Resolution& format = resolutions[index];
   DEVMODE dm;
   memset(&dm, 0, sizeof(dm));
-  dm.dmSize             = sizeof(dm);
-  dm.dmPelsWidth        = format.width;
+  dm.dmSize	     = sizeof(dm);
+  dm.dmPelsWidth	= format.width;
   dm.dmPelsHeight       = format.height;
   dm.dmBitsPerPel       = format.depth;
   dm.dmDisplayFrequency = format.refresh;
-  dm.dmFields           = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
+  dm.dmFields	   = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
   if (dm.dmDisplayFrequency != 0)
     dm.dmFields |= DM_DISPLAYFREQUENCY;
 
@@ -541,524 +586,6 @@ bool			WinDisplay::canChangeDepth()
   }
   return false;
 }
-
-const int		WinDisplay::asciiMap[] = {
-	0,			// no VK_ code
-	0,			// VK_LBUTTON
-	0,			// VK_RBUTTON
-	0,			// VK_CANCEL
-	0,			// VK_MBUTTON
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	8,			// VK_BACK
-	9,			// VK_TAB
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_CLEAR
-	13,			// VK_RETURN
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_SHIFT
-	0,			// VK_CONTROL
-	0,			// VK_MENU
-	0,			// VK_PAUSE
-	0,			// VK_CAPITAL
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	27,			// VK_ESCAPE
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	' ',			// VK_SPACE
-	0,			// VK_PRIOR
-	0,			// VK_NEXT
-	0,			// VK_END
-	0,			// VK_HOME
-	0,			// VK_LEFT
-	0,			// VK_UP
-	0,			// VK_RIGHT
-	0,			// VK_DOWN
-	0,			// VK_SELECT
-	0,			// VK_PRINT
-	0,			// VK_EXECUTE
-	0,			// VK_SNAPSHOT
-	0,			// VK_INSERT
-	127,			// VK_DELETE
-	0,			// VK_HELP
-	'0',			// VK_0
-	'1',			// VK_1
-	'2',			// VK_2
-	'3',			// VK_3
-	'4',			// VK_4
-	'5',			// VK_5
-	'6',			// VK_6
-	'7',			// VK_7
-	'8',			// VK_8
-	'9',			// VK_9
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	'A',			// VK_A
-	'B',			// VK_B
-	'C',			// VK_C
-	'D',			// VK_D
-	'E',			// VK_E
-	'F',			// VK_F
-	'G',			// VK_G
-	'H',			// VK_H
-	'I',			// VK_I
-	'J',			// VK_J
-	'K',			// VK_K
-	'L',			// VK_L
-	'M',			// VK_M
-	'N',			// VK_N
-	'O',			// VK_O
-	'P',			// VK_P
-	'Q',			// VK_Q
-	'R',			// VK_R
-	'S',			// VK_S
-	'T',			// VK_T
-	'U',			// VK_U
-	'V',			// VK_V
-	'W',			// VK_W
-	'X',			// VK_X
-	'Y',			// VK_Y
-	'Z',			// VK_Z
-	0,			// VK_LWIN
-	0,			// VK_RWIN
-	0,			// VK_APPS
-	0,			// no VK_ code
-	0,			// no VK_ code
-	'0',			// VK_NUMPAD0
-	'1',			// VK_NUMPAD1
-	'2',			// VK_NUMPAD2
-	'3',			// VK_NUMPAD3
-	'4',			// VK_NUMPAD4
-	'5',			// VK_NUMPAD5
-	'6',			// VK_NUMPAD6
-	'7',			// VK_NUMPAD7
-	'8',			// VK_NUMPAD8
-	'9',			// VK_NUMPAD9
-	'*',			// VK_MULTIPLY
-	'+',			// VK_ADD
-	0,			// VK_SEPARATOR
-	'-',			// VK_SUBTRACT
-	'.',			// VK_DECIMAL
-	'/',			// VK_DIVIDE
-	0,			// VK_F1
-	0,			// VK_F2
-	0,			// VK_F3
-	0,			// VK_F4
-	0,			// VK_F5
-	0,			// VK_F6
-	0,			// VK_F7
-	0,			// VK_F8
-	0,			// VK_F9
-	0,			// VK_F10
-	0,			// VK_F11
-	0,			// VK_F12
-	0,			// VK_F13
-	0,			// VK_F14
-	0,			// VK_F15
-	0,			// VK_F16
-	0,			// VK_F17
-	0,			// VK_F18
-	0,			// VK_F19
-	0,			// VK_F20
-	0,			// VK_F21
-	0,			// VK_F22
-	0,			// VK_F23
-	0,			// VK_F24
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_NUMLOCK
-	0,			// VK_SCROLL
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_LSHIFT
-	0,			// VK_RSHIFT
-	0,			// VK_LCONTROL
-	0,			// VK_RCONTROL
-	0,			// VK_LMENU
-	0,			// VK_RMENU
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	';',			// no VK_ code
-	'=',			// no VK_ code
-	',',			// no VK_ code
-	'-',			// no VK_ code
-	'.',			// no VK_ code
-	'/',			// no VK_ code
-	'`',			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	'[',			// no VK_ code
-	'\\',			// no VK_ code
-	']',			// no VK_ code
-	'\'',			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_PROCESSKEY
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_ATTN
-	0,			// VK_CRSEL
-	0,			// VK_EXSEL
-	0,			// VK_EREOF
-	0,			// VK_PLAY
-	0,			// VK_ZOOM
-	0,			// VK_NONAME
-	0,			// VK_PA1
-	0,			// VK_OEM_CLEAR
-	0			// no VK_ code
-};
-
-const int		WinDisplay::asciiShiftMap[] = {
-	0,			// no VK_ code
-	0,			// VK_LBUTTON
-	0,			// VK_RBUTTON
-	0,			// VK_CANCEL
-	0,			// VK_MBUTTON
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	8,			// VK_BACK
-	9,			// VK_TAB
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_CLEAR
-	13,			// VK_RETURN
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_SHIFT
-	0,			// VK_CONTROL
-	0,			// VK_MENU
-	0,			// VK_PAUSE
-	0,			// VK_CAPITAL
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	27,			// VK_ESCAPE
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	' ',			// VK_SPACE
-	0,			// VK_PRIOR
-	0,			// VK_NEXT
-	0,			// VK_END
-	0,			// VK_HOME
-	0,			// VK_LEFT
-	0,			// VK_UP
-	0,			// VK_RIGHT
-	0,			// VK_DOWN
-	0,			// VK_SELECT
-	0,			// VK_PRINT
-	0,			// VK_EXECUTE
-	0,			// VK_SNAPSHOT
-	0,			// VK_INSERT
-	127,			// VK_DELETE
-	0,			// VK_HELP
-	')',			// VK_0
-	'!',			// VK_1
-	'@',			// VK_2
-	'#',			// VK_3
-	'$',			// VK_4
-	'%',			// VK_5
-	'^',			// VK_6
-	'&',			// VK_7
-	'*',			// VK_8
-	'(',			// VK_9
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	'a',			// VK_A
-	'b',			// VK_B
-	'c',			// VK_C
-	'd',			// VK_D
-	'e',			// VK_E
-	'f',			// VK_F
-	'g',			// VK_G
-	'h',			// VK_H
-	'i',			// VK_I
-	'j',			// VK_J
-	'k',			// VK_K
-	'l',			// VK_L
-	'm',			// VK_M
-	'n',			// VK_N
-	'o',			// VK_O
-	'p',			// VK_P
-	'q',			// VK_Q
-	'r',			// VK_R
-	's',			// VK_S
-	't',			// VK_T
-	'u',			// VK_U
-	'v',			// VK_V
-	'w',			// VK_W
-	'x',			// VK_X
-	'y',			// VK_Y
-	'z',			// VK_Z
-	0,			// VK_LWIN
-	0,			// VK_RWIN
-	0,			// VK_APPS
-	0,			// no VK_ code
-	0,			// no VK_ code
-	'0',			// VK_NUMPAD0
-	'1',			// VK_NUMPAD1
-	'2',			// VK_NUMPAD2
-	'3',			// VK_NUMPAD3
-	'4',			// VK_NUMPAD4
-	'5',			// VK_NUMPAD5
-	'6',			// VK_NUMPAD6
-	'7',			// VK_NUMPAD7
-	'8',			// VK_NUMPAD8
-	'9',			// VK_NUMPAD9
-	'*',			// VK_MULTIPLY
-	'+',			// VK_ADD
-	0,			// VK_SEPARATOR
-	'-',			// VK_SUBTRACT
-	'.',			// VK_DECIMAL
-	'/',			// VK_DIVIDE
-	0,			// VK_F1
-	0,			// VK_F2
-	0,			// VK_F3
-	0,			// VK_F4
-	0,			// VK_F5
-	0,			// VK_F6
-	0,			// VK_F7
-	0,			// VK_F8
-	0,			// VK_F9
-	0,			// VK_F10
-	0,			// VK_F11
-	0,			// VK_F12
-	0,			// VK_F13
-	0,			// VK_F14
-	0,			// VK_F15
-	0,			// VK_F16
-	0,			// VK_F17
-	0,			// VK_F18
-	0,			// VK_F19
-	0,			// VK_F20
-	0,			// VK_F21
-	0,			// VK_F22
-	0,			// VK_F23
-	0,			// VK_F24
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_NUMLOCK
-	0,			// VK_SCROLL
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_LSHIFT
-	0,			// VK_RSHIFT
-	0,			// VK_LCONTROL
-	0,			// VK_RCONTROL
-	0,			// VK_LMENU
-	0,			// VK_RMENU
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	':',			// no VK_ code
-	'+',			// no VK_ code
-	'<',			// no VK_ code
-	'_',			// no VK_ code
-	'>',			// no VK_ code
-	'?',			// no VK_ code
-	'~',			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	'{',			// no VK_ code
-	'|',			// no VK_ code
-	'}',			// no VK_ code
-	'"',			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_PROCESSKEY
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// no VK_ code
-	0,			// VK_ATTN
-	0,			// VK_CRSEL
-	0,			// VK_EXSEL
-	0,			// VK_EREOF
-	0,			// VK_PLAY
-	0,			// VK_ZOOM
-	0,			// VK_NONAME
-	0,			// VK_PA1
-	0,			// VK_OEM_CLEAR
-	0			// no VK_ code
-};
 
 const int		WinDisplay::buttonMap[] = {
 	BzfKeyEvent::NoButton,	// no VK_ code
@@ -1318,4 +845,11 @@ const int		WinDisplay::buttonMap[] = {
 	BzfKeyEvent::NoButton,	// VK_OEM_CLEAR
 	BzfKeyEvent::NoButton	// no VK_ code
 };
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

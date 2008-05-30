@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,16 +7,28 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// BZFlag common header
+#include "common.h"
+
+// interface header
+#include "PTSceneNode.h"
+
+// system headers
 #include <stdlib.h>
 #include <math.h>
-#include "common.h"
-#include "PTSceneNode.h"
-#include "ViewFrustum.h"
-#include "SceneRenderer.h"
+
+// common implementation headers
 #include "StateDatabase.h"
+#include "BZDBCache.h"
+
+// local implementation headers
+#include "ViewFrustum.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
+#include "SceneRenderer.h"
 
 const GLfloat		PhotonTorpedoSceneNode::CoreSize = 0.125f;
 const GLfloat		PhotonTorpedoSceneNode::CoronaSize = 1.0f;
@@ -24,7 +36,6 @@ const GLfloat		PhotonTorpedoSceneNode::FlareSize = 1.0f;
 const GLfloat		PhotonTorpedoSceneNode::FlareSpread = 0.08f;
 
 PhotonTorpedoSceneNode::PhotonTorpedoSceneNode(const GLfloat pos[3]) :
-				blending(false),
 				renderNode(this)
 {
   OpenGLGStateBuilder builder(gstate);
@@ -60,12 +71,10 @@ void			PhotonTorpedoSceneNode::addLight(
   renderer.addLight(light);
 }
 
-void			PhotonTorpedoSceneNode::notifyStyleChange(
-				const SceneRenderer&)
+void			PhotonTorpedoSceneNode::notifyStyleChange()
 {
-  blending = BZDB->isTrue("blend");
   OpenGLGStateBuilder builder(gstate);
-  if (blending) {
+  if (BZDBCache::blend) {
     builder.setBlending(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     builder.setStipple(1.0f);
   }
@@ -90,13 +99,13 @@ GLfloat			PhotonTorpedoSceneNode::PTRenderNode::core[9][2];
 GLfloat			PhotonTorpedoSceneNode::PTRenderNode::corona[8][2];
 const GLfloat		PhotonTorpedoSceneNode::PTRenderNode::ring[8][2] = {
 				{ 1.0f, 0.0f },
-				{ M_SQRT1_2, M_SQRT1_2 },
+				{ (float)M_SQRT1_2, (float)M_SQRT1_2 },
 				{ 0.0f, 1.0f },
-				{ -M_SQRT1_2, M_SQRT1_2 },
+				{ (float)-M_SQRT1_2, (float)M_SQRT1_2 },
 				{ -1.0f, 0.0f },
-				{ -M_SQRT1_2, -M_SQRT1_2 },
+				{ (float)-M_SQRT1_2, (float)-M_SQRT1_2 },
 				{ 0.0f, -1.0f },
-				{ M_SQRT1_2, -M_SQRT1_2 }
+				{ (float)M_SQRT1_2, (float)-M_SQRT1_2 }
 			};
 
 PhotonTorpedoSceneNode::PTRenderNode::PTRenderNode(
@@ -135,20 +144,20 @@ void			PhotonTorpedoSceneNode::PTRenderNode::render()
   const GLfloat* sphere = sceneNode->getSphere();
   glPushMatrix();
     glTranslatef(sphere[0], sphere[1], sphere[2]);
-    SceneRenderer::getInstance()->getViewFrustum().executeBillboard();
+    RENDERER.getViewFrustum().executeBillboard();
 
-    if (!SceneRenderer::getInstance()->isSameFrame()) {
+    if (!RENDERER.isSameFrame()) {
       numFlares = 3 + int(3.0f * (float)bzfrand());
       for (int i = 0; i < numFlares; i++) {
-	theta[i] = 2.0f * M_PI * (float)bzfrand();
-	phi[i] = (float)bzfrand() - 0.5f;
-	phi[i] *= 2.0f * M_PI * fabsf(phi[i]);
+	theta[i] = (float)(2.0 * M_PI * bzfrand());
+	phi[i] = (float)(bzfrand() - 0.5);
+	phi[i] *= (float)(2.0 * M_PI * fabsf(phi[i]));
       }
     }
 
     // draw some flares
     myColor4fv(flareColor);
-    if (!sceneNode->blending) myStipple(flareColor[3]);
+    if (!BZDBCache::blend) myStipple(flareColor[3]);
     glBegin(GL_QUADS);
     for (int i = 0; i < numFlares; i++) {
       // pick random direction in 3-space.  picking a random theta with
@@ -166,7 +175,7 @@ void			PhotonTorpedoSceneNode::PTRenderNode::render()
     }
     glEnd();
 
-    if (sceneNode->blending) {
+    if (BZDBCache::blend) {
       // draw corona
       glBegin(GL_QUAD_STRIP);
       myColor3fv(mainColor);
@@ -270,4 +279,11 @@ void			PhotonTorpedoSceneNode::PTRenderNode::render()
 
   glPopMatrix();
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

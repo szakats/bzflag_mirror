@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,75 +7,55 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
+/* interface header */
 #include "RemotePlayer.h"
-#include "World.h"
 
-RemotePlayer::RemotePlayer(const PlayerId& id, TeamColor team,
-					const char* name, const char* email) :
-				Player(id, team, name, email)
+/* common implementation headers */
+#include "World.h"
+#include "SyncClock.h"
+
+
+RemotePlayer::RemotePlayer(const PlayerId& _id, TeamColor _team,
+			   const char* _name,
+			   const PlayerType _type) :
+  Player(_id, _team, _name, _type)
 {
-  numShots = World::getWorld()->getMaxShots();
-  shots = new RemoteShotPath*[numShots];
-  for (int i = 0; i < numShots; i++)
+  if (World::getWorld()) {
+    numShots = World::getWorld()->getMaxShots();
+  } else {
+    numShots = 0;
+  }
+  shots.resize(numShots);
+  for (int i = 0; i < numShots; i++) {
     shots[i] = NULL;
+  }
 }
 
 RemotePlayer::~RemotePlayer()
 {
-  for (int i = 0; i < numShots; i++)
-    delete shots[i];
-  delete[] shots;
 }
 
-void			RemotePlayer::addShot(const FiringInfo& info)
+void			RemotePlayer::addShot(FiringInfo& info)
 {
-  float newpos[3];
-  const float *f = getForward();
-  RemoteShotPath* newShot = new RemoteShotPath(info);
-  int shotNum = int(newShot->getShotId() & 255);
-  if (shots[shotNum]) delete shots[shotNum];
-  shots[shotNum] = newShot;
-  // Update tanks position and set dead reckoning for better lag handling
-  // shot origin is center of tank for shockwave
-  if (info.flag == ShockWaveFlag) {
-    newpos[0] = info.shot.pos[0];
-    newpos[1] = info.shot.pos[1];
-    newpos[2] = info.shot.pos[2];
-  }
-  // shot origin is muzzle for other shots
-  else {
-    float front = MuzzleFront;
-    if (info.flag == ObesityFlag) front *= ObeseFactor;
-    else if (info.flag == TinyFlag) front *= TinyFactor;
-    newpos[0] = info.shot.pos[0]-(front * f[0]);
-    newpos[1] = info.shot.pos[1]-(front * f[1]);
-    newpos[2] = info.shot.pos[2]-(front * f[2])-MuzzleHeight;
-  }
-  move(newpos, getAngle());
-  setDeadReckoning();
-}
-
-ShotPath*		RemotePlayer::getShot(int index) const
-{
-  return shots[index & 255];
+  prepareShotInfo(info);
+  Player::addShot(new RemoteShotPath(info,syncedClock.GetServerSeconds()), info);
 }
 
 bool			RemotePlayer::doEndShot(
-				int id, bool isHit, float* pos)
+				int ident, bool isHit, float* pos)
 {
-  const int index = id & 255;
-  const int salt = (id >> 8) & 127;
+  const int index = ident & 255;
+  const int salt = (ident >> 8) & 127;
 
   // special id used in some messages (and really shouldn't be sent here)
-  if (id == -1)
+  if (ident == -1)
     return false;
 
   // ignore bogus shots (those with a bad index or for shots that don't exist)
-  if (index < 0 || index >= World::getWorld()->getMaxShots() || !shots[index])
+  if (index < 0 || index >= numShots || !shots[index])
     return false;
 
   // ignore shots that already ending
@@ -88,6 +68,9 @@ bool			RemotePlayer::doEndShot(
   // so we can identify an old shot from a new one.
   if (salt != ((shots[index]->getShotId() >> 8) & 127))
     return false;
+
+  // keep statistics
+  shotStatistics.recordHit(shots[index]->getFlag());
 
   // don't stop if it's because were hitting something and we don't stop
   // when we hit something.
@@ -109,4 +92,11 @@ void			RemotePlayer::updateShots(float dt)
     if (shots[i])
       shots[i]->update(dt);
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

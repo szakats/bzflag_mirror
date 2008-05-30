@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,38 +7,36 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
+/* interface header */
 #include "HUDDialog.h"
-#include "playing.h"
-#include "MainWindow.h"
-#include "BzfWindow.h"
-#include "BzfDisplay.h"
 
-//
-// HUDDialog
-//
+// local interface headers
+#include "HUDuiElement.h"
+#include "HUDuiControl.h"
+#include "HUDNavigationQueue.h"
 
-HUDDialog::HUDDialog() : focus(NULL)
+HUDDialog::HUDDialog()
 {
   height = width = 0;
 }
 
 HUDDialog::~HUDDialog()
 {
-  // delete all controls left on list
-  const int count = list.size();
-  for (int i = 0; i < count; i++)
-    delete list[i];
+  // delete all elements left on render list
+  size_t count = renderList.size();
+  for (size_t i = 0; i < count; i++)
+    delete renderList[i];
 }
 
 void			HUDDialog::render()
 {
-  const int count = list.size();
-  for (int i = 0; i < count; i++)
-    list[i]->render();
+  // render all elements on the render list
+  size_t count = renderList.size();
+  for (size_t i = 0; i < count; i++)
+    renderList[i]->render();
 }
 
 void			HUDDialog::resize(int _width, int _height)
@@ -47,134 +45,29 @@ void			HUDDialog::resize(int _width, int _height)
   height	= _height;
 }
 
-HUDuiControl*		HUDDialog::getFocus() const
+void			HUDDialog::addControl(HUDuiElement *element)
 {
-  return focus;
+  renderList.push_back(element);
 }
 
-void			HUDDialog::setFocus(HUDuiControl* _focus)
+void			HUDDialog::addControl(HUDuiControl *control, bool navigable)
 {
-  focus = _focus;
+  addControl((HUDuiElement*)control);
+  if (navigable)
+    navList.push_back(control);
 }
 
-void			HUDDialog::initNavigation(std::vector<HUDuiControl*> &list, int start, int end)
+void			HUDDialog::initNavigation()
 {
-  int i;
-  const int count = list.size();
-
-  for (i = 0; i < start; i++) {
-    list[i]->setNext(list[i]);
-    list[i]->setPrev(list[i]);
-  }
-
-  if (start < end) {
-    list[start]->setNext(list[start+1]);
-    list[start]->setPrev(list[end]);
-    for (i = start+1; i < end; i++) {
-	list[i]->setNext(list[i+1]);
-	list[i]->setPrev(list[i-1]);
-    }
-    list[end]->setNext(list[start]);
-    list[end]->setPrev(list[end-1]);
-  }
-
-  for (i = end+1; i < count; i++) {
-    list[i]->setNext(list[i]);
-    list[i]->setPrev(list[i]);
-  }
-
-  setFocus(list[start]);
+  for (HUDNavigationQueue::iterator itr = navList.begin(); itr != navList.end(); ++itr)
+    (*itr)->setNavQueue(&navList);
+  navList.set((size_t)0);
 }
 
-
-//
-// HUDDialogStack
-//
-
-HUDDialogStack		HUDDialogStack::globalStack;
-
-HUDDialogStack::HUDDialogStack()
-{
-  // do nothing
-}
-
-HUDDialogStack::~HUDDialogStack()
-{
-  if (getMainWindow())
-    getMainWindow()->getWindow()->removeResizeCallback(resize, this);
-}
-
-HUDDialogStack*		HUDDialogStack::get()
-{
-  return &globalStack;
-}
-
-bool			HUDDialogStack::isActive() const
-{
-  return stack.size() != 0;
-}
-
-HUDDialog*		HUDDialogStack::top() const
-{
-  const int index = stack.size();
-  if (index == 0) return NULL;
-  return stack[index - 1];
-}
-
-void			HUDDialogStack::push(HUDDialog* dialog)
-{
-  if (!dialog) return;
-  if (isActive()) {
-    const int index = stack.size() - 1;
-    stack[index]->setFocus(HUDui::getFocus());
-    stack[index]->dismiss();
-  }
-  else {
-    getMainWindow()->getWindow()->addResizeCallback(resize, this);
-  }
-  stack.push_back(dialog);
-  HUDui::setDefaultKey(dialog->getDefaultKey());
-  HUDui::setFocus(dialog->getFocus());
-  dialog->resize(getMainWindow()->getWidth(), getMainWindow()->getHeight());
-  dialog->show();
-}
-
-void			HUDDialogStack::pop()
-{
-  if (isActive()) {
-    const int index = stack.size() - 1;
-    stack[index]->setFocus(HUDui::getFocus());
-    stack[index]->dismiss();
-    std::vector<HUDDialog*>::iterator it = stack.begin();
-    for(int i = 0; i < index; i++) it++;
-    stack.erase(it);
-    if (index > 0) {
-      HUDDialog* dialog = stack[index - 1];
-      HUDui::setDefaultKey(dialog->getDefaultKey());
-      HUDui::setFocus(dialog->getFocus());
-      dialog->resize(getMainWindow()->getWidth(),
-			getMainWindow()->getHeight());
-      dialog->show();
-    }
-    else {
-      HUDui::setDefaultKey(NULL);
-      HUDui::setFocus(NULL);
-      getMainWindow()->getWindow()->removeResizeCallback(resize, this);
-    }
-  }
-}
-
-void			HUDDialogStack::render()
-{
-  if (isActive())
-    stack[stack.size() - 1]->render();
-}
-
-void			HUDDialogStack::resize(void* _self)
-{
-  HUDDialogStack* self = (HUDDialogStack*)_self;
-  if (self->isActive())
-    self->top()->resize(getMainWindow()->getWidth(),
-			getMainWindow()->getHeight());
-}
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

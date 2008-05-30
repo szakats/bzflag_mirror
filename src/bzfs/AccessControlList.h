@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,189 +7,302 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __ACCESSCONTROLLIST_H__
 #define __ACCESSCONTROLLIST_H__
 
+#include "common.h"
+
 #include <vector>
 #include <string>
-#include <algorithm>
 
-#include "global.h"
-#include "network.h"
-
-#include "Address.h"
 #include "TimeKeeper.h"
+#include "Address.h"
 
-extern void sendMessage(int playerIndex, PlayerId targetPlayer, const char *message, bool fullBuffer);
 
+/** This struct contains information about a ban - the address that was banned,
+    the time the ban will expire, the callsign of the player who performed the
+    ban, and the reason. It also has operators defined for checking if two
+    bans are equal. */
 struct BanInfo
 {
-  BanInfo( in_addr &banAddr, int period = 0 ) {
-    memcpy( &addr, &banAddr, sizeof( in_addr ));
+  /** This constructor creates a new BanInfo with the address @c banAddr,
+      the ban performer @c bannedBy, and the expiration time @c period
+      minutes from now. */
+  BanInfo(in_addr &banAddr, const char *_bannedBy = NULL, double period = 0,
+	  bool isFromMaster = false ) {
+    addr = banAddr;
+    if (_bannedBy)
+      bannedBy = _bannedBy;
     if (period == 0) {
       banEnd = TimeKeeper::getSunExplodeTime();
     } else {
       banEnd = TimeKeeper::getCurrent();
       banEnd += period * 60.0f;
     }
+    fromMaster = isFromMaster;
   }
-  // BanInfos with same IP are identical
+  /** BanInfos with same IP are identical. */
   bool operator==(const BanInfo &rhs) const {
     return addr.s_addr == rhs.addr.s_addr;
+  }
+  /** Only BanInfos with the same IP are identical. */
+  bool operator!=(const BanInfo &rhs) const {
+    return addr.s_addr != rhs.addr.s_addr;
   }
 
   in_addr	addr;
   TimeKeeper	banEnd;
+  std::string	bannedBy;	// Who did perform the ban
+  std::string	reason;		// reason for banning
+  bool fromMaster;		// where the ban came from, local or master list.
 };
+
+
+/** This struct contains information about a hostban - the host pattern that
+    was banned, the time the ban will expire, the callsign of the player who
+    performed the ban, and the reason. It also has operators defined for
+    checking if two bans are equal. */
+struct HostBanInfo
+{
+  /** This constructor creates a new HostBanInfo with the host pattern
+      @c hostpat, the ban performer @c bannedBy, and the expiration time
+      @c period minutes from now. */
+  HostBanInfo(std::string _hostpat, const char *_bannedBy = NULL,
+	      double period = 0, bool isFromMaster = false ) {
+    hostpat = _hostpat;
+    if (_bannedBy)
+      bannedBy = _bannedBy;
+    if (period == 0) {
+      banEnd = TimeKeeper::getSunExplodeTime();
+    } else {
+      banEnd = TimeKeeper::getCurrent();
+      banEnd += period * 60.0f;
+    }
+    fromMaster = isFromMaster;
+  }
+  /** HostBanInfos with same host pattern are identical. */
+  bool operator==(const HostBanInfo &rhs) const {
+    return hostpat == rhs.hostpat;
+  }
+  /** Only HostBanInfos with same host pattern are identical. */
+  bool operator!=(const HostBanInfo& rhs) const {
+    return hostpat != rhs.hostpat;
+  }
+
+  std::string hostpat;
+  TimeKeeper banEnd;
+  std::string bannedBy;
+  std::string reason;
+  bool fromMaster;	// where the ban came from, local or master list.
+};
+
+
+/** This struct contains information about an idban - the databaseid pattern
+    that was banned, the time the ban will expire, the callsign of the player
+    who performed the ban, and the reason. It also has operators defined for
+    checking if two bans are equal. */
+struct IdBanInfo
+{
+  /** This constructor creates a new IdBanInfo with the id pattern
+      @c idpat, the ban performer @c bannedBy, and the expiration time
+      @c period minutes from now. */
+  IdBanInfo(std::string _idpat, const char *_bannedBy = NULL,
+	    double period = 0, bool isFromMaster = false ) {
+    idpat = _idpat;
+    if (_bannedBy)
+      bannedBy = _bannedBy;
+    if (period == 0) {
+      banEnd = TimeKeeper::getSunExplodeTime();
+    } else {
+      banEnd = TimeKeeper::getCurrent();
+      banEnd += period * 60.0f;
+    }
+    fromMaster = isFromMaster;
+  }
+  /** IdBanInfos with same id pattern are identical. */
+  bool operator==(const IdBanInfo &rhs) const {
+    return idpat == rhs.idpat;
+  }
+  /** Only IdBanInfos with same id pattern are identical. */
+  bool operator!=(const IdBanInfo& rhs) const {
+    return idpat != rhs.idpat;
+  }
+
+  std::string idpat;
+  TimeKeeper banEnd;
+  std::string bannedBy;
+  std::string reason;
+  bool fromMaster;	// where the ban came from, local or master list.
+};
+
 
 /* FIXME the AccessControlList assumes that 255 is a wildcard. it "should"
  * include a cidr mask with each address. it's still useful as is, though
  * see wildcard conversion occurs in convert().
  */
+
+/** This class handles the lists of bans and hostbans. It has functions for
+    adding and removing bans and hostbans, checking if a certain IP or host
+    is banned, sending the ban lists to a player, and reading and writing the
+    ban lists to a file. */
 class AccessControlList
 {
 public:
-  void ban(in_addr &ipAddr, int period = 0) {
-    BanInfo toban(ipAddr, period);
-    banList_t::iterator oldit = std::find(banList.begin(), banList.end(), toban);
-    if (oldit != banList.end()) // IP already in list? -> replace
-      *oldit = toban;
-    else
-      banList.push_back(toban);
-  }
 
-  bool ban(std::string &ipList, int period = 0) {
-    return ban(ipList.c_str(), period);
-  }
+  /** This function will add a ban for the address @c ipAddr with the given
+      parameters. If that address already is banned the old ban will be
+      replaced. */
+  void ban(in_addr &ipAddr, const char *bannedBy, double period = 0,
+	   const char *reason=NULL, bool fromMaster = false);
 
-  bool ban(const char *ipList, int period = 0) {
-    char *buf = strdup(ipList);
-    char *pStart = buf;
-    char *pSep;
-    bool added = false;
+  /** This function takes a list of addresses as a string and tries to ban them
+      using the given parameters. The string should be comma separated,
+      like this: "1.2.3.4,5.6.7.8,9.10.11.12". */
+  bool ban(std::string &ipList, const char *bannedBy=NULL, double period = 0,
+	   const char *reason=NULL, bool fromMaster = false);
 
-    in_addr mask;
-    while ((pSep = strchr(pStart, ',')) != NULL) {
-      *pSep = 0;
-      if (convert(pStart, mask)) {
-	ban(mask, period);
-	added = true;
-      }
-      *pSep = ',';
-      pStart = pSep + 1;
-    }
-    if (convert(pStart, mask)) {
-      ban(mask, period);
-      added = true;
-    }
-    free(buf);
-    return added;
-  }
+  /** This function takes a list of addresses as a <code>const char*</code>
+      and tries to ban them using the given parameters. The string should be
+      comma separated, like this: "1.2.3.4,5.6.7.8,9.10.11.12". */
+  bool ban(const char *ipList, const char *bannedBy=NULL, double period = 0,
+	   const char *reason=NULL, bool fromMaster = false);
 
-  bool unban(in_addr &ipAddr) {
-    banList_t::iterator it = std::remove(banList.begin(), banList.end(), BanInfo(ipAddr));
-    if (it != banList.end()) {
-      banList.erase(it, banList.end());
-      return true;
-    }
-    return false;
-  }
+  /** This function adds a hostban for the host pattern @c hostpat with the
+      given parameters. If the host pattern already is banned the old ban will
+      be replaced. */
+  void hostBan(std::string hostpat, const char *bannedBy, double period = 0,
+	       const char *reason = NULL, bool fromMaster = false);
 
-  bool unban(std::string &ipList) {
-    return unban(ipList.c_str());
-  }
+  /** This function adds an idban for the id pattern @c idpat with the
+      given parameters. If the idban pattern already is banned the old ban will
+      be replaced. */
+  void idBan(std::string hostpat, const char *bannedBy, double period = 0,
+	     const char *reason = NULL, bool fromMaster = false);
 
-  bool unban(const char *ipList) {
-    char *buf = strdup(ipList);
-    char *pStart = buf;
-    char *pSep;
-    bool success = false;
+  /** This function removes any ban for the address @c ipAddr.
+      @returns @c true if there was a ban for that address, @c false if there
+      wasn't. */
+  bool unban(in_addr &ipAddr);
 
-    in_addr mask;
-    while ((pSep = strchr(pStart, ',')) != NULL) {
-      *pSep = 0;
-      if (convert(pStart, mask))
-	success|=unban(mask);
-      *pSep = ',';
-      pStart = pSep + 1;
-    }
-    if (convert(pStart, mask))
-      success|=unban(mask);
-    free(buf);
-    return success;
-  }
+  /** This function unbans any addresses given in @c ipList, which should be
+      a comma separated string in the same format as in the ban() functions.
+      @returns @c true if there was a ban for any of the addresses, @c false
+      if none of the addresses were banned. */
+  bool unban(std::string &ipList);
 
-  bool validate(in_addr &ipAddr) {
-    expire();
+  /** This function unbans any addresses given in @c ipList, which should be
+      a comma separated string in the same format as in the ban() functions.
+      @returns @c true if there was a ban for any of the addresses, @c false
+      if none of the addresses were banned. */
+  bool unban(const char *ipList);
 
-    for (banList_t::iterator it = banList.begin(); it != banList.end(); ++it) {
-      in_addr mask = it->addr;
+  /** This function removes any ban for the host pattern @c hostpat.
+      @returns @c true if there was a ban for the host pattern, @c false
+      otherwise. */
+  bool hostUnban(std::string hostpat);
 
-      if ((ntohl(mask.s_addr) & 0x00ffffff) == 0x00ffffff)
-	mask.s_addr = htonl((ntohl(mask.s_addr) & 0xff000000) | (ntohl(ipAddr.s_addr) & 0x00ffffff));
-      else if ((ntohl(mask.s_addr) & 0x0000ffff) == 0x0000ffff)
-	mask.s_addr = htonl((ntohl(mask.s_addr) & 0xffff0000) | (ntohl(ipAddr.s_addr) & 0x0000ffff));
-      else if ((ntohl(mask.s_addr) & 0x000000ff) == 0x000000ff)
-	mask.s_addr = htonl((ntohl(mask.s_addr) & 0xffffff00) | (ntohl(ipAddr.s_addr) & 0x000000ff));
+  /** This function removes any ban for the database id @c idpat.
+      @returns @c true if there was a ban for the database id, @c false
+      otherwise. */
+  bool idUnban(std::string idpat);
 
-      if (mask.s_addr == ipAddr.s_addr)
-	return false;
-    }
-    return true;
-  }
+  /** This function checks if an address is "valid" or not. Valid in this case
+      means that it has not been banned.
+      @returns @c true if the address is valid, @c false if not. */
+  bool validate(const in_addr &ipAddr, BanInfo *info = NULL);
 
-  void sendBans(PlayerId id)
-  {
-    expire();
+  /** This function checks if a host matches a given host pattern.
+      @returns @c true if a match is found, @c false otherwise. */
+  static bool does_match(const char *targ, int targlen, const char *pat, int patlen);
 
-    char banlistmessage[MessageLen];
-    sendMessage(ServerPlayer, id, "IP Ban List", false);
-    sendMessage(ServerPlayer, id, "-----------", false);
-    for (banList_t::iterator it = banList.begin(); it != banList.end(); ++it) {
-      char *pMsg = banlistmessage;
-      in_addr mask = it->addr;
+  /** This function checks that a hostname is "valid". In this case valid means
+      "not banned".
+      @returns @c true if the hostname is valid, @c false if it isn't. */
+  bool hostValidate(const char *hostname, HostBanInfo *info = NULL);
 
-      sprintf( pMsg, "%d.", ((unsigned char)(ntohl(mask.s_addr) >> 24)));
-      pMsg+=strlen(pMsg);
+  /** This function checks that an id is "valid". In this case valid means
+      "not banned".
+      @returns @c true if the id is valid, @c false if it isn't. */
+  bool idValidate(const char *idname, IdBanInfo *info = NULL);
 
-      if ((ntohl(mask.s_addr) & 0x00ffffff) == 0x00ffffff) {
-        strcat( pMsg, "*.*.*" );
-      } else {
-        sprintf( pMsg, "%d.", ((unsigned char)(ntohl(mask.s_addr) >> 16)));
-        pMsg+=strlen(pMsg);
-        if ((ntohl(mask.s_addr) & 0x0000ffff) == 0x0000ffff) {
-          strcat( pMsg, "*.*" );
-        } else {
-          sprintf( pMsg, "%d.", ((unsigned char)(ntohl(mask.s_addr) >> 8)));
-          pMsg+=strlen(pMsg);
-          if ((ntohl(mask.s_addr) & 0x000000ff) == 0x000000ff)
-	    strcat( pMsg, "*" );
-          else
-	    sprintf( pMsg, "%d", ((unsigned char)ntohl(mask.s_addr)));
-        }
-      }
-      // print duration when < 1 year
-      double duration = it->banEnd - TimeKeeper::getCurrent();
-      if (duration < 365.0f * 24 * 3600)
-	sprintf(pMsg + strlen(pMsg)," (%.1f minutes)", duration / 60);
+  /** This function sends a textual list of the given IP ban to a player. */
+  void sendBan(PlayerId id, const BanInfo&);
 
-      sendMessage(ServerPlayer, id, banlistmessage, true);
-    }
-  }
+  /** This function sends a textual list of all IP bans to a player. */
+  void sendBans(PlayerId id, const char* pattern);
+
+  /** This function sends a textual list of all host bans to a player. */
+  void sendHostBans(PlayerId id, const char* pattern);
+
+  /** This function sends a textual list of all id bans to a player. */
+  void sendIdBans(PlayerId id, const char* pattern);
+
+  /** This function tells this object where to save the banlist, and where
+      to load it from. */
+  void setBanFile(const std::string& filename);
+
+  /** This function loads a banlist from the ban file, if it has been set.
+      It only returns @c false if the file exist but is not in the correct
+      format, otherwise @c true is returned. */
+  bool load();
+
+  /** This function saves the banlist to the ban file, if it has been set. */
+  void save();
+
+  /** This function merges in a banlist from the master ban list ban file,
+      if it has been set. It only returns @c false if the file exist but is not
+      in the correct format, otherwise @c true is returned. */
+  int  merge(const std::string& banData);
+
+  /** This function purges any bans that are flagged as from the master ban list,
+      presumably so it can be remerged */
+  void purgeMasters(void);
+
+  std::vector<std::pair<std::string, std::string> > listMasterBans(void) const;
 
 private:
+  /** This function converts a <code>char*</code> containing an IP mask to an
+      @c in_addr. */
   bool convert(char *ip, in_addr &mask);
 
+  /** This function checks all bans to see if any of them have expired,
+      and removes those who have. */
   void expire();
+
+  /** This function removes bans dependent on their origin
+      (local or from master list) **/
+  void purge(bool master);
+
+  /** This function purges all local bans
+      so the local banfile can be reloaded **/
+  void purgeLocals(void);
 
   typedef std::vector<BanInfo> banList_t;
   banList_t banList;
+
+  typedef std::vector<HostBanInfo> hostBanList_t;
+  hostBanList_t hostBanList;
+
+  typedef std::vector<IdBanInfo> idBanList_t;
+  idBanList_t idBanList;
+
+  std::string banFile;
 };
 
-#else
-class AccessControlList;
+inline void AccessControlList::setBanFile(const std::string& filename) {
+  banFile = filename;
+}
+
+
 #endif /* __ACCESSCONTROLLIST_H__ */
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

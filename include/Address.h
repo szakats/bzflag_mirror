@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* Address:
@@ -21,9 +21,14 @@
 #ifndef	BZF_INET_ADDR_H
 #define	BZF_INET_ADDR_H
 
-#include <sys/types.h>
-#include <string>
 #include "common.h"
+
+// system headers
+#include <sys/types.h>
+#include <vector>
+#include <string>
+
+// local headers
 #include "network.h"
 #include "Pack.h"
 
@@ -43,28 +48,32 @@ class Address {
     bool		operator==(const Address&) const;
     bool		operator!=(const Address&) const;
     bool		isAny() const;
+    bool		isPrivate() const;
     std::string		getDotNotation() const;
+    uint8_t		getIPVersion() const;
 
     void*		pack(void*) const;
     void*		unpack(void*);
 
-    static Address	getHostAddress(const char* hostname = NULL);
+    static Address	getHostAddress(const std::string hostname = std::string(""));
     static std::string	getHostByAddress(InAddr);
-    static const char*	getHostName(const char* hostname = NULL);
+    static const std::string getHostName(const std::string hostname = std::string(""));
 
   private:
-    InAddr		addr;
-    static Address	localAddress;
+    std::vector <InAddr> addr;
 };
 
 typedef uint8_t		PlayerId;
 const int		PlayerIdPLen = sizeof(PlayerId);
+const int		ServerIdPLen = 8;
 
 // FIXME - enum maybe? put into namespace or class cage?
 const PlayerId		NoPlayer = 255;
 const PlayerId		AllPlayers = 254;
 const PlayerId		ServerPlayer = 253;
-const PlayerId		LastRealPlayer = 244;
+const PlayerId		AdminPlayers = 252;
+const PlayerId		UnusedSpecialPlayer2 = 251; // This id is unused at present and vailable for special needs in the future
+const PlayerId		LastRealPlayer = 243;
 
 class ServerId {
   public:
@@ -82,4 +91,11 @@ class ServerId {
 };
 
 #endif // BZF_INET_ADDR_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

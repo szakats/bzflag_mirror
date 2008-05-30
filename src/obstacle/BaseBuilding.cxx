@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,28 +7,31 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <math.h>
 #include "common.h"
-#include "BaseBuilding.h"
+#include <math.h>
 #include "global.h"
+#include "Pack.h"
+#include "BaseBuilding.h"
 #include "Intersect.h"
-#include "QuadWallSceneNode.h"
+#include "MeshTransform.h"
 
-std::string		BaseBuilding::typeName("BaseBuilding");
+
+const char*		BaseBuilding::typeName = "BaseBuilding";
+
+BaseBuilding::BaseBuilding()
+{
+}
 
 BaseBuilding::BaseBuilding(const float *p, float rotation,
-	const float *size, int _team) :
-		Obstacle(p, rotation, size[0], size[1], size[2]),
+	const float *_size, int _team) :
+		Obstacle(p, rotation, _size[0], _size[1], _size[2]),
 		team(_team)
 {
-  if(pos[2] != 0) {
-    height = 1.0;
-  } else {
-    height = 0.0;
-  }
+  finalize();
+  return;
 }
 
 BaseBuilding::~BaseBuilding()
@@ -36,12 +39,34 @@ BaseBuilding::~BaseBuilding()
   // do nothing
 }
 
-std::string		BaseBuilding::getType() const
+void BaseBuilding::finalize()
+{
+  Obstacle::setExtents();
+  return;
+}
+
+Obstacle* BaseBuilding::copyWithTransform(const MeshTransform& xform) const
+{
+  float newPos[3], newSize[3], newAngle;
+  memcpy(newPos, pos, sizeof(float[3]));
+  memcpy(newSize, size, sizeof(float[3]));
+  newAngle = angle;
+
+  MeshTransform::Tool tool(xform);
+  bool flipped;
+  tool.modifyOldStyle(newPos, newSize, newAngle, flipped);
+
+  BaseBuilding* copy = new BaseBuilding(newPos, newAngle, newSize, team);
+
+  return copy;
+}
+
+const char*		BaseBuilding::getType() const
 {
   return typeName;
 }
 
-std::string		BaseBuilding::getClassName()
+const char*		BaseBuilding::getClassName()
 {
   return typeName;
 }
@@ -57,29 +82,73 @@ void			BaseBuilding::getNormal(const float *p, float *n) const
   getNormalRect(p, getPosition(), getRotation(), getWidth(), getBreadth(), n);
 }
 
-bool			BaseBuilding::isInside(const float *p, float radius) const
+void			BaseBuilding::get3DNormal(const float* p, float* n) const
+{
+  // This bit of cruft causes bullets to bounce of buildings in the z direction
+  if (fabs(p[2] - getPosition()[2]) < Epsilon) {
+    n[0] = 0.0f;
+    n[1] = 0.0f;
+    n[2] = -1.0f;
+  }
+  else if (fabs(p[2] - (getPosition()[2] + getHeight())) < Epsilon) {
+    n[0] = 0.0f;
+    n[1] = 0.0f;
+    n[2] = 1.0f;
+  } // end cruftiness
+  else
+    getNormal(p, n);
+}
+
+bool			BaseBuilding::inCylinder(const float *p, float radius, float height) const
 {
   return (p[2] < (getPosition()[2] + getHeight()))
-  &&     ((p[2]+TankHeight) > getPosition()[2])
+  &&     ((p[2]+height) > getPosition()[2])
   &&     testRectCircle(getPosition(), getRotation(), getWidth(), getBreadth(), p, radius);
 }
 
-bool			BaseBuilding::isInside(const float *p, float angle,
-			float dx, float dy) const
+bool			BaseBuilding::inBox(const float *p, float _angle,
+			float dx, float dy, float height) const
 {
   return (p[2] < (getPosition()[2] + getHeight()))
-  &&     ((p[2]+TankHeight) >= getPosition()[2])
-  &&     testRectRect(getPosition(), getRotation(), getWidth(), getBreadth(), p, angle, dx, dy);
+  &&     ((p[2]+height) >= getPosition()[2])
+  &&     testRectRect(getPosition(), getRotation(), getWidth(), getBreadth(),
+		      p, _angle, dx, dy);
 }
 
-bool			BaseBuilding::isCrossing(const float *p, float angle,
-			float dx, float dy,
+bool			BaseBuilding::inMovingBox(const float* oldP, float,
+						  const float *p, float _angle,
+			float dx, float dy, float height) const
+{
+  float topBaseHeight = getPosition()[2] + getHeight();
+  float higherZ;
+  float lowerZ;
+  // if a base is just the ground (z == 0 && height == 0) no collision
+  // ground is already handled
+  if (topBaseHeight <= 0.0)
+    return false;
+  if (oldP[2] > p[2]) {
+    higherZ = oldP[2];
+    lowerZ  = p[2];
+  } else {
+    higherZ = p[2];
+    lowerZ  = oldP[2];
+  }
+  if (lowerZ >= topBaseHeight)
+    return false;
+  if ((higherZ + height) < getPosition()[2])
+    return false;
+  return testRectRect(getPosition(), getRotation(), getWidth(), getBreadth(),
+		      p, _angle, dx, dy);
+}
+
+bool			BaseBuilding::isCrossing(const float *p, float _angle,
+			float dx, float dy, float height,
 			float *plane) const
 {
   // if not inside or contained, then not crossing
-  if (!isInside(p, angle, dx, dy) ||
+  if (!inBox(p, _angle, dx, dy, height) ||
       testRectInRect(getPosition(), getRotation(),
-	getWidth(), getBreadth(), p, angle, dx, dy))
+	getWidth(), getBreadth(), p, _angle, dx, dy))
     return false;
   if(!plane) return true;
 
@@ -112,7 +181,7 @@ bool			BaseBuilding::isCrossing(const float *p, float angle,
 
 bool			BaseBuilding::getHitNormal(const float *pos1, float azimuth1,
 			const float *pos2, float azimuth2,
-			float halfWidth, float halfBreadth,
+			float halfWidth, float halfBreadth, float,
 			float *normal) const
 {
   return Obstacle::getHitNormal(pos1, azimuth1, pos2, azimuth2, halfWidth, halfBreadth,
@@ -120,12 +189,7 @@ bool			BaseBuilding::getHitNormal(const float *pos1, float azimuth1,
 			getHeight(), normal) >= 0.0f;
 }
 
-ObstacleSceneNodeGenerator* BaseBuilding::newSceneNodeGenerator() const
-{
-  return new BaseSceneNodeGenerator(this);
-}
-
-void			BaseBuilding::getCorner(int index, float *pos) const
+void			BaseBuilding::getCorner(int index, float *_pos) const
 {
   const float *base = getPosition();
   const float c = cosf(getRotation());
@@ -134,113 +198,200 @@ void			BaseBuilding::getCorner(int index, float *pos) const
   const float b = getBreadth();
   switch(index & 3) {
     case 0:
-      pos[0] = base[0] + c * w - s * b;
-      pos[1] = base[1] + s * w + c * b;
+      _pos[0] = base[0] + c * w - s * b;
+      _pos[1] = base[1] + s * w + c * b;
       break;
     case 1:
-      pos[0] = base[0] - c * w - s * b;
-      pos[1] = base[1] - s * w + c * b;
+      _pos[0] = base[0] - c * w - s * b;
+      _pos[1] = base[1] - s * w + c * b;
       break;
     case 2:
-      pos[0] = base[0] - c * w + s * b;
-      pos[1] = base[1] - s * w - c * b;
+      _pos[0] = base[0] - c * w + s * b;
+      _pos[1] = base[1] - s * w - c * b;
       break;
     case 3:
-      pos[0] = base[0] + c * w + s * b;
-      pos[1] = base[1] + s * w - c * b;
+      _pos[0] = base[0] + c * w + s * b;
+      _pos[1] = base[1] + s * w - c * b;
       break;
   }
-  pos[2] = base[2];
-  if(index >= 4) pos[2] += getHeight();
+  _pos[2] = base[2];
+  if(index >= 4) _pos[2] += getHeight();
 }
 
-const int	BaseBuilding::getTeam() const {
+int	BaseBuilding::getTeam() const {
   return team;
 }
 
-BaseSceneNodeGenerator::BaseSceneNodeGenerator(const BaseBuilding* _base) : base(_base)
+bool			BaseBuilding::isFlatTop() const
 {
-  // do nothing
+  return true;
 }
 
-BaseSceneNodeGenerator::~BaseSceneNodeGenerator()
+
+void* BaseBuilding::pack(void* buf) const
 {
-  // do nothing
+  buf = nboPackUShort(buf, (uint16_t) team);
+
+  buf = nboPackFloatVector(buf, pos);
+  buf = nboPackFloat(buf, angle);
+  buf = nboPackFloatVector(buf, size);
+
+  unsigned char stateByte = 0;
+  stateByte |= isDriveThrough() ? _DRIVE_THRU : 0;
+  stateByte |= isShootThrough() ? _SHOOT_THRU : 0;
+  buf = nboPackUByte(buf, stateByte);
+
+  return buf;
 }
 
-WallSceneNode*	BaseSceneNodeGenerator::getNextNode(float uRepeats, float vRepeats, bool lod)
+
+void* BaseBuilding::unpack(void* buf)
 {
-  const GLfloat *pos = base->getPosition();
-  if(getNodeNumber() >= 1 && pos[2] == 0) return NULL;
-  if(getNodeNumber() >= 6) return NULL;
-  GLfloat bPoint[3], sCorner[3], tCorner[3];
-  if(base->getPosition()[2] == 0) {
-    incNodeNumber();
-    base->getCorner(0, bPoint);
-    base->getCorner(3, tCorner);
-    base->getCorner(1, sCorner);
+  uint16_t shortTeam;
+  buf = nboUnpackUShort(buf, shortTeam);
+  team = (int)shortTeam;
+
+  buf = nboUnpackFloatVector(buf, pos);
+  buf = nboUnpackFloat(buf, angle);
+  buf = nboUnpackFloatVector(buf, size);
+
+  unsigned char stateByte;
+  buf = nboUnpackUByte(buf, stateByte);
+  driveThrough = (stateByte & _DRIVE_THRU) != 0 ? 0xFF : 0;
+  shootThrough = (stateByte & _SHOOT_THRU) != 0 ? 0xFF : 0;
+
+  finalize();
+
+  return buf;
+}
+
+
+int BaseBuilding::packSize() const
+{
+  int fullSize = 0;
+  fullSize += sizeof(uint16_t); // team
+  fullSize += sizeof(float[3]); // pos
+  fullSize += sizeof(float);    // rotation
+  fullSize += sizeof(float[3]); // size
+  fullSize += sizeof(uint8_t);  // state bits
+  return fullSize;
+}
+
+
+void BaseBuilding::print(std::ostream& out, const std::string& indent) const
+{
+  out << indent << "base" << std::endl;
+  const float *myPos = getPosition();
+  out << indent << "  position " << myPos[0] << " " << myPos[1] << " "
+				 << myPos[2] << std::endl;
+  out << indent << "  size " << getWidth() << " " << getBreadth()
+			     << " " << getHeight() << std::endl;
+  out << indent << "  rotation " << ((getRotation() * 180.0) / M_PI)
+				 << std::endl;
+  out << indent << "  color " << getTeam() << std::endl;
+  if (isPassable()) {
+    out << indent << "  passable" << std::endl;
   } else {
-    switch(incNodeNumber()) {
-      case 1:
-	base->getCorner(4, bPoint);
-	base->getCorner(5, sCorner);
-	base->getCorner(7, tCorner);
-	break;
-      case 2:
-	base->getCorner(0, bPoint);
-	base->getCorner(3, sCorner);
-	base->getCorner(1, tCorner);
-	break;
-      case 3:
-	base->getCorner(0, bPoint);
-	base->getCorner(1, sCorner);
-	base->getCorner(4, tCorner);
-	break;
-      case 4:
-	base->getCorner(1, bPoint);
-	base->getCorner(2, sCorner);
-	base->getCorner(5, tCorner);
-	break;
-      case 5:
-	base->getCorner(2, bPoint);
-	base->getCorner(3, sCorner);
-	base->getCorner(6, tCorner);
-	break;
-      case 6:
-	base->getCorner(3, bPoint);
-	base->getCorner(0, sCorner);
-	base->getCorner(7, tCorner);
-	break;
+    if (isDriveThrough()) {
+      out << indent << "  drivethrough" << std::endl;
+    }
+    if (isShootThrough()) {
+      out << indent << "  shootthrough" << std::endl;
     }
   }
-  GLfloat color[4];
-  switch(base->getTeam()) {
-    case 1:
-      color[0] = 0.7f; color[1] = 0.0f; color[2] = 0.0f;
-      break;
-    case 2:
-      color[0] = 0.0f; color[1] = 0.7f; color[2] = 0.0f;
-      break;
-    case 3:
-      color[0] = 0.0f; color[1] = 0.0f; color[2] = 0.7f;
-      break;
-    case 4:
-      color[0] = 0.7f; color[1] = 0.0f; color[2] = 0.7f;
-      break;
-  }
-  color[3] = 1.0;
-
-  GLfloat sEdge[3];
-  GLfloat tEdge[3];
-  sEdge[0] = sCorner[0] - bPoint[0];
-  sEdge[1] = sCorner[1] - bPoint[1];
-  sEdge[2] = sCorner[2] - bPoint[2];
-  tEdge[0] = tCorner[0] - bPoint[0];
-  tEdge[1] = tCorner[1] - bPoint[1];
-  tEdge[2] = tCorner[2] - bPoint[2];
-
-  WallSceneNode *retval = new QuadWallSceneNode(bPoint, sEdge, tEdge, uRepeats, vRepeats, lod);
-  retval->setColor(color);
-  return retval;
+  out << indent << "end" << std::endl;
+  return;
 }
+
+
+static void outputFloat(std::ostream& out, float value)
+{
+  char buffer[32];
+  snprintf(buffer, 30, " %.8f", value);
+  out << buffer;
+  return;
+}
+
+void BaseBuilding::printOBJ(std::ostream& out, const std::string& /*indent*/) const
+{
+  int i;
+  float verts[8][3] = {
+    {-1.0f, -1.0f, 0.0f},
+    {+1.0f, -1.0f, 0.0f},
+    {+1.0f, +1.0f, 0.0f},
+    {-1.0f, +1.0f, 0.0f},
+    {-1.0f, -1.0f, 1.0f},
+    {+1.0f, -1.0f, 1.0f},
+    {+1.0f, +1.0f, 1.0f},
+    {-1.0f, +1.0f, 1.0f}
+  };
+  float norms[6][3] = {
+    {0.0f, -1.0f, 0.0f}, {+1.0f, 0.0f, 0.0f},
+    {0.0f, +1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f, +1.0f}
+  };
+  float txcds[4][2] = {
+    {0.0f, 0.0f}, {1.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 1.0f}
+  };
+  MeshTransform xform;
+  const float degrees = getRotation() * (float)(180.0 / M_PI);
+  const float zAxis[3] = {0.0f, 0.0f, +1.0f};
+  xform.addScale(getSize());
+  xform.addSpin(degrees, zAxis);
+  xform.addShift(getPosition());
+  xform.finalize();
+  MeshTransform::Tool xtool(xform);
+  for (i = 0; i < 8; i++) {
+    xtool.modifyVertex(verts[i]);
+  }
+  for (i = 0; i < 6; i++) {
+    xtool.modifyNormal(norms[i]);
+  }
+
+  out << "# OBJ - start base" << std::endl;
+  out << "o bzbase_team" << team << "_" << getObjCounter() << std::endl;
+
+  for (i = 0; i < 8; i++) {
+    out << "v";
+    outputFloat(out, verts[i][0]);
+    outputFloat(out, verts[i][1]);
+    outputFloat(out, verts[i][2]);
+    out << std::endl;
+  }
+  for (i = 0; i < 4; i++) {
+    out << "vt";
+    outputFloat(out, txcds[i][0]);
+    outputFloat(out, txcds[i][1]);
+    out << std::endl;
+  }
+  for (i = 0; i < 6; i++) {
+    out << "vn";
+    outputFloat(out, norms[i][0]);
+    outputFloat(out, norms[i][1]);
+    outputFloat(out, norms[i][2]);
+    out << std::endl;
+  }
+  out << "usemtl basetop_team" << team << std::endl;
+  out << "f -5/-4/-2 -6/-3/-2 -7/-2/-2 -8/-1/-2" << std::endl;
+  out << "f -4/-4/-1 -3/-3/-1 -2/-2/-1 -1/-1/-1" << std::endl;
+  out << "usemtl basewall_team" << team << std::endl;
+  out << "f -8/-4/-6 -7/-3/-6 -3/-2/-6 -4/-1/-6" << std::endl;
+  out << "f -7/-4/-5 -6/-3/-5 -2/-2/-5 -3/-1/-5" << std::endl;
+  out << "f -6/-4/-4 -5/-3/-4 -1/-2/-4 -2/-1/-4" << std::endl;
+  out << "f -5/-4/-3 -8/-3/-3 -4/-2/-3 -1/-1/-3" << std::endl;
+
+  out << std::endl;
+
+  incObjCounter();
+
+  return;
+}
+
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

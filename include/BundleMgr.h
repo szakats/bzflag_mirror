@@ -1,18 +1,28 @@
+/* bzflag
+ * Copyright (c) 1993 - 2008 Tim Riker
+ *
+ * This package is free software;  you can redistribute it and/or
+ * modify it under the terms of the license found in the file
+ * named COPYING that should have accompanied this file.
+ *
+ * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #ifndef	BZF_BUNDLEMGR_H
 #define	BZF_BUNDLEMGR_H
 
-#ifdef WIN32
-#pragma warning(4:4786)
-#endif
-
-#include <string>
-#include <vector>
-#include <map>
 #include "common.h"
 
+/* system interface headers */
+#include <map>
+#include <string>
+#include <vector>
 #ifdef __APPLE__
-#import <CoreFoundation/CoreFoundation.h>
+#  include <CoreFoundation/CoreFoundation.h>
 #endif
+
 
 class Bundle;
 
@@ -22,7 +32,7 @@ class BundleMgr
 {
 public:
 	BundleMgr(const std::string &path, const std::string &bundleName);
-	BundleMgr::~BundleMgr();
+	~BundleMgr();
 	Bundle *getBundle(const std::string &locale, bool setcur = true);
 
 	static Bundle *getCurrentBundle();
@@ -40,4 +50,11 @@ private:
 };
 
 #endif
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

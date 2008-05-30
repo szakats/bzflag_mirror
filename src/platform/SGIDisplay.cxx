@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "SGIDisplay.h"
@@ -65,7 +65,7 @@ Resolution::Resolution(XSGIvcVideoFormatInfo* format) :
 				valid(true), data(NULL)
 {
   name = new char[strlen(format->name) + 1];
-  strcpy(name, format->name);
+  strncpy(name, format->name, strlen(format->name));
 
   numChannels = 1;
   config = new Config[numChannels];
@@ -82,7 +82,7 @@ Resolution::Resolution(const char* comboName, int numFormats,
 				valid(true), data(NULL)
 {
   name = new char[strlen(comboName) + 1];
-  strcpy(name, comboName);
+  strncpy(name, comboName, strlen(comboName));
 
   numChannels = numFormats;
   config = new Config[numChannels];
@@ -91,7 +91,7 @@ Resolution::Resolution(const char* comboName, int numFormats,
 
   combination = true;
   char* _data = new char[strlen(comboName) + 1];
-  strcpy(_data, comboName);
+  strncpy(_data, comboName, strlen(comboName));
   data = _data;
 }
 
@@ -360,7 +360,7 @@ XDisplayMode::ResInfo**	SGIDisplayMode::init(XDisplay* _display,
 	    bestMatch = match;
 	    delete[] defaultVideoCombo;
 	    defaultVideoCombo = new char[strlen(comboNames[i]) + 1];
-	    strcpy(defaultVideoCombo, comboNames[i]);
+	    strncpy(defaultVideoCombo, comboNames[i], strlen(comboNames[i]));
 	  }
 	}
 
@@ -449,4 +449,11 @@ bool			SGIDisplayMode::set(int index)
 }
 
 #endif
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

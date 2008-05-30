@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "SGIImageFile.h"
@@ -18,7 +18,7 @@
 // SGIImageFile
 //
 
-SGIImageFile::SGIImageFile(std::istream* stream) : ImageFile(stream)
+SGIImageFile::SGIImageFile(std::istream* input) : ImageFile(input)
 {
   unsigned char header[512];
   readRaw(header, sizeof(header));
@@ -43,12 +43,12 @@ SGIImageFile::SGIImageFile(std::istream* stream) : ImageFile(stream)
   }
 
   // get dimensions
-  uint16_t width, height, depth;
-  width = swap16BE(reinterpret_cast<uint16_t*>(header + 6));
+  uint16_t myWidth, myHeight, depth;
+  myWidth = swap16BE(reinterpret_cast<uint16_t*>(header + 6));
   if (dimensions < 2)
-    height = 1;
+    myHeight = 1;
   else
-    height = swap16BE(reinterpret_cast<uint16_t*>(header + 8));
+    myHeight = swap16BE(reinterpret_cast<uint16_t*>(header + 8));
   if (dimensions < 3)
     depth = 1;
   else
@@ -58,8 +58,8 @@ SGIImageFile::SGIImageFile(std::istream* stream) : ImageFile(stream)
 
   // save info
   isVerbatim = (header[2] == 0);
-  init(static_cast<int>(depth), static_cast<int>(width),
-       static_cast<int>(height));
+  init(static_cast<int>(depth), static_cast<int>(myWidth),
+       static_cast<int>(myHeight));
 }
 
 SGIImageFile::~SGIImageFile()
@@ -99,8 +99,8 @@ bool					SGIImageFile::readVerbatim(void* buffer)
 
       // swizzle into place
       for (int x = 0; x < dx; ++x) {
-        *dst = row[x];
-        dst += dz;
+	*dst = row[x];
+	dst += dz;
       }
     }
   }
@@ -149,50 +149,50 @@ bool					SGIImageFile::readRLE(void* buffer)
 
       // make row buffer bigger if necessary
       if (length > rowSize) {
-        delete[] row;
-        rowSize = length;
-        row     = new unsigned char[rowSize];
+	delete[] row;
+	rowSize = length;
+	row     = new unsigned char[rowSize];
       }
 
       // read raw data
       getStream()->seekg(startTable[y + z * dy], std::ios::beg);
       readRaw(row, length);
       if (!isOkay())
-        break;
+	break;
 
       // decode
       unsigned char* src = row;
       while (1) {
-        // check for error in image
-        if (static_cast<uint32_t>(src - row) >= length) {
-          delete[] row;
-          delete[] startTable;
-          delete[] lengthTable;
-          return false;
-        }
+	// check for error in image
+	if (static_cast<uint32_t>(src - row) >= length) {
+	  delete[] row;
+	  delete[] startTable;
+	  delete[] lengthTable;
+	  return false;
+	}
 
-        // get next code
-        const unsigned char type = *src++;
-        int count = static_cast<int>(type & 0x7f);
+	// get next code
+	const unsigned char type = *src++;
+	int count = static_cast<int>(type & 0x7f);
 
-        // zero code means end of row
-        if (count == 0)
-          break;
+	// zero code means end of row
+	if (count == 0)
+	  break;
 
-        if (type & 0x80) {
-          // copy count pixels
-          while (count--) {
-            *dst = *src++;
-            dst += dz;
-          }
-        } else {
-          // repeat pixel count times
-          const unsigned char pixel = *src++;
-          while (count--) {
-            *dst = pixel;
-            dst += dz;
-          }
-        }
+	if (type & 0x80) {
+	  // copy count pixels
+	  while (count--) {
+	    *dst = *src++;
+	    dst += dz;
+	  }
+	} else {
+	  // repeat pixel count times
+	  const unsigned char pixel = *src++;
+	  while (count--) {
+	    *dst = pixel;
+	    dst += dz;
+	  }
+	}
       }
     }
   }
@@ -204,4 +204,11 @@ bool					SGIImageFile::readRLE(void* buffer)
 
   return isOkay();
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

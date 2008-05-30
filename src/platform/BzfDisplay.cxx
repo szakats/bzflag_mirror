@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "BzfDisplay.h"
@@ -20,7 +20,8 @@
 BzfDisplay::ResInfo::ResInfo(const char* _name, int w, int h, int r)
 {
   name = new char[strlen(_name) + 1];
-  strcpy(name, _name);
+  strncpy(name, _name, strlen(_name));
+  name[strlen(_name)] = '\0';
   width = w;
   height = h;
   refresh = r;
@@ -39,7 +40,8 @@ BzfDisplay::BzfDisplay() : passWidth(640), passHeight(480),
 				numResolutions(0),
 				defaultResolution(-1),
 				currentResolution(-1),
-				resolutions(NULL)
+				resolutions(NULL),
+				modeIndex(-1)
 {
   // do nothing
 }
@@ -111,6 +113,7 @@ bool			BzfDisplay::setResolution(int index)
     return false;
   }
   currentResolution = index;
+  setFullScreenFormat(index);
   return true;
 }
 
@@ -155,4 +158,15 @@ void			BzfDisplay::initResolutions(ResInfo** _resolutions,
   currentResolution = _currentResolution;
   defaultResolution = currentResolution;
 }
+
+void BzfDisplay::setFullScreenFormat(int index) {
+  modeIndex = index;
+}
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -23,19 +23,25 @@
 #ifndef	BZF_SHOT_UPDATE_H
 #define	BZF_SHOT_UPDATE_H
 
-#include <math.h>
 #include "common.h"
+
+// system headers
+#include <math.h>
+
+// local implementation headers
 #include "Address.h"
 #include "Flag.h"
+#include "BufferedNetworkMessage.h"
 
-const int		ShotUpdatePLen = PlayerIdPLen + 30;
-const int		FiringInfoPLen = ShotUpdatePLen + 6;
+const int		ShotUpdatePLen = PlayerIdPLen + 32;
+const int		FiringInfoPLen = ShotUpdatePLen + 10;
 
 class BaseLocalPlayer;
 
 struct ShotUpdate {
   public:
     void*		pack(void*) const;
+    void		pack(BufferedNetworkMessage *msg) const;
     void*		unpack(void*);
 
   public:
@@ -44,21 +50,32 @@ struct ShotUpdate {
     float		pos[3];			// shot position
     float		vel[3];			// shot velocity
     float		dt;			// time shot has existed
+    TeamColor		team;
 };
 
 struct FiringInfo {
   public:
 			FiringInfo();
-			FiringInfo(const BaseLocalPlayer&, int id);
 
     void*		pack(void*) const;
+    void		pack(BufferedNetworkMessage *msg) const;
     void*		unpack(void*);
+    void*		unpackW(void*);
 
   public:
+    float		timeSent;
     ShotUpdate		shot;
-    FlagId		flag;			// flag when fired
+    ShotType		shotType;
+    FlagType*		flagType;			// flag when fired
     float		lifetime;		// lifetime of shot (s)
 };
 
 #endif // BZF_SHOT_UPDATE_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

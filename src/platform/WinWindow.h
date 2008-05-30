@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* WinWindow:
@@ -20,7 +20,6 @@
 #include "BzfWindow.h"
 #include "WinDisplay.h"
 #include "WinVisual.h"
-#include <windows.h>
 
 class WinWindow : public BzfWindow {
   public:
@@ -38,12 +37,15 @@ class WinWindow : public BzfWindow {
     void		setPosition(int x, int y);
     void		setSize(int width, int height);
     void		setMinSize(int width, int height);
-    void		setFullscreen();
+    void		setFullscreen(bool on);
+
+    void		iconify();
 
     void		warpMouse(int x, int y);
     void		getMouse(int& x, int& y) const;
     void		grabMouse();
     void		ungrabMouse();
+    void		enableGrabMouse(bool on);
     void		showMouse();
     void		hideMouse();
 
@@ -57,7 +59,7 @@ class WinWindow : public BzfWindow {
     void		freeContext();
 
     // other Windows stuff
-    HWND		getHandle() const;
+    static HWND		getHandle();
     LONG		queryNewPalette();
     void		paletteChanged();
     bool		activate();
@@ -82,7 +84,7 @@ class WinWindow : public BzfWindow {
     const WinDisplay*	display;
     WinVisual		visual;
     bool		inDestroy;
-    HWND		hwnd;
+    static HWND		hwnd;
     HWND		hwndChild;
     HGLRC		hRC;
     HDC			hDC;
@@ -91,7 +93,6 @@ class WinWindow : public BzfWindow {
     bool		inactiveDueToDeactivateAll;
     bool		useColormap;
     bool		hasGamma;
-    bool		has3DFXGamma;
     float		gammaVal;
     WORD		origGammaRamps[6 * 256];
     PIXELFORMATDESCRIPTOR pfd;
@@ -99,7 +100,15 @@ class WinWindow : public BzfWindow {
     WinWindow*		next;
     static WinWindow*	first;
     static HPALETTE	colormap;
+    bool		mouseGrab;
 };
 
 #endif // BZF_WINWINDOW_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

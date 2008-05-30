@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,83 +7,75 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "common.h"
+// interface header
 #include "ShotPath.h"
-#include "ShotStrategy.h"
-#include "LocalPlayer.h"
-#include "Protocol.h"
-#include "PlayerLink.h"
-#include "playing.h"
-#include "Flag.h"
 
-//
-// FiringInfo (with BaseLocalPlayer)
-//
+/* system headers */
+#include <assert.h>
 
-FiringInfo::FiringInfo(const BaseLocalPlayer& tank, int id)
-{
-  shot.player = tank.getId();
-  shot.id = uint16_t(id);
-  tank.getMuzzle(shot.pos);
-  const float* dir = tank.getForward();
-  const float* tankVel = tank.getVelocity();
-  shot.vel[0] = tankVel[0] + ShotSpeed * dir[0];
-  shot.vel[1] = tankVel[1] + ShotSpeed * dir[1];
-  shot.vel[2] = tankVel[2] + ShotSpeed * dir[2];
-  shot.dt = 0.0f;
-  flag = tank.getFlag();
-  lifetime = ReloadTime;
-}
+/* local implementation headers */
+#include "SegmentedShotStrategy.h"
+#include "GuidedMissleStrategy.h"
+#include "ShockWaveStrategy.h"
 
 //
 // ShotPath
 //
 
-ShotPath::ShotPath(const FiringInfo& info) :
+ShotPath::ShotPath(const FiringInfo& info, double now) :
 				firingInfo(info),
-				reloadTime(ReloadTime),
-				startTime(TimeKeeper::getTick()),
-				currentTime(TimeKeeper::getTick()),
+				reloadTime(BZDB.eval(StateDatabase::BZDB_RELOADTIME)),
 				expiring(false),
 				expired(false)
 {
-  // eek!  a giant switch statement, how un-object-oriented!
-  // each flag should be a flyweight object derived from a
-  // base Flag class with a virtual makeShotStrategy() member.
-  // just remember -- it's only a game.
-  if (Flag::getShotType( firingInfo.flag) == NormalShot)
+  startTime = info.timeSent;
+  currentTime = now;
+  local = false;
+
+  switch(info.shotType)
+  {
+    default:
       strategy = new NormalShotStrategy(this);
-  else {
-	  switch (firingInfo.flag) {
-	    case RapidFireFlag:
-	      strategy = new RapidFireStrategy(this);
-	      break;
-	    case MachineGunFlag:
-	      strategy = new MachineGunStrategy(this);
-	      break;
-	    case GuidedMissileFlag:
-	      strategy = new GuidedMissileStrategy(this);
-	      break;
-	    case LaserFlag:
-	      strategy = new LaserStrategy(this);
-	      break;
-	    case RicochetFlag:
-	      strategy = new RicochetStrategy(this);
-	      break;
-	    case SuperBulletFlag:
-	      strategy = new SuperBulletStrategy(this);
-	      break;
-	    case ShockWaveFlag:
-	      strategy = new ShockWaveStrategy(this);
-	      break;
-	    default:
-	      // shouldn't happen
-	      assert(0);
-	      break;
-	  }
+    break;
+
+    case GMShot:
+      strategy = new GuidedMissileStrategy(this);
+      break;
+
+    case LaserShot:
+      strategy = new LaserStrategy(this);
+      break;
+
+    case ThiefShot:
+      strategy = new ThiefStrategy(this);
+      break;
+
+    case SuperShot:
+      strategy = new SuperBulletStrategy(this);
+      break;
+
+    case PhantomShot:
+      strategy = new PhantomBulletStrategy(this);
+      break;
+
+    case ShockWaveShot:
+      strategy = new ShockWaveStrategy(this);
+      break;
+
+    case RicoShot:
+      strategy = new RicochetStrategy(this);
+      break;
+
+    case MachineGunShot:
+      strategy = new MachineGunStrategy(this);
+      break;
+
+    case RapidFireShot:
+      strategy = new RapidFireStrategy(this);
+      break;
   }
 }
 
@@ -92,10 +84,10 @@ ShotPath::~ShotPath()
   delete strategy;
 }
 
-float			ShotPath::checkHit(const BaseLocalPlayer* player,
+float			ShotPath::checkHit(const ShotCollider& tank,
 							float position[3]) const
 {
-  return strategy->checkHit(player, position);
+  return strategy->checkHit(tank, position);
 }
 
 bool			ShotPath::isStoppedByHit() const
@@ -111,7 +103,8 @@ void			ShotPath::addShot(SceneDatabase* scene,
 
 void			ShotPath::radarRender() const
 {
-  if (!isExpired()) strategy->radarRender();
+  if (!isExpired())
+    strategy->radarRender();
 }
 
 void			ShotPath::updateShot(float dt)
@@ -121,8 +114,12 @@ void			ShotPath::updateShot(float dt)
 
   // update shot
   if (!expired)
-    if (expiring) setExpired();
-    else getStrategy()->update(dt);
+  {
+    if (expiring)
+      setExpired();
+    else
+      getStrategy()->update(dt);
+  }
 }
 
 void			ShotPath::setReloadTime(float _reloadTime)
@@ -161,14 +158,31 @@ void			ShotPath::boostReloadTime(float dt)
   reloadTime += dt;
 }
 
+bool                    ShotPath::predictPosition(float dt, float p[3]) const
+{
+  return getStrategy()->predictPosition(dt, p);
+}
+
+bool                    ShotPath::predictVelocity(float dt, float p[3]) const
+{
+  return getStrategy()->predictVelocity(dt, p);
+}
+
+void			ShotPath::update(float dt)
+{
+  // update shot
+  updateShot(dt);
+}
+
 //
 // LocalShotPath
 //
 
-LocalShotPath::LocalShotPath(const FiringInfo& info) :
-				ShotPath(info)
+LocalShotPath::LocalShotPath(const FiringInfo& info, double now) :
+				ShotPath(info,now)
 {
   // do nothing
+  setLocal(true);
 }
 
 LocalShotPath::~LocalShotPath()
@@ -182,16 +196,15 @@ void			LocalShotPath::update(float dt)
   updateShot(dt);
 
   // send updates if necessary
-  if (PlayerLink::getMulticast())
-    getStrategy()->sendUpdate(getFiringInfo());
+  getStrategy()->sendUpdate(getFiringInfo());
 }
 
 //
 // RemoteShotPath
 //
 
-RemoteShotPath::RemoteShotPath(const FiringInfo& info) :
-				ShotPath(info)
+RemoteShotPath::RemoteShotPath(const FiringInfo& info,double now) :
+				ShotPath(info,now)
 {
   // do nothing
 }
@@ -216,4 +229,11 @@ void			RemoteShotPath::update(const ShotUpdate& shot,
   // let the strategy see the message
   getStrategy()->readUpdate(code, msg);
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

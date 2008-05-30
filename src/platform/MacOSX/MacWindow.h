@@ -2,9 +2,8 @@
 #define  BZF_WINWINDOW_H
 
 #include <Carbon/Carbon.h>
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
+
+#include "bzfgl.h"
 
 #include "BzfWindow.h"
 #include "MacDisplay.h"
@@ -52,4 +51,11 @@ class MacWindow : public BzfWindow {
 };
 
 #endif // BZF_WINWINDOW_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

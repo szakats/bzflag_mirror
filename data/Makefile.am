@@ -1,76 +1,83 @@
-SUBDIRS = l10n
+SUBDIRS = \
+	fonts \
+	l10n \
+	skins
 
-EXTRA_DIST = \
-	bbolt.png	\
-	explode1.png	\
-	glaser.png	\
-	mountain.png	\
-	rbolt.png	\
-	title.png	\
-	blaser.png	\
-	fixedbr.png	\
-	ground.png	\
-	panel.png	\
-	rlaser.png	\
-	wall.png	\
-	boxwall.png	\
-	fixedmr.png	\
-	gtbolt.png	\
-	pbolt.png	\
-	roof.png	\
-	ybolt.png	\
-	btbolt.png	\
-	flage.png	\
-	helvbi.png	\
-	plaser.png	\
-	rtbolt.png	\
-	ylaser.png	\
-	caution.png	\
-	flag.png	\
-	helvbr.png	\
-	ptbolt.png	\
-	timesbi.png	\
-	ytbolt.png	\
-	clouds.png	\
-	gbolt.png	\
-	missile.png	\
-	pyrwall.png	\
-	timesbr.png	\
-	boom.wav	\
-	flag_drop.wav	\
-	jump.wav	\
-	lock.wav	\
-	ricochet.wav	\
-	explosion.wav	\
-	flag_grab.wav	\
-	killteam.wav	\
-	missile.wav	\
-	shock.wav	\
-	fire.wav	\
-	flag_lost.wav	\
-	land.wav	\
-	phantom.wav	\
-	teamgrab.wav	\
-	flag_alert.wav	\
-	flag_won.wav	\
-	laser.wav	\
-	pop.wav		\
-	teleport.wav	\
-	Bzflag.fti	\
-	Bzfs.fti	\
-	Bzflag.ftr
+bzflagdir = $(BZFLAG_DATA)
+bzflag_DATA = \
+	automatic_icon.png	\
+	blend_flash.png		\
+	boom.wav		\
+	bounce.wav		\
+	boxwall.png		\
+	bubble.png		\
+	burrow.wav		\
+	bzflag-256x256.png	\
+	bzflag-32x32.xpm	\
+	bzflag-48x48.png	\
+	caution.png		\
+	clouds.png		\
+	dusty_flare.png		\
+	explode1.png		\
+	explode2.png		\
+	explosion.wav		\
+	fire.wav		\
+	flag.png		\
+	flag_alert.wav		\
+	flag_drop.wav		\
+	flag_grab.wav		\
+	flag_lost.wav		\
+	flag_won.wav		\
+	flap.wav		\
+	frog.png		\
+	hunt.wav		\
+	hunt_select.wav		\
+	hit.wav				\
+	jump.wav		\
+	jumpjets.png		\
+	killteam.wav		\
+	land.wav		\
+	laser.wav		\
+	lock.wav		\
+	menu_arrow.png		\
+	mesh.png		\
+	message_admin.wav	\
+	message_private.wav	\
+	message_team.wav	\
+	missile.png		\
+	missile.wav		\
+	moon.png		\
+	mountain1.png		\
+	mountain2.png		\
+	mountain3.png		\
+	mountain4.png		\
+	mountain5.png		\
+	phantom.wav		\
+	pop.wav			\
+	puddle.png		\
+	pyrwall.png		\
+	radar.png		\
+	raindrop.png		\
+	ricochet.wav		\
+	roof.png		\
+	shock.wav		\
+	snowflake.png		\
+	std_ground.png		\
+	steamroller.wav		\
+	teamgrab.wav		\
+	telelink.png		\
+	teleport.wav		\
+	tetrawall.png		\
+	thief.png		\
+	thief.wav		\
+	treads.png	\
+	title.png		\
+	wall.png		\
+	water.png		\
+	wavy_flare.png		\
+	zone_ground.png
 
-MAINTAINERCLEANFILES = \
+EXTRA_DIST = $(bzflag_DATA)
+
+MAINTAINERCLEANFILES =	\
 	Makefile.in
-
-install-data-local: $(EXTRA_DIST)
-	$(mkinstalldirs) $(DESTDIR)$(datadir)/bzflag
-	@list='$(EXTRA_DIST)'; for p in $$list; do \
-	if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f="`echo $$p | sed -e 's|^.*/||'`"; \
-	  echo " $(INSTALL_DATA) $$d$$p $(DESTDIR)$(datadir)/bzflag/$$f"; \
-	  $(INSTALL_DATA) $$d$$p $(DESTDIR)$(datadir)/bzflag/$$f; \
-	done
-
-uninstall-local:
-	rm -rf $(DESTDIR)$(datadir)/bzflag/*

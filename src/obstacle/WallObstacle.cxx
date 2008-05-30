@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,25 +7,40 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <math.h>
 #include "common.h"
+
+#include <math.h>
+
+#include "Pack.h"
 #include "WallObstacle.h"
 #include "Intersect.h"
-#include "QuadWallSceneNode.h"
 
-std::string		WallObstacle::typeName("WallObstacle");
+const char*		WallObstacle::typeName = "WallObstacle";
+
+WallObstacle::WallObstacle()
+{
+}
 
 WallObstacle::WallObstacle(const float* p, float a, float b, float h) :
 				Obstacle(p, a, 0.0, b, h)
 {
+  finalize();
+}
+
+void WallObstacle::finalize()
+{
   // compute normal
+  const float* p = getPosition();
+  const float a = getRotation();
   plane[0] = cosf(a);
   plane[1] = sinf(a);
   plane[2] = 0.0;
   plane[3] = -(p[0] * plane[0] + p[1] * plane[1] + p[2] * plane[2]);
+
+  return;
 }
 
 WallObstacle::~WallObstacle()
@@ -33,12 +48,12 @@ WallObstacle::~WallObstacle()
   // do nothing
 }
 
-std::string		WallObstacle::getType() const
+const char*		WallObstacle::getType() const
 {
   return typeName;
 }
 
-std::string		WallObstacle::getClassName() // const
+const char*		WallObstacle::getClassName() // const
 {
   return typeName;
 }
@@ -61,16 +76,17 @@ void			WallObstacle::getNormal(const float*, float* n) const
   n[2] = plane[2];
 }
 
-bool			WallObstacle::isInside(const float* p, float r) const
+bool			WallObstacle::inCylinder(const float* p, float r, float /* height */) const
 {
   return p[0] * plane[0] + p[1] * plane[1] + p[2] * plane[2] + plane[3] < r;
 }
 
-bool			WallObstacle::isInside(const float* p, float angle,
-				float halfWidth, float halfBreadth) const
+bool			WallObstacle::inBox(const float* p, float _angle,
+					    float halfWidth, float halfBreadth,
+					    float /* height */) const
 {
-  const float xWidth = cosf(angle);
-  const float yWidth = sinf(angle);
+  const float xWidth = cosf(_angle);
+  const float yWidth = sinf(_angle);
   const float xBreadth = -yWidth;
   const float yBreadth = xWidth;
   float corner[3];
@@ -79,75 +95,85 @@ bool			WallObstacle::isInside(const float* p, float angle,
   // check to see if any corner is inside negative half-space
   corner[0] = p[0] - xWidth * halfWidth - xBreadth * halfBreadth;
   corner[1] = p[1] - yWidth * halfWidth - yBreadth * halfBreadth;
-  if (isInside(corner, 0.0)) return true;
+  if (inCylinder(corner, 0.0f, 0.0f)) return true;
   corner[0] = p[0] + xWidth * halfWidth - xBreadth * halfBreadth;
   corner[1] = p[1] + yWidth * halfWidth - yBreadth * halfBreadth;
-  if (isInside(corner, 0.0)) return true;
+  if (inCylinder(corner, 0.0f, 0.0f)) return true;
   corner[0] = p[0] - xWidth * halfWidth + xBreadth * halfBreadth;
   corner[1] = p[1] - yWidth * halfWidth + yBreadth * halfBreadth;
-  if (isInside(corner, 0.0)) return true;
+  if (inCylinder(corner, 0.0f, 0.0f)) return true;
   corner[0] = p[0] + xWidth * halfWidth + xBreadth * halfBreadth;
   corner[1] = p[1] + yWidth * halfWidth + yBreadth * halfBreadth;
-  if (isInside(corner, 0.0f)) return true;
+  if (inCylinder(corner, 0.0f, 0.0f)) return true;
 
   return false;
+}
+
+bool			WallObstacle::inMovingBox(const float* /* oldP */, float /* oldAngle */,
+				       const float* p, float _angle,
+				       float halfWidth, float halfBreadth, float height) const
+
+{
+  return inBox (p, _angle, halfWidth, halfBreadth, height);
 }
 
 bool			WallObstacle::getHitNormal(
 				const float*, float,
 				const float*, float,
-				float, float,
+				float, float, float,
 				float* normal) const
 {
   getNormal(NULL, normal);
   return true;
 }
 
-ObstacleSceneNodeGenerator*	WallObstacle::newSceneNodeGenerator() const
+
+void* WallObstacle::pack(void* buf) const
 {
-  return new WallSceneNodeGenerator(this);
+  buf = nboPackFloatVector(buf, pos);
+  buf = nboPackFloat(buf, angle);
+  buf = nboPackFloat(buf, size[1]);
+  buf = nboPackFloat(buf, size[2]);
+
+  return buf;
 }
 
-//
-// WallSceneNodeGenerator
-//
 
-WallSceneNodeGenerator::WallSceneNodeGenerator(const WallObstacle* _wall) :
-				wall(_wall)
+void* WallObstacle::unpack(void* buf)
 {
-  // do nothing
+  buf = nboUnpackFloatVector(buf, pos);
+  buf = nboUnpackFloat(buf, angle);
+  buf = nboUnpackFloat(buf, size[1]);
+  buf = nboUnpackFloat(buf, size[2]);
+
+  finalize();
+
+  return buf;
 }
 
-WallSceneNodeGenerator::~WallSceneNodeGenerator()
+
+int WallObstacle::packSize() const
 {
-  // do nothing
+  int fullSize = 0;
+  fullSize += sizeof(float[3]); // pos
+  fullSize += sizeof(float);    // rotation
+  fullSize += sizeof(float);	// breadth
+  fullSize += sizeof(float);	// height
+  return fullSize;
 }
 
-WallSceneNode*		WallSceneNodeGenerator::getNextNode(
-				float uRepeats, float vRepeats, bool lod)
-{
-  if (getNodeNumber() == 1) return NULL;
 
-  GLfloat base[3];
-  GLfloat sEdge[3];
-  GLfloat tEdge[3];
-  const float* pos = wall->getPosition();
-  const float c = cosf(wall->getRotation());
-  const float s = sinf(wall->getRotation());
-  const float h = wall->getBreadth();
-  switch (incNodeNumber()) {
-    case 1:
-      base[0] = pos[0] + s * h;
-      base[1] = pos[1] - c * h;
-      base[2] = 0.0f;
-      sEdge[0] = -2.0f * s * h;
-      sEdge[1] = 2.0f * c * h;
-      sEdge[2] = 0.0f;
-      tEdge[0] = 0.0f;
-      tEdge[1] = 0.0f;
-      tEdge[2] = wall->getHeight();
-      break;
-  }
-  return new QuadWallSceneNode(base, sEdge, tEdge, uRepeats, vRepeats, lod);
+void WallObstacle::print(std::ostream& /*out*/,
+			 const std::string& /*indent*/) const
+{
+  return;
 }
+
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

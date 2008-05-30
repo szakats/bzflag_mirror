@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,22 +7,19 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/*
- *
- */
+#ifndef	__REGION_H__
+#define	__REGION_H__
 
-#ifndef	BZF_REGION_H
-#define	BZF_REGION_H
-
-#if defined(_WIN32)
-	#pragma warning(disable: 4786)
-#endif
-
-#include <vector>
 #include "common.h"
+
+/* system interface headers */
+#include <vector>
+
+
+const float	     maxDistance = 1.0e6;
 
 class RegionPoint {
   public:
@@ -36,12 +33,15 @@ class RegionPoint {
     float		p[2];
 };
 
+
 class BzfRegion {
   public:
 			BzfRegion(int sides, const float p[][2]);
 			~BzfRegion();
 
     bool		isInside(const float p[2]) const;
+    // get point distance from Region. Point should be outside Region!
+    float		getDistance(const float p[2], float nearest[2]) const;
     int			classify(const float p1[2], const float p2[2]) const;
     BzfRegion*		orphanSplitRegion(const float p1[2], const float p2[2]);
 
@@ -77,28 +77,13 @@ class BzfRegion {
     RegionPoint		A;
 };
 
-class RegionPriorityQueue {
-  public:
-			RegionPriorityQueue();
-			~RegionPriorityQueue();
-    void		insert(BzfRegion* region, float priority);
-    BzfRegion*		remove();
-    void		removeAll();
-    bool		isEmpty() const;
 
-  private:
-    struct Node {
-      public:
-			Node(BzfRegion* region, float priority);
-      public:
-	Node*		next;
-	BzfRegion*	region;
-	float		priority;
-    };
+#endif /* __REGION_H__ */
 
-  private:
-    Node*		head;
-};
-
-#endif // BZF_REGION_H
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,12 +7,25 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <string.h>
+// bzflag common header
 #include "common.h"
+
+// interface header
 #include "SceneNode.h"
+
+// system implementation headers
+#include <string.h>
+#include <math.h>
+
+// common implementation headers
+#include "Extents.h"
+#include "RenderNode.h"
+#include "StateDatabase.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
 #include "SceneRenderer.h"
 
 #ifndef __MINGW32__
@@ -23,9 +36,10 @@ void			(__stdcall *SceneNode::color4fv)(const GLfloat*);
 #endif
 void			(*SceneNode::stipple)(GLfloat);
 
-SceneNode::SceneNode() : styleMailbox(0)
+SceneNode::SceneNode()
 {
   static bool init = false;
+
   if (!init) {
     init = true;
     setColorOverride(false);
@@ -34,6 +48,12 @@ SceneNode::SceneNode() : styleMailbox(0)
 
   setCenter(0.0f, 0.0f, 0.0f);
   setRadius(0.0f);
+
+  noPlane = true;
+  occluder = false;
+  octreeState = OctreeCulled;
+
+  return;
 }
 
 SceneNode::~SceneNode()
@@ -95,11 +115,6 @@ void			SceneNode::setColorOverride(bool on)
   }
 }
 
-const GLfloat*		SceneNode::getSphere() const
-{
-  return sphere;
-}
-
 void			SceneNode::setRadius(GLfloat radiusSquared)
 {
   sphere[3] = radiusSquared;
@@ -127,21 +142,7 @@ void			SceneNode::setSphere(const GLfloat _sphere[4])
   sphere[3] = _sphere[3];
 }
 
-void			SceneNode::getRenderNodes(SceneRenderer& renderer)
-{
-  addShadowNodes(renderer);
-  if (!cull(renderer.getViewFrustum())) {
-    if (!renderer.testAndSetStyle(styleMailbox)) notifyStyleChange(renderer);
-    addRenderNodes(renderer);
-  }
-}
-
-void			SceneNode::forceNotifyStyleChange()
-{
-  styleMailbox--;
-}
-
-void			SceneNode::notifyStyleChange(const SceneRenderer&)
+void			SceneNode::notifyStyleChange()
 {
   // do nothing
 }
@@ -154,11 +155,6 @@ void			SceneNode::addRenderNodes(SceneRenderer&)
 void			SceneNode::addShadowNodes(SceneRenderer&)
 {
   // do nothing
-}
-
-const GLfloat*		SceneNode::getPlane() const
-{
-  return NULL;
 }
 
 void			SceneNode::addLight(SceneRenderer&)
@@ -184,15 +180,44 @@ bool			SceneNode::cull(const ViewFrustum& view) const
 {
   // if center of object is outside view frustum and distance is
   // greater than radius of object then cull.
-  for (int i = 0; i < 5; i++) {
+  const int planeCount = view.getPlaneCount();
+  for (int i = 0; i < planeCount; i++) {
     const GLfloat* norm = view.getSide(i);
-    const GLfloat d = sphere[0] * norm[0] +
-		      sphere[1] * norm[1] +
-		      sphere[2] * norm[2] + norm[3];
-    if (d < 0.0f && d * d > sphere[3]) return true;
+    const GLfloat d = (sphere[0] * norm[0]) +
+		      (sphere[1] * norm[1]) +
+		      (sphere[2] * norm[2]) + norm[3];
+    if ((d < 0.0f) && ((d * d) > sphere[3])) return true;
   }
   return false;
 }
+
+
+bool SceneNode::cullShadow(int, const float (*)[4]) const
+{
+  // currently only used for dynamic nodes by ZSceneDatabase
+  // we let the octree deal with the static nodes
+  return true;
+}
+
+
+bool SceneNode::inAxisBox (const Extents& exts) const
+{
+  if (!extents.touches(exts)) {
+    return false;
+  }
+  return true;
+}
+
+int SceneNode::getVertexCount () const
+{
+  return 0;
+}
+
+const GLfloat* SceneNode::getVertex (int) const
+{
+  return NULL;
+}
+
 
 //
 // GLfloat2Array
@@ -216,6 +241,7 @@ GLfloat2Array&		GLfloat2Array::operator=(const GLfloat2Array& a)
   return *this;
 }
 
+
 //
 // GLfloat3Array
 //
@@ -237,4 +263,25 @@ GLfloat3Array&		GLfloat3Array::operator=(const GLfloat3Array& a)
   }
   return *this;
 }
+
+
+void SceneNode::getRenderNodes(std::vector<RenderSet>&)
+{
+  return; // do nothing
+}
+
+
+void SceneNode::renderRadar()
+{
+  printf ("SceneNode::renderRadar() called, implement in subclass\n");
+  return;
+}
+
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8

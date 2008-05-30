@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2003 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* EighthDBoxSceneNode:
@@ -27,7 +27,7 @@ class EighthDPyrSceneNode : public EighthDimSceneNode {
 					const float size[3], float rotation);
 			~EighthDPyrSceneNode();
 
-    void		notifyStyleChange(const SceneRenderer&);
+    void		notifyStyleChange();
     void		addRenderNodes(SceneRenderer&);
 
   protected:
@@ -38,7 +38,7 @@ class EighthDPyrSceneNode : public EighthDimSceneNode {
 				const float size[3], float rotation);
 			~EighthDPyrRenderNode();
 	void		render();
-	const GLfloat*	getPosition() { return sceneNode->getSphere(); }
+	const GLfloat*	getPosition() const { return sceneNode->getSphere(); }
       private:
 	const EighthDPyrSceneNode* sceneNode;
 	GLfloat		corner[5][3];
@@ -50,4 +50,11 @@ class EighthDPyrSceneNode : public EighthDimSceneNode {
 };
 
 #endif // BZF_EIGHTHD_PYR_SCENE_NODE_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
 // ex: shiftwidth=2 tabstop=8
