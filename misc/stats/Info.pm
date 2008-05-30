@@ -1,6 +1,6 @@
 # Info.pm
 #
-# Copyright (c) 2003 Tucker McLean, Tim Riker.
+# Copyright (c) 2003 - 2006 Tucker McLean, Tim Riker.
 #
 # This package is free software;  you can redistribute it and/or
 # modify it under the terms of the license found in the file
@@ -8,7 +8,7 @@
 #
 # THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
 # IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
-# WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 ###
 
 package BZFlag::Info;
@@ -432,7 +432,7 @@ Tucker McLean, tuckerm@noodleroni.com
 
 =head1 COPYRIGHT
 
-Copyright (c) 2003 Tucker McLean, Tim Riker.
+Copyright (c) 2003 - 2006 Tucker McLean, Tim Riker.
 
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

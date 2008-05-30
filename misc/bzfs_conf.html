@@ -15,19 +15,20 @@
 			a:link.build { display: block; color:#0000FF; background-color:#9FB5E0; }
 			a:visit.build { display: block; color:#0000FF; background-color:#7090D0; }
 			a:hover.build { display: block; color:#000000; background-color: #BED0EA; }
-			legend { font-size: 110%; line-height: 1.5; }			
+			legend { font-size: 110%; line-height: 1.5; }
 		</style>
 		<script language="JavaScript">
-			var flags = new Array(	"V", "A", "OO", "F", "MG", "GM", "L", "R", "SB",
-						"IB", "ST", "T", "N", "SH", "SR", "SW", "PZ", "G",
-						"JP", "ID", "CL", "US", "MQ", "SE", "TH", "BU",
-                                                "CB", "LT", "GT", "M", "B", "JM", "WA" );
+			var flags = new Array(	"V", "QT", "OO", "F", "MG", "GM", "L", "R", "SB",
+						"IB", "ST", "T", "N", "SH", "SR", "SW", "PZ", "G", "CS",
+						"JP", "ID", "CL", "US", "MQ", "SE", "TH", "BU", "WG", "LG",
+						"CB", "LT", "RT", "FO", "RO", "M", "B", "JM", "WA", "NJ",
+						"TR", "BY", "RC", "A" );
 
 			function ableControls()
 			{
 				var mainform = document.forms["main"];
 				var ctf = (mainform.game_style.value == "ctf") || (mainform.game_style.value == 'bc');
-				var freeForAll = (mainform.game_style.value == "ffa");	
+				var freeForAll = (mainform.game_style.value == "ffa");
 
 				var rabbit = (mainform.game_style.value == "rc");
 				mainform.world_type.disabled = mainform.game_style.value == "bc";
@@ -115,6 +116,26 @@
 						d.writeln("-lagdrop " + mainform.lag_drop_time.value + "<br/><br/>");
 					}
 
+					if (mainform.jitter_warn_time.value != 0) {
+						d.writeln("#Jitter Warning threshold time [ms]<br/>");
+						d.writeln("-jitterwarn " + mainform.jitter_warn_time.value + "<br/><br/>");
+					}
+
+					if (mainform.jitter_drop_time.value != 0) {
+						d.writeln("#Drop player after this many jitter warnings<br/>");
+						d.writeln("-jitterdrop " + mainform.jitter_drop_time.value + "<br/><br/>");
+					}
+
+					if (mainform.packetloss_warn_time.value != 0) {
+						d.writeln("#Packetloss Warning threshold percent [%]<br/>");
+						d.writeln("-packetlosswarn " + mainform.packetloss_warn_time.value + "<br/><br/>");
+					}
+
+					if (mainform.packetloss_drop_time.value != 0) {
+						d.writeln("#Drop player after this many packetloss warnings<br/>");
+						d.writeln("-packetlossdrop " + mainform.packetloss_drop_time.value + "<br/><br/>");
+					}
+
 					if (mainform.ban_list.value.length > 0) {
 						d.writeln("#Ban players based on ip addresses<br/>");
 						d.writeln("-ban \"" + mainform.ban_list.value + "\"<br/><br/>");
@@ -159,6 +180,11 @@
 					if (mainform.print_score.checked) {
 						d.writeln("#Write score to stdout whenever it changes<br/>");
 						d.writeln("-printscore<br/><br/>");
+					}
+
+					if (mainform.disable_bots.checked) {
+						d.writeln("#Disable robots and the ROGER autopilot<br/>");
+						d.writeln("-disableBots<br/><br/>");
 					}
 
 					if (mainform.help_msgs.value.length > 0) {
@@ -231,27 +257,32 @@
 
 					if (mainform.votepercent.value != 50.1) {
 						d.writeln("#Percentage of players required to affirm a poll<br/>");
-						d.writeln("-votePercentage " + mainform.votepercent.value + "<br/><br/>");
+						d.writeln("-poll votePercentage=" + mainform.votepercent.value + "<br/><br/>");
 					}
 
 					if (mainform.votesrequired.value != 3) {
 						d.writeln("#Minimum count of votes required to make a vote valid<br/>");
-						d.writeln("-votesRequired " + mainform.votesrequired.value + "<br/><br/>");
+						d.writeln("-poll votesRequired=" + mainform.votesrequired.value + "<br/><br/>");
 					}
 
 					if (mainform.votetime.value != 60) {
 						d.writeln("#maximum amount of time a player has to vote on a poll in seconds<br/>");
-						d.writeln("-voteTime " + mainform.votetime.value + "<br/><br/>");
+						d.writeln("-poll voteTime=" + mainform.votetime.value + "<br/><br/>");
 					}
 
 					if (mainform.vetotime.value != 20) {
 						d.writeln("#Maximum seconds an authorized user has to cancel a poll<br/>");
-						d.writeln("-vetoTime " + mainform.vetotime.value + "<br/><br/>");
+						d.writeln("-poll vetoTime=" + mainform.vetotime.value + "<br/><br/>");
 					}
 
 					if (mainform.voterepeattime.value != 300) {
 						d.writeln("#Minimum seconds required before a player may request another vote<br/>");
-						d.writeln("-voteRepeatTime " + mainform.voterepeattime.value + "<br/><br/>");
+						d.writeln("-poll voteRepeatTime=" + mainform.voterepeattime.value + "<br/><br/>");
+					}
+
+					if (mainform.game_style.value == "offa") {
+						d.writeln("#Open Free for All<br/>");
+						d.writeln("-offa<br/><br/>");
 					}
 
 					if (mainform.game_style.value == "ctf") {
@@ -355,6 +386,11 @@
 					if (mainform.allow_jumping.checked) {
 						d.writeln("#Tanks can jump<br/>");
 						d.writeln("-j<br/><br/>");
+					}
+
+					if (mainform.allow_handicap.checked) {
+						d.writeln("#Weaker tanks are given a handicap advantage<br/>");
+						d.writeln("-handicap<br/><br/>");
 					}
 
 					if (mainform.allow_richochet.checked) {
@@ -622,6 +658,18 @@
 							<td><input type="text" name="lag_drop_time" value="0" size="30" title="Drop player after this many lag warnings"/></td>
 						</tr>
 						<tr span="2">
+							<td>Jitter Warn Time</td>
+							<td><input type="text" name="jitter_warn_time" value="0" size="30" title="Jitter Warning threshold time [ms]"/></td>
+							<td>Jitter Warn Drop Count</td>
+							<td><input type="text" name="jitter_drop_time" value="0" size="30" title="Drop player after this many jitter warnings"/></td>
+						</tr>
+						<tr span="2">
+							<td>Packetloss Warn Time</td>
+							<td><input type="text" name="packetloss_warn_time" value="0" size="30" title="Packetloss Warning threshold [%]"/></td>
+							<td>Packetloss Warn Drop Count</td>
+							<td><input type="text" name="packetloss_drop_time" value="0" size="30" title="Drop player after this many packetloss warnings"/></td>
+						</tr>
+						<tr span="2">
 							<td>Ban List</td>
 							<td colspan="3"><input type="text" name="ban_list" size="100" title="Ban players based on ip addresses"/></td>
 						</tr>
@@ -699,6 +747,8 @@
 						<tr>
 							<td>Filter Simple</td>
 							<td><input type="checkbox" name="filtersimple" title="Perform simple exact matches with the bad word list"/></td>
+							<td>Disable bots and autopilot</td>
+							<td><input type="checkbox" name="disable_bots" title="Disable robots and ROGER autopilot"/></td>
 						</tr>
 						<tr>
 							<td>Vote Percent</td>
@@ -728,6 +778,7 @@
 							<td>
 								<select name="game_style" value="ffa" onClick="return ableControls()" title="Free for all or Capture the flag game style">
 									<option value="ffa">Free for All</option>
+									<option value="offa">Open Free for All</option>
 									<option value="ctf">Capture the Flag</option>
 									<option value="bc">Uniform world Capture the Flag</option>
 									<option value="rc">Rabbit Chase</option>
@@ -841,6 +892,10 @@
 							<td>
 								<input type="checkbox" name="allow_richochet" title="Whether or not bullets richochet without a flag"/>
 							</td>
+							<td>Provide Handicap Advantage</td>
+							<td>
+								<input type="checkbox" name="allow_handicap" title="Whether or not weaker tanks are given a handicap advantage"/>
+							</td>
 						</tr>
 						<tr>
 							<td>Max Concurrent Shots</td>
@@ -891,7 +946,7 @@
 							</tr>
 							<tr>
 								<td align="right">(V)</td><td><input type="text" name="v_mand_flag" value="0" size="3" title="High Speed"/></td>
-								<td align="right">(A)</td><td><input type="text" name="a_mand_flag" value="0" size="3" title="Quick Turn"/></td>
+								<td align="right">(QT)</td><td><input type="text" name="qt_mand_flag" value="0" size="3" title="Quick Turn"/></td>
 								<td align="right">(OO)</td><td><input type="text" name="oo_mand_flag" value="0" size="3" title="Oscillating Overthruster"/></td>
 								<td align="right">(F)</td><td><input type="text" name="f_mand_flag" value="0" size="3" title="Rapid Shot"/></td>
 								<td align="right">(MG)</td><td><input type="text" name="mg_mand_flag" value="0" size="3" title="Machine Gun"/></td>
@@ -915,27 +970,36 @@
 							</tr>
 							<tr>
 								<td align="right">(JP)</td><td><input type="text" name="jp_mand_flag" value="0" size="3" title="Jumping"/></td>
+								<td align="right">(LG)</td><td><input type="text" name="lg_mand_flag" value="0" size="3" title="Low Gravity"/></td>
 								<td align="right">(ID)</td><td><input type="text" name="id_mand_flag" value="0" size="3" title="Identify"/></td>
 								<td align="right">(CL)</td><td><input type="text" name="cl_mand_flag" value="0" size="3" title="Cloaking"/></td>
+								<td align="right">(CS)</td><td><input type="text" name="cs_mand_flag" value="0" size="3" title="Cloaked Shot"/></td>
 								<td align="right">(US)</td><td><input type="text" name="us_mand_flag" value="0" size="3" title="Useless"/></td>
+							</tr>
+							<tr>
 								<td align="right">(MQ)</td><td><input type="text" name="mq_mand_flag" value="0" size="3" title="Masquerade"/></td>
 								<td align="right">(SE)</td><td><input type="text" name="se_mand_flag" value="0" size="3" title="Seer"/></td>
-							</tr>
-							<tr>
 								<td align="right">(TH)</td><td><input type="text" name="th_mand_flag" value="0" size="3" title="Thief"/></td>
 								<td align="right">(BU)</td><td><input type="text" name="bu_mand_flag" value="0" size="3" title="Burrow"/></td>
+								<td align="right">(WG)</td><td><input type="text" name="wg_mand_flag" value="0" size="3" title="Wings"/></td>
+								<td align="right">(A)</td><td><input type="text" name="a_mand_flag" value="0" size="3" title="Agility"/></td>
 							</tr>
-							<tr>
 							<tr>
 								<td align="right">(CB)</td><td><input type="text" name="cb_mand_flag" value="0" size="3" title="Colorblind"/></td>
 								<td align="right">(&lt;-)</td><td><input type="text" name="lt_mand_flag" value="0" size="3" title="Left turn only"/></td>
-								<td align="right">(-&gt;)</td><td><input type="text" name="gt_mand_flag" value="0" size="3" title="Right turn only"/></td>
+								<td align="right">(-&gt;)</td><td><input type="text" name="rt_mand_flag" value="0" size="3" title="Right turn only"/></td>
+								<td align="right">(FO)</td><td><input type="text" name="fo_mand_flag" value="0" size="3" title="Forward only"/></td>
+								<td align="right">(RO)</td><td><input type="text" name="ro_mand_flag" value="0" size="3" title="Reverse only"/></td>
 								<td align="right">(M)</td><td><input type="text" name="m_mand_flag" value="0" size="3" title="Momentum"/></td>
 								<td align="right">(B)</td><td><input type="text" name="b_mand_flag" value="0" size="3" title="Blindness"/></td>
 								<td align="right">(JM)</td><td><input type="text" name="jm_mand_flag" value="0" size="3" title="Jamming"/></td>
 							</tr>
 							<tr>
 								<td align="right">(WA)</td><td><input type="text" name="wa_mand_flag" value="0" size="3" title="Wide Angle"/></td>
+								<td align="right">(NJ)</td><td><input type="text" name="nj_mand_flag" value="0" size="3" title="No Jumping"/></td>
+								<td align="right">(TR)</td><td><input type="text" name="tr_mand_flag" value="0" size="3" title="Trigger Happy"/></td>
+								<td align="right">(BY)</td><td><input type="text" name="by_mand_flag" value="0" size="3" title="Bouncy"/></td>
+								<td align="right">(RC)</td><td><input type="text" name="rc_mand_flag" value="0" size="3" title="Reverse Controls"/></td>
 							</tr>
 						</table>
 					</fieldset>
@@ -948,7 +1012,7 @@
 							</tr>
 							<tr>
 								<td align="right">(V)</td><td><input type="checkbox" name="v_forbid_flag" title="High Speed"/></td>
-								<td align="right">(A)</td><td><input type="checkbox" name="a_forbid_flag" title="Quick Turn"/></td>
+								<td align="right">(QT)</td><td><input type="checkbox" name="qt_forbid_flag" title="Quick Turn"/></td>
 								<td align="right">(OO)</td><td><input type="checkbox" name="oo_forbid_flag" title="Oscillating Overthruster"/></td>
 								<td align="right">(F)</td><td><input type="checkbox" name="f_forbid_flag" title="Rapid Shot"/></td>
 								<td align="right">(MG)</td><td><input type="checkbox" name="mg_forbid_flag" title="Machine Gun"/></td>
@@ -972,29 +1036,38 @@
 								<td align="right">(PZ)</td><td><input type="checkbox" name="pz_forbid_flag" title="Phantom Zone"/></td>
 								<td align="right">(G)</td><td><input type="checkbox" name="g_forbid_flag" title="Genocide"/></td>
 								<td align="right">(JP)</td><td><input type="checkbox" name="jp_forbid_flag" title="Jumping"/></td>
-								<td align="right">(ID)</td><td><input type="checkbox" name="id_forbid_flag" title="Identify"/></td>
+								<td align="right">(LG)</td><td><input type="checkbox" name="lg_forbid_flag" title="Low Gravity"/></td>
 							</tr>
 							<tr>
+								<td align="right">(ID)</td><td><input type="checkbox" name="id_forbid_flag" title="Identify"/></td>
 								<td align="right">(CL)</td><td><input type="checkbox" name="cl_forbid_flag" title="Cloaking"/></td>
+								<td align="right">(CS)</td><td><input type="checkbox" name="cs_forbid_flag" title="Cloaked Shot"/></td>
 								<td align="right">(US)</td><td><input type="checkbox" name="us_forbid_flag" title="Useless"/></td>
 								<td align="right">(MQ)</td><td><input type="checkbox" name="mq_forbid_flag" title="Masquerade"/></td>
+							</tr>
+							<tr>
 								<td align="right">(SE)</td><td><input type="checkbox" name="se_forbid_flag" title="Seer"/></td>
 								<td align="right">(TH)</td><td><input type="checkbox" name="th_forbid_flag" title="Thief"/></td>
-							</tr>
-							<tr>
 								<td align="right">(BU)</td><td><input type="checkbox" name="bu_forbid_flag" title="Burrow"/></td>
+								<td align="right">(WG)</td><td><input type="checkbox" name="wg_forbid_flag" title="Wings"/></td>
+								<td align="right">(A)</td><td><input type="checkbox" name="a_forbid_flag" title="Agility"/></td>
 							</tr>
-							<tr>
 							<tr>
 								<td align="right">(CB)</td><td><input type="checkbox" name="cb_forbid_flag" title="Colorblind"/></td>
 								<td align="right">(&lt;-)</td><td><input type="checkbox" name="lt_forbid_flag" title="Left turn only"/></td>
-								<td align="right">(-&gt;)</td><td><input type="checkbox" name="gt_forbid_flag" title="Right turn only"/></td>
+								<td align="right">(-&gt;)</td><td><input type="checkbox" name="rt_forbid_flag" title="Right turn only"/></td>
+								<td align="right">(FO)</td><td><input type="checkbox" name="fo_forbid_flag" title="Forward only"/></td>
+								<td align="right">(RO)</td><td><input type="checkbox" name="ro_forbid_flag" title="Reverse only"/></td>
 								<td align="right">(M)</td><td><input type="checkbox" name="m_forbid_flag" title="Momentum"/></td>
 								<td align="right">(B)</td><td><input type="checkbox" name="b_forbid_flag" title="Blindness"/></td>
 							</tr>
 							<tr>
 								<td align="right">(JM)</td><td><input type="checkbox" name="jm_forbid_flag" title="Jamming"/></td>
 								<td align="right">(WA)</td><td><input type="checkbox" name="wa_forbid_flag" title="Wide Angle"/></td>
+								<td align="right">(NJ)</td><td><input type="checkbox" name="nj_forbid_flag" title="No Jumping"/></td>
+								<td align="right">(TR)</td><td><input type="checkbox" name="tr_forbid_flag" title="Trigger Happy"/></td>
+								<td align="right">(BY)</td><td><input type="checkbox" name="by_forbid_flag" title="Bouncy"/></td>
+								<td align="right">(RC)</td><td><input type="checkbox" name="rc_forbid_flag" title="Reverse Controls"/></td>
 							</tr>
 						</table>
 					</fieldset>
@@ -1003,7 +1076,7 @@
 						<table width="100%">
 							<tr>
 								<td align="right">(V)</td><td><input type="text" size="5" name="v_limit_flag" title="High Speed"/></td>
-								<td align="right">(A)</td><td><input type="text" size="5" name="a_limit_flag" title="Quick Turn"/></td>
+								<td align="right">(QT)</td><td><input type="text" size="5" name="qt_limit_flag" title="Quick Turn"/></td>
 								<td align="right">(OO)</td><td><input type="text" size="5" name="oo_limit_flag" title="Oscillating Overthruster"/></td>
 								<td align="right">(F)</td><td><input type="text" size="5" name="f_limit_flag" title="Rapid Shot"/></td>
 								<td align="right">(MG)</td><td><input type="text" size="5" name="mg_limit_flag" title="Machine Gun"/></td>
@@ -1027,29 +1100,38 @@
 								<td align="right">(PZ)</td><td><input type="text" size="5" name="pz_limit_flag" title="Phantom Zone"/></td>
 								<td align="right">(G)</td><td><input type="text" size="5" name="g_limit_flag" title="Genocide"/></td>
 								<td align="right">(JP)</td><td><input type="text" size="5" name="jp_limit_flag" title="Jumping"/></td>
-								<td align="right">(ID)</td><td><input type="text" size="5" name="id_limit_flag" title="Identify"/></td>
+								<td align="right">(LG)</td><td><input type="text" size="5" name="lg_limit_flag" title="Low Gravity"/></td>
 							</tr>
 							<tr>
+								<td align="right">(ID)</td><td><input type="text" size="5" name="id_limit_flag" title="Identify"/></td>
 								<td align="right">(CL)</td><td><input type="text" size="5" name="cl_limit_flag" title="Cloaking"/></td>
+								<td align="right">(CS)</td><td><input type="text" size="5" name="cs_limit_flag" title="Cloaked Shot"/></td>
 								<td align="right">(US)</td><td><input type="text" size="5" name="us_limit_flag" title="Useless"/></td>
 								<td align="right">(MQ)</td><td><input type="text" size="5" name="mq_limit_flag" title="Masquerade"/></td>
+							</tr>
+							<tr>
 								<td align="right">(SE)</td><td><input type="text" size="5" name="se_limit_flag" title="Seer"/></td>
 								<td align="right">(TH)</td><td><input type="text" size="5" name="th_limit_flag" title="Thief"/></td>
-							</tr>
-							<tr>
 								<td align="right">(BU)</td><td><input type="text" size="5" name="bu_limit_flag" title="Burrow"/></td>
+								<td align="right">(WG)</td><td><input type="text" size="5" name="wg_limit_flag" title="Wings"/></td>
+								<td align="right">(A)</td><td><input type="text" size="5" name="a_limit_flag" title="Agility"/></td>
 							</tr>
-							<tr>
 							<tr>
 								<td align="right">(CB)</td><td><input type="text" size="5" name="cb_limit_flag" title="Colorblind"/></td>
 								<td align="right">(&lt;-)</td><td><input type="text" size="5" name="lt_limit_flag" title="Left turn only"/></td>
-								<td align="right">(-&gt;)</td><td><input type="text" size="5" name="gt_limit_flag" title="Right turn only"/></td>
+								<td align="right">(-&gt;)</td><td><input type="text" size="5" name="rt_limit_flag" title="Right turn only"/></td>
+								<td align="right">(FO)</td><td><input type="text" size="5" name="fo_limit_flag" title="Forward only"/></td>
+								<td align="right">(RO)</td><td><input type="text" size="5" name="ro_limit_flag" title="Reverse only"/></td>
 								<td align="right">(M)</td><td><input type="text" size="5" name="m_limit_flag" title="Momentum"/></td>
 								<td align="right">(B)</td><td><input type="text" size="5" name="b_limit_flag" title="Blindness"/></td>
 							</tr>
 							<tr>
 								<td align="right">(JM)</td><td><input type="text" size="5" name="jm_limit_flag" title="Jamming"/></td>
 								<td align="right">(WA)</td><td><input type="text" size="5" name="wa_limit_flag" title="Wide Angle"/></td>
+								<td align="right">(NJ)</td><td><input type="text" size="5" name="nj_limit_flag" title="No Jumping"/></td>
+								<td align="right">(TR)</td><td><input type="text" size="5" name="tr_limit_flag" title="Trigger Happy"/></td>
+								<td align="right">(BY)</td><td><input type="text" size="5" name="by_limit_flag" title="Bouncy"/></td>
+								<td align="right">(RC)</td><td><input type="text" size="5" name="rc_limit_flag" title="Reverse Controls"/></td>
 							</tr>
 						</table>
 					</fieldset>

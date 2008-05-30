@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "LinuxPlatformFactory.h"
@@ -15,6 +15,11 @@
 #include "XVisual.h"
 #include "XWindow.h"
 #include "LinuxMedia.h"
+#if defined(USBJOYSTICK)
+  #include "USBJoystick.h"
+#else
+  #include "EvdevJoystick.h"
+#endif
 
 PlatformFactory*	PlatformFactory::getInstance()
 {
@@ -55,16 +60,28 @@ BzfWindow*		LinuxPlatformFactory::createWindow(
   return new XWindow((const XDisplay*)display, (XVisual*)visual);
 }
 
+BzfJoystick*		LinuxPlatformFactory::createJoystick()
+{
+#if defined(USBJOYSTICK)
+  // only works for USB joysticks under *BSD
+  return new USBJoystick;
+#elif defined(HAVE_LINUX_INPUT_H)
+  // Event device joystick
+  return new EvdevJoystick;
+#else
+  return new BzfJoystick;
+#endif
+}
+
 BzfMedia*		LinuxPlatformFactory::createMedia()
 {
   return new LinuxMedia;
 }
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

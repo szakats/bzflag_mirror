@@ -13,26 +13,27 @@ This is the README file for the Windows version of BZFlag.
 </P>
 <P>
 <A HREF="http://BZFlag.SourceForge.net/">BZFlag</A> is a network
-multiplayer 3D tank battle game.  You can play against several
-other people anywhere on a TCP/IP based network, including the
-Internet.  BZFlag is freeware;  please read the file COPYING
-found where you installed BZFlag.
-</P>
+multiplayer 3D tank battle game. You can play against several other
+people anywhere on the Internet. BZFlag is freeware and Open Source;
+please read the file COPYING found where you installed BZFlag.</P>
 <HR>
 <H3>R<FONT SIZE="2">EQUIREMENTS</FONT></H3>
 <P>
-BZFlag should run well on a Windows 95/98/NT/2000/XP system with 32MB RAM,
-though 64MB is recommended.  Later versions of Windows will naturally
-require more memory.  Any graphics card will work but a
-3D graphics card with OpenGL acceleration is highly recommended.
-A sound card with DirectSound support is optional.  A network
-card or a modem with PPP software (such as Dial-up Networking, provided
-with Windows) is required.
+BZFlag should run well on a Windows 95/98/NT/2000/XP system with
+64MB RAM, though 128MB is recommended. Current versions of Windows may
+require more memory. Any graphics card will work but a 3D graphics
+card with OpenGL acceleration is highly recommended.. A network card
+or a modem with a connection to the internet is required. BZflag
+requires at least DirectX 7.0 or higher to run. Windows XP ships with
+acceptable versions of all DLLs and librarys, and users of it should
+not have to download or install anything other then the game.
 </P>
 <P>
-BZFlag requires, but does not come with, three free "libraries."  Note
-that Windows 98 and later ship with these libraries, so unless you are
-using Windows 95 or NT4, you should not need to download them.
+BZFlag requires, but does not come with, three free
+&quot;libraries.&quot; Note that Windows 98 and later ship with these
+libraries, so unless you are using Windows 95 or NT4, Most users do
+NOT need to download them.
+</P>
 <UL>
     <LI><A HREF="ftp://ftp.microsoft.com/softlib/mslfiles/opengl95.exe">OpenGL</A>
 	-- a vendor neutral, platform independent 3D graphics library
@@ -41,17 +42,24 @@ using Windows 95 or NT4, you should not need to download them.
     <LI><A HREF="http://www.microsoft.com/windows95/downloads/contents/wuadmintools/s_wunetworkingtools/w95sockets2/?RLD=114">Winsock 2</A>
 	-- a TCP/IP network library
 </UL>
+<P>
 The easiest way to find out if you have the necessary libraries installed
 is to run <B>bzflag.exe</B> (you can find a shortcut in your start menu if
 you chose to install one).  Look for these errors:
+</P>
 <UL>
     <LI>OPENGL32.DLL not found -- install OpenGL
     <LI>DSOUND.DLL not found -- install DirectX
     <LI>WS2_32.DLL not found -- install Winsock 2
 </UL>
-</P>
 <HR>
-<H3>U<FONT SIZE="2">NINSTALLING</FONT></H3>
+<h3>G<font size="2">LOBAL</font> R<font size="2">EGISTRATION</font></h3>
+<p>Many game servers require users to be globally registered to play.
+Global registration is free and handled by the official BZFlag forums.
+Please go to <a href="http://my.bzflag.org/bb/">http://my.bzflag.org/bb/</a>
+to create a global account. A valid e-mail address is required.</p>
+<hr>
+<h3>U<FONT SIZE="2">NINSTALLING</FONT></h3>
 <P>
 Run Add/Remove Programs (from the control panel), select BZFlag, and
 press Add/Remove....
@@ -116,7 +124,7 @@ Typical problems with BZFlag involve either the graphics or the
 network.
 </P>
 <P>
-<B>Graphics</B>:  BZFlag uses OpenGL for rendering.  If you don't have
+<B>Graphics</B>: BZFlag uses OpenGL for rendering.  If you don't have
 a graphics card that accelerates OpenGL you'll never get a good
 frame rate.  Some cards support OpenGL better than others so you
 may want to fiddle with the graphics options in the `Options'
@@ -127,12 +135,23 @@ Shadows are off.
 </P>
 <P>
 If the game runs but the rendering is wrong, your OpenGL driver
-is broken.  It is <B>not</B> a problem with BZFlag.  Try getting the
-latest OpenGL drivers from your card manufacturer (or even the
-latest reference drivers from the chipset manufacturer).  The
-freeware <A HREF="http://mesa3d.sourceforge.net/">Mesa library</A>
-accelerates OpenGL on 3Dfx cards.<BR>
-Useful links:<BR>
+is broken.  It is <B>not</B> a problem with BZFlag. Try getting
+the latest OpenGL drivers from your card manufacturer (or
+the latest reference drivers from the chipset manufacturer).
+</P>
+<P>
+<strong>99%</strong> of graphics problems are caused by
+<strong>old or incompatible video drivers</strong>. The video
+drivers that come with Windows or are distributed through
+Windows Update are <strong>never</strong> current
+and do not provide the OpenGL functions BZFlag needs. Always get
+the current driver for your video card from the card manufacturer
+or chipset company. This is almost always one of the companies
+below. If you are using a laptop you may have to get the current
+driver from your laptop manufacturer.
+</P>
+<P>
+Common video chipsets:<BR>
 <A HREF="http://www.nvidia.com/content/drivers/drivers.asp">nVidia
 accelerated reference drivers</A><BR>
 <A HREF="http://www.ati.com/support/driver.html">ATI accelerated
@@ -191,21 +210,13 @@ get a web browser working across your network then try BZFlag again.
 </P>
 <P>
 If you can't find servers on your network, there either aren't any
-servers or your network doesn't support multicasting.  Either `Start
-Server' or enter the server host name manually on the `Join Game'
-menu then Connect.
+servers or they're running on nonstandard ports.  Either `Start
+Server' or enter the server host name and port manually on the
+`Join Game' menu then Connect.
 </P>
 <P>
-If you can join the server but you can't see other players or other
-players never move and you can't shoot them then the game has
-decided that multicasting is available, but it was wrong.  Modify
-the shortcut to bzflag.exe (or otherwise run bzflag.exe) with the
-command line option `-ttl 0'.
-</P>
-<P>
-If you're using BZFlag over a modem, you'll need to run PPP (usually
-in the form of Windows' Dial-up Networking) before starting BZFlag.
-BZFlag only uses TCP/IP networking;  PPP makes TCP/IP work over your modem.
+If you're using BZFlag over a modem, you'll need to start Windows'
+Dial-up Networking and connect to the internet before starting BZFlag.
 </P>
 <P>
 Visit the <A HREF="http://BZFlag.SourceForge.net/">BZFlag

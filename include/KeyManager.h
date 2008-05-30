@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -18,14 +18,19 @@
 #define BZF_KEYMANAGER_H
 
 #include "common.h"
+
+// system headers
 #include <string>
 #include <map>
 #include <vector>
+
+// local implementation headers
 #include "BzfEvent.h"
 #include "CallbackList.h"
 #include "Singleton.h"
 
 #define KEYMGR (KeyManager::instance())
+
 
 class KeyManager : public Singleton<KeyManager> {
 public:
@@ -37,6 +42,9 @@ public:
   void			bind(const BzfKeyEvent&,
 			     bool press, const std::string& cmd);
   void			unbind(const BzfKeyEvent&, bool press);
+
+  // unbind all keys bound to a specific command
+  void			unbindCommand(const char* command);
 
   // get the command for a key event press or release
   std::string		get(const BzfKeyEvent&, bool press) const;
@@ -76,18 +84,19 @@ private:
   static bool		onCallback(ChangeCallback, void*, void*);
 
 private:
-  class KeyEventLess {
-  public:
-    bool		operator()(const BzfKeyEvent&,
-				   const BzfKeyEvent&) const;
-  };
+	class KeyEventLess {
+	public:
+		bool		operator()(const BzfKeyEvent&,
+			const BzfKeyEvent&) const;
+	};
 
   typedef std::map<BzfKeyEvent, std::string, KeyEventLess> EventToCommandMap;
   typedef std::map<std::string, BzfKeyEvent> StringToEventMap;
 
   EventToCommandMap	pressEventToCommand;
   EventToCommandMap	releaseEventToCommand;
-  StringToEventMap	stringToEvent;
+  // StringToEventMap will grow as unknown printable keys are bound
+  mutable StringToEventMap	stringToEvent;
   CallbackList<ChangeCallback>	callbacks;
   static const char*	buttonNames[];
   static const char*	asciiNames[][2];
@@ -101,10 +110,9 @@ extern const char*		defaultBindings[];
 #endif // BZF_KEYMANAGER_H
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

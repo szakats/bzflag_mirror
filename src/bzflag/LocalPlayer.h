@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,96 +7,80 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef	BZF_LOCAL_PLAYER_H
-#define	BZF_LOCAL_PLAYER_H
+#ifndef __LOCALPLAYER_H__
+#define __LOCALPLAYER_H__
 
-#include "common.h"
+/* interface header */
+#include "BaseLocalPlayer.h"
+
+/* system interface headers */
+#include <string>
+#include <vector>
+
+/* common interface headers */
+#include "Obstacle.h"
+#include "TimeKeeper.h"
+
+/* local interface headers */
 #include "Player.h"
-#include "ShotPath.h"
-#include "FlagSceneNode.h"
-#include "Ray.h"
-#include "BzfEvent.h"
-#include "World.h"
 #include "ServerLink.h"
 
-class Obstacle;
-
-// FIXME -- clean this up (needed for the robot tanks)
-class BaseLocalPlayer : public Player {
-public:
-  BaseLocalPlayer(const PlayerId&,
-		  const char* name, const char* email);
-  ~BaseLocalPlayer();
-
-  void		update();
-  Ray			getLastMotion() const;
-#ifdef __MWERKS__
-  const float	(*getLastMotionBBox() )[3] const;
-#else
-  const float		(*getLastMotionBBox() const)[3];
-#endif
-
-  virtual void	explodeTank() = 0;
-  virtual bool	checkHit(const Player* source,
-			 const ShotPath*& hit, float& minTime) const = 0;
-protected:
-  int			getSalt();
-  virtual void	doUpdate(float dt) = 0;
-  virtual void	doUpdateMotion(float dt) = 0;
-
-protected:
-  TimeKeeper		lastTime;
-  float		lastPosition[3];
-  float		bbox[2][3];		// bbox of last motion
-
-private:
-  int			salt;
-};
+class FlagSceneNode;
 
 class LocalPlayer : public BaseLocalPlayer {
 public:
   enum FiringStatus {
     Deceased,		// can't shoot cos I'm dead
-    Ready,			// ready to shoot
+    Ready,		// ready to shoot
     Loading,		// reloading
-    Sealed,			// I'm inside a building
-    Zoned			// I'm zoned
+    Sealed,		// I'm inside a building
+    Zoned		// I'm zoned
   };
   enum Location {
-    Dead,			// dead, explosion over
+    Dead,		// dead, explosion over
     Exploding,		// dead and exploding
     OnGround,		// playing on ground
     InBuilding,		// playing in building
     OnBuilding,		// playing on building
-    InAir			// playing in air
+    InAir		// playing in air
+  };
+  enum InputMethod {	// what device am I using to move around
+    Keyboard = 0,
+    Mouse,
+    Joystick
   };
 
   LocalPlayer(const PlayerId&,
-	      const char* name, const char* email);
+	      const char* name,
+	      const PlayerType _type=TankPlayer);
   ~LocalPlayer();
 
-  Location		getLocation() const;
+  Location	getLocation() const;
   FiringStatus	getFiringStatus() const;
-  float		getReloadTime() const;
   float		getFlagShakingTime() const;
-  int			getFlagShakingWins() const;
-  const GLfloat*	getAntidoteLocation() const;
-  ShotPath*		getShot(int index) const;
+  int		getFlagShakingWins() const;
+  const float*	getAntidoteLocation() const;
   const Player*	getTarget() const;
-  const Obstacle*	getContainingBuilding() const;
+  int		getDeathPhysicsDriver() const;
+  const std::vector<const Obstacle*>& getInsideBuildings() const;
 
   void		setTeam(TeamColor);
   void		setDesiredSpeed(float fracOfMaxSpeed);
   void		setDesiredAngVel(float fracOfMaxAngVel);
   void		setPause(bool = true);
+  void		activateAutoPilot(bool = true);
   bool		fireShot();
-  void		forceReload(float time = 0.0f);
   void		explodeTank();
-  void		jump();
+  bool		canJump() const;
+  void		doJump();
+  void		setJump();
+  void		setJumpPressed(bool value);
   void		setTarget(const Player*);
+
+  void		setDeadStop ( void  );
 
   void		setNemesis(const Player*);
   const Player*	getNemesis() const;
@@ -107,23 +91,24 @@ public:
   void		restart(const float* pos, float azimuth);
   bool		checkHit(const Player* source, const ShotPath*& hit,
 			 float& minTime) const;
+  bool		checkCollision(const Player* otherTank);
   void		setFlag(FlagType*);
   void		changeScore(short deltaWins, short deltaLosses, short deltaTeamKills);
 
   void		addAntidote(SceneDatabase*);
 
-  bool		isKeyboardMoving() const;
-  void		setKeyboardMoving(bool status);
-  void		setKeyboardSpeed(float speed);
-  void		setKeyboardAngVel(float angVel);
-  float		getKeyboardSpeed() const;
-  float		getKeyboardAngVel() const;
+  InputMethod	getInputMethod() const;
+  void		setInputMethod(InputMethod newInput);
+  void		setInputMethod(std::string newInput);
+  static std::string	getInputMethodName(InputMethod whatInput);
+  bool		queryInputChange();
   void		setKey(int button, bool pressed);
-  bool		getKeyPressed() const;
-  int			getKeyButton() const;
-  void		resetKey();
+  int		getRotation();
+  int		getSpeed();
   bool		isSpawning();
   void		setSpawning( bool spawn );
+  bool          hasHitWall();
+
 
   static LocalPlayer*	getMyTank();
   static void		setMyTank(LocalPlayer*);
@@ -132,134 +117,125 @@ public:
 				       bool phased, bool& expel) const;
   const Obstacle*	getHitBuilding(const float* oldPos, float oldAngle,
 				       const float* pos, float angle,
-				       bool phased, bool& expel) const;
+				       bool phased, bool& expel);
   bool		getHitNormal(const Obstacle* o,
 			     const float* pos1, float azimuth1,
 			     const float* pos2, float azimuth2,
 			     float* normal) const;
-
 
 protected:
   bool		doEndShot(int index, bool isHit, float* pos);
   void		doUpdate(float dt);
   void		doUpdateMotion(float dt);
   void		doMomentum(float dt, float& speed, float& angVel);
+  void		doFriction(float dt, const float *oldVelocity, float *newVelocity);
   void		doForces(float dt, float* velocity, float& angVel);
-  LocalShotPath**	shots;
-  bool          gettingSound;
+  bool	  gettingSound;
   ServerLink*	server;
 
 private:
-  Location		location;
+  void		doSlideMotion(float dt, float slideTime,
+			      float newAngVel, float* newVelocity);
+  float		getNewAngVel(float old, float desired, float dt);
+  void		collectInsideBuildings();
+
+private:
+  Location	location;
   FiringStatus	firingStatus;
-  TimeKeeper	jamTime;
+  TimeKeeper	bounceTime;
+  TimeKeeper	agilityTime;
   float		flagShakingTime;
-  int			flagShakingWins;
+  int		flagShakingWins;
   float		flagAntidotePos[3];
   FlagSceneNode*	antidoteFlag;
   float		desiredSpeed;
   float		desiredAngVel;
   float		lastSpeed;
-  const Obstacle*	insideBuilding;
-  GLfloat		crossingPlane[4];
+  float		crossingPlane[4];
   bool		anyShotActive;
   const Player*	target;
   const Player*	nemesis;
   const Player*	recipient;
   static LocalPlayer*	mainPlayer;
-  bool		keyboardMoving;
-  float		keyboardSpeed;
-  float		keyboardAngVel;
-  int		keyButton;
-  bool		keyPressed;
-  int           stuckingFrameCount;
+  InputMethod	inputMethod;
+  bool		inputChanged;
   bool		spawning;
+  int		wingsFlapCount;
+  bool		left;
+  bool		right;
+  bool		up;
+  bool		down;
+  bool		entryDrop; // first drop since entering
+  bool		wantJump;
+  bool		jumpPressed;
+  int		deathPhyDrv;	// physics driver that caused death
+  std::vector<const Obstacle*> insideBuildings;
+  TimeKeeper	stuckStartTime;
+  TimeKeeper	lastCollisionTime;
+  bool          hitWall; // If doUpdateMotion hit a wall, this is true.
 };
 
-//
-// LocalPlayer
-//
 
-inline LocalPlayer::Location		LocalPlayer::getLocation() const
+inline LocalPlayer::Location LocalPlayer::getLocation() const
 {
   return location;
 }
 
-inline LocalPlayer::FiringStatus	LocalPlayer::getFiringStatus() const
+inline LocalPlayer::FiringStatus LocalPlayer::getFiringStatus() const
 {
   return firingStatus;
 }
 
-inline const Player*	LocalPlayer::getTarget() const
+inline const Player* LocalPlayer::getTarget() const
 {
   return target;
 }
 
-inline const Player*	LocalPlayer::getNemesis() const
+inline const Player* LocalPlayer::getNemesis() const
 {
   return nemesis;
 }
 
-inline const Player*	LocalPlayer::getRecipient() const
+inline const Player* LocalPlayer::getRecipient() const
 {
   return recipient;
 }
 
-inline const Obstacle*	LocalPlayer::getContainingBuilding() const
+inline int		LocalPlayer::getDeathPhysicsDriver() const
 {
-  return insideBuilding;
+  return deathPhyDrv;
 }
 
-inline bool LocalPlayer::isKeyboardMoving() const
+inline const std::vector<const Obstacle*>& LocalPlayer::getInsideBuildings() const
 {
-  return keyboardMoving;
+  return insideBuildings;
 }
 
-inline void LocalPlayer::setKeyboardMoving(bool status)
+inline LocalPlayer::InputMethod LocalPlayer::getInputMethod() const
 {
-  keyboardMoving = status;
+  return inputMethod;
 }
 
-inline void LocalPlayer::setKeyboardSpeed(float speed)
+inline void LocalPlayer::setInputMethod(InputMethod newInput)
 {
-  keyboardSpeed = speed;
+  inputMethod = newInput;
+  inputChanged = true;
 }
 
-inline void LocalPlayer::setKeyboardAngVel(float angVel)
+inline void LocalPlayer::setInputMethod(std::string newInput)
 {
-  keyboardAngVel = angVel;
+  // FIXME - using hardcoded upper bound is ugly
+  for (int i = 0; i < 3; i++) {
+    if (newInput == getInputMethodName((InputMethod)i))
+      setInputMethod((InputMethod)i);
+  }
 }
 
-inline float LocalPlayer::getKeyboardSpeed() const
+inline bool LocalPlayer::queryInputChange()
 {
-  return keyboardSpeed;
-}
-
-inline float LocalPlayer::getKeyboardAngVel() const
-{
-  return keyboardAngVel;
-}
-
-inline void LocalPlayer::setKey(int button, bool pressed)
-{
-  keyButton = button;
-  keyPressed = pressed;
-}
-
-inline void LocalPlayer::resetKey()
-{
-  keyButton = BzfKeyEvent::NoButton;
-  keyPressed = false;
-}
-
-inline bool LocalPlayer::getKeyPressed() const
-{
-  return keyPressed;
-}
-
-inline int LocalPlayer::getKeyButton() const
-{
-  return keyButton;
+  const bool returnVal = inputChanged;
+  inputChanged = false;
+  return returnVal;
 }
 
 inline bool LocalPlayer::isSpawning()
@@ -272,13 +248,40 @@ inline void LocalPlayer::setSpawning( bool spawn )
   spawning = spawn;
 }
 
-#endif // BZF_LOCAL_PLAYER_H
+inline bool LocalPlayer::hasHitWall()
+{
+  return hitWall;
+}
+
+inline int LocalPlayer::getRotation() {
+  if (left && !right)
+    return 1;
+  else if (right && !left)
+    return -1;
+  else
+    return 0;
+}
+
+inline int LocalPlayer::getSpeed() {
+  if (up && !down)
+    return 1;
+  else if (down && !up)
+    return -1;
+  else
+    return 0;
+}
+
+inline LocalPlayer* LocalPlayer::getMyTank()
+{
+  return mainPlayer;
+}
+
+#endif /* __LOCALPLAYER_H__ */
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
 "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
 <!--
- Copyright (c) 1993 - 2004 Tim Riker
+ Copyright (c) 1993 - 2008 Tim Riker
 
  This package is free software; you can redistribute it and/or modify
  it under the terms of the license found in the file named COPYING
@@ -10,7 +10,7 @@
 
  THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
  WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
- MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 -->
 ]>
 
@@ -179,7 +179,7 @@ team Last
 team name (see -team).
 
 interface
-Last multicast interface (see -interface).
+Interface to use (see -interface).
 
 startcode
 Used for start server menu. Use the GUI to modify this.
@@ -217,7 +217,7 @@ shadows
 yes/no -- turns shadows on or off.
 
 smooth
-yes/no -- turns point & line antialiasing on or off.
+yes/no -- turns point &amp; line antialiasing on or off.
 
 texture
 Sets the texturing filter or turns texturing off. Values can be: no,
@@ -287,7 +287,7 @@ Enables blending of buildings on radar based on height.
 
     <sect1>
 
-      <title>Key Options<title>
+      <title>Key Options</title>
 
       <para>Key values are either a single key's name or two key names
       separated by a slash (e.g. =/+). The mouse buttons are treated

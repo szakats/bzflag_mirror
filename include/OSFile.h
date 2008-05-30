@@ -1,6 +1,6 @@
-/* 3dScreamers
+/* 3dScreamers */
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -8,126 +8,142 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-
-
 
 #ifndef _OSFILE_H_
 #define _OSFILE_H_
 
+/* common header */
+#include "common.h"
 
-
-#ifdef _MSC_VER
-  #pragma warning( disable : 4786 )  // Disable warning message
-#endif
-
+/* system headers */
 #ifdef _WIN32
-  #define WIN32_LEAN_AND_MEAN        // Exclude rarely-used stuff from Windows headers
-  #include <windows.h>
-  #include <io.h>
-  #include <direct.h>
+#  ifdef _MSC_VER
+#    pragma warning(disable : 4786)  // Disable warning message
+#  endif
+#  define WIN32_LEAN_AND_MEAN    // Exclude rarely-used stuff from Windows headers
+#  include <windows.h>
+#  include <io.h>
+#  include <direct.h>
 #else
-  #include <sys/types.h>
-  #include <sys/stat.h>
-  #include <unistd.h>
-  #include <dirent.h>
-  #include <ctype.h>
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#  include <dirent.h>
+#  include <ctype.h>
 #endif
 
 #include <string>
 #include <vector>
-
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+
 
 typedef enum
 {
-    eFileStart,
-    eCurentPos,
-    eFileEnd
+  eFileStart,
+  eCurentPos,
+  eFileEnd
 }teFilePos;
 
-void setOSFileBaseDir ( const char *dir );
+void setOSFileBaseDir(const std::string &dir);
+void OSFileOSToStdDir(std::string &dir);
 
 class OSFile
 {
 public:
-    OSFile ();
-    OSFile ( const OSFile &r);
-    OSFile& operator = (const OSFile &r);
+  OSFile();
+  OSFile(const OSFile &r);
+  OSFile& operator = (const OSFile &r);
 
-    OSFile ( const char *name );
-    OSFile ( const char *name, const char *mode );
-    ~OSFile();
+  OSFile(const std::string &szName);
+  OSFile(const std::string &szName, const char *szMode);
+  ~OSFile();
 
-    bool open ( const char *name, const char *mode );
-    bool open ( const char *mode );
-    bool close ();
+  bool open(const std::string &szName, const char *szMode);
+  bool open(const char *szMode);
+  bool close();
 
-    void stdName ( const char *name );
-    void osName ( const char *name );
+  void stdName(const std::string &szName);
+  void osName(const std::string &szName);
 
-    FILE* getFile ();
+  FILE* getFile();
 
-    const char* getStdName ();
-    const char* getOSName ();
+  std::string getStdName();
+  std::string getOSName();
 
-    const char* getFileTitle ();
+  std::string getFileName();
 
-    const char* getExtension ();
+  std::string getExtension();
 
-    const char* getFullOSPath ();
+  std::string getFullOSPath();
 
-    bool isOpen ();
+  std::string getOSFileDir();
 
-    int read ( void* data, int size, int count = 1 );
-    unsigned char readChar ();
-    int scanChar ( unsigned char *pChar );
-    const char* scanStr ();
-    const char* readLine ();
-    int write ( const void* data, int size );
-    void flush ();
+  bool isOpen();
 
-    int seek ( teFilePos ePos, int iOffset );
-    unsigned int size ();
-    unsigned int tell ();
+  int read(void* data, int size, int count = 1);
+  unsigned char readChar();
+  int scanChar(unsigned char *pChar);
+  const char* scanStr();
+  std::string readLine();
+  int write(const void* data, int size);
+  void flush();
 
-    void setUseGlobalPath ( bool use = false );
+  int seek(teFilePos ePos, int iOffset);
+  unsigned int size();
+  unsigned int tell();
+
+  void setUseGlobalPath(bool use = false);
 protected:
-    typedef struct OSFileInfo;
-    OSFileInfo        *info;
+  class OSFileInfo;
+  OSFileInfo    *info;
 };
 
 
 class OSDir
 {
 public:
-    OSDir();
-    OSDir( const OSDir &r);
-    OSDir& operator = (const OSDir &r);
-    OSDir( const char* dirName );
-    ~OSDir();
+  OSDir();
+  OSDir(const OSDir &r);
+  OSDir& operator = (const OSDir &r);
+  OSDir(const std::string &DirName);
+  ~OSDir();
 
-    void setStdDir ( const char* dirName );
-    void setOSDir ( const char* dirName );
+  void setStdDir(const std::string &DirName);
+  void setOSDir(const std::string &DirName);
 
-    void makeStdDir ( const char* dirName );
-    void makeOSDir ( const char* dirName );
+  void makeStdDir(const std::string &DirName);
+  void makeOSDir(const std::string &DirName);
 
-    bool getNextFile ( OSFile &oFile, bool recursive );
-    bool getNextFile ( OSFile &oFile, const char* fileMask, bool recursive );
+  bool getNextFile(OSFile &oFile, bool bRecursive);
+  bool getNextFile(OSFile &oFile, const char* fileMask, bool bRecursive);
 
-    const char* getStdName ();
-    const char* getOSName ();
-    const char* getFullOSPath ();
+  int getFileScanCount();
+
+  std::string getStdName();
+  std::string getOSName();
+  std::string getFullOSPath();
+
+  std::string getOSFileDir();
 
 protected:
-    struct OSDirInfo;
-    OSDirInfo        *info;
+  class OSDirInfo;
+  OSDirInfo    *info;
 
-    bool windowsAddFileStack ( const char *pathName, const char* fileMask , bool recursive );
-    bool linuxAddFileStack( const char *pathName, const char* fileMask , bool recursive);
+  bool windowsAddFileStack(std::string pathName, std::string fileMask, bool bRecursive);
+  bool linuxAddFileStack(std::string pathName, std::string fileMask, bool bRecursive);
 };
 
 
 #endif//_OSFILE_H_
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

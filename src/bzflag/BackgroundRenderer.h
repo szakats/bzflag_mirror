@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -21,53 +21,70 @@
 #define	BZF_BACKGROUND_RENDERER_H
 
 #include "common.h"
-#include "bzfgl.h"
-#include "OpenGLGState.h"
-#include "OpenGLDisplayList.h"
+
+/* system headers */
 #include <string>
 
-class SceneRenderer;
+/* common interface headers */
+#include "bzfgl.h"
+#include "OpenGLGState.h"
+#include "SceneRenderer.h"
+#include "WeatherRenderer.h"
 
-class BackgroundRenderer {
+#include "OpenGLUtils.h"
+
+class BackgroundRenderer : public GLDisplayListCreator
+{
   public:
 			BackgroundRenderer(const SceneRenderer&);
-			~BackgroundRenderer();
+			virtual ~BackgroundRenderer();
 
-    void		renderSkyAndGround(SceneRenderer&, bool fullWindow);
-    void		render(SceneRenderer&);
+    virtual void buildGeometry ( GLDisplayList displayList );
 
-    void                resize();
+    void		setupGroundMaterials();
+    void		setupSkybox();
 
-    bool		getBlank() const;
-    bool		getInvert() const;
-    bool		getSimpleGround() const;
+    void		renderSky(SceneRenderer&, bool fullWindow, bool mirror);
+    void		renderGround(SceneRenderer&, bool fullWindow);
+    void		renderGroundEffects(SceneRenderer&, bool drawingMirror);
+    void		renderEnvironment(SceneRenderer&, bool update);
+
+    void		resize();
+
+    const GLfloat*	getSunDirection() const;
     void		setBlank(bool blank = true);
     void		setInvert(bool invert = true);
     void		setSimpleGround(bool simple = true);
     void		setCelestial(const SceneRenderer&,
-					const float sunDirection[3],
-					const float moonDirection[3]);
+				     const float sunDirection[3],
+				     const float moonDirection[3]);
     void		addCloudDrift(GLfloat uDrift, GLfloat vDrift);
+    void		notifyStyleChange();
 
-    std::string		userTextures[2];
+    int			getTriangleCount() const;
+    void		resetTriangleCount();
   protected:
-    void		drawSky(SceneRenderer&);
+    void		drawSky(SceneRenderer&, bool mirror);
+    void		drawSkybox();
     void		drawGround(void);
+    void		drawGroundCentered(void);
     void		drawGroundGrid(SceneRenderer&);
-    void		drawTeamBases(void);
     void		drawGroundShadows(SceneRenderer&);
     void		drawGroundReceivers(SceneRenderer&);
+    void		drawAdvancedGroundReceivers(SceneRenderer&);
     void		drawMountains(void);
 
-    void		notifyStyleChange(SceneRenderer&);
 
   private:
 			BackgroundRenderer(const BackgroundRenderer&);
     BackgroundRenderer&	operator=(const BackgroundRenderer&);
 
-    void                resizeSky();
-    void		doInitDisplayLists();
-    static void		initDisplayLists(void*);
+    void		resizeSky();
+
+    void		setSkyColors();
+    void		resetCloudList();
+    void		makeCelestialLists(const SceneRenderer&);
+    static void		bzdbCallback(const std::string&, void*);
 
   private:
     // rendering state
@@ -80,17 +97,13 @@ class BackgroundRenderer {
     // stuff for ground
     OpenGLGState	groundGState[4];
     OpenGLGState	invGroundGState[4];
-    OpenGLDisplayList	simpleGroundList[4];
+    int			groundTextureID;
+    const GLfloat*	groundTextureMatrix;
 
     // stuff for grid
     GLfloat		gridSpacing;
     GLfloat		gridCount;
     OpenGLGState	gridGState;
-
-    // stuff for team bases
-    bool		doTeamBases;
-    OpenGLGState	teamBasesGState;
-    OpenGLDisplayList	teamBasesList;
 
     // stuff for ground receivers
     OpenGLGState	receiverGState;
@@ -101,14 +114,15 @@ class BackgroundRenderer {
     int			numMountainTextures;
     int			mountainsMinWidth;
     OpenGLGState*	mountainsGState;
-    OpenGLDisplayList*	mountainsList;
 
     // stuff for clouds
     GLfloat		cloudDriftU, cloudDriftV;
     bool		cloudsAvailable;
     bool		cloudsVisible;
     OpenGLGState	cloudsGState;
-    OpenGLDisplayList	cloudsList;
+
+    // weather
+    WeatherRenderer	weather;
 
     // stuff for sun shadows
     bool		doShadows;
@@ -116,6 +130,10 @@ class BackgroundRenderer {
     OpenGLGState	sunShadowsGState;
 
     // celestial stuff
+    bool		haveSkybox;
+    GLenum		skyboxWrapMode;
+    int			skyboxTexID[6];
+    GLfloat		skyboxColor[8][4];
     bool		doStars;
     bool		doSunset;
     GLfloat		skyZenithColor[3];
@@ -131,38 +149,43 @@ class BackgroundRenderer {
     OpenGLGState	sunGState;
     OpenGLGState	moonGState[2];
     OpenGLGState	starGState[2];
-    OpenGLDisplayList	sunList;
-    OpenGLDisplayList	sunXFormList;
-    OpenGLDisplayList	moonList;
-    OpenGLDisplayList	starList;
-    OpenGLDisplayList	starXFormList;
+
+    // display lists
+    GLDisplayList	sunXFormList;
+    GLDisplayList	moonList;
+    GLDisplayList	starXFormList;
+    GLDisplayList	lowGroundList;
+    GLDisplayList	mediumGroundList;
+    GLDisplayList	cloudsList;
+    std::vector<GLDisplayList> mountanLists;
+
 
     static GLfloat		skyPyramid[5][3];
     static const GLfloat	cloudRepeats;
 
-    static const GLfloat	groundColor[4][3];
-    static const GLfloat	groundColorInv[4][3];
+    static GLfloat		rcvrGroundColor[4][4];
+    static GLfloat		rcvrGroundInvColor[4][4];
+    static GLfloat		groundColor[4][4];
+    static GLfloat		groundColorInv[4][4];
+    static const GLfloat	defaultGroundColor[4][4];
+    static const GLfloat	defaultGroundColorInv[4][4];
     static const GLfloat	receiverColor[3];
     static const GLfloat	receiverColorInv[3];
+
+    int			triangleCount;
+
+    SceneRenderer	      *lastRenderer;
+
+    void buildMountan ( unsigned int index );
 };
 
 //
 // BackgroundRenderer
 //
 
-inline bool		BackgroundRenderer::getBlank() const
-{
-  return blank;
-}
-
 inline void		BackgroundRenderer::setBlank(bool _blank)
 {
   blank = _blank;
-}
-
-inline bool		BackgroundRenderer::getInvert() const
-{
-  return invert;
 }
 
 inline void		BackgroundRenderer::setInvert(bool _invert)
@@ -170,23 +193,28 @@ inline void		BackgroundRenderer::setInvert(bool _invert)
   invert = _invert;
 }
 
-inline bool		BackgroundRenderer::getSimpleGround() const
-{
-  return simpleGround;
-}
-
 inline void		BackgroundRenderer::setSimpleGround(bool _simple)
 {
   simpleGround = _simple;
 }
 
+inline int		BackgroundRenderer::getTriangleCount() const
+{
+  return triangleCount;
+}
+
+inline void		BackgroundRenderer::resetTriangleCount()
+{
+  triangleCount = 0;
+}
+
+
 #endif // BZF_BACKGROUND_RENDERER_H
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

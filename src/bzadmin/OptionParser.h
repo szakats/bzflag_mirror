@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,18 +7,22 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef OPTIONPARSER_H
 #define OPTIONPARSER_H
 
+#include "common.h"
+
+/* system interface headers */
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
 
+/* common interface headers */
 #include "TextUtils.h"
 
 /** This is an abstract base class for all different option parsers.
@@ -75,11 +79,14 @@ protected:
   T& var;
 };
 
+// true ugliness to fool VC5
+typedef std::string STRING;
+
 /** This is a specialization for @c string variables. It copies the
     entire parameter instead of just the first word (which the
     stream operator would have done). */
 template<>
-class VariableParser<std::string> : public Parser {
+class VariableParser<STRING> : public Parser {
 public:
   VariableParser(std::string& variable, const std::string& usageText,
 		 const std::string& helpText)
@@ -114,12 +121,12 @@ protected:
 template<class T>
 class VectorParser : public Parser {
 public:
-  VectorParser(std::vector<T>& variable, 
+  VectorParser(std::vector<T>& variable,
 		 const std::string& usageText,
 		 const std::string& helpText)
     : Parser(usageText, helpText), var(variable) { }
   virtual int parse(char** argv) {
-    std::vector<std::string> tmpVector = string_util::tokenize(argv[0], ",");
+    std::vector<std::string> tmpVector = TextUtils::tokenize(argv[0], ",");
     T t;
     for (unsigned i = 0; i < tmpVector.size(); ++i) {
       std::istringstream iss(tmpVector[i]);
@@ -173,19 +180,19 @@ public:
   */
   template <class T>
   bool registerVariable(const std::string& option, T& variable,
-			const std::string& usage = "", 
+			const std::string& usage = "",
 			const std::string& help = "")
   { //VC doesn't support out of class definition of template functions
     VariableParser<T>* parser = new VariableParser<T>(variable, usage, help);
     parsers[option] = parser;
     return true;
   }
-  /** Same as registerVariable(), but for @c vector<T> variables instead. 
+  /** Same as registerVariable(), but for @c vector<T> variables instead.
       The parameter will be tokenized with ',' as delimiter and the tokens
       will be parsed and placed in the vector. */
   template <class T>
   bool registerVector(const std::string& option, std::vector<T>& variable,
-		      const std::string& usage = "", 
+		      const std::string& usage = "",
 		      const std::string& help = "")
   { //VC doesn't support out of class definition of template functions
     VectorParser<T>* parser = new VectorParser<T>(variable, usage, help);
@@ -208,7 +215,7 @@ protected:
 
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

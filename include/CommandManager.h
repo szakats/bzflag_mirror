@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,18 +7,20 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef BZF_COMMAND_MANAGER_H
-#define BZF_COMMAND_MANAGER_H
+#ifndef __COMMANDMANAGER_H__
+#define __COMMANDMANAGER_H__
 
-// system includes
+#include "common.h"
+
+/* system interface headers */
 #include <string>
 #include <map>
 #include <vector>
 
-// bzflag interface includes
+/* common interface headers */
 #include "common.h"
 #include "Singleton.h"
 
@@ -36,7 +38,7 @@ public:
   // a string with the output of the command (or the empty string if
   // there's no output).
   typedef std::vector<std::string> ArgList;
-  typedef std::string (*CommandFunction)(const std::string& name, const ArgList&);
+  typedef std::string (*CommandFunction)(const std::string& name, const ArgList&, bool* error);
   typedef void (*Callback)(const std::string& name, void* userData);
 
   // add/replace a command handler
@@ -50,10 +52,10 @@ public:
   std::string			getHelp(const std::string& name) const;
 
   // execute a command
-  std::string			run(const std::string& name, const ArgList&) const;
+  std::string			run(const std::string& name, const ArgList& args, bool *ret = NULL) const;
 
   // parse and execute a command
-  std::string			run(const std::string& cmd) const;
+  std::string			run(const std::string& cmd, bool *ret = NULL) const;
 
   // invoke the callback for each registered command
   void				iterate(Callback, void* userData) const;
@@ -75,13 +77,13 @@ private:
   Commands			commands;
 };
 
-#endif
+
+#endif /* __COMMANDMANAGER_H__ */
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,23 +7,23 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-
-/* no header other than WordFilter.h should be included here */
-
-#ifdef _MSC_VER
-#pragma warning( 4:4786)
-#endif
 
 // this classes interface
 #include "WordFilter.h"
 
+// system headers
+#include <iostream>
+#include <ctype.h>
+#include <string>
+
 // implementation-specific headers
-#if DEBUG
+#ifdef DEBUG
 #  include "TimeKeeper.h"
 #endif
 
+// TODO: wordfilter is no good for multibyte strings
 
 /* private */
 
@@ -50,6 +50,9 @@ bool WordFilter::simpleFilter(char *input) const
       endPosition = line.length();
 
     word = line.substr(startPosition, endPosition-startPosition);
+    // transform to lowercase
+    std::transform (word.begin(), word.end(), word.begin(), tolower);
+
     findWord.word = word;
     firstchar = (unsigned char)word[0];
     if (filters[firstchar].find(findWord) != \
@@ -71,12 +74,11 @@ bool WordFilter::simpleFilter(char *input) const
 
 bool WordFilter::aggressiveFilter(char *input) const
 {
-#ifndef HAVE_REGEX_H
-
-  std::cerr << "Regular expressions are not available (using the simple filter)" << std::endl;
-  return simpleFilter(input);
-
-#else /* HAVE_REGEX_H */
+#if defined(DEBUG) && defined(_MSC_VER)
+  // FIXME: disable in debug build on windows to avoid assertions 
+  // thrown by MSVCRT when unicode input goes through regex
+  return false;
+#endif
 
   bool filtered = false;
   regmatch_t match[1];
@@ -109,10 +111,10 @@ bool WordFilter::aggressiveFilter(char *input) const
   for (int counter = 0; counter < inputLength; counter++) {
     char c = tolower(sInput[counter]);
 
-    if (!isalpha(previousChar) && isVisible(c)) {
+    if (!isalpha(previousChar) && TextUtils::isVisible(c)) {
 
       // expand punctuation to potential alphabetic characters
-      if (isPunctuation(c)) {
+      if (TextUtils::isPunctuation(c)) {
 
 	std::string puncChars = alphabeticSetFromCharacter(c);
 	for (unsigned int cnt = 0; cnt < puncChars.size(); cnt++) {
@@ -131,7 +133,7 @@ bool WordFilter::aggressiveFilter(char *input) const
    * e.g. "bzstring" will match a prefix of "bz" and make "s" get added
    * as a bin to check for during matching.
    */
-  for (ExpCompareSet::iterator i = prefixes.begin(); i != prefixes.end(); ++i) {
+  for (ExpCompareSet::const_iterator i = prefixes.begin(); i != prefixes.end(); ++i) {
     if (regexec(i->compiled, sInput.c_str(), 1, match, 0) == 0) {
       if ( (match[0].rm_eo < inputLength) && isalpha(sInput[match[0].rm_eo]) ) {
 	/* do not forget to make sure this is a true prefix */
@@ -157,7 +159,7 @@ bool WordFilter::aggressiveFilter(char *input) const
     /* look at all of the filters that start with the letter wordIndices[j]
      */
     const unsigned int firstchar = (unsigned char)wordIndices[j];
-    for (ExpCompareSet::iterator i = filters[firstchar].begin();
+    for (ExpCompareSet::const_iterator i = filters[firstchar].begin();
 	 i != filters[firstchar].end(); ++i) {
 
       /* the big kahuna burger processing goes on here */
@@ -182,18 +184,18 @@ bool WordFilter::aggressiveFilter(char *input) const
 
 	    /* we are in the middle of a word.. see if we can match a prefix before this */
 	    bool foundit =  false;
-	    for (ExpCompareSet::iterator j = prefixes.begin();
-		 j != prefixes.end(); ++j) {
-	      if (regexec(j->compiled, sInput.c_str(), 1, match, 0) == 0) {
+	    for (ExpCompareSet::const_iterator k = prefixes.begin();
+		 k != prefixes.end(); ++k) {
+	      if (regexec(k->compiled, sInput.c_str(), 1, match, 0) == 0) {
 
-//std::cout << "checking prefix: " << j->word << std::endl;
+//std::cout << "checking prefix: " << k->word << std::endl;
 
 		if ( (match[0].rm_so > 1) && (isalpha(sInput[match[0].rm_so - 1])) ) {
 		  /* we matched, but we are still in the middle of a word */
 		  continue;
 		}
 
-//std::cout << "matched a prefix! " << j->word << std::endl;
+//std::cout << "matched a prefix! " << k->word << std::endl;
 		if (match[0].rm_eo == startOffset) {
 		  /* perfect prefix match */
 		  startOffset = match[0].rm_so;
@@ -217,11 +219,11 @@ bool WordFilter::aggressiveFilter(char *input) const
 
 	    /* we are at the start of a word, but not at the end, try to get to the end */
 	    bool foundit = false;
-	    for (ExpCompareSet::iterator j = suffixes.begin();
-		 j != suffixes.end(); ++j) {
-//std::cout << "checking " << j->word << " against [" << input + endOffset << "]" << std::endl;
+	    for (ExpCompareSet::const_iterator k = suffixes.begin();
+		 k != suffixes.end(); ++k) {
+//std::cout << "checking " << k->word << " against [" << input + endOffset << "]" << std::endl;
 
-	      if (regexec(j->compiled, sInput.c_str() + endOffset, 1, match, 0) == 0) {
+	      if (regexec(k->compiled, sInput.c_str() + endOffset, 1, match, 0) == 0) {
 
 //std::cout << "is " << match[0].rm_eo << " less than " << inputLength - endOffset << std::endl;
 //std::cout << "is alpha =?= " << input[endOffset + match[0].rm_eo + 1] << std::endl;
@@ -233,7 +235,7 @@ bool WordFilter::aggressiveFilter(char *input) const
 		  continue;
 		}
 
-//std::cout << "matched a suffix! " << j->word << std::endl;
+//std::cout << "matched a suffix! " << k->word << std::endl;
 		if (match[0].rm_so == 0) {
 		  /* push the end forward a little since we matched */
 		  endOffset += match[0].rm_eo;
@@ -249,21 +251,37 @@ bool WordFilter::aggressiveFilter(char *input) const
 	    }
 	  }
 
+	  int matchLength = endOffset - startOffset;
+
+	  // make sure that longer matches actually include at least 1 alphabetic
+	  if (matchLength > 3) {
+	    bool foundAlpha = false;
+	    for (std::string::const_iterator position = sInput.begin(); position != sInput.end(); position++) {
+	      if (isalpha(*position)) {
+		foundAlpha = true;
+		break;
+	      }
+	    }
+	    if (!foundAlpha) {
+	      continue;
+	    }
+	  }
+
 	  // add a few more slots if necessary (this should be rare/never)
 	  if (matchCount * 2 + 1 >= matchPair.size()) {
 	    matchPair.resize(matchCount * 2 + 201);
 	  }
 
 	  matchPair[matchCount * 2] = startOffset; /* position */
-	  matchPair[(matchCount * 2) + 1] = endOffset - startOffset; /* length */
+	  matchPair[(matchCount * 2) + 1] = matchLength; /* length */
 	  matchCount++;
 	  filtered = true;
 	  matched = true;
 	  // zappo! .. erase stuff that has been filtered to speed up future checks
 	  // fill with some non-whitespace alpha that is not the start/end of a suffix to prevent rematch
 	  std::string filler;
-	  filler.assign(endOffset - startOffset, 'W');
-	  sInput.replace(startOffset, endOffset - startOffset, filler);
+	  filler.assign(matchLength, 'W');
+	  sInput.replace(startOffset, matchLength, filler);
 
 	} else if ( regCode == REG_NOMATCH ) {
 	  // do nothing
@@ -283,15 +301,15 @@ bool WordFilter::aggressiveFilter(char *input) const
   } /* iterate over characters */
 
   /* finally filter the input.  only filter actual alphanumerics. */
-  for (unsigned int i=0; i < matchCount; i++) {
+  for (unsigned int l = 0; l < matchCount; l++) {
     /* !!! debug */
-#if DEBUG
+#ifdef DEBUG
     char tmp[256] = {0};
-    strncpy(tmp, input + matchPair[i*2], matchPair[(i*2)+1]);
+    strncpy(tmp, input + matchPair[l*2], matchPair[(l*2)+1]);
     std::cout << "Matched: [" << tmp << "]" << std::endl;
 #endif
 
-    if (filterCharacters(input, matchPair[i*2], matchPair[(i*2)+1]) <= 0) {
+    if (filterCharacters(input, matchPair[l*2], matchPair[(l*2)+1]) <= 0) {
       // XXX with multiple matching, we will be unable to filter overlapping matches
       //      std::cerr << "Unable to filter characters" << std::endl;
       continue;
@@ -300,18 +318,12 @@ bool WordFilter::aggressiveFilter(char *input) const
 
 
   return filtered;
-
-#endif /* HAVE_REGEX_H */
 } // end aggressiveFilter
 
 
 // provides a pointer to a fresh compiled expression for some given expression
 regex_t *WordFilter::getCompiledExpression(const std::string &word) const
 {
-#ifndef HAVE_REGEX_H
-  return (regex_t *)NULL;
-
-#else /* HAVE_REGEX_H */
   regex_t *compiledReg;
 
   /* XXX need to convert this to use new/delete */
@@ -325,11 +337,11 @@ regex_t *WordFilter::getCompiledExpression(const std::string &word) const
 
   if ( regcomp(compiledReg, word.c_str(), REG_EXTENDED | REG_ICASE) != 0 ) {
     std::cerr << "Warning: unable to compile regular expression for [" << word << "]" << std::endl;
+    free(compiledReg);
     return (regex_t *)NULL;
   }
   return compiledReg;
 
-#endif /* HAVE_REGEX_H */
 }
 
 
@@ -366,7 +378,7 @@ std::string WordFilter::l33tspeakSetFromCharacter(const char c) const
       set = "g96";
       break;
     case 'i':
-      set = "il|!\\/";
+      set = "il1|!\\/";
       break;
     case 'l':
       set = "li1!|\\/";
@@ -454,7 +466,6 @@ std::string WordFilter::alphabeticSetFromCharacter(const char c) const
 }
 
 
-
 std::string WordFilter::expressionFromString(const std::string &word) const
 {
   /* create the regular expression description */
@@ -533,151 +544,58 @@ WordFilter::WordFilter()
 
 #if 1
   // noun
-  fix.word = "dom";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ity";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ment";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "sion";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "tion";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ness";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ance";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ence";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "er";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "or";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ist";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
+  addSuffix("dom");
+  addSuffix("ity");
+  addSuffix("ment");
+  addSuffix("sion");
+  addSuffix("tion");
+  addSuffix("ness");
+  addSuffix("ance");
+  addSuffix("ence");
+  addSuffix("er");
+  addSuffix("or");
+  addSuffix("ist");
   // adjective
-  fix.word = "ive";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "en";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ic";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "al";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "able";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "y";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ous";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ful";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "less";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
+  addSuffix("ive");
+  addSuffix("ic");
+  addSuffix("al");
+  addSuffix("able");
+  addSuffix("y");
+  addSuffix("ous");
+  addSuffix("ful");
+  addSuffix("less");
   // verb
-  fix.word = "en";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ize";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ate";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ify";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "fy";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ed";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
+  addSuffix("en");
+  addSuffix("ize");
+  addSuffix("ate");
+  addSuffix("ify");
+  addSuffix("fy");
+  addSuffix("ed");
   // adverb
-  fix.word = "ly";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
+  addSuffix("ly");
   // slang
-  fix.word = "a";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "e";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "i";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "o";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "u";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "z";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "r";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ah";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "io";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "rs";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "rz";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "in";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "n";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "ster";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "meister";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
+  addSuffix("a");
+  addSuffix("e");
+  addSuffix("i");
+  addSuffix("o");
+  addSuffix("u");
+  addSuffix("z");
+  addSuffix("r");
+  addSuffix("ah");
+  addSuffix("io");
+  addSuffix("rs");
+  addSuffix("rz");
+  addSuffix("in");
+  addSuffix("n");
+  addSuffix("ster");
+  addSuffix("meister");
   // plurality
-  fix.word = "s";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
-  fix.word = "es";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
+  addSuffix("s");
+  addSuffix("es");
   // imperfect verb
-  fix.word = "ing";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
+  addSuffix("ing");
   // diminutive
-  fix.word = "let";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  suffixes.insert(fix);
+  addSuffix("let");
 
 #endif
 
@@ -689,25 +607,12 @@ WordFilter::WordFilter()
   /* XXX adding prefixes _significantly_ increases the expression count
    * and is rather expensive (slow, XN+N extra checks for N words)
    */
-  fix.word = "bz"; // bz-specific prefix
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  prefixes.insert(fix);
-  fix.word = "beze"; // bz-specific prefix
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  prefixes.insert(fix);
-  fix.word = "u"; // l33t prefix
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  prefixes.insert(fix);
-  fix.word = "you";
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  prefixes.insert(fix);
-  fix.word = "ura"; // l33t prefix
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  prefixes.insert(fix);
-  fix.word = "k"; // common l33t prefix
-  fix.compiled = getCompiledExpression(expressionFromString(fix.word));
-  prefixes.insert(fix);
-
+  addPrefix("bz"); // bz-specific prefix
+  addPrefix("beze"); // bz-specific prefix
+  addPrefix("u"); // l33t prefix
+  addPrefix("you");
+  addPrefix("ura"); // l33t prefix
+  addPrefix("k"); // common l33t prefix
 
 #endif
 
@@ -715,17 +620,16 @@ WordFilter::WordFilter()
 }
 
 /** default copy constructor */
-WordFilter::WordFilter(const WordFilter& filter)
-  : alphabet(filter.alphabet),
-    filterChars(filter.filterChars),
-    suffixes(filter.suffixes),
-    prefixes(filter.prefixes)
+WordFilter::WordFilter(const WordFilter& _filter)
+  : alphabet(_filter.alphabet),
+    filterChars(_filter.filterChars),
+    suffixes(_filter.suffixes),
+    prefixes(_filter.prefixes)
 {
   for (int i=0; i < MAX_FILTER_SETS; i++) {
-    filters[i] = filter.filters[i];
+    filters[i] = _filter.filters[i];
   }
 }
-
 
 
 /** destructor releases the compiled bad words */
@@ -734,11 +638,12 @@ WordFilter::~WordFilter(void)
   ExpCompareSet::iterator i;
 
   // delete compiled words
-  for (int j = 0; j < MAX_FILTER_SETS; ++j) {
+  for (int j = 0; j < MAX_FILTER_SETS; j++) {
     for (i = filters[j].begin();
 	 i != filters[j].end();
-	 ++i) {
+	 i++) {
       if (i->compiled) {
+	regfree(i->compiled);
 	free(i->compiled);
       }
     }
@@ -746,23 +651,24 @@ WordFilter::~WordFilter(void)
   // delete compiled prefixes
   for (i = prefixes.begin();
        i != prefixes.end();
-       ++i) {
+       i++) {
     if (i->compiled) {
+      regfree(i->compiled);
       free(i->compiled);
     }
   }
   // delete compiled suffixes
   for (i = suffixes.begin();
        i != suffixes.end();
-       ++i) {
+       i++) {
     if (i->compiled) {
+      regfree(i->compiled);
       free(i->compiled);
     }
   }
 
   return;
 }
-// consider calling regfree()
 
 
 // adds an individual word to the filter list
@@ -776,8 +682,8 @@ bool WordFilter::addToFilter(const std::string &word, const std::string &express
 
   if (expression.size() == 0) {
     /* make sure to create an expression if it wasn't given */
-    std::string expression = expressionFromString(word);
-    return addToFilter(word, expression);
+    std::string expr = expressionFromString(word);
+    return addToFilter(word, expr);
 
   } else {
     /* base case */
@@ -790,6 +696,8 @@ bool WordFilter::addToFilter(const std::string &word, const std::string &express
     /* check if the word is already added */
     if (filters[firstchar].find(newFilter) != \
 	filters[firstchar].end()) {
+      regfree(newFilter.compiled);
+      free(newFilter.compiled);
       return false;
     } else {
       filters[firstchar].insert(newFilter);
@@ -851,10 +759,18 @@ unsigned int WordFilter::loadFromFile(const std::string &fileName, bool verbose)
     */
 
     if (verbose) {
-      std::cout << ".";
+      static int counter=0;
+      if (counter-- <= 0) {
+	std::cout << ".";
+	std::cout.flush();
+	counter=100;
+      }
     }
 
-    bool added = addToFilter(filterWord, "");
+    // convert the word to lowercase
+    std::transform (filterWord.begin(),filterWord.end(), filterWord.begin(), tolower);
+
+    bool added = addToFilter(filterWord, std::string(""));
     if ((!added) && (verbose)) {
 	std::cout << std::endl << "Word is already added: " << filterWord << std::endl;
     } else {
@@ -876,7 +792,7 @@ unsigned int WordFilter::loadFromFile(const std::string &fileName, bool verbose)
  */
 bool WordFilter::filter(char *input, bool simple) const
 {
-#if DEBUG
+#ifdef DEBUG
   TimeKeeper before = TimeKeeper::getCurrent();
 #endif
   bool filtered;
@@ -885,10 +801,34 @@ bool WordFilter::filter(char *input, bool simple) const
   } else {
     filtered = aggressiveFilter(input);
   }
-#if DEBUG
+#ifdef DEBUG
   TimeKeeper after = TimeKeeper::getCurrent();
   std::cout << "Time elapsed: " << after - before << " seconds" << std::endl;
 #endif
+  return filtered;
+}
+
+bool WordFilter::filter(std::string &input, bool simple) const
+{
+  char input2[512] = {0};
+  bool filtered = false;
+  std::string resultString = "";
+
+  /* filter in 512 chunks.  ugly means to support large input strings,
+   * but it works.  just means words that span the boundary might be
+   * wrong.
+   */
+  for (unsigned int i = 0; i < input.size(); i+=512) {
+    strncpy(input2, input.c_str() + i, 512);
+    bool filteredChunk = filter(input2, simple);
+    if (filteredChunk) {
+      filtered = true;
+    }
+    resultString += input2;
+  }
+  if (filtered) {
+    input = resultString;
+  }
   return filtered;
 }
 
@@ -899,8 +839,9 @@ void WordFilter::outputFilter(void) const
     for (ExpCompareSet::const_iterator j = filters[i].begin(); \
 	 j != filters[i].end(); \
 	 ++j) {
-      std::cout << count++ << ": " << j->word << std::endl;
-      std::cout << "    " << expressionFromString(j->word) << std::endl;
+      std::string jword = j->word;
+      std::cout << count++ << ": " << jword << std::endl;
+      std::cout << "    " << expressionFromString(jword) << std::endl;
     }
   }
 
@@ -933,10 +874,9 @@ unsigned long int WordFilter::wordCount(void) const
 
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

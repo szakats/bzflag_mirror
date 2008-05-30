@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,128 +7,190 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __WORLDINFO_H__
 #define __WORLDINFO_H__
 
-#if (_MSC_VER)
-// turn off bogus `this used in base member initialization list'
-	#pragma warning(disable: 4786)
-	#pragma warning(disable: 4503)
-	#pragma warning(disable: 4355)
-#endif
+#include "common.h"
 
+/* system interface headers */
 #include <vector>
 #include <string>
-#include <algorithm>
-#include <math.h>
 
-#include "global.h"
-#include "Address.h"
-#include "Protocol.h"
+/* bzfs implementation headers */
+#include "EntryZones.h"
+#include "WorldWeapons.h"
+#include "TeamBases.h"
+#include "LinkManager.h"
 
-typedef enum { NOT_IN_BUILDING, IN_BASE, IN_BOX, IN_PYRAMID, IN_TELEPORTER } InBuildingType;
+/* common implementation headers */
+
+class BzMaterial;
+class Obstacle;
+class BoxBuilding;
+class PyramidBuilding;
+class BaseBuilding;
+class TetraBuilding;
+class Teleporter;
+class WallObstacle;
+class MeshObstacle;
+class ArcObstacle;
+class ConeObstacle;
+class SphereObstacle;
+
+class WorldFileLocation;
+class CustomZone;
+
+class FlagType;
+class FlagInfo;
+class PlayerInfo;
+
+typedef enum {
+  NOT_IN_BUILDING,
+  IN_BASE,
+  IN_BOX_NOTDRIVETHROUGH,
+  IN_BOX_DRIVETHROUGH,
+  IN_MESH,
+  IN_MESHFACE,
+  IN_PYRAMID,
+  IN_TETRA,
+  IN_TELEPORTER
+} InBuildingType;
+
 
 class WorldInfo {
 
- public:
+public:
 
   WorldInfo();
   ~WorldInfo();
 
   void setSize ( float x, float y );
   void setGravity ( float g );
+
   void addWall(float x, float y, float z, float r, float w, float h);
-  void addBox(float x, float y, float z, float r, float w, float d, float h, bool drive = false, bool shoot = false);
-  void addPyramid(float x, float y, float z, float r, float w, float d, float h, bool drive = false, bool shoot = false, bool flipZ = false);
-  void addTeleporter(float x, float y, float z, float r, float w, float d, float h, float b, bool drive = false, bool shoot = false);
-  void addBase(float x, float y, float z, float r, float w, float d, float h, bool drive = false, bool shoot = false);
   void addLink(int from, int to);
-  float getMaxWorldHeight();
-  int packDatabase();
+  void addLink(const std::string& from, const std::string& to);
+
+  void addZone(const CustomZone *zone);
+  void addWeapon(const FlagType *type, const float *origin,
+		 float direction, float tilt, TeamColor teamColor,
+		 float initdelay, const std::vector<float> &delay, TimeKeeper &sync);
+  void addWaterLevel (float level, const BzMaterial* matref);
+
+  void addBox(float x, float y, float z, float r,
+	      float w, float d, float h,
+	      bool drive = false, bool shoot = false);
+  void addPyramid(float x, float y, float z, float r,
+		  float w, float d, float h,
+		  bool drive = false, bool shoot = false, bool flipZ = false);
+  void addTeleporter(float x, float y, float z, float r,
+		     float w, float d, float h, float b,
+		     bool horizontal, bool drive = false, bool shoot = false);
+  void addBase(const float pos[3], float r, const float size[3],
+	       int color, bool drive = false, bool shoot = false);
+
+  float getWaterLevel() const;
+  float getMaxWorldHeight() const;
+
+  bool getFlagDropPoint(const FlagInfo* fi, const float* pos, float* pt) const;
+  bool getFlagSpawnPoint(const FlagInfo* fi, float* pt) const;
+  bool getPlayerSpawnPoint(const PlayerInfo* pi, float* pt) const;
+
   void *getDatabase() const;
   int getDatabaseSize() const;
+  int getUncompressedSize() const;
 
- private:
+  WorldWeapons& getWorldWeapons();
+  EntryZones& getEntryZones();
+
+  void finishWorld();
+  int packDatabase();
+
+	bool isFinished() { return finished;}
+
+private:
+
+	bool finished;
 
   bool rectHitCirc(float dx, float dy, const float *p, float r) const;
+  void loadCollisionManager();
+  InBuildingType classifyHit (const Obstacle* obstacle) const;
+  void makeWaterMaterial();
 
- public:
-
-  struct ObstacleLocation {
-    public:
-    float pos[3];
-    float rotation;
-    float size[3];
-    bool shootThrough;
-    bool driveThrough;
-    bool flipZ;
-    ObstacleLocation &operator=(const ObstacleLocation &ol)
-    {
-      memcpy(pos, ol.pos, sizeof(float) * 3);
-      rotation = ol.rotation;
-      memcpy(size, ol.size, sizeof(float) * 3);
-      shootThrough = ol.shootThrough;
-      driveThrough = ol.driveThrough;
-      flipZ = ol.flipZ;
-      return *this;
-    }
-  };
-
-  struct Teleporter : public ObstacleLocation {
-    public:
-    float border;
-    int to[2];
-  };
+public:
 
   /** check collision between world object and a cylinder.
-    * return value is kind of collision.
-    * location will return a pointer to the world colliding object
-    * Checking is quite raw
-    */
-  InBuildingType inBuilding(ObstacleLocation **location,
-			    float x, float y, float z,
-			    float radius, float height = 0.0f) const;
-  /** check collision between a rectangle and a circle
-    */
-  bool inRect(const float *p1, float angle, const float *size, float x, float y, float radius) const;
+   * return value is kind of collision.
+   * location will return a pointer to the world colliding object
+   * Checking is quite raw. Does not use the CollisionManager and
+   * can therefore be used before it has been setup.
+   */
+  InBuildingType inCylinderNoOctree(Obstacle **location,
+				    float x, float y, float z,
+				    float r, float height) const;
 
- private:
+  /** check collision between world object and a cylinder.
+   * return value is kind of collision.
+   * location will return a pointer to the world colliding object
+   * Checking is quite raw
+   */
+  InBuildingType cylinderInBuilding(const Obstacle **obstacle,
+				    float x, float y, float z,
+				    float radius, float height = 0.0f) const;
+
+  /** check collision between world object and a cylinder.
+   * return value is kind of collision.
+   * location will return a pointer to the world colliding object
+   * Checking is quite raw
+   */
+  InBuildingType cylinderInBuilding(const Obstacle **obstacle,
+				    const float* pos,
+				    float radius, float height = 0.0f) const;
+
+  /** check collision between world object and a Z-axis aligned box.
+   * return value is kind of collision.
+   * location will return a pointer to the world colliding object
+   */
+  InBuildingType boxInBuilding(const Obstacle **obstacle,
+			       const float* pos, float angle,
+			       float width, float breadth, float height) const;
+
+
+  /** see if the CollisionManager's view of the world size
+   * matches that of BZDB. if not, reload the CollisionManager
+   */
+  void checkCollisionManager();
+
+  bool inRect(const float *p1, float angle, const float *size,
+			 float x, float y, float r) const;
+
+private:
 
   float size[2];
   float gravity;
-  int numWalls;
-  int numBases;
-  int numBoxes;
-  int numPyramids;
-  int numTeleporters;
-  int sizeWalls;
-  int sizeBoxes;
-  int sizePyramids;
-  int sizeTeleporters;
-  int sizeBases;
   float maxHeight;
-  ObstacleLocation *walls;
-  ObstacleLocation *boxes;
-  ObstacleLocation *bases;
-  ObstacleLocation *pyramids;
-  Teleporter *teleporters;
+  float waterLevel;
+  const BzMaterial* waterMatRef;
+
+  EntryZones entryZones;
+  LinkManager links;
+  WorldWeapons worldWeapons;
+
   char *database;
   int databaseSize;
+  int uncompressedSize;
 };
 
 
-#else
-class WorldInfo;
 #endif /* __WORLDINFO_H__ */
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

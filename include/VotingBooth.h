@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,12 +7,15 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef __VOTINGBOOTH_H__
 #define __VOTINGBOOTH_H__
 
+#include "common.h"
+
+/* system interface headers */
 #include <ctype.h>
 #include <map>
 #include <vector>
@@ -84,13 +87,13 @@ protected:
   /** returns the number of voters that have participated
    */
   inline unsigned long int getVoterCount(void) const {
-    return _vote.size();
+    return (unsigned long int)_vote.size();
   }
 
   /** returns the number of responses available
    */
   inline unsigned long int getResponseCount(void) const {
-    return _choice.size();
+    return (unsigned long int)_choice.size();
   }
 
   /** returns a string identifier for this poll
@@ -109,7 +112,7 @@ class VotingBooth;
 #endif
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

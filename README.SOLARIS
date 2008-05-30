@@ -23,6 +23,11 @@ Bjorn's fixes included:
 
 --
 
+If you have a modern gcc and old Sun X headers, you may need to
+add -fpermissive to CFLAGS and CXXFLAGS in src/platform/Makefile.
+
+--
+
 Due to changes and the new usage of std::map, gcc 2.95.2 no longer
 builds bzflag on solaris. gcc 3.x works fine.
 
@@ -37,9 +42,6 @@ Changes:
 - Sound now works ok. Only 16bit stereo is supported, so if your
   card isn't up to date then it won't work - sorry!
 
-- bzfrelay now compiles ok - I haven't tested it though - please
-  let me know if it works or you encounter problems
-
 
 Known Problems:
 ---------------
@@ -52,7 +54,6 @@ Known Problems:
 	I still haven't figured this one out yet. It seems to be an
 	intermittent problem. Try 'bzflag -window' instead of full
 	screen. This "usually" works. Any ideas?
-
 
 
 17th June 1999
@@ -69,15 +70,6 @@ Known Problems:
 	version but wasn't willing to release it until it's
 	finished - can't have Chris's hard work core dumping
 	now can we!
-
-- When compiling I get errors when make tries to build bzfrelay.
-
-	Time isn't on my side at the moment so this little utility
-	takes last place in the to-do list. I feel it's more
-	important to get the sound code working first.
-
-	Basically, ignore these errors! Everything has been
-	compiled correctly except bzfrelay.
 
 - There's no package installation for Solaris
 
@@ -108,7 +100,6 @@ Known Problems:
 
 	I'm still looking into this one. Try using dtwm or olwm
 	instead.
-
 
 
 For any comments please mail me at: andrew.white@sun.com

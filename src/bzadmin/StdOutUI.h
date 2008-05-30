@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,14 +7,18 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef STDOUTUI_H
 #define STDOUTUI_H
 
+#include "common.h"
+
+/* system interface headers */
 #include <string>
 
+/* common interface headers */
 #include "Address.h"
 #include "BZAdminUI.h"
 #include "global.h"
@@ -25,11 +29,13 @@
 class StdOutUI : public BZAdminUI {
 public:
 
-  void outputMessage(const std::string& msg, ColorCode color);
+  StdOutUI(BZAdminClient& c);
+
+  virtual void outputMessage(const std::string& msg, ColorCode color);
 
   /** This function returns a pointer to a dynamically allocated
       StdOutUI object. */
-  static BZAdminUI* creator(const PlayerIdMap& players, PlayerId me);
+  static BZAdminUI* creator(BZAdminClient&);
 
 protected:
 
@@ -39,7 +45,7 @@ protected:
 #endif
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

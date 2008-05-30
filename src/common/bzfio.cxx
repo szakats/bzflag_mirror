@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,52 +7,93 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _WIN32
-#include <Windows.h>
-#include <fcntl.h>
-#include <io.h>
-#include <iostream>
-#include <fstream>
-
-static HANDLE consoleStdIn;
-static HANDLE consoleStdOut;
-#endif
-
-#include "bzfio.h"
+/* interface header */
 #include "common.h"
+#include "bzfio.h"
 
-void formatDebug(const char* fmt, ...)
+/* system implementation headers */
+#include <iostream>
+#include <stdarg.h>
+#include <time.h>
+#include <string>
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+#ifdef __BEOS__
+#  include <OS.h>
+#endif
+#if !defined(_WIN32)
+#  include <sys/time.h>
+#  include <sys/types.h>
+#else /* !defined(_WIN32) */
+#  include <mmsystem.h>
+#endif
+
+/** global used to control logging level across all applications */
+int debugLevel = 0;
+
+LoggingCallback	*loggingCallback = NULL;
+
+static bool doTimestamp = false;
+static bool doMicros = false;
+
+void setDebugTimestamp (bool enable, bool micros)
 {
-  if (debugLevel >= 1) {
-    char buffer[8192];
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buffer, 8192, fmt, args);
-    va_end(args);
-    std::cout << buffer;
+#ifdef _WIN32
+  micros = false;
+#endif
+  doTimestamp = enable;
+  doMicros = micros;
+}
+
+static char *timestamp (char *buf, bool micros)
+{
+  struct tm *tm;
+  if (micros) {
+#if !defined(_WIN32)
+    struct timeval tv;
+    gettimeofday (&tv, NULL);
+    tm = localtime((const time_t *)&tv.tv_sec);
+    sprintf (buf, "%04d-%02d-%02d %02d:%02d:%02ld.%06ld: ", tm->tm_year+1900,
+	     tm->tm_mon+1,
+	     tm->tm_mday, tm->tm_hour, tm->tm_min, (long)tm->tm_sec, (long)tv.tv_usec );
+#endif
+  } else {
+    time_t tt;
+    time (&tt);
+    tm = localtime (&tt);
+    sprintf (buf, "%04d-%02d-%02d %02d:%02d:%02d: ", tm->tm_year+1900, tm->tm_mon+1,
+	     tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec );
   }
+  return buf;
 }
 
-void initDebug()
+void logDebugMessage(int level, const char* fmt, ...)
 {
-#if defined(_WIN32) && defined(_DEBUG)
-  int conHandle;
-  AllocConsole();
-  consoleStdOut = GetStdHandle( STD_OUTPUT_HANDLE );
-  conHandle = _open_osfhandle((long)consoleStdOut, _O_TEXT);
-  FILE *fp = _fdopen( conHandle, "w" );
-  *stdout = *fp;
-  setvbuf( stdout, NULL, _IONBF, 0 );
-  std::ios::sync_with_stdio();
-#endif
-}
+	char buffer[8192];
+	char tsbuf[26];
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(buffer, 8192, fmt, args);
+	va_end(args);
 
-void termDebug()
-{
-#if defined(_WIN32) && defined(_DEBUG)
-  FreeConsole();
+	if (debugLevel >= level || level == 0)
+	{
+#if defined(_MSC_VER)
+		if (doTimestamp)
+			W32_DEBUG_TRACE(timestamp (tsbuf, false));
+		W32_DEBUG_TRACE(buffer);
+#else
+		if (doTimestamp)
+			std::cout << timestamp (tsbuf, doMicros);
+		std::cout << buffer;
+		fflush(stdout);
 #endif
+	}
+
+	if (loggingCallback)
+		loggingCallback->log(level,buffer);
 }

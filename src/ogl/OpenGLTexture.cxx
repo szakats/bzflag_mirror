@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,46 +7,34 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <string.h>
-// glu used to resample textures for mipmaps;  should use something better.
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-#include "bzfgl.h"
 #include "common.h"
+
+// system headers
+#include <string>
+#include <string.h>
+
+// common headers
+#include "bzfio.h"
+#include "StateDatabase.h"
+#include "bzfgl.h"
 #include "OpenGLTexture.h"
 #include "OpenGLGState.h"
 
-#if defined(GL_VERSION_1_1)
-#  define	BZF_TEXTURE_OBJECT
-#elif defined(GL_EXT_texture_object)
-#  define	BZF_TEXTURE_OBJECT
-#  define	glBindTexture		glBindTextureEXT
-#  define	glDeleteTextures	glDeleteTexturesEXT
-#  define	glGenTextures		glGenTexturesEXT
-#endif
-
-#if defined(GL_VERSION_1_1)
-#  define	BZF_INTENSITY_FORMAT	GL_INTENSITY
-#elif defined(GL_EXT_texture)
-#  define	BZF_INTENSITY_FORMAT	GL_INTENSITY_EXT
+#ifndef _WIN32
+typedef int64_t s64;
 #else
-#  define	BZF_INTENSITY_FORMAT	0 /* not used */
+typedef __int64 s64;
 #endif
 
-static int		hasTextureObject = -1;
 
 //
 // OpenGLTexture::Rep
 //
 
-
-OpenGLTexture::Rep*	OpenGLTexture::Rep::first = NULL;
-const GLenum		OpenGLTexture::Rep::minifyFilter[] = {
+const GLenum		OpenGLTexture::minifyFilter[] = {
 				GL_NEAREST,
 				GL_NEAREST,
 				GL_LINEAR,
@@ -55,7 +43,7 @@ const GLenum		OpenGLTexture::Rep::minifyFilter[] = {
 				GL_NEAREST_MIPMAP_LINEAR,
 				GL_LINEAR_MIPMAP_LINEAR
 			};
-const GLenum		OpenGLTexture::Rep::magnifyFilter[] = {
+const GLenum		OpenGLTexture::magnifyFilter[] = {
 				GL_NEAREST,
 				GL_NEAREST,
 				GL_LINEAR,
@@ -64,7 +52,7 @@ const GLenum		OpenGLTexture::Rep::magnifyFilter[] = {
 				GL_NEAREST,
 				GL_LINEAR
 			};
-const char*		OpenGLTexture::configFilterValues[] = {
+const char*		OpenGLTexture::configFilterNames[] = {
 				"no",
 				"nearest",
 				"linear",
@@ -74,138 +62,176 @@ const char*		OpenGLTexture::configFilterValues[] = {
 				"linearmipmaplinear"
 };
 
-OpenGLTexture::Rep::Rep(int _width, int _height,
-				const GLvoid* pixels,
-				int _maxFilter,
-				bool _repeat,
-				int _internalFormat) :
-				refCount(1), list(0),
-				alpha(false),
-				width(_width),
-				height(_height),
-				repeat(_repeat),
-				internalFormat(_internalFormat),
-				maxFilter(_maxFilter)
 
+//
+// OpenGLTexture
+//
+
+const int OpenGLTexture::filterCount = Max + 1;
+OpenGLTexture::Filter OpenGLTexture::maxFilter = Default;
+
+
+OpenGLTexture::OpenGLTexture(int _width, int _height, const GLvoid* pixels,
+			     Filter _filter, bool _repeat, int _internalFormat) :
+			   width(_width), height(_height)
 {
-  // check for texture object extension
-  if (hasTextureObject < 0) {
-#if defined(GL_VERSION_1_1)
-    hasTextureObject = 1;
-#elif defined(GL_EXT_texture_object)
-    hasTextureObject = (strstr((const char*)glGetString(GL_EXTENSIONS),
-					"GL_EXT_texture_object") != NULL);
-#else
-    hasTextureObject = 0;
-#endif // BZF_TEXTURE_OBJECT
-  }
-
-  // add me to list
-  next = first;
-  first = this;
-
-  // make texture map object/list
-#if defined(BZF_TEXTURE_OBJECT)
-  if (hasTextureObject > 0)
-    glGenTextures(1, &list);
-  else
-#endif // BZF_TEXTURE_OBJECT
-  list = glGenLists(1);
+  alpha = false;
+  repeat = _repeat;
+  internalFormat = _internalFormat;
+  filter = _filter;
+  list = INVALID_GL_TEXTURE_ID;
 
   // get internal format if not provided
   if (internalFormat == 0)
     internalFormat = getBestFormat(width, height, pixels);
 
-  // copy the original texture image
-  image = new GLubyte[4 * width * height];
-  ::memcpy(image, pixels, 4 * width * height);
+  // copy/scale the original texture image
+  setupImage((const GLubyte*)pixels);
 
-  // create the texture maps
-  doInitContext();
+  // build and bind the GL texture
+  initContext();
 
   // watch for context recreation
-  OpenGLGState::registerContextInitializer(initContext, (void*)this);
+  OpenGLGState::registerContextInitializer(static_freeContext,
+					   static_initContext, (void*)this);
 }
 
-OpenGLTexture::Rep::~Rep()
+
+OpenGLTexture::~OpenGLTexture()
 {
-  OpenGLGState::unregisterContextInitializer(initContext, (void*)this);
+  OpenGLGState::unregisterContextInitializer(static_freeContext,
+					     static_initContext, (void*)this);
+  delete[] imageMemory;
 
-  // free image data
-  delete[] image;
-
-  // free OpenGL display list or texture object
-#if defined(BZF_TEXTURE_OBJECT)
-  if (hasTextureObject > 0) {
-    if (list) glDeleteTextures(1, &list);
-  }
-  else
-#endif // BZF_TEXTURE_OBJECT
-  if (list) glDeleteLists(list, 1);
-
-  // remove me from list
-  if (this == first) {
-    first = next;
-  }
-  else {
-    for (Rep* scan = first; scan; scan = scan->next)
-      if (scan->next == this) {
-	scan->next = next;
-	break;
-      }
-  }
+  freeContext();
+  return;
 }
 
-void			OpenGLTexture::Rep::setFilter(int filter)
+
+void OpenGLTexture::static_freeContext(void *that)
 {
-  // limit filter.  try to keep nearest... filters as nearest and
-  // linear... as linear.
-  if (filter > maxFilter) {
-    if ((filter & 1) == 1)	// nearest...
-      if ((maxFilter & 1) == 1) filter = maxFilter;
-      else filter = maxFilter > 0 ? maxFilter - 1 : 0;
-
-    else			// linear...
-      if ((maxFilter & 1) == 1) filter = maxFilter - 1;
-      else filter = maxFilter;
-  }
-
-#if defined(BZF_TEXTURE_OBJECT)
-  if (hasTextureObject > 0)
-    glBindTexture(GL_TEXTURE_2D, list);
-#endif // BZF_TEXTURE_OBJECT
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minifyFilter[filter]);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magnifyFilter[filter]);
+  ((OpenGLTexture*) that)->freeContext();
 }
 
-void			OpenGLTexture::Rep::doInitContext()
-{
-  // set size
-  int tmpWidth = width;
-  int tmpHeight = height;
 
-  // get minimum valid size for texture (boost to 2^m x 2^n)
-  GLint scaledWidth = 1, scaledHeight = 1;
-  GLint maxTextureSize;
+void OpenGLTexture::static_initContext(void *that)
+{
+  ((OpenGLTexture*) that)->initContext();
+}
+
+
+void OpenGLTexture::freeContext()
+{
+  // glDeleteTextures should set binding to 0 by itself when the texture
+  //  is in use, but some stacks (Linux/glx/matrox) are broken, so play it safe
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  if (list != INVALID_GL_TEXTURE_ID) {
+    glDeleteTextures(1, &list);
+    list = INVALID_GL_TEXTURE_ID;
+  }
+  return;
+}
+
+
+void OpenGLTexture::initContext()
+{
+  // make texture map object/list
+  glGenTextures(1, &list);
+
+  // now make texture map display list (compute all mipmaps, if requested).
+  // compute next mipmap from current mipmap to save time.
+  setFilter(filter);
+  glBindTexture(GL_TEXTURE_2D, list);
+  gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat,
+		    scaledWidth, scaledHeight,
+		    GL_RGBA, GL_UNSIGNED_BYTE, image);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  return;
+}
+
+void OpenGLTexture::replateImageData(const GLvoid* pixels)
+{
+  freeContext();
+  memcpy(image,pixels,internalFormat*scaledWidth*scaledHeight);
+  initContext();
+}
+
+
+bool OpenGLTexture::setupImage(const GLubyte* pixels)
+{
+  // align to a 2^N value
+  scaledWidth = 1;
+  scaledHeight = 1;
+  while (scaledWidth < width) {
+    scaledWidth <<= 1;
+  }
+  while (scaledHeight < height) {
+    scaledHeight <<= 1;
+  }
+
+  // get maximum valid size for texture (boost to 2^m x 2^n)
+  GLint maxTextureSize = 1024;
   glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-  if (maxTextureSize > 512) maxTextureSize = 512;
-  while (scaledWidth < tmpWidth) scaledWidth <<= 1;
-  while (scaledHeight < tmpHeight) scaledHeight <<= 1;
-  if (scaledWidth > maxTextureSize) scaledWidth = maxTextureSize;
-  if (scaledHeight > maxTextureSize) scaledHeight = maxTextureSize;
-  const int copyWidth = (scaledWidth > tmpWidth) ? scaledWidth : tmpWidth;
-  const int copyHeight = (scaledHeight > tmpHeight) ? scaledHeight : tmpHeight;
 
-  // make buffers for copied and scaled data
-  GLubyte* origData = new GLubyte[4 * copyWidth * copyHeight + 4];
-  GLubyte* data = (GLubyte*)(((unsigned long)origData & ~3) + 4);
-  GLubyte* origScaledData = new GLubyte[4 * scaledWidth * scaledHeight + 4];
-  GLubyte* scaledData = (GLubyte*)(((unsigned long)origScaledData & ~3) + 4);
-  ::memcpy(data, image, 4 * tmpWidth * tmpHeight);
+  if (BZDB.isSet("forceMaxTextureSize")) // gk knows it's max size, but if they REALY want to force it, do it
+  {
+    // hard limit, some drivers have problems with sizes greater
+    // then this (espeically if you are using glTexSubImage2D)
+    const GLint dbMaxTexSize = BZDB.evalInt("forceMaxTextureSize");
+    GLint bzMaxTexSize = 1;
+    if (dbMaxTexSize > 0) {
+      // align the max size to a power of two  (wasteful)
+      while (bzMaxTexSize < dbMaxTexSize) {
+	bzMaxTexSize <<= 1;
+      }
+    } else {
+      bzMaxTexSize = scaledHeight > scaledWidth ? scaledHeight : scaledWidth;
+    }
+
+    if ((maxTextureSize < 0) || (maxTextureSize > bzMaxTexSize)) {
+      maxTextureSize = bzMaxTexSize;
+    }
+  }
+
+  // clamp to the maximum size
+  if (scaledWidth > maxTextureSize) {
+    scaledWidth = maxTextureSize;
+  }
+  if (scaledHeight > maxTextureSize) {
+    scaledHeight = maxTextureSize;
+  }
+
+  // NOTE: why these are 4-byte aligned is beyond me...
+
+  // copy the data into a 4-byte aligned buffer
+  GLubyte* unaligned = new GLubyte[4 * width * height + 4];
+  GLubyte* aligned = (GLubyte*)(((unsigned long)unaligned & ~3) + 4);
+  ::memcpy(aligned, pixels, 4 * width * height);
+
+  // scale the image if required
+  if ((scaledWidth != width) || (scaledHeight != height)) {
+    GLubyte* unalignedScaled = new GLubyte[4 * scaledWidth * scaledHeight + 4];
+    GLubyte* alignedScaled = (GLubyte*)(((unsigned long)unalignedScaled & ~3) + 4);
+
+    // FIXME: 0 is success, return false otherwise...
+    gluScaleImage (GL_RGBA, width, height, GL_UNSIGNED_BYTE, aligned,
+		   scaledWidth, scaledHeight, GL_UNSIGNED_BYTE, alignedScaled);
+
+    delete[] unaligned;
+    unaligned = unalignedScaled;
+    aligned = alignedScaled;
+    logDebugMessage(1,"Scaling texture from %ix%i to %ix%i\n",
+	   width, height, scaledWidth, scaledHeight);
+  }
+
+  // set the image
+  image = aligned;
+  imageMemory = unaligned;
 
   // note if internal format uses alpha
   switch (internalFormat) {
-    case BZF_INTENSITY_FORMAT:
     case GL_LUMINANCE_ALPHA:
 #if defined(GL_LUMINANCE4_ALPHA4)
     case GL_LUMINANCE4_ALPHA4:
@@ -220,228 +246,119 @@ void			OpenGLTexture::Rep::doInitContext()
 #endif
       alpha = true;
       break;
-
     default:
       alpha = false;
       break;
   }
 
-  // now make texture map display list (compute all mipmaps, if requested).
-  // compute next mipmap from current mipmap to save time.
-  const bool mipmap = ((int)maxFilter > (int)Linear);
-  GLint mipmapLevel = 0;
-
-#if defined(BZF_TEXTURE_OBJECT)
-  if (hasTextureObject > 0)
-    glBindTexture(GL_TEXTURE_2D, list);
-  else
-#endif // BZF_TEXTURE_OBJECT
-  glNewList(list, GL_COMPILE);
-
-  setFilter(maxFilter);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-			repeat ? GL_REPEAT : GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-			repeat ? GL_REPEAT : GL_CLAMP);
-  do {
-    bool doScale = (scaledWidth != tmpWidth || scaledHeight != tmpHeight);
-
-    // scale image to next mipmap level
-    if (doScale)
-      gluScaleImage(
-		GL_RGBA, tmpWidth, tmpHeight, GL_UNSIGNED_BYTE, data,
-		scaledWidth ? scaledWidth : 1,
-		scaledHeight ? scaledHeight : 1,
-		GL_UNSIGNED_BYTE, scaledData);
-
-    // make texture
-    glTexImage2D(GL_TEXTURE_2D, mipmapLevel, internalFormat,
-		scaledWidth ? scaledWidth : 1,
-		scaledHeight ? scaledHeight : 1,
-		0, GL_RGBA, GL_UNSIGNED_BYTE,
-		doScale ? scaledData : data);
-
-    // prepare for next iteration
-    mipmapLevel++;
-    tmpWidth = scaledWidth;
-    tmpHeight = scaledHeight;
-    scaledWidth >>= 1;
-    scaledHeight >>= 1;
-    if (doScale)
-      ::memcpy(data, scaledData, 4 * tmpWidth * tmpHeight);
-  } while (mipmap && (scaledWidth > 0 || scaledHeight > 0));
-
-  setFilter(getFilter());
-
-#if defined(BZF_TEXTURE_OBJECT)
-  if (hasTextureObject > 0)
-    glBindTexture(GL_TEXTURE_2D, 0);
-  else
-#endif // BZF_TEXTURE_OBJECT
-  glEndList();
-
-  // free extra buffers
-  delete[] origScaledData;
-  delete[] origData;
+  return true;
 }
 
-void			OpenGLTexture::Rep::initContext(void* self)
-{
-  ((Rep*)self)->doInitContext();
-}
 
-//
-// OpenGLTexture
-//
-
-OpenGLTexture::Rep*	OpenGLTexture::lastRep = NULL;
-OpenGLTexture::Filter	OpenGLTexture::filter = LinearMipmapLinear;
-
-OpenGLTexture::OpenGLTexture()
-{
-  rep = NULL;
-}
-
-OpenGLTexture::OpenGLTexture(int width, int height,
-				const GLvoid* pixels,
-				Filter maxFilter,
-				bool repeat,
-				int internalFormat)
-{
-  rep = new Rep(width, height, pixels, (int)maxFilter, repeat, internalFormat);
-}
-
-OpenGLTexture::OpenGLTexture(const OpenGLTexture& t)
-{
-  rep = t.rep;
-  ref();
-}
-
-OpenGLTexture::~OpenGLTexture()
-{
-  if (unref()) delete rep;
-}
-
-OpenGLTexture&		OpenGLTexture::operator=(const OpenGLTexture& t)
-{
-  if (rep != t.rep) {
-    if (unref()) delete rep;
-    rep = t.rep;
-    ref();
-  }
-  return *this;
-}
-
-OpenGLTexture::Filter	OpenGLTexture::getFilter()
+OpenGLTexture::Filter OpenGLTexture::getFilter()
 {
   return filter;
 }
 
-std::string		OpenGLTexture::getFilterName()
-{
-  return configFilterValues[static_cast<int>(filter)];
-}
 
-void			OpenGLTexture::setFilter(std::string name)
-{
-  for (unsigned int i = 0; i < (sizeof(configFilterValues) /
-				sizeof(configFilterValues[0])); i++)
-    if (name == configFilterValues[i])
-      setFilter(static_cast<Filter>(i));
-}
-
-void			OpenGLTexture::setFilter(Filter _filter)
+void OpenGLTexture::setFilter(Filter _filter)
 {
   filter = _filter;
 
-#if defined(BZF_TEXTURE_OBJECT)
-
-  // can only change filters when using texture objects
-  if (hasTextureObject <= 0) return;
-
-  // change filter on all textures
-  for (Rep* scan = Rep::first; scan; scan = scan->next)
-    scan->setFilter(filter);
-
-  // back to previously bound texture, or no texture if filter is Off
-  if (Rep::first != lastRep && filter != Off) bind(lastRep);
-  else if (lastRep) bind(NULL);
-
-#else // BZF_TEXTURE_OBJECT
-
-  // bind no texture if filter is Off
-  if (filter == Off && lastRep) bind(NULL);
-
-#endif // BZF_TEXTURE_OBJECT
-}
-
-bool			OpenGLTexture::operator==(const OpenGLTexture& t) const
-{
-  return (rep == t.rep);
-}
-
-bool			OpenGLTexture::operator!=(const OpenGLTexture& t) const
-{
-  return (rep != t.rep);
-}
-
-bool			OpenGLTexture::operator<(const OpenGLTexture& t) const
-{
-  if (rep == t.rep) return false;
-  if (!t.rep) return false;
-  if (!rep) return true;
-  return (rep->list < t.rep->list);
-}
-
-GLuint			OpenGLTexture::getList() const
-{
-  return (!rep ? 0 : rep->list);
-}
-
-void			OpenGLTexture::execute() const
-{
-  bind(rep);
-  lastRep = rep;
-}
-
-float			OpenGLTexture::getAspectRatio() const
-{
-  if (rep)
-    return ((float) rep->height) / ((float) rep->width);
-  else
-    return 1.0f;
-}
-
-void			OpenGLTexture::ref()
-{
-  if (rep) ++rep->refCount;
-}
-
-bool			OpenGLTexture::unref()
-{
-  return (rep && --rep->refCount == 0);
-}
-
-void			OpenGLTexture::bind(Rep* r)
-{
-#if defined(BZF_TEXTURE_OBJECT)
-  if (hasTextureObject > 0) {
-    if (r && r->list) glBindTexture(GL_TEXTURE_2D, r->list);
-    else glBindTexture(GL_TEXTURE_2D, 0);
+  int filterIndex = (int) filter;
+  // limit filter.  try to keep nearest... filters as nearest and
+  // linear... as linear.
+  if (filterIndex > maxFilter) {
+    if ((filterIndex & 1) == 1)	{ // nearest...
+      if ((maxFilter & 1) == 1) {
+	filterIndex = maxFilter;
+      } else {
+	filterIndex = maxFilter > 0 ? maxFilter - 1 : 0;
+      }
+    }
+    else { // linear...
+      if ((maxFilter & 1) == 1) {
+	filterIndex = maxFilter - 1;
+      } else {
+	filterIndex = maxFilter;
+      }
+    }
   }
-  else
-#endif // BZF_TEXTURE_OBJECT
-  if (r && r->list) glCallList(r->list);
-  else glTexImage2D(GL_TEXTURE_2D, 0, 3, 0, 0, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+  GLint binding;
+  glGetIntegerv (GL_TEXTURE_BINDING_2D, &binding);
+  glBindTexture(GL_TEXTURE_2D, list);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minifyFilter[filterIndex]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magnifyFilter[filterIndex]);
+#ifdef HAVE_GLEW
+  if (GLEW_EXT_texture_filter_anisotropic) {
+    GLint aniso = BZDB.evalInt("aniso");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+  }
+#endif
+  glBindTexture(GL_TEXTURE_2D, binding);
 }
 
-int			OpenGLTexture::Rep::getBestFormat(
-				int width, int height,
-				const GLvoid* pixels)
+
+OpenGLTexture::Filter OpenGLTexture::getMaxFilter()
+{
+  return maxFilter;
+}
+
+void OpenGLTexture::setMaxFilter(Filter _filter)
+{
+  maxFilter = _filter;
+}
+
+
+void OpenGLTexture::execute()
+{
+  bind();
+}
+
+
+const char* OpenGLTexture::getFilterName(OpenGLTexture::Filter filter)
+{
+  if ((filter < 0) || (filter > Max)) {
+    return configFilterNames[Max];
+  } else {
+    return configFilterNames[filter];
+  }
+}
+
+
+int OpenGLTexture::getFilterCount()
+{
+  return filterCount;
+}
+
+
+const char** OpenGLTexture::getFilterNames()
+{
+  return configFilterNames;
+}
+
+
+float OpenGLTexture::getAspectRatio() const
+{
+  return ((float) height) / ((float) width);
+}
+
+
+void OpenGLTexture::bind()
+{
+  if (list != INVALID_GL_TEXTURE_ID) {
+    glBindTexture(GL_TEXTURE_2D, list);
+  } else {
+    glBindTexture(GL_TEXTURE_2D, 0); // heh, it's the same call
+  }
+}
+
+
+int OpenGLTexture::getBestFormat(int _width, int _height, const GLvoid* pixels)
 {
   // see if all pixels are achromatic
   const GLubyte* scan = (const GLubyte*)pixels;
-  const int size = width * height;
+  const int size = _width * _height;
   int i;
   for (i = 0; i < size; scan += 4, i++)
     if (scan[0] != scan[1] || scan[0] != scan[2])
@@ -456,21 +373,14 @@ int			OpenGLTexture::Rep::getBestFormat(
   const bool useAlpha = (i != size);
 
   // intensity format defined in 1.1 and an extension in 1.0
-#if defined(GL_VERSION_1_1)
   static const bool hasTextureExt = true;
-#elif defined(GL_INTENSITY_EXT)
-  static const bool hasTextureExt = (strstr((const char*)
-		glGetString(GL_EXTENSIONS), "GL_EXT_texture") != NULL);
-#else
-  static const bool hasTextureExt = false;
-#endif // defined(GL_VERSION_1_1)
 
   // see if all pixels are r=g=b=a.  if so return intensity format.
-  // SGI IMPACT and 3Dfx systems don't support GL_INTENSITY.
+  // SGI IMPACT systems don't support GL_INTENSITY.
   const char* const glRenderer = (const char*)glGetString(GL_RENDERER);
   static bool noIntensity =
-	(strncmp(glRenderer, "IMPACT", 6) == 0) ||
-	(strncmp(glRenderer, "3Dfx", 4) == 0);
+    ((glRenderer == NULL) ||
+     (strncmp(glRenderer, "IMPACT", 6) == 0));
   if (!noIntensity) {
     bool useIntensity = false;
     if (hasTextureExt && useLuminance) {
@@ -480,7 +390,8 @@ int			OpenGLTexture::Rep::getBestFormat(
 	  break;
       useIntensity = (i == size);
     }
-    if (useIntensity) return BZF_INTENSITY_FORMAT;
+    if (useIntensity)
+      return GL_INTENSITY;
   }
 
   // pick internal format
@@ -489,11 +400,62 @@ int			OpenGLTexture::Rep::getBestFormat(
 		(useAlpha ? GL_RGBA : GL_RGB));
 }
 
+
+bool OpenGLTexture::getColorAverages(float rgba[4], bool factorAlpha) const
+{
+  if ((image == NULL) || (scaledWidth <= 0) || (scaledHeight <= 0)) {
+    return false;
+  }
+
+  factorAlpha = (factorAlpha && alpha);
+  const int channelCount = alpha ? 4 : 3;
+
+  // tally the values
+  s64 rgbaTally[4] = {0, 0, 0, 0};
+  for (int x = 0; x < scaledWidth; x++) {
+    for (int y = 0; y < scaledHeight; y++) {
+      for (int c = 0; c < channelCount; c++) {
+	const int pixelBase = 4 * (x + (y * scaledWidth));
+	if (factorAlpha) {
+	  const GLubyte alphaVal = image[pixelBase + 3];
+	  if (c == 3) {
+	    rgbaTally[3] += alphaVal;
+	  } else {
+	    rgbaTally[c] += image[pixelBase + c] * alphaVal;
+	  }
+	} else {
+	  rgbaTally[c] += image[pixelBase + c];
+	}
+      }
+    }
+  }
+
+  // calculate the alpha average
+  float maxTally = 255.0f * (scaledWidth * scaledHeight);
+  if (channelCount == 3) {
+    rgba[3] = 1.0f;
+  } else {
+    rgba[3] = (float)rgbaTally[3] / maxTally;
+  }
+
+  // adjust the maxTally for alpha weighting
+  if (factorAlpha) {
+    maxTally = maxTally * 255.0f;
+  }
+
+  // calcualte the color averages
+  for (int c = 0; c < 3; c++) {
+    rgba[c] = (float)rgbaTally[c] / maxTally;
+  }
+
+  return true;
+}
+
+
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

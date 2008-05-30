@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* OpenGLTexture:
@@ -42,6 +42,7 @@
 #define	BZF_OPENGL_TEXTURE_H
 
 #include "common.h"
+#include <string>
 #include "bzfgl.h"
 
 class OpenGLTexture {
@@ -54,120 +55,111 @@ class OpenGLTexture {
 			LinearMipmapNearest,
 			NearestMipmapLinear,
 			LinearMipmapLinear,
-			Max = LinearMipmapLinear
+			Max = LinearMipmapLinear,
+			Default = Max
     };
 
-			OpenGLTexture();
 			OpenGLTexture(int width, int height,
 					const GLvoid* pixels,
 					Filter maxFilter = Linear,
 					bool repeat = true,
 					int internalFormat = 0);
-			OpenGLTexture(const OpenGLTexture&);
 			~OpenGLTexture();
+    bool		hasAlpha() const;
+
+    void		execute();
+
+    float		getAspectRatio() const;
+    int			getWidth() const;
+    int			getHeight() const;
+
+    Filter		getFilter();
+    void		setFilter(Filter);
+
+    bool		getColorAverages(float rgbaRaw[4],
+					 bool factorAlpha) const;
+
+    void		freeContext();
+    void		initContext();
+
+    // MUST be in the final scaled format
+    void		replateImageData(const GLvoid* pixels);
+
+    static int		getFilterCount();
+    static const char*	getFilterName(Filter id);
+    static const char**	getFilterNames();
+
+    static Filter	getMaxFilter();
+    static void		setMaxFilter(Filter);
+
+    int			getScaledHeight ( void ) { return scaledHeight;}
+    int			getScaledWidth ( void ) { return scaledHeight;}
+
+  private:
+			OpenGLTexture(const OpenGLTexture&);
     OpenGLTexture&	operator=(const OpenGLTexture&);
 
     bool		operator==(const OpenGLTexture&) const;
     bool		operator!=(const OpenGLTexture&) const;
     bool		operator<(const OpenGLTexture&) const;
-    bool		isValid() const;
-    bool		hasAlpha() const;
-    GLuint		getList() const;
-
-    void		execute() const;
-
-    float		getAspectRatio() const;
-    int                 getWidth() const;
-    int                 getHeight() const;
-
-    static Filter	getFilter();
-    static std::string	getFilterName();
-    static void		setFilter(std::string name);
-    static void		setFilter(Filter);
-
-  private:
-    class Rep {
-      public:
-			Rep(int width, int height,
-					const GLvoid* pixels,
-					int maxFilter,
-					bool repeat,
-					int internalFormat);
-			~Rep();
-	void		setFilter(int filter);
-
-      public:
-	int		refCount;
-	GLuint		list;
-	bool		alpha;
-	Rep*		next;
-	static Rep*	first;
-
-      private:
-	void		doInitContext();
-	static void	initContext(void*);
-	static int	getBestFormat(int width, int height,
+    int			getBestFormat( int width, int height,
 					const GLvoid* pixels);
-
-      private:
-	const int	width;
-	const int	height;
-	GLubyte*	image;
-	bool		repeat;
-	int		internalFormat;
-
-	int			maxFilter;
-	static const GLenum	minifyFilter[];
-	static const GLenum	magnifyFilter[];
-	friend class OpenGLTexture;
-    };
-
-    void		ref();
-    bool		unref();
-    static void		bind(Rep*);
-
-  private:
-    Rep*		rep;
-    static Filter	filter;
-    static const char*	configFilterValues[];
-    static Rep*		lastRep;
+    void		bind();
+    bool		setupImage(const GLubyte* pixels);
 
     void* operator new(size_t s) { return ::operator new(s);}
     void  operator delete(void *p) {::operator delete(p);}
-    friend class TextureManager;
 
+    bool	alpha;
+    const int	width;
+    const int	height;
+    GLint	scaledWidth;
+    GLint	scaledHeight;
+    GLubyte*	image;
+    GLubyte*	imageMemory;
+    bool	repeat;
+    int		internalFormat;
+    GLuint	list;
+    Filter	filter;
+
+    static Filter	maxFilter;
+
+    static const int	filterCount;
+    static const char*	configFilterNames[];
+
+    static const GLenum	minifyFilter[];
+    static const GLenum	magnifyFilter[];
+
+    static void		static_freeContext(void *that);
+    static void		static_initContext(void *that);
+
+    friend class TextureManager;
 };
 
 //
 // OpenGLTexture
 //
 
-inline bool		OpenGLTexture::isValid() const
-{
-  return rep != NULL;
-}
-
 inline bool		OpenGLTexture::hasAlpha() const
 {
-  return rep != NULL && rep->alpha;
+  return alpha;
 }
 
 inline int		OpenGLTexture::getWidth() const
 {
-  return rep->width;
+  return width;
 }
 inline int		OpenGLTexture::getHeight() const
 {
-  return rep->height;
+  return height;
 }
 
 #endif // BZF_OPENGL_TEXTURE_H
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

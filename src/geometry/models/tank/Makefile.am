@@ -1,9 +1,10 @@
-MAINTAINERCLEANFILES = \
-	Makefile.in
+noinst_LTLIBRARIES =	libTank.la
 
-noinst_LIBRARIES =	libTank.a
+AM_CPPFLAGS = -I$(top_srcdir)/include @CONF_CPPFLAGS@
+AM_CXXFLAGS = @CONF_CXXFLAGS@
 
-libTank_a_SOURCES =	\
+libTank_la_LDFLAGS = -static
+libTank_la_SOURCES =	\
 	high_barrel.cxx		\
 	high_body.cxx		\
 	high_ltread.cxx		\
@@ -19,3 +20,6 @@ libTank_a_SOURCES =	\
 	medium_ltread.cxx	\
 	medium_rtread.cxx	\
 	medium_turret.cxx
+
+MAINTAINERCLEANFILES = \
+	Makefile.in

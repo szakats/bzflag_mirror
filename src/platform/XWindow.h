@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* XWindow:
@@ -21,31 +21,6 @@
 #include "XDisplay.h"
 #include <X11/Xlib.h>
 #include <GL/glx.h>
-
-#ifdef XIJOYSTICK
-#include <X11/extensions/XInput.h>
-#endif
-
-#ifdef USBJOYSTICK
-#ifdef __cplusplus
-/* Argh! usb.h has a structure with a member "class". We don't use it, so
- * let's just move it out of the way
- */
-#define class CLASS
-extern "C" {
-#endif
-#ifdef __FreeBSD__
-#include <libusb.h>
-#else
-#include <usb.h>
-#endif
-#include <dev/usb/usb.h>
-#include <dev/usb/usbhid.h>
-#ifdef __cplusplus
-#undef class
-}
-#endif
-#endif
 
 class XVisual;
 
@@ -65,7 +40,7 @@ class XWindow : public BzfWindow {
     void		setPosition(int x, int y);
     void		setSize(int width, int height);
     void		setMinSize(int width, int height);
-    void		setFullscreen();
+    void		setFullscreen(bool on);
 
     void		warpMouse(int x, int y);
     void		getMouse(int& x, int& y) const;
@@ -82,19 +57,6 @@ class XWindow : public BzfWindow {
     void		swapBuffers();
     void		makeContext();
     void		freeContext();
-
-#ifdef USBJOYSTICK
-    void               initJoystick(const char* joystickName);
-    bool               joystick() const;
-    void               getJoy(int& x, int& y) const;
-    unsigned long      getJoyButtons() const;
-#endif
-
-#ifdef XIJOYSTICK
-    void		initJoystick(char* joystickName);
-    bool		joystick() const;
-    void		getJoy(int& x, int& y) const;
-#endif
 
     // other X stuff
     static XWindow*	lookupWindow(Window);
@@ -119,24 +81,17 @@ class XWindow : public BzfWindow {
     XWindow*		next;
     XVisualInfo		visual;
     unsigned long*	colormapPixels;
-    XSizeHints*         xsh;
+    XSizeHints*	 xsh;
     float		gammaVal;
     static XWindow*	first;
-
-#ifdef XIJOYSTICK
-    XDevice*		device;
-    int			scaleX, constX;
-    int			scaleY, constY;
-#endif
 };
 
 #endif // BZF_XWINDOW_H
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

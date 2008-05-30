@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,27 +7,58 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef __CUSTOMPYRAMID_H__
-#define __CUSTOMPYRAMID_H__
+#ifndef __CUSTOM_PYRAMID_H__
+#define __CUSTOM_PYRAMID_H__
 
-// bzfs-specific headers
+/* interface header */
 #include "WorldFileObstacle.h"
+
+/* local interface headers */
 #include "WorldInfo.h"
+
+/* common interface headers */
+#include "BzMaterial.h"
 
 
 class CustomPyramid : public WorldFileObstacle {
   public:
     CustomPyramid();
-    virtual void write(WorldInfo*) const;
+    ~CustomPyramid();
+    virtual bool read(const char* cmd, std::istream& input);
+    virtual void writeToGroupDef(GroupDefinition*) const;
+
+  private:
+    enum {
+      XP = 0,
+      XN,
+      YP,
+      YN,
+      ZN,
+      FaceCount
+    };
+
+    bool isOldPyramid;
+
+    bool flipz;
+
+    int phydrv[FaceCount];
+    float texsize[FaceCount][2];
+    float texoffset[FaceCount][2];
+    unsigned char drivethrough[FaceCount];
+    unsigned char shootthrough[FaceCount];
+    BzMaterial materials[FaceCount];
+
+    static const char* faceNames[FaceCount];
 };
 
-#endif  /* __CUSTOMPYRAMID_H__ */
+
+#endif  /* __CUSTOM_PYRAMID_H__ */
 
 // Local variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

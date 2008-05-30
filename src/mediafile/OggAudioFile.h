@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef BZF_OGG_AUDIO_FILE_H
@@ -22,14 +22,17 @@ struct OAFInputBundle {
   std::streamoff	length;
 };
 
+/** This class represents an Ogg Vorbis audio file. It implements the read()
+    function from AudioFile. */
 class OggAudioFile : public AudioFile {
 public:
   OggAudioFile(std::istream*);
   virtual ~OggAudioFile();
 
+  /** This class returns the default extension of Ogg Vorbis files. */
   static std::string	getExtension();
 
-  // AudioFile overrides
+  /** This function reads data from an Ogg Vorbis file. */
   virtual bool		read(void* buffer, int numFrames);
 
 protected:
@@ -46,10 +49,9 @@ long	OAFTell(void* datasource);
 #endif
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // Jeff Myers 10/13/97 changed direct sound cooperative level to
@@ -18,6 +18,8 @@
 #include "TimeKeeper.h"
 #include "Pack.h"
 #include <stdio.h>
+
+#ifdef HAVE_DSOUND_H
 
 static const int	defaultOutputRate = 22050;
 static const int	NumChunks = 4;
@@ -36,17 +38,10 @@ WinMedia::WinMedia(WinWindow* _window) :
 				audioCommandMutex(NULL),
 				audioThread(NULL)
 {
-  dummyEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
 
 WinMedia::~WinMedia()
 {
-  CloseHandle(dummyEvent);
-}
-
-void			WinMedia::sleep(float timeInSeconds)
-{
-  WaitForSingleObject(dummyEvent, (DWORD)(1000.0f * timeInSeconds));
 }
 
 bool			WinMedia::openAudio()
@@ -438,12 +433,11 @@ void			WinMedia::audioSleep(
     WaitForSingleObject(audioCommandEvent, timeout);
   }
 }
-
+#endif
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

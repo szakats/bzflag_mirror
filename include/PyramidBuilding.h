@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* PyramidBuilding:
@@ -18,26 +18,37 @@
 #define	BZF_PYRAMID_BUILDING_H
 
 #include "common.h"
+#include <string>
 #include "Obstacle.h"
 
 class PyramidBuilding : public Obstacle {
   public:
+			PyramidBuilding();
 			PyramidBuilding(const float* pos, float rotation,
-				float width, float breadth, float height, bool drive = false, bool shoot = false);
+				float width, float breadth, float height, unsigned char drive = 0, unsigned char shoot = 0);
 			~PyramidBuilding();
 
-    std::string		getType() const;
-    static std::string	getClassName(); // const
+    virtual Obstacle*	copyWithTransform(const MeshTransform&) const;
+
+    const char*		getType() const;
+    static const char*	getClassName(); // const
+
+    bool		isFlatTop() const;
 
     float		intersect(const Ray&) const;
     void		getNormal(const float* p, float* n) const;
     void		get3DNormal(const float* p, float* n) const;
-    bool		isInside(const float* p, float radius) const;
-    bool		isInside(const float* p, float angle,
-				float halfWidth, float halfBreadth) const;
+
+    bool		inCylinder(const float* p, float radius, float height) const;
+    bool		inBox(const float* p, float angle,
+			      float halfWidth, float halfBreadth, float height) const;
+    bool		inMovingBox(const float* oldP, float oldAngle,
+				    const float *newP, float newAngle,
+				    float halfWidth, float halfBreadth, float height) const;
     bool		isCrossing(const float* p, float angle,
-				float halfWidth, float halfBreadth,
-				float* plane) const;
+				   float halfWidth, float halfBreadth, float height,
+				   float* plane) const;
+
     bool		getHitNormal(
 				const float* pos1, float azimuth1,
 				const float* pos2, float azimuth2,
@@ -45,41 +56,34 @@ class PyramidBuilding : public Obstacle {
 				float height,
 				float* normal) const;
 
-    ObstacleSceneNodeGenerator*	newSceneNodeGenerator() const;
-
     void		getCorner(int index, float* pos) const;
 
-    std::string	        userTextures[1];
+    int packSize() const;
+    void *pack(void*) const;
+    void *unpack(void*);
 
-  protected:
+    void print(std::ostream& out, const std::string& indent) const;
+    void printOBJ(std::ostream& out, const std::string& indent) const;
+    virtual int getTypeID() const {return pyrType;}
+
+    std::string		userTextures[1];
+
+  private:
+    void finalize();
+
     // compute minimum shrinking for height between z and z + height
     float		shrinkFactor(float z, float height = 0.0) const;
 
   private:
-    static std::string	typeName;
-};
-
-class PyramidSceneNodeGenerator : public ObstacleSceneNodeGenerator {
-  friend class PyramidBuilding;
-  public:
-			~PyramidSceneNodeGenerator();
-
-    WallSceneNode*	getNextNode(float, float, bool);
-
-  protected:
-			PyramidSceneNodeGenerator(const PyramidBuilding*);
-
-  private:
-    const PyramidBuilding*	pyramid;
+    static const char*	typeName;
 };
 
 #endif // BZF_PYRAMID_BUILDING_H
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

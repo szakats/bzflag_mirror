@@ -1,12 +1,63 @@
-#include <QuickTime/QuickTime.h>
+/* bzflag
+ * Copyright (c) 1993 - 2008 Tim Riker
+ *
+ * This package is free software;  you can redistribute it and/or
+ * modify it under the terms of the license found in the file
+ * named LICENSE that should have accompanied this file.
+ *
+ * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 #include "MacMedia.h"
+
+#include <QuickTime/QuickTime.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+/* ugh, more mixing with libCommon */
+#include "StateDatabase.h"
+
 
 static SndCallBackUPP gCarbonSndCallBackUPP = nil;
 static int queued_chunks = 0;
 
-static pascal void callbackProc (SndChannelPtr theChannel, SndCommand * theCallBackCmd)
+
+void MacMedia::setMediaDirectory(const std::string& _dir)
 {
- //   dprintf("!");
+  struct stat statbuf;
+  const char *mdir = _dir.c_str();
+
+  extern char *GetMacOSXDataPath(void);
+  if ((stat(mdir, &statbuf) != 0) || !S_ISDIR(statbuf.st_mode)) {
+    /* try the Resource folder if invoked from a .app bundled */
+    mdir = GetMacOSXDataPath();
+    if (mdir) {
+      BZDB.set("directory", mdir);
+      BZDB.setPersistent("directory", false);
+    }
+  }
+  if ((stat(mdir, &statbuf) != 0) || !S_ISDIR(statbuf.st_mode)) {
+    /* try a simple 'data' dir in current directory (source build invocation) */
+    std::string defaultdir = DEFAULT_MEDIA_DIR;
+    mdir = defaultdir.c_str();
+    if (mdir) {
+      BZDB.set("directory", mdir);
+      BZDB.setPersistent("directory", false);
+    }
+  }
+  if ((stat(mdir, &statbuf) != 0) || !S_ISDIR(statbuf.st_mode)) {
+    /* give up, revert to passed in directory */
+    mdir = _dir.c_str();
+  }
+
+  mediaDir = std::string(mdir);
+}
+
+
+static pascal void callbackProc(SndChannelPtr, SndCommand *)
+{
   queued_chunks--;
 }
 
@@ -16,9 +67,7 @@ MacMedia::MacMedia() {
 
 MacMedia::~MacMedia() {}
 
-double MacMedia::stopwatch(bool start) { return 0; }
-
-void   MacMedia::sleep(float   secs ) {}
+double MacMedia::stopwatch(bool) { return 0; }
 
 // Audio
 
@@ -47,7 +96,7 @@ bool MacMedia::openAudio() {
 
   header.numChannels   = 2;
   header.sampleRate    = rate22050hz;
-  header.encode        = extSH;
+  header.encode	= extSH;
   header.sampleSize    = 16;
   header.numFrames     = CHUNK_SIZE;
 
@@ -69,7 +118,8 @@ bool MacMedia::isAudioBrainDead() const {
   return false;
 }
 
-bool MacMedia::startAudioThread(void (*proc)(void*), void* data) {
+bool MacMedia::startAudioThread(void (*proc)(void*), void*)
+{
   audio_proc = proc;
 
   audio_proc(NULL);
@@ -89,17 +139,17 @@ bool MacMedia::isAudioTooEmpty () const {
 
 void MacMedia::writeAudio(void) {
   OSErr iErr = noErr;
-  SndCommand                        playCmd;
-  SndCommand                        callBack;
+  SndCommand			playCmd;
+  SndCommand			callBack;
 
   header.samplePtr = (char*)buffer;
 
   playCmd.cmd = bufferCmd;
-  playCmd.param1 = 0;          // unused
+  playCmd.param1 = 0;	  // unused
   playCmd.param2 = (long)&header;
 
   callBack.cmd = callBackCmd;
-  callBack.param1 = 0;          // which buffer to fill, 0 buffer, 1, 0, ...
+  callBack.param1 = 0;	  // which buffer to fill, 0 buffer, 1, 0, ...
 
 
   channel->callBack = gCarbonSndCallBackUPP;
@@ -172,15 +222,14 @@ int     MacMedia::getAudioBufferChunkSize() const {
   return CHUNK_SIZE;
 }
 
-void    MacMedia::audioSleep(bool checkLowWater, double maxTime) {
-
+void MacMedia::audioSleep(bool, double)
+{
 }
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

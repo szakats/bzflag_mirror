@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,7 +7,7 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -17,12 +17,14 @@
 #ifndef BZF_ERROR_HANDLER_H
 #define	BZF_ERROR_HANDLER_H
 
-#ifdef _MSC_VER
-#pragma warning( 4: 4786 )
-#endif
+// common header first
+#include "common.h"
 
+// system headers
 #include <vector>
 #include <string>
+
+// local implementation headers
 #include "common.h"
 #include "Bundle.h"
 
@@ -30,15 +32,25 @@ typedef void		(*ErrorCallback)(const char*);
 
 ErrorCallback		setErrorCallback(ErrorCallback);
 void			printError(const std::string &fmt, const std::vector<std::string> *parms = NULL);
-void			printFatalError(const char* fmt, ...);
+void			printFatalError(const char* fmt, ...) BZ_ATTR_12;
+
+class FatalErrorCallback
+{
+public:
+  virtual ~FatalErrorCallback(){};
+  virtual void error ( const char* title, const char* message ) = 0;
+};
+
+void addFatalErrorCallback ( FatalErrorCallback* callback );
+void removeFatalErrorCallback ( FatalErrorCallback* callback );
+
 
 #endif // BZF_ERROR_HANDLER_H
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

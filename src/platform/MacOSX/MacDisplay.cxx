@@ -41,6 +41,11 @@ bool MacDisplay::isEventPending() const
   return (status == ::noErr) ? true : false;
 }
 
+bool MacDisplay::peekEvent (BzfEvent &) const
+{
+  return false;
+}
+
 bool MacDisplay::getEvent (BzfEvent &bzf_event) const {
   ::EventRef		eventRef	= 0;
   ::OSStatus		status		= ::noErr;
@@ -239,7 +244,7 @@ void MacDisplay::getKey (BzfKeyEvent &bzf_key, char char_code, ::UInt32 keycode)
     kF12KeyCode	 = 0x6F,
     kF13KeyCode	 = 0x69,	// Print Screen
     kF14KeyCode	 = 0x6B,	// Scroll Lock
-    kF15KeyCode	 = 0x71,	// Pause
+    kF15KeyCode	 = 0x71	// Pause
   };
   bzf_key.ascii = 0;
   bzf_key.button = BzfKeyEvent::NoButton;
@@ -278,33 +283,8 @@ void MacDisplay::getKey (BzfKeyEvent &bzf_key, char char_code, ::UInt32 keycode)
   }
 }
 
-// if -directory is not used, this function is used to get the default path
-// to the data directory which is located in the same directory as the
-// application bundle
-char *GetMacOSXDataPath(void)
-{
-  ::CFBundleRef	appBundle		= NULL;
-  ::CFURLRef	resourceURL		= NULL;
-  char *		string			= NULL;
-  static char	basePath[2048]	= "<undefined resource path>";
-
-  if ((appBundle = ::CFBundleGetMainBundle()) == NULL
-      || (resourceURL = ::CFBundleCopyResourcesDirectoryURL(appBundle)) == NULL) {
-    return NULL;
-  }
-  if(!::CFURLGetFileSystemRepresentation(resourceURL,
-					 true, reinterpret_cast<UInt8 *>(basePath), sizeof(basePath))) {
-    string = NULL;
-  } else {
-    string = basePath;
-  }
-  ::CFRelease(resourceURL);
-  fprintf(stderr, "data path is \"%s\"\n", string);
-  return string;
-}
-
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***

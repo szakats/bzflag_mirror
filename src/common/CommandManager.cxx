@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,20 +7,22 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _MSC_VER
-#pragma warning(4:4786)
-#endif
-
-// system headers
-#include <ctype.h>
-#include <stdio.h>
-
-// class-specific headers
+/* interface header */
 #include "CommandManager.h"
+
+/* system implementation headers */
+#include <ctype.h>
+#include <wctype.h>
+#include <stdio.h>
+#include <assert.h>
+#include <string>
+
+/* common implementation headers */
 #include "TextUtils.h"
+
 
 // initialize the singleton
 template <>
@@ -64,18 +66,22 @@ std::string			CommandManager::getHelp(const std::string& name) const
 }
 
 std::string			CommandManager::run(const std::string& name,
-							    const ArgList& args) const
+							    const ArgList& args, bool* ret) const
 {
   // look up command
   Commands::const_iterator index = commands.find(name);
-  if (index == commands.end())
-    return string_util::format("Command %s not found", name.c_str());
-
+  if (index == commands.end()) {
+    if (ret)
+      *ret = false;
+    return TextUtils::format("Command %s not found", name.c_str());
+  }
+  if (ret)
+    *ret = true;
   // run it
-  return (*index->second.func)(name, args);
+  return (*index->second.func)(name, args,ret);
 }
 
-std::string			CommandManager::run(const std::string& cmd) const
+std::string			CommandManager::run(const std::string& cmd,bool *ret) const
 {
   std::string result;
   const char* scan = cmd.c_str();
@@ -102,10 +108,13 @@ std::string			CommandManager::run(const std::string& cmd) const
     }
 
     // run it or report error
-    if (scan == NULL)
+    if (scan == NULL) {
+      if (ret)
+  	*ret = false;
       return std::string("Error parsing command");
-    else if (name[0] != '#')
-      result = run(name, args);
+    } else if (name[0] != '#') {
+      result = run(name, args, ret);
+    }
 
     // discard ; and empty commands
     while (scan != NULL && *scan == ';') {
@@ -145,7 +154,7 @@ const char*			CommandManager::readUnquoted(const char* string,
 {
   // read up to next whitespace.  escapes are not interpreted.
   const char* start = string;
-  while (*string != '\0' && !isspace(*string) && *string != ';')
+  while (*string != '\0' && !iswspace(*string) && *string != ';')
     ++string;
   *value = std::string(start, string - start);
   return string;
@@ -182,16 +191,15 @@ const char*			CommandManager::readQuoted(const char* string,
 
 const char*			CommandManager::skipWhitespace(const char* string)
 {
-  while (*string != '\0' && isspace(*string))
+  while (*string != '\0' && iswspace(*string))
     ++string;
   return string;
 }
 
 // Local Variables: ***
-// mode:C++ ***
+// mode: C++ ***
 // tab-width: 8 ***
 // c-basic-offset: 2 ***
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-

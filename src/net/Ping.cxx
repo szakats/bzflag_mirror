@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2004 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,27 +7,19 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-// todo make this turn off for .net
-#if defined(_MSC_VER)
-	#pragma warning(disable: 4786)
-#endif
 
-#ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
+/* interface header */
+#include "Ping.h"
 
-#endif
-
-
+/* system implementation headers */
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
-#include <fstream>
-#include "common.h"
+
+/* common implementation headers */
 #include "global.h"
-#include "Ping.h"
 #include "Protocol.h"
 #include "TimeKeeper.h"
 #include "bzfio.h"
@@ -42,7 +34,7 @@
 
 const int		PingPacket::PacketSize = ServerIdPLen + 52;
 
-PingPacket::PingPacket() : gameStyle(PlainGameStyle),
+PingPacket::PingPacket() : gameType(TeamFFA), gameOptions(0),
 				maxShots(1),
 				shakeWins(0),
 				shakeTimeout(0),
@@ -61,7 +53,8 @@ PingPacket::PingPacket() : gameStyle(PlainGameStyle),
 				purpleCount(0),
 				purpleMax(1),
 				observerCount(0),
-				observerMax(1)
+				observerMax(1),
+                                pingTime(0)
 {
   // do nothing
 }
@@ -77,7 +70,7 @@ bool			PingPacket::read(int fd, struct sockaddr_in* addr)
   uint16_t len, code;
 
   // get packet
-  int n = recvMulticast(fd, buffer, sizeof(buffer), addr);
+  int n = recvBroadcast(fd, buffer, sizeof(buffer), addr);
   if (n < 4)
     return false;
 
@@ -97,10 +90,8 @@ bool			PingPacket::read(int fd, struct sockaddr_in* addr)
   // unpack body of reply
   buf = unpack(buf, serverVersion);
 
-  // compare version against my version.  ignore last character of
-  // version number.  that's only used to indicate compatible
-  // client-side changes.
-  return (strncmp(serverVersion, getServerVersion(), 7) == 0);
+  // compare protocol version against my protocol version.
+  return (strncmp(serverVersion, getServerVersion(), 8) == 0);
 }
 
 bool			PingPacket::waitForReply(int fd,
@@ -115,7 +106,7 @@ bool			PingPacket::waitForReply(int fd,
   TimeKeeper currentTime = startTime;
   do {
     // prepare timeout
-    const float timeLeft = blockTime - (currentTime - startTime);
+    const float timeLeft = float(blockTime - (currentTime - startTime));
     struct timeval timeout;
     timeout.tv_sec = long(floorf(timeLeft));
     timeout.tv_usec = long(1.0e+6f * (timeLeft - floorf(timeLeft)));
@@ -123,14 +114,7 @@ bool			PingPacket::waitForReply(int fd,
     // wait for input
     fd_set read_set;
     FD_ZERO(&read_set);
-// turn off == signed/unsigned mismatch on win32
-#if defined(_MSC_VER)
-#pragma warning(disable: 4018)
-#endif
-    FD_SET(fd, &read_set);
-#if defined(_MSC_VER)
-#pragma warning(default: 4018)
-#endif
+    FD_SET((unsigned int)fd, &read_set);
     int nfound = select(fd+1, (fd_set*)&read_set, NULL, NULL, &timeout);
 
     // if got a message read it.  if a ping packet and from right
@@ -149,12 +133,12 @@ bool			PingPacket::waitForReply(int fd,
 bool			PingPacket::write(int fd,
 					const struct sockaddr_in* addr) const
 {
-  char buffer[PacketSize];
+  char buffer[PacketSize] = {0};
   void* buf = buffer;
   buf = nboPackUShort(buf, PacketSize - 4);
   buf = nboPackUShort(buf, MsgPingCodeReply);
   buf = pack(buf, getServerVersion());
-  return sendMulticast(fd, buffer, sizeof(buffer), addr) == sizeof(buffer);
+  return sendBroadcast(fd, buffer, sizeof(buffer), addr) == sizeof(buffer);
 }
 
 bool			PingPacket::isRequest(int fd,
@@ -164,7 +148,7 @@ bool			PingPacket::isRequest(int fd,
   char buffer[6];
   void *msg = buffer;
   uint16_t len, code;
-  int size = recvMulticast(fd, buffer, sizeof(buffer), addr);
+  int size = recvBroadcast(fd, buffer, sizeof(buffer), addr);
   if (size < 2) return false;
   msg = nboUnpackUShort(msg, len);
   msg = nboUnpackUShort(msg, code);
@@ -180,7 +164,7 @@ bool			PingPacket::sendRequest(int fd,
   msg = nboPackUShort(msg, 2);
   msg = nboPackUShort(msg, MsgPingCodeRequest);
   msg = nboPackUShort(msg, (uint16_t) 0);
-  return sendMulticast(fd, buffer, sizeof(buffer), addr) == sizeof(buffer);
+  return sendBroadcast(fd, buffer, sizeof(buffer), addr) == sizeof(buffer);
 }
 
 void*			PingPacket::unpack(void* buf, char* version)
@@ -188,7 +172,8 @@ void*			PingPacket::unpack(void* buf, char* version)
   buf = nboUnpackString(buf, version, 8);
   buf = serverId.unpack(buf);
   buf = sourceAddr.unpack(buf);
-  buf = nboUnpackUShort(buf, gameStyle);
+  buf = nboUnpackUShort(buf, gameType);
+  buf = nboUnpackUShort(buf, gameOptions);
   buf = nboUnpackUShort(buf, maxShots);
   buf = nboUnpackUShort(buf, shakeWins);
   buf = nboUnpackUShort(buf, shakeTimeout);
@@ -216,7 +201,8 @@ void*			PingPacket::pack(void* buf, const char* version) const
   buf = nboPackString(buf, version, 8);
   buf = serverId.pack(buf);
   buf = sourceAddr.pack(buf);
-  buf = nboPackUShort(buf, gameStyle);
+  buf = nboPackUShort(buf, gameType);
+  buf = nboPackUShort(buf, gameOptions);
   buf = nboPackUShort(buf, maxShots);
   buf = nboPackUShort(buf, shakeWins);
   buf = nboPackUShort(buf, shakeTimeout);	// 1/10ths of second
@@ -241,7 +227,8 @@ void*			PingPacket::pack(void* buf, const char* version) const
 
 void			PingPacket::packHex(char* buf) const
 {
-  buf = packHex16(buf, gameStyle);
+  buf = packHex16(buf, gameType);
+  buf = packHex16(buf, gameOptions);
   buf = packHex16(buf, maxShots);
   buf = packHex16(buf, shakeWins);
   buf = packHex16(buf, shakeTimeout);
@@ -266,7 +253,8 @@ void			PingPacket::packHex(char* buf) const
 
 void			PingPacket::unpackHex(char* buf)
 {
-  buf = unpackHex16(buf, gameStyle);
+  buf = unpackHex16(buf, gameType);
+  buf = unpackHex16(buf, gameOptions);
   buf = unpackHex16(buf, maxShots);
   buf = unpackHex16(buf, shakeWins);
   buf = unpackHex16(buf, shakeTimeout);
@@ -328,7 +316,7 @@ char*			PingPacket::packHex16(char* buf, uint16_t v)
   *buf++ = bin2hex((v >> 12) & 0xf);
   *buf++ = bin2hex((v >>  8) & 0xf);
   *buf++ = bin2hex((v >>  4) & 0xf);
-  *buf++ = bin2hex( v        & 0xf);
+  *buf++ = bin2hex( v	& 0xf);
   return buf;
 }
 
@@ -346,7 +334,7 @@ char*			PingPacket::unpackHex16(char* buf, uint16_t& v)
 char*			PingPacket::packHex8(char* buf, uint8_t v)
 {
   *buf++ = bin2hex((v >>  4) & 0xf);
-  *buf++ = bin2hex( v        & 0xf);
+  *buf++ = bin2hex( v	& 0xf);
   return buf;
 }
 
@@ -411,12 +399,9 @@ bool			 PingPacket::readFromFile(std::istream& in)
   // unpack body of reply
   buf = unpack(buf, serverVersion);
 
-  // compare version against my version.  ignore last character of
-  // version number.  that's only used to indicate compatible
-  // client-side changes.
-  return (strncmp(serverVersion, getServerVersion(), 7) == 0);
+  // compare protocol version against my protocol version.
+  return (strncmp(serverVersion, getServerVersion(), 8) == 0);
 }
-
 
 // Local Variables: ***
 // mode: C++ ***
@@ -425,5 +410,3 @@ bool			 PingPacket::readFromFile(std::istream& in)
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
-
-
