@@ -1442,7 +1442,7 @@ yyreduce:
         case 3:
 #line 49 "..\\..\\src\\parser.y"
     { 
-    std::string name = std::string((yyvsp[-2].id));
+    String name = String((yyvsp[-2].id));
     ruleset->addRule(name,new Rule(name,(yyvsp[-1].pv)));
   ;}
     break;
@@ -1484,12 +1484,12 @@ yyreduce:
 
   case 11:
 #line 64 "..\\..\\src\\parser.y"
-    { std::string name = std::string((yyvsp[0].id)); (yyval.ids)->push_back(name); ;}
+    { String name = String((yyvsp[0].id)); (yyval.ids)->push_back(name); ;}
     break;
 
   case 12:
 #line 65 "..\\..\\src\\parser.y"
-    { std::string name = std::string(""); (yyval.ids)->push_back(name); ;}
+    { String name = String(""); (yyval.ids)->push_back(name); ;}
     break;
 
   case 13:
@@ -1499,7 +1499,7 @@ yyreduce:
 
   case 14:
 #line 68 "..\\..\\src\\parser.y"
-    { std::string name = '@'+std::string((yyvsp[-1].id)); (yyval.ids) = new StringVector(); (yyval.ids)->push_back(name); ;}
+    { String name = '@'+String((yyvsp[-1].id)); (yyval.ids) = new StringVector(); (yyval.ids)->push_back(name); ;}
     break;
 
   case 15:

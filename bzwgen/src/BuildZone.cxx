@@ -35,7 +35,7 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
 
   int base = mesh->addFace(swface);
 
-  std::string rulename = std::string("start");
+  String rulename = String("start");
   meshes = generator->getRuleSet()->run(mesh,base,rulename);
   return;
 }

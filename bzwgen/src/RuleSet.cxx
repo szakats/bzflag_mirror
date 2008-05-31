@@ -13,12 +13,12 @@
 #include "RuleSet.h"
 #include "globals.h"
 
-void RuleSet::addRule(std::string& name, Rule* rule) { 
+void RuleSet::addRule(String& name, Rule* rule) { 
   if (debugLevel > 1) printf("Added rule '%s'.\n",rule->getName().c_str());
   rules[name] = rule; 
 }
 
-double RuleSet::getAttr(std::string& name) {
+double RuleSet::getAttr(String& name) {
   AttributeMap::iterator itr = attrmap.find(name); 
   if (itr == attrmap.end()) {
     printf("Warning : attribute '%s' not found!\n",name.c_str());
@@ -29,7 +29,7 @@ double RuleSet::getAttr(std::string& name) {
 
 
 
-int RuleSet::runMesh(Mesh* mesh, int face, std::string& rulename) {
+int RuleSet::runMesh(Mesh* mesh, int face, String& rulename) {
   if (recursion == -1) return -1;
   recursion++;
   if (recursion == MAX_RECURSION) {
@@ -49,7 +49,7 @@ int RuleSet::runMesh(Mesh* mesh, int face, std::string& rulename) {
   return result;
 }
 
-MeshVector* RuleSet::run(Mesh* initial_mesh, int initial_face, std::string& rulename) {
+MeshVector* RuleSet::run(Mesh* initial_mesh, int initial_face, String& rulename) {
   meshes = new MeshVector();
   meshes->push_back(initial_mesh);
   initial_mesh->pushBase(initial_face);
@@ -59,7 +59,7 @@ MeshVector* RuleSet::run(Mesh* initial_mesh, int initial_face, std::string& rule
   return meshes;
 }
 
-int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename) {
+int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, String& rulename) {
   Mesh* newmesh = new Mesh();
   Face* newface = new Face();
   int size = old_mesh->f[old_face]->size();
@@ -74,7 +74,7 @@ int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename) {
   return runMesh(newmesh,newfaceid,rulename);
 }
 
-void RuleSet::loadMaterial(std::string& id, std::string& name) {
+void RuleSet::loadMaterial(String& id, String& name) {
   int matid = materials.size();
   addAttr(id,double(matid));
   materials.push_back(new Material(matid,name));

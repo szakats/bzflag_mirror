@@ -37,14 +37,14 @@ public:
 
 class ExpressionAttribute : public Expression {
   RuleSet* ruleset;
-  std::string attrname;
+  String attrname;
 public:
   ExpressionAttribute(RuleSet* _ruleset, const char* _attrname) : ruleset(_ruleset), attrname(_attrname) {};
   double calculate(Mesh*,int);
 };
 
 class ExpressionFaceAttribute : public Expression {
-  std::string attrname;
+  String attrname;
 public:
   ExpressionFaceAttribute(const char* _attrname) : attrname(_attrname) { 
     std::transform(attrname.begin(), attrname.end(), attrname.begin(), tolower);

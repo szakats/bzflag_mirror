@@ -29,22 +29,22 @@ class BZWGenerator
   COSDir ruledir;
   RuleSet* ruleset;
   char* cstr;
-  std::string texturepath;
+  String texturepath;
   bool worldGenerated;
 public:
   BZWGenerator() : worldGenerated(false) {}
   int parseCommandLine(int argc, char* argv[]);
   int setup();
   ~BZWGenerator() {}
-  void generate(std::ostream* outstream);
+  void generate(OutStream* outstream);
   void loadConfig(const char* configFile);
-  std::string outname;
+  String outname;
 #if COMPILE_PLUGIN
   virtual void process(bz_EventData * eventData);
 #endif
 private:
   bool getOptionI ( int &val, char* shortName, char* longName );
-  bool getOptionS ( std::string &val, char* shortName, char* longName );
+  bool getOptionS ( String &val, char* shortName, char* longName );
   void printHelp();
   void printHelpCommand ( const char* shortName, const char* longName, const char* description );
 };

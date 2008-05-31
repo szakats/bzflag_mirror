@@ -47,7 +47,7 @@ void yyunput(int, char*);
 %%
 ruleset : /* empty */
   | ruleset NONTERM products ';' { 
-    std::string name = std::string($2);
+    String name = String($2);
     ruleset->addRule(name,new Rule(name,$3));
   }
 ;
@@ -61,11 +61,11 @@ product : DEFSIGN NUMBER ':' cond ops { $$ = new Product($5,$2,$4); }
   | DEFSIGN cond ops { $$ = new Product($3,1.0,$2); }
 ;
 faces : /* empty */ { $$ = new StringVector(); }
-  | faces NONTERM  { std::string name = std::string($2); $$->push_back(name); }
-  | faces '*' { std::string name = std::string(""); $$->push_back(name); }
+  | faces NONTERM  { String name = String($2); $$->push_back(name); }
+  | faces '*' { String name = String(""); $$->push_back(name); }
 ;
 faceparam : /* empty */ { $$ = NULL; }
-  | '[' '@' NONTERM ']' { std::string name = '@'+std::string($3); $$ = new StringVector(); $$->push_back(name); }
+  | '[' '@' NONTERM ']' { String name = '@'+String($3); $$ = new StringVector(); $$->push_back(name); }
   | '[' faces ']' { $$ = $2; }
 ;
 ops : /* empty */ { $$ = new OperationVector(); }

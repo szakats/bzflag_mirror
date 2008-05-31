@@ -19,10 +19,10 @@
 
 class Material {
   int name;
-  std::string file;
+  String file;
   bool noradar;
 public:
-  Material(const int _name, const std::string& _file, bool _noradar = false) : name(_name), file(_file), noradar(_noradar) {};
+  Material(const int _name, const String& _file, bool _noradar = false) : name(_name), file(_file), noradar(_noradar) {};
   void output(Output& out);
 };
 

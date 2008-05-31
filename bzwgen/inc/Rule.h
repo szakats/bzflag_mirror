@@ -18,17 +18,17 @@
 #include "Mesh.h"
 
 class Rule {
-  std::string name;
+  String name;
   ProductVector* products;
 public:
-  Rule(const std::string& _name, ProductVector* _products) : name(_name), products(_products) {};
+  Rule(const String& _name, ProductVector* _products) : name(_name), products(_products) {};
   Product* getProduct(Mesh* mesh, int face);
   int runMesh(Mesh* mesh, int face);
-  std::string& getName() { return name; }
+  String& getName() { return name; }
   ~Rule();
 };
 
-typedef std::map <std::string, Rule*> RuleMap;
+typedef std::map <String, Rule*> RuleMap;
 typedef RuleMap::iterator RuleMapIter;
 
 #endif /* __RULE_H__ */

@@ -56,7 +56,7 @@ public:
   double faceV(int face) { return (v[f[face]->vtx->at(3)] - v[f[face]->vtx->at(0)]).length(); }
   Vertex faceHv(int face) { return (v[f[face]->vtx->at(0)] - v[f[face]->vtx->at(1)]); }
   Vertex faceVv(int face) { return (v[f[face]->vtx->at(3)] - v[f[face]->vtx->at(0)]); }
-  std::string faceToString(Face* face);
+  String faceToString(Face* face);
   void pushBase(int fid);
   ~Mesh();
 private:

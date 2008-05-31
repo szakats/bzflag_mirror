@@ -16,6 +16,7 @@
 #include "GridGenerator.h"
 #include <sstream>
 
+typedef std::ostringstream OutStringStream;
 
 extern int yyparse(RuleSet*);
 extern int yylineno;
@@ -141,7 +142,7 @@ bool BZWGenerator::getOptionI ( int &val, char* shortName, char* longName )
   return false;
 }
 
-bool BZWGenerator::getOptionS ( std::string &val, char* shortName, char* longName )
+bool BZWGenerator::getOptionS ( String &val, char* shortName, char* longName )
 {
   if (cmd.Exists(shortName))
   {
@@ -159,7 +160,7 @@ bool BZWGenerator::getOptionS ( std::string &val, char* shortName, char* longNam
 
 int BZWGenerator::setup() {
   ruledir .SetStdDir("./rules");
-  std::string temp;
+  String temp;
 
   int detail = 3;
 
@@ -200,7 +201,7 @@ int BZWGenerator::setup() {
   return 0;
 }
 
-void BZWGenerator::generate(std::ostream* outstream) {
+void BZWGenerator::generate(OutStream* outstream) {
   std::cout << "Initializing... ";
   GridGenerator gen(ruleset);
   std::cout << "done.\n";
@@ -255,13 +256,14 @@ void BZWGenerator::process(bz_EventData *eventData) {
     return;
   }
 
-  std::ostringstream* outstream = new std::ostringstream(std::ostringstream::out);
+  OutStringStream* outstream = new OutStringStream(OutStringStream::out);
   generate(outstream);
 
   bz_GetWorldEventData_V1 *getWorldData = (bz_GetWorldEventData_V1 *) eventData;
 
-  cstr = new char [((std::ostringstream*)(outstream))->str().size()+1];
-  strcpy (cstr, ((std::ostringstream*)(outstream))->str().c_str());
+  // The following code is so ugly that I barely can look at it.
+  cstr = new char [((OutStringStream*)(outstream))->str().size()+1];
+  strcpy (cstr, ((OutStringStream*)(outstream))->str().c_str());
   getWorldData->worldBlob = cstr;
   getWorldData->generated = true;
   worldGenerated = true;

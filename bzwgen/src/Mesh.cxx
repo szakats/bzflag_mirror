@@ -454,8 +454,8 @@ void Mesh::freeFace(int fid) {
   }
 }
 
-std::string Mesh::faceToString(Face* face) { 
-  std::string result = "Face: ( ";
+String Mesh::faceToString(Face* face) { 
+  String result = "Face: ( ";
   for (size_t i = 0; i < face->vtx->size(); i++)
     result += v[face->vtx->at(i)].toString()+ " ";
   result += ")";

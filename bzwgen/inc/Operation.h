@@ -33,22 +33,22 @@ typedef std::vector <Operation*> OperationVector;
 typedef OperationVector::iterator OperationVectIter;
 
 class OperationNonterminal : public Operation {
-  std::string ref;
+  String ref;
 public:
   OperationNonterminal(RuleSet* _ruleset, const char* _ref) : Operation(_ruleset), ref(_ref) { };
   int runMesh(Mesh* mesh, int face);
 };
 
 class OperationLoadMaterial : public Operation {
-  std::string id;
-  std::string filename;
+  String id;
+  String filename;
 public:
   OperationLoadMaterial(RuleSet* _ruleset, const char* _id, const char* _filename ) : Operation(_ruleset), id(_id), filename(_filename) { };
   int runMesh(Mesh* mesh, int face);
 };
 
 class OperationAddFace : public Operation {
-  std::string ref;
+  String ref;
 public:
   OperationAddFace(RuleSet* _ruleset, const char* _ref) : Operation(_ruleset), ref(_ref) { };
   int runMesh(Mesh* mesh, int face);
@@ -67,7 +67,7 @@ public:
 };
 
 class OperationSpawn : public Operation {
-  std::string ref;
+  String ref;
 public:
   OperationSpawn(RuleSet* _ruleset, const char* _ref) : Operation(_ruleset), ref(_ref) { };
   int runMesh(Mesh* mesh, int face);
@@ -226,7 +226,7 @@ public:
 
 class OperationAssign : public OperationSingle {
 protected:
-  std::string attrname;
+  String attrname;
 public:
   OperationAssign(RuleSet* _ruleset, Expression* _exp, const char* _attrname ) : OperationSingle(_ruleset,_exp), attrname(_attrname) {}
   int runMesh(Mesh*,int face);

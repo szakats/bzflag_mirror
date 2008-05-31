@@ -27,16 +27,16 @@ class RuleSet {
   MaterialVector materials;
 public:
   RuleSet() : recursion(0), meshes(NULL) { }
-  MeshVector* run(Mesh* initial_mesh, int initial_face, std::string& rulename);
-  int runMesh(Mesh* mesh, int face, std::string& rulename);
-  int runNewMesh(Mesh* old_mesh, int old_face, std::string& rulename);
-  void loadMaterial(std::string& id, std::string& name);
-  void initialize() { std::string init = std::string("initialize"); runMesh(NULL,0,init); }
-  void addAttr(const char* name, double value) { std::string temp = name; addAttr(temp,value); }
-  void addAttr(std::string& name, double value) { attrmap[name] = value; }
-  double getAttr(std::string& name); 
-  double getAttr(const char* name) { std::string temp = name; return getAttr(temp); }
-  void addRule(std::string& name, Rule* rule);
+  MeshVector* run(Mesh* initial_mesh, int initial_face, String& rulename);
+  int runMesh(Mesh* mesh, int face, String& rulename);
+  int runNewMesh(Mesh* old_mesh, int old_face, String& rulename);
+  void loadMaterial(String& id, String& name);
+  void initialize() { String init = String("initialize"); runMesh(NULL,0,init); }
+  void addAttr(const char* name, double value) { String temp = name; addAttr(temp,value); }
+  void addAttr(String& name, double value) { attrmap[name] = value; }
+  double getAttr(String& name); 
+  double getAttr(const char* name) { String temp = name; return getAttr(temp); }
+  void addRule(String& name, Rule* rule);
   void output(Output& out );
   int materialsCount() { return materials.size(); }
   ~RuleSet();

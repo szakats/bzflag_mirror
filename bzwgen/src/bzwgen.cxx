@@ -47,7 +47,7 @@ BZF_PLUGIN_CALL int bz_Unload ( void )
 int main (int argc, char* argv[]) {
   if (BZWGen.parseCommandLine(argc,argv)) return 0;
   if (BZWGen.setup()) return 1;
-  std::ofstream* outstream = new std::ofstream(BZWGen.outname.c_str());
+  OutFileStream* outstream = new OutFileStream(BZWGen.outname.c_str());
   BZWGen.generate(outstream);
   delete outstream;
 }

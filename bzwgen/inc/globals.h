@@ -22,11 +22,14 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+typedef std::string String;
 typedef std::vector<int> IntVector;
 typedef std::vector<std::string> StringVector;
 typedef std::vector<bool> BoolVector;
 typedef std::vector<double> DoubleVector;
 typedef std::map<std::string,double> AttributeMap;
+typedef std::ostream OutStream;
+typedef std::ofstream OutFileStream;
 
 
 #define COMPILE_PLUGIN 1
@@ -84,7 +87,7 @@ struct Vertex {
   void normalize() { double l = length(); if (l == 0.0) return; x/=l; y/=l; z/=l; }
   Vertex norm() { double l = length(); return (l == 0.0) ? Vertex() : Vertex(x/l,y/l,z/l); }
 
-  std::string toString() { char buffer[80]; sprintf(buffer, "[%.4f,%.4f,%.4f]",x,y,z); return std::string(buffer); }
+  String toString() { char buffer[80]; sprintf(buffer, "[%.4f,%.4f,%.4f]",x,y,z); return String(buffer); }
 
   Vertex cross(const Vertex &v) { 
     return Vertex(

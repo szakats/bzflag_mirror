@@ -18,13 +18,13 @@
 
 
 class Output {
-  std::ostream* outstream;
-  std::string texturepath;
+  OutStream* outstream;
+  String texturepath;
 public:
   int vertices;
   int texcoords;
   int faces;
-  Output(std::ostream* _outstream, std::string _texturepath) : vertices(0), texcoords(0), faces(0), outstream(_outstream), texturepath(_texturepath) {}
+  Output(OutStream* _outstream, String _texturepath) : vertices(0), texcoords(0), faces(0), outstream(_outstream), texturepath(_texturepath) {}
   void vertex(Vertex v) { 
     vertices++;
     (*outstream) << "  vertex " << v.x << " " << v.y << " " << v.z << "\n"; 
@@ -74,7 +74,7 @@ public:
     (*outstream) << "# " << texcoords <<" texcoords\n";
     (*outstream) << "# " << faces <<" faces\n\n";
   }
-  void material(int matref, std::string& filename, bool noradar) { 
+  void material(int matref, String& filename, bool noradar) { 
     (*outstream) << "material\n";
     (*outstream) << "  name mat" << matref << "\n";
     (*outstream) << "  texture " << texturepath << filename;
