@@ -13,7 +13,6 @@
 #ifndef __GRIDGENERATOR_H__
 #define __GRIDGENERATOR_H__
 
-#include <fstream>
 #include "Generator.h"
 #include "Material.h"
 #include "GridMap.h"

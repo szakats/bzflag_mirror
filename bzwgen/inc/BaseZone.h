@@ -14,9 +14,6 @@
 #ifndef __BASEZONE_H__
 #define __BASEZONE_H__
 
-#include <vector>
-#include <fstream>
-#include <string>
 #include "globals.h"
 #include "Zone.h"
 #include "Mesh.h"

@@ -11,7 +11,6 @@
  */
 
 #include "Material.h"
-#include "globals.h"
 
 void Material::output(Output& out) {
   out.material(name,file,noradar);

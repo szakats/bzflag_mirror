@@ -13,10 +13,21 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include <algorithm>
+#include <iostream>
+#include <cctype>
 #include <vector>
-#include <math.h>
 #include <string>
 #include <map>
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+typedef std::vector<int> IntVector;
+typedef std::vector<std::string> StringVector;
+typedef std::vector<bool> BoolVector;
+typedef std::vector<double> DoubleVector;
+typedef std::map<std::string,double> AttributeMap;
+
 
 #define COMPILE_PLUGIN 1
 
@@ -151,12 +162,6 @@ struct ID4 {
     }
   }
 };
-
-typedef std::vector<int> IntVector;
-typedef std::vector<std::string> StringVector;
-typedef std::vector<bool> BoolVector;
-typedef std::vector<double> DoubleVector;
-typedef std::map<std::string,double> AttributeMap;
 
 struct DiscreetMapNode {
   int type;

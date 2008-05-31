@@ -10,25 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include "time.h"
-
-#include "globals.h"
-
-#include "Output.h"
-#include "Generator.h"
-#include "GridGenerator.h"
-#include "Material.h"
-#include "commandArgs.h"
-#include "Zone.h"
-#include "RuleSet.h"
-#if COMPILE_PLUGIN
-#include "bzfsAPI.h"
-#include "plugin_utils.h"
-#endif
 #include "BZWGenerator.h"
+#include <fstream>
 
 int debugLevel = 2;
 

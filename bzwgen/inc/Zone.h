@@ -14,8 +14,6 @@
 #ifndef __ZONE_H__
 #define __ZONE_H__
 
-#include <vector>
-#include <fstream>
 #include "Output.h"
 #include "globals.h"
 #include "Generator.h"

@@ -14,11 +14,9 @@
 #ifndef __OPERATION_H__
 #define __OPERATION_H__
 
-#include <vector>
-#include <string>
+#include "globals.h"
 #include "Expression.h"
 #include "Mesh.h"
-#include "globals.h"
 
 class RuleSet; // To avoid .h file recursion
 

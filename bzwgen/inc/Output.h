@@ -13,8 +13,6 @@
 #ifndef __OUTPUT_H__
 #define __OUTPUT_H__
 
-#include <string>
-#include <fstream>
 #include "globals.h"
 #include "Face.h"
 

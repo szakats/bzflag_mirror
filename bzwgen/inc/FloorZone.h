@@ -13,9 +13,6 @@
 #ifndef __FLOORZONE_H__
 #define __FLOORZONE_H__
 
-#include <vector>
-#include <fstream>
-#include <string>
 #include "globals.h"
 #include "Zone.h"
 #include "Mesh.h"

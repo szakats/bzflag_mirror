@@ -13,7 +13,6 @@
 #ifndef __PRODUCT_H__
 #define __PRODUCT_H__
 
-#include <vector>
 #include "Operation.h"
 #include "Expression.h"
 #include "Mesh.h"

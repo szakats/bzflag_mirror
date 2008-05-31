@@ -13,25 +13,12 @@
 #ifndef __BZWGENERATOR_H__
 #define __BZWGENERATOR_H__
 
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include "time.h"
-
 #include "globals.h"
-
-#include "Output.h"
-#include "Generator.h"
-#include "GridGenerator.h"
-#include "Material.h"
-#include "commandArgs.h"
-#include "Zone.h"
 #include "RuleSet.h"
 #if COMPILE_PLUGIN
 #include "bzfsAPI.h"
 #include "plugin_utils.h"
 #endif
-#include "BZWGenerator.h"
 
 class BZWGenerator 
 #if COMPILE_PLUGIN

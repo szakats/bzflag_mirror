@@ -11,6 +11,11 @@
  */
 
 #include "BZWGenerator.h"
+#include "time.h"
+#include "Output.h"
+#include "GridGenerator.h"
+#include <sstream>
+
 
 extern int yyparse(RuleSet*);
 extern int yylineno;

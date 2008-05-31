@@ -14,9 +14,7 @@
 #ifndef __MATERIAL_H__
 #define __MATERIAL_H__
 
-#include <string>
-#include <vector>
-#include <fstream> 
+#include "globals.h"
 #include "Output.h"
 
 class Material {

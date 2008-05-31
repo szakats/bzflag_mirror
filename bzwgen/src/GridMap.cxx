@@ -15,8 +15,6 @@
 #include "BaseZone.h"
 #include "BuildZone.h"
 #include "GridGenerator.h"
-#include <iostream>
-#include <string>
 
 int BaseZone::color = 1;
 

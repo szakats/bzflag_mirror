@@ -13,10 +13,8 @@
 #ifndef __RULE_H__
 #define __RULE_H__
 
-#include <string>
-#include <map>
-#include "Product.h"
 #include "globals.h"
+#include "Product.h"
 #include "Mesh.h"
 
 class Rule {

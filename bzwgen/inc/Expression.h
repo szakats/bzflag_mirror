@@ -14,10 +14,6 @@
 #ifndef __EXPRESSION_H__
 #define __EXPRESSION_H__
 
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <cctype>
 #include "globals.h"
 #include "Mesh.h"
 #include "MultiFace.h"

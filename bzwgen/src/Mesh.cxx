@@ -11,8 +11,6 @@
  */
 
 #include "Mesh.h"
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 int Mesh::addVertex(Vertex vtx) { 
   if (freeVertices.size() > 0) {

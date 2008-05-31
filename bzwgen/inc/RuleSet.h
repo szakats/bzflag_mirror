@@ -14,7 +14,6 @@
 #ifndef __RULESET_H__
 #define __RULESET_H__
 
-#include <string>
 #include "Rule.h"
 #include "Mesh.h"
 #include "Material.h"
