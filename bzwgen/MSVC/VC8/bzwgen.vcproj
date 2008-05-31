@@ -231,6 +231,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\BZWGenerator.cxx"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\FloorZone.cxx"
 				>
 			</File>
@@ -350,6 +354,10 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\BuildZone.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\BZWGenerator.h"
 				>
 			</File>
 			<File

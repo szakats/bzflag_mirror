@@ -10,6 +10,9 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#ifndef __BZWGENERATOR_H__
+#define __BZWGENERATOR_H__
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -30,46 +33,37 @@
 #endif
 #include "BZWGenerator.h"
 
-int debugLevel = 2;
-
-BZWGenerator BZWGen; 
-
+class BZWGenerator 
 #if COMPILE_PLUGIN
-
-BZ_GET_PLUGIN_VERSION
-
-BZF_PLUGIN_CALL int bz_Load ( const char* commandLine )
-{
-  bz_debugMessage(4,"bzwgen plugin loaded");
-  if (strlen(commandLine) > 4) {
-    BZWGen.loadConfig(commandLine);
-    bz_debugMessage(4,"config file loaded");
-  }
-  bz_registerEvent(bz_eGetWorldEvent, &BZWGen);
-  bz_registerEvent(bz_eWorldFinalized, &BZWGen);
-  
-  BZWGen.setup();
-
-  return 0;
-}
-
-BZF_PLUGIN_CALL int bz_Unload ( void )
-{
-  bz_debugMessage(4,"bzwgen plugin unloaded");
-  return 0;
-}
-
+  : public bz_EventHandler 
 #endif
+{
+  CCommandLineArgs  cmd;
+  COSDir ruledir;
+  RuleSet* ruleset;
+  char* cstr;
+  std::string texturepath;
+  bool worldGenerated;
+public:
+  BZWGenerator() : worldGenerated(false) {}
+  int parseCommandLine(int argc, char* argv[]);
+  int setup();
+  ~BZWGenerator() {}
+  void generate(std::ostream* outstream);
+  void loadConfig(const char* configFile);
+  std::string outname;
+#if COMPILE_PLUGIN
+  virtual void process(bz_EventData * eventData);
+#endif
+private:
+  bool getOptionI ( int &val, char* shortName, char* longName );
+  bool getOptionS ( std::string &val, char* shortName, char* longName );
+  void printHelp();
+  void printHelpCommand ( const char* shortName, const char* longName, const char* description );
+};
 
-int main (int argc, char* argv[]) {
-  if (BZWGen.parseCommandLine(argc,argv)) return 0;
-  if (BZWGen.setup()) return 1;
-  std::ofstream* outstream = new std::ofstream(BZWGen.outname.c_str());
-  BZWGen.generate(outstream);
-  delete outstream;
-}
+#endif /* __BZWGENERATOR_H__ */
 
-	
 // Local Variables: ***
 // mode:C++ ***
 // tab-width: 8 ***

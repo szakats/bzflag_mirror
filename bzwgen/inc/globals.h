@@ -13,6 +13,18 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include <vector>
+#include <math.h>
+#include <string>
+#include <map>
+
+#define COMPILE_PLUGIN 1
+
+#define BZWGMajorVersion 0
+#define BZWGMinorVersion 1
+#define BZWGRevision     3
+#define BZWGBuildState "development"
+
 #define CELLROAD  1
 #define CELLROADX 2
 #define CELLBASE  3
@@ -22,11 +34,14 @@
 #pragma warning(disable:4996)
 #endif
 
-#include <vector>
-#include <math.h>
-#include <string>
-#include <map>
 #include "commandArgs.h"
+
+#ifdef _USE_GNU_DELIMS
+#define argumentDeliminator "--"
+#else
+#define argumentDeliminator "-"
+#endif //_USE_GNU_DELIMS
+
 
 extern int debugLevel;
 
