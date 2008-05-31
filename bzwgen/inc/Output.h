@@ -24,7 +24,7 @@ public:
   int vertices;
   int texcoords;
   int faces;
-  Output(OutStream* _outstream, String _texturepath) : vertices(0), texcoords(0), faces(0), outstream(_outstream), texturepath(_texturepath) {}
+  Output(OutStream* _outstream, String _texturepath) : outstream(_outstream), texturepath(_texturepath ), vertices(0), texcoords(0), faces(0) {}
   void vertex(Vertex v) { 
     vertices++;
     (*outstream) << "  vertex " << v.x << " " << v.y << " " << v.z << "\n"; 
