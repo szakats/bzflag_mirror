@@ -15,6 +15,9 @@
 
 #include "globals.h"
 #include "RuleSet.h"
+#include "commandArgs.h"
+
+
 #if COMPILE_PLUGIN
 #include "bzfsAPI.h"
 #include "plugin_utils.h"

@@ -18,6 +18,7 @@
 #include "globals.h"
 #include "RuleSet.h"
 #include "Material.h"
+#include "commandArgs.h"
 
 
 class Generator {

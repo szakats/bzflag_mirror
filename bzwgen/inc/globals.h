@@ -10,8 +10,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef __COMMON_H__
-#define __COMMON_H__
+#ifndef __GLOBALS_H__
+#define __GLOBALS_H__
 
 #include <algorithm>
 #include <iostream>
@@ -48,7 +48,6 @@ typedef std::ofstream OutFileStream;
 #pragma warning(disable:4996)
 #endif
 
-#include "commandArgs.h"
 
 #ifdef _USE_GNU_DELIMS
 #define argumentDeliminator "--"
@@ -277,7 +276,7 @@ inline bool samepointZ(Vertex A, Vertex B) {
   return (fabs(A.x-B.x) < EPSILON && fabs(A.y-B.y) < EPSILON);
 }
 
-#endif /* __COMMON_H__ */
+#endif /* __GLOBALS_H__ */
 
 // Local Variables: ***
 // mode:C++ ***
