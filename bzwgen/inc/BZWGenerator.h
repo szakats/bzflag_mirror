@@ -17,12 +17,16 @@
 #include "RuleSet.h"
 #include "commandArgs.h"
 
-
+// If compiling as a plugin we need the BZFS API.
 #if COMPILE_PLUGIN
 #include "bzfsAPI.h"
 #include "plugin_utils.h"
-#endif
+#endif // COMPILE_PLUGIN
 
+/** \brief Main application class.
+
+    Depending on compilation mode (standalone or plugin) may 
+    descend from bz_eventHandler. Both versions share as much code as possible. */
 class BZWGenerator 
 #if COMPILE_PLUGIN
   : public bz_EventHandler 
@@ -35,16 +39,30 @@ class BZWGenerator
   String texturepath;
   bool worldGenerated;
 public:
+  /** Standard default constructor, currently does nothing. */
   BZWGenerator() : worldGenerated(false) {}
+  /** Parses the command line for valid switches. Used only in the standalone 
+      compilation of BZWGen.*/
   int parseCommandLine(int argc, char* argv[]);
+  /** Parses the rulesets and config files. */
   int setup();
+  /** Default destructor, does nothing. */
   ~BZWGenerator() {}
+  /** Runs the generator with the current settings. Output goes to outstream 
+      using BZW format. */
   void generate(OutStream* outstream);
+  /** Loads a config file. Config files are simply sets of parameters that 
+      normally would be passed via the command line. */
   void loadConfig(const char* configFile);
+  /** Output file name, used only in standalone mode. */
   String outname;
+
 #if COMPILE_PLUGIN
+  /** Event handler for the plugin mode. Processes bz_eGetWorldEvent 
+      and bz_eWorldFinalized. */
   virtual void process(bz_EventData * eventData);
 #endif
+
 private:
   bool getOptionI ( int &val, char* shortName, char* longName );
   bool getOptionS ( String &val, char* shortName, char* longName );
