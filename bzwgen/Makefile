@@ -4,6 +4,7 @@ CFLAGS = -g -O0 -Wall -Werror -pedantic -ansi -I./inc
 LDFLAGS =
 
 FILES = \
+	src/BZWGenerator.cxx \
 	src/BuildZone.cxx \
 	src/FloorZone.cxx \
 	src/Generator.cxx \

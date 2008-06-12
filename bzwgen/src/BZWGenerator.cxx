@@ -108,7 +108,7 @@ void BZWGenerator::printHelpCommand ( const char* shortName, const char* longNam
 
 void BZWGenerator::printHelp() {
   std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n";
-  printf("Version %s.%s.%s(%s)\ncopyright 2007 BZFlag Project and Tim Riker\n\n",BZWGMajorVersion,BZWGMinorVersion,BZWGRevision,BZWGBuildState);
+  printf("Version %d.%d.%d(%s)\ncopyright 2007 BZFlag Project and Tim Riker\n\n",BZWGMajorVersion,BZWGMinorVersion,BZWGRevision,BZWGBuildState);
   std::cout << "Command line arguments:\n";
   printHelpCommand("h","help","                shows help");
   printHelpCommand("d","debug","integer        sets debug level (0-4)(default: 2)");
@@ -279,3 +279,4 @@ void BZWGenerator::process(bz_EventData *eventData) {
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
+
