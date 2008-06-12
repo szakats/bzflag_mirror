@@ -1,18 +1,15 @@
 bwall.png
-Build from BZFlag images and origonal artwork by Jeff Myers.
-
 bwall2.png
 Build from BZFlag images and origonal artwork by Jeff Myers.
 
 grass.png
-BZFlag LGPL artwork
-
 mesh.png
 BZFlag LGPL artwork
 
 road.png
-Origonal LGPL artwork
-
 roadx.png
+whitec.png
+roof.png
+whitec2.png
 Origonal LGPL artwork
 
