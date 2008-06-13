@@ -9,6 +9,10 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+/** \file BZWGenerator.h
+    \author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+    \brief Defines an aplication class for BZWGen.
+*/
 
 #ifndef __BZWGENERATOR_H__
 #define __BZWGENERATOR_H__
@@ -23,7 +27,8 @@
 #include "plugin_utils.h"
 #endif // COMPILE_PLUGIN
 
-/** \brief Main application class.
+/** \class BZWGenerator
+    \brief Main application class.
 
     Depending on compilation mode (standalone or plugin) may 
     descend from bz_eventHandler. Both versions share as much code as possible. */
@@ -32,8 +37,11 @@ class BZWGenerator
   : public bz_EventHandler 
 #endif
 {
+  /** Class for command line parsing. Later on should be ifdef'ed probaly */
   CCommandLineArgs  cmd;
+  /** Class holding the ruleset directory. */
   COSDir ruledir;
+  /** The read and parsed ruleset. */
   RuleSet* ruleset;
   char* cstr;
   String texturepath;
