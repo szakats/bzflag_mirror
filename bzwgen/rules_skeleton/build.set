@@ -1,0 +1,21 @@
+# ------------------------------------------------------------------------
+#  BZWGen 0.1.3 grammar file
+#  build.set -- standard buildings
+# ------------------------------------------------------------------------
+
+build_preprocess
+  -> 0.4 : (face(h) > 60) splith((face(h)/2 - 2.5) 5.0 1r) [ build_preprocess * build_preprocess ]
+  -> 0.4 : (face(v) > 60) splitv((face(v)/2 - 2.5) 5.0 1r) [ build_preprocess * build_preprocess ]
+  -> spawn(build_run)
+;
+
+
+build_run
+  -> mat_mesh extrude(3.0)
+;
+
+
+  
+# ------------------------------------------------------------------------
+#  end of file
+# ------------------------------------------------------------------------

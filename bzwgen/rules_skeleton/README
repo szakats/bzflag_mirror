@@ -1,0 +1,27 @@
+Guidelines for rules creation/edition
+======================================
+
+Namespaces
+-----------
+BZWGen does not have namespaces (yet), rules from every file sit in
+one global namespace. Hence it is encouraged to create your own 
+namespaces using the underline character. The namespaces should match
+in a way the file they are introduced in. 
+
+Files
+------
+There's an encouragement to keep every building "style" in a single file,
+with it's own namespace. If a rule is used in more than one building 
+style, think about moving it into "common.set".
+
+Special files
+--------------
+
+init.set -- holding just one special rule "initialize" that is called
+right after the parser reads all rules.
+
+common.set -- holding rules used by all of the sets.
+
+start.set -- holding the special "start" rule, that is executed fith
+the face of a single building lot.
+
