@@ -9,9 +9,9 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** \file Point2D.h
-    \author Kornel Kisielewicz kornel.kisielewicz@gmail.com
-    \brief Defines a point in two dimensional space
+/** @file Point2D.h
+    @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+    @brief Defines a point in two dimensional space
 */
 
 #ifndef __POINT2D_H__
@@ -23,8 +23,8 @@
 //namespace bzwgen {
 //namespace geometry {
 
-/** \class Point2D
-    \brief Point in two dimensional space.
+/** @class Point2D
+    @brief Point in two dimensional space.
 
     Current implementation is based on double-precision floats, but that
     may be reverted to float once we reach numerical stability. This 

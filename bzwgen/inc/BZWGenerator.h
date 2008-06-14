@@ -9,9 +9,9 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** \file BZWGenerator.h
-    \author Kornel Kisielewicz kornel.kisielewicz@gmail.com
-    \brief Defines an aplication class for BZWGen.
+/** @file BZWGenerator.h
+    @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+    @brief Defines an aplication class for BZWGen.
 */
 
 #ifndef __BZWGENERATOR_H__
@@ -27,8 +27,8 @@
 #include "plugin_utils.h"
 #endif // COMPILE_PLUGIN
 
-/** \class BZWGenerator
-    \brief Main application class.
+/** @class BZWGenerator
+    @brief Main application class.
 
     Depending on compilation mode (standalone or plugin) may 
     descend from bz_eventHandler. Both versions share as much code as possible. */

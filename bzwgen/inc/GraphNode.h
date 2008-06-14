@@ -9,9 +9,9 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** \file GraphNode.h
-    \author Kornel Kisielewicz kornel.kisielewicz@gmail.com
-    \brief Defines an GraphNode class model for the PlanarGraph class.
+/** @file GraphNode.h
+    @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+    @brief Defines an GraphNode class model for the PlanarGraph class.
 */
 
 #ifndef __GRAPHNODE_H__
@@ -24,8 +24,8 @@
 //namespace bzwgen {
 //namespace geometry {
 
-/** \class GraphNode
-    \brief Class defining an node in a double linked planar graph. 
+/** @class GraphNode
+    @brief Class defining an node in a double linked planar graph. 
 
     Due to the fact that the PlanarGraph is dual linked, each GraphNode holds a 
     set of pointers to other GraphNodes. The initial implementation uses vector
