@@ -468,6 +468,22 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Geometry"
+				>
+				<File
+					RelativePath="..\..\inc\GraphNode.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\PlanarGraph.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\Point2D.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

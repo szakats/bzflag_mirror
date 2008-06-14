@@ -55,6 +55,14 @@ public:
   /** Default constructor. Sets the underlying point to (0,0) and initializes
       an empty list of connections.*/
   GraphNode() {} 
+  /** Constructor which takes Point2D data as parameters. */
+  GraphNode(double x, double y) : Point2D(x,y) {} 
+  /** Connects the current node to the one passed. Adds the passed node to the 
+      connections list for both nodes. */
+  void connect(GraphNodePtr node) {
+    connections.push_back(node);
+    node->connections.push_back(this);
+  }
 
 };
 
