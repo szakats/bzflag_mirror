@@ -65,22 +65,11 @@ struct Vertex {
   Vertex(double _x, double _y, double _z) :x(_x), y(_y), z(_z) {}
   Vertex(double v[3]) :x(v[0]), y(v[1]), z(v[2]) {}
   
-  void add(const Vertex &v) { x += v.x; y += v.y; z += v.z; }
   Vertex operator+(const Vertex &v) { return Vertex(x + v.x, y + v.y, z + v.z); }
-
-  void sub(const Vertex &v) { x -= v.x; y -= v.y; z -= v.z; }
   Vertex operator-(const Vertex &v) { return Vertex(x - v.x, y - v.y, z - v.z); }
-
-  void mult(const Vertex &v) { x *= v.x; y *= v.y; z *= v.z; }
   Vertex operator*(const Vertex &v) { return Vertex(x * v.x, y * v.y, z * v.z); }
-
-  void mult(const double f) { x *= f; y *= f; z *= f; }
   Vertex operator*(const double f) { return Vertex(x * f, y * f, z * f); }
-
-  void div(const Vertex &v) { x /= v.x; y /= v.y; z /= v.z; }
   Vertex operator/(const Vertex &v) { return Vertex(x / v.x, y / v.y, z / v.z); }
-
-  void div(const double f) { x /= f; y /= f; z /= f; }
   Vertex operator/(const double f) { return Vertex(x / f, y / f, z / f); }
 
   void normalize() { double l = length(); if (l == 0.0) return; x/=l; y/=l; z/=l; }
