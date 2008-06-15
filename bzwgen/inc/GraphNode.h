@@ -56,7 +56,7 @@ public:
       an empty list of connections.*/
   GraphNode() {} 
   /** Constructor which takes Point2D data as parameters. */
-  GraphNode(double x, double y) : Vector2Df(x,y) {} 
+  GraphNode(float x, float y) : Vector2Df(x,y) {} 
   /** Connects the current node to the one passed. Adds the passed node to the 
       connections list for both nodes. */
   void connect(GraphNodePtr node) {

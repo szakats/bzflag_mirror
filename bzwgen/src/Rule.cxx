@@ -11,12 +11,13 @@
  */
 
 #include "Rule.h"
+#include "Random.h" 
 
 Product* Rule::getProduct(Mesh* mesh, int face) {
   int size = products->size();
   if (size == 0) return NULL;
   ProductVectIter itr = products->begin();
-  double roll = randomdouble01();
+  double roll = Random::double01();
   do {
     if ((*itr)->conditionsMet(mesh,face)) {
       double rarity = (*itr)->getRarity();

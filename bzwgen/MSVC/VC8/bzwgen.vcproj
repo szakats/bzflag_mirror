@@ -620,6 +620,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\Random.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\Zone.h"
 				>
 			</File>

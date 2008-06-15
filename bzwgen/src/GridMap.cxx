@@ -10,6 +10,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "Random.h"
 #include "GridMap.h"
 #include "FloorZone.h"
 #include "BaseZone.h"
@@ -125,8 +126,8 @@ int GridMap::typeCrossAroundToInt(int x, int y, int type)
 Coord2D GridMap::emptyCoord() {
   int x,y;
   do {
-    x = randomInt(gi.sizeX);
-    y = randomInt(gi.sizeY);
+    x = Random::numberMax(gi.sizeX);
+    y = Random::numberMax(gi.sizeY);
   } while (getNode(x,y).type > 0);
   return Coord2D(x,y);
 }

@@ -13,6 +13,7 @@
 #include "GridGenerator.h"
 #include "Zone.h"
 #include "FloorZone.h"
+#include "Random.h"
 
 
 GridGenerator::GridGenerator(RuleSet* _ruleset) : Generator(_ruleset) { 
@@ -73,8 +74,8 @@ void GridGenerator::plotRoad(int x, int y, bool horiz, int  collision) {
 
 void GridGenerator::performSlice(bool full, int snapmod, bool horiz) {
   int bmod = bases > 0 ? 2 : 1;
-  int x = randomIntRangeStep(snapX,gi.sizeX-snapX*bmod,snapmod*snapX);
-  int y = randomIntRangeStep(snapY,gi.sizeY-snapY*bmod,snapmod*snapY);
+  int x = Random::numberRangeStep(snapX,gi.sizeX-snapX*bmod,snapmod*snapX);
+  int y = Random::numberRangeStep(snapY,gi.sizeY-snapY*bmod,snapmod*snapY);
 
   if (debugLevel > 2) printf("slice (%d,%d)...\n",x,y);
 
@@ -105,7 +106,7 @@ void GridGenerator::run() {
     }
   }
 
-  bool horiz = randomBool();
+  bool horiz = Random::coin();
 
   if (debugLevel > 1) printf("Full slices (%d)...\n",fullslice);
   for (int i = 0; i < fullslice; i++) {

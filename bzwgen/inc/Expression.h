@@ -17,6 +17,7 @@
 #include "globals.h"
 #include "Mesh.h"
 #include "MultiFace.h"
+#include "Random.h"
 
 class RuleSet;
 
@@ -60,8 +61,8 @@ public:
   ExpressionRandom(Expression* _min, Expression* _max, Expression* _step) : vmin(_min), vmax(_max), step(_step) { };
   double calculate(Mesh* mesh,int face) { 
     double stepc = step->calculate(mesh,face);
-    if (fabs(stepc) < 0.0001f) return randomdoubleRange(vmin->calculate(mesh,face),vmax->calculate(mesh,face));
-    return randomdoubleRangeStep(vmin->calculate(mesh,face),vmax->calculate(mesh,face),stepc); 
+    if (fabs(stepc) < 0.0001f) return Random::doubleRange(vmin->calculate(mesh,face),vmax->calculate(mesh,face));
+    return Random::doubleRangeStep(vmin->calculate(mesh,face),vmax->calculate(mesh,face),stepc); 
   };
   ~ExpressionRandom() {
     delete vmin;

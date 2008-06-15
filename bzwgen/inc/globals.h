@@ -102,16 +102,6 @@ struct GridInfo {
 inline int modprev(int x, int mod) { return (x == 0) ? mod-1 : x-1; }
 inline int modnext(int x, int mod) { return (x == mod-1) ? 0 : x+1; }
 
-inline int randomInt01() { return rand()%2; }
-inline int randomInt(int range) { return (range == 0) ? 0 : rand()%range; }
-inline int randomIntRange(int min, int max) { return randomInt(max-min)+min; }
-inline int randomIntRangeStep(int min, int max, int step) { if (step == 0) return 0; int steps = int((max-min) / step);  return randomInt(steps+1)*step+min; }
-inline bool randomBool() { return rand()%2 == 0; }
-inline bool randomChance(int chance) { return randomInt(100) < chance; }
-inline double randomdouble01() { return (double)(rand()) / (double)(RAND_MAX); }
-inline double randomdouble(double range) { return randomdouble01()*range; }
-inline double randomdoubleRange(double min, double max) { return randomdouble(max-min)+min; }
-inline double randomdoubleRangeStep(double min, double max, double step) { if (step == 0) return 0.0; int steps = int((max-min) / step); return randomInt(steps+1)*step + min; }
 inline int roundToInt(double f) { return int(f+0.5f); }
 
 inline double fsign(double f) { if (f == 0.0) return 0.0; return (f < 0.0) ? -1.0 : 1.0; }
