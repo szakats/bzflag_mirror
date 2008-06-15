@@ -8,6 +8,11 @@
 #include "Operation.h"
 #include "Expression.h"
 
+#ifdef _WIN32
+#define YYMALLOC malloc
+#define YYFREE free
+#endif
+
 void yyerror(RuleSet *ruleset, char* s);
 int yylex();
 void yyunput(int, char*);
