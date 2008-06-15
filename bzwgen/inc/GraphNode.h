@@ -18,7 +18,7 @@
 #define __GRAPHNODE_H__
 
 #include <vector>
-#include "Point2D.h"
+#include "Vector2D.h"
 
 // I'll maybe think later of adding namespaces
 //namespace bzwgen {
@@ -33,11 +33,11 @@
     sets in the future. Also, currently I use pointers, but as there will be heavy 
     work on node addition, and maybe removal, I'll switch to boost::weak_ptr later.
 
-    The graph node inherits Point2D, cause the main definition of it's existence is 
+    The graph node inherits Vector2D<float>, cause the main definition of it's existence is 
     it's place on the 2D planar graph.
 
 */
-class GraphNode : public Point2D
+class GraphNode : public Vector2Df
 {
 public:
   /** A graph node pointer. Currently it's a C++ pointer, will be a boost::weak_ptr 
@@ -56,7 +56,7 @@ public:
       an empty list of connections.*/
   GraphNode() {} 
   /** Constructor which takes Point2D data as parameters. */
-  GraphNode(double x, double y) : Point2D(x,y) {} 
+  GraphNode(double x, double y) : Vector2Df(x,y) {} 
   /** Connects the current node to the one passed. Adds the passed node to the 
       connections list for both nodes. */
   void connect(GraphNodePtr node) {
