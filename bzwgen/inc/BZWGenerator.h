@@ -21,44 +21,22 @@
 #include "RuleSet.h"
 #include "commandArgs.h"
 
-// If compiling as a plugin we need the BZFS API.
-#ifdef COMPILE_PLUGIN
-#include "bzfsAPI.h"
-#include "plugin_utils.h"
-#endif // COMPILE_PLUGIN
-
 /** @class BZWGenerator
     @brief Main application class.
 
     Depending on compilation mode (standalone or plugin) may 
     descend from bz_eventHandler. Both versions share as much code as possible. */
 class BZWGenerator 
-#ifdef COMPILE_PLUGIN
-  : public bz_EventHandler 
-#endif // COMPILE_PLUGIN
 {
-  /** Class for command line parsing. Later on should be ifdef'ed probaly */
-  CCommandLineArgs  cmd;
   /** Class holding the ruleset directory. */
   COSDir ruledir;
   /** The read and parsed ruleset. */
   RuleSet* ruleset;
   /** Holds the path (or URL) to the texture directory. */
   String texturepath;
-  /** This char pointer holds the data generated form the event handler, it is 
-      unused when compiling standalone. */
-#ifdef COMPILE_PLUGIN
-  char* cstr;
-  /** Set to true if the world was generated. To prevent the event handler to 
-      regenerate the world. Used only in plugin mode. */
-  bool worldGenerated;
-#endif // COMPILE_PLUGIN = 0
 public:
   /** Standard default constructor, currently does nothing. */
   BZWGenerator() {}
-  /** Parses the command line for valid switches. Used only in the standalone 
-      compilation of BZWGen.*/
-  int parseCommandLine(int argc, char* argv[]);
   /** Parses the rulesets and config files. */
   int setup();
   /** Default destructor, does nothing. */
@@ -71,18 +49,16 @@ public:
   void loadConfig(const char* configFile);
   /** Output file name, used only in standalone mode. */
   String outname;
-
-#ifdef COMPILE_PLUGIN
-  /** Event handler for the plugin mode. Processes bz_eGetWorldEvent 
-      and bz_eWorldFinalized. */
-  virtual void process(bz_EventData * eventData);
-#endif
-
-private:
+protected:
+  /** Class for command line parsing. It is used in both deployments because
+      it also is used as a storage for passed options, and option files.*/
+  CCommandLineArgs  cmd;
+  /** Retuns an int option based on it's short and long name if defined. 
+      If not defined, returns false. */
   bool getOptionI ( int &val, char* shortName, char* longName );
+  /** Retuns an string option based on it's short and long name if defined. 
+      If not defined, returns false. */
   bool getOptionS ( String &val, char* shortName, char* longName );
-  void printHelp();
-  void printHelpCommand ( const char* shortName, const char* longName, const char* description );
 };
 
 #endif /* __BZWGENERATOR_H__ */

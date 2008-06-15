@@ -399,6 +399,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\BZWGeneratorPlugin.cxx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\BZWGeneratorStandalone.cxx"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\FloorZone.cxx"
 				>
 			</File>
@@ -558,6 +566,14 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\BZWGenerator.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\BZWGeneratorPlugin.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\BZWGeneratorStandalone.h"
 				>
 			</File>
 			<File

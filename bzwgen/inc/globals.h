@@ -31,7 +31,6 @@ typedef std::map<std::string,double> AttributeMap;
 typedef std::ostream OutStream;
 typedef std::ofstream OutFileStream;
 
-
 #define BZWGMajorVersion 0
 #define BZWGMinorVersion 1
 #define BZWGRevision     3
@@ -45,7 +44,6 @@ typedef std::ofstream OutFileStream;
 #ifdef _MSC_VER
 #pragma warning(disable:4996)
 #endif
-
 
 #ifdef _USE_GNU_DELIMS
 #define argumentDeliminator "--"

@@ -12,12 +12,23 @@
  * bzwgen.cxx -- main program file and main plugin file for BZWGen.
  */
 
-#include "BZWGenerator.h"
 #include <fstream>
+#include "globals.h"
 
 int debugLevel = 2;
 
-BZWGenerator BZWGen; 
+#ifdef COMPILE_PLUGIN
+
+#include "BZWGeneratorPlugin.h"
+BZWGeneratorPlugin BZWGen; 
+
+#else
+
+#include "BZWGeneratorStandalone.h"
+BZWGeneratorStandalone BZWGen; 
+
+#endif
+
 
 #ifdef COMPILE_PLUGIN
 
