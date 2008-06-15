@@ -38,6 +38,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\inc\;..\;..\..\..\bzflag\MSVC\VC8;..\..\..\bzflag\include;..\..\..\bzflag\plugins\plugin_utils"
+				PreprocessorDefinitions="YYMALLOC=malloc;YYFREE=free"
 				RuntimeLibrary="3"
 				WarningLevel="4"
 				WarnAsError="true"
@@ -105,6 +106,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				PreprocessorDefinitions="YYMALLOC=malloc;YYFREE=free"
 				RuntimeLibrary="2"
 			/>
 			<Tool
@@ -170,7 +172,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\inc\;..\;..\..\..\bzflag\MSVC\VC8;..\..\..\bzflag\include;..\..\..\bzflag\plugins\plugin_utils"
-				PreprocessorDefinitions="bzwgen_EXPORTS;COMPILE_PLUGIN"
+				PreprocessorDefinitions="COMPILE_PLUGIN;YYMALLOC=malloc;YYFREE=free"
 				RuntimeLibrary="3"
 				WarningLevel="4"
 				WarnAsError="true"
@@ -238,7 +240,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="COMPILE_PLUGIN"
+				PreprocessorDefinitions="COMPILE_PLUGIN;YYMALLOC=malloc;YYFREE=free"
 				RuntimeLibrary="2"
 			/>
 			<Tool
@@ -305,6 +307,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\inc\;..\;..\..\..\bzflag\MSVC\VC8;..\..\..\bzflag\include;..\..\..\bzflag\plugins\plugin_utils"
+				PreprocessorDefinitions="YYMALLOC=malloc;YYFREE=free"
 				RuntimeLibrary="2"
 				WarningLevel="4"
 				WarnAsError="true"
