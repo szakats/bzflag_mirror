@@ -71,12 +71,14 @@ bzwgen: ${OBJECTS} ${APP_OBJECTS}
 	@echo "Building bzwgen..."
 	@echo ""
 	${CXX} -o $@ ${OBJECTS} ${APP_OBJECTS} ${CFLAGS} ${LDFLAGS} ${LIBS}
-	@echo "Done!"
+	end
 
 bzwgenplugin: ${OBJECTS} ${PLUGIN_OBJECTS}
 	@echo ""
 	@echo "Building bzwgen as a plugin..."
 	@echo ""
-	${CXX} -shared -o $@.so ${OBJECTS} ${PLUGIN_OBJECTS} ${CFLAGS} -DCOMPILE_PLUGIN ${LDFLAGS} ${LIBS}
-	@echo "Done!"
+	${CXX} -I../bzflag/include/ -shared -o $@.so ${OBJECTS} ${PLUGIN_OBJECTS} ${CFLAGS} -DCOMPILE_PLUGIN ${LDFLAGS} ${LIBS}
+	
+end:	
+@echo "Done!"
 
