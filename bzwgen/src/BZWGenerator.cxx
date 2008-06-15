@@ -159,7 +159,7 @@ bool BZWGenerator::getOptionS ( String &val, char* shortName, char* longName )
 }
 
 int BZWGenerator::setup() {
-#if COMPILE_PLUGIN
+#ifdef COMPILE_PLUGIN
   worldGenerated = false;
 #endif // COMPILE_PLUGIN
   ruledir .SetStdDir("./rules");
@@ -238,7 +238,7 @@ int BZWGenerator::parseCommandLine(int argc, char* argv[]) {
   return 0;
 }
 
-#if COMPILE_PLUGIN
+#ifdef COMPILE_PLUGIN
 
 void BZWGenerator::process(bz_EventData *eventData) {
   if (eventData->eventType == bz_eWorldFinalized) {

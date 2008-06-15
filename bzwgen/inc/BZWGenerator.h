@@ -22,7 +22,7 @@
 #include "commandArgs.h"
 
 // If compiling as a plugin we need the BZFS API.
-#if COMPILE_PLUGIN
+#ifdef COMPILE_PLUGIN
 #include "bzfsAPI.h"
 #include "plugin_utils.h"
 #endif // COMPILE_PLUGIN
@@ -33,7 +33,7 @@
     Depending on compilation mode (standalone or plugin) may 
     descend from bz_eventHandler. Both versions share as much code as possible. */
 class BZWGenerator 
-#if COMPILE_PLUGIN
+#ifdef COMPILE_PLUGIN
   : public bz_EventHandler 
 #endif // COMPILE_PLUGIN
 {
@@ -47,14 +47,11 @@ class BZWGenerator
   String texturepath;
   /** This char pointer holds the data generated form the event handler, it is 
       unused when compiling standalone. */
-#if COMPILE_PLUGIN
+#ifdef COMPILE_PLUGIN
   char* cstr;
   /** Set to true if the world was generated. To prevent the event handler to 
       regenerate the world. Used only in plugin mode. */
   bool worldGenerated;
-#else // COMPILE_PLUGIN = 0
-  /** Class for command line parsing. Later on should be ifdef'ed probaly */
-  CCommandLineArgs  cmd;
 #endif // COMPILE_PLUGIN = 0
 public:
   /** Standard default constructor, currently does nothing. */
@@ -75,7 +72,7 @@ public:
   /** Output file name, used only in standalone mode. */
   String outname;
 
-#if COMPILE_PLUGIN
+#ifdef COMPILE_PLUGIN
   /** Event handler for the plugin mode. Processes bz_eGetWorldEvent 
       and bz_eWorldFinalized. */
   virtual void process(bz_EventData * eventData);

@@ -38,7 +38,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\inc\;..\;..\..\..\bzflag\MSVC\VC8;..\..\..\bzflag\include;..\..\..\bzflag\plugins\plugin_utils"
-				PreprocessorDefinitions="bzwgen_EXPORTS"
+				RuntimeLibrary="3"
 				WarningLevel="4"
 				WarnAsError="true"
 			/>
@@ -55,7 +55,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="bzfs.lib"
 				AdditionalLibraryDirectories="..\..\..\bzflag"
-				ModuleDefinitionFile="../../bzwgen.def"
+				ModuleDefinitionFile=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -105,6 +105,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				RuntimeLibrary="2"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -170,6 +171,7 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\inc\;..\;..\..\..\bzflag\MSVC\VC8;..\..\..\bzflag\include;..\..\..\bzflag\plugins\plugin_utils"
 				PreprocessorDefinitions="bzwgen_EXPORTS;COMPILE_PLUGIN"
+				RuntimeLibrary="3"
 				WarningLevel="4"
 				WarnAsError="true"
 			/>
@@ -237,6 +239,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="COMPILE_PLUGIN"
+				RuntimeLibrary="2"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -302,7 +305,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\inc\;..\;..\..\..\bzflag\MSVC\VC8;..\..\..\bzflag\include;..\..\..\bzflag\plugins\plugin_utils"
-				PreprocessorDefinitions="bzwgen_EXPORTS"
+				RuntimeLibrary="2"
 				WarningLevel="4"
 				WarnAsError="true"
 			/>
@@ -319,7 +322,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="bzfs.lib"
 				AdditionalLibraryDirectories="..\..\..\bzflag"
-				ModuleDefinitionFile="../../bzwgen.def"
+				ModuleDefinitionFile=""
 			/>
 			<Tool
 				Name="VCALinkTool"

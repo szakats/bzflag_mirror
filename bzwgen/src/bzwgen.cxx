@@ -19,7 +19,7 @@ int debugLevel = 2;
 
 BZWGenerator BZWGen; 
 
-#if COMPILE_PLUGIN
+#ifdef COMPILE_PLUGIN
 
 BZ_GET_PLUGIN_VERSION
 

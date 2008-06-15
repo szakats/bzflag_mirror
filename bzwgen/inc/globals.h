@@ -32,8 +32,6 @@ typedef std::ostream OutStream;
 typedef std::ofstream OutFileStream;
 
 
-#define COMPILE_PLUGIN 1
-
 #define BZWGMajorVersion 0
 #define BZWGMinorVersion 1
 #define BZWGRevision     3
