@@ -18,9 +18,19 @@
 #include "Generator.h"
 
 class GridMap {
+private:
+  struct DiscreetMapNode {
+    int type;
+    int zone;
+  };
   DiscreetMapNode* map;
   Generator* generator;
 public:
+  struct GridInfo {
+    int size;
+    int sizeX,sizeY;
+    int stepX,stepY;
+  };
   GridInfo gi;
   ZoneVector zones;
   GridMap() { map = NULL; };

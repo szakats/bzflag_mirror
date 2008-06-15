@@ -88,17 +88,6 @@ struct ID4 {
   }
 };
 
-struct DiscreetMapNode {
-  int type;
-  int zone;
-};
-
-struct GridInfo {
-  int size;
-  int sizeX,sizeY;
-  int stepX,stepY;
-};
-
 inline int modprev(int x, int mod) { return (x == 0) ? mod-1 : x-1; }
 inline int modnext(int x, int mod) { return (x == mod-1) ? 0 : x+1; }
 
