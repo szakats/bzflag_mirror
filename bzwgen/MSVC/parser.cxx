@@ -153,6 +153,11 @@
 #include "Operation.h"
 #include "Expression.h"
 
+#ifdef _WIN32
+#define YYMALLOC malloc
+#define YYFREE free
+#endif
+
 void yyerror(RuleSet *ruleset, char* s);
 int yylex();
 void yyunput(int, char*);
@@ -271,7 +276,7 @@ extern "C" {
 #   define YYMALLOC malloc
 #   if (! defined (malloc) && ! defined (YYINCLUDED_STDLIB_H) \
 	&& (defined (__STDC__) || defined (__cplusplus)))
-void *malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
+ void * malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 #  ifndef YYFREE
