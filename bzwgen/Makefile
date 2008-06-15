@@ -5,6 +5,7 @@ LDFLAGS =
 
 FILES = \
 	src/BZWGenerator.cxx \
+	src/BZWGeneratorStandalone.cxx \
 	src/BuildZone.cxx \
 	src/FloorZone.cxx \
 	src/Generator.cxx \
