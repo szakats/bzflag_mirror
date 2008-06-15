@@ -40,7 +40,7 @@ PLUGIN_OBJECTS = ${PLUGIN_FILES:.cxx=.o}
 
 all: blather bzwgen
 
-plugin: blather bzwgenplugin: 
+#plugin: blather bzwgenplugin: 
 
 .cxx.o: common.h
 	${CXX} ${CFLAGS} ${CPPFLAGS} -c -o $@ $<
@@ -73,11 +73,11 @@ bzwgen: ${OBJECTS} ${APP_OBJECTS}
 	${CXX} -o $@ ${OBJECTS} ${APP_OBJECTS} ${CFLAGS} ${LDFLAGS} ${LIBS}
 	end
 
-bzwgenplugin: ${OBJECTS} ${PLUGIN_OBJECTS}
-	@echo ""
-	@echo "Building bzwgen as a plugin..."
-	@echo ""
-	${CXX} -I../bzflag/include/ -shared -o $@.so ${OBJECTS} ${PLUGIN_OBJECTS} ${CFLAGS} -DCOMPILE_PLUGIN ${LDFLAGS} ${LIBS}
+#bzwgenplugin: ${OBJECTS} ${PLUGIN_OBJECTS}
+#	@echo ""
+#	@echo "Building bzwgen as a plugin..."
+#	@echo ""
+#	${CXX} -I../bzflag/include/ -shared -o $@.so ${OBJECTS} ${PLUGIN_OBJECTS} ${CFLAGS} -DCOMPILE_PLUGIN ${LDFLAGS} ${LIBS}
 	
 end:	
 @echo "Done!"
