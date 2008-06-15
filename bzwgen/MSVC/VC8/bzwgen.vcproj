@@ -17,7 +17,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -145,7 +145,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLL|Win32"
+			Name="debug_plugin|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
@@ -169,7 +169,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\inc\;..\;..\..\..\bzflag\MSVC\VC8;..\..\..\bzflag\include;..\..\..\bzflag\plugins\plugin_utils"
-				PreprocessorDefinitions="bzwgen_EXPORTS"
+				PreprocessorDefinitions="bzwgen_EXPORTS;COMPILE_PLUGIN"
 				WarningLevel="4"
 				WarnAsError="true"
 			/>
@@ -213,6 +213,70 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="release_plugin|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				PreprocessorDefinitions="COMPILE_PLUGIN"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="..\..\inc\"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				ModuleDefinitionFile="../../bzwgen.def"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -229,6 +293,26 @@
 			<File
 				RelativePath="..\..\src\bzwgen.cxx"
 				>
+			</File>
+			<File
+				RelativePath="..\..\bzwgen.def"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\BZWGenerator.cxx"
@@ -306,6 +390,15 @@
 							WarnAsError="false"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="debug_plugin|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="1"
+							WarnAsError="false"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\src\Operation.cxx"
@@ -329,6 +422,15 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							WarningLevel="3"
+							WarnAsError="false"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="debug_plugin|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="1"
 							WarnAsError="false"
 						/>
 					</FileConfiguration>
@@ -521,6 +623,16 @@
 						Outputs="$(InputName).cxx"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="debug_plugin|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Running flex"
+						CommandLine="flex -o..\$(InputName).cxx ..\..\src\$(InputFileName)&#x0D;&#x0A;"
+						Outputs="$(InputName).cxx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\src\parser.y"
@@ -537,6 +649,16 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="DLL|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Running bison"
+						CommandLine="bison -d -o..\$(InputName).cxx ..\..\src\$(InputFileName)&#x0D;&#x0A;"
+						Outputs="$..\(InputName).cxx;$(InputName).hxx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="debug_plugin|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"

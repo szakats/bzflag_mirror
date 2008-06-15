@@ -43,8 +43,7 @@ BZF_PLUGIN_CALL int bz_Unload ( void )
   bz_debugMessage(4,"bzwgen plugin unloaded");
   return 0;
 }
-
-#endif
+#else
 
 int main (int argc, char* argv[]) {
   if (BZWGen.parseCommandLine(argc,argv)) return 0;
@@ -53,6 +52,7 @@ int main (int argc, char* argv[]) {
   BZWGen.generate(outstream);
   delete outstream;
 }
+#endif
 
 	
 // Local Variables: ***
