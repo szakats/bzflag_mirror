@@ -5,7 +5,6 @@ LDFLAGS =
 
 FILES = \
 	src/BZWGenerator.cxx \
-	src/BZWGeneratorStandalone.cxx \
 	src/BuildZone.cxx \
 	src/FloorZone.cxx \
 	src/Generator.cxx \
@@ -25,7 +24,16 @@ FILES = \
 	src/parser.cxx \
 	src/lexer.cxx
 
+APP_FILES = \
+	src/BZWGeneratorStandalone.cxx
+
+PLUGIN_FILES = \
+	BZWGeneratorPlugin.cxx
+
 OBJECTS = ${FILES:.cxx=.o}
+
+APP_OBJECTS = ${APP_FILES:.cxx=.o}
+PLUGIN_OBJECTS = ${PLUGIN_FILES:.cxx=.o}
 
 .PHONY: all clean blather
 .SUFFIXES: .cxx .o .l .y
@@ -56,9 +64,10 @@ clean:
 	rm -f bzwgen src/lexer.cxx src/parser.[ch]xx ${OBJECTS}
 	@echo "Done."
 
-bzwgen: ${OBJECTS}
+bzwgen: ${OBJECTS} ${APP_OBJECTS}
 	@echo ""
 	@echo "Building bzwgen..."
 	@echo ""
-	${CXX} -o $@ ${OBJECTS} ${CFLAGS} ${LDFLAGS} ${LIBS}
+	${CXX} -o $@ ${OBJECTS} ${APP_OBJECTS} ${CFLAGS} ${LDFLAGS} ${LIBS}
 	@echo "Done!"
+
