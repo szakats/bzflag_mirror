@@ -159,6 +159,9 @@ bool BZWGenerator::getOptionS ( String &val, char* shortName, char* longName )
 }
 
 int BZWGenerator::setup() {
+#if COMPILE_PLUGIN
+  worldGenerated = false;
+#endif // COMPILE_PLUGIN
   ruledir .SetStdDir("./rules");
   String temp;
 
@@ -269,7 +272,7 @@ void BZWGenerator::process(bz_EventData *eventData) {
   worldGenerated = true;
 }
 
-#endif
+#endif // COMPILE_PLUGIN
 
 
 // Local Variables: ***

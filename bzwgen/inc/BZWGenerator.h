@@ -35,7 +35,7 @@
 class BZWGenerator 
 #if COMPILE_PLUGIN
   : public bz_EventHandler 
-#endif
+#endif // COMPILE_PLUGIN
 {
   /** Class for command line parsing. Later on should be ifdef'ed probaly */
   CCommandLineArgs  cmd;
@@ -43,12 +43,22 @@ class BZWGenerator
   COSDir ruledir;
   /** The read and parsed ruleset. */
   RuleSet* ruleset;
-  char* cstr;
+  /** Holds the path (or URL) to the texture directory. */
   String texturepath;
+  /** This char pointer holds the data generated form the event handler, it is 
+      unused when compiling standalone. */
+#if COMPILE_PLUGIN
+  char* cstr;
+  /** Set to true if the world was generated. To prevent the event handler to 
+      regenerate the world. Used only in plugin mode. */
   bool worldGenerated;
+#else // COMPILE_PLUGIN = 0
+  /** Class for command line parsing. Later on should be ifdef'ed probaly */
+  CCommandLineArgs  cmd;
+#endif // COMPILE_PLUGIN = 0
 public:
   /** Standard default constructor, currently does nothing. */
-  BZWGenerator() : worldGenerated(false) {}
+  BZWGenerator() {}
   /** Parses the command line for valid switches. Used only in the standalone 
       compilation of BZWGen.*/
   int parseCommandLine(int argc, char* argv[]);
