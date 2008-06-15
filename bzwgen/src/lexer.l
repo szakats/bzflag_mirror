@@ -42,6 +42,7 @@ translate             { return(TRANSLATE); }
 translater            { return(TRANSLATER); }
 material              { return(MATERIAL);   }
 loadmaterial          { return(LOADMATERIAL);   }
+loadmaterialnr        { return(LOADMATERIALNR);   }
 multiface             { return(MULTIFACE); }
 repeath				  { return(REPEATH);}
 repeatv               { return(REPEATV);}

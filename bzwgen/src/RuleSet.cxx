@@ -74,10 +74,10 @@ int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, String& rulename) {
   return runMesh(newmesh,newfaceid,rulename);
 }
 
-void RuleSet::loadMaterial(String& id, String& name) {
+void RuleSet::loadMaterial(String& id, String& name, bool noradar) {
   int matid = materials.size();
   addAttr(id,double(matid));
-  materials.push_back(new Material(matid,name));
+  materials.push_back(new Material(matid,name,noradar));
 }
 
 void RuleSet::output(Output& out ) {

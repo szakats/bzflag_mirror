@@ -42,8 +42,9 @@ public:
 class OperationLoadMaterial : public Operation {
   String id;
   String filename;
+  bool noradar;
 public:
-  OperationLoadMaterial(RuleSet* _ruleset, const char* _id, const char* _filename ) : Operation(_ruleset), id(_id), filename(_filename) { };
+  OperationLoadMaterial(RuleSet* _ruleset, const char* _id, const char* _filename, bool _noradar ) : Operation(_ruleset), id(_id), filename(_filename), noradar(_noradar) { };
   int runMesh(Mesh* mesh, int face);
 };
 

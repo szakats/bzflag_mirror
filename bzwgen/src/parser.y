@@ -26,7 +26,7 @@ void yyunput(int, char*);
 }
 %start ruleset
 %token TRANSLATER TRANSLATE SCALE TEST ROUND NEG ASSERTION FACE TAPER SPAWN CHAMFER 
-%token TEXTURE TEXTUREFULL TEXTUREQUAD TEXTURECLEAR MATERIAL LOADMATERIAL
+%token TEXTURE TEXTUREFULL TEXTUREQUAD TEXTURECLEAR MATERIAL LOADMATERIAL LOADMATERIALNR
 %token SPAWNNGON UNCHAMFER ASSIGN DEFSIGN EXTRUDE EXTRUDET EXPAND RANDOM 
 %token REPEATH REPEATV SPLITV SPLITH
 %token MULTIFACE FREE NGON REMOVE ADDFACE DETACHFACE 
@@ -96,7 +96,8 @@ op : EXTRUDE '(' expr ')' faceparam { $$ = new OperationExtrude(ruleset,$3,$5); 
   | TRANSLATE '(' expr ',' expr ',' expr ')' { $$ = new OperationTranslate(ruleset,$3,$5,$7); }
   | TRANSLATER '(' expr ',' expr ',' expr ')' { $$ = new OperationTranslateR(ruleset,$3,$5,$7); }
   | MATERIAL '(' expr ')' { $$ = new OperationMaterial(ruleset,$3); }
-  | LOADMATERIAL '(' NONTERM ',' NONTERM ')' { $$ = new OperationLoadMaterial(ruleset,$3,$5); }
+  | LOADMATERIALNR '(' NONTERM ',' NONTERM ')' { $$ = new OperationLoadMaterial(ruleset,$3,$5,true); }
+  | LOADMATERIAL '(' NONTERM ',' NONTERM ')' { $$ = new OperationLoadMaterial(ruleset,$3,$5,false); }
   | MULTIFACE '(' ')' { $$ = new OperationMultiFace(ruleset); }
   | FREE '(' ')' { $$ = new OperationFree(ruleset); }
   | REMOVE '(' ')' { $$ = new OperationRemove(ruleset); }

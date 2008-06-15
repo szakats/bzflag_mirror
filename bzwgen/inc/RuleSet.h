@@ -30,7 +30,7 @@ public:
   MeshVector* run(Mesh* initial_mesh, int initial_face, String& rulename);
   int runMesh(Mesh* mesh, int face, String& rulename);
   int runNewMesh(Mesh* old_mesh, int old_face, String& rulename);
-  void loadMaterial(String& id, String& name);
+  void loadMaterial(String& id, String& name, bool noradar);
   void initialize() { String init = String("initialize"); runMesh(NULL,0,init); }
   void addAttr(const char* name, double value) { String temp = name; addAttr(temp,value); }
   void addAttr(String& name, double value) { attrmap[name] = value; }

@@ -46,28 +46,29 @@
      TEXTURECLEAR = 272,
      MATERIAL = 273,
      LOADMATERIAL = 274,
-     SPAWNNGON = 275,
-     UNCHAMFER = 276,
-     ASSIGN = 277,
-     DEFSIGN = 278,
-     EXTRUDE = 279,
-     EXTRUDET = 280,
-     EXPAND = 281,
-     RANDOM = 282,
-     REPEATH = 283,
-     REPEATV = 284,
-     SPLITV = 285,
-     SPLITH = 286,
-     MULTIFACE = 287,
-     FREE = 288,
-     NGON = 289,
-     REMOVE = 290,
-     ADDFACE = 291,
-     DETACHFACE = 292,
-     DRIVETHROUGH = 293,
-     NUMBER = 294,
-     NONTERM = 295,
-     ATTRIBUTE = 296
+     LOADMATERIALNR = 275,
+     SPAWNNGON = 276,
+     UNCHAMFER = 277,
+     ASSIGN = 278,
+     DEFSIGN = 279,
+     EXTRUDE = 280,
+     EXTRUDET = 281,
+     EXPAND = 282,
+     RANDOM = 283,
+     REPEATH = 284,
+     REPEATV = 285,
+     SPLITV = 286,
+     SPLITH = 287,
+     MULTIFACE = 288,
+     FREE = 289,
+     NGON = 290,
+     REMOVE = 291,
+     ADDFACE = 292,
+     DETACHFACE = 293,
+     DRIVETHROUGH = 294,
+     NUMBER = 295,
+     NONTERM = 296,
+     ATTRIBUTE = 297
    };
 #endif
 /* Tokens.  */
@@ -88,28 +89,29 @@
 #define TEXTURECLEAR 272
 #define MATERIAL 273
 #define LOADMATERIAL 274
-#define SPAWNNGON 275
-#define UNCHAMFER 276
-#define ASSIGN 277
-#define DEFSIGN 278
-#define EXTRUDE 279
-#define EXTRUDET 280
-#define EXPAND 281
-#define RANDOM 282
-#define REPEATH 283
-#define REPEATV 284
-#define SPLITV 285
-#define SPLITH 286
-#define MULTIFACE 287
-#define FREE 288
-#define NGON 289
-#define REMOVE 290
-#define ADDFACE 291
-#define DETACHFACE 292
-#define DRIVETHROUGH 293
-#define NUMBER 294
-#define NONTERM 295
-#define ATTRIBUTE 296
+#define LOADMATERIALNR 275
+#define SPAWNNGON 276
+#define UNCHAMFER 277
+#define ASSIGN 278
+#define DEFSIGN 279
+#define EXTRUDE 280
+#define EXTRUDET 281
+#define EXPAND 282
+#define RANDOM 283
+#define REPEATH 284
+#define REPEATV 285
+#define SPLITV 286
+#define SPLITH 287
+#define MULTIFACE 288
+#define FREE 289
+#define NGON 290
+#define REMOVE 291
+#define ADDFACE 292
+#define DETACHFACE 293
+#define DRIVETHROUGH 294
+#define NUMBER 295
+#define NONTERM 296
+#define ATTRIBUTE 297
 
 
 
@@ -128,7 +130,7 @@ typedef union _YYSTYPE {
   Expression* e;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 132 "..\\parser.hxx"
+#line 134 "..\\parser.hxx"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

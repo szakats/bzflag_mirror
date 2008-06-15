@@ -19,7 +19,7 @@ int OperationNonterminal::runMesh(Mesh* mesh, int face) {
 }
 
 int OperationLoadMaterial::runMesh(Mesh*, int face) {
-  ruleset->loadMaterial(id,filename);
+  ruleset->loadMaterial(id,filename,noradar);
   return face;
 }
 

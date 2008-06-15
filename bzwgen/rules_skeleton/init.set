@@ -10,8 +10,8 @@
 
 
 initialize -> 
-  loadmaterial(MATROAD,road)
-  loadmaterial(MATROADX,roadx)
+  loadmaterialnr(MATROAD,road)
+  loadmaterialnr(MATROADX,roadx)
   loadmaterial(MATMESH,mesh)
   loadmaterial(MATGRASS,grass)
   assign(LEDGEHEIGHT = 0.5)

@@ -10,8 +10,8 @@
 
 
 initialize -> 
-  loadmaterial(MATROAD,road)
-  loadmaterial(MATROADX,roadx)
+  loadmaterialnr(MATROAD,road)
+  loadmaterialnr(MATROADX,roadx)
   loadmaterial(MATWALL,bwall)
   loadmaterial(MATWALL2,bwall2)
   loadmaterial(MATMESH,mesh)
