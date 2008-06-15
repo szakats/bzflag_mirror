@@ -35,7 +35,7 @@ public:
   }
   void texcoord(TexCoord tc) { 
     texcoords++;
-    (*outstream) << "  texcoord " << tc.s << " " << tc.t << "\n"; 
+    (*outstream) << "  texcoord " << tc.x << " " << tc.y << "\n"; 
   }
   void face(Face* f, int lastmat = -1) { 
     if (!f->output) return;

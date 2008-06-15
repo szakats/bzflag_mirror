@@ -58,77 +58,15 @@ typedef std::ofstream OutFileStream;
 
 extern int debugLevel;
 
-struct Vertex {
-  double x, y, z;
- 
-  Vertex() : x(0.0), y(0.0), z(0.0) {}
-  Vertex(double _x, double _y, double _z) :x(_x), y(_y), z(_z) {}
-  Vertex(double v[3]) :x(v[0]), y(v[1]), z(v[2]) {}
-  
-  Vertex operator+(const Vertex &v) { return Vertex(x + v.x, y + v.y, z + v.z); }
-  Vertex operator-(const Vertex &v) { return Vertex(x - v.x, y - v.y, z - v.z); }
-  Vertex operator*(const Vertex &v) { return Vertex(x * v.x, y * v.y, z * v.z); }
-  Vertex operator*(const double f) { return Vertex(x * f, y * f, z * f); }
-  Vertex operator/(const Vertex &v) { return Vertex(x / v.x, y / v.y, z / v.z); }
-  Vertex operator/(const double f) { return Vertex(x / f, y / f, z / f); }
+#include "Vector2D.h"
+#include "Vector3D.h"
 
-  void normalize() { double l = length(); if (l == 0.0) return; x/=l; y/=l; z/=l; }
-  Vertex norm() { double l = length(); return (l == 0.0) ? Vertex() : Vertex(x/l,y/l,z/l); }
-
-  String toString() { char buffer[80]; sprintf(buffer, "[%.4f,%.4f,%.4f]",x,y,z); return String(buffer); }
-
-  Vertex cross(const Vertex &v) { 
-    return Vertex(
-      y * v.z - v.y * z,
-      v.x * z - x * v.z,
-      x * v.y - v.x * y
-    );
-  }
-
-  double dot(const Vertex &v) { return x*v.x + y*v.y + z*v.z; }
-
-  double length() { return sqrt(x*x + y*y + z*z); }
-  double lengthsq() { return x*x + y*y + z*z; }
-
-  void set(double v[3]) { x = v[0], y = v[1], z = v[2]; }
-  void set(double _x, double _y, double _z) { x = _x, y = _y, z = _z; }
-  
-  double &operator[](int i) {
-    switch (i) {
-      case 0: return x; break;
-      case 1: return y; break;
-      case 2: return z; break;
-      default: return x;
-    }
-  }
-};
+typedef Vector3D<double> Vertex;
+typedef Vector2D<double> TexCoord;
+typedef Vector2D<int> Coord2D;
 
 typedef std::vector<Vertex> VertexVector;
 typedef VertexVector::iterator VertexVectIter;
-
-struct TexCoord {
-  double s, t;
- 
-  TexCoord() : s(0.0), t(0.0) {}
-  TexCoord(double _s, double _t) :s(_s), t(_t) {}
-  TexCoord(double v[2]) : s(v[0]), t(v[1]) {}
-  
-  void set(double v[2]) { s = v[0], t = v[1]; }
-  void set(double _s, double _t) { s = _s, t = _t; }
-
-  // This may be evil, but TexCoords do not need to be fully perfect :P
-  bool operator==(const TexCoord& b) {
-    return (fabs(s - b.s) < EPSILON && fabs(t - b.t) < EPSILON);
-  }
-
-  double &operator[](int i) {
-    switch (i) { 
-      case 0: return s; break;
-      case 1: return t; break;
-      default: return s;
-    }
-  }
-};
 
 typedef std::vector<TexCoord> TexCoordVector;
 typedef TexCoordVector::iterator TexCoordVectIter;
@@ -163,27 +101,6 @@ struct GridInfo {
   int size;
   int sizeX,sizeY;
   int stepX,stepY;
-};
-
-struct Coord2D {
-  int x;
-  int y;
-  Coord2D() { x=0; y=0; };
-  Coord2D(int ax, int ay) : x(ax), y(ay) {};
-  const Coord2D& operator += (const Coord2D& b) {
-    x += b.x;
-    y += b.y;
-    return *this;
-  }
-  const Coord2D& operator -= (const Coord2D& b) {
-    x -= b.x;
-    y -= b.y;
-    return *this;
-  }	
-  bool operator==(const Coord2D& b) {
-    return (x == b.x && y == b.y);
-  }
-  bool operator != (const Coord2D& b) { return !operator==(b); }
 };
 
 inline int modprev(int x, int mod) { return (x == 0) ? mod-1 : x-1; }
@@ -262,6 +179,10 @@ inline int intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P1, Vertex
 }
 
 inline bool samepointZ(Vertex A, Vertex B) {
+  return (fabs(A.x-B.x) < EPSILON && fabs(A.y-B.y) < EPSILON);
+}
+
+inline bool sameTexCoord(TexCoord A, TexCoord B) {
   return (fabs(A.x-B.x) < EPSILON && fabs(A.y-B.y) < EPSILON);
 }
 

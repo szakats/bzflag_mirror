@@ -480,7 +480,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\inc\Point2D.h"
+					RelativePath="..\..\inc\Vector2D.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\Vector3D.h"
 					>
 				</File>
 			</Filter>
