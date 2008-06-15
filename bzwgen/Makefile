@@ -80,5 +80,5 @@ bzwgen: ${OBJECTS} ${APP_OBJECTS}
 #	${CXX} -I../bzflag/include/ -shared -o $@.so ${OBJECTS} ${PLUGIN_OBJECTS} ${CFLAGS} -DCOMPILE_PLUGIN ${LDFLAGS} ${LIBS}
 	
 end:	
-@echo "Done!"
+	@echo "Done!"
 
