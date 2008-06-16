@@ -13,9 +13,6 @@
 #ifndef __GLOBALS_H__
 #define __GLOBALS_H__
 
-#include <algorithm>
-#include <iostream>
-#include <cctype>
 #include <vector>
 #include <string>
 #include <map>

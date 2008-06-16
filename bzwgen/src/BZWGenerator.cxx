@@ -15,6 +15,7 @@
 #include "Output.h"
 #include "GridGenerator.h"
 #include <sstream>
+#include <iostream>
 
 typedef std::ostringstream OutStringStream;
 

@@ -10,8 +10,10 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include <iostream>
 #include "BZWGeneratorStandalone.h"
 #include "Output.h"
+
 
 void BZWGeneratorStandalone::printHelpCommand ( const char* shortName, const char* longName, const char* description )
 {
