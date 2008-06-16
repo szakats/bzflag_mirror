@@ -38,7 +38,7 @@ int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat) {
   v.push_back(c);
   v.push_back(d);
   int size = v.size();
-  return addFace(new Face(ID4(size-4,size-3,size-2,size-1),mat));
+  return addFace(new Face(size-4,size-3,size-2,size-1,mat));
 }
 
 int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord tca, TexCoord tcb, TexCoord tcc, TexCoord tcd, int mat) {
@@ -52,7 +52,7 @@ int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord tca, Te
   tc.push_back(tcc);
   tc.push_back(tcd);
   int tsize = tc.size();
-  return addFace(new Face(ID4(size-4,size-3,size-2,size-1),ID4(tsize-4,tsize-3,tsize-2,tsize-1),mat));
+  return addFace(new Face(Face::ID4(size-4,size-3,size-2,size-1),Face::ID4(tsize-4,tsize-3,tsize-2,tsize-1),mat));
 }
 
 int Mesh::createNGon(Vertex center, double radius, int n) {
@@ -82,11 +82,10 @@ IntVector* Mesh::extrudeFaceR(int fid, double amount, int mat) {
   for (int i = 0; i < size; i++) {
     result->push_back(
       addFace(new Face(
-        ID4(
-	  base->at(i),
+      	  base->at(i),
 	  base->at(math::modNext(i,size)),
 	  top->at(math::modNext(i,size)),
-	  top->at(i))
+	  top->at(i)
 	,mat))
     );
   }
@@ -109,7 +108,7 @@ void Mesh::extrudeFace(int fid, double amount, int mat) {
 
   for (int i = 0; i < size; i++) {
     addFace(new Face(
-      ID4(
+      Face::ID4(
 	base->at(i),
 	base->at(math::modNext(i,size)),
 	top->at(math::modNext(i,size)),
@@ -271,9 +270,9 @@ IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
     bi = addVertex(b);
 
     if (horizontal) {
-      result->push_back(addFace(new Face(ID4(pbi,bi,ai,pai),mat)));
+      result->push_back(addFace(new Face(pbi,bi,ai,pai,mat)));
     } else {
-      result->push_back(addFace(new Face(ID4(pai,pbi,bi,ai),mat)));
+      result->push_back(addFace(new Face(pai,pbi,bi,ai,mat)));
     }
 
     pai = ai;
@@ -283,9 +282,9 @@ IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
   result->push_back(fid);
 
   if (horizontal) {
-    f[fid]->setID4(ID4(bi,cnr->at(1),cnr->at(2),ai));
+    f[fid]->setID4(Face::ID4(bi,cnr->at(1),cnr->at(2),ai));
   } else {
-    f[fid]->setID4(ID4(ai,bi,cnr->at(2),cnr->at(3)));
+    f[fid]->setID4(Face::ID4(ai,bi,cnr->at(2),cnr->at(3)));
   }
   return result;
 }
@@ -367,9 +366,9 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
     }
 
     if (horizontal) {
-      result->push_back(addFace(new Face(ID4(pbi,bi,ai,pai),mat)));
+      result->push_back(addFace(new Face(pbi,bi,ai,pai,mat)));
     } else {
-      result->push_back(addFace(new Face(ID4(pai,pbi,bi,ai),mat)));
+      result->push_back(addFace(new Face(pai,pbi,bi,ai,mat)));
     }
 
     pai = ai;
@@ -379,9 +378,9 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
   result->push_back(fid);
 
   if (horizontal) {
-    f[fid]->setID4(ID4(bi,cnr->at(1),cnr->at(2),ai));
+    f[fid]->setID4(Face::ID4(bi,cnr->at(1),cnr->at(2),ai));
   } else {
-    f[fid]->setID4(ID4(ai,bi,cnr->at(2),cnr->at(3)));
+    f[fid]->setID4(Face::ID4(ai,bi,cnr->at(2),cnr->at(3)));
   }
   delete sdata;
   return result;

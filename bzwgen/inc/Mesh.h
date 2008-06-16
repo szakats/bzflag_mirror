@@ -61,7 +61,6 @@ public:
   ~Mesh();
 private:
   Vertex extensionVertex(int ida, int idb, int idc);
-
 };
 
 typedef std::vector<Mesh*> MeshVector;

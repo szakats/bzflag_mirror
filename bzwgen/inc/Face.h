@@ -18,6 +18,10 @@
 
 class Face {
 public:
+  struct ID4 {
+    int v[4];
+    ID4(int a, int b, int c, int d) { v[0] = a; v[1] = b; v[2] = c; v[3] = d; }
+  };
   IntVector* vtx;
   IntVector* tcd;
   int mat;
@@ -31,16 +35,24 @@ public:
     vtx = new IntVector;
     tcd = new IntVector;
     for (int i = 0; i < 4; i++) {
-      vtx->push_back(_vtx[i]);
-      tcd->push_back(_tcd[i]);
+      vtx->push_back(_vtx.v[i]);
+      tcd->push_back(_tcd.v[i]);
     }
   }
   Face(ID4 _vtx, int _mat = 0) : mat(_mat), texcoords(false), output(true) {
     vtx = new IntVector;
     tcd = new IntVector;
     for (int i = 0; i < 4; i++) {
-      vtx->push_back(_vtx[i]);
+      vtx->push_back(_vtx.v[i]);
     }
+  }
+  Face(int a, int b, int c, int d, int _mat = 0) : mat(_mat), texcoords(false), output(true) {
+    vtx = new IntVector;
+    tcd = new IntVector;
+    vtx->push_back(a);
+    vtx->push_back(b);
+    vtx->push_back(c);
+    vtx->push_back(d);
   }
   IntVector* vtxClone() {
     int fsize = size();
@@ -51,7 +63,7 @@ public:
   void setID4(ID4 id4) {
     vtx->clear();
     for (int i = 0; i < 4; i++) {
-      vtx->push_back(id4[i]);
+      vtx->push_back(id4.v[i]);
     }
   }
   int addVertex(int v) {
