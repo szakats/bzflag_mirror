@@ -33,8 +33,8 @@ public:
   bool ctfSafe;
 
   Generator(RuleSet* _ruleset) : ruleset(_ruleset) {
-    roadid  = roundToInt(ruleset->getAttr("MATROAD"));
-    roadxid = roundToInt(ruleset->getAttr("MATROADX"));
+    roadid  = math::roundToInt(ruleset->getAttr("MATROAD"));
+    roadxid = math::roundToInt(ruleset->getAttr("MATROADX"));
   }
   virtual void parseOptions(CCommandLineArgs* opt);
   virtual void run();

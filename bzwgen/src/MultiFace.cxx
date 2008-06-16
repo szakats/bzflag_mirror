@@ -124,7 +124,7 @@ bool MultiFace::isLeftOfVectors(int x, int a, int b, int c) {
 
   Vertex normal = Vertex(0.0,0.0,1.0);//faceNormal(fid);
 
-  return fsign( Xline.cross(Pline).dot(normal) ) >= 0;
+  return math::sign( Xline.cross(Pline).dot(normal) ) >= 0;
 }
 
 // BUUUUUG, doesn't handle inter-face jumps when doing the cut edge!
@@ -211,11 +211,11 @@ int MultiFace::addFace(Face* f) {
       first = false;
       if (newf) {
         newvtx->push_back(f->vertex(index));
-        next = modnext(index,fsize);
+	next = math::modNext(index,fsize);
         getvert = getVertexIndex(f->vertex(next));
       } else {
         newvtx->push_back(vertex(index));
-        next = modnext(index,tsize);
+        next = math::modNext(index,tsize);
         getvert = f->getVertexIndex(vertex(next));
       }
       if (getvert != -1) {
@@ -291,23 +291,23 @@ int MultiFace::intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P1, Ve
     double d = ((B.x-A.x)*(D.y-C.y)-(B.y-A.y)*(D.x-C.x));
     double r = ((A.y-C.y)*(D.x-C.x)-(A.x-C.x)*(D.y-C.y));
     double s = ((A.y-C.y)*(B.x-A.x)-(A.x-C.x)*(B.y-A.y));
-    if (iszero(d)) {
-      if (iszero(r)) { // parallel and coincident
+    if (math::isZero(d)) {
+      if (math::isZero(r)) { // parallel and coincident
 	double e;
 	double f;
-	if (iszero(A.y-C.y)&&iszero(B.y-D.y)) {                   // parallel on X
-          if (commonrange(A.x,B.x,C.x,D.x,e,f)) { // AB and CD have common point
+	if (math::isZero(A.y-C.y) && math::isZero(B.y-D.y)) {                   // parallel on X
+          if (math::commonRange(A.x,B.x,C.x,D.x,e,f)) { // AB and CD have common point
             P1 = P2 = A;
             P1.x = e;
 	    P2.x = f;
-	    return iszero(e-f) ? 1 : 2;
+	    return math::isZero(e-f) ? 1 : 2;
 	  } else return 0;
 	} else {                                 // parallel on Y
-	  if (commonrange(A.y,B.y,C.y,D.y,e,f)) { // AB and CD have common point
+	  if (math::commonRange(A.y,B.y,C.y,D.y,e,f)) { // AB and CD have common point
 	    P1 = P2 = A;
 	    P1.y = e;
 	    P2.y = f;
-	    return iszero(e-f) ? 1 : 2;
+	    return math::isZero(e-f) ? 1 : 2;
 	  } else return 0;
 	}
      } else return 0; // parallel but not coincident

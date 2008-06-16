@@ -26,7 +26,7 @@ int Mesh::addVertex(Vertex vtx) {
 
 int Mesh::addTexCoord(TexCoord tcx) { 
   for (size_t i = 0; i < tc.size(); i++) {
-    if (equals(tc[i].x,tcx.x) && equals(tc[i].y,tcx.y)) return i;
+    if (math::equals(tc[i].x,tcx.x) && math::equals(tc[i].y,tcx.y)) return i;
   }
   tc.push_back(tcx); 
   return tc.size()-1; 
@@ -80,7 +80,15 @@ IntVector* Mesh::extrudeFaceR(int fid, double amount, int mat) {
   f[fid]->vtx = top;
 
   for (int i = 0; i < size; i++) {
-    result->push_back(addFace(new Face(ID4(base->at(i),base->at(modnext(i,size)),top->at(modnext(i,size)),top->at(i)),mat)));
+    result->push_back(
+      addFace(new Face(
+        ID4(
+	  base->at(i),
+	  base->at(math::modNext(i,size)),
+	  top->at(math::modNext(i,size)),
+	  top->at(i))
+	,mat))
+    );
   }
 
   delete base;
@@ -100,7 +108,13 @@ void Mesh::extrudeFace(int fid, double amount, int mat) {
   f[fid]->vtx = top;
 
   for (int i = 0; i < size; i++) {
-    addFace(new Face(ID4(base->at(i),base->at(modnext(i,size)),top->at(modnext(i,size)),top->at(i)),mat));
+    addFace(new Face(
+      ID4(
+	base->at(i),
+	base->at(math::modNext(i,size)),
+	top->at(math::modNext(i,size)),
+	top->at(i))
+      ,mat));
   }
 
   delete base;
@@ -154,10 +168,10 @@ void Mesh::expandFace(int fid, double amount) {
   int size = fv->size();
   Vertex* nv = new Vertex[size];
   for (int i = 0; i < size; i++) {
-    Vertex a = v[fv->at(modnext(i,size))] - v[fv->at(modprev(i,size))];
-    Vertex b = v[fv->at(i)] - v[fv->at(modprev(i,size))];
-    double sign = fsign( b.cross(a).dot(normal) );
-    nv[i] = v[fv->at(i)] + extensionVertex(fv->at(modprev(i,size)),fv->at(modnext(i,size)),fv->at(i))*amount*sign;
+    Vertex a = v[fv->at(math::modNext(i,size))] - v[fv->at(math::modPrev(i,size))];
+    Vertex b = v[fv->at(i)] - v[fv->at(math::modPrev(i,size))];
+    double sign = math::sign( b.cross(a).dot(normal) );
+    nv[i] = v[fv->at(i)] + extensionVertex( fv->at(math::modPrev(i,size)) , fv->at(math::modNext(i,size)), fv->at(i) ) *amount*sign;
   }
   for (int i = 0; i < size; i++) {
     v[fv->at(i)] = nv[i];
@@ -214,8 +228,8 @@ Vertex Mesh::faceNormal(int fid) {
 
 IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
   double len = horizontal ? faceH(fid) : faceV(fid);
-  snap = refinesnap(snap,len);
-  int count = roundToInt(len/snap);
+  snap = math::refineSnap(snap,len);
+  int count = math::roundToInt(len/snap);
 
   IntVector* cnr = f[fid]->vtx;
   Vertex stepA, stepB;
@@ -300,7 +314,7 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
   }  
 
   double s = ssnap;
-  if (ssnap > EPSILON) s = refinesnap(ssnap,length);
+  if (ssnap > EPSILON) s = math::refineSnap(ssnap,length);
 
   if (horizontal) {
     stepA = (v[cnr->at(2)]-v[cnr->at(3)]).norm();
@@ -342,8 +356,8 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
       double la = A.length();
       double lb = B.length();
 
-      Vertex sa = v[as]+(A.norm()*snap(la,s));
-      Vertex sb = v[bs]+(B.norm()*snap(lb,s));
+      Vertex sa = v[as]+(A.norm() * math::snap(la,s));
+      Vertex sb = v[bs]+(B.norm() * math::snap(lb,s));
 
       ai = addVertex(sa);
       bi = addVertex(sb);
@@ -410,12 +424,12 @@ void Mesh::chamferFace(int fid, double amount) {
     in.push_back(v[old[i]]);
   }
   for (int i = 0; i < size; i++) {
-    Vertex a = in[i]-in[modprev(i,size)];
-    Vertex b = in[i]-in[modnext(i,size)];
-    double af = (a.length()-amount)/a.length();
-    double bf = (b.length()-amount)/b.length();
-    a = in[modprev(i,size)]+a*af;
-    b = in[modnext(i,size)]+b*bf;
+    Vertex a = in[i]-in[math::modPrev(i,size)];
+    Vertex b = in[i]-in[math::modNext(i,size)];
+    double af = (a.length()-amount) / a.length();
+    double bf = (b.length()-amount) / b.length();
+    a = in[math::modPrev(i,size)]+a*af;
+    b = in[math::modNext(i,size)]+b*bf;
     v[old[i]] = a;
     f[fid]->vtx->push_back(old[i]);
     f[fid]->vtx->push_back(addVertex(b));
@@ -444,7 +458,7 @@ void Mesh::textureFaceQuad(int fid, double au, double av, double bu, double bv) 
 }
 
 void Mesh::textureFace(int fid, double snap, double tile) {
-  textureFaceQuad(fid,0.0,0.0,roundToInt(faceH(fid)/snap)*tile,roundToInt(faceV(fid)/snap)*tile);
+  textureFaceQuad(fid,0.0,0.0,math::roundToInt(faceH(fid)/snap)*tile,math::roundToInt(faceV(fid)/snap)*tile);
 }
 
 void Mesh::freeFace(int fid) {

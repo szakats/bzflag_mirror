@@ -72,7 +72,7 @@ int OperationDetachFace::runMesh(Mesh* mesh,int face) {
     return face;
   }
   flatten(mesh,face);
-  IntVector* faces = ((MultiFace*)mesh->f[face])->detachFace(roundToInt(value));
+  IntVector* faces = ((MultiFace*)mesh->f[face])->detachFace(math::roundToInt(value));
   if (faces != NULL) {
     OperationMultifaces::runMesh(mesh,face,faces);
     delete faces;

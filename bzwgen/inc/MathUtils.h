@@ -22,41 +22,109 @@
 
 #define EPSILON 0.001
 
-inline int modprev(int x, int mod) { return (x == 0) ? mod-1 : x-1; }
-inline int modnext(int x, int mod) { return (x == mod-1) ? 0 : x+1; }
+namespace math {
 
-inline int roundToInt(double f) { return int(f+0.5f); }
-
-inline double fsign(double f) { if (f == 0.0) return 0.0; return (f < 0.0) ? -1.0 : 1.0; }
-
-inline double snap(double f,double snapval) { return double(roundToInt(f/snapval))*snapval; }
-inline double refinesnap(double oldsnap, double max) { return (max/double(roundToInt(max/oldsnap))); }
-
-inline double minf(double a,double b) { return a < b ? a : b; }
-inline double maxf(double a,double b) { return a > b ? a : b; }
-
-inline bool iszero(double f) { return fabs(f) < EPSILON; }
-
-inline bool inrange(double a, double r1, double r2) { 
-  return (r2 > r1) ? (a > r1-EPSILON && a < r2+EPSILON) : (a > r2-EPSILON && a < r1+EPSILON); 
+/** Function returns wether a given float/double is equal to zero with the 
+    given precision. If no precision is given then EPSILON is used. The 
+    function is templated to be both used with doubles and floats. */
+template <class T>
+inline bool isZero(T f, T precision = EPSILON) { 
+  return fabs(f) < precision; 
 }
 
-inline bool commonrange(double a1, double a2, double b1, double b2, double &c1, double &c2) { 
-  double mina = minf(a1,a2);
-  double maxa = maxf(a1,a2);
-  double minb = minf(b1,b2);
-  double maxb = maxf(b1,b2);
-  if (maxa < minb-EPSILON || mina > maxb+EPSILON) return false;
-    c1 = maxf(mina,minb);
-    c2 = minf(maxa,maxb);
-  return true;
-}
-
+/** Function returns wether two given floats/doubles are equal with the 
+    given precision. If no precision is given then EPSILON is used. The 
+    function is templated to be both used with doubles and floats. */
 template <class T>
 inline bool equals(T x, T y, T precision = EPSILON) {
   return fabs(x-y) <= precision;
 }
 
+/** Decrementing in a circular space -- returns x-1, unless x is zero 
+    then it returns mod-1. */
+inline int modPrev(int x, int mod) { 
+  return (x == 0) ? mod-1 : x-1; 
+}
+
+/** Incrementing in a circular space -- returns x+1, unless x is mod-1 
+    then it returns 0. */
+inline int modNext(int x, int mod) { 
+  return (x == mod-1) ? 0 : x+1; 
+}
+
+/** Rounds a float/double to the nearest integer. Contrary to the usual 
+    round, the result is an int. The function is templated to be both 
+    used with doubles and floats. */
+template <class T>
+inline int roundToInt(T f) { 
+  return int(f+0.5f); 
+}
+
+/** Returns the sign of the passed float/double. Contrary to other 
+    functions implemented here, this one doesn't rely on precision.
+    The function is templated to be both used with doubles and floats. */
+template <class T>
+inline T sign(T f) { 
+  if (f == 0.0) return 0.0; 
+  return (f < 0.0) ? -1.0 : 1.0; 
+}
+
+/** Rounds the passed double/float to the nearest multiple of snapval.
+    The function is templated to be both used with doubles and floats. */
+template <class T>
+inline T snap(T f,T snapval) { 
+  return T(roundToInt(f/snapval))*snapval; 
+}
+
+/** Refines the given snap value. The effect is that the returned snap 
+    value will be rounded to the nearest number that is a "divisor" of
+    maxval. The function is templated to be both used with doubles and 
+    floats. */
+template <class T>
+inline T refineSnap(T oldsnap, T maxval) { 
+  return (maxval/T(roundToInt(maxval/oldsnap))); 
+}
+
+/** Returns the smaller of the two values. Thanks to templating may be 
+    used on any numeric type. */
+template <class T>
+inline T min(T a,T b) { 
+  return a < b ? a : b; 
+}
+
+/** Returns the larger of the two values. Thanks to templating may be 
+    used on any numeric type. */
+template <class T>
+inline T max(T a,T b) { 
+  return a > b ? a : b; 
+}
+
+/** Returns true if x is in [r1..r2]. A precision may be optionally passed,
+    if not, EPSILON is assumed. Function is templated to work with both
+    floats and doubles. */
+template <class T>
+inline bool inRange(T x, T r1, T r2, T precision = EPSILON) { 
+  return (r2 > r1) ? (x > r1-precision && x < r2+precision) : (x > r2-precision && x < r1+precision); 
+}
+
+/** Returns true if a1..a2 and b1..b2 ranges have a common part. The part is 
+    returned as result1..result2. A precision may be optionally passed,
+    if not, EPSILON is assumed. Function is templated to work with both
+    floats and doubles. */
+template <class T>
+inline bool commonRange(T a1, T a2, T b1, T b2, T &result1, T &result2, T precision = EPSILON) { 
+  T mina = min(a1,a2);
+  T maxa = max(a1,a2);
+  T minb = min(b1,b2);
+  T maxb = max(b1,b2);
+  if (maxa < minb-precision || mina > maxb+precision) 
+    return false;
+  result1 = max(mina,minb);
+  result2 = min(maxa,maxb);
+  return true;
+}
+
+}
 
 #endif /* __BZMATH_H__ */
 

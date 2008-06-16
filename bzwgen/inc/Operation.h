@@ -208,9 +208,9 @@ public:
     flatten(mesh,face);
     mesh->freeFace(face);
     if (nsize != NULL) {
-      face = mesh->createNGon(mesh->faceCenter(face),nsize->calculate(mesh,face),roundToInt(value));
+      face = mesh->createNGon(mesh->faceCenter(face),nsize->calculate(mesh,face),math::roundToInt(value));
     } else {
-      face = mesh->createNGon(mesh->faceCenter(face),minf(mesh->faceH(face),mesh->faceV(face))/2,roundToInt(value));
+      face = mesh->createNGon(mesh->faceCenter(face),math::min(mesh->faceH(face),mesh->faceV(face))/2,math::roundToInt(value));
     }
     return face;
   }
@@ -240,7 +240,7 @@ public:
   int runMesh(Mesh* mesh,int face) { 
     if (mesh == NULL) return 0;
     flatten(mesh,face);
-    mesh->f[face]->mat = roundToInt(value);
+    mesh->f[face]->mat = math::roundToInt(value);
     return face; 
   };
 };
