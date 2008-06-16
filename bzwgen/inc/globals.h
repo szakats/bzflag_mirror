@@ -16,8 +16,7 @@
 #include <vector>
 #include <string>
 #include <map>
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include "MathUtils.h"
 
 typedef std::string String;
 typedef std::vector<int> IntVector;
@@ -37,7 +36,6 @@ typedef std::ofstream OutFileStream;
 #define CELLROADX 2
 #define CELLBASE  3
 
-#define EPSILON 0.001
 #ifdef _MSC_VER
 #pragma warning(disable:4996)
 #endif
@@ -85,78 +83,10 @@ struct ID4 {
   }
 };
 
-inline int modprev(int x, int mod) { return (x == 0) ? mod-1 : x-1; }
-inline int modnext(int x, int mod) { return (x == mod-1) ? 0 : x+1; }
-
-inline int roundToInt(double f) { return int(f+0.5f); }
-
-inline double fsign(double f) { if (f == 0.0) return 0.0; return (f < 0.0) ? -1.0 : 1.0; }
-
-inline double snap(double f,double snapval) { return double(roundToInt(f/snapval))*snapval; }
-inline double refinesnap(double oldsnap, double max) { return (max/double(roundToInt(max/oldsnap))); }
-
-inline double minf(double a,double b) { return a < b ? a : b; }
-inline double maxf(double a,double b) { return a > b ? a : b; }
-
-inline bool iszero(double f) { return fabs(f) < EPSILON; }
-
-inline bool inrange(double a, double r1, double r2) { 
-  return (r2 > r1) ? (a > r1-EPSILON && a < r2+EPSILON) : (a > r2-EPSILON && a < r1+EPSILON); 
-}
-
-inline bool commonrange(double a1, double a2, double b1, double b2, double &c1, double &c2) { 
-  double mina = minf(a1,a2);
-  double maxa = maxf(a1,a2);
-  double minb = minf(b1,b2);
-  double maxb = maxf(b1,b2);
-  if (maxa < minb-EPSILON || mina > maxb+EPSILON) return false;
-  c1 = maxf(mina,minb);
-  c2 = minf(maxa,maxb);
-  return true;
-}
-
-inline int intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P1, Vertex& P2) {
-  double d = ((B.x-A.x)*(D.y-C.y)-(B.y-A.y)*(D.x-C.x));
-  double r = ((A.y-C.y)*(D.x-C.x)-(A.x-C.x)*(D.y-C.y));
-  double s = ((A.y-C.y)*(B.x-A.x)-(A.x-C.x)*(B.y-A.y));
-  if (iszero(d)) {
-    if (iszero(r)) { // parallel and coincident
-      double e;
-      double f;
-      if (iszero(A.y-C.y)&&iszero(B.y-D.y)) {                   // parallel on X
-        if (commonrange(A.x,B.x,C.x,D.x,e,f)) { // AB and CD have common point
-          P1 = P2 = A;
-          P1.x = e;
-          P2.x = f;
-          return iszero(e-f) ? 1 : 2;
-        } else return 0;
-      } else {                                 // parallel on Y
-        if (commonrange(A.y,B.y,C.y,D.y,e,f)) { // AB and CD have common point
-          P1 = P2 = A;
-          P1.y = e;
-          P2.y = f;
-          return iszero(e-f) ? 1 : 2;
-        } else return 0;
-      }
-    } else return 0; // parallel but not coincident
-  }
-  r /= d;
-  s /= d;
-  if (r > 0-EPSILON && r < 1+EPSILON && s > 0-EPSILON && s < 1+EPSILON) {
-    P1.x = A.x+r*(B.x-A.x);
-    P1.y = A.y+r*(B.y-A.y);
-    P1.z = A.z;
-    return 1;
-  } else return 0;
-}
-
-inline bool samepointZ(Vertex A, Vertex B) {
-  return (fabs(A.x-B.x) < EPSILON && fabs(A.y-B.y) < EPSILON);
-}
-
 inline bool sameTexCoord(TexCoord A, TexCoord B) {
   return (fabs(A.x-B.x) < EPSILON && fabs(A.y-B.y) < EPSILON);
 }
+
 
 #endif /* __GLOBALS_H__ */
 

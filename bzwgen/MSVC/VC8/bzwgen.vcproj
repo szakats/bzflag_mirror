@@ -699,6 +699,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\inc\MathUtils.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\inc\PlanarGraph.h"
 					>
 				</File>

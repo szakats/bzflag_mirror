@@ -287,6 +287,46 @@ bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index
   return distance <= length+EPSILON;
 }
 
+int MultiFace::intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P1, Vertex& P2) {
+    double d = ((B.x-A.x)*(D.y-C.y)-(B.y-A.y)*(D.x-C.x));
+    double r = ((A.y-C.y)*(D.x-C.x)-(A.x-C.x)*(D.y-C.y));
+    double s = ((A.y-C.y)*(B.x-A.x)-(A.x-C.x)*(B.y-A.y));
+    if (iszero(d)) {
+      if (iszero(r)) { // parallel and coincident
+	double e;
+	double f;
+	if (iszero(A.y-C.y)&&iszero(B.y-D.y)) {                   // parallel on X
+          if (commonrange(A.x,B.x,C.x,D.x,e,f)) { // AB and CD have common point
+            P1 = P2 = A;
+            P1.x = e;
+	    P2.x = f;
+	    return iszero(e-f) ? 1 : 2;
+	  } else return 0;
+	} else {                                 // parallel on Y
+	  if (commonrange(A.y,B.y,C.y,D.y,e,f)) { // AB and CD have common point
+	    P1 = P2 = A;
+	    P1.y = e;
+	    P2.y = f;
+	    return iszero(e-f) ? 1 : 2;
+	  } else return 0;
+	}
+     } else return 0; // parallel but not coincident
+  }
+  r /= d;
+  s /= d;
+  if (r > 0-EPSILON && r < 1+EPSILON && s > 0-EPSILON && s < 1+EPSILON) {
+    P1.x = A.x+r*(B.x-A.x);
+    P1.y = A.y+r*(B.y-A.y);
+    P1.z = A.z;
+    return 1;
+  } else return 0;
+}
+
+bool MultiFace::samepointZ(Vertex A, Vertex B) {
+  return (fabs(A.x-B.x) < EPSILON && fabs(A.y-B.y) < EPSILON);
+}
+
+
 
 // Local Variables: ***
 // mode:C++ ***
