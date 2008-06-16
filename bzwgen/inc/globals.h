@@ -32,10 +32,6 @@ typedef std::ofstream OutFileStream;
 #define BZWGRevision     3
 #define BZWGBuildState "development"
 
-#define CELLROAD  1
-#define CELLROADX 2
-#define CELLBASE  3
-
 #ifdef _MSC_VER
 #pragma warning(disable:4996)
 #endif

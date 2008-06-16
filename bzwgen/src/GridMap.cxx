@@ -31,11 +31,11 @@ void GridMap::clear()
 {
   for (int i = 0; i < (gi.sizeX+1)*(gi.sizeY+1); i++) {
     map[i].zone = -1;
-    map[i].type = 0;
+    map[i].type = NONE;
   }
 }
 
-void GridMap::growZone(int x,int y,int type) {
+void GridMap::growZone(int x,int y,CellType type) {
   if (debugLevel > 3) { printf("Pushing zone at : (%d,%d)\n",x,y); }
   int xe = x;
   int ye = y;
@@ -52,13 +52,13 @@ void GridMap::growZone(int x,int y,int type) {
 
   setAreaZone(Coord2D(x,y),Coord2D(xe,ye),zones.size());
 
-  if (type == CELLROAD) {
+  if (type == ROAD) {
     if (debugLevel > 2) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX, generator->roadid, x-xe < y-ye));
-  } else if (type == CELLROADX) {
+  } else if (type == ROADX) {
     if (debugLevel > 2) { printf("Crossroads zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX, generator->roadxid,true));
-  } else if (type == CELLBASE) {
+  } else if (type == BASE) {
     if (debugLevel > 2) { printf("Base zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new BaseZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye), generator->ctfSafe));
   } else {
@@ -68,16 +68,16 @@ void GridMap::growZone(int x,int y,int type) {
   if (debugLevel > 3) { printf("Zone successfuly created : (%d,%d * %d,%d)\n",x,y,xe,ye); }
 }
 
-void GridMap::setAreaType(Coord2D a, Coord2D b, int type) {
+void GridMap::setAreaType(Coord2D a, Coord2D b, CellType type) {
   for (int xx = a.x; xx < b.x; xx++) 
     for (int yy = a.y; yy < b.y; yy++) 
-      settype(xx,yy,type);
+      setType(xx,yy,type);
 }
 
 void GridMap::setAreaZone(Coord2D a, Coord2D b, int zone) {
   for (int xx = a.x; xx < b.x; xx++) 
     for (int yy = a.y; yy < b.y; yy++) 
-      setzone(xx,yy,zone);
+      setZone(xx,yy,zone);
 }
 
 
@@ -102,7 +102,7 @@ bool GridMap::isValid(int x, int y) {
 }
 
 
-int GridMap::typeAroundToInt(int x, int y, int type) 
+int GridMap::typeAroundToInt(int x, int y, CellType type) 
 {
   int count = 0;
   for (int xx = x-1; xx <= x+1; xx++) 
@@ -111,7 +111,7 @@ int GridMap::typeAroundToInt(int x, int y, int type)
   return count;
 }
 
-int GridMap::typeCrossAroundToInt(int x, int y, int type) 
+int GridMap::typeCrossAroundToInt(int x, int y, CellType type) 
 {
   int count = 0;
   if (getNode(x,y).type == type) count++;
@@ -128,7 +128,7 @@ Coord2D GridMap::emptyCoord() {
   do {
     x = Random::numberMax(gi.sizeX);
     y = Random::numberMax(gi.sizeY);
-  } while (getNode(x,y).type > 0);
+  } while (getNode(x,y).type > NONE);
   return Coord2D(x,y);
 }
 

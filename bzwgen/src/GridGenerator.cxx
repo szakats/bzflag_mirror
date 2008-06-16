@@ -50,8 +50,8 @@ void GridGenerator::parseOptions(CCommandLineArgs* opt) {
   map.initialize(this);
 }
 
-#define SETROAD(cx,cy)  { if (map.getNode(cx,cy).type > 0) { map.settype(cx,cy,CELLROADX);         } else { map.settype(cx,cy,CELLROAD); } }
-#define SETROADF(cx,cy) { if (map.getNode(cx,cy).type > 0) { map.settype(cx,cy,CELLROADX); break;  } else { map.settype(cx,cy,CELLROAD); } }
+#define SETROAD(cx,cy)  { if (map.getNode(cx,cy).type > GridMap::NONE) { map.setType(cx,cy,GridMap::ROADX);         } else { map.setType(cx,cy,GridMap::ROAD); } }
+#define SETROADF(cx,cy) { if (map.getNode(cx,cy).type > GridMap::NONE) { map.setType(cx,cy,GridMap::ROADX); break;  } else { map.setType(cx,cy,GridMap::ROAD); } }
 
 void GridGenerator::plotRoad(int x, int y, bool horiz, int  collision) {
   if (collision == 0) {
@@ -98,11 +98,11 @@ void GridGenerator::run() {
     plotRoad(gi.sizeX-snapX-1,gi.sizeY-snapY-1,true,0);
     plotRoad(gi.sizeX-snapX-1,gi.sizeY-snapY-1,false,0);
 
-    map.setAreaType(Coord2D(0,0),Coord2D(snapX,snapY),CELLBASE);
-    map.setAreaType(Coord2D(gi.sizeX-snapX,gi.sizeY-snapY),Coord2D(gi.sizeX,gi.sizeY),CELLBASE);
+    map.setAreaType(Coord2D(0,0),Coord2D(snapX,snapY),GridMap::BASE);
+    map.setAreaType(Coord2D(gi.sizeX-snapX,gi.sizeY-snapY),Coord2D(gi.sizeX,gi.sizeY),GridMap::BASE);
     if (bases > 2) {
-      map.setAreaType(Coord2D(0,gi.sizeY-snapY),Coord2D(snapX,gi.sizeY),CELLBASE);
-      map.setAreaType(Coord2D(gi.sizeX-snapX,0),Coord2D(gi.sizeX,snapY),CELLBASE);
+      map.setAreaType(Coord2D(0,gi.sizeY-snapY),Coord2D(snapX,gi.sizeY),GridMap::BASE);
+      map.setAreaType(Coord2D(gi.sizeX-snapX,0),Coord2D(gi.sizeX,snapY),GridMap::BASE);
     }
   }
 
