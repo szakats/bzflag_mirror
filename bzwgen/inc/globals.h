@@ -83,11 +83,6 @@ struct ID4 {
   }
 };
 
-inline bool sameTexCoord(TexCoord A, TexCoord B) {
-  return (fabs(A.x-B.x) < EPSILON && fabs(A.y-B.y) < EPSILON);
-}
-
-
 #endif /* __GLOBALS_H__ */
 
 // Local Variables: ***

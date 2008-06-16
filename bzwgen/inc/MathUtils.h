@@ -52,6 +52,11 @@ inline bool commonrange(double a1, double a2, double b1, double b2, double &c1, 
   return true;
 }
 
+template <class T>
+inline bool equals(T x, T y, T precision = EPSILON) {
+  return fabs(x-y) <= precision;
+}
+
 
 #endif /* __BZMATH_H__ */
 

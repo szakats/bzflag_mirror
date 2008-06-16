@@ -26,7 +26,7 @@ int Mesh::addVertex(Vertex vtx) {
 
 int Mesh::addTexCoord(TexCoord tcx) { 
   for (size_t i = 0; i < tc.size(); i++) {
-    if (sameTexCoord(tc[i],tcx)) return i;
+    if (equals(tc[i].x,tcx.x) && equals(tc[i].y,tcx.y)) return i;
   }
   tc.push_back(tcx); 
   return tc.size()-1; 
