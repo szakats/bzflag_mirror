@@ -40,13 +40,13 @@ public:
  
   /** @name Constructors */
   /** Default constructor -- sets the values to zero. */
-  Vector2D() : x(0), y(0) {}
+  inline Vector2D() : x(0), y(0) {}
   /** Constructor that sets the point to the given coordinates. */
-  Vector2D(T _x, T _y) :x(_x), y(_y) {}
+  inline Vector2D( T _x, T _y ) :x(_x), y(_y) {}
   /** Constructor that sets the point to the given coordinates, given as an array. */
-  Vector2D(T v[2]) :x(v[0]), y(v[1]) {}
+  inline Vector2D( const T v[2]) :x(v[0]), y(v[1]) {}
   /** Copy constructor. */
-  Vector2D(const Vector2D<T>& v) :x(v.x), y(v.y) {}  
+  inline Vector2D( const Vector2D<T>& v) :x(v.x), y(v.y) {}  
 
   /** @name Operators */
   /** Addition operator. */
@@ -62,7 +62,7 @@ public:
   /** Scalar division operator. */
   Vector2D<T> operator/(const T f) { return Vector2D<T>(x / f, y / f); }
   /** Operator for array-like member access. */
-  T &operator[](int i) {
+  inline T &operator[](int i) {
     switch (i) {
       case 0: return x; break;
       case 1: return y; break;
