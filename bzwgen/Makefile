@@ -44,10 +44,10 @@ all: blather bzwgen
  
 plugin: blather bzwgenplugin 
  
-.cxx_pic.o: common.h
+.cxx_pic.o:
 	${CXX} ${CFLAGS} ${CPPFLAGS} -fpic -c -o $@ $<
  
-.cxx.o: common.h
+.cxx.o:
 	${CXX} ${CFLAGS} ${CPPFLAGS} -c -o $@ $<
  
 src/lexer.cxx: src/lexer.l
