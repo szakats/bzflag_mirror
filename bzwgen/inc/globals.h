@@ -16,6 +16,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <iostream>
 #include "MathUtils.h"
 
 typedef std::string String;
