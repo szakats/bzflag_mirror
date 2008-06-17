@@ -679,14 +679,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\bzflag\include\common.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\bzflag\MSVC\VC8\config.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\bzflag\plugins\plugin_utils\plugin_utils.h"
 					>
 				</File>
