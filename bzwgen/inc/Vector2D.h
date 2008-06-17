@@ -50,19 +50,19 @@ public:
 
   /** @name Operators */
   /** Addition operator. */
-  Vector2D<T> operator+(const Vector2D<T> &v) { return Vector2D<T>(x + v.x, y + v.y); }
+  Vector2D<T> operator+(const Vector2D<T> &v) const { return Vector2D<T>(x + v.x, y + v.y); }
   /** Substraction operator. */
-  Vector2D<T> operator-(const Vector2D<T> &v) { return Vector2D<T>(x - v.x, y - v.y); }
+  Vector2D<T> operator-(const Vector2D<T> &v) const { return Vector2D<T>(x - v.x, y - v.y); }
   /** Multiplication operator. */
-  Vector2D<T> operator*(const Vector2D<T> &v) { return Vector2D<T>(x * v.x, y * v.y); }
+  Vector2D<T> operator*(const Vector2D<T> &v) const { return Vector2D<T>(x * v.x, y * v.y); }
   /** Scalar multiplication operator. */
-  Vector2D<T> operator*(const T f) { return Vector2D<T>(x * f, y * f); }
+  Vector2D<T> operator*(const T f) const { return Vector2D<T>(x * f, y * f); }
   /** Division operator. */
-  Vector2D<T> operator/(const Vector2D<T> &v) { return Vector2D<T>(x / v.x, y / v.y); }
+  Vector2D<T> operator/(const Vector2D<T> &v) const { return Vector2D<T>(x / v.x, y / v.y); }
   /** Scalar division operator. */
-  Vector2D<T> operator/(const T f) { return Vector2D<T>(x / f, y / f); }
+  Vector2D<T> operator/(const T f) const { return Vector2D<T>(x / f, y / f); }
   /** Operator for array-like member access. */
-  inline T &operator[](int i) {
+  inline T &operator[](int i) const {
     switch (i) {
       case 0: return x; break;
       case 1: return y; break;
@@ -78,13 +78,13 @@ public:
   /** Does a in-place normalization on the point, as treated as a 2D vector. */
   void normalize() { T l = length(); if (l == 0) return; x/=l; y/=l; }
   /** Returns a normalization on the point, as treated as a 2D vector. */
-  Vector2D<T> norm() { T l = length(); return (l == 0) ? Vector2D<T>() : Vector2D<T>(x/l,y/l); }
+  Vector2D<T> norm() const { T l = length(); return (l == 0) ? Vector2D<T>() : Vector2D<T>(x/l,y/l); }
   /** Returns a string representation of the Point. */
-  std::string toString() { char buffer[80]; sprintf(buffer, "[%.4f,%.4f]",float(x),float(y)); return std::string(buffer); }
+  std::string toString() const { char buffer[80]; sprintf(buffer, "[%.4f,%.4f]",float(x),float(y)); return std::string(buffer); }
   /** Returns the length of the point if treated as a vector. */
-  T length() { return T(sqrt(x*x + y*y)); }
+  T length() const { return T(sqrt(x*x + y*y)); }
   /** Returns the squared length of the point if treated as a vector. */
-  T lengthsq() { return x*x + y*y; }
+  T lengthsq() const { return x*x + y*y; }
 
 };
 

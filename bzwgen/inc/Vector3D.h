@@ -51,19 +51,19 @@ public:
   
   /** @name Operators */
   /** Addition operator. */
-  Vector3D<T> operator+(const Vector3D<T> &v) { return Vector3D<T>(x + v.x, y + v.y, z + v.z); }
+  Vector3D<T> operator+(const Vector3D<T> &v) const { return Vector3D<T>(x + v.x, y + v.y, z + v.z); }
   /** Substraction operator. */
-  Vector3D<T> operator-(const Vector3D<T> &v) { return Vector3D<T>(x - v.x, y - v.y, z - v.z); }
+  Vector3D<T> operator-(const Vector3D<T> &v) const { return Vector3D<T>(x - v.x, y - v.y, z - v.z); }
   /** Multiplication operator. */
-  Vector3D<T> operator*(const Vector3D<T> &v) { return Vector3D<T>(x * v.x, y * v.y, z * v.z); }
+  Vector3D<T> operator*(const Vector3D<T> &v) const { return Vector3D<T>(x * v.x, y * v.y, z * v.z); }
   /** Scalar multiplication operator. */
-  Vector3D<T> operator*(const T f) { return Vector3D<T>(x * f, y * f, z * f); }
+  Vector3D<T> operator*(const T f) const { return Vector3D<T>(x * f, y * f, z * f); }
   /** Division operator. */
-  Vector3D<T> operator/(const Vector3D<T> &v) { return Vector3D<T>(x / v.x, y / v.y, z / v.z); }
+  Vector3D<T> operator/(const Vector3D<T> &v) const { return Vector3D<T>(x / v.x, y / v.y, z / v.z); }
   /** Scalar division operator. */
-  Vector3D<T> operator/(const T f) { return Vector3D<T>(x / f, y / f, z / f); }
+  Vector3D<T> operator/(const T f) const { return Vector3D<T>(x / f, y / f, z / f); }
   /** Operator for array-like access. */
-  T &operator[](int i) {
+  T &operator[](int i) const {
     switch (i) {
       case 0: return x; break;
       case 1: return y; break;
@@ -80,13 +80,13 @@ public:
   /** Vector normalization in-place. */
   void normalize() { T l = length(); if (l == 0) return; x/=l; y/=l; z/=l; }
   /** Returns vector normal. */
-  Vector3D<T> norm() { T l = length(); return (l == 0) ? Vector3D<T>() : Vector3D<T>(x/l,y/l,z/l); }
+  Vector3D<T> norm() const { T l = length(); return (l == 0) ? Vector3D<T>() : Vector3D<T>(x/l,y/l,z/l); }
 
   /** Converts vector to string representation. */
-  String toString() { char buffer[80]; sprintf(buffer, "[%.4f,%.4f,%.4f]",float(x),float(y),float(z)); return String(buffer); }
+  String toString() const { char buffer[80]; sprintf(buffer, "[%.4f,%.4f,%.4f]",float(x),float(y),float(z)); return String(buffer); }
 
   /** Returns vector cross product. */
-  Vector3D<T> cross(const Vector3D<T> &v) { 
+  Vector3D<T> cross(const Vector3D<T> &v) const { 
     return Vector3D<T>(
       y * v.z - v.y * z,
       v.x * z - x * v.z,
@@ -95,12 +95,12 @@ public:
   }
 
   /** Returns vector dot product. */
-  T dot(const Vector3D<T> &v) { return x*v.x + y*v.y + z*v.z; }
+  T dot(const Vector3D<T> &v) const { return x*v.x + y*v.y + z*v.z; }
 
   /** Returns vector length. */
-  T length() { return T(sqrt(x*x + y*y + z*z)); }
+  T length() const { return T(sqrt(x*x + y*y + z*z)); }
   /** Returns vector length, squared. */
-  T lengthsq() { return x*x + y*y + z*z; }
+  T lengthsq() const { return x*x + y*y + z*z; }
 
   /** Sets the vector to the given coords in an array. */
   void set(T v[3]) { x = v[0], y = v[1], z = v[2]; }
