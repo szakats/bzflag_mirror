@@ -40,24 +40,32 @@ protected:
   /** Number of bases on the map. */
   int bases;
 public:
-  /** Material ID of the standard road material. 
-      Probably shouldn't be public, will be refactored */
+  /** 
+   * Material ID of the standard road material. 
+   * Probably shouldn't be public, will be refactored 
+   */
   int roadid;
-  /** Material ID of the standard road crossing material. 
-      Probably shouldn't be public, will be refactored */
+  /** 
+   * Material ID of the standard road crossing material. 
+   * Probably shouldn't be public, will be refactored 
+   */
   int roadxid;
   /** CTFSafe flag. Also shouldn't be public, will be refactored */
   bool ctfSafe;
-  /** Standard constructor, takes a already loaded RuleSet as
-      it's parameter. The ruleset needs to have MATROAD and 
-      MATROADX defined. */
+  /** 
+   * Standard constructor, takes a already loaded RuleSet as
+   * it's parameter. The ruleset needs to have MATROAD and 
+   * MATROADX defined. 
+   */
   Generator(RuleSet* _ruleset) : ruleset(_ruleset) {
     roadid  = math::roundToInt(ruleset->getAttr("MATROAD"));
     roadxid = math::roundToInt(ruleset->getAttr("MATROADX"));
   }
-  /** Parse command line or config file options. Virtual so the
-      specific generator can overload it. Generator parses the size,
-      bases and ctfsafe options. */
+  /** 
+   * Parse command line or config file options. Virtual so the
+   * specific generator can overload it. Generator parses the size,
+   * bases and ctfsafe options. 
+   */
   virtual void parseOptions(CCommandLineArgs* opt);
   /** Does nothing, should be overloaded. */
   virtual void run();
@@ -65,8 +73,10 @@ public:
   inline int getSize() { return size; }
   /** Returns the loaded RuleSet. */
   inline RuleSet* getRuleSet() { return ruleset; }
-  /** Outputs data. In case of the Generator class this handles
-      output of the file header and materials. */
+  /** 
+   * Outputs data. In case of the Generator class this handles
+   * output of the file header and materials. 
+   */
   virtual void output(Output& out);
   /** Returns the Material by material ID. */
   Material* getMaterial(int id) { return mats[id]; }

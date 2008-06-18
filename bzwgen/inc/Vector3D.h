@@ -9,10 +9,11 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** @file Vector3D.h
-    @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
-    @brief Three dimensional vector template
-*/
+/** 
+ * @file Vector3D.h
+ * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+ * @brief Three dimensional vector template
+ */
 
 #ifndef __VECTOR3D_H__
 #define __VECTOR3D_H__
@@ -23,12 +24,13 @@
 //namespace bzwgen {
 //namespace geometry {
 
-/** @class Vector3D
-    @brief Vector template in three dimensional space.
-
-    Current implementation is based on templates. Typedefs for both float and
-    double version are provided for convieniece. 
-*/
+/** 
+ * @class Vector3D
+ * @brief Vector template in three dimensional space.
+ *
+ * Current implementation is based on templates. Typedefs for both float and
+ * double version are provided for convieniece. 
+ */
 template <class T>
 class Vector3D {
 public:

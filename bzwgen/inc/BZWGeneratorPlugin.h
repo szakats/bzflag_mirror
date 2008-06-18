@@ -9,10 +9,11 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** @file BZWGeneratorPlugin.h
-    @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
-    @brief Plugin version of the BZWGenerator aplication class for BZWGen.
-*/
+/** 
+ * @file BZWGeneratorPlugin.h
+ * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+ * @brief Plugin version of the BZWGenerator aplication class for BZWGen.
+ */
 
 #ifndef __BZWGENERATORPLUGIN_H__
 #define __BZWGENERATORPLUGIN_H__
@@ -24,22 +25,28 @@
 #include "bzfsAPI.h"
 #include "plugin_utils.h"
 
-/** @class BZWGeneratorPlugin
-    @brief Main application class, plugin version
-
-    Extension of the BZWGenerator class for Plugin compilation. Hence implements 
-    bz_eventHandler. */
+/** 
+ * @class BZWGeneratorPlugin
+ * @brief Main application class, plugin version
+ *
+ * Extension of the BZWGenerator class for Plugin compilation. Hence implements 
+ * bz_eventHandler. 
+ */
 class BZWGeneratorPlugin : public BZWGenerator, public bz_EventHandler 
 {
   char* cstr;
-  /** Set to true if the world was generated. To prevent the event handler to 
-      regenerate the world. Used only in plugin mode. */
+  /** 
+   * Set to true if the world was generated. To prevent the event handler to 
+   * regenerate the world. Used only in plugin mode. 
+   */
   bool worldGenerated;
 public:
   /** Standard default constructor, currently does nothing. */
   BZWGeneratorPlugin() : BZWGenerator(), worldGenerated(false), cstr(0) { }
-  /** Event handler for the plugin mode. Processes bz_eGetWorldEvent 
-      and bz_eWorldFinalized. */
+  /** 
+   * Event handler for the plugin mode. Processes bz_eGetWorldEvent 
+   * and bz_eWorldFinalized. 
+   */
   virtual void process(bz_EventData * eventData);
 };
 

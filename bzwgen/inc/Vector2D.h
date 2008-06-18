@@ -9,10 +9,11 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** @file Vector2D.h
-    @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
-    @brief Two dimensional vector template
-*/
+/** 
+ * @file Vector2D.h
+ * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+ * @brief Two dimensional vector template
+ */
 
 #ifndef __VECTOR2D_H__
 #define __VECTOR2D_H__
@@ -23,12 +24,13 @@
 //namespace bzwgen {
 //namespace geometry {
 
-/** @class Vector2D
-    @brief Vector template in two dimensional space.
-
-    Current implementation is based on templates. Typedefs for both float and
-    double version are provided for convieniece. 
-*/
+/** 
+ * @class Vector2D
+ * @brief Vector template in two dimensional space.
+ *
+ * Current implementation is based on templates. Typedefs for both float and
+ * double version are provided for convieniece. 
+ */
 template <class T>
 class Vector2D
 {

@@ -9,10 +9,11 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** @file BZWGeneratorStandalone.h
-    @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
-    @brief Defines an stanadalone aplication class for BZWGen.
-*/
+/** 
+ * @file BZWGeneratorStandalone.h
+ * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+ * @brief Defines an stanadalone aplication class for BZWGen.
+ */
 
 #ifndef __BZWGENERATORSTANDALONE_H__
 #define __BZWGENERATORSTANDALONE_H__
@@ -20,17 +21,21 @@
 #include "globals.h"
 #include "BZWGenerator.h"
 
-/** @class BZWGeneratorStandalone
-    @brief Main application class for standalone compilation.
-
-    Standalone version of the BZWGenerator class. */
+/** 
+ * @class BZWGeneratorStandalone
+ * @brief Main application class for standalone compilation.
+ *
+ * Standalone version of the BZWGenerator class. 
+ */
 class BZWGeneratorStandalone : public BZWGenerator
 {
 public:
   /** Standard default constructor, currently does nothing. */
   BZWGeneratorStandalone() : BZWGenerator() {}
-  /** Parses the command line for valid switches. Used only in the standalone 
-      compilation of BZWGen.*/
+  /** 
+   * Parses the command line for valid switches. Used only in the standalone 
+   * compilation of BZWGen.
+   */
   int parseCommandLine(int argc, char* argv[]);
   /** Default destructor, does nothing. */
   ~BZWGeneratorStandalone() {}

@@ -9,10 +9,11 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** @file Plane.h
-    @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
-    @brief Defines a class representing a plane in space.
-*/
+/**
+ * @file Plane.h
+ * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+ * @brief Defines a class representing a plane in space.
+ */
 
 #ifndef __PLANE_H__
 #define __PLANE_H__
