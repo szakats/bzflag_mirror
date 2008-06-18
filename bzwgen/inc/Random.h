@@ -9,21 +9,24 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** @file Random.h
-    @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
-    @brief Random number generation helper functions.
-*/
+/** 
+ * @file Random.h
+ * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+ * @brief Random number generation helper functions.
+ */
 
 #ifndef __RANDOM_H__
 #define __RANDOM_H__
 
 #include <algorithm>
 
-/** @class Random
-    @brief Random number generation helper functions class.
-
-    If the need arises, this file will also hold the mt1997 random number
-    generator implementation. The class is completely static as for the moment. */
+/** 
+ * @class Random
+ * @brief Random number generation helper functions class.
+ *
+ * If the need arises, this file will also hold the mt1997 random number
+ * generator implementation. The class is completely static as for the moment. 
+ */
 class Random 
 {
 public:
@@ -40,8 +43,10 @@ public:
   static inline int numberRange( int min, int max ) { 
     return numberMax(max-min)+min; 
   }
-  /** Returns a number from the min..max-1 range, the resultant number will be one 
-      that is a multiple of step in the given range. */
+  /** 
+   * Returns a number from the min..max-1 range, the resultant number will be one 
+   * that is a multiple of step in the given range. 
+   */
   static inline int numberRangeStep( int min, int max, int step ) { 
     if (step == 0) return 0; 
     int steps = int((max-min) / step);  
@@ -61,8 +66,10 @@ public:
   static inline double doubleRange( double min, double max ) { 
     return doubleMax(max-min)+min; 
   }
-  /** Returns a floating point number from the min..max-1 range, the resultant number will be one 
-      that is a multiple of step in the given range. */
+  /** 
+   * Returns a floating point number from the min..max-1 range, the resultant number will be one 
+   * that is a multiple of step in the given range. 
+   */
   static inline double doubleRangeStep( double min, double max, double step ) { 
     if (step == 0) return 0.0; 
     int steps = int((max-min) / step); 
