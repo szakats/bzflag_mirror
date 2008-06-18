@@ -9,9 +9,10 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** @file PlanarGraph.h
-    @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
-    @brief Defines an PlanarGraph class for road construction and/or zoning.
+/** 
+ * @file PlanarGraph.h
+ * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+ * @brief Defines an PlanarGraph class for road construction and/or zoning.
 */
 
 #ifndef __PLANARGRAPH_H__
@@ -23,12 +24,13 @@
 //namespace bzwgen {
 //namespace geometry {
 
-/** @class PlanarGraph
-    @brief Class defining double linked planar graph. 
-
-    The PlanarGraph is implemented as a list of GraphNode's each of which
-    holds a list of it's unique neighbours. 
-*/
+/** 
+ * @class PlanarGraph
+ * @brief Class defining double linked planar graph. 
+ *
+ * The PlanarGraph is implemented as a list of GraphNode's each of which
+ * holds a list of it's unique neighbours. 
+ */
 class PlanarGraph
 {
 private:
@@ -37,7 +39,6 @@ private:
 public:
   /** Default constructor. Creates an empty planar graph.*/
   PlanarGraph() {} 
-
 };
 
 
