@@ -9,7 +9,7 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** 
+/**
  * @file Vector3D.h
  * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
  * @brief Three dimensional vector template
@@ -24,12 +24,12 @@
 //namespace bzwgen {
 //namespace geometry {
 
-/** 
+/**
  * @class Vector3D
  * @brief Vector template in three dimensional space.
  *
  * Current implementation is based on templates. Typedefs for both float and
- * double version are provided for convieniece. 
+ * double version are provided for convieniece.
  */
 template <class T>
 class Vector3D {
@@ -40,7 +40,7 @@ public:
   T y;
   /** Z-coordinate. */
   T z;
- 
+
   /** @name Constructors */
   /** Default constructor -- sets the values to zero. */
   Vector3D() : x(0), y(0), z(0) {}
@@ -49,8 +49,8 @@ public:
   /** Constructor that sets the vector to the given array coordinates. */
   Vector3D(T v[3]) :x(v[0]), y(v[1]), z(v[2]) {}
   /** Copy constructor. */
-  Vector3D(const Vector3D<T>& v) :x(v.x), y(v.y), z(v.z) {}  
-  
+  Vector3D(const Vector3D<T>& v) :x(v.x), y(v.y), z(v.z) {}
+
   /** @name Operators */
   /** Addition operator. */
   Vector3D<T> operator+(const Vector3D<T> &v) const { return Vector3D<T>(x + v.x, y + v.y, z + v.z); }
@@ -88,7 +88,7 @@ public:
   String toString() const { char buffer[80]; sprintf(buffer, "[%.4f,%.4f,%.4f]",float(x),float(y),float(z)); return String(buffer); }
 
   /** Returns vector cross product. */
-  Vector3D<T> cross(const Vector3D<T> &v) const { 
+  Vector3D<T> cross(const Vector3D<T> &v) const {
     return Vector3D<T>(
       y * v.z - v.y * z,
       v.x * z - x * v.z,
@@ -108,7 +108,7 @@ public:
   void set(T v[3]) { x = v[0], y = v[1], z = v[2]; }
   /** Sets the vector to the given coords. */
   void set(T _x, T _y, T _z) { x = _x, y = _y, z = _z; }
-  
+
 };
 
 typedef Vector3D<float>  Vector3Df;
