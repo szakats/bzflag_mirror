@@ -10,42 +10,36 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 /** 
- * @file PlanarGraph.h
+ * @file Graph.h
  * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
- * @brief Defines an PlanarGraph class for road construction and/or zoning.
+ * @brief Defines an Graph class.
 */
 
-#ifndef __PLANARGRAPH_H__
-#define __PLANARGRAPH_H__
+#ifndef __GRAPH_H__
+#define __GRAPH_H__
 
-#include "GraphNode.h"
-
-// I'll maybe think later of adding namespaces
-//namespace bzwgen {
-//namespace geometry {
+#include "Node.h"
+#include "Edge.h"
 
 /** 
- * @class PlanarGraph
- * @brief Class defining double linked planar graph. 
- *
- * The PlanarGraph is implemented as a list of GraphNode's each of which
- * holds a list of it's unique neighbours. 
+ * @class Graph
+ * @brief Class defining double linked graph. 
  */
-class PlanarGraph
+class Graph
 {
 private:
-  /** The list of all GraphNodes. */
-  GraphNodeList GraphNode::GraphNodeList;
+  /** The list of all Nodes. */
+  NodeList Node::NodeList;
 public:
   /** Default constructor. Creates an empty planar graph.*/
-  PlanarGraph() {} 
+  Graph() {} 
 };
 
 
 //}; // namespace end geometry
 //}; // namespace end bzwgen
 
-#endif // __PLANARGRAPH_H__
+#endif // __GRAPH_H__
 
 // Local Variables: ***
 // mode:C++ ***
