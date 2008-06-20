@@ -687,6 +687,10 @@
 				Name="Geometry"
 				>
 				<File
+					RelativePath="..\..\inc\Edge.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\inc\GraphNode.h"
 					>
 				</File>
