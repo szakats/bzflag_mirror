@@ -18,8 +18,8 @@
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
 
-#include "Node.h"
-#include "Edge.h"
+#include "graph/Node.h"
+#include "graph/Edge.h"
 
 /** 
  * @class Graph
@@ -29,7 +29,9 @@ class Graph
 {
 private:
   /** The list of all Nodes. */
-  NodeList Node::NodeList;
+  nodeList Node::NodeList;
+  /** The list of all Edges. */
+  edgeList Edge::EdgeList;
 public:
   /** Default constructor. Creates an empty planar graph.*/
   Graph() {} 

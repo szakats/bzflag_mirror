@@ -46,13 +46,13 @@ public:
    */
   typedef Node*		    NodePtr;
   /** 
-   * A list of GraphNodePtr's. Should be at least a set, or an ordered list for 
+   * A list of NodePtr's. Should be at least a set, or an ordered list for 
    * more easy Shape extraction.
    */
   typedef std::vector<NodePtr> NodeList;
 private:
   /** 
-   * The list of GraphNode s that this node is connected to. Currently it's
+   * The list of Node s that this node is connected to. Currently it's
    * unordered, will be probably sorted clockwise for easier shape retrival 
    * later. 
    */
@@ -77,7 +77,7 @@ public:
 };
 
 
-//}; // namespace end Graph
+}; // namespace end Graph
 
 #endif // __NODE_H__
 
