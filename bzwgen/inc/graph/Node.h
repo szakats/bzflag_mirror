@@ -22,6 +22,7 @@
 #include "Vector2D.h"
 
 class Graph;
+class Edge;
 
 // The Node class is a part of Graph class
 namespace Graph {
