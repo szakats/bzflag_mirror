@@ -21,6 +21,8 @@
 #include <vector>
 #include "Vector2D.h"
 
+class Graph;
+
 // The Node class is a part of Graph class
 namespace Graph {
 
@@ -51,12 +53,22 @@ public:
    */
   typedef std::vector<NodePtr> NodeList;
 private:
+  /**
+   * The "ID" of the Node, which is it's index in the Graph NodeList.
+   * Later this should be templatized from a common class for ID'd
+   * vector handling, to prevent the ID's from getting invalid.
+   */
+  int ID;
   /** 
    * The list of Node s that this node is connected to. Currently it's
    * unordered, will be probably sorted clockwise for easier shape retrival 
    * later. 
    */
   NodeList connections;
+  /**
+   * Pointer to the graph of which this given Node is a belonging to.
+   */
+  Graph* graph;
 public:
   /** 
    * Default constructor. Sets the underlying point to (0,0) and initializes
