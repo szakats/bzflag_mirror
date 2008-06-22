@@ -27,13 +27,15 @@
  */
 class Graph
 {
+public:
+  typedef Graph* GraphPtr;
 private:
   /** The list of all Nodes. */
   nodeList Node::NodeList;
   /** The list of all Edges. */
   edgeList Edge::EdgeList;
 public:
-  /** Default constructor. Creates an empty planar graph.*/
+  /** Default constructor. Creates an empty graph.*/
   Graph() {} 
 };
 

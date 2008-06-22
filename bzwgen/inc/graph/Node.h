@@ -20,9 +20,9 @@
 
 #include <vector>
 #include "Vector2D.h"
+#include "Edge.h"
 
 class Graph;
-class Edge;
 
 // The Node class is a part of Graph class
 namespace Graph {
@@ -60,16 +60,14 @@ private:
    * vector handling, to prevent the ID's from getting invalid.
    */
   int ID;
-  /** 
-   * The list of Node s that this node is connected to. Currently it's
-   * unordered, will be probably sorted clockwise for easier shape retrival 
-   * later. 
-   */
-  NodeList connections;
+  /** The list of outgoing edges */
+  EdgeList outgoing;
+  /** The list of incoming edges */
+  EdgeList incoming;
   /**
    * Pointer to the graph of which this given Node is a belonging to.
    */
-  Graph* graph;
+  GraphPtr graph;
 public:
   /** 
    * Default constructor. Sets the underlying point to (0,0) and initializes
@@ -78,15 +76,6 @@ public:
   Node() {} 
   /** Constructor which takes Point2D data as parameters. */
   Node(float x, float y) : Vector2Df(x,y) {} 
-  /** 
-   * Connects the current node to the one passed. Adds the passed node to the 
-   * connections list for both nodes. 
-   */
-  void connect(NodePtr node) {
-    connections.push_back(node);
-    node->connections.push_back(this);
-  }
-
 };
 
 
