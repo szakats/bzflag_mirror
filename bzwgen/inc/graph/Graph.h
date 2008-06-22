@@ -18,6 +18,7 @@
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
 
+#include "graph/forward.h"
 #include "graph/Node.h"
 #include "graph/Edge.h"
 
@@ -29,8 +30,6 @@ namespace graph {
  */
 class Graph
 {
-public:
-  typedef Graph* GraphPtr;
 private:
   /** The list of all Nodes. */
   NodeList nodeList;

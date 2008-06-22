@@ -687,23 +687,7 @@
 				Name="Geometry"
 				>
 				<File
-					RelativePath="..\..\inc\graph\Edge.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\inc\graph\Graph.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\inc\MathUtils.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\inc\graph\Node.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\inc\graph\Plane.h"
 					>
 				</File>
 				<File
@@ -712,6 +696,30 @@
 				</File>
 				<File
 					RelativePath="..\..\inc\Vector3D.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="graph"
+				>
+				<File
+					RelativePath="..\..\inc\graph\Edge.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\graph\forward.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\graph\Graph.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\graph\Node.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\graph\Plane.h"
 					>
 				</File>
 			</Filter>

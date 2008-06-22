@@ -18,6 +18,7 @@
 #include <map>
 #include <iostream>
 #include "MathUtils.h"
+#include "graph/Graph.h"
 
 typedef std::string String;
 typedef std::vector<int> IntVector;

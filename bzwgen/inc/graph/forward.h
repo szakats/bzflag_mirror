@@ -10,45 +10,39 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 /** 
- * @file Edge.h
+ * @file forward.h
  * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
- * @brief Defines an Edge class model for the Graph class.
+ * @brief File with forward definitions for all the Graph classes
+ *
+ * Created to prevent unneccessary includes, and to avoid header
+ * file recursion
  */
 
-#ifndef __EDGE_H__
-#define __EDGE_H__
+#ifndef __FORWARD_H__
+#define __FORWARD_H__
 
 #include <vector>
-#include "graph/forward.h"
 
-// The Edge class is a part of Graph class
+// The e class is a part of Graph class
 namespace graph {
 
-/** 
- * @class Edge
- * @brief Class defining an Edge in a double linked planar graph. 
- */
-class Edge 
-{
-private:
-  /**
-   * The ID of the given edge. Should match the index in the owning Graph
-   * class.
-   */
-  int ID;
-  /** Source node */
-  NodePtr source;
-  /** Target node */
-  NodePtr target;
-  /** Pointer to the reverse edge in a Graph, used for PlanarGraph */
-  EdgePtr reverse;
-public:
-};
+class Graph;
+class Node;
+class Edge;
 
+typedef Graph* GraphPtr;
+typedef Edge* EdgePtr;
+typedef Node* NodePtr;
 
-}; // namespace end Graph
+typedef std::vector<EdgePtr> EdgeList;
+typedef std::vector<NodePtr> NodeList;
 
-#endif // __EDGE_H__
+typedef EdgeList::iterator EdgeListIter;
+typedef NodeList::iterator NodeListIter;
+
+}; // namespace end graph
+
+#endif // __FORWARD_H__
 
 // Local Variables: ***
 // mode:C++ ***

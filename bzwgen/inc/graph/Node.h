@@ -20,7 +20,7 @@
 
 #include <vector>
 #include "Vector2D.h"
-#include "Edge.h"
+#include "graph/forward.h"
 
 // The Node class is a part of Graph class
 namespace graph {
