@@ -33,9 +33,9 @@ public:
   typedef Graph* GraphPtr;
 private:
   /** The list of all Nodes. */
-  Node::NodeList nodeList;
+  NodeList nodeList;
   /** The list of all Edges. */
-  Edge::EdgeList edgeList;
+  EdgeList edgeList;
 public:
   /** Default constructor. Creates an empty graph.*/
   Graph() {} 

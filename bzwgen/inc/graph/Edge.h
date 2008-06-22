@@ -26,6 +26,19 @@ namespace graph {
 // Node class forward
 class Node;
 typedef Node* NodePtr;
+class Edge;
+
+/** 
+ * A graph edge pointer. Currently it's a C++ pointer, may be a boost::weak_ptr 
+ * in the future. 
+ */
+typedef Edge* EdgePtr;
+/** 
+ * A list of EdgePtr's. Should be at least a set, or an ordered list for 
+ * more easy Shape extraction.
+ */
+typedef std::vector<EdgePtr> EdgeList;
+
 
 /** 
  * @class Edge
@@ -33,17 +46,6 @@ typedef Node* NodePtr;
  */
 class Edge 
 {
-public:
-  /** 
-   * A graph edge pointer. Currently it's a C++ pointer, may be a boost::weak_ptr 
-   * in the future. 
-   */
-  typedef Edge* EdgePtr;
-  /** 
-   * A list of EdgePtr's. Should be at least a set, or an ordered list for 
-   * more easy Shape extraction.
-   */
-  typedef std::vector<EdgePtr> EdgeList;
 private:
   /**
    * The ID of the given edge. Should match the index in the owning Graph

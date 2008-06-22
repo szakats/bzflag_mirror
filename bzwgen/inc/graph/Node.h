@@ -25,8 +25,22 @@
 // The Node class is a part of Graph class
 namespace graph {
 
+// Forwards
+class Node;
 class Graph;
 typedef Graph* GraphPtr;
+
+/** 
+ * A graph node pointer. Currently it's a C++ pointer, will be a boost::weak_ptr 
+ * in the future. 
+ */
+typedef Node*		    NodePtr;
+/** 
+ * A list of NodePtr's. Should be at least a set, or an ordered list for 
+ * more easy Shape extraction.
+ */
+typedef std::vector<NodePtr> NodeList;
+
 
 
 /** 
@@ -44,17 +58,6 @@ typedef Graph* GraphPtr;
  */
 class Node : public Vector2Df
 {
-public:
-  /** 
-   * A graph node pointer. Currently it's a C++ pointer, will be a boost::weak_ptr 
-   * in the future. 
-   */
-  typedef Node*		    NodePtr;
-  /** 
-   * A list of NodePtr's. Should be at least a set, or an ordered list for 
-   * more easy Shape extraction.
-   */
-  typedef std::vector<NodePtr> NodeList;
 private:
   /**
    * The "ID" of the Node, which is it's index in the Graph NodeList.
@@ -63,9 +66,9 @@ private:
    */
   int ID;
   /** The list of outgoing edges */
-  Edge::EdgeList outgoing;
+  EdgeList outgoing;
   /** The list of incoming edges */
-  Edge::EdgeList incoming;
+  EdgeList incoming;
   /**
    * Pointer to the graph of which this given Node is a belonging to.
    */
