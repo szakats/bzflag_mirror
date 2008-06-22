@@ -45,6 +45,16 @@ private:
 public:
   /** Standard constructor */
   Edge() : ID(-1), source(NULL), target(NULL), reverse(NULL) {}
+  /** 
+   * Constructor that takes source and target as parameters,
+   * adds the edge to the revelant nodes, DOESN'T check for
+   * reverse EdgePtr however.
+   */
+  Edge(NodePtr _source, NodePtr _target) : source(_source), target(_target) {
+    source->addOutgoing(this);
+    target->addIncoming(this);
+  }
+
 };
 
 

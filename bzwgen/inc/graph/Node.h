@@ -63,7 +63,10 @@ public:
   Node() : graph(0), ID(-1) {} 
   /** Constructor which takes Point2D data as parameters. */
   Node(float x, float y) : Vector2Df(x,y), graph(0), ID(-1)  {} 
-
+  /** Adds a incoming edge */
+  void addIncoming(EdgePtr edge) { incoming.push_back(edge); }
+  /** Adds a outgoing edge */
+  void addOutgoing(EdgePtr edge) { outgoing.push_back(edge); }
 
 };
 
