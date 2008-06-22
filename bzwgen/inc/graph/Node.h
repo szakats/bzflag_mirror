@@ -25,24 +25,6 @@
 // The Node class is a part of Graph class
 namespace graph {
 
-// Forwards
-class Node;
-class Graph;
-typedef Graph* GraphPtr;
-
-/** 
- * A graph node pointer. Currently it's a C++ pointer, will be a boost::weak_ptr 
- * in the future. 
- */
-typedef Node*		    NodePtr;
-/** 
- * A list of NodePtr's. Should be at least a set, or an ordered list for 
- * more easy Shape extraction.
- */
-typedef std::vector<NodePtr> NodeList;
-
-
-
 /** 
  * @class Node
  * @brief Class defining an node in a double linked planar graph. 
@@ -78,9 +60,10 @@ public:
    * Default constructor. Sets the underlying point to (0,0) and initializes
    * an empty list of connections.
    */
-  Node() {} 
+  Node() : graph(0), ID(-1) {} 
   /** Constructor which takes Point2D data as parameters. */
-  Node(float x, float y) : Vector2Df(x,y) {} 
+  Node(float x, float y) : Vector2Df(x,y), graph(0), ID(-1)  {} 
+
 
 };
 

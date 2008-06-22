@@ -43,6 +43,8 @@ private:
   /** Pointer to the reverse edge in a Graph, used for PlanarGraph */
   EdgePtr reverse;
 public:
+  /** Standard constructor */
+  Edge() : ID(-1), source(NULL), target(NULL), reverse(NULL) {}
 };
 
 
