@@ -20,9 +20,8 @@
 
 #include <vector>
 
-
 // The Edge class is a part of Graph class
-namespace Graph {
+namespace graph {
 
 // Node class forward
 class Node;

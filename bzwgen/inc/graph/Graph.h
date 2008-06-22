@@ -21,6 +21,8 @@
 #include "graph/Node.h"
 #include "graph/Edge.h"
 
+namespace graph {
+
 /** 
  * @class Graph
  * @brief Class defining double linked graph. 
@@ -31,17 +33,17 @@ public:
   typedef Graph* GraphPtr;
 private:
   /** The list of all Nodes. */
-  nodeList Node::NodeList;
+  Node::NodeList nodeList;
   /** The list of all Edges. */
-  edgeList Edge::EdgeList;
+  Edge::EdgeList edgeList;
 public:
   /** Default constructor. Creates an empty graph.*/
   Graph() {} 
 };
 
 
-//}; // namespace end geometry
-//}; // namespace end bzwgen
+};// end namespace graph
+
 
 #endif // __GRAPH_H__
 

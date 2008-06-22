@@ -22,10 +22,12 @@
 #include "Vector2D.h"
 #include "Edge.h"
 
-class Graph;
-
 // The Node class is a part of Graph class
-namespace Graph {
+namespace graph {
+
+class Graph;
+typedef Graph* GraphPtr;
+
 
 /** 
  * @class Node
@@ -61,9 +63,9 @@ private:
    */
   int ID;
   /** The list of outgoing edges */
-  EdgeList outgoing;
+  Edge::EdgeList outgoing;
   /** The list of incoming edges */
-  EdgeList incoming;
+  Edge::EdgeList incoming;
   /**
    * Pointer to the graph of which this given Node is a belonging to.
    */
@@ -76,10 +78,11 @@ public:
   Node() {} 
   /** Constructor which takes Point2D data as parameters. */
   Node(float x, float y) : Vector2Df(x,y) {} 
+
 };
 
 
-}; // namespace end Graph
+}; // namespace end graph
 
 #endif // __NODE_H__
 
