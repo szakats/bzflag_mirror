@@ -19,10 +19,14 @@
 #define __EDGE_H__
 
 #include <vector>
-#inlu
+
 
 // The Edge class is a part of Graph class
 namespace Graph {
+
+// Node class forward
+class Node;
+typedef Node* NodePtr;
 
 /** 
  * @class Edge
@@ -47,6 +51,12 @@ private:
    * class.
    */
   int ID;
+  /** Source node */
+  NodePtr source;
+  /** Target node */
+  NodePtr target;
+  /** Pointer to the reverse edge in a Graph, used for PlanarGraph */
+  EdgePtr reverse;
 public:
 };
 
