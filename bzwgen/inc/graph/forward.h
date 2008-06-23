@@ -29,16 +29,20 @@ namespace graph {
 class Graph;
 class Node;
 class Edge;
+class Face;
 
 typedef Graph* GraphPtr;
 typedef Edge* EdgePtr;
 typedef Node* NodePtr;
+typedef Face* FacePtr;
 
 typedef std::vector<EdgePtr> EdgeList;
 typedef std::vector<NodePtr> NodeList;
+typedef std::vector<FacePtr> FaceList;
 
 typedef EdgeList::iterator EdgeListIter;
 typedef NodeList::iterator NodeListIter;
+typedef FaceList::iterator FaceListIter;
 
 }; // namespace end graph
 
