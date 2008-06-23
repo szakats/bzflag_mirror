@@ -22,6 +22,7 @@
 #define __FORWARD_H__
 
 #include <vector>
+#include "ObjectList.h"
 
 // The e class is a part of Graph class
 namespace graph {
@@ -36,13 +37,9 @@ typedef Edge* EdgePtr;
 typedef Node* NodePtr;
 typedef Face* FacePtr;
 
-typedef std::vector<EdgePtr> EdgeList;
-typedef std::vector<NodePtr> NodeList;
-typedef std::vector<FacePtr> FaceList;
-
-typedef EdgeList::iterator EdgeListIter;
-typedef NodeList::iterator NodeListIter;
-typedef FaceList::iterator FaceListIter;
+typedef TObjectList<EdgePtr> EdgeList;
+typedef TObjectList<NodePtr> NodeList;
+typedef TObjectList<FacePtr> FaceList;
 
 }; // namespace end graph
 

@@ -28,14 +28,9 @@ namespace graph {
  * @class Edge
  * @brief Class defining an Edge in a double linked planar graph. 
  */
-class Edge 
+  class Edge : public IObject
 {
 private:
-  /**
-   * The ID of the given edge. Should match the index in the owning Graph
-   * class.
-   */
-  int ID;
   /** Source node */
   NodePtr source;
   /** Target node */
@@ -44,7 +39,7 @@ private:
   EdgePtr reverse;
 public:
   /** Standard constructor */
-  Edge() : ID(-1), source(NULL), target(NULL), reverse(NULL) {}
+  Edge() : source(NULL), target(NULL), reverse(NULL) {}
   /** 
    * Constructor that takes source and target as parameters,
    * adds the edge to the revelant nodes, DOESN'T check for

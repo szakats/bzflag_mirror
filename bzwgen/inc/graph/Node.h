@@ -38,15 +38,9 @@ namespace graph {
  * The graph node inherits Vector2D<float>, cause the main definition of it's existence is 
  * it's place on the 2D planar graph.
  */
-class Node : public Vector2Df
+class Node : public IObject, public Vector2Df
 {
 private:
-  /**
-   * The "ID" of the Node, which is it's index in the Graph NodeList.
-   * Later this should be templatized from a common class for ID'd
-   * vector handling, to prevent the ID's from getting invalid.
-   */
-  int ID;
   /** The list of outgoing edges */
   EdgeList outgoing;
   /** The list of incoming edges */
@@ -60,13 +54,13 @@ public:
    * Default constructor. Sets the underlying point to (0,0) and initializes
    * an empty list of connections.
    */
-  Node() : graph(0), ID(-1) {} 
+  Node() : graph(0) {} 
   /** Constructor which takes Point2D data as parameters. */
-  Node(float x, float y) : Vector2Df(x,y), graph(0), ID(-1)  {} 
+  Node(float x, float y) : Vector2Df(x,y), graph(0)  {} 
   /** Adds a incoming edge */
-  void addIncoming(EdgePtr edge) { incoming.push_back(edge); }
+  void addIncoming(EdgePtr edge) { incoming.add(edge); }
   /** Adds a outgoing edge */
-  void addOutgoing(EdgePtr edge) { outgoing.push_back(edge); }
+  void addOutgoing(EdgePtr edge) { outgoing.add(edge); }
 
 };
 

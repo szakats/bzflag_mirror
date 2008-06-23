@@ -34,14 +34,9 @@ namespace graph {
  * only ONE face. Let's also note, that with the edge list we can 
  * retrieve the vertices list without much problems.
  */
-class Face 
+class Face : public IObject
 {
 private:
-  /**
-   * The ID of the given face. Should match the index in the owning Graph
-   * class.
-   */
-  int ID;
   /**
    * List of edges belonging to this face. The edges should be stored in order,
    * that is to allow a clockwise full traversal of the face.
