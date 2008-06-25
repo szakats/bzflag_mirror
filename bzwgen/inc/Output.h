@@ -38,12 +38,12 @@ public:
     (*outstream) << "  texcoord " << tc.x << " " << tc.y << "\n"; 
   }
   void face(Face* f, int lastmat = -1) { 
-    if (!f->output) return;
+    if (!f->outputable()) return;
     faces++;
     (*outstream) << "  face\n";
 
     if (lastmat >= 0) {
-      if (f->mat != lastmat) matref(f->mat);
+      if (f->getMaterial() != lastmat) matref(f->getMaterial());
     }
 
     (*outstream) << "    vertices ";
@@ -52,7 +52,7 @@ public:
     }
     (*outstream) << "\n";
 
-    if (f->texcoords && f->tcd.size() > 0) {
+    if (f->hasTexCoords()) {
       (*outstream) << "    texcoords ";
       for (size_t i = 0; i < f->tcd.size(); i++) {
         (*outstream) << f->tcd.at(i) << " ";

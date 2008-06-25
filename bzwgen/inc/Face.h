@@ -17,33 +17,21 @@
 #include "Output.h"
 
 class Face {
-public:
-  IntVector vtx;
-  IntVector tcd;
   int mat;
-  bool texcoords;
   bool output;
-  Face() : mat(0), texcoords(true),output(true) {}
-  Face(int a, int b, int c, int d, int _mat = 0) : mat(_mat), texcoords(false), output(true) {
-    vtx.push_back(a);
-    vtx.push_back(b);
-    vtx.push_back(c);
-    vtx.push_back(d);
-  }
-  void reset() {
-    mat = 0;
-    texcoords = true;
-    output = true;
-    clear();
-  }
+public:
+  IntVector tcd;
+  IntVector vtx;
+  Face() : mat(0), output(true) {}
   void clear() {
     vtx.clear();
+    tcd.clear();
   }
-  IntVector* vtxClone() {
-    int fsize = size();
-    IntVector* copy = new IntVector(fsize);
-    for (int i = 0; i < fsize; i++) (*copy)[i] = vtx.at(i);
-    return copy;
+  void clearVertices() {
+    vtx.clear();
+  }
+  void clearTexCoords() {
+    tcd.clear();
   }
   void set4(int a, int b, int c, int d) {
     vtx.clear();
@@ -53,22 +41,24 @@ public:
     vtx.push_back(d);
   }
 
-  int addVertex(int v) {
-    texcoords = false;
+  void addVertex(int v) {
     vtx.push_back(v);
-    return vtx.size()-1;
   }
-  int addVertex(int v, int tc) {
+  void addVertex(int v, int tc) {
     vtx.push_back(v);
     tcd.push_back(tc);
-    return vtx.size()-1;
+  }
+  void addTexCoord(int tc) {
+    tcd.push_back(tc);
   }
   int getVertexIndex(int vid) {
-    for (size_t i = 0; i < vtx.size(); i++) if (vtx.at(i) == vid) return i;
+    for (size_t i = 0; i < vtx.size(); i++) 
+      if (vtx.at(i) == vid) return i;
     return -1;
   }
   bool hasVertex(int vid) {
-    for (size_t i = 0; i < vtx.size(); i++) if (vtx.at(i) == vid) return true;
+    for (size_t i = 0; i < vtx.size(); i++) 
+      if (vtx.at(i) == vid) return true;
     return false;
   }
   int vertex(int vid) { 
@@ -88,12 +78,32 @@ public:
   void removeVertex(int index) {
     vtx.erase(vtx.begin()+index);
   }
-  String toStringIDs() { char buffer[80]; sprintf(buffer, "(%d,%d,%d,%d)",vertex(0),vertex(1),vertex(2),vertex(3)); return String(buffer); }
-  int size() { return vtx.size(); }
+  String toStringIDs() { 
+    char buffer[80]; 
+    sprintf(buffer, "(%d,%d,%d,%d)",vertex(0),vertex(1),vertex(2),vertex(3)); 
+    return String(buffer); 
+  }
+  int size() { 
+    return vtx.size(); 
+  }
   void setMaterial( int materialID ) {
     mat = materialID;
   }
-  virtual bool isMultiFace() { return false; }
+  int getMaterial() {
+    return mat;
+  }
+  void setOutput( bool _output ) {
+    output = _output;
+  }
+  bool outputable() {
+    return output;
+  }
+  bool hasTexCoords( ) {
+    return !tcd.empty();
+  }
+  virtual bool isMultiFace() { 
+    return false; 
+  }
 };
 
 typedef std::vector<Face*> FaceVector;

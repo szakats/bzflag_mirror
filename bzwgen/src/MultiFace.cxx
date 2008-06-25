@@ -94,7 +94,7 @@ IntVector* MultiFace::detachFace(int id) {
     } while (vid != svid);
 
     Face* nface = new Face();
-    nface->mat = mat;
+    nface->setMaterial( getMaterial() );
     nface->vtx = nvtx;
     result->push_back(mesh->addFace(nface));
     index = pickRemovalIndex(comps->at(id),visited);
@@ -186,7 +186,7 @@ int MultiFace::addFace(Face* f) {
   //printf("Addface start... (%d,%d)\n",size(),f->size());
   //    printf("Multi%s\n",mesh->faceToString(this).c_str());
   //    printf("Add%s\n",mesh->faceToString(f).c_str());
-  f->output = false;
+  f->setOutput( false );
   if (comps->size() == 0) {
     for (int i = 0; i < f->size(); i++) 
       vtx.push_back(f->vertex(i));

@@ -194,7 +194,7 @@ void Mesh::weldVertices(int a, int b, Vertex vx) {
     if (indexb != -1) {
       if (indexa != -1) {
         f[i]->vtx.erase(f[i]->vtx.begin()+indexb);
-        if (f[i]->texcoords) f[i]->tcd.erase(f[i]->vtx.begin()+indexb);  
+        if (f[i]->hasTexCoords()) f[i]->tcd.erase(f[i]->vtx.begin()+indexb);  
       } else {
         f[i]->vtx[indexb] = a;
       }
@@ -244,7 +244,7 @@ IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
 
   IntVector* result = new IntVector();
 
-  int mat = f[fid]->mat;
+  int mat = f[fid]->getMaterial();
   
   int ai = 0 , bi = 0;
   int pai = 0, pbi = 0;
@@ -270,11 +270,14 @@ IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
     ai = addVertex(a);
     bi = addVertex(b);
 
+    Face* face = new Face();
+    face->setMaterial( mat );
     if (horizontal) {
-      result->push_back(addFace(new Face(pbi,bi,ai,pai,mat)));
+      face->set4(pbi,bi,ai,pai);
     } else {
-      result->push_back(addFace(new Face(pai,pbi,bi,ai,mat)));
+      face->set4(pai,pbi,bi,ai);
     }
+    result->push_back( addFace( face ) );
 
     pai = ai;
     pbi = bi;
@@ -283,8 +286,8 @@ IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
   result->push_back(fid);
 
   if (horizontal) {
+    //f[fid]->vtx.clear(); DEBUG?
     f[fid]->set4(bi,f[fid]->vtx.at(1),f[fid]->vtx.at(2),ai);
-    //f[fid]->vtx.clear();
     //f[fid]->vtx.push_back( bi );
     //f[fid]->vtx.push_back( f[fid]->vtx.at(1) );
     //f[fid]->vtx.push_back( f[fid]->vtx.at(2) );
@@ -335,7 +338,7 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
 
   IntVector* result = new IntVector();
 
-  int mat = f[fid]->mat;
+  int mat = f[fid]->getMaterial();
   
   int ai = 0 , bi = 0;
   int pai = 0, pbi = 0;
@@ -375,11 +378,14 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
       bi = addVertex(b);
     }
 
+    Face* face = new Face();
+    face->setMaterial( mat );
     if (horizontal) {
-      result->push_back(addFace(new Face(pbi,bi,ai,pai,mat)));
+      face->set4(pbi,bi,ai,pai);
     } else {
-      result->push_back(addFace(new Face(pai,pbi,bi,ai,mat)));
+      face->set4(pai,pbi,bi,ai);
     }
+    result->push_back(addFace(face));
 
     pai = ai;
     pbi = bi;
@@ -421,12 +427,12 @@ void Mesh::output(Output& out, int materialCount) {
 
   for (int m = 0; m <= materialCount; m++) {
     for (size_t i = 0; i < f.size(); i++) 
-      if (f[i]->mat == m) {
+      if (f[i]->getMaterial() == m) {
         if (mat != m) out.matref(m);
         if (passable) out.line("  passable"); 
         mat = m;
         out.face(f[i],mat);
-        mat = f[i]->mat;
+        mat = f[i]->getMaterial();
       }
   }
   out.line("end\n");
@@ -461,21 +467,19 @@ void Mesh::chamferFace(int fid, double amount) {
 
 // TODO: these coords could be reused!
 void Mesh::textureFaceFull(int fid) {
-  f[fid]->tcd.clear();
-  f[fid]->tcd.push_back(addTexCoord(TexCoord(0.0,0.0)));
-  f[fid]->tcd.push_back(addTexCoord(TexCoord(1.0,0.0)));
-  f[fid]->tcd.push_back(addTexCoord(TexCoord(1.0,1.0)));
-  f[fid]->tcd.push_back(addTexCoord(TexCoord(0.0,1.0)));
-  f[fid]->texcoords = true;
+  f[fid]->clearTexCoords();
+  f[fid]->addTexCoord(addTexCoord(TexCoord(0.0,0.0)));
+  f[fid]->addTexCoord(addTexCoord(TexCoord(1.0,0.0)));
+  f[fid]->addTexCoord(addTexCoord(TexCoord(1.0,1.0)));
+  f[fid]->addTexCoord(addTexCoord(TexCoord(0.0,1.0)));
 }
 
 void Mesh::textureFaceQuad(int fid, double au, double av, double bu, double bv) {
-  f[fid]->tcd.clear();
-  f[fid]->tcd.push_back(addTexCoord(TexCoord(au,av)));
-  f[fid]->tcd.push_back(addTexCoord(TexCoord(bu,av)));
-  f[fid]->tcd.push_back(addTexCoord(TexCoord(bu,bv)));
-  f[fid]->tcd.push_back(addTexCoord(TexCoord(au,bv)));
-  f[fid]->texcoords = true;
+  f[fid]->clearTexCoords();
+  f[fid]->addTexCoord(addTexCoord(TexCoord(au,av)));
+  f[fid]->addTexCoord(addTexCoord(TexCoord(bu,av)));
+  f[fid]->addTexCoord(addTexCoord(TexCoord(bu,bv)));
+  f[fid]->addTexCoord(addTexCoord(TexCoord(au,bv)));
 }
 
 void Mesh::textureFace(int fid, double snap, double tile) {
@@ -483,7 +487,7 @@ void Mesh::textureFace(int fid, double snap, double tile) {
 }
 
 void Mesh::freeFace(int fid) {
-  f[fid]->output = false;
+  f[fid]->setOutput( false );
   for (size_t i = 0; i < f[fid]->vtx.size(); i++) {
     freeVertices.push_back(f[fid]->vtx.at(i));
   }

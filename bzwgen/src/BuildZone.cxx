@@ -28,7 +28,7 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
   corners[3] = Vertex((double)A.x,(double)B.y,0.0f);
 
   Face* swface = new Face();
-  swface->mat = 0;
+  swface->setMaterial( 0 );
   for (int i = 0; i < 4; i++) {
     swface->addVertex(mesh->addVertex(corners[i]));
   }

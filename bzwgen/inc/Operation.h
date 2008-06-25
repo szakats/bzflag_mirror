@@ -108,7 +108,7 @@ class OperationRemove : public Operation {
 public:
   OperationRemove(RuleSet* _ruleset) : Operation(_ruleset) { };
   int runMesh(Mesh* mesh, int face) {
-    mesh->f[face]->output = false;
+    mesh->f[face]->setOutput(false);
     return face;
   }
 };
@@ -240,7 +240,7 @@ public:
   int runMesh(Mesh* mesh,int face) { 
     if (mesh == NULL) return 0;
     flatten(mesh,face);
-    mesh->f[face]->mat = math::roundToInt(value);
+    mesh->f[face]->setMaterial( math::roundToInt(value) );
     return face; 
   };
 };
