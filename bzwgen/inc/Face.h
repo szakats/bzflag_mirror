@@ -9,104 +9,212 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-
+/** 
+ * @file Face.h
+ * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+ * @brief Defines a Face class for BZWGen.
+ */
 #ifndef __FACE_H__
 #define __FACE_H__
 
 #include "globals.h"
 #include "Output.h"
 
+/** 
+ * @class Face
+ * @brief Class representing a mesh face.
+ *
+ * The Face consists of indices to vertex and texture coordinates, and
+ * some additional output info.
+ */
 class Face {
-  int mat;
+  /** Material ID of the face */
+  int materialID;
+  /** 
+   * States wether the face should be outputed. Used by MultiFace and 
+   * for reusing geometry data of faces that should not exist.
+   */
   bool output;
 public:
+  /** 
+   * Vector holding the indices of texture coords held by the Mesh 
+   * class. Probably should be made private, but that would be a hell
+   * to refactor in the Mesh class
+   */
   IntVector tcd;
+  /** 
+   * Vector holding the indices of vertex coords held by the Mesh 
+   * class. Probably should be made private, but that would be a hell
+   * to refactor in the Mesh class
+   */
   IntVector vtx;
-  Face() : mat(0), output(true) {}
-  void clear() {
+  /**
+   * Standard and only constructor. Doesn't take any data, addVertex and
+   * addTexCoord should be used for defining the face.
+   */
+  Face() : materialID(0), output(true) {}
+  /**
+   * Clears the vertex index vector.
+   */
+  void clearVertices( ) {
     vtx.clear();
+  }
+  /**
+   * Clears the texture coordinate index vector.
+   */
+  void clearTexCoords( ) {
     tcd.clear();
   }
-  void clearVertices() {
+  /**
+   * Shorthand function to declare a quad face quickly. Depreciated, using
+   * addVertex directly is suggested.
+   */
+  void set4( int vID0, int vID1, int vID2, int vID3 ) {
     vtx.clear();
+    vtx.push_back(vID0);
+    vtx.push_back(vID1);
+    vtx.push_back(vID2);
+    vtx.push_back(vID3);
   }
-  void clearTexCoords() {
-    tcd.clear();
+  /**
+   * Adds a vertex index to the face.
+   */
+  void addVertex( int vertexID ) {
+    vtx.push_back(vertexID);
   }
-  void set4(int a, int b, int c, int d) {
-    vtx.clear();
-    vtx.push_back(a);
-    vtx.push_back(b);
-    vtx.push_back(c);
-    vtx.push_back(d);
+  /**
+   * Adds both a vertex and texture coordinate index to the face.
+   */
+  void addVertex( int vertexID, int texCoordID ) {
+    vtx.push_back( vertexID );
+    tcd.push_back( texCoordID );
   }
-
-  void addVertex(int v) {
-    vtx.push_back(v);
+  /**
+   * Adds both a texture coordinate index to the face.
+   */
+  void addTexCoord( int texCoordID ) {
+    tcd.push_back( texCoordID );
   }
-  void addVertex(int v, int tc) {
-    vtx.push_back(v);
-    tcd.push_back(tc);
-  }
-  void addTexCoord(int tc) {
-    tcd.push_back(tc);
-  }
-  int getVertexIndex(int vid) {
-    for (size_t i = 0; i < vtx.size(); i++) 
-      if (vtx.at(i) == vid) return i;
-    return -1;
-  }
-  bool hasVertex(int vid) {
-    for (size_t i = 0; i < vtx.size(); i++) 
-      if (vtx.at(i) == vid) return true;
+  /**
+   * Returns true, if the given vertex index is a part of this face.
+   */
+  bool hasVertex( int vertexID ) const {
+    for ( size_t i = 0; i < vtx.size(); i++ ) 
+      if ( vtx.at(i) == vertexID ) 
+	return true;
     return false;
   }
-  int vertex(int vid) { 
+  /**
+   * Acts like getVertex except that any input is valid -- the list of
+   * vertices is treated like a cyclic list.
+   */
+  int getCyclicVertex( int index ) const { 
     int size = vtx.size();
     if (vid >= 0) {
-      return vtx.at(vid % size);
+      return vtx.at(index % size);
     } else {
-      return vtx.at((vid + size*int(-vid/size+1)) % size);
+      return vtx.at((index + size*int(-index/size+1)) % size);
     }
   }
-  void insertVertexAfter(int index,int vid) {
-    vtx.insert(vtx.begin()+index+1,vid);
+  /**
+   * Returns the vertex ID specified by the given index in the face's list.
+   */
+  int getVertex( int index ) const {
+    return vtx.at(index);
   }
-  void insertVertexBefore(int index,int vid) {
-    vtx.insert(vtx.begin()+index,vid);
+  /**
+   * Returns the texture coordinate ID specified by the given index in the 
+   * face's list.
+   */
+  int getTexCoord( int index ) const {
+    return vtx.at(index);
   }
-  void removeVertex(int index) {
-    vtx.erase(vtx.begin()+index);
+  /**
+   * Inserts a vertex ID after the position specified.
+   */
+  void insertVertexAfter( int index, int vertexID ) {
+    vtx.insert( vtx.begin()+index+1, vertexID );
   }
-  String toStringIDs() { 
+  /**
+   * Inserts a vertex ID before the position specified.
+   */
+  void insertVertexBefore( int index, int vertexID ) {
+    vtx.insert( vtx.begin()+index, vertexID );
+  }
+  /**
+   * Removes the vertex ID at the specified index, and shifts the
+   * vertex ID array to remove the empty space.
+   */
+  void removeVertex( int index ) {
+    vtx.erase( vtx.begin()+index );
+  }
+  /**
+   * Returns a string representation of the given face. Used for
+   * debugging purposes.
+   */
+  String toStringIDs( ) const { 
     char buffer[80]; 
-    sprintf(buffer, "(%d,%d,%d,%d)",vertex(0),vertex(1),vertex(2),vertex(3)); 
+    sprintf(buffer, "(%d,%d,%d,%d)",vtx.at(0),vtx.at(1),vtx.at(2),vtx.at(3)); 
     return String(buffer); 
   }
-  int size() { 
+  /**
+   * Returns the size of the face. The size is defined as the amount of 
+   * vertices that make up the face.
+   */
+  int size() const { 
     return vtx.size(); 
   }
-  void setMaterial( int materialID ) {
-    mat = materialID;
+  /**
+   * Sets the Material ID for the face.
+   */
+  void setMaterial( int _materialID ) {
+    materialID = _materialID;
   }
-  int getMaterial() {
-    return mat;
+  /**
+   * Returns the Material ID for the face.
+   */
+  int getMaterial() const {
+    return materialID;
   }
+  /**
+   * Sets wether the face should be sent to output.
+   */
   void setOutput( bool _output ) {
     output = _output;
   }
-  bool outputable() {
+  /**
+   * Returns wether the face is intended for output.
+   */
+  bool outputable() const {
     return output;
   }
-  bool hasTexCoords( ) {
+  /**
+   * Returns whether the face has any texture coords defined.
+   */
+  bool hasTexCoords( ) const {
     return !tcd.empty();
   }
-  virtual bool isMultiFace() { 
+  /**
+   * Returns whether the face is a MultiFace.
+   */
+  virtual bool isMultiFace() const { 
     return false; 
+  }
+  /**
+   * Returns the index (position) in the face's vertex array of the 
+   * vertex specified by the passed ID. Used by MultiFace.
+   */
+  int getVertexIndex(int vertexID) const {
+    for ( size_t i = 0; i < vtx.size(); i++ ) 
+      if ( vtx.at(i) == vertexID ) 
+	return i;
+    return -1;
   }
 };
 
+/** Type definition for a Vector of Face pointers. */
 typedef std::vector<Face*> FaceVector;
+/** Type definition for a Vector of Face pointers iterator. */
 typedef FaceVector::iterator FaceVectIter;
 
 #endif /* __FACE_H__ */

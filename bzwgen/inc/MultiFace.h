@@ -25,7 +25,7 @@ public:
   MultiFace(Mesh* _mesh) : Face(), mesh(_mesh) { comps = new FaceVector; }
   IntVector* detachFace(int id);
   int addFace(Face* f);
-  virtual bool isMultiFace() { return true; }
+  virtual bool isMultiFace() const { return true; }
   virtual ~MultiFace() { delete comps; }
   int componentCount() { return comps->size(); }
 private:

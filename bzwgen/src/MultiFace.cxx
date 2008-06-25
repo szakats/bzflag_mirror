@@ -17,9 +17,9 @@ void MultiFace::updateFaces(double z) {
     Face* f = comps->at(fi);
     for (int t = 0; t < f->size(); t++) {
       if (f->tcd.at(t) < 0) {
-        mesh->v[f->vertex(t)].z = z;
+        mesh->v[f->getCyclicVertex(t)].z = z;
       } else {
-        f->vtx[t] = vertex(f->tcd.at(t));
+        f->vtx[t] = getCyclicVertex(f->tcd.at(t));
       }
     }
   }
@@ -30,7 +30,7 @@ void MultiFace::storeFaces() {
     Face* f = comps->at(fi);
     f->tcd.resize(f->size());
     for (int t = 0; t < f->size(); t++) {
-      f->tcd[t] = getVertexIndex(f->vertex(t));
+      f->tcd[t] = getVertexIndex(f->getCyclicVertex(t));
     }
   }
 }
@@ -40,7 +40,7 @@ IntVector* MultiFace::detachFace(int id) {
   printf("Detach face\n");
   if (comps->size() < 2) return NULL;
   if (id >= int(comps->size())) return NULL;
-  updateFaces(mesh->v[vertex(0)].z);
+  updateFaces(mesh->v[getCyclicVertex(0)].z);
   
   IntVector* result  = new IntVector();
   IntVector* visited = new IntVector();
@@ -53,8 +53,8 @@ IntVector* MultiFace::detachFace(int id) {
     printf("Element iteration...\n");
     IntVector nvtx;
 
-    int vid  = vertex(index);
-    int svid = vertex(index);
+    int vid  = getCyclicVertex(index);
+    int svid = getCyclicVertex(index);
     int lastgindex = index;
 
     do {
@@ -72,16 +72,16 @@ IntVector* MultiFace::detachFace(int id) {
       if (oindex < 0 ) {
         printf("Remove (%d)\n",vid);
         removeVertex(gindex);
-        vid = f->vertex(findex+1);
+        vid = f->getCyclicVertex(findex+1);
       } else {
-        int nextovid = oface->vertex(oindex-1);
+        int nextovid = oface->getCyclicVertex(oindex-1);
         if (findex < 0) {
           if (gindex < 0) insertVertexBefore(lastgindex,vid);
           vid = nextovid;
         } else {
-          int nextfvid = f->vertex(findex+1);
-          int prevfvid = f->vertex(findex-1);
-          int prevovid = oface->vertex(oindex-1);
+          int nextfvid = f->getCyclicVertex(findex+1);
+          int prevfvid = f->getCyclicVertex(findex-1);
+          int prevovid = oface->getCyclicVertex(oindex-1);
           if (nextovid == nextfvid) {
             vid = nextfvid;
           } else if (prevfvid == nextovid) {
@@ -138,11 +138,11 @@ Face* MultiFace::getOtherFaceWithVertex(Face* f, int vid) {
 
 int MultiFace::pickRemovalIndex(Face *f,IntVector* visited) {
   for (int i = 0; i < size(); i++) {
-    if (f->hasVertex(vertex(i))) {
+    if (f->hasVertex(getCyclicVertex(i))) {
       bool found = false;
       if (visited->size() > 0) 
         for (size_t k = 0; k < visited->size(); k++)
-          if (visited->at(k) == vertex(i)) {
+          if (visited->at(k) == getCyclicVertex(i)) {
             found = true;
             break;
           }
@@ -159,17 +159,17 @@ void MultiFace::refineFace(Face* f, Face* target) {
     int index;
     //printf("Intersect... (%d,%d)\n",i,modnext(i,f->size()));
     //      printf("Multi%s\n",mesh->faceToString(this).c_str());
-    if (vertexNearestIntersect(f->vertex(i),f->vertex(i+1),ipoint,index,target)) {
+    if (vertexNearestIntersect(f->getCyclicVertex(i),f->getCyclicVertex(i+1),ipoint,index,target)) {
       //printf("Nearerst found... (%d) %s : ",index,ipoint.toString().c_str());
       int ipid;
-      if (samepointZ(mesh->v[f->vertex(i+1)],mesh->v[target->vertex(index+1)])) {
+      if (samepointZ(mesh->v[f->getCyclicVertex(i+1)],mesh->v[target->getCyclicVertex(index+1)])) {
         //printf("Is common\n");
-      } else if (samepointZ(ipoint,mesh->v[f->vertex(i+1)])) {
+      } else if (samepointZ(ipoint,mesh->v[f->getCyclicVertex(i+1)])) {
         //printf("Is samepoint with next\n");
-        target->insertVertexAfter(index,f->vertex(i+1));
-      } else if (samepointZ(ipoint,mesh->v[target->vertex(index+1)])) {
+        target->insertVertexAfter(index,f->getCyclicVertex(i+1));
+      } else if (samepointZ(ipoint,mesh->v[target->getCyclicVertex(index+1)])) {
         //printf("Is samepoint with itself\n");
-        f->insertVertexAfter(i,target->vertex(index+1));
+        f->insertVertexAfter(i,target->getCyclicVertex(index+1));
       } else {
         //printf("Is normal\n");
         ipid = mesh->addVertex(ipoint);
@@ -189,7 +189,7 @@ int MultiFace::addFace(Face* f) {
   f->setOutput( false );
   if (comps->size() == 0) {
     for (int i = 0; i < f->size(); i++) 
-      vtx.push_back(f->vertex(i));
+      vtx.push_back(f->getVertex(i));
   } else {
     refineFace(f,this);
     for (size_t i = 0; i < comps->size(); i++) refineFace(f,comps->at(i));
@@ -199,7 +199,7 @@ int MultiFace::addFace(Face* f) {
     IntVector newvtx;
     int index = 0;
     for (index = 0; index < fsize; index++) 
-      if (getVertexIndex(f->vertex(index)) < 0 && !vertexInside(f->vertex(index))) break;
+      if (getVertexIndex(f->getCyclicVertex(index)) < 0 && !vertexInside(f->getCyclicVertex(index))) break;
     // check if no vertices are inside?
     int end = index;
     bool newf = true;
@@ -210,13 +210,13 @@ int MultiFace::addFace(Face* f) {
       //printf("--- %d,%d\n",index,newf);
       first = false;
       if (newf) {
-        newvtx.push_back(f->vertex(index));
+        newvtx.push_back(f->getCyclicVertex(index));
 	next = math::modNext(index,fsize);
-        getvert = getVertexIndex(f->vertex(next));
+        getvert = getVertexIndex(f->getCyclicVertex(next));
       } else {
-        newvtx.push_back(vertex(index));
+        newvtx.push_back(getCyclicVertex(index));
         next = math::modNext(index,tsize);
-        getvert = f->getVertexIndex(vertex(next));
+        getvert = f->getVertexIndex(getCyclicVertex(next));
       }
       if (getvert != -1) {
         newf = !newf;
@@ -241,7 +241,7 @@ bool MultiFace::vertexInside(int vid) {
   Vertex P2;
   int count = 0;
   for (int i = 0; i < size(); i++) {
-    if (intersectZ(A,B,mesh->v[vertex(i)],mesh->v[vertex(i+1)],P1,P2) > 0) count++;
+    if (intersectZ(A,B,mesh->v[getCyclicVertex(i)],mesh->v[getCyclicVertex(i+1)],P1,P2) > 0) count++;
   }      
   return (count%2 == 1);
 }
@@ -256,9 +256,9 @@ bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index
   Vertex R1;
   Vertex R2;
   for (int i = 0; i < tsize; i++) {
-    int r = intersectZ(A,B,mesh->v[face->vertex(i)],mesh->v[face->vertex(i+1)],R1,R2);
+    int r = intersectZ(A,B,mesh->v[face->getCyclicVertex(i)],mesh->v[face->getCyclicVertex(i+1)],R1,R2);
     if (r > 0) {
-      if (!samepointZ(mesh->v[face->vertex(i)],R1)) {
+      if (!samepointZ(mesh->v[face->getCyclicVertex(i)],R1)) {
         double thisdistance = (A-R1).length();
         if (thisdistance > EPSILON) {
 //          printf("ICH:%s\n",R1.toString().c_str());
@@ -271,7 +271,7 @@ bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index
       }
     }
     if (r == 2) {
-      if (!samepointZ(mesh->v[face->vertex(i)],R2)) {
+      if (!samepointZ(mesh->v[face->getCyclicVertex(i)],R2)) {
         double thisdistance = (A-R2).length();
         if (thisdistance < EPSILON) continue;
 //        printf("ICH(2):%s\n",R2.toString().c_str());

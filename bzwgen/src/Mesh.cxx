@@ -70,7 +70,7 @@ int Mesh::createNGon(Vertex center, double radius, int n) {
   double step = (2*double(M_PI))/n;
   for (int i = 0; i < n; i++) {
     int vt = addVertex(center+Vertex(radius*cos(step*double(i)-step/2),radius*sin(step*double(i)-step/2),0.0));
-    face->vtx.push_back(vt);
+    face->addVertex(vt);
   }
   return addFace(face);
 }
@@ -154,11 +154,12 @@ void Mesh::scaleFace(int fid, double x, double y) {
 }
 
 void Mesh::translateFace(int fid, double x, double y, double z) {
-  int size = f[fid]->vtx.size();
+  int size = f[fid]->size();
   for (int i = 0; i < size; i++) {
-    v[f[fid]->vtx.at(i)].x += x;
-    v[f[fid]->vtx.at(i)].y += y;
-    v[f[fid]->vtx.at(i)].z += z;
+    int vertexID = f[fid]->getVertex(i);
+    v[vertexID].x += x;
+    v[vertexID].y += y;
+    v[vertexID].z += z;
   }
 }
 
@@ -503,7 +504,7 @@ String Mesh::faceToString(Face* face) {
 void Mesh::pushBase(int fid) {
   vbase.clear();
   for (int i = 0; i < f[fid]->size(); i++) {
-    vbase.push_back(v[f[fid]->vertex(i)]);
+    vbase.push_back(v[f[fid]->getVertex(i)]);
   }
 }
 

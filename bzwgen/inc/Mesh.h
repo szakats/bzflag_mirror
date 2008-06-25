@@ -57,6 +57,7 @@ public:
   Vertex faceHv(int face) { return (v[f[face]->vtx.at(0)] - v[f[face]->vtx.at(1)]); }
   Vertex faceVv(int face) { return (v[f[face]->vtx.at(3)] - v[f[face]->vtx.at(0)]); }
   String faceToString(Face* face);
+  Vertex getFaceVertex(int faceID, int vertexID) { return v[f[faceID]->getVertex(vertexID)]; };
   void pushBase(int fid);
   ~Mesh();
 private:
