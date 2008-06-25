@@ -42,9 +42,9 @@ class Node : public IObject, public Vector2Df
 {
 private:
   /** The list of outgoing edges */
-  EdgeList outgoing;
+  EdgeVector outgoing;
   /** The list of incoming edges */
-  EdgeList incoming;
+  EdgeVector incoming;
   /**
    * Pointer to the graph of which this given Node is a belonging to.
    */
@@ -58,9 +58,9 @@ public:
   /** Constructor which takes Point2D data as parameters. */
   Node(float x, float y) : Vector2Df(x,y), graph(0)  {} 
   /** Adds a incoming edge */
-  void addIncoming(EdgePtr edge) { incoming.add(edge); }
+  void addIncoming(EdgePtr edge) { incoming.push_back(edge); }
   /** Adds a outgoing edge */
-  void addOutgoing(EdgePtr edge) { outgoing.add(edge); }
+  void addOutgoing(EdgePtr edge) { outgoing.push_back(edge); }
 
 };
 

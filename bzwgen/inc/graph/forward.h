@@ -41,6 +41,10 @@ typedef TObjectList<EdgePtr> EdgeList;
 typedef TObjectList<NodePtr> NodeList;
 typedef TObjectList<FacePtr> FaceList;
 
+typedef std::vector<EdgePtr> EdgeVector;
+typedef std::vector<NodePtr> NodeVector;
+typedef std::vector<FacePtr> FaceVector;
+
 }; // namespace end graph
 
 #endif // __FORWARD_H__

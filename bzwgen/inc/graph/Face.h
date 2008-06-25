@@ -41,7 +41,7 @@ private:
    * List of edges belonging to this face. The edges should be stored in order,
    * that is to allow a clockwise full traversal of the face.
    */
-  EdgeList edges;
+  EdgeVector edges;
   /**
    * Pointer to the graph of which this face is part of.
    */
