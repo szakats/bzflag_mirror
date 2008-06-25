@@ -47,7 +47,6 @@ public:
  * IObject.
  *
  * TODO:
- * [] operator
  * removal and clearance
  */
 template <class T>
@@ -67,6 +66,14 @@ public:
   T get(size_t index) {
     assert(index < size())
     return list.at(index);
+  }
+  T operator[](size_t index) {
+    assert(index < size())
+    return list.at(index);
+  } 
+  void set(size_t index, T object) {
+    list[index] = object;
+    object->ID = index;
   }
 };
 
