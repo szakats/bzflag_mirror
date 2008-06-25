@@ -53,7 +53,7 @@ public:
 };
 
 
-}; // namespace end Graph
+} // namespace end Graph
 
 #endif // __EDGE_H__
 

@@ -42,6 +42,8 @@ private:
 public:
   /** Default constructor. Creates an empty graph.*/
   Graph() : nodes(0), edges(0) {} 
+  /** Destructor.*/
+  virtual ~Graph() {}
   /** Adds a node to the graph. As convienience returns the passed edge. */
   virtual NodePtr addNode( NodePtr node ) {
     nodeList.add( node );
@@ -87,11 +89,10 @@ public:
     nodeList.clear(id);
   }
 
-
 };
 
 
-};// end namespace graph
+}// end namespace graph
 
 
 #endif // __GRAPH_H__

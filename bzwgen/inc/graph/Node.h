@@ -68,7 +68,7 @@ public:
 };
 
 
-}; // namespace end graph
+} // namespace end graph
 
 #endif // __NODE_H__
 

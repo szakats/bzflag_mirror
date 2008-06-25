@@ -70,7 +70,7 @@ public:
   }
   /** Returns element by index. Note that *not* a reference is returned */
   T operator[](size_t index) {
-    assert(index < size())
+    assert(index < size());
     return list.at(index);
   } 
   void set(size_t index, T object) {
@@ -84,7 +84,7 @@ public:
 };
 
 
-}; // namespace end graph
+} // namespace end graph
 
 #endif // __OBJECTLIST_H__
 

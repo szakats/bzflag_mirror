@@ -49,7 +49,7 @@ typedef EdgeVector::iterator EdgeVectorIterator;
 typedef NodeVector::iterator NodeVectorIterator;
 typedef FaceVector::iterator FaceVectorIterator;
 
-}; // namespace end graph
+} // namespace end graph
 
 #endif // __FORWARD_H__
 

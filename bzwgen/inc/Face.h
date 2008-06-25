@@ -53,6 +53,10 @@ public:
    * addTexCoord should be used for defining the face.
    */
   Face() : materialID(0), output(true) {}
+  /** 
+   * Destructor.
+   */
+  virtual ~Face() {}
   /**
    * Clears the vertex index vector.
    */
