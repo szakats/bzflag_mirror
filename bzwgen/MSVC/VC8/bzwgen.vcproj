@@ -553,6 +553,14 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="graph"
+				>
+				<File
+					RelativePath="..\..\src\Node.cxx"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"

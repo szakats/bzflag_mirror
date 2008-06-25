@@ -61,7 +61,10 @@ public:
   void addIncoming(EdgePtr edge) { incoming.push_back(edge); }
   /** Adds a outgoing edge */
   void addOutgoing(EdgePtr edge) { outgoing.push_back(edge); }
-
+  /** Sets the owning Graph */
+  void setGraph(GraphPtr _graph) { graph = _graph; }
+  /** Removes all the edges connected to the node */
+  void orphanize();
 };
 
 

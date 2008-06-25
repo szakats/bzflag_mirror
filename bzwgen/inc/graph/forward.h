@@ -45,6 +45,10 @@ typedef std::vector<EdgePtr> EdgeVector;
 typedef std::vector<NodePtr> NodeVector;
 typedef std::vector<FacePtr> FaceVector;
 
+typedef EdgeVector::iterator EdgeVectorIterator;
+typedef NodeVector::iterator NodeVectorIterator;
+typedef FaceVector::iterator FaceVectorIterator;
+
 }; // namespace end graph
 
 #endif // __FORWARD_H__

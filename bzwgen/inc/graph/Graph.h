@@ -35,9 +35,59 @@ private:
   NodeList nodeList;
   /** The list of all Edges. */
   EdgeList edgeList;
+  /** Holds the number of nodes */
+  size_t nodes;
+  /** Holds the number of edges */
+  size_t edges;
 public:
   /** Default constructor. Creates an empty graph.*/
-  Graph() {} 
+  Graph() : nodes(0), edges(0) {} 
+  /** Adds a node to the graph. As convienience returns the passed edge. */
+  virtual NodePtr addNode( NodePtr node ) {
+    nodeList.add( node );
+    node->setGraph( this );
+    ++nodes;
+    return node;
+  }
+  /** Adds a single edge to the graph. As convienience returns the passed edge. */
+  virtual EdgePtr addEdge( EdgePtr edge ) {
+    edgeList.add( edge );
+    ++edges;
+    return edge;
+  }
+  /** Returns the number of nodes */
+  size_t nodeCount() const { 
+    return nodes;
+  }
+  /** Returns the number of edges */
+  size_t edgeCount() const { 
+    return edges;
+  }
+  /** Returns node by ID */
+  NodePtr getNode( size_t id ) {
+    return nodeList.get(id);
+  }
+  /** Returns edge by ID */
+  EdgePtr getEdge( size_t id ) {
+    return edgeList.get(id);
+  }
+  /** Removes a given Edge from the graph. Note that it DOES dispose of the edge object. */
+  void removeEdge( size_t id ) {
+    delete edgeList.get(id);
+    edgeList.clear(id);
+  }
+  /** 
+   * Removes a given Node from the graph. Also removes all 
+     connected edges, as they are no longer valid. Note that 
+     it DOES dispose of the node object and edge objects. */
+  void removeNode( size_t id ) {
+    NodePtr node = nodeList.get(id);
+    node->orphanize();
+    delete node;
+    nodeList.clear(id);
+  }
+
+
 };
 
 

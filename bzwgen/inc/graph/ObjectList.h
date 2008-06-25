@@ -24,6 +24,7 @@
 #ifndef __OBJECTLIST_H__
 #define __OBJECTLIST_H__
 
+#include <cassert>
 #include <vector>
 
 // The ObjectList class is a part of Graph class
@@ -45,9 +46,6 @@ public:
  *
  * The template assumes that T is a pointer to a class that inherits
  * IObject.
- *
- * TODO:
- * removal and clearance
  */
 template <class T>
 class TObjectList {
@@ -55,26 +53,34 @@ class TObjectList {
 public:
   /** Standard constructor */
   TObjectList() {}
+  /** Returns list size */
   size_t size() const {
     return list.size();
   }
+  /** Adds a new element to the end of the list */
   int add(T object) {
     list.push_back(object);
     object->ID = size()-1;
     return object->ID;
   }
+  /** Returns element by index */
   T get(size_t index) {
-    assert(index < size())
+    assert(index < size());
     return list.at(index);
   }
+  /** Returns element by index. Note that *not* a reference is returned */
   T operator[](size_t index) {
     assert(index < size())
     return list.at(index);
   } 
   void set(size_t index, T object) {
     list[index] = object;
-    object->ID = index;
+    if (object) object->ID = index;
   }
+  void clear(size_t index) {
+    list[index] = NULL;
+  }
+
 };
 
 
