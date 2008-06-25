@@ -18,17 +18,19 @@
 #include "Face.h"
 
 class Mesh {
-public:
-  VertexVector v;
-  TexCoordVector tc;
-  FaceVector f;
   IntVector freeVertices;
   VertexVector inside;
   VertexVector outside;
+  TexCoordVector tc;
+public:
   VertexVector vbase;
+  VertexVector v;
+  FaceVector f;
   bool passable;
   Mesh() : passable(false) {}
   int addVertex(Vertex vtx);
+  Vertex getVertex(int vertexID) { return v[vertexID]; }
+  void addInsideVertex( Vertex vtx ) { inside.push_back(vtx); }
   int addTexCoord(TexCoord tcx);
   int addFace(Face* face) { f.push_back(face); return f.size()-1; }
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat = 0);

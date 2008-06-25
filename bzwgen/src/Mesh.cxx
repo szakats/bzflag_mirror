@@ -135,7 +135,7 @@ Vertex Mesh::extensionVertex(int ida, int idb, int idc) {
 }
 
 void Mesh::taperFace(int fid, double amount) {
-  int size = f[fid]->vtx.size();
+  int size = f[fid]->size();
   Vertex c = faceCenter(fid);
   for (int i = 0; i < size; i++) {
     Vertex vv = v[f[fid]->vtx.at(i)];
@@ -144,12 +144,13 @@ void Mesh::taperFace(int fid, double amount) {
 }
 
 void Mesh::scaleFace(int fid, double x, double y) {
-  int size = f[fid]->vtx.size();
+  int size = f[fid]->size();
   Vertex c = faceCenter(fid);
   for (int i = 0; i < size; i++) {
     Vertex vc = v[f[fid]->vtx.at(i)] - c;
-    v[f[fid]->vtx.at(i)].x = vc.x*x+c.x;
-    v[f[fid]->vtx.at(i)].y = vc.y*y+c.y;
+    int vertexID = f[fid]->getVertex(i);
+    v[vertexID].x = vc.x*x+c.x;
+    v[vertexID].y = vc.y*y+c.y;
   }
 }
 
@@ -167,7 +168,7 @@ void Mesh::translateFace(int fid, double x, double y, double z) {
 void Mesh::expandFace(int fid, double amount) {
   Vertex normal = faceNormal(fid);
   // needs to be uniform
-  int size = f[fid]->vtx.size();
+  int size = f[fid]->size();
   Vertex* nv = new Vertex[size];
   for (int i = 0; i < size; i++) {
     Vertex a = v[f[fid]->vtx.at(math::modNext(i,size))] - v[f[fid]->vtx.at(math::modPrev(i,size))];

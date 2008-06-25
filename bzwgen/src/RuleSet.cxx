@@ -53,7 +53,7 @@ MeshVector* RuleSet::run(Mesh* initial_mesh, int initial_face, String& rulename)
   meshes = new MeshVector();
   meshes->push_back(initial_mesh);
   initial_mesh->pushBase(initial_face);
-  initial_mesh->inside.push_back(initial_mesh->faceCenter(initial_face)+initial_mesh->faceNormal(initial_face)*0.05f);
+  initial_mesh->addInsideVertex(initial_mesh->faceCenter(initial_face)+initial_mesh->faceNormal(initial_face)*0.05f);
   if (runMesh(initial_mesh,initial_face,rulename) == -1) 
     printf("RuleSet::run failed with start rule '%s!'\n",rulename.c_str());
   return meshes;
@@ -65,12 +65,12 @@ int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, String& rulename) {
   int size = old_mesh->f[old_face]->size();
   for (int i = 0; i < size; i++) {
     newface->vtx.push_back(i);
-    newmesh->addVertex(old_mesh->v[old_mesh->f[old_face]->vtx.at(i)]);
+    newmesh->addVertex(old_mesh->getVertex(old_mesh->f[old_face]->vtx.at(i)));
   }
   int newfaceid = newmesh->addFace(newface);
   newmesh->pushBase(newfaceid);
   meshes->push_back(newmesh);
-  newmesh->inside.push_back(newmesh->faceCenter(newfaceid)+newmesh->faceNormal(newfaceid)*0.05f);
+  newmesh->addInsideVertex(newmesh->faceCenter(newfaceid)+newmesh->faceNormal(newfaceid)*0.05f);
   return runMesh(newmesh,newfaceid,rulename);
 }
 

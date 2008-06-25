@@ -110,7 +110,7 @@ public:
    */
   int getCyclicVertex( int index ) const { 
     int size = vtx.size();
-    if (vid >= 0) {
+    if (index >= 0) {
       return vtx.at(index % size);
     } else {
       return vtx.at((index + size*int(-index/size+1)) % size);
