@@ -64,8 +64,8 @@ int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, String& rulename) {
   Face* newface = new Face();
   int size = old_mesh->f[old_face]->size();
   for (int i = 0; i < size; i++) {
-    newface->vtx->push_back(i);
-    newmesh->addVertex(old_mesh->v[old_mesh->f[old_face]->vtx->at(i)]);
+    newface->vtx.push_back(i);
+    newmesh->addVertex(old_mesh->v[old_mesh->f[old_face]->vtx.at(i)]);
   }
   int newfaceid = newmesh->addFace(newface);
   newmesh->pushBase(newfaceid);

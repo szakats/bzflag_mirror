@@ -16,10 +16,10 @@ void MultiFace::updateFaces(double z) {
   for (size_t fi = 0; fi < comps->size(); fi++) {
     Face* f = comps->at(fi);
     for (int t = 0; t < f->size(); t++) {
-      if (f->tcd->at(t) < 0) {
+      if (f->tcd.at(t) < 0) {
         mesh->v[f->vertex(t)].z = z;
       } else {
-        (*f->vtx)[t] = vertex(f->tcd->at(t));
+        f->vtx[t] = vertex(f->tcd.at(t));
       }
     }
   }
@@ -28,9 +28,9 @@ void MultiFace::updateFaces(double z) {
 void MultiFace::storeFaces() {
   for (size_t fi = 0; fi < comps->size(); fi++) {
     Face* f = comps->at(fi);
-    f->tcd->resize(f->size());
+    f->tcd.resize(f->size());
     for (int t = 0; t < f->size(); t++) {
-      (*f->tcd)[t] = getVertexIndex(f->vertex(t));
+      f->tcd[t] = getVertexIndex(f->vertex(t));
     }
   }
 }
@@ -51,7 +51,7 @@ IntVector* MultiFace::detachFace(int id) {
 
   while (index >= 0) {
     printf("Element iteration...\n");
-    IntVector* nvtx = new IntVector;
+    IntVector nvtx;
 
     int vid  = vertex(index);
     int svid = vertex(index);
@@ -67,7 +67,7 @@ IntVector* MultiFace::detachFace(int id) {
       oindex = (oface == NULL) ? -1 : oface->getVertexIndex(vid);
 
       visited->push_back(vid);
-      nvtx->push_back(vid);
+      nvtx.push_back(vid);
 
       if (oindex < 0 ) {
         printf("Remove (%d)\n",vid);
@@ -189,14 +189,14 @@ int MultiFace::addFace(Face* f) {
   f->output = false;
   if (comps->size() == 0) {
     for (int i = 0; i < f->size(); i++) 
-      vtx->push_back(f->vertex(i));
+      vtx.push_back(f->vertex(i));
   } else {
     refineFace(f,this);
     for (size_t i = 0; i < comps->size(); i++) refineFace(f,comps->at(i));
     int fsize = f->size();
     int tsize = size();
     //printf("Refined... (%d,%d)\n",tsize,fsize);
-    IntVector* newvtx = new IntVector;
+    IntVector newvtx;
     int index = 0;
     for (index = 0; index < fsize; index++) 
       if (getVertexIndex(f->vertex(index)) < 0 && !vertexInside(f->vertex(index))) break;
@@ -210,11 +210,11 @@ int MultiFace::addFace(Face* f) {
       //printf("--- %d,%d\n",index,newf);
       first = false;
       if (newf) {
-        newvtx->push_back(f->vertex(index));
+        newvtx.push_back(f->vertex(index));
 	next = math::modNext(index,fsize);
         getvert = getVertexIndex(f->vertex(next));
       } else {
-        newvtx->push_back(vertex(index));
+        newvtx.push_back(vertex(index));
         next = math::modNext(index,tsize);
         getvert = f->getVertexIndex(vertex(next));
       }
@@ -223,7 +223,6 @@ int MultiFace::addFace(Face* f) {
         index = getvert;
       } else index = next;
     }
-    delete vtx;
     vtx = newvtx;
   }
   comps->push_back(f);

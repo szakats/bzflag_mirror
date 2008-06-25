@@ -47,15 +47,15 @@ public:
     }
 
     (*outstream) << "    vertices ";
-    for (size_t i = 0; i < f->vtx->size(); i++) {
-      (*outstream) << f->vtx->at(i) << " ";
+    for (size_t i = 0; i < f->vtx.size(); i++) {
+      (*outstream) << f->vtx.at(i) << " ";
     }
     (*outstream) << "\n";
 
-    if (f->texcoords && f->tcd->size() > 0) {
+    if (f->texcoords && f->tcd.size() > 0) {
       (*outstream) << "    texcoords ";
-      for (size_t i = 0; i < f->tcd->size(); i++) {
-        (*outstream) << f->tcd->at(i) << " ";
+      for (size_t i = 0; i < f->tcd.size(); i++) {
+        (*outstream) << f->tcd.at(i) << " ";
       }
       (*outstream) << "\n";
     }
