@@ -21,8 +21,6 @@
 #include "RuleSet.h"
 
 class GridGenerator : public Generator {
-protected:
-  GridMap::GridInfo gi;
   GridMap map;
   int fullslice;
   int snapX, snapY;
@@ -32,7 +30,7 @@ public:
   void parseOptions(CCommandLineArgs* opt);
   void run();
   void output(Output& out);
-  GridMap::GridInfo getGridInfo() { return gi; }
+//  GridMap::GridInfo getGridInfo() { return gi; }
   ~GridGenerator();
 private:
   void plotRoad(int x, int y, bool horiz, int collision = 0);

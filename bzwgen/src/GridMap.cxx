@@ -19,17 +19,19 @@
 
 int BaseZone::color = 1;
 
-void GridMap::initialize(Generator* _generator) 
+void GridMap::initialize(Generator* _generator, int _worldSize, int _gridSize) 
 {
+  worldSize = _worldSize;
+  gridSize = _gridSize;
+  gridStep = worldSize / gridSize;
   generator = _generator;
-  gi = ((GridGenerator*)_generator)->getGridInfo();
-  map = new DiscreetMapNode[(gi.sizeX+1)*(gi.sizeY+1)];
+  map = new DiscreetMapNode[(gridSize+1)*(gridSize+1)];
   clear();
 }
 
 void GridMap::clear() 
 {
-  for (int i = 0; i < (gi.sizeX+1)*(gi.sizeY+1); i++) {
+  for (int i = 0; i < (gridSize+1)*(gridSize+1); i++) {
     map[i].zone = -1;
     map[i].type = NONE;
   }
@@ -39,12 +41,12 @@ void GridMap::growZone(int x,int y,CellType type) {
   if (debugLevel > 3) { printf("Pushing zone at : (%d,%d)\n",x,y); }
   int xe = x;
   int ye = y;
-  while(xe < gi.sizeX) {
+  while(xe < gridSize) {
     xe++;
     int etype = getNode(xe,y).type;
     if (etype != type) break;
   }
-  while(ye < gi.sizeY) {
+  while(ye < gridSize) {
     ye++;
     int etype = getNode(x,ye).type;
     if (etype != type) break;
@@ -54,16 +56,16 @@ void GridMap::growZone(int x,int y,CellType type) {
 
   if (type == ROAD) {
     if (debugLevel > 2) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
-    zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX, generator->roadid, x-xe < y-ye));
+    zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep, generator->roadid, x-xe < y-ye));
   } else if (type == ROADX) {
     if (debugLevel > 2) { printf("Crossroads zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
-    zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX, generator->roadxid,true));
+    zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep, generator->roadxid,true));
   } else if (type == BASE) {
     if (debugLevel > 2) { printf("Base zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
     zones.push_back(new BaseZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye), generator->ctfSafe));
   } else {
     if (debugLevel > 2) { printf("Building zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
-    zones.push_back(new BuildZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gi.stepX));
+    zones.push_back(new BuildZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep));
   }
   if (debugLevel > 3) { printf("Zone successfuly created : (%d,%d * %d,%d)\n",x,y,xe,ye); }
 }
@@ -92,13 +94,13 @@ void GridMap::pushZones()
         growZone(x,y,getNode(x,y).type);
       }
       x++;
-    } while (x < gi.sizeX);
+    } while (x < gridSize);
     y++;
-  } while (y < gi.sizeY);
+  } while (y < gridSize);
 }
 
 bool GridMap::isValid(int x, int y) {
-  return (x > 0 && y > 0 && x < gi.sizeX && y < gi.sizeY); 
+  return (x > 0 && y > 0 && x < gridSize && y < gridSize); 
 }
 
 
@@ -126,10 +128,15 @@ int GridMap::typeCrossAroundToInt(int x, int y, CellType type)
 Coord2D GridMap::emptyCoord() {
   int x,y;
   do {
-    x = Random::numberMax(gi.sizeX);
-    y = Random::numberMax(gi.sizeY);
+    x = Random::numberMax(gridSize);
+    y = Random::numberMax(gridSize);
   } while (getNode(x,y).type > NONE);
   return Coord2D(x,y);
+}
+
+
+void GridMap::output(Output& out) { 
+  for (ZoneVectIter iter = zones.begin(); iter != zones.end(); ++iter)  (*iter)->output(out);
 }
 
 GridMap::~GridMap() {

@@ -37,30 +37,29 @@ private:
   };
   DiscreetMapNode* map;
   Generator* generator;
-public:
-  struct GridInfo {
-    int size;
-    int sizeX,sizeY;
-    int stepX,stepY;
-  };
-  GridInfo gi;
+  int worldSize;
+  int gridSize;
+  int gridStep;
   ZoneVector zones;
+public:
   GridMap() { map = NULL; };
-  void initialize(Generator* _generator);
-  inline DiscreetMapNode getNode(int x, int y)	{ return map[y*gi.sizeX+x]; }
-  inline DiscreetMapNode getNode(Coord2D c)  { return map[c.y*gi.sizeX+c.x]; }
+  int getGridSize() const { return gridSize; }
+  void initialize(Generator* _generator, int _worldSize, int _gridSize);
+  inline DiscreetMapNode getNode(int x, int y)	{ return map[y*gridSize+x]; }
+  inline DiscreetMapNode getNode(Coord2D c)  { return map[c.y*gridSize+c.x]; }
   void clear();
-  Coord2D worldCoord(int x, int y) { return Coord2D((x-gi.sizeX/2)*gi.stepX,(y-gi.sizeY/2)*gi.stepY); }
+  Coord2D worldCoord(int x, int y) { return Coord2D((x-gridSize/2)*gridStep,(y-gridSize/2)*gridStep); }
   void setAreaType(Coord2D a, Coord2D b, CellType type);
   void setAreaZone(Coord2D a, Coord2D b, int zone);
-  inline void setType(int x, int y, CellType type) { map[y*gi.sizeX+x].type = type; }
-  inline void setZone(int x, int y, int zone) { map[y*gi.sizeX+x].zone = zone; }
-  inline void setType(Coord2D c, CellType type) { map[c.y*gi.sizeX+c.x].type = type; }
+  inline void setType(int x, int y, CellType type) { map[y*gridSize+x].type = type; }
+  inline void setZone(int x, int y, int zone) { map[y*gridSize+x].zone = zone; }
+  inline void setType(Coord2D c, CellType type) { map[c.y*gridSize+c.x].type = type; }
   void growZone(int x,int y,CellType type);
   void pushZones();
   bool isValid(int x, int y);
   int typeAroundToInt(int x, int y, CellType type);
   int typeCrossAroundToInt(int x, int y, CellType type); 
+  void output(Output& out);
   Coord2D emptyCoord();
   ~GridMap();
 };
