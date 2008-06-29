@@ -24,9 +24,6 @@
 /** 
  * @class BaseZone
  * @brief Class defining a map zone with a base in it.
- * 
- * Current implementation defines an axis-aligned Zone, this will be
- * refactored to the description below:
  *
  * This class defines a Zone that has a base on it. BZFlag bases are 
  * rectangles, yet rectangles don't look good because of texture 

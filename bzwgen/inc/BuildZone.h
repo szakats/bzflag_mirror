@@ -25,9 +25,6 @@
  * @class BuildZone
  * @brief Class defining a build zone
  * 
- * Current implementation defines an axis-aligned Zone, this will be
- * refactored to the description below:
- *
  * This Zone represents a zone on which a building algorithm is run through. 
  * A build zone can be made out of several meshes obtained from the algorithm 
  * of the generator.

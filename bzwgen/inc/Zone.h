@@ -36,9 +36,6 @@ class Generator;
  * @class Zone
  * @brief Class defining a map zone
  * 
- * Current implementation defines an axis-aligned Zone, this will be
- * refactored to the description below:
- *
  * A zone represents a part of the map -- this part can be of arbitral 
  * shape, representede internally as a pointer to a graph::Face. Zone 
  * itself is a abstract class, because it doesn't hold any information 

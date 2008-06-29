@@ -26,9 +26,6 @@
  * @class FloorZone
  * @brief Class defining a floor (road) zone
  * 
- * Current implementation defines an axis-aligned Zone, this will be
- * refactored to the description below:
- *
  * This Zone represents a floor part. Floor is characterized by the fact that it
  * has no collision checks (it is made passthrough), and that it constitutes of 
  * a single mesh (actually a single face). 
