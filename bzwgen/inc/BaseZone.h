@@ -44,7 +44,7 @@ public:
   /**
    * Constructor, sets all the needed data for generation.
    */
-  BaseZone( Generator* _generator, graph::FacePtr _face, bool _ctfSafe ) 
+  BaseZone( Generator* _generator, graph::Face* _face, bool _ctfSafe ) 
     : Zone( _generator,_face ), ctfSafe( _ctfSafe ), color( 1 ) {};
   /**
    * Runs the Zone generation. As a BZFlag base is a native BZW object, this method 

@@ -50,7 +50,7 @@ public:
   /** Destructor.*/
   ~PlanarGraph() {}
   /** Adds a node to the graph. As convienience returns the passed edge. */
-  NodePtr addNode( NodePtr node ) {
+  Node* addNode( Node* node ) {
     nodeList.add( node );
     ++nodes;
     return node;
@@ -60,9 +60,9 @@ public:
    * that no planarity check is done. The arguments are symmetrical, so there's
    * no difference in which one was passed first.
    */
-  void addConnection( NodePtr a, NodePtr b ) {
-    EdgePtr ea = addEdge( new Edge( a, b ) );
-    EdgePtr eb = addEdge( new Edge( b, a ) );
+  void addConnection( Node* a, Node* b ) {
+    Edge* ea = addEdge( new Edge( a, b ) );
+    Edge* eb = addEdge( new Edge( b, a ) );
     ea->setReverse(eb);
   }
   /** Returns the number of nodes */
@@ -78,11 +78,11 @@ public:
     return faces;
   }
   /** Returns node by ID */
-  NodePtr getNode( size_t id ) {
+  Node* getNode( size_t id ) {
     return nodeList.get(id);
   }
   /** Returns edge by ID */
-  EdgePtr getEdge( size_t id ) {
+  Edge* getEdge( size_t id ) {
     return edgeList.get(id);
   }
   /** Removes a given Edge from the graph. Note that it DOES dispose of the edge object. */
@@ -97,7 +97,7 @@ public:
    * it DOES dispose of the node object and edge objects. 
    */
   void removeNode( size_t id ) {
-    NodePtr node = nodeList.get(id);
+    Node* node = nodeList.get(id);
     node->orphanize();
     delete node;
     nodeList.clear(id);
@@ -105,7 +105,7 @@ public:
   }
 private:
   /** Adds a single edge to the graph. As convienience returns the passed edge. */
-  EdgePtr addEdge( EdgePtr edge ) {
+  Edge* addEdge( Edge* edge ) {
     edgeList.add( edge );
     ++edges;
     return edge;

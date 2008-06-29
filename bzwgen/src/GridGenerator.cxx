@@ -113,7 +113,7 @@ void GridGenerator::growZone(int x,int y,CellType type) {
     for (int yy = y; yy < ye; yy++) 
       node(xx,yy).zone = zoneID;
 
-  graph::FacePtr face = createFakeFace(x,y,xe,ye);
+  graph::Face* face = createFakeFace(x,y,xe,ye);
   if (face) face->size();
 
   if (type == ROAD) {
@@ -182,16 +182,16 @@ void GridGenerator::run() {
   Generator::run(); 
 }
 
-graph::FacePtr GridGenerator::createFakeFace(int ax, int ay, int bx, int by) {
-  graph::NodePtr n1 = graph.addNode( new graph::Node( &graph, worldCoord(ax), worldCoord(ay) ) );
-  graph::NodePtr n2 = graph.addNode( new graph::Node( &graph, worldCoord(bx), worldCoord(ay) ) );
-  graph::NodePtr n3 = graph.addNode( new graph::Node( &graph, worldCoord(bx), worldCoord(by) ) );
-  graph::NodePtr n4 = graph.addNode( new graph::Node( &graph, worldCoord(ax), worldCoord(by) ) );
+graph::Face* GridGenerator::createFakeFace(int ax, int ay, int bx, int by) {
+  graph::Node* n1 = graph.addNode( new graph::Node( &graph, worldCoord(ax), worldCoord(ay) ) );
+  graph::Node* n2 = graph.addNode( new graph::Node( &graph, worldCoord(bx), worldCoord(ay) ) );
+  graph::Node* n3 = graph.addNode( new graph::Node( &graph, worldCoord(bx), worldCoord(by) ) );
+  graph::Node* n4 = graph.addNode( new graph::Node( &graph, worldCoord(ax), worldCoord(by) ) );
   graph.addConnection(n1,n2);
   graph.addConnection(n2,n3);
   graph.addConnection(n3,n4);
   graph.addConnection(n4,n1);
-  graph::FacePtr face = new graph::Face( &graph );
+  graph::Face* face = new graph::Face( &graph );
   face->addEdge(n1->getOutgoing(0));
   face->addEdge(n2->getOutgoing(0));
   face->addEdge(n3->getOutgoing(0));

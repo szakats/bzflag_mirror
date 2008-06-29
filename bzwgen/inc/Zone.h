@@ -46,14 +46,14 @@ protected:
   /** Pointer to the Zone's generator. */
   Generator* generator;
   /** Pointer to the zone's graph face */
-  graph::FacePtr face;
+  graph::Face* face;
 public:
   /**
    * Constructor, initializes the neccessary data, except that 
    * does nothing. Initialized zones should only store data. All
    * generations of meshes should be done using run().
    */
-  Zone(Generator* _generator, graph::FacePtr _face) 
+  Zone(Generator* _generator, graph::Face* _face) 
     : generator(_generator), face(_face) {};
   /**
    * Runs mesh generation, preparing the zone for output. Pure 

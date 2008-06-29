@@ -33,26 +33,26 @@ namespace graph {
 {
 private:
   /** Source node */
-  NodePtr source;
+  Node* source;
   /** Target node */
-  NodePtr target;
+  Node* target;
   /** 
    * Pointer to the reverse edge in a PlanarGraph. value is NULL unless 
    * setReverse is called on this or the reverse edge.
    */
-  EdgePtr reverse;
+  Edge* reverse;
   /** 
    * Pointer to  face that this edge belongs to. Used when reconsructing
    * a face map for the given PlanarGraph.
    */
-  FacePtr face;
+  Face* face;
 public:
   /** 
    * Constructor that takes source and target as parameters,
    * adds the edge to the revelant nodes, DOESN'T check for
-   * reverse EdgePtr however.
+   * reverse Edge however.
    */
-  Edge(NodePtr _source, NodePtr _target) : source(_source), target(_target), reverse(NULL), face(NULL) {
+  Edge(Node* _source, Node* _target) : source(_source), target(_target), reverse(NULL), face(NULL) {
     source->addOutgoing(this);
     target->addIncoming(this);
   }
@@ -61,7 +61,7 @@ public:
    * so the function needs to be called just once for every edge pair.
    * If debug mode is on then assertions check the validness of the edge. 
    */
-  void setReverse( EdgePtr edge ) {
+  void setReverse( Edge* edge ) {
     assert( source == edge->target );
     assert( target == edge->source );
     reverse = edge;
@@ -70,13 +70,13 @@ public:
   /**
    * Returns source node pointer.
    */
-  NodePtr getSource() const {
+  Node* getSource() const {
     return source;
   }
   /**
    * Returns target node pointer.
    */
-  NodePtr getTarget() const {
+  Node* getTarget() const {
     return target;
   }
 private:

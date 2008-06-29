@@ -41,7 +41,7 @@ class FloorZone : public Zone {
   Mesh mesh;
 public:
   /** Constructor defining the zone. Only sets the required parameters. */
-  FloorZone( Generator* _generator, graph::FacePtr _face, int _step, int _materialID, bool _rotated ) 
+  FloorZone( Generator* _generator, graph::Face* _face, int _step, int _materialID, bool _rotated ) 
     : Zone( _generator, _face ), step( _step ), materialID( _materialID ), rotated( _rotated ) {};
   /** Generates the floor mesh, and assigned texture information. WARNING: currently works ONLY with quad faces. */
   virtual void run();

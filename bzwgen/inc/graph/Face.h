@@ -47,20 +47,20 @@ private:
   /**
    * Pointer to the graph of which this face is part of.
    */
-  PlanarGraphPtr graph;
+  PlanarGraph* graph;
 public:
   /**
    * Constructor, takes only a pointer to the Graph that the Face 
    * belongs to. Edges need to be added manualy via addEdge in clockwise order.
    */
-  Face(PlanarGraphPtr _graph) : graph(_graph) {}
+  Face(PlanarGraph* _graph) : graph(_graph) {}
   /** 
    * Adds an Edge to the face. Note that edges NEED to be added in clockwise 
    * order, or else most of the algorithms here won't work. Edges are still
    * belonging to the Graph class, Face just holds pointers to them. Returns
    * the index of the added Edge.
    */
-  size_t addEdge(EdgePtr edge) {
+  size_t addEdge(Edge* edge) {
     edges.push_back(edge);
     return edges.size()-1;
   }
@@ -71,7 +71,7 @@ public:
     return edges.size();
   }
   /**
-   * Returns a vector of NodePtr's that are a part of this face.
+   * Returns a vector of Node's that are a part of this face.
    */
   NodeVector getNodes();
 private:

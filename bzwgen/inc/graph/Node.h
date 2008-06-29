@@ -48,20 +48,20 @@ private:
   /**
    * Pointer to the graph of which this given Node is a belonging to.
    */
-  PlanarGraphPtr graph;
+  PlanarGraph* graph;
 public:
   /** Constructor which takes the graph and Point2D data as parameters. */
-  Node(PlanarGraphPtr _graph, float x, float y) : Vector2Df(x,y), graph(_graph)  {} 
+  Node(PlanarGraph* _graph, float x, float y) : Vector2Df(x,y), graph(_graph)  {} 
   /** Adds a incoming edge */
-  void addIncoming(EdgePtr edge) { incoming.push_back(edge); }
+  void addIncoming(Edge* edge) { incoming.push_back(edge); }
   /** Adds a outgoing edge */
-  void addOutgoing(EdgePtr edge) { outgoing.push_back(edge); }
+  void addOutgoing(Edge* edge) { outgoing.push_back(edge); }
   /** Removes all the edges connected to the node */
   void orphanize();
   /** Returns outgoing edge by index. */
-  EdgePtr getOutgoing(size_t index) { return outgoing[index]; }
+  Edge* getOutgoing(size_t index) { return outgoing[index]; }
   /** Returns incoming edge by index. */
-  EdgePtr getIncoming(size_t index) { return incoming[index]; }
+  Edge* getIncoming(size_t index) { return incoming[index]; }
 private:
   /** Blocked default constructor */
   Node() {}

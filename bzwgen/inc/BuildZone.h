@@ -37,7 +37,7 @@ class BuildZone : public Zone {
   MeshVector* meshes;
 public:
   /** Constructor, sets the neccessart data, does nothing except that. */
-  BuildZone(Generator* _generator, graph::FacePtr _face) 
+  BuildZone(Generator* _generator, graph::Face* _face) 
     : Zone(_generator,_face), meshes(NULL) {};
   /** Runs the generator, results are stored in meshes. */
   virtual void run();

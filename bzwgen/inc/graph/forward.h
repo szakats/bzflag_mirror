@@ -32,18 +32,13 @@ class Node;
 class Edge;
 class Face;
 
-typedef PlanarGraph* PlanarGraphPtr;
-typedef Edge* EdgePtr;
-typedef Node* NodePtr;
-typedef Face* FacePtr;
+typedef TObjectList<Edge*> EdgeList;
+typedef TObjectList<Node*> NodeList;
+typedef TObjectList<Face*> FaceList;
 
-typedef TObjectList<EdgePtr> EdgeList;
-typedef TObjectList<NodePtr> NodeList;
-typedef TObjectList<FacePtr> FaceList;
-
-typedef std::vector<EdgePtr> EdgeVector;
-typedef std::vector<NodePtr> NodeVector;
-typedef std::vector<FacePtr> FaceVector;
+typedef std::vector<Edge*> EdgeVector;
+typedef std::vector<Node*> NodeVector;
+typedef std::vector<Face*> FaceVector;
 
 typedef EdgeVector::iterator EdgeVectorIterator;
 typedef NodeVector::iterator NodeVectorIterator;

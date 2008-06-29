@@ -131,7 +131,7 @@ private:
    * Creates a "fake face" in the Generator graph for a zone of the 
    * given coordinates.
    */
-  graph::FacePtr createFakeFace(int ax, int ay, int bx, int by);
+  graph::Face* createFakeFace(int ax, int ay, int bx, int by);
 };
 
 #endif /* __GRIDGENERATOR_H__ */
