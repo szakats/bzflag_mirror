@@ -724,10 +724,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\inc\graph\Graph.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\inc\graph\Node.h"
 					>
 				</File>
@@ -736,7 +732,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\inc\graph\Plane.h"
+					RelativePath="..\..\inc\graph\PlanarGraph.h"
 					>
 				</File>
 			</Filter>

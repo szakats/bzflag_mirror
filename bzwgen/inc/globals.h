@@ -18,7 +18,7 @@
 #include <map>
 #include <iostream>
 #include "MathUtils.h"
-#include "graph/Graph.h"
+#include "graph/PlanarGraph.h"
 
 typedef std::string String;
 typedef std::vector<int> IntVector;
