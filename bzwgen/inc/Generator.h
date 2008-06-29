@@ -44,21 +44,13 @@ protected:
   int bases;
   /** Vector holding the zones generated on the given map. */
   ZoneVector zones;
-public:
-  /** 
-   * Material ID of the standard road material. 
-   * Probably shouldn't be public, will be refactored 
-   */
+  /** Material ID of the standard road material. */
   int roadid;
-  /** 
-   * Material ID of the standard road crossing material. 
-   * Probably shouldn't be public, will be refactored 
-   */
+  /** Material ID of the standard road crossing material. */
   int roadxid;
-  /** 
-   * CTFSafe flag. Also shouldn't be public, will be refactored 
-   */
+  /** CTFSafe flag. */
   bool ctfSafe;
+public:
   /** 
    * Standard constructor, takes a already loaded RuleSet as
    * it's parameter. The ruleset needs to have MATROAD and 

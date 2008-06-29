@@ -12,15 +12,17 @@
 
 #include "GridGenerator.h"
 #include "Zone.h"
-#include "FloorZone.h"
 #include "Random.h"
+#include "FloorZone.h"
+#include "BaseZone.h"
+#include "BuildZone.h"
 
-
+int BaseZone::colorCount = 1;
 
 void GridGenerator::parseOptions(CCommandLineArgs* opt) { 
   Generator::parseOptions(opt); 
   int worldSize  = getSize();
-  int gridSize   = 42;
+  gridSize   = 42;
 
   if (opt->Exists("g"))        { gridSize = opt->GetDataI("g"); }
   if (opt->Exists("gridsize")) { gridSize = opt->GetDataI("gridsize"); }
@@ -42,26 +44,32 @@ void GridGenerator::parseOptions(CCommandLineArgs* opt) {
 
   if (fullslice > subdiv) subdiv = fullslice;
 
-  map.initialize(this,worldSize,gridSize);
+  gridStep = worldSize / gridSize;
+
+  map = new DiscreetMapNode[(gridSize+1)*(gridSize+1)];
+  for (int i = 0; i < (gridSize+1)*(gridSize+1); i++) {
+    map[i].zone = -1;
+    map[i].type = NONE;
+  }
 }
 
-#define SETROAD(cx,cy)  { if (map.getNode(cx,cy).type > GridMap::NONE) { map.setType(cx,cy,GridMap::ROADX);         } else { map.setType(cx,cy,GridMap::ROAD); } }
-#define SETROADF(cx,cy) { if (map.getNode(cx,cy).type > GridMap::NONE) { map.setType(cx,cy,GridMap::ROADX); break;  } else { map.setType(cx,cy,GridMap::ROAD); } }
+#define SETROAD(cx,cy)  { if (node(cx,cy).type > NONE) { node(cx,cy).type = ROADX;         } else { node(cx,cy).type = ROAD; } }
+#define SETROADF(cx,cy) { if (node(cx,cy).type > NONE) { node(cx,cy).type = ROADX; break;  } else { node(cx,cy).type = ROAD; } }
 
 void GridGenerator::plotRoad(int x, int y, bool horiz, bool collision) {
   if (!collision) {
     if (horiz) {
-      for (int xx = 0; xx < map.getGridSize(); xx++) SETROAD(xx,y)
+      for (int xx = 0; xx < gridSize; xx++) SETROAD(xx,y)
     } else {
-      for (int yy = 0; yy < map.getGridSize(); yy++) SETROAD(x,yy)
+      for (int yy = 0; yy < gridSize; yy++) SETROAD(x,yy)
     } 
     return;
   }
   if (horiz) {
-    for (int xx = x;   xx < map.getGridSize(); xx++) SETROADF(xx,y)
+    for (int xx = x;   xx < gridSize; xx++) SETROADF(xx,y)
     for (int xx = x-1; xx >= 0; xx--)           SETROADF(xx,y)
   } else {
-    for (int yy = y;   yy < map.getGridSize(); yy++) SETROADF(x,yy)
+    for (int yy = y;   yy < gridSize; yy++) SETROADF(x,yy)
     for (int yy = y-1; yy >= 0; yy--)           SETROADF(x,yy)
   } 
   
@@ -69,34 +77,73 @@ void GridGenerator::plotRoad(int x, int y, bool horiz, bool collision) {
 
 void GridGenerator::performSlice(bool full, int snapmod, bool horiz) {
   int bmod = bases > 0 ? 2 : 1;
-  int x = Random::numberRangeStep(snap,map.getGridSize()-snap*bmod,snapmod*snap);
-  int y = Random::numberRangeStep(snap,map.getGridSize()-snap*bmod,snapmod*snap);
+  int x = Random::numberRangeStep(snap,gridSize-snap*bmod,snapmod*snap);
+  int y = Random::numberRangeStep(snap,gridSize-snap*bmod,snapmod*snap);
 
   if (debugLevel > 2) printf("slice (%d,%d)...\n",x,y);
 
-  if (map.getNode(x,y).type == CELLROADX) return;
+  if (node(x,y).type == ROADX) return;
 
-  if (map.getNode(horiz ? Coord2D(x+1,y) : Coord2D(x,y+1)).type > 0) return;
+  if (horiz) {
+    if (node(x+1,y).type > 0) return;
+  } else {
+    if (node(x,y+1).type > 0) return;
+  }
 
   plotRoad(x,y,horiz,!full);
 }
 
+void GridGenerator::growZone(int x,int y,CellType type) {
+  if (debugLevel > 3) { printf("Pushing zone at : (%d,%d)\n",x,y); }
+  int xe = x;
+  int ye = y;
+  while(xe < gridSize) {
+    xe++;
+    int etype = node(xe,y).type;
+    if (etype != type) break;
+  }
+  while(ye < gridSize) {
+    ye++;
+    int etype = node(x,ye).type;
+    if (etype != type) break;
+  }
+
+  int zoneID = getZoneCount();
+  for (int xx = x; xx < xe; xx++) 
+    for (int yy = y; yy < ye; yy++) 
+      node(xx,yy).zone = zoneID;
+
+  if (type == ROAD) {
+    if (debugLevel > 2) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    addZone(new FloorZone(this,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep, roadid, x-xe < y-ye));
+  } else if (type == ROADX) {
+    if (debugLevel > 2) { printf("Crossroads zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    addZone(new FloorZone(this,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep, roadxid,true));
+  } else if (type == BASE) {
+    if (debugLevel > 2) { printf("Base zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    addZone(new BaseZone(this,worldCoord(x,y)  ,worldCoord(xe,ye), ctfSafe));
+  } else {
+    if (debugLevel > 2) { printf("Building zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    addZone(new BuildZone(this,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep));
+  }
+  if (debugLevel > 3) { printf("Zone successfuly created : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+}
+
+
 void GridGenerator::run() { 
   if (debugLevel > 1) printf("\nRunning GridGenerator...\n");
-
-  map.clear();
 
   if (bases > 0) {
     plotRoad(snap,snap,true,0);
     plotRoad(snap,snap,false,0);
-    plotRoad(map.getGridSize()-snap-1,map.getGridSize()-snap-1,true,0);
-    plotRoad(map.getGridSize()-snap-1,map.getGridSize()-snap-1,false,0);
+    plotRoad(gridSize-snap-1,gridSize-snap-1,true,0);
+    plotRoad(gridSize-snap-1,gridSize-snap-1,false,0);
 
-    map.setAreaType(Coord2D(0,0),Coord2D(snap,snap),GridMap::BASE);
-    map.setAreaType(Coord2D(map.getGridSize()-snap,map.getGridSize()-snap),Coord2D(map.getGridSize(),map.getGridSize()),GridMap::BASE);
+    setAreaType(0,0,snap,snap,BASE);
+    setAreaType(gridSize-snap,gridSize-snap,gridSize,gridSize,BASE);
     if (bases > 2) {
-      map.setAreaType(Coord2D(0,map.getGridSize()-snap),Coord2D(snap,map.getGridSize()),GridMap::BASE);
-      map.setAreaType(Coord2D(map.getGridSize()-snap,0),Coord2D(map.getGridSize(),snap),GridMap::BASE);
+      setAreaType(0,gridSize-snap,snap,gridSize,BASE);
+      setAreaType(gridSize-snap,0,gridSize,snap,BASE);
     }
   }
 
@@ -115,8 +162,20 @@ void GridGenerator::run() {
   }
 
   if (debugLevel > 1) printf("Pushing zones...\n");
-  map.pushZones();
-  
+
+  int y = 0;
+  int x = 0;
+  do {
+    x = 0;
+    do {
+      if (node(x,y).zone == -1) {
+        growZone(x,y,node(x,y).type);
+      }
+      x++;
+    } while (x < gridSize);
+    y++;
+  } while (y < gridSize);
+
   Generator::run(); 
 }
 

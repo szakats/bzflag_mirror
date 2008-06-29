@@ -423,10 +423,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\GridMap.cxx"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\Material.cxx"
 				>
 			</File>
@@ -606,10 +602,6 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\GridGenerator.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\GridMap.h"
 				>
 			</File>
 			<File
