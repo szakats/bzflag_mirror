@@ -39,7 +39,9 @@ class Face : public IObject
 private:
   /**
    * List of edges belonging to this face. The edges should be stored in order,
-   * that is to allow a clockwise full traversal of the face.
+   * that is to allow a clockwise full traversal of the face. Stored are only
+   * pointers, disposing of edges is the responsibility of either Graph or Node
+   * class.
    */
   EdgeVector edges;
   /**
@@ -47,6 +49,27 @@ private:
    */
   GraphPtr graph;
 public:
+  /**
+   * Standard constructor, takes only a pointer to the Graph that the Face 
+   * belongs to. Edges need to be added manualy via addEdge in clockwise order.
+   */
+  Face(GraphPtr _graph) : graph(_graph) {}
+  /** 
+   * Adds an Edge to the face. Note that edges NEED to be added in clockwise 
+   * order, or else most of the algorithms here won't work. Edges are still
+   * belonging to the Graph class, Face just holds pointers to them. Returns
+   * the index of the added Edge.
+   */
+  size_t addEdge(EdgePtr edge) {
+    edges.push_back(edge);
+    return edges.size()-1;
+  }
+  /** 
+   * Returns the size (amount of stored Edge s) of the Face.
+   */
+  size_t size() const {
+    return edges.size();
+  }
 };
 
 
