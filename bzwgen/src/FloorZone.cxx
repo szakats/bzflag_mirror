@@ -11,8 +11,6 @@
  */
 
 #include "FloorZone.h"
-#include <iostream>
-#include "Face.h"
 #include "Generator.h"
 
 

@@ -24,12 +24,11 @@
 #ifndef __ZONE_H__
 #define __ZONE_H__
 
-#include "Output.h"
-#include "globals.h"
 #include "graph/PlanarGraph.h"
-#include "Mesh.h"
+#include "globals.h"
+#include "Output.h"
 
-// Forward declaration
+// Forward declarations
 class Generator;
 
 /** 
@@ -43,9 +42,13 @@ class Generator;
  */
 class Zone {
 protected:
-  /** Pointer to the Zone's generator. */
+  /** 
+   * Pointer to the Zone's generator.
+   */
   Generator* generator;
-  /** Pointer to the zone's graph face */
+  /** 
+   * Pointer to the zone's graph face.
+   */
   graph::Face* face;
 public:
   /**
@@ -53,30 +56,40 @@ public:
    * does nothing. Initialized zones should only store data. All
    * generations of meshes should be done using run().
    */
-  Zone(Generator* _generator, graph::Face* _face) 
-    : generator(_generator), face(_face) {};
+  Zone( Generator* _generator, graph::Face* _face ) 
+    : generator( _generator ), face( _face ) {};
   /**
    * Runs mesh generation, preparing the zone for output. Pure 
    * virtual method to be overriden.
    */
-  virtual void run() = 0;
+  virtual void run( ) = 0;
   /**
    * Outputs the mesh information to the given Output object.
    * Pure virtual method to be overriden.
    */
-  virtual void output(Output& /* out */) = 0;
+  virtual void output( Output& ) = 0;
   /**
    * Virtual destructor to supress warnings. 
    */
-  virtual ~Zone() {};
+  virtual ~Zone( ) {};
 private:
-  /** Blocked default constructor */
-  Zone() {}
-  /** Blocked copy constructor */
-  Zone(const Zone& ) {}
+  /** 
+   * Blocked default constructor.
+   */
+  Zone( ) {}
+  /** 
+   * Blocked copy constructor.
+   */
+  Zone( const Zone& ) {}
 };
 
-typedef std::vector<Zone*> ZoneVector;
+/** 
+ * Type definition for a vector of zone pointers. 
+ */
+typedef std::vector< Zone* > ZoneVector;
+/** 
+ * Type definition for an iterator over a vector of zone pointers. 
+ */
 typedef ZoneVector::iterator ZoneVectIter;
 
 #endif /* __ZONE_H__ */

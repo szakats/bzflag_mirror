@@ -18,7 +18,6 @@
 #ifndef __FLOORZONE_H__
 #define __FLOORZONE_H__
 
-#include "globals.h"
 #include "Zone.h"
 #include "Mesh.h"
 
@@ -31,21 +30,36 @@
  * a single mesh (actually a single face). 
  */
 class FloorZone : public Zone {
-  /** Stepsize of the world -- to be removed */
+  /** 
+   * Stepsize of the world -- to be removed.
+   */
   int step;
-  /** Holds the passed material ID of the floor */
+  /** 
+   * Holds the passed material ID of the floor.
+   */
   int materialID;
-  /** Flag to set wether the floor part is rotated texture-wise. */
+  /** 
+   * Flag to set wether the floor part is rotated texture-wise. 
+   */
   bool rotated;
-  /** The generated floor mesh. Is empty until run() is called */
+  /** 
+   * The generated floor mesh. Is empty until run() is called.
+   */
   Mesh mesh;
 public:
-  /** Constructor defining the zone. Only sets the required parameters. */
+  /** 
+   * Constructor defining the zone. Only sets the required parameters. 
+   */
   FloorZone( Generator* _generator, graph::Face* _face, int _step, int _materialID, bool _rotated ) 
     : Zone( _generator, _face ), step( _step ), materialID( _materialID ), rotated( _rotated ) {};
-  /** Generates the floor mesh, and assigned texture information. WARNING: currently works ONLY with quad faces. */
-  virtual void run();
-  /** Outputs the generated mesh to the passed Output object. */
+  /** 
+   * Generates the floor mesh, and assigned texture information. 
+   * WARNING: currently works ONLY with quad faces. 
+   */
+  virtual void run( );
+  /** 
+   * Outputs the generated mesh to the passed Output object. 
+   */
   virtual void output( Output& out );
 };
 

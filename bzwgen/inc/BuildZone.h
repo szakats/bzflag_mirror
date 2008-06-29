@@ -17,7 +17,6 @@
 #ifndef __BUILDZONE_H__
 #define __BUILDZONE_H__
 
-#include "globals.h"
 #include "Zone.h"
 #include "Mesh.h"
 
@@ -36,15 +35,23 @@ class BuildZone : public Zone {
    */
   MeshVector* meshes;
 public:
-  /** Constructor, sets the neccessart data, does nothing except that. */
-  BuildZone(Generator* _generator, graph::Face* _face) 
-    : Zone(_generator,_face), meshes(NULL) {};
-  /** Runs the generator, results are stored in meshes. */
-  virtual void run();
-  /** Outputs the generated meshes into the passed Output object. */
-  virtual void output(Output& out);
-  /** Destructor, frees the allocated meshes. */
-  ~BuildZone();
+  /** 
+   * Constructor, sets the neccessart data, does nothing except that. 
+   */
+  BuildZone( Generator* _generator, graph::Face* _face ) 
+    : Zone( _generator, _face ), meshes( NULL ) {};
+  /** 
+   * Runs the generator, results are stored in the meshes vector. 
+   */
+  virtual void run( );
+  /** 
+   * Outputs the generated meshes into the passed Output object. 
+   */
+  virtual void output( Output& out );
+  /** 
+   * Destructor, frees the allocated meshes. 
+   */
+  ~BuildZone( );
 };
 
 #endif /* __BUILDZONE_H__ */

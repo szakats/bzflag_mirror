@@ -363,10 +363,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\BuildZone.cxx"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\bzwgen.cxx"
 				>
 			</File>
@@ -408,10 +404,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\BZWGeneratorStandalone.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\FloorZone.cxx"
 				>
 			</File>
 			<File
@@ -558,20 +550,24 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Zones"
+				>
+				<File
+					RelativePath="..\..\src\BuildZone.cxx"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\FloorZone.cxx"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\..\inc\BaseZone.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\BuildZone.h"
-				>
-			</File>
 			<File
 				RelativePath="..\..\inc\BZWGenerator.h"
 				>
@@ -586,10 +582,6 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\Face.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\FloorZone.h"
 				>
 			</File>
 			<File
@@ -622,10 +614,6 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\Random.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\Zone.h"
 				>
 			</File>
 			<Filter
@@ -725,6 +713,26 @@
 				</File>
 				<File
 					RelativePath="..\..\inc\graph\PlanarGraph.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Zones"
+				>
+				<File
+					RelativePath="..\..\inc\BaseZone.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\BuildZone.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\FloorZone.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\Zone.h"
 					>
 				</File>
 			</Filter>

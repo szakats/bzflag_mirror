@@ -13,7 +13,6 @@
 #include "BuildZone.h"
 #include "Generator.h"
 
-
 void BuildZone::run() {
   Mesh* mesh = new Mesh();
 
@@ -30,8 +29,6 @@ void BuildZone::run() {
   String rulename = String("start");
   meshes = generator->getRuleSet()->run(mesh,base,rulename);
 }
-
-
 
 void BuildZone::output( Output& out ) {
   if (meshes == NULL) return;
