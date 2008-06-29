@@ -50,13 +50,8 @@ private:
    */
   PlanarGraphPtr graph;
 public:
-  /** 
-   * Default constructor. Sets the underlying point to (0,0) and initializes
-   * an empty list of connections.
-   */
-  Node() : graph(0) {} 
-  /** Constructor which takes Point2D data as parameters. */
-  Node(float x, float y) : Vector2Df(x,y), graph(0)  {} 
+  /** Constructor which takes the graph and Point2D data as parameters. */
+  Node(PlanarGraphPtr _graph, float x, float y) : Vector2Df(x,y), graph(_graph)  {} 
   /** Adds a incoming edge */
   void addIncoming(EdgePtr edge) { incoming.push_back(edge); }
   /** Adds a outgoing edge */
@@ -65,6 +60,12 @@ public:
   void setGraph(PlanarGraphPtr _graph) { graph = _graph; }
   /** Removes all the edges connected to the node */
   void orphanize();
+private:
+  /** Blocked default constructor */
+  Node() {}
+  /** Blocked copy constructor */
+  Node(const Node& ) {}
+
 };
 
 

@@ -50,7 +50,7 @@ private:
   PlanarGraphPtr graph;
 public:
   /**
-   * Standard constructor, takes only a pointer to the Graph that the Face 
+   * Constructor, takes only a pointer to the Graph that the Face 
    * belongs to. Edges need to be added manualy via addEdge in clockwise order.
    */
   Face(PlanarGraphPtr _graph) : graph(_graph) {}
@@ -70,6 +70,12 @@ public:
   size_t size() const {
     return edges.size();
   }
+private:
+  /** Blocked default constructor */
+  Face() {}
+  /** Blocked copy constructor */
+  Face(const Face& ) {}
+
 };
 
 

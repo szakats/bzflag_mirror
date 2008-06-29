@@ -36,28 +36,29 @@ private:
   NodePtr source;
   /** Target node */
   NodePtr target;
-  /** Pointer to the reverse edge in a PlanarGraph */
+  /** 
+   * Pointer to the reverse edge in a PlanarGraph. value is NULL unless 
+   * setReverse is called on this or the reverse edge.
+   */
   EdgePtr reverse;
   /** 
    * Pointer to  face that this edge belongs to. Used when reconsructing
-   * a face map for the given PlanarGraph
+   * a face map for the given PlanarGraph.
    */
   FacePtr face;
 public:
-  /** Standard constructor */
-  Edge() : source(NULL), target(NULL), reverse(NULL) {}
   /** 
    * Constructor that takes source and target as parameters,
    * adds the edge to the revelant nodes, DOESN'T check for
    * reverse EdgePtr however.
    */
-  Edge(NodePtr _source, NodePtr _target) : source(_source), target(_target) {
+  Edge(NodePtr _source, NodePtr _target) : source(_source), target(_target), reverse(NULL), face(NULL) {
     source->addOutgoing(this);
     target->addIncoming(this);
   }
   /**
    * Sets the reverse edge. Also sets the reverse edge for the edge passed,
-   * so the function needs to be called justr once for every edge pair.
+   * so the function needs to be called just once for every edge pair.
    * If debug mode is on then assertions check the validness of the edge. 
    */
   void setReverse( EdgePtr edge ) {
@@ -66,7 +67,11 @@ public:
     reverse = edge;
     edge->reverse = this;
   }
-
+private:
+  /** Blocked default constructor */
+  Edge() {}
+  /** Blocked copy constructor */
+  Edge(const Edge& ) {}
 };
 
 
