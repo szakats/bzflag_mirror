@@ -124,12 +124,6 @@ private:
   /** 
    * Translates a grid coordinate into a world coordinate
    */
-  Coord2D worldCoord(int x, int y) const { 
-    return Coord2D((x-gridSize/2)*gridStep,(y-gridSize/2)*gridStep); 
-  }
-  /** 
-   * Translates a grid coordinate into a world coordinate
-   */
   float worldCoord(int a) const { 
     return (float)(a-gridSize/2)*gridStep; 
   }

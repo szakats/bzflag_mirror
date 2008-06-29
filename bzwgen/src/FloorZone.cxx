@@ -17,20 +17,25 @@
 
 
 void FloorZone::run() {
-  if ((A.x == B.x) || (A.y == B.y)) {
-    if (debugLevel > 0) { printf("Bad floor coords! (%d,%d)*(%d,%d)\n",A.x,A.y,B.x,B.y); }
-    return;
-  }
   mesh.passable = true;
 
-  mesh.createNewFace(
-    Vertex((double)A.x,(double)A.y,0.001f), Vertex((double)B.x,(double)A.y,0.001f),
-    Vertex((double)B.x,(double)B.y,0.001f), Vertex((double)A.x,(double)B.y,0.001f),
-    TexCoord(0.0,0.0),
-    rotated ? TexCoord(0.0,double((B.x-A.x)/step))                  : TexCoord(double((B.x-A.x)/step),0.0),
-    rotated ? TexCoord(double((B.y-A.y)/step),double((B.x-A.x)/step)) : TexCoord(double((B.x-A.x)/step),double((B.y-A.y)/step)),
-    rotated ? TexCoord(double((B.y-A.y)/step),0.0)                  : TexCoord(0,double((B.y-A.y)/step)),
-    materialID);
+  graph::NodeVector nodes = face->getNodes();
+
+  Face* swface = new Face();
+  swface->setMaterial( materialID );
+  for (size_t i = 0; i < nodes.size(); i++) {
+    swface->addVertex( mesh.addVertex( Vertex( nodes[i]->x, nodes[i]->y, 0.001f ) ) );
+  }
+
+  double texX = (nodes[2]->x - nodes[0]->x) / step;
+  double texY = (nodes[2]->y - nodes[0]->y) / step;
+
+  swface->addTexCoord( mesh.addTexCoord( TexCoord(0.0,0.0) ) );
+  swface->addTexCoord( mesh.addTexCoord( rotated ? TexCoord(0.0 ,texX) : TexCoord(texX,0.0) ) );
+  swface->addTexCoord( mesh.addTexCoord( rotated ? TexCoord(texY,texX) : TexCoord(texX,texY) ) );
+  swface->addTexCoord( mesh.addTexCoord( rotated ? TexCoord(texY,0.0)  : TexCoord(0,texY) ) );
+
+  mesh.addFace(swface);
 }
 
 

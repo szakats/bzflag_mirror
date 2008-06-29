@@ -118,16 +118,16 @@ void GridGenerator::growZone(int x,int y,CellType type) {
 
   if (type == ROAD) {
     if (debugLevel > 2) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
-    addZone(new FloorZone(this,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep, roadid, x-xe < y-ye));
+    addZone(new FloorZone(this,face,gridStep,roadid, x-xe < y-ye));
   } else if (type == ROADX) {
     if (debugLevel > 2) { printf("Crossroads zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
-    addZone(new FloorZone(this,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep, roadxid,true));
+    addZone(new FloorZone(this,face,gridStep,roadxid,true));
   } else if (type == BASE) {
     if (debugLevel > 2) { printf("Base zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
-    addZone(new BaseZone(this,worldCoord(x,y)  ,worldCoord(xe,ye), ctfSafe));
+    addZone(new BaseZone(this,face, ctfSafe));
   } else {
     if (debugLevel > 2) { printf("Building zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
-    addZone(new BuildZone(this,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep));
+    addZone(new BuildZone(this,face));
   }
   if (debugLevel > 3) { printf("Zone successfuly created : (%d,%d * %d,%d)\n",x,y,xe,ye); }
 }

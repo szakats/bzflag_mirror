@@ -67,6 +67,18 @@ public:
     reverse = edge;
     edge->reverse = this;
   }
+  /**
+   * Returns source node pointer.
+   */
+  NodePtr getSource() const {
+    return source;
+  }
+  /**
+   * Returns target node pointer.
+   */
+  NodePtr getTarget() const {
+    return target;
+  }
 private:
   /** Blocked default constructor */
   Edge() {}

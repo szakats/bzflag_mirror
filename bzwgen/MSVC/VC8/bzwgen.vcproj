@@ -554,7 +554,11 @@
 				Name="graph"
 				>
 				<File
-					RelativePath="..\..\src\Node.cxx"
+					RelativePath="..\..\src\graph\Face.cxx"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\graph\Node.cxx"
 					>
 				</File>
 			</Filter>

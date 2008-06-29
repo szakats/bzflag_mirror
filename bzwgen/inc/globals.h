@@ -51,7 +51,6 @@ extern int debugLevel;
 
 typedef Vector3D<double> Vertex;
 typedef Vector2D<double> TexCoord;
-typedef Vector2D<int> Coord2D;
 
 typedef std::vector<Vertex> VertexVector;
 typedef VertexVector::iterator VertexVectIter;

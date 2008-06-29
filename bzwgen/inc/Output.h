@@ -29,7 +29,7 @@ public:
     (*outstream) << "mesh\n"; 
   }
   void meshEnd() { 
-    (*outstream) << "mesh\n"; 
+    (*outstream) << "end\n\n"; 
   }
   void meshPassable() { 
     (*outstream) << " passable\n"; 

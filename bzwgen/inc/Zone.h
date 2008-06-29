@@ -26,6 +26,8 @@
 
 #include "Output.h"
 #include "globals.h"
+#include "graph/PlanarGraph.h"
+#include "Mesh.h"
 
 // Forward declaration
 class Generator;
@@ -46,18 +48,16 @@ class Zone {
 protected:
   /** Pointer to the Zone's generator. */
   Generator* generator;
-  /** Coordinates of the zone -- to be changed into a graph::Face pointer */
-  Coord2D A,B;
-  /** Stepsize of the world -- to be removed */
-  int step;
+  /** Pointer to the zone's graph face */
+  graph::FacePtr face;
 public:
   /**
    * Constructor, initializes the neccessary data, except that 
    * does nothing. Initialized zones should only store data. All
    * generations of meshes should be done using run().
    */
-  Zone(Generator* _generator, Coord2D a, Coord2D b, int astep) 
-    : generator(_generator), A(a), B(b), step(astep) {};
+  Zone(Generator* _generator, graph::FacePtr _face) 
+    : generator(_generator), face(_face) {};
   /**
    * Runs mesh generation, preparing the zone for output. Pure 
    * virtual method to be overriden.

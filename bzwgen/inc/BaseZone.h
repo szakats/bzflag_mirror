@@ -20,7 +20,6 @@
 
 #include "globals.h"
 #include "Zone.h"
-#include "Mesh.h"
 
 /** 
  * @class BaseZone
@@ -48,9 +47,8 @@ public:
   /**
    * Constructor, sets all the needed data for generation.
    */
-  BaseZone(Generator* _generator, Coord2D a, Coord2D b, bool _ctfSafe) : Zone(_generator,a,b,0), ctfSafe(_ctfSafe), color(1) {
-    colorCount = 1;
-  };
+  BaseZone( Generator* _generator, graph::FacePtr _face, bool _ctfSafe ) 
+    : Zone( _generator,_face ), ctfSafe( _ctfSafe ), color( 1 ) {};
   /**
    * Runs the Zone generation. As a BZFlag base is a native BZW object, this method 
    * only assignes each base a color.
@@ -60,10 +58,12 @@ public:
     colorCount++;
   };
   /** 
-   * Outputs the zone to the given Output object. 
+   * Outputs the zone to the given Output object. Currently
+   * assumes that a quad is passed as the face.
    */
   virtual void output(Output& out) {
-    out.baseZone(Vertex(A.x,A.y,0),Vertex(B.x,B.y,0),color,ctfSafe);
+    graph::NodeVector nodes = face->getNodes();
+    out.baseZone(Vertex(nodes[0]->x,nodes[0]->y,0.0f),Vertex(nodes[2]->x,nodes[2]->y,0.0f),color,ctfSafe);
     color++;
   }
 };

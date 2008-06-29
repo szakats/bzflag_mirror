@@ -70,6 +70,10 @@ public:
   size_t size() const {
     return edges.size();
   }
+  /**
+   * Returns a vector of NodePtr's that are a part of this face.
+   */
+  NodeVector getNodes();
 private:
   /** Blocked default constructor */
   Face() {}

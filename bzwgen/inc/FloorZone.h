@@ -34,6 +34,8 @@
  * a single mesh (actually a single face). 
  */
 class FloorZone : public Zone {
+  /** Stepsize of the world -- to be removed */
+  int step;
   /** Holds the passed material ID of the floor */
   int materialID;
   /** Flag to set wether the floor part is rotated texture-wise. */
@@ -42,9 +44,9 @@ class FloorZone : public Zone {
   Mesh mesh;
 public:
   /** Constructor defining the zone. Only sets the required parameters. */
-  FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int _materialID, bool _rotated) 
-    : Zone(_generator,a,b,astep), materialID(_materialID), rotated(_rotated) {};
-  /** Generates the floor mesh, and assigned texture information. */
+  FloorZone(Generator* _generator, graph::FacePtr _face, int _step, int _materialID, bool _rotated) 
+    : Zone(_generator,_face), step(_step), materialID(_materialID), rotated(_rotated) {};
+  /** Generates the floor mesh, and assigned texture information. WARNING: currently works ONLY with quad faces. */
   virtual void run();
   /** Outputs the generated mesh to the passed Output object. */
   virtual void output(Output& out);

@@ -15,22 +15,14 @@
 
 
 void BuildZone::run() {
-  if ((A.x == B.x) || (A.y == B.y)) {
-    if (debugLevel > 0) { printf("Bad building coords! (%d,%d)*(%d,%d)\n",A.x,A.y,B.x,B.y); }
-    return;
-  }
   Mesh* mesh = new Mesh();
 
-  Vertex corners[4];
-  corners[0] = Vertex((double)A.x,(double)A.y,0.0f);
-  corners[1] = Vertex((double)B.x,(double)A.y,0.0f);
-  corners[2] = Vertex((double)B.x,(double)B.y,0.0f);
-  corners[3] = Vertex((double)A.x,(double)B.y,0.0f);
+  graph::NodeVector nodes = face->getNodes();  
 
   Face* swface = new Face();
   swface->setMaterial( 0 );
-  for (int i = 0; i < 4; i++) {
-    swface->addVertex(mesh->addVertex(corners[i]));
+  for (size_t i = 0; i < nodes.size(); i++) {
+    swface->addVertex(mesh->addVertex(Vertex(nodes[i]->x,nodes[i]->y,0.0f)));
   }
 
   int base = mesh->addFace(swface);

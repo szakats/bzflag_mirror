@@ -40,8 +40,8 @@ class BuildZone : public Zone {
   MeshVector* meshes;
 public:
   /** Constructor, sets the neccessart data, does nothing except that. */
-  BuildZone(Generator* _generator,Coord2D a, Coord2D b, int astep) 
-    : Zone(_generator,a,b,astep), meshes(NULL) {};
+  BuildZone(Generator* _generator, graph::FacePtr _face) 
+    : Zone(_generator,_face), meshes(NULL) {};
   /** Runs the generator, results are stored in meshes. */
   virtual void run();
   /** Outputs the generated meshes into the passed Output object. */
