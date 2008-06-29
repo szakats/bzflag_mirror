@@ -77,16 +77,15 @@ int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, String& rulename) {
 void RuleSet::loadMaterial(String& id, String& name, bool noradar) {
   int matid = materials.size();
   addAttr(id,double(matid));
-  materials.push_back(new Material(matid,name,noradar));
+  materials.push_back( Material(matid,name,noradar) );
 }
 
 void RuleSet::output(Output& out ) {
-  for (MaterialVectIter itr = materials.begin(); itr!= materials.end(); ++itr) (*itr)->output(out);
+  for (MaterialVectIter itr = materials.begin(); itr!= materials.end(); ++itr) (*itr).output(out);
 }
 
 RuleSet::~RuleSet() { 
   for (RuleMapIter itr = rules.begin();itr != rules.end(); ++itr) delete itr->second; 
-  for (MaterialVectIter itr = materials.begin(); itr!= materials.end(); ++itr) delete (*itr);
 }
 
 // Local Variables: ***

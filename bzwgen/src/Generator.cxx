@@ -35,7 +35,7 @@ void Generator::output(Output& out) {
   out.header(size);
 
   if (debugLevel > 1) printf("\nOutputing materials...\n");
-  for (MaterialVectIter iter = mats.begin(); iter != mats.end(); ++iter) (*iter)->output(out);
+  for (MaterialVectIter iter = mats.begin(); iter != mats.end(); ++iter) (*iter).output(out);
   if (ruleset != NULL) ruleset->output(out);
 
   if (debugLevel > 1) printf("Outputing zones...\n");

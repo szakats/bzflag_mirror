@@ -106,13 +106,12 @@ public:
    * Returns the requested Material by material ID. 
    */
   Material* getMaterial(int id) { 
-    return mats[id]; 
+    return &mats[id]; 
   }
   /** 
    * Destructor, frees the materials, the zones, but not the ruleset. 
    */
   virtual ~Generator() {
-    for (MaterialVectIter itr = mats.begin(); itr!= mats.end(); ++itr) delete (*itr);
     for (ZoneVectIter itr = zones.begin(); itr!= zones.end(); ++itr) delete (*itr);
   }
 };

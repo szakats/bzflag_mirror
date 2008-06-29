@@ -423,10 +423,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\Material.cxx"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\Mesh.cxx"
 				>
 			</File>

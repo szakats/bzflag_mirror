@@ -33,16 +33,16 @@ void BuildZone::run() {
 
 
 
-void BuildZone::output(Output& out) {
+void BuildZone::output( Output& out ) {
   if (meshes == NULL) return;
-  MeshVectIter itr; 
-  for (itr = meshes->begin(); itr!= meshes->end(); ++itr) (*itr)->output(out,generator->getRuleSet()->materialsCount());
+  for (MeshVectIter itr = meshes->begin(); itr!= meshes->end(); ++itr) 
+    (*itr)->output(out,generator->getRuleSet()->materialsCount());
 }
 
-BuildZone::~BuildZone () { 
+BuildZone::~BuildZone( ) { 
   if (meshes == NULL) return;
-  MeshVectIter itr; 
-  for (itr = meshes->begin(); itr!= meshes->end(); ++itr) delete (*itr);
+  for (MeshVectIter itr = meshes->begin(); itr!= meshes->end(); ++itr) 
+    delete (*itr);
   delete meshes;
 }
 

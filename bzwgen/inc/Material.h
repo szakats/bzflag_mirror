@@ -9,7 +9,11 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-
+/** 
+ * @file Material.h
+ * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+ * @brief Defines a class for holding material info.
+ */
 
 #ifndef __MATERIAL_H__
 #define __MATERIAL_H__
@@ -17,16 +21,30 @@
 #include "globals.h"
 #include "Output.h"
 
+/** 
+ * @class Material
+ * @brief Class for holding material information.
+ */
 class Material {
+  /** ID of the material, and at the same time it's "name". */
   int name;
-  String file;
+  /** Path to the file with the texture. */
+  String path;
+  /** Wether this material doesn't appear on radar. */
   bool noradar;
 public:
-  Material(const int _name, const String& _file, bool _noradar = false) : name(_name), file(_file), noradar(_noradar) {};
-  void output(Output& out);
+  /** Constructor, takes and initializes all the neccessary data. */
+  Material( const int _name, const String& _path, bool _noradar = false ) 
+    : name( _name ), path( _path ), noradar( _noradar ) {};
+  /** Outputs the material to the passed output class. */
+  void output( Output& out ) {
+    out.material( name, path, noradar );
+  }
 };
 
-typedef std::vector<Material*> MaterialVector;
+/** Type definition for a vector of materials. */
+typedef std::vector<Material> MaterialVector;
+/** Type definition for a iterator over a vector of materials. */
 typedef MaterialVector::iterator MaterialVectIter;
 
 #endif /* __MATERIAL_H__ */
