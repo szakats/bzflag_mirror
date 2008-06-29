@@ -10,40 +10,43 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 /** 
- * @file Graph.h
+ * @file PlanarGraph.h
  * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
  * @brief Defines an Graph class.
 */
 
-#ifndef __GRAPH_H__
-#define __GRAPH_H__
+#ifndef __PLANARGRAPH_H__
+#define __PLANARGRAPH_H__
 
 #include "graph/forward.h"
 #include "graph/Node.h"
 #include "graph/Edge.h"
+#include "graph/Face.h"
 
 namespace graph {
 
 /** 
- * @class Graph
- * @brief Class defining double linked graph. 
+ * @class PlanarGraph
+ * @brief Class defining double linked planar graph. 
  */
-class Graph
+class PlanarGraph
 {
 private:
-  /** The list of all Nodes. */
+  /** The list of all Node s. */
   NodeList nodeList;
-  /** The list of all Edges. */
+  /** The list of all Edge s. */
   EdgeList edgeList;
+  /** The list of all Face s. */
+  FaceList faceList;
   /** Holds the number of nodes */
   size_t nodes;
   /** Holds the number of edges */
   size_t edges;
 public:
   /** Default constructor. Creates an empty graph.*/
-  Graph() : nodes(0), edges(0) {} 
+  PlanarGraph() : nodes(0), edges(0) {} 
   /** Destructor.*/
-  virtual ~Graph() {}
+  virtual ~PlanarGraph() {}
   /** Adds a node to the graph. As convienience returns the passed edge. */
   virtual NodePtr addNode( NodePtr node ) {
     nodeList.add( node );
@@ -95,7 +98,7 @@ public:
 }// end namespace graph
 
 
-#endif // __GRAPH_H__
+#endif // __PLANARGRAPH_H__
 
 // Local Variables: ***
 // mode:C++ ***
