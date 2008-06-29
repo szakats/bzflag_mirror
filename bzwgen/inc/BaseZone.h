@@ -29,6 +29,7 @@ public:
     color = 1;
     ctfSafe = _ctfSafe;
   };
+  virtual void run() {};
   void setColor(int _color) { color = _color; }
   virtual void output(Output& out) {
     out.baseZone(Vertex(A.x,A.y,0),Vertex(B.x,B.y,0),color,ctfSafe);

@@ -23,6 +23,7 @@ protected:
   Mesh mesh;
 public:
   FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int matref, bool rotated);
+  virtual void run() {};
   virtual void output(Output& out);
 };
 

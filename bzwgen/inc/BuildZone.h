@@ -24,6 +24,7 @@ class BuildZone : public Zone {
   MeshVector* meshes;
 public:
   BuildZone(Generator* _generator,Coord2D a, Coord2D b, int astep);
+  virtual void run() {};
   virtual void output(Output& out);
   ~BuildZone();
 };

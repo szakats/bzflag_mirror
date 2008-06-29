@@ -52,7 +52,6 @@ public:
   /** Adds a node to the graph. As convienience returns the passed edge. */
   NodePtr addNode( NodePtr node ) {
     nodeList.add( node );
-    node->setGraph( this );
     ++nodes;
     return node;
   }
@@ -90,6 +89,7 @@ public:
   void removeEdge( size_t id ) {
     delete edgeList.get(id);
     edgeList.clear(id);
+    edges--;
   }
   /** 
    * Removes a given Node from the graph. Also removes all 
@@ -101,6 +101,7 @@ public:
     node->orphanize();
     delete node;
     nodeList.clear(id);
+    nodes--;
   }
 private:
   /** Adds a single edge to the graph. As convienience returns the passed edge. */
