@@ -419,25 +419,25 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
 }
 
 void Mesh::output(Output& out, int materialCount) {
-  out.line("mesh");
+  out.meshStart();
   int mat = -1;
   for (size_t i = 0; i < inside.size(); i++) out.vertex(inside[i],"inside");
   for (size_t i = 0; i < outside.size(); i++) out.vertex(outside[i],"outside");
   for (size_t i = 0; i < v.size(); i++) out.vertex(v[i]);
-  for (size_t i = 0; i < tc.size(); i++) out.texcoord(tc[i]);
-  if (passable) out.line("  passable"); 
+  for (size_t i = 0; i < tc.size(); i++) out.texCoord(tc[i]);
+  if (passable) out.meshPassable(); 
 
   for (int m = 0; m <= materialCount; m++) {
     for (size_t i = 0; i < f.size(); i++) 
       if (f[i]->getMaterial() == m) {
         if (mat != m) out.matref(m);
-        if (passable) out.line("  passable"); 
+        if (passable) out.meshPassable(); 
         mat = m;
         out.face(f[i],mat);
         mat = f[i]->getMaterial();
       }
   }
-  out.line("end\n");
+  out.meshEnd();
 }
 
 // TODO: handle texcoords?

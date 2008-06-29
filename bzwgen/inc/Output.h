@@ -20,11 +20,20 @@
 class Output {
   OutStream* outstream;
   String texturepath;
-public:
   int vertices;
   int texcoords;
   int faces;
+public:
   Output(OutStream* _outstream, String _texturepath) : outstream(_outstream), texturepath(_texturepath ), vertices(0), texcoords(0), faces(0) {}
+  void meshStart() { 
+    (*outstream) << "mesh\n"; 
+  }
+  void meshEnd() { 
+    (*outstream) << "mesh\n"; 
+  }
+  void meshPassable() { 
+    (*outstream) << " passable\n"; 
+  }
   void vertex(Vertex v) { 
     vertices++;
     (*outstream) << "  vertex " << v.x << " " << v.y << " " << v.z << "\n"; 
@@ -33,7 +42,7 @@ public:
     vertices++;
     (*outstream) << "  " << name << " " << v.x << " " << v.y << " " << v.z << "\n"; 
   }
-  void texcoord(TexCoord tc) { 
+  void texCoord(TexCoord tc) { 
     texcoords++;
     (*outstream) << "  texcoord " << tc.x << " " << tc.y << "\n"; 
   }
@@ -62,9 +71,6 @@ public:
 
     (*outstream) << "  endface\n";
   }
-  void line(const char* textline) { 
-    (*outstream) << textline << "\n";
-  }
   void matref(int matref) { 
     (*outstream) << "  matref mat" << matref << "\n";
   }
@@ -83,7 +89,7 @@ public:
     if (noradar) (*outstream) << "  noradar\n";
     (*outstream) << "end\n\n";
   }
-  void basezone(Coord2D A, Coord2D B, int color, bool ctfSafe) { 
+  void baseZone(Vertex A, Vertex B, int color, bool ctfSafe) { 
     (*outstream) << "base\n";
     (*outstream) << "  position " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 0\n";
     (*outstream) << "  size " << abs(A.x-B.x)/2 << " " << abs(A.y-B.y)/2 << " 0\n";
