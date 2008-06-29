@@ -13,7 +13,7 @@
  * @file PlanarGraph.h
  * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
  * @brief Defines an Graph class.
-*/
+ */
 
 #ifndef __PLANARGRAPH_H__
 #define __PLANARGRAPH_H__
@@ -42,23 +42,29 @@ private:
   size_t nodes;
   /** Holds the number of edges */
   size_t edges;
+  /** Holds the number of faces */
+  size_t faces;
 public:
   /** Default constructor. Creates an empty graph.*/
   PlanarGraph() : nodes(0), edges(0) {} 
   /** Destructor.*/
-  virtual ~PlanarGraph() {}
+  ~PlanarGraph() {}
   /** Adds a node to the graph. As convienience returns the passed edge. */
-  virtual NodePtr addNode( NodePtr node ) {
+  NodePtr addNode( NodePtr node ) {
     nodeList.add( node );
     node->setGraph( this );
     ++nodes;
     return node;
   }
-  /** Adds a single edge to the graph. As convienience returns the passed edge. */
-  virtual EdgePtr addEdge( EdgePtr edge ) {
-    edgeList.add( edge );
-    ++edges;
-    return edge;
+  /** 
+   * Connects two nodes. Creates two edges and adds them to the graph. Note 
+   * that no planarity check is done. The arguments are symmetrical, so there's
+   * no difference in which one was passed first.
+   */
+  void addConnection( NodePtr a, NodePtr b ) {
+    EdgePtr ea = addEdge( new Edge( a, b ) );
+    EdgePtr eb = addEdge( new Edge( b, a ) );
+    ea->setReverse(eb);
   }
   /** Returns the number of nodes */
   size_t nodeCount() const { 
@@ -67,6 +73,10 @@ public:
   /** Returns the number of edges */
   size_t edgeCount() const { 
     return edges;
+  }
+  /** Returns the number of faces */
+  size_t faceCount() const { 
+    return faces;
   }
   /** Returns node by ID */
   NodePtr getNode( size_t id ) {
@@ -83,15 +93,22 @@ public:
   }
   /** 
    * Removes a given Node from the graph. Also removes all 
-     connected edges, as they are no longer valid. Note that 
-     it DOES dispose of the node object and edge objects. */
+   * connected edges, as they are no longer valid. Note that 
+   * it DOES dispose of the node object and edge objects. 
+   */
   void removeNode( size_t id ) {
     NodePtr node = nodeList.get(id);
     node->orphanize();
     delete node;
     nodeList.clear(id);
   }
-
+private:
+  /** Adds a single edge to the graph. As convienience returns the passed edge. */
+  EdgePtr addEdge( EdgePtr edge ) {
+    edgeList.add( edge );
+    ++edges;
+    return edge;
+  }
 };
 
 

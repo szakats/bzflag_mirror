@@ -27,12 +27,12 @@
 // The e class is a part of Graph class
 namespace graph {
 
-class Graph;
+class PlanarGraph;
 class Node;
 class Edge;
 class Face;
 
-typedef Graph* GraphPtr;
+typedef PlanarGraph* PlanarGraphPtr;
 typedef Edge* EdgePtr;
 typedef Node* NodePtr;
 typedef Face* FacePtr;

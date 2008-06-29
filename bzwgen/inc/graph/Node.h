@@ -48,7 +48,7 @@ private:
   /**
    * Pointer to the graph of which this given Node is a belonging to.
    */
-  GraphPtr graph;
+  PlanarGraphPtr graph;
 public:
   /** 
    * Default constructor. Sets the underlying point to (0,0) and initializes
@@ -62,7 +62,7 @@ public:
   /** Adds a outgoing edge */
   void addOutgoing(EdgePtr edge) { outgoing.push_back(edge); }
   /** Sets the owning Graph */
-  void setGraph(GraphPtr _graph) { graph = _graph; }
+  void setGraph(PlanarGraphPtr _graph) { graph = _graph; }
   /** Removes all the edges connected to the node */
   void orphanize();
 };

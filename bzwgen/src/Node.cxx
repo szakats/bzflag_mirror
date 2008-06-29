@@ -11,7 +11,7 @@
  */
 
 #include "graph/Node.h"
-#include "graph/Graph.h"
+#include "graph/PlanarGraph.h"
 
 namespace graph {
 

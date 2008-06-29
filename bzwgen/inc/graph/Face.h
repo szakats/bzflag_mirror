@@ -47,13 +47,13 @@ private:
   /**
    * Pointer to the graph of which this face is part of.
    */
-  GraphPtr graph;
+  PlanarGraphPtr graph;
 public:
   /**
    * Standard constructor, takes only a pointer to the Graph that the Face 
    * belongs to. Edges need to be added manualy via addEdge in clockwise order.
    */
-  Face(GraphPtr _graph) : graph(_graph) {}
+  Face(PlanarGraphPtr _graph) : graph(_graph) {}
   /** 
    * Adds an Edge to the face. Note that edges NEED to be added in clockwise 
    * order, or else most of the algorithms here won't work. Edges are still

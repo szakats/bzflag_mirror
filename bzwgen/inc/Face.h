@@ -14,8 +14,8 @@
  * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
  * @brief Defines a Face class for BZWGen.
  */
-#ifndef __FACE_H__
-#define __FACE_H__
+#ifndef __FACE3D_H__
+#define __FACE3D_H__
 
 #include "globals.h"
 #include "Output.h"
@@ -221,7 +221,7 @@ typedef std::vector<Face*> FaceVector;
 /** Type definition for a Vector of Face pointers iterator. */
 typedef FaceVector::iterator FaceVectIter;
 
-#endif /* __FACE_H__ */
+#endif /* __FACE3D_H__ */
 
 // Local Variables: ***
 // mode:C++ ***

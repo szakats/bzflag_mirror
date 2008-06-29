@@ -19,6 +19,7 @@
 #define __EDGE_H__
 
 #include <vector>
+#include <cassert>
 #include "graph/forward.h"
 
 // The Edge class is a part of Graph class
@@ -35,8 +36,13 @@ private:
   NodePtr source;
   /** Target node */
   NodePtr target;
-  /** Pointer to the reverse edge in a Graph, used for PlanarGraph */
+  /** Pointer to the reverse edge in a PlanarGraph */
   EdgePtr reverse;
+  /** 
+   * Pointer to  face that this edge belongs to. Used when reconsructing
+   * a face map for the given PlanarGraph
+   */
+  FacePtr face;
 public:
   /** Standard constructor */
   Edge() : source(NULL), target(NULL), reverse(NULL) {}
@@ -48,6 +54,17 @@ public:
   Edge(NodePtr _source, NodePtr _target) : source(_source), target(_target) {
     source->addOutgoing(this);
     target->addIncoming(this);
+  }
+  /**
+   * Sets the reverse edge. Also sets the reverse edge for the edge passed,
+   * so the function needs to be called justr once for every edge pair.
+   * If debug mode is on then assertions check the validness of the edge. 
+   */
+  void setReverse( EdgePtr edge ) {
+    assert( source = edge->target );
+    assert( target = edge->source );
+    reverse = edge;
+    edge->reverse = this;
   }
 
 };
