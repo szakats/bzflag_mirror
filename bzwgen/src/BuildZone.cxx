@@ -12,9 +12,7 @@
 
 #include "BuildZone.h"
 
-BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Zone(_generator,a,b,astep) {
-  meshes = NULL;
-
+void BuildZone::run() {
   if ((A.x == B.x) || (A.y == B.y)) {
     if (debugLevel > 0) { printf("Bad building coords! (%d,%d)*(%d,%d)\n",A.x,A.y,B.x,B.y); }
     return;
@@ -37,8 +35,9 @@ BuildZone::BuildZone(Generator* _generator, Coord2D a, Coord2D b, int astep) : Z
 
   String rulename = String("start");
   meshes = generator->getRuleSet()->run(mesh,base,rulename);
-  return;
 }
+
+
 
 void BuildZone::output(Output& out) {
   if (meshes == NULL) return;

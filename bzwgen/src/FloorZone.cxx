@@ -15,8 +15,7 @@
 #include "Face.h"
 
 
-FloorZone::FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int matref, bool rotated) : Zone(_generator,a,b,astep)
-{
+void FloorZone::run() {
   if ((A.x == B.x) || (A.y == B.y)) {
     if (debugLevel > 0) { printf("Bad floor coords! (%d,%d)*(%d,%d)\n",A.x,A.y,B.x,B.y); }
     return;
@@ -30,8 +29,9 @@ FloorZone::FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int
     rotated ? TexCoord(0.0,double((B.x-A.x)/step))                  : TexCoord(double((B.x-A.x)/step),0.0),
     rotated ? TexCoord(double((B.y-A.y)/step),double((B.x-A.x)/step)) : TexCoord(double((B.x-A.x)/step),double((B.y-A.y)/step)),
     rotated ? TexCoord(double((B.y-A.y)/step),0.0)                  : TexCoord(0,double((B.y-A.y)/step)),
-    matref);
+    materialID);
 }
+
 
 void FloorZone::output(Output& out) 
 {

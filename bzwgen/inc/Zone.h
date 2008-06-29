@@ -55,7 +55,8 @@ public:
    * does nothing. Initialized zones should only store data. All
    * generations of meshes should be done using run().
    */
-  Zone(Generator* _generator, Coord2D a, Coord2D b, int astep) : generator(_generator), A(a), B(b), step(astep) {};
+  Zone(Generator* _generator, Coord2D a, Coord2D b, int astep) 
+    : generator(_generator), A(a), B(b), step(astep) {};
   /**
    * Runs mesh generation, preparing the zone for output. Pure 
    * virtual method to be overriden.

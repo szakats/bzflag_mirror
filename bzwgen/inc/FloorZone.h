@@ -9,6 +9,11 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+/** 
+ * @file FloorZone.h
+ * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+ * @brief Defines a Floor (road) Zone class.
+ */
 
 #ifndef __FLOORZONE_H__
 #define __FLOORZONE_H__
@@ -17,13 +22,31 @@
 #include "Zone.h"
 #include "Mesh.h"
 
-
+/** 
+ * @class FloorZone
+ * @brief Class defining a floor (road) zone
+ * 
+ * Current implementation defines an axis-aligned Zone, this will be
+ * refactored to the description below:
+ *
+ * This Zone represents a floor part. Floor is characterized by the fact that it
+ * has no collision checks (it is made passthrough), and that it constitutes of 
+ * a single mesh (actually a single face). 
+ */
 class FloorZone : public Zone {
-protected:
+  /** Holds the passed material ID of the floor */
+  int materialID;
+  /** Flag to set wether the floor part is rotated texture-wise. */
+  bool rotated;
+  /** The generated floor mesh. Is empty until run() is called */
   Mesh mesh;
 public:
-  FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int matref, bool rotated);
-  virtual void run() {};
+  /** Constructor defining the zone. Only sets the required parameters. */
+  FloorZone(Generator* _generator, Coord2D a, Coord2D b, int astep, int _materialID, bool _rotated) 
+    : Zone(_generator,a,b,astep), materialID(_materialID), rotated(_rotated) {};
+  /** Generates the floor mesh, and assigned texture information. */
+  virtual void run();
+  /** Outputs the generated mesh to the passed Output object. */
   virtual void output(Output& out);
 };
 
