@@ -22,6 +22,7 @@
 #include "Material.h"
 #include "commandArgs.h"
 #include "Zone.h"
+#include "graph/PlanarGraph.h"
 
 /** 
  * @class Generator
@@ -50,6 +51,8 @@ protected:
   int roadxid;
   /** CTFSafe flag. */
   bool ctfSafe;
+  /** The planar graph of faces for zones. */
+  graph::PlanarGraph graph;
 public:
   /** 
    * Standard constructor, takes a already loaded RuleSet as

@@ -124,9 +124,20 @@ private:
   /** 
    * Translates a grid coordinate into a world coordinate
    */
-  Coord2D worldCoord(int x, int y) { 
+  Coord2D worldCoord(int x, int y) const { 
     return Coord2D((x-gridSize/2)*gridStep,(y-gridSize/2)*gridStep); 
   }
+  /** 
+   * Translates a grid coordinate into a world coordinate
+   */
+  float worldCoord(int a) const { 
+    return (float)(a-gridSize/2)*gridStep; 
+  }
+  /**
+   * Creates a "fake face" in the Generator graph for a zone of the 
+   * given coordinates.
+   */
+  graph::FacePtr createFakeFace(int ax, int ay, int bx, int by);
 };
 
 #endif /* __GRIDGENERATOR_H__ */

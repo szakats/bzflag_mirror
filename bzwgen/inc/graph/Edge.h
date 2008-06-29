@@ -62,8 +62,8 @@ public:
    * If debug mode is on then assertions check the validness of the edge. 
    */
   void setReverse( EdgePtr edge ) {
-    assert( source = edge->target );
-    assert( target = edge->source );
+    assert( source == edge->target );
+    assert( target == edge->source );
     reverse = edge;
     edge->reverse = this;
   }

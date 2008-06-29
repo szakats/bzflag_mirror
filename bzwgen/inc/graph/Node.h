@@ -58,6 +58,10 @@ public:
   void addOutgoing(EdgePtr edge) { outgoing.push_back(edge); }
   /** Removes all the edges connected to the node */
   void orphanize();
+  /** Returns outgoing edge by index. */
+  EdgePtr getOutgoing(size_t index) { return outgoing[index]; }
+  /** Returns incoming edge by index. */
+  EdgePtr getIncoming(size_t index) { return incoming[index]; }
 private:
   /** Blocked default constructor */
   Node() {}
