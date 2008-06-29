@@ -17,7 +17,7 @@
 #include "BuildZone.h"
 #include "GridGenerator.h"
 
-int BaseZone::color = 1;
+int BaseZone::colorCount = 1;
 
 void GridMap::initialize(Generator* _generator, int _worldSize, int _gridSize) 
 {
@@ -97,6 +97,9 @@ void GridMap::pushZones()
     } while (x < gridSize);
     y++;
   } while (y < gridSize);
+
+  ZoneVectIter itr; 
+  for (itr = zones.begin(); itr!= zones.end(); ++itr) (*itr)->run();
 }
 
 bool GridMap::isValid(int x, int y) {
