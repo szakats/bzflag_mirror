@@ -11,6 +11,8 @@
  */
 
 #include "BuildZone.h"
+#include "Generator.h"
+
 
 void BuildZone::run() {
   if ((A.x == B.x) || (A.y == B.y)) {

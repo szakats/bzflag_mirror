@@ -40,7 +40,6 @@ private:
   int worldSize;
   int gridSize;
   int gridStep;
-  ZoneVector zones;
 public:
   GridMap() { map = NULL; };
   int getGridSize() const { return gridSize; }
@@ -59,7 +58,6 @@ public:
   bool isValid(int x, int y);
   int typeAroundToInt(int x, int y, CellType type);
   int typeCrossAroundToInt(int x, int y, CellType type); 
-  void output(Output& out);
   Coord2D emptyCoord();
   ~GridMap();
 };

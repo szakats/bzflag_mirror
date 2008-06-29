@@ -21,13 +21,16 @@
 #include "RuleSet.h"
 #include "Material.h"
 #include "commandArgs.h"
+#include "Zone.h"
 
 /** 
  * @class Generator
  * @brief Abstract class for the map generator. 
  *
  * This class is intended to be derived from. It holds a protected RuleSet
- * and takes care of material handling.
+ * and takes care of material handling. The generator also stores zones and 
+ * handles them (removal, output and running) but the addition of new zones 
+ * is left to the Generator classes that inherit from Generator.
  */
 class Generator {
 protected:
@@ -39,6 +42,8 @@ protected:
   MaterialVector mats;
   /** Number of bases on the map. */
   int bases;
+  /** Vector holding the zones generated on the given map. */
+  ZoneVector zones;
 public:
   /** 
    * Material ID of the standard road material. 
@@ -50,7 +55,9 @@ public:
    * Probably shouldn't be public, will be refactored 
    */
   int roadxid;
-  /** CTFSafe flag. Also shouldn't be public, will be refactored */
+  /** 
+   * CTFSafe flag. Also shouldn't be public, will be refactored 
+   */
   bool ctfSafe;
   /** 
    * Standard constructor, takes a already loaded RuleSet as
@@ -67,23 +74,51 @@ public:
    * bases and ctfsafe options. 
    */
   virtual void parseOptions(CCommandLineArgs* opt);
-  /** Does nothing, should be overloaded. */
-  virtual void run();
-  /** Returns the size of the world. */
-  inline int getSize() { return size; }
-  /** Returns the loaded RuleSet. */
-  inline RuleSet* getRuleSet() { return ruleset; }
   /** 
-   * Outputs data. In case of the Generator class this handles
-   * output of the file header and materials. 
+   * Runs the generator. Calls run on every stored zone. 
+   */
+  virtual void run();
+  /** 
+   * Returns the size of the world. 
+   */
+  inline int getSize() const { 
+    return size; 
+  }
+  /** 
+   * Returns the current count of added zones.
+   */
+  inline int getZoneCount() const { 
+    return zones.size(); 
+  }
+  /** 
+   * Adds a zone pointer to the zones handled by this Generator.
+   * The generator will dispose of the zone at destruction.
+   */
+  inline void addZone(Zone* zone) {
+    zones.push_back(zone);
+  }
+  /** 
+   * Returns the loaded RuleSet. 
+   */
+  inline RuleSet* getRuleSet() { 
+    return ruleset; 
+  }
+  /** 
+   * Outputs data. Goes through all the stored zones and outputs them.
    */
   virtual void output(Output& out);
-  /** Returns the Material by material ID. */
-  Material* getMaterial(int id) { return mats[id]; }
-  /** Destructor, frees the materials, but not the ruleset. */
+  /** 
+   * Returns the requested Material by material ID. 
+   */
+  Material* getMaterial(int id) { 
+    return mats[id]; 
+  }
+  /** 
+   * Destructor, frees the materials, the zones, but not the ruleset. 
+   */
   virtual ~Generator() {
-    MaterialVectIter itr; 
-    for (itr = mats.begin(); itr!= mats.end(); ++itr) delete (*itr);
+    for (MaterialVectIter itr = mats.begin(); itr!= mats.end(); ++itr) delete (*itr);
+    for (ZoneVectIter itr = zones.begin(); itr!= zones.end(); ++itr) delete (*itr);
   }
 };
 

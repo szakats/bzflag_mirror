@@ -16,8 +16,6 @@
 #include "Random.h"
 
 
-GridGenerator::GridGenerator(RuleSet* _ruleset) : Generator(_ruleset) { 
-}
 
 void GridGenerator::parseOptions(CCommandLineArgs* opt) { 
   Generator::parseOptions(opt); 
@@ -27,11 +25,10 @@ void GridGenerator::parseOptions(CCommandLineArgs* opt) {
   if (opt->Exists("g"))        { gridSize = opt->GetDataI("g"); }
   if (opt->Exists("gridsize")) { gridSize = opt->GetDataI("gridsize"); }
 
-  snapX = 3;
-  snapY = 3;
+  snap = 3;
 
-  if (opt->Exists("p"))        { snapX = snapY = opt->GetDataI("p"); }
-  if (opt->Exists("gridsnap")) { snapX = snapY = opt->GetDataI("gridsnap"); }
+  if (opt->Exists("p"))        { snap = opt->GetDataI("p"); }
+  if (opt->Exists("gridsnap")) { snap = opt->GetDataI("gridsnap"); }
 
   subdiv = 120;
 
@@ -51,8 +48,8 @@ void GridGenerator::parseOptions(CCommandLineArgs* opt) {
 #define SETROAD(cx,cy)  { if (map.getNode(cx,cy).type > GridMap::NONE) { map.setType(cx,cy,GridMap::ROADX);         } else { map.setType(cx,cy,GridMap::ROAD); } }
 #define SETROADF(cx,cy) { if (map.getNode(cx,cy).type > GridMap::NONE) { map.setType(cx,cy,GridMap::ROADX); break;  } else { map.setType(cx,cy,GridMap::ROAD); } }
 
-void GridGenerator::plotRoad(int x, int y, bool horiz, int  collision) {
-  if (collision == 0) {
+void GridGenerator::plotRoad(int x, int y, bool horiz, bool collision) {
+  if (!collision) {
     if (horiz) {
       for (int xx = 0; xx < map.getGridSize(); xx++) SETROAD(xx,y)
     } else {
@@ -72,8 +69,8 @@ void GridGenerator::plotRoad(int x, int y, bool horiz, int  collision) {
 
 void GridGenerator::performSlice(bool full, int snapmod, bool horiz) {
   int bmod = bases > 0 ? 2 : 1;
-  int x = Random::numberRangeStep(snapX,map.getGridSize()-snapX*bmod,snapmod*snapX);
-  int y = Random::numberRangeStep(snapY,map.getGridSize()-snapY*bmod,snapmod*snapY);
+  int x = Random::numberRangeStep(snap,map.getGridSize()-snap*bmod,snapmod*snap);
+  int y = Random::numberRangeStep(snap,map.getGridSize()-snap*bmod,snapmod*snap);
 
   if (debugLevel > 2) printf("slice (%d,%d)...\n",x,y);
 
@@ -81,26 +78,25 @@ void GridGenerator::performSlice(bool full, int snapmod, bool horiz) {
 
   if (map.getNode(horiz ? Coord2D(x+1,y) : Coord2D(x,y+1)).type > 0) return;
 
-  plotRoad(x,y,horiz,full ? 0 : 1);
+  plotRoad(x,y,horiz,!full);
 }
 
 void GridGenerator::run() { 
   if (debugLevel > 1) printf("\nRunning GridGenerator...\n");
 
-  Generator::run(); 
   map.clear();
 
   if (bases > 0) {
-    plotRoad(snapX,snapY,true,0);
-    plotRoad(snapX,snapY,false,0);
-    plotRoad(map.getGridSize()-snapX-1,map.getGridSize()-snapY-1,true,0);
-    plotRoad(map.getGridSize()-snapX-1,map.getGridSize()-snapY-1,false,0);
+    plotRoad(snap,snap,true,0);
+    plotRoad(snap,snap,false,0);
+    plotRoad(map.getGridSize()-snap-1,map.getGridSize()-snap-1,true,0);
+    plotRoad(map.getGridSize()-snap-1,map.getGridSize()-snap-1,false,0);
 
-    map.setAreaType(Coord2D(0,0),Coord2D(snapX,snapY),GridMap::BASE);
-    map.setAreaType(Coord2D(map.getGridSize()-snapX,map.getGridSize()-snapY),Coord2D(map.getGridSize(),map.getGridSize()),GridMap::BASE);
+    map.setAreaType(Coord2D(0,0),Coord2D(snap,snap),GridMap::BASE);
+    map.setAreaType(Coord2D(map.getGridSize()-snap,map.getGridSize()-snap),Coord2D(map.getGridSize(),map.getGridSize()),GridMap::BASE);
     if (bases > 2) {
-      map.setAreaType(Coord2D(0,map.getGridSize()-snapY),Coord2D(snapX,map.getGridSize()),GridMap::BASE);
-      map.setAreaType(Coord2D(map.getGridSize()-snapX,0),Coord2D(map.getGridSize(),snapY),GridMap::BASE);
+      map.setAreaType(Coord2D(0,map.getGridSize()-snap),Coord2D(snap,map.getGridSize()),GridMap::BASE);
+      map.setAreaType(Coord2D(map.getGridSize()-snap,0),Coord2D(map.getGridSize(),snap),GridMap::BASE);
     }
   }
 
@@ -121,15 +117,9 @@ void GridGenerator::run() {
   if (debugLevel > 1) printf("Pushing zones...\n");
   map.pushZones();
   
+  Generator::run(); 
 }
 
-void GridGenerator::output(Output& out) { 
-  Generator::output(out); 
-  map.output(out);
-}
-
-GridGenerator::~GridGenerator() { 
-}
 
 
   

@@ -52,20 +52,20 @@ void GridMap::growZone(int x,int y,CellType type) {
     if (etype != type) break;
   }
 
-  setAreaZone(Coord2D(x,y),Coord2D(xe,ye),zones.size());
+  setAreaZone(Coord2D(x,y),Coord2D(xe,ye),generator->getZoneCount());
 
   if (type == ROAD) {
     if (debugLevel > 2) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
-    zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep, generator->roadid, x-xe < y-ye));
+    generator->addZone(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep, generator->roadid, x-xe < y-ye));
   } else if (type == ROADX) {
     if (debugLevel > 2) { printf("Crossroads zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
-    zones.push_back(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep, generator->roadxid,true));
+    generator->addZone(new FloorZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep, generator->roadxid,true));
   } else if (type == BASE) {
     if (debugLevel > 2) { printf("Base zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
-    zones.push_back(new BaseZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye), generator->ctfSafe));
+    generator->addZone(new BaseZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye), generator->ctfSafe));
   } else {
     if (debugLevel > 2) { printf("Building zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
-    zones.push_back(new BuildZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep));
+    generator->addZone(new BuildZone(generator,worldCoord(x,y)  ,worldCoord(xe,ye)  ,gridStep));
   }
   if (debugLevel > 3) { printf("Zone successfuly created : (%d,%d * %d,%d)\n",x,y,xe,ye); }
 }
@@ -98,8 +98,6 @@ void GridMap::pushZones()
     y++;
   } while (y < gridSize);
 
-  ZoneVectIter itr; 
-  for (itr = zones.begin(); itr!= zones.end(); ++itr) (*itr)->run();
 }
 
 bool GridMap::isValid(int x, int y) {
@@ -138,13 +136,7 @@ Coord2D GridMap::emptyCoord() {
 }
 
 
-void GridMap::output(Output& out) { 
-  for (ZoneVectIter iter = zones.begin(); iter != zones.end(); ++iter)  (*iter)->output(out);
-}
-
 GridMap::~GridMap() {
-  ZoneVectIter itr; 
-  for (itr = zones.begin(); itr!= zones.end(); ++itr) delete (*itr);
 	delete map;
 }
 // Local Variables: ***

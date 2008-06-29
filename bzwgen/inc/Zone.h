@@ -21,13 +21,14 @@
  * division of the map. 
  */
 
-
 #ifndef __ZONE_H__
 #define __ZONE_H__
 
 #include "Output.h"
 #include "globals.h"
-#include "Generator.h"
+
+// Forward declaration
+class Generator;
 
 /** 
  * @class Zone
