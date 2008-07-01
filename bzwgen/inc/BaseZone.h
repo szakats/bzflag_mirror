@@ -29,22 +29,12 @@
  * Hence, this Zone should be passed a square for best results. 
  */
 class BaseZone : public Zone {
-protected:
-  /** Color (Team color) of this base. */
-  int color;
-  /** CTF safe flag */
-  bool ctfSafe;
-  /** 
-   * A static integer to keep the number of bases generated. Used to
-   * assign each generated base a unique color.
-   */
-  static int colorCount;
 public:
   /**
    * Constructor, sets all the needed data for generation.
    */
   BaseZone( Generator* _generator, graph::Face* _face, bool _ctfSafe ) 
-    : Zone( _generator,_face ), ctfSafe( _ctfSafe ), color( 1 ) {};
+    : Zone( _generator,_face ), color( 1 ), ctfSafe( _ctfSafe ) {};
   /**
    * Runs the Zone generation. As a BZFlag base is a native BZW object, this method 
    * only assignes each base a color.
@@ -62,6 +52,17 @@ public:
     out.baseZone(Vertex(nodes[0]->x,nodes[0]->y,0.0f),Vertex(nodes[2]->x,nodes[2]->y,0.0f),color,ctfSafe);
     color++;
   }
+protected:
+  /** Color (Team color) of this base. */
+  int color;
+  /** CTF safe flag */
+  bool ctfSafe;
+  /** 
+  * A static integer to keep the number of bases generated. Used to
+  * assign each generated base a unique color.
+  */
+  static int colorCount;
+
 };
 
 #endif /* __BASEZONE_H__ */
