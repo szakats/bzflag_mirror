@@ -5,6 +5,8 @@ CFLAGS = -g -O0 -Wall -pedantic -ansi -I./inc
 LDFLAGS =
  
 FILES = \
+	src/graph/Face.cxx \
+	src/graph/Node.cxx \
 	src/BZWGenerator.cxx \
 	src/BuildZone.cxx \
 	src/FloorZone.cxx \
