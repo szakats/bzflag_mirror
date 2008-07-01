@@ -83,7 +83,7 @@ private:
 };
 
 
-}; // namespace end graph
+} // namespace end graph
 
 #endif // __FACE_H__
 

@@ -10,8 +10,6 @@ FILES = \
 	src/FloorZone.cxx \
 	src/Generator.cxx \
 	src/GridGenerator.cxx \
-	src/GridMap.cxx \
-	src/Material.cxx \
 	src/Mesh.cxx \
 	src/MultiFace.cxx \
 	src/Operation.cxx \

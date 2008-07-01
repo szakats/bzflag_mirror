@@ -92,14 +92,14 @@ public:
   void baseZone(Vertex A, Vertex B, int color, bool ctfSafe) { 
     (*outstream) << "base\n";
     (*outstream) << "  position " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 0\n";
-    (*outstream) << "  size " << abs(A.x-B.x)/2 << " " << abs(A.y-B.y)/2 << " 0\n";
+    (*outstream) << "  size " << fabs(A.x-B.x)/2 << " " << fabs(A.y-B.y)/2 << " 0\n";
     (*outstream) << "  color " << color << "\n";
     (*outstream) << "end\n\n";
 
     if( ctfSafe ) {
       (*outstream) << "zone\n";
       (*outstream) << "  position " << (A.x+B.x)/2 << " " << (A.y+B.y)/2 << " 0\n";
-      (*outstream) << "  size " << abs(A.x-B.x)/2 << " " << abs(A.y-B.y)/2 << " 0\n";
+      (*outstream) << "  size " << fabs(A.x-B.x)/2 << " " << fabs(A.y-B.y)/2 << " 0\n";
       (*outstream) << "  safety " << color << "\n";
       (*outstream) << "end\n\n";
     }
