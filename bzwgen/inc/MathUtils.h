@@ -170,6 +170,29 @@ inline bool commonRange(T a1, T a2, T b1, T b2, T &result1, T &result2, T precis
 }
 
 /**
+ * Checks wether two segments intersect. 
+ */
+template <class T>
+int intersect2D( Vector2D<T> A, Vector2D<T> B, Vector2D<T> C, Vector2D<T> D )  
+{
+  Vector2D<T> AB = B - A;
+  Vector2D<T> CD = D - C;
+  T d = AB.x*CD.y - AB.y*CD.x;
+  T r = (A.y-C.y)*CD.x-(A.x-C.x)*CD.y;
+  T s = (A.y-C.y)*AB.x-(A.x-C.x)*AB.y;
+  if (isZero(d)) {
+    if (isZero(r)) { // parallel and coincident
+      return true;
+    } else return false; // parallel but not coincident
+  }
+  r /= d;
+  s /= d;
+  if (r > 0-EPSILON && r < 1+EPSILON && s > 0-EPSILON && s < 1+EPSILON) {
+    return true;
+  } else return false;
+}
+
+/**
  * Checks wether two segments intersect. Result is 0 if there is no 
  * intersection, 1 if there is a intersection point, 2 if there is a
  * parallel coincident section.
@@ -185,7 +208,7 @@ int intersect2D( Vector2D<T> A, Vector2D<T> B, Vector2D<T> C, Vector2D<T> D,
 {
   Vector2D<T> AB = B - A;
   Vector2D<T> CD = D - C;
-  T d = BA.x*CD.y - BA.y*CD.x;
+  T d = AB.x*CD.y - AB.y*CD.x;
   T r = (A.y-C.y)*CD.x-(A.x-C.x)*CD.y;
   T s = (A.y-C.y)*AB.x-(A.x-C.x)*AB.y;
   if (isZero(d)) {
@@ -214,7 +237,6 @@ int intersect2D( Vector2D<T> A, Vector2D<T> B, Vector2D<T> C, Vector2D<T> D,
   if (r > 0-EPSILON && r < 1+EPSILON && s > 0-EPSILON && s < 1+EPSILON) {
     P1.x = A.x+r*AB.x;
     P1.y = A.y+r*AB.y;
-    P1.z = A.z;
     return 1;
   } else return 0;
 }
