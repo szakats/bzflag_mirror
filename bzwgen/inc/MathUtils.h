@@ -170,37 +170,35 @@ inline bool commonRange(T a1, T a2, T b1, T b2, T &result1, T &result2, T precis
 }
 
 /**
- * Checks wether two segments intersect. 
+ * Checks whether two segments intersect. 
  */
 template <class T>
-int intersect2D( Vector2D<T> A, Vector2D<T> B, Vector2D<T> C, Vector2D<T> D )  
+bool intersect2D( Vector2D<T> A, Vector2D<T> B, Vector2D<T> C, Vector2D<T> D )  
 {
   Vector2D<T> AB = B - A;
   Vector2D<T> CD = D - C;
   T d = AB.x*CD.y - AB.y*CD.x;
   T r = (A.y-C.y)*CD.x-(A.x-C.x)*CD.y;
   T s = (A.y-C.y)*AB.x-(A.x-C.x)*AB.y;
-  if (isZero(d)) {
+  if (isZero(d)) { // parallel
     if (isZero(r)) { // parallel and coincident
       return true;
     } else return false; // parallel but not coincident
   }
   r /= d;
   s /= d;
-  if (r > 0-EPSILON && r < 1+EPSILON && s > 0-EPSILON && s < 1+EPSILON) {
-    return true;
-  } else return false;
+  return (r > 0-EPSILON && r < 1+EPSILON && s > 0-EPSILON && s < 1+EPSILON);
 }
 
 /**
- * Checks wether two segments intersect. Result is 0 if there is no 
+ * Checks whether two segments intersect. Result is 0 if there is no 
  * intersection, 1 if there is a intersection point, 2 if there is a
  * parallel coincident section.
  *
  * WARNING: I just noted that this code may have a bug, when returning
  * the intersection segment. Only the x or y values of the result are
  * affected, the other value is copied from A. This may be the reason
- * for faulty MultiFace behaviour?
+ * for faulty MultiFace behavior?
  */
 template <class T>
 int intersect2D( Vector2D<T> A, Vector2D<T> B, Vector2D<T> C, Vector2D<T> D, 
@@ -211,11 +209,11 @@ int intersect2D( Vector2D<T> A, Vector2D<T> B, Vector2D<T> C, Vector2D<T> D,
   T d = AB.x*CD.y - AB.y*CD.x;
   T r = (A.y-C.y)*CD.x-(A.x-C.x)*CD.y;
   T s = (A.y-C.y)*AB.x-(A.x-C.x)*AB.y;
-  if (isZero(d)) {
+  if (isZero(d)) { // parallel
     if (isZero(r)) { // parallel and coincident
       T e;
       T f;
-      if (isZero(A.y-C.y) && math::isZero(B.y-D.y)) { // parallel on X
+      if (isZero(A.y-C.y) && isZero(B.y-D.y)) { // parallel on X
         if (commonRange(A.x,B.x,C.x,D.x,e,f)) { // AB and CD have common point
           P1 = P2 = A;
           P1.x = e;

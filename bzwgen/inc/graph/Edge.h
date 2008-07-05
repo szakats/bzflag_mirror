@@ -88,6 +88,13 @@ public:
 	  Vector2Df v = target->vector() - source->vector();
 	  return math::vectorAngle( v.x, v.y );
   }
+  /**
+   * Returns whether the edge intersects with the one passed.
+   */
+  bool intersects( Edge edge ) {
+    return math::intersect2D( source->vector(), target->vector(), 
+      edge.source->vector(), edge.target->vector() );
+  }
 private:
   /** Blocked default constructor */
   Edge( ) {}

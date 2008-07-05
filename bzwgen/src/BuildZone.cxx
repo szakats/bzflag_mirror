@@ -21,7 +21,7 @@ void BuildZone::run() {
   Face* swface = new Face();
   swface->setMaterial( 0 );
   for (size_t i = 0; i < nodes.size(); i++) {
-    swface->addVertex(mesh->addVertex(Vertex(nodes[i]->x,nodes[i]->y,0.0f)));
+    swface->addVertex(mesh->addVertex(Vertex(nodes[i]->vector().x,nodes[i]->vector().y,0.0f)));
   }
 
   int base = mesh->addFace(swface);

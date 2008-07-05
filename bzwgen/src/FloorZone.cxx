@@ -22,11 +22,11 @@ void FloorZone::run() {
   Face* swface = new Face();
   swface->setMaterial( materialID );
   for (size_t i = 0; i < nodes.size(); i++) {
-    swface->addVertex( mesh.addVertex( Vertex( nodes[i]->x, nodes[i]->y, 0.001f ) ) );
+    swface->addVertex( mesh.addVertex( Vertex( nodes[i]->vector().x, nodes[i]->vector().y, 0.001f ) ) );
   }
 
-  double texX = (nodes[2]->x - nodes[0]->x) / step;
-  double texY = (nodes[2]->y - nodes[0]->y) / step;
+  double texX = (nodes[2]->vector().x - nodes[0]->vector().x) / step;
+  double texY = (nodes[2]->vector().y - nodes[0]->vector().y) / step;
 
   swface->addTexCoord( mesh.addTexCoord( TexCoord(0.0,0.0) ) );
   swface->addTexCoord( mesh.addTexCoord( rotated ? TexCoord(0.0 ,texX) : TexCoord(texX,0.0) ) );

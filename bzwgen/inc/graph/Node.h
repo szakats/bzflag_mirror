@@ -39,7 +39,7 @@ namespace graph {
  * The graph node inherits Vector2D<float>, cause the main definition of it's existence is 
  * it's place on the 2D planar graph.
  */
-class Node : public IObject, public Vector2Df
+class Node : public IObject
 {
 private:
   /** 
@@ -54,13 +54,17 @@ private:
    * Pointer to the graph of which this given Node is a belonging to.
    */
   PlanarGraph* graph;
+  /**
+   * The nodes position on the plane.
+   */
+  Vector2Df coord;
 public:
   /** 
    * Constructor. Takes the graph the node belongs to and 2D coordinates  
    * as parameters. Does nothing except parameter initialization.
    */
   Node( PlanarGraph* _graph, float x, float y ) 
-    : Vector2Df( x, y ), graph( _graph ) {} 
+    : coord( x, y ), graph( _graph ) {} 
   /** 
    * Adds a incoming edge.
    */
@@ -82,7 +86,7 @@ public:
    * Returns itself as a float vector. 
    */
   Vector2Df vector( ) const { 
-    return Vector2Df( x, y ); 
+    return coord; 
   }
   /**
    * Returns the first outgoing edge. First in this case is somewhat
