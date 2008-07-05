@@ -19,6 +19,7 @@
 #define __VECTOR2D_H__
 
 #include <string>
+#include "MathUtils.h"
 
 // I'll maybe think later of adding namespaces
 //namespace bzwgen {
@@ -88,6 +89,16 @@ public:
   /** Returns the squared length of the point if treated as a vector. */
   T lengthsq() const { return x*x + y*y; }
 
+  /** Zero test. Test done using MathUtils isZero. */
+  bool isZero( const T precision = EPSILON ) const { 
+    return ( math::isZero( x, precision ) && 
+             math::isZero( y, precision ) ); 
+  }
+  /** Equality test. Test done using MathUtils equals. */
+  bool equals( const Vector2D<T>& v, const T precision = EPSILON ) const { 
+    return ( math::equals( x, v.x, precision ) && 
+             math::equals( y, v.y, precision ) ); 
+  }
 };
 
 typedef Vector2D<float>  Vector2Df;

@@ -19,6 +19,9 @@
 #define __VECTOR3D_H__
 
 #include <string>
+#include "MathUtils.h"
+#include "Vector2D.h"
+
 
 // I'll maybe think later of adding namespaces
 //namespace bzwgen {
@@ -108,6 +111,24 @@ public:
   void set(T v[3]) { x = v[0], y = v[1], z = v[2]; }
   /** Sets the vector to the given coords. */
   void set(T _x, T _y, T _z) { x = _x, y = _y, z = _z; }
+
+  /** Returns a 2D vector that shares this vectors x,y */
+  Vector2D<T> toVector2D ( ) const {
+    return Vector2D<T>(x,y);
+  }
+
+  /** Zero test. Test done using MathUtils isZero. */
+  bool isZero( const T precision = EPSILON ) const { 
+    return ( math::isZero( x, precision ) && 
+             math::isZero( y, precision ) && 
+             math::isZero( z, precision ) ); 
+  }
+  /** Equality test. Test done using MathUtils equals. */
+  bool equals( const Vector3D<T>& v, const T precision = EPSILON ) const { 
+    return ( math::equals( x, v.x, precision ) && 
+             math::equals( y, v.y, precision ) && 
+             math::equals( z, v.z, precision ) ); 
+  }
 
 };
 
