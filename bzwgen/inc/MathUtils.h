@@ -65,6 +65,18 @@ inline int roundToInt(T f) {
   return int(f+0.5f); 
 }
 
+/** 
+ * Returns the angle (in radians), between (1,0) and (x,y). Contrary to
+ * atan2 the result value is always positive, in the [0..2*PI) range.
+ * The function is templated to be both used with doubles and floats. 
+ */
+template <class T>
+inline T vectorAngle(T x, T y) { 
+	T at = atan2(y,x);
+	if (at < (T)0) at += T(2*M_PI); 
+}
+
+
 /** @name Precision functions */
 /** 
  * Function returns wether a given float/double is equal to zero with the 

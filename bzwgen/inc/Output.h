@@ -9,6 +9,11 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+/** 
+* @file Output.h
+* @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+* @brief Defines a Output class for the generator.
+*/
 
 #ifndef __OUTPUT_H__
 #define __OUTPUT_H__
@@ -16,12 +21,34 @@
 #include "globals.h"
 #include "Face.h"
 
-
+/**
+ * @class Output
+ * @brief Output class for the generator
+ *
+ * Currently server as an abstraction over the BZW world format. Properly
+ * rewritten (or made into an interface) could be used to output to any 
+ * kind of output format.
+ */
 class Output {
+  /**
+   * The passed outstream to which data will be written.
+   */
   OutStream* outstream;
+  /**
+   * URL to the textures, BZW specific.
+   */
   String texturepath;
+  /** 
+   * Number of written vertices.
+   */
   int vertices;
+  /** 
+   * Number of written texture coordinates.
+   */
   int texcoords;
+  /** 
+   * Number of written faces.
+   */
   int faces;
 public:
   Output(OutStream* _outstream, String _texturepath) : outstream(_outstream), texturepath(_texturepath ), vertices(0), texcoords(0), faces(0) {}

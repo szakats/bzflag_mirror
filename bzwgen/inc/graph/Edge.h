@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <cassert>
+#include "MathUtils.h"
 #include "graph/forward.h"
 
 // The Edge class is a part of Graph class
@@ -29,7 +30,7 @@ namespace graph {
  * @class Edge
  * @brief Class defining an Edge in a double linked planar graph. 
  */
-  class Edge : public IObject
+class Edge : public IObject
 {
 private:
   /** Source node */
@@ -70,20 +71,28 @@ public:
   /**
    * Returns source node pointer.
    */
-  Node* getSource() const {
+  Node* getSource( ) const {
     return source;
   }
   /**
    * Returns target node pointer.
    */
-  Node* getTarget() const {
+  Node* getTarget( ) const {
     return target;
+  }
+  /** 
+   * Returns the angle (in radians) between (1,1) vector and the edge.
+   * The angle is always positive in the [0..2*PI) range. 
+   */
+  float getAngle( ) const {
+	  Vector2Df v = target->vector() - source->vector();
+	  return math::vectorAngle( v.x, v.y );
   }
 private:
   /** Blocked default constructor */
-  Edge() {}
+  Edge( ) {}
   /** Blocked copy constructor */
-  Edge(const Edge& ) {}
+  Edge( const Edge& ) {}
 };
 
 

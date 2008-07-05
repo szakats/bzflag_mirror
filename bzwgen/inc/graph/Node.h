@@ -62,6 +62,8 @@ public:
   Edge* getOutgoing(size_t index) { return outgoing[index]; }
   /** Returns incoming edge by index. */
   Edge* getIncoming(size_t index) { return incoming[index]; }
+  /** Returns itself as a float vector. */
+  Vector2Df vector( ) const { return Vector2Df(x,y); }
 private:
   /** Blocked default constructor */
   Node() {}

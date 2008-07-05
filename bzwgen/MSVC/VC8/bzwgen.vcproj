@@ -715,6 +715,10 @@
 					RelativePath="..\..\inc\graph\PlanarGraph.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\inc\graph\SortedEdgeList.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Zones"

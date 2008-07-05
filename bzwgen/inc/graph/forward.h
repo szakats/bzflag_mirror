@@ -31,6 +31,7 @@ class PlanarGraph;
 class Node;
 class Edge;
 class Face;
+class SortedEdgeList;
 
 typedef TObjectList<Edge*> EdgeList;
 typedef TObjectList<Node*> NodeList;
