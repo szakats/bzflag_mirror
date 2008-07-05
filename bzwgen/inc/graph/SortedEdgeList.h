@@ -18,39 +18,93 @@
 #ifndef __SORTEDEDGELIST_H__
 #define __SORTEDEDGELIST_H__
 
-#include <vector>
+#include <set>
 #include <cassert>
 #include "graph/forward.h"
 
 // The EdgeList class is a part of Graph class
 namespace graph {
 
+/** 
+ * @class SortedEdgeList
+ * @brief A sorted edge list class
+ *
+ * Edges are sorted clockwise, comparing the angle to the (1.0,0.0) 
+ * vector.
+ */
+class SortedEdgeList
+{
+private:
+  /** 
+  * Structure for edge comparison. 
+  */
+  struct EdgeCompare {
+    /** 
+    * Edge comparision function. Comparision is done by comparing 
+    * angles. 
+    */
+    bool operator()( Edge* s1, Edge* s2) const;
+  };
+public:
+  /**
+   * Type definition for the EdgeSet
+   */
+  typedef std::set<Edge*,EdgeCompare> EdgeSet;
+  /**
+   * Type definition for the EdgeSet iterator
+   */
+  typedef EdgeSet::iterator iterator;
+private:
+  /** 
+   * This is the set used to actually store the Edge pointers.
+   */
+  EdgeSet edgeSet;
+public:
 	/** 
-	* @class SortedEdgeList
-	* @brief A sorted edge list class
-	*
-	* Edges are sorted clockwise, comparing the angle to the (1.0,0.0) 
-	* vector.
-	*/
-	class SortedEdgeList
-	{
-		/** Structure for edge comparison. */
-		struct EdgeCompare {
-        /** 
-         * Edge comparision function. Comparision is done by comparing 
-         * angles. 
-         */
-        bool operator()( Edge* s1, Edge* s2) const {
-            return s1->getAngle() > s2->getAngle();
-        }
-		};
-	public:
-		/** Default constructor */
-		SortedEdgeList() {}
-	private:
-		/** Blocked copy constructor */
-		SortedEdgeList(const Edge& ) {}
-	};
+   * Default constructor.
+   */
+	SortedEdgeList() {}
+  /** 
+   * Adds an edge to the list.
+   */
+  void add( Edge* edge ) {
+    edgeSet.insert(edge);      
+  }
+  /** 
+   * Returns the begin iterator. Note that the iterator is NOT cyclic.
+   */
+  EdgeSet::iterator begin() {
+    return edgeSet.begin();
+  }
+  /** 
+   * Returns the end iterator. Note that the iterator is NOT cyclic.
+   */
+  EdgeSet::iterator end() {
+    return edgeSet.end();
+  }
+  /** 
+   * Returns the next edge stored after the one passed. Due to the clockwise
+   * ordering, the next one will be the next in clockwise order. Also, the
+   * list is treated as a cyclic list, so there is always a next element, 
+   * unless there are no elements. 
+   *
+   * If the passed element is not in the list (hence also if it's empty) then
+   * NULL is returned.
+   */
+  Edge* next( Edge* edge ) {
+    iterator edgeItr = edgeSet.find( edge );
+    if ( edgeItr == edgeSet.end( ) ) return NULL;
+    edgeItr++;
+    if ( edgeItr == edgeSet.end( ) ) edgeItr = edgeSet.begin();
+    return (*edgeItr);
+    
+  }
+private:
+  /** 
+   * Blocked copy constructor.
+   */
+  SortedEdgeList(const Edge& ) {}
+};
 
 
 } // namespace end Graph

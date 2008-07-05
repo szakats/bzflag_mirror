@@ -21,6 +21,7 @@
 #include <vector>
 #include "Vector2D.h"
 #include "graph/forward.h"
+#include "graph/SortedEdgeList.h"
 
 // The Node class is a part of Graph class
 namespace graph {

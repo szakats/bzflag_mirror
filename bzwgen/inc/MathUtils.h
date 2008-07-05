@@ -74,6 +74,7 @@ template <class T>
 inline T vectorAngle(T x, T y) { 
 	T at = atan2(y,x);
 	if (at < (T)0) at += T(2*M_PI); 
+  return at;
 }
 
 
