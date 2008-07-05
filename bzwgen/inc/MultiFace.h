@@ -29,12 +29,11 @@ public:
   virtual ~MultiFace() { delete comps; }
   int componentCount() { return comps->size(); }
 private:
-  bool samepointZ(Vertex A, Vertex B);
   void updateFaces(double z);
   void storeFaces();
   void refineFace(Face* f, Face* target);
   bool vertexInside(int vid);
-  bool vertexNearestIntersect(int begin, int end, Vertex &P, int &index, Face* target);
+  bool vertexNearestIntersect(const Vector2Dd A, const Vector2Dd B, Vector2Dd &P, int &index, Face* face);
   int pickRemovalIndex(Face *f, IntVector* visited);
   Face* getOtherFaceWithVertex(Face* f, int vid);
   bool isLeftOfVectors(int x, int a, int b, int c);

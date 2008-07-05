@@ -155,24 +155,26 @@ int MultiFace::pickRemovalIndex(Face *f,IntVector* visited) {
 void MultiFace::refineFace(Face* f, Face* target) {
   int i = 0;
   while (i < f->size()) {
-    Vertex ipoint;
-    int index;
     //printf("Intersect... (%d,%d)\n",i,modnext(i,f->size()));
     //      printf("Multi%s\n",mesh->faceToString(this).c_str());
-    if (vertexNearestIntersect(f->getCyclicVertex(i),f->getCyclicVertex(i+1),ipoint,index,target)) {
+    Vector2Dd ipoint;
+    int index;
+    Vector2Dd fvi     = mesh->v[f->getCyclicVertex(i)].toVector2D();
+    Vector2Dd fvinext = mesh->v[f->getCyclicVertex(i+1)].toVector2D();
+
+    if (vertexNearestIntersect(fvi,fvinext,ipoint,index,target)) {
       //printf("Nearerst found... (%d) %s : ",index,ipoint.toString().c_str());
-      int ipid;
-      if (samepointZ(mesh->v[f->getCyclicVertex(i+1)],mesh->v[target->getCyclicVertex(index+1)])) {
+      if (fvinext.equals(mesh->v[target->getCyclicVertex(index+1)].toVector2D())) {
         //printf("Is common\n");
-      } else if (samepointZ(ipoint,mesh->v[f->getCyclicVertex(i+1)])) {
+      } else if (ipoint.equals(fvinext)) {
         //printf("Is samepoint with next\n");
         target->insertVertexAfter(index,f->getCyclicVertex(i+1));
-      } else if (samepointZ(ipoint,mesh->v[target->getCyclicVertex(index+1)])) {
+      } else if (ipoint.equals(mesh->v[target->getCyclicVertex(index+1)].toVector2D())) {
         //printf("Is samepoint with itself\n");
         f->insertVertexAfter(i,target->getCyclicVertex(index+1));
       } else {
         //printf("Is normal\n");
-        ipid = mesh->addVertex(ipoint);
+        int ipid = mesh->addVertex( Vertex(ipoint.x,ipoint.y,mesh->v[f->getCyclicVertex(i)].z) );
         f->insertVertexAfter(i,ipid);
         target->insertVertexAfter(index,ipid);
       }
@@ -234,9 +236,8 @@ int MultiFace::addFace(Face* f) {
 
 bool MultiFace::vertexInside(int vid) {
   Vector2Dd A = mesh->v[vid].toVector2D();
-  Vector2Dd B = mesh->v[vid].toVector2D();
-  B.y = 100000.0; // sufficient to be out of range
-  B.x = 200000.0; // sufficient to be out of range
+  Vector2Dd B(100000.0, 200000.0); // sufficient to be out of range
+
   int count = 0;
   for (int i = 0; i < size(); i++) {
     if (math::intersect2D(A,B,mesh->v[getCyclicVertex(i)].toVector2D(),mesh->v[getCyclicVertex(i+1)].toVector2D())) count++;
@@ -245,9 +246,7 @@ bool MultiFace::vertexInside(int vid) {
 }
 
 
-bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index, Face* face) {
-  Vector2Dd A = mesh->v[begin].toVector2D();
-  Vector2Dd B = mesh->v[end].toVector2D();
+bool MultiFace::vertexNearestIntersect(const Vector2Dd A, const Vector2Dd B, Vector2Dd &P, int &index, Face* face) {
   double length = (A-B).length();
   int tsize = face->size();
   double distance = length + 1.0;
@@ -260,11 +259,11 @@ bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index
     if (r > 0) {
       if (!R1.equals(C)) {
         double thisdistance = (A-R1).length();
-        if (thisdistance > EPSILON) {
+        if (!math::isZero(thisdistance)) {
 //          printf("ICH:%s\n",R1.toString().c_str());
           if (thisdistance < distance) {
             distance = thisdistance;
-            P.set(R1.x,R1.y,mesh->v[begin].z);
+            P = R1;
             index = i;
           }
         }
@@ -273,11 +272,11 @@ bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index
     if (r == 2) {
       if (!R2.equals(C)) {
         double thisdistance = (A-R2).length();
-        if (thisdistance < EPSILON) continue;
+        if (math::isZero(thisdistance)) continue;
 //        printf("ICH(2):%s\n",R2.toString().c_str());
         if (thisdistance < distance) {
           distance = thisdistance;
-          P.set(R2.x,R2.y,mesh->v[begin].z);
+          P = R2;
           index = i;
         }
       }
@@ -285,12 +284,6 @@ bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index
   }      
   return distance <= length+EPSILON;
 }
-
-
-bool MultiFace::samepointZ(Vertex A, Vertex B) {
-  return (math::equals(A.x,B.x) && math::equals(A.y,B.y));
-}
-
 
 
 // Local Variables: ***
