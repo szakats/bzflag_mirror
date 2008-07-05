@@ -81,7 +81,7 @@ public:
     return target;
   }
   /** 
-   * Returns the angle (in radians) between (1,1) vector and the edge.
+   * Returns the angle (in radians) between (0,1) vector and the edge.
    * The angle is always positive in the [0..2*PI) range. 
    */
   float getAngle( ) const {

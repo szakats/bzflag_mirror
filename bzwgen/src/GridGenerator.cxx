@@ -192,10 +192,10 @@ graph::Face* GridGenerator::createFakeFace(int ax, int ay, int bx, int by) {
   graph.addConnection(n3,n4);
   graph.addConnection(n4,n1);
   graph::Face* face = new graph::Face( &graph );
-  face->addEdge(n1->getOutgoing(0));
-  face->addEdge(n2->getOutgoing(0));
-  face->addEdge(n3->getOutgoing(0));
-  face->addEdge(n4->getOutgoing(0));
+  face->addEdge( n1->getFirstOutgoingEdge() );
+  face->addEdge( n2->getFirstOutgoingEdge() );
+  face->addEdge( n3->getFirstOutgoingEdge() );
+  face->addEdge( n4->getFirstOutgoingEdge() );
   return face;
 }
 

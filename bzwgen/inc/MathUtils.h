@@ -66,7 +66,7 @@ inline int roundToInt(T f) {
 }
 
 /** 
- * Returns the angle (in radians), between (1,0) and (x,y). Contrary to
+ * Returns the angle (in radians), between (0,1) and (x,y). Contrary to
  * atan2 the result value is always positive, in the [0..2*PI) range.
  * The function is templated to be both used with doubles and floats. 
  */

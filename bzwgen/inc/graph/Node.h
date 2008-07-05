@@ -42,34 +42,71 @@ namespace graph {
 class Node : public IObject, public Vector2Df
 {
 private:
-  /** The list of outgoing edges */
-  EdgeVector outgoing;
-  /** The list of incoming edges */
-  EdgeVector incoming;
+  /** 
+   * The sorted list of outgoing edges. See SortedEdgeList.
+   */
+  SortedEdgeList outgoing;
+  /** 
+   * The sorted list of incoming edges. See SortedEdgeList.
+   */
+  SortedEdgeList incoming;
   /**
    * Pointer to the graph of which this given Node is a belonging to.
    */
   PlanarGraph* graph;
 public:
-  /** Constructor which takes the graph and Point2D data as parameters. */
-  Node(PlanarGraph* _graph, float x, float y) : Vector2Df(x,y), graph(_graph)  {} 
-  /** Adds a incoming edge */
-  void addIncoming(Edge* edge) { incoming.push_back(edge); }
-  /** Adds a outgoing edge */
-  void addOutgoing(Edge* edge) { outgoing.push_back(edge); }
-  /** Removes all the edges connected to the node */
-  void orphanize();
-  /** Returns outgoing edge by index. */
-  Edge* getOutgoing(size_t index) { return outgoing[index]; }
-  /** Returns incoming edge by index. */
-  Edge* getIncoming(size_t index) { return incoming[index]; }
-  /** Returns itself as a float vector. */
-  Vector2Df vector( ) const { return Vector2Df(x,y); }
+  /** 
+   * Constructor. Takes the graph the node belongs to and 2D coordinates  
+   * as parameters. Does nothing except parameter initialization.
+   */
+  Node( PlanarGraph* _graph, float x, float y ) 
+    : Vector2Df( x, y ), graph( _graph ) {} 
+  /** 
+   * Adds a incoming edge.
+   */
+  void addIncoming( Edge* edge ) { 
+    incoming.insert( edge ); 
+  }
+  /** 
+   * Adds a outgoing edge.
+   */
+  void addOutgoing( Edge* edge ) { 
+    outgoing.insert( edge ); 
+  }
+  /** 
+   * Removes all the edges connected to the node. Edges are removed from 
+   * the associated graph class.
+   */
+  void orphanize( );
+  /** 
+   * Returns itself as a float vector. 
+   */
+  Vector2Df vector( ) const { 
+    return Vector2Df( x, y ); 
+  }
+  /**
+   * Returns the first outgoing edge. First in this case is somewhat
+   * meaningless -- the edge is the smallest one in the sense of clockwise
+   * comparision to the (0,1) vector.
+   */
+  Edge* getFirstOutgoingEdge( ) {
+    return outgoing.first( );
+  }
+  /**
+   * Returns the first incoming edge.
+   */
+  Edge* getFirstIncomingEdge( ) {
+    return incoming.first( );
+  }
 private:
-  /** Blocked default constructor */
+  /** 
+   * Blocked default constructor.
+   */
   Node() {}
-  /** Blocked copy constructor */
-  Node(const Node& ) {}
+  /** 
+   * Blocked copy constructor.
+   */
+  Node( const Node& ) {}
 
 };
 

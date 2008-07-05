@@ -16,10 +16,10 @@
 namespace graph {
 
 void Node::orphanize() {
-  for (EdgeVectorIterator itr = incoming.begin(); itr!= incoming.end(); ++itr) {
+  for ( SortedEdgeList::iterator itr = incoming.begin(); itr!= incoming.end(); ++itr) {
     graph->removeEdge((*itr)->ID);
   }
-  for (EdgeVectorIterator itr = outgoing.begin(); itr!= outgoing.end(); ++itr) {
+  for ( SortedEdgeList::iterator itr = outgoing.begin(); itr!= outgoing.end(); ++itr) {
     graph->removeEdge((*itr)->ID);
   }
   incoming.clear();

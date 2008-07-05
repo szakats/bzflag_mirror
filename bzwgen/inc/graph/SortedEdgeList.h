@@ -67,19 +67,19 @@ public:
   /** 
    * Adds an edge to the list.
    */
-  void add( Edge* edge ) {
+  void insert( Edge* edge ) {
     edgeSet.insert(edge);      
   }
   /** 
    * Returns the begin iterator. Note that the iterator is NOT cyclic.
    */
-  EdgeSet::iterator begin() {
+  iterator begin() {
     return edgeSet.begin();
   }
   /** 
    * Returns the end iterator. Note that the iterator is NOT cyclic.
    */
-  EdgeSet::iterator end() {
+  iterator end() {
     return edgeSet.end();
   }
   /** 
@@ -97,7 +97,34 @@ public:
     edgeItr++;
     if ( edgeItr == edgeSet.end( ) ) edgeItr = edgeSet.begin();
     return (*edgeItr);
-    
+  }
+  /** 
+   * Returns the previous edge stored after the one passed. Due to the 
+   * clockwise ordering, the next one will be the next in clockwise order. 
+   * Also, the list is treated as a cyclic list, so there is always a next 
+   * element, unless there are no elements. 
+   *
+   * If the passed element is not in the list (hence also if it's empty) then
+   * NULL is returned.
+   */
+  Edge* prev( Edge* edge ) {
+    iterator edgeItr = edgeSet.find( edge );
+    if ( edgeItr == edgeSet.end( ) ) return NULL;
+    edgeItr--;
+    if ( edgeItr == edgeSet.end( ) ) edgeItr = edgeSet.begin();
+    return (*edgeItr);
+  }
+  /**
+   * Clears the list. Does not dispose of the edges.
+   */
+  void clear() {
+    edgeSet.clear();
+  }
+  /** 
+   * Returns the "first" (smallest) edge in the list.
+   */
+  Edge* first( ) {
+    return (*edgeSet.begin());
   }
 private:
   /** 
