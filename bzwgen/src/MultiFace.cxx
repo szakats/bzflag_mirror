@@ -233,51 +233,51 @@ int MultiFace::addFace(Face* f) {
 
 
 bool MultiFace::vertexInside(int vid) {
-  Vertex A = mesh->v[vid];
-  Vertex B = mesh->v[vid];
+  Vector2Dd A = mesh->v[vid].toVector2D();
+  Vector2Dd B = mesh->v[vid].toVector2D();
   B.y = 100000.0; // sufficient to be out of range
   B.x = 200000.0; // sufficient to be out of range
-  Vertex P1;
-  Vertex P2;
   int count = 0;
   for (int i = 0; i < size(); i++) {
-    if (intersectZ(A,B,mesh->v[getCyclicVertex(i)],mesh->v[getCyclicVertex(i+1)],P1,P2) > 0) count++;
+    if (math::intersect2D(A,B,mesh->v[getCyclicVertex(i)].toVector2D(),mesh->v[getCyclicVertex(i+1)].toVector2D())) count++;
   }      
   return (count%2 == 1);
 }
 
 
 bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index, Face* face) {
-  Vertex A = mesh->v[begin];
-  Vertex B = mesh->v[end];
+  Vector2Dd A = mesh->v[begin].toVector2D();
+  Vector2Dd B = mesh->v[end].toVector2D();
   double length = (A-B).length();
   int tsize = face->size();
   double distance = length + 1.0;
-  Vertex R1;
-  Vertex R2;
+  Vector2Dd R1;
+  Vector2Dd R2;
   for (int i = 0; i < tsize; i++) {
-    int r = intersectZ(A,B,mesh->v[face->getCyclicVertex(i)],mesh->v[face->getCyclicVertex(i+1)],R1,R2);
+    Vector2Dd C = mesh->v[face->getCyclicVertex(i)].toVector2D();
+    Vector2Dd D = mesh->v[face->getCyclicVertex(i+1)].toVector2D();
+    int r = math::intersect2D(A,B,C,D,R1,R2);
     if (r > 0) {
-      if (!samepointZ(mesh->v[face->getCyclicVertex(i)],R1)) {
+      if (!R1.equals(C)) {
         double thisdistance = (A-R1).length();
         if (thisdistance > EPSILON) {
 //          printf("ICH:%s\n",R1.toString().c_str());
           if (thisdistance < distance) {
             distance = thisdistance;
-            P = R1;
+            P.set(R1.x,R1.y,mesh->v[begin].z);
             index = i;
           }
         }
       }
     }
     if (r == 2) {
-      if (!samepointZ(mesh->v[face->getCyclicVertex(i)],R2)) {
+      if (!R2.equals(C)) {
         double thisdistance = (A-R2).length();
         if (thisdistance < EPSILON) continue;
 //        printf("ICH(2):%s\n",R2.toString().c_str());
         if (thisdistance < distance) {
           distance = thisdistance;
-          P = R2;
+          P.set(R2.x,R2.y,mesh->v[begin].z);
           index = i;
         }
       }
@@ -286,43 +286,9 @@ bool MultiFace::vertexNearestIntersect(int begin, int end, Vertex &P, int &index
   return distance <= length+EPSILON;
 }
 
-int MultiFace::intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P1, Vertex& P2) {
-    double d = ((B.x-A.x)*(D.y-C.y)-(B.y-A.y)*(D.x-C.x));
-    double r = ((A.y-C.y)*(D.x-C.x)-(A.x-C.x)*(D.y-C.y));
-    double s = ((A.y-C.y)*(B.x-A.x)-(A.x-C.x)*(B.y-A.y));
-    if (math::isZero(d)) {
-      if (math::isZero(r)) { // parallel and coincident
-	double e;
-	double f;
-	if (math::isZero(A.y-C.y) && math::isZero(B.y-D.y)) {                   // parallel on X
-          if (math::commonRange(A.x,B.x,C.x,D.x,e,f)) { // AB and CD have common point
-            P1 = P2 = A;
-            P1.x = e;
-	    P2.x = f;
-	    return math::isZero(e-f) ? 1 : 2;
-	  } else return 0;
-	} else {                                 // parallel on Y
-	  if (math::commonRange(A.y,B.y,C.y,D.y,e,f)) { // AB and CD have common point
-	    P1 = P2 = A;
-	    P1.y = e;
-	    P2.y = f;
-	    return math::isZero(e-f) ? 1 : 2;
-	  } else return 0;
-	}
-     } else return 0; // parallel but not coincident
-  }
-  r /= d;
-  s /= d;
-  if (r > 0-EPSILON && r < 1+EPSILON && s > 0-EPSILON && s < 1+EPSILON) {
-    P1.x = A.x+r*(B.x-A.x);
-    P1.y = A.y+r*(B.y-A.y);
-    P1.z = A.z;
-    return 1;
-  } else return 0;
-}
 
 bool MultiFace::samepointZ(Vertex A, Vertex B) {
-  return (fabs(A.x-B.x) < EPSILON && fabs(A.y-B.y) < EPSILON);
+  return (math::equals(A.x,B.x) && math::equals(A.y,B.y));
 }
 
 

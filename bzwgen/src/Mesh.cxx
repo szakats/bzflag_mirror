@@ -288,7 +288,7 @@ IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
   result->push_back(fid);
 
   if (horizontal) {
-    //f[fid]->vtx.clear(); DEBUG?
+    //f[fid]->vtx.clear(); //DEBUG?
     f[fid]->set4(bi,f[fid]->vtx.at(1),f[fid]->vtx.at(2),ai);
     //f[fid]->vtx.push_back( bi );
     //f[fid]->vtx.push_back( f[fid]->vtx.at(1) );

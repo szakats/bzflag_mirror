@@ -30,7 +30,6 @@ public:
   int componentCount() { return comps->size(); }
 private:
   bool samepointZ(Vertex A, Vertex B);
-  int intersectZ(Vertex A, Vertex B, Vertex C, Vertex D, Vertex& P1, Vertex& P2);
   void updateFaces(double z);
   void storeFaces();
   void refineFace(Face* f, Face* target);
