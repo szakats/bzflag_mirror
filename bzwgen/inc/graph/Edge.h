@@ -47,13 +47,21 @@ private:
    * a face map for the given PlanarGraph.
    */
   Face* face;
+  /**
+   * A flag that notes if this is a reversed edge. The point is that only
+   * one of each pair of reversed edges has this set. This allows to 
+   * skip half of the intersection checks.
+   */
+  bool reversed;
 public:
   /** 
    * Constructor that takes source and target as parameters,
    * adds the edge to the revelant nodes, DOESN'T check for
    * reverse Edge however.
    */
-  Edge(Node* _source, Node* _target) : source(_source), target(_target), reverse(NULL), face(NULL) {
+  Edge(Node* _source, Node* _target) 
+    : source(_source), target(_target), reverse(NULL), face(NULL), reversed(false) 
+  {
     source->addOutgoing(this);
     target->addIncoming(this);
   }
@@ -67,6 +75,7 @@ public:
     assert( target == edge->source );
     reverse = edge;
     edge->reverse = this;
+    edge->reversed = true;
   }
   /**
    * Returns source node pointer.
@@ -91,9 +100,21 @@ public:
   /**
    * Returns whether the edge intersects with the one passed.
    */
-  bool intersects( Edge edge ) {
+  bool intersects( Edge edge ) const {
     return math::intersect2D( source->vector(), target->vector(), 
       edge.source->vector(), edge.target->vector() );
+  }
+  /**
+   * Returns whether a hypothetical edge intersects with this one.
+   */
+  bool intersects( Vector2Df a, Vector2Df b ) const {
+    return math::intersect2D( source->vector(), target->vector(), a, b );
+  }
+  /**
+   * Returns the reversed status of this edge.
+   */
+  bool isReversed( ) const {
+    return reversed;
   }
 private:
   /** Blocked default constructor */

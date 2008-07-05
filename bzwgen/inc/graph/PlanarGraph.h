@@ -45,11 +45,13 @@ private:
   /** Holds the number of faces */
   size_t faces;
 public:
-  /** Default constructor. Creates an empty graph.*/
-  PlanarGraph() : nodes(0), edges(0) {} 
-  /** Destructor.*/
-  ~PlanarGraph() {}
-  /** Adds a node to the graph. As convienience returns the passed edge. */
+  /** 
+   * Default constructor. Creates an empty graph.
+   */
+  PlanarGraph( ) : nodes( 0 ), edges( 0 ) {} 
+  /** 
+   * Adds a node to the graph. As convenience returns the added node. 
+   */
   Node* addNode( Node* node ) {
     nodeList.add( node );
     ++nodes;
@@ -63,32 +65,45 @@ public:
   void addConnection( Node* a, Node* b ) {
     Edge* ea = addEdge( new Edge( a, b ) );
     Edge* eb = addEdge( new Edge( b, a ) );
-    ea->setReverse(eb);
+    ea->setReverse( eb );
   }
-  /** Returns the number of nodes */
-  size_t nodeCount() const { 
+  /** 
+   * Returns the number of nodes.
+   */
+  size_t nodeCount( ) const { 
     return nodes;
   }
-  /** Returns the number of edges */
-  size_t edgeCount() const { 
+  /** 
+   * Returns the number of edges.
+   */
+  size_t edgeCount( ) const { 
     return edges;
   }
-  /** Returns the number of faces */
-  size_t faceCount() const { 
+  /** 
+   * Returns the number of faces.
+   */
+  size_t faceCount( ) const { 
     return faces;
   }
-  /** Returns node by ID */
+  /** 
+   * Returns node by ID.
+   */
   Node* getNode( size_t id ) {
-    return nodeList.get(id);
+    return nodeList.get( id );
   }
-  /** Returns edge by ID */
+  /** 
+   * Returns edge by ID.
+   */
   Edge* getEdge( size_t id ) {
-    return edgeList.get(id);
+    return edgeList.get( id );
   }
-  /** Removes a given Edge from the graph. Note that it DOES dispose of the edge object. */
+  /** 
+   * Removes a given Edge from the graph. Note that it DOES dispose of the 
+   * edge object. 
+   */
   void removeEdge( size_t id ) {
-    delete edgeList.get(id);
-    edgeList.clear(id);
+    delete edgeList.get( id );
+    edgeList.clear( id );
     edges--;
   }
   /** 
@@ -97,14 +112,36 @@ public:
    * it DOES dispose of the node object and edge objects. 
    */
   void removeNode( size_t id ) {
-    Node* node = nodeList.get(id);
-    node->orphanize();
+    Node* node = nodeList.get( id );
+    node->orphanize( );
     delete node;
-    nodeList.clear(id);
+    nodeList.clear( id );
     nodes--;
   }
+  /** 
+   * Checks whether two nodes can be connected with an edge, without 
+   * breaking planarity.
+   */
+  bool checkConnection( const Node* a, const Node* b ) const {
+    return checkEdge( a->vector(), b->vector() );
+  }
+  /** 
+   * Checks whether an added edge would cause a planarity break.
+   */
+  bool checkEdge( const Vector2Df a, const Vector2Df b ) const {
+    for ( size_t i = 0; i < edgeList.size( ); i++ ) {
+      Edge* edge = edgeList.get( i );
+      if ( edge && !edge->isReversed( ) && edge->intersects( a, b ) ) {
+        return false;
+      }
+    }
+    return true;
+  }
 private:
-  /** Adds a single edge to the graph. As convienience returns the passed edge. */
+  /** 
+   * Adds a single edge to the graph. As convenience returns the passed 
+   * edge. 
+   */
   Edge* addEdge( Edge* edge ) {
     edgeList.add( edge );
     ++edges;

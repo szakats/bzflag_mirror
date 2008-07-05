@@ -64,7 +64,7 @@ public:
     return object->ID;
   }
   /** Returns element by index */
-  T get(size_t index) {
+  T get(size_t index) const {
     assert(index < size());
     return list.at(index);
   }
