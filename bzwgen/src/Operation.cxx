@@ -97,7 +97,8 @@ int OperationExtrude::runMesh(Mesh* mesh,int face) {
   if (mesh == NULL) return 0;
   flatten(mesh,face);
   if (facerules != NULL) {
-    IntVector* faces = mesh->extrudeFaceR(face,value,mesh->getFace(face)->getMaterial());
+    IntVector* faces = new IntVector;
+    mesh->extrudeFace(face,value,mesh->getFace(face)->getMaterial(),faces);
     OperationMultifaces::runMesh(mesh,face,faces);
     delete faces;
   } else {
@@ -109,7 +110,8 @@ int OperationExtrude::runMesh(Mesh* mesh,int face) {
 int OperationExtrudeT::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
   flatten(mesh,face);
-  IntVector* faces = mesh->extrudeFaceR(face,value,mesh->getFace(face)->getMaterial());\
+  IntVector* faces = new IntVector;
+  mesh->extrudeFace(face,value,mesh->getFace(face)->getMaterial(), faces);
   double snap = ruleset->getAttr("SNAP");
   double textile = ruleset->getAttr("TEXTILE");
   for (size_t i = 0; i < faces->size(); i++) {

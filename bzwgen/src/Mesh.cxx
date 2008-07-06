@@ -12,24 +12,24 @@
 
 #include "Mesh.h"
 
-int Mesh::addVertex(Vertex vtx) { 
+int Mesh::addVertex( Vertex vertex ) { 
   if (freeVertices.size() > 0) {
-    int free = freeVertices[freeVertices.size()-1];
+    int free = freeVertices[ freeVertices.size() - 1 ];
     freeVertices.pop_back();
-    v[free] = vtx;
+    v[free] = vertex;
     return free;
   } else {
-    v.push_back(vtx); 
+    v.push_back( vertex ); 
     return v.size()-1; 
   }
 }
 
-int Mesh::addTexCoord(TexCoord tcx) { 
-  for (size_t i = 0; i < tc.size(); i++) {
-    if (math::equals(tc[i].x,tcx.x) && math::equals(tc[i].y,tcx.y)) return i;
+int Mesh::addTexCoord( TexCoord texCoord ) { 
+  for ( size_t i = 0; i < tc.size(); i++ ) {
+    if ( tc[i].equals( texCoord ) ) return i;
   }
-  tc.push_back(tcx); 
-  return tc.size()-1; 
+  tc.push_back( texCoord ); 
+  return tc.size() - 1; 
 }
 
 int Mesh::createNGon(Vertex center, double radius, int n) {
@@ -42,36 +42,9 @@ int Mesh::createNGon(Vertex center, double radius, int n) {
   return addFace(face);
 }
 
-
-IntVector* Mesh::extrudeFaceR(int fid, double amount, int mat) {
-  Vertex dir = faceNormal(fid)*amount;
-  IntVector base    = f[fid]->getVertices();
-  IntVector* result = new IntVector;
-  IntVector top;
-
-  int size = base.size();
-
-  for (int i = 0; i < size; i++) {
-    top.push_back( addVertex( v[ base.at(i) ] + dir ) );
-  }
-  f[fid]->setVertices( top );
-
-  for (int i = 0; i < size; i++) {
-    Face* face = new Face();
-    face->setMaterial( mat );
-    face->addVertex( base.at( i ) );
-    face->addVertex( base.at( math::modNext( i, size ) ) );
-    face->addVertex( top.at( math::modNext( i, size ) ) );
-    face->addVertex( top.at( i ) );
-    result->push_back( addFace( face ) );
-  }
-
-  return result;
-}
-
-void Mesh::extrudeFace(int fid, double amount, int mat) {
-  Vertex dir = faceNormal(fid)*amount;
-  IntVector base   = f[fid]->getVertices();
+void Mesh::extrudeFace( int faceID, double amount, int mat, IntVector* result ) {
+  Vertex dir = faceNormal(faceID)*amount;
+  IntVector base   = f[faceID]->getVertices();
   IntVector top;
 
   int size = base.size();
@@ -79,7 +52,7 @@ void Mesh::extrudeFace(int fid, double amount, int mat) {
   for (int i = 0; i < size; i++) {
     top.push_back(addVertex(v[base.at(i)]+dir));
   }
-  f[fid]->setVertices( top );
+  f[faceID]->setVertices( top );
 
   for (int i = 0; i < size; i++) {
     Face* face = new Face();
@@ -88,7 +61,8 @@ void Mesh::extrudeFace(int fid, double amount, int mat) {
     face->addVertex( base.at(math::modNext(i,size)) );
     face->addVertex( top.at(math::modNext(i,size)) );
     face->addVertex( top.at(i) );
-    addFace( face );
+    int added = addFace( face );
+    if (result) result->push_back( added );
   }
 }
 
@@ -101,30 +75,30 @@ Vertex Mesh::extensionVertex(int ida, int idb, int idc) {
   return dir*length;
 }
 
-void Mesh::taperFace(int fid, double amount) {
-  int size = f[fid]->size();
-  Vertex c = faceCenter( fid );
+void Mesh::taperFace(int faceID, double amount) {
+  int size = f[faceID]->size();
+  Vertex c = faceCenter( faceID );
   for ( int i = 0; i < size; i++ ) {
-    Vertex vv = getFaceVertex( fid, i );
-    v[ f[fid]->getVertex( i ) ] = ( vv - c ) * amount + c;
+    Vertex vv = getFaceVertex( faceID, i );
+    v[ f[faceID]->getVertex( i ) ] = ( vv - c ) * amount + c;
   }
 }
 
-void Mesh::scaleFace(int fid, double x, double y) {
-  int size = f[fid]->size();
-  Vertex c = faceCenter( fid );
+void Mesh::scaleFace( int faceID, double x, double y ) {
+  int size = f[faceID]->size();
+  Vertex c = faceCenter( faceID );
   for ( int i = 0; i < size; i++ ) {
-    Vertex vc = getFaceVertex( fid, i ) - c;
-    int vertexID = f[fid]->getVertex( i );
+    Vertex vc = getFaceVertex( faceID, i ) - c;
+    int vertexID = f[faceID]->getVertex( i );
     v[vertexID].x = vc.x * x + c.x;
     v[vertexID].y = vc.y * y + c.y;
   }
 }
 
-void Mesh::translateFace(int fid, double x, double y, double z) {
-  int size = f[fid]->size();
+void Mesh::translateFace( int faceID, double x, double y, double z ) {
+  int size = f[faceID]->size();
   for ( int i = 0; i < size; i++ ) {
-    int vertexID = f[fid]->getVertex(i);
+    int vertexID = f[faceID]->getVertex( i );
     v[vertexID].x += x;
     v[vertexID].y += y;
     v[vertexID].z += z;
@@ -132,22 +106,22 @@ void Mesh::translateFace(int fid, double x, double y, double z) {
 }
 
 
-void Mesh::expandFace(int fid, double amount) {
-  Vertex normal = faceNormal(fid);
+void Mesh::expandFace( int faceID, double amount  ) {
+  Vertex normal = faceNormal( faceID );
   // needs to be uniform
-  int size = f[fid]->size();
+  int size = f[faceID]->size();
   Vertex* nv = new Vertex[size];
-  for (int i = 0; i < size; i++) {
-    Vertex a = getFaceEdge( fid, math::modPrev( i, size ), math::modNext( i, size ) );
-    Vertex b = getFaceEdge( fid, math::modPrev( i, size ), i );
+  for ( int i = 0; i < size; i++ ) {
+    Vertex a = getFaceEdge( faceID, math::modPrev( i, size ), math::modNext( i, size ) );
+    Vertex b = getFaceEdge( faceID, math::modPrev( i, size ), i );
     double sign = math::sign( b.cross( a ).dot( normal ) );
     nv[i] = getFaceVertex( fid, i) + extensionVertex( 
-      f[fid]->getVertex( math::modPrev( i, size ) ), 
-      f[fid]->getVertex( math::modNext( i, size ) ),
-      f[fid]->getVertex( i ) ) * amount * sign;
+      f[faceID]->getVertex( math::modPrev( i, size ) ), 
+      f[faceID]->getVertex( math::modNext( i, size ) ),
+      f[faceID]->getVertex( i ) ) * amount * sign;
   }
-  for (int i = 0; i < size; i++) {
-    v[ f[fid]->getVertex( i ) ] = nv[i];
+  for ( int i = 0; i < size; i++ ) {
+    v[ f[faceID]->getVertex( i ) ] = nv[i];
   }
   delete nv;
 }
@@ -185,22 +159,22 @@ void Mesh::weldVertices( int a, int b ) {
 
 
 
-Vertex Mesh::faceCenter( int fid ) {
-  return ( getFaceVertex( fid, 0 ) + getFaceVertex( fid, 1 ) + 
-           getFaceVertex( fid, 2 ) + getFaceVertex( fid, 3 ) ) / 4;
+Vertex Mesh::faceCenter( int faceID ) {
+  return ( getFaceVertex( faceID, 0 ) + getFaceVertex( faceID, 1 ) + 
+           getFaceVertex( faceID, 2 ) + getFaceVertex( faceID, 3 ) ) / 4;
 }
 
 // TODO : remove hack for multifaces;
-Vertex Mesh::faceNormal( int fid ) {
-  if ( f[fid]->isMultiFace() ) return Vertex( 0.0, 0.0, 1.0 );
-  Vertex a = getFaceEdge( fid, 1, 0 );
-  Vertex b = getFaceEdge( fid, 2, 0 );
+Vertex Mesh::faceNormal( int faceID ) {
+  if ( f[faceID]->isMultiFace() ) return Vertex( 0.0, 0.0, 1.0 );
+  Vertex a = getFaceEdge( faceID, 1, 0 );
+  Vertex b = getFaceEdge( faceID, 2, 0 );
   Vertex r = a.cross(b);
   double length = r.length();
   return r / length;
 }
 
-IntVector* Mesh::repeatSubdivdeFace(int fid, double snap, bool horizontal) {
+IntVector* Mesh::repeatSubdivdeFace( int fid, double snap, bool horizontal ) {
   double len = horizontal ? faceH(fid) : faceV(fid);
   snap = math::refineSnap(snap,len);
   int count = math::roundToInt(len/snap);
@@ -428,13 +402,13 @@ void Mesh::output(Output& out, int materialCount) {
 
 // TODO: handle texcoords?
 // TODO: handle previous?
-void Mesh::chamferFace(int fid, double amount) {
+void Mesh::chamferFace( int faceID, double amount ) {
   IntVector old;
-  int size = f[fid]->size();
+  int size = f[faceID]->size();
   for (int i = 0; i < size; i++) {
-    old.push_back( f[fid]->getVertex( i ) );
+    old.push_back( f[faceID]->getVertex( i ) );
   }
-  f[fid]->clearVertices();
+  f[faceID]->clearVertices();
   VertexVector in;
   VertexVector out;
   for (int i = 0; i < size; i++) {
@@ -448,38 +422,38 @@ void Mesh::chamferFace(int fid, double amount) {
     a = in[ math::modPrev( i, size ) ] + a * af;
     b = in[ math::modNext( i, size ) ] + b * bf;
     v[old[i]] = a;
-    f[fid]->addVertex( old[i] );
-    f[fid]->addVertex( addVertex(b) );
+    f[faceID]->addVertex( old[i] );
+    f[faceID]->addVertex( addVertex(b) );
   }
 }
 
 // TODO: these coords could be reused!
-void Mesh::textureFaceFull( int fid ) {
-  f[fid]->clearTexCoords();
-  f[fid]->addTexCoord( addTexCoord( TexCoord( 0.0, 0.0 ) ) );
-  f[fid]->addTexCoord( addTexCoord( TexCoord( 1.0, 0.0 ) ) );
-  f[fid]->addTexCoord( addTexCoord( TexCoord( 1.0, 1.0 ) ) );
-  f[fid]->addTexCoord( addTexCoord( TexCoord( 0.0, 1.0 ) ) );
+void Mesh::textureFaceFull( int faceID ) {
+  f[faceID]->clearTexCoords();
+  f[faceID]->addTexCoord( addTexCoord( TexCoord( 0.0, 0.0 ) ) );
+  f[faceID]->addTexCoord( addTexCoord( TexCoord( 1.0, 0.0 ) ) );
+  f[faceID]->addTexCoord( addTexCoord( TexCoord( 1.0, 1.0 ) ) );
+  f[faceID]->addTexCoord( addTexCoord( TexCoord( 0.0, 1.0 ) ) );
 }
 
-void Mesh::textureFaceQuad( int fid, double au, double av, double bu, double bv ) {
-  f[fid]->clearTexCoords();
-  f[fid]->addTexCoord( addTexCoord( TexCoord( au, av ) ) );
-  f[fid]->addTexCoord( addTexCoord( TexCoord( bu, av ) ) );
-  f[fid]->addTexCoord( addTexCoord( TexCoord( bu, bv ) ) );
-  f[fid]->addTexCoord( addTexCoord( TexCoord( au, bv ) ) );
+void Mesh::textureFaceQuad( int faceID, double au, double av, double bu, double bv ) {
+  f[faceID]->clearTexCoords();
+  f[faceID]->addTexCoord( addTexCoord( TexCoord( au, av ) ) );
+  f[faceID]->addTexCoord( addTexCoord( TexCoord( bu, av ) ) );
+  f[faceID]->addTexCoord( addTexCoord( TexCoord( bu, bv ) ) );
+  f[faceID]->addTexCoord( addTexCoord( TexCoord( au, bv ) ) );
 }
 
-void Mesh::textureFace( int fid, double snap, double tile ) {
-  textureFaceQuad( fid, 0.0, 0.0,
-    math::roundToInt( faceH( fid ) / snap ) * tile,
-    math::roundToInt( faceV( fid ) / snap ) * tile);
+void Mesh::textureFace( int faceID, double snap, double tile ) {
+  textureFaceQuad( faceID, 0.0, 0.0,
+    math::roundToInt( faceH( faceID ) / snap ) * tile,
+    math::roundToInt( faceV( faceID ) / snap ) * tile);
 }
 
-void Mesh::freeFace( int fid ) {
+void Mesh::freeFace( int faceID ) {
   f[fid]->setOutput( false );
-  for ( size_t i = 0; i < f[fid]->size(); i++ ) {
-    freeVertices.push_back( f[fid]->getVertex( i ) );
+  for ( size_t i = 0; i < f[faceID]->size(); i++ ) {
+    freeVertices.push_back( f[faceID]->getVertex( i ) );
   }
 }
 
@@ -490,10 +464,10 @@ String Mesh::faceToString(Face* face) {
   result += ")";
   return result;
 }
-void Mesh::pushBase( int fid ) {
+void Mesh::pushBase( int faceID ) {
   vbase.clear();
-  for ( size_t i = 0; i < f[fid]->size(); i++ ) {
-    vbase.push_back( v[ f[fid]->getVertex( i ) ] );
+  for ( size_t i = 0; i < f[faceID]->size(); i++ ) {
+    vbase.push_back( v[ f[faceID]->getVertex( i ) ] );
   }
 }
 

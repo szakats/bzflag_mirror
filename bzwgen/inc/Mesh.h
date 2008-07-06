@@ -28,51 +28,62 @@ class Mesh {
   bool passable;
 public:
   Mesh() : passable(false) {}
-  int addVertex(Vertex vtx);
+  int addVertex( Vertex vertex );
+  int addTexCoord( TexCoord texCoord );
+  int addFace(Face* face) { 
+    f.push_back( face ); 
+    return f.size()-1; 
+  }
+  inline void addInsideVertex( Vertex vertex ) { 
+    inside.push_back( vertex ); 
+  }
+
   inline Vertex getVertex( int vertexID ) const { 
     return v[vertexID]; 
-  }
-  inline void substituteVertex( int vertexID, Vertex vtx ) { 
-    v[vertexID] = vtx; 
   }
   inline Face* getFace( int faceID ) { 
     return f[ faceID ];
   }
-  inline void substituteFace( int faceID, Face* face ) { 
-    f[ faceID ] = face;
-  }
-  inline void setPassable( ) {
-    passable = true;
-  }
   inline Vertex getFaceVertex( int faceID, int vertexID ) const { 
     return v[ f[ faceID ]->getVertex( vertexID ) ]; 
   }
-  inline void addInsideVertex( Vertex vtx ) { 
-    inside.push_back(vtx); 
-  }
-  int addTexCoord(TexCoord tcx);
-  int addFace(Face* face) { f.push_back(face); return f.size()-1; }
-  void extrudeFace(int fid, double amount, int mat = 0);
-  IntVector* extrudeFaceR(int fid, double amount, int mat = 0);
-  IntVector* splitFace(int fid, DoubleVector* splitData, bool horizontal, double ssnap = 0.0);
-  void expandFace(int fid, double amount);
-  Vertex faceNormal(int fid);
-  Vertex faceCenter(int fid);
-  IntVector* repeatSubdivdeFace(int fid, double snap, bool horizontal);
-  void chamferFace(int fid, double amount);
-  void taperFace(int fid, double amount);
-  void scaleFace(int fid, double x, double y);
-  void freeFace(int fid);
-  void translateFace(int fid, double x, double y, double z);
-  void weldVertices(int a, int b);
-  void output(Output& out, int materialCount);
-  void textureFace(int fid, double snap, double tile);
-  void textureFaceFull(int fid);
-  void textureFaceQuad(int fid, double au, double av, double bu, double bv);
-  int createNGon(Vertex center, double radius, int n);
   inline Vertex getFaceEdge( int faceID, int id1, int id2 ) const { 
     return ( getFaceVertex( faceID, id2 ) - getFaceVertex( faceID, id1 ) ); 
   }
+
+  inline void substituteVertex( int vertexID, Vertex vtx ) { 
+    v[vertexID] = vtx; 
+  }
+  inline void substituteFace( int faceID, Face* face ) { 
+    f[ faceID ] = face;
+  }
+
+  inline void setPassable( ) {
+    passable = true;
+  }
+  
+  void extrudeFace(int fid, double amount, int mat = 0, IntVector* result = NULL);
+  IntVector* splitFace(int fid, DoubleVector* splitData, bool horizontal, double ssnap = 0.0);
+  void expandFace( int faceID, double amount );
+  IntVector* repeatSubdivdeFace(int fid, double snap, bool horizontal);
+  void chamferFace( int faceID, double amount );
+  void taperFace( int faceID, double amount );
+  void scaleFace( int faceID, double x, double y );
+  void freeFace( int faceID );
+  void translateFace( int faceID, double x, double y, double z );
+
+  void weldVertices(int a, int b);
+  
+  void output(Output& out, int materialCount);
+
+  void textureFace( int faceID, double snap, double tile );
+  void textureFaceFull( int faceID );
+  void textureFaceQuad( int faceID, double au, double av, double bu, double bv );
+
+  int createNGon(Vertex center, double radius, int n);
+
+  Vertex faceNormal( int faceID );
+  Vertex faceCenter( int faceID );
   inline double faceH( int faceID ) const { 
     return getFaceEdge( faceID, 1, 0 ).length(); 
   }
@@ -80,7 +91,8 @@ public:
     return getFaceEdge( faceID, 0, 3 ).length(); 
   }
   String faceToString(Face* face);
-  void pushBase(int fid);
+
+  void pushBase( int faceID );
   int rePushBase( );
   ~Mesh();
 private:
