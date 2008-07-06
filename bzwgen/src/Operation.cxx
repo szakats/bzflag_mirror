@@ -25,7 +25,7 @@ int OperationLoadMaterial::runMesh(Mesh*, int face) {
 
 
 int OperationAddFace::runMesh(Mesh* mesh, int face) { 
-  if (!mesh->f[face]->isMultiFace()) {
+  if (!mesh->getFace(face)->isMultiFace()) {
     printf("Error: addface passed on a non-MultiFace face!");
     return face;
   }
@@ -36,7 +36,7 @@ int OperationAddFace::runMesh(Mesh* mesh, int face) {
   }
   int newface = mesh->addFace(clone);
   newface = ruleset->runMesh(mesh,newface,ref);
-  ((MultiFace*)mesh->f[face])->addFace(mesh->f[newface]);
+  ((MultiFace*)mesh->getFace(face))->addFace(mesh->getFace(newface));
   return face;
 }
 
@@ -66,12 +66,12 @@ OperationMultifaces::OperationMultifaces(RuleSet* _ruleset, Expression* _exp, St
 }
 
 int OperationDetachFace::runMesh(Mesh* mesh,int face) {
-  if (!mesh->f[face]->isMultiFace()) {
+  if (!mesh->getFace(face)->isMultiFace()) {
     printf("Error: detachface passed on a non-MultiFace face!");
     return face;
   }
   flatten(mesh,face);
-  IntVector* faces = ((MultiFace*)mesh->f[face])->detachFace(math::roundToInt(value));
+  IntVector* faces = ((MultiFace*)mesh->getFace(face))->detachFace(math::roundToInt(value));
   if (faces != NULL) {
     OperationMultifaces::runMesh(mesh,face,faces);
     delete faces;
@@ -102,11 +102,11 @@ int OperationExtrude::runMesh(Mesh* mesh,int face) {
   if (mesh == NULL) return 0;
   flatten(mesh,face);
   if (facerules != NULL) {
-    IntVector* faces = mesh->extrudeFaceR(face,value,mesh->f[face]->getMaterial());
+    IntVector* faces = mesh->extrudeFaceR(face,value,mesh->getFace(face)->getMaterial());
     OperationMultifaces::runMesh(mesh,face,faces);
     delete faces;
   } else {
-    mesh->extrudeFace(face,value,mesh->f[face]->getMaterial());
+    mesh->extrudeFace(face,value,mesh->getFace(face)->getMaterial());
   }
   return face; 
 }
@@ -114,7 +114,7 @@ int OperationExtrude::runMesh(Mesh* mesh,int face) {
 int OperationExtrudeT::runMesh(Mesh* mesh,int face) { 
   if (mesh == NULL) return 0;
   flatten(mesh,face);
-  IntVector* faces = mesh->extrudeFaceR(face,value,mesh->f[face]->getMaterial());\
+  IntVector* faces = mesh->extrudeFaceR(face,value,mesh->getFace(face)->getMaterial());\
   double snap = ruleset->getAttr("SNAP");
   double textile = ruleset->getAttr("TEXTILE");
   for (size_t i = 0; i < faces->size(); i++) {
@@ -164,41 +164,10 @@ int OperationRepeat::runMesh(Mesh* mesh,int face) {
   return face; 
 }
 
-int OperationTest::runMesh(Mesh* mesh, int face) {
-  MultiFace* mf = new MultiFace(mesh);
-  Face* f1 = new Face();
-  Face* f2 = new Face();
-  for (int i = 0; i < 4; i++) {
-    int f1vid = mesh->f[face]->getVertex( i );
-    int f2vid = mesh->addVertex( mesh->getFaceVertex( face, i ) );
-    f1->addVertex( f1vid );
-    f2->addVertex( f2vid );
-  }
-  mesh->v[f1->getVertex(0)] = mesh->v[f1->getVertex(0)]+Vertex(0.0,+4.0,0.0);
-  mesh->v[f1->getVertex(1)] = mesh->v[f1->getVertex(1)]+Vertex(0.0,+4.0,0.0);
-  mesh->v[f1->getVertex(2)] = mesh->v[f1->getVertex(2)]+Vertex(0.0,-4.0,0.0);
-  mesh->v[f1->getVertex(3)] = mesh->v[f1->getVertex(3)]+Vertex(0.0,-4.0,0.0);
-
-  mesh->v[f2->getVertex(0)] = mesh->v[f2->getVertex(0)]+Vertex(+4.0,0.0,0.0);
-  mesh->v[f2->getVertex(1)] = mesh->v[f2->getVertex(1)]+Vertex(-4.0,0.0,0.0);
-  mesh->v[f2->getVertex(2)] = mesh->v[f2->getVertex(2)]+Vertex(-4.0,0.0,0.0);
-  mesh->v[f2->getVertex(3)] = mesh->v[f2->getVertex(3)]+Vertex(+4.0,0.0,0.0);
-
-  printf("Adding face1...\n");
-  mf->addFace(f1);
-  printf("Adding face2...\n");
-  mf->addFace(f2);
-  printf("Done. (%d)\n",mf->size());
-
-  delete mesh->f[face];
-  mesh->f[face] = mf;
-  return face;
-}
-
 int OperationMultiFace::runMesh(Mesh* mesh, int face) {
   MultiFace* mf = new MultiFace(mesh);
-  mf->addFace(mesh->f[face]);
-  mesh->f[face] = mf;
+  mf->addFace(mesh->getFace(face));
+  mesh->substituteFace( face, mf );
   return face;
 }
 

@@ -22,15 +22,21 @@ class Mesh {
   VertexVector inside;
   VertexVector outside;
   TexCoordVector tc;
+  FaceVector f;
 public:
   VertexVector vbase;
   VertexVector v;
-  FaceVector f;
   bool passable;
   Mesh() : passable(false) {}
   int addVertex(Vertex vtx);
   inline Vertex getVertex( int vertexID ) const { 
     return v[vertexID]; 
+  }
+  inline Face* getFace( int faceID ) { 
+    return f[ faceID ];
+  }
+  inline void substituteFace( int faceID, Face* face ) { 
+    f[ faceID ] = face;
   }
   inline Vertex getFaceVertex( int faceID, int vertexID ) const { 
     return v[ f[ faceID ]->getVertex( vertexID ) ]; 

@@ -62,7 +62,7 @@ MeshVector* RuleSet::run(Mesh* initial_mesh, int initial_face, String& rulename)
 int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, String& rulename) {
   Mesh* newmesh = new Mesh();
   Face* newface = new Face();
-  size_t size = old_mesh->f[old_face]->size();
+  size_t size = old_mesh->getFace(old_face)->size();
   for ( size_t i = 0; i < size; i++ ) {
     newface->addVertex( i );
     newmesh->addVertex( old_mesh->getFaceVertex( old_face, i ) );

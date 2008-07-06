@@ -53,7 +53,6 @@ addface               { return(ADDFACE); }
 detachface            { return(DETACHFACE); }
 free                  { return(FREE); }
 ngon                  { return(NGON); }
-test                  { return(TEST); }
 drivethrough          { return(DRIVETHROUGH); }
 texture               { return(TEXTURE); }
 texturefull           { return(TEXTUREFULL); }

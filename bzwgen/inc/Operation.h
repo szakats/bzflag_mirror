@@ -55,12 +55,6 @@ public:
   int runMesh(Mesh* mesh, int face);
 };
 
-class OperationTest : public Operation {
-public:
-  OperationTest(RuleSet* _ruleset) : Operation(_ruleset) { };
-  int runMesh(Mesh* mesh, int face);
-};
-
 class OperationMultiFace : public Operation {
 public:
   OperationMultiFace(RuleSet* _ruleset) : Operation(_ruleset) { };
@@ -78,9 +72,9 @@ class OperationUnchamfer : public Operation {
 public:
   OperationUnchamfer(RuleSet* _ruleset) : Operation(_ruleset) { };
   int runMesh(Mesh* mesh, int face) {
-    size_t size = mesh->f[face]->size();
+    size_t size = mesh->getFace(face)->size();
     for ( size_t i = 0; i < size_t(size / 2); i++ ) {
-      mesh->weldVertices( mesh->f[face]->getVertex( i ), mesh->f[face]->getVertex( i+1 ) );
+      mesh->weldVertices( mesh->getFace(face)->getVertex( i ), mesh->getFace(face)->getVertex( i+1 ) );
     }
     return face;
   }
@@ -108,7 +102,7 @@ class OperationRemove : public Operation {
 public:
   OperationRemove(RuleSet* _ruleset) : Operation(_ruleset) { };
   int runMesh(Mesh* mesh, int face) {
-    mesh->f[face]->setOutput(false);
+    mesh->getFace(face)->setOutput(false);
     return face;
   }
 };
@@ -126,7 +120,7 @@ class OperationTextureClear : public Operation {
 public:
   OperationTextureClear(RuleSet* _ruleset) : Operation(_ruleset) { };
   int runMesh(Mesh* mesh, int face) {
-    mesh->f[face]->clearTexCoords();
+    mesh->getFace(face)->clearTexCoords();
     return face;
   }
 };
@@ -240,7 +234,7 @@ public:
   int runMesh(Mesh* mesh,int face) { 
     if (mesh == NULL) return 0;
     flatten(mesh,face);
-    mesh->f[face]->setMaterial( math::roundToInt(value) );
+    mesh->getFace(face)->setMaterial( math::roundToInt(value) );
     return face; 
   };
 };

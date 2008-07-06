@@ -24,10 +24,10 @@ double ExpressionFaceAttribute::calculate(Mesh* mesh,int face) {
   if (attrname == "h") return mesh->faceH(face);
   if (attrname == "v") return mesh->faceV(face);
   if (attrname == "s") return mesh->faceH(face) * mesh->faceV(face);
-  if (attrname == "n") return double(mesh->f[face]->size());
+  if (attrname == "n") return double(mesh->getFace(face)->size());
   if (attrname == "c") {
-    if (mesh->f[face]->isMultiFace()) {
-      return double(((MultiFace*)mesh->f[face])->componentCount());
+    if (mesh->getFace(face)->isMultiFace()) {
+      return double(((MultiFace*)mesh->getFace(face))->componentCount());
     } else {
       if (debugLevel > 1) printf("Warning : face(c) called with non-MultiFace!\n");
     }
