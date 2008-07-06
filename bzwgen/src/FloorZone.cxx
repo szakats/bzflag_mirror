@@ -15,7 +15,7 @@
 
 
 void FloorZone::run() {
-  mesh.passable = true;
+  mesh.setPassable();
 
   graph::NodeVector nodes = face->getNodes();
 

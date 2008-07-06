@@ -93,7 +93,7 @@ class OperationDriveThrough : public Operation {
 public:
   OperationDriveThrough(RuleSet* _ruleset) : Operation(_ruleset) { };
   int runMesh(Mesh* mesh, int face) {
-    mesh->passable = true;
+    mesh->setPassable();
     return face;
   }
 };

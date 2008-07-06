@@ -29,12 +29,7 @@ int OperationAddFace::runMesh(Mesh* mesh, int face) {
     printf("Error: addface passed on a non-MultiFace face!");
     return face;
   }
-  Face* clone = new Face();
-  int fsize = mesh->vbase.size();
-  for (int i = 0; i < fsize; i++) {
-    clone->addVertex( mesh->addVertex( mesh->vbase[i] ) );
-  }
-  int newface = mesh->addFace(clone);
+  int newface = mesh->rePushBase();
   newface = ruleset->runMesh(mesh,newface,ref);
   ((MultiFace*)mesh->getFace(face))->addFace(mesh->getFace(newface));
   return face;

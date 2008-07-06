@@ -32,39 +32,6 @@ int Mesh::addTexCoord(TexCoord tcx) {
   return tc.size()-1; 
 }
 
-int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat) {
-  v.push_back(a);
-  v.push_back(b);
-  v.push_back(c);
-  v.push_back(d);
-  int size = v.size();
-  Face* face = new Face();
-  for (size_t i = 4; i > 0; i--) {
-    face->addVertex(size-i);
-  }
-  face->setMaterial(mat);
-  return addFace(face);
-}
-
-int Mesh::createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, TexCoord tca, TexCoord tcb, TexCoord tcc, TexCoord tcd, int mat) {
-  v.push_back(a);
-  v.push_back(b);
-  v.push_back(c);
-  v.push_back(d);
-  int size = v.size();
-  tc.push_back(tca);
-  tc.push_back(tcb);
-  tc.push_back(tcc);
-  tc.push_back(tcd);
-  int tsize = tc.size();
-  Face* face = new Face();
-  for (size_t i = 4; i > 0; i--) {
-    face->addVertex(size-i,tsize-i);
-  }
-  face->setMaterial(mat);
-  return addFace(face);
-}
-
 int Mesh::createNGon(Vertex center, double radius, int n) {
   Face* face = new Face();
   double step = (2*double(M_PI))/n;
@@ -185,7 +152,8 @@ void Mesh::expandFace(int fid, double amount) {
   delete nv;
 }
 
-void Mesh::weldVertices( int a, int b, Vertex vx ) {
+void Mesh::weldVertices( int a, int b ) {
+  Vertex c = ( v[a] + v[b] )/2;
   for (size_t i = 0; i < f.size(); i++) {
     int indexa = -1;
     int indexb = -1;
@@ -211,13 +179,8 @@ void Mesh::weldVertices( int a, int b, Vertex vx ) {
       f[i]->setVertices( vtx );
     }
   }
-  v[a] = vx;  
+  v[a] = c;  
   freeVertices.push_back(b);
-}
-
-void Mesh::weldVertices( int a, int b ) {
-  Vertex c = ( v[a] + v[b] )/2;
-  weldVertices( a, b, c );
 }
 
 
@@ -533,6 +496,16 @@ void Mesh::pushBase( int fid ) {
     vbase.push_back( v[ f[fid]->getVertex( i ) ] );
   }
 }
+
+int Mesh::rePushBase( ) {
+  Face* clone = new Face();
+  int fsize = vbase.size();
+  for (int i = 0; i < fsize; i++) {
+    clone->addVertex( addVertex( vbase[i] ) );
+  }
+  return addFace(clone);
+}
+
 
 Mesh::~Mesh() {
   for ( FaceVectIter itr = f.begin(); itr!= f.end(); ++itr ) 

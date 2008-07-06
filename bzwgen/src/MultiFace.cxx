@@ -13,14 +13,17 @@
 #include "MultiFace.h"
 
 void MultiFace::updateFaces(double z) {
-  for (size_t fi = 0; fi < comps->size(); fi++) {
-    Face* f = comps->at(fi);
+  for ( size_t fi = 0; fi < comps->size(); fi++ ) {
+    Face* f = comps->at( fi );
     IntVector vtx = f->getVertices();
-    for (size_t t = 0; t < f->size(); t++) {
+    for ( size_t t = 0; t < f->size(); t++ ) {
       if (f->getTexCoord(t) < 0) {
-        mesh->v[f->getCyclicVertex(t)].z = z;
+        int vi = f->getCyclicVertex( t );
+        Vertex v = mesh->getVertex( vi );
+        v.z = z;
+        mesh->substituteVertex( vi, v );
       } else {
-        vtx[t] = getCyclicVertex(f->getTexCoord(t));
+        vtx[t] = getCyclicVertex( f->getTexCoord( t ) );
       }
     }
     f->setVertices( vtx );
@@ -42,7 +45,7 @@ IntVector* MultiFace::detachFace(int id) {
   printf("Detach face\n");
   if (comps->size() < 2) return NULL;
   if (id >= int(comps->size())) return NULL;
-  updateFaces(mesh->v[getVertex(0)].z);
+  updateFaces(mesh->getVertex(getVertex(0)).z);
   
   IntVector* result  = new IntVector();
   IntVector* visited = new IntVector();
@@ -119,10 +122,10 @@ IntVector* MultiFace::detachFace(int id) {
 }
 
 bool MultiFace::isLeftOfVectors(int x, int a, int b, int c) {
-  Vertex P = mesh->v[b];
-  Vertex A = (P-mesh->v[a]).norm();
-  Vertex Xline = A+(mesh->v[x]-P).norm();
-  Vertex Pline = A+(mesh->v[c]-P).norm();
+  Vertex P = mesh->getVertex(b);
+  Vertex A = (P-mesh->getVertex(a)).norm();
+  Vertex Xline = A+(mesh->getVertex(x)-P).norm();
+  Vertex Pline = A+(mesh->getVertex(c)-P).norm();
 
   Vertex normal = Vertex(0.0,0.0,1.0);//faceNormal(fid);
 
@@ -161,22 +164,22 @@ void MultiFace::refineFace( Face* f, Face* target ) {
     //      printf("Multi%s\n",mesh->faceToString(this).c_str());
     Vector2Dd ipoint;
     int index;
-    Vector2Dd fvi     = mesh->v[f->getCyclicVertex(i)].toVector2D();
-    Vector2Dd fvinext = mesh->v[f->getCyclicVertex(i+1)].toVector2D();
+    Vector2Dd fvi     = mesh->getVertex( f->getCyclicVertex(i) ).toVector2D();
+    Vector2Dd fvinext = mesh->getVertex( f->getCyclicVertex(i+1) ).toVector2D();
 
     if (vertexNearestIntersect(fvi,fvinext,ipoint,index,target)) {
       //printf("Nearerst found... (%d) %s : ",index,ipoint.toString().c_str());
-      if (fvinext.equals(mesh->v[target->getCyclicVertex(index+1)].toVector2D())) {
+      if (fvinext.equals(mesh->getVertex( target->getCyclicVertex( index+1 ) ).toVector2D())) {
         //printf("Is common\n");
       } else if (ipoint.equals(fvinext)) {
         //printf("Is samepoint with next\n");
         target->insertVertexAfter(index,f->getCyclicVertex(i+1));
-      } else if (ipoint.equals(mesh->v[target->getCyclicVertex(index+1)].toVector2D())) {
+      } else if (ipoint.equals(mesh->getVertex( target->getCyclicVertex(index+1) ).toVector2D())) {
         //printf("Is samepoint with itself\n");
         f->insertVertexAfter(i,target->getCyclicVertex(index+1));
       } else {
         //printf("Is normal\n");
-        int ipid = mesh->addVertex( Vertex(ipoint.x,ipoint.y,mesh->v[f->getCyclicVertex(i)].z) );
+        int ipid = mesh->addVertex( Vertex( ipoint.x, ipoint.y, mesh->getVertex( f->getCyclicVertex( i ) ).z ) );
         f->insertVertexAfter(i,ipid);
         target->insertVertexAfter(index,ipid);
       }
@@ -237,13 +240,13 @@ int MultiFace::addFace( Face* f ) {
 
 
 bool MultiFace::vertexInside( int vid ) {
-  Vector2Dd A = mesh->v[vid].toVector2D();
+  Vector2Dd A = mesh->getVertex( vid ).toVector2D();
   Vector2Dd B( 100000.0, 200000.0 ); // sufficient to be out of range
 
   int count = 0;
   for ( size_t i = 0; i < size(); i++ ) {
-    if ( math::intersect2D( A, B, mesh->v[ getCyclicVertex(i) ].toVector2D(),
-                                  mesh->v[ getCyclicVertex(i+1) ].toVector2D())
+    if ( math::intersect2D( A, B, mesh->getVertex( getCyclicVertex(i) ).toVector2D(),
+                                  mesh->getVertex( getCyclicVertex(i+1) ).toVector2D())
        ) 
       count++;
   }      
@@ -258,8 +261,8 @@ bool MultiFace::vertexNearestIntersect(const Vector2Dd A, const Vector2Dd B, Vec
   Vector2Dd R1;
   Vector2Dd R2;
   for ( size_t i = 0; i < tsize; i++ ) {
-    Vector2Dd C = mesh->v[ face->getCyclicVertex( i ) ].toVector2D();
-    Vector2Dd D = mesh->v[face->getCyclicVertex(i+1)].toVector2D();
+    Vector2Dd C = mesh->getVertex( face->getCyclicVertex( i ) ).toVector2D();
+    Vector2Dd D = mesh->getVertex( face->getCyclicVertex(i+1) ).toVector2D();
     int r = math::intersect2D(A,B,C,D,R1,R2);
     if (r > 0) {
       if (!R1.equals(C)) {
