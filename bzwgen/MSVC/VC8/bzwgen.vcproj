@@ -43,6 +43,7 @@
 				RuntimeLibrary="3"
 				WarningLevel="4"
 				WarnAsError="true"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -58,6 +59,7 @@
 				AdditionalDependencies="bzfs.lib"
 				AdditionalLibraryDirectories="..\..\..\bzflag"
 				ModuleDefinitionFile=""
+				GenerateDebugInformation="true"
 			/>
 			<Tool
 				Name="VCALinkTool"

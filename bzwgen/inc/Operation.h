@@ -78,9 +78,9 @@ class OperationUnchamfer : public Operation {
 public:
   OperationUnchamfer(RuleSet* _ruleset) : Operation(_ruleset) { };
   int runMesh(Mesh* mesh, int face) {
-    int size = mesh->f[face]->vtx.size();
-    for (int i = 0; i < int(size / 2); i++) {
-      mesh->weldVertices(mesh->f[face]->vtx.at(i),mesh->f[face]->vtx.at(i+1));
+    size_t size = mesh->f[face]->size();
+    for ( size_t i = 0; i < size_t(size / 2); i++ ) {
+      mesh->weldVertices( mesh->f[face]->getVertex( i ), mesh->f[face]->getVertex( i+1 ) );
     }
     return face;
   }
@@ -126,7 +126,7 @@ class OperationTextureClear : public Operation {
 public:
   OperationTextureClear(RuleSet* _ruleset) : Operation(_ruleset) { };
   int runMesh(Mesh* mesh, int face) {
-    mesh->f[face]->tcd.clear();
+    mesh->f[face]->clearTexCoords();
     return face;
   }
 };

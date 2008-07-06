@@ -29,8 +29,15 @@ public:
   bool passable;
   Mesh() : passable(false) {}
   int addVertex(Vertex vtx);
-  Vertex getVertex(int vertexID) { return v[vertexID]; }
-  void addInsideVertex( Vertex vtx ) { inside.push_back(vtx); }
+  inline Vertex getVertex( int vertexID ) const { 
+    return v[vertexID]; 
+  }
+  inline Vertex getFaceVertex( int faceID, int vertexID ) const { 
+    return v[ f[ faceID ]->getVertex( vertexID ) ]; 
+  }
+  inline void addInsideVertex( Vertex vtx ) { 
+    inside.push_back(vtx); 
+  }
   int addTexCoord(TexCoord tcx);
   int addFace(Face* face) { f.push_back(face); return f.size()-1; }
   int createNewFace(Vertex a, Vertex b, Vertex c, Vertex d, int mat = 0);
@@ -54,12 +61,22 @@ public:
   void textureFaceFull(int fid);
   void textureFaceQuad(int fid, double au, double av, double bu, double bv);
   int createNGon(Vertex center, double radius, int n);
-  double faceH(int face) { return (v[f[face]->vtx.at(0)] - v[f[face]->vtx.at(1)]).length(); }
-  double faceV(int face) { return (v[f[face]->vtx.at(3)] - v[f[face]->vtx.at(0)]).length(); }
-  Vertex faceHv(int face) { return (v[f[face]->vtx.at(0)] - v[f[face]->vtx.at(1)]); }
-  Vertex faceVv(int face) { return (v[f[face]->vtx.at(3)] - v[f[face]->vtx.at(0)]); }
+  inline Vertex getFaceEdge( int faceID, int id1, int id2 ) const { 
+    return ( getFaceVertex( faceID, id2 ) - getFaceVertex( faceID, id1 ) ); 
+  }
+  inline Vertex faceHv( int faceID ) const { 
+    return getFaceEdge( faceID, 1, 0 );
+  }
+  inline Vertex faceVv( int faceID ) const { 
+    return getFaceEdge( faceID, 0, 3 );
+  }
+  inline double faceH( int faceID ) const { 
+    return faceHv( faceID ).length(); 
+  }
+  inline double faceV( int faceID ) const { 
+    return faceVv( faceID ).length(); 
+  }
   String faceToString(Face* face);
-  Vertex getFaceVertex(int faceID, int vertexID) { return v[f[faceID]->getVertex(vertexID)]; };
   void pushBase(int fid);
   ~Mesh();
 private:

@@ -35,19 +35,18 @@ class Face {
    * for reusing geometry data of faces that should not exist.
    */
   bool output;
-public:
+protected:
   /** 
    * Vector holding the indices of texture coords held by the Mesh 
-   * class. Probably should be made private, but that would be a hell
-   * to refactor in the Mesh class
+   * class. 
    */
   IntVector tcd;
   /** 
    * Vector holding the indices of vertex coords held by the Mesh 
-   * class. Probably should be made private, but that would be a hell
-   * to refactor in the Mesh class
+   * class. 
    */
   IntVector vtx;
+public:
   /**
    * Standard and only constructor. Doesn't take any data, addVertex and
    * addTexCoord should be used for defining the face.
@@ -68,17 +67,6 @@ public:
    */
   void clearTexCoords( ) {
     tcd.clear();
-  }
-  /**
-   * Shorthand function to declare a quad face quickly. Depreciated, using
-   * addVertex directly is suggested.
-   */
-  void set4( int vID0, int vID1, int vID2, int vID3 ) {
-    vtx.clear();
-    vtx.push_back(vID0);
-    vtx.push_back(vID1);
-    vtx.push_back(vID2);
-    vtx.push_back(vID3);
   }
   /**
    * Adds a vertex index to the face.
@@ -123,7 +111,7 @@ public:
   /**
    * Returns the vertex ID specified by the given index in the face's list.
    */
-  int getVertex( int index ) const {
+  int getVertex( const int index ) const {
     return vtx.at(index);
   }
   /**
@@ -165,7 +153,7 @@ public:
    * Returns the size of the face. The size is defined as the amount of 
    * vertices that make up the face.
    */
-  int size() const { 
+  size_t size() const { 
     return vtx.size(); 
   }
   /**
@@ -214,6 +202,30 @@ public:
 	return i;
     return -1;
   }
+  /**
+   * Returns a copy of the texCoord indices array.
+   */
+  IntVector getTexCoords( ) const {
+    return tcd;
+  }
+  /**
+   * Sets the texCoord indices array to the passed vector.
+   */
+  void setTexCoords( IntVector _tcd ) {
+    tcd = _tcd;
+  }
+  /**
+   * Returns a copy of the vertex indices array.
+   */
+  IntVector getVertices( ) const {
+    return vtx;
+  }
+  /**
+   * Sets the vertex indices array to the passed vector.
+   */
+  void setVertices( IntVector _vtx ) {
+    vtx = _vtx;
+  }
 };
 
 /** Type definition for a Vector of Face pointers. */
@@ -230,3 +242,4 @@ typedef FaceVector::iterator FaceVectIter;
 // indent-tabs-mode: t ***
 // End: ***
 // ex: shiftwidth=2 tabstop=8
+

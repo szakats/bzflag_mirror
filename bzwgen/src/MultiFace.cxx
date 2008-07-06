@@ -15,22 +15,24 @@
 void MultiFace::updateFaces(double z) {
   for (size_t fi = 0; fi < comps->size(); fi++) {
     Face* f = comps->at(fi);
-    for (int t = 0; t < f->size(); t++) {
-      if (f->tcd.at(t) < 0) {
+    IntVector vtx = f->getVertices();
+    for (size_t t = 0; t < f->size(); t++) {
+      if (f->getTexCoord(t) < 0) {
         mesh->v[f->getCyclicVertex(t)].z = z;
       } else {
-        f->vtx[t] = getCyclicVertex(f->tcd.at(t));
+        vtx[t] = getCyclicVertex(f->getTexCoord(t));
       }
     }
+    f->setVertices( vtx );
   }
 }
 
 void MultiFace::storeFaces() {
   for (size_t fi = 0; fi < comps->size(); fi++) {
     Face* f = comps->at(fi);
-    f->tcd.resize(f->size());
-    for (int t = 0; t < f->size(); t++) {
-      f->tcd[t] = getVertexIndex(f->getCyclicVertex(t));
+    f->clearTexCoords();
+    for (size_t t = 0; t < f->size(); t++) {
+      f->addTexCoord( getVertexIndex( f->getCyclicVertex(t) ) );
     }
   }
 }
@@ -40,7 +42,7 @@ IntVector* MultiFace::detachFace(int id) {
   printf("Detach face\n");
   if (comps->size() < 2) return NULL;
   if (id >= int(comps->size())) return NULL;
-  updateFaces(mesh->v[getCyclicVertex(0)].z);
+  updateFaces(mesh->v[getVertex(0)].z);
   
   IntVector* result  = new IntVector();
   IntVector* visited = new IntVector();
@@ -95,7 +97,7 @@ IntVector* MultiFace::detachFace(int id) {
 
     Face* nface = new Face();
     nface->setMaterial( getMaterial() );
-    nface->vtx = nvtx;
+    nface->setVertices( nvtx );
     result->push_back(mesh->addFace(nface));
     index = pickRemovalIndex(comps->at(id),visited);
   }
@@ -136,25 +138,25 @@ Face* MultiFace::getOtherFaceWithVertex(Face* f, int vid) {
   return NULL;
 }
 
-int MultiFace::pickRemovalIndex(Face *f,IntVector* visited) {
-  for (int i = 0; i < size(); i++) {
-    if (f->hasVertex(getCyclicVertex(i))) {
+int MultiFace::pickRemovalIndex( Face *f, IntVector* visited ) {
+  for ( size_t i = 0; i < size(); i++ ) {
+    if ( f->hasVertex( getCyclicVertex( i ) ) ) {
       bool found = false;
-      if (visited->size() > 0) 
-        for (size_t k = 0; k < visited->size(); k++)
-          if (visited->at(k) == getCyclicVertex(i)) {
+      if ( visited->size() > 0 ) 
+        for ( size_t k = 0; k < visited->size(); k++ )
+          if ( visited->at( k ) == getCyclicVertex( i ) ) {
             found = true;
             break;
           }
-      if (!found) return i;
+      if ( !found ) return i;
     } 
   }
   return -1;
 }
 
-void MultiFace::refineFace(Face* f, Face* target) {
-  int i = 0;
-  while (i < f->size()) {
+void MultiFace::refineFace( Face* f, Face* target ) {
+  size_t i = 0;
+  while ( i < f->size() ) {
     //printf("Intersect... (%d,%d)\n",i,modnext(i,f->size()));
     //      printf("Multi%s\n",mesh->faceToString(this).c_str());
     Vector2Dd ipoint;
@@ -184,14 +186,14 @@ void MultiFace::refineFace(Face* f, Face* target) {
 }
 
 
-int MultiFace::addFace(Face* f) {
+int MultiFace::addFace( Face* f ) {
   //printf("Addface start... (%d,%d)\n",size(),f->size());
   //    printf("Multi%s\n",mesh->faceToString(this).c_str());
   //    printf("Add%s\n",mesh->faceToString(f).c_str());
   f->setOutput( false );
-  if (comps->size() == 0) {
-    for (int i = 0; i < f->size(); i++) 
-      vtx.push_back(f->getVertex(i));
+  if ( comps->size() == 0 ) {
+    for ( size_t i = 0; i < f->size(); i++ ) 
+      vtx.push_back( f->getVertex( i ) );
   } else {
     refineFace(f,this);
     for (size_t i = 0; i < comps->size(); i++) refineFace(f,comps->at(i));
@@ -234,26 +236,29 @@ int MultiFace::addFace(Face* f) {
 }
 
 
-bool MultiFace::vertexInside(int vid) {
+bool MultiFace::vertexInside( int vid ) {
   Vector2Dd A = mesh->v[vid].toVector2D();
-  Vector2Dd B(100000.0, 200000.0); // sufficient to be out of range
+  Vector2Dd B( 100000.0, 200000.0 ); // sufficient to be out of range
 
   int count = 0;
-  for (int i = 0; i < size(); i++) {
-    if (math::intersect2D(A,B,mesh->v[getCyclicVertex(i)].toVector2D(),mesh->v[getCyclicVertex(i+1)].toVector2D())) count++;
+  for ( size_t i = 0; i < size(); i++ ) {
+    if ( math::intersect2D( A, B, mesh->v[ getCyclicVertex(i) ].toVector2D(),
+                                  mesh->v[ getCyclicVertex(i+1) ].toVector2D())
+       ) 
+      count++;
   }      
-  return (count%2 == 1);
+  return ( count % 2 == 1);
 }
 
 
 bool MultiFace::vertexNearestIntersect(const Vector2Dd A, const Vector2Dd B, Vector2Dd &P, int &index, Face* face) {
   double length = (A-B).length();
-  int tsize = face->size();
+  size_t tsize = face->size();
   double distance = length + 1.0;
   Vector2Dd R1;
   Vector2Dd R2;
-  for (int i = 0; i < tsize; i++) {
-    Vector2Dd C = mesh->v[face->getCyclicVertex(i)].toVector2D();
+  for ( size_t i = 0; i < tsize; i++ ) {
+    Vector2Dd C = mesh->v[ face->getCyclicVertex( i ) ].toVector2D();
     Vector2Dd D = mesh->v[face->getCyclicVertex(i+1)].toVector2D();
     int r = math::intersect2D(A,B,C,D,R1,R2);
     if (r > 0) {

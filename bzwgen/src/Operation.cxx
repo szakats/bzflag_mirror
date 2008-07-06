@@ -31,9 +31,8 @@ int OperationAddFace::runMesh(Mesh* mesh, int face) {
   }
   Face* clone = new Face();
   int fsize = mesh->vbase.size();
-  clone->vtx.resize(fsize);
   for (int i = 0; i < fsize; i++) {
-    clone->vtx[i] = mesh->addVertex(mesh->vbase[i]);
+    clone->addVertex( mesh->addVertex( mesh->vbase[i] ) );
   }
   int newface = mesh->addFace(clone);
   newface = ruleset->runMesh(mesh,newface,ref);
@@ -170,20 +169,20 @@ int OperationTest::runMesh(Mesh* mesh, int face) {
   Face* f1 = new Face();
   Face* f2 = new Face();
   for (int i = 0; i < 4; i++) {
-    int f1vid = mesh->f[face]->vtx.at(i);
-    int f2vid = mesh->addVertex(mesh->v[mesh->f[face]->vtx.at(i)]);
-    f1->vtx.push_back(f1vid);
-    f2->vtx.push_back(f2vid);
+    int f1vid = mesh->f[face]->getVertex( i );
+    int f2vid = mesh->addVertex( mesh->getFaceVertex( face, i ) );
+    f1->addVertex( f1vid );
+    f2->addVertex( f2vid );
   }
-  mesh->v[f1->vtx.at(0)] = mesh->v[f1->vtx.at(0)]+Vertex(0.0,+4.0,0.0);
-  mesh->v[f1->vtx.at(1)] = mesh->v[f1->vtx.at(1)]+Vertex(0.0,+4.0,0.0);
-  mesh->v[f1->vtx.at(2)] = mesh->v[f1->vtx.at(2)]+Vertex(0.0,-4.0,0.0);
-  mesh->v[f1->vtx.at(3)] = mesh->v[f1->vtx.at(3)]+Vertex(0.0,-4.0,0.0);
+  mesh->v[f1->getVertex(0)] = mesh->v[f1->getVertex(0)]+Vertex(0.0,+4.0,0.0);
+  mesh->v[f1->getVertex(1)] = mesh->v[f1->getVertex(1)]+Vertex(0.0,+4.0,0.0);
+  mesh->v[f1->getVertex(2)] = mesh->v[f1->getVertex(2)]+Vertex(0.0,-4.0,0.0);
+  mesh->v[f1->getVertex(3)] = mesh->v[f1->getVertex(3)]+Vertex(0.0,-4.0,0.0);
 
-  mesh->v[f2->vtx.at(0)] = mesh->v[f2->vtx.at(0)]+Vertex(+4.0,0.0,0.0);
-  mesh->v[f2->vtx.at(1)] = mesh->v[f2->vtx.at(1)]+Vertex(-4.0,0.0,0.0);
-  mesh->v[f2->vtx.at(2)] = mesh->v[f2->vtx.at(2)]+Vertex(-4.0,0.0,0.0);
-  mesh->v[f2->vtx.at(3)] = mesh->v[f2->vtx.at(3)]+Vertex(+4.0,0.0,0.0);
+  mesh->v[f2->getVertex(0)] = mesh->v[f2->getVertex(0)]+Vertex(+4.0,0.0,0.0);
+  mesh->v[f2->getVertex(1)] = mesh->v[f2->getVertex(1)]+Vertex(-4.0,0.0,0.0);
+  mesh->v[f2->getVertex(2)] = mesh->v[f2->getVertex(2)]+Vertex(-4.0,0.0,0.0);
+  mesh->v[f2->getVertex(3)] = mesh->v[f2->getVertex(3)]+Vertex(+4.0,0.0,0.0);
 
   printf("Adding face1...\n");
   mf->addFace(f1);

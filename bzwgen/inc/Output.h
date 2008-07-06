@@ -83,15 +83,15 @@ public:
     }
 
     (*outstream) << "    vertices ";
-    for (size_t i = 0; i < f->vtx.size(); i++) {
-      (*outstream) << f->vtx.at(i) << " ";
+    for (size_t i = 0; i < f->size(); i++) {
+      (*outstream) << f->getVertex( i ) << " ";
     }
     (*outstream) << "\n";
 
     if (f->hasTexCoords()) {
       (*outstream) << "    texcoords ";
-      for (size_t i = 0; i < f->tcd.size(); i++) {
-        (*outstream) << f->tcd.at(i) << " ";
+      for (size_t i = 0; i < f->size(); i++) {
+        (*outstream) << f->getTexCoord( i ) << " ";
       }
       (*outstream) << "\n";
     }

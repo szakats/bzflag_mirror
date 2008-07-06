@@ -49,7 +49,11 @@ public:
    */
   virtual void output(Output& out) {
     graph::NodeVector nodes = face->getNodes();
-    out.baseZone(Vertex(nodes[0]->vector().x,nodes[0]->vector().y,0.0f),Vertex(nodes[2]->vector().x,nodes[2]->vector().y,0.0f),color,ctfSafe);
+    out.baseZone(
+      Vertex( nodes[0]->vector().x, nodes[0]->vector().y, 0.0f ),
+      Vertex( nodes[2]->vector().x, nodes[2]->vector().y, 0.0f ),
+      color,ctfSafe
+    );
     color++;
   }
 protected:
