@@ -72,31 +72,127 @@ void Application::setup2D( void )
 	rwin->add(pane);
 	pane->drop();
 
-	res::CTexture *ltexture = rmgr->loadTexture("title.png","title");
+	//res::CTexture *title = rmgr->loadTexture("title.png","title");
+	//pane->drawImage( title, core::vector2d<s32>( rwin->getInnerSize().X - title->getSize().X , rwin->getInnerSize().Y -title->getSize().Y ), title->getSize(),render::ETT_TEST);	
 
-	pane->drawImage( ltexture, core::vector2d<s32>( rwin->getInnerSize().X - ltexture->getSize().X , rwin->getInnerSize().Y -ltexture->getSize().Y ), ltexture->getSize(),render::ETT_TEST);	
+
+	res::CTexture *icon = rmgr->loadTexture("bzflag-256x256.png","icon");
+	pane->drawImage( icon, core::vector2d<s32>( rwin->getInnerSize().X - icon->getSize().X , rwin->getInnerSize().Y -icon->getSize().Y ), icon->getSize(),render::ETT_TEST);	
+
 }
-
 
 void Application::setupScene()
 {
 	cam = new scene::C3DCamera(rwin, core::PI / 3.0f, 1.0f,1000.0f, true); 
-	cam->setBackgroundColor(core::CColorI(0,0,255,0));
+	cam->setBackgroundColor(core::CColorI(128,128,255,0));
 
-	cam->setPosition(core::vector3df(0.0f,0.0f,-20.0f));
+//	cam->setTarget(core::vector3df(0,0,0),core::vector3df(0,0,1));
+
+	cam->setPosition(core::vector3df(0.0f,7.0f,-20.0f));
 	rwin->getRenderLayer3D()->add(cam);
 	cam->drop();
 
-	res::CCubeModel *cube = new res::CCubeModel("cube1",5.0f,5.0f,5.0f);
-	cube->getMaterial(0)->setRenderFeature(render::ERPF_COLOR_ONLY);
+	res::CTexture *boxwall = rmgr->loadTexture("boxwall.png","boxwall");
+
+	res::CCubeModel *cube = new res::CCubeModel("cube1",5.0f,5.0f,5.0f,0,0,0,true);
+	cube->getMaterial(0)->setRenderFeature(render::ERPF_DIFFUSEMAP);
+	cube->getMaterial(0)->setTexture(0,boxwall);
 
 	scene::CModelSceneNode *cubeNode = new scene::CModelSceneNode(cube);
 	smgr->addSceneNode(cubeNode);
-	cubeNode->setPosition(core::vector3df(0.0f,0.0f,0.0f));
+	cubeNode->setPosition(core::vector3df(0.0f,2.5f,0.0f));
 	cubeNode->rotateYDegrees(45.0f);
-	cubeNode->rotateXDegrees(-45.0f);
-
+	//cubeNode->rotateXDegrees(-45.0f);
 	cubeNode->drop();
+
+
+	cube = new res::CCubeModel("cube1",1.0f,1.0f,1.0f,0,0,0,true);
+	cube->getMaterial(0)->setRenderFeature(render::ERPF_DIFFUSEMAP);
+	cube->getMaterial(0)->setTexture(0,boxwall);
+
+	scene::CModelSceneNode *cubeNode2 = new scene::CModelSceneNode(cube);
+	smgr->addSceneNode(cubeNode2);
+	cubeNode2->setPosition(core::vector3df(0.0f,5.5f,0.0f));
+	//cubeNode->rotateYDegrees(45.0f);
+	//cubeNode->rotateXDegrees(-45.0f);
+	cubeNode2->drop();
+
+
+	res::CTexture *groundTex = rmgr->loadTexture("std_ground.png","std_ground");
+
+	res::CPlaneModel *plane = new res::CPlaneModel("ground",800,800,100,100,200,200);
+	plane->getMaterial(0)->setTexture(0,groundTex);
+	plane->getMaterial(0)->setRenderFeature(render::ERPF_DIFFUSEMAP);
+
+	scene::CModelSceneNode *planeNode = new scene::CModelSceneNode(plane);
+	smgr->addSceneNode(planeNode);
+	planeNode->setPosition(core::vector3df(0.0f,0.0f,0.0f));
+	//cubeNode->rotateYDegrees(45.0f);
+	//cubeNode->rotateXDegrees(-90.0f);
+	planeNode->drop();
+
+	// lighting
+
+	render::CRenderStateLighting *rstLgt = new render::CRenderStateLighting(true);
+	cam->replace(rstLgt);
+	rstLgt->drop();
+
+	render::CRenderStateSpecularLighting *rstSpl = new render::CRenderStateSpecularLighting(true,true);
+	cam->replace(rstSpl);
+	rstSpl->drop();
+
+	render::CRenderStateAmbientLight *rstAmb = new render::CRenderStateAmbientLight(core::CColorI(50,50,50,255));
+	cam->replace(rstAmb);
+	rstAmb->drop();
+
+
+	light = new scene::CLight( scene::ELT_POINT, 
+		core::CColorF(0.7f,0.7f,0.7f,1.0f), 
+		core::CColorF(1.0f,1.0f,1.0f,1.0f),
+		core::CColorF(0.2f,0.2f,0.2f,1.0f), 
+		100.0f,
+		0.5f,
+		core::PI/3,
+		core::PI/2,
+		0.0f,
+		0.0f,
+		1.0f / 500.0f,
+		0.0f 
+		);
+
+	light->setPosition(core::vector3df(15.0f,15.0f,0.0f));
+	smgr->add(light);
+	light->drop();
+
+	scene::CSceneStateLight *cstLgt = new scene::CSceneStateLight(light,true);
+	smgr->getRootSceneNode()->addSceneState(cstLgt);
+	cstLgt->drop();
+
+	light->makeShadowProjector( 1024,	
+								1024,	
+								1.0f,	
+								1000.0f,
+								0.0f,	
+								0.0f,	
+								0.0f,	
+								0.0f	
+								);
+
+	// now that the light projects shadows, it must also be set which nodes in the scene should
+	// cast a shadow from this light. In our basic test-scene we will use the diamond-model/node
+	// as the sole shadow-caster
+	scene::CSceneStateShadowCaster *sssc = new scene::CSceneStateShadowCaster(light);
+	cubeNode->addSceneState(sssc);
+	cubeNode2->addSceneState(sssc);
+	sssc->drop();
+
+	scene::CSceneStateShadowReceiver *sssr = new scene::CSceneStateShadowReceiver(light,true);
+
+	// now that scenestate is added to the plane node so that it should receive shadow from the light
+	planeNode->addSceneState(sssr);
+	cubeNode->addSceneState(sssr);
+	cubeNode2->addSceneState(sssr);
+	sssr->drop();
 }
 
 void Application::keyPressed(input::CKeyEvent& event)

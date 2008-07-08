@@ -33,6 +33,8 @@ protected:
 	CResourceManager			*rmgr;
 	scene::CSceneManager		*smgr;
 	scene::C3DCamera			*cam;
+	scene::CLight				*light; 
+
 };
 
 
