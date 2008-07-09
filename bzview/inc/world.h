@@ -103,6 +103,8 @@ public:
 
 	tvItList findItemsOfClass ( std::string className );
 	int findItemOfClassByName ( std::string className, std::string name );
+
+	bool valid ( void ) {return items.size()>0;}
 protected:
 
 	std::map<int,MapItem*>	items;

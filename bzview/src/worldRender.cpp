@@ -5,53 +5,55 @@
 
 float groundRepeat = 1.0f/20.0f;
 
-void processTransformStack ( AffineTransformationStack &transforms )
+void processTransformStack ( AffineTransformationStack &transforms,scene::CModelSceneNode *node )
 {
 // 	GLfloat t[4][4] = {{1.0f, 0.0f, 0.0f, 0.0f},
 // 					{0.0f, 1.0f, 0.0f, 0.0f},
 // 					{0.0f, 0.0f, 1.0f, 0.0f},
 // 					{0.0f, 0.0f, 0.0f, 1.0f}};
-// 
-// 	int numTrans = (int)transforms.size();
-// 	for ( int i = numTrans-1; i >= 0; i-- )
-// 	{
-// 		switch(transforms[i].type)
-// 		{
-// 			case eShear:
-// 					t[0][2] = transforms[i].values[0];
-// 					t[1][2] = transforms[i].values[1];
-// 					t[2][0] = transforms[i].values[3];
-// 					glMultMatrixf((GLfloat*)t);
-// 					break;	
-// 
-// 			case eSpin:
-// 				glRotatef(transforms[i].values[0],transforms[i].values[1],transforms[i].values[2],transforms[i].values[3]);
-// 				break;
-// 
-// 			case eScale:
-// 				glScalef(transforms[i].values[0],transforms[i].values[1],transforms[i].values[2]);
-// 				break;
-// 
-// 			case eShift:
-// 			default:
-// 				glTranslatef(transforms[i].values[0],transforms[i].values[1],transforms[i].values[2]);
-// 				break;
-// 		}
-// 	}
+// node
+	for ( size_t i = transforms.size()-1; i >= 0; i-- )
+	{
+		switch(transforms[i].type)
+		{
+			case eShear:
+// 				//node->??
+// 				t[0][2] = transforms[i].values[0];
+// 				t[1][2] = transforms[i].values[1];
+// 				t[2][0] = transforms[i].values[3];
+// 				glMultMatrixf((GLfloat*)t);
+				break;	
+
+			case eSpin:
+				node->setRotation(core::quaternion(vector3df(transforms[i].values[1],transforms[i].values[2],transforms[i].values[3]),transforms[i].values[0]));
+				break;
+
+			case eScale:
+				glScalef(transforms[i].values[0],transforms[i].values[1],transforms[i].values[2]);
+				break;
+
+			case eShift:
+			default:
+				node->tr
+				glTranslatef(transforms[i].values[0],transforms[i].values[1],transforms[i].values[2]);
+				break;
+		}
+	}
 }
 
 WorldRender::WorldRender(World &_world) : world(_world)
 {
 }
 
-void WorldRender::init ( void )
+void WorldRender::build ( CResourceManager *_rmgr, scene::CSceneManager *_smgr )
 {
-}
+	rmgr = _rmgr;
+	smgr = _smgr;
 
-void WorldRender::draw ( void )
-{
-	// draw some boxes
-// 	glEnable(GL_LIGHTING);
+	transformStack.clear();
+
+	res::CTexture *roof = rmgr->loadTexture("mesh.png","roof");
+
 
 	// draw some big ass ground
 	tvItList worlds = world.findItemsOfClass(std::string("world"));
@@ -71,31 +73,71 @@ void WorldRender::draw ( void )
 			worldSize[1] = worldSize[0];
 	}
 
-	drawGrounds(worldSize);
+	buildGrounds(worldSize);
 
-	tvItList boxes = world.findItemsOfClass(std::string("box"));
+	tvItList objects = world.getItemList();
 
-	for ( unsigned int i = 0; i < boxes.size(); i++)
-		drawClassicBox(world.getItem(boxes[i]));
-
-
-	tvItList pyramids = world.findItemsOfClass(std::string("pyramid"));
-
-	for ( unsigned int i = 0; i < pyramids.size(); i++)
-		drawClassicPyramid(world.getItem(pyramids[i]));
-
-
-	tvItList instances = world.findItemsOfClass(std::string("instance"));
-
-	for ( unsigned int i = 0; i < instances.size(); i++)
-		drawInstance(world.getItem(instances[i]));
-
-	drawUnderGrounds(worldSize);
-// 	glColor4f(1,1,1,1);
+	for ( size_t i = 0; i < objects.size(); i++)
+		buildObject(world.getItem(objects[i]));
 }
 
-void WorldRender::drawGrounds ( float size[2] )
+void WorldRender::buildGrounds ( float size[2] )
 {
+	// add the ground
+	res::CTexture *groundTex = rmgr->loadTexture("std_ground.png","std_ground");
+	res::CTexture *wall = rmgr->loadTexture("wall.png","wall");
+
+	res::CPlaneModel *plane = new res::CPlaneModel("ground",size[0]*2,size[1]*2,size[0]/4,size[1]/4,size[0]/2,size[1]/2);
+	plane->getMaterial(0)->setTexture(0,groundTex);
+	plane->getMaterial(0)->setRenderFeature(render::ERPF_DIFFUSEMAP);
+
+	scene::CModelSceneNode *planeNode = new scene::CModelSceneNode(plane);
+	smgr->addSceneNode(planeNode);
+	planeNode->setPosition(core::vector3df(0.0f,0.0f,0.0f));
+	//cubeNode->rotateYDegrees(45.0f);
+	//cubeNode->rotateXDegrees(-90.0f);
+	planeNode->drop();
+
+	// X+ wall
+	res::CCubeModel *wallmesh = new res::CCubeModel("X+wall",0.5f,10.0f,size[1]*2,0,0,0,true);
+	wallmesh->getMaterial(0)->setRenderFeature(render::ERPF_DIFFUSEMAP);
+	wallmesh->getMaterial(0)->setTexture(0,wall);
+
+	scene::CModelSceneNode *wallNode = new scene::CModelSceneNode(wallmesh);
+	smgr->addSceneNode(wallNode);
+	wallNode->setPosition(core::vector3df(size[0],5.0f,0.0f));
+	wallNode->drop();
+
+	// X- wall
+	wallmesh = new res::CCubeModel("X-wall",0.5f,10.0f,size[1]*2,0,0,0,true);
+	wallmesh->getMaterial(0)->setRenderFeature(render::ERPF_DIFFUSEMAP);
+	wallmesh->getMaterial(0)->setTexture(0,wall);
+
+	wallNode = new scene::CModelSceneNode(wallmesh);
+	smgr->addSceneNode(wallNode);
+	wallNode->setPosition(core::vector3df(-size[0],5.0f,0.0f));
+	wallNode->drop();
+
+	// Z+ wall
+	wallmesh = new res::CCubeModel("Z+wall",size[0]*2,10.0f,0.5f,0,0,0,true);
+	wallmesh->getMaterial(0)->setRenderFeature(render::ERPF_DIFFUSEMAP);
+	wallmesh->getMaterial(0)->setTexture(0,wall);
+
+	wallNode = new scene::CModelSceneNode(wallmesh);
+	smgr->addSceneNode(wallNode);
+	wallNode->setPosition(core::vector3df(0.0f,5.0f,size[1]));
+	wallNode->drop();
+
+	// Z+ wall
+	wallmesh = new res::CCubeModel("Z+wall",size[0]*2,10.0f,0.5f,0,0,0,true);
+	wallmesh->getMaterial(0)->setRenderFeature(render::ERPF_DIFFUSEMAP);
+	wallmesh->getMaterial(0)->setTexture(0,wall);
+
+	wallNode = new scene::CModelSceneNode(wallmesh);
+	smgr->addSceneNode(wallNode);
+	wallNode->setPosition(core::vector3df(0.0f,5.0f,-size[1]));
+	wallNode->drop();
+
 	// green and solid from the top side of the dirt
 // 	glColor4f(0.125f,0.5f,0.125f,1);
 // 
@@ -160,8 +202,8 @@ void WorldRender::drawGrounds ( float size[2] )
 // 	glTexturesOff();
 }
 
-void WorldRender::drawUnderGrounds ( float size[2] )
-{
+//void WorldRender::drawUnderGrounds ( float size[2] )
+//{
 	// green and solid from the top
 // 	glColor4f(0.0f,0.25f,0.0f,0.75f);
 // 
@@ -227,73 +269,69 @@ void WorldRender::drawUnderGrounds ( float size[2] )
 // 	glEnd();
  }
 // 
- void WorldRender::drawObject ( MapItem* object )
+ void WorldRender::buildObject ( MapItem* object )
  {
-// 	if (!object)
-// 		return;
-// 
-// 	std::string className = TextUtils::tolower(object->getClass());
-// 
-// 	if (className == "box")
-// 		drawClassicBox(object);
-// 	else if (className == "pyramid")
-// 		drawClassicPyramid(object);
-// 	else if (className == "instance")
-// 		drawInstance(object);
-}
+ 	if (!object)
+ 		return;
+ 
+	std::string className = tolower(object->getClass());
+ 
+	transformStack.push_back(object->transformStack);
+ 	if (className == "box")
+ 		buildClassicBox(object);
+ 	else if (className == "pyramid")
+ 		buildClassicPyramid(object);
+ 	else if (className == "instance")
+ 		buildInstance(object);
 
-void  WorldRender::drawClassicBox ( MapItem* object )
+	transformStack.pop_back();
+ }
+
+
+void WorldRender:processStack ( scene::CModelSceneNode *node )
 {
-// 	ClassicBoxItem	*box = (ClassicBoxItem*)object;
-// 	if (!box)
-// 		return;
-// 
-// 	ClassicBoxDrawInfo *drawInfo = NULL;
-// 	if (!box->drawInfo)
-// 	{
-// 		drawInfo = new ClassicBoxDrawInfo;
-// 		drawInfo->load(box,editor);
-// 		box->drawInfo = (BaseDrawInfo*)drawInfo;
-// 	}
-// 	drawInfo = (ClassicBoxDrawInfo*)box->drawInfo;
-// 
-// 	glPushMatrix();
-// 	glRotatef(box->rot,0,0,1);
-// 	glTranslatef(box->pos[0],box->pos[1],box->pos[2]);
-// 	processTransformStack(box->transformStack);
-// 
-// 	drawInfo->draw();
-// 
-// 	glPopMatrix();
+	std::list<AffineTransformationStack>::iterator itr = transformStack.begin();
+	while (itr != transformStack.end())
+	{
+		processTransformStack(*itr,node);
+		itr++;
+	}
 }
 
-void WorldRender::drawClassicPyramid (  MapItem* object )
+void  WorldRender::buildClassicBox ( MapItem* object )
 {
-// 	ClassicPyramidItem	*pyr = (ClassicPyramidItem*)object;
-// 	if (!pyr)
-// 		return;
-// 
-// 	ClassicPyramidDrawInfo *drawInfo = NULL;
-// 	if (!pyr->drawInfo)
-// 	{
-// 		drawInfo = new ClassicPyramidDrawInfo;
-// 		drawInfo->load(pyr,editor);
-// 		pyr->drawInfo = (BaseDrawInfo*)drawInfo;
-// 	}
-// 	drawInfo = (ClassicPyramidDrawInfo*)pyr->drawInfo;
-// 
-// 	glPushMatrix();
-// 	glRotatef(pyr->rot,0,0,1);
-// 	glTranslatef(pyr->pos[0],pyr->pos[1],pyr->pos[2]);
-// 	processTransformStack(pyr->transformStack);
-// 
-// 	drawInfo->draw();
-// 
-// 	glPopMatrix();
+	if (!object)
+		return;
+
+	ClassicBoxItem* box = (ClassicBoxItem*)object;
+
+	std::string name;
+	if (box->name.size())
+		name = box->name;
+	else
+		name = format("box:%d",object->getID());
+
+	res::CTexture *boxwall = rmgr->loadTexture("boxwall.png","boxwall");
+
+	res::CCubeModel *boxMesh = new res::CCubeModel(name.c_str(),box->scale[0],box->scale[2],box->scale[1],0,0,0,true);
+	boxMesh->getMaterial(0)->setRenderFeature(render::ERPF_DIFFUSEMAP);
+	boxMesh->getMaterial(0)->setTexture(0,boxwall);
+
+	scene::CModelSceneNode *boxNode = new scene::CModelSceneNode(boxMesh);
+	smgr->addSceneNode(boxNode);
+
+	// process the transform stack
+	wallNode->setPosition(core::vector3df(size[0],5.0f,0.0f));
+	wallNode->drop();
+
 }
 
+void WorldRender::buildClassicPyramid (  MapItem* object )
+{
 
-void WorldRender::drawInstance (  MapItem* object )
+}
+
+void WorldRender::buildInstance (  MapItem* object )
 {
 	InstanceItem *instance = (InstanceItem*)object;
 	if (!instance)
@@ -303,13 +341,8 @@ void WorldRender::drawInstance (  MapItem* object )
 	if ( !group )
 		return;
 
-// 	glPushMatrix();
-	processTransformStack(instance->transformStack);
-
 	for ( int i = 0; i < group->getSubItemCount(); i++ )
-		drawObject(group->getSubItem(i));
-
-// 	glPopMatrix();
+		buildObject(group->getSubItem(i));
 }
 
 

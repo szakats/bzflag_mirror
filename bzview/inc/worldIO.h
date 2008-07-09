@@ -9,7 +9,7 @@ class WorldParser
 public:
 	WorldParser(World &_world);
 
-	bool read ( std::string filePath );
+	bool read ( const std::string &filePath );
 
 protected:
 	World &world;

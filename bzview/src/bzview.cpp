@@ -2,16 +2,22 @@
 //
 
 #include "bzview.h"
+#include "utils.h"
+#include "worldIO.h"
 
 #ifdef _WIN32
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR    lpCmdLine, int       nCmdShow)
 {
+	std::vector<std::string> params = tokenize(lpCmdLine," ",0,true);
 #else
 int main( int argc, char*argv[] )
 {
+	std::vector<std::string> params;
+	for (int i =1; i < argc; i++)
+		params.push_back(argv[i]);
 #endif
 	Application app;
-	return app.run();
+	return app.run(params);
 }	
 
 Application::Application() : rwin(NULL)
@@ -24,7 +30,7 @@ Application::~Application()
 	lf::deinitLF();
 }
 
-bool Application::init ( void )
+bool Application::init ( const std::vector<std::string> &params )
 {
 	rwin = CLFRender::getInstance().createRenderWindow(core::vector2di(0,0),core::vector2d<s32>(1024,768),32, 32,render::EWCF_AUTOCLOSE, render::EAAF_NONE);
 
@@ -44,7 +50,19 @@ bool Application::init ( void )
 	smgr = rwin->getRenderLayer3D()->getSceneManager();
 	CLFRender::getInstance().setAutoSleep(0);
 
-	setupScene();
+	world.clearItems();
+	// load map
+	if (params.size())
+	{
+		WorldParser parser(world);
+		parser.read (params[0]);
+	}
+
+	if(!world.valid())
+		setupScene();
+	else
+		setupWorldScene();
+
 	setup2D();
 
 	return true;
@@ -55,9 +73,9 @@ bool Application::frame ( void )
 	return CLFRender::getInstance().update();
 }
 
-int Application::run ( void )
+int Application::run ( const std::vector<std::string> &params )
 {
-	if (!init())
+	if (!init(params))
 		return 1;
 
 	while(frame());
@@ -79,6 +97,29 @@ void Application::setup2D( void )
 	res::CTexture *icon = rmgr->loadTexture("bzflag-256x256.png","icon");
 	pane->drawImage( icon, core::vector2d<s32>( rwin->getInnerSize().X - icon->getSize().X , rwin->getInnerSize().Y -icon->getSize().Y ), icon->getSize(),render::ETT_TEST);	
 
+}
+void Application::setupWorldScene( void )
+{
+	cam = new scene::C3DCamera(rwin, core::PI / 3.0f, 1.0f,1000.0f, true); 
+	cam->setBackgroundColor(core::CColorI(128,128,255,0));
+
+//	cam->setTarget(core::vector3df(0,0,0),core::vector3df(0,0,1));
+
+	cam->setPosition(core::vector3df(0.0f,7.0f,-20.0f));
+	rwin->getRenderLayer3D()->add(cam);
+	cam->drop();
+
+	WorldRender worldBuilder(world);
+
+	worldBuilder.build(rmgr,smgr);
+
+	tvItList indexList = world.getItemList();
+
+	for (size_t i = 0; i < indexList.size() i++)
+	{
+		int index = indexList[i];
+		addObject(world.getItem(index));
+	}
 }
 
 void Application::setupScene()

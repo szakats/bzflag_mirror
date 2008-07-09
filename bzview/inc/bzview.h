@@ -8,8 +8,13 @@
 	#pragma warning( disable : 4267 )
 #endif
 
+#include <string>
+#include <vector>
+
 #include <lf/Lightfeather.h>
 using namespace lf;
+
+#include "world.h"
 
 class Application: public input::IKeyListener
 {
@@ -17,23 +22,31 @@ public:
 	Application();
 	virtual ~Application();
 
-	virtual bool init ( void );
+	virtual bool init ( const std::vector<std::string> &params );
 	virtual bool frame ( void );
 
-	int run ( void );
+	int run ( const std::vector<std::string> &params );
 
 	void keyPressed(input::CKeyEvent& event);
 
 protected:
-
 	virtual void setup2D ( void );
 	virtual void setupScene ( void );
+	virtual void setupWorldScene ( void );
+
+	// setup
+	void addObject ( MapItem* object );
+
+	void processBox ( MapItem* object );
+	void processInstance ( MapItem* object );
 
 	render::IRenderWindow		*rwin;
 	CResourceManager			*rmgr;
 	scene::CSceneManager		*smgr;
 	scene::C3DCamera			*cam;
 	scene::CLight				*light; 
+
+	World						world;
 
 };
 

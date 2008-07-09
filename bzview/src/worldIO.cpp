@@ -28,7 +28,7 @@ WorldParser::WorldParser(World &_world) : world(_world)
 {
 }
 
-bool WorldParser::read ( std::string filePath )
+bool WorldParser::read ( const std::string &filePath )
 {
 	COSFile	file(filePath.c_str());
 
