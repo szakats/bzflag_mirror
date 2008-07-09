@@ -25,17 +25,21 @@ void processTransformStack ( AffineTransformationStack &transforms,scene::CModel
 				break;	
 
 			case eSpin:
-				node->setRotation(core::quaternion(vector3df(transforms[i].values[1],transforms[i].values[2],transforms[i].values[3]),transforms[i].values[0]));
+				{
+					//core::quaternion newRot = node->ge
+					//	node->setRotation(core::quaternion(vector3df(transforms[i].values[1],transforms[i].values[2],transforms[i].values[3]),transforms[i].values[0]));
+
+				}
 				break;
 
 			case eScale:
-				glScalef(transforms[i].values[0],transforms[i].values[1],transforms[i].values[2]);
+				//glScalef(transforms[i].values[0],transforms[i].values[1],transforms[i].values[2]);
 				break;
 
 			case eShift:
 			default:
-				node->tr
-				glTranslatef(transforms[i].values[0],transforms[i].values[1],transforms[i].values[2]);
+			//	node->tr
+			//	glTranslatef(transforms[i].values[0],transforms[i].values[1],transforms[i].values[2]);
 				break;
 		}
 	}
@@ -58,19 +62,19 @@ void WorldRender::build ( CResourceManager *_rmgr, scene::CSceneManager *_smgr )
 	// draw some big ass ground
 	tvItList worlds = world.findItemsOfClass(std::string("world"));
 
-	float worldSize[2] = {400,400};
+	unsigned int worldSize[2] = {400,400};
 
 	if ( worlds.size() )
 	{
 		WorldItem* worldItem = (WorldItem*)world.getItem(worlds[0]);
 
 		if ( worldItem->size[0] > 0)
-			worldSize[0] = worldItem->size[0];
+			worldSize[0] = (unsigned int)worldItem->size[0];
 
 		if ( worldItem->size[1] > 0)
-			worldSize[1] = worldItem->size[1];
+			worldSize[1] = (unsigned int)worldItem->size[1];
 		else
-			worldSize[1] = worldSize[0];
+			worldSize[1] = (unsigned int)worldSize[0];
 	}
 
 	buildGrounds(worldSize);
@@ -81,7 +85,7 @@ void WorldRender::build ( CResourceManager *_rmgr, scene::CSceneManager *_smgr )
 		buildObject(world.getItem(objects[i]));
 }
 
-void WorldRender::buildGrounds ( float size[2] )
+void WorldRender::buildGrounds ( unsigned int size[2] )
 {
 	// add the ground
 	res::CTexture *groundTex = rmgr->loadTexture("std_ground.png","std_ground");
@@ -267,14 +271,15 @@ void WorldRender::buildGrounds ( float size[2] )
 // 		glVertex3f(-size[0],-size[1],wallHeight);
 // 
 // 	glEnd();
- }
+//}
 // 
  void WorldRender::buildObject ( MapItem* object )
  {
  	if (!object)
  		return;
  
-	std::string className = tolower(object->getClass());
+	std::string className;
+	tolower(object->getClass(),className);
  
 	transformStack.push_back(object->transformStack);
  	if (className == "box")
@@ -288,7 +293,7 @@ void WorldRender::buildGrounds ( float size[2] )
  }
 
 
-void WorldRender:processStack ( scene::CModelSceneNode *node )
+ void WorldRender::processStack ( scene::CModelSceneNode *node )
 {
 	std::list<AffineTransformationStack>::iterator itr = transformStack.begin();
 	while (itr != transformStack.end())
@@ -321,8 +326,8 @@ void  WorldRender::buildClassicBox ( MapItem* object )
 	smgr->addSceneNode(boxNode);
 
 	// process the transform stack
-	wallNode->setPosition(core::vector3df(size[0],5.0f,0.0f));
-	wallNode->drop();
+	boxNode->setPosition(core::vector3df(box->pos[0],box->pos[2],box->pos[1]));
+	boxNode->drop();
 
 }
 

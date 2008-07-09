@@ -10,11 +10,11 @@ public:
 	WorldRender (World &_world);
 
 	void build ( CResourceManager *_rmgr, scene::CSceneManager *_smgr );
- );
+
 protected:
 	World	&world;
 
-	void buildGrounds ( float size[2] );
+	void buildGrounds ( unsigned int size[2] );
 //	void drawUnderGrounds ( float size[2] );
 
 	void buildObject ( MapItem* object );

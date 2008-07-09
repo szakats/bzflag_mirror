@@ -4,6 +4,7 @@
 #include "bzview.h"
 #include "utils.h"
 #include "worldIO.h"
+#include "worldRender.h"
 
 #ifdef _WIN32
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR    lpCmdLine, int       nCmdShow)
@@ -112,14 +113,6 @@ void Application::setupWorldScene( void )
 	WorldRender worldBuilder(world);
 
 	worldBuilder.build(rmgr,smgr);
-
-	tvItList indexList = world.getItemList();
-
-	for (size_t i = 0; i < indexList.size() i++)
-	{
-		int index = indexList[i];
-		addObject(world.getItem(index));
-	}
 }
 
 void Application::setupScene()
