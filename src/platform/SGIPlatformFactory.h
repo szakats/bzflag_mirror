@@ -1,39 +1,46 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* SGIPlatformFactory:
- *	Factory for Irix platform stuff.
+ *	Factory for SGI Irix platform stuff.
  */
 
-#ifndef BZF_SGI_PLATFORM_FACTORY_H
-#define BZF_SGI_PLATFORM_FACTORY_H
+#ifndef BZF_SGIPLATFORM_FACTORY_H
+#define	BZF_SGIPLATFORM_FACTORY_H
 
-#include "UnixPlatformFactory.h"
+#include "PlatformFactory.h"
 
-class SGIPlatformFactory : public UnixPlatformFactory {
-public:
-	SGIPlatformFactory();
-	~SGIPlatformFactory();
+class SGIPlatformFactory : public PlatformFactory {
+  public:
+			SGIPlatformFactory();
+			~SGIPlatformFactory();
 
-	double				getClock() const;
+    BzfDisplay*		createDisplay(const char* name, const char*);
+    BzfVisual*		createVisual(const BzfDisplay*);
+    BzfWindow*		createWindow(const BzfDisplay*, BzfVisual*);
 
-private:
-	SGIPlatformFactory(const SGIPlatformFactory&);
-	SGIPlatformFactory& operator=(const SGIPlatformFactory&);
+  private:
+			SGIPlatformFactory(const SGIPlatformFactory&);
+    SGIPlatformFactory&	operator=(const SGIPlatformFactory&);
 
-private:
-	double				secondsPerTick;
-	unsigned int		clockZero;
-	volatile unsigned int* iotimer_addr;
+    BzfMedia*		createMedia();
 };
 
-#endif // BZF_UNIX_PLATFORM_FACTORY_H
+#endif // BZF_SGIPLATFORM_FACTORY_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

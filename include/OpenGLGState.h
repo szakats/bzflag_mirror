@@ -1,468 +1,191 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* OpenGLGState:
  *	Encapsulates OpenGL rendering state information.
  */
 
-#ifndef BZF_OPENGL_GSTATE_H
-#define BZF_OPENGL_GSTATE_H
+#ifndef	BZF_OPENGL_GSTATE_H
+#define	BZF_OPENGL_GSTATE_H
 
 #include "common.h"
-#include "OpenGLTexture.h"
-#include "CallbackList.h"
+#include "bzfgl.h"
 
+class OpenGLMaterial;
 class OpenGLGStateRep;
+class OpenGLGStateState;
+class RenderNode;
 
-typedef void			(*GraphicsContextInitializer)(
-							bool destroy, void* userData);
-
-//
-// GStateRep -- not for public consumption
-//
-
-class GState {
-public:
-	enum TexEnv { kModulate, kDecal, kReplace };
-	enum Shading { kConstant, kLinear };
-	enum Func { kNever, kAlways, kEqual, kNotEqual,
-						kLess, kLEqual, kGreater, kGEqual };
-	enum BlendFactor { kZero, kOne,
-						kSrcAlpha, kOneMinusSrcAlpha,
-						kDstAlpha, kOneMinusDstAlpha,
-						kSrcColor, kOneMinusSrcColor,
-						kDstColor, kOneMinusDstColor };
-
-	GState();
-
-public:
-	// gstate builders should not modify these after freezing the gstate rep
-	OpenGLTexture		texture;
-	TexEnv				texEnv;
-	Shading				shadingModel;
-	BlendFactor			blendingSrc;
-	BlendFactor			blendingDst;
-	bool				smoothing;
-	bool				culling;
-	bool				dithering;
-	Func				alphaFunc;
-	float				alphaFuncRef;
-	Func				depthFunc;
-	bool				depthMask;
-	float				pointSize;
-	bool				stipple;
-	int					pass;
-
-	bool				forceTexture;
-	bool				forceBlending;
-	bool				forceSmoothing;
-	bool				forceDithering;
-};
-
-//
-// OpenGLGState -- a bundle of rendering state
-//
+typedef void		(*OpenGLContextFunction)(void* userData);
 
 class OpenGLGState {
-public:
-	OpenGLGState();
-	OpenGLGState(const OpenGLGState&);
-	~OpenGLGState();
-	OpenGLGState&		operator=(const OpenGLGState& state);
+  friend class OpenGLGStateBuilder;
+  friend class ContextInitializer;
+  public:
+			OpenGLGState();
+			OpenGLGState(const OpenGLGState&);
+			OpenGLGState(const OpenGLGStateState&);
+			~OpenGLGState();
+    OpenGLGState&	operator=(const OpenGLGState& state);
+    void		setState() const;
+    bool		getNeedsSorting() const;
+    bool		isBlended() const;
+    bool		isTextured() const;
+    bool		isTextureMatrix() const;
+    bool		isSphereMap() const;
+    bool		isLighted() const;
+    void		addRenderNode(RenderNode* node) const;
+    static void		resetState();
+    static void		clearLists();
+    static void		renderLists();
+    static void		setStipple(GLfloat alpha);
+    static void		setStippleIndex(int index);
+    static int		getStippleIndex(float alpha);
+    static int		getOpaqueStippleIndex();
 
-	// set the device and shadow rendering state to a known state.
-	// this assumes the shadow state may not accurately reflect the
-	// device state.
-	static void			init();
+    static void		init();
+    static bool		haveGLContext();
 
-	// reset the device and shadow rendering state to a known state.
-	// this assumes the shadow rendering state correctly reflects
-	// the device state.  use init() is the device state has been
-	// modified externally.
-	static void			resetState();
+    // these are in OpenGLGState for lack of a better place.  register...
+    // is for clients to add a function to call when the OpenGL context
+    // has been destroyed and must be recreated.  the function is called
+    // by initContext() and initContext() will call all initializers in
+    // the order they were registered, plus reset the OpenGLGState state.
+    //
 
-	// globally enable/disable certain kinds of state.  gstates that
-	// try to set disabled state and don't have the corresponding
-	// force flag set don't modify the state.  these are enabled
-	// by default.
-	static void			enableTexture(bool);
-	static void			enableBlending(bool);
-	static void			enableSmoothing(bool);
-	static void			enableDithering(bool);
+    //
+    // The freeFunc()'s job is to make sure that all references that the
+    // owning object might use are invalidated. It should also deallocate
+    // any GL objects that it might have collected. If the references are
+    // not invalidated, then the owner may end up deleting GL objects that
+    // it does not own, because the references have been changed during the
+    // context switch (ex: another routine might have received the same
+    // references when making new objects.)
+    //
+    // The initFunc()'s job is to reallocate GL objects for its owner.
+    //
+    // Destroying and recreating the OpenGL context is only necessary on
+    // platforms that cannot abstract the graphics system sufficiently.
+    // for example, on win32, changing the display bit depth will cause
+    // most OpenGL drivers to crash unless we destroy the context before
+    // the switch and recreate it afterwards.
+    //
+    static void		registerContextInitializer(
+				OpenGLContextFunction freeFunc,
+				OpenGLContextFunction initFunc,
+				void* userData);
 
-	// change the device and shadow rendering state to match this
-	// object.  only the state that's different from the shadow
-	// state is changed.  direct changes to the device state made
-	// by the client are not detected.  if any have been made then
-	// setState() may not yield the correct device state.
-	void				setState() const;
+    static void		unregisterContextInitializer(
+				OpenGLContextFunction freeFunc,
+				OpenGLContextFunction initFunc,
+				void* userData);
 
-	// get the GState
-	const GState*		getState() const;
+    static void		initContext();
+    static bool		getExecutingFreeFuncs();
+    static bool		getExecutingInitFuncs();
 
-	// instrumentation stuff
-	struct Instruments {
-	public:
-		float			time;
-		unsigned int	nState;
-		unsigned int	nTexture;
-		unsigned int	nTexEnv;
-		unsigned int	nShading;
-		unsigned int	nBlending;
-		unsigned int	nSmoothing;
-		unsigned int	nCulling;
-		unsigned int	nAlphaFunc;
-		unsigned int	nDepthFunc;
-		unsigned int	nDepthMask;
-		unsigned int	nPointSize;
-		unsigned int	nStipple;
-	};
-	static void					instrReset();
-	static const Instruments*	instrGet();
+  private:
+    static void		initGLState();
+    static void		freeStipple(void*);
+    static void		initStipple(void*);
 
-	// these are in OpenGLGState for lack of a better place.  register...
-	// is for clients to add a function to call when the graphics context
-	// has been destroyed and must be recreated.  freeContext() invokes
-	// all the callbacks in the reverse order they were registered with
-	// the destroy parameter set to true;  the callbacks should release
-	// all graphics state.  initContext() invokes all the callbacks in the
-	// order they were registered with the destroy parameter set to
-	// false;  the callbacks may initialize OpenGL state.  initContext()
-	// then resets the rendering state to the default.
-	//
-	// the callbacks must not add or remove context initializer callbacks.
-	//
-	// destroying and recreating the OpenGL context is only necessary on
-	// platforms that cannot abstract the graphics system sufficiently.
-	// for example, on win32, changing the display bit depth will cause
-	// most OpenGL drivers to crash unless we destroy the context before
-	// the switch and recreate it afterwards.
-	static void			addContextInitializer(
-							GraphicsContextInitializer,
-							void* userData = NULL);
-	static void			removeContextInitializer(
-							GraphicsContextInitializer,
-							void* userData = NULL);
-	static void			freeContext();
-	static void			initContext();
+    class ContextInitializer {
+      public:
+	friend class OpenGLGState;
+	ContextInitializer(OpenGLContextFunction freeFunc,
+			   OpenGLContextFunction initFunc,
+			   void* data);
+	~ContextInitializer();
 
-private:
-	// builder needs access to rep to construct from an OpenGLGState
-	friend class OpenGLGStateBuilder;
+	static void executeFreeFuncs();
+	static void executeInitFuncs();
 
-	OpenGLGState(OpenGLGStateRep*);
+	static ContextInitializer* find(OpenGLContextFunction freeFunc,
+					OpenGLContextFunction initFunc,
+					void* data);
 
-private:
-	OpenGLGStateRep*	rep;
-	static CallbackList<GraphicsContextInitializer>	initList;
+      public:
+	OpenGLContextFunction freeCallback;
+	OpenGLContextFunction initCallback;
+	void* userData;
+
+	ContextInitializer* prev;
+	ContextInitializer* next;
+	static ContextInitializer* head;
+	static ContextInitializer* tail;
+    };
+
+  private:
+    OpenGLGStateRep*	rep;
+    static GLuint	stipples;
+  public:
+    static bool executingFreeFuncs;
+    static bool executingInitFuncs;
 };
 
-//
-// GState builder -- creates gstates
-//
+inline bool OpenGLGState::getExecutingFreeFuncs()
+{
+  return executingFreeFuncs;
+}
+inline bool OpenGLGState::getExecutingInitFuncs()
+{
+  return executingInitFuncs;
+}
+
 
 class OpenGLGStateBuilder {
-public:
-	OpenGLGStateBuilder();
-	OpenGLGStateBuilder(const OpenGLGState&);
-	~OpenGLGStateBuilder();
-	OpenGLGStateBuilder &operator=(const OpenGLGState&);
+  public:
+			OpenGLGStateBuilder();
+			OpenGLGStateBuilder(const OpenGLGState&);
+			~OpenGLGStateBuilder();
+    OpenGLGStateBuilder &operator=(const OpenGLGState&);
 
-	// set the default state;  the defaults are the default arguments
-	// to each method to set state.
-	void				reset();
+    void		reset();
+    void		enableTexture(bool = true);
+    void		enableTextureMatrix(bool = true);
+    void		enableSphereMap(bool = true);
+    void		enableMaterial(bool = true);
+    void		resetBlending();
+    void		resetSmoothing();
+    void		resetAlphaFunc();
+    void		setTexture(const int texture);
+    void		setTextureMatrix(const GLfloat* matrix);
+    void		setTextureEnvMode(GLenum mode = GL_MODULATE);
+    void		setMaterial(const OpenGLMaterial& material, bool highQuality);
+    void		setBlending(GLenum sFactor = GL_SRC_ALPHA,
+				    GLenum dFactor = GL_ONE_MINUS_SRC_ALPHA);
+    void		setStipple(float alpha);
+    void		setSmoothing(bool smooth = true);
+    void		setCulling(GLenum culling);
+    void		setShading(GLenum shading = GL_SMOOTH);
+    void		setAlphaFunc(GLenum func = GL_GEQUAL,
+				     GLclampf ref = 0.1f);
+    void		setNeedsSorting(bool);
+    OpenGLGState	getState() const;
 
-	// an invalid (default) texture disables texturing
-	void				setTexture(const OpenGLTexture&);
-	void				setTexEnv(GState::TexEnv = GState::kModulate);
-	void				setShading(GState::Shading = GState::kConstant);
-	void				setBlending(
-							GState::BlendFactor src = GState::kOne,
-							GState::BlendFactor dst = GState::kZero);
-	void				setSmoothing(bool = false);
-	void				setCulling(bool = true);
-	void				setDithering(bool = true);
-	void				setAlphaFunc(GState::Func = GState::kAlways,
-							float ref = 0.0f);
-	void				setDepthFunc(GState::Func = GState::kAlways);
-	void				setDepthMask(bool enabled = true);
-	void				setPointSize(float size = 1.0f);
-	void				setStipple(bool stipple = false);
-	void				setPass(int = 0);
-	void				setForceTexture(bool);
-	void				setForceBlending(bool);
-	void				setForceSmoothing(bool);
-	void				setForceDithering(bool);
+  private:
+    void		init(const OpenGLGState&);
 
-	// get current builder state
-	OpenGLTexture		getTexture() const;
-	GState::TexEnv		getTexEnv() const;
-	GState::Shading		getShading() const;
-	GState::BlendFactor	getBlendingSrc() const;
-	GState::BlendFactor	getBlendingDst() const;
-	bool				getSmoothing() const;
-	bool				getCulling() const;
-	bool				getDithering() const;
-	GState::Func		getAlphaFunc() const;
-	float				getAlphaFuncRef() const;
-	GState::Func		getDepthFunc() const;
-	bool				getDepthMask() const;
-	float				getPointSize() const;
-	bool				getStipple() const;
-	int					getPass() const;
-	bool				getForceTexture() const;
-	bool				getForceBlending() const;
-	bool				getForceSmoothing() const;
-	bool				getForceDithering() const;
-
-	// return a gstate having the current state of the builder
-	OpenGLGState		getState() const;
-
-private:
-	GState*				data;
-	OpenGLGStateRep*	rep;
+  private:
+    OpenGLGStateState*	state;
 };
 
-inline
-void					OpenGLGStateBuilder::setTexture(
-								const OpenGLTexture& texture)
-{
-	data->texture = texture;
-}
-
-inline
-void					OpenGLGStateBuilder::setTexEnv(
-								GState::TexEnv texEnv)
-{
-	data->texEnv = texEnv;
-}
-
-inline
-void					OpenGLGStateBuilder::setShading(
-								GState::Shading model)
-{
-	data->shadingModel = model;
-}
-
-inline
-void					OpenGLGStateBuilder::setBlending(
-								GState::BlendFactor src,
-								GState::BlendFactor dst)
-{
-	data->blendingSrc = src;
-	data->blendingDst = dst;
-}
-
-inline
-void					OpenGLGStateBuilder::setSmoothing(bool enabled)
-{
-	data->smoothing = enabled;
-}
-
-inline
-void					OpenGLGStateBuilder::setCulling(bool enabled)
-{
-	data->culling = enabled;
-}
-
-inline
-void					OpenGLGStateBuilder::setDithering(bool enabled)
-{
-	data->dithering = enabled;
-}
-
-inline
-void					OpenGLGStateBuilder::setAlphaFunc(
-								GState::Func func, float ref)
-{
-	data->alphaFunc    = func;
-	if (ref < 0.0f)
-		data->alphaFuncRef = 0.0f;
-	else if (ref > 1.0f)
-		data->alphaFuncRef = 1.0f;
-	else
-		data->alphaFuncRef = ref;
-}
-
-inline
-void					OpenGLGStateBuilder::setDepthFunc(
-								GState::Func func)
-{
-	data->depthFunc = func;
-}
-
-inline
-void					OpenGLGStateBuilder::setDepthMask(bool enabled)
-{
-	data->depthMask = enabled;
-}
-
-inline
-void					OpenGLGStateBuilder::setPointSize(float size)
-{
-	if (size <= 0.0f)
-		data->pointSize = 1.0f;
-	else
-		data->pointSize = size;
-}
-
-inline
-void					OpenGLGStateBuilder::setStipple(bool enabled)
-{
-	data->stipple = enabled;
-}
-
-inline
-void					OpenGLGStateBuilder::setPass(int pass)
-{
-	data->pass = pass;
-}
-
-inline
-void					OpenGLGStateBuilder::setForceTexture(bool force)
-{
-	data->forceTexture = force;
-}
-
-inline
-void					OpenGLGStateBuilder::setForceBlending(bool force)
-{
-	data->forceBlending = force;
-}
-
-inline
-void					OpenGLGStateBuilder::setForceSmoothing(bool force)
-{
-	data->forceSmoothing = force;
-}
-
-inline
-void					OpenGLGStateBuilder::setForceDithering(bool force)
-{
-	data->forceDithering = force;
-}
-
-inline
-OpenGLTexture			OpenGLGStateBuilder::getTexture() const
-{
-	return data->texture;
-}
-
-inline
-GState::TexEnv			OpenGLGStateBuilder::getTexEnv() const
-{
-	return data->texEnv;
-}
-
-inline
-GState::Shading			OpenGLGStateBuilder::getShading() const
-{
-	return data->shadingModel;
-}
-
-inline
-GState::BlendFactor		OpenGLGStateBuilder::getBlendingSrc() const
-{
-	return data->blendingSrc;
-}
-
-inline
-GState::BlendFactor		OpenGLGStateBuilder::getBlendingDst() const
-{
-	return data->blendingDst;
-}
-
-inline
-bool					OpenGLGStateBuilder::getSmoothing() const
-{
-	return data->smoothing;
-}
-
-inline
-bool					OpenGLGStateBuilder::getCulling() const
-{
-	return data->culling;
-}
-
-inline
-bool					OpenGLGStateBuilder::getDithering() const
-{
-	return data->dithering;
-}
-
-inline
-GState::Func			OpenGLGStateBuilder::getAlphaFunc() const
-{
-	return data->alphaFunc;
-}
-
-inline
-float					OpenGLGStateBuilder::getAlphaFuncRef() const
-{
-	return data->alphaFuncRef;
-}
-
-inline
-GState::Func			OpenGLGStateBuilder::getDepthFunc() const
-{
-	return data->depthFunc;
-}
-
-inline
-bool					OpenGLGStateBuilder::getDepthMask() const
-{
-	return data->depthMask;
-}
-
-inline
-float					OpenGLGStateBuilder::getPointSize() const
-{
-	return data->pointSize;
-}
-
-inline
-bool					OpenGLGStateBuilder::getStipple() const
-{
-	return data->stipple;
-}
-
-inline
-int						OpenGLGStateBuilder::getPass() const
-{
-	return data->pass;
-}
-
-inline
-bool					OpenGLGStateBuilder::getForceTexture() const
-{
-	return data->forceTexture;
-}
-
-inline
-bool					OpenGLGStateBuilder::getForceBlending() const
-{
-	return data->forceBlending;
-}
-
-inline
-bool					OpenGLGStateBuilder::getForceSmoothing() const
-{
-	return data->forceSmoothing;
-}
-
-inline
-bool					OpenGLGStateBuilder::getForceDithering() const
-{
-	return data->forceDithering;
-}
 
 #endif // BZF_OPENGL_GSTATE_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

@@ -1,118 +1,47 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* ViewFrustum
  *	Encapsulates a camera.
  */
 
-#ifndef BZF_VIEW_FRUSTUM_H
-#define BZF_VIEW_FRUSTUM_H
+#ifndef	BZF_VIEW_FRUSTUM_H
+#define	BZF_VIEW_FRUSTUM_H
 
 #include "common.h"
+#include "bzfgl.h"
+#include "Frustum.h"
 
-class ViewFrustum {
-public:
-						ViewFrustum();
-						~ViewFrustum();
+// FIXME -- will need a means for off center projections for
+//	looking through teleporters
 
-	const float*		getEye() const;
-	const float*		getDirection() const;
-	const float*		getUp() const;
-	const float*		getRight() const;
-	float				getFOVx() const;
-	float				getFOVy() const;
-	float				getNear() const;
-	float				getFar() const;
-	const float*		getViewMatrix() const;
-	const float*		getProjectionMatrix() const;
-
-	void				setView(const float* eye, const float* target);
-	void				setProjection(float fovx, float aspectRatio,
-							float m_near, float m_far);
-	void				setOffset(float eyeOffset, float focalPlane);
-
-	static const float*	getTransform();
-
-private:
-	float				eye[3];
-	float				forward[3], right[3], up[3];
-	float				m_near, m_far;
-	float				fovx, fovy;
-	float				viewMatrix[16];
-	float				projectionMatrix[16];
+class ViewFrustum : public Frustum {
+  public:
+    ViewFrustum();
+    ~ViewFrustum();
+    void		executeProjection() const;
+    void		executeDeepProjection() const;
+    void		executeView() const;
+    void		executeOrientation() const;
+    void		executePosition() const;
+    void		executeBillboard() const;
 };
 
-//
-// ViewFrustum
-//
-
-inline
-const float*			ViewFrustum::getEye() const
-{
-	return eye;
-}
-
-inline
-const float*			ViewFrustum::getDirection() const
-{
-	return forward;
-}
-
-inline
-const float*			ViewFrustum::getUp() const
-{
-	return up;
-}
-
-inline
-const float*			ViewFrustum::getRight() const
-{
-	return right;
-}
-
-inline
-float					ViewFrustum::getFOVx() const
-{
-	return fovx;
-}
-
-inline
-float					ViewFrustum::getFOVy() const
-{
-	return fovy;
-}
-
-inline
-float					ViewFrustum::getNear() const
-{
-	return m_near;
-}
-
-inline
-float					ViewFrustum::getFar() const
-{
-	return m_far;
-}
-
-inline
-const float*			ViewFrustum::getViewMatrix() const
-{
-	return viewMatrix;
-}
-
-inline
-const float*			ViewFrustum::getProjectionMatrix() const
-{
-	return projectionMatrix;
-}
-
 #endif // BZF_VIEW_FRUSTUM_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

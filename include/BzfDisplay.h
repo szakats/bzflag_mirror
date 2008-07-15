@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* BzfDisplay:
@@ -15,68 +15,81 @@
  */
 
 #ifndef BZF_DISPLAY_H
-#define BZF_DISPLAY_H
+#define	BZF_DISPLAY_H
 
 #include "common.h"
 
 class BzfEvent;
 
 class BzfDisplay {
-public:
-	BzfDisplay();
-	virtual ~BzfDisplay();
+  public:
+			BzfDisplay();
+    virtual		~BzfDisplay();
 
-	virtual bool		isValid() const = 0;
-	virtual bool		isEventPending() const = 0;
-	virtual bool		getEvent(BzfEvent&) const = 0;
+    virtual bool	isValid() const = 0;
+    virtual bool	isEventPending() const = 0;
+    virtual bool	getEvent(BzfEvent&) const = 0;
+    virtual bool	peekEvent(BzfEvent&) const = 0;
 
-	int					getWidth() const;
-	int					getHeight() const;
+    virtual bool	hasGetKeyMode() {return false;};
+    virtual void	getModState(bool &shift, bool &control, bool &alt) {
+      shift = false; control = false; alt = false;};
 
-	void				setPassthrough(bool);
-	bool				isPassthrough() const;
-	void				setPassthroughSize(int w, int h);
-	int					getPassthroughWidth() const;
-	int					getPassthroughHeight() const;
+    int			getWidth() const;
+    int			getHeight() const;
+    void		setFullScreenFormat(int);
 
-public:
-	class ResInfo {
-	public:
-						ResInfo(const char* name, int w, int h, int r);
-						~ResInfo();
-	public:
-		char*			name;
-		int				width;
-		int				height;
-		int				refresh;
-	};
+    void		setPassthroughSize(int w, int h);
+    int			getPassthroughWidth() const;
+    int			getPassthroughHeight() const;
 
-	int					getNumResolutions() const;
-	const ResInfo*		getResolution(int index) const;
-	int					getResolution() const;
-	int					getDefaultResolution() const;
-	bool				setResolution(int index);
-	bool				setDefaultResolution();
-	int					findResolution(const char* name) const;
-	bool				isValidResolution(int index) const;
+  public:
+    class ResInfo {
+      public:
+			ResInfo(const char* name, int w, int h, int r);
+			~ResInfo();
+      public:
+	char*		name;
+	int		width;
+	int		height;
+	int		refresh;
+    };
 
-protected:
-	void				initResolutions(ResInfo**, int num, int current);
+    int			getNumResolutions() const;
+    const ResInfo*	getResolution(int index) const;
+    int			getResolution() const;
+    int			getDefaultResolution() const;
+    bool		setResolution(int index);
+    bool		setDefaultResolution();
+    int			findResolution(const char* name) const;
+    bool		isValidResolution(int index) const;
 
-private:
-	BzfDisplay(const BzfDisplay&);
-	BzfDisplay&			operator=(const BzfDisplay&);
+  protected:
+    void		initResolutions(ResInfo**, int num, int current);
 
-	virtual bool		doSetResolution(int) = 0;
-	virtual bool		doSetDefaultResolution();
+  private:
+			BzfDisplay(const BzfDisplay&);
+    BzfDisplay&		operator=(const BzfDisplay&);
 
-private:
-	bool				passthrough;
-	int					passWidth, passHeight;
-	int					numResolutions;
-	int					defaultResolution;
-	int					currentResolution;
-	ResInfo**			resolutions;
+    virtual bool	doSetResolution(int) = 0;
+    virtual bool	doSetDefaultResolution();
+
+  private:
+    int			passWidth, passHeight;
+    int			numResolutions;
+    int			defaultResolution;
+    int			currentResolution;
+    ResInfo**		resolutions;
+  protected:
+    int		 modeIndex;
 };
 
 #endif // BZF_DISPLAY_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8
