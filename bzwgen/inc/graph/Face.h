@@ -51,19 +51,16 @@ private:
 public:
   /**
    * Constructor, takes only a pointer to the Graph that the Face 
-   * belongs to. Edges need to be added manualy via addEdge in clockwise order.
+   * belongs to. Edges need to be added manually via addEdge in clockwise order.
    */
-  Face(PlanarGraph* _graph) : graph(_graph) {}
+  Face( PlanarGraph* _graph ) : graph(_graph) {}
   /** 
    * Adds an Edge to the face. Note that edges NEED to be added in clockwise 
    * order, or else most of the algorithms here won't work. Edges are still
    * belonging to the Graph class, Face just holds pointers to them. Returns
-   * the index of the added Edge.
+   * the index of the added Edge. Also sets the edge face owner to self.
    */
-  size_t addEdge(Edge* edge) {
-    edges.push_back(edge);
-    return edges.size()-1;
-  }
+  size_t addEdge( Edge* edge );
   /** 
    * Returns the size (amount of stored Edge s) of the Face.
    */

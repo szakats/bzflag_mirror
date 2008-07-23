@@ -99,6 +99,18 @@ public:
   Edge* getFirstIncomingEdge( ) {
     return incoming.first( );
   }
+  /**
+   * Returns a reference to the incoming EdgeList.
+   */
+  SortedEdgeList& getIncomingList( ) {
+    return incoming;
+  }
+  /**
+   * Returns a reference to the outgoing EdgeList.
+   */
+  SortedEdgeList& getOutgoingList( ) {
+    return outgoing;
+  }
 private:
   /** 
    * Blocked default constructor.

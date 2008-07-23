@@ -80,6 +80,17 @@ public:
   void clear(size_t index) {
     list[index] = NULL;
   }
+  /**
+   * Returns an unmanaged copy of the internal vector of elements. The
+   * copy however is without "holes".
+   */
+  std::vector<T> getCopy() const {
+    std::vector<T> result;
+    for (size_t i = 0; i < list.size(); i++) {
+      if (list[i]) result.push_back(list[i]);
+    }
+    return result;
+  }
 
 };
 

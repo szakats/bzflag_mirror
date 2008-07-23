@@ -11,6 +11,7 @@
  */
 
 #include "graph/Face.h"
+#include "graph/Edge.h"
 #include "graph/PlanarGraph.h"
 
 namespace graph {
@@ -22,6 +23,13 @@ NodeVector Face::getNodes() {
   }
   return result;
 }
+
+size_t Face::addEdge( Edge* edge ) {
+  edges.push_back( edge );
+  edge->setFace( this );
+  return edges.size() - 1;
+}
+
 
 }
 

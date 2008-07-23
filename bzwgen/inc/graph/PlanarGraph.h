@@ -48,7 +48,7 @@ public:
   /** 
    * Default constructor. Creates an empty graph.
    */
-  PlanarGraph( ) : nodes( 0 ), edges( 0 ) {} 
+  PlanarGraph( ) : nodes( 0 ), edges( 0 ), faces( 0 ) {} 
   /** 
    * Adds a node to the graph. As convenience returns the added node. 
    */
@@ -137,7 +137,34 @@ public:
     }
     return true;
   }
+
+
+  /**
+   * Reads face information from the graph. The reading is achieved by
+   * a x-coordinate sweep calculating the Minimal Cycle Basis. Unless the
+   * outer rim of the graph is marked as assigned, or is single linked,
+   * the method will also return the bounding (outer) face.
+   */
+  void readFaces();
 private:
+  /** 
+   * Extracts the faces assigned to the current node. Works only on 
+   * edges that don't have a face assigned to them. Extracted face 
+   * edges are given pointers to the extracted face.
+   */
+  void extractFaces( Node* node );
+  /** 
+   * Extracts the face assigned with the passed edge. Marks all face's
+   * edges to point to the extracted face.
+   */
+  void extractFace( Edge* edge );
+  /**
+   * Does a comparison on nodes by their X coordinate. Used by the
+   * Minimal Cycle Basis extraction algorithm in readFaces.
+   */
+  static bool compareNodesX (const Node* a, const Node* b) {
+    return a->vector().x < b->vector().x;
+  }
   /** 
    * Adds a single edge to the graph. As convenience returns the passed 
    * edge. 

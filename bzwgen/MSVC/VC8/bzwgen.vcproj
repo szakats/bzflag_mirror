@@ -552,6 +552,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\graph\PlanarGraph.cxx"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\graph\SortedEdgeList.cxx"
 					>
 				</File>

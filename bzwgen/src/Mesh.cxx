@@ -115,7 +115,7 @@ void Mesh::expandFace( int faceID, double amount  ) {
     Vertex a = getFaceEdge( faceID, math::modPrev( i, size ), math::modNext( i, size ) );
     Vertex b = getFaceEdge( faceID, math::modPrev( i, size ), i );
     double sign = math::sign( b.cross( a ).dot( normal ) );
-    nv[i] = getFaceVertex( fid, i) + extensionVertex( 
+    nv[i] = getFaceVertex( faceID, i) + extensionVertex( 
       f[faceID]->getVertex( math::modPrev( i, size ) ), 
       f[faceID]->getVertex( math::modNext( i, size ) ),
       f[faceID]->getVertex( i ) ) * amount * sign;
@@ -451,7 +451,7 @@ void Mesh::textureFace( int faceID, double snap, double tile ) {
 }
 
 void Mesh::freeFace( int faceID ) {
-  f[fid]->setOutput( false );
+  f[faceID]->setOutput( false );
   for ( size_t i = 0; i < f[faceID]->size(); i++ ) {
     freeVertices.push_back( f[faceID]->getVertex( i ) );
   }

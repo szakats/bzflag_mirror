@@ -20,8 +20,11 @@
 
 #include <vector>
 #include <cassert>
+#include "Vector2D.h"
 #include "MathUtils.h"
 #include "graph/forward.h"
+#include "graph/Node.h"
+
 
 // The Edge class is a part of Graph class
 namespace graph {
@@ -43,7 +46,7 @@ private:
    */
   Edge* reverse;
   /** 
-   * Pointer to  face that this edge belongs to. Used when reconsructing
+   * Pointer to  face that this edge belongs to. Used when reconstructing
    * a face map for the given PlanarGraph.
    */
   Face* face;
@@ -59,11 +62,11 @@ public:
    * adds the edge to the revelant nodes, DOESN'T check for
    * reverse Edge however.
    */
-  Edge(Node* _source, Node* _target) 
-    : source(_source), target(_target), reverse(NULL), face(NULL), reversed(false) 
+  Edge( Node* _source, Node* _target ) 
+    : source( _source ), target( _target ), reverse( NULL ), face( NULL ), reversed( false ) 
   {
-    source->addOutgoing(this);
-    target->addIncoming(this);
+    source->addOutgoing( this );
+    target->addIncoming( this );
   }
   /**
    * Sets the reverse edge. Also sets the reverse edge for the edge passed,
@@ -88,6 +91,18 @@ public:
    */
   Node* getTarget( ) const {
     return target;
+  }
+  /**
+   * Returns the face (if assigned) that this edge is part of.
+   */
+  Face* getFace( ) const {
+    return face;
+  }
+  /**
+   * Sets the face that this edge is part of.
+   */
+  void setFace( Face* _face ) {
+    face = _face;
   }
   /** 
    * Returns the angle (in radians) between (0,1) vector and the edge.
