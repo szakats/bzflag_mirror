@@ -35,8 +35,8 @@ class Generator;
  * @class Zone
  * @brief Class defining a map zone
  * 
- * A zone represents a part of the map -- this part can be of arbitral 
- * shape, representede internally as a pointer to a graph::Face. Zone 
+ * A zone represents a part of the map -- this part can be of arbitrary 
+ * shape, represented internally as a pointer to a graph::Face. Zone 
  * itself is a abstract class, because it doesn't hold any information 
  * about generation nor output.
  */
@@ -52,7 +52,7 @@ protected:
   graph::Face* face;
 public:
   /**
-   * Constructor, initializes the neccessary data, except that 
+   * Constructor, initializes the necessary data, except that 
    * does nothing. Initialized zones should only store data. All
    * generations of meshes should be done using run().
    */
@@ -60,16 +60,16 @@ public:
     : generator( _generator ), face( _face ) {};
   /**
    * Runs mesh generation, preparing the zone for output. Pure 
-   * virtual method to be overriden.
+   * virtual method to be overridden.
    */
   virtual void run( ) = 0;
   /**
    * Outputs the mesh information to the given Output object.
-   * Pure virtual method to be overriden.
+   * Pure virtual method to be overridden.
    */
   virtual void output( Output& ) = 0;
   /**
-   * Virtual destructor to supress warnings. 
+   * Virtual destructor to suppress warnings. 
    */
   virtual ~Zone( ) {};
 private:

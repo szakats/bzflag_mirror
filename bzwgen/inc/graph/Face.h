@@ -48,12 +48,16 @@ private:
    * Pointer to the graph of which this face is part of.
    */
   PlanarGraph* graph;
+  /**
+  * Pointer to a subgraph. Unless explicitly created is always null.
+  */
+  PlanarGraph* subgraph;
 public:
   /**
    * Constructor, takes only a pointer to the Graph that the Face 
    * belongs to. Edges need to be added manually via addEdge in clockwise order.
    */
-  Face( PlanarGraph* _graph ) : graph(_graph) {}
+  Face( PlanarGraph* _graph ) : graph( _graph ), subgraph( NULL ) {}
   /** 
    * Adds an Edge to the face. Note that edges NEED to be added in clockwise 
    * order, or else most of the algorithms here won't work. Edges are still
@@ -64,18 +68,36 @@ public:
   /** 
    * Returns the size (amount of stored Edge s) of the Face.
    */
-  size_t size() const {
-    return edges.size();
+  size_t size( ) const {
+    return edges.size( );
   }
   /**
    * Returns a vector of Node's that are a part of this face.
    */
-  NodeVector getNodes();
+  NodeVector getNodes( ) const;
+  /**
+   * Initializes subgraph. The subgraph initially will be made of a copy of 
+   * the face that is it's parent. As a convenience, returns a pointer
+   * to the created subgraph. If the graph created would be "degenerate" 
+   * (i.e. either a point or a single double-edge) then the method returns 
+   * NULL.
+   */
+  PlanarGraph* initializeSubgraph( );
+  /** 
+   * Returns a pointer to the subgraph, NULL if no subgraph is stored.
+   */
+  PlanarGraph* getSubgraph( ) const {
+    return graph;
+  }
+  /** 
+   * Destructor. Destroys the underlying subgraph if one exists.
+   */
+  ~Face( );
 private:
   /** Blocked default constructor */
-  Face() {}
+  Face( ) {}
   /** Blocked copy constructor */
-  Face(const Face& ) {}
+  Face( const Face& ) {}
 
 };
 

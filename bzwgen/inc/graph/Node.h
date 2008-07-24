@@ -63,6 +63,15 @@ public:
   Node( PlanarGraph* _graph, float x, float y ) 
     : coord( x, y ), graph( _graph ) {} 
   /** 
+   * Copy from pointer constructor.
+   */
+  Node( Node* node, PlanarGraph* _graph = NULL ) : coord( node->coord ) {
+    if (_graph) 
+      graph = node->graph;
+    else 
+      graph = _graph;
+  }
+  /** 
    * Adds a incoming edge.
    */
   void addIncoming( Edge* edge ) { 

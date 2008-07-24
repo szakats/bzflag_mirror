@@ -21,7 +21,7 @@
 #include <string>
 #include "MathUtils.h"
 
-// I'll maybe think later of adding namespaces
+// I'll maybe think later of adding name spaces
 //namespace bzwgen {
 //namespace geometry {
 
@@ -30,7 +30,7 @@
  * @brief Vector template in two dimensional space.
  *
  * Current implementation is based on templates. Typedefs for both float and
- * double version are provided for convieniece. 
+ * double version are provided for convenience. 
  */
 template <class T>
 class Vector2D

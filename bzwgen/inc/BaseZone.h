@@ -36,8 +36,8 @@ public:
   BaseZone( Generator* _generator, graph::Face* _face, bool _ctfSafe ) 
     : Zone( _generator,_face ), color( 1 ), ctfSafe( _ctfSafe ) {};
   /**
-   * Runs the Zone generation. As a BZFlag base is a native BZW object, this method 
-   * only assignes each base a color.
+   * Runs the Zone generation. As a BZFlag base is a native BZW object, this
+   * method only assigns each base a color.
    */
   virtual void run() {
     color = colorCount;
