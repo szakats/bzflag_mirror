@@ -59,24 +59,24 @@ public:
    * it's parameter. The ruleset needs to have MATROAD and 
    * MATROADX defined. 
    */
-  Generator(RuleSet* _ruleset) : ruleset(_ruleset) {
-    roadid  = math::roundToInt(ruleset->getAttr("MATROAD"));
-    roadxid = math::roundToInt(ruleset->getAttr("MATROADX"));
+  Generator( RuleSet* _ruleset ) : ruleset( _ruleset ) {
+    roadid  = math::roundToInt( ruleset->getAttr( "MATROAD" ) );
+    roadxid = math::roundToInt( ruleset->getAttr( "MATROADX" ) );
   }
   /** 
    * Parse command line or config file options. Virtual so the
    * specific generator can overload it. Generator parses the size,
    * bases and ctfsafe options. 
    */
-  virtual void parseOptions(CCommandLineArgs* opt);
+  virtual void parseOptions( CCommandLineArgs* opt );
   /** 
    * Runs the generator. Calls run on every stored zone. 
    */
-  virtual void run();
+  virtual void run( );
   /** 
    * Returns the size of the world. 
    */
-  inline int getSize() const { 
+  inline int getSize( ) const { 
     return size; 
   }
   /** 
@@ -89,8 +89,8 @@ public:
    * Adds a zone pointer to the zones handled by this Generator.
    * The generator will dispose of the zone at destruction.
    */
-  inline void addZone(Zone* zone) {
-    zones.push_back(zone);
+  inline void addZone( Zone* zone ) {
+    zones.push_back( zone );
   }
   /** 
    * Returns the loaded RuleSet. 
@@ -101,18 +101,19 @@ public:
   /** 
    * Outputs data. Goes through all the stored zones and outputs them.
    */
-  virtual void output(Output& out);
+  virtual void output( Output& out );
   /** 
    * Returns the requested Material by material ID. 
    */
-  Material* getMaterial(int id) { 
-    return &mats[id]; 
+  Material* getMaterial( int id ) { 
+    return &mats[ id ]; 
   }
   /** 
    * Destructor, frees the materials, the zones, but not the ruleset. 
    */
-  virtual ~Generator() {
-    for (ZoneVectIter itr = zones.begin(); itr!= zones.end(); ++itr) delete (*itr);
+  virtual ~Generator( ) {
+    for ( ZoneVectIter itr = zones.begin(); itr!= zones.end(); ++itr ) 
+      delete ( *itr );
   }
 };
 

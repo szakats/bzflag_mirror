@@ -88,13 +88,13 @@ public:
   /** 
    * Returns node by ID.
    */
-  Node* getNode( size_t id ) {
+  Node* getNode( size_t id ) const {
     return nodeList.get( id );
   }
   /** 
    * Returns edge by ID.
    */
-  Edge* getEdge( size_t id ) {
+  Edge* getEdge( size_t id ) const {
     return edgeList.get( id );
   }
   /** 

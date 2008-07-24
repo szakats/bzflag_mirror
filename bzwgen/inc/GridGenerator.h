@@ -30,7 +30,7 @@
  * This class is a Generator class that works on a discreet and axis-aligned
  * grid. The zones for this generator are created from a discreet 2D map
  * that is created by subdivision of the world with axis-aligned rows and
- * collumns representing roads.
+ * columns representing roads.
  */
 
 class GridGenerator : public Generator {
@@ -38,21 +38,21 @@ public:
   /** 
    * Constructor, just runs it's inherited constructor. 
    */
-  GridGenerator(RuleSet* _ruleset) : Generator(_ruleset), map(NULL) {};
+  GridGenerator( RuleSet* _ruleset ) : Generator( _ruleset ), map( NULL ) {};
   /** 
    * Parses options. GridGenerator parses gridsnap, gridsize,
    * subdiv and fullslice options
    */
-  void parseOptions(CCommandLineArgs* opt);
+  void parseOptions( CCommandLineArgs* opt );
   /**
-   * Runs the generator. First generates the grid map, then pushes the calculated 
-   * zones, and let's inherited run() handle zone generation.
+   * Runs the generator. First generates the grid map, then pushes the 
+   * calculated zones, and let's inherited run() handle zone generation.
    */
-  void run();
+  void run( );
   /**
    * Destructor, frees the allocated map.
    */
-  virtual ~GridGenerator() {
+  virtual ~GridGenerator( ) {
     delete map;
   }
 private:
@@ -69,7 +69,7 @@ private:
   };
   /** A discreet map node. Contains the cell type and zoneID*/
   struct DiscreetMapNode {
-    /** The node's celltype. */
+    /** The node's CellType. */
     CellType type;
     /** Zone ID. The index in the zone array. -1 if no zone is assigned. */
     int zone;
@@ -88,50 +88,50 @@ private:
   int gridSize;
   /**
    * Plots a road from the given point, either horizontally or
-   * vertically. Collision states wether the plotting should be
+   * vertically. Collision states whether the plotting should be
    * stopped if another road is hit, or should it go through the
    * whole map (full slice).
    */
-  void plotRoad(int x, int y, bool horiz, bool collision = false);
+  void plotRoad( int x, int y, bool horiz, bool collision = false );
   /**
-   * Performs a random road slice on the map. Full states wether 
+   * Performs a random road slice on the map. Full states whether 
    * it should be a full slice or subdivided one, snapmod controls
-   * snap value, and horiz states wether it should be horizontal or
+   * snap value, and horiz states whether it should be horizontal or
    * vertical.
    */
-  void performSlice(bool full, int snapmod, bool horiz);
+  void performSlice( bool full, int snapmod, bool horiz );
   /**
    * Takes the given coordinates, and creates a zone starting at 
    * those coordinates that is as big as possible (grows it until
    * it reaches another zone boundary).
    */
-  void growZone(int x,int y,CellType type);
+  void growZone( int x,int y,CellType type );
   /** 
    * Returns the DiscreetMapNode at the given coordinates. Returns 
    * a reference so the node can be easily modified.
    */
-  inline DiscreetMapNode& node(int x, int y)	{ 
-    return map[y*gridSize+x]; 
+  inline DiscreetMapNode& node( int x, int y )	{ 
+    return map[ y * gridSize + x ]; 
   }
   /** 
    * Fills the given area (ax,ay)x(bx,by) with given cell type.
    */
-  void setAreaType(int ax, int ay, int bx, int by, CellType type) {
-    for (int x = ax; x < bx; x++) 
-      for (int y = ay; y < by; y++) 
-        node(x,y).type = type;
+  void setAreaType( int ax, int ay, int bx, int by, CellType type ) {
+    for ( int x = ax; x < bx; x++ ) 
+      for ( int y = ay; y < by; y++ ) 
+        node( x, y ).type = type;
   }
   /** 
    * Translates a grid coordinate into a world coordinate
    */
-  float worldCoord(int a) const { 
-    return (float)(a-gridSize/2)*gridStep; 
+  float worldCoord( int a ) const { 
+    return ( float ) ( a - gridSize / 2 ) * gridStep; 
   }
   /**
    * Creates a "fake face" in the Generator graph for a zone of the 
    * given coordinates.
    */
-  graph::Face* createFakeFace(int ax, int ay, int bx, int by);
+  graph::Face* createFakeFace( int ax, int ay, int bx, int by );
 };
 
 #endif /* __GRIDGENERATOR_H__ */

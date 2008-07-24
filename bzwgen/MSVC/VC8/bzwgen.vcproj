@@ -396,50 +396,6 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath="..\..\src\BZWGenerator.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\BZWGeneratorPlugin.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\BZWGeneratorStandalone.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\Generator.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\GridGenerator.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\Mesh.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\MultiFace.cxx"
-				>
-			</File>
-			<Filter
-				Name="GPLib"
-				>
-				<File
-					RelativePath="..\..\src\commandArgs.cxx"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\OSFile.cxx"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\TextUtils.cxx"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="Language"
 				>
@@ -572,6 +528,62 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Application"
+				>
+				<File
+					RelativePath="..\..\src\BZWGenerator.cxx"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\BZWGeneratorPlugin.cxx"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\BZWGeneratorStandalone.cxx"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Generators"
+				>
+				<File
+					RelativePath="..\..\src\Generator.cxx"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\GridGenerator.cxx"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Geometry"
+				>
+				<File
+					RelativePath="..\..\src\Mesh.cxx"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\MultiFace.cxx"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="GPLib"
+				>
+				<File
+					RelativePath="..\..\src\commandArgs.cxx"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\OSFile.cxx"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\TextUtils.cxx"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -579,51 +591,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\inc\BZWGenerator.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\BZWGeneratorPlugin.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\BZWGeneratorStandalone.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\Face.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\Generator.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\inc\globals.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\inc\GridGenerator.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\Material.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\Mesh.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\MultiFace.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\inc\Output.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\Random.h"
 				>
 			</File>
 			<Filter
@@ -683,10 +655,14 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Geometry"
+				Name="Math"
 				>
 				<File
 					RelativePath="..\..\inc\MathUtils.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\Random.h"
 					>
 				</File>
 				<File
@@ -747,6 +723,54 @@
 				</File>
 				<File
 					RelativePath="..\..\inc\Zone.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Generators"
+				>
+				<File
+					RelativePath="..\..\inc\Generator.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\GridGenerator.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Application"
+				>
+				<File
+					RelativePath="..\..\inc\BZWGenerator.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\BZWGeneratorPlugin.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\BZWGeneratorStandalone.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Geometry"
+				>
+				<File
+					RelativePath="..\..\inc\Face.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\Material.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\Mesh.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\inc\MultiFace.h"
 					>
 				</File>
 			</Filter>
