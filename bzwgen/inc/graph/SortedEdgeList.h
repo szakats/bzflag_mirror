@@ -36,8 +36,8 @@ class SortedEdgeList
 {
 private:
   /** 
-  * Structure for edge comparison. 
-  */
+   * Structure for edge comparison. 
+   */
   struct EdgeCompare {
     /** 
     * Edge comparision function. Comparision is done by comparing 

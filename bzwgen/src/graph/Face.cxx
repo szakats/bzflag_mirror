@@ -29,21 +29,21 @@ PlanarGraph* Face::initializeSubgraph( ) {
 
   // add node-edges pairs for each edge except the last
   for ( size_t i = 0; i < edges.size()-1; i++ ) {
-    Node* next = new Node( edge[i]->getTarget(), subgraph );
+    Node* next = new Node( edges[i]->getTarget(), subgraph );
     subgraph->addNode( next );
-    subgraph->addEdge( new Edge( prev, next ) );
+    subgraph->addConnection( prev, next );
     prev = next;
   }
 
   // add the last edge that closes the loop
-  subgraph->addEdge( new Edge( prev, start ) );
+  subgraph->addConnection( prev, start );
 
   return subgraph;
 }
 
-NodeVector Face::getNodes() {
+NodeVector Face::getNodes() const {
   NodeVector result;
-  for ( EdgeVectorIterator itr = edges.begin(); itr!= edges.end(); ++itr ) {
+  for ( EdgeVector::const_iterator itr = edges.begin(); itr!= edges.end(); ++itr ) {
     result.push_back( (*itr)->getSource() );
   }
   return result;

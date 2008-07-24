@@ -59,11 +59,12 @@ private:
 public:
   /** 
    * Constructor that takes source and target as parameters,
-   * adds the edge to the revelant nodes, DOESN'T check for
+   * adds the edge to the revel ant nodes, DOESN'T check for
    * reverse Edge however.
    */
   Edge( Node* _source, Node* _target ) 
-    : source( _source ), target( _target ), reverse( NULL ), face( NULL ), reversed( false ) 
+    : source( _source ), target( _target ), reverse( NULL ), face( NULL ), 
+      reversed( false ) 
   {
     source->addOutgoing( this );
     target->addIncoming( this );
