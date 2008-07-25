@@ -7,11 +7,14 @@ LDFLAGS =
 FILES = \
 	src/graph/Face.cxx \
 	src/graph/Node.cxx \
+	src/graph/PlanarGraph.cxx \
+	src/graph/SortedEdgeList.cxx \
 	src/BZWGenerator.cxx \
 	src/BuildZone.cxx \
 	src/FloorZone.cxx \
 	src/Generator.cxx \
 	src/GridGenerator.cxx \
+	src/FaceGenerator.cxx \
 	src/Mesh.cxx \
 	src/MultiFace.cxx \
 	src/Operation.cxx \

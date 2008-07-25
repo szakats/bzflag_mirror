@@ -548,6 +548,10 @@
 				Name="Generators"
 				>
 				<File
+					RelativePath="..\..\src\FaceGenerator.cxx"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\Generator.cxx"
 					>
 				</File>
@@ -729,6 +733,10 @@
 			<Filter
 				Name="Generators"
 				>
+				<File
+					RelativePath="..\..\inc\FaceGenerator.h"
+					>
+				</File>
 				<File
 					RelativePath="..\..\inc\Generator.h"
 					>
