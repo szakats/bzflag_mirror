@@ -25,7 +25,7 @@
 
 /** 
  * @class GridGenerator
- * @brief Abstract class for the map generator. 
+ * @brief Grid based generator class. 
  *
  * This class is a Generator class that works on a discreet and axis-aligned
  * grid. The zones for this generator are created from a discreet 2D map
