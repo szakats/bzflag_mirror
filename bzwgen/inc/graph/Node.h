@@ -97,7 +97,7 @@ public:
   /**
    * Returns the first outgoing edge. First in this case is somewhat
    * meaningless -- the edge is the smallest one in the sense of clockwise
-   * comparision to the (0,1) vector.
+   * comparison to the (0,1) vector.
    */
   Edge* getFirstOutgoingEdge( ) {
     return outgoing.first( );
@@ -119,6 +119,12 @@ public:
    */
   SortedEdgeList& getOutgoingList( ) {
     return outgoing;
+  }
+  /** 
+   * Returns the distance to the given coord
+   */
+  float distanceTo( Vector2Df v ) {
+    return (coord - v).length();
   }
 private:
   /** 

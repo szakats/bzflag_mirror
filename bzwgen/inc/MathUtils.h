@@ -40,6 +40,16 @@ inline T sign(T f) {
 }
 
 /** 
+ * Returns the absolute value of the passed float/double. The function 
+ * is templated to be both used with any numeric type. 
+ */
+template <class T>
+inline T abs(T f) { 
+  if (f >= 0) return f; 
+  return -f; 
+}
+
+/** 
  * Returns the smaller of the two values. Thanks to templating may be 
  * used on any numeric type. 
  */

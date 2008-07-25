@@ -26,6 +26,7 @@ void Node::orphanize() {
   outgoing.clear();
 }
 
+
 }
 
 // Local Variables: ***

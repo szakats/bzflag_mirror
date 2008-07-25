@@ -59,7 +59,58 @@ namespace graph {
     faceList.add( face );
     ++faces;
   }
-}
+
+  Node* PlanarGraph::closestNode( const Vector2Df v ) {
+    if (nodes == 0) return NULL;
+
+    // get first existing node
+    Node* result = NULL;
+    {
+      size_t i = 0;
+      while ( result == NULL ) {
+        result = nodeList.get(i);
+        i++;
+      }
+    }
+    float distance = result->distanceTo( v );
+
+    for (size_t i = 0; i < nodeList.size(); i++) {
+      if (nodeList.get(i) != NULL) {
+        if (nodeList.get(i)->distanceTo( v ) < distance) {
+          result = nodeList.get(i);
+          distance = result->distanceTo( v );
+        }
+      }
+    }
+    return result;
+  }
+
+  Edge* PlanarGraph::closestEdge( const Vector2Df v ) {
+    if (edges == 0) return NULL;
+
+    // get first existing node
+    Edge* result = NULL;
+    {
+      size_t i = 0;
+      while ( result == NULL ) {
+        result = edgeList.get(i);
+        i++;
+      }
+    }
+    float distance = result->distanceTo( v );
+
+    for (size_t i = 0; i < edgeList.size(); i++) {
+      if (edgeList.get( i ) != NULL) {
+        if (edgeList.get( i )->distanceTo( v ) < distance) {
+          result = edgeList.get( i );
+          distance = result->distanceTo( v );
+        }
+      }
+    }
+    return result;
+  }
+
+} // end namespace graph
 
 // Local Variables: ***
 // mode:C++ ***

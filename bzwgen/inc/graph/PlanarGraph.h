@@ -137,8 +137,6 @@ public:
     }
     return true;
   }
-
-
   /**
    * Reads face information from the graph. The reading is achieved by
    * a x-coordinate sweep calculating the Minimal Cycle Basis. Unless the
@@ -146,6 +144,20 @@ public:
    * the method will also return the bounding (outer) face.
    */
   void readFaces();
+  /**
+   * Returns the Node closest to the given coordinate. Currently the method 
+   * just linearly compares the vector to all Nodes in the graph -- maybe 
+   * later some proper CG algorithm will be implemented. Returns NULL if no
+   * Node is present in the graph.
+   */
+  Node* closestNode( const Vector2Df v );
+  /**
+   * Returns the Edge closest to the given coordinate. Currently the method 
+   * just linearly compares the vector to all Nodes in the graph -- maybe 
+   * later some proper CG algorithm will be implemented. Returns NULL if no
+   * Node is present in the graph.
+   */
+  Edge* closestEdge( const Vector2Df v );
 private:
   /** 
    * Extracts the faces assigned to the current node. Works only on 

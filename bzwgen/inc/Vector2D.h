@@ -89,6 +89,12 @@ public:
   /** Returns the squared length of the point if treated as a vector. */
   T lengthsq() const { return x*x + y*y; }
 
+  /** Returns vector cross product. */
+  T cross(const Vector2D<T> &v) const {
+    return ( x * v.y - v.x * y );
+  }
+
+
   /** Zero test. Test done using MathUtils isZero. */
   bool isZero( const T precision = EPSILON ) const { 
     return ( math::isZero( x, precision ) && 

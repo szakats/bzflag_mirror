@@ -132,6 +132,16 @@ public:
   bool isReversed( ) const {
     return reversed;
   }
+  /** 
+   * Returns the to the given coordinate
+   */
+  float distanceTo( Vector2Df v ) {
+    Vector2Df dir = target->vector() - source->vector();
+    Vector2Df d2  = v - source->vector();
+
+    return math::abs( d2.cross( dir ) ) / dir.length();
+  }
+
 private:
   /** Blocked default constructor */
   Edge( ) {}
