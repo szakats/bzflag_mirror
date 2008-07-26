@@ -17,12 +17,29 @@
 #include "BaseZone.h"
 #include "BuildZone.h"
 
-void FaceGenerator::parseOptions( CCommandLineArgs* /*opt*/ ) {
-
+void FaceGenerator::parseOptions( CCommandLineArgs* opt ) {
+  Generator::parseOptions( opt );
 }
 
-void FaceGenerator::run() {
-  Generator::run();
+void FaceGenerator::run( ) {
+  createInitialGraph( );
+  graph.readFaces( );
+  Generator::run( );
+}
+
+void FaceGenerator::createInitialGraph( ) {
+  float hsize = float(size) / 2;
+  graph::Node* n1 = graph.addNode( new graph::Node( &graph, -hsize, -hsize ) );
+  graph::Node* n2 = graph.addNode( new graph::Node( &graph, hsize,  -hsize ) );
+  graph::Node* n3 = graph.addNode( new graph::Node( &graph, hsize,  hsize  ) );
+  graph::Node* n4 = graph.addNode( new graph::Node( &graph, -hsize, hsize  ) );
+
+  // if these would be single-linked connections, then we could
+  // save the problem of identifying the world face.
+  graph.addConnection( n1, n2 );
+  graph.addConnection( n2, n3 );
+  graph.addConnection( n3, n4 );
+  graph.addConnection( n4, n1 );
 }
 
 

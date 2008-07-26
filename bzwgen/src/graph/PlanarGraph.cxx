@@ -29,7 +29,7 @@ namespace graph {
 
   void PlanarGraph::extractFaces( Node* node ) {
     Edge* startEdge = node->getFirstOutgoingEdge();
-    if (!startEdge) return;
+    if ( !startEdge ) return;
     Edge* edge = startEdge;
 
     // Cycle through the outgoing edges.
@@ -74,8 +74,8 @@ namespace graph {
     }
     float distance = result->distanceTo( v );
 
-    for (size_t i = 0; i < nodeList.size(); i++) {
-      if (nodeList.get(i) != NULL) {
+    for ( size_t i = 0; i < nodeList.size(); i++ ) {
+      if ( nodeList.get(i) != NULL ) {
         if (nodeList.get(i)->distanceTo( v ) < distance) {
           result = nodeList.get(i);
           distance = result->distanceTo( v );
@@ -99,7 +99,7 @@ namespace graph {
     }
     float distance = result->distanceTo( v );
 
-    for (size_t i = 0; i < edgeList.size(); i++) {
+    for ( size_t i = 0; i < edgeList.size(); i++ ) {
       if (edgeList.get( i ) != NULL) {
         if (edgeList.get( i )->distanceTo( v ) < distance) {
           result = edgeList.get( i );

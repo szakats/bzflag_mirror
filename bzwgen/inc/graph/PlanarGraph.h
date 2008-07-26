@@ -174,7 +174,7 @@ private:
    * Does a comparison on nodes by their X coordinate. Used by the
    * Minimal Cycle Basis extraction algorithm in readFaces.
    */
-  static bool compareNodesX (const Node* a, const Node* b) {
+  static bool compareNodesX ( const Node* a, const Node* b ) {
     return a->vector().x < b->vector().x;
   }
   /** 

@@ -19,35 +19,35 @@
 
 int BaseZone::colorCount = 1;
 
-void GridGenerator::parseOptions(CCommandLineArgs* opt) { 
-  Generator::parseOptions(opt); 
+void GridGenerator::parseOptions( CCommandLineArgs* opt ) { 
+  Generator::parseOptions( opt ); 
   int worldSize  = getSize();
   gridSize   = 42;
 
-  if (opt->Exists("g"))        { gridSize = opt->GetDataI("g"); }
-  if (opt->Exists("gridsize")) { gridSize = opt->GetDataI("gridsize"); }
+  if ( opt->Exists( "g" ) )        { gridSize = opt->GetDataI( "g" ); }
+  if ( opt->Exists( "gridsize" ) ) { gridSize = opt->GetDataI( "gridsize" ); }
 
   snap = 3;
 
-  if (opt->Exists("p"))        { snap = opt->GetDataI("p"); }
-  if (opt->Exists("gridsnap")) { snap = opt->GetDataI("gridsnap"); }
+  if ( opt->Exists( "p" ) )        { snap = opt->GetDataI("p"); }
+  if ( opt->Exists( "gridsnap" ) ) { snap = opt->GetDataI("gridsnap"); }
 
   subdiv = 120;
 
-  if (opt->Exists("v"))      { subdiv = opt->GetDataI("v"); }
-  if (opt->Exists("subdiv")) { subdiv = opt->GetDataI("subdiv"); }
+  if ( opt->Exists( "v" ) )      { subdiv = opt->GetDataI("v"); }
+  if ( opt->Exists( "subdiv" ) ) { subdiv = opt->GetDataI("subdiv"); }
 
   fullslice = 8;
 
-  if (opt->Exists("f"))         { subdiv = opt->GetDataI("f"); }
-  if (opt->Exists("fullslice")) { subdiv = opt->GetDataI("fullslice"); }
+  if ( opt->Exists( "f" ) )         { subdiv = opt->GetDataI( "f" ); }
+  if ( opt->Exists( "fullslice" ) ) { subdiv = opt->GetDataI( "fullslice" ); }
 
-  if (fullslice > subdiv) subdiv = fullslice;
+  if ( fullslice > subdiv ) subdiv = fullslice;
 
   gridStep = worldSize / gridSize;
 
-  map = new DiscreetMapNode[(gridSize+1)*(gridSize+1)];
-  for (int i = 0; i < (gridSize+1)*(gridSize+1); i++) {
+  map = new DiscreetMapNode[ ( gridSize + 1 ) * ( gridSize + 1 ) ];
+  for ( int i = 0; i < ( gridSize + 1 ) * ( gridSize + 1 ); i++ ) {
     map[i].zone = -1;
     map[i].type = NONE;
   }
@@ -67,10 +67,10 @@ void GridGenerator::plotRoad(int x, int y, bool horiz, bool collision) {
   }
   if (horiz) {
     for (int xx = x;   xx < gridSize; xx++) SETROADF(xx,y)
-    for (int xx = x-1; xx >= 0; xx--)           SETROADF(xx,y)
+    for (int xx = x-1; xx >= 0; xx--)       SETROADF(xx,y)
   } else {
     for (int yy = y;   yy < gridSize; yy++) SETROADF(x,yy)
-    for (int yy = y-1; yy >= 0; yy--)           SETROADF(x,yy)
+    for (int yy = y-1; yy >= 0; yy--)       SETROADF(x,yy)
   } 
   
 }

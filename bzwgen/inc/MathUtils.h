@@ -92,7 +92,7 @@ inline T vectorAngle(T x, T y) {
 
 /** @name Precision functions */
 /** 
- * Function returns wether a given float/double is equal to zero with the 
+ * Function returns whether a given float/double is equal to zero with the 
  * given precision. If no precision is given then EPSILON is used. The 
  * function is templated to be both used with doubles and floats. 
  */
@@ -102,7 +102,7 @@ inline bool isZero(T f, T precision = EPSILON) {
 }
 
 /** 
- * Function returns wether two given floats/doubles are equal with the 
+ * Function returns whether two given floats/doubles are equal with the 
  * given precision. If no precision is given then EPSILON is used. The 
  * function is templated to be both used with doubles and floats. 
  */
