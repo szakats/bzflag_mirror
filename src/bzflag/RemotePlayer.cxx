@@ -1,90 +1,102 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/* interface header */
 #include "RemotePlayer.h"
-#include "World.h"
 
-RemotePlayer::RemotePlayer(PlayerId id, TeamColor team,
-										const char* name, const char* email) :
-								Player(id, team, name, email)
+/* common implementation headers */
+#include "World.h"
+#include "SyncClock.h"
+
+
+RemotePlayer::RemotePlayer(const PlayerId& _id, TeamColor _team,
+			   const char* _name,
+			   const PlayerType _type) :
+  Player(_id, _team, _name, _type)
 {
-	numShots = World::getWorld()->getMaxShots();
-	shots = new RemoteShotPath*[numShots];
-	for (int i = 0; i < numShots; i++)
-		shots[i] = NULL;
+  if (World::getWorld()) {
+    numShots = World::getWorld()->getMaxShots();
+  } else {
+    numShots = 0;
+  }
+  shots.resize(numShots);
+  for (int i = 0; i < numShots; i++) {
+    shots[i] = NULL;
+  }
 }
 
 RemotePlayer::~RemotePlayer()
 {
-	for (int i = 0; i < numShots; i++)
-		delete shots[i];
-	delete[] shots;
 }
 
-void					RemotePlayer::addShot(const FiringInfo& info)
+void			RemotePlayer::addShot(FiringInfo& info)
 {
-	RemoteShotPath* newShot = new RemoteShotPath(info);
-	int shotNum = int(newShot->getShotId() & 255);
-	if (shots[shotNum]) delete shots[shotNum];
-	shots[shotNum] = newShot;
+  prepareShotInfo(info);
+  Player::addShot(new RemoteShotPath(info,syncedClock.GetServerSeconds()), info);
 }
 
-ShotPath*				RemotePlayer::getShot(int index) const
+bool			RemotePlayer::doEndShot(
+				int ident, bool isHit, float* pos)
 {
-	return shots[index & 255];
+  const int index = ident & 255;
+  const int salt = (ident >> 8) & 127;
+
+  // special id used in some messages (and really shouldn't be sent here)
+  if (ident == -1)
+    return false;
+
+  // ignore bogus shots (those with a bad index or for shots that don't exist)
+  if (index < 0 || index >= numShots || !shots[index])
+    return false;
+
+  // ignore shots that already ending
+  if (shots[index]->isExpired() || shots[index]->isExpiring())
+    return false;
+
+  // ignore shots that have the wrong salt.  since we reuse shot indices
+  // it's possible for an old MsgShotEnd to arrive after we've started a
+  // new shot.  that's where the salt comes in.  it changes for each shot
+  // so we can identify an old shot from a new one.
+  if (salt != ((shots[index]->getShotId() >> 8) & 127))
+    return false;
+
+  // keep statistics
+  shotStatistics.recordHit(shots[index]->getFlag());
+
+  // don't stop if it's because were hitting something and we don't stop
+  // when we hit something.
+  if (isHit && !shots[index]->isStoppedByHit())
+    return false;
+
+  // end it
+  const float* shotPos = shots[index]->getPosition();
+  pos[0] = shotPos[0];
+  pos[1] = shotPos[1];
+  pos[2] = shotPos[2];
+  shots[index]->setExpired();
+  return true;
 }
 
-bool					RemotePlayer::doEndShot(
-								int id, bool isHit, float* pos)
+void			RemotePlayer::updateShots(float dt)
 {
-	const int index = id & 255;
-	const int salt = (id >> 8) & 127;
-
-	// special id used in some messages (and really shouldn't be sent here)
-	if (id == -1)
-		return false;
-
-	// ignore bogus shots (those with a bad index or for shots that don't exist)
-	if (index < 0 || index >= World::getWorld()->getMaxShots() || !shots[index])
-		return false;
-
-	// ignore shots that already ending
-	if (shots[index]->isExpired() || shots[index]->isExpiring())
-		return false;
-
-	// ignore shots that have the wrong salt.  since we reuse shot indices
-	// it's possible for an old MsgShotEnd to arrive after we've started a
-	// new shot.  that's where the salt comes in.  it changes for each shot
-	// so we can identify an old shot from a new one.
-	if (salt != ((shots[index]->getShotId() >> 8) & 127))
-		return false;
-
-	// don't stop if it's because were hitting something and we don't stop
-	// when we hit something.
-	if (isHit && !shots[index]->isStoppedByHit())
-		return false;
-
-	// end it
-	const float* shotPos = shots[index]->getPosition();
-	pos[0] = shotPos[0];
-	pos[1] = shotPos[1];
-	pos[2] = shotPos[2];
-	shots[index]->setExpired();
-	return true;
+  for (int i = 0; i < numShots; i++)
+    if (shots[i])
+      shots[i]->update(dt);
 }
 
-void					RemotePlayer::updateShots(float dt)
-{
-	for (int i = 0; i < numShots; i++)
-		if (shots[i])
-			shots[i]->update(dt);
-}
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

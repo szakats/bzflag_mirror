@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -15,58 +15,84 @@
  *	Encapsulates creation of display database
  */
 
-#ifndef BZF_SCENE_BUILDER_H
-#define BZF_SCENE_BUILDER_H
+#ifndef	BZF_SCENE_BUILDER_H
+#define	BZF_SCENE_BUILDER_H
 
 #include "common.h"
-#include <string>
+#include "OpenGLMaterial.h"
 
-class Obstacle;
+class SceneRenderer;
+class SceneDatabase;
 class WallObstacle;
+class MeshObstacle;
 class BoxBuilding;
 class PyramidBuilding;
 class BaseBuilding;
 class Teleporter;
 class World;
-class SceneNode;
-class Matrix;
 
 class SceneDatabaseBuilder {
-public:
-	SceneDatabaseBuilder();
-	~SceneDatabaseBuilder();
+  public:
+			SceneDatabaseBuilder();
+			~SceneDatabaseBuilder();
 
-	SceneNode*			make(const World*);
+    SceneDatabase*	make(const World*);
 
-protected:
-	std::string			makeBuffer(const World*);
-	void				addWall(const WallObstacle&);
-	void				addBox(const BoxBuilding&);
-	void				addPyramid(const PyramidBuilding&);
-	void				addBase(const BaseBuilding&);
-	void				addTeleporter(const Teleporter&);
+  protected:
+    void		addWall(SceneDatabase*, const WallObstacle&);
+    void		addMesh(SceneDatabase*, MeshObstacle*);
+    void		addBox(SceneDatabase*, BoxBuilding&);
+    void		addPyramid(SceneDatabase*, PyramidBuilding&);
+    void		addBase(SceneDatabase*, BaseBuilding&);
+    void		addTeleporter(SceneDatabase*, const Teleporter&, const World*);
+    void		addWaterLevel(SceneDatabase*, const World*);
 
-	void				prepMatrix(const Obstacle&, float dz, Matrix&);
-	void				prepNormalMatrix(const Matrix&, Matrix&);
-	void				addVertex(const Matrix&, const float*);
-	void				addVertex(const Matrix&, float x, float y, float z);
-	void				addNormal(const Matrix&, const float*);
+  private:
+    // disallow duplication
+			SceneDatabaseBuilder(const SceneDatabaseBuilder&);
+    SceneDatabaseBuilder& operator=(const SceneDatabaseBuilder&);
 
-private:
-	// disallow duplication
-	SceneDatabaseBuilder(const SceneDatabaseBuilder&);
-	SceneDatabaseBuilder& operator=(const SceneDatabaseBuilder&);
+  private:
+    OpenGLMaterial	wallMaterial;
+    float		wallTexWidth, wallTexHeight;
+    bool		wallLOD;
 
-private:
-	std::string			color;
-	std::string			normal;
-	std::string			texcoord;
-	std::string			vertex;
-	std::string			primitives1;
-	std::string			primitives2;
-	std::string			primitives3;
-	std::string			primitives4;
-	unsigned int		nVertex;
+    OpenGLMaterial	boxMaterial;
+    float		boxTexWidth, boxTexHeight;
+    bool		boxLOD;
+
+    OpenGLMaterial	pyramidMaterial;
+    bool		pyramidLOD;
+
+    bool		baseLOD;
+
+    OpenGLMaterial	teleporterMaterial;
+    bool		teleporterLOD;
+
+    static const GLfloat wallColors[4][4];
+    static const GLfloat wallModulateColors[4][4];
+    static const GLfloat wallLightedColors[1][4];
+    static const GLfloat wallLightedModulateColors[1][4];
+    static const GLfloat boxColors[6][4];
+    static const GLfloat boxModulateColors[6][4];
+    static const GLfloat boxLightedColors[6][4];
+    static const GLfloat boxLightedModulateColors[6][4];
+    static const GLfloat pyramidColors[5][4];
+    static const GLfloat pyramidModulateColors[5][4];
+    static const GLfloat pyramidLightedColors[5][4];
+    static const GLfloat pyramidLightedModulateColors[5][4];
+    static const GLfloat teleporterColors[3][4];
+    static const GLfloat teleporterModulateColors[3][4];
+    static const GLfloat teleporterLightedColors[3][4];
+    static const GLfloat teleporterLightedModulateColors[3][4];
 };
 
 #endif // BZF_SCENE_BUILDER_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

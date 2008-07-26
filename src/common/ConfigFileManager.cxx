@@ -1,5 +1,5 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
@@ -7,127 +7,110 @@
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "common.h"
 #include "ConfigFileManager.h"
-#include "ConfigFileReader.h"
 #include "FileManager.h"
-#include <iostream>
+#include "CommandManager.h"
+#include "StateDatabase.h"
+#include "KeyManager.h"
 
-//
-// ConfigFileManager
-//
+static const int	MaximumLineLength = 1024;
 
-ConfigFileManager*		ConfigFileManager::mgr = NULL;
+// initialize the singleton
+template <>
+ConfigFileManager* Singleton<ConfigFileManager>::_instance = (ConfigFileManager*)0;
+
+void writeBZDB(const std::string& name, void *stream)
+{
+  std::ostream& s = *static_cast<std::ostream*>(stream);
+  std::string value = BZDB.get(name);
+  std::string defaultVal = BZDB.getDefault(name);
+  std::string newkey;
+  bool commentOut = (value == defaultVal);
+
+  // quotify anything with a space and empty strings
+  if ((value.find(' ') != value.npos) || (value.size() == 0)) {
+    value = std::string("\"") + value + "\"";
+  }
+
+  // quotify the key if there's a space
+  if (name.find(' ') != name.npos)
+    newkey = std::string("\"") + name + "\"";
+  else
+    newkey = name;
+
+  s << (commentOut ? "#set " : "set ") << newkey << ' ' << value << std::endl;
+}
+
+void writeKEYMGR(const std::string& name, bool press, const std::string& command, void* stream)
+{
+  std::ostream& s = *static_cast<std::ostream*>(stream);
+  // quotify anything with a space
+  std::string value = name;
+  if (value.find(' ') != value.npos)
+    value = std::string("\"") + value + "\"";
+  s << "bind " << value << ' ' << (press ? "down " : "up ");
+  value = command;
+  if (value.find(' ') != value.npos)
+    value = std::string("\"") + value + "\"";
+  s << value << std::endl;
+}
 
 ConfigFileManager::ConfigFileManager()
 {
-	// do nothing
+  // do nothing
 }
 
 ConfigFileManager::~ConfigFileManager()
 {
-	// clean up
-	for (Readers::iterator index = readers.begin();
-							index != readers.end(); ++index)
-		delete index->second;
-	readers.clear();
-	mgr = NULL;
 }
 
-ConfigFileManager*		ConfigFileManager::getInstance()
+bool				ConfigFileManager::parse(std::istream& stream)
 {
-	if (mgr == NULL)
-		mgr = new ConfigFileManager;
-	return mgr;
+  char buffer[MaximumLineLength];
+  while (!stream.eof()) {
+    stream.getline(buffer, MaximumLineLength);
+    CMDMGR.run(buffer);
+  }
+  return true;
 }
 
-void					ConfigFileManager::add(
-							const std::string& tag,
-							ConfigFileReader* adopted)
+bool				ConfigFileManager::read(const std::string& filename)
 {
-	remove(tag);
-	readers.insert(std::make_pair(tag, adopted));
+  std::istream* stream = FILEMGR.createDataInStream(filename);
+  if (stream == NULL) {
+    return false;
+  }
+  bool ret = parse(*stream);
+  delete stream;
+  return ret;
 }
 
-void					ConfigFileManager::remove(const std::string& tag)
+void				ConfigFileManager::read(std::istream& stream)
 {
-	Readers::iterator index = readers.find(tag);
-	if (index != readers.end()) {
-		delete index->second;
-		readers.erase(index);
-	}
+  parse(stream);
 }
 
-ConfigFileReader*		ConfigFileManager::get(const std::string& tag) const
+bool				ConfigFileManager::write(const std::string& filename)
 {
-	Readers::const_iterator index = readers.find(tag);
-	if (index != readers.end())
-		return index->second->clone();
-	else
-		return NULL;
+  std::ostream* stream = FILEMGR.createDataOutStream(filename);
+  if (stream == NULL) {
+    return false;
+  }
+  BZDB.write(writeBZDB, stream);
+  KEYMGR.iterate(writeKEYMGR, stream);
+  delete stream;
+  return true;
 }
 
-void					ConfigFileManager::parse(XMLTree::iterator xml)
-{
-	XMLTree::sibling_iterator scan = xml.begin();
-	XMLTree::sibling_iterator end  = xml.end();
-	for (; scan != end; ++scan) {
-		// ignore anything but a tag
-		if (scan->type == XMLNode::Tag) {
-			// get the appropriate reader
-			ConfigFileReader* reader = get(scan->value);
-			if (reader == NULL)
-				throw XMLIOException(scan->position,
-							string_util::format(
-								"invalid tag `%s'",
-								scan->value.c_str()));
 
-			// let the reader parse
-			try {
-				reader->parse(scan);
-				delete reader;
-			}
-			catch (...) {
-				delete reader;
-				throw;
-			}
-		}
-	}
-}
-
-bool					ConfigFileManager::read(const std::string& filename)
-{
-	// try to open the file
-	std::istream* stream = FILEMGR->createDataInStream(filename);
-	if (stream == NULL)
-		return false;
-
-	// parse
-	try {
-		read(*stream, XMLStreamPosition(filename));
-		delete stream;
-		return true;
-	}
-	catch (...) {
-		delete stream;
-		throw;
-	}
-}
-
-void					ConfigFileManager::read(std::istream& stream)
-{
-	read(stream, XMLStreamPosition());
-}
-
-void					ConfigFileManager::read(std::istream& stream,
-							const XMLStreamPosition& position)
-{
-	// syntactic parsing
-	XMLTree xmlTree;
-	xmlTree.read(stream, position);
-
-	// and semantic parsing
-	parse(xmlTree.begin());
-}
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

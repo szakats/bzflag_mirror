@@ -1,836 +1,669 @@
 /* bzflag
- * Copyright (c) 1993 - 2002 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// interface header
 #include "SceneBuilder.h"
+
+// local implemenation headers
+#include "ZSceneDatabase.h"
+#include "BSPSceneDatabase.h"
 #include "World.h"
-#include "Matrix.h"
-#include "ErrorHandler.h"
-#include "SceneNodes.h"
-#include "SceneReader.h"
-#include <sstream>
+
+// scene node implemenation headers
+#include "MeshPolySceneNode.h"
+#include "TankSceneNode.h"
+#include "BoxSceneNodeGenerator.h"
+#include "WallSceneNodeGenerator.h"
+#include "MeshSceneNodeGenerator.h"
+#include "BaseSceneNodeGenerator.h"
+#include "PyramidSceneNodeGenerator.h"
+#include "ObstacleSceneNodeGenerator.h"
+#include "TeleporterSceneNodeGenerator.h"
+#include "EighthDimShellNode.h"
+#include "EighthDBoxSceneNode.h"
+#include "EighthDPyrSceneNode.h"
+#include "EighthDBaseSceneNode.h"
+
+// common implementation headers
+#include "StateDatabase.h"
+#include "SceneRenderer.h"
+#include "BZDBCache.h"
+#include "TextureManager.h"
+#include "ObstacleList.h"
+#include "ObstacleMgr.h"
+
+
+// uncomment for cheaper eighth dimension scene nodes
+//#define SHELL_INSIDE_NODES
+
 
 //
 // SceneDatabaseBuilder
 //
 
-SceneDatabaseBuilder::SceneDatabaseBuilder()
+static const GLfloat black[3] = { 0.0f, 0.0f, 0.0f };
+
+const GLfloat SceneDatabaseBuilder::wallColors[4][4] = {
+  { 0.5f, 0.5f, 0.5f, 1.0f },
+  { 0.4f, 0.4f, 0.4f, 1.0f },
+  { 0.5f, 0.5f, 0.5f, 1.0f },
+  { 0.6f, 0.6f, 0.6f, 1.0f }
+};
+const GLfloat SceneDatabaseBuilder::wallModulateColors[4][4] = {
+  { 0.5f, 0.5f, 0.5f, 1.0f },
+  { 0.4f, 0.4f, 0.4f, 1.0f },
+  { 0.5f, 0.5f, 0.5f, 1.0f },
+  { 0.6f, 0.6f, 0.6f, 1.0f }
+};
+const GLfloat SceneDatabaseBuilder::wallLightedColors[1][4] = {
+  { 0.5f, 0.5f, 0.5f, 1.0f }
+};
+const GLfloat SceneDatabaseBuilder::wallLightedModulateColors[1][4] = {
+  { 0.5f, 0.5f, 0.5f, 1.0f }
+};
+
+const GLfloat SceneDatabaseBuilder::boxColors[6][4] = {
+  { 0.75f, 0.25f, 0.25f, 1.0f },
+  { 0.63f, 0.25f, 0.25f, 1.0f },
+  { 0.75f, 0.25f, 0.25f, 1.0f },
+  { 0.75f, 0.375f, 0.375f, 1.0f },
+  { 0.875f, 0.5f, 0.5f, 1.0f },
+  { 0.275f, 0.2f, 0.2f, 1.0f }
+};
+const GLfloat SceneDatabaseBuilder::boxModulateColors[6][4] = {
+  { 0.75f, 0.75f, 0.75f, 1.0f },
+  { 0.63f, 0.63f, 0.63f, 1.0f },
+  { 0.75f, 0.75f, 0.75f, 1.0f },
+  { 0.69f, 0.69f, 0.69f, 1.0f },
+  { 0.875f, 0.875f, 0.875f, 1.0f },
+  { 0.375f, 0.375f, 0.375f, 1.0f }
+};
+const GLfloat SceneDatabaseBuilder::boxLightedColors[6][4] = {
+  { 0.75f, 0.25f, 0.25f, 1.0f },
+  { 0.75f, 0.25f, 0.25f, 1.0f },
+  { 0.75f, 0.25f, 0.25f, 1.0f },
+  { 0.75f, 0.25f, 0.25f, 1.0f },
+  { 0.875f, 0.5f, 0.5f, 1.0f },
+  { 0.875f, 0.5f, 0.5f, 1.0f }
+};
+const GLfloat SceneDatabaseBuilder::boxLightedModulateColors[6][4] = {
+  { 0.75f, 0.75f, 0.75f, 1.0f },
+  { 0.75f, 0.75f, 0.75f, 1.0f },
+  { 0.75f, 0.75f, 0.75f, 1.0f },
+  { 0.75f, 0.75f, 0.75f, 1.0f },
+  { 0.875f, 0.875f, 0.875f, 1.0f },
+  { 0.875f, 0.875f, 0.875f, 1.0f }
+};
+
+const GLfloat SceneDatabaseBuilder::pyramidColors[5][4] = {
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.13f, 0.13f, 0.51f, 1.0f },
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.375f, 0.375f, 0.75f, 1.0f },
+  { 0.175f, 0.175f, 0.35f, 1.0f }
+};
+
+const GLfloat SceneDatabaseBuilder::pyramidModulateColors[5][4] = {
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.13f, 0.13f, 0.51f, 1.0f },
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.375f, 0.375f, 0.75f, 1.0f },
+  { 0.175f, 0.175f, 0.35f, 1.0f }
+};
+const GLfloat SceneDatabaseBuilder::pyramidLightedColors[5][4] = {
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.25f, 0.25f, 0.63f, 1.0f }
+};
+const GLfloat SceneDatabaseBuilder::pyramidLightedModulateColors[5][4] = {
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.25f, 0.25f, 0.63f, 1.0f },
+  { 0.25f, 0.25f, 0.63f, 1.0f }
+};
+
+const GLfloat SceneDatabaseBuilder::teleporterColors[3][4] = {
+  { 1.0f, 0.875f, 0.0f, 1.0f },
+  { 0.9f, 0.8f, 0.0f, 1.0f },
+  { 0.0f, 0.0f, 0.0f, 0.5f }
+};
+const GLfloat SceneDatabaseBuilder::teleporterModulateColors[3][4] = {
+  { 1.0f, 1.0f, 1.0f, 1.0f },
+  { 0.9f, 0.9f, 0.9f, 1.0f },
+  { 0.0f, 0.0f, 0.0f, 0.5f }
+};
+const GLfloat SceneDatabaseBuilder::teleporterLightedColors[3][4] = {
+  { 1.0f, 0.875f, 0.0f, 1.0f },
+  { 1.0f, 0.875f, 0.0f, 1.0f },
+  { 0.0f, 0.0f, 0.0f, 0.5f }
+};
+const GLfloat SceneDatabaseBuilder::teleporterLightedModulateColors[3][4] = {
+  { 1.0f, 1.0f, 1.0f, 1.0f },
+  { 1.0f, 1.0f, 1.0f, 1.0f },
+  { 0.0f, 0.0f, 0.0f, 0.5f }
+};
+
+
+SceneDatabaseBuilder::SceneDatabaseBuilder() :
+  wallMaterial(black, black, 0.0f),
+  boxMaterial(black, black, 0.0f),
+  pyramidMaterial(black, black, 0.0f),
+  teleporterMaterial(black, black, 0.0f)
 {
-	// do nothing
+  // FIXME -- should get texture heights from resources
+
+  TextureManager &tm = TextureManager::instance();
+
+
+  // make styles -- first the outer wall
+  int wallTexture = tm.getTextureID( "wall" );
+  wallTexWidth = wallTexHeight = 10.0f;
+  if (wallTexture>=0)
+    wallTexWidth = tm.GetAspectRatio(wallTexture) * wallTexHeight;
+
+
+  // make box styles
+  int boxTexture = tm.getTextureID( "boxwall" );
+  boxTexWidth = boxTexHeight = 0.2f * BZDB.eval(StateDatabase::BZDB_BOXHEIGHT);
+  if (boxTexture>=0)
+    boxTexWidth = tm.GetAspectRatio(boxTexture) * boxTexHeight;
+
+
+  // lower maximum tank lod if lowdetail is true
+  if (RENDERER.useQuality() == _LOW_QUALITY)
+    TankSceneNode::setMaxLOD(2);
 }
+
 
 SceneDatabaseBuilder::~SceneDatabaseBuilder()
 {
-	// do nothing
+  // do nothing
 }
 
-SceneNode*				SceneDatabaseBuilder::make(const World* world)
+
+SceneDatabase* SceneDatabaseBuilder::make(const World* world)
 {
-	std::string buffer(makeBuffer(world));
-	std::istringstream stream(buffer.c_str());
+  // set LOD flags
+  const bool doLODs = BZDBCache::lighting && BZDBCache::zbuffer;
+  wallLOD = baseLOD = boxLOD = pyramidLOD = teleporterLOD = doLODs;
 
-	try {
-		// read XML
-		XMLTree xmlTree;
-		xmlTree.read(stream, XMLStreamPosition());
+  // pick type of database
+  SceneDatabase* db;
+  if (BZDBCache::zbuffer)
+    db = new ZSceneDatabase;
+  else
+    db = new BSPSceneDatabase;
+  // FIXME -- when making BSP tree, try several shuffles for best tree
 
-		// parse scene
-		SceneReader reader;
-		return reader.parse(xmlTree.begin());
-	}
-	catch (XMLIOException& e) {
-		printError("<world-file> (%d,%d): %s",
-						e.position.line,
-						e.position.column,
-						e.what());
-		return NULL;
-	}
+  if (!world) {
+    return db;
+  }
+
+  // free any prior inside nodes
+  world->freeInsideNodes();
+
+
+  // add nodes to database
+  unsigned int i;
+
+  const ObstacleList& walls = OBSTACLEMGR.getWalls();
+  for (i = 0; i < walls.size(); i++) {
+    addWall(db, *((WallObstacle*) walls[i]));
+  }
+
+  const ObstacleList& boxes = OBSTACLEMGR.getBoxes();
+  for (i = 0; i < boxes.size(); i++) {
+    addBox (db, *((BoxBuilding*) boxes[i]));
+  }
+
+  const ObstacleList& bases = OBSTACLEMGR.getBases();
+  for (i = 0; i < bases.size(); i++) {
+    addBase (db, *((BaseBuilding*) bases[i]));
+  }
+
+  const ObstacleList& pyramids = OBSTACLEMGR.getPyrs();
+  for (i = 0; i < pyramids.size(); i++) {
+    addPyramid (db, *((PyramidBuilding*) pyramids[i]));
+  }
+
+  const ObstacleList& teles = OBSTACLEMGR.getTeles();
+  for (i = 0; i < teles.size(); i++) {
+    addTeleporter (db, *((Teleporter*) teles[i]), world);
+  }
+
+  const ObstacleList& meshes = OBSTACLEMGR.getMeshes();
+  for (i = 0; i < meshes.size(); i++) {
+    addMesh (db, (MeshObstacle*) meshes[i]);
+  }
+
+  // add the water level node
+  addWaterLevel(db, world);
+
+  db->finalizeStatics();
+
+  return db;
 }
 
-std::string				SceneDatabaseBuilder::makeBuffer(const World* world)
+
+void SceneDatabaseBuilder::addWaterLevel(SceneDatabase* db,
+					 const World* world)
 {
-	std::string primitives;
-	std::string unlighted;
+  float plane[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
+  const float level = world->getWaterLevel();
+  plane[3] = -level;
 
-	nVertex  = 0;
-	color    = "";
-	normal   = "";
-	texcoord = "";
-	vertex   = "";
+  // don't draw it if it isn't active
+  if (level < 0.0f) {
+    return;
+  }
 
-	const WallObstacles& walls       = world->getWalls();
-	const BoxBuildings& boxes        = world->getBoxes();
-	const Teleporters& teleporters   = world->getTeleporters();
-	const PyramidBuildings& pyramids = world->getPyramids();
-	const BaseBuildings& bases       = world->getBases();
+  // setup the vertex and texture coordinates
+  float size = BZDBCache::worldSize;
+  GLfloat3Array v(4);
+  GLfloat3Array n(0);
+  GLfloat2Array t(4);
+  v[0][0] = v[0][1] = v[1][1] = v[3][0] = -size/2.0f;
+  v[1][0] = v[2][0] = v[2][1] = v[3][1] = +size/2.0f;
+  v[0][2] = v[1][2] = v[2][2] = v[3][2] = level;
+  t[0][0] = t[0][1] = t[1][1] = t[3][0] = 0.0f;
+  t[1][0] = t[2][0] = t[2][1] = t[3][1] = 2.0f;
 
-	// walls
-	primitives1 = "";
-	primitives2 = "";
-	primitives3 = "";
-	primitives4 = "";
-	for (WallObstacles::const_iterator wallScan = walls.begin();
-								wallScan != walls.end();
-								++wallScan)
-		addWall(*wallScan);
-	primitives +=	"<gstate>\n"
-					  "<shading model=\"flat\" />\n"
-					  "<texture filename=\"wall\" />\n";
-	primitives +=	  primitives1;
-	primitives +=   "</gstate>\n";
-	unlighted +=	"<gstate>\n"
-					  "<shading model=\"flat\" />\n";
-	unlighted += 	  primitives1;
-	unlighted += 	"</gstate>\n";
+  // get the material
+  const BzMaterial* mat = world->getWaterMaterial();
+  const bool noRadar = mat->getNoRadar();
+  const bool noShadow = mat->getNoShadow();
 
-	// boxes
-	primitives1 = "";
-	primitives2 = "";
-	primitives3 = "";
-	primitives4 = "";
-	for (BoxBuildings::const_iterator boxScan = boxes.begin();
-								boxScan != boxes.end();
-								++boxScan)
-		addBox(*boxScan);
-	primitives +=	"<gstate>\n"
-					  "<shading model=\"flat\" />\n"
-					  "<texture filename=\"boxwall\" />\n";
-	primitives +=	  primitives1;
-	primitives +=	"</gstate>\n";
-	primitives +=	"<gstate>\n"
-					  "<shading model=\"flat\" />\n"
-					  "<texture filename=\"roof\" />\n";
-	primitives +=	  primitives2;
-	primitives +=	  primitives3;
-	primitives +=	"</gstate>\n";
-	unlighted +=	"<gstate>\n"
-					  "<shading model=\"flat\" />\n";
-	unlighted +=	  primitives1;
-	unlighted +=	  primitives2;
-	unlighted +=	  primitives3;
-	unlighted +=	"</gstate>\n";
+  MeshPolySceneNode* node =
+    new MeshPolySceneNode(plane, noRadar, noShadow, v, n, t);
 
-	// teleporters
-	primitives1 = "";
-	primitives2 = "";
-	primitives3 = "";
-	primitives4 = "";
-	for (Teleporters::const_iterator teleporterScan = teleporters.begin();
-								teleporterScan != teleporters.end();
-								++teleporterScan)
-		addTeleporter(*teleporterScan);
-	primitives +=	"<gstate>\n"
-					  "<shading model=\"flat\" />\n"
-					  "<texture filename=\"caution\" />\n";
-	primitives +=	  primitives1;
-	primitives +=	"</gstate>\n";
-	primitives +=	"<choice><mask t=\"renderBlending\">1 2</mask>\n"
-					  "<gstate>\n"
-					    "<shading model=\"flat\" />\n"
-					    "<stipple mask=\"true\" />\n"
-					    "<geometry><stipple>0.5</stipple>\n";
-	primitives +=	      primitives2;
-	primitives +=	    "</geometry>\n"
-					  "</gstate>\n"
-					  "<gstate>\n"
-					    "<shading model=\"flat\" />\n"
-					    "<blending src=\"sa\" dst=\"1-sa\" />\n"
-					    "<depth write=\"false\" />\n";
-	primitives +=	    primitives2;
-	primitives +=	  "</gstate>\n"
-					"</choice>\n";
-	unlighted +=	"<gstate>\n"
-					  "<shading model=\"flat\" />\n";
-	unlighted +=	  primitives1;
-	unlighted +=	"</gstate>\n";
-	unlighted +=	"<choice><mask t=\"renderBlending\">1 2</mask>\n"
-					  "<gstate>\n"
-					    "<shading model=\"flat\" />\n"
-					    "<stipple mask=\"true\" />\n"
-					    "<geometry><stipple>0.5</stipple>\n";
-	unlighted +=	      primitives3;
-	unlighted +=	    "</geometry>\n"
-					  "</gstate>\n"
-					  "<gstate>\n"
-					    "<shading model=\"flat\" />\n"
-					    "<blending src=\"sa\" dst=\"1-sa\" />\n"
-					    "<depth write=\"false\" />\n";
-	unlighted +=	    primitives3;
-	unlighted +=	  "</gstate>\n"
-					"</choice>\n";
+  // setup the material
+  MeshSceneNodeGenerator::setupNodeMaterial(node, mat);
 
-	// pyramids
-	primitives1 = "";
-	primitives2 = "";
-	primitives3 = "";
-	primitives4 = "";
-	for (PyramidBuildings::const_iterator pyramidScan = pyramids.begin();
-								pyramidScan != pyramids.end();
-								++pyramidScan)
-		addPyramid(*pyramidScan);
-	primitives +=	"<gstate>\n"
-					  "<shading model=\"flat\" />\n"
-					  "<texture filename=\"pyrwall\" />\n";
-	primitives +=	  primitives1;
-	primitives +=	  primitives2;
-	primitives +=   "</gstate>\n";
-	unlighted +=	"<gstate>\n"
-					  "<shading model=\"flat\" />\n";
-	unlighted +=	  primitives3;
-	unlighted +=	"</gstate>\n";
+  db->addStaticNode(node, false);
 
-	// bases
-	primitives1 = "";
-	primitives2 = "";
-	primitives3 = "";
-	primitives4 = "";
-	for (BaseBuildings::const_iterator baseScan = bases.begin();
-								baseScan != bases.end();
-								++baseScan) 
-		addBase(*baseScan);
-	primitives +=	"<gstate>\n"
-					  "<shading model=\"flat\" />\n"
-					  "<culling cull=\"false\" />\n";
-	primitives +=	  primitives1;
-	primitives +=	"</gstate>\n";
-	unlighted +=	"<gstate>\n"
-					  "<shading model=\"flat\" />\n"
-					  "<culling cull=\"false\" />\n";
-	unlighted +=	  primitives2;
-	unlighted +=	"</gstate>\n";
-
-	std::string buffer;
-	buffer +=	"<choice><mask t=\"renderLighting\">1 2</mask>\n"
-				  "<choice><mask t=\"renderTexturing\">1 2</mask>\n"
-				    "<geometry>\n"
-				      "<color>\n";
-	buffer +=	        color;
-	buffer +=	      "</color>\n";
-	buffer +=	      "<texcoord>\n";
-	buffer +=	        texcoord;
-	buffer +=	      "</texcoord>\n";
-	buffer +=	      "<vertex>\n";
-	buffer +=	        vertex;
-	buffer +=	      "</vertex>\n";
-	buffer +=	      unlighted;
-	buffer +=	    "</geometry>\n";
-
-	buffer +=	    "<geometry id=\"world_fancy\">\n"
-				      "<color>"
-				        "1 1 1 1"
-				      "</color>\n";
-	buffer +=	      "<texcoord>\n";
-	buffer +=	        texcoord;
-	buffer +=	      "</texcoord>\n";
-	buffer +=	      "<normal>\n";
-	buffer +=	        normal;
-	buffer +=	      "</normal>\n";
-	buffer +=	      "<vertex>\n";
-	buffer +=	        vertex;
-	buffer +=	      "</vertex>\n";
-	buffer +=	      primitives;
-	buffer +=	    "</geometry>\n";
-	buffer +=	  "</choice>\n";
-	buffer +=	  "<ref id=\"world_fancy\" />\n";
-	buffer +=	"</choice>\n";
-
-	return buffer;
+  return;
 }
 
-void					SceneDatabaseBuilder::prepMatrix(
-								const Obstacle& o, float dz, Matrix& m)
+
+void SceneDatabaseBuilder::addWall(SceneDatabase* db, const WallObstacle& o)
 {
-	const float* pos = o.getPosition();
-	m.setTranslate(pos[0], pos[1], pos[2] + dz);
-	Matrix x;
-	x.setRotate(0.0f, 0.0f, 1.0f, o.getRotation() * 180.0f / M_PI);
-	m.mult(x);
+  if (o.getHeight() <= 0.0f) {
+    return;
+  }
+
+  int part = 0;
+  WallSceneNode* node;
+  ObstacleSceneNodeGenerator* nodeGen = new WallSceneNodeGenerator (&o);
+
+  TextureManager &tm = TextureManager::instance();
+  int wallTexture = -1;
+
+  bool  useColorTexture = false;
+
+  // try object, standard, then default
+  if (o.userTextures[0].size())
+    wallTexture = tm.getTextureID(o.userTextures[0].c_str(),false);
+  if (wallTexture < 0)
+    wallTexture = tm.getTextureID( "wall" );
+  else
+    useColorTexture = wallTexture >= 0;
+
+  while ((node = nodeGen->getNextNode(o.getBreadth() / wallTexWidth,
+				      o.getHeight() / wallTexHeight, wallLOD))) {
+    node->setColor(wallColors[part]);
+    node->setModulateColor(wallModulateColors[part]);
+    node->setLightedColor(wallLightedColors[0]);
+    node->setLightedModulateColor(wallLightedModulateColors[0]);
+    node->setMaterial(wallMaterial);
+    node->setTexture(wallTexture);
+    node->setUseColorTexture(useColorTexture);
+
+    db->addStaticNode(node, false);
+    part = (part + 1) % 5;
+  }
+  delete nodeGen;
 }
 
-void					SceneDatabaseBuilder::prepNormalMatrix(
-								const Matrix& x, Matrix& n)
+
+void SceneDatabaseBuilder::addMesh(SceneDatabase* db, MeshObstacle* mesh)
 {
-	n = x;
-	n.inverse();
-	n.transpose();
+  WallSceneNode* node;
+  MeshSceneNodeGenerator* nodeGen = new MeshSceneNodeGenerator (mesh);
+
+  while ((node = nodeGen->getNextNode(wallLOD))) {
+    // make the inside node
+    const bool ownTheNode = db->addStaticNode(node, true);
+    // The BSP can split a MeshPolySceneNode and then delete it, which is
+    // not good for the EighthDimShellNode's referencing scheme. If the
+    // BSP would have split and then deleted this node, ownTheNode will
+    // return true, and the EighthDimShellNode will then own the node.
+    EighthDimShellNode* inode = new EighthDimShellNode(node, ownTheNode);
+    mesh->addInsideSceneNode(inode);
+  }
+  delete nodeGen;
 }
 
-void					SceneDatabaseBuilder::addVertex(
-								const Matrix& m, const float* v)
+
+void SceneDatabaseBuilder::addBox(SceneDatabase* db, BoxBuilding& o)
 {
-	float v1[3];
-	m.transform3(v1, v);
-	vertex += string_util::format("%f %f %f\n", v1[0], v1[1], v1[2]);
-	++nVertex;
+  // this assumes boxes have six parts:  four sides, a roof, and a bottom.
+  int part = 0;
+  WallSceneNode* node;
+  ObstacleSceneNodeGenerator* nodeGen = new BoxSceneNodeGenerator(&o);
+  TextureManager &tm = TextureManager::instance();
+  int    boxTexture = -1;
+  bool  useColorTexture[2] = {false,false};
+
+  // try object, standard, then default
+  if (o.userTextures[0].size())
+    boxTexture = tm.getTextureID(o.userTextures[0].c_str(),false);
+  if (boxTexture < 0)
+    boxTexture = tm.getTextureID(BZDB.get("boxWallTexture").c_str(),true);
+
+  useColorTexture[0] = boxTexture >= 0;
+
+  int boxTopTexture = -1;
+
+  if (o.userTextures[1].size())
+    boxTopTexture = tm.getTextureID(o.userTextures[1].c_str(),false);
+  if (boxTopTexture < 0)
+    boxTopTexture = tm.getTextureID(BZDB.get("boxTopTexture").c_str(),true);
+
+  useColorTexture[1] = boxTopTexture >= 0;
+
+  float textureFactor = BZDB.eval("boxWallTexRepeat");
+  if (RENDERER.useQuality() >= _HIGH_QUALITY)
+    textureFactor = BZDB.eval("boxWallHighResTexRepeat");
+
+  while ((node = ((part < 4) ?
+		  nodeGen->getNextNode(-textureFactor*boxTexWidth,
+				       -textureFactor*boxTexWidth, boxLOD) :
+		  // I'm using boxTexHeight for roof since textures are same
+		  // size and this number is available
+		  nodeGen->getNextNode(-boxTexHeight,
+				       -boxTexHeight, boxLOD)))) {
+    node->setColor(boxColors[part]);
+    node->setModulateColor(boxModulateColors[part]);
+    node->setLightedColor(boxLightedColors[part]);
+    node->setLightedModulateColor(boxLightedModulateColors[part]);
+    node->setMaterial(boxMaterial);
+    if (part < 4) {
+      node->setTexture(boxTexture);
+      node->setUseColorTexture(useColorTexture[0]);
+    } else {
+      node->setTexture(boxTopTexture);
+      node->setUseColorTexture(useColorTexture[1]);
+    }
+
+#ifdef SHELL_INSIDE_NODES
+    const bool ownTheNode = db->addStaticNode(node, true);
+    EighthDimShellNode* inode = new EighthDimShellNode(node, ownTheNode);
+    o.addInsideSceneNode(inode);
+#else
+    db->addStaticNode(node, false);
+#endif // SHELL_INSIDE_NODES
+
+    part = (part + 1) % 6;
+  }
+
+#ifndef SHELL_INSIDE_NODES
+  // add the inside node
+  GLfloat obstacleSize[3];
+  obstacleSize[0] = o.getWidth();
+  obstacleSize[1] = o.getBreadth();
+  obstacleSize[2] = o.getHeight();
+  SceneNode* inode =
+    new EighthDBoxSceneNode(o.getPosition(), obstacleSize, o.getRotation());
+  o.addInsideSceneNode(inode);
+#endif // SHELL_INSIDE_NODES
+
+  delete nodeGen;
 }
 
-void					SceneDatabaseBuilder::addVertex(
-								const Matrix& m, float x, float y, float z)
+
+void SceneDatabaseBuilder::addPyramid(SceneDatabase* db, PyramidBuilding& o)
 {
-	float v[3];
-	v[0] = x;
-	v[1] = y;
-	v[2] = z;
-	addVertex(m, v);
+  // this assumes pyramids have four parts:  four sides
+  int part = 0;
+  WallSceneNode* node;
+  ObstacleSceneNodeGenerator* nodeGen = new PyramidSceneNodeGenerator(&o);
+
+  TextureManager &tm = TextureManager::instance();
+  int pyramidTexture = -1;
+
+  bool useColorTexture = false;
+  // try object, standard, then default
+  if (o.userTextures[0].size())
+    pyramidTexture = tm.getTextureID(o.userTextures[0].c_str(),false);
+  if (pyramidTexture < 0)
+    pyramidTexture = tm.getTextureID(BZDB.get("pyrWallTexture").c_str(),false);
+
+  useColorTexture = pyramidTexture >= 0;
+
+  // Using boxTexHeight since it's (currently) the same and it's already available
+  float textureFactor = BZDB.eval("pyrWallTexRepeat");
+  if (RENDERER.useQuality() >= _HIGH_QUALITY)
+    textureFactor = BZDB.eval("pyrWallHighResTexRepeat");
+
+  while ((node = nodeGen->getNextNode(-textureFactor * boxTexHeight,
+				      -textureFactor * boxTexHeight,
+				      pyramidLOD))) {
+    node->setColor(pyramidColors[part]);
+    node->setModulateColor(pyramidModulateColors[part]);
+    node->setLightedColor(pyramidLightedColors[part]);
+    node->setLightedModulateColor(pyramidLightedModulateColors[part]);
+    node->setMaterial(pyramidMaterial);
+    node->setTexture(pyramidTexture);
+    node->setUseColorTexture(useColorTexture);
+
+#ifdef SHELL_INSIDE_NODES
+    const bool ownTheNode = db->addStaticNode(node, true);
+    EighthDimShellNode* inode = new EighthDimShellNode(node, ownTheNode);
+    o.addInsideSceneNode(inode);
+#else
+    db->addStaticNode(node, false);
+#endif // SHELL_INSIDE_NODES
+
+    part = (part + 1) % 5;
+  }
+
+#ifndef SHELL_INSIDE_NODES
+  // add the inside node
+  GLfloat obstacleSize[3];
+  obstacleSize[0] = o.getWidth();
+  obstacleSize[1] = o.getBreadth();
+  obstacleSize[2] = o.getHeight();
+  SceneNode* inode =
+    new EighthDPyrSceneNode(o.getPosition(), obstacleSize, o.getRotation());
+  o.addInsideSceneNode(inode);
+#endif // SHELL_INSIDE_NODES
+
+  delete nodeGen;
 }
 
-void					SceneDatabaseBuilder::addNormal(
-								const Matrix& m, const float* n)
+
+void SceneDatabaseBuilder::addBase(SceneDatabase *db, BaseBuilding &o)
 {
-	float n1[3];
-	m.transform3(n1, n);
-	normal += string_util::format("%f %f %f\n", n1[0], n1[1], n1[2]);
+  WallSceneNode* node;
+  ObstacleSceneNodeGenerator* nodeGen = new BaseSceneNodeGenerator(&o);
+
+  TextureManager &tm = TextureManager::instance();
+  int   boxTexture = -1;
+
+  bool  useColorTexture[2] = {false,false};
+
+  // try object, standard, then default
+  if (o.userTextures[0].size())
+    boxTexture = tm.getTextureID(o.userTextures[0].c_str(),false);
+  if (boxTexture < 0) {
+    std::string teamBase = Team::getImagePrefix((TeamColor)o.getTeam());
+    teamBase += BZDB.get("baseWallTexture");
+    boxTexture = tm.getTextureID(teamBase.c_str(),false);
+  }
+  if (boxTexture < 0)
+    boxTexture = tm.getTextureID( BZDB.get("boxWallTexture").c_str() );
+
+  useColorTexture[0] = boxTexture >= 0;
+
+  int   baseTopTexture = -1;
+
+  if (o.userTextures[1].size())
+    baseTopTexture = tm.getTextureID(o.userTextures[1].c_str(),false);
+  if (baseTopTexture < 0) {
+    std::string teamBase = Team::getImagePrefix((TeamColor)o.getTeam());
+    teamBase += BZDB.get("baseTopTexture").c_str();
+    baseTopTexture = tm.getTextureID(teamBase.c_str(),false);
+  }
+  if (baseTopTexture < 0)
+    baseTopTexture = -1;
+  else
+    useColorTexture[1] = baseTopTexture >= 0;
+
+  // this assumes bases have 6 parts - if they don't, it still works
+  int part = 0;
+  // repeat the textue once for the top and bottom, else use the old messed up way
+  // There are 3 cases for the texture ordering:
+  // 1. getNextNode() only returns the top texture
+  // 2. getNextNode() returns the top texture(0), and the 4 sides(1-4)
+  // 3. getNextNode() returns the top texture(0), and the 4 sides(1-4), and the bottom(5)
+  while ((node = ( ((part % 5) == 0) ? nodeGen->getNextNode(1,1, boxLOD) :
+		   nodeGen->getNextNode(o.getBreadth(),
+					o.getHeight(),
+					boxLOD)))) {
+    if ((part % 5) != 0) {
+      node->setColor(boxColors[part - 2]);
+      node->setModulateColor(boxModulateColors[part - 2]);
+      node->setLightedColor(boxLightedColors[part - 2]);
+      node->setLightedModulateColor(boxLightedModulateColors[part - 2]);
+      node->setMaterial(boxMaterial);
+      node->setTexture(boxTexture);
+      node->setUseColorTexture(useColorTexture[0]);
+    } else {
+      if (useColorTexture[1]) {  // only set the texture if we have one and are using it
+	node->setTexture(baseTopTexture);
+	node->setUseColorTexture(useColorTexture[1]);
+      }
+    }
+    part++;
+
+#ifdef SHELL_INSIDE_NODES
+    const bool ownTheNode = db->addStaticNode(node, true);
+    EighthDimShellNode* inode = new EighthDimShellNode(node, ownTheNode);
+    o.addInsideSceneNode(inode);
+#else
+    db->addStaticNode(node, false);
+#endif // SHELL_INSIDE_NODES
+  }
+
+#ifndef SHELL_INSIDE_NODES
+  // add the inside node
+  GLfloat obstacleSize[3];
+  obstacleSize[0] = o.getWidth();
+  obstacleSize[1] = o.getBreadth();
+  obstacleSize[2] = o.getHeight();
+  SceneNode* inode = new
+    EighthDBaseSceneNode(o.getPosition(), obstacleSize, o.getRotation());
+  o.addInsideSceneNode(inode);
+#endif // SHELL_INSIDE_NODES
+
+  delete nodeGen;
 }
 
-void					SceneDatabaseBuilder::addWall(const WallObstacle& o)
+void SceneDatabaseBuilder::addTeleporter(SceneDatabase* db,
+					 const Teleporter& o,
+					 const World* world)
 {
-	static const float s_normal[][3] = {
-								{ 1.0f, 0.0f, 0.0f },
-								{ 1.0f, 0.0f, 0.0f },
-								{ 1.0f, 0.0f, 0.0f },
-								{ 1.0f, 0.0f, 0.0f }
-						};
-	static const float s_vertex[][3] = {
-								{ 0.0f, -1.0f, 1.0f },
-								{ 0.0f, -1.0f, 0.0f },
-								{ 0.0f,  1.0f, 1.0f },
-								{ 0.0f,  1.0f, 0.0f }
-						};
+  // this assumes teleporters have fourteen parts:  12 border sides, 2 faces
+  int part = 0;
+  WallSceneNode* node;
+  ObstacleSceneNodeGenerator* nodeGen = new TeleporterSceneNodeGenerator(&o);
 
-//  const float dx = o.getWidth();
-	const float dy = o.getBreadth();
-	const float dz = o.getHeight();
+  TextureManager &tm = TextureManager::instance();
+  int teleporterTexture = -1;
 
-	color    += "0.5 0.5 0.5 1  0.5 0.5 0.5 1  0.5 0.5 0.5 1  0.5 0.5 0.5 1\n";
-	texcoord += string_util::format("0 0  0 %f  %f 0  %f %f\n",
-								 0.1f * dz, 0.1f * dy, 0.1f * dy, 0.1f * dz);
+  bool  useColorTexture = false;
 
-	Matrix m;
-	prepMatrix(o, 0.0f, m);
-	Matrix x;
-	x.setScale(1.0f, dy, dz);
-	m.mult(x);
-	prepNormalMatrix(m, x);
+  // try object, standard, then default
+  //check for material, then preset textures.
+  const BzMaterial *frameMat = MATERIALMGR.findMaterial(std::string("TeleFrame"));
+  if (frameMat)
+    teleporterTexture = tm.getTextureID(frameMat->getTexture(0).c_str(),true);
 
-	unsigned int i;
-	unsigned int n = nVertex;
-	for (i = 0; i < countof(s_vertex); ++i)
-		addVertex(m, s_vertex[i]);
-	for (i = 0; i < countof(s_normal); ++i)
-		addNormal(x, s_normal[i]);
+  if (teleporterTexture < 0 && o.userTextures[0].size())
+    teleporterTexture = tm.getTextureID(o.userTextures[0].c_str(),false);
+  if (teleporterTexture < 0)
+    teleporterTexture = tm.getTextureID(BZDB.get("cautionTexture").c_str(),true);
 
-	primitives1 += string_util::format("<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d</index></primitive>\n",
-								n, n + 1, n + 2, n + 3);
+  useColorTexture = teleporterTexture >= 0;
+
+  int numParts = o.isHorizontal() ? 18 : 14;
+
+  while ((node = nodeGen->getNextNode(1.0, o.getHeight() / o.getBreadth(),
+				      teleporterLOD))) {
+    if (o.isHorizontal ()) {
+      if (part >= 0 && part <= 15) {
+	node->setColor (teleporterColors[0]);
+	node->setModulateColor (teleporterModulateColors[0]);
+	node->setLightedColor (teleporterLightedColors[0]);
+	node->setLightedModulateColor (teleporterLightedModulateColors[0]);
+	node->setMaterial (teleporterMaterial);
+	node->setTexture (teleporterTexture);
+	node->setUseColorTexture (useColorTexture);
+      }
+    } else {
+      if (part >= 0 && part <= 1) {
+	node->setColor (teleporterColors[0]);
+	node->setModulateColor (teleporterModulateColors[0]);
+	node->setLightedColor (teleporterLightedColors[0]);
+	node->setLightedModulateColor (teleporterLightedModulateColors[0]);
+	node->setMaterial (teleporterMaterial);
+	node->setTexture (teleporterTexture);
+	node->setUseColorTexture (useColorTexture);
+      } else if (part >= 2 && part <= 11) {
+	node->setColor (teleporterColors[1]);
+	node->setModulateColor (teleporterModulateColors[1]);
+	node->setLightedColor (teleporterLightedColors[1]);
+	node->setLightedModulateColor (teleporterLightedModulateColors[1]);
+	node->setMaterial (teleporterMaterial);
+	node->setTexture (teleporterTexture);
+	node->setUseColorTexture (useColorTexture);
+      }
+    }
+
+    db->addStaticNode(node, false);
+    part = (part + 1) % numParts;
+  }
+
+  MeshPolySceneNode* linkNode;
+  const BzMaterial* mat = world->getLinkMaterial();
+
+  linkNode = MeshSceneNodeGenerator::getMeshPolySceneNode(o.getBackLink());
+  MeshSceneNodeGenerator::setupNodeMaterial(linkNode, mat);
+  db->addStaticNode(linkNode, false);
+
+  linkNode = MeshSceneNodeGenerator::getMeshPolySceneNode(o.getFrontLink());
+  MeshSceneNodeGenerator::setupNodeMaterial(linkNode, mat);
+  db->addStaticNode(linkNode, false);
+
+  delete nodeGen;
 }
 
-void					SceneDatabaseBuilder::addBox(const BoxBuilding& o)
-{
-	static const float s_normal[][3] = {
-								{ -1.0f,  0.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{  0.0f, -1.0f,  0.0f },
-								{  0.0f, -1.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  0.0f,  1.0f,  0.0f },
-								{  0.0f,  1.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-
-								{  0.0f,  0.0f,  1.0f },
-								{  0.0f,  0.0f,  1.0f },
-								{  0.0f,  0.0f,  1.0f },
-								{  0.0f,  0.0f,  1.0f },
-
-								{  0.0f,  0.0f, -1.0f },
-								{  0.0f,  0.0f, -1.0f },
-								{  0.0f,  0.0f, -1.0f },
-								{  0.0f,  0.0f, -1.0f }
-						};
-	static const float s_vertex[][3] = {
-								{ -1.0f, -1.0f,  1.0f },
-								{ -1.0f, -1.0f,  0.0f },
-								{  1.0f, -1.0f,  1.0f },
-								{  1.0f, -1.0f,  0.0f },
-								{ -1.0f,  1.0f,  1.0f },
-								{ -1.0f,  1.0f,  0.0f },
-								{  1.0f,  1.0f,  1.0f },
-								{  1.0f,  1.0f,  0.0f },
-								{ -1.0f, -1.0f,  1.0f },
-								{ -1.0f, -1.0f,  0.0f },
-
-								{ -1.0f, -1.0f,  1.0f },
-								{  1.0f, -1.0f,  1.0f },
-								{ -1.0f,  1.0f,  1.0f },
-								{  1.0f,  1.0f,  1.0f },
-
-								{ -1.0f, -1.0f,  0.0f },
-								{  1.0f, -1.0f,  0.0f },
-								{ -1.0f,  1.0f,  0.0f },
-								{  1.0f,  1.0f,  0.0f }
-						};
-
-	const float dx = o.getWidth();
-	const float dy = o.getBreadth();
-	const float dz = o.getHeight();
-	const float tm1 = 1.0f / (0.2f * BoxHeight);
-
-	color +=	"0.75 0.25 0.25 1\n"
-				"0.75 0.25 0.25 1\n"
-				"0.75 0.25 0.25 1\n"
-				"0.75 0.25 0.25 1\n"
-				"0.63 0.25 0.25 1\n"
-				"0.63 0.25 0.25 1\n"
-				"0.75 0.25 0.25 1\n"
-				"0.75 0.25 0.25 1\n"
-				"0.75 0.375 0.375 1\n"
-				"0.75 0.375 0.375 1\n"
-
-				"0.875 0.5 0.5 1\n"
-				"0.875 0.5 0.5 1\n"
-				"0.875 0.5 0.5 1\n"
-				"0.875 0.5 0.5 1\n"
-
-				"0.275 0.2 0.2 1\n"
-				"0.275 0.2 0.2 1\n"
-				"0.275 0.2 0.2 1\n"
-				"0.275 0.2 0.2 1\n";
-
-	texcoord += string_util::format(
-				" %f %f %f %f"
-				" %f %f %f %f"
-				" %f %f %f %f"
-				" %f %f %f %f"
-				" %f %f %f %f"
-				" 0 0 %f 0 0 %f %f %f"
-				" 0 0 %f 0 0 %f %f %f",
-				0.0f, tm1 * dz, 0.0f, 0.0f,
-				tm1 * dx, tm1 * dz, tm1 * dx, 0.0f,
-				tm1 * (dx+dy), tm1 * dz, tm1 * (dx+dy), 0.0f,
-				tm1 * (2*dx+dy), tm1 * dz, tm1 * (2*dx+dy), 0.0f,
-				tm1 * 2*(dx+dy), tm1 * dz, tm1 * 2*(dx+dy), 0.0f,
-				0.5f * dx, 0.5f * dy, 0.5f * dx, 0.5f * dy,
-				0.5f * dx, 0.5f * dy, 0.5f * dx, 0.5f * dy);
-
-	Matrix m;
-	prepMatrix(o, 0.0f, m);
-	Matrix x;
-	x.setScale(dx, dy, dz);
-	m.mult(x);
-	prepNormalMatrix(m, x);
-
-	unsigned int i;
-	unsigned int n = nVertex;
-	for (i = 0; i < countof(s_vertex); ++i)
-		addVertex(m, s_vertex[i]);
-	for (i = 0; i < countof(s_normal); ++i)
-		addNormal(x, s_normal[i]);
-
-	primitives1 += string_util::format("<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d %d %d %d %d %d %d"
-								"</index></primitive>\n",
-								n + 0, n + 1, n + 2, n + 3, n + 6,
-								n + 7, n + 4, n + 5, n + 8, n + 9);
-	primitives2 += string_util::format("<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d"
-								"</index></primitive>\n",
-								n + 10, n + 11, n + 12, n + 13);
-	primitives3 += string_util::format("<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d"
-								"</index></primitive>\n",
-								n + 15, n + 14, n + 17, n + 16);
-}
-
-void					SceneDatabaseBuilder::addPyramid(const PyramidBuilding& o)
-{
-	static const float s_normal[][3] = {
-						        {  0.0f,  0.0f,  1.0f },
-								{ -1.0f,  0.0f,  1.0f },
-								{ -1.0f,  0.0f,  1.0f },
-								{  0.0f, -1.0f,  1.0f },
-								{  0.0f, -1.0f,  1.0f },
-						        {  0.0f,  1.0f,  1.0f },
-								{  0.0f,  1.0f,  1.0f },
-						        {  1.0f,  0.0f,  1.0f },
-								{  1.0f,  0.0f,  1.0f },
-
-								{  0.0f,  0.0f, -1.0f },
-								{  0.0f,  0.0f, -1.0f },
-								{  0.0f,  0.0f, -1.0f },
-								{  0.0f,  0.0f, -1.0f }
-						};
-	static const float s_vertex[][3] = {
-								{  0.0f,  0.0f,  1.0f },
-								{ -1.0f, -1.0f,  0.0f },
-								{ -1.0f, -1.0f,  0.0f },
-								{  1.0f, -1.0f,  0.0f },
-								{  1.0f, -1.0f,  0.0f },
-								{ -1.0f,  1.0f,  0.0f },
-								{ -1.0f,  1.0f,  0.0f },
-								{  1.0f,  1.0f,  0.0f },
-								{  1.0f,  1.0f,  0.0f },
-
-								{ -1.0f, -1.0f,  0.0f },
-								{  1.0f, -1.0f,  0.0f },
-								{ -1.0f,  1.0f,  0.0f },
-								{  1.0f,  1.0f,  0.0f }
-						};
-
-	const float dx = o.getWidth();
-	const float dy = o.getBreadth();
-	const float dz = o.getHeight();
-
-	Matrix m;
-	prepMatrix(o, 0.0f, m);
-	Matrix x;
-	x.setScale(dx, dy, dz);
-	m.mult(x);
-	prepNormalMatrix(m, x);
-
-	color +=	"0.25 0.25 0.63 1\n"
-				"0.25 0.25 0.63 1\n"
-				"0.25 0.25 0.63 1\n"
-
-				"0.13 0.13 0.51 1\n"
-				"0.13 0.13 0.51 1\n"
-
-				"0.375 0.375 0.75 1\n"
-				"0.375 0.375 0.75 1\n"
-
-				"0.25 0.25 0.63 1\n"
-				"0.25 0.25 0.63 1\n"
-
-				"0.25 0.25 0.63 1\n"
-				"0.25 0.25 0.63 1\n"
-				"0.25 0.25 0.63 1\n"
-				"0.25 0.25 0.63 1\n";
-	texcoord += string_util::format(
-				" 0 %f"
-				" %f 0 %f 0"
-				" %f 0 %f 0"
-				" %f 0 %f 0"
-				" %f 0 %f 0"
-				"  0 0 %f 0 0 %f %f %f",
-				0.25f * dz,
-				-0.25f * dx, 0.25f * dx, -0.25f * dx, 0.25f * dx,
-				-0.25f * dx, 0.25f * dx, -0.25f * dx, 0.25f * dx,
-				0.25f * dx, 0.25f * dz, 0.25f * dx, 0.25f * dz);
-
-	unsigned int i;
-	unsigned int n = nVertex;
-	for (i = 0; i < countof(s_vertex); ++i)
-		addVertex(m, s_vertex[i]);
-	for (i = 0; i < countof(s_normal); ++i)
-		addNormal(x, s_normal[i]);
-
-	primitives1 += string_util::format("<geometry><color>0.25 0.25 0.63 1</color>"
-								"<primitive type=\"triangles\"><index>"
-								"%d %d %d %d %d %d %d %d %d %d %d %d"
-								"</index></primitive></geometry>\n",
-								n + 0, n + 1, n + 4, n + 0, n + 3, n + 8,
-								n + 0, n + 7, n + 6, n + 0, n + 5, n + 2);
-	primitives2 += string_util::format("<geometry><color>0.25 0.25 0.63 1</color>"
-								"<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d"
-								"</index></primitive></geometry>\n",
-								n + 9, n + 10, n + 12, n + 11);
-
-	primitives3 += string_util::format("<primitive type=\"triangles\"><index>"
-								"%d %d %d %d %d %d %d %d %d %d %d %d"
-								"</index></primitive>"
-								"<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d"
-								"</index></primitive>\n",
-								n + 0, n + 1, n + 4, n + 0, n + 3, n + 8,
-								n + 0, n + 7, n + 6, n + 0, n + 5, n + 2,
-								n + 9, n + 10, n + 12, n + 11);
-}
-
-void					SceneDatabaseBuilder::addBase(const BaseBuilding& o)
-{
-	static const float s_normal[][3] = {
-								{ 0.0f, 0.0f, 1.0f },
-								{ 0.0f, 0.0f, 1.0f },
-								{ 0.0f, 0.0f, 1.0f },
-								{ 0.0f, 0.0f, 1.0f }
-						};
-	static const float s_vertex[][3] = {
-								{ -1.0f, -1.0f,  0.0f },
-								{  1.0f, -1.0f,  0.0f },
-								{ -1.0f,  1.0f,  0.0f },
-								{  1.0f,  1.0f,  0.0f }
-						};
-
-	const float dx = o.getWidth();
-	const float dy = o.getBreadth();
-	const float dz = o.getHeight();
-	const float* c = Team::getTankColor(static_cast<TeamColor>(o.getTeam()));
-
-	// lift bases on the ground a little so they don't flimmer
-	Matrix m;
-	prepMatrix(o, dz == 0.0f ? 0.04f : 0.0f, m);
-	Matrix x;
-	x.setScale(dx, dy, dz);
-	m.mult(x);
-	prepNormalMatrix(m, x);
-
-	color += string_util::format("%f %f %f 1 %f %f %f 1 %f %f %f 1 %f %f %f 1\n",
-								c[0], c[1], c[2],
-								c[0], c[1], c[2],
-								c[0], c[1], c[2],
-								c[0], c[1], c[2]);
-	texcoord += " 0 0 0 0 0 0 0 0\n";
-
-	unsigned int i;
-	unsigned int n = nVertex;
-	for (i = 0; i < countof(s_vertex); ++i)
-		addVertex(m, s_vertex[i]);
-	for (i = 0; i < countof(s_normal); ++i)
-		addNormal(x, s_normal[i]);
-
-	primitives1 += string_util::format("<geometry><color>%f %f %f 1</color>"
-								"<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d"
-								"</index></primitive></geometry>\n",
-								c[0], c[1], c[2],
-								n + 1, n + 0, n + 3, n + 2);
-	primitives2 += string_util::format("<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d"
-								"</index></primitive>\n",
-								n + 1, n + 0, n + 3, n + 2);
-}
-
-void					SceneDatabaseBuilder::addTeleporter(const Teleporter& o)
-{
-	static const float s_normal[][3] = {
-								{  0.0f, -1.0f,  0.0f },
-								{  0.0f, -1.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{  0.0f,  1.0f,  0.0f },
-								{  0.0f,  1.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  0.0f, -1.0f,  0.0f },
-								{  0.0f, -1.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  0.0f,  0.0f,  1.0f },
-								{  0.0f,  0.0f,  1.0f },
-								{  0.0f,  0.0f,  1.0f },
-								{  0.0f,  0.0f,  1.0f },
-								{  0.0f,  0.0f, -1.0f },
-								{  0.0f,  0.0f, -1.0f },
-								{  0.0f,  0.0f, -1.0f },
-								{  0.0f,  0.0f, -1.0f },
-								{  0.0f,  1.0f,  0.0f },
-								{  0.0f,  1.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  0.0f, -1.0f,  0.0f },
-								{  0.0f, -1.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{  0.0f,  1.0f,  0.0f },
-								{  0.0f,  1.0f,  0.0f },
-
-								{  1.0f,  0.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-								{  1.0f,  0.0f,  0.0f },
-
-								{ -1.0f,  0.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f },
-								{ -1.0f,  0.0f,  0.0f }
-						};
-
-	const float dx = o.getWidth();
-	const float dy = o.getBreadth();
-	const float dz = o.getHeight();
-	const float db = o.getBorder();
-
-	const float yo = dy;
-	const float yi = dy - db;
-
-	Matrix m;
-	prepMatrix(o, 0.0f, m);
-	Matrix x;
-	prepNormalMatrix(m, x);
-
-	color +=	"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-				"1 0.875 0 1\n"
-
-				"0 0 0 0.5\n"
-				"0 0 0 0.5\n"
-				"0 0 0 0.5\n"
-				"0 0 0 0.5\n"
-
-				"0 0 0 0.5\n"
-				"0 0 0 0.5\n"
-				"0 0 0 0.5\n"
-				"0 0 0 0.5\n";
-	texcoord += "0.0  0.0   0.0  9.5\n"
-		      "0.5  0.0   0.5  9.0\n"
-		      "1.0  0.0   1.0  9.0\n"
-		      "1.5  0.0   1.5  9.5\n"
-		      "2.0  0.0   2.0  9.5\n"
-		      "0.0  9.5   0.0  4.5\n"
-		      "0.5  9.0   0.5  5.0\n"
-		      "1.0  9.0   1.0  13.0\n"
-		      "1.5  9.5   1.5  14.5\n"
-		      "1.5  9.5   1.5  12.5\n"
-		      "2.0  9.5   2.0  12.5\n"
-		      "0.5  9.0   0.5  13.0\n"
-		      "1.0  9.0   1.0  13.0\n"
-		      "0.5  0.0   0.5  9.5\n"
-		      "1.0  0.0   1.0  9.0\n"
-		      "1.5  0.0   1.5  9.0\n"
-		      "2.0  0.0   2.0  9.5\n"
-		      "2.5  0.0   2.5  9.5\n"
-
-		      "0 0 0 0 0 0 0 0\n"
-		      "0 0 0 0 0 0 0 0\n";
-
-	unsigned int i;
-	unsigned int n = nVertex;
-
-	addVertex(m, -dx, -yo, 0.0f);
-	addVertex(m, -dx, -yo, dz + db);
-	addVertex(m, -dx, -yi, 0.0f);
-	addVertex(m, -dx, -yi, dz);
-	addVertex(m,  dx, -yi, 0.0f);
-	addVertex(m,  dx, -yi, dz);
-	addVertex(m,  dx, -yo, 0.0f);
-	addVertex(m,  dx, -yo, dz + db);
-	addVertex(m, -dx, -yo, 0.0f);
-	addVertex(m, -dx, -yo, dz + db);
-
-	addVertex(m, -dx, -yo, dz + db);
-	addVertex(m, -dx,  yo, dz + db);
-	addVertex(m, -dx, -yi, dz);
-	addVertex(m, -dx,  yi, dz);
-	addVertex(m,  dx, -yi, dz);
-	addVertex(m,  dx,  yi, dz);
-	addVertex(m,  dx, -yo, dz + db);
-	addVertex(m,  dx,  yo, dz + db);
-	addVertex(m,  dx, -yo, dz + db);
-	addVertex(m,  dx,  yo, dz + db);
-	addVertex(m, -dx, -yo, dz + db);
-	addVertex(m, -dx,  yo, dz + db);
-	addVertex(m, -dx, -yi, dz);
-	addVertex(m, -dx,  yi, dz);
-	addVertex(m,  dx, -yi, dz);    
-	addVertex(m,  dx,  yi, dz);
-
-	addVertex(m,  dx,  yo, 0.0f);
-	addVertex(m,  dx,  yo, dz + db);
-	addVertex(m,  dx,  yi, 0.0f);
-	addVertex(m,  dx,  yi, dz);
-	addVertex(m, -dx,  yi, 0.0f);
-	addVertex(m, -dx,  yi, dz);
-	addVertex(m, -dx,  yo, 0.0f);
-	addVertex(m, -dx,  yo, dz + db);
-	addVertex(m,  dx,  yo, 0.0f);
-	addVertex(m,  dx,  yo, dz + db);
-
-	addVertex(m,  dx, -yi, 0.0f);
-	addVertex(m,  dx,  yi, 0.0f);
-	addVertex(m,  dx, -yi, dz);
-	addVertex(m,  dx,  yi, dz);
-	addVertex(m, -dx, -yi, 0.0f);
-	addVertex(m, -dx,  yi, 0.0f);
-	addVertex(m, -dx, -yi, dz);
-	addVertex(m, -dx,  yi, dz);
-
-	for (i = 0; i < countof(s_normal); ++i)
-		addNormal(x, s_normal[i]);
-
-	primitives1 += string_util::format("<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d %d %d %d %d %d %d"
-								"</index></primitive>\n",
-								n + 0, n + 1, n + 2, n + 3, n + 4,
-								n + 5, n + 6, n + 7, n + 8, n + 9);
-	primitives1 += string_util::format("<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d %d %d %d %d %d %d"
-								"</index></primitive>\n",
-								n + 26, n + 27, n + 28, n + 29, n + 30,
-								n + 31, n + 32, n + 33, n + 34, n + 35);
-	primitives1 += string_util::format("<primitive type=\"triangles\"><index>"
-								"%d %d %d %d %d %d "
-								"%d %d %d %d %d %d "
-								"%d %d %d %d %d %d "
-								"%d %d %d %d %d %d"
-								"</index></primitive>\n",
-								n + 10, n + 11, n + 12, n + 13, n + 12, n + 11,
-								n + 14, n + 15, n + 16, n + 17, n + 16, n + 15,
-								n + 18, n + 19, n + 20, n + 21, n + 20, n + 19,
-								n + 22, n + 23, n + 24, n + 25, n + 24, n + 23);
-	primitives2 += string_util::format("<geometry><color>0 0 0 0.5</color>"
-								"<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d"
-								"</index></primitive>"
-								"<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d"
-								"</index></primitive>"
-								"</geometry>\n",
-								n + 36, n + 37, n + 38, n + 39,
-								n + 41, n + 40, n + 43, n + 42);
-	primitives3 += string_util::format("<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d"
-								"</index></primitive>"
-								"<primitive type=\"tstrip\"><index>"
-								"%d %d %d %d"
-								"</index></primitive>\n",
-								n + 36, n + 37, n + 38, n + 39,
-								n + 41, n + 40, n + 43, n + 42);
-}
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

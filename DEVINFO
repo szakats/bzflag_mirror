@@ -1,567 +1,468 @@
+
 Information for the BZFlag Developer
 ====================================
 
-As of version 1.8, BZFlag the source code lives in the following
-directories:
-
-game independent, platform independent libraries
-------------------------------------------------
-common		- general utility
-mediafile	- image and audio file reading
-geometry	- geometric mathematics
-obstacle	- collision detection
-scene		- scene graph
-ogl		- wrapper classes for OpenGL
-ui		- user interface
-view		- laying out objects to display
-
-game independent, platform dependent libraries
-----------------------------------------------
-net		- networking
-platform	- non-windowing, non-audio utility
-mplatform	- windowing and audio utility
-
-game dependent, platform independent libraries
-----------------------------------------------
-game		- game classes used by more than one application
+BZFlag source code lives in the following directories:
 
 applications
 ------------
-bzflag		-- the BZFlag client
-bzfls		-- the BZFlag meta-server (i.e. the list of servers server)
-bzfs		-- the BZFlag server
-bzgview		-- a viewer for BZFlag 3D models
+src/bzflag	- the BZFlag client
+src/bzfs	- the BZFlag server
+src/bzadmin	- the BZFlag admin tool and chat client
+tools/		- various helper tools
 
-Note that only a few directories contain code directly related to
-the game BZFlag.  In particular: game, bzflag, bzfls, and bzfs.
-(And obstacle, but that will hopefully be made more general soon.)
-The rest of the code could potentially be used in a different game.
-If your code is BZFlag specific then it should go into one of the
-above directories (game if used by more than one app, otherwise
-into the appropriate app directory).  If not then put it in one of
-the other directories or add a new directory.
+game dependent libraries
+------------------------
+src/game	- core game logic
+
+game independent, platform independent libraries
+------------------------------------------------
+src/common	- general utility
+src/3D		- 3D geometry
+src/geometry	- geometric mathematics
+src/obstacle	- collision detection
+src/scene	- scene graph
+src/ogl		- wrapper classes for OpenGL
+src/mediafile	- sound and image file support
+src/regex	- BSD regular expression library
+src/zlib	- Zlib compression library
+
+game independent, platform dependent libraries
+----------------------------------------------
+src/date	- build dates and versioning
+src/net		- networking
+src/platform	- general platform dependent code
+
+"other stuff"
+-------------
+doc/		- documentation in docbook format
+include/	- public headers
+misc/		- kitchen sink of anything
+web/		- website stuff
+
+Note that only a few directories contain code directly related to the
+game BZFlag.  In particular: bzflag, bzadmin, bzfs, and game. (And
+obstacle, but that will hopefully be made more general some day.) The
+rest of the code could potentially be used in a different game. If
+your code is BZFlag specific then it should go into one of the above
+directories (game if it can potentially be used by more than one app,
+otherwise into the appropriate app directory).  If not then put it in
+one of the other directories or add a new directory.
 
 
 Coding conventions
 ==================
 
-If you plan on contributing any source code to BZFlag, we would
-like you to follow these conventions.  Contributions that don't
-conform are likely to be rejected until they do.
+If you plan on contributing any source code to BZFlag, we would like
+you to follow certain conventions.  Contributions that don't conform are
+likely to be ridiculed and rejected until they do.
 
 Code Organization
 -----------------
-Follow the above organization when introducing new files.  Any
-code that would potentially be useful in another game goes outside
-of the app directories and outside the game directory.  Platform
-dependent code normally goes into platform, mplatform, or net.
+Follow the above organization when introducing new files.  Any code
+that would potentially be useful in another game goes outside of the
+app directories and outside the game directory.  Platform dependent
+code normally goes into platform, net.  Code that is specific to
+bzflag should go into the game directory.  There are README files in
+most all of the source directories that describe what belongs in those
+directories
 
 Header files that are private to a library go into that library's
-directory.  Header files exported from a library go into the
-include off the top-level.  Header files for classes introduced
-in an application directory should never go into include.
+directory.  Header files exported from a library go into the include
+directory off the top-level.  Header files for classes introduced in
+an application directory should never go into a #include outside of
+that application directory.
+
+C files use the .c extension. C++ files use the .cxx extension.
+Header files for both C and C++ use the .h extension.
+
+Headers
+-------
+Don't put interface headers into the common.h header.  Class interface
+headers should include just what is necessary to make the interface
+work.  The source implementation file should include it's interface
+and whatever else it might need specific to the implementation.  For C
+code, the header file should include everything the C code needs
+(otherwise there's no point to the header) including prototypes for
+all non-static functions.
+
+The include order for headers within a header is common.h, system
+headers, common interface headers, and then local interface headers.
+
+The include order for headers within a source file is its own
+interface header if there is one, or common.h otherwise, system
+headers, common implementation headers, and then local implementation
+headers.
+
+Adhering to this order will avoid nasty
+ordering dependencies and makes it easy to change things down the road.
+
+Ideally, there should be one class per file.  There are, of course,
+exceptions to this such as simple utility classes that are local to
+that same file's implementation.  If it's a public class, though, it's
+usually best to separate it out into another file by itself.
+
+Avoid "extern" in C files. This prevents the compiler from type checking in
+most cases. If you need access to something, put it in a header. That's what
+headers are for.
 
 C++ features
 ------------
-Earlier versions of BZFlag avoided certain features of C++ that
-have matured enough to be widely and well supported.  These
-features are now permitted and encouraged:
+Earlier versions of BZFlag avoided certain features of C++ that have
+matured enough to be widely and well supported.  These features are
+now permitted and encouraged including:
+
   bool			-- the boolean type and True and False are gone
-  templates		-- use where appropriate
-  exceptions		-- use where appropriate
   standard C++ library	-- use where appropriate (AList is gone)
+  templates		-- use sparingly where appropriate
 
-The BzfString class still exists and, for now, it should be used
-instead of std::string.  Contributions using std::string directly
-will not be accepted (unless your contribution is to completely
-replace all uses of BzfString with std::string;  it would be
-easiest to typedef std::string BzfString and fix the necessary
-code).
+These should still be avoided:
 
-Exception handling is used in BZFlag in some places.  However,
-do not use exception specifications on function/method declarations.
-And be sure you don't leak any memory if exceptions are thrown.
-Using std::auto_ptr<> is discouraged because older VC++ compilers
-have a broken implementation.
+  exceptions		-- still poorly supported on old lame compilers
+  run-time typing	-- if you find yourself needing RTTI, its often a
+			   sign of bad design. try to find another way to
+			   implement your idea.
 
-Run-time typing is strongly discouraged.  It's typically not
-necessary and shouldn't be introduced unless you've got a *really*
-good reason.
+Multiple inheritance is strongly discouraged unless in the Java style
+of single implementation inheritance and multiple interface
+inheritance.  Multiple inheritance otherwise can quickly lead to very
+hard to understand code.
 
-Multiple inheritance is strongly discouraged unless in the Java
-style of single implementation inheritance and multiple interface
-inheritance.  Multiple inheritance otherwise can quickly lead to
-very hard to understand code.
+Only use standard C++ language features, at no time should any compiler
+specific extensions be used (GNU or VisualC++ extensions). If an extension 
+can not be avoided then it must be able to be disabled or replaced using a
+#define in config.h. BZFlag is a cross platform applicaton so it is
+important to remember that not all builds will use your specific compiler.
 
 Formatting
 ----------
-I don't care if you don't like the formatting style in BZFlag.
-Everybody has their own style and has things they don't like about
-any other style.  Well we can't have a zillion styles in the code.
-So follow the BZFlag if you want your contribution included.  The
-source code serves for examples but some rules:
+Everybody has their own style and has things they don't like about any
+other style.  Well we can't have a zillion styles in the code. So
+follow the BZFlag if you want your contribution included.  The source
+code serves for examples but some rules:
 
-  1)  use tabs to indent; one tab per indentation level.  the
-      source looks best with tabs at every 4th column so using
-      that setting is strongly encouraged.
-  2)  the opening brace of all blocks goes on the same line as
-      the statement introducing it except for functions where it
-      goes on the following line.  the closing brace is indented
-      like the statement except for functions where it aligns
-      with the open brace.  for example:
-        void foo()
-        {
-          for (;;) {
-            if (expr) {
-            }
-          }
-        }
-  3)  an else clause goes on a new line:
-        if (expr) {
-        }
-        else {
-        }
-      do not use `} else {'.
-  4)  if *either* the if block or else block requires brackets
-      then they both get brackets.  if neither require brackets
-      then use brackets on both or neither at your discretion.
-  5)  use `if (ptr != NULL)' and `if (ptr == NULL)' rather than
-      `if (ptr)' and `if (!ptr)'.
-  6)  line up the `=' when assignments appear on sequential lines:
-         int a   = 5;
-         float x = 4.0f;
-  7)  when using `delete' or `delete[]' don't bother to test the
+  1)  indents are 2 characters. Tabs are 8 characters. There are vi and
+      emacs settings in each file to adopt, enforce, remind, and
+      encourage this convention. Suggestions welcome here for setting
+      up other environments. Here are the lines that should be included
+      at the end of source files:
+
+	// Local Variables:
+	// mode: C++
+	// tab-width: 8
+	// c-basic-offset: 2
+	// indent-tabs-mode: t
+	// End:
+	// ex: shiftwidth=2 tabstop=8
+
+  2)  the opening brace of all blocks goes on the same line as the
+      statement introducing it except for functions and classes where
+      it goes on the following line. the closing brace is indented
+      like the statement except for functions where it aligns with the
+      open brace.  for example:
+
+	void foo()
+	{
+	  for (;;) {
+	    if (expr) {
+	    }
+	  }
+	}
+
+  3)  an else clause goes on the same line (there are many unacceptable
+      alternatives):
+
+	if (expr) {
+	} else {
+	}
+	*note that old code had the else on the next line,
+	 please clean this up wherever you may find it*
+
+  4)  if *either* the if block or else block requires brackets then
+      they both get brackets.  if neither requires brackets then use
+      brackets on both or neither at your discretion. In case both
+      styles are allowed, don't change the existing code just because
+      it is not coded like you prefer.
+
+  5)  when using `delete' or `delete[]' don't bother to test the
       pointer if it's NULL first.  use new and delete rather than
       malloc and free.
-  8)  function names and class member variables in class definitions
-      should generally be at the 6th tab stop.
-  9)  data members should be usually private unless making plain old
+
+  6)  data members should be usually private unless making plain old
       data.  separate methods from data in class definitions with
       (possibly redundant) access specifiers.  public c'tors/d'tors
       should be first, followed by public member functions, protected
       member functions, private member functions, and data members.
-  10) macro names are all capitals, class names have the first letter
+
+  7)  macro names are all capitals, class names have the first letter
       of each word capitalized, all other names have the first letter
       of each word except the first capitalized.  only macros may use
-      underscores except a leading underscore in a method parameter
-      name is allowed to make it different from a member variable.
-        #define FOO bar
-        class MyClass {
-        public:
-            void        addStuff(int addMe, int _y) { y = addMe + y; }
+      underscores, except for in the names of method parameters where
+      a leading underscore is allowed to make it different from a
+      member variable.
 
-        private:
-            int         y;
-        };
-  11) put spaces after statements followed by expressions and
-      spaces around operators.  for example:
-        if (a == b)
+	#define FOO bar
+	class MyClass {
+	public:
+	    void        addStuff(int addMe, int _y) { y = addMe + _y; }
+
+	private:
+	    int         y;
+	};
+
+  8)  put spaces after statements followed by expressions and spaces
+      around operators.  for example:
+	if (a == b)
       not
-        if(a==b)
+	if(a==b)
 
-Violations of these rules in the existing code are not excuses to 
-follow suit.  Non-conformant code may be fixed.  Patches to non-
-conformant code should follow the non-conformant code's style if
+  9)  Do not leave old commented code hanging around and do not submit
+      patches with "// Added by foo on xx" comments. This is what
+      version control software is for.
+
+ 10)  Do not code very long line. Try to stay within 80 column if possible,
+      for any reason you should raise that limit, don't go over 132.
+
+Violations of these rules in the existing code are not excuses to
+follow suit.  Non-conformant code may be fixed.  Patches to
+non-conformant code should follow the non-conformant code's style if
 following the rules would cause an ugly mess.
 
+Performance
+-----------
 
-Configuration Files
-===================
-Configuration files are now XML with minor extensions.  Scene graphs
-are also XML.  All XML file processing is performed using the same
-class:  XMLTree.  XMLTree syntatically parses XML files and stores
-the result in a tree data structure.  That tree is then passed to
-the appropriate semantic parser, which may pass off sub-trees to
-other semantic parsers.
-
-Configuration files use the suffix `bzc' (and scene graph files use
-`bzg').  During startup, bzflag does the following initialization:
-
-  * sets default configuration
-  * loads $(HOME)/.bzflag (the pathname depends on the user and platform)
-  * parses command line arguments
-  * creates the window, initializes audio, etc
-  * loads user.bzc if it exists, otherwise load config.bzc
-
-On exit, the configuration is written to $(HOME)/.bzflag to provide
-some persistence.  The initialization order allows the command line
-to override old configuration and old configuration to override
-defaults.  It also allows the user to hook in a replacement
-configuration file (user.bzc) for local changes that shouldn't be
-overwritten everytime bzflag exits.
-
-XMLTree supports:
-  nested tags
-  comments
-  CDATA sections
-  character references
-  processing instructions (which are just parsed and stored)
-
-XMLTree doesn't support:
-  prolog
-  DTD's (and related stuff)
-  any character encoding but ASCII
-
-XMLTree adds the following extensions:
-  <!INCLUDE "<filename>"/>
-    causes the named file to be included inline, replacing the
-    !INCLUDE tag.
-  multiple top-level tags
-    forcing a single top-level tag is rather annoying for the
-    configuration files, so this restriction is relaxed.
-
-ConfigFileManager stores configuration file readers along with the
-tag each handles.  It can parse files (or parsed XMLTree's) that
-contain those tags, automatically switching between readers as
-necessary.
+If the code you are editing is in a performance-critical section of bzflag
+(that is, if it is called multiple times per frame on the client, or
+per server loop on the server), you should profile the proposed changes.
+The new code does not necessarily need to be faster, but a quantitative
+analysis is required.
 
 
-The State Database
+Committing Changes
 ==================
-BZFlag now uses a centralized database for storing many (most?)
-simple values.  The StateDatabase contains name/value pairs.  Names
-and values are strings but values can be interpreted as booleans,
-integers, or floats as necessary.  StateDatabase even has a method
-for a boolean truth test (isTrue()).  In the code, the StateDatabase
-is always accessed through the macro BZDB.
 
-Names in the database can be marked persistent.  Persistent values
-are written to the user's configuration file on exit.
+Make atomic changes in a way that a system will be working, or at
+least will be buildable, before and after committing a set of changes.
 
-Names can be marked read-only, locked, and read-write.  The access
-control applies only to the end user and server, not to the
-programmer.  User commands to modify values respect the access
-control and only allow changes to read-write values.  This allows
-the program to expose values without allowing the user to change
-them.
+Try to separate out bigger commits into smaller ones.  In particular,
+if a change involves multiple functionality changes, the commit should
+be broken up into smaller coherent chunks.  This way if a bug or other
+issue with a particular commit is later encountered, the change can be
+more easily isolated and undone or fixed.
 
-When the server is given the ability to get/set values on each
-client, the client will enforce access control.  The server will
-be able to write to locked and read-write values.  It will also
-be allowed to change the access control on locked and read-write
-names to either locked or read-write.  It will not be permitted
-to write to or change the access control on read-only values.
-This facility will allow the server to control the client to a
-certain extent.  Code already exists to allow the server to
-prevent the user from changing the time of day.
+Making Patches
+--------------
 
-See bzflag.cxx for a list of most built-in database entries.
-Others may be introduced elsewhere and it's difficult to keep a
-complete list.  The "set" command with no arguments will display
-all values that don't begin with an underscore.  A leading
-underscore indicates an internal value that the user probably
-isn't interested in, but the user can still them via the "print"
-command.
+If you do not have source code commit access and would like to propose
+a change for inclusion, you should create a patch.  Patches should be
+submitted to the Sourceforge project site patches tracker at:
 
+https://sourceforge.net/tracker/?func=add&group_id=3248&atid=303248
 
-Commands
-========
+You can create a patch for submission to Sourceforge from a source
+checkout using the following command:
 
-Users now control the client almost exclusively through commands.
-Commands can be entered explicitly using the console.  Commands
-are also bound to keys and buttons and the user can add, remove,
-and change those bindings.  Even menus act through commands.
+svn diff -u > my_patch_name.diff
 
-The only interaction that isn't through commands is controlling
-motion which is done via polling the cursor or joystick position.
-That too should become a command.
+If your patch results in the deletion of existing files, you can
+annotate that deletion by adding it to the patch like this:
 
-There are several standard commands and some BZFlag specific.
-The "help" command with no arguments will print a list of available
-commands.
+diff -u src/bzfs/somefile.cxx /dev/null >> my_patch_name.diff
+
+If your patch requires the addition of new files, simply include these
+new files individually or in a tarball as part of the patch submission.
+
+In general, patches should be relatively small succint changes that
+can be readily reviewed, tested, and applied.  Patches that are
+difficult to review, test, or apply will likely not be accepted.  That
+said, creating useful patches that have been discussed with the
+existing developers is one of the more immediate means to become a
+developer for BZFlag yourself.
 
 
-Key Bindings
-============
+Testing
+=======
 
-Key bindings are now managed through KeyManager.  It can bind a key
-or button press or release to any command.  The only key binding
-that is hard coded is the escape key to show the main menu.  When
-visible, the menu or a message composer will get first crack at
-keys and may prevent the KeyManager from handling them.
+If you have rendering problems, you might want to try setting:
 
-Default key bindings are set in bzflag.cxx but they are overridden
-by any bindings in the user's configuration file.  Of particular
-interest is the ` key which displays the console.  Escape dismisses
-the console.
+LIBGL_ALWAYS_INDIRECT=1
+
+On many systems this will force software rendering.  It will greatly
+reduce the performance, but may assist in solving rendering issues.
+
+A debug build may be specified via:
+
+./configure --enable-debug
+
+A profile build is specified via:
+
+./configure --enable-profile
 
 
-Details -- common
-=================
-common.h	-- basic types and function declarations
-BzfString	-- a simple ref counted string class (don't use std::string)
-CallbackList	-- template for lists of callback functions
-ConfigFileManager -- stores configuration file parsers and parses config files
-ErrorHandler	-- a central place for printing errors (using printError())
-FileManager	-- creates streams for I/O in the data directory
-StateDatabase	-- a name/value pair database
-TimeBomb	-- used for expiring development releases
-XMLTree		-- an XML parser for reading configuration files
+Sounds
+======
+Sounds are stored as uncompressed 22.050KHz WAV files. We will likely move to
+OGG someday.
 
-Details -- game
+
+Images
+======
+Images are stored as portable network graphics (.png). Compression is
+okay, but no additional options such as interlacing.
+
+
+BZDB
+====
+BZDB is the generic name:value pair database within bzflag and
+bzfs. Its useful for data that can be serialized to a string that
+needs to be accessible to many areas of the code. It also provides
+facilities for saving persistent pairs to the config file and
+downloading variables from the server.
+
+BZDB is not an object broker, and isn't meant to be. If you have data
+within an object that needs to be accessible from a number of places,
+but don't want to pass the object around, you could store that data
+within BZDB (if accessed often, such as game variables like gravity,
+you will need a cached version anyway to avoid the overhead of
+lookup). Using BZDB adds unnecessary overhead if objects generally
+keep their data hidden without needing persistent state.
+
+Basically, if your data can be serialized to a string, and it makes
+sense to do so (eg: config file option, game variable downloaded from
+server), use BZDB. If you wanted an object broker, use a freakin'
+global.
+
+
+Version numbers
 ===============
-Contains headers and source files specific to a particlar game, in this
-case BZFlag.
+The BZFlag versioning info is defined in:   include/version.h
 
-Details -- geometry
-===================
-BoundingBox	-- represents a bounding box
-Intersect	-- 2D and 3D intersection functions
-Matrix		-- a 4x4 matrix for transforming homogeneous coordinates
-Ray		-- a 3D ray
-ViewFrustum	-- a 3D viewing frustum
+There are a number of #defines in that file that define the Major,
+Minor, and Revision versions, as well as the build type, build date,
+build user, and network protocol version.
 
-Details -- mediafile
-====================
-AudioFile	-- a generic audio file reader
-ImageFile	-- a generic image file reader
-MediaFile	-- static methods for reading media files of known types
-SGIImageFile	-- an SGI image format file reader
-WaveAudioFile	-- a WAV audio format file reader
+The BZFlag version number is in the format of:
 
-Details -- mplatform
-====================
-Contains files to implement platform dependent versions of:
-  BzfDisplay	-- event handling, screen size, and video format changing
-  BzfVisual	-- wraps pixel format selection
-  BzfWindow	-- window management, gamma control, mouse & joystick stuff
-  PlatformMediaFactory	-- create the above, audio control
+  MajorVersion.MinorVersion.Revision
 
-Details -- net
-==============
-Contains stuff for network handling.  This is in flux.  All platform
-specific network code should end up in here.
+All "development" versions use an odd number for the minor version
+number.  All "release" versions use an even number for the minor
+version, e.g.. 1.9.x is a development version for a future 1.10
+release.  Release versions also use even revision version
+numbers. Maintenance work is done on odd numbered revisions and
+releases are even numbered. For development versions the revision
+version represents significant feature changes or stages in a
+development version, such as a change to the network protocol or a
+move to a definite testing stage.  For "release" versions, the
+revision represents patches or bug fixes to the base release, but not
+new feature development.  This allows the developers to "leave some
+room" for patches and emergency fixes to a release line.
 
-Details -- obstacle
-===================
-Collision detection stuff.  Currently specific to BZFlag it handles
-boxes, pyramids, teleporters, etc.  This should be rewritten to do
-generic 3D collision detection on, at least, convex polyhedra.  It
-should also do collision response.
+The network protocol version is a string. When changes to the protocol
+are made that render it incompatible with prior releases, the version
+number of the protocol must be changed.  This is necessary to prevent
+incompatible clients from attempting connections.  When a change is
+made, the network protocol version needs to be set to the application
+version that is current at that time.  This is also when the revision
+of the application should be incremented.
 
-Details -- ogl
-==============
-Wraps rendering state, texture maps, and texture fonts.  Currently
-it is OpenGL specific but it could be made rendering library agnostic.
-There are a number of places outside this library where OpenGL is
-used, though.  Ideally all rendering library calls would go through
-a library agnostic interface.  However, OpenGL has the widest support
-of any rendering library so this is pretty much a non-issue (unless
-someone wants to port to a game console).
+The displayed application version includes additional information in
+the format:
 
-Details -- platform
-===================
-Contains files to implement platform dependent versions of
-PlatformFactory, which handles:
-  configuration file I/O
-  text console output
-  time and timers
-  querying the user name
-  environment variables
-  signal handling
-Configuration files are platform independent but their location is
-not.
+  Major.Minor.Revision-BuildOS-BuildType-BuildDate
 
-Details -- scene
+BuildOS is the operating system that the building system is running;
+on systems that use the automake build system this is automatically
+generated.
+
+BuildType is a string that represents the intended use of the build.
+For development releases, the build type is normally "SVN".  For
+testing releases, the build type can be "testing", "beta",
+"releasecandidate", etc.  For final release versions the build type
+should be "release".  The build type provides a human readable keyword
+for the version and intended or expected stability of the build.
+
+BuildDate represents the date of the build in the format YYYYMMDD.
+This string is generated during runtime by the compiler's preprocessor
+__DATE__ macro.
+
+
+Making a Release
 ================
-Implements a simple scene graph.  A scene graph describes a 3D model.
-The library supports simple animation by linearly interpolating values.
-Note that it's a directed graph, not a tree, so nodes can be referenced
-by different parents to reuse them.  Cycles are (usually) errors but
-they are not detected or prevented, so be careful.
+In order to make a release, there are handful of steps that need to be
+taken.  If any step fails to be completed successfully, the release
+cannot proceed.  A checklist of items to be completed follows:
 
-Nodes are reference counted.  SceneNodeGroup is the base class of all
-nodes that have children and it manages the ref counts of its children.
-The programmer is otherwise responsible for managing ref counts.
+- All code is committed to the repository.
 
-scene has the following node types (these are not type names):
-  transforms	-- various linear transforms including billboarding
-  gstate	-- set renderer state (e.g. texture, blending function)
-  geometry	-- colors, normals, texture coordinates, and vertices
-  primitives	-- points, lines, and triangles
-  animation	-- adjusts and creates interpolation variables
-  selector	-- chooses certain children based on some criteria
-  lights	-- simple lights applied to children with normals
-  metadata	-- arbitrary string data
-Selectors are used to switch models for level-of-detail or to hide
-objects that shouldn't be visible.  They could also be used to
-terminate recursion in models the use cycles in the graph.
+- NEWS includes a comment for all items added since the previous
+  release, preferably denoting who made what changes.
 
-The library supports the following actions (called visitors):
-  Find		-- find the first node with a given name
-  FindAll	-- find all named nodes
-  Render	-- full featured renderer
-  SimpleRender	-- simple renderer
+- Man files, bzfs_conf.html, and bzfs.conf files are updated with
+  latest changes.
 
-The Render (SceneVisitorRender) action traverses the scene graph,
-culls primitives outside the view frustum, sorts visible objects
-to minimize rendering state changes and to get blended objects in
-back-to-front order, then draws them.  SimpleRender just draws
-objects in the order they're found in the graph.
+- Version numbers are updated to the next expected release number.
+  This minimally includes updating README, buildDate.cxx, and
+  ChangeLog.  Version numbers in all other platform-specific
+  README.* files should also be verified.
 
-SceneVisitorRender uses std::sort() to do the sorting.  If your
-std::sort() is quicksort then it's possible for the sort to take
-quadratic time (if the nodes are already sorted).  That's pretty
-unlikely but it's something to be aware of.  Some compilers use
-a standard library that implements introsort which is O(NlogN)
-in the worst case and otherwise just as fast as quicksort.
+- Update package/win32/nsis/*.nsi (for windows) with appropriate
+  version numbers
 
-To use a scene graph effectively you must understand how state is
-handled during traversal and how traversal is performed.  Traversal
-is depth first and children are traversed from first (index 0) to
-last.  When leaving a node, any rendering state it may have modified
-is restored to what it was before entering the node.  So the state
-at any particular node depends only on the path to that node, not on
-any other part of the scene graph.  That's an important feature:  it
-simplifies understanding of the graph and permits performance
-enhancements (because the graph can be easily rearranged).
+- Update and commit ChangeLog for changes since the last release.  Use
+  YYYY-MM-DD date of the previous release, available in the NEWS file.
+  cvs2cl.pl method is preferred but either should do.
 
-Rendering state is always pushed onto a stack when entering a node
-and popped when leaving it.  What is modified depends on the type of
-node:
-  transform	-- pushes a new matrix onto a matrix stack
-  gstate	-- pushes a new gstate
-  geometry	-- pushes *non-empty* colors, normals, texcoord, vertices
-  animation	-- pushes rendering parameters
-  light		-- pushes a new light
-Note that geometry can accumulate in a limited way:  an geometry node
-that doesn't specify, say, colors will inherit colors from earlier
-geometry nodes.  Transforms can base the new matrix on any matrix
-currently in the matrix stack.  Usually, they multiply with the top
-matrix.  Rendering parameters can be introduced or adjusted.  But
-gstates are always replaced in toto.
+  misc/cvs2cl.pl -b -T          --OR--
+  rcs2log -h users.sourceforge.net -r "-d>YYYY-MM-DD" > ChangeLog
 
-Nodes animate by providing multiple values for some parameter and
-indicating the rendering parameter used to interpolate it (which
-normally defaults to "t").  For example, a SceneNodeTransform can
-animate a translation by specifying two or more translations:
+- Perform a "make distcheck" on multiple (preferably all) platforms.
+  This will verify that a proper source distribution can be made.
+  Also verify that all non-autotools builds build properly.
 
-  <transform>
-    <translate>
-      0 0 0
-      1 0 0
-      1 1 0
-    </translate>
-  </transform>
+- Tag the release.  Tag format should be consistent with the other
+  tags using the format of vMAJOR_MINOR_RELEASE
+	e.g. cvs tag v1_10_2
 
-When t <= 0, the translation is (0 0 0).  When 0 <= t < 1 the
-translation linearly interpolates from (0 0 0) to (1 0 0).  When
-1 <= t < 2 it linearly interpolates from (1 0 0) to (1 1 0).  When
-t >= 2 the translation is (1 1 0).  Not all nodes support animation.
-Currently the following parameters can be animated:
-  SceneNodeChoice
-    mask
-  SceneNodeGeometry
-    color
-    normal
-    texcoord
-    vertex
-  SceneNodeLight
-    ambient
-    diffuse
-    specular
-    position
-    spotDirection
-    spotExponent
-    spotCutoff
-    attenuation
-  SceneNodeSphereTransform
-    translate
-    azimuth
-    altitude
-    twist
-    radius
-  SceneNodeTransform
-    translate
-    center
-    rotate
-    scaleOrientation
-    scale
+- Perform a "cvs export -r vMAJOR_MINOR_RELEASE" from somewhere else
+  in the filesystem to obtain a tagged version of the sources.
 
-The SceneNodeAnimate node allows rendering parameters to be adjusted
-or created from existing parameters.  Animations can cycle or swing;
-cycle means that they restart from the beginning when they reach the
-end and swing means that when they reach the end they go backwards
-to the beginning then restart.  The number of cycles can be limited
-to any positive value, including fractions of a cycle.
+- Perform a "make dist" of that export to generate a source release
+  tarball.
 
-Given an input parameter x, an intermediate value y is computed:
-  y = (scale * (x + bias) - start) / (end - start)
-y is the normalized cycle parameter.  if the animation mode is swing
-then y is halved because it takes twice as long to complete one swing
-cycle (start to end to start) than a normal cycle (start to end).
+- Verify that the source tarball can be expanded, builds, and runs.
 
-What happens next depends on if the number of cycles is limited.  If
-so then t is clamped to the range [0, cycles].  If cycles is an
-integer and the animation is cycling (not swinging) then y is clamped
-to the end of the cycle rather than the beginning since this is usually
-desired.
+- Build platform-specific binaries from the source tarball.
 
-The integer part of y is then discarded.  If y is negative then 1 is
-added;  this means, for example, -0.75 maps to 0.25 and that animations
-don't reverse direction when y passes through 0.
+- Post the source tarball, zip and platform-specific binaries to
+  SourceForge.
 
-Finally, the output parameter is computed from the adjusted y.  If
-swinging then [0,0.5) is mapped to [start,end) and [0.5,1) is mapped to
-[end,start).  If cycling then [0,1] is mapped to [start,end].  If there
-is a step size then the output parameter is forced to the closest step
-not greater than the current value (the step is counted from start, not
-from zero).
+- Increment and commit the version number in configure.ac to the
+  source repository so that later builds are immediately
+  distinguished.
 
-SceneVisitorRender predefines "time" to be the wall clock time since
-the game started.  Scene graphs can use this as the input parameter
-for animations by using "time" as the src parameter and "t" as the
-dst parameter.
+- Notify the following (at least):
 
-The SceneNodeGState deserves a short description.  It controls how a
-primitive is drawn and there should be a gstate somewhere in the graph
-above every primitive.  A gstate node's parameters map directly to the
-methods in an OpenGLGStateBuilder.  In summary:
-  <texture filename="<filename>" rgba="true|false" repeat="true|false"
-	   filter="nearest|linear|
-                   nearestmipmapnearest|linearmipmapnearest|
-                   nearestmipmaplinear|linearmipmaplinear" />
-						use texture
-  <texenv mode="modulate|decal|replace" />	use tex env mode
-  <shading model="flat|smooth" />		use shade model
-  <blending src="0|1|sa|1-sa|da|1-da|dc|1-dc"
-            dst="0|1|sa|1-sa|da|1-da|sc|1-sc" /> use blending function
-  <alpha func="0|==|!=|<|<=|>|>=|1" ref={ref} /> use alpha function
-  <depth write="true|false" func="0|==|!=|<|<=|>|>=|1" />
-						use depth function
-  <smoothing smooth="true|false" />		use line/point smoothing or not
-  <culling cull="true|false" />			enable/disable culling
-  <dithering dither="true|false" />		enable/disable dithering
-  <point size="{s}" />				draw points of size s
-  <stipple alpha="{a}" />			set stipple with given opacity
-  <pass number="{n}" />				draw on pass n
-You can also add `force="true|false"' to texture, blending, and smoothing.
-Using "true" forces the gstate to override globally disabled rendering
-state.  So, for example, if you absolutely have to have smoothing on
-your lines and points even if the user wants those turned off then
-use `<smoothing smooth="true" force="true" />'.  However, usually you
-should use a choice node to make separate models for each case.
+bzflag-users@lists.SourceForge.net
+news on http://BZFlag.org/
+news on http://sourceforge.net/projects/bzflag/
+http://freshmeat.net/projects/bzflag/ (rank BZFlag here!)
 
-Details -- ui
-=============
-CommandManager	-- manages commands (name,function pairs)
-CommandsStandard-- the standard commands
-KeyManager	-- manages key bindings (key event,command pairs)
-Menu		-- a menu, made of menu controls
-MenuControls	-- various user interface elements for menus
-MenuManager	-- manages the known menus and the active menu stack
-MenuReader	-- reads menus from configuration files
-MessageBuffer	-- a buffer of timestamped message strings
-MessageManager	-- manages named message buffers
+- Optionally notify the following:
 
-Details -- view
-===============
-A view is a rectangular region where something gets displayed,
-including other views.  BZFlag uses views to layout the display.
-The view directory has several kinds of views and the bzflag
-directory contains other views specific to BZFlag.
+http://slashdot.org/
+http://happypenguin.org/ (BZFlag is now #2 in the ratings!)
+news@linuxgames.com - http://LinuxGames.com/
+John Gowin <jgowin@linuxorbit.com> (thanx for the review!)
+jd@linuxgaming.co.uk
+updates@superdownloads.com.br
+mail -s add LSM@execpc.com < bzflag.lsm
+http://www.gbld.net/
 
-Named views are stored in data/views.bzc.  See that for examples.
-By default, bzflag uses the "normal" view but this can be changed
-at any time by setting "displayView" to the name of the desired
-view.
+Testing the server
+==================
+
+An example line to use for bzfs testing is:
+
+src/bzfs/bzfs -c -d -d -d +f good +f bad -fb -j -ms 3 -password \
+ password -s 10 -sa -sb -sw 1 -st 15 -world misc/hix.bzw
