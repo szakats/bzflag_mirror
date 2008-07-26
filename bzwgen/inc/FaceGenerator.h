@@ -59,9 +59,17 @@ private:
   /**
    * Creates the layout of the secondary roads. To save on collision 
    * tests these are stored inside the faces made by the primary 
-   * road network. 
+   * road network. In case of a normal bzw map, there would be
+   * only a few primary roads.
    */
   void runSecondaryRoadGeneration( );
+  /** 
+   * The final level of road network generation is the subdivision of
+   * lots created by secondary road generation into lots acceptable by
+   * the ruleset (e.g. with no degenerated faces). This method also is
+   * responsible for pushing zones.
+   */
+  void subdivideFace( graph::Face* face );
 };
 
 #endif /* __FACEGENERATOR_H__ */

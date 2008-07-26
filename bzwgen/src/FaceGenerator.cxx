@@ -44,17 +44,36 @@ void FaceGenerator::createInitialGraph( ) {
 
 void FaceGenerator::runPrimaryRoadGeneration( ) {
   createInitialGraph( );
+  
   // ...
+  
   graph.readFaces( );
 }
 
 void FaceGenerator::runSecondaryRoadGeneration( ) {
   graph::FaceVector faces = graph.getFaces( );
+
+  // For each face in our graph we do the secondary generation
   for ( size_t i = 0; i < faces.size(); i++ ) {
-    faces[i]->initializeSubgraph( );
-    PlanarGraph* sgraph = faces[i]->getSubgraph( );
+    graph::PlanarGraph* sgraph = faces[i]->initializeSubgraph( );
     // ...
-    sgraph->readFaces( );    
+    sgraph->readFaces( );
+
+    // pass the faces to subdivision
+    graph::FaceVector sfaces = sgraph->getFaces();
+    for ( size_t j = 0; j < sfaces.size(); j++ ) {
+      subdivideFace( sfaces[j] );
+    }
+  }
+}
+
+void FaceGenerator::subdivideFace( graph::Face* face ) {
+  graph::PlanarGraph* sgraph = face->initializeSubgraph( );
+  // ...
+  sgraph->readFaces( );
+  graph::FaceVector sfaces = sgraph->getFaces();
+  for ( size_t i = 0; i < sfaces.size(); i++ ) {
+    // ...
   }
 }
 
