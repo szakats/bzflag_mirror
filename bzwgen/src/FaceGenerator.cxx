@@ -22,8 +22,8 @@ void FaceGenerator::parseOptions( CCommandLineArgs* opt ) {
 }
 
 void FaceGenerator::run( ) {
-  createInitialGraph( );
-  graph.readFaces( );
+  runPrimaryRoadGeneration( );
+  runSecondaryRoadGeneration( );
   Generator::run( );
 }
 
@@ -40,6 +40,22 @@ void FaceGenerator::createInitialGraph( ) {
   graph.addConnection( n2, n3 );
   graph.addConnection( n3, n4 );
   graph.addConnection( n4, n1 );
+}
+
+void FaceGenerator::runPrimaryRoadGeneration( ) {
+  createInitialGraph( );
+  // ...
+  graph.readFaces( );
+}
+
+void FaceGenerator::runSecondaryRoadGeneration( ) {
+  graph::FaceVector faces = graph.getFaces( );
+  for ( size_t i = 0; i < faces.size(); i++ ) {
+    faces[i]->initializeSubgraph( );
+    PlanarGraph* sgraph = faces[i]->getSubgraph( );
+    // ...
+    sgraph->readFaces( );    
+  }
 }
 
 

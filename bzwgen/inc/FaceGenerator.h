@@ -51,7 +51,17 @@ private:
    * around the world.
    */
   void createInitialGraph( );
-
+  /**
+   * Creates the layout of the major roads. Stores them in the graph.
+   * Generation is controlled by already stored options.
+   */
+  void runPrimaryRoadGeneration( );
+  /**
+   * Creates the layout of the secondary roads. To save on collision 
+   * tests these are stored inside the faces made by the primary 
+   * road network. 
+   */
+  void runSecondaryRoadGeneration( );
 };
 
 #endif /* __FACEGENERATOR_H__ */

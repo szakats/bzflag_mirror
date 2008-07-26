@@ -158,6 +158,12 @@ public:
    * Node is present in the graph.
    */
   Edge* closestEdge( const Vector2Df v );
+  /** 
+   * Returns a copy of the vector with the list of generated faces.
+   */
+  inline FaceVector getFaces( ) const {
+    return faceList.getCopy( );
+  }
 private:
   /** 
    * Extracts the faces assigned to the current node. Works only on 
