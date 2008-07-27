@@ -13,11 +13,13 @@
 #ifndef __GLOBALS_H__
 #define __GLOBALS_H__
 
+#define _CRT_SECURE_NO_DEPRECATE 1
 #include <vector>
 #include <string>
 #include <map>
 #include <iostream>
 #include "MathUtils.h"
+#include "Logger.h"
 
 typedef std::string String;
 typedef std::vector<int> IntVector;
