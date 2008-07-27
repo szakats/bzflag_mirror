@@ -37,6 +37,7 @@ void BZWGeneratorStandalone::printHelp() {
   std::cout << "Command line arguments:\n";
   printHelpCommand("h","help","                shows help");
   printHelpCommand("d","debug","integer        sets debug level (0-4)(default: 2)");
+  printHelpCommand("f","filedebug","integer    sets log.txt output debug level (0-4)(default: no output)");
   printHelpCommand("o","output","filename      sets output filename (default: map.bzw)");
   printHelpCommand("r","rulesdir","directory   sets rules directory (default: rules)");;
   printHelpCommand("s","size","integer         sets world size (default: 800)");

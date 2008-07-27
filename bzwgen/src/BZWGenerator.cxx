@@ -128,8 +128,13 @@ int BZWGenerator::setup() {
 
   int detail = 3;
   int debugLevel = 2;
+  int fileDebugLevel = -1;
   getOptionI(debugLevel,"d","debug");
+  getOptionI(fileDebugLevel,"f","filedebug");
   Logger.setOutputLogLevel( debugLevel );
+  if ( fileDebugLevel >= 0 ) {
+    Logger.setFileLogLevel( fileDebugLevel );
+  }
 
   getOptionI(detail,"l","detail");
   getOptionS(texturepath,"t","texture");

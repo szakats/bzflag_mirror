@@ -21,6 +21,7 @@
 #include <stdio.h> 
 #include <stdarg.h>
 #include <iostream> 
+#include <fstream> 
 
 #pragma warning (push)
 #pragma warning (disable:4996)
@@ -41,6 +42,14 @@ class LoggerSingleton {
    * Log level of messages going to the standard output (cout)
    */
   int outputLogLevel;
+  /** 
+   * Log level of messages going to the file output.
+   */
+  int fileLogLevel;
+  /**
+   * Stream for file output. Initialized when setFileLogLevel is called.
+   */
+  std::ostream* fileStream;
 public:
   /** 
    * Singleton instance accessor.
@@ -53,14 +62,14 @@ public:
    * Message logging, takes level and printf-like syntax.
    */
   void LoggerSingleton::log( int level, char *str, ... ) {
-    if ( level <= outputLogLevel ) {
-      va_list va;
-      va_start( va, str );
-      if ( vsnprintf( buffer, 159, str, va ) == -1 )
-        std::cerr << "LoggerSingleton::log, buffer is too small!\n" ;
-      va_end( va );
-      std::cout << buffer << "\n";
-    }
+    if ( !needsLogging( level ) ) return;
+    va_list va;
+    va_start( va, str );
+    if ( vsnprintf( buffer, 159, str, va ) == -1 )
+      std::cerr << "LoggerSingleton::log, buffer is too small!\n" ;
+    va_end( va );
+    if ( level <= outputLogLevel ) std::cout << buffer << "\n";
+    if ( level <= fileLogLevel && fileStream ) (*fileStream) << buffer << "\n";
   }
   /** 
    * Message logging, shortcut for logging without level (meaning always).
@@ -72,6 +81,7 @@ public:
       std::cerr << "LoggerSingleton::log, buffer is too small!\n" ;
     va_end( va );
     std::cout << buffer << "\n";
+    if ( fileStream ) (*fileStream) << buffer << "\n";
   }
   /** 
    * Sets the level of output for the console.
@@ -79,12 +89,31 @@ public:
   void setOutputLogLevel( int level ) {
     outputLogLevel = level;
   }
+  /** 
+   * Sets the level of output for the console.
+   */
+  void setFileLogLevel( int level ) {
+    fileLogLevel = level;
+    if (!fileStream) fileStream = new std::ofstream("log.txt");
+  }
+  ~LoggerSingleton() {
+    if (fileStream) delete fileStream;    
+  }
 private:
+  /** 
+   * Returns true if either outputLogLevel or fileLogLevel is greater then
+   * the passed argument.
+   */
+  bool needsLogging( int level ) {
+    return ( level <= outputLogLevel || level <= fileLogLevel );
+  }
   /** 
    * Blocked constructor.
    */
   LoggerSingleton() {
     outputLogLevel = 2;
+    fileLogLevel = 0;
+    fileStream = NULL;
   }
   /** 
    * Blocked copy constructor.
