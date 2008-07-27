@@ -15,8 +15,6 @@
 #include <fstream>
 #include "globals.h"
 
-int debugLevel = 2;
-
 #ifdef COMPILE_PLUGIN
 
 #include "BZWGeneratorPlugin.h"
