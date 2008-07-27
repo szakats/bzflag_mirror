@@ -80,7 +80,7 @@ void GridGenerator::performSlice(bool full, int snapmod, bool horiz) {
   int x = Random::numberRangeStep(snap,gridSize-snap*bmod,snapmod*snap);
   int y = Random::numberRangeStep(snap,gridSize-snap*bmod,snapmod*snap);
 
-  if (debugLevel > 2) printf("slice (%d,%d)...\n",x,y);
+  Logger.log( 3, "slice (%d,%d)...", x, y );
 
   if (node(x,y).type == ROADX) return;
 
@@ -94,7 +94,7 @@ void GridGenerator::performSlice(bool full, int snapmod, bool horiz) {
 }
 
 void GridGenerator::growZone(int x,int y,CellType type) {
-  if (debugLevel > 3) { printf("Pushing zone at : (%d,%d)\n",x,y); }
+  Logger.log( 3, "Pushing zone at : (%d,%d)", x, y ); 
   int xe = x;
   int ye = y;
   while(xe < gridSize) {
@@ -117,24 +117,24 @@ void GridGenerator::growZone(int x,int y,CellType type) {
   if (face) face->size();
 
   if (type == ROAD) {
-    if (debugLevel > 2) { printf("Road zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    Logger.log( 3, "Road zone added : (%d,%d * %d,%d)", x, y, xe, ye ); 
     addZone(new FloorZone(this,face,gridStep,roadid, x-xe < y-ye));
   } else if (type == ROADX) {
-    if (debugLevel > 2) { printf("Crossroads zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    Logger.log( 3, "Crossroads zone added : (%d,%d * %d,%d)", x, y, xe, ye ); 
     addZone(new FloorZone(this,face,gridStep,roadxid,true));
   } else if (type == BASE) {
-    if (debugLevel > 2) { printf("Base zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    Logger.log( 3, "Base zone added : (%d,%d * %d,%d)", x, y, xe, ye ); 
     addZone(new BaseZone(this,face, ctfSafe));
   } else {
-    if (debugLevel > 2) { printf("Building zone added : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+    Logger.log( 3, "Building zone added : (%d,%d * %d,%d)", x, y, xe, ye ); 
     addZone(new BuildZone(this,face));
   }
-  if (debugLevel > 3) { printf("Zone successfuly created : (%d,%d * %d,%d)\n",x,y,xe,ye); }
+  Logger.log( 4, "Zone successfuly created : (%d,%d * %d,%d)", x, y, xe, ye ); 
 }
 
 
 void GridGenerator::run() { 
-  if (debugLevel > 1) printf("\nRunning GridGenerator...\n");
+  Logger.log( 2, "Running GridGenerator...");
 
   if (bases > 0) {
     plotRoad(snap,snap,true,0);
@@ -152,19 +152,19 @@ void GridGenerator::run() {
 
   bool horiz = Random::coin();
 
-  if (debugLevel > 1) printf("Full slices (%d)...\n",fullslice);
+  Logger.log( 2, "Full slices (%d)...", fullslice );
   for (int i = 0; i < fullslice; i++) {
     horiz = !horiz;
     performSlice(true,3,horiz);
   }
 
-  if (debugLevel > 1) printf("Subdivision (%d)...\n",subdiv);
+  Logger.log( 2, "Subdivision (%d)...", subdiv );
   for (int i = fullslice; i < subdiv; i++) {
     horiz = !horiz;
     performSlice(false,1,horiz);
   }
 
-  if (debugLevel > 1) printf("Pushing zones...\n");
+  Logger.log( 2, "Pushing zones..." );
 
   int y = 0;
   int x = 0;

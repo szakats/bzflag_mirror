@@ -45,9 +45,6 @@ typedef std::ofstream OutFileStream;
 #define argumentDeliminator "-"
 #endif //_USE_GNU_DELIMS
 
-
-extern int debugLevel;
-
 #include "Vector2D.h"
 #include "Vector3D.h"
 

@@ -168,24 +168,22 @@ int BZWGenerator::setup() {
 }
 
 void BZWGenerator::generate(OutStream* outstream) {
-  std::cout << "Initializing... ";
+  Logger.log( "Initializing... " );
   GridGenerator gen(ruleset);
-  std::cout << "done.\n";
 
-  std::cout << "Parsing options... ";
+  Logger.log( "Parsing options... " );
   gen.parseOptions(&cmd);
-  std::cout << "done.\n";
 
-  std::cout << "Generating... ";
+  Logger.log( "Generating... " );
   gen.run();
-  std::cout << "done.\n";
-
+  
+  Logger.log( "Outputing... " );
   Output os(outstream,texturepath);
-  std::cout << "Outputing... ";
   os.info(BZWGMajorVersion,BZWGMinorVersion,BZWGRevision);
   gen.output(os);
   os.footer();
-  std::cout << "done.\n";
+  
+  Logger.log( "Done. ");
 }
 
 // Local Variables: ***

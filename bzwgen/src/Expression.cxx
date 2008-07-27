@@ -29,10 +29,10 @@ double ExpressionFaceAttribute::calculate(Mesh* mesh,int face) {
     if (mesh->getFace(face)->isMultiFace()) {
       return double(((MultiFace*)mesh->getFace(face))->componentCount());
     } else {
-      if (debugLevel > 1) printf("Warning : face(c) called with non-MultiFace!\n");
+      Logger.log( 2, "Warning : face(c) called with non-MultiFace!");
     }
   }
-  if (debugLevel > 1) printf("Warning : Unknown face() attribute : '%s'!\n",attrname.c_str());
+  Logger.log( 2, "Warning : Unknown face() attribute : '%s'!\n", attrname.c_str() );
   return 0.0;
 }
 

@@ -14,14 +14,14 @@
 #include "globals.h"
 
 void RuleSet::addRule(String& name, Rule* rule) { 
-  if (debugLevel > 1) printf("Added rule '%s'.\n",rule->getName().c_str());
+  Logger.log( 2, "Added rule '%s'.", rule->getName().c_str() );
   rules[name] = rule; 
 }
 
 double RuleSet::getAttr(String& name) {
   AttributeMap::iterator itr = attrmap.find(name); 
   if (itr == attrmap.end()) {
-    printf("Warning : attribute '%s' not found!\n",name.c_str());
+    Logger.log( "Warning : attribute '%s' not found!", name.c_str() );
     return 0.0;
   }
   return itr->second;
@@ -34,13 +34,13 @@ int RuleSet::runMesh(Mesh* mesh, int face, String& rulename) {
   recursion++;
   if (recursion == MAX_RECURSION) {
     recursion = -1;
-    printf("Warning : Recursion level 1000 reached! Are you sure you have no infinite loops?\n");
+    Logger.log( "Warning : Recursion level 1000 reached! Are you sure you have no infinite loops?");
     return -1;
   }
 
   RuleMapIter itr = rules.find(rulename); 
   if (itr == rules.end()) {
-    printf("Warning : rule '%s' not found!\n",rulename.c_str());
+    Logger.log( "Warning : rule '%s' not found!", rulename.c_str() );
     return -1;
   }
   int result = itr->second->runMesh(mesh,face);
@@ -55,7 +55,7 @@ MeshVector* RuleSet::run(Mesh* initial_mesh, int initial_face, String& rulename)
   initial_mesh->pushBase(initial_face);
   initial_mesh->addInsideVertex(initial_mesh->faceCenter(initial_face)+initial_mesh->faceNormal(initial_face)*0.05f);
   if (runMesh(initial_mesh,initial_face,rulename) == -1) 
-    printf("RuleSet::run failed with start rule '%s!'\n",rulename.c_str());
+    Logger.log( "RuleSet::run failed with start rule '%s!'", rulename.c_str() );
   return meshes;
 }
 
