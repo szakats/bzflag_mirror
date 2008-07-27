@@ -18,10 +18,12 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
-#define _CRT_SECURE_NO_DEPRECATE 1
 #include <stdio.h> 
 #include <stdarg.h>
 #include <iostream> 
+
+#pragma warning (push)
+#pragma warning (disable:4996)
 
 /**
  * @class Logger
@@ -50,15 +52,32 @@ public:
   /** 
    * Message logging, takes level and printf-like syntax.
    */
-  bool LoggerSingleton::log( int level, char *str, ... ) {
+  void LoggerSingleton::log( int level, char *str, ... ) {
     if ( level <= outputLogLevel ) {
       va_list va;
       va_start( va, str );
       if ( vsnprintf( buffer, 159, str, va ) == -1 )
         std::cerr << "LoggerSingleton::log, buffer is too small!\n" ;
-      va_end(va);
+      va_end( va );
       std::cout << buffer << "\n";
     }
+  }
+  /** 
+   * Message logging, shortcut for logging without level (meaning always).
+   */
+  void LoggerSingleton::log( char *str, ... ) {
+    va_list va;
+    va_start( va, str );
+    if ( vsnprintf( buffer, 159, str, va ) == -1 )
+      std::cerr << "LoggerSingleton::log, buffer is too small!\n" ;
+    va_end( va );
+    std::cout << buffer << "\n";
+  }
+  /** 
+   * Sets the level of output for the console.
+   */
+  void setOutputLogLevel( int level ) {
+    outputLogLevel = level;
   }
 private:
   /** 
@@ -73,8 +92,10 @@ private:
   LoggerSingleton( LoggerSingleton& ) {}
 };
 
-#define Logger LoggerSingleton.getInstance()
+#define Logger LoggerSingleton::getInstance()
 
+
+#pragma warning (pop)
 
 #endif // __LOGGER_H__
 

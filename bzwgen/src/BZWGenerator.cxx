@@ -127,8 +127,10 @@ int BZWGenerator::setup() {
   String temp;
 
   int detail = 3;
-
+  int debugLevel = 2;
   getOptionI(debugLevel,"d","debug");
+  Logger.setOutputLogLevel( debugLevel );
+
   getOptionI(detail,"l","detail");
   getOptionS(texturepath,"t","texture");
   if(getOptionS(temp,"r","rulesdir"))
@@ -138,13 +140,13 @@ int BZWGenerator::setup() {
   ruleset = new RuleSet();
   
   while (ruledir.GetNextFile(file,"*.set",false)) {
-    std::cout << "Loading " << file.GetOSName() << "... ";
+    Logger.log( "Loading %s... ",file.GetOSName());
     file.Open("r");
     yyin = file.GetFile();
     if (yyparse(ruleset) == 0) {
-      std::cout << "done.\n";
+      Logger.log( "Loading done." );
     } else {
-      std::cout << "failed!\n";
+      Logger.log( "Loading failed!" );
       return 1;
     }
     yylineno = 1;

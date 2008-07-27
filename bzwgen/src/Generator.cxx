@@ -27,18 +27,18 @@ void Generator::parseOptions(CCommandLineArgs* opt) {
 }
   
 void Generator::run() {
-  if (debugLevel > 1) printf("Generating zones...\n");
+  Logger.log( 2, "Generating zones..." );
   for (ZoneVectIter itr = zones.begin(); itr!= zones.end(); ++itr) (*itr)->run();
 }
 
 void Generator::output(Output& out) {
   out.header(size);
 
-  if (debugLevel > 1) printf("\nOutputing materials...\n");
+  Logger.log( 2, "Outputing materials..." );
   for (MaterialVectIter iter = mats.begin(); iter != mats.end(); ++iter) (*iter).output(out);
   if (ruleset != NULL) ruleset->output(out);
 
-  if (debugLevel > 1) printf("Outputing zones...\n");
+  Logger.log( 2, "Outputing zones..." );
   for (ZoneVectIter iter = zones.begin(); iter != zones.end(); ++iter)  (*iter)->output(out);
 }
 

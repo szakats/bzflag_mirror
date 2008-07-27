@@ -599,6 +599,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\Logger.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\Output.h"
 				>
 			</File>

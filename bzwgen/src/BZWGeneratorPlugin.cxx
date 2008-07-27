@@ -26,7 +26,7 @@ void BZWGeneratorPlugin::process(bz_EventData *eventData) {
     return;
 
 
-  std::cout << "bz_eGetWorldEvent called\n";
+  Logger.log( 2, "bz_eGetWorldEvent called!" );
 
   if (worldGenerated) {
     bz_GetWorldEventData_V1 *getWorldData = (bz_GetWorldEventData_V1 *) eventData;
