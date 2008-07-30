@@ -72,7 +72,7 @@ public:
    */
   static inline double doubleRangeStep( double min, double max, double step ) { 
     if (step == 0) return 0.0; 
-    int steps = int((max-min) / step); 
+   int steps = int((max-min) / step); 
     return numberMax(steps+1)*step + min; 
   }
 
@@ -84,6 +84,13 @@ public:
   /** Returns a percentage chance randomization as a boolean. */
   static inline bool chance(int chance) { 
     return numberMax(100) < chance; 
+  }
+  /**
+   * Returns a random sign, that is either 1 or -1 with a 50/50 
+   * probability.
+   */
+  static inline float sign() { 
+    return rand()%2 == 0 ? 1.0f : -1.0f; 
   }
 };
 

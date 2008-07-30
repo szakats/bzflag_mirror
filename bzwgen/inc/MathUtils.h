@@ -21,6 +21,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#define PI M_PI 
 #define EPSILON 0.001
 
 template<class T> class Vector2D;

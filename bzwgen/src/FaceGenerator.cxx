@@ -77,6 +77,15 @@ void FaceGenerator::subdivideFace( graph::Face* face ) {
   }
 }
 
+static Vector2Df FaceVector::deviateVector( const Vector2Df v, float noise ) {
+  float deviation = Random::doubleMax( noise ) * PI * Random::sign();
+  return Vector2Df( cos( theta ) * v.x - sin( theta ) * v.y,
+                    sin( theta ) * v.x + cos( theta ) * v.y );
+}
+
+//void FaceVector::growRoads( graph::Node* node, int branching, float segmentLength, float noise );
+
+
 
 // Local Variables: ***
 // mode:C++ ***
