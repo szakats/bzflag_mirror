@@ -46,6 +46,20 @@ public:
    */
   virtual ~FaceGenerator( ) {}
 private:
+  /**
+   * Takes the vector, and soes some random deviation on it, up to the
+   * passed value in radians. Assumes that the vector is (0,0) based.
+   */
+  static Vector2Df deviateVector( Vector2Df v, float noise );
+  /** 
+   * Main growth function for secondary road generation. Is executed 
+   * recursively. Branching controls how many segments maximum can go 
+   * out of the current node (excluding the ones already connected),
+   * segmentLength controls the maximum length of a generated segment,
+   * and noise is a catch-all for introducing randomness into the 
+   * generation. 
+   */
+  void growRoads( graph::Node* node, int branching, float segmentLength, float noise );
   /** 
    * Creates the first "face" of the graph, by adding edges and nodes 
    * around the world.
