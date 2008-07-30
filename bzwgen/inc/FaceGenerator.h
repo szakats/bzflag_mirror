@@ -50,7 +50,7 @@ private:
    * Takes the vector, and does some random deviation on it, up to the
    * passed value in radians. Assumes that the vector is (0,0) based.
    */
-  static Vector2Df deviateVector( const Vector2Df v, float noise );
+  static Vector2Df deviateVector( const Vector2Df v, double noise );
   /** 
    * Main growth function for secondary road generation. Is executed 
    * recursively. Branching controls how many segments maximum can go 
@@ -59,7 +59,7 @@ private:
    * and noise is a catch-all for introducing randomness into the 
    * generation. 
    */
-  void growRoads( graph::Node* node, int branching, float segmentLength, float noise );
+  void growRoads( graph::Node* node, int branching, double segmentLength, double noise );
   /** 
    * Creates the first "face" of the graph, by adding edges and nodes 
    * around the world.

@@ -77,13 +77,25 @@ void FaceGenerator::subdivideFace( graph::Face* face ) {
   }
 }
 
-static Vector2Df FaceVector::deviateVector( const Vector2Df v, float noise ) {
-  float deviation = Random::doubleMax( noise ) * PI * Random::sign();
+Vector2Df FaceGenerator::deviateVector( const Vector2Df v, double noise ) {
+  float theta = float( Random::doubleMax( noise ) * PI * Random::sign() );
   return Vector2Df( cos( theta ) * v.x - sin( theta ) * v.y,
                     sin( theta ) * v.x + cos( theta ) * v.y );
 }
 
-//void FaceVector::growRoads( graph::Node* node, int branching, float segmentLength, float noise );
+void FaceGenerator::growRoads( graph::Node* /*node*/, int branching, double segmentLength, double noise ) {
+  int branches = math::roundToInt( branching * Random::doubleRange( 1.0f - noise, 1.0f + noise ) );
+
+  for ( int i = 0; i < branches; i++ ) {
+
+    Vector2Df direction;
+
+    direction = deviateVector( direction, noise );
+    direction = direction * (float)segmentLength * (float)Random::doubleRange( 1.0 - noise, 1.0 + noise );
+    
+    // checks for hitting an existing segment/node.
+  } 
+}
 
 
 
