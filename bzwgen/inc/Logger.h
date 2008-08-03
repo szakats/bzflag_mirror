@@ -23,8 +23,10 @@
 #include <iostream> 
 #include <fstream> 
 
-#pragma warning (push)
-#pragma warning (disable:4996)
+#ifdef _WIN32
+  #pragma warning (push)
+  #pragma warning (disable:4996)
+#endif
 
 /**
  * @class Logger
@@ -61,7 +63,7 @@ public:
   /** 
    * Message logging, takes level and printf-like syntax.
    */
-  void LoggerSingleton::log( int level, char *str, ... ) {
+  void log( int level, char *str, ... ) {
     if ( !needsLogging( level ) ) return;
     va_list va;
     va_start( va, str );
@@ -74,7 +76,7 @@ public:
   /** 
    * Message logging, shortcut for logging without level (meaning always).
    */
-  void LoggerSingleton::log( char *str, ... ) {
+  void log( char *str, ... ) {
     va_list va;
     va_start( va, str );
     if ( vsnprintf( buffer, 159, str, va ) == -1 )
@@ -123,8 +125,9 @@ private:
 
 #define Logger LoggerSingleton::getInstance()
 
-
-#pragma warning (pop)
+#ifdef _WIN32
+  #pragma warning (pop)
+#endif
 
 #endif // __LOGGER_H__
 
