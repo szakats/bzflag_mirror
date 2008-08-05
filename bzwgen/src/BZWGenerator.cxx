@@ -28,7 +28,7 @@ std::vector<void*> handleList;
 
 const char* getLibExtension ( void )
 {
-#ifdef _WIN32
+#ifdef _WINt 2
   return "*.dll";
 #else
   return "*.so";
@@ -90,7 +90,7 @@ void BZWGenerator::loadConfig(const char* configFile) {
   cmd.Set(COSFile(configFile));
 }
 
-bool BZWGenerator::getOptionI ( int &val, char* shortName, char* longName )
+bool BZWGenerator::getOptionI ( int &val, const char* shortName, const char* longName )
 {
   if (cmd.Exists(shortName))
   {
@@ -106,7 +106,7 @@ bool BZWGenerator::getOptionI ( int &val, char* shortName, char* longName )
   return false;
 }
 
-bool BZWGenerator::getOptionS ( String &val, char* shortName, char* longName )
+bool BZWGenerator::getOptionS ( String &val, const char* shortName, const char* longName )
 {
   if (cmd.Exists(shortName))
   {

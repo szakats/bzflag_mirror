@@ -71,7 +71,7 @@ blather:
  
 clean:
 	@echo "Cleaning up..."
-	rm -f bzwgen src/lexer.cxx src/parser.[ch]xx ${OBJECTS} ${PICOBJECTS}
+	rm -f bzwgen src/lexer.cxx src/parser.[ch]xx ${OBJECTS} ${APP_OBJECTS} ${PICOBJECTS}
 	@echo "Done."
  
 bzwgen: ${OBJECTS} ${APP_OBJECTS}

@@ -53,7 +53,7 @@ public:
    * Loads a config file. Config files are simply sets of parameters that 
    * normally would be passed via the command line. 
    */
-  void loadConfig(const char* configFile);
+  void loadConfig( const char* configFile );
   /** Output file name, used only in standalone mode. */
   String outname;
 protected:
@@ -66,12 +66,12 @@ protected:
    * Retuns an int option based on it's short and long name if defined. 
    * If not defined, returns false. 
    */
-  bool getOptionI ( int &val, char* shortName, char* longName );
+  bool getOptionI ( int &val, const char* shortName, const char* longName );
   /** 
    * Retuns an string option based on it's short and long name if defined. 
    * If not defined, returns false. 
    */
-  bool getOptionS ( String &val, char* shortName, char* longName );
+  bool getOptionS ( String &val, const char* shortName, const char* longName );
 };
 
 #endif /* __BZWGENERATOR_H__ */

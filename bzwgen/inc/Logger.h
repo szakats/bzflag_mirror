@@ -63,7 +63,7 @@ public:
   /** 
    * Message logging, takes level and printf-like syntax.
    */
-  void log( int level, char *str, ... ) {
+  void log( int level, const char *str, ... ) {
     if ( !needsLogging( level ) ) return;
     va_list va;
     va_start( va, str );
@@ -76,7 +76,7 @@ public:
   /** 
    * Message logging, shortcut for logging without level (meaning always).
    */
-  void log( char *str, ... ) {
+  void log( const char *str, ... ) {
     va_list va;
     va_start( va, str );
     if ( vsnprintf( buffer, 159, str, va ) == -1 )
