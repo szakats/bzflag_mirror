@@ -27,6 +27,7 @@
 #undef toupper
 #endif
 #include <string>
+#include <cstring>
 #include <stdarg.h>
 #include <vector>
 

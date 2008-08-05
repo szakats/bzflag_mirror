@@ -11,6 +11,7 @@
  */
 
 #include <iostream>
+#include <cstring>
 #include "BZWGeneratorStandalone.h"
 #include "Output.h"
 

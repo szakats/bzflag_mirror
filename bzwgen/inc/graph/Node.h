@@ -61,7 +61,7 @@ public:
    * as parameters. Does nothing except parameter initialization.
    */
   Node( PlanarGraph* _graph, float x, float y ) 
-    : coord( x, y ), graph( _graph ) {} 
+    : graph( _graph ), coord( x, y ) {} 
   /** 
    * Copy from pointer constructor.
    */
