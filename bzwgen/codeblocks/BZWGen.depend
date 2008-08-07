@@ -1,0 +1,326 @@
+# depslib dependency file v1.0
+1217965768 source:/home/epyon/projects/bzwgen/src/BZWGenerator.cxx
+	"BZWGenerator.h"
+	"time.h"
+	"Output.h"
+	"GridGenerator.h"
+	<sstream>
+	<iostream>
+
+1217965667 /home/epyon/projects/bzwgen/inc//BZWGenerator.h
+	"globals.h"
+	"RuleSet.h"
+	"commandArgs.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//globals.h
+	<vector>
+	<string>
+	<map>
+	<iostream>
+	"MathUtils.h"
+	"Logger.h"
+	"Vector2D.h"
+	"Vector3D.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//MathUtils.h
+	<math.h>
+
+1217965982 /home/epyon/projects/bzwgen/inc//Logger.h
+	<stdio.h>
+	<stdarg.h>
+	<iostream>
+	<fstream>
+
+1217710065 /home/epyon/projects/bzwgen/inc//Vector2D.h
+	<string>
+	"MathUtils.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//Vector3D.h
+	<string>
+	"MathUtils.h"
+	"Vector2D.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//RuleSet.h
+	"Rule.h"
+	"Mesh.h"
+	"Material.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//Rule.h
+	"globals.h"
+	"Product.h"
+	"Mesh.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//Product.h
+	"Operation.h"
+	"Expression.h"
+	"Mesh.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//Operation.h
+	"globals.h"
+	"Expression.h"
+	"Mesh.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//Expression.h
+	"globals.h"
+	"Mesh.h"
+	"MultiFace.h"
+	"Random.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//Mesh.h
+	"globals.h"
+	"Output.h"
+	"Face.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//Output.h
+	"globals.h"
+	"Face.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//Face.h
+	"globals.h"
+	"Output.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//MultiFace.h
+	"globals.h"
+	"Output.h"
+	"Face.h"
+	"Mesh.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//Random.h
+	<algorithm>
+
+1217710065 /home/epyon/projects/bzwgen/inc//Material.h
+	"globals.h"
+	"Output.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//commandArgs.h
+	<map>
+	<string>
+	"OSFile.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//OSFile.h
+	<windows.h>
+	<io.h>
+	<direct.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<unistd.h>
+	<dirent.h>
+	<ctype.h>
+	<string>
+	<vector>
+	<stdio.h>
+
+1217710065 /home/epyon/projects/bzwgen/inc//GridGenerator.h
+	"Generator.h"
+	"Material.h"
+	"globals.h"
+	"Output.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//Generator.h
+	"globals.h"
+	"RuleSet.h"
+	"Material.h"
+	"commandArgs.h"
+	"Zone.h"
+	"graph/PlanarGraph.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//Zone.h
+	"graph/PlanarGraph.h"
+	"globals.h"
+	"Output.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//graph/PlanarGraph.h
+	"graph/forward.h"
+	"graph/Node.h"
+	"graph/Edge.h"
+	"graph/Face.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//graph/forward.h
+	<vector>
+	"ObjectList.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//graph/ObjectList.h
+	<cassert>
+	<vector>
+
+1218144929 /home/epyon/projects/bzwgen/inc//graph/Node.h
+	<vector>
+	"Vector2D.h"
+	"graph/forward.h"
+	"graph/SortedEdgeList.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//graph/SortedEdgeList.h
+	<set>
+	<cassert>
+	"graph/forward.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//graph/Edge.h
+	<vector>
+	<cassert>
+	"Vector2D.h"
+	"MathUtils.h"
+	"graph/forward.h"
+	"graph/Node.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//graph/Face.h
+	<vector>
+	"graph/forward.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/BZWGeneratorPlugin.cxx
+	"BZWGeneratorPlugin.h"
+	<sstream>
+
+1217710065 /home/epyon/projects/bzwgen/inc//BZWGeneratorPlugin.h
+	"globals.h"
+	"BZWGenerator.h"
+	"bzfsAPI.h"
+	"plugin_utils.h"
+
+1217799029 source:/home/epyon/projects/bzwgen/src/BZWGeneratorStandalone.cxx
+	<iostream>
+	<cstring>
+	"BZWGeneratorStandalone.h"
+	"Output.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//BZWGeneratorStandalone.h
+	"globals.h"
+	"BZWGenerator.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/BuildZone.cxx
+	"BuildZone.h"
+	"Generator.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//BuildZone.h
+	"Zone.h"
+	"Mesh.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/Expression.cxx
+	"Expression.h"
+	"RuleSet.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/FloorZone.cxx
+	"FloorZone.h"
+	"Generator.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//FloorZone.h
+	"Zone.h"
+	"Mesh.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/Generator.cxx
+	"Generator.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/GridGenerator.cxx
+	"GridGenerator.h"
+	"Zone.h"
+	"Random.h"
+	"FloorZone.h"
+	"BaseZone.h"
+	"BuildZone.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//BaseZone.h
+	"Zone.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/Mesh.cxx
+	"Mesh.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/MultiFace.cxx
+	"MultiFace.h"
+
+1217799000 source:/home/epyon/projects/bzwgen/src/OSFile.cxx
+	"OSFile.h"
+	"TextUtils.h"
+	<stddef.h>
+
+1217798991 /home/epyon/projects/bzwgen/inc//TextUtils.h
+	<algorithm>
+	<ctype.h>
+	<string>
+	<cstring>
+	<stdarg.h>
+	<vector>
+
+1217710063 source:/home/epyon/projects/bzwgen/src/Operation.cxx
+	"Operation.h"
+	"RuleSet.h"
+	"MultiFace.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/Rule.cxx
+	"Rule.h"
+	"Random.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/RuleSet.cxx
+	"RuleSet.h"
+	"globals.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/TextUtils.cxx
+	"TextUtils.h"
+	<string>
+	<algorithm>
+	<sstream>
+	<stdarg.h>
+	<vector>
+	<stdio.h>
+	<assert.h>
+
+1217710063 source:/home/epyon/projects/bzwgen/src/bzwgen.cxx
+	<fstream>
+	"globals.h"
+	"BZWGeneratorPlugin.h"
+	"BZWGeneratorStandalone.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/commandArgs.cxx
+	"commandArgs.h"
+	"TextUtils.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/graph/Face.cxx
+	"graph/Face.h"
+	"graph/Edge.h"
+	"graph/PlanarGraph.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/graph/Node.cxx
+	"graph/Node.h"
+	"graph/PlanarGraph.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/graph/PlanarGraph.cxx
+	<algorithm>
+	"graph/PlanarGraph.h"
+
+1217710063 source:/home/epyon/projects/bzwgen/src/graph/SortedEdgeList.cxx
+	"graph/SortedEdgeList.h"
+	"graph/Node.h"
+	"graph/Edge.h"
+
+1217968070 source:/home/epyon/projects/bzwgen/src/lexer.cxx
+	<stdio.h>
+	<string.h>
+	<errno.h>
+	<stdlib.h>
+	<inttypes.h>
+	<memory>
+	<string>
+	"RuleSet.h"
+	"Product.h"
+	"Operation.h"
+	"Expression.h"
+	"parser.hxx"
+	<unistd.h>
+
+1217968066 /home/epyon/projects/bzwgen/src/parser.hxx
+
+1217968066 source:/home/epyon/projects/bzwgen/src/parser.cxx
+	<memory>
+	<string>
+	"globals.h"
+	"Rule.h"
+	"RuleSet.h"
+	"Product.h"
+	"Operation.h"
+	"Expression.h"
+	<stddef.h>
+	<libintl.h>
+	<alloca.h>
+	<malloc.h>
+	<stdlib.h>
+	<stdlib.h>
+	<stdio.h>
+

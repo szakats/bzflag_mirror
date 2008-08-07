@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="BZWGen" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="../bin/Debug/BZWGen" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../bin/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="../bin/Release/BZWGen" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../bin/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add directory="/home/epyon/projects/bzwgen/inc/" />
+					<Add directory="/home/epyon/projects/bzwgen/inc/graph" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add directory="/home/epyon/projects/bzwgen/inc/" />
+			<Add directory="/home/epyon/projects/bzwgen/inc/graph" />
+		</Compiler>
+		<Unit filename="../inc/BZWGenerator.h" />
+		<Unit filename="../inc/BZWGeneratorPlugin.h" />
+		<Unit filename="../inc/BZWGeneratorStandalone.h" />
+		<Unit filename="../inc/BaseZone.h" />
+		<Unit filename="../inc/BuildZone.h" />
+		<Unit filename="../inc/Expression.h" />
+		<Unit filename="../inc/Face.h" />
+		<Unit filename="../inc/FaceGenerator.h" />
+		<Unit filename="../inc/FloorZone.h" />
+		<Unit filename="../inc/Generator.h" />
+		<Unit filename="../inc/GridGenerator.h" />
+		<Unit filename="../inc/Logger.h" />
+		<Unit filename="../inc/Material.h" />
+		<Unit filename="../inc/MathUtils.h" />
+		<Unit filename="../inc/Mesh.h" />
+		<Unit filename="../inc/MultiFace.h" />
+		<Unit filename="../inc/OSFile.h" />
+		<Unit filename="../inc/Operation.h" />
+		<Unit filename="../inc/Output.h" />
+		<Unit filename="../inc/Product.h" />
+		<Unit filename="../inc/Random.h" />
+		<Unit filename="../inc/Rule.h" />
+		<Unit filename="../inc/RuleSet.h" />
+		<Unit filename="../inc/TextUtils.h" />
+		<Unit filename="../inc/Vector2D.h" />
+		<Unit filename="../inc/Vector3D.h" />
+		<Unit filename="../inc/Zone.h" />
+		<Unit filename="../inc/commandArgs.h" />
+		<Unit filename="../inc/globals.h" />
+		<Unit filename="../inc/graph/Edge.h" />
+		<Unit filename="../inc/graph/Face.h" />
+		<Unit filename="../inc/graph/Node.h" />
+		<Unit filename="../inc/graph/Node.h~" />
+		<Unit filename="../inc/graph/ObjectList.h" />
+		<Unit filename="../inc/graph/PlanarGraph.h" />
+		<Unit filename="../inc/graph/SortedEdgeList.h" />
+		<Unit filename="../inc/graph/forward.h" />
+		<Unit filename="../src/BZWGenerator.cxx" />
+		<Unit filename="../src/BZWGeneratorPlugin.cxx" />
+		<Unit filename="../src/BZWGeneratorStandalone.cxx" />
+		<Unit filename="../src/BuildZone.cxx" />
+		<Unit filename="../src/Expression.cxx" />
+		<Unit filename="../src/FaceGenerator.cxx" />
+		<Unit filename="../src/FloorZone.cxx" />
+		<Unit filename="../src/Generator.cxx" />
+		<Unit filename="../src/GridGenerator.cxx" />
+		<Unit filename="../src/Mesh.cxx" />
+		<Unit filename="../src/MultiFace.cxx" />
+		<Unit filename="../src/OSFile.cxx" />
+		<Unit filename="../src/Operation.cxx" />
+		<Unit filename="../src/Rule.cxx" />
+		<Unit filename="../src/RuleSet.cxx" />
+		<Unit filename="../src/TextUtils.cxx" />
+		<Unit filename="../src/bzwgen.cxx" />
+		<Unit filename="../src/commandArgs.cxx" />
+		<Unit filename="../src/graph/Face.cxx" />
+		<Unit filename="../src/graph/Node.cxx" />
+		<Unit filename="../src/graph/PlanarGraph.cxx" />
+		<Unit filename="../src/graph/SortedEdgeList.cxx" />
+		<Unit filename="../src/lexer.cxx" />
+		<Unit filename="../src/lexer.l" />
+		<Unit filename="../src/parser.cxx" />
+		<Unit filename="../src/parser.hxx" />
+		<Unit filename="../src/parser.y" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

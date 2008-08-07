@@ -91,7 +91,7 @@ void FaceGenerator::growRoads( graph::Node* node, int branching, double segmentL
   int branches = math::roundToInt( branching * Random::doubleRange( 1.0f - noise, 1.0f + noise ) );
 
   // lets get the owner of the node
-  PlanarGraph* graph = node->getGraph();
+  graph::PlanarGraph* graph = node->getGraph();
 
   // Identify the incoming edge and create a vector for it
   // ...
@@ -105,10 +105,10 @@ void FaceGenerator::growRoads( graph::Node* node, int branching, double segmentL
     direction = deviateVector( direction, noise );
     direction = direction * (float)segmentLength * (float)Random::doubleRange( 1.0 - noise, 1.0 + noise );
 
-    Vector2Df target = node->vector + direction;
+    Vector2Df target = node->vector() + direction;
 
-    Node* nnode = graph->closestNode( target );
-    Edge* nedge = graph->closestEdge( target );
+    graph::Node* nnode = graph->closestNode( target );
+    graph::Edge* nedge = graph->closestEdge( target );
 
     float ndist = nnode->distanceTo( target );
     float edist = nedge->distanceTo( target );
@@ -131,13 +131,13 @@ void FaceGenerator::growRoads( graph::Node* node, int branching, double segmentL
     if ( nedge ) {
       // split the edge and do a connection to an edge instead;
       // ...
-      continue
+      continue;
     }
 
     // TODO: this test must avoid hiting at the edges!
-    if ( !graph->checkConnection( node->vector, target ) ) continue;
+    if ( !graph->checkEdge( node->vector(), target ) ) continue;
 
-    Node * newnode = new Node( graph, target )
+    graph::Node * newnode = new graph::Node( graph, target );
     graph->addNode( newnode );
     graph->addConnection( node, newnode );
 
