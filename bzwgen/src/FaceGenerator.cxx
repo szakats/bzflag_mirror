@@ -133,8 +133,9 @@ void FaceGenerator::growRoads( graph::Node* node, int branching, double segmentL
       continue;
     }
     if ( nedge ) {
-      // split the edge and do a connection to an edge instead;
-      // ...
+      Vector2Df v = nedge->pointCast( target );
+      Node* split = graph->splitEdge( nedge, target );
+      graph->addConnection( node, split );
       continue;
     }
 

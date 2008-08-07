@@ -9,7 +9,7 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** 
+/**
  * @file Edge.h
  * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
  * @brief Defines an Edge class model for the Graph class.
@@ -29,9 +29,9 @@
 // The Edge class is a part of Graph class
 namespace graph {
 
-/** 
+/**
  * @class Edge
- * @brief Class defining an Edge in a double linked planar graph. 
+ * @brief Class defining an Edge in a double linked planar graph.
  */
 class Edge : public IObject
 {
@@ -40,31 +40,31 @@ private:
   Node* source;
   /** Target node */
   Node* target;
-  /** 
-   * Pointer to the reverse edge in a PlanarGraph. value is NULL unless 
+  /**
+   * Pointer to the reverse edge in a PlanarGraph. value is NULL unless
    * setReverse is called on this or the reverse edge.
    */
   Edge* reverse;
-  /** 
+  /**
    * Pointer to  face that this edge belongs to. Used when reconstructing
    * a face map for the given PlanarGraph.
    */
   Face* face;
   /**
    * A flag that notes if this is a reversed edge. The point is that only
-   * one of each pair of reversed edges has this set. This allows to 
+   * one of each pair of reversed edges has this set. This allows to
    * skip half of the intersection checks.
    */
   bool reversed;
 public:
-  /** 
+  /**
    * Constructor that takes source and target as parameters,
    * adds the edge to the revel ant nodes, DOESN'T check for
    * reverse Edge however.
    */
-  Edge( Node* _source, Node* _target ) 
-    : source( _source ), target( _target ), reverse( NULL ), face( NULL ), 
-      reversed( false ) 
+  Edge( Node* _source, Node* _target )
+    : source( _source ), target( _target ), reverse( NULL ), face( NULL ),
+      reversed( false )
   {
     source->addOutgoing( this );
     target->addIncoming( this );
@@ -72,7 +72,7 @@ public:
   /**
    * Sets the reverse edge. Also sets the reverse edge for the edge passed,
    * so the function needs to be called just once for every edge pair.
-   * If debug mode is on then assertions check the validness of the edge. 
+   * If debug mode is on then assertions check the validness of the edge.
    */
   void setReverse( Edge* edge ) {
     assert( source == edge->target );
@@ -105,9 +105,9 @@ public:
   void setFace( Face* _face ) {
     face = _face;
   }
-  /** 
+  /**
    * Returns the angle (in radians) between (0,1) vector and the edge.
-   * The angle is always positive in the [0..2*PI) range. 
+   * The angle is always positive in the [0..2*PI) range.
    */
   float getAngle( ) const {
 	  Vector2Df v = target->vector() - source->vector();
@@ -117,7 +117,7 @@ public:
    * Returns whether the edge intersects with the one passed.
    */
   bool intersects( Edge edge ) const {
-    return math::intersect2D( source->vector(), target->vector(), 
+    return math::intersect2D( source->vector(), target->vector(),
       edge.source->vector(), edge.target->vector() );
   }
   /**
@@ -132,15 +132,24 @@ public:
   bool isReversed( ) const {
     return reversed;
   }
-  /** 
+  /**
    * Returns the to the given coordinate
    */
-  float distanceTo( Vector2Df v ) {
+  float distanceTo( Vector2Df v ) const {
     Vector2Df dir = target->vector() - source->vector();
     Vector2Df d2  = v - source->vector();
 
     return math::abs( d2.cross( dir ) ) / dir.length();
   }
+  /**
+   * Returns a point that is perpendicular to the given point and
+   * lies on the edge.
+   */
+  Vector2Df pointCast( Vector2Df v ) const {
+    Vector2Df dir = (target->vector() - source->vector()).norm();
+    return source.vector() + dir * ( ( v - source.vector() ).dot( dir ) / dir.dot( dir ) );
+  }
+
 
 private:
   /** Blocked default constructor */
