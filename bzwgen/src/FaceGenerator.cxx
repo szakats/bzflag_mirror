@@ -44,9 +44,10 @@ void FaceGenerator::createInitialGraph( ) {
 
 void FaceGenerator::runPrimaryRoadGeneration( ) {
   createInitialGraph( );
-  
+
+  // Split the graph into more or less regular zones (use subdivide face?)
   // ...
-  
+
   graph.readFaces( );
 }
 
@@ -56,6 +57,9 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
   // For each face in our graph we do the secondary generation
   for ( size_t i = 0; i < faces.size(); i++ ) {
     graph::PlanarGraph* sgraph = faces[i]->initializeSubgraph( );
+
+    // Choose a random edge in the graph, split it into two, and run
+    // grow roads on it?
     // ...
     sgraph->readFaces( );
 
@@ -83,18 +87,63 @@ Vector2Df FaceGenerator::deviateVector( const Vector2Df v, double noise ) {
                     sin( theta ) * v.x + cos( theta ) * v.y );
 }
 
-void FaceGenerator::growRoads( graph::Node* /*node*/, int branching, double segmentLength, double noise ) {
+void FaceGenerator::growRoads( graph::Node* node, int branching, double segmentLength, double noise ) {
   int branches = math::roundToInt( branching * Random::doubleRange( 1.0f - noise, 1.0f + noise ) );
+
+  // lets get the owner of the node
+  PlanarGraph* graph = node->getGraph();
+
+  // Identify the incoming edge and create a vector for it
+  // ...
 
   for ( int i = 0; i < branches; i++ ) {
 
     Vector2Df direction;
 
+    // initial direction choice, should be away from last
+
     direction = deviateVector( direction, noise );
     direction = direction * (float)segmentLength * (float)Random::doubleRange( 1.0 - noise, 1.0 + noise );
-    
-    // checks for hitting an existing segment/node.
-  } 
+
+    Vector2Df target = node->vector + direction;
+
+    Node* nnode = graph->closestNode( target );
+    Edge* nedge = graph->closestEdge( target );
+
+    float ndist = nnode->distanceTo( target );
+    float edist = nedge->distanceTo( target );
+
+    if ( ndist > edist )
+      nnode = NULL;
+    else
+      nedge = NULL;
+
+
+    // change the values below to something more sensible (parameters?)
+    if ( ndist > 0.1 ) nnode = NULL;
+    if ( edist > 0.1 ) nedge = NULL;
+
+    if ( nnode ) {
+      // do a connection to a node instead
+      // ...
+      continue;
+    }
+    if ( nedge ) {
+      // split the edge and do a connection to an edge instead;
+      // ...
+      continue
+    }
+
+    // TODO: this test must avoid hiting at the edges!
+    if ( !graph->checkConnection( node->vector, target ) ) continue;
+
+    Node * newnode = new Node( graph, target )
+    graph->addNode( newnode );
+    graph->addConnection( node, newnode );
+
+    // recurrential run
+    growRoads( newnode, branching, segmentLength, noise );
+  }
 }
 
 

@@ -9,7 +9,7 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** 
+/**
  * @file Node.h
  * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
  * @brief Defines an Node class model for the Graph class.
@@ -26,24 +26,24 @@
 // The Node class is a part of Graph class
 namespace graph {
 
-/** 
+/**
  * @class Node
- * @brief Class defining an node in a double linked planar graph. 
- * 
- * Due to the fact that the Graph is dual linked, each Node holds a 
+ * @brief Class defining an node in a double linked planar graph.
+ *
+ * Due to the fact that the Graph is dual linked, each Node holds a
  * set of pointers to other Nodes. The initial implementation uses vector
  * for holding the GraphNode pointers, but that probably will be changed to
- * sets in the future. Also, currently I use pointers, but as there will be heavy 
+ * sets in the future. Also, currently I use pointers, but as there will be heavy
  * work on node addition, and maybe removal, I'll switch to boost::weak_ptr later.
  */
 class Node : public IObject
 {
 private:
-  /** 
+  /**
    * The sorted list of outgoing edges. See SortedEdgeList.
    */
   SortedEdgeList outgoing;
-  /** 
+  /**
    * The sorted list of incoming edges. See SortedEdgeList.
    */
   SortedEdgeList incoming;
@@ -56,43 +56,49 @@ private:
    */
   Vector2Df coord;
 public:
-  /** 
-   * Constructor. Takes the graph the node belongs to and 2D coordinates  
+  /**
+   * Constructor. Takes the graph the node belongs to and 2D coordinates
    * as parameters. Does nothing except parameter initialization.
    */
-  Node( PlanarGraph* _graph, float x, float y ) 
-    : graph( _graph ), coord( x, y ) {} 
-  /** 
+  Node( PlanarGraph* _graph, float x, float y )
+    : graph( _graph ), coord( x, y ) {}
+  /**
+   * Constructor. Takes the graph the node belongs to and vector
+   * as parameters. Does nothing except parameter initialization.
+   */
+  Node( PlanarGraph* _graph, Vector2Df v )
+    : graph( _graph ), coord( v ) {}
+  /**
    * Copy from pointer constructor.
    */
   Node( Node* node, PlanarGraph* _graph = NULL ) : coord( node->coord ) {
-    if (_graph) 
+    if (_graph)
       graph = node->graph;
-    else 
+    else
       graph = _graph;
   }
-  /** 
+  /**
    * Adds a incoming edge.
    */
-  void addIncoming( Edge* edge ) { 
-    incoming.insert( edge ); 
+  void addIncoming( Edge* edge ) {
+    incoming.insert( edge );
   }
-  /** 
+  /**
    * Adds a outgoing edge.
    */
-  void addOutgoing( Edge* edge ) { 
-    outgoing.insert( edge ); 
+  void addOutgoing( Edge* edge ) {
+    outgoing.insert( edge );
   }
-  /** 
-   * Removes all the edges connected to the node. Edges are removed from 
+  /**
+   * Removes all the edges connected to the node. Edges are removed from
    * the associated graph class.
    */
   void orphanize( );
-  /** 
-   * Returns itself as a float vector. 
+  /**
+   * Returns itself as a float vector.
    */
-  Vector2Df vector( ) const { 
-    return coord; 
+  Vector2Df vector( ) const {
+    return coord;
   }
   /**
    * Returns the first outgoing edge. First in this case is somewhat
@@ -109,6 +115,12 @@ public:
     return incoming.first( );
   }
   /**
+   * Gets the graph pointer of the graph owning this node.
+   */
+  PlanarGraph* getGraph() const {
+    return graph;
+  }
+  /**
    * Returns a reference to the incoming EdgeList.
    */
   SortedEdgeList& getIncomingList( ) {
@@ -120,18 +132,18 @@ public:
   SortedEdgeList& getOutgoingList( ) {
     return outgoing;
   }
-  /** 
+  /**
    * Returns the distance to the given coord
    */
   float distanceTo( Vector2Df v ) {
     return (coord - v).length();
   }
 private:
-  /** 
+  /**
    * Blocked default constructor.
    */
   Node() {}
-  /** 
+  /**
    * Blocked copy constructor.
    */
   Node( const Node& ) {}
