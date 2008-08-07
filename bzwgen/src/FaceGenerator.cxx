@@ -73,10 +73,14 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 
 void FaceGenerator::subdivideFace( graph::Face* face ) {
   graph::PlanarGraph* sgraph = face->initializeSubgraph( );
-  // ...
+  // repeat
+  //   take the longest edge
+  //   do a division of the face with a line perpendicular to the face
+  // until
   sgraph->readFaces( );
   graph::FaceVector sfaces = sgraph->getFaces();
   for ( size_t i = 0; i < sfaces.size(); i++ ) {
+    // Add the faces to a list?
     // ...
   }
 }
@@ -124,8 +128,8 @@ void FaceGenerator::growRoads( graph::Node* node, int branching, double segmentL
     if ( edist > 0.1 ) nedge = NULL;
 
     if ( nnode ) {
-      // do a connection to a node instead
-      // ...
+      if (!graph->checkConnection( node, nnode ) ) continue;
+      graph->addConnection( node, nnode );
       continue;
     }
     if ( nedge ) {
