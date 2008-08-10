@@ -98,13 +98,20 @@ void FaceGenerator::growRoads( graph::Node* node, int branching, double segmentL
   graph::PlanarGraph* graph = node->getGraph();
 
   // Identify the incoming edge and create a vector for it
-  // ...
+  Vector2Df incoming = node->getFirstIncomingEdge().getSource() - node->vector();
+
+  // Single rotation
+  float rotationValue = 2 * PI / ( branches + 1 );
 
   for ( int i = 0; i < branches; i++ ) {
 
-    Vector2Df direction;
+    float rotation = ( i + 1 ) * rotationValue;
 
     // initial direction choice, should be away from last
+    Vector2Df direction = Vector2Df(
+      cos( rotation ) * incoming.x - sin ( rotation ) * incoming.y,
+      sin( rotation ) * incoming.x - cos ( rotation ) * incoming.y
+    );
 
     direction = deviateVector( direction, noise );
     direction = direction * (float)segmentLength * (float)Random::doubleRange( 1.0 - noise, 1.0 + noise );
