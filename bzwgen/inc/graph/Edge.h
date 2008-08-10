@@ -147,7 +147,7 @@ public:
    */
   Vector2Df pointCast( Vector2Df v ) const {
     Vector2Df dir = (target->vector() - source->vector()).norm();
-    return source.vector() + dir * ( ( v - source.vector() ).dot( dir ) / dir.dot( dir ) );
+    return source->vector() + dir * ( ( v - source->vector() ).dot( dir ) / dir.dot( dir ) );
   }
 
 

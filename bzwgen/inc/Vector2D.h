@@ -9,7 +9,7 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** 
+/**
  * @file Vector2D.h
  * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
  * @brief Two dimensional vector template
@@ -25,12 +25,12 @@
 //namespace bzwgen {
 //namespace geometry {
 
-/** 
+/**
  * @class Vector2D
  * @brief Vector template in two dimensional space.
  *
  * Current implementation is based on templates. Typedefs for both float and
- * double version are provided for convenience. 
+ * double version are provided for convenience.
  */
 template <class T>
 class Vector2D
@@ -40,7 +40,7 @@ public:
   T x;
   /** Y-coordinate. */
   T y;
- 
+
   /** @name Constructors */
   /** Default constructor -- sets the values to zero. */
   inline Vector2D() : x(0), y(0) {}
@@ -49,7 +49,7 @@ public:
   /** Constructor that sets the point to the given coordinates, given as an array. */
   inline Vector2D( const T v[2]) :x(v[0]), y(v[1]) {}
   /** Copy constructor. */
-  inline Vector2D( const Vector2D<T>& v) :x(v.x), y(v.y) {}  
+  inline Vector2D( const Vector2D<T>& v) :x(v.x), y(v.y) {}
 
   /** @name Operators */
   /** Addition operator. */
@@ -90,20 +90,24 @@ public:
   T lengthsq() const { return x*x + y*y; }
 
   /** Returns vector cross product. */
-  T cross(const Vector2D<T> &v) const {
+  T cross( const Vector2D<T> &v ) const {
     return ( x * v.y - v.x * y );
+  }
+  /** Returns the dot product */
+  T dot( const Vector2D<T> &v ) const {
+      return ( x * v.x + y * v.y );
   }
 
 
   /** Zero test. Test done using MathUtils isZero. */
-  bool isZero( const T precision = EPSILON ) const { 
-    return ( math::isZero( x, precision ) && 
-             math::isZero( y, precision ) ); 
+  bool isZero( const T precision = EPSILON ) const {
+    return ( math::isZero( x, precision ) &&
+             math::isZero( y, precision ) );
   }
   /** Equality test. Test done using MathUtils equals. */
-  bool equals( const Vector2D<T>& v, const T precision = EPSILON ) const { 
-    return ( math::equals( x, v.x, precision ) && 
-             math::equals( y, v.y, precision ) ); 
+  bool equals( const Vector2D<T>& v, const T precision = EPSILON ) const {
+    return ( math::equals( x, v.x, precision ) &&
+             math::equals( y, v.y, precision ) );
   }
 };
 

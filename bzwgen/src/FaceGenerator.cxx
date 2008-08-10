@@ -98,7 +98,7 @@ void FaceGenerator::growRoads( graph::Node* node, int branching, double segmentL
   graph::PlanarGraph* graph = node->getGraph();
 
   // Identify the incoming edge and create a vector for it
-  Vector2Df incoming = node->getFirstIncomingEdge().getSource() - node->vector();
+  Vector2Df incoming = node->getFirstIncomingEdge()->getSource()->vector() - node->vector();
 
   // Single rotation
   float rotationValue = 2 * PI / ( branches + 1 );
@@ -141,7 +141,7 @@ void FaceGenerator::growRoads( graph::Node* node, int branching, double segmentL
     }
     if ( nedge ) {
       Vector2Df v = nedge->pointCast( target );
-      Node* split = graph->splitEdge( nedge, target );
+      graph::Node* split = graph->splitEdge( nedge, target );
       graph->addConnection( node, split );
       continue;
     }
