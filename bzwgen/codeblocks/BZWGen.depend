@@ -162,7 +162,7 @@
 	"graph/forward.h"
 	"graph/Node.h"
 
-1217710065 /home/epyon/projects/bzwgen/inc//graph/Face.h
+1218576167 /home/epyon/projects/bzwgen/inc//graph/Face.h
 	<vector>
 	"graph/forward.h"
 
@@ -323,4 +323,18 @@
 	<stdlib.h>
 	<stdlib.h>
 	<stdio.h>
+
+1218393922 source:/home/epyon/projects/bzwgen/src/FaceGenerator.cxx
+	"FaceGenerator.h"
+	"Zone.h"
+	"Random.h"
+	"FloorZone.h"
+	"BaseZone.h"
+	"BuildZone.h"
+
+1217710065 /home/epyon/projects/bzwgen/inc//FaceGenerator.h
+	"Generator.h"
+	"Material.h"
+	"globals.h"
+	"Output.h"
 

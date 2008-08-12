@@ -21,7 +21,7 @@ PlanarGraph* Face::initializeSubgraph( ) {
   if ( edges.size() < 3 ) return NULL;
 
   subgraph = new PlanarGraph( );
-  
+
   // create the first node
   Node* start = new Node( edges[0]->getSource(), subgraph );
   Node* prev = start;
@@ -59,6 +59,18 @@ Face::~Face( ) {
   if ( subgraph ) delete subgraph;
 }
 
+float Face::area( ) const {
+  float result = 0.0f;
+  for ( size_t i = 0; i < edges.size()-1; i++ ) {
+    Vector2Df v1 = edges[i]->getSource()->vector();
+    Vector2Df v2 = edges[i+1]->getSource()->vector();
+    result += v1.cross( v2 );
+  }
+  Vector2Df v1 = edges[edges.size()-1]->getSource()->vector();
+  Vector2Df v2 = edges[0]->getSource()->vector();
+  result += v1.cross( v2 );
+  return result / 2.0f;
+}
 
 }
 
