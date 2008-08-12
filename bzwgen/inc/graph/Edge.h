@@ -149,6 +149,12 @@ public:
     Vector2Df dir = (target->vector() - source->vector()).norm();
     return source->vector() + dir * ( ( v - source->vector() ).dot( dir ) / dir.dot( dir ) );
   }
+  /**
+   * Returns the length of the edge.
+   */
+  float length( ) const {
+    return ( target->vector() - source->vector() ).length( );
+  }
 
 
 private:

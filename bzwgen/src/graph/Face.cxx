@@ -69,7 +69,7 @@ float Face::area( ) const {
   Vector2Df v1 = edges[edges.size()-1]->getSource()->vector();
   Vector2Df v2 = edges[0]->getSource()->vector();
   result += v1.cross( v2 );
-  return result / 2.0f;
+  return math::abs( result / 2.0f );
 }
 
 }

@@ -22,6 +22,7 @@
 #include "graph/Node.h"
 #include "graph/Edge.h"
 #include "graph/Face.h"
+#include "Random.h"
 
 namespace graph {
 
@@ -173,6 +174,44 @@ public:
    * Node is present in the graph.
    */
   Edge* closestEdge( const Vector2Df v );
+  /**
+   * Returns a random edge belonging to the graph. If no edge is present
+   * will return NULL.
+   */
+  Edge* randomEdge( ) {
+    if ( edges == 0 ) return NULL;
+    Edge* edge = NULL;
+    while ( edge == NULL ) {
+      edge = edgeList.get( Random::numberMax( edgeList.size( ) ) );
+    };
+    return edge;
+  }
+  /**
+   * Returns the longest edge belonging to the graph. If no edge is present
+   * will return NULL.
+   */
+  Edge* longestEdge( ) {
+    if ( edges == 0 ) return NULL;
+    Edge* edge = NULL;
+    size_t count = 0;
+    while ( edge == NULL ) {
+      edge = edgeList.get( count );
+      count++;
+    }
+    float length = edge->length( );
+    for ( size_t i = count; i < edgeList.size(); i++ ) {
+      if ( edgeList.get( count ) != NULL ) {
+        if ( edgeList.get( count )->length( ) > length ) {
+          edge = edgeList.get( count );
+          length = edge->length( );
+        }
+      }
+    }
+    return edge;
+  }
+
+
+
   /**
    * Returns a copy of the vector with the list of generated faces.
    */
