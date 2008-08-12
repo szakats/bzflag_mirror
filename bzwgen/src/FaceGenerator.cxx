@@ -58,9 +58,25 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
   for ( size_t i = 0; i < faces.size(); i++ ) {
     graph::PlanarGraph* sgraph = faces[i]->initializeSubgraph( );
 
-    // Choose a random edge in the graph, split it into two, and run
-    // grow roads on it?
-    // ...
+    // Maybe use random edge instead?
+    graph::Node* splitNode = sgraph->splitEdge( sgraph->longestEdge( ) );
+
+    // This should be parameters, their value is somewhat meaningless now.
+    size_t branching = 3;
+    float segmentLength = 10.0f;
+    float noiseValue = 0.1f;
+
+    // Create initial growing point targeting to the center from
+    // the newly created Node at the split edge
+    Vector2Df toCenter = ( sgraph->getCenter( ) - splitNode->vector( ) ).norm( );
+    Vector2Df newCoord = splitNode->vector( ) + ( toCenter * segmentLength );
+
+    graph::Node* newNode = sgraph->addNode( new graph::Node( sgraph, newCoord ) );
+    sgraph->addConnection( splitNode, newNode );
+
+    // Now run the recursive road growing on it.
+    growRoads( newNode, branching, segmentLength, noiseValue );
+
     sgraph->readFaces( );
 
     // pass the faces to subdivision
@@ -91,7 +107,7 @@ Vector2Df FaceGenerator::deviateVector( const Vector2Df v, double noise ) {
                     sin( theta ) * v.x + cos( theta ) * v.y );
 }
 
-void FaceGenerator::growRoads( graph::Node* node, int branching, double segmentLength, double noise ) {
+void FaceGenerator::growRoads( graph::Node* node, size_t branching, double segmentLength, double noise ) {
   int branches = math::roundToInt( branching * Random::doubleRange( 1.0f - noise, 1.0f + noise ) );
 
   // lets get the owner of the node

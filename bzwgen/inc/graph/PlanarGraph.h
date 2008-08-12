@@ -154,6 +154,16 @@ public:
     return node;
   }
   /**
+   * splitEdge version that takes only the edge and splits it at midpoint.
+   * Returns splitpoint node.
+   */
+  Node* splitEdge( Edge* edge ) {
+    Vector2Df splitPoint = ( edge->getSource( )->vector( )
+                           + edge->getTarget( )->vector( ) ) / 2.0f;
+    return splitEdge( edge, splitPoint );
+  }
+
+  /**
    * Reads face information from the graph. The reading is achieved by
    * a x-coordinate sweep calculating the Minimal Cycle Basis. Unless the
    * outer rim of the graph is marked as assigned, or is single linked,
@@ -209,8 +219,22 @@ public:
     }
     return edge;
   }
-
-
+  /**
+   * Returns the "center" of the graph. In this case it's a average of
+   * all the graph's nodes. Returns (0,0) if no nodes are present.
+   */
+  Vector2Df getCenter( ) const {
+    Vector2Df center;
+    size_t count = 0;
+    for ( size_t i = 0; i < nodeList.size( ); i++ ) {
+      Node* node = nodeList.get( i );
+      if ( node == NULL ) continue;
+      center = center + node->vector( );
+      count++;
+    }
+    if ( count > 0 ) center = center / float( count );
+    return center;
+  }
 
   /**
    * Returns a copy of the vector with the list of generated faces.
