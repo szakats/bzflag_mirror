@@ -36,7 +36,7 @@ namespace graph {
     do {
       if ( edge->getFace() == NULL ) {
         extractFace( edge );
-      }      
+      }
       edge = node->getOutgoingList().next( edge );
     } while ( edge != startEdge );
   }
@@ -50,7 +50,7 @@ namespace graph {
       edge = edge->getTarget()->getOutgoingList().prev( edge );
     } while ( edge != startEdge );
 
-    // check if the face is degenerate. 
+    // check if the face is degenerate.
     if ( face->size() < 3 ) {
       delete face;
       return;
@@ -100,15 +100,36 @@ namespace graph {
     float distance = result->distanceTo( v );
 
     for ( size_t i = 0; i < edgeList.size(); i++ ) {
-      if (edgeList.get( i ) != NULL) {
-        if (edgeList.get( i )->distanceTo( v ) < distance) {
-          result = edgeList.get( i );
+      Edge* edge = edgeList.get( i );
+      if ( edge != NULL && !edge->isReversed( ) ) {
+        if ( edge->distanceTo( v ) < distance ) {
+          result = edge;
           distance = result->distanceTo( v );
         }
       }
     }
     return result;
   }
+
+  void PlanarGraph::split( Vector2Df a, Vector2Df b ) {
+    NodeVector splitPoints;
+    for ( size_t i = 0; i < edgeList.size(); i++ ) {
+      Edge* edge = edgeList.get( i );
+      if ( edge != NULL && !edge->isReversed( ) ) {
+        Vector2Df r1;
+        Vector2Df r2;
+        if ( math::intersect2D( edge->getSource( )->vector(), edge->getTarget( )->vector(), a, b, r1, r2 ) == 1 ) {
+          splitPoints.push_back( splitEdge( edge, r1 ) );
+        }
+      }
+    }
+    if ( splitPoints.empty() ) return;
+    std::sort( splitPoints.begin(), splitPoints.end(), compareNodesX );
+    for ( size_t i = 0; i < splitPoints.size()-1; i++ ) {
+      addConnection( splitPoints[i], splitPoints[i+1] );
+    }
+  }
+
 
 } // end namespace graph
 

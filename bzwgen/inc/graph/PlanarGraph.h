@@ -244,6 +244,13 @@ public:
   }
 private:
   /**
+   * Does a split on the graph using the given coords as points
+   * on the split line. Edges are split at the intersection points
+   * and edges are added into the split faces.
+   * TODO: fix intersect2D result!
+   */
+  void split( Vector2Df a, Vector2Df b );
+  /**
    * Extracts the faces assigned to the current node. Works only on
    * edges that don't have a face assigned to them. Extracted face
    * edges are given pointers to the extracted face.
@@ -256,10 +263,11 @@ private:
   void extractFace( Edge* edge );
   /**
    * Does a comparison on nodes by their X coordinate. Used by the
-   * Minimal Cycle Basis extraction algorithm in readFaces.
+   * Minimal Cycle Basis extraction algorithm in readFaces. Second sorting
+   * is done via y coordinate.
    */
   static bool compareNodesX ( const Node* a, const Node* b ) {
-    return a->vector().x < b->vector().x;
+    return (a->vector().x < b->vector().x || a->vector().y < b->vector().y );
   }
   /**
    * Adds a single edge to the graph. As convenience returns the passed
