@@ -80,19 +80,30 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
     sgraph->readFaces( );
 
     // pass the faces to subdivision
+    // TODO : parameter
     graph::FaceVector sfaces = sgraph->getFaces();
     for ( size_t j = 0; j < sfaces.size(); j++ ) {
-      subdivideFace( sfaces[j] );
+      if ( sfaces[j]->area( ) > 100.f )
+        subdivideFace( sfaces[j] );
     }
   }
 }
 
 void FaceGenerator::subdivideFace( graph::Face* face ) {
   graph::PlanarGraph* sgraph = face->initializeSubgraph( );
-  // repeat
-  //   take the longest edge
-  //   do a division of the face with a line perpendicular to the face
-  // until
+
+  while ( true ) {
+    graph::Edge* longest = sgraph->longestEdge( );
+    // change this value to something meaningfull - parameter?
+    if ( longest->length( ) < 10.0f ) break;
+    //   do a division of the face with a line perpendicular to the face
+    // perpendicuar or parallel?
+    // 3 methods
+    // TODO: -- either two edges further and do a midpoint connection [easy]
+    // TODO: -- perpendicular cast
+    // TODO: -- parallel to the next edge cast
+  }
+
   sgraph->readFaces( );
   graph::FaceVector sfaces = sgraph->getFaces();
   for ( size_t i = 0; i < sfaces.size(); i++ ) {
