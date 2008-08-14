@@ -65,6 +65,9 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
     size_t branching = 3;
     float segmentLength = 10.0f;
     float noiseValue = 0.1f;
+    float roadThreshold = 0.01f;
+    float subdivisionThreshold = 10.0f;
+    float faceThreshold = 100.0f;
 
     // Create initial growing point targeting to the center from
     // the newly created Node at the split edge
@@ -75,29 +78,28 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
     sgraph->addConnection( splitNode, newNode );
 
     // Now run the recursive road growing on it.
-    growRoads( newNode, branching, segmentLength, noiseValue );
+    growRoads( newNode, branching, segmentLength, noiseValue, roadThreshold );
 
     sgraph->readFaces( );
 
     // pass the faces to subdivision
-    // TODO : parameter
     graph::FaceVector sfaces = sgraph->getFaces();
     for ( size_t j = 0; j < sfaces.size(); j++ ) {
-      if ( sfaces[j]->area( ) > 100.f )
-        subdivideFace( sfaces[j] );
+      if ( sfaces[j]->area( ) > faceThreshold )
+        subdivideFace( sfaces[j], subdivisionThreshold );
       else
         lots.push_back( sfaces[i] );
     }
   }
 }
 
-void FaceGenerator::subdivideFace( graph::Face* face ) {
+void FaceGenerator::subdivideFace( graph::Face* face, float threshold ) {
   graph::PlanarGraph* sgraph = face->initializeSubgraph( );
 
   while ( true ) {
     graph::Edge* longest = sgraph->longestEdge( );
     // change this value to something meaningfull - parameter?
-    if ( longest->length( ) < 10.0f ) break;
+    if ( longest->length( ) < threshold ) break;
     //   do a division of the face with a line perpendicular to the face
     // perpendicuar or parallel?
     // 3 methods
@@ -120,7 +122,7 @@ Vector2Df FaceGenerator::deviateVector( const Vector2Df v, double noise ) {
                     sin( theta ) * v.x + cos( theta ) * v.y );
 }
 
-void FaceGenerator::growRoads( graph::Node* node, size_t branching, double segmentLength, double noise ) {
+void FaceGenerator::growRoads( graph::Node* node, size_t branching, float segmentLength, float noise, float threshold ) {
   int branches = math::roundToInt( branching * Random::doubleRange( 1.0f - noise, 1.0f + noise ) );
 
   // lets get the owner of the node
@@ -160,8 +162,8 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching, double segme
 
 
     // change the values below to something more sensible (parameters?)
-    if ( ndist > 0.1 ) nnode = NULL;
-    if ( edist > 0.1 ) nedge = NULL;
+    if ( ndist > threshold ) nnode = NULL;
+    if ( edist > threshold ) nedge = NULL;
 
     if ( nnode ) {
       if (!graph->checkConnection( node, nnode ) ) continue;
@@ -183,7 +185,7 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching, double segme
     graph->addConnection( node, newnode );
 
     // recurrential run
-    growRoads( newnode, branching, segmentLength, noise );
+    growRoads( newnode, branching, segmentLength, noise, threshold );
   }
 }
 

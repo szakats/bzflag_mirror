@@ -62,9 +62,9 @@ private:
    * out of the current node (excluding the ones already connected),
    * segmentLength controls the maximum length of a generated segment,
    * and noise is a catch-all for introducing randomness into the
-   * generation.
+   * generation. Threshold controls the maximum snap distance.
    */
-  void growRoads( graph::Node* node, size_t branching, double segmentLength, double noise );
+  void growRoads( graph::Node* node, size_t branching, float segmentLength, float noise, float threshold );
   /**
    * Creates the first "face" of the graph, by adding edges and nodes
    * around the world.
@@ -86,9 +86,10 @@ private:
    * The final level of road network generation is the subdivision of
    * lots created by secondary road generation into lots acceptable by
    * the ruleset (e.g. with no degenerated faces). This method also is
-   * responsible for pushing zones.
+   * responsible for pushing zones. Threshold controls the edge length
+   * after which subdivision ceases.
    */
-  void subdivideFace( graph::Face* face );
+  void subdivideFace( graph::Face* face, float threshold );
 };
 
 #endif /* __FACEGENERATOR_H__ */
