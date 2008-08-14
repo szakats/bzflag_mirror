@@ -115,16 +115,18 @@ public:
   }
   /**
    * Returns whether the edge intersects with the one passed.
+   * Edges edges sharing a point do NOT intersect.
    */
   bool intersects( Edge edge ) const {
     return math::intersect2D( source->vector(), target->vector(),
-      edge.source->vector(), edge.target->vector() );
+      edge.source->vector(), edge.target->vector(), -0.01f );
   }
   /**
    * Returns whether a hypothetical edge intersects with this one.
+   * Edges edges sharing a point do NOT intersect.
    */
   bool intersects( Vector2Df a, Vector2Df b ) const {
-    return math::intersect2D( source->vector(), target->vector(), a, b );
+    return math::intersect2D( source->vector(), target->vector(), a, b, -0.01f );
   }
   /**
    * Returns the reversed status of this edge.

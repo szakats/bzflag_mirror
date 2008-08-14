@@ -85,6 +85,8 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
     for ( size_t j = 0; j < sfaces.size(); j++ ) {
       if ( sfaces[j]->area( ) > 100.f )
         subdivideFace( sfaces[j] );
+      else
+        lots.push_back( sfaces[i] );
     }
   }
 }
@@ -106,10 +108,10 @@ void FaceGenerator::subdivideFace( graph::Face* face ) {
 
   sgraph->readFaces( );
   graph::FaceVector sfaces = sgraph->getFaces();
-  for ( size_t i = 0; i < sfaces.size(); i++ ) {
-    // Add the faces to a list?
-    // ...
-  }
+
+  // Add the created faces into the list of "buildable" faces
+  for ( size_t i = 0; i < sfaces.size(); i++ )
+    lots.push_back( sfaces[i] );
 }
 
 Vector2Df FaceGenerator::deviateVector( const Vector2Df v, double noise ) {

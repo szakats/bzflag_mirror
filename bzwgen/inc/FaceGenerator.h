@@ -47,6 +47,11 @@ public:
   virtual ~FaceGenerator( ) {}
 private:
   /**
+   * A vector of all the "production" faces that will be used to
+   * create zones.
+   */
+  graph::FaceVector lots;
+  /**
    * Takes the vector, and does some random deviation on it, up to the
    * passed value in radians. Assumes that the vector is (0,0) based.
    */
