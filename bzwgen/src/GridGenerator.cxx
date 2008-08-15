@@ -19,8 +19,8 @@
 
 int BaseZone::colorCount = 1;
 
-void GridGenerator::parseOptions( CCommandLineArgs* opt ) { 
-  Generator::parseOptions( opt ); 
+void GridGenerator::parseOptions( CCommandLineArgs* opt ) {
+  Generator::parseOptions( opt );
   int worldSize  = getSize();
   gridSize   = 42;
 
@@ -62,7 +62,7 @@ void GridGenerator::plotRoad(int x, int y, bool horiz, bool collision) {
       for (int xx = 0; xx < gridSize; xx++) SETROAD(xx,y)
     } else {
       for (int yy = 0; yy < gridSize; yy++) SETROAD(x,yy)
-    } 
+    }
     return;
   }
   if (horiz) {
@@ -71,8 +71,8 @@ void GridGenerator::plotRoad(int x, int y, bool horiz, bool collision) {
   } else {
     for (int yy = y;   yy < gridSize; yy++) SETROADF(x,yy)
     for (int yy = y-1; yy >= 0; yy--)       SETROADF(x,yy)
-  } 
-  
+  }
+
 }
 
 void GridGenerator::performSlice(bool full, int snapmod, bool horiz) {
@@ -80,7 +80,7 @@ void GridGenerator::performSlice(bool full, int snapmod, bool horiz) {
   int x = Random::numberRangeStep(snap,gridSize-snap*bmod,snapmod*snap);
   int y = Random::numberRangeStep(snap,gridSize-snap*bmod,snapmod*snap);
 
-  Logger.log( 3, "slice (%d,%d)...", x, y );
+  Logger.log( 3, "GridGenerator : slice (%d,%d)...", x, y );
 
   if (node(x,y).type == ROADX) return;
 
@@ -94,7 +94,7 @@ void GridGenerator::performSlice(bool full, int snapmod, bool horiz) {
 }
 
 void GridGenerator::growZone(int x,int y,CellType type) {
-  Logger.log( 3, "Pushing zone at : (%d,%d)", x, y ); 
+  Logger.log( 3, "GridGenerator : pushing zone at (%d,%d)", x, y );
   int xe = x;
   int ye = y;
   while(xe < gridSize) {
@@ -109,32 +109,32 @@ void GridGenerator::growZone(int x,int y,CellType type) {
   }
 
   int zoneID = getZoneCount();
-  for (int xx = x; xx < xe; xx++) 
-    for (int yy = y; yy < ye; yy++) 
+  for (int xx = x; xx < xe; xx++)
+    for (int yy = y; yy < ye; yy++)
       node(xx,yy).zone = zoneID;
 
   graph::Face* face = createFakeFace(x,y,xe,ye);
   if (face) face->size();
 
   if (type == ROAD) {
-    Logger.log( 3, "Road zone added : (%d,%d * %d,%d)", x, y, xe, ye ); 
+    Logger.log( 3, "GridGenerator : road zone added (%d,%d * %d,%d)", x, y, xe, ye );
     addZone(new FloorZone(this,face,gridStep,roadid, x-xe < y-ye));
   } else if (type == ROADX) {
-    Logger.log( 3, "Crossroads zone added : (%d,%d * %d,%d)", x, y, xe, ye ); 
+    Logger.log( 3, "GridGenerator : crossroads zone added (%d,%d * %d,%d)", x, y, xe, ye );
     addZone(new FloorZone(this,face,gridStep,roadxid,true));
   } else if (type == BASE) {
-    Logger.log( 3, "Base zone added : (%d,%d * %d,%d)", x, y, xe, ye ); 
+    Logger.log( 3, "GridGenerator : base zone added (%d,%d * %d,%d)", x, y, xe, ye );
     addZone(new BaseZone(this,face, ctfSafe));
   } else {
-    Logger.log( 3, "Building zone added : (%d,%d * %d,%d)", x, y, xe, ye ); 
+    Logger.log( 3, "GridGenerator : building zone added (%d,%d * %d,%d)", x, y, xe, ye );
     addZone(new BuildZone(this,face));
   }
-  Logger.log( 4, "Zone successfuly created : (%d,%d * %d,%d)", x, y, xe, ye ); 
+  Logger.log( 4, "GridGenerator : zone successfuly created (%d,%d * %d,%d)", x, y, xe, ye );
 }
 
 
-void GridGenerator::run() { 
-  Logger.log( 2, "Running GridGenerator...");
+void GridGenerator::run() {
+  Logger.log( 2, "GridGenerator : running...");
 
   if (bases > 0) {
     plotRoad(snap,snap,true,0);
@@ -152,19 +152,19 @@ void GridGenerator::run() {
 
   bool horiz = Random::coin();
 
-  Logger.log( 2, "Full slices (%d)...", fullslice );
+  Logger.log( 2, "GridGenerator : full slices (%d)...", fullslice );
   for (int i = 0; i < fullslice; i++) {
     horiz = !horiz;
     performSlice(true,3,horiz);
   }
 
-  Logger.log( 2, "Subdivision (%d)...", subdiv );
+  Logger.log( 2, "GridGenerator : subdivision (%d)...", subdiv );
   for (int i = fullslice; i < subdiv; i++) {
     horiz = !horiz;
     performSlice(false,1,horiz);
   }
 
-  Logger.log( 2, "Pushing zones..." );
+  Logger.log( 2, "GridGenerator : pushing zones..." );
 
   int y = 0;
   int x = 0;
@@ -179,7 +179,8 @@ void GridGenerator::run() {
     y++;
   } while (y < gridSize);
 
-  Generator::run(); 
+  Generator::run();
+  Logger.log( 2, "GridGenerator : run completed.");
 }
 
 graph::Face* GridGenerator::createFakeFace(int ax, int ay, int bx, int by) {
@@ -201,7 +202,7 @@ graph::Face* GridGenerator::createFakeFace(int ax, int ay, int bx, int by) {
 
 
 
-  
+
 
 // Local Variables: ***
 // mode:C++ ***

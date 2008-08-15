@@ -22,10 +22,12 @@ void FaceGenerator::parseOptions( CCommandLineArgs* opt ) {
 }
 
 void FaceGenerator::run( ) {
+  Logger.log( 2, "FaceGenerator : running..." );
   runPrimaryRoadGeneration( );
   runSecondaryRoadGeneration( );
   pushZones( );
   Generator::run( );
+  Logger.log( 2, "FaceGenerator : run completed." );
 }
 
 void FaceGenerator::createInitialGraph( ) {
@@ -44,6 +46,7 @@ void FaceGenerator::createInitialGraph( ) {
 }
 
 void FaceGenerator::runPrimaryRoadGeneration( ) {
+  Logger.log( 2, "FaceGenerator : primary road generation..." );
   createInitialGraph( );
 
   // Split the graph into more or less regular zones (use subdivide face?)
@@ -53,8 +56,8 @@ void FaceGenerator::runPrimaryRoadGeneration( ) {
 }
 
 void FaceGenerator::runSecondaryRoadGeneration( ) {
+  Logger.log( 2, "FaceGenerator : secondary road generation ( %d faces )...",graph.faceCount( ));
   graph::FaceVector faces = graph.getFaces( );
-
   // For each face in our graph we do the secondary generation
   for ( size_t i = 0; i < faces.size(); i++ ) {
     graph::PlanarGraph* sgraph = faces[i]->initializeSubgraph( );
@@ -82,6 +85,7 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
     growRoads( newNode, branching, segmentLength, noiseValue, roadThreshold );
 
     sgraph->readFaces( );
+    Logger.log( 2, "FaceGenerator : secondary run, face #%d - subdivided to %d faces",i,sgraph->faceCount( ));
 
     // pass the faces to subdivision
     graph::FaceVector sfaces = sgraph->getFaces();
@@ -123,6 +127,7 @@ void FaceGenerator::subdivideFace( graph::Face* face, float threshold ) {
   // Add the created faces into the list of "buildable" faces
   for ( size_t i = 0; i < sfaces.size(); i++ )
     lots.push_back( sfaces[i] );
+  Logger.log( 4, "FaceGenerator : subdivision to %d faces", sgraph->faceCount( ));
 }
 
 Vector2Df FaceGenerator::deviateVector( const Vector2Df v, double noise ) {
@@ -196,6 +201,7 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching, float segmen
 }
 
 void FaceGenerator::pushZones( ) {
+  Logger.log( 2, "FaceGenerator : pusing zones (%d)...", lots.size() );
   for ( size_t i = 0; i < lots.size(); i++ ) {
     addZone( new BuildZone( this, lots[i] ) );
   }
