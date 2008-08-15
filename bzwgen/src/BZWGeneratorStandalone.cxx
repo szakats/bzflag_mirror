@@ -34,7 +34,7 @@ void BZWGeneratorStandalone::printHelpCommand ( const char* shortName, const cha
 
 void BZWGeneratorStandalone::printHelp() {
   std::cout << "\nBZWGen by Kornel 'Epyon' Kisielewicz\n";
-  printf("Version %d.%d.%d(%s)\ncopyright 2007 BZFlag Project and Tim Riker\n\n",BZWGMajorVersion,BZWGMinorVersion,BZWGRevision,BZWGBuildState);
+  printf("Version %d.%d.%d(%s)\nCopyright 2007-2008 BZFlag Project and Tim Riker\n\n",BZWGMajorVersion,BZWGMinorVersion,BZWGRevision,BZWGBuildState);
   std::cout << "Command line arguments:\n";
   printHelpCommand("h","help","                shows help");
   printHelpCommand("d","debug","integer        sets debug level (0-4)(default: 2)");
@@ -50,7 +50,8 @@ void BZWGeneratorStandalone::printHelp() {
   printHelpCommand("","ctfsafe","                   turns flag safety zones on for CTF maps");
   printHelpCommand("l","detail","integer       sets the level of detail (1-3)(default: 3)");
   printHelpCommand("w","sidewalk","            sets sidewalks passable (default: false)");
-  printHelpCommand("t","texture","URL          sets the URL for textures\n");
+  printHelpCommand("t","texture","URL          sets the URL for textures");
+  printHelpCommand("e","experimental","        turns on experimental generator\n");
 }
 
 int BZWGeneratorStandalone::parseCommandLine(int argc, char* argv[]) {

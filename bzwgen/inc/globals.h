@@ -32,7 +32,7 @@ typedef std::ofstream OutFileStream;
 
 #define BZWGMajorVersion 0
 #define BZWGMinorVersion 1
-#define BZWGRevision     3
+#define BZWGRevision     4
 #define BZWGBuildState "development"
 
 #ifdef _MSC_VER

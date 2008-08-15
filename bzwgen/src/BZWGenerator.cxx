@@ -14,6 +14,7 @@
 #include "time.h"
 #include "Output.h"
 #include "GridGenerator.h"
+#include "FaceGenerator.h"
 #include <sstream>
 #include <iostream>
 
@@ -122,33 +123,35 @@ bool BZWGenerator::getOptionS ( String &val, const char* shortName, const char* 
   return false;
 }
 
-int BZWGenerator::setup() {
-  ruledir .SetStdDir("./rules");
+int BZWGenerator::setup( ) {
+  ruledir.SetStdDir( "./rules" );
   String temp;
 
   int detail = 3;
   int debugLevel = 2;
   int fileDebugLevel = -1;
-  getOptionI(debugLevel,"d","debug");
-  getOptionI(fileDebugLevel,"f","filedebug");
+
+  getOptionI( debugLevel,     "d", "debug" );
+  getOptionI( fileDebugLevel, "f", "filedebug" );
+
   Logger.setOutputLogLevel( debugLevel );
   if ( fileDebugLevel >= 0 ) {
     Logger.setFileLogLevel( fileDebugLevel );
   }
 
-  getOptionI(detail,"l","detail");
-  getOptionS(texturepath,"t","texture");
-  if(getOptionS(temp,"r","rulesdir"))
-    ruledir.SetOSDir(temp.c_str());
+  getOptionI( detail,      "l", "detail" );
+  getOptionS( texturepath, "t", "texture" );
+  if ( getOptionS( temp, "r", "rulesdir" ) )
+    ruledir.SetOSDir( temp.c_str() );
 
   COSFile file;
   ruleset = new RuleSet();
 
-  while (ruledir.GetNextFile(file,"*.set",false)) {
+  while ( ruledir.GetNextFile( file, "*.set", false ) ) {
     Logger.log( 1, "BZWGenerator : loading %s... ", file.GetOSName() );
-    file.Open("r");
+    file.Open( "r" );
     yyin = file.GetFile();
-    if (yyparse(ruleset) == 0) {
+    if ( yyparse( ruleset ) == 0) {
       Logger.log( 3, "BZWGenerator : loading done." );
     } else {
       Logger.log( "BZWGenerator : loading %s failed!", file.GetOSName() );
@@ -160,35 +163,40 @@ int BZWGenerator::setup() {
 
   loadPlugIns();
 
-  bool passsidewalk = false;
-  if (cmd.Exists("w") || cmd.Exists("sidewalk")) { passsidewalk = true; }
+  bool passsidewalk = ( cmd.Exists( "w" ) || cmd.Exists( "sidewalk" ) );
+  experimental      = ( cmd.Exists( "e" ) || cmd.Exists( "experimental" ) );
 
   ruleset->initialize();
-  ruleset->addAttr("DETAIL",double(detail));
-  ruleset->addAttr("PASSABLE_SIDEWALK",double(passsidewalk ? 1.0 : -1.0));
+  ruleset->addAttr( "DETAIL",            double( detail ) );
+  ruleset->addAttr( "PASSABLE_SIDEWALK", double( passsidewalk ? 1.0 : -1.0 ) );
 
-  srand((unsigned int)time(NULL));
+  srand( (unsigned int) time( NULL ) );
 
   return 0;
 }
 
-void BZWGenerator::generate(OutStream* outstream) {
+void BZWGenerator::generate( OutStream* outstream ) {
   Logger.log( 1, "BZWGenerator : initializing... " );
-  GridGenerator gen(ruleset);
+  Generator* gen;
+  if ( experimental )
+    gen = new FaceGenerator( ruleset );
+  else
+    gen = new GridGenerator( ruleset );
 
   Logger.log( 1, "BZWGenerator : parsing options... " );
-  gen.parseOptions(&cmd);
+  gen->parseOptions( &cmd );
 
   Logger.log( 1, "BZWGenerator : generating... " );
-  gen.run();
+  gen->run( );
 
   Logger.log( 1, "BZWGenerator : outputing... " );
-  Output os(outstream,texturepath);
-  os.info(BZWGMajorVersion,BZWGMinorVersion,BZWGRevision);
-  gen.output(os);
-  os.footer();
+  Output os( outstream, texturepath );
+  os.info( BZWGMajorVersion, BZWGMinorVersion, BZWGRevision );
+  gen->output( os );
+  os.footer( );
 
   Logger.log( 1, "BZWGenerator : generation done. ");
+  delete gen;
 }
 
 // Local Variables: ***
