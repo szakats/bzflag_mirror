@@ -111,14 +111,17 @@ namespace graph {
     return result;
   }
 
-  void PlanarGraph::split( Vector2Df a, Vector2Df b ) {
+  void PlanarGraph::slice( Vector2Df a, Vector2Df b ) {
+    Vector2Df dir = a - b;
+    Vector2Df A = a + dir * 100000.0f;
+    Vector2Df B = a - dir * 100000.0f;
     NodeVector splitPoints;
     for ( size_t i = 0; i < edgeList.size(); i++ ) {
       Edge* edge = edgeList.get( i );
       if ( edge != NULL && !edge->isReversed( ) ) {
         Vector2Df r1;
         Vector2Df r2;
-        if ( math::intersect2D( edge->getSource( )->vector(), edge->getTarget( )->vector(), a, b, r1, r2 ) == 1 ) {
+        if ( math::intersect2D( edge->getSource( )->vector(), edge->getTarget( )->vector(), A, B, r1, r2 ) == 1 ) {
           splitPoints.push_back( splitEdge( edge, r1 ) );
         }
       }

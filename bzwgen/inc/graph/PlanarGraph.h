@@ -242,14 +242,14 @@ public:
   inline FaceVector getFaces( ) const {
     return faceList.getCopy( );
   }
-private:
   /**
-   * Does a split on the graph using the given coords as points
-   * on the split line. Edges are split at the intersection points
+   * Does a slice on the graph using the given coords as points
+   * on the slice line. Edges are split at the intersection points
    * and edges are added into the split faces.
    * TODO: fix intersect2D result!
    */
-  void split( Vector2Df a, Vector2Df b );
+  void slice( Vector2Df a, Vector2Df b );
+private:
   /**
    * Extracts the faces assigned to the current node. Works only on
    * edges that don't have a face assigned to them. Extracted face

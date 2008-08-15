@@ -100,6 +100,14 @@ void FaceGenerator::subdivideFace( graph::Face* face, float threshold ) {
     graph::Edge* longest = sgraph->longestEdge( );
     // change this value to something meaningfull - parameter?
     if ( longest->length( ) < threshold ) break;
+    // Current method -- perpendicular slice
+    Vector2Df middle = ( longest->getSource( )->vector( ) +
+                         longest->getTarget( )->vector( ) ) / 2.0f;
+    Vector2Df dir = longest->getSource( )->vector( ) - middle;
+    Vector2Df perp = Vector2Df( dir.y, -dir.x );
+
+    sgraph->slice( middle, middle + perp );
+
     //   do a division of the face with a line perpendicular to the face
     // perpendicuar or parallel?
     // 3 methods
@@ -160,8 +168,6 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching, float segmen
     else
       nedge = NULL;
 
-
-    // change the values below to something more sensible (parameters?)
     if ( ndist > threshold ) nnode = NULL;
     if ( edist > threshold ) nedge = NULL;
 
@@ -177,7 +183,6 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching, float segmen
       continue;
     }
 
-    // TODO: this test must avoid hiting at the edges!
     if ( !graph->checkEdge( node->vector(), target ) ) continue;
 
     graph::Node * newnode = new graph::Node( graph, target );
