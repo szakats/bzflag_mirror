@@ -24,6 +24,7 @@ void FaceGenerator::parseOptions( CCommandLineArgs* opt ) {
 void FaceGenerator::run( ) {
   runPrimaryRoadGeneration( );
   runSecondaryRoadGeneration( );
+  pushZones( );
   Generator::run( );
 }
 
@@ -191,6 +192,12 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching, float segmen
 
     // recurrential run
     growRoads( newnode, branching, segmentLength, noise, threshold );
+  }
+}
+
+void FaceGenerator::pushZones( ) {
+  for ( size_t i = 0; i < lots.size(); i++ ) {
+    addZone( new BuildZone( this, lots[i] ) );
   }
 }
 

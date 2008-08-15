@@ -71,6 +71,10 @@ private:
    */
   void createInitialGraph( );
   /**
+   * Takes the list of lots and pushes Zones based on them.
+   */
+  void pushZones( );
+  /**
    * Creates the layout of the major roads. Stores them in the graph.
    * Generation is controlled by already stored options.
    */
