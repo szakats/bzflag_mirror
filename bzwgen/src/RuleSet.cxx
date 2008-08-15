@@ -13,15 +13,15 @@
 #include "RuleSet.h"
 #include "globals.h"
 
-void RuleSet::addRule(String& name, Rule* rule) { 
-  Logger.log( 2, "Added rule '%s'.", rule->getName().c_str() );
-  rules[name] = rule; 
+void RuleSet::addRule(String& name, Rule* rule) {
+  Logger.log( 3, "RuleSet : added rule '%s'.", rule->getName().c_str() );
+  rules[name] = rule;
 }
 
 double RuleSet::getAttr(String& name) {
-  AttributeMap::iterator itr = attrmap.find(name); 
+  AttributeMap::iterator itr = attrmap.find(name);
   if (itr == attrmap.end()) {
-    Logger.log( "Warning : attribute '%s' not found!", name.c_str() );
+    Logger.log( "RuleSet : Warning : attribute '%s' not found!", name.c_str() );
     return 0.0;
   }
   return itr->second;
@@ -34,13 +34,13 @@ int RuleSet::runMesh(Mesh* mesh, int face, String& rulename) {
   recursion++;
   if (recursion == MAX_RECURSION) {
     recursion = -1;
-    Logger.log( "Warning : Recursion level 1000 reached! Are you sure you have no infinite loops?");
+    Logger.log( "RuleSet : Warning : Recursion level 1000 reached! Are you sure you have no infinite loops?");
     return -1;
   }
 
-  RuleMapIter itr = rules.find(rulename); 
+  RuleMapIter itr = rules.find(rulename);
   if (itr == rules.end()) {
-    Logger.log( "Warning : rule '%s' not found!", rulename.c_str() );
+    Logger.log( "RuleSet : Warning : rule '%s' not found!", rulename.c_str() );
     return -1;
   }
   int result = itr->second->runMesh(mesh,face);
@@ -54,8 +54,8 @@ MeshVector* RuleSet::run(Mesh* initial_mesh, int initial_face, String& rulename)
   meshes->push_back(initial_mesh);
   initial_mesh->pushBase(initial_face);
   initial_mesh->addInsideVertex(initial_mesh->faceCenter(initial_face)+initial_mesh->faceNormal(initial_face)*0.05f);
-  if (runMesh(initial_mesh,initial_face,rulename) == -1) 
-    Logger.log( "RuleSet::run failed with start rule '%s!'", rulename.c_str() );
+  if (runMesh(initial_mesh,initial_face,rulename) == -1)
+    Logger.log( "RuleSet : run failed with start rule '%s!'", rulename.c_str() );
   return meshes;
 }
 
@@ -84,8 +84,8 @@ void RuleSet::output(Output& out ) {
   for (MaterialVectIter itr = materials.begin(); itr!= materials.end(); ++itr) (*itr).output(out);
 }
 
-RuleSet::~RuleSet() { 
-  for (RuleMapIter itr = rules.begin();itr != rules.end(); ++itr) delete itr->second; 
+RuleSet::~RuleSet() {
+  for (RuleMapIter itr = rules.begin();itr != rules.end(); ++itr) delete itr->second;
 }
 
 // Local Variables: ***

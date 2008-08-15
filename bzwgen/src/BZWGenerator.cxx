@@ -42,7 +42,7 @@ void loadOnePlugIn ( const char* file )
     HANDLE hLib = LoadLibrary(file);
     if (!hLib)
       return;
-    
+
     init = GetProcAddress(hLib,"bzwgen_init_plugin");
     if (!init)
     {
@@ -53,7 +53,7 @@ void loadOnePlugIn ( const char* file )
 #else
 
 #endif
-  
+
   if (init && *init(0))
   {
     // do something
@@ -140,18 +140,18 @@ int BZWGenerator::setup() {
   getOptionS(texturepath,"t","texture");
   if(getOptionS(temp,"r","rulesdir"))
     ruledir.SetOSDir(temp.c_str());
-  
+
   COSFile file;
   ruleset = new RuleSet();
-  
+
   while (ruledir.GetNextFile(file,"*.set",false)) {
-    Logger.log( "Loading %s... ",file.GetOSName());
+    Logger.log( 1, "BZWGenerator : loading %s... ", file.GetOSName() );
     file.Open("r");
     yyin = file.GetFile();
     if (yyparse(ruleset) == 0) {
-      Logger.log( "Loading done." );
+      Logger.log( 3, "BZWGenerator : loading done." );
     } else {
-      Logger.log( "Loading failed!" );
+      Logger.log( "BZWGenerator : loading %s failed!", file.GetOSName() );
       return 1;
     }
     yylineno = 1;
@@ -173,22 +173,22 @@ int BZWGenerator::setup() {
 }
 
 void BZWGenerator::generate(OutStream* outstream) {
-  Logger.log( "Initializing... " );
+  Logger.log( 1, "BZWGenerator : initializing... " );
   GridGenerator gen(ruleset);
 
-  Logger.log( "Parsing options... " );
+  Logger.log( 1, "BZWGenerator : parsing options... " );
   gen.parseOptions(&cmd);
 
-  Logger.log( "Generating... " );
+  Logger.log( 1, "BZWGenerator : generating... " );
   gen.run();
-  
-  Logger.log( "Outputing... " );
+
+  Logger.log( 1, "BZWGenerator : outputing... " );
   Output os(outstream,texturepath);
   os.info(BZWGMajorVersion,BZWGMinorVersion,BZWGRevision);
   gen.output(os);
   os.footer();
-  
-  Logger.log( "Done. ");
+
+  Logger.log( 1, "BZWGenerator : generation done. ");
 }
 
 // Local Variables: ***

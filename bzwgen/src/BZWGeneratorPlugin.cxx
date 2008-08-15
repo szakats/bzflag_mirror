@@ -22,11 +22,11 @@ void BZWGeneratorPlugin::process(bz_EventData *eventData) {
     return;
   }
 
-  if (eventData->eventType != bz_eGetWorldEvent) 
+  if (eventData->eventType != bz_eGetWorldEvent)
     return;
 
 
-  Logger.log( 2, "bz_eGetWorldEvent called!" );
+  Logger.log( 2, "BZWGeneratorPlugin : bz_eGetWorldEvent called!" );
 
   if (worldGenerated) {
     bz_GetWorldEventData_V1 *getWorldData = (bz_GetWorldEventData_V1 *) eventData;
