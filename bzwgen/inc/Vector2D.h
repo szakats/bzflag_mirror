@@ -42,69 +42,146 @@ public:
   T y;
 
   /** @name Constructors */
-  /** Default constructor -- sets the values to zero. */
-  inline Vector2D() : x(0), y(0) {}
-  /** Constructor that sets the point to the given coordinates. */
-  inline Vector2D( T _x, T _y ) :x(_x), y(_y) {}
-  /** Constructor that sets the point to the given coordinates, given as an array. */
-  inline Vector2D( const T v[2]) :x(v[0]), y(v[1]) {}
-  /** Copy constructor. */
-  inline Vector2D( const Vector2D<T>& v) :x(v.x), y(v.y) {}
+  /**
+   * Default constructor -- sets the values to zero.
+   */
+  inline Vector2D( ) : x( 0 ), y( 0 ) { }
+  /**
+   * Constructor that sets the point to the given coordinates.
+   */
+  inline Vector2D( T _x, T _y ) : x( _x ), y( _y ) { }
+  /**
+   * Constructor that sets the point to the given coordinates,
+   * given as an array.
+   */
+  inline Vector2D( const T v[2] ) : x( v[0] ), y( v[1] ) { }
+  /**
+   * Copy constructor.
+   */
+  inline Vector2D( const Vector2D<T>& v) : x( v.x ), y( v.y ) { }
 
   /** @name Operators */
-  /** Addition operator. */
-  Vector2D<T> operator+(const Vector2D<T> &v) const { return Vector2D<T>(x + v.x, y + v.y); }
-  /** Substraction operator. */
-  Vector2D<T> operator-(const Vector2D<T> &v) const { return Vector2D<T>(x - v.x, y - v.y); }
-  /** Multiplication operator. */
-  Vector2D<T> operator*(const Vector2D<T> &v) const { return Vector2D<T>(x * v.x, y * v.y); }
-  /** Scalar multiplication operator. */
-  Vector2D<T> operator*(const T f) const { return Vector2D<T>(x * f, y * f); }
-  /** Division operator. */
-  Vector2D<T> operator/(const Vector2D<T> &v) const { return Vector2D<T>(x / v.x, y / v.y); }
-  /** Scalar division operator. */
-  Vector2D<T> operator/(const T f) const { return Vector2D<T>(x / f, y / f); }
-  /** Operator for array-like member access. */
-  inline T &operator[](int i) const {
-    switch (i) {
+  /**
+   * Addition operator.
+   */
+  Vector2D<T> operator+ ( const Vector2D<T> &v ) const {
+    return Vector2D<T>( x + v.x, y + v.y );
+  }
+  /**
+   * Substraction operator.
+   */
+  Vector2D<T> operator- ( const Vector2D<T> &v ) const {
+    return Vector2D<T>( x - v.x, y - v.y );
+  }
+  /**
+   * Multiplication operator.
+   */
+  Vector2D<T> operator* ( const Vector2D<T> &v ) const {
+    return Vector2D<T>( x * v.x, y * v.y );
+  }
+  /**
+   * Scalar multiplication operator.
+   */
+  Vector2D<T> operator* ( const T f ) const {
+    return Vector2D<T>( x * f, y * f );
+  }
+  /**
+   * Division operator.
+   */
+  Vector2D<T> operator/ ( const Vector2D<T> &v ) const {
+    return Vector2D<T>( x / v.x, y / v.y );
+  }
+  /**
+   * Scalar division operator.
+   */
+  Vector2D<T> operator/ ( const T f ) const {
+    return Vector2D<T>( x / f, y / f );
+  }
+  /**
+   * Operator for array-like member access.
+   */
+  inline T &operator[] ( int i ) const {
+    switch ( i ) {
       case 0: return x; break;
       case 1: return y; break;
       default: return x;
     }
   }
-  /** Equality operator. Tests structural equality only. */
-  bool operator==(const Vector2D<T>& v) const { return (x == v.x) && (y == v.y); }
-  /** Inequality operator. Tests structural inequality only. */
-  bool operator!=(const Vector2D<T>& v) const { return !((x == v.x) && (y == v.y)); }
+  /**
+   * Equality operator. Tests structural equality only.
+   */
+  bool operator== ( const Vector2D<T>& v ) const {
+    return ( x == v.x ) && ( y == v.y );
+  }
+  /**
+   * Inequality operator. Tests structural inequality only.
+   */
+  bool operator!= ( const Vector2D<T>& v ) const {
+    return !( ( x == v.x ) && ( y == v.y ) );
+  }
 
   /** @name Other operations */
-  /** Does a in-place normalization on the point, as treated as a 2D vector. */
-  void normalize() { T l = length(); if (l == 0) return; x/=l; y/=l; }
-  /** Returns a normalization on the point, as treated as a 2D vector. */
-  Vector2D<T> norm() const { T l = length(); return (l == 0) ? Vector2D<T>() : Vector2D<T>(x/l,y/l); }
-  /** Returns a string representation of the Point. */
-  std::string toString() const { char buffer[80]; sprintf(buffer, "[%.4f,%.4f]",float(x),float(y)); return std::string(buffer); }
-  /** Returns the length of the point if treated as a vector. */
-  T length() const { return T(sqrt(x*x + y*y)); }
-  /** Returns the squared length of the point if treated as a vector. */
-  T lengthsq() const { return x*x + y*y; }
+  /**
+   * Does a in-place normalization on the point, as treated as a 2D vector.
+   */
+  void normalize() {
+    T l = length();
+    if ( l == 0 ) return;
+    x /= l;
+    y /= l;
+  }
+  /**
+   * Returns a normalization on the point, as treated as a 2D vector.
+   */
+  Vector2D<T> norm() const {
+    T l = length();
+    return (l == 0) ? Vector2D<T>( ) : Vector2D<T>( x/l, y/l );
+  }
+  /**
+   * Returns a string representation of the Point.
+   */
+  std::string toString() const {
+    char buffer[80];
+    sprintf( buffer, "[%.4f,%.4f]", float(x), float(y) );
+    return std::string( buffer );
+  }
+  /**
+   * Returns the length of the point if treated as a vector.
+   */
+  T length() const {
+    return T( sqrt( x*x + y*y ) );
+  }
+  /**
+   * Returns the squared length of the point if treated as a vector.
+   */
+  T lengthsq() const {
+    return x*x + y*y;
+  }
 
-  /** Returns vector cross product. */
+  /**
+   * Returns vector cross product.
+   */
   T cross( const Vector2D<T> &v ) const {
     return ( x * v.y - v.x * y );
   }
-  /** Returns the dot product */
+  /**
+   * Returns the dot product
+   */
   T dot( const Vector2D<T> &v ) const {
       return ( x * v.x + y * v.y );
   }
 
 
-  /** Zero test. Test done using MathUtils isZero. */
+  /**
+   * Zero test. Test done using MathUtils isZero.
+   */
   bool isZero( const T precision = EPSILON ) const {
     return ( math::isZero( x, precision ) &&
              math::isZero( y, precision ) );
   }
-  /** Equality test. Test done using MathUtils equals. */
+  /**
+   * Equality test. Test done using MathUtils equals.
+   */
   bool equals( const Vector2D<T>& v, const T precision = EPSILON ) const {
     return ( math::equals( x, v.x, precision ) &&
              math::equals( y, v.y, precision ) );
