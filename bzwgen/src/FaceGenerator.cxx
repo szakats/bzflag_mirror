@@ -62,15 +62,18 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
   // For each face in our graph we do the secondary generation
   for ( size_t i = /****************/1/**************/; i < faces.size(); i++ ) {
     Logger.log( 3, "FaceGenerator : secondary road generation face #%d...", i );
+    Logger.log( 4, "FaceGenerator : face %s...", faces[i]->toString( ).c_str() );
     graph::PlanarGraph* sgraph = faces[i]->initializeSubgraph( );
 
     // Maybe use random edge instead?
     graph::Node* splitNode = sgraph->splitEdge( sgraph->longestEdge( ) );
+    Logger.log( 4, "FaceGenerator : splitnode %s", splitNode->toString( ).c_str() );
 
     // This should be parameters, their value is somewhat meaningless now.
     size_t branching = 3;
     float segmentLength = 50.0f;
-    float noiseValue = 0.1f;
+//    float noiseValue = 0.1f;
+    float noiseValue = 0.0f;
     float roadThreshold = 4.0f;
     float subdivisionThreshold = 10.0f;
     float faceThreshold = 100.0f;
@@ -93,6 +96,7 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
     // pass the faces to subdivision
     graph::FaceVector sfaces = sgraph->getFaces();
     for ( size_t j = 0; j < sfaces.size(); j++ ) {
+        Logger.log( 4, "FaceGenerator : secondary generated face #%s...", sfaces[j]->toString( ).c_str() );
 //      if ( sfaces[j]->area( ) > faceThreshold )
 //        subdivideFace( sfaces[j], subdivisionThreshold );
 //      else
@@ -142,7 +146,7 @@ Vector2Df FaceGenerator::deviateVector( const Vector2Df v, double noise ) {
 void FaceGenerator::growRoads( graph::Node* node, size_t branching,
                                float segmentLength, float noise,
                                float threshold ) {
-   Logger.log( 4, "FaceGenerator : grow roads on node #%d..." , node->ID );
+  Logger.log( 4, "FaceGenerator : grow roads on node #%s..." , node->toString( ).c_str() );
   int branches = math::roundToInt( branching * Random::doubleRange( 1.0f - noise, 1.0f + noise ) );
 
   // lets get the owner of the node
@@ -154,20 +158,28 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching,
   // Single rotation
   float rotationValue = 2 * PI / ( branches + 1 );
 
+  Logger.log( 4, "FaceGenerator : grow roads incoming %s" , incoming.toString( ).c_str() );
+  Logger.log( 4, "FaceGenerator : rotationValue %f" , rotationValue );
+  Logger.log( 4, "FaceGenerator : branches %d" , branches );
+
   for ( int i = 0; i < branches; i++ ) {
+    Logger.log( 4, "FaceGenerator : branch %d" , i );
 
     float rotation = ( i + 1 ) * rotationValue;
+    Logger.log( 4, "FaceGenerator : rotation %f" , rotation );
 
     // initial direction choice, should be away from last
     Vector2Df direction = Vector2Df(
       cos( rotation ) * incoming.x - sin ( rotation ) * incoming.y,
       sin( rotation ) * incoming.x - cos ( rotation ) * incoming.y
-    );
+    ).norm();
+    Logger.log( 4, "FaceGenerator : direction %s" , direction.toString( ).c_str() );
 
     direction = deviateVector( direction, noise );
     direction = direction * (float)segmentLength * (float)Random::doubleRange( 1.0 - noise, 1.0 + noise );
 
     Vector2Df target = node->vector() + direction;
+    Logger.log( 4, "FaceGenerator : target %s->%s" , node->toString( ).c_str() , target.toString( ).c_str() );
 
     graph::Node* nnode = graph->closestNode( target );
     graph::Edge* nedge = graph->closestEdge( target );
@@ -184,14 +196,19 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching,
     if ( edist > threshold ) nedge = NULL;
 
     if ( nnode ) {
-      if (!graph->checkConnection( node, nnode ) ) continue;
+      if (!graph->checkConnection( node, nnode ) ) {
+        Logger.log( 4, "FaceGenerator : result - node connection fail with %s", nnode->toString( ).c_str() );
+        continue;
+      }
       graph->addConnection( node, nnode );
+      Logger.log( 4, "FaceGenerator : result - new connection with %s", nnode->toString( ).c_str() );
       continue;
     }
     if ( nedge ) {
       Vector2Df v = nedge->pointCast( target );
-      graph::Node* split = graph->splitEdge( nedge, target );
+      graph::Node* split = graph->splitEdge( nedge, v );
       graph->addConnection( node, split );
+      Logger.log( 4, "FaceGenerator : result - split connection with %s", split->toString( ).c_str() );
       continue;
     }
 
@@ -201,6 +218,7 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching,
     graph->addNode( newnode );
     graph->addConnection( node, newnode );
 
+    Logger.log( 4, "FaceGenerator : result - add and recurrence %s", newnode->toString( ).c_str() );
     // recurrential run
     growRoads( newnode, branching, segmentLength, noise, threshold );
   }
