@@ -14,9 +14,10 @@
 #include "Generator.h"
 
 void BuildZone::run() {
+  Logger.log( 4, "BuildZone : running at %s...", face->toString().c_str() );
   Mesh* mesh = new Mesh();
 
-  graph::NodeVector nodes = face->getNodes();  
+  graph::NodeVector nodes = face->getNodes();
 
   Face* swface = new Face();
   swface->setMaterial( 0 );
@@ -32,13 +33,13 @@ void BuildZone::run() {
 
 void BuildZone::output( Output& out ) {
   if (meshes == NULL) return;
-  for (MeshVectIter itr = meshes->begin(); itr!= meshes->end(); ++itr) 
+  for (MeshVectIter itr = meshes->begin(); itr!= meshes->end(); ++itr)
     (*itr)->output(out,generator->getRuleSet()->materialsCount());
 }
 
-BuildZone::~BuildZone( ) { 
+BuildZone::~BuildZone( ) {
   if (meshes == NULL) return;
-  for (MeshVectIter itr = meshes->begin(); itr!= meshes->end(); ++itr) 
+  for (MeshVectIter itr = meshes->begin(); itr!= meshes->end(); ++itr)
     delete (*itr);
   delete meshes;
 }

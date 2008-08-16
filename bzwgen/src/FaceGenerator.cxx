@@ -100,7 +100,8 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 //      if ( sfaces[j]->area( ) > faceThreshold )
 //        subdivideFace( sfaces[j], subdivisionThreshold );
 //      else
-        lots.push_back( sfaces[i] );
+        if ( sfaces[j]->size() < 5 )
+          lots.push_back( sfaces[j] );
     }
   }
 }
@@ -226,7 +227,7 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching,
 }
 
 void FaceGenerator::pushZones( ) {
-  Logger.log( 2, "FaceGenerator : pusing zones (%d)...", lots.size() );
+  Logger.log( 2, "FaceGenerator : pushing zones (%d)...", lots.size() );
   for ( size_t i = 0; i < lots.size(); i++ ) {
     addZone( new BuildZone( this, lots[i] ) );
   }
