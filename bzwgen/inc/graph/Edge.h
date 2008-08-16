@@ -138,14 +138,18 @@ public:
    * Returns the to the given coordinate
    */
   float distanceTo( Vector2Df v ) const {
-    Vector2Df dir = target->vector() - source->vector();
-    Vector2Df d2  = v - source->vector();
-
-    return math::abs( d2.cross( dir ) ) / dir.length();
+    Vector2Df a = source->vector();
+    Vector2Df b = target->vector();
+    Vector2Df d = b - a;
+    float ratio = ((v.x - a.x) * d.x + (v.y - a.y) * d.y) / ( d.lengthsq() );
+    if ( ratio < 0.0f ) return v.distanceTo( a );
+    if ( ratio > 1.0f ) return v.distanceTo( b );
+    return v.distanceTo( a.lerp( b, ratio ) );
   }
   /**
    * Returns a point that is perpendicular to the given point and
-   * lies on the edge.
+   * lies on the edge. Note that the point doesn't have to lie on the
+   * edge!
    */
   Vector2Df pointCast( Vector2Df v ) const {
     Vector2Df dir = (target->vector() - source->vector()).norm();

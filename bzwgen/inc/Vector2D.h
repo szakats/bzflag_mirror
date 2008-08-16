@@ -170,8 +170,19 @@ public:
   T dot( const Vector2D<T> &v ) const {
       return ( x * v.x + y * v.y );
   }
-
-
+  /**
+   * Returns distance to the other vector
+   */
+  T distanceTo( const Vector2D<T> &v ) const {
+      return ( *this - v ).length();
+  }
+  /**
+   * Lineary interpolates to the given value. Ratio = 0 equals
+   * this vector, ratio = 1 the other.
+   */
+  Vector2D<T> lerp( const Vector2D<T> &v, T ratio ) const {
+      return (*this) * ( 1 - ratio ) + v * ratio;
+  }
   /**
    * Zero test. Test done using MathUtils isZero.
    */
