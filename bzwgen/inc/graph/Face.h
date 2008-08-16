@@ -97,6 +97,10 @@ public:
    * Destructor. Destroys the underlying subgraph if one exists.
    */
   ~Face( );
+  /**
+   * Returns a string representation of the Face.
+   */
+  std::string toString() const;
 private:
   /** Blocked default constructor */
   Face( ) {}

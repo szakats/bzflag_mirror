@@ -22,6 +22,7 @@
 #define __FORWARD_H__
 
 #include <vector>
+#include <string>
 #include <cassert>
 #include "ObjectList.h"
 

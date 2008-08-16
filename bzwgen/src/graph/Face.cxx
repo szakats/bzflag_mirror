@@ -73,6 +73,14 @@ float Face::area( ) const {
   return math::abs( result / 2.0f );
 }
 
+std::string Face::toString( ) const {
+  std::string buffer = "<";
+  for ( size_t i = 0; i < size(); i++ ) {
+    buffer += edges[i]->getSource()->toString();
+  }
+  return buffer + ">";
+}
+
 }
 
 // Local Variables: ***

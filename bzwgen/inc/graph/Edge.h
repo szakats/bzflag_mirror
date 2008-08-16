@@ -163,6 +163,17 @@ public:
   Edge* getReversed() const {
     return reverse;
   }
+  /**
+   * Returns a string representation of the Edge.
+   */
+  std::string toString() const {
+    char buffer[80];
+    sprintf( buffer, "[#%d,(%.4f,%.4f)->(%.4f,%.4f)]", ID,
+      float(source->vector().x), float(source->vector().y),
+      float(target->vector().x), float(target->vector().y)
+    );
+    return std::string( buffer );
+  }
 
 
 private:

@@ -138,6 +138,14 @@ public:
   float distanceTo( Vector2Df v ) {
     return (coord - v).length();
   }
+  /**
+   * Returns a string representation of the Node.
+   */
+  std::string toString() const {
+    char buffer[80];
+    sprintf( buffer, "[#%d,%.4f,%.4f]", ID, float(coord.x), float(coord.y) );
+    return std::string( buffer );
+  }
 private:
   /**
    * Blocked default constructor.
