@@ -12,22 +12,26 @@
 
 #include <algorithm>
 #include "graph/PlanarGraph.h"
+#include <cassert>
+#include "Logger.h"
 
 namespace graph {
 
   void PlanarGraph::readFaces() {
-
       // Create a sorted list of Nodes by the x coordinate.
       NodeVector xnodes = nodeList.getCopy();
       std::sort( xnodes.begin(), xnodes.end(), compareNodesX );
-
       // Perform a sweep while reading faces
+      Logger.log( 4, "PlanarGraph : reading faces from %d nodes", xnodes.size() );
       for ( size_t i = 0; i < xnodes.size(); i++ ) {
+        Logger.log( 4, "PlanarGraph : extracting from node #%d...", i );
         extractFaces( xnodes[i] );
       }
+      Logger.log( 4, "PlanarGraph : read %d faces", faces );
   }
 
   void PlanarGraph::extractFaces( Node* node ) {
+    assert( node );
     Edge* startEdge = node->getFirstOutgoingEdge();
     if ( !startEdge ) return;
     Edge* edge = startEdge;
@@ -42,16 +46,19 @@ namespace graph {
   }
 
   void PlanarGraph::extractFace( Edge* edge ) {
+    assert( edge );
     Face* face = new Face( this );
     Edge* startEdge = edge;
-
+    Logger.log( 4, "PlanarGraph : extract face..." );
+    int count = 0;
     do {
+      count++;
       face->addEdge( edge );
-      edge = edge->getTarget()->getOutgoingList().prev( edge );
-    } while ( edge != startEdge );
+      edge = edge->getTarget()->getOutgoingList().next( edge->getReversed( ) );
+    } while ( edge != startEdge && count < 12 );
 
     // check if the face is degenerate.
-    if ( face->size() < 3 ) {
+    if ( face->size() < 3 || edge != startEdge ) {
       delete face;
       return;
     }

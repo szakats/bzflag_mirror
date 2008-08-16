@@ -157,6 +157,12 @@ public:
   float length( ) const {
     return ( target->vector() - source->vector() ).length( );
   }
+  /**
+   * Returns the corresponding reversed edge.
+   */
+  Edge* getReversed() const {
+    return reverse;
+  }
 
 
 private:

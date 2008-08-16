@@ -52,14 +52,16 @@ void FaceGenerator::runPrimaryRoadGeneration( ) {
   // Split the graph into more or less regular zones (use subdivide face?)
   // ...
 
+  Logger.log( 2, "FaceGenerator : reading primary faces..." );
   graph.readFaces( );
 }
 
 void FaceGenerator::runSecondaryRoadGeneration( ) {
-  Logger.log( 2, "FaceGenerator : secondary road generation ( %d faces )...",graph.faceCount( ));
+  Logger.log( 2, "FaceGenerator : secondary road generation ( %d faces )...", graph.faceCount( ) );
   graph::FaceVector faces = graph.getFaces( );
   // For each face in our graph we do the secondary generation
-  for ( size_t i = 0; i < faces.size(); i++ ) {
+  for ( size_t i = /****************/1/**************/; i < faces.size(); i++ ) {
+    Logger.log( 3, "FaceGenerator : secondary road generation face #%d...", i );
     graph::PlanarGraph* sgraph = faces[i]->initializeSubgraph( );
 
     // Maybe use random edge instead?
@@ -67,9 +69,9 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 
     // This should be parameters, their value is somewhat meaningless now.
     size_t branching = 3;
-    float segmentLength = 10.0f;
+    float segmentLength = 50.0f;
     float noiseValue = 0.1f;
-    float roadThreshold = 0.01f;
+    float roadThreshold = 4.0f;
     float subdivisionThreshold = 10.0f;
     float faceThreshold = 100.0f;
 
@@ -81,18 +83,19 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
     graph::Node* newNode = sgraph->addNode( new graph::Node( sgraph, newCoord ) );
     sgraph->addConnection( splitNode, newNode );
 
+    Logger.log( 3, "FaceGenerator : secondary road generation growing roads..." );
     // Now run the recursive road growing on it.
     growRoads( newNode, branching, segmentLength, noiseValue, roadThreshold );
-
+    Logger.log( 3, "FaceGenerator : secondary growing roads complete, %d nodes and %d edges ", sgraph->nodeCount(), sgraph->edgeCount() );
     sgraph->readFaces( );
     Logger.log( 2, "FaceGenerator : secondary run, face #%d - subdivided to %d faces",i,sgraph->faceCount( ));
 
     // pass the faces to subdivision
     graph::FaceVector sfaces = sgraph->getFaces();
     for ( size_t j = 0; j < sfaces.size(); j++ ) {
-      if ( sfaces[j]->area( ) > faceThreshold )
-        subdivideFace( sfaces[j], subdivisionThreshold );
-      else
+//      if ( sfaces[j]->area( ) > faceThreshold )
+//        subdivideFace( sfaces[j], subdivisionThreshold );
+//      else
         lots.push_back( sfaces[i] );
     }
   }
@@ -136,7 +139,10 @@ Vector2Df FaceGenerator::deviateVector( const Vector2Df v, double noise ) {
                     sin( theta ) * v.x + cos( theta ) * v.y );
 }
 
-void FaceGenerator::growRoads( graph::Node* node, size_t branching, float segmentLength, float noise, float threshold ) {
+void FaceGenerator::growRoads( graph::Node* node, size_t branching,
+                               float segmentLength, float noise,
+                               float threshold ) {
+   Logger.log( 4, "FaceGenerator : grow roads on node #%d..." , node->ID );
   int branches = math::roundToInt( branching * Random::doubleRange( 1.0f - noise, 1.0f + noise ) );
 
   // lets get the owner of the node

@@ -9,7 +9,7 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** 
+/**
  * @file forward.h
  * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
  * @brief File with forward definitions for all the Graph classes
@@ -22,6 +22,7 @@
 #define __FORWARD_H__
 
 #include <vector>
+#include <cassert>
 #include "ObjectList.h"
 
 // The e class is a part of Graph class

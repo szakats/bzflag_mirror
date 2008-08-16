@@ -50,6 +50,7 @@ NodeVector Face::getNodes() const {
 }
 
 size_t Face::addEdge( Edge* edge ) {
+  assert( edge );
   edges.push_back( edge );
   edge->setFace( this );
   return edges.size() - 1;
