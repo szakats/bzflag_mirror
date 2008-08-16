@@ -100,12 +100,23 @@ public:
   }
   /**
    * Removes a given Edge from the graph. Note that it DOES dispose of the
-   * edge object.
+   * edge object. It also disposes of the reversed edge.
    */
   void removeEdge( size_t id ) {
+    Edge* edge    = edgeList.get( id );
+    Edge* reverse = edge->getReversed();
+    size_t rid    = reverse->ID;
+    Node* source  = edge->getSource();
+    Node* target  = edge->getTarget();
+    source->getOutgoingList( ).remove( edge );
+    target->getIncomingList( ).remove( edge );
+    target->getOutgoingList( ).remove( reverse );
+    source->getIncomingList( ).remove( reverse );
     delete edgeList.get( id );
+    delete edgeList.get( rid );
     edgeList.clear( id );
-    edges--;
+    edgeList.clear( rid );
+    edges -= 2;
   }
   /**
    * Removes a given Node from the graph. Also removes all
@@ -141,12 +152,13 @@ public:
   /**
    * Splits the edge into two edges, both connected to a newly created
    * Node at the passed coordinates. No planarity checking is done.
-   * A pointer to the Node is returned.
+   * A pointer to the Node is returned. WARNING, edge is not valid
+   * after the split!
    * TODO: may be optimised to reuse the removed edge?
    */
   Node* splitEdge( Edge* edge, Vector2Df point ) {
-    Node* source = edge->getSource();
-    Node* target = edge->getTarget();
+    Node* source  = edge->getSource();
+    Node* target  = edge->getTarget();
     removeEdge( edge->ID );
     Node* node = new Node( this, point );
     addConnection( source, node );

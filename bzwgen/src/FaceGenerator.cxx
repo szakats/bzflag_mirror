@@ -205,6 +205,7 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching,
       continue;
     }
     if ( nedge ) {
+      Logger.log( 4, "FaceGenerator : edge found %s", nedge->toString( ).c_str() );
       Vector2Df v = nedge->pointCast( target );
       graph::Node* split = graph->splitEdge( nedge, v );
       graph->addConnection( node, split );
