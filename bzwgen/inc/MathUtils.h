@@ -196,7 +196,13 @@ bool intersect2D( Vector2D<T> A, Vector2D<T> B, Vector2D<T> C, Vector2D<T> D, T 
   T s = (A.y-C.y)*AB.x-(A.x-C.x)*AB.y;
   if (isZero(d)) { // parallel
     if (isZero(r)) { // parallel and coincident
-      return true;
+      T e;
+      T f;
+      if (isZero(A.y-C.y) && isZero(B.y-D.y)) { // parallel on X
+        return commonRange(A.x,B.x,C.x,D.x,e,f,precision);
+      } else { // parallel on Y
+        return commonRange(A.y,B.y,C.y,D.y,e,f,precision);
+      }
     } else return false; // parallel but not coincident
   }
   r /= d;
