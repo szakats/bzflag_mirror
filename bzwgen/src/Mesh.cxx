@@ -12,24 +12,24 @@
 
 #include "Mesh.h"
 
-int Mesh::addVertex( Vertex vertex ) { 
+int Mesh::addVertex( Vertex vertex ) {
   if (freeVertices.size() > 0) {
     int free = freeVertices[ freeVertices.size() - 1 ];
     freeVertices.pop_back();
     v[free] = vertex;
     return free;
   } else {
-    v.push_back( vertex ); 
-    return v.size()-1; 
+    v.push_back( vertex );
+    return v.size()-1;
   }
 }
 
-int Mesh::addTexCoord( TexCoord texCoord ) { 
+int Mesh::addTexCoord( TexCoord texCoord ) {
   for ( size_t i = 0; i < tc.size(); i++ ) {
     if ( tc[i].equals( texCoord ) ) return i;
   }
-  tc.push_back( texCoord ); 
-  return tc.size() - 1; 
+  tc.push_back( texCoord );
+  return tc.size() - 1;
 }
 
 int Mesh::createNGon(Vertex center, double radius, int n) {
@@ -115,8 +115,8 @@ void Mesh::expandFace( int faceID, double amount  ) {
     Vertex a = getFaceEdge( faceID, math::modPrev( i, size ), math::modNext( i, size ) );
     Vertex b = getFaceEdge( faceID, math::modPrev( i, size ), i );
     double sign = math::sign( b.cross( a ).dot( normal ) );
-    nv[i] = getFaceVertex( faceID, i) + extensionVertex( 
-      f[faceID]->getVertex( math::modPrev( i, size ) ), 
+    nv[i] = getFaceVertex( faceID, i) + extensionVertex(
+      f[faceID]->getVertex( math::modPrev( i, size ) ),
       f[faceID]->getVertex( math::modNext( i, size ) ),
       f[faceID]->getVertex( i ) ) * amount * sign;
   }
@@ -131,7 +131,7 @@ void Mesh::weldVertices( int a, int b ) {
   for (size_t i = 0; i < f.size(); i++) {
     int indexa = -1;
     int indexb = -1;
-    for (size_t j = 0; j < f[i]->size(); j++) {    
+    for (size_t j = 0; j < f[i]->size(); j++) {
       if (f[i]->getVertex(j) == b) {
         indexb = j;
       } else if (f[i]->getVertex(j) == a) {
@@ -144,7 +144,7 @@ void Mesh::weldVertices( int a, int b ) {
         vtx.erase(vtx.begin()+indexb);
         if (f[i]->hasTexCoords()) {
           IntVector tcd = f[i]->getTexCoords();
-          tcd.erase(tcd.begin()+indexb);  
+          tcd.erase(tcd.begin()+indexb);
           f[i]->setTexCoords( tcd );
         }
       } else {
@@ -153,20 +153,25 @@ void Mesh::weldVertices( int a, int b ) {
       f[i]->setVertices( vtx );
     }
   }
-  v[a] = c;  
+  v[a] = c;
   freeVertices.push_back(b);
 }
 
 
 
 Vertex Mesh::faceCenter( int faceID ) {
-  return ( getFaceVertex( faceID, 0 ) + getFaceVertex( faceID, 1 ) + 
-           getFaceVertex( faceID, 2 ) + getFaceVertex( faceID, 3 ) ) / 4;
+  Vertex c;
+  size_t size = f[ faceID ]->size();
+  for ( size_t i = 0; i < size; i++ )
+    c = c + getFaceVertex( faceID, i );
+  return c / double(size);
 }
 
 // TODO : remove hack for multifaces;
+// TODO : remove hack for non-quads;
 Vertex Mesh::faceNormal( int faceID ) {
   if ( f[faceID]->isMultiFace() ) return Vertex( 0.0, 0.0, 1.0 );
+  if ( f[faceID]->size() != 4 ) return Vertex( 0.0, 0.0, 1.0 );
   Vertex a = getFaceEdge( faceID, 1, 0 );
   Vertex b = getFaceEdge( faceID, 2, 0 );
   Vertex r = a.cross(b);
@@ -175,6 +180,7 @@ Vertex Mesh::faceNormal( int faceID ) {
 }
 
 IntVector* Mesh::repeatSubdivdeFace( int fid, double snap, bool horizontal ) {
+  assert( f[ fid ]->size() == 4 );
   double len = horizontal ? faceH(fid) : faceV(fid);
   snap = math::refineSnap(snap,len);
   int count = math::roundToInt(len/snap);
@@ -192,7 +198,7 @@ IntVector* Mesh::repeatSubdivdeFace( int fid, double snap, bool horizontal ) {
   IntVector* result = new IntVector();
 
   int mat = f[fid]->getMaterial();
-  
+
   int ai = 0 , bi = 0;
   int pai = 0, pbi = 0;
   int as = 0, bs = 0;
@@ -260,6 +266,7 @@ IntVector* Mesh::repeatSubdivdeFace( int fid, double snap, bool horizontal ) {
 }
 
 IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, double ssnap) {
+  assert( f[ fid ]->size() == 4 );
   Vertex stepA, stepB;
 
   DoubleVector* sdata = new DoubleVector(splitData->size());
@@ -279,7 +286,7 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
       double value = sdata->at(i);
       if (value < 0.0) (*sdata)[i] = -value*relperunit;
     }
-  }  
+  }
 
   double s = ssnap;
   if (ssnap > EPSILON) s = math::refineSnap(ssnap,length);
@@ -295,7 +302,7 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
   IntVector* result = new IntVector();
 
   int mat = f[fid]->getMaterial();
-  
+
   int ai = 0 , bi = 0;
   int pai = 0, pbi = 0;
   int as = 0, bs = 0;
@@ -385,13 +392,13 @@ void Mesh::output(Output& out, int materialCount) {
   for (size_t i = 0; i < outside.size(); i++) out.vertex(outside[i],"outside");
   for (size_t i = 0; i < v.size(); i++) out.vertex(v[i]);
   for (size_t i = 0; i < tc.size(); i++) out.texCoord(tc[i]);
-  if (passable) out.meshPassable(); 
+  if (passable) out.meshPassable();
 
   for (int m = 0; m <= materialCount; m++) {
-    for (size_t i = 0; i < f.size(); i++) 
+    for (size_t i = 0; i < f.size(); i++)
       if (f[i]->getMaterial() == m) {
         if (mat != m) out.matref(m);
-        if (passable) out.meshPassable(); 
+        if (passable) out.meshPassable();
         mat = m;
         out.face(f[i],mat);
         mat = f[i]->getMaterial();
@@ -457,7 +464,7 @@ void Mesh::freeFace( int faceID ) {
   }
 }
 
-String Mesh::faceToString(Face* face) { 
+String Mesh::faceToString(Face* face) {
   String result = "Face: ( ";
   for ( size_t i = 0; i < face->size(); i++ )
     result += v[ face->getVertex( i ) ].toString() + " ";
@@ -482,7 +489,7 @@ int Mesh::rePushBase( ) {
 
 
 Mesh::~Mesh() {
-  for ( FaceVectIter itr = f.begin(); itr!= f.end(); ++itr ) 
+  for ( FaceVectIter itr = f.begin(); itr!= f.end(); ++itr )
     delete (*itr);
 }
 

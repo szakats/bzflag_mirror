@@ -30,38 +30,38 @@ public:
   Mesh() : passable(false) {}
   int addVertex( Vertex vertex );
   int addTexCoord( TexCoord texCoord );
-  int addFace(Face* face) { 
-    f.push_back( face ); 
-    return f.size()-1; 
+  int addFace(Face* face) {
+    f.push_back( face );
+    return f.size()-1;
   }
-  inline void addInsideVertex( Vertex vertex ) { 
-    inside.push_back( vertex ); 
+  inline void addInsideVertex( Vertex vertex ) {
+    inside.push_back( vertex );
   }
 
-  inline Vertex getVertex( int vertexID ) const { 
-    return v[vertexID]; 
+  inline Vertex getVertex( int vertexID ) const {
+    return v[vertexID];
   }
-  inline Face* getFace( int faceID ) { 
+  inline Face* getFace( int faceID ) {
     return f[ faceID ];
   }
-  inline Vertex getFaceVertex( int faceID, int vertexID ) const { 
-    return v[ f[ faceID ]->getVertex( vertexID ) ]; 
+  inline Vertex getFaceVertex( int faceID, int vertexID ) const {
+    return v[ f[ faceID ]->getVertex( vertexID ) ];
   }
-  inline Vertex getFaceEdge( int faceID, int id1, int id2 ) const { 
-    return ( getFaceVertex( faceID, id2 ) - getFaceVertex( faceID, id1 ) ); 
+  inline Vertex getFaceEdge( int faceID, int id1, int id2 ) const {
+    return ( getFaceVertex( faceID, id2 ) - getFaceVertex( faceID, id1 ) );
   }
 
-  inline void substituteVertex( int vertexID, Vertex vtx ) { 
-    v[vertexID] = vtx; 
+  inline void substituteVertex( int vertexID, Vertex vtx ) {
+    v[vertexID] = vtx;
   }
-  inline void substituteFace( int faceID, Face* face ) { 
+  inline void substituteFace( int faceID, Face* face ) {
     f[ faceID ] = face;
   }
 
   inline void setPassable( ) {
     passable = true;
   }
-  
+
   void extrudeFace(int fid, double amount, int mat = 0, IntVector* result = NULL);
   IntVector* splitFace(int fid, DoubleVector* splitData, bool horizontal, double ssnap = 0.0);
   void expandFace( int faceID, double amount );
@@ -73,7 +73,7 @@ public:
   void translateFace( int faceID, double x, double y, double z );
 
   void weldVertices(int a, int b);
-  
+
   void output(Output& out, int materialCount);
 
   void textureFace( int faceID, double snap, double tile );
@@ -84,11 +84,11 @@ public:
 
   Vertex faceNormal( int faceID );
   Vertex faceCenter( int faceID );
-  inline double faceH( int faceID ) const { 
-    return getFaceEdge( faceID, 1, 0 ).length(); 
+  inline double faceH( int faceID ) const {
+    return getFaceEdge( faceID, 1, 0 ).length();
   }
-  inline double faceV( int faceID ) const { 
-    return getFaceEdge( faceID, 0, 3 ).length(); 
+  inline double faceV( int faceID ) const {
+    return getFaceEdge( faceID, 1, 2 ).length();
   }
   String faceToString(Face* face);
 

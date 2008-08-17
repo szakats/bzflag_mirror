@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <cassert>
 #include <iostream>
 #include "MathUtils.h"
 #include "Logger.h"

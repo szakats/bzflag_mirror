@@ -71,7 +71,7 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 
     // This should be parameters, their value is somewhat meaningless now.
     size_t branching = 3;
-    float segmentLength = 50.0f;
+    float segmentLength = 100.0f;
 //    float noiseValue = 0.1f;
     float noiseValue = 0.0f;
     float roadThreshold = 4.0f;
@@ -100,8 +100,8 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 //      if ( sfaces[j]->area( ) > faceThreshold )
 //        subdivideFace( sfaces[j], subdivisionThreshold );
 //      else
-        if ( sfaces[j]->size() < 5 )
-          lots.push_back( sfaces[j] );
+        assert( sfaces[j]->size() > 2 );
+        lots.push_back( sfaces[j] );
     }
   }
 }
@@ -197,10 +197,10 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching,
     if ( edist > threshold ) nedge = NULL;
 
     if ( nnode ) {
-      if (!graph->checkConnection( node, nnode ) ) {
-        Logger.log( 4, "FaceGenerator : result - node connection fail with %s", nnode->toString( ).c_str() );
-        continue;
-      }
+      //if (!graph->checkConnection( node, nnode ) ) {
+      //  Logger.log( 4, "FaceGenerator : result - node connection fail with %s", nnode->toString( ).c_str() );
+      //  continue;
+      //}
       graph->addConnection( node, nnode );
       Logger.log( 4, "FaceGenerator : result - new connection with %s", nnode->toString( ).c_str() );
       continue;

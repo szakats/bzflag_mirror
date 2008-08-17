@@ -9,7 +9,7 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/** 
+/**
  * @file Face.h
  * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
  * @brief Defines a Face class for BZWGen.
@@ -20,7 +20,7 @@
 #include "globals.h"
 #include "Output.h"
 
-/** 
+/**
  * @class Face
  * @brief Class representing a mesh face.
  *
@@ -30,20 +30,20 @@
 class Face {
   /** Material ID of the face */
   int materialID;
-  /** 
-   * States wether the face should be outputed. Used by MultiFace and 
+  /**
+   * States wether the face should be outputed. Used by MultiFace and
    * for reusing geometry data of faces that should not exist.
    */
   bool output;
 protected:
-  /** 
-   * Vector holding the indices of texture coords held by the Mesh 
-   * class. 
+  /**
+   * Vector holding the indices of texture coords held by the Mesh
+   * class.
    */
   IntVector tcd;
-  /** 
-   * Vector holding the indices of vertex coords held by the Mesh 
-   * class. 
+  /**
+   * Vector holding the indices of vertex coords held by the Mesh
+   * class.
    */
   IntVector vtx;
 public:
@@ -52,7 +52,7 @@ public:
    * addTexCoord should be used for defining the face.
    */
   Face() : materialID(0), output(true) {}
-  /** 
+  /**
    * Destructor.
    */
   virtual ~Face() {}
@@ -91,8 +91,8 @@ public:
    * Returns true, if the given vertex index is a part of this face.
    */
   bool hasVertex( int vertexID ) const {
-    for ( size_t i = 0; i < vtx.size(); i++ ) 
-      if ( vtx.at(i) == vertexID ) 
+    for ( size_t i = 0; i < vtx.size(); i++ )
+      if ( vtx.at(i) == vertexID )
 	return true;
     return false;
   }
@@ -100,7 +100,7 @@ public:
    * Acts like getVertex except that any input is valid -- the list of
    * vertices is treated like a cyclic list.
    */
-  int getCyclicVertex( int index ) const { 
+  int getCyclicVertex( int index ) const {
     int size = vtx.size();
     if (index >= 0) {
       return vtx.at(index % size);
@@ -112,10 +112,11 @@ public:
    * Returns the vertex ID specified by the given index in the face's list.
    */
   int getVertex( const int index ) const {
+    assert( index < int(vtx.size()) );
     return vtx.at(index);
   }
   /**
-   * Returns the texture coordinate ID specified by the given index in the 
+   * Returns the texture coordinate ID specified by the given index in the
    * face's list.
    */
   int getTexCoord( int index ) const {
@@ -144,17 +145,17 @@ public:
    * Returns a string representation of the given face. Used for
    * debugging purposes.
    */
-  String toStringIDs( ) const { 
-    char buffer[80]; 
-    sprintf(buffer, "(%d,%d,%d,%d)",vtx.at(0),vtx.at(1),vtx.at(2),vtx.at(3)); 
-    return String(buffer); 
+  String toStringIDs( ) const {
+    char buffer[80];
+    sprintf(buffer, "(%d,%d,%d,%d)",vtx.at(0),vtx.at(1),vtx.at(2),vtx.at(3));
+    return String(buffer);
   }
   /**
-   * Returns the size of the face. The size is defined as the amount of 
+   * Returns the size of the face. The size is defined as the amount of
    * vertices that make up the face.
    */
-  size_t size() const { 
-    return vtx.size(); 
+  size_t size() const {
+    return vtx.size();
   }
   /**
    * Sets the Material ID for the face.
@@ -189,16 +190,16 @@ public:
   /**
    * Returns whether the face is a MultiFace.
    */
-  virtual bool isMultiFace() const { 
-    return false; 
+  virtual bool isMultiFace() const {
+    return false;
   }
   /**
-   * Returns the index (position) in the face's vertex array of the 
+   * Returns the index (position) in the face's vertex array of the
    * vertex specified by the passed ID. Used by MultiFace.
    */
   int getVertexIndex(int vertexID) const {
-    for ( size_t i = 0; i < vtx.size(); i++ ) 
-      if ( vtx.at(i) == vertexID ) 
+    for ( size_t i = 0; i < vtx.size(); i++ )
+      if ( vtx.at(i) == vertexID )
 	return i;
     return -1;
   }
