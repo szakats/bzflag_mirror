@@ -71,10 +71,9 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 
     // This should be parameters, their value is somewhat meaningless now.
     size_t branching = 3;
-    float segmentLength = 200.0f;
-//    float noiseValue = 0.1f;
-    float noiseValue = 0.0f;
-    float roadThreshold = 4.0f;
+    float segmentLength = 60.0f;
+    float noiseValue = 0.1f;
+    float roadThreshold = 40.0f;
     float subdivisionThreshold = 10.0f;
     float faceThreshold = 100.0f;
 
@@ -178,7 +177,7 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching,
 
     direction = deviateVector( direction, noise );
     direction = direction * (float)segmentLength * (float)Random::doubleRange( 1.0 - noise, 1.0 + noise );
-    direction = math::precision( direction, 0.1f );
+    //direction = math::precision( direction, 0.1f );
 
     Vector2Df target = node->vector() + direction;
     Logger.log( 4, "FaceGenerator : target %s->%s" , node->toString( ).c_str() , target.toString( ).c_str() );
@@ -198,17 +197,18 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching,
     if ( edist > threshold ) nedge = NULL;
 
     if ( nnode ) {
-      //if (!graph->checkConnection( node, nnode ) ) {
-      //  Logger.log( 4, "FaceGenerator : result - node connection fail with %s", nnode->toString( ).c_str() );
-      //  continue;
-      //}
+      if (!graph->checkConnection( node, nnode ) ) {
+        Logger.log( 4, "FaceGenerator : result - node connection fail with %s", nnode->toString( ).c_str() );
+        continue;
+      }
       graph->addConnection( node, nnode );
       Logger.log( 4, "FaceGenerator : result - new connection with %s", nnode->toString( ).c_str() );
       continue;
     }
     if ( nedge ) {
       Logger.log( 4, "FaceGenerator : edge found %s", nedge->toString( ).c_str() );
-      Vector2Df v = math::precision( nedge->pointCast( target ), 0.01f );
+      Vector2Df v = nedge->pointCast( target );
+      //v = math::precision( v, 0.01f );
       graph::Node* split = graph->splitEdge( nedge, v );
       graph->addConnection( node, split );
       Logger.log( 4, "FaceGenerator : result - split connection with %s", split->toString( ).c_str() );
