@@ -160,7 +160,7 @@ public:
     Node* source  = edge->getSource();
     Node* target  = edge->getTarget();
     removeEdge( edge->ID );
-    Node* node = new Node( this, point );
+    Node* node = addNode( new Node( this, point ) );
     addConnection( source, node );
     addConnection( node, target );
     return node;

@@ -47,21 +47,20 @@ namespace graph {
 
   void PlanarGraph::extractFace( Edge* edge ) {
     assert( edge );
-    Face* face = new Face( this );
     Edge* startEdge = edge;
+    EdgeVector edges;
     Logger.log( 4, "PlanarGraph : extract face..." );
-    int count = 0;
     do {
-      count++;
-      face->addEdge( edge );
+      edges.push_back( edge );
       edge = edge->getTarget()->getOutgoingList().next( edge->getReversed( ) );
-    } while ( edge != startEdge && count < 12 );
+    } while ( edge != startEdge && edges.size() < 12 );
 
     // check if the face is degenerate.
-    if ( face->size() < 3 || edge != startEdge ) {
-      delete face;
-      return;
-    }
+    if ( edges.size() < 3 || edge != startEdge ) return;
+
+    Face* face = new Face( this );
+    for ( size_t i = 0; i < edges.size(); i++ )
+       face->addEdge( edges[i] );
 
     faceList.add( face );
     ++faces;

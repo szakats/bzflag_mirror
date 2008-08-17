@@ -111,6 +111,14 @@ template <class T>
 inline bool equals(T x, T y, T precision = EPSILON) {
   return fabs(x-y) <= precision;
 }
+/**
+ * Rounds the floating point nuber to precision p. The
+ * function is templated to be both used with doubles and floats.
+ */
+template <class T>
+inline T precision(T f, T p) {
+  return T( roundToInt( f / p ) ) * p;
+}
 
 /** @name Circular space functions */
 /**
@@ -257,6 +265,15 @@ int intersect2D( Vector2D<T> A, Vector2D<T> B, Vector2D<T> C, Vector2D<T> D,
     P1.y = A.y+r*AB.y;
     return 1;
   } else return 0;
+}
+
+/**
+ * Rounds the given vector2D to precision p. The
+ * function is templated to be both used with doubles and floats.
+ */
+template <class T>
+inline Vector2D<T> precision( Vector2D<T> v, T p ) {
+  return Vector2D<T>( precision( v.x, p ), precision( v.y, p ) );
 }
 
 }

@@ -71,7 +71,7 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 
     // This should be parameters, their value is somewhat meaningless now.
     size_t branching = 3;
-    float segmentLength = 100.0f;
+    float segmentLength = 200.0f;
 //    float noiseValue = 0.1f;
     float noiseValue = 0.0f;
     float roadThreshold = 4.0f;
@@ -178,6 +178,7 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching,
 
     direction = deviateVector( direction, noise );
     direction = direction * (float)segmentLength * (float)Random::doubleRange( 1.0 - noise, 1.0 + noise );
+    direction = math::precision( direction, 0.1f );
 
     Vector2Df target = node->vector() + direction;
     Logger.log( 4, "FaceGenerator : target %s->%s" , node->toString( ).c_str() , target.toString( ).c_str() );
@@ -188,7 +189,7 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching,
     float ndist = nnode->distanceTo( target );
     float edist = nedge->distanceTo( target );
 
-    if ( ndist > edist )
+    if ( ndist > edist+0.01f )
       nnode = NULL;
     else
       nedge = NULL;
@@ -207,7 +208,7 @@ void FaceGenerator::growRoads( graph::Node* node, size_t branching,
     }
     if ( nedge ) {
       Logger.log( 4, "FaceGenerator : edge found %s", nedge->toString( ).c_str() );
-      Vector2Df v = nedge->pointCast( target );
+      Vector2Df v = math::precision( nedge->pointCast( target ), 0.01f );
       graph::Node* split = graph->splitEdge( nedge, v );
       graph->addConnection( node, split );
       Logger.log( 4, "FaceGenerator : result - split connection with %s", split->toString( ).c_str() );
