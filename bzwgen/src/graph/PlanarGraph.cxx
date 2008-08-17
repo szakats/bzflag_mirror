@@ -42,6 +42,7 @@ namespace graph {
         extractFace( edge );
       }
       edge = node->getOutgoingList().next( edge );
+      assert( edge );
     } while ( edge != startEdge );
   }
 
@@ -53,10 +54,11 @@ namespace graph {
     do {
       edges.push_back( edge );
       edge = edge->getTarget()->getOutgoingList().next( edge->getReversed( ) );
+      assert( edge );
     } while ( edge != startEdge && edges.size() < 12 );
 
     // check if the face is degenerate.
-    if ( edges.size() < 3 || edge != startEdge ) return;
+    if ( edges.size() < 3 || edges.size() > 11 || edge != startEdge ) return;
 
     Face* face = new Face( this );
     for ( size_t i = 0; i < edges.size(); i++ )
@@ -139,6 +141,18 @@ namespace graph {
     }
   }
 
+  size_t PlanarGraph::removeDeadEnds( ) {
+    size_t count = 0;
+    for ( size_t i = 0; i < nodeList.size(); i++ ) {
+      Node* node = nodeList.get( i );
+      if ( node == NULL ) continue;
+      if ( node->getIncomingList().size() < 2 ) {
+        removeNode( node->ID );
+        count++;
+      }
+    }
+    return count;
+  }
 
 } // end namespace graph
 

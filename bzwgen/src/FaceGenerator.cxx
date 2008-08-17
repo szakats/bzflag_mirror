@@ -52,6 +52,33 @@ void FaceGenerator::runPrimaryRoadGeneration( ) {
   // Split the graph into more or less regular zones (use subdivide face?)
   // ...
 
+////////////////////////////////////////
+    graph::Node* splitNode = graph.splitEdge( graph.longestEdge( ) );
+    Logger.log( 4, "FaceGenerator : splitnode %s", splitNode->toString( ).c_str() );
+
+    // This should be parameters, their value is somewhat meaningless now.
+    size_t branching = 3;
+    float segmentLength = 400.0f;
+    float noiseValue = 0.1f;
+    float roadThreshold = 300.0f;
+
+    // Create initial growing point targeting to the center from
+    // the newly created Node at the split edge
+    Vector2Df toCenter = ( graph.getCenter( ) - splitNode->vector( ) ).norm( );
+    Vector2Df newCoord = splitNode->vector( ) + ( toCenter * segmentLength );
+
+    graph::Node* newNode = graph.addNode( new graph::Node( &graph, newCoord ) );
+    graph.addConnection( splitNode, newNode );
+
+    Logger.log( 3, "FaceGenerator : primary road generation growing roads..." );
+    // Now run the recursive road growing on it.
+    growRoads( newNode, branching, segmentLength, noiseValue, roadThreshold );
+
+    size_t rem = graph.removeDeadEnds( );
+    Logger.log( 3, "FaceGenerator : removed %d dead ends.", rem );
+
+///////////////////////////////////////
+
   Logger.log( 2, "FaceGenerator : reading primary faces..." );
   graph.readFaces( );
 }
@@ -71,9 +98,9 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 
     // This should be parameters, their value is somewhat meaningless now.
     size_t branching = 3;
-    float segmentLength = 60.0f;
+    float segmentLength = 50.0f;
     float noiseValue = 0.1f;
-    float roadThreshold = 40.0f;
+    float roadThreshold = 30.0f;
     float subdivisionThreshold = 10.0f;
     float faceThreshold = 100.0f;
 
@@ -91,6 +118,9 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
     Logger.log( 3, "FaceGenerator : secondary growing roads complete, %d nodes and %d edges ", sgraph->nodeCount(), sgraph->edgeCount() );
     sgraph->readFaces( );
     Logger.log( 2, "FaceGenerator : secondary run, face #%d - subdivided to %d faces",i,sgraph->faceCount( ));
+
+    size_t rem = sgraph->removeDeadEnds( );
+    Logger.log( 3, "FaceGenerator : removed %d dead ends.", rem );
 
     // pass the faces to subdivision
     graph::FaceVector sfaces = sgraph->getFaces();

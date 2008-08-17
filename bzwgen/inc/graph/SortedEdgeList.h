@@ -127,6 +127,12 @@ public:
     edgeSet.clear();
   }
   /**
+   * Clears the list. Does not dispose of the edges.
+   */
+  size_t size() const {
+    return edgeSet.size();
+  }
+  /**
    * Returns the "first" (smallest) edge in the list.
    */
   Edge* first( ) {

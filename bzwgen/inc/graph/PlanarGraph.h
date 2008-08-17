@@ -261,6 +261,10 @@ public:
    * TODO: fix intersect2D result!
    */
   void slice( Vector2Df a, Vector2Df b );
+   /**
+    * Removes nodes that are dead ends (either orphaned or one pair of edges).
+    */
+  size_t removeDeadEnds( );
 private:
   /**
    * Extracts the faces assigned to the current node. Works only on
