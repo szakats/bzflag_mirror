@@ -131,8 +131,7 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 //        subdivideFace( sfaces[j], subdivisionThreshold );
 //      else
         assert( sfaces[j]->size() > 2 );
-        if ( sfaces[j]->size() == 4 && sfaces[j]->isConvex() ) lots.push_back( sfaces[j] );
-        Logger.log( 4, "C" );
+        if ( sfaces[j]->size() == 4 && sfaces[j]->isConvex() && sfaces[j]->area( ) > 400.0f ) lots.push_back( sfaces[j] );
     }
   }
 }
