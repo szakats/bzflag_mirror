@@ -180,7 +180,11 @@ Vertex Mesh::faceNormal( int faceID ) {
 }
 
 IntVector* Mesh::repeatSubdivdeFace( int fid, double snap, bool horizontal ) {
-  assert( f[ fid ]->size() == 4 );
+  if ( f[ fid ]->size() != 4 ) {
+    IntVector* result = new IntVector();
+    result->push_back( fid );
+    return result;
+  }
   double len = horizontal ? faceH(fid) : faceV(fid);
   snap = math::refineSnap(snap,len);
   int count = math::roundToInt(len/snap);
@@ -266,7 +270,11 @@ IntVector* Mesh::repeatSubdivdeFace( int fid, double snap, bool horizontal ) {
 }
 
 IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, double ssnap) {
-  assert( f[ fid ]->size() == 4 );
+  if ( f[ fid ]->size() != 4 ) {
+    IntVector* result = new IntVector();
+    result->push_back( fid );
+    return result;
+  }
   Vertex stepA, stepB;
 
   DoubleVector* sdata = new DoubleVector(splitData->size());
