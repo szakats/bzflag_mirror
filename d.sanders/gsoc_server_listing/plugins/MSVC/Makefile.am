@@ -1,0 +1,4 @@
+SUBDIRS = VC8
+
+MAINTAINERCLEANFILES =	\
+	Makefile.in
