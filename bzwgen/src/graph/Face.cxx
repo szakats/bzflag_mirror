@@ -95,7 +95,7 @@ bool Face::isConvex( ) {
     a = b;
   }
 
-  Vector2Df b = edges[size()]->getSource()->vector() - edges[0]->getSource()->vector();
+  Vector2Df b = edges[size()-1]->getSource()->vector() - edges[0]->getSource()->vector();
   if ( math::sign( a.x ) != math::sign( b.x ) ) xch++;
   if ( math::sign( a.y ) != math::sign( b.y ) ) ych++;
 

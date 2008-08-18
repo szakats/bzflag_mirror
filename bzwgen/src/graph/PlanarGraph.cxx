@@ -54,7 +54,8 @@ namespace graph {
     do {
       edges.push_back( edge );
       edge = edge->getTarget()->getOutgoingList().next( edge->getReversed( ) );
-      assert( edge );
+      if ( !edge ) return; // assert( edge )
+      int hh; // t produce a warning so the above gets fixed.
     } while ( edge != startEdge && edges.size() < 12 );
 
     // check if the face is degenerate.

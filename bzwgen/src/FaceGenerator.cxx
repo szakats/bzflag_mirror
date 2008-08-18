@@ -125,12 +125,14 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
     // pass the faces to subdivision
     graph::FaceVector sfaces = sgraph->getFaces();
     for ( size_t j = 0; j < sfaces.size(); j++ ) {
+        assert( sfaces[j] );
         Logger.log( 4, "FaceGenerator : secondary generated face #%s...", sfaces[j]->toString( ).c_str() );
 //      if ( sfaces[j]->area( ) > faceThreshold )
 //        subdivideFace( sfaces[j], subdivisionThreshold );
 //      else
         assert( sfaces[j]->size() > 2 );
-        if ( sfaces[j]->isConvex() && sfaces[j]->size() < 5 ) lots.push_back( sfaces[j] );
+        if ( sfaces[j]->size() == 4 && sfaces[j]->isConvex() ) lots.push_back( sfaces[j] );
+        Logger.log( 4, "C" );
     }
   }
 }
