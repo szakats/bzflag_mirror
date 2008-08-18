@@ -101,6 +101,10 @@ public:
    * Returns a string representation of the Face.
    */
   std::string toString() const;
+  /**
+   * Returns wether face is convex.
+   */
+  bool isConvex();
 private:
   /** Blocked default constructor */
   Face( ) {}

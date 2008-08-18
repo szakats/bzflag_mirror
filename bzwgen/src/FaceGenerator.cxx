@@ -130,7 +130,7 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 //        subdivideFace( sfaces[j], subdivisionThreshold );
 //      else
         assert( sfaces[j]->size() > 2 );
-        lots.push_back( sfaces[j] );
+        if ( sfaces[j]->isConvex() && sfaces[j]->size() < 5 ) lots.push_back( sfaces[j] );
     }
   }
 }

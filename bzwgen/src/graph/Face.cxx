@@ -81,6 +81,27 @@ std::string Face::toString( ) const {
   return buffer + ">";
 }
 
+bool Face::isConvex( ) {
+  if ( size() < 3 ) return false;
+  size_t xch = 0;
+  size_t ych = 0;
+
+  Vector2Df a = edges[0]->getSource()->vector() - edges[1]->getSource()->vector();
+
+  for( size_t i =1; i < size()-1; i++ ) {
+    Vector2Df b = edges[i]->getSource()->vector() - edges[i+1]->getSource()->vector();
+    if ( math::sign( a.x ) != math::sign( b.x ) ) xch++;
+    if ( math::sign( a.y ) != math::sign( b.y ) ) ych++;
+    a = b;
+  }
+
+  Vector2Df b = edges[size()]->getSource()->vector() - edges[0]->getSource()->vector();
+  if ( math::sign( a.x ) != math::sign( b.x ) ) xch++;
+  if ( math::sign( a.y ) != math::sign( b.y ) ) ych++;
+
+  return( xch <= 2 && ych <= 2 );
+}
+
 }
 
 // Local Variables: ***
