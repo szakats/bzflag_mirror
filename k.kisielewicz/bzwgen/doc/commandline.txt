@@ -1,0 +1,55 @@
+-h (-help)                 
+
+Lists short summary of accessible command line parameters.
+
+-d (-debug) integer        Default: 2
+
+Sets the debug level. Debug level is a integer between 0 and 4, and controls the amount of debug output the program produces. Has no effect on the generated map file.
+
+-o (-output) filename      Default: map.bzw
+
+Sets name of the output map file.
+
+-r (-rulesdir) directory   Default: rules
+
+Sets the name and path of the directory where the rules are. All rule files from the specified directory are loaded into the generator.
+
+-s (-size) integer         Default: 800
+
+Sets the size of the world in meters. The value is the side of the bounding box, so it's twice as large as the size defined in the map file. Note that this value is independent of the grid size.
+
+-g (-gridsize) integer     Default: 42
+
+Sets grid size. The world is divided into gsize by gsize "cells", which are used to generate the road network and building lots. Indirectly this also defines the width of the roads - their width is  (World Size)/(Grid size).
+
+-p (-gridsnap) integer     Default: 3
+
+Sets the grid snap value. For the roads to connect nicely, and form proper rectangles, roads are generated in lines only divisible by the grid snap value. Setting it to lower than 2 may lead to unexpected results.
+
+-f (-fullslice) integer    Default: 8
+
+Sets the number of full slices. The first step in road placement is placing roads that go from one end of the map to the other without stopping. This value controls the amount of such full placements. Note that this is the maximum amount -- if the generator tries to place a full slice in a position where one is already defined the attempt is lost.
+
+-v (-subdiv) integer       Default: 120
+
+Sets the total number of subdivisions. After the major (full slice) roads have been placed, the rest follows normal slicing. That is, if from a given point we run a road, it stops when it hits an existing road. This value is the sum of both full slices and partial ones. Note that this also is the maximum amount -- if the generator tries to place a road in a position where one is already defined the attempt is lost.
+
+-b (-bases) integer        Default: 0
+
+Sets number of bases, for Capture the Flag games. The value can be either 0, 2 or 4. If set to a non-zero value the generator will place bases in the corners of the map.
+
+-ctfsafe                   
+
+Turns flag safety zones on for CTF maps.
+
+-l (-detail) integer       Default: 3
+
+Sets the level of detail of the generated geometry. This value is passed to the ruleset, and it's up to the ruleset to handle it. Currently setting it to lower than 3 will supress the generation of inset windows.
+
+-w (-sidewalk)             
+
+Instructs the generator to make the generated sidewalks drivethrough, so no jumping is needed to drive onto them.
+
+-t (-texture) URL          Default: none
+
+Specifies a URL that will be prepended to all texture filenames, allowing easier server deployment.

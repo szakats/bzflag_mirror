@@ -1,0 +1,212 @@
+Quick introduction to BZWGen grammar (as for v.0.1.3)
+(to be expanded into a full documentation)
+------------------------------------------------------
+
+The language is based around rules, that are in files in the "rules" folder. The rule files currently use the same namespace, so they basically could be treated as one big file. The language is case-semsitive, whitespace is ignored.
+
+The rule files are loaded at startup, and specific rules are executed as needed by the generator. As for now rules operate on a single face, passing it through all the operations and passing them to other rules.
+
+
+Rules
+======
+
+Rules have the form:
+
+rule (one or more products) ;
+
+(note the semicolon at the end). If a rule has more then one product it must also include a probability value between 0.0 and 1.0, which is added before the ":" sign. Example:
+
+rule 
+  -> 0.2 : product1
+  -> 0.6 : product2
+  -> 0.2 : product3
+;
+
+Probability should add up to 1.0. Note that there is just one semicolon at the end. When the generator executes a rule, it picks only ONE of the products at random with the given probability.
+
+Instead of a probablility a condition may be added (see Expressions). Example:
+
+rule 
+  -> (face(h) > 5) product1
+  -> product2
+;
+
+This will choose product1 if the face horizontal length is greater than 5, product2 otherwise. It's a good idea to provide a rule with no conditions even if epmty so the compiler doesn't cry that a rule returned NULL. It is also possible to combine probability with conditionals. In this case the sum of probability should be one considering ONLY those products that are always true, or have a non-probability tagged product at the end.
+
+initialize
+-----------
+
+The language has currently one special rule : "initialize", this one usualy is in the init.set file, and is executed once, right after all the rules have been read. DO NOT include any geometry code because it will crash badly. This rule is mainly for initalizeing constant values (currently initializes material constants).
+
+start
+------
+
+This is the entry point into the grammar. For each building lot, the generator creates a face and calls the rule "start" passing that initial face to it.
+
+
+Products
+=========
+
+Products are sets of operations and calls to other rules. They operations are linear, and executed in order, with the input face being passed along to each next operation. Calls to other rules are made by their pure name, hence the names should not conflict with the operation names.
+
+
+Operations
+===========
+
+Operations are usualy geometric operations done on the passed to them face. Some of them are "branching" -- meaning that the operation passes the original face further, but produces other faces that can be "delegated" to other rules. The syntax of a operation is usualy:
+
+   operation_name ( paramters ) [ branch_rules ]
+
+Parameters are seperated by commas (,) branch rules by spaces. Parameters are either a constant number (float) or an Expression (see below). 
+
+A parameter may be also a split rule. These are expressions seperated by spaces.
+
+
+Branch rules
+-------------
+
+Branch rules list a sequence of rulenames.  Branch rules are always optional. They are matched in sequence with the faces that the given operation produces. Additionaly the last face produced is "returned".
+
+Example : we run "splith(1r 1r 1r)" then we will have 3 faces (the last one is additionaly passed back into the grammar), so we can write "splith(1r 1r 1r) [ rule1 rule2 ] rule3" which will direct the first face to rule1, the second to rule2 and the third to rule3. This is however the same as "splith(1r 1r 1r) [ rule1 rule2 rule3 ]"
+
+If we don't care about a particular face, we can write "*" instead, it then will be skipped, but the order will be preserved.
+
+Example : "splith(1r 1r 1r) [ * door ] " means that we only care about the central face of subdivision - ignore the first, send the second to "door" and ignore the rest.
+
+If we want ALL of the faces to follow the same rule then we pass the rulename with a "@" sign before it.
+
+Split rules
+------------
+
+Split rules are used by splitv and splith to define the subdivision of a face. They constitute of a sequence of numbers, that are subsequent lengths of splitted faces. Numbers may also be appended fith a "r" indicating that they are relative values. Relative values are calculated by substracting non-relative lenghts from overall length and dividing the rest by the value of the relative number.
+
+Example : "splith( 1r 4.0 2r )" will divide the given face into three, with the middle one having size 4 horizontaly, the first one having one third of the rest, and the second one two-thirds. So, assuming that the face had length 22.0, we will have three faces, of horizontal lengths  6.0, 4.0 and 12.0 respectively.
+
+Expressions
+============ 
+
+Currently the language supports a small set of expressions. They all are evaluated to a float number. If a given operation needs a integer it will be rounded from the float. If it needs a boolean, the float will be checked wether it's negative (false) or positive (true). Technically 0.0 is also false, but don't rely on that. All current boolean expressions resolve to -1.0 or 1.0.
+
+Expressions may be one of the following:
+
+Constants
+----------
+
+The grammar accepts both whole numbers and floating point (only in the x.y notation). Negative numbers are supported, though care should be taken to make them stick to the number and not anything else (the parser is buggy in this case currently, so 2-3 will *not* be parsed correctly).
+
+Attributes
+-----------
+
+These are evaluated at RUNTIME, so they may be changed between executions. Attributes are created using the assign() command, and start with a $ sign. It is a good practice to write them uppercase to avoid confusion with rules and operations. Attributes may be used in expressions. 
+
+Arithmetic ops
+---------------
+
+The parser supports +, -, /, * operations and grouping with (). Care should be taken with the '-' sign -- see Constants above.
+
+Comparision ops
+----------------
+
+Currently just two comparision operations are supported: < and >. They are currently only used for the assert Operation.
+
+Boolean ops
+----------------
+
+AND and OR are supported by using the & and | signs. They have lowest priority so grouping the expressions with () is usualy not needed.
+
+Functions
+----------
+
+Functions are evaluated dynamically. Currently the following functions are supported:
+
+random(min,max,step) -- returns a random floating point number between min and max, in steps of "step" (eg. random(1.0,5.0,1.5) may return one of : 1.0,2.5,4.0)
+
+face(attr) -- returns an attribute of the current face. 'attr' must be one of the following : x,y,z,h,v,s -- these are x,y,z coordinates of the face's center point, horizontal length for a quad, vertical length for a quad, and size of the quad. h, v and s are not supported currently for non-quads!
+
+neg(attr) -- temporary "negation" function instead of the precedesing '-' sign.
+
+round(attr) -- round the float to the nearest whole number.
+
+
+List of Operations
+===================
+
+Geometric
+----------
+
+expand ( amount ) -- does a linear expansion of the face. Linear meaning that the distance between the expanded edge and the original edge is constant for all sides and equal to 'amount'.
+
+taper ( amount ) -- taperizes the face. Contrary to expand it is not linear. Also 'amount' is a floating point value between 1.0 and 0.0, describing the amount of taperization. 1.0 is unchanged, 0.0 reduces the face to almost a single point.
+
+scale ( amount x, amount y ) -- taperizes the face with different values depending on the axis. 'amount x' and 'amount y' is a floating point value between 1.0 and 0.0, describing the amount of taperization on the given axis. 1.0 is unchanged, 0.0 reduces the face to almost a single point.
+
+translate ( x, y, z ) -- translates the face using the given coordinates. Note that all the face's vertices are translated!
+
+translater ( x, y, z ) -- same as above but uses relative values for x and y (relative to face height and width).
+
+chamfer ( amount ) -- chamfer substitutes all vertices of the face with two, and performes a chamfer on them, meaning that the new points will be in distance 'amount' from the original one, along the face edges. Warning: this operation should be only applied to a new, not yet connected face, for it doesn't refine the rest of the geometry.
+
+unchamfer ( ) -- operation to undo the previous one. It welds pairs of vertices in the face. 
+
+
+Generative
+-----------
+
+Note : "snap" argument is always optional, and allows the divisions to snap to nearest snap line as defined by the argument. The argument is refined to the closest value that fills the lenght perfectly.
+
+extrude ( amount ) [ list ] -- probably the most important operation. Extrudes the face by 'amount' in the direction of it's normal, producing a amount of additional faces equal to the amount of face sides. The faces are returned in the branch list. The original extruded face is returned.
+
+extrudet ( amount ) [ list ] -- the same as above, but also runs snap based texturing on all the faces.
+
+repeath ( snap ) [ list ] -- subdivides the current face into a number of segments horizontaly. The number of segments is the amount that can fill the face horizontally with segments of length snap. The segments are returned in the branch list, the last one is also returned as result.
+
+repeatv ( snap ) [ list ] -- the same as repeath, only verticaly.
+
+splith ( splitrules , snap ) [ list ] -- Divides the current face into several faces  horizontaly, using 'splitrules' to determinate split position. The faces are returned in the branch list, the last one is also returned as result. Snap parameter is optional, and allows the divisions to snap to nearest snap line as defined by the argument. The argument is refined to the closest value that fills the lenght perfectly. 
+
+splitv ( splitrules , snap ) [ list ] -- the same as splith only verticaly.
+
+
+Control
+--------
+
+assertion ( condition ) -- checks wether condition is true, if it is, continues, if not, immidately breaks the generation of the model at this stage.
+
+assign ( name = value ) -- assigns attribute 'name' with the 'value'.
+
+material ( number ) -- assignes the current and future faces produced from this point on material with the id 'number'.
+
+loadmaterial ( name , file ) -- loads a texture for further use. Name is the attribute name it will be assigned, and file is the filename (in the media folder, and without the .png extension).
+
+spawn ( rulename ) -- duplicates the current face, and uses it as a base to produce a NEW mesh, starting with the rule 'rulename'.
+
+Texture
+--------
+
+texture ( ) -- does default texturing of the face based on the SNAP and TEXTILE values
+
+texturefull () -- textures the face fully using 1 and 0 values
+
+texturequad ( au, av, bu, bv ) -- textures the quad using the provided float values
+
+textureclear () -- clears the texcoords on the given face
+
+
+Multi-face
+-----------
+
+addface ( rulename ) -- this operation can be done only on multifaces. It runs rule "rulename" and adds the resulting shape to the current multiface. As it modifies the underlying face, this operation should be only done at ground level, before any generation is done. Also, "rulename" should generate a pure face, no geometry.
+
+detachface ( id ) -- this operation can be done only on multifaces. It substracts the face from the multiface, and returns the substracted parts in the branch list. Note that the substraction happens only at those parts that are unique to the detached face.
+
+multiface ( ) -- marks the current face as multiface. As it destroys the underlying face, this operation should be only done at ground level, before any generation is done. 
+
+
+Other
+------
+
+ngon ( sides , size ) -- creates an n-sided polygon in the center of the given face. This one renders the face it was created upon INVALID, so it should be only used at the start of generation work. Optional size parameter may be used to specify it's radius, otherwise a maximum radius within the borders of the given face is used.
+
+remove ( ) -- removes the face, or more precisely renders it "invisible".
+
+free ( ) -- removes the face completely and marks all vertices used by it for reusage. 

@@ -1,0 +1,16 @@
+
+Original Author: 
+Kornel "Epyon" Kisielewicz 
+homepage : http://chaosforge.org/
+e-mail   : admin@chaosforge.org
+
+Additional developers:
+Daniel Remenak (DTRemenak)
+Jeffery Myers (JeffM)
+Scott Wichser (blast007)
+Joshua Bodine (Constitution)
+Bryan Jennings (Bryjen)
+
+patches from:
+Thomas Daede (TD-linux): Add an option to prepend a URL to all textures.
+Joshua Bodine (Constitution): flag safety zones for CTF maps.

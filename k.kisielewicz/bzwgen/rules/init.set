@@ -1,0 +1,50 @@
+# ------------------------------------------------------------------------
+#  BZWGen 0.1.3 grammar file
+#  init.set -- pre-run initialization of variables
+#
+#  This rule set file has just one rule "initialize" - it is run 
+#  immidately after the parser reads all grammar files. As such, the
+#  rule may not include ANY geometric operations, and should only be made
+#  out of definitions
+# ------------------------------------------------------------------------
+
+
+initialize -> 
+  loadmaterialnr(MATROAD,road)
+  loadmaterialnr(MATROADX,roadx)
+  loadmaterial(MATWALL,bwall)
+  loadmaterial(MATWALL2,bwall2)
+  loadmaterial(MATMESH,mesh)
+  loadmaterial(MATROOF,roof)
+  loadmaterial(MATROOFT,rooft)
+  loadmaterial(MATGLASS,glass)
+  loadmaterial(MATGLASS2,glass2)
+  loadmaterial(MATGRASS,grass)
+  loadmaterial(MATDOORW,doorw)
+  loadmaterial(MATDOORR,doorr)
+  loadmaterial(MATWHITE,whitec)
+  loadmaterial(MATW11,window1_1)
+  loadmaterial(MATW12,window1_2)
+  loadmaterial(MATW21,window2_1)
+  loadmaterial(MATW22,window2_2)
+  loadmaterial(MATW31,window3_1)
+  loadmaterial(MATW32,window3_2)
+  loadmaterial(MATW41,window4_1)
+  loadmaterial(MATW42,window4_2)
+  loadmaterial(MATW51,window5_1)
+  loadmaterial(MATW52,window5_2)
+  assign(LEDGEHEIGHT = 0.5)
+  assign(LEDGEWIDTH  = 0.3)
+  assign(SNAP = 4.0)
+  assign(TEXTILE = 0.5)
+  assign(TYPE = 0)
+  assign(TYPE_SKY = 1)
+  assign(TYPE_SKY2 = 2)
+  assign(TYPE_RED = 3)
+  assign(TYPE_WHITE = 4)
+  assign(TYPE_NGON = 5)
+;
+
+# ------------------------------------------------------------------------
+#  end of file
+# ------------------------------------------------------------------------

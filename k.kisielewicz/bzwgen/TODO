@@ -1,0 +1,18 @@
+ TODO file for bzwgen
+======================
+
+* Roof types - for non-skyscraper buildings, this might need some few grammar operations implemented
+
+* .bzw object placement - for allowing the placement of arbitrary .bzw objects, will need a place object rule
+
+* Separate floor levels for buildings - so they look more real, with doors too
+
+* Non-quad shapes - badly needed
+
+* Multishapes - will need a serious rehaul of the grammar to implement 
+
+* Scatter maps - like the default random bzfs map but better
+
+* Definition files - for generator flavours
+
+* Documentation of the source code - it's getting less and less self-explanatory

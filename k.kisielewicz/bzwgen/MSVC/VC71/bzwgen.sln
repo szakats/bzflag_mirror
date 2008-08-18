@@ -1,0 +1,39 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bzwgen", "bzwgen.vcproj", "{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Debug_BISON = Debug_BISON
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}.Debug.ActiveCfg = Debug|Win32
+		{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}.Debug.Build.0 = Debug|Win32
+		{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}.Debug_BISON.ActiveCfg = Release(bison)|Win32
+		{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}.Debug_BISON.Build.0 = Release(bison)|Win32
+		{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}.Release.ActiveCfg = Release|Win32
+		{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}.Debug|Win32.Build.0 = Debug|Win32
+		{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}.Release|Win32.ActiveCfg = Release|Win32
+		{C4E2BC3D-6476-4E2F-9EE0-5DCEE7A264FA}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

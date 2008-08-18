@@ -1,0 +1,107 @@
+# ------------------------------------------------------------------------
+#  BZWGen 0.1.3 grammar file
+#  build.set -- standard buildings
+# ------------------------------------------------------------------------
+
+build_preprocess
+  -> 0.4 : (face(h) > 60) splith((face(h)/2 - 2.5) 5.0 1r) [ build_preprocess * build_preprocess ]
+  -> 0.4 : (face(v) > 60) splitv((face(v)/2 - 2.5) 5.0 1r) [ build_preprocess * build_preprocess ]
+  -> spawn(build_run)
+;
+
+build_choosewindow
+  -> 0.2 : assign(WINDOWA = $MATW11) assign(WINDOWB = $MATW12)
+  -> 0.2 : assign(WINDOWA = $MATW21) assign(WINDOWB = $MATW22)
+  -> 0.2 : assign(WINDOWA = $MATW31) assign(WINDOWB = $MATW32)
+  -> 0.2 : assign(WINDOWA = $MATW41) assign(WINDOWB = $MATW42)
+  -> 0.2 : assign(WINDOWA = $MATW51) assign(WINDOWB = $MATW52)
+;
+
+build_run
+  -> 0.2 : (face(s) < 20000) sky_run
+  -> 0.3 : assign(TYPE = $TYPE_RED) assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL)  build_1
+  -> 0.3 : build_choosewindow assign(TYPE = $TYPE_WHITE) assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL2) build_2
+  -> 0.3 : (face(h) > 30 & face(v) > 30) build_choosewindow assign(TYPE = $TYPE_WHITE) assign(TEXSNAP = 4) assign(TEXTILE = 0.5) assign(BUILD_MAT = $MATWALL2) facade_run
+  -> 0.2 : sky_run
+;
+
+build_2 
+  -> 0.3 : mat_glass extrudet(4.0) [ build_entry * build_entry * ] build_cont
+  -> 0.3 : mat_glass extrudet(4.0) [ * build_entry * build_entry ] build_cont
+  -> 0.2 : mat_wall2 extrudet(3.7) [ * build_entry * build_entry ] extrude(0) expand(1.0) build_cont
+  -> 0.1 : mat_wall2 extrudet(random(12.0,40.0,4.0)) [ * build_fullinsetwall * build_fullinsetwall ] roof_run
+  -> 0.1 : mat_wall2 extrudet(random(12.0,40.0,4.0)) [ build_fullinsetwall * build_fullinsetwall ] roof_run
+;
+
+build_1
+  -> 0.3 : mat_wall extrudet(4.0) [ build_entry * build_entry * ] build_cont
+  -> 0.3 : mat_wall extrudet(4.0) [ * build_entry * build_entry ] build_cont
+  -> 0.2 : mat_wall extrudet(random(12.0,40.0,4.0)) [ * build_fullinsetwall * build_fullinsetwall ] build_roof 
+  -> 0.2 : mat_wall extrudet(random(12.0,40.0,4.0)) [ build_fullinsetwall * build_fullinsetwall * ] build_roof 
+;
+
+build_entry -> splith(1r 4.0 1r) [ common_texture build_entrydoor common_texture ] ;
+
+build_entrydoor 
+  -> ($BUILD_MAT = $MATWALL2) mat_mesh extrude(-2.0) [ common_remove * * * ] mat_doorw texturefull()
+  -> ($BUILD_MAT = $MATWALL)  mat_roof extrude(-2.0) [ common_remove * * * ] mat_doorr texturefull()
+  -> mat_roof extrude(-2.0) 
+; 
+
+build_cont
+  -> 0.5 : common_ledge extrude(3.7) [ @build_detail ] build_cont
+  -> 0.2 : common_ledge extrude(3.7) [ @build_insetwall ] build_cont
+  -> 0.1 : (face(h) > 100) common_ledge build_parth build_cont
+  -> 0.1 : (face(v) > 100) common_ledge build_partv build_cont
+  -> 0.3 : build_roof
+;
+
+build_roof 
+  -> 0.5 : (face(s) < 20000 & face(z) < 20) mat_mesh extrude(0) expand(0.3) mat_rooft extrude(5) expand(-5) mat_roof
+  -> roof_run
+;
+
+
+build_parted -> material($BUILD_MAT) extrudet(3.7);
+
+build_parth
+  -> splith((face(h)/3) 1r  ,4) [ * build_parted ]
+  -> splith(1r (2*face(h)/3),4) [ * build_parted ]
+;
+
+build_partv
+  -> splitv((face(v)/3) 1r  ,4) [ * build_parted ]
+  -> splitv(1r (2*face(v)/3),4) [ * build_parted ]
+;
+
+build_insetwall -> splith(1r 1r 1r,4) [ build_detail build_inset build_detail ] ;
+
+build_fullinsetwall -> splith(1r 1r 1r,4) [ build_insetdetail build_inset build_insetdetail ] ;
+
+build_inset 
+  -> 0.8 : material($BUILD_MAT) extrudet(-3.0) [ @mat_roof ] texture() mat_glass
+  -> 0.2 : material($BUILD_MAT) extrudet(-3.0) [ @mat_roof ] texture()
+;
+
+build_detail 
+  -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) mat_white textureclear() repeath(4.0) [ @build_window ]
+  -> material($BUILD_MAT) texture()
+;
+
+build_insetdetail 
+  -> ($BUILD_MAT = $MATWALL2 & $DETAIL > 2) mat_white textureclear() repeath(4.0) [ @build_fullwindow ]
+  -> material($BUILD_MAT) texture()
+;
+
+build_fullwindow -> extrude(0) expand(-0.2) extrude(-0.15) texture() mat_glass;
+
+
+build_window 
+  -> 0.5 : extrude(0) expand(-0.2) scale(1,0.6) translate(0,0,0.4) extrude(-0.15) texturefull() material($WINDOWA)
+  -> 0.5 : extrude(0) expand(-0.2) scale(1,0.6) translate(0,0,0.4) extrude(-0.15) texturefull() material($WINDOWB)
+;
+
+  
+# ------------------------------------------------------------------------
+#  end of file
+# ------------------------------------------------------------------------

@@ -1,0 +1,55 @@
+# ------------------------------------------------------------------------
+#  BZWGen 0.1.3 grammar file
+#  roof.set -- generation of roofs
+# ------------------------------------------------------------------------
+
+roof_run -> roof_classic roof_bonus;
+
+roof_bonus
+  -> 0.2  : ($TYPE = $TYPE_SKY & face(s) < 5000 & face(n) < 5) spawn(roof_antenna2) 
+  -> 0.4  : ($TYPE = $TYPE_SKY & face(s) < 20000 & face(n) < 5) spawn(roof_antenna) roof_bonus
+  -> 0.2  : assert(face(h) > 15.0) assert(face(v) > 15.0) spawn(roof_building) 
+  -> 0.2  : mat_mesh
+  -> 0.02 : extrude(0.0) expand(-2.0) extrude(-0.3) mat_grass
+  -> 0.58 : 
+;
+
+roof_building
+  -> 0.6 : expand(-5.0) mat_mesh extrude(2.0) mat_roof
+  -> 0.4 : expand(-5.0) mat_mesh chamfer(1.0) extrude(2.0)
+;
+
+roof_classic 
+  -> mat_mesh extrude(0.0) expand(0.3) extrude(0.5) mat_roof 
+;
+
+roof_antenna -> 
+  translater(random(0.2,0.8,0.2) - 0.4,random(0.2,0.8,0.2) - 0.4,0) 
+  ngon(4,2.0)
+  mat_roof
+  extrude(0.8)
+  extrude(0)
+  expand(-1.6)
+  extrude(random(0,12,4)+12)
+  taper(0.5)
+;
+
+roof_antenna2 -> 
+  ngon(4,6.0)
+  mat_roof
+  scale(1,0.5)
+  extrude(0.8)
+  splitv(1r 1r) [ @roof_antenna2_add ]
+;
+
+
+roof_antenna2_add ->
+  extrude(0)
+  expand(-2.6)
+  extrude(24)
+  taper(0.5)
+;
+# ------------------------------------------------------------------------
+#  end of file
+# ------------------------------------------------------------------------
+

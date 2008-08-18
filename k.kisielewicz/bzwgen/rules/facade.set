@@ -1,0 +1,43 @@
+# ------------------------------------------------------------------------
+#  BZWGen 0.1.3 grammar file
+#  facade.set -- extended facade buildings
+# ------------------------------------------------------------------------
+
+facade_run 
+ -> 0.5 : mat_wall extrudet(4.0) [ build_entry * build_entry * ] facade_main build_roof 
+ -> 0.5 : mat_wall extrudet(4.0) [ build_entry * build_entry * ] facade_main build_roof 
+;
+
+facade_main
+  -> 0.3 : extrude(random(12.0,40.0,4.0)) [ @facade_1 ]
+  -> 0.3 : (face(h) > 70) extrude(random(12.0,40.0,4.0)) [ @facade_4 ]
+  -> 0.5 : (face(h) > 70) extrude(random(12.0,40.0,4.0)) [ @facade_3 ]
+  -> extrude(random(12.0,40.0,4.0)) [ @facade_2 ]
+;
+
+facade_1 -> repeath(20.0) [ @facade_1_block ];
+
+facade_1_block -> splith(2 1r 2) [ mat_white facade_1_windows mat_white ];
+
+facade_1_windows -> extrudet(-1) [ @mat_white ] facade_windows;
+
+facade_2 -> repeath(16.0) [ @facade_1_block ];
+
+facade_3 -> splith(10 1r 10) [ facade_1_block facade_3_inset facade_1_block ];
+
+facade_3_inset -> extrudet(-2) [ @mat_white ] facade_1_block;
+
+facade_windows -> repeatv(4) [ @facade_window_rows ];
+
+facade_window_rows -> mat_white repeath(4) [ @build_window ];
+
+facade_4 -> repeath(20.0) [ @facade_4_block ];
+
+facade_4_block -> splith(1r 4 1r) [ facade_windows facade_4_inset facade_windows ];
+
+facade_4_inset -> extrudet(-1) [ @mat_white ] texture() mat_glass;
+
+
+# ------------------------------------------------------------------------
+#  end of file
+# ------------------------------------------------------------------------
