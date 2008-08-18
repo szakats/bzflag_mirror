@@ -98,8 +98,8 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 
     // This should be parameters, their value is somewhat meaningless now.
     size_t branching = 3;
-    float segmentLength = 50.0f;
-    float noiseValue = 0.1f;
+    float segmentLength = 70.0f;
+    float noiseValue = 0.06f;
     float roadThreshold = 30.0f;
     float subdivisionThreshold = 10.0f;
     float faceThreshold = 100.0f;
@@ -131,7 +131,7 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
 //        subdivideFace( sfaces[j], subdivisionThreshold );
 //      else
         assert( sfaces[j]->size() > 2 );
-        if ( sfaces[j]->size() == 4 && sfaces[j]->isConvex() && sfaces[j]->area( ) > 400.0f ) lots.push_back( sfaces[j] );
+        if ( sfaces[j]->size() > 4 && sfaces[j]->size() < 7 && sfaces[j]->isConvex() && sfaces[j]->area( ) > 400.0f ) lots.push_back( sfaces[j] );
     }
   }
 }
