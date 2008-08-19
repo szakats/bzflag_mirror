@@ -1,24 +1,23 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/* BzfWindow:
- *	Abstract, platform independent base for OpenGL windows.
- */
-
-#ifndef BZF_WINDOW_H
-#define	BZF_WINDOW_H
+#ifndef __BZFWINDOW_H__
+#define	__BZFWINDOW_H__
 
 #include "common.h"
-#include "AList.h"
+
+/* system headers */
+#include <vector>
+
 
 class BzfDisplay;
 
@@ -27,17 +26,19 @@ class BzfWindowCB {
     void		(*cb)(void*);
     void*		data;
 };
-BZF_DEFINE_ALIST(BzfWindowCBAList, BzfWindowCB);
 
+/** BzfWindow:
+ *	Abstract, platform independent base for OpenGL windows.
+ */
 class BzfWindow {
   public:
 			BzfWindow(const BzfDisplay*);
     virtual		~BzfWindow();
 
     const BzfDisplay*	getDisplay() const { return display; }
-    virtual boolean	isValid() const = 0;
+    virtual bool	isValid() const = 0;
 
-    virtual void	showWindow(boolean) = 0;
+    virtual void	showWindow(bool) = 0;
 
     virtual void	getPosition(int& x, int& y) = 0;
     virtual void	getSize(int& width, int& height) const = 0;
@@ -46,27 +47,28 @@ class BzfWindow {
     virtual void	setPosition(int x, int y) = 0;
     virtual void	setSize(int width, int height) = 0;
     virtual void	setMinSize(int width, int height) = 0;
-    virtual void	setFullscreen() = 0;
+    virtual void	setFullscreen(bool) = 0;
+    virtual void	iconify(void) {;};
+    virtual bool	create(void) {return true;};
 
     virtual void	warpMouse(int x, int y) = 0;
     virtual void	getMouse(int& x, int& y) const = 0;
     virtual void	grabMouse() = 0;
     virtual void	ungrabMouse() = 0;
+    virtual void	enableGrabMouse(bool) {;};
     virtual void	showMouse() = 0;
     virtual void	hideMouse() = 0;
 
     virtual void	setGamma(float) = 0;
     virtual float	getGamma() const = 0;
-    virtual boolean	hasGammaControl() const = 0;
+    virtual bool	hasGammaControl() const = 0;
 
     virtual void	makeCurrent() = 0;
+    virtual void	yieldCurrent();
+    virtual void	releaseCurrent();
     virtual void	swapBuffers() = 0;
     virtual void	makeContext() = 0;
     virtual void	freeContext() = 0;
-
-    virtual void	initJoystick(const char* joystickName);
-    virtual boolean	joystick() const { return False; }
-    virtual void	getJoy(int& x, int& y) const { x = 0; y = 0; }
 
     void		callExposeCallbacks() const;
     void		addExposeCallback(void (*cb)(void*), void* data);
@@ -78,8 +80,17 @@ class BzfWindow {
 
   private:
     const BzfDisplay*	display;
-    BzfWindowCBAList	exposeCallbacks;
-    BzfWindowCBAList	resizeCallbacks;
+    std::vector<BzfWindowCB>	exposeCallbacks;
+    std::vector<BzfWindowCB>	resizeCallbacks;
 };
 
-#endif // BZF_WINDOW_H
+
+#endif  /* __BZFWINDOW_H__ */
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

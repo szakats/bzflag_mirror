@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* OpenGLMaterial:
@@ -30,8 +30,8 @@
 #ifndef	BZF_OPENGL_MATERIAL_H
 #define	BZF_OPENGL_MATERIAL_H
 
-#include "bzfgl.h"
 #include "common.h"
+#include "bzfgl.h"
 
 class OpenGLMaterial {
   public:
@@ -43,16 +43,17 @@ class OpenGLMaterial {
 			~OpenGLMaterial();
     OpenGLMaterial&	operator=(const OpenGLMaterial&);
 
-    boolean		operator==(const OpenGLMaterial&) const;
-    boolean		operator!=(const OpenGLMaterial&) const;
-    boolean		operator<(const OpenGLMaterial&) const;
+    bool		operator==(const OpenGLMaterial&) const;
+    bool		operator!=(const OpenGLMaterial&) const;
+    bool		operator<(const OpenGLMaterial&) const;
 
     const GLfloat*	getSpecularColor() const;
     const GLfloat*	getEmissiveColor() const;
     GLfloat		getShininess() const;
 
-    boolean		isValid() const;
-    GLuint		getList() const;
+    void		setQuality(bool highQuality);
+
+    bool		isValid() const;
     void		execute() const;
 
   private:
@@ -69,9 +70,9 @@ class OpenGLMaterial {
 			Rep(const GLfloat* specular,
 				const GLfloat* emissive,
 				GLfloat shininess);
+	static void	freeContext(void*);
 	static void	initContext(void*);
       public:
-	boolean		init;
 	int		refCount;
 	Rep*		prev;
 	Rep*		next;
@@ -80,6 +81,7 @@ class OpenGLMaterial {
 	GLfloat		emissive[4];
 	GLfloat		shininess;
 	static Rep*	head;
+        bool		highQuality;
     };
     Rep*		rep;
 };
@@ -103,4 +105,18 @@ inline GLfloat		OpenGLMaterial::getShininess() const
   return rep->shininess;
 }
 
+inline void		OpenGLMaterial::setQuality(bool highQuality)
+{
+  rep->highQuality = highQuality;
+}
+
+
 #endif // BZF_OPENGL_MATERIAL_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

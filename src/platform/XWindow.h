@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* XWindow:
@@ -22,10 +22,6 @@
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 
-#ifdef XIJOYSTICK
-#include <X11/extensions/XInput.h>
-#endif
-
 class XVisual;
 
 class XWindow : public BzfWindow {
@@ -33,9 +29,9 @@ class XWindow : public BzfWindow {
 			XWindow(const XDisplay*, XVisual*);
 			~XWindow();
 
-    boolean		isValid() const;
+    bool		isValid() const;
 
-    void		showWindow(boolean);
+    void		showWindow(bool);
 
     void		getPosition(int& x, int& y);
     void		getSize(int& width, int& height) const;
@@ -44,7 +40,7 @@ class XWindow : public BzfWindow {
     void		setPosition(int x, int y);
     void		setSize(int width, int height);
     void		setMinSize(int width, int height);
-    void		setFullscreen();
+    void		setFullscreen(bool on);
 
     void		warpMouse(int x, int y);
     void		getMouse(int& x, int& y) const;
@@ -55,18 +51,12 @@ class XWindow : public BzfWindow {
 
     void		setGamma(float);
     float		getGamma() const;
-    boolean		hasGammaControl() const;
+    bool		hasGammaControl() const;
 
     void		makeCurrent();
     void		swapBuffers();
     void		makeContext();
     void		freeContext();
-
-#ifdef XIJOYSTICK
-    void		initJoystick(char* joystickName);
-    boolean		joystick() const;
-    void		getJoy(int& x, int& y) const;
-#endif
 
     // other X stuff
     static XWindow*	lookupWindow(Window);
@@ -85,20 +75,23 @@ class XWindow : public BzfWindow {
     Window		window;
     Colormap		colormap;
     GLXContext		context;
-    boolean		noWM;
-    boolean		defaultColormap;
+    bool		noWM;
+    bool		defaultColormap;
     XWindow*		prev;
     XWindow*		next;
     XVisualInfo		visual;
     unsigned long*	colormapPixels;
+    XSizeHints*	 xsh;
     float		gammaVal;
     static XWindow*	first;
-    
-#ifdef XIJOYSTICK
-    XDevice*		device;
-    int			scaleX, constX;
-    int			scaleY, constY;
-#endif
 };
 
 #endif // BZF_XWINDOW_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

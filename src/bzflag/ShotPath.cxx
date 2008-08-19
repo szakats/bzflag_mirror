@@ -1,166 +1,80 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// interface header
 #include "ShotPath.h"
-#include "ShotStrategy.h"
-#include "LocalPlayer.h"
-#include "Protocol.h"
-#include "PlayerLink.h"
-#include "playing.h"
 
-//
-// ShotUpdate
-//
+/* system headers */
+#include <assert.h>
 
-void*			ShotUpdate::pack(void* buf) const
-{
-  buf = player.pack(buf);
-  buf = nboPackUShort(buf, id);
-  buf = nboPackFloat(buf, pos[0]);
-  buf = nboPackFloat(buf, pos[1]);
-  buf = nboPackFloat(buf, pos[2]);
-  buf = nboPackFloat(buf, vel[0]);
-  buf = nboPackFloat(buf, vel[1]);
-  buf = nboPackFloat(buf, vel[2]);
-  buf = nboPackFloat(buf, dt);
-  return buf;
-}
-
-void*			ShotUpdate::unpack(void* buf)
-{
-  buf = player.unpack(buf);
-  buf = nboUnpackUShort(buf, id);
-  buf = nboUnpackFloat(buf, pos[0]);
-  buf = nboUnpackFloat(buf, pos[1]);
-  buf = nboUnpackFloat(buf, pos[2]);
-  buf = nboUnpackFloat(buf, vel[0]);
-  buf = nboUnpackFloat(buf, vel[1]);
-  buf = nboUnpackFloat(buf, vel[2]);
-  buf = nboUnpackFloat(buf, dt);
-  return buf;
-}
-
-//
-// FiringInfo
-//
-
-FiringInfo::FiringInfo()
-{
-  // do nothing -- must be prepared before use by unpack() or assignment
-}
-
-FiringInfo::FiringInfo(const BaseLocalPlayer& tank, int id)
-{
-  shot.player = tank.getId();
-  shot.id = uint16_t(id);
-  tank.getMuzzle(shot.pos);
-  const float* dir = tank.getForward();
-  const float* tankVel = tank.getVelocity();
-  shot.vel[0] = tankVel[0] + ShotSpeed * dir[0];
-  shot.vel[1] = tankVel[1] + ShotSpeed * dir[1];
-  shot.vel[2] = tankVel[2] + ShotSpeed * dir[2];
-  shot.dt = 0.0f;
-  flag = tank.getFlag();
-  lifetime = ReloadTime;
-}
-
-void*			FiringInfo::pack(void* buf) const
-{
-  buf = shot.pack(buf);
-  buf = nboPackUShort(buf, uint16_t(flag));
-  buf = nboPackFloat(buf, lifetime);
-  return buf;
-}
-
-void*			FiringInfo::unpack(void* buf)
-{
-  uint16_t _flag;
-  buf = shot.unpack(buf);
-  buf = nboUnpackUShort(buf, _flag);
-  flag = FlagId(_flag);
-  buf = nboUnpackFloat(buf, lifetime);
-  return buf;
-}
+/* local implementation headers */
+#include "SegmentedShotStrategy.h"
+#include "GuidedMissleStrategy.h"
+#include "ShockWaveStrategy.h"
 
 //
 // ShotPath
 //
 
-ShotPath::ShotPath(const FiringInfo& info) :
+ShotPath::ShotPath(const FiringInfo& info, double now) :
 				firingInfo(info),
-				reloadTime(ReloadTime),
-				startTime(TimeKeeper::getTick()),
-				currentTime(TimeKeeper::getTick()),
-				expiring(False),
-				expired(False)
+				reloadTime(BZDB.eval(StateDatabase::BZDB_RELOADTIME)),
+				expiring(false),
+				expired(false)
 {
-  // eek!  a giant switch statement, how un-object-oriented!
-  // each flag should be a flyweight object derived from a
-  // base Flag class with a virtual makeShotStrategy() member.
-  // just remember -- it's only a game.
-  switch (firingInfo.flag) {
-    case NoFlag:
-    case RedFlag:
-    case GreenFlag:
-    case BlueFlag:
-    case PurpleFlag:
-    case VelocityFlag:
-    case QuickTurnFlag:
-    case OscOverthrusterFlag:
-    case InvisibleBulletFlag:
-    case StealthFlag:
-    case TinyFlag:
-    case NarrowFlag:
-    case ShieldFlag:
-    case SteamrollerFlag:
-    case IdentifyFlag:
-    case CloakingFlag:
-    case PhantomZoneFlag:
-    case JumpingFlag:
-    case GenocideFlag:
-    case ColorblindnessFlag:
-    case ObesityFlag:
-    case LeftTurnOnlyFlag:
-    case RightTurnOnlyFlag:
-    case MomentumFlag:
-    case BlindnessFlag:
-    case JammingFlag:
-    case WideAngleFlag:
+  startTime = info.timeSent;
+  currentTime = now;
+  local = false;
+
+  switch(info.shotType)
+  {
+    default:
       strategy = new NormalShotStrategy(this);
-      break;
-    case RapidFireFlag:
-      strategy = new RapidFireStrategy(this);
-      break;
-    case MachineGunFlag:
-      strategy = new MachineGunStrategy(this);
-      break;
-    case GuidedMissileFlag:
+    break;
+
+    case GMShot:
       strategy = new GuidedMissileStrategy(this);
       break;
-    case LaserFlag:
+
+    case LaserShot:
       strategy = new LaserStrategy(this);
       break;
-    case RicochetFlag:
-      strategy = new RicochetStrategy(this);
+
+    case ThiefShot:
+      strategy = new ThiefStrategy(this);
       break;
-    case SuperBulletFlag:
+
+    case SuperShot:
       strategy = new SuperBulletStrategy(this);
       break;
-    case ShockWaveFlag:
+
+    case PhantomShot:
+      strategy = new PhantomBulletStrategy(this);
+      break;
+
+    case ShockWaveShot:
       strategy = new ShockWaveStrategy(this);
       break;
-    default:
-      // shouldn't happen
-      assert(0);
+
+    case RicoShot:
+      strategy = new RicochetStrategy(this);
+      break;
+
+    case MachineGunShot:
+      strategy = new MachineGunStrategy(this);
+      break;
+
+    case RapidFireShot:
+      strategy = new RapidFireStrategy(this);
       break;
   }
 }
@@ -170,26 +84,27 @@ ShotPath::~ShotPath()
   delete strategy;
 }
 
-float			ShotPath::checkHit(const BaseLocalPlayer* player,
+float			ShotPath::checkHit(const ShotCollider& tank,
 							float position[3]) const
 {
-  return strategy->checkHit(player, position);
+  return strategy->checkHit(tank, position);
 }
 
-boolean			ShotPath::isStoppedByHit() const
+bool			ShotPath::isStoppedByHit() const
 {
   return strategy->isStoppedByHit();
 }
 
 void			ShotPath::addShot(SceneDatabase* scene,
-						boolean colorblind)
+						bool colorblind)
 {
   strategy->addShot(scene, colorblind);
 }
 
 void			ShotPath::radarRender() const
 {
-  if (!isExpired()) strategy->radarRender();
+  if (!isExpired())
+    strategy->radarRender();
 }
 
 void			ShotPath::updateShot(float dt)
@@ -199,8 +114,12 @@ void			ShotPath::updateShot(float dt)
 
   // update shot
   if (!expired)
-    if (expiring) setExpired();
-    else getStrategy()->update(dt);
+  {
+    if (expiring)
+      setExpired();
+    else
+      getStrategy()->update(dt);
+  }
 }
 
 void			ShotPath::setReloadTime(float _reloadTime)
@@ -224,13 +143,13 @@ void			ShotPath::setVelocity(const float* v)
 
 void			ShotPath::setExpiring()
 {
-  expiring = True;
+  expiring = true;
 }
 
 void			ShotPath::setExpired()
 {
-  expiring = True;
-  expired = True;
+  expiring = true;
+  expired = true;
   getStrategy()->expire();
 }
 
@@ -239,14 +158,31 @@ void			ShotPath::boostReloadTime(float dt)
   reloadTime += dt;
 }
 
+bool                    ShotPath::predictPosition(float dt, float p[3]) const
+{
+  return getStrategy()->predictPosition(dt, p);
+}
+
+bool                    ShotPath::predictVelocity(float dt, float p[3]) const
+{
+  return getStrategy()->predictVelocity(dt, p);
+}
+
+void			ShotPath::update(float dt)
+{
+  // update shot
+  updateShot(dt);
+}
+
 //
 // LocalShotPath
 //
 
-LocalShotPath::LocalShotPath(const FiringInfo& info) :
-				ShotPath(info)
+LocalShotPath::LocalShotPath(const FiringInfo& info, double now) :
+				ShotPath(info,now)
 {
   // do nothing
+  setLocal(true);
 }
 
 LocalShotPath::~LocalShotPath()
@@ -260,16 +196,15 @@ void			LocalShotPath::update(float dt)
   updateShot(dt);
 
   // send updates if necessary
-  if (PlayerLink::getMulticast())
-    getStrategy()->sendUpdate(getFiringInfo());
+  getStrategy()->sendUpdate(getFiringInfo());
 }
 
 //
 // RemoteShotPath
 //
 
-RemoteShotPath::RemoteShotPath(const FiringInfo& info) :
-				ShotPath(info)
+RemoteShotPath::RemoteShotPath(const FiringInfo& info,double now) :
+				ShotPath(info,now)
 {
   // do nothing
 }
@@ -294,3 +229,11 @@ void			RemoteShotPath::update(const ShotUpdate& shot,
   // let the strategy see the message
   getStrategy()->readUpdate(code, msg);
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

@@ -1,24 +1,38 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/* interface header */
 #include "BzfMedia.h"
-#include "TimeKeeper.h"
-#include "wave.h"
+
+/* system implementation headers */
+#include <iostream>
 #include <string.h>
+#include <string>
+#include <stdio.h>
 
-BzfMedia::BzfMedia() : mediaDir("data") { }
-BzfMedia::~BzfMedia() { }
+/* common implementation headers */
+#include "TimeKeeper.h"
+#ifndef HAVE_SDL
+#  include "wave.h"
+#endif
+#include "MediaFile.h"
 
-double			BzfMedia::stopwatch(boolean start)
+
+BzfMedia::BzfMedia() : mediaDir(DEFAULT_MEDIA_DIR) {
+}
+BzfMedia::~BzfMedia() {
+}
+
+double			BzfMedia::stopwatch(bool start)
 {
   static TimeKeeper prev;
   if (start) {
@@ -30,21 +44,21 @@ double			BzfMedia::stopwatch(boolean start)
   }
 }
 
-BzfString		BzfMedia::getMediaDirectory() const
+std::string		BzfMedia::getMediaDirectory() const
 {
   return mediaDir;
 }
 
-void			BzfMedia::setMediaDirectory(const BzfString& _dir)
+void			BzfMedia::setMediaDirectory(const std::string& _dir)
 {
   mediaDir = _dir;
 }
 
-unsigned char*		BzfMedia::readImage(const BzfString& filename,
+unsigned char*		BzfMedia::readImage(const std::string& filename,
 				int& width, int& height, int& depth) const
 {
   // try mediaDir/filename
-  BzfString name = makePath(mediaDir, filename);
+  std::string name = makePath(mediaDir, filename);
   unsigned char* image = doReadImage(name, width, height, depth);
   if (image) return image;
 
@@ -52,9 +66,9 @@ unsigned char*		BzfMedia::readImage(const BzfString& filename,
   image = doReadImage(filename, width, height, depth);
   if (image) return image;
 
-#if defined(INSTALL_DATA_DIR)
+#if defined(BZFLAG_DATA)
   // try standard-mediaDir/filename
-  name = makePath(INSTALL_DATA_DIR, filename);
+  name = makePath(BZFLAG_DATA, filename);
   image = doReadImage(name, width, height, depth);
   if (image) return image;
 #endif
@@ -69,22 +83,64 @@ unsigned char*		BzfMedia::readImage(const BzfString& filename,
   image = doReadImage(name, width, height, depth);
   if (image) return image;
 
-#if defined(INSTALL_DATA_DIR)
+#if defined(BZFLAG_DATA)
   // try standard-mediaDir/filename with replaced extension
-  name = makePath(INSTALL_DATA_DIR, filename);
+  name = makePath(BZFLAG_DATA, filename);
   name = replaceExtension(name, getImageExtension());
   image = doReadImage(name, width, height, depth);
   if (image) return image;
 #endif
 
+  // try data/filename
+  name = makePath(DEFAULT_MEDIA_DIR, filename);
+  image = doReadImage(name, width, height, depth);
+  if (image) return image;
+
+  // try data/filename with replaced extension
+  name = replaceExtension(makePath(DEFAULT_MEDIA_DIR, filename), getImageExtension());
+  image = doReadImage(name, width, height, depth);
+  if (image) return image;
+
+  // try ../data/filename
+  name = "../";
+  name += DEFAULT_MEDIA_DIR;
+  name = makePath(name, filename);
+  image = doReadImage(name, width, height, depth);
+  if (image) return image;
+
+  // try ../data/filename with replaced extension
+  name = "../";
+  name += DEFAULT_MEDIA_DIR;
+  name = replaceExtension(makePath(name, filename), getImageExtension());
+  image = doReadImage(name, width, height, depth);
+  if (image) return image;
+
+  // try ../../data/filename
+  name = "../../";
+  name += DEFAULT_MEDIA_DIR;
+  name = makePath(name, filename);
+  image = doReadImage(name, width, height, depth);
+  if (image) return image;
+
+  // try ../../data/filename with replaced extension
+  name = "../../";
+  name += DEFAULT_MEDIA_DIR;
+  name = replaceExtension(makePath(name, filename), getImageExtension());
+  image = doReadImage(name, width, height, depth);
+  if (image) return image;
+
+#ifndef DEBUG
+  std::cout << "Unable to locate [" << filename << "] image file (media dir is set to " << mediaDir << ")" << std::endl;
+#endif
+
   return NULL;
 }
 
-float*			BzfMedia::readSound(const BzfString& filename,
+float*			BzfMedia::readSound(const std::string& filename,
 				int& numFrames, int& rate) const
 {
   // try mediaDir/filename
-  BzfString name = makePath(mediaDir, filename);
+  std::string name = makePath(mediaDir, filename);
   float* sound = doReadSound(name, numFrames, rate);
   if (sound) return sound;
 
@@ -92,9 +148,9 @@ float*			BzfMedia::readSound(const BzfString& filename,
   sound = doReadSound(filename, numFrames, rate);
   if (sound) return sound;
 
-#if defined(INSTALL_DATA_DIR)
+#if defined(BZFLAG_DATA)
   // try standard-mediaDir/filename
-  name = makePath(INSTALL_DATA_DIR, filename);
+  name = makePath(BZFLAG_DATA, filename);
   sound = doReadSound(name, numFrames, rate);
   if (sound) return sound;
 #endif
@@ -109,146 +165,107 @@ float*			BzfMedia::readSound(const BzfString& filename,
   sound = doReadSound(name, numFrames, rate);
   if (sound) return sound;
 
-#if defined(INSTALL_DATA_DIR)
+#if defined(BZFLAG_DATA)
   // try mediaDir/filename with replaced extension
-  name = makePath(INSTALL_DATA_DIR, filename);
+  name = makePath(BZFLAG_DATA, filename);
   name = replaceExtension(name, getSoundExtension());
   sound = doReadSound(name, numFrames, rate);
   if (sound) return sound;
 #endif
 
+  // try mediaDir/filename
+  name = makePath(DEFAULT_MEDIA_DIR, filename);
+  sound = doReadSound(name, numFrames, rate);
+  if (sound) return sound;
+
+  // try mediaDir/filename with replaced extension
+  name = replaceExtension(makePath(DEFAULT_MEDIA_DIR, filename), getSoundExtension());
+  sound = doReadSound(name, numFrames, rate);
+  if (sound) return sound;
+
+  // try mediaDir/filename
+  name = "../";
+  name += DEFAULT_MEDIA_DIR;
+  name = makePath(name, filename);
+  sound = doReadSound(name, numFrames, rate);
+  if (sound) return sound;
+
+  // try mediaDir/filename with replaced extension
+  name = "../";
+  name += DEFAULT_MEDIA_DIR;
+  name = replaceExtension(makePath(name, filename), getSoundExtension());
+  sound = doReadSound(name, numFrames, rate);
+  if (sound) return sound;
+
+  // try mediaDir/filename
+  name = "../../";
+  name += DEFAULT_MEDIA_DIR;
+  name = makePath(name, filename);
+  sound = doReadSound(name, numFrames, rate);
+  if (sound) return sound;
+
+  // try mediaDir/filename with replaced extension
+  name = "../../";
+  name += DEFAULT_MEDIA_DIR;
+  name = replaceExtension(makePath(name, filename), getSoundExtension());
+  sound = doReadSound(name, numFrames, rate);
+  if (sound) return sound;
+
+#ifndef DEBUG
+std::cout << "Unable to locate [" << filename << "] audio file (media dir is set to " << mediaDir << ")" << std::endl;
+#endif
+
   return NULL;
 }
 
-BzfString		BzfMedia::makePath(const BzfString& dir,
-				const BzfString& filename) const
+std::string		BzfMedia::makePath(const std::string& dir,
+				const std::string& filename) const
 {
-  if (dir.isNull() || filename.getString()[0] == '/') return filename;
-  BzfString path = dir;
+  if ((dir.length() == 0) || filename[0] == '/') return filename;
+  std::string path = dir;
   path += "/";
   path += filename;
   return path;
 }
 
-BzfString		BzfMedia::replaceExtension(
-				const BzfString& pathname,
-				const BzfString& extension) const
+std::string		BzfMedia::replaceExtension(
+				const std::string& pathname,
+				const std::string& extension) const
 {
-  BzfString newName;
+  std::string newName;
 
   const int extPosition = findExtension(pathname);
   if (extPosition == 0)
     newName = pathname;
   else
-    newName = BzfString(pathname(0, extPosition));
+    newName = pathname.substr(0, extPosition);
 
   newName += ".";
   newName += extension;
   return newName;
 }
 
-int			BzfMedia::findExtension(const BzfString& pathname) const
+int			BzfMedia::findExtension(const std::string& pathname) const
 {
-  const char* string = pathname;
-  int scan = pathname.getLength();
-  while (--scan > 0) {
-    if (string[scan] == '.')
-      return scan;
-    if (string[scan] == '/')
-      break;
-  }
-  return 0;
+  int dot = pathname.rfind(".");
+  int slash = pathname.rfind("/");
+  return ((slash > dot) ? 0 : dot);
 }
 
-BzfString		BzfMedia::getImageExtension() const
+std::string		BzfMedia::getImageExtension() const
 {
-  return BzfString("rgb");
+  return std::string("png");
 }
 
-BzfString		BzfMedia::getSoundExtension() const
+std::string		BzfMedia::getSoundExtension() const
 {
-  return BzfString("wav");
+  return std::string("wav");
 }
 
-unsigned char*		BzfMedia::doReadImage(const char* filename,
-				int& dx, int& dy, int& dz) const
+unsigned char*		BzfMedia::doReadImage(const std::string& filename,
+				int& dx, int& dy, int&) const
 {
-  // open file
-  FILE* file = fopen(filename, "rb");
-  if (!file) return NULL;
-
-  // read header
-  unsigned char header[512];
-  const size_t numItems = fread(header, sizeof(header), 1, file);
-  if (numItems != 1 ||
-	getShort(header + 0) != 474 ||
-	(header[2] != 0 && header[2] != 1) ||
-	(header[3] < 1 || header[3] > 1) ||
-	(getUShort(header + 4) < 1 || getUShort(header + 4) > 3) ||
-	(getLong(header + 104) != 0)) {
-    fclose(file);
-    return NULL;
-  }
-
-  // get dimensions
-  uint16_t width, height, depth;
-  width  = getUShort(header + 6);
-  height = (getUShort(header + 4) < 2) ? 1 : getUShort(header + 8);
-  depth  = (getUShort(header + 4) < 3) ? 1 : getUShort(header + 10);
-  dx = (int)width;
-  dy = (int)height;
-  dz = (int)depth;
-
-  // make image buffer
-  unsigned char* image = new unsigned char[4 * dx * dy];
-
-  // read scan lines
-  boolean okay;
-  if (header[2] == 0)
-    okay = doReadVerbatim(file, dx, dy, dz, image);
-  else
-    okay = doReadRLE(file, dx, dy, dz, image);
-
-  // done with file
-  fclose(file);
-
-  if (!okay) {
-    delete[] image;
-    image = NULL;
-  }
-
-  // handle different image depths
-  if (dz == 1) {
-    // r=g=b, a=max
-    int n = dx * dy;
-    unsigned char* scan = image;
-    for (; n > 0; --n) {
-      scan[2] = scan[1] = scan[0];
-      scan[3] = 0xff;
-      scan += 4;
-    }
-  }
-  else if (dz == 2) {
-    // r=g=b, move alpha channel
-    int n = dx * dy;
-    unsigned char* scan = image;
-    for (; n > 0; --n) {
-      scan[3] = scan[1];
-      scan[2] = scan[1] = scan[0];
-      scan += 4;
-    }
-  }
-  else if (dz == 3) {
-    // a=max
-    int n = dx * dy;
-    unsigned char* scan = image + 3;
-    for (; n > 0; --n) {
-      *scan = 0xff;
-      scan += 4;
-    }
-  }
-
-  return image;
+  return MediaFile::readImage( filename, &dx, &dy );
 }
 
 int16_t			BzfMedia::getShort(const void* ptr)
@@ -270,7 +287,7 @@ int32_t			BzfMedia::getLong(const void* ptr)
 	((int32_t)data[2] << 8) + (int32_t)data[3];
 }
 
-boolean			BzfMedia::doReadVerbatim(FILE* file,
+bool			BzfMedia::doReadVerbatim(FILE* file,
 				int dx, int dy, int dz,
 				unsigned char* image)
 {
@@ -288,7 +305,7 @@ boolean			BzfMedia::doReadVerbatim(FILE* file,
     for (int j = 0; j < dy; ++j) {
       // read raw data
       if (fread(row, dx, 1, file) != 1)
-	return False;
+	return false;
 
       // reformat
       for (int i = 0; i < dx; ++i) {
@@ -297,10 +314,10 @@ boolean			BzfMedia::doReadVerbatim(FILE* file,
       }
     }
   }
-  return True;
+  return true;
 }
 
-boolean			BzfMedia::doReadRLE(FILE* file,
+bool			BzfMedia::doReadRLE(FILE* file,
 				int dx, int dy, int dz,
 				unsigned char* image)
 {
@@ -314,13 +331,15 @@ boolean			BzfMedia::doReadRLE(FILE* file,
   // read offset tables
   const int tableSize = dy * dz;
   int32_t* startTable  = new int32_t[tableSize];
-  int32_t* lengthTable = new int32_t[tableSize];
   if (fread(startTable, 4 * tableSize, 1, file) != 1) {
-    return False;
+    delete[] startTable;
+    return false;
   }
+  int32_t* lengthTable = new int32_t[tableSize];
   if (fread(lengthTable, 4 * tableSize, 1, file) != 1) {
     delete[] startTable;
-    return False;
+    delete[] lengthTable;
+    return false;
   }
 
   // convert offset tables to proper endianness
@@ -340,7 +359,7 @@ boolean			BzfMedia::doReadRLE(FILE* file,
 	  fread(row, length, 1, file) != 1) {
 	delete[] startTable;
 	delete[] lengthTable;
-	return False;
+	return false;
       }
 
       // decode
@@ -350,7 +369,7 @@ boolean			BzfMedia::doReadRLE(FILE* file,
 	if (src - row >= length) {
 	  delete[] startTable;
 	  delete[] lengthTable;
-	  return False;
+	  return false;
 	}
 
 	// get next code
@@ -382,10 +401,16 @@ boolean			BzfMedia::doReadRLE(FILE* file,
 
   delete[] startTable;
   delete[] lengthTable;
-  return True;
+  return true;
 }
 
-float*			BzfMedia::doReadSound(const char* filename,
+#ifdef HAVE_SDL
+float*			BzfMedia::doReadSound(const std::string&, int&, int&) const
+{
+  return NULL;
+}
+#else
+float*			BzfMedia::doReadSound(const std::string& filename,
 				int& numFrames, int& rate) const
 {
   short format, channels, width;
@@ -395,7 +420,7 @@ float*			BzfMedia::doReadSound(const char* filename,
   int i;
   float *data;
 
-  file = openWavFile(filename, &format, &speed, &numFrames, &channels, &width);
+  file = openWavFile(filename.c_str(), &format, &speed, &numFrames, &channels, &width);
   if (!file) return 0;
   rate=speed;
   rawdata=new char[numFrames*width*channels];
@@ -452,3 +477,25 @@ float*			BzfMedia::doReadSound(const char* filename,
   delete [] rawdata;
   return data;
 }
+#endif
+
+// Setting Audio Driver
+void	BzfMedia::setDriver(std::string) {
+}
+
+// Setting Audio Device
+void	BzfMedia::setDevice(std::string) {
+}
+
+void BzfMedia::audioDriver(std::string& driverName)
+{
+  driverName = "";
+}
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

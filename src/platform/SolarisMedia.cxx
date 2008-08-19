@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "SolarisMedia.h"
@@ -24,7 +24,7 @@ static const int defaultAudioRate	= 22050;
 #endif
 
 static const int defaultChannels	= 2;
-static const int defaultEncoding 	= AUDIO_ENCODING_LINEAR;
+static const int defaultEncoding	= AUDIO_ENCODING_LINEAR;
 static const int defaultPrecision	= 16;
 
 short tmp_buf[512];
@@ -48,7 +48,7 @@ SolarisMedia::~SolarisMedia()
   // do nothing
 }
 
-double			SolarisMedia::stopwatch(boolean start)
+double			SolarisMedia::stopwatch(bool start)
 {
 	struct timeval tv;
 	gettimeofday(&tv, 0);
@@ -60,27 +60,19 @@ double			SolarisMedia::stopwatch(boolean start)
 	return (double)tv.tv_sec + 1.0e-6 * (double)tv.tv_usec - stopwatchTime;
 }
 
-void			SolarisMedia::sleep(float timeInSeconds)
-{
-	struct timeval tv;
-	tv.tv_sec = (long)timeInSeconds;
-	tv.tv_usec = (long)(1.0e6 * (timeInSeconds - tv.tv_sec));
-	select(0, NULL, NULL, NULL, &tv);
-}
-
 static const int	NumChunks = 4;
 
-boolean			SolarisMedia::openAudio()
+bool			SolarisMedia::openAudio()
 {
   int fd[2];
 
   if(audio_ready)
-    return False;
+    return false;
 
   audio_fd = open("/dev/audio", O_WRONLY  | O_NDELAY);
 
   if(audio_fd < 0)
-    return False;
+    return false;
 
   if(DEBUG_SOLARIS)
     fprintf(stderr, "Audio device '/dev/audio' opened\n");
@@ -88,7 +80,7 @@ boolean			SolarisMedia::openAudio()
   audioctl_fd = open("/dev/audioctl", O_RDWR);
 
   if(audioctl_fd < 0)
-    return False;
+    return false;
 
   if(DEBUG_SOLARIS)
     fprintf(stderr, "Opened audio control device '/dev/audioctl'\n");
@@ -107,7 +99,7 @@ boolean			SolarisMedia::openAudio()
       fprintf(stderr, "Cannot get audio information.\n");
     close(audio_fd);
     close(audioctl_fd);
-    return False;
+    return false;
   }
 
   if(DEBUG_SOLARIS)
@@ -120,7 +112,7 @@ boolean			SolarisMedia::openAudio()
       fprintf(stderr, "Cannot get audio information.\n");
     close(audio_fd);
     close(audioctl_fd);
-    return False;
+    return false;
   }
 
   AUDIO_INITINFO(&a_info);
@@ -131,7 +123,7 @@ boolean			SolarisMedia::openAudio()
   a_info.play.encoding    = defaultEncoding;
 
   a_info.play.buffer_size = NumChunks * AUDIO_BUFFER_SIZE;
-  audioBufferSize   	  = AUDIO_BUFFER_SIZE;
+  audioBufferSize	  = AUDIO_BUFFER_SIZE;
   audioLowWaterMark	  = 2;
 
   if(ioctl(audio_fd, AUDIO_SETINFO, &a_info) == -1)
@@ -139,7 +131,7 @@ boolean			SolarisMedia::openAudio()
     if(DEBUG_SOLARIS)
       fprintf(stderr, "Warning: Cannot set audio parameters.\n");
 
-    return False;
+    return false;
   }
 
   if(DEBUG_SOLARIS)
@@ -147,7 +139,7 @@ boolean			SolarisMedia::openAudio()
 
   if (pipe(fd)<0) {
     closeAudio();
-    return False;
+    return false;
   }
 
   queueIn = fd[1];
@@ -164,12 +156,12 @@ boolean			SolarisMedia::openAudio()
   childProcID=0;
 
   // ready to go
-  audio_ready = True;
+  audio_ready = true;
 
   if(DEBUG_SOLARIS)
     fprintf(stderr, "Audio ready.\n");
 
-  return True;
+  return true;
 }
 
 
@@ -179,24 +171,24 @@ void			SolarisMedia::closeAudio()
   close(audioctl_fd);
 }
 
-boolean			SolarisMedia::startAudioThread(
+bool			SolarisMedia::startAudioThread(
 				void (*proc)(void*), void* data)
 {
   // if no audio thread then just call proc and return
   if (!hasAudioThread()) {
     proc(data);
-    return True;
+    return true;
   }
 
   // has an audio thread so fork and call proc
-  if (childProcID) return True;
+  if (childProcID) return true;
   if ((childProcID=fork()) > 0) {
     close(queueOut);
     close(audio_fd);
-    return True;
+    return true;
   }
   else if (childProcID < 0) {
-    return False;
+    return false;
   }
   close(queueIn);
   proc(data);
@@ -209,13 +201,13 @@ void			SolarisMedia::stopAudioThread()
   childProcID=0;
 }
 
-boolean			SolarisMedia::hasAudioThread() const
+bool			SolarisMedia::hasAudioThread() const
 {
   // XXX -- adjust this if the system always uses or never uses a thread
 #if defined(NO_AUDIO_THREAD)
-  return False;
+  return false;
 #else
-  return True;
+  return true;
 #endif
 }
 
@@ -225,7 +217,7 @@ void			SolarisMedia::writeSoundCommand(const void* cmd, int len)
   write(queueIn, cmd, len);
 }
 
-boolean			SolarisMedia::readSoundCommand(void* cmd, int len)
+bool			SolarisMedia::readSoundCommand(void* cmd, int len)
 {
   return (read(queueOut, cmd, len)==len);
 }
@@ -245,7 +237,7 @@ int			SolarisMedia::getAudioBufferChunkSize() const
   return audioBufferSize>>1;
 }
 
-boolean			SolarisMedia::isAudioTooEmpty() const
+bool			SolarisMedia::isAudioTooEmpty() const
 {
   ioctl(audioctl_fd, AUDIO_GETINFO, &a_info);
   return ((int)a_info.play.eof >= eof_written - audioLowWaterMark);
@@ -282,7 +274,7 @@ void			SolarisMedia::writeAudioFrames(
 }
 
 void			SolarisMedia::audioSleep(
-				boolean checkLowWater, double endTime)
+				bool checkLowWater, double endTime)
 {
   fd_set commandSelectSet;
   struct timeval tv;
@@ -295,7 +287,7 @@ void			SolarisMedia::audioSleep(
       // break if buffer has drained enough
       if (isAudioTooEmpty()) break;
       FD_ZERO(&commandSelectSet);
-      FD_SET(queueOut, &commandSelectSet);
+      FD_SET((unsigned int)queueOut, &commandSelectSet);
       tv.tv_sec=0;
       tv.tv_usec=50000;
       if (select(maxFd, &commandSelectSet, 0, 0, &tv)) break;
@@ -303,10 +295,18 @@ void			SolarisMedia::audioSleep(
     } while (endTime<0.0 || (TimeKeeper::getCurrent()-start)<endTime);
   } else {
     FD_ZERO(&commandSelectSet);
-    FD_SET(queueOut, &commandSelectSet);
+    FD_SET((unsigned int)queueOut, &commandSelectSet);
     tv.tv_sec=int(endTime);
     tv.tv_usec=int(1.0e6*(endTime-floor(endTime)));
 
     select(maxFd, &commandSelectSet, 0, 0, (endTime>=0.0)?&tv : 0);
   }
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

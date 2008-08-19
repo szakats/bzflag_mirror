@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* XVisual:
@@ -28,7 +28,7 @@ class XVisual : public BzfVisual {
 			~XVisual();
 
     void		setLevel(int level);
-    void		setDoubleBuffer(boolean);
+    void		setDoubleBuffer(bool);
     void		setIndex(int minDepth);
     void		setRGBA(int minRed, int minGreen,
 				int minBlue, int minAlpha);
@@ -36,10 +36,10 @@ class XVisual : public BzfVisual {
     void		setStencil(int minDepth);
     void		setAccum(int minRed, int minGreen,
 				int minBlue, int minAlpha);
-    void		setStereo(boolean);
+    void		setStereo(bool);
     void		setMultisample(int minSamples);
 
-    boolean		build();
+    bool		build();
 
     // for other X stuff
     XVisualInfo*	get();
@@ -50,15 +50,23 @@ class XVisual : public BzfVisual {
     void		removeAttribute(int index);
     void		editAttribute(int index, int value);
 
-    boolean		matchRequirements(XVisualInfo*) const;
-    static boolean	visualClassIsBetter(int thisBetter, int thanThis);
+    bool		matchRequirements(XVisualInfo*) const;
+    static bool		visualClassIsBetter(int thisBetter, int thanThis);
 
   private:
     XDisplay::Rep*	display;
-    boolean		multisampleExt;
+    bool		multisampleExt;
     int			attributes[65];
     int			attributeCount;
     XVisualInfo*	visual;
 };
 
 #endif // BZF_XVISUAL_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

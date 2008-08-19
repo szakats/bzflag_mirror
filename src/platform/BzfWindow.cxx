@@ -1,31 +1,35 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// interface header
 #include "BzfWindow.h"
+
+// system headers
+#include <vector>
+
+// common implementation headers
 #include "ErrorHandler.h"
 
 BzfWindow::BzfWindow(const BzfDisplay* _display) : display(_display)
 {
-  // do nothing
 }
 
 BzfWindow::~BzfWindow()
 {
-  // do nothing
 }
 
 void			BzfWindow::callExposeCallbacks() const
 {
-  const int count = exposeCallbacks.getLength();
+  const int count = exposeCallbacks.size();
   for (int i = 0; i < count; i++) {
     const BzfWindowCB& cb = exposeCallbacks[i];
     (*cb.cb)(cb.data);
@@ -38,17 +42,16 @@ void			BzfWindow::addExposeCallback(
   BzfWindowCB cb;
   cb.cb = _cb;
   cb.data = data;
-  exposeCallbacks.append(cb);
+  exposeCallbacks.push_back(cb);
 }
 
 void			BzfWindow::removeExposeCallback(
 				void (*_cb)(void*), void* data)
 {
-  const int count = exposeCallbacks.getLength();
-  for (int i = 0; i < count; i++) {
-    const BzfWindowCB& cb = exposeCallbacks[i];
-    if (cb.cb == _cb && cb.data == data) {
-      exposeCallbacks.remove(i);
+  std::vector<BzfWindowCB>::iterator it = exposeCallbacks.begin();
+  for(; it != exposeCallbacks.end(); it++) {
+    if((it->cb == _cb) && (it->data == data)) {
+      exposeCallbacks.erase(it);
       break;
     }
   }
@@ -56,7 +59,7 @@ void			BzfWindow::removeExposeCallback(
 
 void			BzfWindow::callResizeCallbacks() const
 {
-  const int count = resizeCallbacks.getLength();
+  const int count = resizeCallbacks.size();
   for (int i = 0; i < count; i++) {
     const BzfWindowCB& cb = resizeCallbacks[i];
     (*cb.cb)(cb.data);
@@ -69,24 +72,35 @@ void			BzfWindow::addResizeCallback(
   BzfWindowCB cb;
   cb.cb = _cb;
   cb.data = data;
-  resizeCallbacks.append(cb);
+  resizeCallbacks.push_back(cb);
 }
 
 void			BzfWindow::removeResizeCallback(
 				void (*_cb)(void*), void* data)
 {
-  const int count = resizeCallbacks.getLength();
-  for (int i = 0; i < count; i++) {
-    const BzfWindowCB& cb = resizeCallbacks[i];
-    if (cb.cb == _cb && cb.data == data) {
-      resizeCallbacks.remove(i);
+  std::vector<BzfWindowCB>::iterator it = resizeCallbacks.begin();
+  for(; it != resizeCallbacks.end(); it++) {
+    if((it->cb == _cb) && (it->data == data)) {
+      resizeCallbacks.erase(it);
       break;
     }
   }
 }
 
-void			BzfWindow::initJoystick(const char* joystickName)
+void			BzfWindow::yieldCurrent(void)
 {
-  printError("joystick '%s' not supported...", joystickName);
+	// do nothing
 }
 
+void			BzfWindow::releaseCurrent(void)
+{
+	// do nothing
+}
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

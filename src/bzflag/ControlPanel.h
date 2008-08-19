@@ -1,110 +1,137 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	BZF_CONTROL_PANEL_H
 #define	BZF_CONTROL_PANEL_H
 
+#if defined(_MSC_VER)
+  #pragma warning(disable: 4786)
+#endif
+
+// common - 1st
+#include "common.h"
+
+// system headers
+#include <string>
+#include <vector>
+#include <deque>
+
+//common headers
+#include "bzfgl.h"
+
+// local headers
 #include "MainWindow.h"
-#include "global.h"
-#include "OpenGLTexture.h"
-#include "OpenGLTexFont.h"
-#include "OpenGLGState.h"
-#include "BzfString.h"
-#include "AList.h"
 
 class RadarRenderer;
 class SceneRenderer;
+class LocalFontFace;
 
-class ControlPanelMessage {
-  public:
-			ControlPanelMessage(const BzfString&, const GLfloat*);
-  public:
-    BzfString		string;
-    GLfloat		color[3];
+struct ControlPanelMessage {
+			ControlPanelMessage(const std::string&);
+    void		breakLines(float maxLength, int fontFace, float fontSize);
+
+    std::string		string;
+    std::vector<std::string>	lines;
+    int numlines;
 };
-BZF_DEFINE_ALIST(ControlPanelMessageList, ControlPanelMessage);
 
 class ControlPanel {
   public:
 			ControlPanel(MainWindow&, SceneRenderer&);
 			~ControlPanel();
 
-    void		render();
+    void		setControlColor(const GLfloat *color = NULL);
+    void		render(SceneRenderer&);
     void		resize();
+    void		invalidate();
 
     void		setNumberOfFrameBuffers(int);
 
-    void		addMessage(const BzfString&, const GLfloat* = NULL);
-	void		setMessagesOffset(int offset, int whence);
+    void		addMessage(const std::string&, const int mode = 3);
+    void		setMessagesOffset(int offset, int whence, bool paged);
+    void		setMessagesMode(int _messageMode);
+    int		getMessagesMode() {return messageMode;};
     void		setStatus(const char*);
-    void		resetTeamCounts();
-    void		setTeamCounts(const int* counts);
     void		setRadarRenderer(RadarRenderer*);
+
+    void		setDimming(float dimming);
+
+    void		saveMessages(const std::string& filename,
+				     bool stripAnsi) const;
 
   private:
     // no copying!
 			ControlPanel(const ControlPanel&);
     ControlPanel&	operator=(const ControlPanel&);
 
-    void		expose();
-    void		change();
-
-    void		zoomPanel(int width, int height);
-
     static void		resizeCallback(void*);
     static void		exposeCallback(void*);
+    static void		bzdbCallback(const std::string& name, void* data);
 
-  private:
+    enum MessageModes {
+      MessageAllTabs = -2,
+      MessageCurrent = -1,
+      MessageAll     = 0,
+      MessageChat    = 1,
+      MessageServer  = 2,
+      MessageMisc    = 3,
+      MessageModeCount
+    };
+    bool tabsOnRight;
+    std::vector<const char *> *tabs;
+    std::vector<float> tabTextWidth;
+    long totalTabWidth;
+
+
     MainWindow&		window;
-    boolean		resized;
+    bool		resized;
     int			numBuffers;
     int			exposed;
     int			changedMessage;
-    int			changedStatus;
-    int			changedCounts;
     RadarRenderer*	radarRenderer;
+    SceneRenderer*	renderer;
 
-    int			panelWidth;
-    int			panelHeight;
-    int			panelFormat;
-    unsigned char*	panelImage;
-    int			panelZoomedImageSize;
-    unsigned char*	panelZoomedImage;
-    unsigned char*	origPanelZoomedImage;
+    LocalFontFace*	fontFace;
+    float		fontSize;
 
-    OpenGLGState	gstate;
-    OpenGLTexture	background;
-    OpenGLTexFont	messageFont;
-    OpenGLTexFont	statusFont;
-    OpenGLTexFont	countFont;
-    int			width, blanking;
-    float		ratio;
+    float		dimming;
     float		du, dv;
-    float		radarAreaUV[4];
-    float		messageAreaUV[4];
-    float		statusAreaUV[4];
-    float		teamCountAreaUV[NumTeams][2];
-    float		teamCountSizeUV[2];
     int			radarAreaPixels[4];
     int			messageAreaPixels[4];
-    int			statusAreaPixels[4];
-    int			teamCountAreaPixels[NumTeams][2];
-    int			teamCountSizePixels[2];
-    BzfString		status;
-    int			teamCounts[NumTeams];
-    ControlPanelMessageList	messages;
-    static int			messagesOffset;
+    std::deque<ControlPanelMessage>	messages[MessageModeCount];
+    int messageMode;
+    GLfloat		teamColor[3];
+    static int		messagesOffset;
     static const int	maxScrollPages;
-    static const int	maxLines;
+    int			maxLines;
+    float		margin;
+    float		lineHeight;
+    bool		unRead[MessageModeCount];
+
 };
 
+inline void ControlPanel::setDimming(float newDimming)
+{
+  const float newDim = 1.0f - newDimming;
+  dimming = (newDim > 1.0f) ? 1.0f : (newDim < 0.0f) ? 0.0f : newDim;
+}
+
+
 #endif // BZF_CONTROL_PANEL_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

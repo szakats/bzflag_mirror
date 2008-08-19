@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /*
@@ -17,39 +17,37 @@
 #ifndef	BZF_ROBOT_PLAYER_H
 #define	BZF_ROBOT_PLAYER_H
 
+#include "common.h"
+
+/* system interface headers */
+#include <vector>
+
+/* interface header */
 #include "LocalPlayer.h"
+
+/* local interface headers */
 #include "Region.h"
+#include "RegionPriorityQueue.h"
+#include "ServerLink.h"
 
-class ServerLink;
 
-BZF_DEFINE_ALIST(RegionAzimuthList, float);
-
-class RobotPlayer : public BaseLocalPlayer {
+class RobotPlayer : public LocalPlayer {
   public:
 			RobotPlayer(const PlayerId&,
-				const char* name, ServerLink*,
-				const char* _email);
-			~RobotPlayer();
+				const char* name, ServerLink*);
 
     float		getTargetPriority(const Player*) const;
     const Player*	getTarget() const;
-    void		setTarget(const RegionList& regions, const Player*);
+    void		setTarget(const Player*);
+    static void		setObstacleList(std::vector<BzfRegion*>*);
 
-    ShotPath*		getShot(int index) const;
-
-    void		setTeam(TeamColor);
-    void		restart();
-    boolean		checkHit(const Player* source, const ShotPath*& hit,
-							float& minTime) const;
+    void		restart(const float* pos, float azimuth);
     void		explodeTank();
-    void		changeScore(short deltaWins, short deltaLosses);
 
   private:
-    boolean		doEndShot(int index, boolean isHit, float* pos);
     void		doUpdate(float dt);
     void		doUpdateMotion(float dt);
-    BzfRegion*		findRegion(const RegionList& list,
-					const float p[2]) const;
+    BzfRegion*		findRegion(const float p[2], float nearest[2]) const;
     float		getRegionExitPoint(
 				const float p1[2], const float p2[2],
 				const float a[2], const float targetPoint[2],
@@ -58,15 +56,24 @@ class RobotPlayer : public BaseLocalPlayer {
 				BzfRegion* region, BzfRegion* targetRegion,
 				const float targetPoint[2], int mailbox);
 
+     void		projectPosition(const Player *targ,const float t,float &x,float &y,float &z) const;
+     void		getProjectedPosition(const Player *targ, float *projpos) const;
+
   private:
-    ServerLink*		server;
-    LocalShotPath**	shots;
     const Player*	target;
-    RegionPointList	path;
-    RegionAzimuthList	pathAzimuth;
+    std::vector<RegionPoint>	path;
     int			pathIndex;
-    boolean		scoreChanged;
-    float		timeSinceShot;
+    float		timerForShot;
+    bool		drivingForward;
+    static std::vector<BzfRegion*>* obstacleList;
 };
 
 #endif // BZF_ROBOT_PLAYER_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

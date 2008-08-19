@@ -1,27 +1,30 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/*
- *
- */
+#ifndef	__MAINWINDOW_H__
+#define	__MAINWINDOW_H__
 
-#ifndef	BZF_MAIN_WINDOW_H
-#define	BZF_MAIN_WINDOW_H
-
-#define	USE_GL_STEREO
-
+/* BZFlag common header */
 #include "common.h"
 
-class BzfWindow;
+/* system interface headers */
+#include <vector>
+#include <string>
+
+/* common interface headers */
+#include "BzfWindow.h"
+#include "BzfJoystick.h"
+
+#define	USE_GL_STEREO
 
 class MainWindow {
   public:
@@ -36,46 +39,59 @@ class MainWindow {
 			LowerHalf
     };
 
-			MainWindow(BzfWindow*);
+			MainWindow(BzfWindow*, BzfJoystick*);
 			~MainWindow();
 
     BzfWindow*		getWindow() const { return window; }
+    BzfJoystick*	getJoystick() const { return joystick; }
 
-    boolean		getQuit() const;
     int			getOriginX() const;
     int			getOriginY() const;
     int			getWidth() const;
     int			getHeight() const;
-    int			getPanelHeight() const;
     int			getViewHeight() const;
-    boolean		getFullscreen();
+    bool		getFullscreen();
+    bool		getFullView() const;
 
-    void		setQuit();
     void		setPosition(int x, int y);
     void		setSize(int width, int height);
-    void		setMinSize(int width, int panelHeight, int viewHeight);
-    void		setPanelRatio(float);
+    void		setMinSize(int width, int height);
+    void		setFullView(bool);
     void		setFullscreen();
+    void		toggleFullscreen();
+    void		iconify(void);
     void		setNoMouseGrab();
 
     void		setZoomFactor(int);
     void		setQuadrant(Quadrant);
 
-    void		showWindow(boolean = True);
+    void		showWindow(bool = true);
     void		warpMouse();
     void		grabMouse();
+    void		enableGrabMouse(bool on);
+    bool		isGrabEnabled(void);
     void		ungrabMouse();
 
     void		resize();
 
     // return true iff there's a joystick available (and it's been initialized)
-    boolean		joystick() const;
+    bool		haveJoystick() const;
 
     // FIXME -- try to get rid of these.  we'd like to receive
     // events instead because it means no round trip to the server
     // for these values that we need every frame.
     void		getMousePosition(int& mx, int& my) const;
-    void		getJoyPosition(int& mx, int& my) const;
+    void		getJoyPosition(int& jx, int& jy) const;
+    unsigned long	getJoyButtonSet() const;
+    unsigned int	getJoyHatswitch(int switchno) const;
+    void		getJoyDevices(std::vector<std::string> &list) const;
+    void		getJoyDeviceAxes(std::vector<std::string> &list) const;
+    unsigned int	getJoyDeviceNumHats() const;
+    void		setJoyXAxis(const std::string axis);
+    void		setJoyYAxis(const std::string axis);
+    void		initJoystick(std::string &joystickName);
+
+    bool		isInFault() { return faulting; };
 
   private:
     // no copying
@@ -83,33 +99,31 @@ class MainWindow {
     MainWindow&		operator=(const MainWindow&);
 
     static void		resizeCB(void*);
+    static void		exposeCB(void*);
 
   private:
     BzfWindow*		window;
-    boolean		quit;
+    BzfJoystick*	joystick;
+    bool		quit;
     Quadrant		quadrant;
-    float		panelRatio;
-    boolean		isFullscreen;
-    boolean		allowMouseGrab;
+    bool		isFullscreen;
+    bool		isFullView;
+    bool		allowMouseGrab;
+    bool		grabEnabled;
     int			zoomFactor;
     int			trueWidth, trueHeight;
     int			xOrigin, yOrigin;
     int			width;
-    int			panelHeight;
+    int			height;
     int			viewHeight;
     int			minWidth;
-    int			minPanelHeight;
-    int			minViewHeight;
+    int			minHeight;
+    bool		faulting;
 };
 
 //
 // MainWindow
 //
-
-inline boolean		MainWindow::getQuit() const
-{
-  return quit;
-}
 
 inline int		MainWindow::getOriginX() const
 {
@@ -128,12 +142,7 @@ inline int		MainWindow::getWidth() const
 
 inline int		MainWindow::getHeight() const
 {
-  return panelHeight + viewHeight;
-}
-
-inline int		MainWindow::getPanelHeight() const
-{
-  return panelHeight;
+  return height;
 }
 
 inline int		MainWindow::getViewHeight() const
@@ -141,4 +150,17 @@ inline int		MainWindow::getViewHeight() const
   return viewHeight;
 }
 
-#endif // BZF_MAIN_WINDOW_H
+inline bool		MainWindow::getFullView() const
+{
+  return isFullView;
+}
+
+#endif /* __MAINWINDOW_H__ */
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

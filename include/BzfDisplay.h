@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* BzfDisplay:
@@ -26,12 +26,18 @@ class BzfDisplay {
 			BzfDisplay();
     virtual		~BzfDisplay();
 
-    virtual boolean	isValid() const = 0;
-    virtual boolean	isEventPending() const = 0;
-    virtual boolean	getEvent(BzfEvent&) const = 0;
+    virtual bool	isValid() const = 0;
+    virtual bool	isEventPending() const = 0;
+    virtual bool	getEvent(BzfEvent&) const = 0;
+    virtual bool	peekEvent(BzfEvent&) const = 0;
+
+    virtual bool	hasGetKeyMode() {return false;};
+    virtual void	getModState(bool &shift, bool &control, bool &alt) {
+      shift = false; control = false; alt = false;};
 
     int			getWidth() const;
     int			getHeight() const;
+    void		setFullScreenFormat(int);
 
     void		setPassthroughSize(int w, int h);
     int			getPassthroughWidth() const;
@@ -53,10 +59,10 @@ class BzfDisplay {
     const ResInfo*	getResolution(int index) const;
     int			getResolution() const;
     int			getDefaultResolution() const;
-    boolean		setResolution(int index);
-    boolean		setDefaultResolution();
+    bool		setResolution(int index);
+    bool		setDefaultResolution();
     int			findResolution(const char* name) const;
-    boolean		isValidResolution(int index) const;
+    bool		isValidResolution(int index) const;
 
   protected:
     void		initResolutions(ResInfo**, int num, int current);
@@ -65,8 +71,8 @@ class BzfDisplay {
 			BzfDisplay(const BzfDisplay&);
     BzfDisplay&		operator=(const BzfDisplay&);
 
-    virtual boolean	doSetResolution(int) = 0;
-    virtual boolean	doSetDefaultResolution();
+    virtual bool	doSetResolution(int) = 0;
+    virtual bool	doSetDefaultResolution();
 
   private:
     int			passWidth, passHeight;
@@ -74,6 +80,16 @@ class BzfDisplay {
     int			defaultResolution;
     int			currentResolution;
     ResInfo**		resolutions;
+  protected:
+    int		 modeIndex;
 };
 
 #endif // BZF_DISPLAY_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

@@ -1,18 +1,29 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+// bzflag common header
+#include "common.h"
+
+// interface header
+#include "EighthDBoxSceneNode.h"
+
+// system headers
 #include <stdlib.h>
 #include <math.h>
-#include "EighthDBoxSceneNode.h"
+
+// common implementation header
+#include "StateDatabase.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
 #include "SceneRenderer.h"
 
 const int		BoxPolygons = 60;
@@ -67,13 +78,12 @@ EighthDBoxSceneNode::~EighthDBoxSceneNode()
   // do nothing
 }
 
-void			EighthDBoxSceneNode::notifyStyleChange(
-				const SceneRenderer& renderer)
+void			EighthDBoxSceneNode::notifyStyleChange()
 {
-  EighthDimSceneNode::notifyStyleChange(renderer);
+  EighthDimSceneNode::notifyStyleChange();
 
   OpenGLGStateBuilder builder(gstate);
-  if (renderer.useSmoothing()) {
+  if (BZDB.isTrue("smooth")) {
     builder.setBlending(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     builder.setSmoothing();
   }
@@ -145,3 +155,11 @@ void			EighthDBoxSceneNode::EighthDBoxRenderNode::render()
   glVertex3fv(corner[3]);  glVertex3fv(corner[7]);
   glEnd();
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

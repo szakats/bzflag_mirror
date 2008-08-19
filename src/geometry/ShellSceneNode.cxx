@@ -1,21 +1,32 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <math.h>
-#include "ShellSceneNode.h"
-#include "SceneRenderer.h"
-#include "OpenGLMaterial.h"
+// bzflag common header
+#include "common.h"
 
-#define	ShellRadius1_2	(M_SQRT1_2 * ShellRadius)
+// interface header
+#include "ShellSceneNode.h"
+
+// system headers
+#include <math.h>
+
+// common implementation headers
+#include "OpenGLMaterial.h"
+#include "StateDatabase.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
+#include "SceneRenderer.h"
+
+#define	ShellRadius1_2	((GLfloat)(M_SQRT1_2 * ShellRadius))
 
 const GLfloat		ShellSceneNode::shellVertex[9][3] = {
 				{ 3.0f * ShellRadius, 0.0f, 0.0f },
@@ -31,13 +42,13 @@ const GLfloat		ShellSceneNode::shellVertex[9][3] = {
 const GLfloat		ShellSceneNode::shellNormal[10][3] = {
 				{ 1.0f, 0.0f, 0.0f },
 				{ 0.0f, -1.0f, 0.0f },
-				{ 0.0f, -M_SQRT1_2, -M_SQRT1_2 },
+				{ 0.0f, (float)-M_SQRT1_2, (float)-M_SQRT1_2 },
 				{ 0.0f, 0.0f, -1.0f },
-				{ 0.0f, M_SQRT1_2, -M_SQRT1_2 },
+				{ 0.0f, (float)M_SQRT1_2, (float)-M_SQRT1_2 },
 				{ 0.0f, 1.0f, 0.0f },
-				{ 0.0f, M_SQRT1_2, M_SQRT1_2 },
+				{ 0.0f, (float)M_SQRT1_2, (float)M_SQRT1_2 },
 				{ 0.0f, 0.0f, 1.0f },
-				{ 0.0f, -M_SQRT1_2, M_SQRT1_2 },
+				{ 0.0f, (float)-M_SQRT1_2, (float)M_SQRT1_2 },
 				{-1.0f, 0.0f, 0.0f }
 			};
 
@@ -52,7 +63,7 @@ ShellSceneNode::ShellSceneNode(const GLfloat pos[3],
   setRadius(9.0f * ShellRadius * ShellRadius);
 
   OpenGLGStateBuilder builder(gstate);
-  builder.setMaterial(OpenGLMaterial(specular, emissive, 20.0f));
+  builder.setMaterial(OpenGLMaterial(specular, emissive, 20.0f), RENDERER.useQuality() > _LOW_QUALITY);
   gstate = builder.getState();
 }
 
@@ -65,15 +76,14 @@ void			ShellSceneNode::move(const GLfloat pos[3],
 						const GLfloat forward[3])
 {
   setCenter(pos);
-  azimuth = 180.0f / M_PI*atan2f(forward[1], forward[0]);
-  elevation = -180.0f / M_PI*atan2f(forward[2], hypotf(forward[0],forward[1]));
+  azimuth = (float)(180.0 / M_PI*atan2f(forward[1], forward[0]));
+  elevation = (float)(-180.0 / M_PI*atan2f(forward[2], hypotf(forward[0],forward[1])));
 }
 
-void			ShellSceneNode::notifyStyleChange(
-				const SceneRenderer& renderer)
+void			ShellSceneNode::notifyStyleChange()
 {
   OpenGLGStateBuilder builder(gstate);
-  const boolean lighting = renderer.useLighting();
+  const bool lighting = BZDB.isTrue("lighting");
   builder.enableMaterial(lighting);
   builder.setShading(lighting ? GL_SMOOTH : GL_FLAT);
   renderNode.setLighting(lighting);
@@ -97,7 +107,7 @@ void			ShellSceneNode::addShadowNodes(SceneRenderer& renderer)
 ShellSceneNode::ShellRenderNode::ShellRenderNode(
 				const ShellSceneNode* _sceneNode) :
 				sceneNode(_sceneNode),
-				lighted(False)
+				lighted(false)
 {
   // do nothing
 }
@@ -108,7 +118,7 @@ ShellSceneNode::ShellRenderNode::~ShellRenderNode()
 }
 
 void			ShellSceneNode::ShellRenderNode::
-				setLighting(boolean _lighted)
+				setLighting(bool _lighted)
 {
   lighted = _lighted;
 }
@@ -161,3 +171,11 @@ void			ShellSceneNode::ShellRenderNode::render()
 
   glPopMatrix();
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

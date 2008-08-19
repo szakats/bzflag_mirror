@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* BoltSceneNode:
@@ -17,51 +17,62 @@
 #ifndef	BZF_BOLT_SCENE_NODE_H
 #define	BZF_BOLT_SCENE_NODE_H
 
+#include "common.h"
 #include "ShotSceneNode.h"
 #include "OpenGLLight.h"
 
-class OpenGLTexture;
-
 class BoltSceneNode : public ShotSceneNode {
   public:
-			BoltSceneNode(const GLfloat pos[3]);
+			BoltSceneNode(const GLfloat pos[3], const GLfloat vel[3]);
 			~BoltSceneNode();
 
-    void		setFlares(boolean);
+    void		setFlares(bool);
     void		setSize(float radius);
-    void		setColor(GLfloat r, GLfloat g, GLfloat b);
+    void		setColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a = 1.0f);
+    void		setTextureColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a = 1.0f);
     void		setColor(const GLfloat* rgb);
-    void		setTexture(const OpenGLTexture&);
-    void		setColorblindTexture(const OpenGLTexture&);
+    void		setTexture(const int);
     void		setTextureAnimation(int cu, int cv);
 
-    boolean		getColorblind() const;
-    void		setColorblind(boolean);
+    bool		getColorblind() const;
+    void		setColorblind(bool);
+
+    bool		getInvisible() const;
+    void		setInvisible(bool);
 
     void		move(const GLfloat pos[3], const GLfloat forward[3]);
     void		addLight(SceneRenderer&);
 
-    void		notifyStyleChange(const SceneRenderer&);
+    void		notifyStyleChange();
     void		addRenderNodes(SceneRenderer&);
+
+  public:
+    bool		phasingShot;
 
   protected:
     class BoltRenderNode : public RenderNode {
       public:
 			BoltRenderNode(const BoltSceneNode*);
 			~BoltRenderNode();
-	void		setColor(const GLfloat* rgb);
+	void		setColor(const GLfloat* rgba);
+	void		setTextureColor(const GLfloat* rgba);
 	void		render();
-	const GLfloat*	getPosition() { return sceneNode->getSphere(); }
+	void		renderGeoBolt();
+	void		renderGeoGMBolt();
+	void		renderGeoPill( float radius, float length, int segments, float endRad = -1);
+
+	const GLfloat*	getPosition() const { return sceneNode->getSphere(); }
 	void		setAnimation(int cu, int cv);
       private:
 	const BoltSceneNode* sceneNode;
 	int		u, v, cu, cv;
 	GLfloat		du, dv;
-	GLfloat		mainColor[3];
-	GLfloat		innerColor[3];
+	GLfloat		mainColor[4];
+	GLfloat		innerColor[4];
 	GLfloat		outerColor[4];
 	GLfloat		coronaColor[4];
 	GLfloat		flareColor[4];
+	GLfloat		textureColor[4];
 	int		numFlares;
 	float		theta[6];
 	float		phi[6];
@@ -76,16 +87,27 @@ class BoltSceneNode : public ShotSceneNode {
     friend class BoltRenderNode;
 
   private:
-    boolean		drawFlares;
-    boolean		blending;
-    boolean		texturing;
-    boolean		colorblind;
+    bool		drawFlares;
+    bool		invisible;
+    bool		texturing;
+    bool		colorblind;
     float		size;
-    GLfloat		color[3];
+    GLfloat		velocity[3];
+    GLfloat		color[4];
     OpenGLLight		light;
     OpenGLGState	gstate;
     OpenGLGState	colorblindGState;
     BoltRenderNode	renderNode;
+
+    GLfloat		azimuth, elevation, length;
 };
 
 #endif // BZF_BOLT_SCENE_NODE_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

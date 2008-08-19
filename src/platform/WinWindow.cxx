@@ -1,44 +1,46 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // Jeff Myers 10/8/97 added hooks to display setings dialog
 // crs 10/26/1997 modified JM's changes
 
 #include "WinWindow.h"
-#include "OpenGLGState.h"
 #include <stdio.h>
 #include <math.h>
+#include "StateDatabase.h"
+#include "DirectoryNames.h"
 
 WinWindow*		WinWindow::first = NULL;
 HPALETTE		WinWindow::colormap = NULL;
+
+HWND WinWindow::hwnd = NULL;
 
 WinWindow::WinWindow(const WinDisplay* _display, WinVisual* _visual) :
 				BzfWindow(_display),
 				display(_display),
 				visual(*_visual),
-				inDestroy(False),
-				hwnd(NULL),
+				inDestroy(false),
 				hwndChild(NULL),
 				hRC(NULL),
 				hDC(NULL),
 				hDCChild(NULL),
-				inactiveDueToDeactivate(False),
-				inactiveDueToDeactivateAll(False),
-				useColormap(False),
-				hasGamma(False),
-				has3DFXGamma(False),
+				inactiveDueToDeactivate(false),
+				inactiveDueToDeactivateAll(false),
+				useColormap(false),
+				hasGamma(false),
 				gammaVal(1.0f),
 				prev(NULL),
-				next(NULL)
+				next(NULL),
+				mouseGrab(false)
 {
   // make window
   hwnd = CreateWindow("BZFLAG", "bzflag",
@@ -94,12 +96,12 @@ WinWindow::~WinWindow()
   display->getRep()->unref();
 }
 
-boolean			WinWindow::isValid() const
+bool			WinWindow::isValid() const
 {
   return hwnd != NULL;
 }
 
-void			WinWindow::showWindow(boolean on)
+void			WinWindow::showWindow(bool on)
 {
   ShowWindow(hwnd, on ? SW_SHOW : SW_HIDE);
 }
@@ -146,29 +148,81 @@ void			WinWindow::setSize(int width, int height)
   MoveWindow(hwndChild, 0, 0, width, height, FALSE);
 }
 
-void			WinWindow::setMinSize(int width, int height)
+void			WinWindow::setMinSize(int, int)
 {
   // FIXME
 }
 
-void			WinWindow::setFullscreen()
+void			WinWindow::setFullscreen(bool on)
 {
-  DWORD style = GetWindowLong(hwnd, GWL_STYLE);
-  style &= ~(WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_THICKFRAME);
-  SetWindowLong(hwnd, GWL_STYLE, style);
-  if (display->isFullScreenOnly())
-    MoveWindow(hwnd, 0, 0,
-		display->getFullWidth(),
-		display->getFullHeight(), FALSE);
-  else
-    MoveWindow(hwnd, 0, 0,
-		GetDeviceCaps(hDC, HORZRES),
-		GetDeviceCaps(hDC, VERTRES), FALSE);
+  if (on) {
+    // no window decorations
+    DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+    style &= ~(WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_THICKFRAME);
+    SetWindowLong(hwnd, GWL_STYLE, style);
+
+    // take up the whole screen
+    if (display->isFullScreenOnly())
+      MoveWindow(hwnd, 0, 0,
+		  display->getFullWidth(),
+		  display->getFullHeight(), FALSE);
+    else
+      MoveWindow(hwnd, 0, 0,
+		  GetDeviceCaps(hDC, HORZRES),
+		  GetDeviceCaps(hDC, VERTRES), FALSE);
+
+  } else if (!display->isFullScreenOnly()) {
+    // reset the resolution if we changed it before
+    display->setDefaultResolution();
+
+    // window stuff
+    DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+    style |= (WS_BORDER | WS_CAPTION);
+    SetWindowLong(hwnd, GWL_STYLE, style);
+
+    // size it
+    if (BZDB.isSet("geometry")) {
+      int w, h, x, y, count;
+      char xs, ys;
+      count = sscanf(BZDB.get("geometry").c_str(),
+    		 "%dx%d%c%d%c%d", &w, &h, &xs, &x, &ys, &y);
+      if (w < 256) w = 256;
+      if (h < 192) h = 192;
+      if (count == 6) {
+        if (xs == '-') x = display->getWidth() - x - w;
+        if (ys == '-') y = display->getHeight() - y - h;
+        setPosition(x, y);
+      }
+      setSize(w, h);
+    } else {
+      // uh.... right
+      setPosition(0,0);
+      setSize(640,480);
+    }
+
+    // force windows to repaint the whole desktop
+    RECT rect;
+    GetWindowRect(NULL, &rect);
+    InvalidateRect(NULL, &rect, TRUE);
+  }
 
   // resize child
   int width, height;
   getSize(width, height);
   MoveWindow(hwndChild, 0, 0, width, height, FALSE);
+
+  // reset mouse grab
+  if (mouseGrab) {
+    ungrabMouse();
+    grabMouse();
+  }
+}
+
+void			WinWindow::iconify()
+{
+  ShowWindow(hwnd, SW_MINIMIZE);
+  if (mouseGrab)
+    ungrabMouse();
 }
 
 void			WinWindow::warpMouse(int x, int y)
@@ -187,12 +241,41 @@ void			WinWindow::getMouse(int& x, int& y) const
 
 void			WinWindow::grabMouse()
 {
-  // FIXME
+  RECT wrect;
+  GetWindowRect(hwnd, &wrect);
+
+  int xborder = GetSystemMetrics(SM_CXDLGFRAME);
+  int yborder = GetSystemMetrics(SM_CYDLGFRAME);
+  int titlebar = GetSystemMetrics(SM_CYCAPTION);
+
+  DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+  // don't compensate for window trimmings if they're turned off
+  if (!((style & (WS_BORDER | WS_CAPTION | WS_DLGFRAME))
+        == (WS_BORDER | WS_CAPTION | WS_DLGFRAME)))
+    xborder = yborder = titlebar = 0;
+
+  RECT rect;
+  rect.top = wrect.top + titlebar + yborder;
+  rect.left = wrect.left + xborder;
+  rect.bottom = wrect.bottom - yborder;
+  rect.right = wrect.right - xborder;
+  ClipCursor(&rect);
 }
 
 void			WinWindow::ungrabMouse()
 {
-  // FIXME
+  ClipCursor(NULL);
+}
+
+void			WinWindow::enableGrabMouse(bool on)
+{
+  if (on) {
+    mouseGrab = true;
+    grabMouse();
+  } else {
+    mouseGrab = false;
+    ungrabMouse();
+  }
 }
 
 void			WinWindow::showMouse()
@@ -207,7 +290,7 @@ void			WinWindow::hideMouse()
 
 void			WinWindow::setGamma(float newGamma)
 {
-  if (!useColormap && !hasGamma && !has3DFXGamma)
+  if (!useColormap && !hasGamma)
     return;
 
   // save gamma
@@ -234,9 +317,9 @@ float			WinWindow::getGamma() const
   return gammaVal;
 }
 
-boolean			WinWindow::hasGammaControl() const
+bool			WinWindow::hasGammaControl() const
 {
-  return useColormap || hasGamma || has3DFXGamma;
+  return useColormap || hasGamma;
 }
 
 void			WinWindow::makeCurrent()
@@ -265,6 +348,40 @@ void			WinWindow::freeContext()
     destroyChild();
 }
 
+bool checkGammaRampsFile( WORD ramps[6*256] )
+{
+  std::string gammaFile = getConfigDirName() + "bzflag.gamma";
+
+  FILE *fp = fopen(gammaFile.c_str(),"rb");
+  if (!fp)
+    return false; // no crash
+
+  fread(ramps,sizeof(WORD)*6*256,1,fp);
+  fclose(fp);
+
+  return true;
+}
+
+bool saveGammaRampsFile( WORD ramps[6*256] )
+{
+  std::string gammaFile = getConfigDirName() + "bzflag.gamma";
+
+  FILE *fp = fopen(gammaFile.c_str(),"wb");
+  if (!fp)
+    return false; // BAD
+
+  fwrite(ramps,sizeof(WORD)*6*256,1,fp);
+  fclose(fp);
+
+  return true;
+}
+
+void deleteGammaRampsFile ( void )
+{
+  std::string gammaFile = getConfigDirName() + "bzflag.gamma";
+  DeleteFile(gammaFile.c_str());
+}
+
 void			WinWindow::createChild()
 {
   // get parent size
@@ -280,7 +397,7 @@ void			WinWindow::createChild()
   if (hwndChild == NULL) return;
 
   if (display->isFullScreenOnly())
-    setFullscreen();
+    setFullscreen(true);
 
   // get DC
   hDCChild = GetDC(hwndChild);
@@ -311,7 +428,10 @@ void			WinWindow::createChild()
 
   // if no colormap then adjust gamma ramps
   if (!useColormap) {
-    getGammaRamps(origGammaRamps);
+    if (!checkGammaRampsFile(origGammaRamps))
+      getGammaRamps(origGammaRamps);
+
+    saveGammaRampsFile(origGammaRamps);
     setGamma(gammaVal);
   }
 
@@ -335,6 +455,7 @@ void			WinWindow::createChild()
 void			WinWindow::destroyChild()
 {
   setGammaRamps(origGammaRamps);
+  deleteGammaRampsFile();
   if (hRC != NULL) {
     if (wglGetCurrentContext() == hRC)
       wglMakeCurrent(NULL, NULL);
@@ -351,36 +472,19 @@ void			WinWindow::destroyChild()
   }
 }
 
-typedef BOOL		(*GammaRamp3DFX)(HDC, LPVOID);
-
 void			WinWindow::getGammaRamps(WORD* ramps)
 {
   if (hDCChild == NULL)
     return;
 
-  // see if we've got the 3Dfx gamma ramp extension
-  PROC proc = wglGetProcAddress("wglGetDeviceGammaRamp3DFX");
-  if (proc != NULL) {
-    GammaRamp3DFX wglGetDeviceGammaRamp3DFX = (GammaRamp3DFX)proc;
-    has3DFXGamma = wglGetDeviceGammaRamp3DFX(hDCChild, ramps + 3 * 256);
-  }
-
   // get device gamma ramps
-  hasGamma = GetDeviceGammaRamp(hDCChild, ramps);
+  hasGamma = GetDeviceGammaRamp(hDCChild, ramps) != FALSE;
 }
 
 void			WinWindow::setGammaRamps(const WORD* ramps)
 {
   if (hDCChild == NULL)
     return;
-
-  if (has3DFXGamma) {
-    PROC proc = wglGetProcAddress("wglSetDeviceGammaRamp3DFX");
-    if (proc != NULL) {
-      GammaRamp3DFX wglSetDeviceGammaRamp3DFX = (GammaRamp3DFX)proc;
-      wglSetDeviceGammaRamp3DFX(hDCChild, (LPVOID)(ramps + 3 * 256));
-    }
-  }
 
   if (hasGamma)
     SetDeviceGammaRamp(hDCChild, (LPVOID)ramps);
@@ -401,27 +505,21 @@ void			WinWindow::deactivateAll()
 {
   for (WinWindow* scan = first; scan; scan = scan->next) {
     scan->freeContext();
-    scan->inactiveDueToDeactivateAll = True;
+    scan->inactiveDueToDeactivateAll = true;
   }
 }
 
 void			WinWindow::reactivateAll()
 {
-  boolean anyNewChildren = False;
   for (WinWindow* scan = first; scan; scan = scan->next) {
-    const boolean hadChild = (scan->hDCChild != NULL);
-    scan->inactiveDueToDeactivateAll = False;
+    const bool hadChild = (scan->hDCChild != NULL);
+    scan->inactiveDueToDeactivateAll = false;
     scan->makeContext();
-    if (!hadChild && scan->hDCChild != NULL)
-      anyNewChildren = True;
+    scan->callExposeCallbacks();
   }
-
-  // reload context data
-  if (anyNewChildren)
-    OpenGLGState::initContext();
 }
 
-HWND			WinWindow::getHandle() const
+HWND			WinWindow::getHandle()
 {
   return hwnd;
 }
@@ -458,49 +556,72 @@ void			WinWindow::paletteChanged()
   }
 }
 
-boolean			WinWindow::activate()
+bool			WinWindow::activate()
 {
-  inactiveDueToDeactivate = False;
+  inactiveDueToDeactivate = false;
+
+  // don't do unwindowing stuff if we don't need to
+  if (BZDB.isTrue("Win32NoMin") || BZDB.isTrue("_window")) {
+    // still have the window, just regrab the mouse
+    if (mouseGrab)
+      grabMouse();
+    return true;
+  }
 
   // restore window
   ShowWindow(hwnd, SW_RESTORE);
   SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
 				SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
 
+  // regrab the mouse with the new window size
+  if (mouseGrab)
+    grabMouse();
+
   // recreate OpenGL context
-  const boolean hadChild = (hDCChild != NULL);
+  const bool hadChild = (hDCChild != NULL);
   makeContext();
 
-  if (!hadChild && hDCChild != NULL) {
-    // reload context data
-    OpenGLGState::initContext();
+  if (mouseGrab)
+    grabMouse();
 
+  if (!hadChild && hDCChild != NULL) {
     // force a redraw
     callExposeCallbacks();
 
-    return True;
+    return true;
   }
 
-  return False;
+  return false;
 }
 
-boolean			WinWindow::deactivate()
+bool			WinWindow::deactivate()
 {
+  // ungrab the mouse when we lose focus
+  if (mouseGrab)
+    ungrabMouse();
+
+  // don't do unwindowing stuff if we don't need to
+  if (BZDB.isTrue("Win32NoMin") || BZDB.isTrue("_window"))
+    return true;
+
   // minimize window while not active.  skip if being destroyed.
   if (!inDestroy)
     ShowWindow(hwnd, SW_MINIMIZE);
 
   // destroy OpenGL context
-  const boolean hadChild = (hDCChild != NULL);
+  const bool hadChild = (hDCChild != NULL);
   freeContext();
 
-  inactiveDueToDeactivate = True;
+  if (mouseGrab)
+    ungrabMouse();
+
+  inactiveDueToDeactivate = true;
   return hadChild;
 }
 
 void			WinWindow::onDestroy()
 {
-  inDestroy = True;
+  inDestroy = true;
 }
 
 BYTE			WinWindow::getIntensityValue(float i) const
@@ -542,7 +663,7 @@ void			WinWindow::makeColormap(
     logicalPalette->palPalEntry[i].peFlags = 0;
   }
 
-  static const boolean matchGDI = False;
+  static const bool matchGDI = false;
   if (matchGDI) {
     // default colors reserved by system
     static const int NUM_GDI_COLORS = 20;
@@ -627,5 +748,13 @@ void			WinWindow::makeColormap(
     ::SetPaletteEntries(colormap, 0, n, logicalPalette->palPalEntry + 0);
 
   // free the cruft
-  delete[] (void*)logicalPalette;
+  delete [] logicalPalette;
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

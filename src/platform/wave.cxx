@@ -1,17 +1,17 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "wave.h"
 #include "common.h"
+#include "wave.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -249,8 +249,11 @@ int main(int argc, char *argv[]) {
 
   fd = open("/dev/dsp", O_WRONLY, 0);
   if (fd == -1) {
-    fprintf(stderr, "Failed to open /dev/dsp\n");
-    return -1;
+    fd = open("/dev/sound/dsp", O_WRONLY, 0);
+    if (fd == -1) {
+      fprintf(stderr, "Failed to open /dev/dsp or /dev/sound/dsp\n");
+      return -1;
+    }
   }
 #if BYTE_ORDER == BIG_ENDIAN
   sndformat=AFMT_S16_BE;
@@ -280,6 +283,8 @@ int main(int argc, char *argv[]) {
   }
   write(fd, data, samples*channels);
   fprintf(stderr, "sound is %dus\n", samples * (1000000 / audioOutputRate));
+
+  // FIXME: can/should use TimeKeeper
   usleep(samples * (1000000 / audioOutputRate));
 /*
   while (1) {
@@ -298,3 +303,11 @@ int main(int argc, char *argv[]) {
 }
 #endif
 
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

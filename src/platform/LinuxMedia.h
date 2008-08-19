@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* LinuxMedia:
@@ -26,26 +26,25 @@ class LinuxMedia : public BzfMedia {
 			LinuxMedia();
 			~LinuxMedia();
 
-    double		stopwatch(boolean);
-    void		sleep(float);
-    boolean		openAudio();
+    double		stopwatch(bool);
+    bool		openAudio();
     void		closeAudio();
-    boolean		startAudioThread(void (*)(void*), void*);
+    bool		startAudioThread(void (*)(void*), void*);
     void		stopAudioThread();
-    boolean		hasAudioThread() const;
+    bool		hasAudioThread() const;
     void		writeSoundCommand(const void*, int);
-    boolean		readSoundCommand(void*, int);
+    bool		readSoundCommand(void*, int);
     int			getAudioOutputRate() const;
     int			getAudioBufferSize() const;
     int			getAudioBufferChunkSize() const;
-    boolean		isAudioTooEmpty() const;
+    bool		isAudioTooEmpty() const;
     void		writeAudioFrames(const float* samples, int numFrames);
-    void		audioSleep(boolean checkLowWater, double maxTime);
+    void		audioSleep(bool checkLowWater, double maxTime);
 
   private:
-    boolean		checkForAudioHardware();
-    boolean		openAudioHardware();
-    boolean		openIoctl(int cmd, void* value, boolean req = True);
+    bool		checkForAudioHardware();
+    bool		openAudioHardware();
+    bool		openIoctl(int cmd, void* value, bool req = true);
     static void		audioThreadInit(void*);
 
     void		writeAudioFrames8Bit(
@@ -56,8 +55,8 @@ class LinuxMedia : public BzfMedia {
     static double	getTime();
 
   private:
-    boolean		audioReady;
-    int		        audioOutputRate;
+    bool		audioReady;
+    int			audioOutputRate;
     int			audioBufferSize;
     int			audioLowWaterMark;
     int			maxFd;
@@ -66,13 +65,21 @@ class LinuxMedia : public BzfMedia {
     short*		outputBuffer;
     pid_t		childProcID;
     double		stopwatchTime;
-    boolean		audio8Bit;
+    bool		audio8Bit;
 
-    boolean		noSetFragment;
-    boolean		getospaceBroken;
+    bool		noSetFragment;
+    bool		getospaceBroken;
     int			chunksPending;
     double		chunkTime;
     double		chunksPerSecond;
 };
 
 #endif // BZF_LINUXMEDIA_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

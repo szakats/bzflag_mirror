@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* WinVisual:
@@ -19,7 +19,6 @@
 
 #include "BzfVisual.h"
 #include "WinDisplay.h"
-#include <windows.h>
 
 class WinVisual : public BzfVisual {
   public:
@@ -28,7 +27,7 @@ class WinVisual : public BzfVisual {
 			~WinVisual();
 
     void		setLevel(int level);
-    void		setDoubleBuffer(boolean);
+    void		setDoubleBuffer(bool);
     void		setIndex(int minDepth);
     void		setRGBA(int minRed, int minGreen,
 				int minBlue, int minAlpha);
@@ -36,10 +35,10 @@ class WinVisual : public BzfVisual {
     void		setStencil(int minDepth);
     void		setAccum(int minRed, int minGreen,
 				int minBlue, int minAlpha);
-    void		setStereo(boolean);
+    void		setStereo(bool);
     void		setMultisample(int minSamples);
 
-    boolean		build();
+    bool		build();
 
     // for other Windows stuff
     void		reset();
@@ -59,3 +58,11 @@ class WinVisual : public BzfVisual {
 };
 
 #endif // BZF_WINVISUAL_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

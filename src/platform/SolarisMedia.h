@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* SolarisMedia:
@@ -17,10 +17,11 @@
 #ifndef BZF_SOLARISMEDIA_H
 #define	BZF_SOLARISMEDIA_H
 
+#include "BzfMedia.h"
+
 #include <math.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include "bzsignal.h"
 #include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
@@ -29,28 +30,28 @@
 #include <sys/audioio.h>
 #include <sys/stropts.h>
 
-#include "BzfMedia.h"
+#include "bzsignal.h"
+
 
 class SolarisMedia : public BzfMedia {
   public:
 			SolarisMedia();
 			~SolarisMedia();
 
-    double		stopwatch(boolean);
-    void		sleep(float);
-    boolean		openAudio();
+    double		stopwatch(bool);
+    bool		openAudio();
     void		closeAudio();
-    boolean		startAudioThread(void (*)(void*), void*);
+    bool		startAudioThread(void (*)(void*), void*);
     void		stopAudioThread();
-    boolean		hasAudioThread() const;
+    bool		hasAudioThread() const;
     void		writeSoundCommand(const void*, int);
-    boolean		readSoundCommand(void*, int);
+    bool		readSoundCommand(void*, int);
     int			getAudioOutputRate() const;
     int			getAudioBufferSize() const;
     int			getAudioBufferChunkSize() const;
-    boolean		isAudioTooEmpty() const;
+    bool		isAudioTooEmpty() const;
     void		writeAudioFrames(const float* samples, int numFrames);
-    void		audioSleep(boolean checkLowWater, double maxTime);
+    void		audioSleep(bool checkLowWater, double maxTime);
 
 private:
 
@@ -71,3 +72,11 @@ private:
 };
 
 #endif // BZF_SOLARISMEDIA_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

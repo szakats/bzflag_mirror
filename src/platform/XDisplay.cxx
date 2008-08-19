@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "XDisplay.h"
@@ -15,15 +15,6 @@
 #include "BzfEvent.h"
 #include <string.h>
 #include <X11/keysym.h>
-
-#ifdef XIJOYSTICK
-#include <stdlib.h>
-static int	ioErrorHandler(Display*)
-{ 
-  abort();
-  return 0;
-}
-#endif
 
 //
 // XDisplay::Rep
@@ -33,21 +24,10 @@ XDisplay::Rep::Rep(const char* displayName) :
 				refCount(1),
 				display(NULL),
 				screen(0)
-#ifdef XIJOYSTICK
-				,devices(NULL)
-#endif
 {
   // open display
   display = XOpenDisplay(displayName);
   if (!display) return;
-
-#ifdef XIJOYSTICK
-  int dummy;
-  if (XQueryExtension(display, "XInputExtension", &dummy, &dummy, &dummy)) {
-    devices = XListInputDevices(display, &ndevices);
-    XSetIOErrorHandler(ioErrorHandler);
-  }
-#endif
 
   // other initialization
   screen = DefaultScreen(display);
@@ -55,10 +35,6 @@ XDisplay::Rep::Rep(const char* displayName) :
 
 XDisplay::Rep::~Rep()
 {
-#ifdef XIJOYSTICK
-  if (devices)
-    XFreeDeviceList(devices);
-#endif
   if (display) XCloseDisplay(display);
 }
 
@@ -76,28 +52,6 @@ Window			XDisplay::Rep::getRootWindow() const
 {
   return display ? RootWindow(display, screen) : None;
 }
-
-#ifdef XIJOYSTICK
-int			XDisplay::Rep::mapButton(int button) const
-{
-  static const int map[] = { BzfKeyEvent::LeftMouse,
-				BzfKeyEvent::MiddleMouse,
-				BzfKeyEvent::RightMouse,
-				BzfKeyEvent::F1,
-				BzfKeyEvent::F2,
-				BzfKeyEvent::F3,
-				BzfKeyEvent::F4,
-				BzfKeyEvent::F5,
-				BzfKeyEvent::F6,
-				BzfKeyEvent::F7,
-				BzfKeyEvent::F8,
-				BzfKeyEvent::F9
-			};
-  if (button < 1 || button > 12)
-    return BzfKeyEvent::NoButton;
-  return map[button];
-}
-#endif
 
 //
 // XDisplay
@@ -141,21 +95,35 @@ XDisplay::~XDisplay()
   rep->unref();
 }
 
-boolean			XDisplay::isValid() const
+bool			XDisplay::isValid() const
 {
   return rep->getDisplay() != NULL;
 }
 
-boolean			XDisplay::isEventPending() const
+bool			XDisplay::isEventPending() const
 {
   return (XPending(rep->getDisplay()) != 0);
 }
 
-boolean			XDisplay::getEvent(BzfEvent& event) const
+
+bool XDisplay::getEvent(BzfEvent& event) const
 {
   XEvent xevent;
   XNextEvent(rep->getDisplay(), &xevent);
+  return setupEvent(event, xevent);
+}
 
+
+bool XDisplay::peekEvent(BzfEvent& event) const
+{
+  XEvent xevent;
+  XPeekEvent(rep->getDisplay(), &xevent);
+  return setupEvent(event, xevent);
+}
+
+
+bool XDisplay::setupEvent(BzfEvent& event, const XEvent& xevent) const
+{
   switch (xevent.type) {
     case Expose:
     case ConfigureNotify:
@@ -168,20 +136,16 @@ boolean			XDisplay::getEvent(BzfEvent& event) const
     case KeyRelease:
     case ClientMessage:
       event.window = XWindow::lookupWindow(xevent.xexpose.window);
-      if (!event.window) return False;
+      if (!event.window) return false;
       break;
 
     default:
-#ifdef XIJOYSTICK
-      if ((xevent.type != rep->getButtonPressType()) &&
-	  (xevent.type != rep->getButtonReleaseType()))
-#endif
-	return False;
+      return false;
   }
 
   switch (xevent.type) {
     case Expose:
-      if (xevent.xexpose.count != 0) return False;
+      if (xevent.xexpose.count != 0) return false;
       event.type = BzfEvent::Redraw;
       break;
 
@@ -192,7 +156,7 @@ boolean			XDisplay::getEvent(BzfEvent& event) const
       event.window->getSize(width, height);
       if (width == xevent.xconfigure.width &&
 	  height == xevent.xconfigure.height)
-	return False;
+	return false;
 */
       event.type = BzfEvent::Resize;
       event.resize.width = xevent.xconfigure.width;
@@ -216,91 +180,72 @@ boolean			XDisplay::getEvent(BzfEvent& event) const
 
     case ButtonPress:
       event.type = BzfEvent::KeyDown;
-      event.keyDown.ascii = 0;
+      event.keyDown.chr = 0;
       event.keyDown.shift = 0;
       switch (xevent.xbutton.button) {
 	case Button1: event.keyDown.button = BzfKeyEvent::LeftMouse; break;
 	case Button2: event.keyDown.button = BzfKeyEvent::MiddleMouse; break;
 	case Button3: event.keyDown.button = BzfKeyEvent::RightMouse; break;
-	default:      return False;
+	default:      return false;
       }
       break;
 
     case ButtonRelease:
       event.type = BzfEvent::KeyUp;
-      event.keyUp.ascii = 0;
+      event.keyUp.chr = 0;
       event.keyUp.shift = 0;
       switch (xevent.xbutton.button) {
 	case Button1: event.keyUp.button = BzfKeyEvent::LeftMouse; break;
 	case Button2: event.keyUp.button = BzfKeyEvent::MiddleMouse; break;
 	case Button3: event.keyUp.button = BzfKeyEvent::RightMouse; break;
-	default:      return False;
+	default:      return false;
       }
       break;
 
     case KeyPress:
       event.type = BzfEvent::KeyDown;
-      if (!getKey(xevent, event.keyDown)) return False;
+      if (!getKey(xevent, event.keyDown)) return false;
       break;
 
     case KeyRelease:
       event.type = BzfEvent::KeyUp;
-      if (!getKey(xevent, event.keyUp)) return False;
+      if (!getKey(xevent, event.keyUp)) return false;
       break;
 
     case ClientMessage: {
       XClientMessageEvent* cme = (XClientMessageEvent*)&xevent;
       if (cme->format == 32) {
 	if ((Atom)cme->data.l[0] == XInternAtom(rep->getDisplay(),
-					"WM_DELETE_WINDOW", True)) {
+					"WM_DELETE_WINDOW", true)) {
 	  event.type = BzfEvent::Quit;
 	  break;
 	}
       }
-      return False;
+      return false;
     }
-
-#ifdef XIJOYSTICK
-    default:
-      if (xevent.type == rep->getButtonPressType()) {
-	XDeviceButtonEvent *button = (XDeviceButtonEvent*) &xevent;
-	event.type = BzfEvent::KeyDown;
-	event.keyDown.ascii = 0;
-	event.keyDown.shift = 0;
-	event.keyDown.button = rep->mapButton(button->button);
-	if (event.keyDown.button == BzfKeyEvent::NoButton)
-  	return False;
-      } else if (xevent.type == rep->getButtonReleaseType()) {
-	XDeviceButtonEvent *button = (XDeviceButtonEvent*) &xevent;
-	event.type = BzfEvent::KeyUp;
-	event.keyUp.ascii = 0;
-	event.keyUp.shift = 0;
-	event.keyUp.button = rep->mapButton(button->button);
-	if (event.keyUp.button == BzfKeyEvent::NoButton)
-  	return False;
-      }
-#endif
   }
 
-  return True;
+  return true;
 }
 
-boolean			XDisplay::getKey(const XEvent& xevent,
+
+bool			XDisplay::getKey(const XEvent& xevent,
 						BzfKeyEvent& key) const
 {
   char buf[3];
   KeySym keysym;
+  /* TODO: allow wide character input */
   if (XLookupString((XKeyEvent*)&xevent.xkey, buf, 1, &keysym, NULL) == 1) {
-    key.ascii = buf[0];
+    key.chr = buf[0];
     key.button = BzfKeyEvent::NoButton;
 
     if (keysym == XK_Delete) {
-      key.ascii = 0;
+      key.chr = 0;
       key.button = BzfKeyEvent::Delete;
     }
   }
   else {
-    key.ascii = 0;
+    key.chr = 0;
     switch (keysym) {
       case XK_Pause:	key.button = BzfKeyEvent::Pause; break;
       case XK_Home:	key.button = BzfKeyEvent::Home; break;
@@ -325,7 +270,7 @@ boolean			XDisplay::getKey(const XEvent& xevent,
       case XK_F10:	key.button = BzfKeyEvent::F10; break;
       case XK_F11:	key.button = BzfKeyEvent::F11; break;
       case XK_F12:	key.button = BzfKeyEvent::F12; break;
-      default:		return False;
+      default:		return false;
     }
   }
 
@@ -333,15 +278,15 @@ boolean			XDisplay::getKey(const XEvent& xevent,
   if (xevent.xkey.state & ShiftMask) key.shift |= BzfKeyEvent::ShiftKey;
   if (xevent.xkey.state & ControlMask) key.shift |= BzfKeyEvent::ControlKey;
   if (xevent.xkey.state & Mod1Mask) key.shift |= BzfKeyEvent::AltKey;
-  return True;
+  return true;
 }
 
-boolean			XDisplay::doSetResolution(int modeIndex)
+bool			XDisplay::doSetResolution(int modeIndex)
 {
   return mode->set(modeIndex);
 }
 
-boolean			XDisplay::doSetDefaultResolution()
+bool			XDisplay::doSetDefaultResolution()
 {
   return mode->setDefault(getDefaultResolution());
 }
@@ -366,13 +311,21 @@ XDisplayMode::ResInfo**	XDisplayMode::init(XDisplay*, int&, int&)
   return NULL;
 }
 
-boolean			XDisplayMode::set(int)
+bool			XDisplayMode::set(int)
 {
   // no switching
-  return False;
+  return false;
 }
 
-boolean			XDisplayMode::setDefault(int mode)
+bool			XDisplayMode::setDefault(int mode)
 {
   return set(mode);
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

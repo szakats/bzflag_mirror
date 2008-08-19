@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* LinuxDisplay:
@@ -18,7 +18,7 @@
 #define	BZF_LINUXDISPLAY_H
 
 #include "XDisplay.h"
-#if defined(__linux__) && defined(XF86VIDMODE_EXT)
+#if defined(XF86VIDMODE_EXT)
 #define USE_XF86VIDMODE_EXT
 #define private c_private
 #include <X11/extensions/xf86vmode.h>
@@ -32,11 +32,11 @@ class LinuxDisplayMode : public XDisplayMode {
 			~LinuxDisplayMode();
 
     ResInfo**		init(XDisplay* owner, int& num, int& current);
-    boolean		set(int);
-    boolean		setDefault(int);
+    bool		set(int);
+    bool		setDefault(int);
 
   private:
-    boolean		doSet(int, boolean position);
+    bool		doSet(int, bool position);
 
   private:
     XDisplay*		display;
@@ -49,3 +49,11 @@ class LinuxDisplayMode : public XDisplayMode {
 };
 
 #endif // BZF_LINUXDISPLAY_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

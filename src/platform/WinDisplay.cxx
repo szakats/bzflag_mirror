@@ -1,16 +1,18 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+#define _WIN32_WINDOWS 0x0500
 
-#define INITGUID
+// in this file at least, we want wide-character functionality
+#define UNICODE
 
 #include "WinDisplay.h"
 #include "WinWindow.h"
@@ -18,6 +20,7 @@
 #include "BzfEvent.h"
 #include <stdio.h>
 #include <string.h>
+#include "StateDatabase.h"
 
 class Resolution {
   public:
@@ -67,7 +70,7 @@ WinDisplay::Rep::Rep(const char*) : refCount(1),
   wc.hCursor		= LoadCursor(NULL, IDC_ARROW);
   wc.hbrBackground	= (HBRUSH)GetStockObject(NULL_BRUSH);
   wc.lpszMenuName	= NULL;
-  wc.lpszClassName	= "BZFLAG";
+  wc.lpszClassName	= L"BZFLAG";
   wc.hIconSm		= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_BZICON));
 
   if (RegisterClassEx(&wc) == 0)
@@ -161,22 +164,13 @@ LONG WINAPI		WinDisplay::Rep::windowProc(HWND hwnd, UINT msg,
 WinDisplay::WinDisplay(const char* displayName, const char*) :
 				rep(NULL),
 				hwnd(NULL),
-				using3Dfx(False),
 				fullWidth(0),
 				fullHeight(0),
 				resolutions(NULL),
-				translated(False),
+				translated(false),
 				charCode(0)
 {
   rep = new Rep(displayName);
-
-  // see if we're using a 3Dfx card.  if so we'll skip the resolution
-  // picking later.
-  using3Dfx = (GetModuleHandle("glide2x.dll") != NULL);
-  if (using3Dfx) {
-    fullWidth = getPassthroughWidth();
-    fullHeight = getPassthroughHeight();
-  }
 
   // get resolutions
   if (isValid() && !isFullScreenOnly()) {
@@ -198,18 +192,26 @@ WinDisplay::WinDisplay(const char* displayName, const char*) :
     // register modes
     initResolutions(resInfo, numModes, currentMode);
   }
+
+  addFatalErrorCallback(this);
 }
 
 WinDisplay::~WinDisplay()
 {
+  removeFatalErrorCallback(this);
   setDefaultResolution();
   delete[] resolutions;
   rep->unref();
 }
 
-boolean			WinDisplay::isFullScreenOnly() const
+void WinDisplay::error ( const char* title, const char* message )
 {
-  return using3Dfx;
+  MessageBoxA(hwnd,message,title,MB_OK | MB_ICONERROR | MB_TASKMODAL);
+}
+
+bool			WinDisplay::isFullScreenOnly() const
+{
+  return false;
 }
 
 int			WinDisplay::getFullWidth() const
@@ -222,111 +224,156 @@ int			WinDisplay::getFullHeight() const
   return fullHeight;
 }
 
-boolean			WinDisplay::isValid() const
+bool			WinDisplay::isValid() const
 {
   return rep->hInstance != NULL;
 }
 
-boolean			WinDisplay::isEventPending() const
+bool			WinDisplay::isEventPending() const
 {
   MSG msg;
   return (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) != 0);
 }
 
-boolean			WinDisplay::getEvent(BzfEvent& event) const
+bool WinDisplay::windowsEventToBZFEvent ( MSG &msg, BzfEvent& event ) const
 {
-  MSG msg;
-  if (GetMessage(&msg, NULL, 0, 0) == -1) return False;
-  event.window = WinWindow::lookupWindow(msg.hwnd);
-  switch (msg.message) {
-    case WM_CLOSE:
-    case WM_QUIT:
-      event.type = BzfEvent::Quit;
-      break;
+	event.window = WinWindow::lookupWindow(msg.hwnd);
+	switch (msg.message) {
+	case WM_CLOSE:
+	case WM_QUIT:
+	case WM_SYSCOMMAND:
+		if (msg.wParam != SC_CLOSE)
+			break;
+		event.type = BzfEvent::Quit;
+		break;
 
-    case WM_PAINT:
-      event.type = BzfEvent::Redraw;
-      ValidateRect(msg.hwnd, NULL);		// no more WM_PAINTs, please!
-      break;
+	case WM_PAINT:
+		event.type = BzfEvent::Redraw;
+		ValidateRect(msg.hwnd, NULL);		// no more WM_PAINTs, please!
+		break;
 
-    case WM_SIZE:
-      event.type = BzfEvent::Resize;
-      event.resize.width = LOWORD(msg.lParam);
-      event.resize.height = HIWORD(msg.lParam);
-      break;
+	case WM_SIZE:
+		event.type = BzfEvent::Resize;
+		event.resize.width = LOWORD(msg.lParam);
+		event.resize.height = HIWORD(msg.lParam);
+		break;
 
-    case WM_MOUSEMOVE:
-      event.type = BzfEvent::MouseMove;
-      event.mouseMove.x = LOWORD(msg.lParam);
-      event.mouseMove.y = HIWORD(msg.lParam);
-      break;
+	case WM_MOUSEMOVE:
+		event.type = BzfEvent::MouseMove;
+		event.mouseMove.x = LOWORD(msg.lParam);
+		event.mouseMove.y = HIWORD(msg.lParam);
+		break;
 
-    case WM_APP + 0:
-      event.type = BzfEvent::Map;
-      break;
+	case WM_APP + 0:
+		event.type = BzfEvent::Map;
+		break;
 
-    case WM_APP + 1:
-      event.type = BzfEvent::Unmap;
-      break;
+	case WM_APP + 1:
+		event.type = BzfEvent::Unmap;
+		break;
 
-    case WM_LBUTTONDOWN:
-    case WM_MBUTTONDOWN:
-    case WM_RBUTTONDOWN:
-      event.type = BzfEvent::KeyDown;
-      event.keyDown.ascii = 0;
-      event.keyDown.shift = 0;
-      switch (msg.message) {
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		event.type = BzfEvent::KeyDown;
+		event.keyDown.chr = 0;
+		event.keyDown.shift = 0;
+		switch (msg.message) {
 	case WM_LBUTTONDOWN:	event.keyDown.button = BzfKeyEvent::LeftMouse; break;
 	case WM_MBUTTONDOWN:	event.keyDown.button = BzfKeyEvent::MiddleMouse; break;
 	case WM_RBUTTONDOWN:	event.keyDown.button = BzfKeyEvent::RightMouse; break;
-	default:		return False;
-      }
-      break;
+	default:		return false;
+		}
+		break;
 
-    case WM_LBUTTONUP:
-    case WM_MBUTTONUP:
-    case WM_RBUTTONUP:
-      event.type = BzfEvent::KeyUp;
-      event.keyUp.ascii = 0;
-      event.keyUp.shift = 0;
-      switch (msg.message) {
+	case WM_LBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_RBUTTONUP:
+		event.type = BzfEvent::KeyUp;
+		event.keyUp.chr = 0;
+		event.keyUp.shift = 0;
+		switch (msg.message) {
 	case WM_LBUTTONUP:	event.keyUp.button = BzfKeyEvent::LeftMouse; break;
 	case WM_MBUTTONUP:	event.keyUp.button = BzfKeyEvent::MiddleMouse; break;
 	case WM_RBUTTONUP:	event.keyUp.button = BzfKeyEvent::RightMouse; break;
-	default:		return False;
-      }
-      break;
+	default:		return false;
+		}
+		break;
 
-    case WM_KEYDOWN:
-    case WM_SYSKEYDOWN:
-      ((WinDisplay*)this)->translated = (boolean)(TranslateMessage(&msg) != 0);
-      if (!translated) ((WinDisplay*)this)->charCode = 0;
-      if (isNastyKey(msg)) return False;
-      DispatchMessage(&msg);
-      event.type = BzfEvent::KeyDown;
-      if (!getKey(msg, event.keyDown)) return False;
-      break;
+	case WM_MOUSEWHEEL:{
 
-    case WM_KEYUP:
-    case WM_SYSKEYUP: {
-      ((WinDisplay*)this)->translated = (boolean)(TranslateMessage(&msg) != 0);
-      if (isNastyKey(msg)) return False;
-      DispatchMessage(&msg);
-      event.type = BzfEvent::KeyUp;
-      if (!getKey(msg, event.keyUp)) return False;
-      break;
-    }
+		event.type = BzfEvent::KeyDown;
+		event.keyDown.chr = 0;
+		event.keyDown.shift = 0;
 
-    default:
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
-      return False;
-  }
+		if (LOWORD(msg.wParam) == MK_SHIFT)
+			event.keyDown.shift |= BzfKeyEvent::ShiftKey;
+		if (LOWORD(msg.wParam) == MK_CONTROL)
+			event.keyDown.shift |= BzfKeyEvent::ControlKey;
+		if (LOWORD(msg.wParam) == MK_ALT)
+			event.keyDown.shift |= BzfKeyEvent::AltKey;
 
-  return True;
+		short field = HIWORD(msg.wParam);
+		if (field > 0)
+			event.keyDown.button  = BzfKeyEvent::WheelUp;
+		else
+			event.keyDown.button  = BzfKeyEvent::WheelDown;
+		 }
+		break;
+
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+		translated = (bool)(TranslateMessage(&msg) != 0);
+		if (!translated) ((WinDisplay*)this)->charCode = 0;
+		if (isNastyKey(msg)) return false;
+		DispatchMessage(&msg);
+		event.type = BzfEvent::KeyDown;
+		if (!getKey(msg, event.keyDown)) return false;
+		break;
+
+	case WM_KEYUP:
+	case WM_SYSKEYUP: {
+		translated = (bool)(TranslateMessage(&msg) != 0);
+		if (isNastyKey(msg)) return false;
+		DispatchMessage(&msg);
+		event.type = BzfEvent::KeyUp;
+		if (!getKey(msg, event.keyUp)) return false;
+		break;
+	}
+
+	default:
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+		return false;
+	}
+	return true;
 }
 
-boolean			WinDisplay::getKey(const MSG& msg,
+bool			WinDisplay::peekEvent(BzfEvent& event) const
+{
+	MSG msg;
+	if (PeekMessage(&msg, NULL, 0, 0,0) == -1) return false;
+	return windowsEventToBZFEvent(msg,event);
+}
+
+bool			WinDisplay::getEvent(BzfEvent& event) const
+{
+  MSG msg;
+  if (GetMessage(&msg, NULL, 0, 0) == -1) return false;
+  return windowsEventToBZFEvent(msg,event);
+}
+
+void			WinDisplay::getModState(bool &shift, bool &ctrl, bool &alt) {
+  shift = (GetKeyState(VK_SHIFT) < 0);
+  ctrl  = (GetKeyState(VK_CONTROL) < 0);
+  alt   = (GetKeyState(VK_MENU) < 0);
+}
+
+#define UNICODE_IS_HIGH_SURROGATE(ch) ((ch) >= 0xD800 && (ch) <= 0xDBFF)
+#define UNICODE_IS_LOW_SURROGATE(ch) ((ch) >= 0xDC00 && (ch) <= 0xDFFF)
+#define UNICODE_SURROGATE_TO_UTF32(ch, cl) (((ch) - 0xD800) * 0x400 + ((cl) - 0xDC00) + 0x10000)
+
+bool			WinDisplay::getKey(const MSG& msg,
 					BzfKeyEvent& key) const
 {
   key.shift = 0;
@@ -339,73 +386,71 @@ boolean			WinDisplay::getKey(const MSG& msg,
     if (PeekMessage(&cmsg, NULL, 0, 0, PM_NOREMOVE) &&
 	(cmsg.message == WM_CHAR || cmsg.message == WM_SYSCHAR)) {
       GetMessage(&cmsg, NULL, 0, 0);
-      ((WinDisplay*)this)->charCode = (char)(TCHAR)cmsg.wParam;
+      // charCode is in UTF-16, so convert it to a codepoint
+      charCode = cmsg.wParam;
+      if (UNICODE_IS_HIGH_SURROGATE(charCode >> 16) && UNICODE_IS_LOW_SURROGATE(charCode & 0xFFFF))
+	charCode = UNICODE_SURROGATE_TO_UTF32(charCode >> 16, charCode & 0xFFFF);
     }
     else {
-      ((WinDisplay*)this)->charCode = 0;
+      charCode = 0;
     }
   }
 
-  if (charCode != 0)
-    key.ascii = charCode;
-  else if ((GetKeyState(VK_SHIFT) < 0) == (GetKeyState(VK_CAPITAL) < 0))
-    key.ascii = asciiMap[(int)msg.wParam];
-  else
-    key.ascii = asciiShiftMap[(int)msg.wParam];
+  key.chr = charCode;
   key.button = buttonMap[(int)msg.wParam];
-  if (key.button == BzfKeyEvent::Delete) key.ascii = 0;
-  return (key.ascii != 0 || key.button != 0);
+  if (key.button == BzfKeyEvent::Delete) key.chr = 0;
+  return (key.chr != 0 || key.button != 0);
 }
 
-boolean			WinDisplay::isNastyKey(const MSG& msg) const
+bool			WinDisplay::isNastyKey(const MSG& msg) const
 {
   switch (msg.wParam) {
     case VK_LWIN:
     case VK_RWIN:
       // disable windows keys
-      return True;
+      return true;
 
     case VK_ESCAPE:
       // disable ctrl+escape (which pops up the start menu)
       if (GetKeyState(VK_CONTROL) < 0)
-	return True;
+	return true;
       break;
   }
-  return False;
+  return false;
 }
 
-boolean			WinDisplay::setDefaultResolution()
+bool			WinDisplay::setDefaultResolution() const
 {
   ChangeDisplaySettings(0, 0);
-  return True;
+  return true;
 }
 
-boolean			WinDisplay::doSetResolution(int index)
+bool			WinDisplay::doSetResolution(int index)
 {
   // try setting the format
   Resolution& format = resolutions[index];
   DEVMODE dm;
   memset(&dm, 0, sizeof(dm));
-  dm.dmSize             = sizeof(dm);
-  dm.dmPelsWidth        = format.width;
+  dm.dmSize	     = sizeof(dm);
+  dm.dmPelsWidth	= format.width;
   dm.dmPelsHeight       = format.height;
   dm.dmBitsPerPel       = format.depth;
   dm.dmDisplayFrequency = format.refresh;
-  dm.dmFields           = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
+  dm.dmFields	   = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
   if (dm.dmDisplayFrequency != 0)
     dm.dmFields |= DM_DISPLAYFREQUENCY;
 
   // test the change before really doing it
   if (ChangeDisplaySettings(&dm, CDS_FULLSCREEN | CDS_TEST) !=
 						DISP_CHANGE_SUCCESSFUL)
-    return False;
+    return false;
 
   // deactivate windows before resolution change.  if we don't do this
   // then the app will almost certainly crash in the OpenGL driver.
   WinWindow::deactivateAll();
 
   // change resolution
-  const boolean changed = (ChangeDisplaySettings(&dm, CDS_FULLSCREEN) ==
+  const bool changed = (ChangeDisplaySettings(&dm, CDS_FULLSCREEN) ==
 						DISP_CHANGE_SUCCESSFUL);
 
   // reactivate previously deactivated window after change
@@ -420,13 +465,22 @@ BzfDisplay::ResInfo**	WinDisplay::getVideoFormats(
   HDC hDC = GetDC(GetDesktopWindow());
 
   // get the current display depth
-  const boolean changeDepth = canChangeDepth();
+  const bool changeDepth = canChangeDepth();
   int currentDepth = GetDeviceCaps(hDC, BITSPIXEL) * GetDeviceCaps(hDC, PLANES);
 
   // count the resolutions
   int i, j = 0;
-  DEVMODE dm;
-  while (EnumDisplaySettings(NULL, j, &dm))
+  typedef struct {   //On WinXP, DEVMODE buffer overruns are occuring, if the DEVMODE data structure
+					 //is not up to date. You need to compile with the new header files
+	  DEVMODE dm;    //Using old headers, Buffer is 148, but the data returned is 156, causing stack corruption
+	  byte fudge[30];//Throw some fudge in here so that it works even with old headers
+  } SlopDEVMODE;
+  SlopDEVMODE dm;
+  DEVMODE *pdm = &dm.dm;
+
+  memset( pdm, 0, sizeof(DEVMODE));
+  pdm->dmSize = sizeof(DEVMODE);
+  while (EnumDisplaySettings(NULL, j, pdm))
     j++;
 
   // allocate space for resolutions
@@ -435,25 +489,25 @@ BzfDisplay::ResInfo**	WinDisplay::getVideoFormats(
 
   // enumerate all resolutions.  note that we might throw some
   // resolutions away, so resolutions may be bigger than necessary.
-  for (i = j = 0; EnumDisplaySettings(NULL, j, &dm); j++) {
+  for (i = j = 0; EnumDisplaySettings(NULL, j, pdm); j++) {
     // convert frequency of 1 to 0 (meaning the default)
-    if ((dm.dmFields & DM_DISPLAYFREQUENCY) && dm.dmDisplayFrequency == 1)
-      dm.dmDisplayFrequency = 0;
+    if ((pdm->dmFields & DM_DISPLAYFREQUENCY) && pdm->dmDisplayFrequency == 1)
+      pdm->dmDisplayFrequency = 0;
 
     // ignore formats of different depth if we can't change depth
-    if (!changeDepth && (int)dm.dmBitsPerPel != currentDepth)
+    if (!changeDepth && (int)pdm->dmBitsPerPel != currentDepth)
       continue;
 
     // ignore formats we know won't work
-    if (dm.dmPelsWidth < 640 || dm.dmPelsHeight < 400 || dm.dmBitsPerPel < 8)
+    if (pdm->dmPelsWidth < 640 || pdm->dmPelsHeight < 400 || pdm->dmBitsPerPel < 8)
       continue;
 
     // fill in format
     Resolution r;
-    r.width = dm.dmPelsWidth;
-    r.height = dm.dmPelsHeight;
-    r.refresh = dm.dmDisplayFrequency;
-    r.depth = dm.dmBitsPerPel;
+    r.width = pdm->dmPelsWidth;
+    r.height = pdm->dmPelsHeight;
+    r.refresh = pdm->dmDisplayFrequency;
+    r.depth = pdm->dmBitsPerPel;
 
     // do we already have an equivalent format already?
     int k;
@@ -475,7 +529,7 @@ BzfDisplay::ResInfo**	WinDisplay::getVideoFormats(
   int current = -1;
   const int currentWidth = GetDeviceCaps(hDC, HORZRES);
   const int currentHeight = GetDeviceCaps(hDC, VERTRES);
-  for (i = numResolutions; i >= 0; i--) {
+  for (i = numResolutions - 1; i >= 0; i--) {
     const Resolution* r = resolutions + i;
     if (r->width == currentWidth &&
 	r->height == currentHeight &&
@@ -512,7 +566,7 @@ BzfDisplay::ResInfo**	WinDisplay::getVideoFormats(
 }
 
 #define OSR2_BUILD_NUMBER 1111
-boolean			WinDisplay::canChangeDepth()
+bool			WinDisplay::canChangeDepth()
 {
   // not all versions of windows change dynamically change bit depth.
   // NT 4.0 and 95 OSR2 can and we assume anything later then them
@@ -520,792 +574,282 @@ boolean			WinDisplay::canChangeDepth()
   OSVERSIONINFO vinfo;
   vinfo.dwOSVersionInfoSize = sizeof(vinfo);
   if (!GetVersionEx(&vinfo))
-    return False;
+    return false;
   if (vinfo.dwMajorVersion > 4)
-    return True;
+    return true;
   if (vinfo.dwMajorVersion == 4) {
     if (vinfo.dwPlatformId == VER_PLATFORM_WIN32_NT)
-      return True;
+      return true;
     if (vinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS &&
 	LOWORD(vinfo.dwBuildNumber) >= OSR2_BUILD_NUMBER)
-      return True;
+      return true;
   }
-  return False;
+  return false;
 }
 
-const int		WinDisplay::asciiMap[] = {
-        0,			// no VK_ code
-        0,			// VK_LBUTTON
-        0,			// VK_RBUTTON
-        0,			// VK_CANCEL
-        0,			// VK_MBUTTON
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        8,			// VK_BACK
-        9,			// VK_TAB
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_CLEAR
-        13,			// VK_RETURN
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_SHIFT
-        0,			// VK_CONTROL
-        0,			// VK_MENU
-        0,			// VK_PAUSE
-        0,			// VK_CAPITAL
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        27,			// VK_ESCAPE
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        ' ',			// VK_SPACE
-        0,			// VK_PRIOR
-        0,			// VK_NEXT
-        0,			// VK_END
-        0,			// VK_HOME
-        0,			// VK_LEFT
-        0,			// VK_UP
-        0,			// VK_RIGHT
-        0,			// VK_DOWN
-        0,			// VK_SELECT
-        0,			// VK_PRINT
-        0,			// VK_EXECUTE
-        0,			// VK_SNAPSHOT
-        0,			// VK_INSERT
-        127,			// VK_DELETE
-        0,			// VK_HELP
-        '0',			// VK_0
-        '1',			// VK_1
-        '2',			// VK_2
-        '3',			// VK_3
-        '4',			// VK_4
-        '5',			// VK_5
-        '6',			// VK_6
-        '7',			// VK_7
-        '8',			// VK_8
-        '9',			// VK_9
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        'A',			// VK_A
-        'B',			// VK_B
-        'C',			// VK_C
-        'D',			// VK_D
-        'E',			// VK_E
-        'F',			// VK_F
-        'G',			// VK_G
-        'H',			// VK_H
-        'I',			// VK_I
-        'J',			// VK_J
-        'K',			// VK_K
-        'L',			// VK_L
-        'M',			// VK_M
-        'N',			// VK_N
-        'O',			// VK_O
-        'P',			// VK_P
-        'Q',			// VK_Q
-        'R',			// VK_R
-        'S',			// VK_S
-        'T',			// VK_T
-        'U',			// VK_U
-        'V',			// VK_V
-        'W',			// VK_W
-        'X',			// VK_X
-        'Y',			// VK_Y
-        'Z',			// VK_Z
-        0,			// VK_LWIN
-        0,			// VK_RWIN
-        0,			// VK_APPS
-        0,			// no VK_ code
-        0,			// no VK_ code
-        '0',			// VK_NUMPAD0
-        '1',			// VK_NUMPAD1
-        '2',			// VK_NUMPAD2
-        '3',			// VK_NUMPAD3
-        '4',			// VK_NUMPAD4
-        '5',			// VK_NUMPAD5
-        '6',			// VK_NUMPAD6
-        '7',			// VK_NUMPAD7
-        '8',			// VK_NUMPAD8
-        '9',			// VK_NUMPAD9
-        '*',			// VK_MULTIPLY
-        '+',			// VK_ADD
-        0,			// VK_SEPARATOR
-        '-',			// VK_SUBTRACT
-        '.',			// VK_DECIMAL
-        '/',			// VK_DIVIDE
-        0,			// VK_F1
-        0,			// VK_F2
-        0,			// VK_F3
-        0,			// VK_F4
-        0,			// VK_F5
-        0,			// VK_F6
-        0,			// VK_F7
-        0,			// VK_F8
-        0,			// VK_F9
-        0,			// VK_F10
-        0,			// VK_F11
-        0,			// VK_F12
-        0,			// VK_F13
-        0,			// VK_F14
-        0,			// VK_F15
-        0,			// VK_F16
-        0,			// VK_F17
-        0,			// VK_F18
-        0,			// VK_F19
-        0,			// VK_F20
-        0,			// VK_F21
-        0,			// VK_F22
-        0,			// VK_F23
-        0,			// VK_F24
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_NUMLOCK
-        0,			// VK_SCROLL
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_LSHIFT
-        0,			// VK_RSHIFT
-        0,			// VK_LCONTROL
-        0,			// VK_RCONTROL
-        0,			// VK_LMENU
-        0,			// VK_RMENU
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        ';',			// no VK_ code
-        '=',			// no VK_ code
-        ',',			// no VK_ code
-        '-',			// no VK_ code
-        '.',			// no VK_ code
-        '/',			// no VK_ code
-        '`',			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        '[',			// no VK_ code
-        '\\',			// no VK_ code
-        ']',			// no VK_ code
-        '\'',			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_PROCESSKEY
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_ATTN
-        0,			// VK_CRSEL
-        0,			// VK_EXSEL
-        0,			// VK_EREOF
-        0,			// VK_PLAY
-        0,			// VK_ZOOM
-        0,			// VK_NONAME
-        0,			// VK_PA1
-        0,			// VK_OEM_CLEAR
-        0			// no VK_ code
-};
-
-const int		WinDisplay::asciiShiftMap[] = {
-        0,			// no VK_ code
-        0,			// VK_LBUTTON
-        0,			// VK_RBUTTON
-        0,			// VK_CANCEL
-        0,			// VK_MBUTTON
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        8,			// VK_BACK
-        9,			// VK_TAB
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_CLEAR
-        13,			// VK_RETURN
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_SHIFT
-        0,			// VK_CONTROL
-        0,			// VK_MENU
-        0,			// VK_PAUSE
-        0,			// VK_CAPITAL
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        27,			// VK_ESCAPE
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        ' ',			// VK_SPACE
-        0,			// VK_PRIOR
-        0,			// VK_NEXT
-        0,			// VK_END
-        0,			// VK_HOME
-        0,			// VK_LEFT
-        0,			// VK_UP
-        0,			// VK_RIGHT
-        0,			// VK_DOWN
-        0,			// VK_SELECT
-        0,			// VK_PRINT
-        0,			// VK_EXECUTE
-        0,			// VK_SNAPSHOT
-        0,			// VK_INSERT
-        127,			// VK_DELETE
-        0,			// VK_HELP
-        ')',			// VK_0
-        '!',			// VK_1
-        '@',			// VK_2
-        '#',			// VK_3
-        '$',			// VK_4
-        '%',			// VK_5
-        '^',			// VK_6
-        '&',			// VK_7
-        '*',			// VK_8
-        '(',			// VK_9
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        'a',			// VK_A
-        'b',			// VK_B
-        'c',			// VK_C
-        'd',			// VK_D
-        'e',			// VK_E
-        'f',			// VK_F
-        'g',			// VK_G
-        'h',			// VK_H
-        'i',			// VK_I
-        'j',			// VK_J
-        'k',			// VK_K
-        'l',			// VK_L
-        'm',			// VK_M
-        'n',			// VK_N
-        'o',			// VK_O
-        'p',			// VK_P
-        'q',			// VK_Q
-        'r',			// VK_R
-        's',			// VK_S
-        't',			// VK_T
-        'u',			// VK_U
-        'v',			// VK_V
-        'w',			// VK_W
-        'x',			// VK_X
-        'y',			// VK_Y
-        'z',			// VK_Z
-        0,			// VK_LWIN
-        0,			// VK_RWIN
-        0,			// VK_APPS
-        0,			// no VK_ code
-        0,			// no VK_ code
-        '0',			// VK_NUMPAD0
-        '1',			// VK_NUMPAD1
-        '2',			// VK_NUMPAD2
-        '3',			// VK_NUMPAD3
-        '4',			// VK_NUMPAD4
-        '5',			// VK_NUMPAD5
-        '6',			// VK_NUMPAD6
-        '7',			// VK_NUMPAD7
-        '8',			// VK_NUMPAD8
-        '9',			// VK_NUMPAD9
-        '*',			// VK_MULTIPLY
-        '+',			// VK_ADD
-        0,			// VK_SEPARATOR
-        '-',			// VK_SUBTRACT
-        '.',			// VK_DECIMAL
-        '/',			// VK_DIVIDE
-        0,			// VK_F1
-        0,			// VK_F2
-        0,			// VK_F3
-        0,			// VK_F4
-        0,			// VK_F5
-        0,			// VK_F6
-        0,			// VK_F7
-        0,			// VK_F8
-        0,			// VK_F9
-        0,			// VK_F10
-        0,			// VK_F11
-        0,			// VK_F12
-        0,			// VK_F13
-        0,			// VK_F14
-        0,			// VK_F15
-        0,			// VK_F16
-        0,			// VK_F17
-        0,			// VK_F18
-        0,			// VK_F19
-        0,			// VK_F20
-        0,			// VK_F21
-        0,			// VK_F22
-        0,			// VK_F23
-        0,			// VK_F24
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_NUMLOCK
-        0,			// VK_SCROLL
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_LSHIFT
-        0,			// VK_RSHIFT
-        0,			// VK_LCONTROL
-        0,			// VK_RCONTROL
-        0,			// VK_LMENU
-        0,			// VK_RMENU
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        ':',			// no VK_ code
-        '+',			// no VK_ code
-        '<',			// no VK_ code
-        '_',			// no VK_ code
-        '>',			// no VK_ code
-        '?',			// no VK_ code
-        '~',			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        '{',			// no VK_ code
-        '|',			// no VK_ code
-        '}',			// no VK_ code
-        '"',			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_PROCESSKEY
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// no VK_ code
-        0,			// VK_ATTN
-        0,			// VK_CRSEL
-        0,			// VK_EXSEL
-        0,			// VK_EREOF
-        0,			// VK_PLAY
-        0,			// VK_ZOOM
-        0,			// VK_NONAME
-        0,			// VK_PA1
-        0,			// VK_OEM_CLEAR
-        0			// no VK_ code
-};
-
 const int		WinDisplay::buttonMap[] = {
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_LBUTTON
-        BzfKeyEvent::NoButton,	// VK_RBUTTON
-        BzfKeyEvent::NoButton,	// VK_CANCEL
-        BzfKeyEvent::NoButton,	// VK_MBUTTON
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_BACK
-        BzfKeyEvent::NoButton,	// VK_TAB
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_CLEAR
-        BzfKeyEvent::NoButton,	// VK_RETURN
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_SHIFT
-        BzfKeyEvent::NoButton,	// VK_CONTROL
-        BzfKeyEvent::NoButton,	// VK_MENU
-        BzfKeyEvent::Pause,	// VK_PAUSE
-        BzfKeyEvent::NoButton,	// VK_CAPITAL
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_ESCAPE
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_SPACE
-        BzfKeyEvent::PageUp,	// VK_PRIOR
-        BzfKeyEvent::PageDown,	// VK_NEXT
-        BzfKeyEvent::End,	// VK_END
-        BzfKeyEvent::Home,	// VK_HOME
-        BzfKeyEvent::Left,	// VK_LEFT
-        BzfKeyEvent::Up,	// VK_UP
-        BzfKeyEvent::Right,	// VK_RIGHT
-        BzfKeyEvent::Down,	// VK_DOWN
-        BzfKeyEvent::NoButton,	// VK_SELECT
-        BzfKeyEvent::NoButton,	// VK_PRINT
-        BzfKeyEvent::NoButton,	// VK_EXECUTE
-        BzfKeyEvent::NoButton,	// VK_SNAPSHOT
-        BzfKeyEvent::Insert,	// VK_INSERT
-        BzfKeyEvent::Delete,	// VK_DELETE
-        BzfKeyEvent::NoButton,	// VK_HELP
-        BzfKeyEvent::NoButton,	// VK_0
-        BzfKeyEvent::NoButton,	// VK_1
-        BzfKeyEvent::NoButton,	// VK_2
-        BzfKeyEvent::NoButton,	// VK_3
-        BzfKeyEvent::NoButton,	// VK_4
-        BzfKeyEvent::NoButton,	// VK_5
-        BzfKeyEvent::NoButton,	// VK_6
-        BzfKeyEvent::NoButton,	// VK_7
-        BzfKeyEvent::NoButton,	// VK_8
-        BzfKeyEvent::NoButton,	// VK_9
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_A
-        BzfKeyEvent::NoButton,	// VK_B
-        BzfKeyEvent::NoButton,	// VK_C
-        BzfKeyEvent::NoButton,	// VK_D
-        BzfKeyEvent::NoButton,	// VK_E
-        BzfKeyEvent::NoButton,	// VK_F
-        BzfKeyEvent::NoButton,	// VK_G
-        BzfKeyEvent::NoButton,	// VK_H
-        BzfKeyEvent::NoButton,	// VK_I
-        BzfKeyEvent::NoButton,	// VK_J
-        BzfKeyEvent::NoButton,	// VK_K
-        BzfKeyEvent::NoButton,	// VK_L
-        BzfKeyEvent::NoButton,	// VK_M
-        BzfKeyEvent::NoButton,	// VK_N
-        BzfKeyEvent::NoButton,	// VK_O
-        BzfKeyEvent::NoButton,	// VK_P
-        BzfKeyEvent::NoButton,	// VK_Q
-        BzfKeyEvent::NoButton,	// VK_R
-        BzfKeyEvent::NoButton,	// VK_S
-        BzfKeyEvent::NoButton,	// VK_T
-        BzfKeyEvent::NoButton,	// VK_U
-        BzfKeyEvent::NoButton,	// VK_V
-        BzfKeyEvent::NoButton,	// VK_W
-        BzfKeyEvent::NoButton,	// VK_X
-        BzfKeyEvent::NoButton,	// VK_Y
-        BzfKeyEvent::NoButton,	// VK_Z
-        BzfKeyEvent::NoButton,	// VK_LWIN
-        BzfKeyEvent::NoButton,	// VK_RWIN
-        BzfKeyEvent::NoButton,	// VK_APPS
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_NUMPAD0
-        BzfKeyEvent::NoButton,	// VK_NUMPAD1
-        BzfKeyEvent::NoButton,	// VK_NUMPAD2
-        BzfKeyEvent::NoButton,	// VK_NUMPAD3
-        BzfKeyEvent::NoButton,	// VK_NUMPAD4
-        BzfKeyEvent::NoButton,	// VK_NUMPAD5
-        BzfKeyEvent::NoButton,	// VK_NUMPAD6
-        BzfKeyEvent::NoButton,	// VK_NUMPAD7
-        BzfKeyEvent::NoButton,	// VK_NUMPAD8
-        BzfKeyEvent::NoButton,	// VK_NUMPAD9
-        BzfKeyEvent::NoButton,	// VK_MULTIPLY
-        BzfKeyEvent::NoButton,	// VK_ADD
-        BzfKeyEvent::NoButton,	// VK_SEPARATOR
-        BzfKeyEvent::NoButton,	// VK_SUBTRACT
-        BzfKeyEvent::NoButton,	// VK_DECIMAL
-        BzfKeyEvent::NoButton,	// VK_DIVIDE
-        BzfKeyEvent::F1,	// VK_F1
-        BzfKeyEvent::F2,	// VK_F2
-        BzfKeyEvent::F3,	// VK_F3
-        BzfKeyEvent::F4,	// VK_F4
-        BzfKeyEvent::F5,	// VK_F5
-        BzfKeyEvent::F6,	// VK_F6
-        BzfKeyEvent::F7,	// VK_F7
-        BzfKeyEvent::F8,	// VK_F8
-        BzfKeyEvent::F9,	// VK_F9
-        BzfKeyEvent::F10,	// VK_F10
-        BzfKeyEvent::F11,	// VK_F11
-        BzfKeyEvent::F12,	// VK_F12
-        BzfKeyEvent::NoButton,	// VK_F13
-        BzfKeyEvent::NoButton,	// VK_F14
-        BzfKeyEvent::NoButton,	// VK_F15
-        BzfKeyEvent::NoButton,	// VK_F16
-        BzfKeyEvent::NoButton,	// VK_F17
-        BzfKeyEvent::NoButton,	// VK_F18
-        BzfKeyEvent::NoButton,	// VK_F19
-        BzfKeyEvent::NoButton,	// VK_F20
-        BzfKeyEvent::NoButton,	// VK_F21
-        BzfKeyEvent::NoButton,	// VK_F22
-        BzfKeyEvent::NoButton,	// VK_F23
-        BzfKeyEvent::NoButton,	// VK_F24
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_NUMLOCK
-        BzfKeyEvent::NoButton,	// VK_SCROLL
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_LSHIFT
-        BzfKeyEvent::NoButton,	// VK_RSHIFT
-        BzfKeyEvent::NoButton,	// VK_LCONTROL
-        BzfKeyEvent::NoButton,	// VK_RCONTROL
-        BzfKeyEvent::NoButton,	// VK_LMENU
-        BzfKeyEvent::NoButton,	// VK_RMENU
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_PROCESSKEY
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// no VK_ code
-        BzfKeyEvent::NoButton,	// VK_ATTN
-        BzfKeyEvent::NoButton,	// VK_CRSEL
-        BzfKeyEvent::NoButton,	// VK_EXSEL
-        BzfKeyEvent::NoButton,	// VK_EREOF
-        BzfKeyEvent::NoButton,	// VK_PLAY
-        BzfKeyEvent::NoButton,	// VK_ZOOM
-        BzfKeyEvent::NoButton,	// VK_NONAME
-        BzfKeyEvent::NoButton,	// VK_PA1
-        BzfKeyEvent::NoButton,	// VK_OEM_CLEAR
-        BzfKeyEvent::NoButton	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_LBUTTON
+	BzfKeyEvent::NoButton,	// VK_RBUTTON
+	BzfKeyEvent::NoButton,	// VK_CANCEL
+	BzfKeyEvent::NoButton,	// VK_MBUTTON
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_BACK
+	BzfKeyEvent::NoButton,	// VK_TAB
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_CLEAR
+	BzfKeyEvent::NoButton,	// VK_RETURN
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_SHIFT
+	BzfKeyEvent::NoButton,	// VK_CONTROL
+	BzfKeyEvent::NoButton,	// VK_MENU
+	BzfKeyEvent::Pause,	// VK_PAUSE
+	BzfKeyEvent::NoButton,	// VK_CAPITAL
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_ESCAPE
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_SPACE
+	BzfKeyEvent::PageUp,	// VK_PRIOR
+	BzfKeyEvent::PageDown,	// VK_NEXT
+	BzfKeyEvent::End,	// VK_END
+	BzfKeyEvent::Home,	// VK_HOME
+	BzfKeyEvent::Left,	// VK_LEFT
+	BzfKeyEvent::Up,	// VK_UP
+	BzfKeyEvent::Right,	// VK_RIGHT
+	BzfKeyEvent::Down,	// VK_DOWN
+	BzfKeyEvent::NoButton,	// VK_SELECT
+	BzfKeyEvent::NoButton,	// VK_PRINT
+	BzfKeyEvent::NoButton,	// VK_EXECUTE
+	BzfKeyEvent::NoButton,	// VK_SNAPSHOT
+	BzfKeyEvent::Insert,	// VK_INSERT
+	BzfKeyEvent::Delete,	// VK_DELETE
+	BzfKeyEvent::NoButton,	// VK_HELP
+	BzfKeyEvent::NoButton,	// VK_0
+	BzfKeyEvent::NoButton,	// VK_1
+	BzfKeyEvent::NoButton,	// VK_2
+	BzfKeyEvent::NoButton,	// VK_3
+	BzfKeyEvent::NoButton,	// VK_4
+	BzfKeyEvent::NoButton,	// VK_5
+	BzfKeyEvent::NoButton,	// VK_6
+	BzfKeyEvent::NoButton,	// VK_7
+	BzfKeyEvent::NoButton,	// VK_8
+	BzfKeyEvent::NoButton,	// VK_9
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_A
+	BzfKeyEvent::NoButton,	// VK_B
+	BzfKeyEvent::NoButton,	// VK_C
+	BzfKeyEvent::NoButton,	// VK_D
+	BzfKeyEvent::NoButton,	// VK_E
+	BzfKeyEvent::NoButton,	// VK_F
+	BzfKeyEvent::NoButton,	// VK_G
+	BzfKeyEvent::NoButton,	// VK_H
+	BzfKeyEvent::NoButton,	// VK_I
+	BzfKeyEvent::NoButton,	// VK_J
+	BzfKeyEvent::NoButton,	// VK_K
+	BzfKeyEvent::NoButton,	// VK_L
+	BzfKeyEvent::NoButton,	// VK_M
+	BzfKeyEvent::NoButton,	// VK_N
+	BzfKeyEvent::NoButton,	// VK_O
+	BzfKeyEvent::NoButton,	// VK_P
+	BzfKeyEvent::NoButton,	// VK_Q
+	BzfKeyEvent::NoButton,	// VK_R
+	BzfKeyEvent::NoButton,	// VK_S
+	BzfKeyEvent::NoButton,	// VK_T
+	BzfKeyEvent::NoButton,	// VK_U
+	BzfKeyEvent::NoButton,	// VK_V
+	BzfKeyEvent::NoButton,	// VK_W
+	BzfKeyEvent::NoButton,	// VK_X
+	BzfKeyEvent::NoButton,	// VK_Y
+	BzfKeyEvent::NoButton,	// VK_Z
+	BzfKeyEvent::NoButton,	// VK_LWIN
+	BzfKeyEvent::NoButton,	// VK_RWIN
+	BzfKeyEvent::NoButton,	// VK_APPS
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_NUMPAD0
+	BzfKeyEvent::NoButton,	// VK_NUMPAD1
+	BzfKeyEvent::NoButton,	// VK_NUMPAD2
+	BzfKeyEvent::NoButton,	// VK_NUMPAD3
+	BzfKeyEvent::NoButton,	// VK_NUMPAD4
+	BzfKeyEvent::NoButton,	// VK_NUMPAD5
+	BzfKeyEvent::NoButton,	// VK_NUMPAD6
+	BzfKeyEvent::NoButton,	// VK_NUMPAD7
+	BzfKeyEvent::NoButton,	// VK_NUMPAD8
+	BzfKeyEvent::NoButton,	// VK_NUMPAD9
+	BzfKeyEvent::NoButton,	// VK_MULTIPLY
+	BzfKeyEvent::NoButton,	// VK_ADD
+	BzfKeyEvent::NoButton,	// VK_SEPARATOR
+	BzfKeyEvent::NoButton,	// VK_SUBTRACT
+	BzfKeyEvent::NoButton,	// VK_DECIMAL
+	BzfKeyEvent::NoButton,	// VK_DIVIDE
+	BzfKeyEvent::F1,	// VK_F1
+	BzfKeyEvent::F2,	// VK_F2
+	BzfKeyEvent::F3,	// VK_F3
+	BzfKeyEvent::F4,	// VK_F4
+	BzfKeyEvent::F5,	// VK_F5
+	BzfKeyEvent::F6,	// VK_F6
+	BzfKeyEvent::F7,	// VK_F7
+	BzfKeyEvent::F8,	// VK_F8
+	BzfKeyEvent::F9,	// VK_F9
+	BzfKeyEvent::F10,	// VK_F10
+	BzfKeyEvent::F11,	// VK_F11
+	BzfKeyEvent::F12,	// VK_F12
+	BzfKeyEvent::NoButton,	// VK_F13
+	BzfKeyEvent::NoButton,	// VK_F14
+	BzfKeyEvent::NoButton,	// VK_F15
+	BzfKeyEvent::NoButton,	// VK_F16
+	BzfKeyEvent::NoButton,	// VK_F17
+	BzfKeyEvent::NoButton,	// VK_F18
+	BzfKeyEvent::NoButton,	// VK_F19
+	BzfKeyEvent::NoButton,	// VK_F20
+	BzfKeyEvent::NoButton,	// VK_F21
+	BzfKeyEvent::NoButton,	// VK_F22
+	BzfKeyEvent::NoButton,	// VK_F23
+	BzfKeyEvent::NoButton,	// VK_F24
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_NUMLOCK
+	BzfKeyEvent::NoButton,	// VK_SCROLL
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_LSHIFT
+	BzfKeyEvent::NoButton,	// VK_RSHIFT
+	BzfKeyEvent::NoButton,	// VK_LCONTROL
+	BzfKeyEvent::NoButton,	// VK_RCONTROL
+	BzfKeyEvent::NoButton,	// VK_LMENU
+	BzfKeyEvent::NoButton,	// VK_RMENU
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_PROCESSKEY
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// no VK_ code
+	BzfKeyEvent::NoButton,	// VK_ATTN
+	BzfKeyEvent::NoButton,	// VK_CRSEL
+	BzfKeyEvent::NoButton,	// VK_EXSEL
+	BzfKeyEvent::NoButton,	// VK_EREOF
+	BzfKeyEvent::NoButton,	// VK_PLAY
+	BzfKeyEvent::NoButton,	// VK_ZOOM
+	BzfKeyEvent::NoButton,	// VK_NONAME
+	BzfKeyEvent::NoButton,	// VK_PA1
+	BzfKeyEvent::NoButton,	// VK_OEM_CLEAR
+	BzfKeyEvent::NoButton	// no VK_ code
 };
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

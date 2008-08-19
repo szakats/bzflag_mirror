@@ -1,41 +1,118 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "common.h"
+#include <math.h>
+#include <string.h>
+#include <iostream>
 #include "Obstacle.h"
 #include "Intersect.h"
-#include <math.h>
+#include "StateDatabase.h"
+
+
+// limits the maximum extent of any obstacle
+const float Obstacle::maxExtent = 1.0e30f;
+
+// for counting OBJ file objects
+int Obstacle::objCounter = 0;
+
+
+Obstacle::Obstacle()
+{
+  memset(pos, 0, sizeof(float) * 3);
+  memset(size, 0, sizeof(float) * 3);
+  angle = 0;
+  driveThrough = 0;
+  shootThrough = 0;
+  ZFlip = false;
+  source = WorldSource;
+  listID = 0;
+
+  insideNodeCount = 0;
+  insideNodes = NULL;
+}
 
 Obstacle::Obstacle(const float* _pos, float _angle,
-				float _width, float _breadth, float _height) :
-				angle(_angle),
-				width(_width),
-				breadth(_breadth),
-				height(_height)
+		   float _width, float _breadth, float _height,
+		   unsigned char drive, unsigned char shoot)
 {
   pos[0] = _pos[0];
   pos[1] = _pos[1];
   pos[2] = _pos[2];
+  angle = _angle;
+  size[0] = _width;
+  size[1] = _breadth;
+  size[2] = _height;
+
+  driveThrough = drive;
+  shootThrough = shoot;
+  ZFlip = false;
+  source = WorldSource;
+
+  insideNodeCount = 0;
+  insideNodes = NULL;
+  listID = 0;
 }
 
 Obstacle::~Obstacle()
 {
-  // do nothing
+  delete[] insideNodes;
+  return;
 }
 
-boolean			Obstacle::isCrossing(const float*, float,
-						float, float, float*) const
+bool			Obstacle::isValid() const
+{
+  for (int a = 0; a < 3; a++) {
+    if ((extents.mins[a] < -maxExtent) || (extents.maxs[a] > maxExtent)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void			Obstacle::setExtents()
+{
+  float xspan = (fabsf(cosf(angle)) * size[0]) + (fabsf(sinf(angle)) * size[1]);
+  float yspan = (fabsf(cosf(angle)) * size[1]) + (fabsf(sinf(angle)) * size[0]);
+  extents.mins[0] = pos[0] - xspan;
+  extents.maxs[0] = pos[0] + xspan;
+  extents.mins[1] = pos[1] - yspan;
+  extents.maxs[1] = pos[1] + yspan;
+  extents.mins[2] = pos[2];
+  extents.maxs[2] = pos[2] + size[2];
+  return;
+}
+
+bool			Obstacle::isFlatTop ( void ) const
+{
+  return false;
+}
+
+void			Obstacle::setZFlip ( void )
+{
+  ZFlip = true;
+}
+
+bool			Obstacle::getZFlip ( void ) const
+{
+  return ZFlip;
+}
+
+
+bool			Obstacle::isCrossing(const float*, float,
+						float, float, float, float*) const
 {
   // never crossing by default
-  return False;
+  return false;
 }
 
 float			Obstacle::getHitNormal(
@@ -62,11 +139,13 @@ float			Obstacle::getHitNormal(
   int i, bestSide = -1;
   float minTime = 1.0f;
   for (i = 0; i < 4; i++) {
-    float p[2], d[2];
+    float p[3], d[3];
     p[0] = pos1[0] + square[i][0]*c1*width - square[i][1]*s1*breadth;
     p[1] = pos1[1] + square[i][0]*s1*width + square[i][1]*c1*breadth;
+    p[2] = 0;
     d[0] = pos2[0] + square[i][0]*c2*width - square[i][1]*s2*breadth - p[0];
     d[1] = pos2[1] + square[i][0]*s2*width + square[i][1]*c2*breadth - p[1];
+    d[2] = 0;
     int side;
     const float t = timeAndSideRayHitsRect(Ray(p, d),
 				oPos, oAzimuth, oWidth, oBreadth, side);
@@ -83,11 +162,16 @@ float			Obstacle::getHitNormal(
       minTime = t;
       bestSide = 4;
     }
+  } else if (pos2[2] == pos1[2]) {
+    if (pos1[2] == (oHeight + oPos[2])) {
+      minTime = 0.0f;
+      bestSide = 4;
+    }
   }
 
   // now do the same with obstacle's corners against moving object.
   // we must transform the building into moving object's space.
-  boolean isObstacle = False;
+  bool isObstacle = false;
   c1 = cosf(oAzimuth);
   s1 = sinf(oAzimuth);
   for (i = 0; i < 4; i++) {
@@ -108,7 +192,7 @@ float			Obstacle::getHitNormal(
     if (side >= 0 && t <= minTime) {
       minTime = t;
       bestSide = side;
-      isObstacle = True;
+      isObstacle = true;
     }
   }
 
@@ -120,32 +204,66 @@ float			Obstacle::getHitNormal(
     normal[2] = 1.0f;
   }
   else if (!isObstacle) {
-    const float angle = 0.5f * M_PI * (float)bestSide + oAzimuth;
-    normal[0] = cosf(angle);
-    normal[1] = sinf(angle);
+    const float _angle = (float)(0.5 * M_PI * (float)bestSide + oAzimuth);
+    normal[0] = cosf(_angle);
+    normal[1] = sinf(_angle);
     normal[2] = 0.0f;
   }
   else {
-    const float angle = 0.5f * M_PI * (float)bestSide +
-			minTime * (azimuth2 - azimuth1) + azimuth1;
-    normal[0] = -cosf(angle);
-    normal[1] = -sinf(angle);
+    const float _angle = (float)(0.5 * M_PI * (float)bestSide +
+			minTime * (azimuth2 - azimuth1) + azimuth1);
+    normal[0] = -cosf(_angle);
+    normal[1] = -sinf(_angle);
     normal[2] = 0.0f;
   }
   return minTime;
 }
 
-//
-// ObstacleSceneNodeGenerator
-//
 
-ObstacleSceneNodeGenerator::ObstacleSceneNodeGenerator() :
-				node(0)
+void Obstacle::addInsideSceneNode(SceneNode* node)
 {
-  // do nothing
+  insideNodeCount++;
+  SceneNode** tmp = new SceneNode*[insideNodeCount];
+  memcpy(tmp, insideNodes, (insideNodeCount - 1) * sizeof(SceneNode*));
+  delete[] insideNodes;
+  insideNodes = tmp;
+  insideNodes[insideNodeCount - 1] = node;
 }
 
-ObstacleSceneNodeGenerator::~ObstacleSceneNodeGenerator()
+
+void Obstacle::freeInsideSceneNodeList()
 {
-  // do nothing
+  insideNodeCount = 0;
+  delete[] insideNodes;
+  insideNodes = NULL;
+  return;
 }
+
+
+int Obstacle::getInsideSceneNodeCount() const
+{
+  return insideNodeCount;
+}
+
+
+SceneNode** Obstacle::getInsideSceneNodeList() const
+{
+  return insideNodes;
+}
+
+Obstacle* Obstacle::copyWithTransform(MeshTransform const&) const
+{
+  std::cout << "ERROR: Obstacle::copyWithTransform()" << std::endl;
+  exit(1);
+  // umm, yeah...make the compiler happy...
+  return NULL;
+}
+
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

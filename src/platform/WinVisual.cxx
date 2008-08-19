@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "WinVisual.h"
@@ -48,7 +48,7 @@ WinVisual::WinVisual(const WinDisplay* _display) :
   pfd.dwDamageMask	= 0;
 }
 
-WinVisual::WinVisual(const WinVisual& visual) :
+WinVisual::WinVisual(const WinVisual& visual) : BzfVisual(),
 				display(visual.display),
 				pfd(visual.pfd),
 				pixelFormat(visual.pixelFormat),
@@ -64,12 +64,12 @@ WinVisual::~WinVisual()
 
 void			WinVisual::setLevel(int level)
 {
-  if (level < 0) pfd.iLayerType = PFD_UNDERLAY_PLANE;
+  if (level < 0) pfd.iLayerType = (BYTE)PFD_UNDERLAY_PLANE;
   else if (level > 0) pfd.iLayerType = PFD_OVERLAY_PLANE;
   else pfd.iLayerType = PFD_MAIN_PLANE;
 }
 
-void			WinVisual::setDoubleBuffer(boolean on)
+void			WinVisual::setDoubleBuffer(bool on)
 {
   if (on) pfd.dwFlags |= PFD_DOUBLEBUFFER;
   else pfd.dwFlags &= ~PFD_DOUBLEBUFFER;
@@ -106,7 +106,7 @@ void			WinVisual::setAccum(int minRed, int minGreen,
   pfd.cAccumBits = minRed + minGreen + minBlue + minAlpha;
 }
 
-void			WinVisual::setStereo(boolean on)
+void			WinVisual::setStereo(bool on)
 {
   if (on) pfd.dwFlags |= PFD_STEREO;
   else pfd.dwFlags &= ~PFD_STEREO;
@@ -117,14 +117,14 @@ void			WinVisual::setMultisample(int)
   // do nothing
 }
 
-boolean			WinVisual::build()
+bool			WinVisual::build()
 {
   if (pixelFormat == -1) {
     if (hDC == NULL) {
       HWND hwnd = CreateWindow("BZFLAG", "bzflag",
 			WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP,
 			0, 0, 1, 1, NULL, NULL, display->hInstance, NULL);
-      if (hwnd == NULL) return False;
+      if (hwnd == NULL) return false;
       hDC = GetDC(hwnd);
       pixelFormat = ChoosePixelFormat(hDC, &pfd);
       ReleaseDC(hwnd, hDC);
@@ -152,3 +152,11 @@ int			WinVisual::get(HDC _hDC,
   if (_pfd) *_pfd = &pfd;
   return pixelFormat;
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

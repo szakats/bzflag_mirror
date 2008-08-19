@@ -1,35 +1,59 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <string.h>
+// bzflag common header
+#include "common.h"
+
+// interface header
 #include "SceneNode.h"
+
+// system implementation headers
+#include <string.h>
+#include <math.h>
+
+// common implementation headers
+#include "Extents.h"
+#include "RenderNode.h"
+#include "StateDatabase.h"
+
+// FIXME (SceneRenderer.cxx is in src/bzflag)
 #include "SceneRenderer.h"
 
+#ifndef __MINGW32__
 void			(__stdcall *SceneNode::color3f)(GLfloat, GLfloat, GLfloat);
 void			(__stdcall *SceneNode::color4f)(GLfloat, GLfloat, GLfloat, GLfloat);
 void			(__stdcall *SceneNode::color3fv)(const GLfloat*);
 void			(__stdcall *SceneNode::color4fv)(const GLfloat*);
+#endif
 void			(*SceneNode::stipple)(GLfloat);
 
-SceneNode::SceneNode() : styleMailbox(0)
+SceneNode::SceneNode()
 {
-  static boolean init = False;
+  static bool init = false;
+
   if (!init) {
-    init = True;
-    setColorOverride(False);
+    init = true;
+    setColorOverride(false);
   }
+  memset(sphere, 0, sizeof(GLfloat) & 4);
 
   setCenter(0.0f, 0.0f, 0.0f);
   setRadius(0.0f);
+
+  noPlane = true;
+  occluder = false;
+  octreeState = OctreeCulled;
+
+  return;
 }
 
 SceneNode::~SceneNode()
@@ -48,20 +72,29 @@ static void __stdcall	oglColor4fv(const GLfloat* v)
 				{ glColor4fv(v); }
 #endif
 
+#ifdef __MINGW32__
+bool			SceneNode::colorOverride = true;
+#else
 void __stdcall		SceneNode::noColor3f(GLfloat, GLfloat, GLfloat) { }
 void __stdcall		SceneNode::noColor4f(
 				GLfloat, GLfloat, GLfloat, GLfloat) { }
 void __stdcall		SceneNode::noColor3fv(const GLfloat*) { }
 void __stdcall		SceneNode::noColor4fv(const GLfloat*) { }
+#endif
 void			SceneNode::noStipple(GLfloat) { }
 
-void			SceneNode::setColorOverride(boolean on)
+void			SceneNode::setColorOverride(bool on)
 {
+#ifdef __MINGW32__
+  colorOverride = on;
+#endif
   if (on) {
+#ifndef __MINGW32__
     color3f  = &noColor3f;
     color4f  = &noColor4f;
     color3fv = &noColor3fv;
     color4fv = &noColor4fv;
+#endif
     stipple  = &noStipple;
   }
   else {
@@ -71,18 +104,15 @@ void			SceneNode::setColorOverride(boolean on)
     color3fv = &oglColor3fv;
     color4fv = &oglColor4fv;
 #else
+#ifndef __MINGW32__
     color3f  = &::glColor3f;
     color4f  = &::glColor4f;
     color3fv = &::glColor3fv;
     color4fv = &::glColor4fv;
 #endif
+#endif
     stipple  = &OpenGLGState::setStipple;
   }
-}
-
-const GLfloat*		SceneNode::getSphere() const
-{
-  return sphere;
 }
 
 void			SceneNode::setRadius(GLfloat radiusSquared)
@@ -112,21 +142,7 @@ void			SceneNode::setSphere(const GLfloat _sphere[4])
   sphere[3] = _sphere[3];
 }
 
-void			SceneNode::getRenderNodes(SceneRenderer& renderer)
-{
-  addShadowNodes(renderer);
-  if (!cull(renderer.getViewFrustum())) {
-    if (!renderer.testAndSetStyle(styleMailbox)) notifyStyleChange(renderer);
-    addRenderNodes(renderer);
-  }
-}
-
-void			SceneNode::forceNotifyStyleChange()
-{
-  styleMailbox--;
-}
-
-void			SceneNode::notifyStyleChange(const SceneRenderer&)
+void			SceneNode::notifyStyleChange()
 {
   // do nothing
 }
@@ -139,11 +155,6 @@ void			SceneNode::addRenderNodes(SceneRenderer&)
 void			SceneNode::addShadowNodes(SceneRenderer&)
 {
   // do nothing
-}
-
-const GLfloat*		SceneNode::getPlane() const
-{
-  return NULL;
 }
 
 void			SceneNode::addLight(SceneRenderer&)
@@ -165,19 +176,48 @@ int			SceneNode::split(const float*,
   return 1;
 }
 
-boolean			SceneNode::cull(const ViewFrustum& view) const
+bool			SceneNode::cull(const ViewFrustum& view) const
 {
   // if center of object is outside view frustum and distance is
   // greater than radius of object then cull.
-  for (int i = 0; i < 5; i++) {
+  const int planeCount = view.getPlaneCount();
+  for (int i = 0; i < planeCount; i++) {
     const GLfloat* norm = view.getSide(i);
-    const GLfloat d = sphere[0] * norm[0] +
-		      sphere[1] * norm[1] +
-		      sphere[2] * norm[2] + norm[3];
-    if (d < 0.0f && d * d > sphere[3]) return True;
+    const GLfloat d = (sphere[0] * norm[0]) +
+		      (sphere[1] * norm[1]) +
+		      (sphere[2] * norm[2]) + norm[3];
+    if ((d < 0.0f) && ((d * d) > sphere[3])) return true;
   }
-  return False;
+  return false;
 }
+
+
+bool SceneNode::cullShadow(int, const float (*)[4]) const
+{
+  // currently only used for dynamic nodes by ZSceneDatabase
+  // we let the octree deal with the static nodes
+  return true;
+}
+
+
+bool SceneNode::inAxisBox (const Extents& exts) const
+{
+  if (!extents.touches(exts)) {
+    return false;
+  }
+  return true;
+}
+
+int SceneNode::getVertexCount () const
+{
+  return 0;
+}
+
+const GLfloat* SceneNode::getVertex (int) const
+{
+  return NULL;
+}
+
 
 //
 // GLfloat2Array
@@ -201,6 +241,7 @@ GLfloat2Array&		GLfloat2Array::operator=(const GLfloat2Array& a)
   return *this;
 }
 
+
 //
 // GLfloat3Array
 //
@@ -222,3 +263,25 @@ GLfloat3Array&		GLfloat3Array::operator=(const GLfloat3Array& a)
   }
   return *this;
 }
+
+
+void SceneNode::getRenderNodes(std::vector<RenderSet>&)
+{
+  return; // do nothing
+}
+
+
+void SceneNode::renderRadar()
+{
+  printf ("SceneNode::renderRadar() called, implement in subclass\n");
+  return;
+}
+
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

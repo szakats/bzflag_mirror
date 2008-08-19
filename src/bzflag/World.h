@@ -1,112 +1,143 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/*
+#ifndef	__WORLD_H__
+#define	__WORLD_H__
+
+#include "common.h"
+
+/* system interface headers */
+#include <vector>
+#include <string>
+
+/* common interface headers */
+#include "Team.h"
+#include "FlagWarpSceneNode.h"
+#include "BundleMgr.h"
+#include "LinkManager.h"
+
+/* local interface headers */
+#include "RemotePlayer.h"
+#include "WorldPlayer.h"
+#include "Weapon.h"
+#include "EntryZone.h"
+
+class FlagSceneNode;
+class MeshDrawInfo;
+
+/**
  * World:
  *	Game database -- buildings, teleporters, game style
  */
-
-#ifndef	BZF_WORLD_H
-#define	BZF_WORLD_H
-
-#include "common.h"
-#include "global.h"
-#include "BoxBuilding.h"
-#include "PyramidBuilding.h"
-#include "Teleporter.h"
-#include "WallObstacle.h"
-#include "Flag.h"
-#include "Team.h"
-#include "EighthDimSceneNode.h"
-
-class Ray;
-class Player;
-class DeadPlayer;
-class RemotePlayer;
-class SceneDatabase;
-class FlagSceneNode;
-class FlagWarpSceneNode;
-
 class World {
   friend class WorldBuilder;
   public:
 			World();
 			~World();
 
-    boolean		allowTeamFlags() const;
-    boolean		allowSuperFlags() const;
-    boolean		allowRogues() const;
-    boolean		allowJumping() const;
-    boolean		allowInertia() const;
-    boolean		allShotsRicochet() const;
-    boolean		allowAntidote() const;
-    boolean		allowShakeTimeout() const;
-    boolean		allowShakeWins() const;
-    boolean		allowTimeOfDayAdjust() const;
-    float		getLinearAcceleration() const;
-    float		getAngularAcceleration() const;
+    bool		allowTeamFlags() const;
+    bool		allowTeamKills() const;
+    bool		allowSuperFlags() const;
+    bool		allowJumping() const;
+    bool		allShotsRicochet() const;
+    bool		allowAntidote() const;
+    bool		allowShakeTimeout() const;
+    bool		allowShakeWins() const;
+    bool		allowRabbit() const;
+    bool		allowHandicap() const;
+    bool		allowTeams() const;
+    float		getWaterLevel() const;
+    const BzMaterial*	getWaterMaterial() const;
+    const BzMaterial*	getLinkMaterial() const;
     float		getFlagShakeTimeout() const;
     int			getFlagShakeWins() const;
     int			getMaxPlayers() const;
-    int			getMaxDeadPlayers() const;
+    int			getCurMaxPlayers() const;
+    void		setCurMaxPlayers(int curMaxPlayers);
     int			getMaxShots() const;
     int			getMaxFlags() const;
     float		getShakeTimeout() const;
     int			getShakeWins() const;
-    uint32_t		getEpochOffset() const;
     const Team*		getTeams() const;
     const Team&		getTeam(int index) const;
     Team*		getTeams();
     Team&		getTeam(int index);
     RemotePlayer**	getPlayers() const;
     RemotePlayer*&	getPlayer(int index) const;
-    DeadPlayer**	getDeadPlayers() const;
+    void		setPlayersSize(int _playersSize);
+    int		 getPlayersSize();
+    RemotePlayer*	getCurrentRabbit() const;
+    WorldPlayer*	getWorldWeapons() const;
     Flag&		getFlag(int index) const;
-    const float*	getBase(int) const;
-    const WallObstacles	&getWalls() const;
-    const BoxBuildings&	getBoxes() const;
-    const PyramidBuildings& getPyramids() const;
-    const Teleporters&	getTeleporters() const;
+    const float*	getBase(int, int=0) const;
     const Teleporter*	getTeleporter(int source, int& face) const;
     int			getTeleporter(const Teleporter*, int face) const;
     int			getTeleportTarget(int source) const;
-    EighthDimSceneNode*	getInsideSceneNode(const Obstacle*) const;
+    int			getTeleportTarget(int source, unsigned int seed) const;
 
     TeamColor		whoseBase(const float* pos) const;
-    const Obstacle*	inBuilding(const float* pos, float radius) const;
+    const Obstacle*	inBuilding(const float* pos, float radius,
+				   float tankHeight) const;
+    const Obstacle*	inBuilding(const float* pos, float angle,
+				   float tankWidth, float tankBreadth,
+				   float tankHeight) const;
     const Obstacle*	hitBuilding(const float* pos, float angle,
-					float tankWidth,
-					float tankBreadth) const;
-    boolean		crossingTeleporter(const float* oldPos, float angle,
+				    float tankWidth, float tankBreadth,
+				    float tankHeight) const;
+    const Obstacle*	hitBuilding(const float* oldPos, float oldAngle,
+				    const float* pos, float angle,
+				    float tankWidth, float tankBreadth,
+				    float tankHeight, bool directional) const;
+    bool		crossingTeleporter(const float* oldPos, float angle,
 					float tankWidth, float tankBreadth,
-					float* plane) const;
+					float tankHeight, float* plane) const;
     const Teleporter*	crossesTeleporter(const float* oldPos,
-					const float* newPos, int& face) const;
+					  const float* newPos, int& face) const;
     const Teleporter*	crossesTeleporter(const Ray& r, int& face) const;
     float		getProximity(const float* pos, float radius) const;
 
     void		initFlag(int index);
     void		updateFlag(int index, float dt);
-    void		addFlags(SceneDatabase*);
+    void		updateAnimations(float dt);
+    void		addFlags(SceneDatabase*, bool seerView);
+    void		updateWind(float dt);
+    void		getWind(float wind[3], const float pos[3]) const;
 
-    void		reviveDeadPlayer(Player* revivedPlayer);
-    void		addDeadPlayer(Player* dyingPlayer);
+    void		makeMeshDrawMgrs();
 
     static World*	getWorld();
     static void		setWorld(World*);
 
+    static BundleMgr*	getBundleMgr();
+    static void		setBundleMgr(BundleMgr *bundleMgr);
+
+    static std::string	getLocale();
+    static void		setLocale(const std::string &locale);
+
     static void		init();
     static void		done();
     static void		setFlagTexture(FlagSceneNode*);
+
+    void		makeLinkMaterial();
+
+    void		loadCollisionManager();
+    void		checkCollisionManager();
+
+    bool		writeWorld(const std::string& filename,
+				   std::string& fullname);
+
+    void		drawCollisionGrid() const;
+
+    void		freeInsideNodes() const;
 
   private:
     // disallow copy and assignment
@@ -114,136 +145,127 @@ class World {
     World&		operator=(const World&);
 
     void		freeFlags();
-    void		freeInsideNodes();
+    void		freeMeshDrawMgrs();
 
   private:
-    short		gameStyle;
-    float		linearAcceleration;
-    float		angularAcceleration;
+    short		gameType;
+    short		gameOptions;
     int			maxPlayers;
+    int			curMaxPlayers;
     int			maxShots;
     int			maxFlags;
     float		shakeTimeout;
     int			shakeWins;
-    uint32_t		epochOffset;
-    float		bases[NumTeams][9];
-    BoxBuildings	boxes;
-    PyramidBuildings	pyramids;
-    Teleporters		teleporters;
-    WallObstacles	walls;
-    int*		teleportTargets;
+    float		waterLevel;
+    const BzMaterial*	waterMaterial;
+    const BzMaterial*	linkMaterial;
+
+    typedef struct { float p[7]; } BaseParms;
+    typedef std::vector<BaseParms> TeamBases;
+    TeamBases		bases[NumTeams];
     Team		team[NumTeams];
+
+    std::vector<Weapon>	weapons;
+    std::vector<EntryZone> entryZones;
+
     RemotePlayer**	players;
-    DeadPlayer**	deadPlayers;
+    int		 playersSize;
+    WorldPlayer*	worldWeapons;
     Flag*		flags;
     FlagSceneNode**	flagNodes;
     FlagWarpSceneNode**	flagWarpNodes;
-    EighthDimSceneNode** boxInsideNodes;
-    EighthDimSceneNode** pyramidInsideNodes;
+
+    int			drawInfoCount;
+    MeshDrawInfo**	drawInfoArray;
+
+    float		wind[3];
+
+    LinkManager		links;
+
+    // required graphics settings
+    int			oldFogEffect;
+    bool		oldUseDrawInfo;
+
     static World*	playingField;
-    static const int	maxDeadPlayers;
+    static BundleMgr	*bundleMgr;
+    static std::string	locale;
+    static int flagTexture;
 };
 
-class WorldBuilder {
-  public:
-			WorldBuilder();
-			~WorldBuilder();
-
-    void*		unpack(void*);
-
-    World*		getWorld();
-    World*		peekWorld();	// doesn't give up ownership
-
-    void		setGameStyle(short gameStyle);
-    void		setInertia(float linearAccel, float angularAccel);
-    void		setMaxPlayers(int maxPlayers);
-    void		setMaxShots(int maxSimultaneousShots);
-    void		setMaxFlags(int maxFlags);
-    void		setShakeTimeout(float timeout) const;
-    void		setShakeWins(int wins) const;
-    void		setEpochOffset(uint32_t seconds) const;
-    void		append(const WallObstacle&);
-    void		append(const BoxBuilding&);
-    void		append(const PyramidBuilding&);
-    void		append(const Teleporter&);
-    void		setTeleporterTarget(int source, int target);
-    void		setBase(TeamColor team,
-				const float* pos, float rotation,
-				float w, float b, const float* safety);
-
-  private:
-    void		growTargetList(int newMinSize);
-    void		preGetWorld();
-
-  private:
-    boolean		owned;
-    World*		world;
-    int			targetArraySize;
-    int*		teleportTargets;
-};
 
 //
 // World
 //
 
-inline boolean		World::allowTeamFlags() const
+inline	bool	World::allowTeams() const
 {
-  return (gameStyle & short(TeamFlagGameStyle)) != 0;
+	return gameType != OpenFFA;
 }
 
-inline boolean		World::allowSuperFlags() const
+
+inline bool		World::allowTeamFlags() const
 {
-  return (gameStyle & short(SuperFlagGameStyle)) != 0;
+  return gameType == ClassicCTF;
 }
 
-inline boolean		World::allowRogues() const
+inline bool		World::allowTeamKills() const
 {
-  return (gameStyle & short(RoguesGameStyle)) != 0;
+	return (gameOptions & short(NoTeamKills)) == 0;
 }
 
-inline boolean		World::allowJumping() const
+inline bool		World::allowSuperFlags() const
 {
-  return (gameStyle & short(JumpingGameStyle)) != 0;
+  return (gameOptions & short(SuperFlagGameStyle)) != 0;
 }
 
-inline boolean		World::allowInertia() const
+inline bool		World::allowJumping() const
 {
-  return (gameStyle & short(InertiaGameStyle)) != 0;
+  return (gameOptions & short(JumpingGameStyle)) != 0;
 }
 
-inline boolean		World::allShotsRicochet() const
+inline bool		World::allShotsRicochet() const
 {
-  return (gameStyle & short(RicochetGameStyle)) != 0;
+  return (gameOptions & short(RicochetGameStyle)) != 0;
 }
 
-inline boolean		World::allowAntidote() const
+inline bool		World::allowAntidote() const
 {
-  return (gameStyle & short(AntidoteGameStyle)) != 0;
+  return (gameOptions & short(AntidoteGameStyle)) != 0;
 }
 
-inline boolean		World::allowShakeTimeout() const
+inline bool		World::allowShakeTimeout() const
 {
-  return (gameStyle & short(ShakableGameStyle)) != 0 && shakeTimeout != 0.0f;
+  return (gameOptions & short(ShakableGameStyle)) != 0 && shakeTimeout != 0.0f;
 }
 
-inline boolean		World::allowShakeWins() const
+inline bool		World::allowShakeWins() const
 {
-  return (gameStyle & short(ShakableGameStyle)) != 0 && shakeWins != 0;
+  return (gameOptions & short(ShakableGameStyle)) != 0 && shakeWins != 0;
 }
 
-inline boolean		World::allowTimeOfDayAdjust() const
+inline bool		World::allowRabbit() const
 {
-  return (gameStyle & short(TimeSyncGameStyle)) == 0;
+  return gameType == RabbitChase;
 }
 
-inline float		World::getLinearAcceleration() const
+inline bool		World::allowHandicap() const
 {
-  return linearAcceleration;
+  return (gameOptions & short(HandicapGameStyle)) != 0;
 }
 
-inline float		World::getAngularAcceleration() const
+inline float		World::getWaterLevel() const
 {
-  return angularAcceleration;
+  return waterLevel;
+}
+
+inline const BzMaterial*	World::getWaterMaterial() const
+{
+  return waterMaterial;
+}
+
+inline const BzMaterial*	World::getLinkMaterial() const
+{
+  return linkMaterial;
 }
 
 inline float		World::getFlagShakeTimeout() const
@@ -261,9 +283,14 @@ inline int		World::getMaxPlayers() const
   return maxPlayers;
 }
 
-inline int		World::getMaxDeadPlayers() const
+inline int		World::getCurMaxPlayers() const
 {
-  return maxDeadPlayers;
+  return curMaxPlayers;
+}
+
+inline void		World::setCurMaxPlayers(int _curMaxPlayers)
+{
+  curMaxPlayers = _curMaxPlayers;
 }
 
 inline int		World::getMaxShots() const
@@ -286,11 +313,6 @@ inline int		World::getShakeWins() const
   return shakeWins;
 }
 
-inline uint32_t		World::getEpochOffset() const
-{
-  return epochOffset;
-}
-
 inline const Team*	World::getTeams() const
 {
   return team;
@@ -311,6 +333,11 @@ inline Team&		World::getTeam(int index)
   return team[index];
 }
 
+inline int	      World::getPlayersSize()
+{
+  return playersSize;
+}
+
 inline RemotePlayer**	World::getPlayers() const
 {
   return players;
@@ -321,9 +348,9 @@ inline RemotePlayer*&	World::getPlayer(int index) const
   return players[index];
 }
 
-inline DeadPlayer**	World::getDeadPlayers() const
+inline WorldPlayer*	World::getWorldWeapons() const
 {
-  return deadPlayers;
+  return worldWeapons;
 }
 
 inline Flag&		World::getFlag(int index) const
@@ -331,29 +358,13 @@ inline Flag&		World::getFlag(int index) const
   return flags[index];
 }
 
-inline const float*	World::getBase(int team) const
+inline const float*	World::getBase(int _team, int base) const
 {
-  return bases[team];
-}
+  const TeamBases &b = bases[_team];
+  if ((base < 0) || (base >= (int)b.size()))
+    return NULL;
 
-inline const WallObstacles&	World::getWalls() const
-{
-  return walls;
-}
-
-inline const BoxBuildings&	World::getBoxes() const
-{
-  return boxes;
-}
-
-inline const PyramidBuildings&	World::getPyramids() const
-{
-  return pyramids;
-}
-
-inline const Teleporters&	World::getTeleporters() const
-{
-  return teleporters;
+  return b[base].p;
 }
 
 inline World*		World::getWorld()
@@ -361,4 +372,41 @@ inline World*		World::getWorld()
   return playingField;
 }
 
-#endif // BZF_WORLD_H
+inline BundleMgr*	World::getBundleMgr()
+{
+  return World::bundleMgr;
+}
+
+inline void		World::setBundleMgr(BundleMgr *_bundleMgr)
+{
+  bundleMgr = _bundleMgr;
+}
+
+inline std::string	World::getLocale()
+{
+  return locale;
+}
+
+inline void		World::setLocale(const std::string& _locale)
+{
+  locale = _locale;
+}
+
+inline void		World::getWind(float w[3], const float[3]) const
+{
+  // homogeneous, for now
+  w[0] = wind[0];
+  w[1] = wind[1];
+  w[2] = wind[2];
+  return;
+}
+
+#endif /* __WORLD_H__ */
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

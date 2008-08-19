@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* BoxBuilding:
@@ -17,54 +17,84 @@
 #ifndef	BZF_BOX_BUILDING_H
 #define	BZF_BOX_BUILDING_H
 
-#include "AList.h"
+#include "common.h"
+#include <string>
 #include "Obstacle.h"
 
 class BoxBuilding : public Obstacle {
   public:
+			BoxBuilding();
 			BoxBuilding(const float* pos, float rotation,
-				float width, float breadth, float height);
+					float width, float breadth, float height,
+					unsigned char drive = 0, unsigned char shoot = 0,
+					bool invisible = false);
 			~BoxBuilding();
 
-    BzfString		getType() const;
-    static BzfString	getClassName(); // const
+    Obstacle*		copyWithTransform(const MeshTransform&) const;
+
+    const char*		getType() const;
+    static const char*	getClassName(); // const
+
+    bool		isFlatTop() const;
 
     float		intersect(const Ray&) const;
     void		getNormal(const float* p, float* n) const;
-    boolean		isInside(const float* p, float radius) const;
-    boolean		isInside(const float* p, float angle,
-				float halfWidth, float halfBreadth) const;
-    boolean		isCrossing(const float* p, float angle,
-				float halfWidth, float halfBreadth,
-				float* plane) const;
-    boolean		getHitNormal(
+    void		get3DNormal(const float* p, float* n) const;
+    inline bool	 isInvisible() const;
+
+    bool		inCylinder(const float* p, float radius, float height) const;
+    bool		inBox(const float* p, float angle,
+			      float halfWidth, float halfBreadth, float height) const;
+    bool		inMovingBox(const float* oldP, float oldAngle,
+				    const float *newP, float newAngle,
+				    float halfWidth, float halfBreadth, float height) const;
+    bool		isCrossing(const float* p, float angle,
+				   float halfWidth, float halfBreadth, float height,
+				   float* plane) const;
+
+    bool		getHitNormal(
 				const float* pos1, float azimuth1,
 				const float* pos2, float azimuth2,
 				float halfWidth, float halfBreadth,
+				float height,
 				float* normal) const;
-
-    ObstacleSceneNodeGenerator*	newSceneNodeGenerator() const;
 
     void		getCorner(int index, float* pos) const;
 
-  private:
-    static BzfString	typeName;
-};
+    int packSize() const;
+    void *pack(void*) const;
+    void *unpack(void*);
 
-BZF_DEFINE_ALIST(BoxBuildings, BoxBuilding);
+    void print(std::ostream& out, const std::string& indent) const;
+    void printOBJ(std::ostream& out, const std::string& indent) const;
+    virtual int getTypeID() const {return boxType;}
 
-class BoxSceneNodeGenerator : public ObstacleSceneNodeGenerator {
-  friend class BoxBuilding;
-  public:
-			~BoxSceneNodeGenerator();
-
-    WallSceneNode*	getNextNode(float, float, boolean);
-
-  protected:
-			BoxSceneNodeGenerator(const BoxBuilding*);
+    std::string	userTextures[2];
 
   private:
-    const BoxBuilding*	box;
+    void finalize();
+
+ private:
+   static const char*	typeName;
+   bool noNodes;
 };
+
+
+//
+// BoxBuilding
+//
+
+bool BoxBuilding::isInvisible() const {
+  return noNodes;
+}
+
 
 #endif // BZF_BOX_BUILDING_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

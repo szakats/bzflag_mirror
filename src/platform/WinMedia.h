@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* WinMedia:
@@ -18,8 +18,9 @@
 #define	BZF_WINMEDIA_H
 
 #include "BzfMedia.h"
-#include <windows.h>
+#ifdef HAVE_DSOUND_H
 #include <dsound.h>
+#endif
 
 class WinWindow;
 
@@ -28,31 +29,32 @@ class WinMedia : public BzfMedia {
 			WinMedia(WinWindow*);
 			~WinMedia();
 
-    void		sleep(float);
-    boolean		openAudio();
+    bool		openAudio();
     void		closeAudio();
-    boolean		startAudioThread(void (*)(void*), void*);
+    bool		startAudioThread(void (*)(void*), void*);
     void		stopAudioThread();
-    boolean		hasAudioThread() const;
+    bool		hasAudioThread() const;
     void		writeSoundCommand(const void*, int);
-    boolean		readSoundCommand(void*, int);
+    bool		readSoundCommand(void*, int);
     int			getAudioOutputRate() const;
     int			getAudioBufferSize() const;
     int			getAudioBufferChunkSize() const;
-    boolean		isAudioTooEmpty() const;
+    bool		isAudioTooEmpty() const;
     void		writeAudioFrames(const float* samples, int numFrames);
-    void		audioSleep(boolean checkLowWater, double maxTime);
+    void		audioSleep(bool checkLowWater, double maxTime);
 
   private:
     static DWORD WINAPI	audioThreadInit(void*);
 
   private:
     HWND		window;
-    boolean		audioReady;
-    boolean		audioPlaying;
+    bool		audioReady;
+    bool		audioPlaying;
+#ifdef HAVE_DSOUND_H
     IDirectSound*	audioInterface;
     IDirectSoundBuffer*	audioPrimaryPort;
     IDirectSoundBuffer*	audioPort;
+#endif
     int			audioNumChannels;
     int			audioOutputRate;
     int			audioBufferSize;
@@ -69,9 +71,16 @@ class WinMedia : public BzfMedia {
     HANDLE		audioCommandEvent;
     HANDLE		audioCommandMutex;
     HANDLE		audioThread;
-    HANDLE		dummyEvent;
     static void		(*threadProc)(void*);
     static void*	threadData;
 };
 
 #endif // BZF_WINMEDIA_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

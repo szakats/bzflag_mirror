@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 // Jeff Myers 10/13/97 changed direct sound cooperative level to
@@ -19,6 +19,8 @@
 #include "Pack.h"
 #include <stdio.h>
 
+#ifdef HAVE_DSOUND_H
+
 static const int	defaultOutputRate = 22050;
 static const int	NumChunks = 4;
 void			(*WinMedia::threadProc)(void*);
@@ -26,7 +28,7 @@ void*			WinMedia::threadData;
 
 WinMedia::WinMedia(WinWindow* _window) :
 				window(_window->getHandle()),
-				audioReady(False),
+				audioReady(false),
 				audioInterface(NULL),
 				audioPrimaryPort(NULL),
 				audioPort(NULL),
@@ -36,32 +38,25 @@ WinMedia::WinMedia(WinWindow* _window) :
 				audioCommandMutex(NULL),
 				audioThread(NULL)
 {
-  dummyEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
 
 WinMedia::~WinMedia()
 {
-  CloseHandle(dummyEvent);
 }
 
-void			WinMedia::sleep(float timeInSeconds)
-{
-  WaitForSingleObject(dummyEvent, (DWORD)(1000.0f * timeInSeconds));
-}
-
-boolean			WinMedia::openAudio()
+bool			WinMedia::openAudio()
 {
   // don't re-initialize
-  if (audioReady) return False;
+  if (audioReady) return false;
 
   // create DirectSound interface pointer
   if (DirectSoundCreate(NULL, &audioInterface, NULL) != DS_OK)
-    return False;
+    return false;
 
   // set cooperative level
   if (audioInterface->SetCooperativeLevel(window, DSSCL_EXCLUSIVE) != DS_OK) {
     closeAudio();
-    return False;
+    return false;
   }
 
   // create audio command queue
@@ -107,11 +102,11 @@ boolean			WinMedia::openAudio()
   }
   if (FAILED(status)) {
     closeAudio();
-    return False;
+    return false;
   }
 
   // haven't started playing yet
-  audioPlaying = False;
+  audioPlaying = false;
 
   // have written zero samples so far
   audioWritePtr = 0;
@@ -152,15 +147,15 @@ boolean			WinMedia::openAudio()
   }
   if (FAILED(status)) {
     closeAudio();
-    return False;
+    return false;
   }
 //  audioPrimaryPort->Play(0, 0, DSBPLAY_LOOPING);
 
   // make an output buffer
   outputBuffer = new short[audioBufferChunkSize];
 
-  audioReady = True;
-  return True;
+  audioReady = true;
+  return true;
 }
 
 void			WinMedia::closeAudio()
@@ -186,17 +181,17 @@ void			WinMedia::closeAudio()
   if (audioCommandMutex) CloseHandle(audioCommandMutex);
   delete[] audioCommandBuffer;
 
-  audioReady = False;
+  audioReady = false;
   audioInterface = NULL;
   audioPrimaryPort = NULL;
   audioPort = NULL;
   outputBuffer = NULL;
 }
 
-boolean			WinMedia::startAudioThread(
+bool			WinMedia::startAudioThread(
 				void (*proc)(void*), void* data)
 {
-  if (audioThread || !proc) return False;
+  if (audioThread || !proc) return false;
   threadProc = proc;
   threadData = data;
 
@@ -219,13 +214,16 @@ void			WinMedia::stopAudioThread()
   audioThread = NULL;
 }
 
-boolean			WinMedia::hasAudioThread() const
+bool			WinMedia::hasAudioThread() const
 {
-  return True;
+  return true;
 }
 
 DWORD WINAPI		WinMedia::audioThreadInit(void*)
 {
+  // boost the audio thread's priority
+  SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+
   // call user routine
   (*threadProc)(threadData);
   return 0;
@@ -264,17 +262,17 @@ void			WinMedia::writeSoundCommand(const void* msg, int len)
   ReleaseMutex(audioCommandMutex);
 }
 
-boolean			WinMedia::readSoundCommand(void* msg, int len)
+bool			WinMedia::readSoundCommand(void* msg, int len)
 {
   // no event unless signaled non-empty
   if (WaitForSingleObject(audioCommandEvent, 0) != WAIT_OBJECT_0)
-    return False;
+    return false;
 
   // take ownership of the buffer.  if we can't then give up after
   // resetting the event flag.
   if (WaitForSingleObject(audioCommandMutex, INFINITE) != WAIT_OBJECT_0) {
     ResetEvent(audioCommandEvent);
-    return False;
+    return false;
   }
 
   // read message
@@ -296,7 +294,7 @@ boolean			WinMedia::readSoundCommand(void* msg, int len)
   // release hold of buffer
   ReleaseMutex(audioCommandMutex);
 
-  return True;
+  return true;
 }
 
 int			WinMedia::getAudioOutputRate() const
@@ -318,7 +316,7 @@ int			WinMedia::getAudioBufferChunkSize() const
   return audioBufferChunkSize / audioNumChannels;
 }
 
-boolean			WinMedia::isAudioTooEmpty() const
+bool			WinMedia::isAudioTooEmpty() const
 {
   // the write offset returned by GetCurrentPosition() is probably
   // useless.  the documentation certainly is.
@@ -329,7 +327,7 @@ boolean			WinMedia::isAudioTooEmpty() const
     if (samplesLeft < 0) samplesLeft += audioBufferSize;
     return samplesLeft <= audioLowWaterMark;
   }
-  return False;
+  return false;
 }
 
 void			WinMedia::writeAudioFrames(
@@ -390,7 +388,7 @@ void			WinMedia::writeAudioFrames(
     audioPort->Unlock(ptr1, size1, ptr2, size2);
 
     if (!audioPlaying) {
-      audioPlaying = True;
+      audioPlaying = true;
       audioPort->Play(0, 0, DSBPLAY_LOOPING);
     }
 
@@ -402,7 +400,7 @@ void			WinMedia::writeAudioFrames(
 }
 
 void			WinMedia::audioSleep(
-				boolean checkLowWater, double maxTime)
+				bool checkLowWater, double maxTime)
 {
   // wait for a message on the command queue.  do this by waiting
   // for the command queue event.
@@ -421,7 +419,7 @@ void			WinMedia::audioSleep(
     do {
       // break if buffer has drained enough
       if (isAudioTooEmpty())
-        break;
+	break;
 
       // wait.  break if command was sent.
       if (WaitForSingleObject(audioCommandEvent, 1) == WAIT_OBJECT_0)
@@ -435,3 +433,11 @@ void			WinMedia::audioSleep(
     WaitForSingleObject(audioCommandEvent, timeout);
   }
 }
+#endif
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

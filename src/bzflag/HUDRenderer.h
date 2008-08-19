@@ -1,216 +1,277 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/*
+#ifndef	__HUDRENDERER_H__
+#define	__HUDRENDERER_H__
+
+#include "common.h"
+
+/* system interface headers */
+#include <vector>
+#include <string>
+
+/* common interface headers */
+#include "TimeKeeper.h"
+#include "HUDuiTypeIn.h"
+#include "Flag.h"
+#include "SceneRenderer.h"
+
+/* local interface headers */
+#include "FlashClock.h"
+#include "MainWindow.h"
+#include "BzfDisplay.h"
+#include "Player.h"
+#include "ScoreboardRenderer.h"
+#include "LocalPlayer.h"
+#include "OpenGLUtils.h"
+
+class LocalFontFace;
+
+const int		MaxAlerts = 3;
+
+class HUDMarker {
+public:
+  float		heading;
+  GLfloat		color[3];
+};
+typedef std::vector<HUDMarker> MarkerList;
+
+
+class EnhancedHUDMarker
+{
+public:
+  EnhancedHUDMarker()
+  {
+    pos[0] = pos[1] = pos[2] = 0;
+    color[0] = color[1] = color[2] = 0;
+  }
+
+  EnhancedHUDMarker( const float *p, const float* c)
+  {
+    memcpy( color, c, sizeof(GLfloat)*3);
+    memcpy( pos, p, sizeof(float)*3);
+  }
+
+  float pos[3];
+  GLfloat color[3];
+  std::string name;
+  bool friendly;
+};
+typedef std::vector < EnhancedHUDMarker > EnhancedMarkerList;
+
+
+
+/**
  * HUDRenderer:
  *	Encapsulates information about rendering the heads-up display.
  */
+class HUDRenderer : public GLDisplayListCreator {
+public:
+  HUDRenderer(const BzfDisplay*, const SceneRenderer&);
+  ~HUDRenderer();
 
-#ifndef	BZF_HUD_RENDERER_H
-#define	BZF_HUD_RENDERER_H
+  virtual void buildGeometry ( GLDisplayList displayList );
 
-#include "global.h"
-#include "common.h"
-#include "BzfString.h"
-#include "OpenGLTexFont.h"
-#include "TimeKeeper.h"
-#include "HUDui.h"
+  int		getNoMotionSize() const;
+  int		getMaxMotionSize() const;
 
-class BzfDisplay;
-class SceneRenderer;
-class MainWindow;
-class Player;
-enum FlagId;
+  void		setColor(float r, float g, float b);
+  void		setPlaying(bool playing);
+  void		setRoaming(bool roaming);
+  void		setPlayerHasHighScore(bool = true);
+  void		setTeamHasHighScore(bool = true);
+  void		setHeading(float angle);
+  void		setAltitude(float altitude);
+  void		setAltitudeTape(bool = true);
+  void		setCracks(bool = true);
+  void		setFPS(float fps);
+  void		setDrawTime(float drawTimeInseconds);
+  void		setFrameTriangleCount(int tpf);
+  void		setFrameRadarTriangleCount(int rtpf);
+  void		setAlert(int num, const char* string, float duration,
+			 bool warning = false);
+  void		setFlagHelp(FlagType* desc, float duration);
+  void		addMarker(float heading, const float *color);
+  void		setRestartKeyLabel(const std::string&);
+  void		setTimeLeft(uint32_t timeLeftInSeconds);
 
-const int		MaxAlerts = 3;
-const int		MaxHUDMarkers = 3;
-const int		HUDNumCracks = 8;
-const int		HUDCrackLevels = 4;
+  void AddEnhancedMarker ( const float* pos, const float *color, bool friendly = false, float zShift = 0 );
+  void AddEnhancedNamedMarker ( const float* pos, const float *color, std::string name, bool friendly = false, float zShift = 0 );
 
-class FlashClock {
-  public:
-			FlashClock();
-			~FlashClock();
+  void AddLockOnMarker ( const float* pos, std::string name, bool friendly = false, float zShift = 0 );
 
-    void		setClock(float time);
-    void		setClock(float time, float onTime, float offTime);
+  void saveMatrixes ( const float *mm, const float *pm );
+  void		setDim(bool);
 
-    boolean		isOn();
+  bool		getComposing() const;
+  std::string	getComposeString() const;
+  void		setComposeString(const std::string &message) const;
+  void		setComposeString(const std::string &message, bool _allowEdit) const;
 
-  private:
-    TimeKeeper		startTime;
-    float		duration;
-    float		onDuration;
-    float		flashDuration;
+  void		setComposing(const std::string &prompt);
+  void		setComposing(const std::string &prompt, bool _allowEdit);
+
+  void		render(void);
+  ScoreboardRenderer *getScoreboard();
+
+protected:
+  void		hudColor3f(GLfloat, GLfloat, GLfloat);
+  void		hudColor4f(GLfloat, GLfloat, GLfloat, GLfloat);
+  void		hudColor3fv(const GLfloat*);
+  void		hudColor3Afv( const GLfloat*, const float );
+  void		hudColor4fv(const GLfloat*);
+  void		hudSColor3fv(const GLfloat*);
+  void		renderAlerts(void);
+  void		renderStatus(void);
+  void		renderOptions(SceneRenderer&);
+  void		renderCompose(SceneRenderer&);
+  void		renderBox(SceneRenderer&);
+  void		renderTankLabels(SceneRenderer&);
+  void		renderTimes(void);
+  void		renderShots(const Player*);
+
+  void		renderPlaying(SceneRenderer&);
+  void		renderNotPlaying(SceneRenderer&);
+  void		renderRoaming(SceneRenderer&);
+
+  void drawLockonMarker ( float *color, float alpha, float *object, const float *viewPos, std::string name, bool friendly );
+  void drawWaypointMarker ( float *color, float alpha, float *object, const float *viewPos, std::string name, bool friendly );
+
+  void drawMarkersInView ( int centerX, int centerY, const LocalPlayer* myTank );
+  /** basic render update used by renderPlaying(), renderNotPlaying(), and renderRoaming()
+   */
+  void		renderUpdate(SceneRenderer&);
+
+  std::string	makeHelpString(const char* help) const;
+
+private:
+  void		setBigFontSize(int width, int height);
+  void		setAlertFontSize(int width, int height);
+  void		setMajorFontSize(int width, int height);
+  void		setMinorFontSize(int width, int height);
+  void		setHeadingFontSize(int width, int height);
+  void		setComposeFontSize(int width, int height);
+  void		setLabelsFontSize(int width, int height);
+
+  void		resize(bool firstTime);
+  static void	resizeCallback(void*);
+  static int	tankScoreCompare(const void* _a, const void* _b);
+  static int	teamScoreCompare(const void* _a, const void* _b);
+
+  GLDisplayList	friendlyMarkerList;
+private:
+  const BzfDisplay*	display;
+  ScoreboardRenderer*	scoreboard;
+  MainWindow&		window;
+  bool			firstRender;
+  int			noMotionSize;
+  int			maxMotionSize;
+  float			headingOffset;
+  GLfloat		hudColor[3];
+  GLfloat		messageColor[3];
+  GLfloat		warningColor[3];
+
+  LocalFontFace*	bigFontFace;
+  float			bigFontSize;
+  LocalFontFace*	alertFontFace;
+  float			alertFontSize;
+  LocalFontFace*	majorFontFace;
+  float			majorFontSize;
+  LocalFontFace*	minorFontFace;
+  float			minorFontSize;
+  LocalFontFace*	headingFontFace;
+  float			headingFontSize;
+  LocalFontFace*	composeFontFace;
+  float			composeFontSize;
+  LocalFontFace*	labelsFontFace;
+  float			labelsFontSize;
+  float			majorFontHeight;
+  float			alertFontHeight;
+
+  bool		playing;
+  bool		roaming;
+  bool		dim;
+  int		numPlayers;
+  uint32_t	timeLeft;
+  TimeKeeper	timeSet;
+  bool		playerHasHighScore;
+  bool		teamHasHighScore;
+  float		heading;
+  float		altitude;
+  bool		altitudeTape;
+  float		fps;
+  float		drawTime;
+  int		headingMarkSpacing;
+  float		headingLabelWidth[36];
+  float		altitudeMarkSpacing;
+  float		altitudeLabelMaxWidth;
+  float		restartLabelWidth;
+  float		resumeLabelWidth;
+  float		autoPilotWidth;
+  float		gameOverLabelWidth;
+  float		huntArrowWidth;
+  float		huntedArrowWidth;
+  float		tkWarnRatio;
+  std::string	restartLabel;
+
+  FlashClock		globalClock;
+  FlashClock		scoreClock;
+
+  FlashClock		alertClock[MaxAlerts];
+  std::string		alertLabel[MaxAlerts];
+  float		alertLabelWidth[MaxAlerts];
+  const GLfloat*	alertColor[MaxAlerts];
+
+  float		flagHelpY;
+  FlashClock		flagHelpClock;
+  int			flagHelpLines;
+  std::string		flagHelpText;
+
+  bool		showOptions;
+  bool		showCompose;
+  bool		showCracks;
+
+  MarkerList		markers;
+  EnhancedMarkerList	enhancedMarkers;
+  EnhancedMarkerList	lockOnMarkers;
+
+
+  HUDuiTypeIn*	composeTypeIn;
+
+  static const float	altitudeOffset;
+  static const GLfloat black[3];
+  static std::string	headingLabel[36];
+  static std::string	restartLabelFormat;
+  static std::string	resumeLabel;
+  static std::string	gameOverLabel;
+  static std::string	autoPilotLabel;
+  bool			dater;
+  time_t		lastTimeChange;
+  int			triangleCount;
+  int			radarTriangleCount;
+
+  double modelMatrix[16];
+  double projMatrix[16];
+  int		viewport[4];
+
 };
 
-class HUDRenderer {
-  public:
-			HUDRenderer(const BzfDisplay*,
-				const SceneRenderer&);
-			~HUDRenderer();
 
-    int			getNoMotionSize() const;
-    int			getMaxMotionSize() const;
+#endif /* __HUDRENDERER_H__ */
 
-    void		setColor(float r, float g, float b);
-    void		setPlaying(boolean playing);
-    void		setPlayerHasHighScore(boolean = True);
-    void		setTeamHasHighScore(boolean = True);
-    void		setHeading(float angle);
-    void		setAltitude(float altitude);
-    void		setAltitudeTape(boolean = True);
-    void		setFPS(float fps);
-    void		setDrawTime(float drawTimeInseconds);
-    void		setAlert(int num, const char* string, float duration,
-						boolean warning = False);
-    void		setFlagHelp(FlagId, float duration);
-    void		setCracks(boolean showCracks);
-    void		setMarker(int index, boolean = True);
-    void		setMarkerHeading(int index, float heading);
-    void		setMarkerColor(int index, float r, float g, float b);
-    void		setRestartKeyLabel(const BzfString&);
-    void		setTimeLeft(int timeLeftInSeconds);
-
-    void		setDim(boolean);
-
-    boolean		getComposing() const;
-    BzfString		getComposeString() const;
-
-    void		setComposing(const char* prompt);
-
-    void		render(SceneRenderer&);
-
-  protected:
-    void		hudColor3f(GLfloat, GLfloat, GLfloat);
-    void		hudColor4f(GLfloat, GLfloat, GLfloat, GLfloat);
-    void		hudColor3fv(const GLfloat*);
-    void		hudColor4fv(const GLfloat*);
-    void		hudSColor3fv(const GLfloat*);
-    void		renderAlerts(SceneRenderer&);
-    void		renderStatus(SceneRenderer&);
-    void		renderCracks(SceneRenderer&);
-    void		renderOptions(SceneRenderer&);
-    void		renderCompose(SceneRenderer&);
-    void		renderScoreboard(SceneRenderer&);
-    void		renderPlaying(SceneRenderer&);
-    void		renderNotPlaying(SceneRenderer&);
-    void		renderTimes(SceneRenderer&);
-    void		drawPlayerScore(const Player*,
-					float x1, float x2, float x3, float y);
-    void		drawDeadPlayerScore(const Player*,
-					float x1, float x2, float x3, float y);
-    void		drawTeamScore(int team, float x, float y);
-
-    void		makeCrack(int n, int l, float a);
-    BzfString		makeHelpString(const char* help) const;
-
-  private:
-    void		setBigFontSize(int width, int height);
-    void		setAlertFontSize(int width, int height);
-    void		setMajorFontSize(int width, int height);
-    void		setMinorFontSize(int width, int height);
-    void		setHeadingFontSize(int width, int height);
-    void		setComposeFontSize(int width, int height);
-
-    void		resize(boolean firstTime);
-    static void		resizeCallback(void*);
-
-    class Marker {
-      public:
-	boolean		on;
-	float		heading;
-	GLfloat		color[3];
-    };
-
-  private:
-    const BzfDisplay*	display;
-    MainWindow&		window;
-    boolean		firstRender;
-    int			noMotionSize;
-    int			maxMotionSize;
-    float		headingOffset;
-    GLfloat		hudColor[3];
-    GLfloat		messageColor[3];
-    GLfloat		warningColor[3];
-    OpenGLTexFont	bigFont;
-    OpenGLTexFont	alertFont;
-    OpenGLTexFont	majorFont;
-    OpenGLTexFont	minorFont;
-    OpenGLTexFont	headingFont;
-    OpenGLTexFont	composeFont;
-    boolean		playing;
-    boolean		dim;
-    boolean		sDim;
-    int			numPlayers;
-    int			timeLeft;
-    TimeKeeper		timeSet;
-    boolean		playerHasHighScore;
-    boolean		teamHasHighScore;
-    float		heading;
-    float		altitude;
-    boolean		altitudeTape;
-    float		fps;
-    float		drawTime;
-    int			headingMarkSpacing;
-    float		headingLabelWidth[36];
-    float		altitudeMarkSpacing;
-    float		altitudeLabelMaxWidth;
-    float		scoreLabelWidth;
-    float		killsLabelWidth;
-    float		teamScoreLabelWidth;
-    float		restartLabelWidth;
-    float		resumeLabelWidth;
-    float		gameOverLabelWidth;
-    BzfString		restartLabel;
-
-    FlashClock		globalClock;
-    FlashClock		scoreClock;
-
-    float		alertY;
-    FlashClock		alertClock[MaxAlerts];
-    BzfString		alertLabel[MaxAlerts];
-    float		alertLabelWidth[MaxAlerts];
-    const GLfloat*	alertColor[MaxAlerts];
-
-    float		flagHelpY;
-    FlashClock		flagHelpClock;
-    BzfString		flagHelp[int(LastFlag) - int(FirstFlag) + 1];
-    int			flagHelpIndex;
-    int			flagHelpLines;
-
-    boolean		showOptions;
-    boolean		showCompose;
-
-    GLfloat		cracks[HUDNumCracks][(1 << HUDCrackLevels) + 1][2];
-    boolean		showCracks;
-
-    Marker		marker[MaxHUDMarkers];
-
-    HUDuiTypeIn*	composeTypeIn;
-
-    static const float	altitudeOffset;
-    static const GLfloat black[3];
-    static BzfString	headingLabel[36];
-    static BzfString	altitudeLabel[20];
-    static BzfString	scoreSpacingLabel;
-    static BzfString	scoreLabel;
-    static BzfString	killLabel;
-    static BzfString	teamScoreLabel;
-    static BzfString	playerLabel;
-    static BzfString	restartLabelFormat;
-    static BzfString	resumeLabel;
-    static BzfString	gameOverLabel;
-    static const char*	flagHelpString[int(LastFlag) - int(FirstFlag) + 1];
-};
-
-#endif // BZF_HUD_RENDERER_H
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

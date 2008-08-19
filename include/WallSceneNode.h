@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* WallSceneNode:
@@ -24,6 +24,7 @@
 #ifndef	BZF_WALL_SCENE_NODE_H
 #define	BZF_WALL_SCENE_NODE_H
 
+#include "common.h"
 #include "SceneNode.h"
 
 class WallSceneNode : public SceneNode {
@@ -31,13 +32,13 @@ class WallSceneNode : public SceneNode {
 			WallSceneNode();
 			~WallSceneNode();
 
-    const GLfloat*	getColor() const { return color; }
-    const GLfloat*	getModulateColor() const { return modulateColor; }
-    const GLfloat*	getLightedColor() const { return lightedColor; }
-    const GLfloat*	getLightedModulateColor() const
-				{ return lightedModulateColor; }
-    const GLfloat*	getPlane() const;
+    const GLfloat*	getColor() const;
+    const GLfloat*	getDynamicColor() const;
+    const GLfloat*	getModulateColor() const;
+    const GLfloat*	getLightedColor() const;
+    const GLfloat*	getLightedModulateColor() const;
     GLfloat		getDistance(const GLfloat*) const;
+    virtual bool	inAxisBox (const Extents& exts) const;
 
     void		setColor(GLfloat r, GLfloat g,
 				GLfloat b, GLfloat a = 1.0f);
@@ -52,23 +53,33 @@ class WallSceneNode : public SceneNode {
 				GLfloat b, GLfloat a = 1.0f);
     void		setLightedModulateColor(const GLfloat* rgba);
     void		setMaterial(const OpenGLMaterial&);
-    void		setTexture(const OpenGLTexture&);
+    void		setTexture(const int);
+    void		setTextureMatrix(const GLfloat* texmat);
+    void		setDynamicColor(const float* color);
+    void		setBlending(bool);
+    void		setSphereMap(bool);
+    void		setNoCulling(bool);
+    void		setNoSorting(bool);
+    void		setAlphaThreshold(float);
+    void		setRadarColor(const float color[4]);
 
     void		setColor();
 
-    boolean		cull(const ViewFrustum&) const;
-    void		notifyStyleChange(const SceneRenderer& renderer);
+    bool		cull(const ViewFrustum&) const;
+    void		notifyStyleChange();
 
     void		copyStyle(WallSceneNode*);
 
+    void		setUseColorTexture(bool use){useColorTexture=use;}
   protected:
     int			getNumLODs() const;
     void		setNumLODs(int, float* elementAreas);
     void		setPlane(const GLfloat[4]);
     int			pickLevelOfDetail(const SceneRenderer&) const;
 
-    int			getStyle() const { return style; }
-    const OpenGLGState&	getGState() const { return gstate; }
+    int			getStyle() const;
+    const OpenGLGState*	getGState() const { return &gstate; }
+    const OpenGLGState*	getWallGState() const;
 
     static int		splitWall(const GLfloat* plane,
 				const GLfloat3Array& vertices,
@@ -76,39 +87,76 @@ class WallSceneNode : public SceneNode {
 				SceneNode*& front, SceneNode*& back); // const
 
   private:
-    static void		splitEdge(const GLfloat* p1, const GLfloat* p2,
-				const GLfloat* uv1, const GLfloat* uv2,
-				const GLfloat* plane,
-				GLfloat* p, GLfloat* uv); // const
+    static void splitEdge(float d1, float d2,
+			  const GLfloat* p1, const GLfloat* p2,
+			  const GLfloat* uv1, const GLfloat* uv2,
+			  GLfloat* p, GLfloat* uv); //const
 
   private:
     int			numLODs;
     float*		elementAreas;
-    GLfloat		plane[4];	// unit normal, distance to origin
+    const GLfloat*	dynamicColor;
     GLfloat		color[4];
     GLfloat		modulateColor[4];
     GLfloat		lightedColor[4];
     GLfloat		lightedModulateColor[4];
+    float		alphaThreshold;
     int			style;
-    boolean		transparent;
-    boolean		modulateTransparent;
-    boolean		lightedTransparent;
-    boolean		lightedModulateTransparent;
+    bool		noCulling;
+    bool		noSorting;
+    bool		isBlended;
+    bool		wantBlending;
+    bool		wantSphereMap;
     OpenGLGState	gstate;
+    bool		useColorTexture;
 };
 
 //
 // WallSceneNode
 //
 
-inline int		WallSceneNode::getNumLODs() const
+inline int WallSceneNode::getNumLODs() const
 {
   return numLODs;
 }
 
-inline const GLfloat*	WallSceneNode::getPlane() const
+inline const GLfloat* WallSceneNode::getColor() const
 {
-  return plane;
+  return color;
+}
+inline const GLfloat* WallSceneNode::getDynamicColor() const
+{
+  return dynamicColor;
+}
+inline const GLfloat* WallSceneNode::getModulateColor() const
+{
+  return modulateColor;
+}
+inline const GLfloat* WallSceneNode::getLightedColor() const
+{
+  return lightedColor;
+}
+inline const GLfloat* WallSceneNode::getLightedModulateColor() const
+{
+  return lightedModulateColor;
 }
 
+inline int WallSceneNode::getStyle() const
+{
+  return style;
+}
+inline const OpenGLGState* WallSceneNode::getWallGState() const
+{
+  return &gstate;
+}
+
+
 #endif // BZF_WALL_SCENE_NODE_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

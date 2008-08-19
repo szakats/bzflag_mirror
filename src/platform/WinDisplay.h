@@ -1,13 +1,13 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* WinDisplay:
@@ -16,32 +16,35 @@
 
 #ifndef BZF_WINDISPLAY_H
 #define	BZF_WINDISPLAY_H
-
 #include "common.h"
 #include "BzfDisplay.h"
-#include "AList.h"
-#include "BzfString.h"
-#include <windows.h>
 #include "bzfgl.h"
+
+#include "ErrorHandler.h"
 
 class BzfKeyEvent;
 class Resolution;
 
-class WinDisplay : public BzfDisplay {
+class WinDisplay : public BzfDisplay , FatalErrorCallback {
   public:
 			WinDisplay(const char* displayName,
 				const char* videoFormat);
 			~WinDisplay();
 
-    boolean		isValid() const;
-    boolean		isEventPending() const;
-    boolean		getEvent(BzfEvent&) const;
+    virtual bool	isValid() const;
+    bool		isEventPending() const;
+    bool		getEvent(BzfEvent&) const;
+    bool		hasGetKeyMode() {return true;};
+    void		getModState(bool &shift, bool &control, bool &alt);
 
-    boolean		setDefaultResolution();
+    bool		setDefaultResolution() const;
 
-    boolean		isFullScreenOnly() const;
+    bool		isFullScreenOnly() const;
     int			getFullWidth() const;
     int			getFullHeight() const;
+
+	bool		peekEvent(BzfEvent& event) const;
+
 
     // for other Windows stuff
     class Rep {
@@ -67,31 +70,41 @@ class WinDisplay : public BzfDisplay {
 			WinDisplay(const WinDisplay&);
     WinDisplay&		operator=(const WinDisplay&);
 
-    boolean		getKey(const MSG&, BzfKeyEvent&) const;
-    boolean		isNastyKey(const MSG&) const;
+    bool		getKey(const MSG&, BzfKeyEvent&) const;
+    bool		isNastyKey(const MSG&) const;
 
-    boolean		doSetResolution(int);
+    bool		doSetResolution(int);
     ResInfo**		getVideoFormats(int& num, int& current);
-    static boolean	canChangeDepth();
+    static bool		canChangeDepth();
+
+	bool windowsEventToBZFEvent ( MSG &msg, BzfEvent& event ) const;
 
   private:
     Rep*		rep;
 
     // resolution info
     HWND		hwnd;
-    bool		using3Dfx;
     int			fullWidth;
     int			fullHeight;
     Resolution*		resolutions;
 
+    // fatal error handler
+    virtual void error ( const char* title, const char* message );
+
     // for key to character translations
-    boolean		translated;
-    int			charCode;
+    mutable bool	translated;
+    mutable int		charCode;
 
     // keyboard mapping
-    static const int	asciiMap[];
-    static const int	asciiShiftMap[];
     static const int	buttonMap[];
 };
 
 #endif // BZF_WINDISPLAY_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

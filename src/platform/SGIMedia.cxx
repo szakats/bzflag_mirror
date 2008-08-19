@@ -1,33 +1,40 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/* interface header */
 #include "SGIMedia.h"
+
+/* system implementation headers */
+#include <stddef.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/prctl.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <math.h>
 #include <fcntl.h>
 #include <invent.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <bstring.h>
-#include <sys/prctl.h>
-#include <sys/wait.h>
-#include "bzsignal.h"
 #include <limits.h>
 #include <sys/schedctl.h>
-
-#include <stddef.h>
 #include <sys/mman.h>
 #include <sys/syssgi.h>
+
+#ifdef HAVE_BSTRING_H
+#  include <bstring.h>
+#endif
+
+/* common implementation headers */
+#include "bzsignal.h"
+
 
 //
 // SGIMedia
@@ -38,7 +45,7 @@ static const int	NumChunks = 3;
 void			(*SGIMedia::threadProc)(void*);
 void*			SGIMedia::threadData;
 
-SGIMedia::SGIMedia() : BzfMedia(), audioReady(False),
+SGIMedia::SGIMedia() : BzfMedia(), audioReady(false),
 				audioPort(NULL),
 				queueIn(-1), queueOut(-1),
 				outputBuffer(NULL),
@@ -69,7 +76,7 @@ SGIMedia::~SGIMedia()
   // do nothing
 }
 
-double			SGIMedia::stopwatch(boolean start)
+double			SGIMedia::stopwatch(bool start)
 {
   if (!iotimer_addr) return 0.0;
   if (start) {
@@ -81,27 +88,19 @@ double			SGIMedia::stopwatch(boolean start)
   }
 }
 
-void			SGIMedia::sleep(float timeInSeconds)
-{
-  struct timeval tv;
-  tv.tv_sec = (long)timeInSeconds;
-  tv.tv_usec = (long)(1.0e6 * (timeInSeconds - floor(timeInSeconds)));
-  select(0, NULL, NULL, NULL, &tv);
-}
-
-boolean			SGIMedia::openAudio()
+bool			SGIMedia::openAudio()
 {
   // don't re-initialize
-  if (audioReady) return False;
+  if (audioReady) return false;
 
   // check for and open audio hardware
-  if (!checkForAudioHardware() || !openAudioHardware()) return False;
+  if (!checkForAudioHardware() || !openAudioHardware()) return false;
 
   // open communication channel (FIFO pipe)
   int fd[2];
   if (pipe(fd) < 0) {
     closeAudio();
-    return False;
+    return false;
   }
   queueIn = fd[1];
   queueOut = fd[0];
@@ -116,11 +115,11 @@ boolean			SGIMedia::openAudio()
   outputBuffer = new short[audioBufferSize];
 
   // ready to go
-  audioReady = True;
-  return True;
+  audioReady = true;
+  return true;
 }
 
-boolean			SGIMedia::checkForAudioHardware()
+bool			SGIMedia::checkForAudioHardware()
 {
   inventory_t* scan;
   setinvent();
@@ -133,7 +132,7 @@ boolean			SGIMedia::checkForAudioHardware()
   return scan != NULL;
 }
 
-boolean			SGIMedia::openAudioHardware()
+bool			SGIMedia::openAudioHardware()
 {
   ALconfig	config;
 
@@ -173,7 +172,7 @@ boolean			SGIMedia::openAudioHardware()
   ALfreeconfig(config);
 
   // if no audio ports available then don't change configuration
-  if (audioPort == 0) return False;
+  if (audioPort == 0) return false;
 
   // set my configuration
   audioParams[0] = AL_OUTPUT_RATE;
@@ -184,7 +183,7 @@ boolean			SGIMedia::openAudioHardware()
   audioParams[5] = originalAudioParams[5];
   ALsetparams(AL_DEFAULT_DEVICE, audioParams, 6);
 
-  return True;
+  return true;
 }
 
 void			SGIMedia::closeAudio()
@@ -204,17 +203,17 @@ void			SGIMedia::closeAudio()
   if (queueIn != -1) close(queueIn);
   if (queueOut != -1) close(queueOut);
 
-  audioReady = False;
+  audioReady = false;
   audioPort = NULL;
   queueIn = -1;
   queueOut = -1;
   outputBuffer = NULL;
 }
 
-boolean			SGIMedia::startAudioThread(
+bool			SGIMedia::startAudioThread(
 				void (*proc)(void*), void* data)
 {
-  if (childProcID > 0 || !proc) return False;
+  if (childProcID > 0 || !proc) return false;
   threadProc = proc;
   threadData = data;
   childProcID = sproc(&audioThreadInit, PR_SADDR);
@@ -229,9 +228,9 @@ void			SGIMedia::stopAudioThread()
   childProcID = 0;
 }
 
-boolean			SGIMedia::hasAudioThread() const
+bool			SGIMedia::hasAudioThread() const
 {
-  return True;
+  return true;
 }
 
 static void		die(int)
@@ -267,7 +266,7 @@ void			SGIMedia::writeSoundCommand(const void* cmd, int len)
   write(queueIn, cmd, len);
 }
 
-boolean			SGIMedia::readSoundCommand(void* cmd, int len)
+bool			SGIMedia::readSoundCommand(void* cmd, int len)
 {
   return (read(queueOut, cmd, len) == len);
 }
@@ -287,7 +286,7 @@ int			SGIMedia::getAudioBufferChunkSize() const
   return audioBufferSize >> 1;
 }
 
-boolean			SGIMedia::isAudioTooEmpty() const
+bool			SGIMedia::isAudioTooEmpty() const
 {
   return ALgetfillable(audioPort) >= audioLowWaterMark;
 }
@@ -316,16 +315,16 @@ void			SGIMedia::writeAudioFrames(
 }
 
 void			SGIMedia::audioSleep(
-				boolean checkLowWater, double endTime)
+				bool checkLowWater, double endTime)
 {
   // prepare fd bit vectors
   fd_set audioSelectSet;
   fd_set commandSelectSet;
   FD_ZERO(&commandSelectSet);
-  FD_SET(queueOut, &commandSelectSet);
+  FD_SET((unsigned int)queueOut, &commandSelectSet);
   if (checkLowWater) {
     FD_ZERO(&audioSelectSet);
-    FD_SET(audioPortFd, &audioSelectSet);
+    FD_SET((unsigned int)audioPortFd, &audioSelectSet);
   }
 
   // prepare timeout
@@ -339,3 +338,11 @@ void			SGIMedia::audioSleep(
   select(maxFd, &commandSelectSet, checkLowWater ? &audioSelectSet : NULL,
 			NULL, (struct timeval*)(endTime >= 0.0 ? &tv : NULL));
 }
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8

@@ -1,23 +1,22 @@
 /* bzflag
- * Copyright (c) 1993 - 2001 Tim Riker
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the license found in the file
- * named LICENSE that should have accompanied this file.
+ * named COPYING that should have accompanied this file.
  *
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- */
-
-/* Ray
- *	Encapsulates a semi-infinite ray.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef	BZF_RAY_H
 #define	BZF_RAY_H
 
 #include "common.h"
+#include <string.h> // for memset()
+
+/** Encapsulates a semi-infinite ray. */
 
 class Ray {
   public:
@@ -42,7 +41,7 @@ class Ray {
 
 inline Ray::Ray()
 {
-  // do nothing
+  memset(o, 0, sizeof(float) * 3);
 }
 
 inline Ray::~Ray()
@@ -61,3 +60,11 @@ inline const float*	Ray::getDirection() const
 }
 
 #endif // BZF_RAY_H
+
+// Local Variables: ***
+// mode: C++ ***
+// tab-width: 8 ***
+// c-basic-offset: 2 ***
+// indent-tabs-mode: t ***
+// End: ***
+// ex: shiftwidth=2 tabstop=8
