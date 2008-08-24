@@ -45,39 +45,39 @@ void FaceGenerator::createInitialGraph( ) {
   graph.addConnection( n4, n1 );
 }
 
+void FaceGenerator::growRoadNetwork( graph::PlanarGraph* sgraph, size_t branching, float segmentLength, float noise, float threshold ) {
+  // Maybe use random edge instead?
+  graph::Node* splitNode = sgraph->splitEdge( sgraph->longestEdge( ) );
+  Logger.log( 4, "FaceGenerator : splitnode %s", splitNode->toString( ).c_str() );
+
+  // Create initial growing point targeting to the center from
+  // the newly created Node at the split edge
+  Vector2Df toCenter = ( sgraph->getCenter( ) - splitNode->vector( ) ).norm( );
+  Vector2Df newCoord = splitNode->vector( ) + ( toCenter * segmentLength );
+
+  graph::Node* newNode = sgraph->addNode( new graph::Node( sgraph, newCoord ) );
+  sgraph->addConnection( splitNode, newNode );
+
+  Logger.log( 3, "FaceGenerator : growing roads..." );
+  // Now run the recursive road growing on it.
+  growRoads( newNode, branching, segmentLength, noise, threshold );
+  Logger.log( 3, "FaceGenerator : growing roads complete, %d nodes and %d edges ", sgraph->nodeCount(), sgraph->edgeCount() );
+
+  size_t rem = sgraph->removeDeadEnds( );
+  Logger.log( 3, "FaceGenerator : removed %d dead ends.", rem );
+}
+
+
 void FaceGenerator::runPrimaryRoadGeneration( ) {
   Logger.log( 2, "FaceGenerator : primary road generation..." );
   createInitialGraph( );
 
-  // Split the graph into more or less regular zones (use subdivide face?)
-  // ...
+  size_t branching = 3;
+  float segmentLength = 400.0f;
+  float noiseValue = 0.1f;
+  float roadThreshold = 300.0f;
 
-////////////////////////////////////////
-    graph::Node* splitNode = graph.splitEdge( graph.longestEdge( ) );
-    Logger.log( 4, "FaceGenerator : splitnode %s", splitNode->toString( ).c_str() );
-
-    // This should be parameters, their value is somewhat meaningless now.
-    size_t branching = 3;
-    float segmentLength = 400.0f;
-    float noiseValue = 0.1f;
-    float roadThreshold = 300.0f;
-
-    // Create initial growing point targeting to the center from
-    // the newly created Node at the split edge
-    Vector2Df toCenter = ( graph.getCenter( ) - splitNode->vector( ) ).norm( );
-    Vector2Df newCoord = splitNode->vector( ) + ( toCenter * segmentLength );
-
-    graph::Node* newNode = graph.addNode( new graph::Node( &graph, newCoord ) );
-    graph.addConnection( splitNode, newNode );
-
-    Logger.log( 3, "FaceGenerator : primary road generation growing roads..." );
-    // Now run the recursive road growing on it.
-    growRoads( newNode, branching, segmentLength, noiseValue, roadThreshold );
-
-    size_t rem = graph.removeDeadEnds( );
-    Logger.log( 3, "FaceGenerator : removed %d dead ends.", rem );
-
-///////////////////////////////////////
+  growRoadNetwork( &graph, branching, segmentLength, noiseValue, roadThreshold );
 
   Logger.log( 2, "FaceGenerator : reading primary faces..." );
   graph.readFaces( );
@@ -92,35 +92,19 @@ void FaceGenerator::runSecondaryRoadGeneration( ) {
     Logger.log( 4, "FaceGenerator : face %s...", faces[i]->toString( ).c_str() );
     graph::PlanarGraph* sgraph = faces[i]->initializeSubgraph( );
 
-    // Maybe use random edge instead?
-    graph::Node* splitNode = sgraph->splitEdge( sgraph->longestEdge( ) );
-    Logger.log( 4, "FaceGenerator : splitnode %s", splitNode->toString( ).c_str() );
-
     // This should be parameters, their value is somewhat meaningless now.
     size_t branching = 3;
     float segmentLength = 70.0f;
     float noiseValue = 0.06f;
     float roadThreshold = 30.0f;
-    float subdivisionThreshold = 10.0f;
-    float faceThreshold = 100.0f;
+//   float subdivisionThreshold = 10.0f;
+//   float faceThreshold = 100.0f;
 
-    // Create initial growing point targeting to the center from
-    // the newly created Node at the split edge
-    Vector2Df toCenter = ( sgraph->getCenter( ) - splitNode->vector( ) ).norm( );
-    Vector2Df newCoord = splitNode->vector( ) + ( toCenter * segmentLength );
+    growRoadNetwork( sgraph, branching, segmentLength, noiseValue, roadThreshold );
 
-    graph::Node* newNode = sgraph->addNode( new graph::Node( sgraph, newCoord ) );
-    sgraph->addConnection( splitNode, newNode );
-
-    Logger.log( 3, "FaceGenerator : secondary road generation growing roads..." );
-    // Now run the recursive road growing on it.
-    growRoads( newNode, branching, segmentLength, noiseValue, roadThreshold );
-    Logger.log( 3, "FaceGenerator : secondary growing roads complete, %d nodes and %d edges ", sgraph->nodeCount(), sgraph->edgeCount() );
     sgraph->readFaces( );
     Logger.log( 2, "FaceGenerator : secondary run, face #%d - subdivided to %d faces",i,sgraph->faceCount( ));
 
-    size_t rem = sgraph->removeDeadEnds( );
-    Logger.log( 3, "FaceGenerator : removed %d dead ends.", rem );
 
     // pass the faces to subdivision
     graph::FaceVector sfaces = sgraph->getFaces();

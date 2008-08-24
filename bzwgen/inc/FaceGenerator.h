@@ -75,6 +75,12 @@ private:
    */
   void pushZones( );
   /**
+   * Grow a road network on the passed graph. This method is the start
+   * point for the recursive growRoads method. See growRoads for parameter
+   * description.
+   */
+  void growRoadNetwork( graph::PlanarGraph* graph, size_t branching, float segmentLength, float noise, float threshold );
+  /**
    * Creates the layout of the major roads. Stores them in the graph.
    * Generation is controlled by already stored options.
    */
