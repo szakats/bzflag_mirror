@@ -19,27 +19,29 @@ void BuildZone::run() {
 
   graph::NodeVector nodes = face->getNodes();
 
-  Face* swface = new Face();
-  swface->setMaterial( 0 );
-  for (size_t i = 0; i < nodes.size(); i++) {
-    swface->addVertex(mesh->addVertex(Vertex(nodes[i]->vector().x,nodes[i]->vector().y,0.0f)));
+  Face* baseFace = new Face();
+  baseFace->setMaterial( 0 );
+  for ( size_t i = 0; i < nodes.size(); i++ ) {
+    baseFace->addVertex( mesh->addVertex( Vertex( nodes[i]->vector().x, nodes[i]->vector().y, 0.0f ) ) );
   }
 
-  int base = mesh->addFace(swface);
+  int baseFaceID = mesh->addFace( baseFace );
 
+  Logger.log( 4, "BuildZone : running ruleset 'start' rule..." );
   String rulename = String("start");
-  meshes = generator->getRuleSet()->run(mesh,base,rulename);
+  meshes = generator->getRuleSet()->run( mesh, baseFaceID, rulename );
+  Logger.log( 4, "BuildZone : complete" );
 }
 
 void BuildZone::output( Output& out ) {
   if (meshes == NULL) return;
-  for (MeshVectIter itr = meshes->begin(); itr!= meshes->end(); ++itr)
-    (*itr)->output(out,generator->getRuleSet()->materialsCount());
+  for ( MeshVectIter itr = meshes->begin(); itr!= meshes->end(); ++itr )
+    (*itr)->output( out, generator->getRuleSet()->materialsCount() );
 }
 
 BuildZone::~BuildZone( ) {
-  if (meshes == NULL) return;
-  for (MeshVectIter itr = meshes->begin(); itr!= meshes->end(); ++itr)
+  if ( meshes == NULL ) return;
+  for ( MeshVectIter itr = meshes->begin(); itr!= meshes->end(); ++itr )
     delete (*itr);
   delete meshes;
 }

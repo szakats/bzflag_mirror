@@ -18,8 +18,10 @@
 namespace graph {
 
   void PlanarGraph::readFaces() {
+      Logger.log( 4, "PlanarGraph : readFaces" );
       // Create a sorted list of Nodes by the x coordinate.
       NodeVector xnodes = nodeList.getCopy();
+      Logger.log( 4, "PlanarGraph : readFaces, sorting %d nodes...", xnodes.size() );
       std::sort( xnodes.begin(), xnodes.end(), compareNodesX );
       // Perform a sweep while reading faces
       Logger.log( 4, "PlanarGraph : reading faces from %d nodes", xnodes.size() );

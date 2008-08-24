@@ -13,14 +13,14 @@
 #include "RuleSet.h"
 #include "globals.h"
 
-void RuleSet::addRule(String& name, Rule* rule) {
+void RuleSet::addRule( String& name, Rule* rule ) {
   Logger.log( 3, "RuleSet : added rule '%s'.", rule->getName().c_str() );
   rules[name] = rule;
 }
 
-double RuleSet::getAttr(String& name) {
-  AttributeMap::iterator itr = attrmap.find(name);
-  if (itr == attrmap.end()) {
+double RuleSet::getAttr( String& name ) {
+  AttributeMap::iterator itr = attrmap.find( name );
+  if ( itr == attrmap.end() ) {
     Logger.log( "RuleSet : Warning : attribute '%s' not found!", name.c_str() );
     return 0.0;
   }
@@ -30,31 +30,39 @@ double RuleSet::getAttr(String& name) {
 
 
 int RuleSet::runMesh(Mesh* mesh, int face, String& rulename) {
-  if (recursion == -1) return -1;
+  Logger.log( 4, "RuleSet : runMesh, rule '%s', recursion level %d", rulename.c_str(), recursion );
+  if ( recursion == -1 ) return -1;
   recursion++;
-  if (recursion == MAX_RECURSION) {
+  if ( recursion == MAX_RECURSION ) {
     recursion = -1;
     Logger.log( "RuleSet : Warning : Recursion level 1000 reached! Are you sure you have no infinite loops?");
     return -1;
   }
 
-  RuleMapIter itr = rules.find(rulename);
-  if (itr == rules.end()) {
+  RuleMapIter itr = rules.find( rulename );
+  if ( itr == rules.end() ) {
     Logger.log( "RuleSet : Warning : rule '%s' not found!", rulename.c_str() );
     return -1;
   }
-  int result = itr->second->runMesh(mesh,face);
+  int result = itr->second->runMesh( mesh, face );
 
   recursion--;
   return result;
 }
 
-MeshVector* RuleSet::run(Mesh* initial_mesh, int initial_face, String& rulename) {
+MeshVector* RuleSet::run( Mesh* initial_mesh, int initial_face, String& rulename ) {
+  assert( initial_mesh );
+  Logger.log( 4, "RuleSet : running rule '%s'", rulename.c_str() );
+  Vertex normal = initial_mesh->faceNormal( initial_face );
+  if ( normal.z <= 0.0 ) {
+    Logger.log( "RuleSet : run passed a face with bad normal : %s", normal.toString().c_str() );
+    return NULL;
+  }
   meshes = new MeshVector();
-  meshes->push_back(initial_mesh);
-  initial_mesh->pushBase(initial_face);
-  initial_mesh->addInsideVertex(initial_mesh->faceCenter(initial_face)+initial_mesh->faceNormal(initial_face)*0.05f);
-  if (runMesh(initial_mesh,initial_face,rulename) == -1)
+  meshes->push_back( initial_mesh );
+  initial_mesh->pushBase( initial_face );
+  initial_mesh->addInsideVertex( initial_mesh->faceCenter( initial_face ) + normal * 0.05f );
+  if ( runMesh( initial_mesh, initial_face, rulename ) == -1 )
     Logger.log( "RuleSet : run failed with start rule '%s!'", rulename.c_str() );
   return meshes;
 }

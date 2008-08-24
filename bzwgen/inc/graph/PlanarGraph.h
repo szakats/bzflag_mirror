@@ -283,6 +283,8 @@ private:
    * is done via y coordinate.
    */
   static bool compareNodesX ( const Node* a, const Node* b ) {
+    assert( a );
+    assert( b );
     return (a->vector().x < b->vector().x || a->vector().y < b->vector().y );
   }
   /**
