@@ -9,7 +9,11 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-
+/**
+ * @file Product.h
+ * @author Kornel Kisielewicz kornel.kisielewicz@gmail.com
+ * @brief Grammar Product class for BZWGen.
+ */
 #ifndef __PRODUCT_H__
 #define __PRODUCT_H__
 
@@ -17,29 +21,86 @@
 #include "Expression.h"
 #include "Mesh.h"
 
+/**
+ * @class Product
+ * @brief Class representing a BZWGen grammar product.
+ *
+ * Rules constitute of products, products constitute of Operations.
+ * A rule may be just a single product, or it may constitue of several ones
+ * with different conditions and rarieties.
+ */
 class Product {
-  OperationVector* ops;
+  /**
+   * A vector of operations for the given product, that are to be executed
+   * sequentially.
+   */
+  OperationVector* operations;
+  /**
+   * Rarity of the given product. The rarities of all the products in a
+   * given rule should sum up to 1.0.
+   */
   double rarity;
-  Expression* cond;
+  /**
+   * The condition under which the product may be executed. Checked with
+   * each invocation at run-time.
+   */
+  Expression* condition;
 public:
-  Product(OperationVector* _ops, double _rarity, Expression* _cond = NULL) : ops(_ops), rarity(_rarity), cond(_cond) {};
-  int runMesh(Mesh* mesh, int face) {
-    for (size_t i = 0; i < ops->size(); i++) {
-      face = ops->at(i)->runMesh(mesh,face);
-      if (face == -1) return -1;
+  /**
+   * Constructor, to be called by the parser. Takes the vector of operations,
+   * a rarity and condition. Initializes data, does nothing.
+   */
+  Product( OperationVector* _operations, double _rarity, Expression* _condition = NULL )
+    : operations( _operations ), rarity( _rarity ), condition( _condition ) {};
+  /**
+   * Run the sequence of operations on the given mesh and the given face.
+   * returns the face ID of the last result, or -1 if an error is encountered.
+   */
+  int runMesh( Mesh* mesh, int face ) {
+    for ( size_t i = 0; i < operations->size(); i++ ) {
+      face = operations->at( i )->runMesh( mesh, face );
+      if ( face == -1 ) return -1;
     }
     return face;
   }
-  bool conditionsMet(Mesh* mesh, int face) { 
-    return cond == NULL ? true : (cond->calculate(mesh,face) >= 0.0);
+  /**
+   * Checks wether the conditions that were assigned to this product are
+   * met. If no conditions are assigned, returns true.
+   */
+  bool conditionsMet( Mesh* mesh, int face ) {
+    return condition == NULL ? true : ( condition->calculate( mesh,face ) >= 0.0 );
   }
-  double getRarity() { return rarity; }
+  /**
+   * Rarity value accessor.
+   */
+  double getRarity() {
+    return rarity;
+  }
+  /**
+   * Destructor, frees all operations, and disposes of the operation
+   * vector. Frees condition if present.
+   */
   ~Product() {
-    OperationVectIter itr; 
-    for (itr = ops->begin(); itr!= ops->end(); ++itr) delete (*itr);
-    delete ops; 
-    if (cond != NULL) delete cond;
+    deletePointerVector( operations );
+    deletePointer( condition );
+    OperationVectIter itr;
+//    for ( itr = ops->begin(); itr!= ops->end(); ++itr)
+//      delete ( *itr );
+//   delete ops;
+//    if ( cond != NULL )
+//      delete cond;
   }
+private:
+  /**
+   * Blocked default constructor. Product may only be instantiated by the
+   * grammar.
+   */
+  Product( ) {}
+  /**
+   * Blocked copy constructor. Product has pointers, so it's unsafe for
+   * copy.
+   */
+  Product( const Product& ) {}
 };
 
 typedef std::vector <Product*> ProductVector;

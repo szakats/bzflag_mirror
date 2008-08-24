@@ -49,6 +49,31 @@ typedef std::ofstream OutFileStream;
 #include "Vector2D.h"
 #include "Vector3D.h"
 
+template< class T >
+inline void deletePointerVector( std::vector<T>*& v ) {
+  if ( v == NULL ) return;
+  typename std::vector<T>::iterator iter = v->begin();
+  for ( ; iter != v->end(); ++iter )
+    delete ( *iter );
+  delete v;
+  v = NULL;
+}
+
+template< class T >
+inline void deletePointerVector( std::vector<T>& v ) {
+  typename std::vector<T>::iterator iter = v.begin();
+  for ( ; iter != v.end(); ++iter )
+    delete ( *iter );
+}
+
+template< class T >
+inline void deletePointer( T*& p ) {
+  if ( p == NULL ) return;
+  delete p;
+  p = NULL;
+}
+
+
 typedef Vector3D<double> Vertex;
 typedef Vector2D<double> TexCoord;
 
