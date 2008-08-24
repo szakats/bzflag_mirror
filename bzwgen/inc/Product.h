@@ -83,12 +83,6 @@ public:
   ~Product() {
     deletePointerVector( operations );
     deletePointer( condition );
-    OperationVectIter itr;
-//    for ( itr = ops->begin(); itr!= ops->end(); ++itr)
-//      delete ( *itr );
-//   delete ops;
-//    if ( cond != NULL )
-//      delete cond;
   }
 private:
   /**
