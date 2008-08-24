@@ -44,7 +44,9 @@ int RuleSet::runMesh(Mesh* mesh, int face, String& rulename) {
     Logger.log( "RuleSet : Warning : rule '%s' not found!", rulename.c_str() );
     return -1;
   }
+  Logger.log( 4, "RuleSet : runMesh, rule '%s', recursion level %d, running rule...", rulename.c_str(), recursion );
   int result = itr->second->runMesh( mesh, face );
+  Logger.log( 4, "RuleSet : runMesh, rule '%s', recursion level %d, rule ran, result = %d...", rulename.c_str(), recursion, result );
 
   recursion--;
   return result;
@@ -67,33 +69,36 @@ MeshVector* RuleSet::run( Mesh* initial_mesh, int initial_face, String& rulename
   return meshes;
 }
 
-int RuleSet::runNewMesh(Mesh* old_mesh, int old_face, String& rulename) {
+int RuleSet::runNewMesh( Mesh* old_mesh, int old_face, String& rulename ) {
+  Logger.log( 4, "RuleSet : runNewMesh, rule '%s'...", rulename.c_str() );
   Mesh* newmesh = new Mesh();
   Face* newface = new Face();
-  size_t size = old_mesh->getFace(old_face)->size();
+  size_t size = old_mesh->getFace( old_face )->size();
   for ( size_t i = 0; i < size; i++ ) {
     newface->addVertex( i );
     newmesh->addVertex( old_mesh->getFaceVertex( old_face, i ) );
   }
-  int newfaceid = newmesh->addFace(newface);
-  newmesh->pushBase(newfaceid);
-  meshes->push_back(newmesh);
-  newmesh->addInsideVertex(newmesh->faceCenter(newfaceid)+newmesh->faceNormal(newfaceid)*0.05f);
-  return runMesh(newmesh,newfaceid,rulename);
+  int newfaceid = newmesh->addFace( newface );
+  newmesh->pushBase( newfaceid );
+  meshes->push_back( newmesh );
+  newmesh->addInsideVertex( newmesh->faceCenter( newfaceid ) + newmesh->faceNormal( newfaceid ) * 0.05f );
+  return runMesh( newmesh, newfaceid, rulename );
 }
 
-void RuleSet::loadMaterial(String& id, String& name, bool noradar) {
+void RuleSet::loadMaterial( String& id, String& name, bool noradar ) {
   int matid = materials.size();
-  addAttr(id,double(matid));
-  materials.push_back( Material(matid,name,noradar) );
+  addAttr( id, double( matid ) );
+  materials.push_back( Material( matid, name, noradar ) );
 }
 
-void RuleSet::output(Output& out ) {
-  for (MaterialVectIter itr = materials.begin(); itr!= materials.end(); ++itr) (*itr).output(out);
+void RuleSet::output( Output& out ) {
+  for ( MaterialVectIter itr = materials.begin(); itr!= materials.end(); ++itr )
+    (*itr).output( out );
 }
 
 RuleSet::~RuleSet() {
-  for (RuleMapIter itr = rules.begin();itr != rules.end(); ++itr) delete itr->second;
+  for ( RuleMapIter itr = rules.begin();itr != rules.end(); ++itr )
+    delete itr->second;
 }
 
 // Local Variables: ***
