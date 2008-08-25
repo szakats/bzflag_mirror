@@ -19,6 +19,9 @@
 #define __MULTIFACE_H__
 
 #include "globals.h"
+
+#include <memory>
+
 #include "Output.h"
 #include "Face.h"
 #include "Mesh.h"
@@ -34,7 +37,7 @@ class MultiFace : public Face {
   /**
    * Vector of component face pointers. Managed and deleted by the class.
    */
-  FaceVector* comps;
+  std::auto_ptr<FaceVector> comps;
   /**
    * As MultiFace has many complex operations, it needs a pointer to the 
    * underlying mesh, to access vertex data.
@@ -45,9 +48,13 @@ public:
    * Standard constructor, takes the underlying mesh as an argument.
    * Initializes the underlying component face vector.
    */
-  MultiFace( Mesh* _mesh ) : Face( ), mesh( _mesh ) {
-    comps = new FaceVector; 
+  MultiFace( Mesh* _mesh ) : Face( ), comps(new FaceVector), mesh( _mesh )
+  {
   }
+  /**
+   * Standard destructor, disposes of the component vector.
+   */
+  virtual ~MultiFace() { }
   /**
    * Detaches a face from the MultiFace. The id here is the internal index 
    * in the component vector. Returns a list of Mesh face ID's of the faces
@@ -72,10 +79,6 @@ public:
   int componentCount() { 
     return comps->size(); 
   }
-  /**
-   * Standard destructor, disposes of the component vector.
-   */
-  virtual ~MultiFace() { delete comps; }
 private:
   /**
    * Updates the Z-coordinate of all stored faces. Called right before 

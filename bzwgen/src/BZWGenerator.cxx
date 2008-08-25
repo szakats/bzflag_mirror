@@ -177,11 +177,11 @@ int BZWGenerator::setup( ) {
 
 void BZWGenerator::generate( OutStream* outstream ) {
   Logger.log( 1, "BZWGenerator : initializing... " );
-  Generator* gen;
+  std::auto_ptr<Generator> gen;
   if ( experimental )
-    gen = new FaceGenerator( ruleset );
+    gen.reset(new FaceGenerator( ruleset ));
   else
-    gen = new GridGenerator( ruleset );
+    gen.reset(new GridGenerator( ruleset ));
 
   Logger.log( 1, "BZWGenerator : parsing options... " );
   gen->parseOptions( &cmd );
@@ -196,7 +196,6 @@ void BZWGenerator::generate( OutStream* outstream ) {
   os.footer( );
 
   Logger.log( 1, "BZWGenerator : generation done. ");
-  delete gen;
 }
 
 // Local Variables: ***

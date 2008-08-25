@@ -53,7 +53,7 @@ public:
    * Destructor, frees the allocated map.
    */
   virtual ~GridGenerator( ) {
-    delete map;
+    delete[] map;
   }
 private:
   /** Type of cell on the grid */

@@ -123,7 +123,7 @@ void Mesh::expandFace( int faceID, double amount  ) {
   for ( int i = 0; i < size; i++ ) {
     v[ f[faceID]->getVertex( i ) ] = nv[i];
   }
-  delete nv;
+  delete[] nv;
 }
 
 void Mesh::weldVertices( int a, int b ) {
@@ -277,7 +277,7 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
   }
   Vertex stepA, stepB;
 
-  DoubleVector* sdata = new DoubleVector(splitData->size());
+  DoubleVector sdata(splitData->size());
   int splits = splitData->size()-1;
 
   double length = horizontal ? faceH(fid) : faceV(fid);
@@ -285,14 +285,14 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
   double lsum = 0.0;
   for (int i = 0; i < splits+1; i++) {
     double value = splitData->at(i);
-    (*sdata)[i] = value;
+    sdata[i] = value;
     if (value >= 0.0) lsum += value; else relsum += -value;
   }
   if (relsum > 0) {
     double relperunit = ( length-lsum ) / relsum;
     for (int i = 0; i < splits+1; i++) {
-      double value = sdata->at(i);
-      if (value < 0.0) (*sdata)[i] = -value*relperunit;
+      double value = sdata.at(i);
+      if (value < 0.0) sdata[i] = -value*relperunit;
     }
   }
 
@@ -329,8 +329,8 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
   Vertex b = v[bs];
 
   for (int i = 0; i < splits; i++) {
-    a = a + stepA*sdata->at(i);
-    b = b + stepB*sdata->at(i);
+    a = a + stepA*sdata.at(i);
+    b = b + stepB*sdata.at(i);
 
     if (ssnap > EPSILON) {
       Vertex A = a-v[as];
@@ -389,7 +389,6 @@ IntVector* Mesh::splitFace(int fid, DoubleVector* splitData, bool horizontal, do
     f[fid]->addVertex( idx3 );
   }
 
-  delete sdata;
   return result;
 }
 
@@ -497,8 +496,7 @@ int Mesh::rePushBase( ) {
 
 
 Mesh::~Mesh() {
-  for ( FaceVectIter itr = f.begin(); itr!= f.end(); ++itr )
-    delete (*itr);
+  deletePointerVector( f );
 }
 
 

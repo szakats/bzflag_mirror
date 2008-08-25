@@ -18,7 +18,10 @@ typedef std::ostringstream OutStringStream;
 
 void BZWGeneratorPlugin::process(bz_EventData *eventData) {
   if (eventData->eventType == bz_eWorldFinalized) {
-    delete cstr;
+    // This bothers me because this pointer has been given
+    // out. Potential pointer into freed memory...
+    delete[] cstr;
+    cstr = 0;
     return;
   }
 
@@ -35,14 +38,15 @@ void BZWGeneratorPlugin::process(bz_EventData *eventData) {
     return;
   }
 
-  OutStringStream* outstream = new OutStringStream(OutStringStream::out);
-  generate(outstream);
+  OutStringStream outstream(OutStringStream::out);
+  generate(&outstream);
 
   bz_GetWorldEventData_V1 *getWorldData = (bz_GetWorldEventData_V1 *) eventData;
 
   // The following code is so ugly that I barely can look at it.
-  cstr = new char [((OutStringStream*)(outstream))->str().size()+1];
-  strcpy (cstr, ((OutStringStream*)(outstream))->str().c_str());
+  delete[] cstr;
+  cstr = new char [outstream.str().size()+1];
+  strcpy (cstr, outstream.str().c_str());
   getWorldData->worldBlob = cstr;
   getWorldData->generated = true;
   worldGenerated = true;

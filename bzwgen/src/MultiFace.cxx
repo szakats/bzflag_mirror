@@ -47,12 +47,12 @@ IntVector* MultiFace::detachFace(int id) {
   if (id >= int(comps->size())) return NULL;
   updateFaces(mesh->getVertex(getVertex(0)).z);
   
-  IntVector* result  = new IntVector();
-  IntVector* visited = new IntVector();
+  IntVector* result  = new IntVector;
+  IntVector visited;
 
   Face* f = comps->at(id);
 
-  int index = pickRemovalIndex(comps->at(id),visited);
+  int index = pickRemovalIndex(comps->at(id),&visited);
 
   while (index >= 0) {
     printf("Element iteration...\n");
@@ -71,7 +71,7 @@ IntVector* MultiFace::detachFace(int id) {
       Face* oface = getOtherFaceWithVertex(f,vid);
       oindex = (oface == NULL) ? -1 : oface->getVertexIndex(vid);
 
-      visited->push_back(vid);
+      visited.push_back(vid);
       nvtx.push_back(vid);
 
       if (oindex < 0 ) {
@@ -102,11 +102,10 @@ IntVector* MultiFace::detachFace(int id) {
     nface->setMaterial( getMaterial() );
     nface->setVertices( nvtx );
     result->push_back(mesh->addFace(nface));
-    index = pickRemovalIndex(comps->at(id),visited);
+    index = pickRemovalIndex(comps->at(id),&visited);
   }
 
   printf("Cleaning up\n");
-  delete visited;
 
   comps->erase(comps->begin() + id);
 

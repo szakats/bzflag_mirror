@@ -112,8 +112,7 @@ public:
    * Destructor, frees the materials, the zones, but not the ruleset. 
    */
   virtual ~Generator( ) {
-    for ( ZoneVectIter itr = zones.begin(); itr!= zones.end(); ++itr ) 
-      delete ( *itr );
+    deletePointerVector( zones );
   }
 };
 

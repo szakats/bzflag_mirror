@@ -47,16 +47,18 @@ int OperationAssign::runMesh( Mesh* mesh, int face ) {
 }
 
 OperationMultifaces::OperationMultifaces( RuleSet* _ruleset, Expression* _exp, StringVector* _facerules )
-: OperationSingle( _ruleset, _exp ), facerules( _facerules ), allsame( false ) {
+  : OperationSingle( _ruleset, _exp ), facerules( _facerules ), allsame( false )
+{
   if ( facerules != NULL ) {
     if ( facerules->size() == 0 ) {
       delete facerules;
       facerules = NULL;
-    } else
+    } else {
       if ( facerules->size() == 1 && facerules->at(0)[0] == '@' ) {
         allsame = true;
         facerules->at( 0 ).erase( 0, 1 );
       }
+    }
   }
 }
 
@@ -66,10 +68,9 @@ int OperationDetachFace::runMesh(Mesh* mesh,int face) {
     return face;
   }
   flatten( mesh,face );
-  IntVector* faces = ( (MultiFace*)mesh->getFace( face ) )->detachFace( math::roundToInt( value[0] ) );
-  if ( faces != NULL ) {
-    OperationMultifaces::runMesh( mesh, face, faces );
-    delete faces;
+  std::auto_ptr<IntVector> faces(( (MultiFace*)mesh->getFace( face ) )->detachFace( math::roundToInt(value[0]) ));
+  if ( faces.get() != NULL ) {
+    OperationMultifaces::runMesh( mesh, face, faces.get() );
   }
   return face;
 }
@@ -93,36 +94,36 @@ int OperationMultifaces::runMesh( Mesh* mesh, int, IntVector* faces ) {
 }
 
 
-int OperationExtrude::runMesh( Mesh* mesh, int face ) {
+int OperationExtrude::runMesh( Mesh* mesh, int face )
+{
   if ( mesh == NULL ) return 0;
   flatten( mesh, face );
   if ( facerules != NULL ) {
-    IntVector* faces = new IntVector;
-    mesh->extrudeFace( face, value[0], mesh->getFace( face )->getMaterial(), faces );
-    OperationMultifaces::runMesh( mesh, face, faces );
-    delete faces;
+    IntVector faces;
+    mesh->extrudeFace( face, value[0], mesh->getFace( face )->getMaterial(), &faces );
+    OperationMultifaces::runMesh( mesh, face, &faces );
   } else {
     mesh->extrudeFace( face, value[0], mesh->getFace( face )->getMaterial() );
   }
   return face;
 }
 
-int OperationExtrudeT::runMesh( Mesh* mesh, int face ) {
+int OperationExtrudeT::runMesh( Mesh* mesh, int face )
+{
   if (mesh == NULL) return 0;
   flatten( mesh, face );
-  IntVector* faces = new IntVector;
-  mesh->extrudeFace( face, value[0], mesh->getFace( face )->getMaterial(), faces );
+  IntVector faces;
+  mesh->extrudeFace( face, value[0], mesh->getFace( face )->getMaterial(), &faces );
 
   double snap    = ruleset->getAttr( "SNAP" );
   double textile = ruleset->getAttr( "TEXTILE" );
 
-  for ( size_t i = 0; i < faces->size(); i++ ) {
-    mesh->textureFace( faces->at(i), snap, textile );
+  for ( size_t i = 0; i < faces.size(); i++ ) {
+    mesh->textureFace( faces.at(i), snap, textile );
   }
   if ( facerules != NULL ) {
-    OperationMultifaces::runMesh( mesh, face, faces );
+    OperationMultifaces::runMesh( mesh, face, &faces );
   }
-  delete faces;
   return face;
 }
 
@@ -135,31 +136,28 @@ int OperationTexture::runMesh( Mesh* mesh, int face ) {
 int OperationSplitFace::runMesh( Mesh* mesh,int face ) {
   if ( mesh == NULL ) return 0;
 
-  DoubleVector* dv = new DoubleVector( splits->size() );
+  DoubleVector dv( splits->size() );
   for ( size_t i = 0; i < splits->size(); i++ )
-    (*dv)[i] = splits->at(i)->calculate( mesh, face );
+    dv[i] = splits->at(i)->calculate( mesh, face );
 
-  IntVector* faces;
-  if (exp[0] != NULL)
-    faces = mesh->splitFace( face, dv, horiz, exp[0]->calculate(mesh,face) );
-  else
-    faces = mesh->splitFace( face, dv, horiz );
+  double ssnap(0.0);
+  if (exp[0] != NULL) ssnap = exp[0]->calculate(mesh, face);
+  std::auto_ptr<IntVector> faces(mesh->splitFace( face, &dv, horiz, ssnap ));
+
   if (facerules != NULL) {
-    OperationMultifaces::runMesh( mesh, face, faces );
+    OperationMultifaces::runMesh( mesh, face, faces.get() );
   }
-  delete faces;
-  delete dv;
   return face;
 }
 
-int OperationRepeat::runMesh( Mesh* mesh,int face ) {
+int OperationRepeat::runMesh( Mesh* mesh,int face )
+{
   if (mesh == NULL) return 0;
   flatten( mesh, face );
-  IntVector* faces = mesh->repeatSubdivdeFace( face, value[0], horiz );
+  std::auto_ptr<IntVector> faces(mesh->repeatSubdivdeFace( face, value[0], horiz ));
   if (facerules != NULL) {
-    OperationMultifaces::runMesh( mesh, face, faces );
+    OperationMultifaces::runMesh( mesh, face, faces.get() );
   }
-  delete faces;
   return face;
 }
 

@@ -57,9 +57,8 @@ BZF_PLUGIN_CALL int bz_Unload ( void )
 int main (int argc, char* argv[]) {
   if (BZWGen.parseCommandLine(argc,argv)) return 0;
   if (BZWGen.setup()) return 1;
-  OutFileStream* outstream = new OutFileStream(BZWGen.outname.c_str());
-  BZWGen.generate(outstream);
-  delete outstream;
+  OutFileStream outstream(BZWGen.outname.c_str());
+  BZWGen.generate(&outstream);
 }
 #endif
 

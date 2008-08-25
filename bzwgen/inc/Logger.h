@@ -99,7 +99,7 @@ public:
     if (!fileStream) fileStream = new std::ofstream("log.txt");
   }
   ~LoggerSingleton() {
-    if (fileStream) delete fileStream;    
+    delete fileStream;    
   }
 private:
   /** 

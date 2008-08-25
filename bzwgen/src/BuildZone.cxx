@@ -29,6 +29,7 @@ void BuildZone::run() {
 
   Logger.log( 4, "BuildZone : running ruleset 'start' rule..." );
   String rulename = String("start");
+  // Possible memory leak here?
   meshes = generator->getRuleSet()->run( mesh, baseFaceID, rulename );
   Logger.log( 4, "BuildZone : complete" );
 }
@@ -40,10 +41,7 @@ void BuildZone::output( Output& out ) {
 }
 
 BuildZone::~BuildZone( ) {
-  if ( meshes == NULL ) return;
-  for ( MeshVectIter itr = meshes->begin(); itr!= meshes->end(); ++itr )
-    delete (*itr);
-  delete meshes;
+  deletePointerVector( meshes );
 }
 
 // Local Variables: ***
