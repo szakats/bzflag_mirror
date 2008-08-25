@@ -11,35 +11,30 @@
  */
 
 #include "Rule.h"
-#include "Random.h" 
+#include "Random.h"
 
-Product* Rule::getProduct(Mesh* mesh, int face) {
+Product* Rule::getProduct( Mesh* mesh, int face ) {
   int size = products->size();
-  if (size == 0) return NULL;
+  if ( size == 0 ) return NULL;
   ProductVectIter itr = products->begin();
   double roll = Random::double01();
   do {
-    if ((*itr)->conditionsMet(mesh,face)) {
+    if ( (*itr)->conditionsMet( mesh, face ) ) {
       double rarity = (*itr)->getRarity();
-      if (rarity >= roll) return (*itr);
+      if ( rarity >= roll ) return (*itr);
       roll -= rarity;
     }
     ++itr;
-  } while (itr!= products->end());
-  Logger.log( 1, "Warning : Rule '%s' returned no product!\n", name.c_str() );
+  } while ( itr != products->end() );
+  Logger.log( 1, "Warning : Rule '%s' returned no product!", name.c_str() );
   return NULL;
 }
-int Rule::runMesh(Mesh* mesh, int face) {
-  Product* product = getProduct(mesh,face);
-  return product == NULL ? -1 : product->runMesh(mesh,face);
+int Rule::runMesh( Mesh* mesh, int face ) {
+  Logger.log( 4, "Rule : rule '%s' getting product...", name.c_str() );
+  Product* product = getProduct( mesh, face );
+  Logger.log( 4, "Rule : running product...", name.c_str() );
+  return product == NULL ? -1 : product->runMesh( mesh, face );
 }
-
-Rule::~Rule() { 
-  ProductVectIter itr; 
-  for (itr = products->begin(); itr!= products->end(); ++itr) delete (*itr);
-  delete products; 
-}
-
 
 // Local Variables: ***
 // mode:C++ ***

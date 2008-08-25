@@ -54,7 +54,7 @@ inline void deletePointerVector( std::vector<T>*& v ) {
   if ( v == NULL ) return;
   typename std::vector<T>::iterator iter = v->begin();
   for ( ; iter != v->end(); ++iter )
-    delete ( *iter );
+    if ( *iter ) delete ( *iter );
   delete v;
   v = NULL;
 }
@@ -63,7 +63,7 @@ template< class T >
 inline void deletePointerVector( std::vector<T>& v ) {
   typename std::vector<T>::iterator iter = v.begin();
   for ( ; iter != v.end(); ++iter )
-    delete ( *iter );
+    if ( *iter ) delete ( *iter );
 }
 
 template< class T >
