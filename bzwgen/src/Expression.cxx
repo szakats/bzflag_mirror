@@ -13,21 +13,21 @@
 #include "Expression.h"
 #include "RuleSet.h"
 
-double ExpressionAttribute::calculate(Mesh*,int) {
-  return ruleset->getAttr(attrname);
+double ExpressionAttribute::calculate( Mesh*, int ) {
+  return ruleset->getAttr( attrname );
 }
 
-double ExpressionFaceAttribute::calculate(Mesh* mesh,int face) {
-  if (attrname == "x") return mesh->faceCenter(face).x;
-  if (attrname == "y") return mesh->faceCenter(face).y;
-  if (attrname == "z") return mesh->faceCenter(face).z;
-  if (attrname == "h") return mesh->faceH(face);
-  if (attrname == "v") return mesh->faceV(face);
-  if (attrname == "s") return mesh->faceH(face) * mesh->faceV(face);
-  if (attrname == "n") return double(mesh->getFace(face)->size());
-  if (attrname == "c") {
-    if (mesh->getFace(face)->isMultiFace()) {
-      return double(((MultiFace*)mesh->getFace(face))->componentCount());
+double ExpressionFaceAttribute::calculate( Mesh* mesh, int face ) {
+  if ( attrname == "x" ) return mesh->faceCenter( face ).x;
+  if ( attrname == "y" ) return mesh->faceCenter( face ).y;
+  if ( attrname == "z" ) return mesh->faceCenter( face ).z;
+  if ( attrname == "h" ) return mesh->faceH( face );
+  if ( attrname == "v" ) return mesh->faceV( face );
+  if ( attrname == "s" ) return mesh->faceH( face ) * mesh->faceV( face );
+  if ( attrname == "n" ) return double( mesh->getFace( face )->size() );
+  if ( attrname == "c" ) {
+    if (mesh->getFace( face )->isMultiFace()) {
+      return double( ( ( MultiFace* ) mesh->getFace( face ) )->componentCount() );
     } else {
       Logger.log( 2, "Warning : face(c) called with non-MultiFace!");
     }
