@@ -346,7 +346,9 @@ bool RootServer::process ( IRCClient &ircClient, teIRCEventType	eventType, trBas
 	// check to see if we dont' have them already
 	if (ircUsersAsPlayers.find(data->user) == ircUsersAsPlayers.end())
 	{
-	  ircUsersAsPlayers[data->user] = new UserOnIRC(data->user);
+	  std::string nick = data->user;
+	  makelower(nick);
+	  ircUsersAsPlayers[nick] = new UserOnIRC(data->user);
 	}
       }
     }
@@ -369,7 +371,10 @@ bool RootServer::process ( IRCClient &ircClient, teIRCEventType	eventType, trBas
 	else
 	{
 	  // see if it's an IRC user, if so go and remove there player too
-	  std::map<std::string,UserOnIRC*>::iterator itr = ircUsersAsPlayers.find(data->user);
+	  std::string nick = data->user;
+	  makelower(nick);
+
+	  std::map<std::string,UserOnIRC*>::iterator itr = ircUsersAsPlayers.find(nick);
 	  if (itr != ircUsersAsPlayers.end())
 	  {
 	    delete(itr->second);
