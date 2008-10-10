@@ -396,7 +396,7 @@ bool RootServer::process ( IRCClient &ircClient, teIRCEventType	eventType, trBas
       string_list ircUsers = client.listUsers(ircOptions.channel);
       for ( size_t s = 0; s < ircUsers.size(); s++)
       {
-	if (ircUsers[s] != "ChanServ" && ircUsers[s] != ircOptions.nick)
+	if (compare_nocase(ircUsers[s],"ChanServ") == 0 && compare_nocase(ircUsers[s],ircOptions.nick) == 0)
 	{
 	  std::string nick = ircUsers[s];	 
 	  ircUsersAsPlayers[nick] = new UserOnIRC(nick);
