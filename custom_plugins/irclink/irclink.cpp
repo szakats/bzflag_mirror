@@ -30,7 +30,7 @@ public:
   {
     IRCNick = nick;
     bzflagCallsign = "IRC-" + nick;
-    bz_addServerSidePlayer(this);
+    bzPlayerID = bz_addServerSidePlayer(this);
   }
   virtual ~UserOnIRC()
   {
@@ -39,6 +39,7 @@ public:
 
   virtual void added(int player)
   {
+    bzPlayerID = player;
     setPlayerData(bzflagCallsign.c_str(),NULL,"irclink",eObservers);
     joinGame();
   }
@@ -108,7 +109,7 @@ public:
 
     while (itr != playersOnIRC.end())
     {
-      if (itr->second->IRCNick == nick)
+      if (compare_nocase(itr->second->IRCNick,nick) == 0)
 	return itr->second;
       itr++;
     }
@@ -142,6 +143,7 @@ BZF_PLUGIN_CALL int bz_Load ( const char* commandLine )
   rootServer = new RootServer;
 
   bz_debugMessage(4,"irclink plugin loaded");
+  bz_setMaxWaitTime(0.01f,"irclink");
   return 0;
 }
 
@@ -150,6 +152,7 @@ BZF_PLUGIN_CALL int bz_Unload ( void )
   if (rootServer)
     delete(rootServer);
   bz_debugMessage(4,"irclink plugin unloaded");
+  bz_clearMaxWaitTime("irclink");
   return 0;
 }
 
@@ -231,7 +234,10 @@ RootServer::RootServer()
 void RootServer::ircToBZPrivageMessage ( const std::string &from, int to, const std::string &message )
 {
   // find the IRC users player ID
-  std::map<std::string,UserOnIRC*>::iterator itr = ircUsersAsPlayers.find(from);
+  std::string nick = from;
+  makelower(nick);
+
+  std::map<std::string,UserOnIRC*>::iterator itr = ircUsersAsPlayers.find(nick);
 
   sendingChat = true;
   if (itr == ircUsersAsPlayers.end())
@@ -337,7 +343,7 @@ bool RootServer::process ( IRCClient &ircClient, teIRCEventType	eventType, trBas
       // make sure it's not one of our sub bots, or us, or a services bot
       if (!getBZFlagPlayerFromNick(data->user) && data->user != ircOptions.nick && data->user != "ChanServ")
       {
-	// check to see if we dont' have them allready
+	// check to see if we dont' have them already
 	if (ircUsersAsPlayers.find(data->user) == ircUsersAsPlayers.end())
 	{
 	  ircUsersAsPlayers[data->user] = new UserOnIRC(data->user);
@@ -415,7 +421,7 @@ bool RootServer::process ( IRCClient &ircClient, teIRCEventType	eventType, trBas
       // find out who it's from, if it's from an IRC user that has a player, have the player say it
       trClientMessageEventInfo * mesageInfo = (trClientMessageEventInfo*)&info;
 
-      std::map<std::string,UserOnIRC*>::iterator itr = ircUsersAsPlayers.find(mesageInfo->from);
+      std::map<std::string,UserOnIRC*>::iterator itr = ircUsersAsPlayers.find(makelower(mesageInfo->from));
       if ( itr != ircUsersAsPlayers.end())
       {
 	sendingChat = true;
@@ -435,24 +441,29 @@ bool RootServer::process ( IRCClient &ircClient, teIRCEventType	eventType, trBas
     {
 	trClientNickChangeEventInfo * nickInfo = (trClientNickChangeEventInfo*)&info;
 
+	std::string oldNick = nickInfo->oldname;
+	std::string newNick = nickInfo->newName;
+	makelower(oldNick);
+	makelower(newNick);
+
 	// someone changed nicks, find them and keep the maping correct.
 
-	std::map<std::string,UserOnIRC*>::iterator itr = ircUsersAsPlayers.find(nickInfo->oldname);
+	std::map<std::string,UserOnIRC*>::iterator itr = ircUsersAsPlayers.find(oldNick);
 	if (itr != ircUsersAsPlayers.end())
 	{
-	  if (ircUsersAsPlayers.find(nickInfo->newName) == ircUsersAsPlayers.end())
+	  if (ircUsersAsPlayers.find(newNick) == ircUsersAsPlayers.end())
 	  {
 	    UserOnIRC* user = itr->second;
 	    user->IRCNick = nickInfo->newName;
 	    ircUsersAsPlayers.erase(itr);
-	    ircUsersAsPlayers[nickInfo->newName] = user;
+	    ircUsersAsPlayers[newNick] = user;
 	  }
 	}
 	else
 	{
 	  // we didnt' know about the old player, so go and add it as a new
-	  if (ircUsersAsPlayers.find(nickInfo->newName) == ircUsersAsPlayers.end())
-	    ircUsersAsPlayers[nickInfo->newName] = new UserOnIRC(nickInfo->newName);
+	  if (ircUsersAsPlayers.find(newNick) == ircUsersAsPlayers.end())
+	    ircUsersAsPlayers[newNick] = new UserOnIRC(nickInfo->newName);
 	}
     }
     break;
@@ -476,6 +487,7 @@ PlayerOnBZFlag::PlayerOnBZFlag (const std::string &callsign, int id )
   bzflagCallsign = callsign;
   IRCNick = "BZ-" + bzflagCallsign;
 
+  client->connect(ircOptions.ircServer,ircOptions.ircPort);
 }
 
 PlayerOnBZFlag::~PlayerOnBZFlag ()
