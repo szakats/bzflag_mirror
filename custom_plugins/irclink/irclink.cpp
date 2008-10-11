@@ -71,6 +71,8 @@ public:
   int bzPlayerID;
 
   IRCClient *client;
+
+  void buildNick ( void );
 };
 
 // the class that handles the actual server portion
@@ -497,7 +499,7 @@ PlayerOnBZFlag::PlayerOnBZFlag (const std::string &callsign, int id )
   client->registerEventHandler(eIRCPrivateMessageEvent,this);
 
   bzflagCallsign = callsign;
-  IRCNick = "BZ-" + bzflagCallsign;
+  buildNick();
 
   client->connect(ircOptions.ircServer,ircOptions.ircPort);
 }
@@ -510,6 +512,39 @@ PlayerOnBZFlag::~PlayerOnBZFlag ()
     delete(client);
   }
 }
+
+bool validChar( char c )
+{
+  if (c >= '0' && c <= '9')
+    return true;
+
+  if (c >= 'A' && c <= 'Z')
+    return true;
+
+  if (c >= 'a' && c <= 'z')
+    return true;
+
+  return false;
+}
+
+void PlayerOnBZFlag::buildNick ( void )
+{
+  std::string callsign = bzflagCallsign;
+
+  std::string::iterator itr = callsign.begin();
+  while (itr != callsign.end())
+  {
+    if (!validChar(*itr))
+      *itr = '_';
+    itr++;
+  }
+
+  if (callsign.size() > 10) // 3 for BZ-, 3 for numbers for confilcts
+    callsign.erase(callsign.begin()+10,callsign.end());
+
+  IRCNick = "BZ-" + callsign;
+}
+
 
 void PlayerOnBZFlag::sentToChannel ( const char* message )
 {
@@ -543,7 +578,8 @@ bool PlayerOnBZFlag::process ( IRCClient &ircClient, teIRCEventType	eventType, t
     break;
 
   case eIRCNickNameError:
-    IRCNick += "1";
+    buildNick();
+    IRCNick += format("%d",rand()%99);
     client->login(IRCNick,bzflagCallsign,bzflagCallsign,ircOptions.host);
     return false;
   }
