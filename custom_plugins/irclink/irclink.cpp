@@ -466,9 +466,16 @@ bool RootServer::process ( IRCClient &ircClient, teIRCEventType	eventType, trBas
 	}
 	else
 	{
-	  // we didnt' know about the old player, so go and add it as a new
-	  if (ircUsersAsPlayers.find(newNick) == ircUsersAsPlayers.end())
-	    ircUsersAsPlayers[newNick] = new UserOnIRC(nickInfo->newName);
+	  // make sure it's not one of our players
+	  PlayerOnBZFlag *player = getBZFlagPlayerFromNick(oldNick);
+	  if (player)
+	    player->IRCNick = newNick; // somehow one of our boys got a nick change
+	  else
+	  {
+	    // we didnt' know about the old irc user at all, so go and add it as a new
+	    if (ircUsersAsPlayers.find(newNick) == ircUsersAsPlayers.end())
+	      ircUsersAsPlayers[newNick] = new UserOnIRC(nickInfo->newName);
+	  }
 	}
     }
     break;
