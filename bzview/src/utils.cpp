@@ -253,13 +253,13 @@ std::string url_decode(const std::string &text)
     } else {
       char hex[5] = "0x00";
 
-      itr++;;
+      itr++;
       if (itr == text.end())
 	return destination;
 
       hex[2] = *itr;
 
-      itr++;;
+      itr++;
       if (itr == text.end())
 	return destination;
 
