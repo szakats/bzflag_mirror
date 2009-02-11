@@ -1287,7 +1287,7 @@ int WINAPI MSGLWndProc (HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	CREATESTRUCT	*pCS;
 
-	long iWinLong = GetWindowLong(hWnd,GWL_USERDATA);;
+	long iWinLong = GetWindowLong(hWnd,GWL_USERDATA);
 	
 	if (iWinLong)
 		pPKWin = (CPocketEngine*)GetWindowLong(hWnd,GWL_USERDATA);
