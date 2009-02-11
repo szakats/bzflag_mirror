@@ -40,7 +40,7 @@ void BZWGeneratorStandalone::printHelp() {
   printHelpCommand("d","debug","integer        sets debug level (0-4)(default: 2)");
   printHelpCommand("f","filedebug","integer    sets log.txt output debug level (0-4)(default: no output)");
   printHelpCommand("o","output","filename      sets output filename (default: map.bzw)");
-  printHelpCommand("r","rulesdir","directory   sets rules directory (default: rules)");;
+  printHelpCommand("r","rulesdir","directory   sets rules directory (default: rules)");
   printHelpCommand("s","size","integer         sets world size (default: 800)");
   printHelpCommand("g","gridsize","integer     sets grid size (default: 42)");
   printHelpCommand("p","gridsnap","integer     sets the grid snap (default: 3)");
