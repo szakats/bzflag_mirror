@@ -35,12 +35,12 @@
 
 #include <stdio.h>
 
-typedef enum
+enum teFilePos
 {
   eFileStart,
   eCurentPos,
   eFileEnd
-}teFilePos;
+};
 
 void setOSFileBaseDir(const std::string &dir);
 void OSFileOSToStdDir(std::string &dir);

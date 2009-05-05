@@ -54,7 +54,7 @@ class Selection : public Renderable, public Observer {
 public:
 
 	// states of the 3D cursor
-	typedef enum SelectionState {
+	enum SelectionState {
 		TRANSLATE,
 		ROTATE,
 		SCALE,
@@ -64,26 +64,26 @@ public:
 
 	// constructer
 	Selection(SelectionState state = TRANSLATE);
-	
+
 	// destructor
 	~Selection() {}
-	
+
 	// called by selectHandler to determine which part of the selector was picked
 	static osg::Node* getPickedNode( Renderable* r, const osg::NodePath& pickedNodes, unsigned int startIndex = 0 );
-	
+
 	// inherited update() method
 	void update( Observable* observable, void* data );
-	
+
 	// regenerate the axes
 	void rebuildAxes( Model::objRefList& objects );
-	
+
 	// set the state
 	SelectionState setState( SelectionState state );
 	SelectionState setStateByKey( unsigned char c );
-	
+
 	// set the scale
 	void setScale( const osg::Vec3& scale ) { this->selectionNode->setScale( scale ); }
-	
+
 private:
 
 	// some constants defining the shape and color of the axes
@@ -92,43 +92,43 @@ private:
 	static const float SHAFT_RADIUS;
 	static const float TIP_LENGTH;
 	static const float TIP_RADIUS;
-	
+
 	// the state of the handler (translate, rotate, scale, etc.)
 	SelectionState state;
-	
+
 	// build the axes geode
 	osg::ref_ptr< Renderable > buildAxes( osg::Vec3 localOrigin );
-	
+
 	// build the scaler geode
 	osg::ref_ptr< Renderable > buildScaler( osg::Vec3 localOrigin );
-	
+
 	// build the rotator geode
 	osg::ref_ptr< Renderable > buildRotator( osg::Vec3 localOrigin );
-	
+
 	// build a copy of the local object axes
 	osg::ref_ptr< Renderable > buildLocalAxes( osg::Vec3 localOrigin );
-	
+
 	// the current node
 	osg::ref_ptr< Renderable > selectionNode;
-	
+
 	// store the 3-axis geode (i.e. flyweight it)
 	osg::ref_ptr< Renderable > axes;
-	
+
 	// store the scale selector
 	osg::ref_ptr< Renderable > scaler;
-	
+
 	// store the rotate selector
 	osg::ref_ptr< Renderable > rotator;
-	
+
 	// local axis copy
 	osg::ref_ptr< Renderable > objectAxes;
-	
+
 	// local axis group
 	osg::ref_ptr< Renderable > objectAxisGroup;
-	
+
 	// compute the local origin
 	osg::Vec3 computeLocalOrigin( Model::objRefList& objects );
-	
+
 };
-	
+
 #endif /*SELECTION_H_*/

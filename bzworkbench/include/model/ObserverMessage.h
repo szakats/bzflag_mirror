@@ -16,25 +16,25 @@
 /**
  * This is a messaging class that the Model sends to the Observers.
  */
- 
+
 class ObserverMessage {
 
 public:
 
-	
-	typedef enum ObserverMessageType {
+
+	enum ObserverMessageType {
 		UPDATE_OBJECT = 1,	// update an object
 		REMOVE_OBJECT,		// remove an object
 		ADD_OBJECT,			// add an object
 		UPDATE_WORLD,		// re-size the world
 		UPDATE_WATERLEVEL	// alter the water level
 	};
-	
+
 	ObserverMessageType type;
 	void* data;
-	
+
 	ObserverMessage(ObserverMessageType _type, void* _data) { this->type = _type; this->data = _data; }
-	
+
 };
 
 #endif /*VIEWMESSAGE_H_*/
