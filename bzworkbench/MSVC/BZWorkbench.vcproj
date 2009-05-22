@@ -92,6 +92,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy .\Debug\BZWorkbench.exe ..\&#x0D;&#x0A;copy $(OSG_ROOT)\bin\osg55-osgd.dll ..\&#x0D;&#x0A;copy $(OSG_ROOT)\bin\osg55-osgDBd.dll ..\&#x0D;&#x0A;copy $(OSG_ROOT)\bin\osg55-osgGAd.dll ..\&#x0D;&#x0A;copy $(OSG_ROOT)\bin\osg55-osgTextd.dll ..\&#x0D;&#x0A;copy $(OSG_ROOT)\bin\osg55-osgUtild.dll ..\&#x0D;&#x0A;copy $(OSG_ROOT)\bin\osg55-osgViewerd.dll ..\&#x0D;&#x0A;copy $(OSG_ROOT)\bin\ot11-OpenThreadsd.dll ..\&#x0D;&#x0A;&#x0D;&#x0A;copy $(OSG_ROOT)\bin\osgPlugins-2.8.0\osgdb_objd.dll ..\&#x0D;&#x0A;copy $(OSG_ROOT)\bin\osgPlugins-2.8.0\osgdb_pngd.dll ..\&#x0D;&#x0A;copy $(OSG_ROOT)\bin\zlib1d.dll ..\&#x0D;&#x0A;copy $(OSG_ROOT)\bin\libpng13d.dll ..\"
 			/>
 		</Configuration>
 		<Configuration
