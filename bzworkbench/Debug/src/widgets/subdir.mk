@@ -10,19 +10,19 @@ CPP_SRCS += \
 ../src/widgets/QuickLabel.cpp \
 ../src/widgets/TransformWidget.cpp 
 
-CPP_DEPS += \
-./src/widgets/Console.d \
-./src/widgets/Fl_ImageButton.d \
-./src/widgets/MaterialWidget.d \
-./src/widgets/QuickLabel.d \
-./src/widgets/TransformWidget.d 
-
 OBJS += \
 ./src/widgets/Console.o \
 ./src/widgets/Fl_ImageButton.o \
 ./src/widgets/MaterialWidget.o \
 ./src/widgets/QuickLabel.o \
 ./src/widgets/TransformWidget.o 
+
+CPP_DEPS += \
+./src/widgets/Console.d \
+./src/widgets/Fl_ImageButton.d \
+./src/widgets/MaterialWidget.d \
+./src/widgets/QuickLabel.d \
+./src/widgets/TransformWidget.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

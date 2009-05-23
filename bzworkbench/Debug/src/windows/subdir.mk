@@ -10,19 +10,19 @@ CPP_SRCS += \
 ../src/windows/RenderWindow.cpp \
 ../src/windows/View.cpp 
 
-CPP_DEPS += \
-./src/windows/ConsoleWindow.d \
-./src/windows/EventHandlerCollection.d \
-./src/windows/MainWindow.d \
-./src/windows/RenderWindow.d \
-./src/windows/View.d 
-
 OBJS += \
 ./src/windows/ConsoleWindow.o \
 ./src/windows/EventHandlerCollection.o \
 ./src/windows/MainWindow.o \
 ./src/windows/RenderWindow.o \
 ./src/windows/View.o 
+
+CPP_DEPS += \
+./src/windows/ConsoleWindow.d \
+./src/windows/EventHandlerCollection.d \
+./src/windows/MainWindow.d \
+./src/windows/RenderWindow.d \
+./src/windows/View.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

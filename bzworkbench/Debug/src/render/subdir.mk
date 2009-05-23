@@ -9,17 +9,17 @@ CPP_SRCS += \
 ../src/render/Selection.cpp \
 ../src/render/TextureRepeaterVisitor.cpp 
 
-CPP_DEPS += \
-./src/render/GeometryExtractorVisitor.d \
-./src/render/Ground.d \
-./src/render/Selection.d \
-./src/render/TextureRepeaterVisitor.d 
-
 OBJS += \
 ./src/render/GeometryExtractorVisitor.o \
 ./src/render/Ground.o \
 ./src/render/Selection.o \
 ./src/render/TextureRepeaterVisitor.o 
+
+CPP_DEPS += \
+./src/render/GeometryExtractorVisitor.d \
+./src/render/Ground.d \
+./src/render/Selection.d \
+./src/render/TextureRepeaterVisitor.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

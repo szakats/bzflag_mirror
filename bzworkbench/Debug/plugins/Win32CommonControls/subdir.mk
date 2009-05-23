@@ -6,11 +6,11 @@
 CPP_SRCS += \
 ../plugins/Win32CommonControls/Win32CommonControls.cpp 
 
-CPP_DEPS += \
-./plugins/Win32CommonControls/Win32CommonControls.d 
-
 OBJS += \
 ./plugins/Win32CommonControls/Win32CommonControls.o 
+
+CPP_DEPS += \
+./plugins/Win32CommonControls/Win32CommonControls.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

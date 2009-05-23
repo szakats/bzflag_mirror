@@ -15,18 +15,6 @@ CPP_SRCS += \
 ../src/dialogs/MenuBar.cpp \
 ../src/dialogs/WorldOptionsDialog.cpp 
 
-CPP_DEPS += \
-./src/dialogs/AdvancedOptionsDialog.d \
-./src/dialogs/ConeConfigurationDialog.d \
-./src/dialogs/ConfigurationMenu.d \
-./src/dialogs/Fl_Dialog.d \
-./src/dialogs/Fl_Error.d \
-./src/dialogs/Fl_Tweak.d \
-./src/dialogs/MainMenu.d \
-./src/dialogs/MasterConfigurationDialog.d \
-./src/dialogs/MenuBar.d \
-./src/dialogs/WorldOptionsDialog.d 
-
 OBJS += \
 ./src/dialogs/AdvancedOptionsDialog.o \
 ./src/dialogs/ConeConfigurationDialog.o \
@@ -38,6 +26,18 @@ OBJS += \
 ./src/dialogs/MasterConfigurationDialog.o \
 ./src/dialogs/MenuBar.o \
 ./src/dialogs/WorldOptionsDialog.o 
+
+CPP_DEPS += \
+./src/dialogs/AdvancedOptionsDialog.d \
+./src/dialogs/ConeConfigurationDialog.d \
+./src/dialogs/ConfigurationMenu.d \
+./src/dialogs/Fl_Dialog.d \
+./src/dialogs/Fl_Error.d \
+./src/dialogs/Fl_Tweak.d \
+./src/dialogs/MainMenu.d \
+./src/dialogs/MasterConfigurationDialog.d \
+./src/dialogs/MenuBar.d \
+./src/dialogs/WorldOptionsDialog.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

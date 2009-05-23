@@ -88,7 +88,7 @@ void buildModelDatabase() {
 	Model::registerObject("mesh", "<mesh:<face><drawinfo>><drawinfo:<lod>><lod:<matref>>", "end", mesh::init);
 	// need to do this for faces
 	Model::addTerminatorSupport("face", "endface");
-	
+
 	Model::registerObject("meshbox", NULL, "end", meshbox::init);
 	Model::registerObject("meshpyr", NULL, "end", meshpyr::init);
 	Model::registerObject("options", NULL, "end", options::init);
@@ -102,37 +102,37 @@ void buildModelDatabase() {
 	Model::registerObject("weapon", NULL, "end", weapon::init);
 	Model::registerObject("world", NULL, "end", world::init);
 	Model::registerObject("zone", NULL, "end", zone::init);
-	
+
 	Model::registerObject("define", "<define:<arc><base><box><cone><group><mesh><meshbox><meshpyr><pyramid><sphere><teleporter><tetra>>", "enddef", define::init);
 }
 
 int main(int argc, char** argv) {
-	
+
 	// init the model
 	Model* model = new Model();
-	
+
 	// add supported objects
 	buildModelDatabase();
-	
+
 	// initialize the BZWParser
 	BZWParser::init( model );
-	
+
 	// init the SceneBuilder
 	SceneBuilder::init();
-	
+
 	printf("model addr: %x\n", model);
-	
+
 	// load the main window
 	MainWindow* mw = new MainWindow(model);
 	mw->resizable(mw);
-	
+
 	// show the main window
 	mw->show();
-	
+
 	// load any plugins
 	the_mainWindow = mw;
 	initPlugins();
-	
+
 	// run the program
 	return Fl::run();
 }
