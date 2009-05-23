@@ -191,30 +191,30 @@ void Primitives::RebuildBoxUV(osg::Group* box, osg::Vec3* size)
 
 // build a pyramid
 osg::Geode* Primitives::BuildPyramid() {
-
+	return NULL; // FIXME: implement
 }
 
 // build a teleporter
 osg::Geode* Primitives::BuildTeleporter() {
-
+	return NULL; // FIXME: implement
 }
 
 // build a blue base
 osg::Geode* Primitives::BuildBlueBase() {
-
+	return NULL; // FIXME: implement
 }
 
 // build a green base
 osg::Geode* Primitives::BuildGreenBase() {
-
+	return NULL; // FIXME: implement
 }
 
 // build a red base
 osg::Geode* Primitives::BuildRedBase() {
-
+	return NULL; // FIXME: implement
 }
 
 // build a purple base
 osg::Geode* Primitives::BuildPurpleBase() {
-
+	return NULL; // FIXME: implement
 }
