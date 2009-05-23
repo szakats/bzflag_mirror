@@ -1,11 +1,12 @@
 
 all:
-	(cd src; $(MAKE) all)
+	(cd Debug; $(MAKE) all)
 
 clean:
-	(cd src; $(MAKE) clean)
+	(cd Debug; $(MAKE) clean)
 
 fresh:
-	(cd src; $(MAKE) fresh)
+	$(MAKE) clean
+	$(MAKE) all
 
 

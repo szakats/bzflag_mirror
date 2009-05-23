@@ -8,10 +8,8 @@ CPP_SRCS += \
 ../src/BZWBPlugins.cpp \
 ../src/TextUtils.cpp \
 ../src/commonControls.cpp \
-../src/main.cpp 
-
-CXX_SRCS += \
-../src/OSFile.cxx 
+../src/main.cpp \
+../src/OSFile.cpp 
 
 OBJS += \
 ./src/BZWBAPI.o \
@@ -26,9 +24,7 @@ CPP_DEPS += \
 ./src/BZWBPlugins.d \
 ./src/TextUtils.d \
 ./src/commonControls.d \
-./src/main.d 
-
-CXX_DEPS += \
+./src/main.d \
 ./src/OSFile.d 
 
 
