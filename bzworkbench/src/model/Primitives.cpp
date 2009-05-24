@@ -160,23 +160,23 @@ void Primitives::RebuildBoxUV(osg::Group* box, const osg::Vec3* size)
 
 	// +x -x
 	sideUVs[0]->push_back( osg::Vec2( 0, 0 ) );
-	sideUVs[0]->push_back( osg::Vec2( 0, ySideScale ) );
-	sideUVs[0]->push_back( osg::Vec2( zSideScale, ySideScale ) );
-	sideUVs[0]->push_back( osg::Vec2( zSideScale, 0 ) );
+	sideUVs[0]->push_back( osg::Vec2( 0, zSideScale ) );
+	sideUVs[0]->push_back( osg::Vec2( ySideScale, zSideScale ) );
+	sideUVs[0]->push_back( osg::Vec2( ySideScale, 0 ) );
 	sideUVs[1]->push_back( osg::Vec2( 0, 0 ) );
-	sideUVs[1]->push_back( osg::Vec2( 0, ySideScale ) );
-	sideUVs[1]->push_back( osg::Vec2( zSideScale, ySideScale ) );
-	sideUVs[1]->push_back( osg::Vec2( zSideScale, 0 ) );
+	sideUVs[1]->push_back( osg::Vec2( 0, zSideScale ) );
+	sideUVs[1]->push_back( osg::Vec2( ySideScale, zSideScale ) );
+	sideUVs[1]->push_back( osg::Vec2( ySideScale, 0 ) );
 
 	// +y -y
 	sideUVs[2]->push_back( osg::Vec2( 0, 0 ) );
-	sideUVs[2]->push_back( osg::Vec2( 0, xSideScale ) );
-	sideUVs[2]->push_back( osg::Vec2( zSideScale, xSideScale ) );
-	sideUVs[2]->push_back( osg::Vec2( zSideScale, 0 ) );
+	sideUVs[2]->push_back( osg::Vec2( 0, zSideScale ) );
+	sideUVs[2]->push_back( osg::Vec2( xSideScale, zSideScale ) );
+	sideUVs[2]->push_back( osg::Vec2( xSideScale, 0 ) );
 	sideUVs[3]->push_back( osg::Vec2( 0, 0 ) );
-	sideUVs[3]->push_back( osg::Vec2( 0, xSideScale ) );
-	sideUVs[3]->push_back( osg::Vec2( zSideScale, xSideScale ) );
-	sideUVs[3]->push_back( osg::Vec2( zSideScale, 0 ) );
+	sideUVs[3]->push_back( osg::Vec2( 0, zSideScale ) );
+	sideUVs[3]->push_back( osg::Vec2( xSideScale, zSideScale ) );
+	sideUVs[3]->push_back( osg::Vec2( xSideScale, 0 ) );
 
 	// +z -z
 	sideUVs[4]->push_back( osg::Vec2( 0, 0 ) );
