@@ -150,9 +150,6 @@ class bz2object : public Renderable, public DataEntry
 		void setMaterials( vector< osg::ref_ptr< material > >& _materials ) { this->materials = _materials; }
 		void setSelected( bool value ) { selected = value; }
 
-		// use this instead of setScale();
-		virtual void setSize( osg::Vec3 newSize ) { setScale( newSize ); }
-
 		// set/set the thisNode
 		osg::Node* getThisNode() { return thisNode.get(); }
 		void setThisNode( osg::Node* node ) {

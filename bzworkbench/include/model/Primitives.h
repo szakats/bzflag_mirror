@@ -29,7 +29,7 @@ public:
 	static osg::Node* BuildBox(osg::Vec3* size);
 
 	// rebuild UVs for a box, should be called whenever the box is scaled
-	static void RebuildBoxUV(osg::Group* box, osg::Vec3* size);
+	static void RebuildBoxUV(osg::Group* box, const osg::Vec3* size);
 
 	// build a pyramid
 	static osg::Geode* BuildPyramid();

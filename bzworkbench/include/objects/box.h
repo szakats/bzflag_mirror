@@ -20,11 +20,13 @@
 #include "bz2object.h"
 
 #include "model/SceneBuilder.h"
+#include "model/Primitives.h"
 
 #include "render/GeometryExtractorVisitor.h"
 
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
+#include <osg/Group>
 
 /**
  * Box data
@@ -54,11 +56,11 @@ public:
 	
 	// toString
 	string toString(void);
+
+	virtual void setSize( const osg::Vec3d& newSize );
 	
 private:
-	
-	// update the box's geometry
-	void updateGeometry( UpdateMessage& msg );
+
 	
 };
 

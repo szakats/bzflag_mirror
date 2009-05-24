@@ -115,6 +115,9 @@ osg::Node* Primitives::BuildBox(osg::Vec3* size) {
 	if (sideImg)
 		sideTexture->setImage(sideImg);
 
+	sideTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+	sideTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+
 	// load roof texture
 	osg::Texture2D* roofTexture = new osg::Texture2D();
 	sideTexture->setDataVariance( osg::Object::DYNAMIC );
@@ -122,6 +125,9 @@ osg::Node* Primitives::BuildBox(osg::Vec3* size) {
 	// only set image if it was loaded properly
 	if (roofImg)
 		roofTexture->setImage(roofImg);
+
+	roofTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+	roofTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 
 	// make a state set for associating the textures with the box
 	osg::StateSet* state[6];
@@ -139,7 +145,7 @@ osg::Node* Primitives::BuildBox(osg::Vec3* size) {
 	return group;
 }
 
-void Primitives::RebuildBoxUV(osg::Group* box, osg::Vec3* size)
+void Primitives::RebuildBoxUV(osg::Group* box, const osg::Vec3* size)
 {
 	// generate UVs
 	osg::Vec2Array* sideUVs[6];
