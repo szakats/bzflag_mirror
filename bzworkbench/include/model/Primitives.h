@@ -1,8 +1,13 @@
-/*
- * Primitives.h
+/* BZWorkbench
+ * Copyright (c) 1993 - 2008 Tim Riker
  *
- *  Created on: May 22, 2009
- *      Author: william
+ * This package is free software;  you can redistribute it and/or
+ * modify it under the terms of the license found in the file
+ * named COPYING that should have accompanied this file.
+ *
+ * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #ifndef PRIMITIVES_H_
@@ -26,13 +31,16 @@ public:
 	static osg::Node* BuildByName( const char* name );
 
 	// build a box
-	static osg::Node* BuildBox(osg::Vec3* size);
+	static osg::Node* BuildBox( const osg::Vec3* size );
 
 	// rebuild UVs for a box, should be called whenever the box is scaled
-	static void RebuildBoxUV(osg::Group* box, const osg::Vec3* size);
+	static void RebuildBoxUV( osg::Group* box, const osg::Vec3* size );
 
 	// build a pyramid
-	static osg::Geode* BuildPyramid();
+	static osg::Node* BuildPyramid( const osg::Vec3* size );
+
+	// rebuild UVs for a pyr, should be called whenever the box is scaled
+	static void RebuildPyramidUV( osg::Geode* pyr, const osg::Vec3* size );
 
 	// build a teleporter
 	static osg::Geode* BuildTeleporter();

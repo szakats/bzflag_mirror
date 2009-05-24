@@ -12,9 +12,11 @@
 
 #include "objects/pyramid.h"
 
-pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("share/pyramid/pyramid.obj")) {
+#include "model/Primitives.h"
+
+pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("pyramid")) {
 	
-	setName( SceneBuilder::nameNode("share/pyramid/pyramid.obj") );
+	setName( SceneBuilder::nameNode("pyramid") );
 	
 	setPos( osg::Vec3(0.0, 0.0, 0.0) );
 	setSize( osg::Vec3(10.0, 10.0, 10.0) );
@@ -22,9 +24,9 @@ pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>", SceneBui
 }
 
 // constructor with binary data
-pyramid::pyramid( osg::Vec3 position, float rotation, osg::Vec3 scale ) : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("share/pyramid/pyramid.obj")) {
+pyramid::pyramid( osg::Vec3 position, float rotation, osg::Vec3 scale ) : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("pyramid")) {
 	
-	setName( SceneBuilder::nameNode("share/pyramid/pyramid.obj") );
+	setName( SceneBuilder::nameNode("pyramid") );
 	
 	setPos( position );
 	setRotationZ( rotation );
@@ -76,12 +78,10 @@ int pyramid::update(UpdateMessage& message) {
 			break;
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
-			updateGeometry( message );
 			setSize( *(message.getAsScale()) );
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
-			updateGeometry( message );
 			setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
 			
@@ -99,24 +99,8 @@ string pyramid::toString(void) {
 				  "end\n";	
 }
 
-void pyramid::updateGeometry( UpdateMessage& message ) {
-	// if we changed the scale, update the texture coordinates (i.e. the scale might have changed)
-	// NOTE: it is expected that message.data will point to an osg::Vec3, which contains the scaling FACTOR
-	if( message.type == UpdateMessage::SET_SCALE_FACTOR ) {
-		
-		// extract the scale factor from the message
-		osg::Vec3* scaleFactor = message.getAsScaleFactor();
-		
-		// get the geometries from the box mesh
-		GeometryExtractorVisitor geoExtractor = GeometryExtractorVisitor( this );
-		vector< osg::Geometry* > geos = geoExtractor.getGeometries();
-		
-		// there should be 2 geometries (One Geometry makes up the 4 sides, the other the floor.)
-		// if there isn't, then bail
-		if( geos.size() != 2 ) {
-			// printf(" error! %d geometries (expected 2)\n", geos.size());
-			return;
-		}
-	}
+void pyramid::setSize( const osg::Vec3d& newSize ) {
+	Primitives::RebuildPyramidUV( (osg::Geode*)getNode().get(), &(osg::Vec3)newSize );
+	bz2object::setSize( newSize );
 }
 

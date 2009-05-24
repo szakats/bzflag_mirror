@@ -58,11 +58,10 @@ public:
 	
 	// render
 	int render(void);
+
+	virtual void setSize( const osg::Vec3d& newSize );
 	
 private:
-
-	// modify the geometry
-	void updateGeometry( UpdateMessage& msg );
 };
 
 #endif /*PYRAMID_H_*/
