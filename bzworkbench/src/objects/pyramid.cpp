@@ -16,36 +16,33 @@
 
 pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("pyramid")) {
 	
-	setName( SceneBuilder::nameNode("pyramid") );
+	this->setName( SceneBuilder::nameNode("pyramid") );
 	
-	setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	setSize( osg::Vec3(10.0, 10.0, 10.0) );
+	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
+	this->setSize( osg::Vec3(10.0, 10.0, 10.0) );
 	SceneBuilder::markUnselected( this );
 }
 
 // constructor with binary data
 pyramid::pyramid( osg::Vec3 position, float rotation, osg::Vec3 scale ) : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("pyramid")) {
+	this->setName( SceneBuilder::nameNode("pyramid") );
 	
-	setName( SceneBuilder::nameNode("pyramid") );
-	
-	setPos( position );
-	setRotationZ( rotation );
-	setSize( scale );
+	this->setPos( position );
+	this->setRotationZ( rotation );
+	this->setSize( scale );
 	SceneBuilder::markUnselected( this );
 }
 
 // constructor with string
-pyramid::pyramid(string& data) : bz2object("pyramid", "<position><rotation><size>", data.c_str()) {
-	addChild( SceneBuilder::buildNode("share/pyramid/pyramid.obj") );
-	setName( SceneBuilder::nameNode("share/pyramid/pyramid.obj") );
-	SceneBuilder::markUnselected( this );
+pyramid::pyramid(string& data) : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("pyramid")) {
+	this->setName( SceneBuilder::nameNode("pyramid") );
 	
-	if( data.length() <= 1 ) {
-		setPos( osg::Vec3(0.0, 0.0, 0.0) );
-		setSize( osg::Vec3(10.0, 10.0, 10.0) );
-	}
-	else 
-		update(data);	
+	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
+	this->setSize( osg::Vec3(10.0, 10.0, 10.0) );
+	
+	SceneBuilder::markUnselected( this );
+
+	this->update(data);	
 }	
 
 // getter
@@ -53,7 +50,18 @@ string pyramid::get() { return toString(); }
 
 // setter
 int pyramid::update(string& data) {
-	return bz2object::update(data);	
+	osg::Vec3 size = getSize();
+
+	int result = bz2object::update( data );
+	if( result == 0 )
+		return result;
+
+	// if size changes then UVs must be regenerated
+	if( getSize() != size ) {
+		setSize(getSize());
+	}
+
+	return result;	
 }
 
 // setter with messaging

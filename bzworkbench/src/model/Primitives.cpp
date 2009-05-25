@@ -28,7 +28,7 @@ osg::Node* Primitives::BuildByName( const char* name ) {
 	if (str == "pyramid")
 		return BuildPyramid( &osg::Vec3( 1, 1, 1 ) );
 	else
-		return new osg::Geode();
+		return NULL;
 }
 
 // build a box
@@ -288,12 +288,12 @@ void Primitives::RebuildPyramidUV( osg::Geode* pyr, const osg::Vec3* size ) {
 	for ( int i = 0; i < 4; i++ ) {
 		if ( i%2 ) {
 			texcoords->push_back( osg::Vec2( 0, 0 ) );
-			texcoords->push_back( osg::Vec2( xScale, 0 ) );
+			texcoords->push_back( osg::Vec2( yScale, 0 ) );
 			texcoords->push_back( osg::Vec2( 0, diagonalScale ) );
 		}
 		else {
 			texcoords->push_back( osg::Vec2( 0, 0 ) );
-			texcoords->push_back( osg::Vec2( yScale, 0 ) );
+			texcoords->push_back( osg::Vec2( xScale, 0 ) );
 			texcoords->push_back( osg::Vec2( 0, diagonalScale ) );
 		}
 	}
