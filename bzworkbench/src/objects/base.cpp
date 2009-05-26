@@ -22,7 +22,7 @@ base::base() :
 	string meshname = getBaseMesh( team );
 	
 	baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
-	addChild( baseNode.get() );
+	setThisNode( baseNode.get() );
 	
 	setName( SceneBuilder::nameNode( meshname.c_str() ) );
 	
@@ -38,14 +38,14 @@ base::base(string& data) :
 	weapon = "";
 	team = 0;
 	
-	update(data);
-	
 	string meshname = getBaseMesh( team );
 	
 	baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
-	addChild( baseNode.get() );
+	setThisNode( baseNode.get() );
 	
 	setName( SceneBuilder::nameNode( meshname.c_str() ) );
+
+	update( data );
 	
 	SceneBuilder::markUnselected( this );	
 }
@@ -60,7 +60,7 @@ base::base( osg::Vec3 position, float rotation, osg::Vec3 size, int team, string
 	string meshname = getBaseMesh( team );
 	
 	baseNode = SceneBuilder::buildNode( meshname.c_str() ); 
-	addChild( baseNode.get() );
+	setThisNode( baseNode.get() );
 	
 	setName( SceneBuilder::nameNode( meshname.c_str() ) );
 	
@@ -117,8 +117,8 @@ int base::update(string& data) {
 		return 0;
 	
 	// load in the data
-	team = t;
-	weapon = (weapons.size() > 0 ? weapons[0] : string(""));
+	setTeam( t );
+	setWeapon( (weapons.size() > 0 ? weapons[0] : string("")).c_str() );
 	
 	return 1;
 }
@@ -141,29 +141,29 @@ int base::render(void) {
 string base::getBaseMesh( int t ) {
 	switch( t ) {
 		case BASE_RED:
-			return "share/base/red_base.obj";
+			return "red_base";
 		case BASE_GREEN:
-			return "share/base/green_base.obj";
+			return "green_base";
 		case BASE_BLUE:
-			return "share/base/blue_base.obj";
+			return "blue_base";
 		case BASE_PURPLE:
-			return "share/base/purple_base.obj";
+			return "purple_base";
 		default:
-			return "share/base/unknown_base.obj";	
+			return "box";	
 	}
 }
 
 // set the current team
 void base::setTeam( int t ) {
 	// get rid of the previous base node
-	removeChild( baseNode.get() );
+	//removeChild( baseNode.get() );
 	
 	// get the new base mesh name
 	string name = getBaseMesh( t );
 	
 	// build the node and add it
 	baseNode = SceneBuilder::buildNode( name.c_str() ); 
-	addChild( baseNode.get() );
+	setThisNode( baseNode.get() );
 	
 	// set the team
 	team = t;
@@ -206,4 +206,10 @@ int base::update(UpdateMessage& message) {
 	}
 	
 	return 1;
+}
+
+void base::setSize( const osg::Vec3d& newSize ) {
+	Primitives::RebuildBaseUV( (osg::Group*)getThisNode(), &(osg::Vec3)newSize );
+
+	bz2object::setSize( newSize );
 }

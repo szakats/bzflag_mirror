@@ -14,10 +14,11 @@
 
 #include <osg/Vec3>
 #include <osg/Geometry>
-#include <osg/Texture2D>
 #include <osg/StateSet>
 #include <osg/Group>
 #include <osgDB/ReadFile>
+
+using namespace std;
 
 // build a primitive given its name
 osg::Node* Primitives::BuildByName( const char* name ) {
@@ -25,129 +26,40 @@ osg::Node* Primitives::BuildByName( const char* name ) {
 
 	if (str == "box")
 		return BuildBox( &osg::Vec3( 1, 1, 1 ) );
-	if (str == "pyramid")
+	else if (str == "pyramid")
 		return BuildPyramid( &osg::Vec3( 1, 1, 1 ) );
-	if (str == "teleporter")
+	else if (str == "teleporter")
 		return BuildTeleporter( &osg::Vec3( 0.1f, 1, 1 ), 0.1f );
+	else if (str == "red_base")
+		return BuildRedBase( &osg::Vec3( 1, 1, 1 ) );
+	else if (str == "green_base")
+		return BuildGreenBase( &osg::Vec3( 1, 1, 1 ) );
+	else if (str == "blue_base")
+		return BuildBlueBase( &osg::Vec3( 1, 1, 1 ) );
+	else if (str == "purple_base")
+		return BuildPurpleBase( &osg::Vec3( 1, 1, 1 ) );
 	else
 		return NULL;
 }
 
 // build a box
 osg::Node* Primitives::BuildBox( const osg::Vec3* size ) {
-	osg::Group* group = new osg::Group();
-	// separate geometry nodes are needed so that each side
-	// can have a separate material
-	// array is in the order +x -x +y -y +z -z in bzflag coordinates
-	osg::Geode* sideNodes[6];
-	for ( int i = 0; i < 6; i++ )
-		sideNodes[i] = new osg::Geode();
+	osg::Group* group = buildUntexturedBox( size );
 
-	// assign geometry nodes to group
-	for ( int i = 0; i < 6; i++ )
-		group->addChild( sideNodes[i] );
-
-	// create geometry and assign it to the nodes
-	osg::Geometry* sideGeometry[6];
-	for ( int i = 0; i < 6; i++ ) {
-		sideGeometry[i] = new osg::Geometry();
-		sideNodes[i]->addDrawable(sideGeometry[i]);
-	}
-
-	// add vertices for all sides
-	osg::Vec3Array* pxVerts = new osg::Vec3Array();
-	pxVerts->push_back( osg::Vec3( size->x(), -size->y(), 0 ) );
-	pxVerts->push_back( osg::Vec3( size->x(), -size->y(), size->z() ) );
-	pxVerts->push_back( osg::Vec3( size->x(), size->y(), size->z() ) );
-	pxVerts->push_back( osg::Vec3( size->x(), size->y(), 0 ) );
-	sideGeometry[0]->setVertexArray(pxVerts);
-
-	osg::Vec3Array* nxVerts = new osg::Vec3Array();
-	nxVerts->push_back( osg::Vec3( -size->x(), size->y(), 0 ) );
-	nxVerts->push_back( osg::Vec3( -size->x(), size->y(), size->z() ) );
-	nxVerts->push_back( osg::Vec3( -size->x(), -size->y(), size->z() ) );
-	nxVerts->push_back( osg::Vec3( -size->x(), -size->y(), 0 ) );
-	sideGeometry[1]->setVertexArray(nxVerts);
-
-	osg::Vec3Array* pyVerts = new osg::Vec3Array();
-	pyVerts->push_back( osg::Vec3( size->x(), size->y(), 0 ) );
-	pyVerts->push_back( osg::Vec3( size->x(), size->y(), size->z() ) );
-	pyVerts->push_back( osg::Vec3( -size->x(), size->y(), size->z() ) );
-	pyVerts->push_back( osg::Vec3( -size->x(), size->y(), 0 ) );
-	sideGeometry[2]->setVertexArray(pyVerts);
-
-	osg::Vec3Array* nyVerts = new osg::Vec3Array();
-	nyVerts->push_back( osg::Vec3( -size->x(), -size->y(), 0 ) );
-	nyVerts->push_back( osg::Vec3( -size->x(), -size->y(), size->z() ) );
-	nyVerts->push_back( osg::Vec3( size->x(), -size->y(), size->z() ) );
-	nyVerts->push_back( osg::Vec3( size->x(), -size->y(), 0 ) );
-	sideGeometry[3]->setVertexArray(nyVerts);
-
-	osg::Vec3Array* pzVerts = new osg::Vec3Array();
-	pzVerts->push_back( osg::Vec3( size->x(), size->y(), size->z() ) );
-	pzVerts->push_back( osg::Vec3( size->x(), -size->y(), size->z() ) );
-	pzVerts->push_back( osg::Vec3( -size->x(), -size->y(), size->z() ) );
-	pzVerts->push_back( osg::Vec3( -size->x(), size->y(), size->z() ) );
-	sideGeometry[4]->setVertexArray(pzVerts);
-
-	osg::Vec3Array* nzVerts = new osg::Vec3Array();
-	nzVerts->push_back( osg::Vec3( size->x(), size->y(), 0 ) );
-	nzVerts->push_back( osg::Vec3( size->x(), -size->y(), 0 ) );
-	nzVerts->push_back( osg::Vec3( -size->x(), -size->y(), 0 ) );
-	nzVerts->push_back( osg::Vec3( -size->x(), size->y(), 0 ) );
-	sideGeometry[5]->setVertexArray(nzVerts);
-
-	// generate UV coordinates
-	RebuildBoxUV(group, size);
-
-	// specify the vertex indices, this is the same for all sides
-	osg::DrawElementsUInt* side =
-		new osg::DrawElementsUInt( osg::PrimitiveSet::QUADS, 0 );
-	side->push_back( 0 );
-	side->push_back( 1 );
-	side->push_back( 2 );
-	side->push_back( 3 );
-
-	// add vertex indices for each side
-	for ( int i = 0; i < 6; i++ ) {
-		sideGeometry[i]->setVertexAttribBinding( 0, osg::Geometry::BIND_PER_VERTEX );
-		sideGeometry[i]->addPrimitiveSet( side );
-	}
+	// make UV coordinates
+	RebuildBoxUV( group, size );
 
 	// load side texture
-	osg::Texture2D* sideTexture = new osg::Texture2D();
-	sideTexture->setDataVariance( osg::Object::DYNAMIC );
-	osg::Image* sideImg = osgDB::readImageFile("share/box/boxwall.png");
-	// only set image if it was loaded properly
-	if (sideImg)
-		sideTexture->setImage(sideImg);
-
-	sideTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-	sideTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+	osg::Texture2D* sideTexture = loadTexture( "share/box/boxwall.png" );
 
 	// load roof texture
-	osg::Texture2D* roofTexture = new osg::Texture2D();
-	sideTexture->setDataVariance( osg::Object::DYNAMIC );
-	osg::Image* roofImg = osgDB::readImageFile("share/box/roof.png");
-	// only set image if it was loaded properly
-	if (roofImg)
-		roofTexture->setImage(roofImg);
+	osg::Texture2D* roofTexture = loadTexture( "share/box/roof.png" );
 
-	roofTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-	roofTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-
-	// make a state set for associating the textures with the box
-	osg::StateSet* state[6];
-	for (int i = 0; i < 6; i++) {
-		state[i] = new osg::StateSet();
-
-		if (i < 4)
-			state[i]->setTextureAttributeAndModes( 0, sideTexture, osg::StateAttribute::ON );
-		else
-			state[i]->setTextureAttributeAndModes( 0, roofTexture, osg::StateAttribute::ON );
-
-		sideNodes[i]->setStateSet(state[i]);
-	}
+	// associate textures with nodes
+	for (int i = 0; i < 4; i++)
+		setNodeTexture( group->getChild( i ), sideTexture );
+	for (int i = 4; i < 6; i++)
+		setNodeTexture( group->getChild( i ), roofTexture );
 
 	return group;
 }
@@ -159,41 +71,35 @@ void Primitives::RebuildBoxUV(osg::Group* box, const osg::Vec3* size)
 	for (int i = 0; i < 6; i++)
 		sideUVs[i] = new osg::Vec2Array();
 
-	float xSideScale = size->x()*2/9.42f;
-	float ySideScale = size->y()*2/9.42f;
-	float zSideScale = size->z()/9.42f;
-	float xTopScale = xSideScale*5;
-	float yTopScale = ySideScale*5;
+	float xSideUV = size->x()*2/9.42f;
+	float ySideUV = size->y()*2/9.42f;
+	float zSideUV = size->z()/9.42f;
+	float xTopUV = xSideUV*5;
+	float yTopUV = ySideUV*5;
 
 	// +x -x
-	sideUVs[0]->push_back( osg::Vec2( 0, 0 ) );
-	sideUVs[0]->push_back( osg::Vec2( 0, zSideScale ) );
-	sideUVs[0]->push_back( osg::Vec2( ySideScale, zSideScale ) );
-	sideUVs[0]->push_back( osg::Vec2( ySideScale, 0 ) );
-	sideUVs[1]->push_back( osg::Vec2( 0, 0 ) );
-	sideUVs[1]->push_back( osg::Vec2( 0, zSideScale ) );
-	sideUVs[1]->push_back( osg::Vec2( ySideScale, zSideScale ) );
-	sideUVs[1]->push_back( osg::Vec2( ySideScale, 0 ) );
+	for ( int i = 0; i < 2; i++ ) {
+		sideUVs[i]->push_back( osg::Vec2( 0, 0 ) );
+		sideUVs[i]->push_back( osg::Vec2( 0, zSideUV ) );
+		sideUVs[i]->push_back( osg::Vec2( ySideUV, zSideUV ) );
+		sideUVs[i]->push_back( osg::Vec2( ySideUV, 0 ) );
+	}
 
 	// +y -y
-	sideUVs[2]->push_back( osg::Vec2( 0, 0 ) );
-	sideUVs[2]->push_back( osg::Vec2( 0, zSideScale ) );
-	sideUVs[2]->push_back( osg::Vec2( xSideScale, zSideScale ) );
-	sideUVs[2]->push_back( osg::Vec2( xSideScale, 0 ) );
-	sideUVs[3]->push_back( osg::Vec2( 0, 0 ) );
-	sideUVs[3]->push_back( osg::Vec2( 0, zSideScale ) );
-	sideUVs[3]->push_back( osg::Vec2( xSideScale, zSideScale ) );
-	sideUVs[3]->push_back( osg::Vec2( xSideScale, 0 ) );
+	for ( int i = 2; i < 4; i++ ) {
+		sideUVs[i]->push_back( osg::Vec2( 0, 0 ) );
+		sideUVs[i]->push_back( osg::Vec2( 0, zSideUV ) );
+		sideUVs[i]->push_back( osg::Vec2( xSideUV, zSideUV ) );
+		sideUVs[i]->push_back( osg::Vec2( xSideUV, 0 ) );
+	}
 
 	// +z -z
-	sideUVs[4]->push_back( osg::Vec2( 0, 0 ) );
-	sideUVs[4]->push_back( osg::Vec2( 0, yTopScale ) );
-	sideUVs[4]->push_back( osg::Vec2( xTopScale, yTopScale ) );
-	sideUVs[4]->push_back( osg::Vec2( xTopScale, 0 ) );
-	sideUVs[5]->push_back( osg::Vec2( 0, 0 ) );
-	sideUVs[5]->push_back( osg::Vec2( 0, yTopScale ) );
-	sideUVs[5]->push_back( osg::Vec2( xTopScale, yTopScale ) );
-	sideUVs[5]->push_back( osg::Vec2( xTopScale, 0 ) );
+	for ( int i = 4; i < 6; i++ ) {
+		sideUVs[i]->push_back( osg::Vec2( 0, 0 ) );
+		sideUVs[i]->push_back( osg::Vec2( 0, yTopUV ) );
+		sideUVs[i]->push_back( osg::Vec2( xTopUV, yTopUV ) );
+		sideUVs[i]->push_back( osg::Vec2( xTopUV, 0 ) );
+	}
 
 	for ( int i = 0; i < 6; i++ ) {
 		osg::Geode* geode = (osg::Geode*)box->getChild( i );
@@ -256,22 +162,10 @@ osg::Node* Primitives::BuildPyramid( const osg::Vec3* size ) {
 	geometry->addPrimitiveSet( bottom );
 
 	// load the texture from a file
-	osg::Texture2D* sideTexture = new osg::Texture2D();
-	sideTexture->setDataVariance( osg::Object::DYNAMIC );
-	osg::Image* sideImg = osgDB::readImageFile("share/pyramid/pyrwall.png");
-	// only set image if it was loaded properly
-	if (sideImg)
-		sideTexture->setImage(sideImg);
+	osg::Texture2D* sideTexture = loadTexture("share/pyramid/pyrwall.png");
 
-	// the texture needs to repeat
-	sideTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-	sideTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-
-	// make a state set for assigning the texture
-	osg::StateSet* state = new osg::StateSet();
-	state->setTextureAttributeAndModes( 0, sideTexture, osg::StateAttribute::ON );
-
-	pyramid->setStateSet(state);
+	// assign the texture
+	setNodeTexture( pyramid, sideTexture );
 
 	return pyramid;
 }
@@ -310,7 +204,7 @@ void Primitives::RebuildPyramidUV( osg::Geode* pyr, const osg::Vec3* size ) {
 }
 
 // build a teleporter
-osg::Group* Primitives::BuildTeleporter( const osg::Vec3* size, 
+osg::Node* Primitives::BuildTeleporter( const osg::Vec3* size, 
 										const float borderSize ) {
 	osg::Group* teleporter = new osg::Group();
 	osg::Geode* portal = new osg::Geode();
@@ -324,36 +218,12 @@ osg::Group* Primitives::BuildTeleporter( const osg::Vec3* size,
 	RebuildTeleporterUV( teleporter, size, borderSize );
 
 	// load textures
-	osg::Texture2D* portalTexture = new osg::Texture2D();
-	portalTexture->setDataVariance( osg::Object::DYNAMIC );
-	osg::Image* portalImg = osgDB::readImageFile("share/teleporter/telelink.png");
-	// only set image if it was loaded properly
-	if (portalImg)
-		portalTexture->setImage(portalImg);
+	osg::Texture2D* portalTexture = loadTexture( "share/teleporter/telelink.png" );
+	osg::Texture2D* borderTexture = loadTexture( "share/teleporter/caution.png" );
 
-	// the texture needs to repeat
-	portalTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-	portalTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-
-	osg::Texture2D* borderTexture = new osg::Texture2D();
-	borderTexture->setDataVariance( osg::Object::DYNAMIC );
-	osg::Image* borderImg = osgDB::readImageFile("share/teleporter/caution.png");
-	// only set image if it was loaded properly
-	if (borderImg)
-		borderTexture->setImage(borderImg);
-
-	// the texture needs to repeat
-	borderTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-	borderTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-
-	// make state sets for assigning the textures
-	osg::StateSet* portalState = new osg::StateSet();
-	portalState->setTextureAttributeAndModes( 0, portalTexture, osg::StateAttribute::ON );
-	osg::StateSet* borderState = new osg::StateSet();
-	borderState->setTextureAttributeAndModes( 0, borderTexture, osg::StateAttribute::ON );
-
-	portal->setStateSet( portalState );
-	border->setStateSet( borderState );
+	// assign the textures
+	setNodeTexture( portal, portalTexture );
+	setNodeTexture( border, borderTexture );
 
 	return teleporter;
 }
@@ -620,21 +490,188 @@ void Primitives::RebuildTeleporterMesh( osg::Group* tele, const osg::Vec3* size,
 }
 
 // build a blue base
-osg::Geode* Primitives::BuildBlueBase() {
-	return NULL; // FIXME: implement
+osg::Node* Primitives::BuildBlueBase( const osg::Vec3* size ) {
+	return buildBase( "share/base/blue_basewall.png", "share/base/blue_basetop.png", size );
 }
 
 // build a green base
-osg::Geode* Primitives::BuildGreenBase() {
-	return NULL; // FIXME: implement
+osg::Node* Primitives::BuildGreenBase( const osg::Vec3* size ) {
+	return buildBase( "share/base/green_basewall.png", "share/base/green_basetop.png", size );
 }
 
 // build a red base
-osg::Geode* Primitives::BuildRedBase() {
-	return NULL; // FIXME: implement
+osg::Node* Primitives::BuildRedBase( const osg::Vec3* size ) {
+	return buildBase( "share/base/red_basewall.png", "share/base/red_basetop.png", size );
 }
 
 // build a purple base
-osg::Geode* Primitives::BuildPurpleBase() {
-	return NULL; // FIXME: implement
+osg::Node* Primitives::BuildPurpleBase( const osg::Vec3* size ) {
+	return buildBase( "share/base/purple_basewall.png", "share/base/purple_basetop.png", size );
+}
+
+// regenerate base UVs
+void Primitives::RebuildBaseUV( osg::Group* base, const osg::Vec3* size ) {
+	// generate UVs
+	osg::Vec2Array* sideUVs[6];
+	for (int i = 0; i < 6; i++)
+		sideUVs[i] = new osg::Vec2Array();
+
+	// FIXME: properly generate side UVs for base
+	float xSideUV = 1;
+	float ySideUV = 1;
+	float zSideUV = 1;
+	float xTopUV = 1;
+	float yTopUV = 1;
+
+	// +x -x
+	for ( int i = 0; i < 2; i++ ) {
+		sideUVs[i]->push_back( osg::Vec2( 0, 0 ) );
+		sideUVs[i]->push_back( osg::Vec2( 0, zSideUV ) );
+		sideUVs[i]->push_back( osg::Vec2( ySideUV, zSideUV ) );
+		sideUVs[i]->push_back( osg::Vec2( ySideUV, 0 ) );
+	}
+
+	// +y -y
+	for ( int i = 2; i < 4; i++ ) {
+		sideUVs[i]->push_back( osg::Vec2( 0, 0 ) );
+		sideUVs[i]->push_back( osg::Vec2( 0, zSideUV ) );
+		sideUVs[i]->push_back( osg::Vec2( xSideUV, zSideUV ) );
+		sideUVs[i]->push_back( osg::Vec2( xSideUV, 0 ) );
+	}
+
+	// +z -z
+	for ( int i = 4; i < 6; i++ ) {
+		sideUVs[i]->push_back( osg::Vec2( 0, 0 ) );
+		sideUVs[i]->push_back( osg::Vec2( 0, yTopUV ) );
+		sideUVs[i]->push_back( osg::Vec2( xTopUV, yTopUV ) );
+		sideUVs[i]->push_back( osg::Vec2( xTopUV, 0 ) );
+	}
+
+	for ( int i = 0; i < 6; i++ ) {
+		osg::Geode* geode = (osg::Geode*)base->getChild( i );
+		osg::Geometry* geom = (osg::Geometry*)geode->getDrawable( 0 );
+		geom->setTexCoordArray( 0, sideUVs[i] );
+	}
+}
+
+osg::Group* Primitives::buildUntexturedBox( const osg::Vec3* size ) {
+	osg::Group* group = new osg::Group();
+	// separate geometry nodes are needed so that each side
+	// can have a separate material
+	// array is in the order +x -x +y -y +z -z in bzflag coordinates
+	osg::Geode* sideNodes[6];
+	for ( int i = 0; i < 6; i++ )
+		sideNodes[i] = new osg::Geode();
+
+	// assign geometry nodes to group
+	for ( int i = 0; i < 6; i++ )
+		group->addChild( sideNodes[i] );
+
+	// create geometry and assign it to the nodes
+	osg::Geometry* sideGeometry[6];
+	for ( int i = 0; i < 6; i++ ) {
+		sideGeometry[i] = new osg::Geometry();
+		sideNodes[i]->addDrawable(sideGeometry[i]);
+	}
+
+	// add vertices for all sides
+	osg::Vec3Array* pxVerts = new osg::Vec3Array();
+	pxVerts->push_back( osg::Vec3( size->x(), -size->y(), 0 ) );
+	pxVerts->push_back( osg::Vec3( size->x(), -size->y(), size->z() ) );
+	pxVerts->push_back( osg::Vec3( size->x(), size->y(), size->z() ) );
+	pxVerts->push_back( osg::Vec3( size->x(), size->y(), 0 ) );
+	sideGeometry[0]->setVertexArray(pxVerts);
+
+	osg::Vec3Array* nxVerts = new osg::Vec3Array();
+	nxVerts->push_back( osg::Vec3( -size->x(), size->y(), 0 ) );
+	nxVerts->push_back( osg::Vec3( -size->x(), size->y(), size->z() ) );
+	nxVerts->push_back( osg::Vec3( -size->x(), -size->y(), size->z() ) );
+	nxVerts->push_back( osg::Vec3( -size->x(), -size->y(), 0 ) );
+	sideGeometry[1]->setVertexArray(nxVerts);
+
+	osg::Vec3Array* pyVerts = new osg::Vec3Array();
+	pyVerts->push_back( osg::Vec3( size->x(), size->y(), 0 ) );
+	pyVerts->push_back( osg::Vec3( size->x(), size->y(), size->z() ) );
+	pyVerts->push_back( osg::Vec3( -size->x(), size->y(), size->z() ) );
+	pyVerts->push_back( osg::Vec3( -size->x(), size->y(), 0 ) );
+	sideGeometry[2]->setVertexArray(pyVerts);
+
+	osg::Vec3Array* nyVerts = new osg::Vec3Array();
+	nyVerts->push_back( osg::Vec3( -size->x(), -size->y(), 0 ) );
+	nyVerts->push_back( osg::Vec3( -size->x(), -size->y(), size->z() ) );
+	nyVerts->push_back( osg::Vec3( size->x(), -size->y(), size->z() ) );
+	nyVerts->push_back( osg::Vec3( size->x(), -size->y(), 0 ) );
+	sideGeometry[3]->setVertexArray(nyVerts);
+
+	osg::Vec3Array* pzVerts = new osg::Vec3Array();
+	pzVerts->push_back( osg::Vec3( size->x(), size->y(), size->z() ) );
+	pzVerts->push_back( osg::Vec3( size->x(), -size->y(), size->z() ) );
+	pzVerts->push_back( osg::Vec3( -size->x(), -size->y(), size->z() ) );
+	pzVerts->push_back( osg::Vec3( -size->x(), size->y(), size->z() ) );
+	sideGeometry[4]->setVertexArray(pzVerts);
+
+	osg::Vec3Array* nzVerts = new osg::Vec3Array();
+	nzVerts->push_back( osg::Vec3( size->x(), size->y(), 0 ) );
+	nzVerts->push_back( osg::Vec3( size->x(), -size->y(), 0 ) );
+	nzVerts->push_back( osg::Vec3( -size->x(), -size->y(), 0 ) );
+	nzVerts->push_back( osg::Vec3( -size->x(), size->y(), 0 ) );
+	sideGeometry[5]->setVertexArray(nzVerts);
+
+	// specify the vertex indices, this is the same for all sides
+	osg::DrawElementsUInt* side =
+		new osg::DrawElementsUInt( osg::PrimitiveSet::QUADS, 0 );
+	side->push_back( 0 );
+	side->push_back( 1 );
+	side->push_back( 2 );
+	side->push_back( 3 );
+
+	// add vertex indices for each side
+	for ( int i = 0; i < 6; i++ ) {
+		sideGeometry[i]->setVertexAttribBinding( 0, osg::Geometry::BIND_PER_VERTEX );
+		sideGeometry[i]->addPrimitiveSet( side );
+	}
+	
+	return group;
+}
+
+osg::Group* Primitives::buildBase( const std::string& sideTextureFile, const std::string& roofTextureFile, const osg::Vec3* size ) {
+	osg::Group* group = buildUntexturedBox( size );
+
+	// make UV coordinates
+	RebuildBaseUV( group, size );
+
+	// load side texture
+	osg::Texture2D* sideTexture = loadTexture( sideTextureFile );
+
+	// load roof texture
+	osg::Texture2D* roofTexture = loadTexture( roofTextureFile );
+
+	// associate textures with nodes
+	for (int i = 0; i < 4; i++)
+		setNodeTexture( group->getChild( i ), sideTexture );
+	for (int i = 4; i < 6; i++)
+		setNodeTexture( group->getChild( i ), roofTexture );
+
+	return group;
+}
+
+osg::Texture2D* Primitives::loadTexture( const std::string& file ) {
+	osg::Texture2D* texture = new osg::Texture2D();
+	texture->setDataVariance( osg::Object::DYNAMIC );
+	osg::Image* img = osgDB::readImageFile( file );
+	// only set image if it was loaded properly
+	if (img)
+		texture->setImage(img);
+
+	texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+	texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+
+	return texture;
+}
+
+void Primitives::setNodeTexture( osg::Node* node, osg::Texture2D* texture ) {
+	osg::StateSet* state = new osg::StateSet();
+
+	state->setTextureAttributeAndModes( 0, texture, osg::StateAttribute::ON );
+	node->setStateSet(state);
 }

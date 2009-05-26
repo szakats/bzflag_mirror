@@ -15,10 +15,9 @@
 
 #include <osg/Node>
 #include <osg/Geode>
+#include <osg/Texture2D>
 
 #include <string>
-
-using namespace std;
 
 /**
  * Contains methods for building various basic meshes found in bzflag.
@@ -43,7 +42,7 @@ public:
 	static void RebuildPyramidUV( osg::Geode* pyr, const osg::Vec3* size );
 
 	// build a teleporter
-	static osg::Group* BuildTeleporter( const osg::Vec3* size, 
+	static osg::Node* BuildTeleporter( const osg::Vec3* size, 
 									 const float borderSize );
 
 	// rebuild the UVs for a teleporter, call whenever the size is changed
@@ -55,16 +54,28 @@ public:
 									   const float borderSize );
 
 	// build a blue base
-	static osg::Geode* BuildBlueBase();
+	static osg::Node* BuildBlueBase( const osg::Vec3* size );
 
 	// build a green base
-	static osg::Geode* BuildGreenBase();
+	static osg::Node* BuildGreenBase( const osg::Vec3* size );
 
 	// build a red base
-	static osg::Geode* BuildRedBase();
+	static osg::Node* BuildRedBase( const osg::Vec3* size );
 
 	// build a purple base
-	static osg::Geode* BuildPurpleBase();
+	static osg::Node* BuildPurpleBase( const osg::Vec3* size );
+
+	// regenerate base UVs
+	static void RebuildBaseUV( osg::Group* base, const osg::Vec3* size );
+
+private:
+	static osg::Group* buildUntexturedBox( const osg::Vec3* size );
+
+	static osg::Group* buildBase( const std::string& sideTextureFile, const std::string& roofTextureFile, const osg::Vec3* size );
+
+	static osg::Texture2D* loadTexture( const std::string& file );
+
+	static void setNodeTexture( osg::Node* node, osg::Texture2D* texture );
 };
 
 #endif /* PRIMITIVES_H_ */

@@ -62,6 +62,8 @@ public:
 	
 	void setTeam( int team );
 	void setWeapon( const char* weapon ) { this->weapon = weapon; }
+
+	void setSize( const osg::Vec3d& newSize );
 	
 private:
 	int team;
