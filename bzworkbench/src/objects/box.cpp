@@ -39,7 +39,7 @@ box::~box() { }
 
 // getter
 string box::get(void) {
-	return this->toString();
+	return toString();
 }
 
 // setter (string data)
@@ -66,28 +66,28 @@ int box::update(UpdateMessage& message) {
 
 	switch( message.type ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
-			this->setPos( *(message.getAsPosition()) );
+			setPos( *(message.getAsPosition()) );
 			break;
 
 		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
-			this->setPos( getPos() + *(message.getAsPositionFactor()) );
+			setPos( getPos() + *(message.getAsPositionFactor()) );
 			break;
 
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
-			this->setRotationZ( message.getAsRotation()->z() );
+			setRotationZ( message.getAsRotation()->z() );
 			break;
 
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
-			this->setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
+			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
 			break;
 
 		case UpdateMessage::SET_SCALE: {	// handle a new scale (only scale one axis at a time)
-			this->setSize( *(message.getAsScale()) );
+			setSize( *(message.getAsScale()) );
 			break;
 		}
 
 		case UpdateMessage::SET_SCALE_FACTOR: {	// handle a scaling factor (again, 1 axis at a time)
-			this->setSize( getSize() + *(message.getAsScaleFactor()) );
+			setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
 		}
 		default:	// unknown event; don't handle

@@ -45,11 +45,7 @@ public:
 	
 	// override the getSize and setSize methods
 	osg::Vec3 getSize() { return osg::Vec3( realSize.x(), realSize.y(), realSize.z() ); }
-	void setSize( osg::Vec3 newSize ) {
-		realSize = newSize;
-		UpdateMessage msg = UpdateMessage( UpdateMessage::SET_SCALE, &newSize );
-		updateGeometry( msg );
-	}
+	void setSize( const osg::Vec3d& newSize );
 	
 	// tostring
 	string toString(void);
@@ -57,20 +53,11 @@ public:
 	// binary getters and setters
 	float getBorder() { return border; }
 	
-	void setBorder( float b ) { border = b; }
+	void setBorder( float newBorder );
 	
 private:
 	
 	float border;
-	
-	// parts of the teleporter node (necessary because teleporters don't scale normally, and we'll need to intervene :) )
-	osg::ref_ptr< Renderable > leftLeg, rightLeg, topBeam, frontPortal, rearPortal;
-	
-	// the teleporter group
-	osg::ref_ptr< osg::Group > theTeleporter;
-	
-	// helper method: update the teleporter nodes
-	void updateGeometry( UpdateMessage& message );
 	
 	// the real size (not reflected in the node geometry)
 	Point3D realSize;

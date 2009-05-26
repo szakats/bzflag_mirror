@@ -610,7 +610,8 @@ vector<string> BZWParser::getLineElements(const char* data, int count) {
 			
 		string element = line.substr(0, min(spaceIndex, retIndex));
 		
-		ret.push_back(element);
+		if (element != "")
+			ret.push_back(element);
 		
 		line = line.substr(spaceIndex + 1);
 		

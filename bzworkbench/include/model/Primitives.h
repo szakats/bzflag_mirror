@@ -43,7 +43,16 @@ public:
 	static void RebuildPyramidUV( osg::Geode* pyr, const osg::Vec3* size );
 
 	// build a teleporter
-	static osg::Geode* BuildTeleporter();
+	static osg::Group* BuildTeleporter( const osg::Vec3* size, 
+									 const float borderSize );
+
+	// rebuild the UVs for a teleporter, call whenever the size is changed
+	static void RebuildTeleporterUV( osg::Group* tele, const osg::Vec3* size, 
+									 const float borderSize );
+
+	// rebuild the mesh for a teleporter, call whenever the border size is changed
+	static void RebuildTeleporterMesh( osg::Group* tele, const osg::Vec3* size, 
+									   const float borderSize );
 
 	// build a blue base
 	static osg::Geode* BuildBlueBase();
