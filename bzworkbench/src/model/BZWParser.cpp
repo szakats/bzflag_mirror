@@ -92,6 +92,37 @@ bool hasLine(string text) {
  }
 
 /**
+ * Helper method: replaces sequential spaces and tabs with a single space
+ */
+string removeWhiteSpace(const string& line) {
+	// don't bother with empty strings
+	if( line.length() <= 0 )
+		return line;
+	
+	string ret;
+	bool whitespace = false;
+	string::const_iterator it;
+	for ( it = line.begin(); it != line.end(); it++ ) {
+		if (*it == ' ' || *it == '\t') {
+			if (!whitespace) {
+				// hit whitespace for the first time
+				ret += ' ';
+				whitespace = true;
+			}
+			else // don't add more whitespace
+				continue;
+		}
+		else {
+			// hit a non-whitespace char, reset bool
+			ret += *it;
+			whitespace = false;
+		}
+	}
+
+	return ret;
+}
+
+/**
  * Get the value text from a line
  */
 string BZWParser::value(const char* _key, const char* _text) {
@@ -595,7 +626,9 @@ vector<string> BZWParser::getValuesByKeys(vector<string> keys, const char* heade
  */
 vector<string> BZWParser::getLineElements(const char* data, int count) {
 	vector<string> ret = vector<string>();
-	string line = cutWhiteSpace(string(data)) + " ";
+
+	string line = removeWhiteSpace(string(data));
+	line = cutWhiteSpace(line) + " ";
 	
 	// separate all elements by finding the " "s
 	while(count != 0) {
@@ -607,11 +640,10 @@ vector<string> BZWParser::getLineElements(const char* data, int count) {
 		if(spaceIndex == string::npos &&
 		   retIndex == string::npos)
 			break;
-			
+
 		string element = line.substr(0, min(spaceIndex, retIndex));
 		
-		if (element != "")
-			ret.push_back(element);
+		ret.push_back(element);
 		
 		line = line.substr(spaceIndex + 1);
 		
