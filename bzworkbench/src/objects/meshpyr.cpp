@@ -29,7 +29,7 @@ int meshpyr::update(string& data) {
 // tostring
 string meshpyr::toString(void) {
 	return string("meshpyr\n") +
-				  BZWLines() +
+				  BZWLines( this ) +
 				  "end\n";
 }
 

@@ -190,7 +190,7 @@ string zone::toString(void) {
 	}
 	
 	return string("zone\n") +
-				  BZWLines() +
+				  BZWLines( this ) +
 				  (safetyString.length() == 0 ? "# safety\n" : "  safety " + safetyString) +
 				  (teamString.length() == 0 ? "# team\n" : "  team " + teamString) +
 				  (flagString.length() == 0 ? "# flag\n" : "  flag " + flagString) +

@@ -19,6 +19,10 @@
 
 #include <string>
 
+#ifndef M_PI
+#define M_PI           3.14159265358979323846
+#endif
+
 /**
  * Contains methods for building various basic meshes found in bzflag.
  */
@@ -67,6 +71,11 @@ public:
 
 	// regenerate base UVs
 	static void RebuildBaseUV( osg::Group* base, const osg::Vec3* size );
+
+	// build a sphere
+	static osg::Node* BuildSphere( const osg::Vec3* size, const osg::Vec2* texSize, bool hemisphere, int divisions );
+
+	static void RebuildSphere( osg::Group* sphere, const osg::Vec3* size, const osg::Vec2* texSize, bool hemisphere, int divisions );
 
 private:
 	static osg::Group* buildUntexturedBox( const osg::Vec3* size );

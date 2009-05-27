@@ -103,7 +103,7 @@ int pyramid::update(UpdateMessage& message) {
 // toString
 string pyramid::toString(void) {
 	return string("pyramid\n") +
-				  BZWLines() +
+				  BZWLines( this ) +
 				  "end\n";	
 }
 

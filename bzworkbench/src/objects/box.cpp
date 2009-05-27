@@ -100,7 +100,7 @@ int box::update(UpdateMessage& message) {
 // toString
 string box::toString(void) {
 	return string("box\n") +
-				  BZWLines() +
+				  BZWLines( this ) +
 				  "end\n";
 }
 

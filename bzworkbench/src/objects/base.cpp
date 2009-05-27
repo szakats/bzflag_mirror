@@ -126,7 +126,7 @@ int base::update(string& data) {
 // tostring
 string base::toString() {
 	return string("base\n") +
-				  BZWLines() +
+				  BZWLines( this ) +
 				  "  color " + string(itoa(team)) + "\n" +
 				  (weapon.length() != 0 ? "  oncap " + weapon + "\n" : "") +
 				  "end\n";	

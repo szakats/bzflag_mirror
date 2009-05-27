@@ -185,7 +185,7 @@ int cone::update( UpdateMessage& message ) {
 // toString
 string cone::toString(void) {
 	return string("cone\n") +
-				  BZWLines() +
+				  BZWLines( this ) +
 				  "  divisions " + string(itoa(divisions)) + "\n" +
 				  (flatShading == true ? "  flatshading\n" : "") +
 				  (smoothbounce == true ? "  smoothbounce\n" : "") + 

@@ -87,7 +87,7 @@ string meshbox::toString(void) {
 		}
 	}
 	return string("meshbox\n") +
-				  BZWLines() +
+				  BZWLines( this ) +
 				  outsidemats +
 				  topmats +
 				  "end\n";

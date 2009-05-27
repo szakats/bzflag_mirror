@@ -107,7 +107,7 @@ int arc::update(string& data) {
 // toString
 string arc::toString(void) {
 	return string("arc\n") +
-				  BZWLines() +
+				  BZWLines( this ) +
 				  "  angle " + string(ftoa(angle)) + "\n" +
 				  "  ratio " + string(ftoa(ratio)) + "\n" +
 				  "  divisions " + string(itoa(divisions)) + "\n" +

@@ -138,7 +138,7 @@ int teleporter::update( UpdateMessage& message ) {
 string teleporter::toString(void) {
 	
 	// get the bz2object BZW lines
-	string bzwlines = BZWLines();
+	string bzwlines = BZWLines( this );
 	
 	// finally, make that string
 	return string("teleporter") + "\n" +

@@ -67,7 +67,7 @@ class bz2object : public Renderable, public DataEntry
 		virtual string toString(void);
 
 		// this method only returns the (indented) lines in the BZW text and is meant to be called by derived classes
-		string BZWLines(void);
+		static string BZWLines( bz2object* obj );
 
 		// data getters (makes MasterConfigurationDialog code easier)
 		osg::ref_ptr<physics> getPhyDrv() { return physicsDriver; }

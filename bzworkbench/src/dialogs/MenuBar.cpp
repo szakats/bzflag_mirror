@@ -308,7 +308,25 @@ void MenuBar::addTeleporterCallback_real(Fl_Widget* w) {
 
 // add a sphere
 void MenuBar::addSphereCallback_real(Fl_Widget* w) {
-	printf("added a sphere\n");
+	// make a new pyramid using the Model's object registry
+	DataEntry* newSphere = this->parent->getModel()->_buildObject( "sphere" );
+	
+	// make it into a bz2object
+	bz2object* newObj = dynamic_cast< bz2object* >( newSphere );
+	
+	if(!newObj)
+		return;
+	
+	newObj->setName( SceneBuilder::makeUniqueName("sphere") );
+	
+	// add the object to the model
+	parent->getModel()->_unselectAll();
+	parent->getModel()->_addObject( newObj );
+	parent->getModel()->_setSelected( newObj );
+	
+	// open up a MasterConfigurationDialog and configure it
+	parent->configure( newObj );
+	
 	value(0);
 }
 

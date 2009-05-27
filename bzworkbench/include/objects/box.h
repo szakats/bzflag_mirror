@@ -57,7 +57,7 @@ public:
 	// toString
 	string toString(void);
 
-	virtual void setSize( const osg::Vec3d& newSize );
+	void setSize( const osg::Vec3d& newSize );
 	
 private:
 

@@ -424,72 +424,72 @@ int bz2object::update(string& data)
 // toString
 string bz2object::toString(void)
 {
-	return getHeader() + "\n" + BZWLines() + "end\n";
+	return getHeader() + "\n" + BZWLines( this ) + "end\n";
 }
 
 // this method only returns the (indented) lines in the BZW text and is meant to be called by derived classes
-string bz2object::BZWLines(void)
+string bz2object::BZWLines( bz2object* obj )
 {
 	string ret = string("");
 	
 	// add name key/value to the string if supported
-	if(isKey("name") && getName().length() > 0)
-		ret += "  name " + getName() + "\n";
+	if(obj->isKey("name") && obj->getName().length() > 0)
+		ret += "  name " + obj->getName() + "\n";
 	
 	// add position key/value to the string if supported
-	if(isKey("position"))
-		ret += "  position " + Point3D( getPosition() ).toString();
+	if(obj->isKey("position"))
+		ret += "  position " + Point3D( obj->getPosition() ).toString();
 		
 	// add rotation key/value to the string if supported
-	if(isKey("rotation") && !isKey("spin"))
-		ret += "  rotation " + string( ftoa(getRotation().z()) ) + "\n";
+	if(obj->isKey("rotation") && !obj->isKey("spin"))
+		ret += "  rotation " + string( ftoa(obj->getRotation().z()) ) + "\n";
 		
 	// add size key/value to the string if supported
-	if(isKey("size"))
-		ret += "  size " + Point3D( getSize() ).toString();
+	if(obj->isKey("size"))
+		ret += "  size " + Point3D( obj->getSize() ).toString();
 	
 	// add a scale if size isn't supported (this is the case with groups, for example)
-	if( !isKey("size") && isKey("scale") )
-		ret += "  scale " + Point3D( getSize() ).toString();
+	if( !obj->isKey("size") && obj->isKey("scale") )
+		ret += "  scale " + Point3D( obj->getSize() ).toString();
 	
 	// add the initial transformation
-	if( isKey("shift") )
-		ret += "  " + startShift->toString();
+	if( obj->isKey("shift") )
+		ret += "  " + obj->startShift->toString();
 	
 	// add all transformations to the string if they are supported
-	for(vector< osg::ref_ptr<BZTransform> >::iterator i = transformations.begin(); i != transformations.end(); i++) {
-		if(isKey((*i)->getHeader().c_str()) && (*i)->isApplied())
+	for(vector< osg::ref_ptr<BZTransform> >::iterator i = obj->transformations.begin(); i != obj->transformations.end(); i++) {
+		if(obj->isKey((*i)->getHeader().c_str()) && (*i)->isApplied())
 			ret += "  " + (*i)->toString();
 	}
 	
 	// add the Euler rotation values as spin keys
-	if( isKey("spin") ) {
-		ret += "  " + spin_x->toString();
-		ret += "  " + spin_y->toString();
-		ret += "  " + spin_z->toString();
+	if( obj->isKey("spin") ) {
+		ret += "  " + obj->spin_x->toString();
+		ret += "  " + obj->spin_y->toString();
+		ret += "  " + obj->spin_z->toString();
 	}
 		
 	// add the final transformation
-	if( isKey("shift") )
-		ret += "  " + endShift->toString();
+	if( obj->isKey("shift") )
+		ret += "  " + obj->endShift->toString();
 	
 	// if position isn't supported, then add another shift to emulate it (i.e. with groups)
-	if( !isKey("position") && isKey("shift") )
-		ret += "  shift " + Point3D( getPos() ).toString();
+	if( !obj->isKey("position") && obj->isKey("shift") )
+		ret += "  shift " + Point3D( obj->getPos() ).toString();
 	
 	// add phydrv key/value to the string if supported and if defined
-	if(isKey("phydrv") && physicsDriver != NULL)
-		ret += "  phydrv " + physicsDriver->getName() + "\n";
+	if(obj->isKey("phydrv") && obj->physicsDriver != NULL)
+		ret += "  phydrv " + obj->physicsDriver->getName() + "\n";
 	
 	// add all matref key/value pairs to the string if supported and defined
-	if(isKey("matref") && materials.size() != 0) {
-		for(vector<osg::ref_ptr<material> >::iterator i = materials.begin(); i != materials.end(); i++) {
+	if(obj->isKey("matref") && obj->materials.size() != 0) {
+		for(vector<osg::ref_ptr<material> >::iterator i = obj->materials.begin(); i != obj->materials.end(); i++) {
 			ret += "  matref " + (*i)->getName() + "\n";
 		}	
 	}
 	
 	// add unused text
-	ret += getUnusedText();
+	ret += obj->getUnusedText();
 	
 	return ret;
 }

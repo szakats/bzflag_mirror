@@ -194,7 +194,7 @@ string group::toString(void) {
 				  teamString +
 				  (driveThrough == true ? "  drivethrough\n" : "") +
 				  (shootThrough == true ? "  shootThrough\n" : "") +
-				  this->BZWLines() +
+				  this->BZWLines( this ) +
 				  "end\n";
 				  
 	// reset the rotation to 0 (so only the container has the spin transformations)

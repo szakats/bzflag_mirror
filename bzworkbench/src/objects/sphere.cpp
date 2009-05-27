@@ -13,8 +13,10 @@
 #include "objects/sphere.h"
 
 sphere::sphere() : 
-	bz2object("sphere", "<position><rotation><size><radius><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
+bz2object("sphere", "<position><rotation><size><radius><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>", SceneBuilder::buildNode( "sphere" ) ) {
 	
+	setSize( osg::Vec3( 10, 10, 10 ) );
+
 	// define some basic values
 	divisions = 16;
 	setName("default_sphere");
@@ -27,6 +29,9 @@ sphere::sphere() :
 sphere::sphere(string& data) :
 	bz2object("sphere", "<position><rotation><size><radius><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>", data.c_str()) {
 	
+	setThisNode( SceneBuilder::buildNode( "sphere" ) );
+	setSize( osg::Vec3( 10, 10, 10 ) );
+
 	// define some basic values
 	divisions = 16;
 	setName("default_sphere");
@@ -119,7 +124,7 @@ int sphere::update(string& data) {
 // toString
 string sphere::toString(void) {
 	return string("sphere\n") +
-				  BZWLines() +
+				  BZWLines( this ) +
 				  "  divisions " + string(itoa(divisions)) + "\n" +
 				  (flatShading == true ? "  flatshading\n" : "") +
 				  (smoothbounce == true ? "  smoothbounce\n" : "") + 

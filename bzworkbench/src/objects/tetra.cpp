@@ -68,7 +68,7 @@ int tetra::update(string& data) {
 // tostring
 string tetra::toString(void) {
 	return string("tetra\n") +
-				  BZWLines() +
+				  BZWLines( this ) +
 				  "  vertex " + vertexes[0].toString() + 
 				  "  vertex " + vertexes[1].toString() +
 				  "  vertex " + vertexes[2].toString() +

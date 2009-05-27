@@ -174,7 +174,7 @@ string weapon::toString(void) {
 	}
 	
 	return string("weapon\n") +
-				  BZWLines() +
+				  BZWLines( this ) +
 				  (type.length() == 0 ? "# type\n" : "  type " + type + "\n") +
 				  (trigger.length() == 0 ? "# trigger\n" : "  trigger " + trigger + "\n") +
 				  (eventTeam.length() == 0 ? "# eventteam\n" : "  eventteam " + eventTeam + "\n") +
