@@ -39,7 +39,7 @@ int define::update(string& data) {
 	const char* header = getHeader().c_str();
 	
 	// get the text
-	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
+	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str(), "enddef");
 	
 	if(lines[0] == BZW_NOT_FOUND)
 		return 0;
@@ -56,9 +56,9 @@ int define::update(string& data) {
 			
 	// get the data
 	string::size_type sectionStart = lines[0].find("\n") + 1;
-	string::size_type sectionEnd = lines[0].find( "enddef", sectionStart );
+	string::size_type sectionLength = lines[0].find( "enddef", sectionStart ) - sectionStart;
 	
-	lines[0] = lines[0].substr( sectionStart, sectionEnd );
+	lines[0] = lines[0].substr( sectionStart, sectionLength );
 	
 	const char* defineData = lines[0].c_str();
 	
