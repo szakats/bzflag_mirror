@@ -265,7 +265,7 @@ int bz2object::update(string& data)
 			return 0;
 		}
 		if(sizes.size() == 0) {
-			sizes.push_back(Point3D(-1.0f, -1.0f, -1.0f).toString());	
+			sizes.push_back(Point3D(10.0f, 10.0f, 10.0f).toString());	
 		}
 		
 	}

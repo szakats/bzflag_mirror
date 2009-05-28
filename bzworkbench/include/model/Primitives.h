@@ -45,18 +45,6 @@ public:
 	// rebuild UVs for a pyr, should be called whenever the box is scaled
 	static void RebuildPyramidUV( osg::Geode* pyr, const osg::Vec3* size );
 
-	// build a teleporter
-	static osg::Node* BuildTeleporter( const osg::Vec3* size, 
-									 const float borderSize );
-
-	// rebuild the UVs for a teleporter, call whenever the size is changed
-	static void RebuildTeleporterUV( osg::Group* tele, const osg::Vec3* size, 
-									 const float borderSize );
-
-	// rebuild the mesh for a teleporter, call whenever the border size is changed
-	static void RebuildTeleporterMesh( osg::Group* tele, const osg::Vec3* size, 
-									   const float borderSize );
-
 	// build a blue base
 	static osg::Node* BuildBlueBase( const osg::Vec3* size );
 
