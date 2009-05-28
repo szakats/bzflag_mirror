@@ -332,7 +332,23 @@ void MenuBar::addSphereCallback_real(Fl_Widget* w) {
 
 // add an arc
 void MenuBar::addArcCallback_real(Fl_Widget* w) {
-	printf("added an arc\n");
+	// make a new box using the Model's object registry
+	DataEntry* newArc = this->parent->getModel()->_buildObject( "arc" );
+	
+	// make it into a bz2object
+	bz2object* newObj = dynamic_cast< bz2object* >( newArc );
+	
+	if(!newObj)
+		return;
+	
+	// add the object to the model
+	parent->getModel()->_unselectAll();
+	parent->getModel()->_addObject( newObj );
+	parent->getModel()->_setSelected( newObj );
+	
+	// open up a MasterConfigurationDialog and configure it
+	parent->configure( newObj );
+
 	value(0);
 }
 

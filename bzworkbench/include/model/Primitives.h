@@ -77,7 +77,6 @@ public:
 
 	static void RebuildSphere( osg::Group* sphere, const osg::Vec3* size, const osg::Vec2* texSize, bool hemisphere, int divisions );
 
-private:
 	static osg::Group* buildUntexturedBox( const osg::Vec3* size );
 
 	static osg::Group* buildBase( const std::string& sideTextureFile, const std::string& roofTextureFile, const osg::Vec3* size );

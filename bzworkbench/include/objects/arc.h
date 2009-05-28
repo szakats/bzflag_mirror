@@ -42,12 +42,22 @@ public:
 	
 	// render
 	int render(void);
-	
+
+	void setSize( const osg::Vec3d& newSize);
+
 private:
 	bool flatShading, smoothbounce;
 	float angle, ratio;
 	int divisions;
-	
+
+	void updateGeometry( const osg::Vec4& texsize );
+
+	void makePie(osg::Geometry* sideMesh, osg::Geometry* topbotMesh, bool isCircle, float a, float r,
+				   float h, float radius, float squish,
+				   osg::Vec4& texsz);
+	void makeRing(osg::Geometry* sideMesh, osg::Geometry* topbotMesh, bool isCircle, float a, float r,
+				    float h, float inrad, float outrad,
+					float squish, osg::Vec4& texsz);
 };
 
 #endif /*ARC_H_*/
