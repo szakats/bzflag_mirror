@@ -15,17 +15,26 @@
 // construct an empty box
 meshbox::meshbox() : 
 	bz2object("meshbox", "<position><rotation><size><top matref><outside matref><matref><phydrv><obstacle>") {
-	topMaterials = vector<string>();
-	outsideMaterials = vector<string>();
+	setDefaults();
 }
 
 // construct a box from data
 meshbox::meshbox(string& data) : 
 	bz2object("meshbox", "<position><rotation><size><top matref><outside matref><matref><phydrv><obstacle>", data.c_str()) {
-	topMaterials = vector<string>();
-	outsideMaterials = vector<string>();
+	setDefaults();
 	
 	update(data);
+}
+
+void meshbox::setDefaults() {
+	updateGeometry();
+
+	topMaterials = vector<string>();
+	outsideMaterials = vector<string>();
+
+	setPos( osg::Vec3(0.0, 0.0, 0.0) );
+	setSize( osg::Vec3(10.0, 10.0, 10.0) );
+	SceneBuilder::markUnselected( this );
 }
 
 // getter
@@ -66,7 +75,41 @@ int meshbox::update(string& data) {
 		return 0;
 	topMaterials = tops;
 	outsideMaterials = outsides;
+
+	// force a size update
+	setSize(getSize());
 	return 1;
+}
+
+int meshbox::update( UpdateMessage& message ) {
+	switch( message.type ) {
+		case UpdateMessage::SET_POSITION: 	// handle a new position
+			setPos( *(message.getAsPosition()) );
+			break;
+			
+		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
+			setPos( getPos() + *(message.getAsPositionFactor()) );
+			break;
+			
+		case UpdateMessage::SET_ROTATION:		// handle a new rotation
+			setRotationZ( message.getAsRotation()->z() );
+			break;
+			
+		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
+			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
+			break;
+			
+		case UpdateMessage::SET_SCALE:		// handle a new scale
+			setSize( *(message.getAsScale()) );
+			break;
+			
+		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
+			setSize( getSize() + *(message.getAsScaleFactor()) );
+			break;
+			
+		default:	// unknown event; don't handle
+			return 0;
+	}
 }
 
 // tostring
@@ -96,4 +139,22 @@ string meshbox::toString(void) {
 // render
 int meshbox::render(void) {
 	return 0;	
+}
+
+void meshbox::setSize( const osg::Vec3d& newSize ) {
+	Primitives::rebuildBoxUV( (osg::Group*)getThisNode(), &(osg::Vec3)newSize );
+
+	bz2object::setSize( newSize );
+}
+
+void meshbox::updateGeometry() {
+	osg::Group* box = (osg::Group*)Primitives::buildUntexturedBox( &osg::Vec3( 1, 1, 1 ) );
+
+	osg::Texture2D* wallTexture = Primitives::loadTexture( "share/box/boxwall.png" );
+	osg::Texture2D* roofTexture = Primitives::loadTexture( "share/box/roof.png" );
+
+	for (int i = 0; i < 4; i++)
+		Primitives::setNodeTexture( box->getChild( i ), wallTexture );
+	for (int i = 4; i < 6; i++)
+		Primitives::setNodeTexture( box->getChild( i ), roofTexture );
 }

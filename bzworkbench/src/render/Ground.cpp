@@ -39,10 +39,11 @@ Ground::Ground( float size, float waterLevel ) : Renderable("ground") {
    
    // texture coordinates
    osg::Vec2Array* groundTexCoords = new osg::Vec2Array();
+   float texUV = size * 2 / 20.0f;
    groundTexCoords->push_back( osg::Vec2(0.0, 0.0) );
-   groundTexCoords->push_back( osg::Vec2(size, 0.0) );
-   groundTexCoords->push_back( osg::Vec2(size, size) );
-   groundTexCoords->push_back( osg::Vec2(0.0, size) );
+   groundTexCoords->push_back( osg::Vec2(texUV, 0.0) );
+   groundTexCoords->push_back( osg::Vec2(texUV, texUV) );
+   groundTexCoords->push_back( osg::Vec2(0.0, texUV) );
    
    // make the member ground geode
    osg::Geode* groundGeode = SceneBuilder::buildGeode( "ground", groundPoints, groundIndexes, groundTexCoords, "share/world/std_ground.png" );

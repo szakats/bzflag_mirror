@@ -69,9 +69,12 @@ int waterLevel::update(string& data) {
 	// load the data
 	if(!DataEntry::update(data))
 		return 0;
-	name = names[0];
-	material = matNames[0];
-	height = atof( heights[0].c_str() );
+	if (names.size() > 0)
+		name = names[0];
+	if (matNames.size() > 0)
+		material = matNames.back();
+	if (heights.size() > 0)
+		height = atof( heights[0].c_str() );
 	
 	return 1;
 	
