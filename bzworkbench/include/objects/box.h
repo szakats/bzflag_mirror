@@ -46,6 +46,9 @@ public:
 	
 	// nothing to destroy...
 	virtual ~box();
+
+	// restore default values
+	void setDefaults();
 	
 	// getter
 	string get(void);
@@ -60,8 +63,7 @@ public:
 	void setSize( const osg::Vec3d& newSize );
 	
 private:
-
-	
+	void updateGeometry();
 };
 
 #endif /*BOX_H_*/

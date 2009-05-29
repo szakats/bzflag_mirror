@@ -41,8 +41,7 @@ osg::Node* SceneBuilder::buildNode( const char* nodeFile ) {
 	string nodeName = SceneBuilder::nameNode( nodeFile );
 
 	// load it in
-	//osg::Node* node = osgDB::readNodeFile( nodeFile );
-	osg::Node* node = Primitives::BuildByName( nodeFile );
+	osg::Node* node = osgDB::readNodeFile( nodeFile );
 
 	if(node == NULL)
 		return NULL;

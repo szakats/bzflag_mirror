@@ -14,28 +14,27 @@
 
 
 // constructors
-box::box() : bz2object("box", "<name><position><rotation><size>", SceneBuilder::buildNode( "box" )) {
-	this->setName( SceneBuilder::nameNode("box") );
-
-	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	this->setSize( osg::Vec3(10.0, 10.0, 10.0) );
-	SceneBuilder::markUnselected( this );
-
+box::box() : bz2object("box", "<name><position><rotation><size>") {
+	setDefaults();
 }
 
-box::box(string& data) : bz2object("box", "<name><position><rotation><size>", SceneBuilder::buildNode( "box" )) {
-	this->setName( SceneBuilder::nameNode("box") );
-
-	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	this->setSize( osg::Vec3( 10.0, 10.0, 10.0 ) );
-
-	SceneBuilder::markUnselected( this );
+box::box(string& data) : bz2object("box", "<name><position><rotation><size>") {
+	setDefaults();
 
 	this->update( data );
 }
 
 // nothing to destroy...
 box::~box() { }
+
+void box::setDefaults() {
+	updateGeometry();
+
+	setPos( osg::Vec3(0.0, 0.0, 0.0) );
+	setSize( osg::Vec3( 10.0, 10.0, 10.0 ) );
+
+	SceneBuilder::markUnselected( this );
+}
 
 // getter
 string box::get(void) {
@@ -105,6 +104,28 @@ string box::toString(void) {
 }
 
 void box::setSize( const osg::Vec3d& newSize ) {
-	Primitives::RebuildBoxUV((osg::Group*)getNode().get(), &(osg::Vec3)newSize);
+	Primitives::rebuildBoxUV((osg::Group*)getThisNode(), &(osg::Vec3)newSize);
 	bz2object::setSize( newSize );
+}
+
+void box::updateGeometry() {
+	// make 1 by 1 by 1 box which can be scaled to the proper size
+	osg::Group* group = Primitives::buildUntexturedBox( &osg::Vec3( 1, 1, 1 ) );
+
+	// make UV coordinates
+	Primitives::rebuildBoxUV( group, &getSize() );
+
+	// load side texture
+	osg::Texture2D* sideTexture = Primitives::loadTexture( "share/box/boxwall.png" );
+
+	// load roof texture
+	osg::Texture2D* roofTexture = Primitives::loadTexture( "share/box/roof.png" );
+
+	// associate textures with nodes
+	for (int i = 0; i < 4; i++)
+		Primitives::setNodeTexture( group->getChild( i ), sideTexture );
+	for (int i = 4; i < 6; i++)
+		Primitives::setNodeTexture( group->getChild( i ), roofTexture );
+
+	setThisNode( group );
 }

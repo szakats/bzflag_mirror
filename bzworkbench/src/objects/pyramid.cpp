@@ -14,36 +14,27 @@
 
 #include "model/Primitives.h"
 
-pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("pyramid")) {
-	
-	this->setName( SceneBuilder::nameNode("pyramid") );
-	
-	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	this->setSize( osg::Vec3(10.0, 10.0, 10.0) );
-	SceneBuilder::markUnselected( this );
-}
-
-// constructor with binary data
-pyramid::pyramid( osg::Vec3 position, float rotation, osg::Vec3 scale ) : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("pyramid")) {
-	this->setName( SceneBuilder::nameNode("pyramid") );
-	
-	this->setPos( position );
-	this->setRotationZ( rotation );
-	this->setSize( scale );
-	SceneBuilder::markUnselected( this );
+pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>") {
+	setDefaults();
 }
 
 // constructor with string
-pyramid::pyramid(string& data) : bz2object("pyramid", "<position><rotation><size>", SceneBuilder::buildNode("pyramid")) {
+pyramid::pyramid(string& data) : bz2object("pyramid", "<position><rotation><size>") {
+	setDefaults();
+
+	this->update(data);	
+}
+
+void pyramid::setDefaults() {
+	updateGeometry();
+
 	this->setName( SceneBuilder::nameNode("pyramid") );
 	
 	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
 	this->setSize( osg::Vec3(10.0, 10.0, 10.0) );
 	
 	SceneBuilder::markUnselected( this );
-
-	this->update(data);	
-}	
+}
 
 // getter
 string pyramid::get() { return toString(); }
@@ -108,7 +99,12 @@ string pyramid::toString(void) {
 }
 
 void pyramid::setSize( const osg::Vec3d& newSize ) {
-	Primitives::RebuildPyramidUV( (osg::Geode*)getNode().get(), &(osg::Vec3)newSize );
+	Primitives::rebuildPyramidUV( (osg::Geode*)getThisNode(), &(osg::Vec3)newSize );
 	bz2object::setSize( newSize );
 }
 
+void pyramid::updateGeometry() {
+	osg::Node* node = Primitives::buildPyramid( &osg::Vec3( 1, 1, 1 ) );
+
+	setThisNode( node );
+}

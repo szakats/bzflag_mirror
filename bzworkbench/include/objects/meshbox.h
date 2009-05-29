@@ -46,6 +46,8 @@ public:
 
 private:
 	vector<string> topMaterials, outsideMaterials;
+
+	void updateGeometry();
 };
 
 #endif /*MESHBOX_H_*/

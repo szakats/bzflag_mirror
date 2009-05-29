@@ -24,18 +24,27 @@ public:
 	static DataEntry* init() { return new meshpyr(); }
 	static DataEntry* init(string& data) { return new meshpyr(data); }
 	
+	// restore default values
+	void setDefaults();
+
 	// getter
 	string get(void);
 	
 	// setter
 	int update(string& data);
+	int update( UpdateMessage& message );
 	
 	// tostring
 	string toString(void);
 	
 	// render
 	int render(void);
+
+	void setSize( const osg::Vec3d& newSize );
 	
+private:
+
+	void updateGeometry();
 };
 
 #endif /*MESHPYR_H_*/

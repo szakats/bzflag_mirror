@@ -25,6 +25,9 @@ public:
 	
 	static DataEntry* init() { return new sphere(); }
 	static DataEntry* init(string& data) { return new sphere(data); }
+
+	// restore default values
+	void setDefaults();
 	
 	// getter
 	string get(void);
@@ -39,8 +42,10 @@ public:
 	int render(void);
 	
 private:
-	bool flatShading, smoothbounce;
+	bool flatShading, smoothbounce, hemisphere;
 	int divisions;
+
+	void updateGeometry();
 };
 
 #endif /*SPHERE_H_*/

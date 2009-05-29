@@ -16,7 +16,7 @@
 
 // constructor
 teleporter::teleporter() :
-	bz2object("teleporter", "<position><size><rotation><name><border>", SceneBuilder::buildNode("teleporter")) {
+	bz2object("teleporter", "<position><size><rotation><name><border>") {
 	
 	setDefaults();
 
@@ -26,7 +26,7 @@ teleporter::teleporter() :
 
 // constructor with data
 teleporter::teleporter(string& data) :	// don't pass the data to the parent class (this prevents super-sized teleporters)
-	bz2object("teleporter", "<position><size><rotation><name><border>", SceneBuilder::buildNode("teleporter")) {
+	bz2object("teleporter", "<position><size><rotation><name><border>") {
 	
 	setDefaults();
 
