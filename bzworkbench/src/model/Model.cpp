@@ -255,7 +255,10 @@ bool Model::_build(vector<string>& bzworld) {
 		// parse waterLevel
 		else if(header == "waterLevel") {
 			if(this->cmap.count(header) > 0) {
-				this->waterLevelData->update(*i);	
+				this->waterLevelData->update(*i);
+				// tell the observers we have a different world
+				ObserverMessage obs( ObserverMessage::UPDATE_WORLD, worldData );
+				this->notifyObservers( &obs );
 				continue;
 			}
 			else {
