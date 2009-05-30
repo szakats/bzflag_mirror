@@ -31,6 +31,8 @@ public:
 	static DataEntry* init() { return new arc(); }
 	static DataEntry* init(string& data) { return new arc(data); }
 	
+	void setDefault();
+
 	// getter
 	string get(void);
 	
@@ -49,8 +51,9 @@ private:
 	bool flatShading, smoothbounce;
 	float angle, ratio;
 	int divisions;
+	osg::Vec4 texsize;
 
-	void updateGeometry( const osg::Vec4& texsize );
+	void updateGeometry();
 
 	void makePie(osg::Geometry* sideMesh, osg::Geometry* topbotMesh, bool isCircle, float a, float r,
 				   float h, float radius, float squish,

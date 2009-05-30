@@ -72,7 +72,7 @@ class bz2object : public Renderable, public DataEntry
 		// data getters (makes MasterConfigurationDialog code easier)
 		osg::ref_ptr<physics> getPhyDrv() { return physicsDriver; }
 		vector< osg::ref_ptr<BZTransform> >& getTransformations() { return transformations; }
-		vector< osg::ref_ptr<material> >& getMaterials() { return materials; }
+		vector< material* >& getMaterials() { return materials; }
 		bool isSelected() { return selected; }
 
 		// use this instead of getPosition()
@@ -147,7 +147,7 @@ class bz2object : public Renderable, public DataEntry
 		// data setters (makes MasterConfigurationDialog code easier)
 		void setPhyDrv( physics* phydrv ) { physicsDriver = phydrv; }
 		void setTransforms( vector< osg::ref_ptr<BZTransform> >& _transformations ) { this->transformations = _transformations; }
-		void setMaterials( vector< osg::ref_ptr< material > >& _materials ) { this->materials = _materials; }
+		void setMaterials( vector< material* >& _materials ) { this->materials = _materials; }
 		void setSelected( bool value ) { selected = value; }
 
 		// set/set the thisNode
@@ -180,7 +180,7 @@ class bz2object : public Renderable, public DataEntry
 
 	protected:
 		osg::ref_ptr< physics > physicsDriver;
-		vector< osg::ref_ptr< material > > materials;
+		vector< material* > materials;
 		vector< osg::ref_ptr< BZTransform > > transformations;
 		// set true if selected in the 3D scene
 		bool selected;

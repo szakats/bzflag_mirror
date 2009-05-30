@@ -133,7 +133,7 @@ public:
 	
 	// use this to compute the osg stateset to apply
 	// this entails merging parts of other materials
-	static material* computeFinalMaterial( vector< osg::ref_ptr< material > >& materialList );
+	static material* computeFinalMaterial( vector< material* >& materialList );
 	
 	// get the current material
 	osg::Material* getCurrentMaterial();

@@ -157,4 +157,6 @@ void meshbox::updateGeometry() {
 		Primitives::setNodeTexture( box->getChild( i ), wallTexture );
 	for (int i = 4; i < 6; i++)
 		Primitives::setNodeTexture( box->getChild( i ), roofTexture );
+
+	setThisNode( box );
 }

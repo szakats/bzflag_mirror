@@ -43,9 +43,9 @@ AdvancedOptionsDialog::AdvancedOptionsDialog( bz2object* _obj ) :
 	
 	// second, add the widgets
 	materialWidgets = vector< MaterialWidget* >();
-	vector< osg::ref_ptr< material > > objMaterials = obj->getMaterials();
+	vector< material* > objMaterials = obj->getMaterials();
 	if( objMaterials.size() > 0 ) {
-		for( vector< osg::ref_ptr< material > >::iterator i = objMaterials.begin(); i != objMaterials.end(); i++ ) {
+		for( vector< material* >::iterator i = objMaterials.begin(); i != objMaterials.end(); i++ ) {
 			MaterialWidget* mw = new MaterialWidget( materialList->x() + 5, 0, materialList->w() - 10, 2 * DEFAULT_TEXTSIZE, materialRefs );
 			mw->setSelectedMaterial( (*i)->getName() );
 			addMaterialCallback_real( materialList, mw );

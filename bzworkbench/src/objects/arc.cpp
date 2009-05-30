@@ -15,30 +15,18 @@
 // default constructor
 arc::arc() : 
 	bz2object("arc", "<position><rotation><size><flatshading><angle><ratio><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
-	
-	// define some basic values
-	ratio = 1.0f;
-	divisions = 16;
-	angle = 180.0f;
-	setName("default_arc");
-	physicsDriver = NULL;
-	flatShading = false;
-	smoothbounce = true;
-
-	
-	osg::Group* group = new osg::Group();
-	group->addChild( new osg::Geode() );
-	group->addChild( new osg::Geode() );
-
-	setThisNode( group );
-
-	setSize( osg::Vec3( 10, 10, 10 ) );
+	setDefault();
 }
 
 // data constructor
 arc::arc(string& data) :
 	bz2object("arc", "<position><rotation><size><flatshading><angle><ratio><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>", data.c_str()) {
+	setDefault();
 	
+	update(data);
+}
+
+void arc::setDefault() {
 	// define some basic values
 	ratio = 0.5f;
 	divisions = 16;
@@ -47,6 +35,7 @@ arc::arc(string& data) :
 	physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
+	texsize.set( 1, 1, 1, 1 );
 	
 	osg::Group* group = new osg::Group();
 	group->addChild( new osg::Geode() );
@@ -56,9 +45,7 @@ arc::arc(string& data) :
 
 	setSize( osg::Vec3( 10, 10, 10 ) );
 
-	update(data);
 }
-
 
 // getter
 string arc::get(void) { return toString(); }
@@ -104,20 +91,37 @@ int arc::update(string& data) {
 	
 	// get smoothbounce
 	vector<string> smoothBounces =  BZWParser::getValuesByKey("smoothbounce", header, arcData);
+
+	vector<string> texsizes = BZWParser::getValuesByKey("texsize", header, arcData);
 	
 	// do base class update
 	if(!bz2object::update(data))
 		return 0;
 	
 	// set the data
-	setName( names[0] );
-	angle = atof( angles[0].c_str() );
-	divisions = atoi( vDivisions[0].c_str() );
-	ratio = atof( ratios[0].c_str() );
+	if ( names.size() > 0 )
+		setName( names[0] );
+	if ( angles.size() > 0 )
+		angle = atof( angles[0].c_str() );
+	if ( vDivisions.size() > 0 )
+		divisions = atoi( vDivisions[0].c_str() );
+	if ( ratios.size() > 0 )
+		ratio = atof( ratios[0].c_str() );
+	if ( texsizes.size() > 0 ) {
+		vector<string> points = BZWParser::getLineElements( texsizes[0].c_str() );
+
+		if (points.size() > 3) 
+			texsize.set( atof( points[0].c_str() ),
+				atof( points[1].c_str() ),
+				atof( points[2].c_str() ),
+				atof( points[3].c_str() ));
+		else
+			texsize.set( 0, 0, 0, 0 );
+	}
 	flatShading = (flatShadings.size() == 0 ? false : true);
 	smoothbounce = (smoothBounces.size() == 0 ? false : true);
 
-	updateGeometry( osg::Vec4(1, 1, 1, 1) );
+	updateGeometry();
 	
 	return 1;	
 }
@@ -142,10 +146,10 @@ int arc::render(void) {
 
 void arc::setSize( const osg::Vec3d& newSize) {
 	bz2object::setSize( newSize );
-	updateGeometry( osg::Vec4(1, 1, 1, 1) );
+	updateGeometry();
 }
 
-void arc::updateGeometry( const osg::Vec4& texsize ) {
+void arc::updateGeometry() {
 	osg::Group* arc = (osg::Group*)getThisNode();
 	osg::Geode* sides = (osg::Geode*)arc->getChild( 0 );
 	osg::Geode* topBottom = (osg::Geode*)arc->getChild( 1 );

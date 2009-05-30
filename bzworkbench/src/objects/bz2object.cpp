@@ -20,7 +20,7 @@ bz2object::bz2object(const char* name, const char* keys):
 	thisNode = NULL;
 		
 	transformations = vector< osg::ref_ptr<BZTransform> >();
-	materials = vector< osg::ref_ptr< material > >();
+	materials = vector< material* >();
 	setSelected( false );
 	setName( "(unknown bz2object)" );
 	
@@ -62,7 +62,7 @@ bz2object::bz2object(const char* name, const char* keys, const char* data):
 	thisNode = NULL;
 	
 	transformations = vector< osg::ref_ptr<BZTransform> >();
-	materials = vector< osg::ref_ptr< material > >();
+	materials = vector< material* >();
 	setSelected( false );
 	
 	vector<float> sdata;
@@ -106,7 +106,7 @@ bz2object::bz2object(const char* name, const char* keys, osg::Node* node ):
 	thisNode = node;
 	
 	transformations = vector< osg::ref_ptr<BZTransform> >();
-	materials = vector< osg::ref_ptr< material > >();
+	materials = vector< material* >();
 	setSelected( false );
 	setName( "(unknown bz2object)" );
 	
@@ -148,7 +148,7 @@ bz2object::bz2object( const char* name, const char* keys, const char* data, osg:
 	thisNode = node;
 	
 	transformations = vector< osg::ref_ptr<BZTransform> >();
-	materials = vector< osg::ref_ptr< material > >();
+	materials = vector< material* >();
 	setSelected( false );
 	
 	vector<float> sdata;
@@ -483,7 +483,7 @@ string bz2object::BZWLines( bz2object* obj )
 	
 	// add all matref key/value pairs to the string if supported and defined
 	if(obj->isKey("matref") && obj->materials.size() != 0) {
-		for(vector<osg::ref_ptr<material> >::iterator i = obj->materials.begin(); i != obj->materials.end(); i++) {
+		for(vector<material* >::iterator i = obj->materials.begin(); i != obj->materials.end(); i++) {
 			ret += "  matref " + (*i)->getName() + "\n";
 		}	
 	}
@@ -511,7 +511,7 @@ int bz2object::update( UpdateMessage& message )
 			if( !isKey("matref") )
 				break;
 				
-			vector< osg::ref_ptr< material > >* materialList = message.getAsMaterialList();
+			vector< material* >* materialList = message.getAsMaterialList();
 			if( materialList != NULL ) {
 				materials = *materialList;
 				refreshMaterial();
@@ -544,8 +544,8 @@ int bz2object::update( UpdateMessage& message )
 			// search for the material in the list
 			if( materials.size() > 0 ) {
 				unsigned int i = 0;
-				for( vector< osg::ref_ptr< material > >::iterator itr = materials.begin(); itr != materials.end(); itr++, i++) {
-					if( itr->get() == mat ) {
+				for( vector< material* >::iterator itr = materials.begin(); itr != materials.end(); itr++, i++) {
+					if( *itr == mat ) {
 						printf(" updating material...\n");
 						materials[i] = mat;
 						break;
@@ -625,7 +625,7 @@ void bz2object::insertMaterial( unsigned int index, material* mat )
 	if( materials.size() == 0 ) {
 		materials.push_back( mat );
 	} else {
-		vector< osg::ref_ptr< material > >::iterator itr = materials.begin();
+		vector< material* >::iterator itr = materials.begin();
 		for( unsigned int i = 0; i < materials.size(); i++, itr++ ) {
 			if( i == index ) {
 				materials.insert( itr, mat );
@@ -643,8 +643,8 @@ void bz2object::removeMaterial( material* mat )
 	if( materials.size() == 0 || mat == NULL )
 		return;
 	
-	for( vector< osg::ref_ptr< material > >::iterator i = materials.begin(); i != materials.end(); i++ ) {
-		if( i->get() == mat ) {
+	for( vector< material* >::iterator i = materials.begin(); i != materials.end(); i++ ) {
+		if( *i == mat ) {
 			materials.erase( i );
 			break;
 		}
@@ -659,7 +659,7 @@ void bz2object::removeMaterial( unsigned int index )
 	if( index >= materials.size() || index < 0 ) 
 		return;
 	
-	vector< osg::ref_ptr< material > >::iterator itr = materials.begin();
+	vector< material* >::iterator itr = materials.begin();
 	for( unsigned int i = 0; i < materials.size(); i++, itr++ ) {
 		if( i == index ) {
 			materials.erase( itr );

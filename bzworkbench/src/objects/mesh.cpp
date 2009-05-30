@@ -22,7 +22,7 @@ mesh::mesh(void) :
 	insidePoints = vector<Point3D>();
 	outsidePoints = vector<Point3D>();
 	noClusters = smoothBounce = useDrawInfo = false;
-	materials = vector< osg::ref_ptr< material > >();
+	materials = vector< material* >();
 	faces = vector<MeshFace>();
 	drawInfo = DrawInfo();
 	materialMap = map<string, string>();
@@ -38,7 +38,7 @@ mesh::mesh(string& data) :
 	insidePoints = vector<Point3D>();
 	outsidePoints = vector<Point3D>();
 	noClusters = smoothBounce = useDrawInfo = false;
-	materials = vector< osg::ref_ptr< material > >();
+	materials = vector< material* >();
 	faces = vector<MeshFace>();
 	drawInfo = DrawInfo();
 	materialMap = map<string, string>();

@@ -116,7 +116,7 @@ public:
 		this->data.mat = _data;
 	}
 	
-	UpdateMessage( int _type, vector< osg::ref_ptr<material> >* _data ) {
+	UpdateMessage( int _type, vector< material* >* _data ) {
 		this->type = _type;
 		this->data.materials = _data;
 	}
@@ -135,7 +135,7 @@ public:
 	IndexedTransform* getAsIndexedTransform() { return data.indexedTransformation; }
 	
 	material* getAsMaterial() { return data.mat; }
-	vector< osg::ref_ptr<material> >* getAsMaterialList() { return data.materials; }
+	vector< material* >* getAsMaterialList() { return data.materials; }
 	IndexedMaterial* getAsIndexedMaterial() { return data.indexedMaterial; }
 	
 private:
@@ -151,7 +151,7 @@ private:
 		vector< osg::ref_ptr<BZTransform> >* transforms;	// transformations
 		
 		material* mat;			// a material to be pushed/popped
-		vector< osg::ref_ptr< material > >* materials;		// material stack
+		vector< material* >* materials;		// material stack
 		
 		IndexedMaterial* indexedMaterial; 		// material to be inserted
 		

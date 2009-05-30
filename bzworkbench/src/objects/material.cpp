@@ -338,7 +338,7 @@ string material::toString(void) {
 }
 
 // compute the final material from a list of materials
-material* material::computeFinalMaterial( vector< osg::ref_ptr< material > >& materialList ) { 
+material* material::computeFinalMaterial( vector< material* >& materialList ) { 
 	osg::Vec4 ambient = osg::Vec4( 0, 0, 0, 0),
 			  diffuse = osg::Vec4( 0, 0, 0, 0),
 			  specular = osg::Vec4( 0, 0, 0, 0),
@@ -348,7 +348,7 @@ material* material::computeFinalMaterial( vector< osg::ref_ptr< material > >& ma
 	osg::Texture2D* tex = NULL;
 	
 	if( materialList.size() > 0 ) {
-		for( vector< osg::ref_ptr< material > >::iterator i = materialList.begin(); i != materialList.end(); i++ ) {
+		for( vector< material* >::iterator i = materialList.begin(); i != materialList.end(); i++ ) {
 			
 			(*i)->computeFinalMaterial();
 			(*i)->computeFinalTexture();
