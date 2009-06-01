@@ -17,7 +17,6 @@
 #include "dialogs/Fl_Dialog.h"
 #include "widgets/QuickLabel.h"
 #include "dialogs/WorldOptionsDialog.h"
-#include "dialogs/MainMenu.h"
 
 #include "model/Model.h"
 

@@ -94,7 +94,7 @@ int meshpyr::render(void) {
 	return 0;	
 }
 
-void meshpyr::setSize( const osg::Vec3d& newSize ) {
+void meshpyr::setSize( osg::Vec3 newSize ) {
 	Primitives::rebuildPyramidUV( (osg::Geode*)getThisNode(), &(osg::Vec3)newSize );
 	bz2object::setSize( newSize );
 }

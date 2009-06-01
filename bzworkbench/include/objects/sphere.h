@@ -34,16 +34,21 @@ public:
 	
 	// setter
 	int update(string& data);
+	int update(UpdateMessage& message);
 	
 	// toString
 	string toString(void);
 	
 	// render
 	int render(void);
+
+	void setSize( osg::Vec3 newSize );
+	osg::Vec3 getSize();
 	
 private:
 	bool flatShading, smoothbounce, hemisphere;
 	int divisions;
+	osg::Vec3 realSize;
 
 	void updateGeometry();
 };

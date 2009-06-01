@@ -133,12 +133,10 @@ int teleporter::update( UpdateMessage& message ) {
 			
 		case UpdateMessage::SET_SCALE:		// handle a new scale
 			setSize( *(message.getAsScale()) );
-			updateGeometry();
 			break;
 			
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
 			setSize( getSize() + *(message.getAsScaleFactor()) );
-			updateGeometry();
 			break;
 			
 		default:	// unknown event; don't handle
@@ -161,12 +159,14 @@ string teleporter::toString(void) {
 				  "end\n";	
 }
 
-void teleporter::setSize( const osg::Vec3d& newSize ) {
-	realSize = (osg::Vec3)newSize;
+void teleporter::setSize( osg::Vec3 newSize ) {
+	realSize = newSize;
+	updateGeometry();
 }
 
 void teleporter::setBorder( float newBorder ) { 
 	border = newBorder;
+	updateGeometry();
 }
 
 // build a teleporter

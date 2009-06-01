@@ -38,6 +38,7 @@ public:
 	
 	// setter
 	int update(string& data);
+	int update(UpdateMessage& message);
 	
 	// toString
 	string toString(void);
@@ -45,7 +46,7 @@ public:
 	// render
 	int render(void);
 
-	void setSize( const osg::Vec3d& newSize);
+	void setSize( osg::Vec3 newSize);
 
 private:
 	bool flatShading, smoothbounce;

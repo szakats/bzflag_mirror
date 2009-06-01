@@ -103,8 +103,8 @@ string box::toString(void) {
 				  "end\n";
 }
 
-void box::setSize( const osg::Vec3d& newSize ) {
-	Primitives::rebuildBoxUV((osg::Group*)getThisNode(), &(osg::Vec3)newSize);
+void box::setSize( osg::Vec3 newSize ) {
+	Primitives::rebuildBoxUV((osg::Group*)getThisNode(), &newSize);
 	bz2object::setSize( newSize );
 }
 

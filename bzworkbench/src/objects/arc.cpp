@@ -126,6 +126,37 @@ int arc::update(string& data) {
 	return 1;	
 }
 
+int arc::update(UpdateMessage& message) {
+	switch( message.type ) {
+		case UpdateMessage::SET_POSITION: 	// handle a new position
+			setPos( *(message.getAsPosition()) );
+			break;
+			
+		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
+			setPos( getPos() + *(message.getAsPositionFactor()) );
+			break;
+			
+		case UpdateMessage::SET_ROTATION:		// handle a new rotation
+			setRotationZ( message.getAsRotation()->z() );
+			break;
+			
+		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
+			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
+			break;
+			
+		case UpdateMessage::SET_SCALE:		// handle a new scale
+			setSize( *(message.getAsScale()) );
+			break;
+			
+		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
+			setSize( getSize() + *(message.getAsScaleFactor()) );
+			break;
+			
+		default:	// unknown event; don't handle
+			return 0;
+	}
+}
+
 // toString
 string arc::toString(void) {
 	return string("arc\n") +
@@ -144,7 +175,7 @@ int arc::render(void) {
 	return 0;	
 }
 
-void arc::setSize( const osg::Vec3d& newSize) {
+void arc::setSize( osg::Vec3 newSize ) {
 	bz2object::setSize( newSize );
 	updateGeometry();
 }

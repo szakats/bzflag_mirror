@@ -152,7 +152,7 @@ int base::update(UpdateMessage& message) {
 	return 1;
 }
 
-void base::setSize( const osg::Vec3d& newSize ) {
+void base::setSize( osg::Vec3 newSize ) {
 	updateBaseUV( (osg::Group*)getThisNode(), &(osg::Vec3)newSize );
 
 	bz2object::setSize( newSize );

@@ -60,7 +60,7 @@ public:
 	// toString
 	string toString(void);
 
-	void setSize( const osg::Vec3d& newSize );
+	void setSize( osg::Vec3 newSize );
 	
 private:
 	void updateGeometry();

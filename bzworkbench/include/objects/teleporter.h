@@ -46,7 +46,7 @@ public:
 	
 	// override the getSize and setSize methods
 	osg::Vec3 getSize() { return osg::Vec3( realSize.x(), realSize.y(), realSize.z() ); }
-	void setSize( const osg::Vec3d& newSize );
+	void setSize( osg::Vec3 newSize );
 	
 	// tostring
 	string toString(void);

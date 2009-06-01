@@ -21,7 +21,6 @@
 #include "model/Model.h"
 #include "model/SceneBuilder.h"
 
-#include "dialogs/MainMenu.h"
 #include "dialogs/ConfigurationMenu.h"
 #include "dialogs/MenuBar.h"
 #include "dialogs/WorldOptionsDialog.h"

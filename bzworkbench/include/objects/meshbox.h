@@ -47,7 +47,7 @@ public:
 	// render
 	int render(void);
 
-	void setSize( const osg::Vec3d& newSize );
+	void setSize( osg::Vec3 newSize );
 
 private:
 	vector<string> topMaterials, outsideMaterials;

@@ -98,8 +98,8 @@ string pyramid::toString(void) {
 				  "end\n";	
 }
 
-void pyramid::setSize( const osg::Vec3d& newSize ) {
-	Primitives::rebuildPyramidUV( (osg::Geode*)getThisNode(), &(osg::Vec3)newSize );
+void pyramid::setSize( osg::Vec3 newSize ) {
+	Primitives::rebuildPyramidUV( (osg::Geode*)getThisNode(), &newSize );
 	bz2object::setSize( newSize );
 }
 

@@ -33,15 +33,15 @@ void sphere::setDefaults() {
 	group->addChild( bottom );
 	setThisNode( group );
 
-	setThisNode( SceneBuilder::buildNode( "sphere" ) );
-	setSize( osg::Vec3( 10, 10, 10 ) );
-
 	// define some basic values
+	realSize = osg::Vec3( 10, 10, 10 );
 	divisions = 16;
-	setName("default_sphere");
 	physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
+	hemisphere = false;
+
+	updateGeometry();
 }
 
 // getter
@@ -123,6 +123,38 @@ int sphere::update(string& data) {
 	return 1;
 }
 
+int sphere::update(UpdateMessage& message) {
+	switch( message.type ) {
+		case UpdateMessage::SET_POSITION: 	// handle a new position
+			setPos( *(message.getAsPosition()) );
+			break;
+			
+		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
+			setPos( getPos() + *(message.getAsPositionFactor()) );
+			break;
+			
+		case UpdateMessage::SET_ROTATION:		// handle a new rotation
+			setRotationZ( message.getAsRotation()->z() );
+			break;
+			
+		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
+			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
+			break;
+			
+		case UpdateMessage::SET_SCALE:		// handle a new scale
+			setSize( *(message.getAsScale()) );
+			break;
+			
+		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
+			setSize( getSize() + *(message.getAsScaleFactor()) );
+			break;
+			
+		default:	// unknown event; don't handle
+			return 0;
+	}
+}
+
+
 // toString
 string sphere::toString(void) {
 	return string("sphere\n") +
@@ -138,10 +170,19 @@ int sphere::render(void) {
 	return 0;	
 }
 
+void sphere::setSize( osg::Vec3 newSize ) {
+	realSize = newSize;
+	updateGeometry();
+}
+
+osg::Vec3 sphere::getSize() {
+	return realSize;
+}
+
 void sphere::updateGeometry() {
 	osg::Group* sphere = (osg::Group*)getThisNode(); 
 	osg::Geode* outside = (osg::Geode*)sphere->getChild( 0 );
-	osg::Geode* bottom = (osg::Geode*)sphere->getChild( 0 );
+	osg::Geode* bottom = (osg::Geode*)sphere->getChild( 1 );
 
 	if ( outside->getNumDrawables() > 0 )
 		outside->removeDrawables( 0 );
@@ -440,5 +481,9 @@ void sphere::updateGeometry() {
 		bottomGeom->addPrimitiveSet( faces );
 	}
 
+	osg::Texture2D* outsideTex = Primitives::loadTexture( "share/box/boxwall.png" );
+	osg::Texture2D* bottomTex = Primitives::loadTexture( "share/box/roof.png" );
 
+	Primitives::setNodeTexture( outside, outsideTex );
+	Primitives::setNodeTexture( bottom, bottomTex );
 }

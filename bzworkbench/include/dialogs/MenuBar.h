@@ -167,16 +167,6 @@ public:
 		m->addMeshCallback_real(w);
 	}
 	
-	static void addTetrahedronCallback(Fl_Widget* w, void* data) {
-		MenuBar* m = (MenuBar*)data;
-		m->addTetrahedronCallback_real(w);	
-	}
-	
-	static void addTorusCallback(Fl_Widget* w, void* data) {
-		MenuBar* m = (MenuBar*)data;
-		m->addTorusCallback_real(w);
-	}
-	
 	static void addConeCallback(Fl_Widget* w, void* data) {
 		MenuBar* m = (MenuBar*)data;
 		m->addConeCallback_real(w);
@@ -279,8 +269,6 @@ private:
 	void addSphereCallback_real(Fl_Widget* w);
 	void addArcCallback_real(Fl_Widget* w);
 	void addMeshCallback_real(Fl_Widget* w);
-	void addTetrahedronCallback_real(Fl_Widget* w);
-	void addTorusCallback_real(Fl_Widget* w);
 	void addConeCallback_real(Fl_Widget* w);
 	void addZoneCallback_real(Fl_Widget* w);
 	void importObjectCallback_real(Fl_Widget* w);
@@ -302,6 +290,8 @@ private:
 	
 	// build the menu
 	void buildMenu(void);
+
+	bz2object* makeObject( const char* objectName );
 	
 };
 

@@ -92,7 +92,7 @@ class bz2object : public Renderable, public DataEntry
 		}
 
 		// use this instead of setScale()
-		virtual void setSize( const osg::Vec3d& newSize ) { setScale( newSize ); }
+		virtual void setSize( osg::Vec3 newSize ) { setScale( newSize ); }
 
 		// use this instead of setAttitude()
 		virtual void setRot( const osg::Quat& newRot ) { setAttitude( newRot ); }

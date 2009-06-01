@@ -141,7 +141,7 @@ int meshbox::render(void) {
 	return 0;	
 }
 
-void meshbox::setSize( const osg::Vec3d& newSize ) {
+void meshbox::setSize( osg::Vec3 newSize ) {
 	Primitives::rebuildBoxUV( (osg::Group*)getThisNode(), &(osg::Vec3)newSize );
 
 	bz2object::setSize( newSize );

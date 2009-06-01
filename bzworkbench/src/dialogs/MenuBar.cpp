@@ -45,8 +45,6 @@ void MenuBar::buildMenu(void) {
 		add("Objects/Add sphere", 0, addSphereCallback, this);
 		add("Objects/Add arc", 0, addArcCallback, this);
 		add("Objects/Add mesh", FL_CTRL+'m', addMeshCallback, this);
-		add("Objects/Add tetrahedron", 0, addTetrahedronCallback, this);
-		add("Objects/Add torus", 0, addTorusCallback, this);
 		add("Objects/Add cone", 0, addConeCallback, this);
 		add("Objects/Add zone", 0, addZoneCallback, this);
 		add("Objects/Add base", 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER);
@@ -215,187 +213,61 @@ void MenuBar::unselect_all_real( Fl_Widget* w ) {
 
 // add a box
 void MenuBar::addBoxCallback_real(Fl_Widget* w) {
-	// we're breaking the Law of Demeter here...
-	printf("adding a box\n");
-	printf("model addr: %p\n", this->parent->getModel());
-	// make a new box using the Model's object registry
-	DataEntry* newBox = this->parent->getModel()->_buildObject( "box" );
-	
-	// make it into a bz2object
-	bz2object* newObj = dynamic_cast< bz2object* >( newBox );
-	
-	if(!newObj)
-		return;
-		
-	newObj->setName( SceneBuilder::makeUniqueName("box") );
-	
-	// add the object to the model
-	parent->getModel()->_unselectAll();
-	parent->getModel()->_addObject( newObj );
-	parent->getModel()->_setSelected( newObj );
-	
-	// open up a MasterConfigurationDialog and configure it
-	parent->configure( newObj );
-	
-	
+	makeObject( "box" );
 	value(0);
 }
 
 // add a pyramid
 void MenuBar::addPyramidCallback_real(Fl_Widget* w) {
-	// make a new pyramid using the Model's object registry
-	DataEntry* newPyr = this->parent->getModel()->_buildObject( "pyramid" );
-	
-	// make it into a bz2object
-	bz2object* newObj = dynamic_cast< bz2object* >( newPyr );
-	
-	if(!newObj)
-		return;
-	
-	newObj->setName( SceneBuilder::makeUniqueName("pyramid") );
-	
-	// add the object to the model
-	parent->getModel()->_unselectAll();
-	parent->getModel()->_addObject( newObj );
-	parent->getModel()->_setSelected( newObj );
-	
-	// open up a MasterConfigurationDialog and configure it
-	parent->configure( newObj );
-	
+	makeObject( "pyramid" );
 	value(0);
 }
 
 // add a meshbox
 void MenuBar::addMeshboxCallback_real(Fl_Widget* w) {
-	printf("added a meshbox\n");
+	makeObject( "meshbox" );
 	value(0);
 }
 
 // add a mesh pyramid
 void MenuBar::addMeshpyrCallback_real(Fl_Widget* w) {
-	printf("added a mesh pyramid\n");
+	makeObject( "meshpyr" );
 	value(0);
 }
 
 // add a teleporter
 void MenuBar::addTeleporterCallback_real(Fl_Widget* w) {
-	// make a new box using the Model's object registry
-	DataEntry* newTeleporter = this->parent->getModel()->_buildObject( "teleporter" );
-	
-	// make it into a bz2object
-	bz2object* newObj = dynamic_cast< bz2object* >( newTeleporter );
-	
-	if(!newObj)
-		return;
-	
-	string name = SceneBuilder::makeUniqueName("teleporter");
-	printf("teleporter name: %s\n", name.c_str());
-	
-	newObj->setName( name );
-	
-	// add the object to the model
-	parent->getModel()->_unselectAll();
-	parent->getModel()->_addObject( newObj );
-	parent->getModel()->_setSelected( newObj );
-	parent->getModel()->_setSelected( newObj );
-	
-	// open up a MasterConfigurationDialog and configure it
-	parent->configure( newObj );
-	
-	
+	makeObject( "teleporter" );
 	value(0);
 }
 
 // add a sphere
 void MenuBar::addSphereCallback_real(Fl_Widget* w) {
-	// make a new pyramid using the Model's object registry
-	DataEntry* newSphere = this->parent->getModel()->_buildObject( "sphere" );
-	
-	// make it into a bz2object
-	bz2object* newObj = dynamic_cast< bz2object* >( newSphere );
-	
-	if(!newObj)
-		return;
-	
-	newObj->setName( SceneBuilder::makeUniqueName("sphere") );
-	
-	// add the object to the model
-	parent->getModel()->_unselectAll();
-	parent->getModel()->_addObject( newObj );
-	parent->getModel()->_setSelected( newObj );
-	
-	// open up a MasterConfigurationDialog and configure it
-	parent->configure( newObj );
-	
+	makeObject( "sphere" );
 	value(0);
 }
 
 // add an arc
 void MenuBar::addArcCallback_real(Fl_Widget* w) {
-	// make a new box using the Model's object registry
-	DataEntry* newArc = this->parent->getModel()->_buildObject( "arc" );
-	
-	// make it into a bz2object
-	bz2object* newObj = dynamic_cast< bz2object* >( newArc );
-	
-	if(!newObj)
-		return;
-	
-	// add the object to the model
-	parent->getModel()->_unselectAll();
-	parent->getModel()->_addObject( newObj );
-	parent->getModel()->_setSelected( newObj );
-	
-	// open up a MasterConfigurationDialog and configure it
-	parent->configure( newObj );
-
+	makeObject( "arc" );
 	value(0);
 }
 
 // add a mesh
 void MenuBar::addMeshCallback_real(Fl_Widget* w) {
-	printf("added a mesh\n");
-	value(0);
-}
-
-// add a tetrahedron
-void MenuBar::addTetrahedronCallback_real(Fl_Widget* w) {
-	printf("added a tetrahedron\n");
-	value(0);
-}
-
-// add a torus
-void MenuBar::addTorusCallback_real(Fl_Widget* w) {
-	printf("added a torus\n");
+	makeObject( "mesh" );
 	value(0);
 }
 
 // add a cone
 void MenuBar::addConeCallback_real(Fl_Widget* w) {
-	// make a new box using the Model's object registry
-	DataEntry* newCone = this->parent->getModel()->_buildObject( "cone" );
-	
-	// make it into a bz2object
-	bz2object* newObj = dynamic_cast< bz2object* >( newCone );
-	
-	if(!newObj)
-		return;
-	
-	// add the object to the model
-	parent->getModel()->_unselectAll();
-	parent->getModel()->_addObject( newObj );
-	parent->getModel()->_setSelected( newObj );
-	
-	// open up a MasterConfigurationDialog and configure it
-	parent->configure( newObj );
-	
-	
+	makeObject( "cone" );
 	value(0);
 }
 
 // add a zone
 void MenuBar::addZoneCallback_real(Fl_Widget* w) {
-	printf("added a zone\n");
+	makeObject( "zone" );
 	value(0);
 }
 
@@ -407,158 +279,45 @@ void MenuBar::importObjectCallback_real(Fl_Widget* w) {
 
 // add base 1
 void MenuBar::addPurpleBaseCallback_real(Fl_Widget* w) {
+	base* newObj = dynamic_cast< base* >( makeObject( "base" ) );
 	
-	// get the objects and see that we don't have any other bases
-	Model::objRefList objects = this->parent->getModel()->_getObjects();
-	if( objects.size() > 0 ) {
-		base* b;
-		// find all bases
-		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
-			b = dynamic_cast< base* >( i->get() );
-			if(b != NULL && b->getTeam() == BASE_PURPLE)
-				return;		// there already is a purple base; don't add a second!
-		}
-	}
-	
-	// make a new base using the Model's object registry
-	DataEntry* newBase = parent->getModel()->_buildObject( "base" );
-	
-	// make it into a bz2object
-	base* newObj = dynamic_cast< base* >( newBase );
-	
-	if(!newObj)
-		return;
-		
 	// set the base
-	newObj->setTeam( BASE_PURPLE );
-	
-	newObj->setName( "purple_base" );
-	
-	
-	// add the object to the model
-	parent->getModel()->_unselectAll();
-	parent->getModel()->_addObject( newObj );
-	parent->getModel()->_setSelected( newObj );
-	
-	// open up a MasterConfigurationDialog and configure it
-	parent->configure( newObj );
+	if (newObj)
+		newObj->setTeam( BASE_PURPLE );
 	
 	value(0);
 }
 
 // add base 2
 void MenuBar::addRedBaseCallback_real(Fl_Widget* w) {
-	// get the objects and see that we don't have any other bases
-	Model::objRefList objects = this->parent->getModel()->_getObjects();
-	if( objects.size() > 0 ) {
-		base* b;
-		// find all bases
-		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
-			b = dynamic_cast< base* >( i->get() );
-			if(b != NULL && b->getTeam() == BASE_RED)
-				return;		// there already is a purple base; don't add a second!
-		}
-	}
-	
-	// make a new base using the Model's object registry
-	DataEntry* newBase = parent->getModel()->_buildObject( "base" );
-	
-	// make it into a bz2object
-	base* newObj = dynamic_cast< base* >( newBase );
-	
-	if(!newObj)
-		return;
-		
-	newObj->setName( "red_base" );
-	
+	base* newObj = dynamic_cast< base* >( makeObject( "base" ) );
 	
 	// set the base
-	newObj->setTeam( BASE_RED );
-	
-	// add the object to the model
-	parent->getModel()->_unselectAll();
-	parent->getModel()->_addObject( newObj );
-	parent->getModel()->_setSelected( newObj );
-	
-	// open up a MasterConfigurationDialog and configure it
-	parent->configure( newObj );
+	if (newObj)
+		newObj->setTeam( BASE_RED );
 	
 	value(0);
 }
 
 // add base 3
 void MenuBar::addGreenBaseCallback_real(Fl_Widget* w) {
-	// get the objects and see that we don't have any other bases
-	Model::objRefList objects = this->parent->getModel()->_getObjects();
-	if( objects.size() > 0 ) {
-		base* b;
-		// find all bases
-		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
-			b = dynamic_cast< base* >( i->get() );
-			if(b != NULL && b->getTeam() == BASE_GREEN)
-				return;		// there already is a purple base; don't add a second!
-		}
-	}
+	base* newObj = dynamic_cast< base* >( makeObject( "base" ) );
 	
-	// make a new base using the Model's object registry
-	DataEntry* newBase = parent->getModel()->_buildObject( "base" );
-	
-	// make it into a bz2object
-	base* newObj = dynamic_cast< base* >( newBase );
-	
-	if(!newObj)
-		return;
-		
 	// set the base
-	newObj->setTeam( BASE_GREEN );
-	
-	// add the object to the model
-	parent->getModel()->_unselectAll();
-	parent->getModel()->_addObject( newObj );
-	parent->getModel()->_setSelected( newObj );
-	
-	// open up a MasterConfigurationDialog and configure it
-	parent->configure( newObj );
+	if (newObj)
+		newObj->setTeam( BASE_GREEN );
 	
 	value(0);
 }
 
 // add base 4
 void MenuBar::addBlueBaseCallback_real(Fl_Widget* w) {
-	// get the objects and see that we don't have any other bases
-	Model::objRefList objects = this->parent->getModel()->_getObjects();
-	if( objects.size() > 0 ) {
-		base* b;
-		// find all bases
-		for(Model::objRefList::iterator i = objects.begin(); i != objects.end(); i++) {
-			b = dynamic_cast< base* >( i->get() );
-			if(b != NULL && b->getTeam() == BASE_BLUE)
-				return;		// there already is a purple base; don't add a second!
-		}
-	}
-	
-	// make a new base using the Model's object registry
-	DataEntry* newBase = parent->getModel()->_buildObject( "base" );
-	
-	// make it into a bz2object
-	base* newObj = dynamic_cast< base* >( newBase );
-	
-	if(!newObj)
-		return;
-	
-	newObj->setName( "blue_base" );
+	base* newObj = dynamic_cast< base* >( makeObject( "base" ) );
 	
 	// set the base
-	newObj->setTeam( BASE_BLUE );
-	
-	// add the object to the model
-	parent->getModel()->_unselectAll();
-	parent->getModel()->_addObject( newObj );
-	parent->getModel()->_setSelected( newObj );
-	
-	// open up a MasterConfigurationDialog and configure it
-	parent->configure( newObj );
-	
+	if (newObj)
+		newObj->setTeam( BASE_BLUE );
+
 	value(0);
 }
 
@@ -674,4 +433,24 @@ void MenuBar::linkCallback_real(Fl_Widget* w) {
 	}
 	
 	value(0);
+}
+
+bz2object* MenuBar::makeObject( const char* objectName ) {
+	// make a new box using the Model's object registry
+	DataEntry* newBox = this->parent->getModel()->_buildObject( objectName );
+	
+	// make it into a bz2object
+	bz2object* newObj = dynamic_cast< bz2object* >( newBox );
+	
+	if(!newObj)
+		return NULL;
+		
+	newObj->setName( SceneBuilder::makeUniqueName( objectName ) );
+	
+	// add the object to the model
+	parent->getModel()->_unselectAll();
+	parent->getModel()->_addObject( newObj );
+	parent->getModel()->_setSelected( newObj );
+
+	return newObj;
 }
