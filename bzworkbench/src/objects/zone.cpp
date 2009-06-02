@@ -12,18 +12,26 @@
 
 #include "objects/zone.h"
 
+#include <osg/PolygonMode>
+
 // constructor
 zone::zone() : bz2object("zone", "<name><position><size><rotation><team><flag><safety><zoneflag>") {
-	teams = vector<int>();
-	safety = vector<int>();
+	setDefaults();
 }
 
 // constructor with data
 zone::zone(string& data) : bz2object("zone", "<name><position><size><rotation><team><flag><safety><zoneflag>", data.c_str()) {
-	teams = vector<int>();
-	safety = vector<int>();
+	setDefaults();
 	
 	update(data);
+}
+
+void zone::setDefaults() {
+	updateGeometry();
+
+	teams = vector<int>();
+	safety = vector<int>();
+	setSize( osg::Vec3( 10, 10, 10 ) );
 }
 
 // getter
@@ -150,6 +158,37 @@ int zone::update(string& data) {
 	return 1;
 }
 
+int zone::update( UpdateMessage& message ) {
+	switch( message.type ) {
+		case UpdateMessage::SET_POSITION: 	// handle a new position
+			setPos( *(message.getAsPosition()) );
+			break;
+			
+		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
+			setPos( getPos() + *(message.getAsPositionFactor()) );
+			break;
+			
+		case UpdateMessage::SET_ROTATION:		// handle a new rotation
+			setRotationZ( message.getAsRotation()->z() );
+			break;
+			
+		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
+			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
+			break;
+			
+		case UpdateMessage::SET_SCALE:		// handle a new scale
+			setSize( *(message.getAsScale()) );
+			break;
+			
+		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
+			setSize( getSize() + *(message.getAsScaleFactor()) );
+			break;
+			
+		default:	// unknown event; don't handle
+			return 0;
+	}
+}
+
 // toString
 string zone::toString(void) {
 	// string-ify the teams, safeties, zoneflags, and flags
@@ -201,4 +240,21 @@ string zone::toString(void) {
 // render
 int zone::render(void) {
 	return 0;	
+}
+
+void zone::updateGeometry() {
+	// create unit box
+	osg::ref_ptr< osg::Geode > boxGeode = new osg::Geode();
+	osg::ref_ptr< osg::Box > box = new osg::Box( osg::Vec3( 0, 0, 0.5f ), 2, 2, 1 );
+	osg::ref_ptr< osg::ShapeDrawable > boxDrawable = new osg::ShapeDrawable( box );
+	boxGeode->addDrawable( boxDrawable );
+
+	// make material
+	boxDrawable->setColor( osg::Vec4( 0, 0, 1, 1 ) );
+	osg::ref_ptr< osg::StateSet > stateset = boxDrawable->getOrCreateStateSet();
+	osg::ref_ptr< osg::PolygonMode > polyMode = new osg::PolygonMode();
+	polyMode->setMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE );
+	stateset->setAttribute( polyMode.get(), osg::StateAttribute::ON);
+
+	setThisNode( boxGeode );
 }

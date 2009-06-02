@@ -72,12 +72,16 @@ public:
 	
 	static DataEntry* init() { return new zone(); }
 	static DataEntry* init(string& data) { return new zone(data); }
+
+	void setDefaults();
 	
 	// getter
 	string get(void);
 	
 	// setter
-	int update(string& data);
+	int update( string& data );
+	int update( UpdateMessage& message );
+
 	
 	// toString
 	string toString(void);
@@ -91,6 +95,7 @@ private:
 	vector<FlagElement> zoneflags;
 	vector<string> flags;
 
+	void updateGeometry();
 };
 
 #endif /*ZONE_H_*/
