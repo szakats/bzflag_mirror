@@ -10,7 +10,6 @@ CPP_SRCS += \
 ../src/dialogs/Fl_Dialog.cpp \
 ../src/dialogs/Fl_Error.cpp \
 ../src/dialogs/Fl_Tweak.cpp \
-../src/dialogs/MainMenu.cpp \
 ../src/dialogs/MasterConfigurationDialog.cpp \
 ../src/dialogs/MenuBar.cpp \
 ../src/dialogs/WorldOptionsDialog.cpp 
@@ -22,7 +21,6 @@ OBJS += \
 ./src/dialogs/Fl_Dialog.o \
 ./src/dialogs/Fl_Error.o \
 ./src/dialogs/Fl_Tweak.o \
-./src/dialogs/MainMenu.o \
 ./src/dialogs/MasterConfigurationDialog.o \
 ./src/dialogs/MenuBar.o \
 ./src/dialogs/WorldOptionsDialog.o 
@@ -34,7 +32,6 @@ CPP_DEPS += \
 ./src/dialogs/Fl_Dialog.d \
 ./src/dialogs/Fl_Error.d \
 ./src/dialogs/Fl_Tweak.d \
-./src/dialogs/MainMenu.d \
 ./src/dialogs/MasterConfigurationDialog.d \
 ./src/dialogs/MenuBar.d \
 ./src/dialogs/WorldOptionsDialog.d 
