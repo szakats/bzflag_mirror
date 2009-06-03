@@ -636,7 +636,15 @@
 					>
 				</File>
 				<File
+					RelativePath="..\include\render\Point2D.h"
+					>
+				</File>
+				<File
 					RelativePath="..\include\render\Point3D.h"
+					>
+				</File>
+				<File
+					RelativePath="..\include\render\Point4D.h"
 					>
 				</File>
 				<File

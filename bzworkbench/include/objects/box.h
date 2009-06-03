@@ -15,9 +15,11 @@
 
 #include "DataEntry.h"
 #include "render/Point3D.h"
+#include "render/Point2D.h"
 #include "ftoa.h"
 #include "model/BZWParser.h"
 #include "bz2object.h"
+
 
 #include "model/SceneBuilder.h"
 #include "model/Primitives.h"
@@ -28,12 +30,22 @@
 #include <osg/PrimitiveSet>
 #include <osg/Group>
 
+#include "objects/material.h"
 /**
  * Box data
  */
 class box : public bz2object {
 
 public:
+	enum {
+		XP = 0,
+		XN,
+		YP,
+		YN,
+		ZP,
+		ZN,
+		FaceCount
+	};
 
 	// constructor
 	box();
@@ -61,8 +73,18 @@ public:
 	string toString(void);
 
 	void setSize( osg::Vec3 newSize );
-	
+
 private:
+	osg::ref_ptr< physics > physDrvs[FaceCount];
+	Point2D texSizes[FaceCount];
+	Point2D texOffsets[FaceCount];
+	bool driveThroughs[FaceCount];
+	bool shootThroughs[FaceCount];
+	bool ricochets[FaceCount];
+	osg::ref_ptr< material > materials[FaceCount];
+
+	static const char* faceNames[FaceCount];
+
 	void updateGeometry();
 };
 

@@ -115,10 +115,12 @@ osg::Geode* SceneBuilder::buildGeode( const char* _nodeName, osg::Geometry* geom
  */
 
 osg::Texture2D* SceneBuilder::buildTexture2D( const char* filename ) {
+	string searchDir("share/");
+
 	if( filename != NULL ) {
 		osg::Texture2D* texture = NULL;
 
-		osg::Image* image = osgDB::readImageFile( filename );
+		osg::Image* image = osgDB::readImageFile( (searchDir + filename + ".png").c_str() );
 
 		if( image != NULL ) {	// only build the texture if the image exists!
 

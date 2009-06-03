@@ -12,6 +12,8 @@
 
 #include "objects/material.h"
 
+using namespace std;
+
 // build the aliases for the textures
 void material::buildAliases() { 
 	textureAliases = map< string, string > ();
@@ -25,11 +27,10 @@ material::material() :
 	osg::StateSet() {
 	name = SceneBuilder::makeUniqueName("material");
 	dynCol = NULL;
-	textureMatrix = NULL;
 	color = string("");
-	textures = vector< osg::ref_ptr< osg::Texture2D > >();
-	noTextures = noTexColor = noTexAlpha = true;
-	noRadar = spheremap = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = false;
+	textures = vector< TextureInfo >();
+	noTextures = true;
+	noRadar = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = false;
 	alphaThreshold = 1.0f;
 	
 	// allocate a material
@@ -51,11 +52,10 @@ material::material(string& data) :
 	osg::StateSet() {
 	name = SceneBuilder::makeUniqueName("material");
 	dynCol = NULL;
-	textureMatrix = NULL;
 	color = string("");
-	textures = vector< osg::ref_ptr< osg::Texture2D > >();
-	noTextures = noTexColor = noTexAlpha = true;
-	noRadar = spheremap = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = false;
+	textures = vector< TextureInfo >();
+	noTextures = true;
+	noRadar = noShadow = noCulling = noLighting = noSorting = groupAlpha = occluder = false;
 	alphaThreshold = 1.0f;
 	
 	// allocate a material
@@ -79,206 +79,183 @@ string material::get(void) { return toString(); }
 
 // setter
 int material::update(string& data) {
-	
+
 	const char* header = getHeader().c_str();
-	
+
 	// get the section
 	vector<string> chunks = BZWParser::getSectionsByHeader(header, data.c_str());
-	
+
 	if(chunks[0] == BZW_NOT_FOUND)
 		return 0;
-		
+
 	if(!hasOnlyOne(chunks, "material"))
 		return 0;
-	
+
 	const char* tmp = chunks[0].c_str();
-	
-	// get the name
-	vector<string> names = BZWParser::getValuesByKey("name", header, tmp);
-	if(!hasOnlyOne(names, "name"))
-		return 0;
-	
-	// get resetmats if any
-	vector<string> resetmats = BZWParser::getLinesByKey("resetmat", header, tmp);
-	
-	string matData = tmp;
-	
-	if( resetmats.size() > 0 ) {
-		// find the location of the last resetmat
-		string::size_type i = matData.rfind("resetmat", matData.length() - 1);
-		
-		// eliminate all texture data before it
-		matData = "material\n" + matData.substr(i);
-		
-		printf("material data is \n|%s|\n", tmp );
+
+	vector<string> lines = BZWParser::getLines(header, data.c_str());
+
+	vector<string> dyncols;
+	vector<string> diffuses;
+	vector<string> ambients;
+	vector<string> emissives;
+	vector<string> speculars;
+	vector<string> shininesses;
+	vector<string> alphathresholds;
+	vector<string> matrefs;
+
+	textures.clear();
+
+	for (vector<string>::iterator itr = lines.begin(); itr != lines.end(); itr++) {
+
+		string line = *itr;
+		string key  = BZWParser::key( line.c_str() );
+
+		if ( key == "resetmat" ) {
+			reset();
+		}
+		else if ( key == "dyncol" ) { // get the dynamic color
+			dyncols.push_back( BZWParser::value( "dyncol", line.c_str() ) );
+		}
+		else if ( key == "texmat" ) { // get the texture matrix
+			string value = BZWParser::value( "texmat", line.c_str() );
+			texturematrix* texmat = (texturematrix*)Model::command( MODEL_GET, "texturematrix", value);
+			if ( texmat != NULL)
+				setTextureMatrix( texmat );
+			else
+				printf("material::update(): Error! Could not find texmat %s", value.c_str());
+		}
+		else if ( key == "color" ) { // get the diffuse colors
+			diffuses.push_back( BZWParser::value( "color", line.c_str() ) );
+		}
+		else if ( key == "diffuse" ) { // get the diffuse colors
+			diffuses.push_back( BZWParser::value( "diffuse", line.c_str() ) );
+		}
+		else if ( key == "ambient" ) { // get the ambient colors
+			ambients.push_back( BZWParser::value( "ambient", line.c_str() ) );
+		}
+		else if ( key == "emission" ) { // get the emissive colors
+			emissives.push_back( BZWParser::value( "emission", line.c_str() ) );
+		}
+		else if ( key == "specular" ) { // get the specular colors
+			speculars.push_back( BZWParser::value( "specular", line.c_str() ) );
+		}
+		else if ( key == "shininess" ) { // get the specular colors
+			shininesses.push_back( BZWParser::value( "shininess", line.c_str() ) );
+		}
+		else if ( key == "texture" ) { // get the textures
+			setTexture( BZWParser::value( "texture", line.c_str() ) );
+		}
+		else if ( key == "addtexture" ) { // get the addtextures
+			addTexture( BZWParser::value( "addtexture", line.c_str() ) );
+		}
+		else if ( key == "notexture" ) { // get notextures
+			noTextures = true;
+		}
+		else if ( key == "notexcolor" ) { // get notexcolor
+			setNoTexColor( true );
+		}
+		else if ( key == "notexalpha" ) { // get notexalpha
+			setNoTexAlpha( true );
+		}
+		else if ( key == "spheremap" ) { // get spheremap
+			setSphereMap( true );
+		}
+		else if ( key == "noshadow" ) { // get noshadow
+			setNoShadows( true );
+		}
+		else if ( key == "noculling" ) { // get noculling
+			setNoCulling( true );
+		}
+		else if ( key == "nolighting" ) { // get nolighting
+			setNoLighting( true );
+		}
+		else if ( key == "nosorting" ) { // get nosorting
+			setNoSorting( true );
+		}
+		else if ( key == "noradar" ) { // get noradar
+			setNoRadar( true );
+		}
+		else if ( key == "groupalpha" ) { // get groupalpha
+			setGroupAlpha( true );
+		}
+		else if ( key == "occluder" ) { // get occluder
+			setOccluder( true );
+		}
+		else if ( key == "alphathresh" ) { // get alpha threshold
+			alphathresholds.push_back( BZWParser::value( "alphathresh", line.c_str() ) );
+		}
+		else if ( key == "matref" ) {
+			matrefs.push_back( BZWParser::value( "matref", line.c_str() ) );
+		}
 	}
-	
-	const char* materialData = matData.c_str();
-	
-	// get the dynamic color
-	vector<string> dyncols = BZWParser::getValuesByKey("dyncol", header, materialData);
+
 	if(dyncols.size() > 1) {
 		printf("material::update(): Error! Defined \"dyncol\" %d times!\n", (int)dyncols.size());
 		return 0;
 	}
-		
-	// get the texture matrix
-	vector<string> texmats = BZWParser::getValuesByKey("texmat", header, materialData);
-	if(texmats.size() > 1) {
-		printf("material::update(): Error! Defined \"texmat\" %d times!\n", (int)texmats.size());
+	if(diffuses.size() > 1) {
+		printf("material::update():  Error! Could not parse \"color\" or \"diffuse\" properly!\n");
 		return 0;
 	}
-		
-	// get the diffuse colors
-	vector<string> colors = BZWParser::getValuesByKey("color", header, materialData);
-	vector<string> diffs = BZWParser::getValuesByKey("diffuse", header, materialData);
-	if((colors.size() > 1 && diffs.size() == 0) || 
-	   (colors.size() == 0 && diffs.size() > 1)) {
-	   printf("material::update():  Error! Could not parse \"color\" or \"diffuse\" properly!\n");
-	   return 0;
-	}
-	   
-	vector<string> diffuses = (colors.size() == 0 ? diffs : colors);
-	
-	// get the ambient colors
-	vector<string> ambients = BZWParser::getValuesByKey("ambient", header, materialData);
-	
-	// get the emissive colors
-	vector<string> emissives = BZWParser::getValuesByKey("emission", header, materialData);
-	
-	// get the specular colors
-	vector<string> speculars = BZWParser::getValuesByKey("specular", header, materialData);
-	
-	// get the textures
-	vector<string> textureKeys;
-	textureKeys.push_back("addtexture");
-	textureKeys.push_back("texture");
-	vector<string> texs = BZWParser::getValuesByKeys(textureKeys, header, materialData);
-	
-	// get notextures
-	vector<string> notextures = BZWParser::getValuesByKey("notexture", header, materialData);
-	
-	// get notexcolor
-	vector<string> notexcolors = BZWParser::getValuesByKey("notexcolor", header, materialData);
-	
-	// get spheremap
-	vector<string> spheremaps = BZWParser::getValuesByKey("spheremap", header, materialData);
-	
-	// get noshadow
-	vector<string> noshadows = BZWParser::getValuesByKey("noshadow", header, materialData);
-	
-	// get noculling
-	vector<string> nocullings = BZWParser::getValuesByKey("noculling", header, materialData);
-	
-	// get nolighting
-	vector<string> nolightings = BZWParser::getValuesByKey("nolighting", header, materialData);
-	
-	// get nosorting
-	vector<string> nosortings = BZWParser::getValuesByKey("nosort", header, materialData);
-	
-	// get noradar
-	vector<string> noradars = BZWParser::getValuesByKey("noradar", header, materialData);
-	
-	// get notexalpha
-	vector<string> notexalphas = BZWParser::getValuesByKey("notexalpha", header, materialData);
-	
-	// get groupalpha
-	vector<string> groupalphas = BZWParser::getValuesByKey("groupalpha", header, materialData);
-	
-	// get occluder
-	vector<string> occluders = BZWParser::getValuesByKey("occluder", header, materialData);
-	
-	// get shininess
-	vector<string> shininesses = BZWParser::getValuesByKey("shininess", header, materialData);
 	if(shininesses.size() > 1) {
 		printf("material::update(): Error! Defined \"shininess\" %d times!\n", (int)shininesses.size());
 		return 0;
 	}
-		
-	// get alpha threshold
-	vector<string> alphathresholds = BZWParser::getValuesByKey("alphathresh", header, materialData);
 	if(alphathresholds.size() > 1) {
 		printf("material::update(): Error! Defined \"alphathresh\" %d times!\n", (int)alphathresholds.size());
 		return 0;
 	}
-		
-	// get other material refrences
-	vector<string> matrefs = BZWParser::getValuesByKey("matref", header, materialData);
-		
+
 	// load the retrieved data into the class
 	if(!DataEntry::update(data))
 		return 0;
-	name = names[0];
+
 	dynCol = (dyncols.size() != 0 ? (dynamicColor*)Model::command( MODEL_GET, "dynamicColor", dyncols[0] ) : NULL);
-	textureMatrix = (texmats.size() != 0 ? (texturematrix*)Model::command( MODEL_GET, "texturematrix", texmats[0]) : NULL);
 	(emissives.size() != 0 ? setEmissive(RGBA( emissives[emissives.size() - 1].c_str() )) : setEmissive(RGBA(-1, -1, -1, -1)));
 	(speculars.size() != 0 ? setSpecular(RGBA( speculars[speculars.size() - 1].c_str() )) : setSpecular(RGBA(-1, -1, -1, -1)));
 	(ambients.size() != 0 ? setAmbient(RGBA( ambients[ambients.size() - 1].c_str() )) : setAmbient(RGBA(-1, -1, -1, -1)));
 	(diffuses.size() != 0 ? setDiffuse(RGBA( diffuses[diffuses.size() - 1].c_str() )) : setDiffuse(RGBA(-1, -1, -1, -1)));
-	
-	textures.clear();
+	(shininesses.size() > 0 ? setShininess(atof( shininesses[0].c_str() )) : setShininess(0.0) );
+	alphaThreshold = (alphathresholds.size() > 0 ? atof( alphathresholds[0].c_str() ) : 1.0f);
+
 	materials.clear();
 	// get the materials from the model
 	for( vector<string>::iterator i = matrefs.begin(); i != matrefs.end(); i++) {
 		material* mat = (material*)Model::command( MODEL_GET, "material", *i );
 		if( mat != NULL )
 			materials.push_back( mat );
+		else 
+			printf("material::update(): Error! Could not find matref %s", (*i).c_str());
 	}
+
 	// compute the final material
 	computeFinalMaterial();
-	
-	// get the textures
-	textures.clear();
-	if( texs.size() > 0 ) {
-		for( vector<string>::iterator i = texs.begin(); i != texs.end(); i++ ) {
-			// filename should be the texture name + .png
-			string filename = (*i);
-			if( i->find(".png", filename.size() - 4) == string::npos ) {
-				filename = (*i) + ".png";
-			}
-			osg::Texture2D* tex = SceneBuilder::buildTexture2D( filename.c_str() );
-			if( tex )
-				textures.push_back( tex );
-		}
-	}
-	
+
 	// compute the final texture
 	computeFinalTexture();
-	
-	noTextures = (notextures.size() == 0 ? false : true);
-	noTexColor = (notexcolors.size() == 0 ? false : true);
-	spheremap = (spheremaps.size() == 0 ? false : true);
-	noShadow = (noshadows.size() == 0 ? false : true);
-	noCulling = (nocullings.size() == 0 ? false : true);
-	noSorting = (nosortings.size() == 0 ? false : true);
-	noRadar = (noradars.size() == 0 ? false : true);
-	noTexAlpha = (notexalphas.size() == 0 ? false : true);
-	groupAlpha = (groupalphas.size() == 0 ? false : true);
-	occluder = (occluders.size() == 0 ? false : true);
-	noLighting = (nolightings.size() == 0 ? false : true);
-	(shininesses.size() > 0 ? setShininess(atof( shininesses[0].c_str() )) : setShininess(0.0) );
-	alphaThreshold = (alphathresholds.size() > 0 ? atof( alphathresholds[0].c_str() ) : 1.0f);
-	
+
 	return 1;
 }
 
 // tostring
 string material::toString(void) {
 	string texString = string("");
-	if( textures.size() > 0 ) {
-		for(vector< osg::ref_ptr<osg::Texture2D> >::iterator i = textures.begin(); i != textures.end(); i++) {
-			string filename = (*i)->getImage()->getFileName();
-			string::size_type suffixIndex = filename.find(".png");
-			if( suffixIndex != string::npos )
-				filename = filename.substr(0, suffixIndex );
+	if( textures.size() > 0) {
+		for(vector< TextureInfo >::iterator i = textures.begin(); i != textures.end(); i++) {
+			TextureInfo info = *i;
 				
-			texString += "  addtexture " + filename + "\n";	
+			texString += "  addtexture " + info.name + "\n" +
+				(info.matrix != NULL ? string("") + "  texmat " + info.matrix->getName() + "\n" : "") +
+				(info.noColor == true ? "  notexcolor\n" : "") +
+				(info.noAlpha == true ? "  notexalpha\n" : "") +
+				(info.sphereMap == true ? "  spheremap\n" : "");	
 		}
 	}
 	
 	string matString = string("");
 	if( materials.size() > 0 ) {
-		for(vector< osg::ref_ptr< material > >::iterator i = materials.begin(); i != materials.end(); i++) {
+		for(vector< material* >::iterator i = materials.begin(); i != materials.end(); i++) {
 			matString += "  matref " + (*i)->getName() + "\n";	
 		}
 	}
@@ -313,11 +290,7 @@ string material::toString(void) {
 	return string("material\n") +
 				  (name.length() == 0 ? string("# name") : "  name " + name) + "\n" +
 				  (dynCol != NULL ? string("  dyncol ") + dynCol->getName() : string("  dyncol -1")) + "\n" +
-				  (textureMatrix != NULL ? string("  texmat ") + textureMatrix->getName() : string("  texmat -1")) + "\n" +
 				  (noTextures == true ? "  notextures\n" : "") +
-				  (noTexColor == true ? "  notexcolor\n" : "") +
-				  (noTexAlpha == true ? "  notexalpha\n" : "") +
-				  (spheremap == true ? "  spheremap\n" : "") +
 				  (noShadow == true ? "  noshadow\n" : "") +
 				  (noCulling == true ? "  noculling\n" : "") +
 				  (noSorting == true ? "  nosort\n" : "") +
@@ -335,6 +308,71 @@ string material::toString(void) {
 				  matString +
 				  getUnusedText() + 
 				  "end\n";
+}
+
+void material::addTexture(const std::string& name) {
+	TextureInfo info;
+	info.name = name;
+	info.matrix = NULL;
+	info.combineMode = osg::TexEnv::DECAL;
+	info.noAlpha = false;
+	info.noColor = false;
+	info.sphereMap = false;
+
+	textures.push_back( info );
+}
+
+void material::setTexture(const std::string& name) {
+	if (textures.size() <= 0)
+		addTexture( name );
+	else
+		textures[ textures.size() - 1 ].name = name;
+
+	computeFinalTexture();
+}
+
+void material::setTextureMatrix( texturematrix* texmat ) {
+	textures[ textures.size() - 1 ].matrix = texmat;
+}
+
+void material::setCombineMode( osg::TexEnv::Mode value ) {
+	textures[ textures.size() - 1 ].combineMode = value;
+}
+
+void material::setNoTexAlpha( bool value ) {
+	textures[ textures.size() - 1 ].noAlpha = value;
+}
+
+void material::setNoTexColor( bool value) {
+	textures[ textures.size() - 1 ].noColor = value;
+}
+
+void material::setSphereMap( bool value ) {
+	textures[ textures.size() - 1 ].sphereMap = value;
+}
+
+void material::reset() {
+	dynCol = NULL;
+
+	setAmbient( osg::Vec4( 0.2f, 0.2f, 0.2f, 1.0f ) );
+	setDiffuse( osg::Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
+	setSpecular( osg::Vec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+	setEmissive( osg::Vec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+	setShininess( 0.0f );
+
+	alphaThreshold = 0.0f;
+
+	occluder = false;
+	groupAlpha = false;
+	noRadar    = false;
+	noShadow   = false;
+	noCulling  = false;
+	noSorting  = false;
+	noLighting = false;
+
+	textures.clear();
+
+	shaders.clear();
 }
 
 // compute the final material from a list of materials
@@ -410,69 +448,70 @@ material* material::computeFinalMaterial( vector< material* >& materialList ) {
 	return mat;
 }
 
-// compute the final texture
-// simple: BZFlag only pays attention to the first texture declared
-void material::computeFinalTexture() { 
-	
-	if( textures.size() > 0 ) {
-		osg::Texture2D* finalTexture = textures[ 0 ].get();
-		setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
-		setTextureAttribute( 0, finalTexture );
-	}
-	else {
-		setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE );
-	}
-}
-
 // compute the final osg material
 void material::computeFinalMaterial() {
-	
+
 	osg::Vec4 ambient = osg::Vec4( 0, 0, 0, 0),
-			  diffuse = osg::Vec4( 0, 0, 0, 0),
-			  specular = osg::Vec4( 0, 0, 0, 0),
-			  emissive = osg::Vec4( 0, 0, 0, 0);
-			  
+		diffuse = osg::Vec4( 0, 0, 0, 0),
+		specular = osg::Vec4( 0, 0, 0, 0),
+		emissive = osg::Vec4( 0, 0, 0, 0);
+
 	float shiny = 0.0;
-	
+
 	if( materials.size() > 0 ) {
-		
-		for( vector< osg::ref_ptr< material > >::iterator i = materials.begin(); i != materials.end(); i++ ) {
-			
-			material* mat = i->get();
-			
+
+		for( vector< material* >::iterator i = materials.begin(); i != materials.end(); i++ ) {
+
+			material* mat = *i;
+
 			// NOTE: BZFlag pays attention only to the LAST occurence of a color
 			if( mat ) {
 				if(IS_VALID_COLOR( mat->getAmbient() ) ) {
 					ambient = mat->getAmbient();
 				}
-					
+
 				if(IS_VALID_COLOR( mat->getDiffuse() ) ) {
 					diffuse = mat->getDiffuse();
 				}	
-					
+
 				if(IS_VALID_COLOR( mat->getSpecular() ) ) {
 					specular = mat->getSpecular();
 				}
-				
+
 				if(IS_VALID_COLOR( mat->getEmissive() ) ) {
 					emissive = mat->getSpecular();
 				}
-				
+
 				shiny = mat->getShininess();
 			}
 		}
-		
+
 		osg::Material* finalMaterial = new osg::Material();
-			
+
 		finalMaterial->setAmbient( osg::Material::FRONT, ambient );
 		finalMaterial->setDiffuse( osg::Material::FRONT, diffuse );
 		finalMaterial->setSpecular( osg::Material::FRONT, specular );
 		finalMaterial->setEmission( osg::Material::FRONT, emissive );
 		finalMaterial->setShininess( osg::Material::FRONT, shiny );
-		
+
 		setAttribute( finalMaterial, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
 	}
-	
+}
+
+// compute the final texture
+// simple: BZFlag only pays attention to the first texture declared
+void material::computeFinalTexture() { 
+	if( textures.size() > 0 ) {
+		osg::Texture2D* finalTexture = SceneBuilder::buildTexture2D( textures[ 0 ].name.c_str() );
+
+		if ( finalTexture ) {
+			setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+			setTextureAttribute( 0, finalTexture );
+			return;
+		}
+	}
+
+	setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE );
 }
 
 // get the current material

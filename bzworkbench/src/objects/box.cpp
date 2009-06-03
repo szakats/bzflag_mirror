@@ -12,6 +12,14 @@
 
 #include "objects/box.h"
 
+const char* box::faceNames[FaceCount] = {
+  "x+",
+  "x-",
+  "y+",
+  "y-",
+  "z+",
+  "z-"
+};
 
 // constructors
 box::box() : bz2object("box", "<name><position><rotation><size>") {
@@ -30,6 +38,30 @@ box::~box() { }
 void box::setDefaults() {
 	updateGeometry();
 
+	for (int i = 0; i < FaceCount; i++) {
+		materials[i] = new material();
+	}
+	materials[XP]->setTexture( "boxwall" );
+	materials[XN]->setTexture( "boxwall" );
+	materials[YP]->setTexture( "boxwall" );
+	materials[YN]->setTexture( "boxwall" );
+	materials[ZP]->setTexture( "roof" );
+	materials[ZN]->setTexture( "roof" );
+
+	osg::Group* group = (osg::Group*)getThisNode();
+
+	for (int i = 0; i < FaceCount; i++) {
+		const float defScale = (i >= ZP) ? -2.0f : -8.0f;
+		texSizes[i] = Point2D(defScale, defScale);
+		texOffsets[i] = Point2D(0.0f, 0.0f);
+		physDrvs[i] = NULL;
+		driveThroughs[i] = false;
+		shootThroughs[i] = false;
+		ricochets[i] = false;
+
+		group->getChild( i )->setStateSet( materials[ i ] );
+	}
+
 	setPos( osg::Vec3(0.0, 0.0, 0.0) );
 	setSize( osg::Vec3( 10.0, 10.0, 10.0 ) );
 
@@ -43,6 +75,9 @@ string box::get(void) {
 
 // setter (string data)
 int box::update(string& data) {
+
+
+
 	osg::Vec3 size = getSize();
 
 	int result = bz2object::update( data );
@@ -114,18 +149,6 @@ void box::updateGeometry() {
 
 	// make UV coordinates
 	Primitives::rebuildBoxUV( group, &getSize() );
-
-	// load side texture
-	osg::Texture2D* sideTexture = Primitives::loadTexture( "share/box/boxwall.png" );
-
-	// load roof texture
-	osg::Texture2D* roofTexture = Primitives::loadTexture( "share/box/roof.png" );
-
-	// associate textures with nodes
-	for (int i = 0; i < 4; i++)
-		Primitives::setNodeTexture( group->getChild( i ), sideTexture );
-	for (int i = 4; i < 6; i++)
-		Primitives::setNodeTexture( group->getChild( i ), roofTexture );
 
 	setThisNode( group );
 }

@@ -34,10 +34,7 @@ Model::Model() : Observable()
 	this->defaultMaterial->setSpecular( osg::Vec4( 0.0, 0.0, 0.0, 0.0) );
 	this->defaultMaterial->setEmissive( osg::Vec4( 0.0, 0.0, 0.0, 1.0) );
 	
-	vector< osg::ref_ptr<osg::Texture2D> > defaultTextures = vector< osg::ref_ptr< osg::Texture2D > >();
-	defaultTextures.push_back( SceneBuilder::buildTexture2D( "share/tetrawall.png" ) );
-	
-	this->defaultMaterial->setTextures( defaultTextures );
+	this->defaultMaterial->setTexture( "tetrawall" );
 	
 	this->objects = objRefList();
 	modRef = this;
@@ -71,10 +68,7 @@ Model::Model(const char* _supportedObjects, const char* _objectHierarchy, const 
 	this->defaultMaterial->setSpecular( osg::Vec4( 0.0, 0.0, 0.0, 0.0) );
 	this->defaultMaterial->setEmissive( osg::Vec4( 0.0, 0.0, 0.0, 1.0) );
 	
-	vector< osg::ref_ptr<osg::Texture2D> > defaultTextures = vector< osg::ref_ptr< osg::Texture2D > >();
-	defaultTextures.push_back( SceneBuilder::buildTexture2D( "share/tetrawall.png" ) );
-	
-	this->defaultMaterial->setTextures( defaultTextures );
+	this->defaultMaterial->setTexture( "tetrawall" );
 	
 	this->objects = objRefList();
 	modRef = this;

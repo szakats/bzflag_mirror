@@ -24,8 +24,7 @@
 #include <osg/Material>
 #include <osg/Texture2D>
 #include <osg/StateSet>
-
-using namespace std;
+#include <osg/TexEnv>
 
 class dynamicColor;
 class texturematrix;
@@ -58,78 +57,68 @@ public:
 	// binary getters and setters
 	string getName() { return name; }
 	dynamicColor* getDynamicColor() { return dynCol; }
-	texturematrix* getTextureMatrix() { return textureMatrix; }
-	
-	vector< osg::ref_ptr< material > >& getMaterials() { return materials; }
-	vector< osg::ref_ptr< osg::Texture2D > >& getTextures() { return textures; }
 	
 	const osg::Vec4& getAmbient() { return getCurrentMaterial()->getAmbient( osg::Material::FRONT ); }
 	const osg::Vec4& getDiffuse() { return getCurrentMaterial()->getDiffuse(osg::Material::FRONT); }
 	const osg::Vec4& getSpecular() { return getCurrentMaterial()->getSpecular(osg::Material::FRONT); }
 	const osg::Vec4& getEmissive() { return getCurrentMaterial()->getEmission(osg::Material::FRONT); }
 	float getShininess() { return getCurrentMaterial()->getShininess(osg::Material::FRONT); }
-	
 	float getAlphaThreshold() { return alphaThreshold; }
-	bool usesTextures() { return !noTextures; }
-	bool usesTexColor() { return !noTexColor; }
-	bool usesSphereMap() { return spheremap; }
-	bool usesShadows() { return !noShadow; }
-	bool usesCulling() { return !noCulling; }
-	bool usesRadar() { return !noRadar; }
-	bool usesGroupAlpha() { return groupAlpha; }
-	bool usesOccluder() { return occluder; }
+
+	bool getNoTextures() { return noTextures; }
+	bool getNoShadows() { return noShadow; }
+	bool getNoCulling() { return noCulling; }
+	bool getNoSorting() { return noSorting; }
+	bool getNoRadar() { return noRadar; }
+	bool getNoLighting() { return noLighting; }
+	bool getNoShaders() { return noShaders; }
+	bool getGroupAlpha() { return groupAlpha; }
+	bool getOccluder() { return occluder; }
 	
 	void setName( const string& _name ) { this->name = _name; }
 	void setDynamicColor( dynamicColor* _dynCol ) { dynCol = _dynCol; }
-	void setTextureMatrix( texturematrix* texmat ) { textureMatrix = texmat; }
-	
-	void setMaterials( vector< osg::ref_ptr< material > >& mats ) {
-		materials.clear();
-		
-		if( mats.size() > 0 ) {
-			for( vector< osg::ref_ptr< material > >::iterator i = mats.begin(); i != mats.end(); i++ ) {
-				if( i->get() != NULL )
-					materials.push_back( *i );
-			}
-		}
-		
-		computeFinalMaterial();
-	}
-	
-	void setTextures( vector< osg::ref_ptr< osg::Texture2D > >& texs ) {
-		textures.clear();
-		
-		if( texs.size() > 0 ) {
-			for( vector< osg::ref_ptr< osg::Texture2D > >::iterator i = texs.begin(); i != texs.end(); i++ ) {
-				if( i->get() != NULL )
-					textures.push_back( *i );
-			}
-		}
-		
-		computeFinalTexture();
-	}
-	
-	void setAmbient( const osg::Vec4& rgba ) { getCurrentMaterial()->setAmbient( osg::Material::FRONT, rgba ); }
-	void setDiffuse( const osg::Vec4& rgba ) { getCurrentMaterial()->setDiffuse( osg::Material::FRONT, rgba ); }
-	void setSpecular( const osg::Vec4& rgba ) { getCurrentMaterial()->setSpecular( osg::Material::FRONT, rgba ); }
-	void setEmissive( const osg::Vec4& rgba ) { getCurrentMaterial()->setEmission( osg::Material::FRONT, rgba ); }
+
+	void setAmbient( const osg::Vec4& value ) { getCurrentMaterial()->setAmbient( osg::Material::FRONT, value ); }
+	void setDiffuse( const osg::Vec4& value ) { getCurrentMaterial()->setDiffuse( osg::Material::FRONT, value ); }
+	void setSpecular( const osg::Vec4& value ) { getCurrentMaterial()->setSpecular( osg::Material::FRONT, value ); }
+	void setEmissive( const osg::Vec4& value ) { getCurrentMaterial()->setEmission( osg::Material::FRONT, value ); }
 	// setters with RGBA values
-	void setAmbient( const RGBA& rgba ) { setAmbient( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
-	void setDiffuse( const RGBA& rgba ) { setDiffuse( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
-	void setSpecular( const RGBA& rgba ) { setSpecular( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
-	void setEmissive( const RGBA& rgba ) { setEmissive( osg::Vec4( rgba.x(), rgba.y(), rgba.z(), rgba.w() ) ); }
-	
-	void setShininess( float shininess ) { getCurrentMaterial()->setShininess( osg::Material::FRONT, shininess );  }
-	
-	void setAlphaThreshold( float alphaThreshold ) { this->alphaThreshold = alphaThreshold; }
-	void useTextures( bool value ) { noTextures = !value; }
-	void useTexColor( bool value ) { noTexColor = !value; }
-	void useSphereMap( bool value ) { spheremap = value; }
-	void useShadows( bool value ) { noShadow = !value; }
-	void useCulling( bool value ) { noCulling = !value; }
-	void useRadar( bool value ) { noRadar = !value; }
-	void useGroupAlpha( bool value ) { groupAlpha = value; }
-	void useOccluder( bool value ) { occluder = value; }
+	void setAmbient( const RGBA& value ) { setAmbient( osg::Vec4( value.x(), value.y(), value.z(), value.w() ) ); }
+	void setDiffuse( const RGBA& value ) { setDiffuse( osg::Vec4( value.x(), value.y(), value.z(), value.w() ) ); }
+	void setSpecular( const RGBA& value ) { setSpecular( osg::Vec4( value.x(), value.y(), value.z(), value.w() ) ); }
+	void setEmissive( const RGBA& value ) { setEmissive( osg::Vec4( value.x(), value.y(), value.z(), value.w() ) ); }
+	void setShininess( float value ) { getCurrentMaterial()->setShininess( osg::Material::FRONT, value );  }
+	void setAlphaThreshold( float value ) { alphaThreshold = value; }
+
+	void setNoTextures( bool value ) { noTextures = value; }
+	void setNoShadows( bool value ) { noShadow = value; }
+	void setNoCulling( bool value ) { noCulling = value; }
+	void setNoSorting( bool value ) { noSorting = value; }
+	void setNoRadar( bool value ) { noRadar = value; }
+	void setNoLighting( bool value ) { noLighting = value; }
+	void setNoShaders( bool value ) { noShaders = value; }
+	void setGroupAlpha( bool value ) { groupAlpha = value; }
+	void setOccluder( bool value ) { occluder = value; }
+
+	// the following set()'s operate on the last added texture
+	void addTexture(const std::string&);
+    void setTexture(const std::string&);
+    void setTextureMatrix( texturematrix* texmat );
+	void setCombineMode( osg::TexEnv::Mode value );
+    void setNoTexAlpha( bool value );
+    void setNoTexColor( bool value);
+    void setSphereMap( bool value );
+	void clearTextures() { textures.clear(); } // remove all textures
+
+	int getTextureCount();
+    const std::string& getTexture( int num ) { return textures[num].name; }
+    texturematrix* getTextureMatrix( int num ) { return textures[num].matrix; }
+	osg::TexEnv::Mode getCombineMode( int num ) { return textures[num].combineMode; }
+    bool getNoTexAlpha( int num ) { return textures[num].noAlpha; }
+    bool getNoTexColor( int num ) { return textures[num].noColor; }
+	bool getUseSphereMap( int num ) { return textures[num].sphereMap; }
+
+	void reset();
 	
 	// use this to compute the osg stateset to apply
 	// this entails merging parts of other materials
@@ -142,15 +131,34 @@ public:
 	osg::Texture2D* getCurrentTexture();
 	
 private:
-	string name, color;
+	std::string name;
+	std::string color;
+
+	std::vector< std::string > shaders;
+
+	std::vector< material* > materials;
+
 	dynamicColor* dynCol;
-	texturematrix* textureMatrix;
-	
-	vector< osg::ref_ptr< material > > materials;		// the various material references
-	vector< osg::ref_ptr< osg::Texture2D > > textures;	// the various textures from "texture" and "addTexture"
-	
-	bool noTextures, noTexColor, noTexAlpha, spheremap, noShadow, noCulling, noSorting, noRadar, noLighting, groupAlpha, occluder;
+	bool noTextures;
+	bool noShadow;
+	bool noCulling;
+	bool noSorting;
+	bool noRadar;
+	bool noLighting;
+	bool noShaders;
+	bool groupAlpha;
+	bool occluder;
 	float alphaThreshold;
+
+	struct TextureInfo {
+      std::string name;
+      texturematrix* matrix;
+	  osg::TexEnv::Mode combineMode;
+      bool noAlpha;
+      bool noColor;
+      bool sphereMap;
+    };
+	std::vector< TextureInfo > textures;	// the various textures from "texture" and "addTexture"
 	
 	// compute the final OSG texture
 	void computeFinalTexture();
