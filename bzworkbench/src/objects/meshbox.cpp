@@ -13,16 +13,16 @@
 #include "objects/meshbox.h"
 
 // construct an empty box
-meshbox::meshbox() : 
+meshbox::meshbox() :
 	bz2object("meshbox", "<position><rotation><size><top matref><outside matref><matref><phydrv><obstacle>") {
 	setDefaults();
 }
 
 // construct a box from data
-meshbox::meshbox(string& data) : 
+meshbox::meshbox(string& data) :
 	bz2object("meshbox", "<position><rotation><size><top matref><outside matref><matref><phydrv><obstacle>", data.c_str()) {
 	setDefaults();
-	
+
 	update(data);
 }
 
@@ -44,32 +44,26 @@ string meshbox::get(void) { return toString(); }
 int meshbox::update(string& data) {
 	// get the header
 	const char* header = getHeader().c_str();
-	
+
 	// get the sections
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
-	
+
 	// quit if there aren't any
 	if(lines[0] == BZW_NOT_FOUND)
 		return 0;
-		
+
 	if(!hasOnlyOne(lines, "meshbox"))
 		return 0;
-	
-	// quit if there are multiple ones
-	if(lines.size() > 1) {
-		printf("meshbox::update(): Error! Defined %d meshboxes!\n", (int)lines.size());
-		return 0;
-	}
-	
+
 	// get the data
 	const char* meshBoxData = lines[0].c_str();
-	
+
 	// find occurences of top
 	vector<string> tops = BZWParser::getValuesByKey("top matref", header, meshBoxData);
-	
+
 	// find occurences of outside
 	vector<string> outsides = BZWParser::getValuesByKey("outside matref", header, meshBoxData);
-	
+
 	// copy the data over
 	if(!bz2object::update(data))
 		return 0;
@@ -86,27 +80,27 @@ int meshbox::update( UpdateMessage& message ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
 			setPos( *(message.getAsPosition()) );
 			break;
-			
+
 		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
 			setPos( getPos() + *(message.getAsPositionFactor()) );
 			break;
-			
+
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
 			setRotationZ( message.getAsRotation()->z() );
 			break;
-			
+
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
 			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
 			break;
-			
+
 		case UpdateMessage::SET_SCALE:		// handle a new scale
 			setSize( *(message.getAsScale()) );
 			break;
-			
+
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
 			setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
-			
+
 		default:	// unknown event; don't handle
 			return 0;
 	}
@@ -118,15 +112,15 @@ string meshbox::toString(void) {
 	string topmats = string("");
 	if(topMaterials.size() > 0) {
 		for(vector<string>::iterator i = topMaterials.begin(); i != topMaterials.end(); i++) {
-			topmats += string("  top matref ") + i->c_str() + "\n";	
+			topmats += string("  top matref ") + i->c_str() + "\n";
 		}
 	}
-	
+
 	// get the outside materials
 	string outsidemats = string("");
 	if(outsideMaterials.size() > 0) {
 		for(vector<string>::iterator i = outsideMaterials.begin(); i != outsideMaterials.end(); i++) {
-			outsidemats += string("  outside matref ") + i->c_str() + "\n";	
+			outsidemats += string("  outside matref ") + i->c_str() + "\n";
 		}
 	}
 	return string("meshbox\n") +
@@ -138,7 +132,7 @@ string meshbox::toString(void) {
 
 // render
 int meshbox::render(void) {
-	return 0;	
+	return 0;
 }
 
 void meshbox::setSize( osg::Vec3 newSize ) {

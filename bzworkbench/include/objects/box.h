@@ -49,26 +49,26 @@ public:
 
 	// constructor
 	box();
-	
+
 	// constructor with data
 	box(string& data);
-	
+
 	static DataEntry* init() { return new box(); }
 	static DataEntry* init(string& data) { return new box( data ); }
-	
+
 	// nothing to destroy...
 	virtual ~box();
 
 	// restore default values
 	void setDefaults();
-	
+
 	// getter
 	string get(void);
-	
+
 	// setters
 	int update(string& data);
 	int update(UpdateMessage& msg);
-	
+
 	// toString
 	string toString(void);
 
@@ -81,7 +81,6 @@ private:
 	bool driveThroughs[FaceCount];
 	bool shootThroughs[FaceCount];
 	bool ricochets[FaceCount];
-	osg::ref_ptr< material > materials[FaceCount];
 
 	static const char* faceNames[FaceCount];
 

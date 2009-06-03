@@ -32,32 +32,32 @@ class texturematrix;
 #define IS_VALID_COLOR( c ) (c.x() >= 0.0 && c.y() >= 0.0 && c.z() >= 0.0 && c.w() >= 0.0)
 
 class material : public DataEntry, public osg::StateSet {
-	
+
 	friend class SceneBuilder;		// allow SceneBuilder to access protected/private methods
 
 public:
 	// default constructor
 	material();
-	
+
 	// constructor with data
 	material(string& data);
-	
+
 	static DataEntry* init() { return new material(); }
 	static DataEntry* init(string& data) { return new material(data); }
-	
+
 	// getter
 	string get(void);
-	
+
 	// setter
 	int update(string& data);
-	
+
 	// tostring
 	string toString(void);
-	
+
 	// binary getters and setters
 	string getName() { return name; }
 	dynamicColor* getDynamicColor() { return dynCol; }
-	
+
 	const osg::Vec4& getAmbient() { return getCurrentMaterial()->getAmbient( osg::Material::FRONT ); }
 	const osg::Vec4& getDiffuse() { return getCurrentMaterial()->getDiffuse(osg::Material::FRONT); }
 	const osg::Vec4& getSpecular() { return getCurrentMaterial()->getSpecular(osg::Material::FRONT); }
@@ -74,7 +74,7 @@ public:
 	bool getNoShaders() { return noShaders; }
 	bool getGroupAlpha() { return groupAlpha; }
 	bool getOccluder() { return occluder; }
-	
+
 	void setName( const string& _name ) { this->name = _name; }
 	void setDynamicColor( dynamicColor* _dynCol ) { dynCol = _dynCol; }
 
@@ -110,7 +110,7 @@ public:
     void setSphereMap( bool value );
 	void clearTextures() { textures.clear(); } // remove all textures
 
-	int getTextureCount();
+	int getTextureCount() { return textures.size(); }
     const std::string& getTexture( int num ) { return textures[num].name; }
     texturematrix* getTextureMatrix( int num ) { return textures[num].matrix; }
 	osg::TexEnv::Mode getCombineMode( int num ) { return textures[num].combineMode; }
@@ -119,17 +119,19 @@ public:
 	bool getUseSphereMap( int num ) { return textures[num].sphereMap; }
 
 	void reset();
-	
+
 	// use this to compute the osg stateset to apply
 	// this entails merging parts of other materials
 	static material* computeFinalMaterial( vector< material* >& materialList );
-	
+
 	// get the current material
 	osg::Material* getCurrentMaterial();
-	
+
 	// get the current texture
 	osg::Texture2D* getCurrentTexture();
-	
+
+	material& operator=(material const &rhs);
+
 private:
 	std::string name;
 	std::string color;
@@ -159,16 +161,13 @@ private:
       bool sphereMap;
     };
 	std::vector< TextureInfo > textures;	// the various textures from "texture" and "addTexture"
-	
+
 	// compute the final OSG texture
 	void computeFinalTexture();
-	
-	// list of texture aliases (input: texture alias; output: BZWB texture file)
-	map< string, string > textureAliases;
-	
+
 	// compute the final OSG material
 	void computeFinalMaterial();
-	
+
 	// build the alias map
 	void buildAliases();
 };
