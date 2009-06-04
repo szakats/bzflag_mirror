@@ -65,6 +65,8 @@ public:
 	void setSize( osg::Vec3 newSize );
 
 private:
+	bool flipz;
+
 	osg::ref_ptr< physics > physDrvs[FaceCount];
 	Point2D texSizes[FaceCount];
 	Point2D texOffsets[FaceCount];

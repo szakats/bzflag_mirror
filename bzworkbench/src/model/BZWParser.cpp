@@ -610,13 +610,13 @@ vector<string> BZWParser::getLinesByKeys(vector<string> keys, const char* _heade
  */
 
 vector<string> BZWParser::getValuesByKeys(vector<string> keys, const char* header, const char* text ) {
-	vector<string> linesByKeys = BZWParser::getLinesByKeys( keys, header, text );
-
 	vector<string> ret = vector<string>();
 
-	if( linesByKeys.size() > 0 ) {
-		for( vector<string>::iterator i = linesByKeys.begin(); i != linesByKeys.end(); i++ ) {
-			ret.push_back( BZWParser::key( i->c_str() ) );
+	for (vector<string>::iterator i = keys.begin(); i != keys.end(); i++) {
+		vector<string> vals = getValuesByKey( (*i).c_str(), header, text );
+
+		for (vector<string>::iterator v = vals.begin(); v != vals.end(); v++) {
+			ret.push_back(*v);
 		}
 	}
 

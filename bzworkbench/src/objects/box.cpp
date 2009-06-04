@@ -77,7 +77,7 @@ int box::update(string& data) {
 	if(lines[0] == BZW_NOT_FOUND)
 		return 0;
 
-	if(!hasOnlyOne(lines, "meshbox"))
+	if(!hasOnlyOne(lines, "box"))
 		return 0;
 
 	const char* boxData = lines[0].c_str();
