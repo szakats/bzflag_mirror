@@ -104,6 +104,8 @@ int meshbox::update( UpdateMessage& message ) {
 		default:	// unknown event; don't handle
 			return 0;
 	}
+
+	return 1;
 }
 
 // tostring
@@ -136,21 +138,18 @@ int meshbox::render(void) {
 }
 
 void meshbox::setSize( osg::Vec3 newSize ) {
-	Primitives::rebuildBoxUV( (osg::Group*)getThisNode(), &(osg::Vec3)newSize );
+	Primitives::rebuildBoxUV( (osg::Group*)getThisNode(), newSize );
 
 	bz2object::setSize( newSize );
 }
 
 void meshbox::updateGeometry() {
-	osg::Group* box = (osg::Group*)Primitives::buildUntexturedBox( &osg::Vec3( 1, 1, 1 ) );
-
-	osg::Texture2D* wallTexture = Primitives::loadTexture( "share/box/boxwall.png" );
-	osg::Texture2D* roofTexture = Primitives::loadTexture( "share/box/roof.png" );
+	osg::Group* box = (osg::Group*)Primitives::buildUntexturedBox( osg::Vec3( 1, 1, 1 ) );
 
 	for (int i = 0; i < 4; i++)
-		Primitives::setNodeTexture( box->getChild( i ), wallTexture );
+		SceneBuilder::assignTexture( "boxwall", box->getChild( i ), osg::StateAttribute::ON );
 	for (int i = 4; i < 6; i++)
-		Primitives::setNodeTexture( box->getChild( i ), roofTexture );
+		SceneBuilder::assignTexture( "roof", box->getChild( i ), osg::StateAttribute::ON );
 
 	setThisNode( box );
 }

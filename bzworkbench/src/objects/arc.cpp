@@ -13,7 +13,7 @@
 #include "objects/arc.h"
 
 // default constructor
-arc::arc() : 
+arc::arc() :
 	bz2object("arc", "<position><rotation><size><flatshading><angle><ratio><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
 	setDefault();
 }
@@ -22,7 +22,7 @@ arc::arc() :
 arc::arc(string& data) :
 	bz2object("arc", "<position><rotation><size><flatshading><angle><ratio><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>", data.c_str()) {
 	setDefault();
-	
+
 	update(data);
 }
 
@@ -36,7 +36,7 @@ void arc::setDefault() {
 	flatShading = false;
 	smoothbounce = true;
 	texsize.set( 1, 1, 1, 1 );
-	
+
 	osg::Group* group = new osg::Group();
 	group->addChild( new osg::Geode() );
 	group->addChild( new osg::Geode() );
@@ -54,50 +54,50 @@ string arc::get(void) { return toString(); }
 int arc::update(string& data) {
 	const char* header = getHeader().c_str();
 	// get the chunk we need
-	
+
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
-	
+
 	// check and see if the proper data segment was found
 	if(lines[0] == BZW_NOT_FOUND)
 		return 0;
-		
+
 	if(!hasOnlyOne(lines, "arc"))
 		return 0;
-		
+
 	const char* arcData = lines[0].c_str();
-		
+
 	// get the name
 	vector<string> names = BZWParser::getValuesByKey("name", header, arcData);
 	if(!hasOnlyOne(names, "name"))
 		return 0;
-		
+
 	// get the angle
 	vector<string> angles = BZWParser::getValuesByKey("angle", header, arcData);
 	if(!hasOnlyOne(angles, "angle"))
 		return 0;
-	
+
 	// get the divisions
 	vector<string> vDivisions = BZWParser::getValuesByKey("divisions", header, arcData);
 	if(!hasOnlyOne(vDivisions, "divisions"))
 		return 0;
-		
+
 	// get the ratio
 	vector<string> ratios = BZWParser::getValuesByKey("ratio", header, arcData);
 	if(!hasOnlyOne(ratios, "ratio"))
 		return 0;
-			
+
 	// get flatshading
 	vector<string> flatShadings = BZWParser::getValuesByKey("flatshading", header, arcData);
-	
+
 	// get smoothbounce
 	vector<string> smoothBounces =  BZWParser::getValuesByKey("smoothbounce", header, arcData);
 
 	vector<string> texsizes = BZWParser::getValuesByKey("texsize", header, arcData);
-	
+
 	// do base class update
 	if(!bz2object::update(data))
 		return 0;
-	
+
 	// set the data
 	if ( names.size() > 0 )
 		setName( names[0] );
@@ -110,7 +110,7 @@ int arc::update(string& data) {
 	if ( texsizes.size() > 0 ) {
 		vector<string> points = BZWParser::getLineElements( texsizes[0].c_str() );
 
-		if (points.size() > 3) 
+		if (points.size() > 3)
 			texsize.set( atof( points[0].c_str() ),
 				atof( points[1].c_str() ),
 				atof( points[2].c_str() ),
@@ -122,8 +122,8 @@ int arc::update(string& data) {
 	smoothbounce = (smoothBounces.size() == 0 ? false : true);
 
 	updateGeometry();
-	
-	return 1;	
+
+	return 1;
 }
 
 int arc::update(UpdateMessage& message) {
@@ -131,30 +131,32 @@ int arc::update(UpdateMessage& message) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
 			setPos( *(message.getAsPosition()) );
 			break;
-			
+
 		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
 			setPos( getPos() + *(message.getAsPositionFactor()) );
 			break;
-			
+
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
 			setRotationZ( message.getAsRotation()->z() );
 			break;
-			
+
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
 			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
 			break;
-			
+
 		case UpdateMessage::SET_SCALE:		// handle a new scale
 			setSize( *(message.getAsScale()) );
 			break;
-			
+
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
 			setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
-			
+
 		default:	// unknown event; don't handle
 			return 0;
 	}
+
+	return 1;
 }
 
 // toString
@@ -165,14 +167,14 @@ string arc::toString(void) {
 				  "  ratio " + string(ftoa(ratio)) + "\n" +
 				  "  divisions " + string(itoa(divisions)) + "\n" +
 				  (flatShading == true ? "  flatshading\n" : "") +
-				  (smoothbounce == true ? "  smoothbounce\n" : "") + 
+				  (smoothbounce == true ? "  smoothbounce\n" : "") +
 				  "end\n";
-	
+
 }
 
 // render
 int arc::render(void) {
-	return 0;	
+	return 0;
 }
 
 void arc::setSize( osg::Vec3 newSize ) {
@@ -184,7 +186,7 @@ void arc::updateGeometry() {
 	osg::Group* arc = (osg::Group*)getThisNode();
 	osg::Geode* sides = (osg::Geode*)arc->getChild( 0 );
 	osg::Geode* topBottom = (osg::Geode*)arc->getChild( 1 );
-	
+
 	// clear any previous geometry
 	if ( sides->getNumDrawables() > 0 )
 		sides->removeDrawables( 0 );
@@ -199,7 +201,7 @@ void arc::updateGeometry() {
 	bool isPie = false;    // has no inside edge
 	bool isCircle = false; // angle of 360 degrees
 	const float minSize = 1.0e-6f; // cheezy / lazy
-	
+
 	// set size
 	osg::Vec3 sz( 1, 1, 1 );
 
@@ -272,10 +274,8 @@ void arc::updateGeometry() {
 	}
 
 	// load and apply textures
-	osg::Texture2D* sideTexture = Primitives::loadTexture( "share/box/boxwall.png" );
-	osg::Texture2D* topbotTexture = Primitives::loadTexture( "share/box/roof.png" );
-	Primitives::setNodeTexture( sides, sideTexture );
-	Primitives::setNodeTexture( topBottom, topbotTexture );
+	SceneBuilder::assignTexture( "boxwall", sides, osg::StateAttribute::ON);
+	SceneBuilder::assignTexture( "roof", topBottom, osg::StateAttribute::ON);
 }
 
 

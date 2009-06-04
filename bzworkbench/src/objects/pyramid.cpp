@@ -22,17 +22,17 @@ pyramid::pyramid() : bz2object("pyramid", "<position><rotation><size>") {
 pyramid::pyramid(string& data) : bz2object("pyramid", "<position><rotation><size>") {
 	setDefaults();
 
-	this->update(data);	
+	this->update(data);
 }
 
 void pyramid::setDefaults() {
 	updateGeometry();
 
 	this->setName( SceneBuilder::nameNode("pyramid") );
-	
+
 	this->setPos( osg::Vec3(0.0, 0.0, 0.0) );
 	this->setSize( osg::Vec3(10.0, 10.0, 10.0) );
-	
+
 	SceneBuilder::markUnselected( this );
 }
 
@@ -52,42 +52,42 @@ int pyramid::update(string& data) {
 		setSize(getSize());
 	}
 
-	return result;	
+	return result;
 }
 
 // setter with messaging
 // NOTE: don't call the superclass method, because it deals solely with transformations (which are n/a here)
 int pyramid::update(UpdateMessage& message) {
-	
+
 	switch( message.type ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
 			setPos( *(message.getAsPosition()) );
 			break;
-			
+
 		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
 			setPos( getPos() + *(message.getAsPositionFactor()) );
 			break;
-			
+
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
 			setRotationZ( message.getAsRotation()->z() );
 			break;
-			
+
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
 			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
 			break;
-			
+
 		case UpdateMessage::SET_SCALE:		// handle a new scale
 			setSize( *(message.getAsScale()) );
 			break;
-			
+
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
 			setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
-			
+
 		default:	// unknown event; don't handle
 			return 0;
 	}
-	
+
 	return 1;
 }
 
@@ -95,16 +95,16 @@ int pyramid::update(UpdateMessage& message) {
 string pyramid::toString(void) {
 	return string("pyramid\n") +
 				  BZWLines( this ) +
-				  "end\n";	
+				  "end\n";
 }
 
 void pyramid::setSize( osg::Vec3 newSize ) {
-	Primitives::rebuildPyramidUV( (osg::Geode*)getThisNode(), &newSize );
+	Primitives::rebuildPyramidUV( (osg::Group*)getThisNode(), newSize );
 	bz2object::setSize( newSize );
 }
 
 void pyramid::updateGeometry() {
-	osg::Node* node = Primitives::buildPyramid( &osg::Vec3( 1, 1, 1 ) );
+	osg::Node* node = Primitives::buildPyramid( osg::Vec3( 1, 1, 1 ) );
 
 	setThisNode( node );
 }

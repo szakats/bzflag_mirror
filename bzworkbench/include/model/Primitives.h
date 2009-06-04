@@ -31,18 +31,14 @@ class Primitives {
 public:
 
 	// build a pyramid
-	static osg::Node* buildPyramid( const osg::Vec3* size );
+	static osg::Node* buildPyramid( osg::Vec3 size );
 
 	// rebuild UVs for a pyr, should be called whenever the box is scaled
-	static void rebuildPyramidUV( osg::Geode* pyr, const osg::Vec3* size );
+	static void rebuildPyramidUV( osg::Group* pyr, osg::Vec3 size );
 
-	static void rebuildBoxUV(osg::Group* box, const osg::Vec3* size);
+	static void rebuildBoxUV(osg::Group* box, osg::Vec3 size);
 
-	static osg::Group* buildUntexturedBox( const osg::Vec3* size );
-
-	static osg::Texture2D* loadTexture( const std::string& file );
-
-	static void setNodeTexture( osg::Node* node, osg::Texture2D* texture );
+	static osg::Group* buildUntexturedBox( osg::Vec3 size );
 };
 
 #endif /* PRIMITIVES_H_ */

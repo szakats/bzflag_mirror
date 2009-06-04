@@ -624,6 +624,20 @@ vector<string> BZWParser::getValuesByKeys(vector<string> keys, const char* heade
 }
 
 /**
+ * Get the values corresponding to a key and a list of faces
+ */
+vector<string> BZWParser::getValuesByKeyAndFaces(const char* key, vector<string> faces, const char* header, const char* section ) {
+	// build a list of keys
+	vector<string> keys;
+
+	for (vector<string>::iterator itr = faces.begin(); itr != faces.end(); itr++) {
+		keys.push_back(*itr + " " + key);
+	}
+
+	return getValuesByKeys( keys, header, section );
+}
+
+/**
  * This method gets all the elements in a line separated by one or more spaces
  * Pass -1 to count to get all elements
  */

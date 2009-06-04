@@ -22,55 +22,55 @@
 
 class teleporter : public bz2object {
 public:
-	
+
 	// constructor
 	teleporter();
-	
+
 	// constructor with data
 	teleporter(string& data);
-	
+
 	static DataEntry* init() {
 		return new teleporter();
 	}
 	static DataEntry* init(std::string& data) { return new teleporter(data); }
-	
+
 	// restore default values
 	void setDefaults();
 
 	// getter
 	std::string get(void);
-	
+
 	// setter
 	int update(std::string& data);
 	int update(UpdateMessage& message);
-	
+
 	// override the getSize and setSize methods
 	osg::Vec3 getSize() { return osg::Vec3( realSize.x(), realSize.y(), realSize.z() ); }
 	void setSize( osg::Vec3 newSize );
-	
+
 	// tostring
 	string toString(void);
-	
+
 	// binary getters and setters
 	float getBorder() { return border; }
-	
+
 	void setBorder( float newBorder );
-	
+
 private:
-	
+
 	float border;
-	
+
 	// the real size (not reflected in the node geometry)
 	Point3D realSize;
 
 	void updateGeometry();
 
 	// rebuild the UVs for a teleporter
-	void updateTeleporterUV( osg::Group* tele, const osg::Vec3* size, 
+	void updateTeleporterUV( osg::Group* tele, osg::Vec3 size,
 									 const float borderSize );
 
 	// rebuild the mesh for a teleporter
-	void updateTeleporterMesh( osg::Group* tele, const osg::Vec3* size, 
+	void updateTeleporterMesh( osg::Group* tele, osg::Vec3 size,
 									   const float borderSize );
 
 };

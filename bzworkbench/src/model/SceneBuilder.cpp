@@ -115,12 +115,12 @@ osg::Geode* SceneBuilder::buildGeode( const char* _nodeName, osg::Geometry* geom
  */
 
 osg::Texture2D* SceneBuilder::buildTexture2D( const char* filename ) {
-	string searchDir("share/");
+	string searchPath("share/textures/");
 
 	if( filename != NULL ) {
 		osg::Texture2D* texture = NULL;
 
-		osg::Image* image = osgDB::readImageFile( (searchDir + filename + ".png").c_str() );
+		osg::Image* image = osgDB::readImageFile( (searchPath + filename + ".png").c_str() );
 
 		if( image != NULL ) {	// only build the texture if the image exists!
 
@@ -149,34 +149,19 @@ void SceneBuilder::assignTexture( const char* _textureName, osg::Node* node, uns
 		string textureName = string(_textureName) + SCENEBUILDER_TAIL_TEXTURE2D;
 
 		// the texture itself
-		osg::Texture2D* texture = NULL;
+		osg::Texture2D* texture = buildTexture2D( _textureName );
 
-		texture = new osg::Texture2D();
+		if (texture != NULL) {
 
-		osg::Image* image = osgDB::readImageFile( _textureName );
+			// make a new state set for the texture (so we can manipulate the texture attributes)
+			osg::StateSet* texStateSet = node->getOrCreateStateSet();
 
-		if( image != NULL ) {	// only build the texture if the image exists!
+			// assign the texture to the state set and activate it
+			texStateSet->setTextureAttributeAndModes( 0, texture, mode );
 
-			// don't allow OSG to optimize the texture (otherwise it may disappear)
-			texture->setDataVariance( osg::Object::DYNAMIC );
-
-			// set the texture's image
-			texture->setImage( image );
-
-			// turn on GL_REPEAT texture wrapping
-			texture->setWrap( osg::Texture::WRAP_R, osg::Texture::REPEAT );
-			texture->setWrap( osg::Texture::WRAP_S, osg::Texture::REPEAT );
-			texture->setWrap( osg::Texture::WRAP_T, osg::Texture::REPEAT );
+			// finally, attach the texture to the geode
+			node->setStateSet( texStateSet );
 		}
-
- 		// make a new state set for the texture (so we can manipulate the texture attributes)
-		osg::StateSet* texStateSet = node->getOrCreateStateSet();
-
-		// assign the texture to the state set and activate it
-		texStateSet->setTextureAttributeAndModes( 0, texture, mode );
-
-		// finally, attach the texture to the geode
-		node->setStateSet( texStateSet );
 	}
 }
 

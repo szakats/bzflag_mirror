@@ -31,9 +31,5 @@ src/objects \
 src/model \
 src \
 src/dialogs \
-share/teleporter \
-share/pyramid \
-share/box \
-share/base \
 plugins/Win32CommonControls \
 

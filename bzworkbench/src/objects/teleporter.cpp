@@ -17,7 +17,7 @@
 // constructor
 teleporter::teleporter() :
 	bz2object("teleporter", "<position><size><rotation><name><border>") {
-	
+
 	setDefaults();
 
 	// make sure geometry is built
@@ -27,7 +27,7 @@ teleporter::teleporter() :
 // constructor with data
 teleporter::teleporter(string& data) :	// don't pass the data to the parent class (this prevents super-sized teleporters)
 	bz2object("teleporter", "<position><size><rotation><name><border>") {
-	
+
 	setDefaults();
 
 	update( data );
@@ -47,12 +47,12 @@ void teleporter::setDefaults() {
 	setThisNode( teleporter );
 
 	setBorder( 0.5f );
-	
+
 	osg::Vec3 scale = osg::Vec3( getBorder(), 10, 20 );
 	realSize = scale;
-	
+
 	setSize( scale );
-	
+
 	SceneBuilder::markUnselected( this );
 }
 
@@ -63,22 +63,22 @@ string teleporter::get(void) {  return toString(); }
 int teleporter::update(string& data) {
 	// get header
 	const char* header = getHeader().c_str();
-	
+
 	// get the section
 	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
-	
+
 	if(lines[0] == BZW_NOT_FOUND)
 		return 0;
-		
+
 	if(!hasOnlyOne(lines, "teleporter"))
 		return 0;
-		
+
 	// get the data
 	const char* teleporterData = lines[0].c_str();
-	
+
 	// get the name if it's in the title
 	vector<string> names = BZWParser::getValuesByKey( "teleporter", header, teleporterData );
-	
+
 	// get the border
 	vector<string> borders = BZWParser::getValuesByKey( "border", header, teleporterData );
 	if( borders.size() > 1 ) {
@@ -88,75 +88,75 @@ int teleporter::update(string& data) {
 	// get the size, since the teleporter scales differently than other objects
 	// the size must be parsed here
 	vector<string> sizes = BZWParser::getValuesByKey( "size", header, teleporterData );
-		
+
 	// just go with the first size (only one should be defined)
 	if(sizes.size() > 0)
 		setSize( Point3D( sizes[0].c_str() ) );
 
-	
+
 	if( !bz2object::update( data ) )
 		return 0;
 
 	// reset the scale so that it doesn't effect the size of the object
 	bz2object::setSize( osg::Vec3( 1, 1, 1 ) );
-	
+
 	if( names.size() > 0 ) setName( names[0] );
-	
+
 	// set the data
 	setBorder( (borders.size() != 0 ? atof( borders[0].c_str() ) : 0.0f) );
-	
+
 	return 1;
 }
 
 // update with binary message
 int teleporter::update( UpdateMessage& message ) {
-	
+
 	// superclass event handler
 	int result = bz2object::update( message );
-	
+
 	switch( message.type ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
 			setPos( *(message.getAsPosition()) );
 			break;
-			
+
 		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
 			setPos( getPos() + *(message.getAsPositionFactor()) );
 			break;
-			
+
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
 			setRotationZ( message.getAsRotation()->z() );
 			break;
-			
+
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
 			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
 			break;
-			
+
 		case UpdateMessage::SET_SCALE:		// handle a new scale
 			setSize( *(message.getAsScale()) );
 			break;
-			
+
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
 			setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
-			
+
 		default:	// unknown event; don't handle
 			return result;
 	}
-	
+
 	return 1;
 }
 
 // tostring
 string teleporter::toString(void) {
-	
+
 	// get the bz2object BZW lines
 	string bzwlines = BZWLines( this );
-	
+
 	// finally, make that string
 	return string("teleporter") + "\n" +
 				  bzwlines +
 				  "  border " + string(ftoa(border)) + "\n" +
-				  "end\n";	
+				  "end\n";
 }
 
 void teleporter::setSize( osg::Vec3 newSize ) {
@@ -164,7 +164,7 @@ void teleporter::setSize( osg::Vec3 newSize ) {
 	updateGeometry();
 }
 
-void teleporter::setBorder( float newBorder ) { 
+void teleporter::setBorder( float newBorder ) {
 	border = newBorder;
 	updateGeometry();
 }
@@ -176,20 +176,16 @@ void teleporter::updateGeometry() {
 	osg::Geode* border = (osg::Geode*)teleporter->getChild( 1 );
 
 	// generate mesh and texture coordinates
-	updateTeleporterMesh( teleporter, &getSize(), getBorder() );
-	updateTeleporterUV( teleporter, &getSize(), getBorder() );
-
-	// load textures
-	osg::Texture2D* portalTexture = Primitives::loadTexture( "share/teleporter/telelink.png" );
-	osg::Texture2D* borderTexture = Primitives::loadTexture( "share/teleporter/caution.png" );
+	updateTeleporterMesh( teleporter, getSize(), getBorder() );
+	updateTeleporterUV( teleporter, getSize(), getBorder() );
 
 	// assign the textures
-	Primitives::setNodeTexture( portal, portalTexture );
-	Primitives::setNodeTexture( border, borderTexture );
+	SceneBuilder::assignTexture( "telelink", portal, osg::StateAttribute::ON );
+	SceneBuilder::assignTexture( "caution", border, osg::StateAttribute::ON );
 }
 
 // regenerate the UVs for a teleporter, call whenever the size is changed
-void teleporter::updateTeleporterUV( osg::Group* tele, const osg::Vec3* size, 
+void teleporter::updateTeleporterUV( osg::Group* tele, osg::Vec3 size,
 									 const float borderSize ) {
 	// get portal and border geometries
 	osg::Geode* portal = (osg::Geode*)tele->getChild( 0 );
@@ -205,17 +201,17 @@ void teleporter::updateTeleporterUV( osg::Group* tele, const osg::Vec3* size,
 
 	const bool wantBorder = (borderSize >= 0.001f);
 
-	
+
 	const float br = borderSize;
 	const float hb = br * 0.5f;
-	const float yo = size->y() + br;
-	const float ym = size->y() + hb;
-	const float yi = size->y();
-	const float xl = size->x();
-	const float xb = (size->x() > hb) ? size->x() : hb;
-	const float zt = size->z() + br;
-	const float zm = size->z() + hb;
-	const float zb = size->z();
+	const float yo = size.y() + br;
+	//const float ym = size.y() + hb;
+	const float yi = size.y();
+	//const float xl = size.x();
+	const float xb = (size.x() > hb) ? size.x() : hb;
+	const float zt = size.z() + br;
+	//const float zm = size.z() + hb;
+	const float zb = size.z();
 
 	const float ztxc = zb / (2.0f * yi);
 	portalUVs->push_back( osg::Vec2( 0.0f, 0.0f ) ); // t0
@@ -314,7 +310,7 @@ void teleporter::updateTeleporterUV( osg::Group* tele, const osg::Vec3* size,
 }
 
 // rebuild the mesh for a teleporter, call whenever the border size is changed
-void teleporter::updateTeleporterMesh( osg::Group* tele, const osg::Vec3* size, 
+void teleporter::updateTeleporterMesh( osg::Group* tele, osg::Vec3 size,
 									   const float borderSize ) {
 	osg::Geode* portal = (osg::Geode*)tele->getChild( 0 );
 	osg::Geode* border = (osg::Geode*)tele->getChild( 1 );
@@ -343,14 +339,14 @@ void teleporter::updateTeleporterMesh( osg::Group* tele, const osg::Vec3* size,
 	const bool wantBorder = (borderSize >= 0.001f);
 	const float br = borderSize;
 	const float hb = br * 0.5f;
-	const float yo = size->y() + br;
-	const float ym = size->y() + hb;
-	const float yi = size->y();
-	const float xl = size->x();
-	const float xb = (size->x() > hb) ? size->x() : hb;
-	const float zt = size->z() + br;
-	const float zm = size->z() + hb;
-	const float zb = size->z();
+	const float yo = size.y() + br;
+	//const float ym = size.y() + hb;
+	const float yi = size.y();
+	const float xl = size.x();
+	const float xb = (size.x() > hb) ? size.x() : hb;
+	const float zt = size.z() + br;
+	//const float zm = size.z() + hb;
+	const float zb = size.z();
 
     // back face vertices  (-x normal)
 	portalVerts->push_back( osg::Vec3( -xl, +yi, 0.0f ) ); // v0
@@ -444,7 +440,7 @@ void teleporter::updateTeleporterMesh( osg::Group* tele, const osg::Vec3* size,
 		borderVerts->push_back( osg::Vec3( +xb, -yo, 0.0f ) ); // v16
 		borderVerts->push_back( osg::Vec3( -xb, -yo, 0.0f ) ); // v13
 
-		for ( int i = 0; i < 56; i++ ) 
+		for ( int i = 0; i < 56; i++ )
 			borderDE->push_back( i );
 	}
 }

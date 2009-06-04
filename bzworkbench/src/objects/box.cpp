@@ -22,11 +22,11 @@ const char* box::faceNames[FaceCount] = {
 };
 
 // constructors
-box::box() : bz2object("box", "<name><position><rotation><size><matref>") {
+box::box() : bz2object("box", "<name><position><rotation><size><matref><phydrv><drivethrough><shootthrough><passable><ricochet><texsize><texoffset>") {
 	setDefaults();
 }
 
-box::box(string& data) : bz2object("box", "<name><position><rotation><size><matref>") {
+box::box(string& data) : bz2object("box", "<name><position><rotation><size><matref><phydrv><drivethrough><shootthrough><passable><ricochet><texsize><texoffset>") {
 	setDefaults();
 
 	this->update( data );
@@ -50,8 +50,8 @@ void box::setDefaults() {
 		ricochets[i] = false;
 
 		// set default textures
-		Primitives::setNodeTexture(group->getChild(i),
-				SceneBuilder::buildTexture2D( (i >= ZP) ? "roof" : "boxwall"));
+		SceneBuilder::assignTexture((i >= ZP) ? "roof" : "boxwall", group->getChild(i),
+				osg::StateAttribute::ON);
 	}
 
 	setPos( osg::Vec3(0.0, 0.0, 0.0) );
@@ -84,58 +84,65 @@ int box::update(string& data) {
 
 	for (int i = 0; i < FaceCount; i++) {
 		string faceName(faceNames[i]);
+		vector<string> faces;
+		faces.push_back(faceNames[i]);
 
-		string physDrvKey;
-		physDrvKey = faceName + " physdrv";
-		vector<string> physdrvs = BZWParser::getValuesByKey(physDrvKey.c_str(), header, boxData);
+		// need to be able to parse the meshbox face names
+		if (i <= YN) {
+			faces.push_back("sides");
+			faces.push_back("outside");
+		}
+		else if (i == ZP) {
+			faces.push_back("top");
+		}
+		else if (i == ZN) {
+			faces.push_back("bottom");
+		}
+
+
+		vector<string> physdrvs = BZWParser::getValuesByKeyAndFaces("phydrv", faces, header, boxData);
 		if(physdrvs.size() > 1) {
-			printf("box::update(): Error! Defined \"%s physdrv\" %d times!\n", faceName.c_str(), (int)physdrvs.size());
+			printf("box::update(): Error! Defined \"%s phydrv\" %d times!\n", faceName.c_str(), (int)physdrvs.size());
 			return 0;
 		}
 
-		string texsizeKey;
-		texsizeKey = faceName + " texsize";
-		vector<string> texsizes = BZWParser::getValuesByKey(texsizeKey.c_str(), header, boxData);
+		vector<string> texsizes = BZWParser::getValuesByKeyAndFaces("texsize", faces, header, boxData);
 		if(texsizes.size() > 1) {
 			printf("box::update(): Error! Defined \"%s texsize\" %d times!\n", faceName.c_str(), (int)texsizes.size());
 			return 0;
 		}
 
-		string texoffsetKey;
-		texoffsetKey = faceName + " texoffset";
-		vector<string> texoffsets = BZWParser::getValuesByKey(texoffsetKey.c_str(), header, boxData);
+		vector<string> texoffsets = BZWParser::getValuesByKeyAndFaces("texoffset", faces, header, boxData);
 		if(texoffsets.size() > 1) {
 			printf("box::update(): Error! Defined \"%s texoffset\" %d times!\n", faceName.c_str(), (int)texoffsets.size());
 			return 0;
 		}
 
-		string drivethroughKey;
-		drivethroughKey = faceName + " drivethrough";
-		vector<string> drivethroughs = BZWParser::getValuesByKey(drivethroughKey.c_str(), header, boxData);
+		vector<string> drivethroughs = BZWParser::getValuesByKeyAndFaces("drivethrough", faces, header, boxData);
 		if(drivethroughs.size() > 1) {
 			printf("box::update(): Error! Defined \"%s drivethrough\" %d times!\n", faceName.c_str(), (int)drivethroughs.size());
 			return 0;
 		}
 
-		string shootthroughKey;
-		shootthroughKey = faceName + " shootthrough";
-		vector<string> shootthroughs = BZWParser::getValuesByKey(shootthroughKey.c_str(), header, boxData);
+		vector<string> passables = BZWParser::getValuesByKeyAndFaces("passable", faces, header, boxData);
+		if(passables.size() > 1) {
+			printf("box::update(): Error! Defined \"%s passable\" %d times!\n", faceName.c_str(), (int)passables.size());
+			return 0;
+		}
+
+		vector<string> shootthroughs = BZWParser::getValuesByKeyAndFaces("shootthrough", faces, header, boxData);
 		if(shootthroughs.size() > 1) {
 			printf("box::update(): Error! Defined \"%s shootthrough\" %d times!\n", faceName.c_str(), (int)shootthroughs.size());
 			return 0;
 		}
 
-		string ricochetKey;
-		ricochetKey = faceName + " drivethrough";
-		vector<string> ricochets = BZWParser::getValuesByKey(ricochetKey.c_str(), header, boxData);
+		vector<string> ricochets = BZWParser::getValuesByKeyAndFaces("drivethrough", faces, header, boxData);
 		if(ricochets.size() > 1) {
 			printf("box::update(): Error! Defined \"%s ricochet\" %d times!\n", faceName.c_str(), (int)ricochets.size());
 			return 0;
 		}
 
-		string matrefKey;
-		matrefKey = faceName + " matref";
-		vector<string> matrefs = BZWParser::getValuesByKey(matrefKey.c_str(), header, boxData);
+		vector<string> matrefs = BZWParser::getValuesByKeyAndFaces("matref", faces, header, boxData);
 
 		if (physdrvs.size() > 0) {
 			physics* phys = (physics*)Model::command( MODEL_GET, "phydrv", physdrvs[0] );
@@ -151,6 +158,11 @@ int box::update(string& data) {
 
 		if (texoffsets.size() > 0) {
 			texSizes[i] = Point2D( texoffsets[0].c_str() );
+		}
+
+		if (passables.size() > 0) {
+			driveThroughs[i] = true;
+			shootThroughs[i] = true;
 		}
 
 		if (drivethroughs.size() > 0) {
@@ -236,22 +248,38 @@ int box::update(UpdateMessage& message) {
 
 // toString
 string box::toString(void) {
+	string faceLines;
+
+	for (int i = 0; i < FaceCount; i++) {
+		if (physDrvs[i] != NULL)
+			faceLines += string(faceNames[i]) + " phydrv " + physDrvs[i]->getName() + "\n";
+		faceLines += string(faceNames[i]) + " texsize " + texSizes[i].toString() + "\n";
+		faceLines += string(faceNames[i]) + " texoffset " + texOffsets[i].toString() + "\n";
+		if (driveThroughs[i])
+			faceLines += string(faceNames[i]) + " drivethrough\n";
+		if (shootThroughs[i])
+			faceLines += string(faceNames[i]) + " shootthrough\n";
+		if (ricochets[i])
+			faceLines += string(faceNames[i]) + " ricochet\n";
+	}
+
 	return string("box\n") +
 				  BZWLines( this ) +
+				  faceLines +
 				  "end\n";
 }
 
 void box::setSize( osg::Vec3 newSize ) {
-	Primitives::rebuildBoxUV((osg::Group*)getThisNode(), &newSize);
+	Primitives::rebuildBoxUV((osg::Group*)getThisNode(), newSize);
 	bz2object::setSize( newSize );
 }
 
 void box::updateGeometry() {
 	// make 1 by 1 by 1 box which can be scaled to the proper size
-	osg::Group* group = Primitives::buildUntexturedBox( &osg::Vec3( 1, 1, 1 ) );
+	osg::Group* group = Primitives::buildUntexturedBox( osg::Vec3( 1, 1, 1 ) );
 
 	// make UV coordinates
-	Primitives::rebuildBoxUV( group, &getSize() );
+	Primitives::rebuildBoxUV( group, getSize() );
 
 	setThisNode( group );
 }

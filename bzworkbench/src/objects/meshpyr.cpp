@@ -13,7 +13,7 @@
 #include "objects/meshpyr.h"
 
 // default constructor
-meshpyr::meshpyr() : bz2object("meshpyr", "<position><rotation><size><matref><phydrv>") { 
+meshpyr::meshpyr() : bz2object("meshpyr", "<position><rotation><size><matref><phydrv>") {
 	setDefaults();
 }
 
@@ -21,7 +21,7 @@ meshpyr::meshpyr() : bz2object("meshpyr", "<position><rotation><size><matref><ph
 meshpyr::meshpyr(string& data) : bz2object("meshpyr", "<position><rotation><size><matref><phydrv>", data.c_str()) {
 	setDefaults();
 
-	update(data); 
+	update(data);
 }
 
 void meshpyr::setDefaults() {
@@ -48,7 +48,7 @@ int meshpyr::update(string& data) {
 		setSize(getSize());
 	}
 
-	return result;	
+	return result;
 }
 
 int meshpyr::update(UpdateMessage& message ) {
@@ -56,30 +56,32 @@ int meshpyr::update(UpdateMessage& message ) {
 		case UpdateMessage::SET_POSITION: 	// handle a new position
 			setPos( *(message.getAsPosition()) );
 			break;
-			
+
 		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
 			setPos( getPos() + *(message.getAsPositionFactor()) );
 			break;
-			
+
 		case UpdateMessage::SET_ROTATION:		// handle a new rotation
 			setRotationZ( message.getAsRotation()->z() );
 			break;
-			
+
 		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
 			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
 			break;
-			
+
 		case UpdateMessage::SET_SCALE:		// handle a new scale
 			setSize( *(message.getAsScale()) );
 			break;
-			
+
 		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
 			setSize( getSize() + *(message.getAsScaleFactor()) );
 			break;
-			
+
 		default:	// unknown event; don't handle
 			return 0;
 	}
+
+	return 1;
 }
 
 // tostring
@@ -91,16 +93,16 @@ string meshpyr::toString(void) {
 
 // render
 int meshpyr::render(void) {
-	return 0;	
+	return 0;
 }
 
 void meshpyr::setSize( osg::Vec3 newSize ) {
-	Primitives::rebuildPyramidUV( (osg::Geode*)getThisNode(), &(osg::Vec3)newSize );
+	Primitives::rebuildPyramidUV( (osg::Group*)getThisNode(), newSize );
 	bz2object::setSize( newSize );
 }
 
 void meshpyr::updateGeometry() {
-	osg::Node* node = Primitives::buildPyramid( &osg::Vec3( 1, 1, 1 ) );
+	osg::Node* node = Primitives::buildPyramid( osg::Vec3( 1, 1, 1 ) );
 
 	setThisNode( node );
 }

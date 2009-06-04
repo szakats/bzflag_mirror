@@ -24,13 +24,13 @@ using namespace std;
 
 class base : public bz2object {
 public:
-	
+
 	// constructor
 	base();
-	
+
 	// constructor with data
 	base(string& data);
-	
+
 	static DataEntry* init() { return new base(); }
 	static DataEntry* init(string& data) { return new base(data); }
 
@@ -39,35 +39,35 @@ public:
 
 	// getter
 	string get(void);
-	
+
 	// setter
 	int update(string& data);
-	
+
 	// event handler
 	int update( UpdateMessage& msg );
-	
+
 	// tostring
 	string toString();
-	
+
 	// render
 	int render(void);
-	
+
 	// BZWB-specific getters and setters
 	int getTeam() { return team; }
 	string& getWeapon() { return weapon; }
-	
+
 	void setTeam( int team );
 	void setWeapon( const char* weapon ) { this->weapon = weapon; }
 
 	void setSize( osg::Vec3 newSize );
-	
+
 private:
 	int team;
 	string weapon;
-	
+
 	void updateGeometry();
 
-	void updateBaseUV( osg::Group* base, const osg::Vec3* size );
+	void updateBaseUV( osg::Group* base, osg::Vec3 size );
 
 	void setBaseColor( int team );
 };
