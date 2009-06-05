@@ -16,14 +16,14 @@
 
 // constructor
 base::base() :
-	bz2object("base", "<position><rotation><size><color><oncap>") {
+	bz2object("base", "<position><rotation><size><team><color><oncap>") {
 
 	setDefaults();
 }
 
 // constructor with data
 base::base(string& data) :
-	bz2object("base", "<position><rotation><size><color><oncap>", data.c_str()) {
+	bz2object("base", "<position><rotation><size><team><color><oncap>", data.c_str()) {
 
 	setDefaults();
 
@@ -63,7 +63,10 @@ int base::update(string& data) {
 	const char* baseData = lines[0].c_str();
 
 	// get the team
-	vector<string> teams = BZWParser::getValuesByKey("color", header, baseData);
+	vector<string> teamkeys;
+	teamkeys.push_back("color");
+	teamkeys.push_back("team");
+	vector<string> teams = BZWParser::getValuesByKeys(teamkeys, header, baseData);
 	if(teams.size() > 1) {
 		printf("base::update():  Error! Defined \"color\" %d times!\n", (int)teams.size());
 		return 0;
