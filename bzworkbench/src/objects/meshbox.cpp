@@ -14,144 +14,47 @@
 
 #include "model/Primitives.h"
 
+#ifndef M_SQRT2
+#define M_SQRT2    1.41421356237309504880
+#endif
+
 // construct an empty box
-meshbox::meshbox() :
-	bz2object("meshbox", "<position><rotation><size><top matref><outside matref><matref><phydrv><obstacle>") {
+meshbox::meshbox() {
 	setDefaults();
 }
 
 // construct a box from data
-meshbox::meshbox(string& data) :
-	bz2object("meshbox", "<position><rotation><size><top matref><outside matref><matref><phydrv><obstacle>", data.c_str()) {
+meshbox::meshbox(string& data) {
 	setDefaults();
 
 	update(data);
 }
 
 void meshbox::setDefaults() {
-	updateGeometry();
+	// define some basic values
+	ratio = 1.0f;
+	divisions = 4;
+	angle = 360.0f;
+	physicsDriver = NULL;
+	flatShading = true;
+	smoothbounce = false;
+	texsize.set( -8.0f, -8.0f, -8.0f, -8.0f  );
+	boxStyle = true;
 
-	topMaterials = vector<string>();
-	outsideMaterials = vector<string>();
+	osg::Group* group = new osg::Group();
+	for (int i = 0; i < MaterialCount; i++)
+		group->addChild( new osg::Geode() );
 
-	setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	setSize( osg::Vec3(10.0, 10.0, 10.0) );
-	SceneBuilder::markUnselected( this );
-}
+	SceneBuilder::assignTexture( "roof", group->getChild( 0 ) );
+	SceneBuilder::assignTexture( "roof", group->getChild( 1 ) );
+	SceneBuilder::assignTexture( "boxwall", group->getChild( 3 ) );
 
-// getter
-string meshbox::get(void) { return toString(); }
+	// transform to the correct orientation and size
+	Renderable::setRotationZ( 45 );
+	bz2object::setSize( osg::Vec3( (float)M_SQRT2, (float)M_SQRT2, 1 ) ); 
 
-// setter
-int meshbox::update(string& data) {
-	// get the header
-	const char* header = getHeader().c_str();
+	setThisNode( group );
 
-	// get the sections
-	vector<string> lines = BZWParser::getSectionsByHeader(header, data.c_str());
+	setSize( osg::Vec3( 10, 10, 10 ) );
 
-	// quit if there aren't any
-	if(lines[0] == BZW_NOT_FOUND)
-		return 0;
-
-	if(!hasOnlyOne(lines, "meshbox"))
-		return 0;
-
-	// get the data
-	const char* meshBoxData = lines[0].c_str();
-
-	// find occurences of top
-	vector<string> tops = BZWParser::getValuesByKey("top matref", header, meshBoxData);
-
-	// find occurences of outside
-	vector<string> outsides = BZWParser::getValuesByKey("outside matref", header, meshBoxData);
-
-	// copy the data over
-	if(!bz2object::update(data))
-		return 0;
-	topMaterials = tops;
-	outsideMaterials = outsides;
-
-	// force a size update
-	setSize(getSize());
-	return 1;
-}
-
-int meshbox::update( UpdateMessage& message ) {
-	switch( message.type ) {
-		case UpdateMessage::SET_POSITION: 	// handle a new position
-			setPos( *(message.getAsPosition()) );
-			break;
-
-		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
-			setPos( getPos() + *(message.getAsPositionFactor()) );
-			break;
-
-		case UpdateMessage::SET_ROTATION:		// handle a new rotation
-			setRotationZ( message.getAsRotation()->z() );
-			break;
-
-		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
-			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
-			break;
-
-		case UpdateMessage::SET_SCALE:		// handle a new scale
-			setSize( *(message.getAsScale()) );
-			break;
-
-		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
-			setSize( getSize() + *(message.getAsScaleFactor()) );
-			break;
-
-		default:	// unknown event; don't handle
-			return 0;
-	}
-
-	return 1;
-}
-
-// tostring
-string meshbox::toString(void) {
-	// get the top materials
-	string topmats = string("");
-	if(topMaterials.size() > 0) {
-		for(vector<string>::iterator i = topMaterials.begin(); i != topMaterials.end(); i++) {
-			topmats += string("  top matref ") + i->c_str() + "\n";
-		}
-	}
-
-	// get the outside materials
-	string outsidemats = string("");
-	if(outsideMaterials.size() > 0) {
-		for(vector<string>::iterator i = outsideMaterials.begin(); i != outsideMaterials.end(); i++) {
-			outsidemats += string("  outside matref ") + i->c_str() + "\n";
-		}
-	}
-	return string("meshbox\n") +
-				  BZWLines( this ) +
-				  outsidemats +
-				  topmats +
-				  "end\n";
-}
-
-// render
-int meshbox::render(void) {
-	return 0;
-}
-
-void meshbox::setSize( osg::Vec3 newSize ) {
-	Primitives::rebuildBoxUV( (osg::Group*)getThisNode(), newSize );
-
-	bz2object::setSize( newSize );
-}
-
-void meshbox::updateGeometry() {
-	osg::Group* box = (osg::Group*)Primitives::buildUntexturedBox( osg::Vec3( 1, 1, 1 ) );
-
-	for (int i = 0; i < 4; i++)
-		SceneBuilder::assignTexture( "boxwall", box->getChild( i ), osg::StateAttribute::ON );
-	for (int i = 4; i < 6; i++)
-		SceneBuilder::assignTexture( "roof", box->getChild( i ), osg::StateAttribute::ON );
-
-	setThisNode( box );
 }

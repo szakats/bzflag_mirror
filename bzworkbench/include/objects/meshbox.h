@@ -13,46 +13,23 @@
 #ifndef MESHBOX_H_
 #define MESHBOX_H_
 
-#include "bz2object.h"
+#include "objects/arc.h"
 
 #include <string>
-#include <vector>
 
-using namespace std;
-
-class meshbox : public bz2object {
+class meshbox : public arc {
 
 public:
 	// construct an empty box
 	meshbox();
 	
 	// construct a box from data
-	meshbox(string& data);
+	meshbox(std::string& data);
 	
 	static DataEntry* init() { return new meshbox(); }
 	static DataEntry* init(string& data) { return new meshbox(data); }
 
 	void setDefaults();
-	
-	// getter
-	string get(void);
-	
-	// setter
-	int update(string& data);
-	int update(UpdateMessage& message);
-	
-	// tostring
-	string toString(void);
-	
-	// render
-	int render(void);
-
-	void setSize( osg::Vec3 newSize );
-
-private:
-	vector<string> topMaterials, outsideMaterials;
-
-	void updateGeometry();
 };
 
 #endif /*MESHBOX_H_*/

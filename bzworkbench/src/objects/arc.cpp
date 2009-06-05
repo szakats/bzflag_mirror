@@ -16,34 +16,50 @@
 #define M_PI           3.14159265358979323846
 #endif
 
+const char* arc::sideNames[MaterialCount] = {
+  "top",
+  "bottom",
+  "inside",
+  "outside",
+  "startside",
+  "endside"
+};
+
 // default constructor
 arc::arc() :
 	bz2object("arc", "<position><rotation><size><flatshading><angle><ratio><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
-	setDefault();
+	setDefaults();
 }
 
 // data constructor
 arc::arc(string& data) :
 	bz2object("arc", "<position><rotation><size><flatshading><angle><ratio><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>", data.c_str()) {
-	setDefault();
+	setDefaults();
 
 	update(data);
 }
 
-void arc::setDefault() {
+void arc::setDefaults() {
 	// define some basic values
-	ratio = 0.5f;
+	ratio = 1.0f;
 	divisions = 16;
-	angle = 180.0f;
-	setName("default_arc");
+	angle = 360.0f;
 	physicsDriver = NULL;
 	flatShading = false;
-	smoothbounce = true;
-	texsize.set( 1, 1, 1, 1 );
+	smoothbounce = false;
+	texsize.set( -8.0f, -8.0f, -8.0f, -8.0f  );
+	boxStyle = false;
 
 	osg::Group* group = new osg::Group();
-	group->addChild( new osg::Geode() );
-	group->addChild( new osg::Geode() );
+	for (int i = 0; i < MaterialCount; i++)
+		group->addChild( new osg::Geode() );
+
+	SceneBuilder::assignTexture( "roof", group->getChild( 0 ), osg::StateAttribute::ON);
+	SceneBuilder::assignTexture( "roof", group->getChild( 1 ), osg::StateAttribute::ON);
+	SceneBuilder::assignTexture( "boxwall", group->getChild( 2 ), osg::StateAttribute::ON);
+	SceneBuilder::assignTexture( "boxwall", group->getChild( 3 ), osg::StateAttribute::ON);
+	SceneBuilder::assignTexture( "wall", group->getChild( 4 ), osg::StateAttribute::ON);
+	SceneBuilder::assignTexture( "wall", group->getChild( 5 ), osg::StateAttribute::ON);
 
 	setThisNode( group );
 
@@ -65,15 +81,42 @@ int arc::update(string& data) {
 	if(lines[0] == BZW_NOT_FOUND)
 		return 0;
 
-	if(!hasOnlyOne(lines, "arc"))
+	string key = (boxStyle == true ? "meshbox" : "arc");
+	if(!hasOnlyOne(lines, key.c_str()))
 		return 0;
 
 	const char* arcData = lines[0].c_str();
 
-	// get the name
-	vector<string> names = BZWParser::getValuesByKey("name", header, arcData);
-	if(!hasOnlyOne(names, "name"))
+	// get the matrefs
+	osg::Group* group = (osg::Group*)getThisNode();
+	for (int i = 0; i < MaterialCount; i++) {
+		vector<string> faces;
+		faces.push_back(sideNames[i]);
+
+		vector<string> matrefs = BZWParser::getValuesByKeyAndFaces("matref", faces, header, arcData);
+
+		if (matrefs.size() > 0) {
+			vector< material* > materials;
+			for (vector<string>::iterator itr = matrefs.begin(); itr != matrefs.end(); itr++) {
+				material* mat = (material*)Model::command( MODEL_GET, "material", *itr );
+				if (mat != NULL)
+					materials.push_back( mat );
+				else
+					printf("arc::update(): Error! Couldn't find material %s\n", (*itr).c_str());
+			}
+
+			material* finalMat = material::computeFinalMaterial(materials);
+
+			group->getChild(i)->setStateSet(finalMat);
+		}
+	}
+
+	// get the texsize
+	vector<string> texsizes = BZWParser::getValuesByKey("texsize", header, arcData);
+	if(texsizes.size() > 1) {
+		printf("arc::update(): Error! Defined \"texsize\" %d times!\n", (int)texsizes.size());
 		return 0;
+	}
 
 	// get the angle
 	vector<string> angles = BZWParser::getValuesByKey("angle", header, arcData);
@@ -95,16 +138,12 @@ int arc::update(string& data) {
 
 	// get smoothbounce
 	vector<string> smoothBounces =  BZWParser::getValuesByKey("smoothbounce", header, arcData);
-
-	vector<string> texsizes = BZWParser::getValuesByKey("texsize", header, arcData);
-
+	
 	// do base class update
 	if(!bz2object::update(data))
 		return 0;
 
 	// set the data
-	if ( names.size() > 0 )
-		setName( names[0] );
 	if ( angles.size() > 0 )
 		angle = atof( angles[0].c_str() );
 	if ( vDivisions.size() > 0 )
@@ -112,15 +151,7 @@ int arc::update(string& data) {
 	if ( ratios.size() > 0 )
 		ratio = atof( ratios[0].c_str() );
 	if ( texsizes.size() > 0 ) {
-		vector<string> points = BZWParser::getLineElements( texsizes[0].c_str() );
-
-		if (points.size() > 3)
-			texsize.set( atof( points[0].c_str() ),
-				atof( points[1].c_str() ),
-				atof( points[2].c_str() ),
-				atof( points[3].c_str() ));
-		else
-			texsize.set( 0, 0, 0, 0 );
+		texsize = Point4D( texsizes[0].c_str() );
 	}
 	flatShading = (flatShadings.size() == 0 ? false : true);
 	smoothbounce = (smoothBounces.size() == 0 ? false : true);
@@ -165,15 +196,35 @@ int arc::update(UpdateMessage& message) {
 
 // toString
 string arc::toString(void) {
-	return string("arc\n") +
-				  BZWLines( this ) +
-				  "  angle " + string(ftoa(angle)) + "\n" +
-				  "  ratio " + string(ftoa(ratio)) + "\n" +
-				  "  divisions " + string(itoa(divisions)) + "\n" +
-				  (flatShading == true ? "  flatshading\n" : "") +
-				  (smoothbounce == true ? "  smoothbounce\n" : "") +
-				  "end\n";
+	string ret;
+	if (!boxStyle)
+		ret += "arc\n";
+	else
+		ret += "meshbox\n";
 
+	ret += BZWLines( this );
+
+	// materials
+	for (int i = 0; i < MaterialCount; i++) {
+		osg::Group* group = (osg::Group*)getThisNode();
+		osg::StateSet* stateset = group->getChild(i)->getStateSet();
+		if (stateset->getName() != "")
+			ret += "  " + string(sideNames[i]) + " matref " + stateset->getName();
+	}
+
+	// some options shouldn't be included for a meshbox
+	if (!boxStyle)
+		ret += "  divisions " + string(itoa(divisions)) + "\n" +
+			   "  angle " + string(ftoa(angle) ) + "\n" +
+			   "  ratio " + string(ftoa(ratio)) + "\n" +
+			   (flatShading == true ? "  flatshading\n" : "");
+
+	ret += string("") +
+		   (smoothbounce == true ? "  smoothbounce\n" : "") +
+		   "  texsize " + texsize.toString() + "\n" +
+		   "end\n";
+
+	return ret;
 }
 
 // render
@@ -182,32 +233,33 @@ int arc::render(void) {
 }
 
 void arc::setSize( osg::Vec3 newSize ) {
-	bz2object::setSize( newSize );
+	realSize = newSize;
 	updateGeometry();
+}
+
+osg::Vec3 arc::getSize() {
+	return realSize;
 }
 
 void arc::updateGeometry() {
 	osg::Group* arc = (osg::Group*)getThisNode();
-	osg::Geode* sides = (osg::Geode*)arc->getChild( 0 );
-	osg::Geode* topBottom = (osg::Geode*)arc->getChild( 1 );
 
-	// clear any previous geometry
-	if ( sides->getNumDrawables() > 0 )
-		sides->removeDrawables( 0 );
-	if ( topBottom->getNumDrawables() > 0 )
-		topBottom->removeDrawables( 0 );
-
-	osg::Geometry* sideMesh = new osg::Geometry();
-	osg::Geometry* topbotMesh = new osg::Geometry();
-	sides->addDrawable( sideMesh );
-	topBottom->addDrawable( topbotMesh );
+	// clear any previous geometry and make new geometry
+	osg::Geometry* sides[MaterialCount];
+	for (int i = 0; i < MaterialCount; i++) {
+		osg::Geode* geode = (osg::Geode*)arc->getChild( i );
+		if ( geode->getNumDrawables() > 0 )
+			geode->removeDrawables( 0 );
+		sides[i] = new osg::Geometry();
+		geode->addDrawable( sides[i] );
+	}
 
 	bool isPie = false;    // has no inside edge
 	bool isCircle = false; // angle of 360 degrees
 	const float minSize = 1.0e-6f; // cheezy / lazy
 
 	// set size
-	osg::Vec3 sz( 1, 1, 1 );
+	osg::Vec3 sz = realSize;
 
 	// validity checking
 	if ((sz.x() < minSize) || (sz.y() < minSize) || (sz.z() < minSize) ||
@@ -272,18 +324,16 @@ void arc::updateGeometry() {
 	const float squish = sz.y() / sz.x();
 
 	if (isPie) {
-		makePie(sideMesh, topbotMesh, isCircle, a, 0, sz.z(), outrad, squish, texsz);
+		makePie(sides, isCircle, a, 0, sz.z(), outrad, squish, texsz);
 	} else {
-		makeRing(sideMesh, topbotMesh, isCircle, a, 0, sz.z(), inrad, outrad, squish, texsz);
+		makeRing(sides, isCircle, a, 0, sz.z(), inrad, outrad, squish, texsz);
 	}
 
-	// load and apply textures
-	SceneBuilder::assignTexture( "boxwall", sides, osg::StateAttribute::ON);
-	SceneBuilder::assignTexture( "roof", topBottom, osg::StateAttribute::ON);
+	
 }
 
 
-void arc::makePie(osg::Geometry* sideMesh, osg::Geometry* topbotMesh, bool isCircle, float a, float r,
+void arc::makePie(osg::Geometry** sides, bool isCircle, float a, float r,
 				   float h, float radius, float squish,
 				   osg::Vec4& texsz)
 {
@@ -370,10 +420,26 @@ void arc::makePie(osg::Geometry* sideMesh, osg::Geometry* topbotMesh, bool isCir
 	const int vbot = vlen;
 	const int tmid = ((divisions + 1) * 3);
 
-	osg::Vec3Array* realVertices = new osg::Vec3Array();
-	osg::Vec2Array* realTexcoords = new osg::Vec2Array();
-	osg::DrawElementsUInt* quads = new osg::DrawElementsUInt( osg::DrawElements::QUADS, 0 );
-	osg::DrawElementsUInt* tris = new osg::DrawElementsUInt( osg::DrawArrays::TRIANGLES, 0 );
+	osg::Vec3Array* realVertices[MaterialCount];
+	osg::Vec2Array* realTexcoords[MaterialCount];
+
+	for ( int j = 0; j < MaterialCount; j++ ) {
+		realVertices[j] = new osg::Vec3Array();
+		realTexcoords[j] = new osg::Vec2Array();
+		sides[j]->setVertexArray( realVertices[j] );
+		sides[j]->setTexCoordArray( 0, realTexcoords[j] );
+	}
+	osg::DrawElementsUInt* topIdx = new osg::DrawElementsUInt( osg::DrawArrays::TRIANGLES, 0 );
+	osg::DrawElementsUInt* bottomIdx = new osg::DrawElementsUInt( osg::DrawArrays::TRIANGLES, 0 );
+	osg::DrawElementsUInt* outsideIdx = new osg::DrawElementsUInt( osg::DrawArrays::QUADS, 0 );
+	osg::DrawElementsUInt* startIdx = new osg::DrawElementsUInt( osg::DrawElements::QUADS, 0 );
+	osg::DrawElementsUInt* endIdx = new osg::DrawElementsUInt( osg::DrawElements::QUADS, 0 );
+	sides[0]->addPrimitiveSet( topIdx );
+	sides[1]->addPrimitiveSet( bottomIdx );
+	sides[3]->addPrimitiveSet( outsideIdx );
+	sides[4]->addPrimitiveSet( startIdx );
+	sides[5]->addPrimitiveSet( endIdx );
+	
 	int arrayPlace = 0;
 
 	for (i = 0; i < divisions; i++) {
@@ -385,77 +451,70 @@ void arc::makePie(osg::Geometry* sideMesh, osg::Geometry* topbotMesh, bool isCir
 #define PTCI(x) (((divisions + 1) * 3) - (x) - i - 1)
 
 		// outside
-		realVertices->push_back( (*vertices)[PV(0)] );
-		realVertices->push_back( (*vertices)[PV(2)] );
-		realVertices->push_back( (*vertices)[PV(3)] );
-		realVertices->push_back( (*vertices)[PV(1)] );
-		realTexcoords->push_back( (*texcoords)[PTO(0)] );
-		realTexcoords->push_back( (*texcoords)[PTO(2)] );
-		realTexcoords->push_back( (*texcoords)[PTO(3)] );
-		realTexcoords->push_back( (*texcoords)[PTO(1)] );
+		realVertices[3]->push_back( (*vertices)[PV(0)] );
+		realVertices[3]->push_back( (*vertices)[PV(2)] );
+		realVertices[3]->push_back( (*vertices)[PV(3)] );
+		realVertices[3]->push_back( (*vertices)[PV(1)] );
+		realTexcoords[3]->push_back( (*texcoords)[PTO(0)] );
+		realTexcoords[3]->push_back( (*texcoords)[PTO(2)] );
+		realTexcoords[3]->push_back( (*texcoords)[PTO(3)] );
+		realTexcoords[3]->push_back( (*texcoords)[PTO(1)] );
 		for (int j = 0; j < 4; j++)
-			quads->push_back( arrayPlace++ );
+			outsideIdx->push_back( i*4 + j );
 
 		// top
-		realVertices->push_back( (*vertices)[vtop] );
-		realVertices->push_back( (*vertices)[PV(1)] );
-		realVertices->push_back( (*vertices)[PV(3)] );
-		realTexcoords->push_back( (*texcoords)[tmid] );
-		realTexcoords->push_back( (*texcoords)[PTC(0)] );
-		realTexcoords->push_back( (*texcoords)[PTC(1)] );
+		realVertices[0]->push_back( (*vertices)[vtop] );
+		realVertices[0]->push_back( (*vertices)[PV(1)] );
+		realVertices[0]->push_back( (*vertices)[PV(3)] );
+		realTexcoords[0]->push_back( (*texcoords)[tmid] );
+		realTexcoords[0]->push_back( (*texcoords)[PTC(0)] );
+		realTexcoords[0]->push_back( (*texcoords)[PTC(1)] );
 		for (int j = 0; j < 3; j++)
-			tris->push_back( arrayPlace++ );
+			topIdx->push_back( i*3 + j );
 
 		// bottom
-		realVertices->push_back( (*vertices)[vbot] );
-		realVertices->push_back( (*vertices)[PV(2)] );
-		realVertices->push_back( (*vertices)[PV(0)] );
-		realTexcoords->push_back( (*texcoords)[tmid] );
-		realTexcoords->push_back( (*texcoords)[PTCI(1)] );
-		realTexcoords->push_back( (*texcoords)[PTCI(0)] );
+		realVertices[1]->push_back( (*vertices)[vbot] );
+		realVertices[1]->push_back( (*vertices)[PV(2)] );
+		realVertices[1]->push_back( (*vertices)[PV(0)] );
+		realTexcoords[1]->push_back( (*texcoords)[tmid] );
+		realTexcoords[1]->push_back( (*texcoords)[PTCI(1)] );
+		realTexcoords[1]->push_back( (*texcoords)[PTCI(0)] );
 		for (int j = 0; j < 3; j++)
-			tris->push_back( arrayPlace++ );
+			bottomIdx->push_back( i*3 + j );
 	}
 
 
 	if (!isCircle) {
 		int tc = (divisions * 2);
 		// start face
-		realVertices->push_back( (*vertices)[vbot] );
-		realVertices->push_back( (*vertices)[0] );
-		realVertices->push_back( (*vertices)[1] );
-		realVertices->push_back( (*vertices)[vtop] );
-		realTexcoords->push_back( (*texcoords)[0] );
-		realTexcoords->push_back( (*texcoords)[tc] );
-		realTexcoords->push_back( (*texcoords)[tc+1] );
-		realTexcoords->push_back( (*texcoords)[1] );
+		realVertices[4]->push_back( (*vertices)[vbot] );
+		realVertices[4]->push_back( (*vertices)[0] );
+		realVertices[4]->push_back( (*vertices)[1] );
+		realVertices[4]->push_back( (*vertices)[vtop] );
+		realTexcoords[4]->push_back( (*texcoords)[0] );
+		realTexcoords[4]->push_back( (*texcoords)[tc] );
+		realTexcoords[4]->push_back( (*texcoords)[tc+1] );
+		realTexcoords[4]->push_back( (*texcoords)[1] );
 		for (int i = 0; i < 4; i++)
-			quads->push_back( arrayPlace++ );
+			startIdx->push_back( i );
 
 		// end face
 		int e = divisions * 2;
-		realVertices->push_back( (*vertices)[e] );
-		realVertices->push_back( (*vertices)[vbot] );
-		realVertices->push_back( (*vertices)[vtop] );
-		realVertices->push_back( (*vertices)[e+1] );
-		realTexcoords->push_back( (*texcoords)[0] );
-		realTexcoords->push_back( (*texcoords)[tc] );
-		realTexcoords->push_back( (*texcoords)[tc+1] );
-		realTexcoords->push_back( (*texcoords)[1] );
+		realVertices[5]->push_back( (*vertices)[e] );
+		realVertices[5]->push_back( (*vertices)[vbot] );
+		realVertices[5]->push_back( (*vertices)[vtop] );
+		realVertices[5]->push_back( (*vertices)[e+1] );
+		realTexcoords[5]->push_back( (*texcoords)[0] );
+		realTexcoords[5]->push_back( (*texcoords)[tc] );
+		realTexcoords[5]->push_back( (*texcoords)[tc+1] );
+		realTexcoords[5]->push_back( (*texcoords)[1] );
 		for (int i = 0; i < 4; i++)
-			quads->push_back( arrayPlace++ );
+			endIdx->push_back( i );
 	}
-
-	sideMesh->setVertexArray( realVertices );
-	sideMesh->setTexCoordArray( 0, realTexcoords );
-	sideMesh->addPrimitiveSet( quads );
-	topbotMesh->setVertexArray( realVertices );
-	topbotMesh->setTexCoordArray( 0, realTexcoords );
-	topbotMesh->addPrimitiveSet( tris );
 }
 
 
-void arc::makeRing(osg::Geometry* sideMesh, osg::Geometry* topbotMesh, bool isCircle, float a, float r,
+void arc::makeRing(osg::Geometry** sides, bool isCircle, float a, float r,
 				    float h, float inrad, float outrad,
 					float squish, osg::Vec4& texsz)
 {
@@ -516,10 +575,21 @@ void arc::makeRing(osg::Geometry* sideMesh, osg::Geometry* topbotMesh, bool isCi
 		nlen = (divisions + 1) * 2;
 	}
 
-	osg::Vec3Array* realVertices = new osg::Vec3Array();
-	osg::Vec2Array* realTexcoords = new osg::Vec2Array();
-	osg::DrawElementsUInt* quadsSide = new osg::DrawElementsUInt( osg::DrawElements::QUADS, 0 );
-	osg::DrawElementsUInt* quadsTopBot = new osg::DrawElementsUInt( osg::DrawElements::QUADS, 0 );
+	osg::Vec3Array* realVertices[MaterialCount];
+	osg::Vec2Array* realTexcoords[MaterialCount];
+
+	osg::DrawElementsUInt* indices[MaterialCount];
+
+	for (int j = 0; j < MaterialCount; j++ ) {
+		realVertices[j] = new osg::Vec3Array();
+		realTexcoords[j] = new osg::Vec2Array();
+		indices[j] = new osg::DrawElementsUInt( osg::DrawElements::QUADS, 0 );
+		sides[j]->setVertexArray( realVertices[j] );
+		sides[j]->setTexCoordArray( 0, realTexcoords[j] );
+		sides[j]->addPrimitiveSet( indices[j] );
+	}
+	
+
 	int arrayPlace = 0;
 
 	for (i = 0; i < divisions; i++) {
@@ -530,80 +600,79 @@ void arc::makeRing(osg::Geometry* sideMesh, osg::Geometry* topbotMesh, bool isCi
 #define RIT(x) ((divisions + ((x)%2))*2 - ((x) + (i * 2)))
 
 		// inside
-		realVertices->push_back( (*vertices)[RV(4)] );
-		realVertices->push_back( (*vertices)[RV(0)] );
-		realVertices->push_back( (*vertices)[RV(1)] );
-		realVertices->push_back( (*vertices)[RV(5)] );
-		realTexcoords->push_back( (*texcoords)[RIT(2)] );
-		realTexcoords->push_back( (*texcoords)[RIT(0)] );
-		realTexcoords->push_back( (*texcoords)[RIT(1)] );
-		realTexcoords->push_back( (*texcoords)[RIT(3)] );
+		realVertices[2]->push_back( (*vertices)[RV(4)] );
+		realVertices[2]->push_back( (*vertices)[RV(0)] );
+		realVertices[2]->push_back( (*vertices)[RV(1)] );
+		realVertices[2]->push_back( (*vertices)[RV(5)] );
+		realTexcoords[2]->push_back( (*texcoords)[RIT(2)] );
+		realTexcoords[2]->push_back( (*texcoords)[RIT(0)] );
+		realTexcoords[2]->push_back( (*texcoords)[RIT(1)] );
+		realTexcoords[2]->push_back( (*texcoords)[RIT(3)] );
+		for (int j = 0; j < 4; j++)
+			indices[2]->push_back( i*4 + j );
 
 		// outside
-		realVertices->push_back( (*vertices)[RV(2)] );
-		realVertices->push_back( (*vertices)[RV(6)] );
-		realVertices->push_back( (*vertices)[RV(7)] );
-		realVertices->push_back( (*vertices)[RV(3)] );
-		realTexcoords->push_back( (*texcoords)[RT(0)] );
-		realTexcoords->push_back( (*texcoords)[RT(2)] );
-		realTexcoords->push_back( (*texcoords)[RT(3)] );
-		realTexcoords->push_back( (*texcoords)[RT(1)] );
-		for (int j = 0; j < 8; j++)
-			quadsSide->push_back( arrayPlace++ );
+		realVertices[3]->push_back( (*vertices)[RV(2)] );
+		realVertices[3]->push_back( (*vertices)[RV(6)] );
+		realVertices[3]->push_back( (*vertices)[RV(7)] );
+		realVertices[3]->push_back( (*vertices)[RV(3)] );
+		realTexcoords[3]->push_back( (*texcoords)[RT(0)] );
+		realTexcoords[3]->push_back( (*texcoords)[RT(2)] );
+		realTexcoords[3]->push_back( (*texcoords)[RT(3)] );
+		realTexcoords[3]->push_back( (*texcoords)[RT(1)] );
+		for (int j = 0; j < 4; j++)
+			indices[3]->push_back( i*4 + j );
 
 		// top
-		realVertices->push_back( (*vertices)[RV(3)] );
-		realVertices->push_back( (*vertices)[RV(7)] );
-		realVertices->push_back( (*vertices)[RV(5)] );
-		realVertices->push_back( (*vertices)[RV(1)] );
-		realTexcoords->push_back( (*texcoords)[RT(0)] );
-		realTexcoords->push_back( (*texcoords)[RT(2)] );
-		realTexcoords->push_back( (*texcoords)[RT(3)] );
-		realTexcoords->push_back( (*texcoords)[RT(1)] );
+		realVertices[0]->push_back( (*vertices)[RV(3)] );
+		realVertices[0]->push_back( (*vertices)[RV(7)] );
+		realVertices[0]->push_back( (*vertices)[RV(5)] );
+		realVertices[0]->push_back( (*vertices)[RV(1)] );
+		realTexcoords[0]->push_back( (*texcoords)[RT(0)] );
+		realTexcoords[0]->push_back( (*texcoords)[RT(2)] );
+		realTexcoords[0]->push_back( (*texcoords)[RT(3)] );
+		realTexcoords[0]->push_back( (*texcoords)[RT(1)] );
+		for (int j = 0; j < 4; j++)
+			indices[0]->push_back( i*4 + j );
 
 		// bottom
-		realVertices->push_back( (*vertices)[RV(0)] );
-		realVertices->push_back( (*vertices)[RV(4)] );
-		realVertices->push_back( (*vertices)[RV(6)] );
-		realVertices->push_back( (*vertices)[RV(2)] );
-		realTexcoords->push_back( (*texcoords)[RT(0)] );
-		realTexcoords->push_back( (*texcoords)[RT(2)] );
-		realTexcoords->push_back( (*texcoords)[RT(3)] );
-		realTexcoords->push_back( (*texcoords)[RT(1)] );
-		for (int j = 0; j < 8; j++)
-			quadsTopBot->push_back( arrayPlace++ );
+		realVertices[1]->push_back( (*vertices)[RV(0)] );
+		realVertices[1]->push_back( (*vertices)[RV(4)] );
+		realVertices[1]->push_back( (*vertices)[RV(6)] );
+		realVertices[1]->push_back( (*vertices)[RV(2)] );
+		realTexcoords[1]->push_back( (*texcoords)[RT(0)] );
+		realTexcoords[1]->push_back( (*texcoords)[RT(2)] );
+		realTexcoords[1]->push_back( (*texcoords)[RT(3)] );
+		realTexcoords[1]->push_back( (*texcoords)[RT(1)] );
+		for (int j = 0; j < 4; j++)
+			indices[1]->push_back( i*4 + j );
 	}
 
 	if (!isCircle) {
 		int tc = (divisions * 2);
 		// start face
-		realVertices->push_back( (*vertices)[0] );
-		realVertices->push_back( (*vertices)[2] );
-		realVertices->push_back( (*vertices)[3] );
-		realVertices->push_back( (*vertices)[1] );
-		realTexcoords->push_back( (*texcoords)[0] );
-		realTexcoords->push_back( (*texcoords)[tc] );
-		realTexcoords->push_back( (*texcoords)[tc+1] );
-		realTexcoords->push_back( (*texcoords)[1] );
+		realVertices[4]->push_back( (*vertices)[0] );
+		realVertices[4]->push_back( (*vertices)[2] );
+		realVertices[4]->push_back( (*vertices)[3] );
+		realVertices[4]->push_back( (*vertices)[1] );
+		realTexcoords[4]->push_back( (*texcoords)[0] );
+		realTexcoords[4]->push_back( (*texcoords)[tc] );
+		realTexcoords[4]->push_back( (*texcoords)[tc+1] );
+		realTexcoords[4]->push_back( (*texcoords)[1] );
+		for (int j = 0; j < 4; j++)
+			indices[4]->push_back( j );
 
 		// end face
 		int e = divisions * 4;
-		realVertices->push_back( (*vertices)[e+2] );
-		realVertices->push_back( (*vertices)[e] );
-		realVertices->push_back( (*vertices)[e+1] );
-		realVertices->push_back( (*vertices)[e+3] );
-		realTexcoords->push_back( (*texcoords)[0] );
-		realTexcoords->push_back( (*texcoords)[tc] );
-		realTexcoords->push_back( (*texcoords)[tc+1] );
-		realTexcoords->push_back( (*texcoords)[1] );
-		for (int j = 0; j < 8; j++)
-			quadsSide->push_back( arrayPlace++ );
+		realVertices[5]->push_back( (*vertices)[e+2] );
+		realVertices[5]->push_back( (*vertices)[e] );
+		realVertices[5]->push_back( (*vertices)[e+1] );
+		realVertices[5]->push_back( (*vertices)[e+3] );
+		realTexcoords[5]->push_back( (*texcoords)[0] );
+		realTexcoords[5]->push_back( (*texcoords)[tc] );
+		realTexcoords[5]->push_back( (*texcoords)[tc+1] );
+		realTexcoords[5]->push_back( (*texcoords)[1] );
+		for (int j = 0; j < 4; j++)
+			indices[5]->push_back( j );
 	}
-
-	sideMesh->setVertexArray( realVertices );
-	sideMesh->setTexCoordArray( 0, realTexcoords );
-	sideMesh->addPrimitiveSet( quadsSide );
-	topbotMesh->setVertexArray( realVertices );
-	topbotMesh->setTexCoordArray( 0, realTexcoords );
-	topbotMesh->addPrimitiveSet( quadsTopBot );
 }

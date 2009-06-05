@@ -12,6 +12,10 @@
 
 #include "objects/meshpyr.h"
 
+#ifndef M_SQRT2
+#define M_SQRT2    1.41421356237309504880
+#endif
+
 // default constructor
 meshpyr::meshpyr() {
 	setDefaults();
@@ -46,6 +50,10 @@ void meshpyr::setDefaults() {
 	SceneBuilder::assignTexture( "pyrwall", group->getChild( 1 ) );
 	SceneBuilder::assignTexture( "pyrwall", group->getChild( 2 ) );
 	SceneBuilder::assignTexture( "pyrwall", group->getChild( 3 ) );
+
+	// transform to the correct orientation and size
+	Renderable::setRotationZ( 45 );
+	bz2object::setSize( osg::Vec3( (float)M_SQRT2, (float)M_SQRT2, 1 ) ); 
 
 	// default size is 10x10x10
 	setSize( osg::Vec3( 10, 10, 10 ) );

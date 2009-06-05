@@ -47,6 +47,7 @@ void cone::setDefaults() {
 	physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
+	pyramidStyle = false;
 
 	sweepAngle = 360.0f;
 

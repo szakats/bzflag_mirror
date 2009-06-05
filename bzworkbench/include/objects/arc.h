@@ -15,6 +15,7 @@
 
 #include "bz2object.h"
 #include "model/BZWParser.h"
+#include "render/Point4D.h"
 #include <string>
 #include <vector>
 
@@ -23,6 +24,15 @@ using namespace std;
 class arc : public bz2object {
 
 public:
+	enum {
+		Top,
+		Bottom,
+		Inside,
+		Outside,
+		StartFace,
+		EndFace,
+		MaterialCount
+    };
 
 	arc();
 	
@@ -31,7 +41,7 @@ public:
 	static DataEntry* init() { return new arc(); }
 	static DataEntry* init(string& data) { return new arc(data); }
 	
-	void setDefault();
+	virtual void setDefaults();
 
 	// getter
 	string get(void);
@@ -47,19 +57,26 @@ public:
 	int render(void);
 
 	void setSize( osg::Vec3 newSize);
+	osg::Vec3 getSize();
 
-private:
-	bool flatShading, smoothbounce;
-	float angle, ratio;
+protected:
+	static const char* sideNames[MaterialCount];
+
+	bool flatShading;
+	bool smoothbounce;
+	float angle;
+	float ratio;
 	int divisions;
-	osg::Vec4 texsize;
+	Point4D texsize;
+	bool boxStyle;
+	osg::Vec3 realSize;
 
 	void updateGeometry();
 
-	void makePie(osg::Geometry* sideMesh, osg::Geometry* topbotMesh, bool isCircle, float a, float r,
+	void makePie(osg::Geometry** sides, bool isCircle, float a, float r,
 				   float h, float radius, float squish,
 				   osg::Vec4& texsz);
-	void makeRing(osg::Geometry* sideMesh, osg::Geometry* topbotMesh, bool isCircle, float a, float r,
+	void makeRing(osg::Geometry** sides, bool isCircle, float a, float r,
 				    float h, float inrad, float outrad,
 					float squish, osg::Vec4& texsz);
 };
