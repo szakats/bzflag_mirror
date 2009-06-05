@@ -13,96 +13,43 @@
 #include "objects/meshpyr.h"
 
 // default constructor
-meshpyr::meshpyr() : bz2object("meshpyr", "<position><rotation><size><matref><phydrv>") {
+meshpyr::meshpyr() {
 	setDefaults();
 }
 
 // constructor with data
-meshpyr::meshpyr(string& data) : bz2object("meshpyr", "<position><rotation><size><matref><phydrv>", data.c_str()) {
+meshpyr::meshpyr(string& data) {
 	setDefaults();
 
 	update(data);
 }
 
 void meshpyr::setDefaults() {
-	updateGeometry();
+	// define some basic values
+	divisions = 4;
+	physicsDriver = NULL;
+	flatShading = false;
+	smoothbounce = true;
+	flipz = false;
+	pyramidStyle = true;
 
-	setPos( osg::Vec3(0.0, 0.0, 0.0) );
-	setSize( osg::Vec3(10.0, 10.0, 10.0) );
-	SceneBuilder::markUnselected( this );
-}
+	sweepAngle = 360.0f;
 
-// getter
-string meshpyr::get(void) { return toString(); }
+	// make group and geodes
+	osg::Group* group = new osg::Group();
+	for (int i = 0; i < 4; i++)
+		group->addChild( new osg::Geode() );
+	setThisNode( group );
 
-// setter
-int meshpyr::update(string& data) {
-	osg::Vec3 size = getSize();
+	// assign default textures
+	SceneBuilder::assignTexture( "pyrwall", group->getChild( 0 ) );
+	SceneBuilder::assignTexture( "pyrwall", group->getChild( 1 ) );
+	SceneBuilder::assignTexture( "pyrwall", group->getChild( 2 ) );
+	SceneBuilder::assignTexture( "pyrwall", group->getChild( 3 ) );
 
-	int result = bz2object::update( data );
-	if( result == 0 )
-		return result;
+	// default size is 10x10x10
+	setSize( osg::Vec3( 10, 10, 10 ) );
 
-	// if size changes then UVs must be regenerated
-	if( getSize() != size ) {
-		setSize(getSize());
-	}
-
-	return result;
-}
-
-int meshpyr::update(UpdateMessage& message ) {
-	switch( message.type ) {
-		case UpdateMessage::SET_POSITION: 	// handle a new position
-			setPos( *(message.getAsPosition()) );
-			break;
-
-		case UpdateMessage::SET_POSITION_FACTOR:	// handle a translation
-			setPos( getPos() + *(message.getAsPositionFactor()) );
-			break;
-
-		case UpdateMessage::SET_ROTATION:		// handle a new rotation
-			setRotationZ( message.getAsRotation()->z() );
-			break;
-
-		case UpdateMessage::SET_ROTATION_FACTOR:	// handle an angular translation
-			setRotationZ( getRotation().z() + message.getAsRotationFactor()->z() );
-			break;
-
-		case UpdateMessage::SET_SCALE:		// handle a new scale
-			setSize( *(message.getAsScale()) );
-			break;
-
-		case UpdateMessage::SET_SCALE_FACTOR:	// handle a scaling factor
-			setSize( getSize() + *(message.getAsScaleFactor()) );
-			break;
-
-		default:	// unknown event; don't handle
-			return 0;
-	}
-
-	return 1;
-}
-
-// tostring
-string meshpyr::toString(void) {
-	return string("meshpyr\n") +
-				  BZWLines( this ) +
-				  "end\n";
-}
-
-// render
-int meshpyr::render(void) {
-	return 0;
-}
-
-void meshpyr::setSize( osg::Vec3 newSize ) {
-	Primitives::rebuildPyramidUV( (osg::Group*)getThisNode(), newSize );
-	bz2object::setSize( newSize );
-}
-
-void meshpyr::updateGeometry() {
-	osg::Node* node = Primitives::buildPyramid( osg::Vec3( 1, 1, 1 ) );
-
-	setThisNode( node );
+	// build the geometry
+	buildGeometry();
 }

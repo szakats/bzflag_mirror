@@ -12,6 +12,10 @@
 
 #include "objects/arc.h"
 
+#ifndef M_PI
+#define M_PI           3.14159265358979323846
+#endif
+
 // default constructor
 arc::arc() :
 	bz2object("arc", "<position><rotation><size><flatshading><angle><ratio><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {

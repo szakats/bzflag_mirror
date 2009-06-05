@@ -12,6 +12,8 @@
 
 #include "objects/base.h"
 
+#include "model/Primitives.h"
+
 // constructor
 base::base() :
 	bz2object("base", "<position><rotation><size><color><oncap>") {

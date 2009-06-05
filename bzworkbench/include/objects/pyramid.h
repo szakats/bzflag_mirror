@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "render/GeometryExtractorVisitor.h"
+#include "render/Point2D.h"
 
 using namespace std;
 

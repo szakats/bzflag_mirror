@@ -13,6 +13,36 @@
 #include "model/Model.h"
 #include "windows/View.h"
 
+#include "model/BZWParser.h"
+
+#include "DataEntry.h"
+
+#include "objects/arc.h"
+#include "objects/base.h"
+#include "objects/box.h"
+#include "objects/cone.h"
+#include "objects/define.h"
+#include "objects/dynamicColor.h"
+#include "objects/group.h"
+#include "objects/link.h"
+#include "objects/material.h"
+#include "objects/mesh.h"
+#include "objects/meshbox.h"
+#include "objects/meshpyr.h"
+#include "objects/options.h"
+#include "objects/physics.h"
+#include "objects/pyramid.h"
+#include "objects/sphere.h"
+#include "objects/teleporter.h"
+#include "objects/tetra.h"
+#include "objects/texturematrix.h"
+#include "objects/waterLevel.h"
+#include "objects/weapon.h"
+#include "objects/world.h"
+#include "objects/zone.h"
+
+#include "objects/bz2object.h"
+
 Model* Model::modRef;
 
 Model::Model() : Observable()

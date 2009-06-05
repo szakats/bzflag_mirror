@@ -22,7 +22,7 @@
 #include "../widgets/QuickLabel.h"
 #include "../defines.h"
 
-#include "../objects/cone.h"
+#include "objects/cone.h"
 
 class ConeConfigurationDialog : public ConfigurationDialog {
 

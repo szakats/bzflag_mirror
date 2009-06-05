@@ -13,21 +13,22 @@
 #ifndef CONE_H_
 #define CONE_H_
 
-#include "bz2object.h"
-
+#include "objects/bz2object.h"
 #include "model/SceneBuilder.h"
-#include <osg/Node>
-#include <osg/Geode>
-#include <osg/Geometry>
-#include <osg/PrimitiveSet>
-#include <osg/StateSet>
-#include <osg/StateAttribute>
-#include <osg/ShadeModel>
+#include "render/Point2D.h"
 
 #include <math.h>
 
 class cone : public bz2object {
 public:
+	enum {
+		Edge,
+		Bottom,
+		StartFace,
+		EndFace,
+		MaterialCount
+	};
+
 	// default constructor
 	cone();
 	
@@ -37,6 +38,8 @@ public:
 	static DataEntry* init() { return new cone(); }
 	static DataEntry* init(string& data) { return new cone(data); }
 	
+	virtual void setDefaults();
+
 	// getter
 	string get(void);
 	
@@ -53,48 +56,27 @@ public:
 	float getSweepAngle() { return sweepAngle; }
 	int getDivisions() { return divisions; }
 	
-	void setFlatShading(bool value) {
-		flatShading = value;
-		updateShadeModel();
-	}
+	void setFlatShading(bool value);
 	
 	void setSmoothBounce(bool value) { smoothbounce = value; }
 	
-	void setSweepAngle(float value) {
-		if( value != sweepAngle ) {		// refresh the geometry
-			theCone->removeChild( coneNode.get() );
-			theCone->removeChild( baseNode.get() );
-			
-			buildGeometry();
-		}
-		
-		sweepAngle = value;
-	}
+	void setSweepAngle(float value);
 	
-	void setDivisions(int value) {
-		if( value != divisions ) {	// refresh the geometry
-			theCone->removeChild( coneNode.get() );
-			theCone->removeChild( baseNode.get() );
-			
-			buildGeometry();
-		}
-		
-		divisions = value;
-	}
+	void setDivisions(int value);
 	
-private:
-	bool flatShading, smoothbounce;
+protected:
+	static const char* sideNames[MaterialCount];
+
+	bool flatShading;
+	bool smoothbounce;
+	bool flipz;
 	int divisions;
+	bool pyramidStyle;
 	
 	// sweep angle
 	float sweepAngle;
-	
-	// reference to the nodes that make up the cone
-	osg::ref_ptr< osg::Geode > coneNode;
-	osg::ref_ptr< osg::Geode > baseNode;
-	osg::ref_ptr< osg::Geode > crossSectionNode;	// this is only used when sweepAngle < 360
-	
-	osg::ref_ptr< osg::Group > theCone;	// the group containing the aforementioned geodes
+
+	Point2D texsize;
 	
 	// helper method to build the geometry
 	void buildGeometry();

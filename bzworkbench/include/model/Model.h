@@ -254,7 +254,7 @@ private:
 	static Model* modRef;
 };
 
-#include "BZWParser.h"
+/*#include "BZWParser.h"
 
 #include "../DataEntry.h"
 
@@ -282,7 +282,7 @@ private:
 #include "../objects/world.h"
 #include "../objects/zone.h"
 
-#include "../objects/bz2object.h"
+#include "../objects/bz2object.h"*/
 
 // #include "../windows/View.h"
 

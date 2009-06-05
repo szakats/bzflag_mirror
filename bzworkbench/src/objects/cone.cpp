@@ -12,49 +12,61 @@
 
 #include "objects/cone.h"
 
+#include <osg/Node>
+#include <osg/Geode>
+#include <osg/Geometry>
+#include <osg/PrimitiveSet>
+#include <osg/StateSet>
+#include <osg/StateAttribute>
+#include <osg/ShadeModel>
+
+const char* cone::sideNames[MaterialCount] = {
+  "edge",
+  "bottom",
+  "startside",
+  "endside"
+};
+
 // default constructor
 cone::cone() :
-	bz2object("cone", "<position><rotation><size><angle><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
+	bz2object("cone", "<position><rotation><size><angle><flatshading><name><texsize><flipz><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
+	setDefaults();
+}
 
+// constructor with data
+cone::cone(string& data) :
+	bz2object("cone", "<position><rotation><size><angle><flatshading><name><texsize><flipz><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
+	setDefaults();
+
+	update(data);
+}
+
+void cone::setDefaults() {
 	// define some basic values
 	divisions = 16;
-	setName( SceneBuilder::makeUniqueName("default_cone"));
 	physicsDriver = NULL;
 	flatShading = false;
 	smoothbounce = true;
 
 	sweepAngle = 360.0f;
 
+	// make group and geodes
+	osg::Group* group = new osg::Group();
+	for (int i = 0; i < 4; i++)
+		group->addChild( new osg::Geode() );
+	setThisNode( group );
+
+	// assign default textures
+	SceneBuilder::assignTexture( "boxwall", group->getChild( 0 ) );
+	SceneBuilder::assignTexture( "roof", group->getChild( 1 ) );
+	SceneBuilder::assignTexture( "wall", group->getChild( 2 ) );
+	SceneBuilder::assignTexture( "wall", group->getChild( 3 ) );
+
 	// default size is 10x10x10
 	setSize( osg::Vec3( 10, 10, 10 ) );
 
 	// build the geometry
 	buildGeometry();
-
-}
-
-// constructor with data
-cone::cone(string& data) :
-	bz2object("cone", "<position><rotation><size><angle><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>") {
-
-	// define some basic values
-	divisions = -1;	// bogus value (fixed by update)
-	setName(SceneBuilder::makeUniqueName("default_cone"));
-	physicsDriver = NULL;
-	flatShading = false;
-	smoothbounce = true;
-
-	sweepAngle = 0.0f;		// bogus value (fixed by update)
-
-	// default size is 10x10x10
-	setSize( osg::Vec3( 10, 10, 10 ) );
-
-	if( update(data) == 0 ) {
-		// if the update failed, just add a default cone
-		divisions = 16;
-		sweepAngle = 360.0f;
-		buildGeometry();
-	}
 }
 
 // getter
@@ -72,21 +84,44 @@ int cone::update(string& data) {
 		return 0;
 	}
 
-	if(!hasOnlyOne(lines, "cone")) {
+	string key = (pyramidStyle == true ? "meshpyr" : "cone");
+	if(!hasOnlyOne(lines, key.c_str())) {
 		printf("cone: improper data\n");
 		return 0;
 	}
 
 	const char* coneData = lines[0].c_str();
 
-	// get the name
-	vector<string> names = BZWParser::getValuesByKey("name", header, coneData);
-	if(names.size() > 1) {
-		printf("cone::update(): error! defined \"name\" %d times\n", (int)names.size() );
+	// get the matrefs
+	osg::Group* group = (osg::Group*)getThisNode();
+	for (int i = 0; i < MaterialCount; i++) {
+		vector<string> faces;
+		faces.push_back(sideNames[i]);
+
+		vector<string> matrefs = BZWParser::getValuesByKeyAndFaces("matref", faces, header, coneData);
+
+		if (matrefs.size() > 0) {
+			vector< material* > materials;
+			for (vector<string>::iterator itr = matrefs.begin(); itr != matrefs.end(); itr++) {
+				material* mat = (material*)Model::command( MODEL_GET, "material", *itr );
+				if (mat != NULL)
+					materials.push_back( mat );
+				else
+					printf("cone::update(): Error! Couldn't find material %s\n", (*itr).c_str());
+			}
+
+			material* finalMat = material::computeFinalMaterial(materials);
+
+			group->getChild(i)->setStateSet(finalMat);
+		}
+	}
+
+	// get the texsize
+	vector<string> texsizes = BZWParser::getValuesByKey("texsize", header, coneData);
+	if(texsizes.size() > 1) {
+		printf("cone::update(): Error! Defined \"texsize\" %d times!\n", (int)texsizes.size());
 		return 0;
 	}
-	if( names.size() == 0 )
-		names.push_back( string("default_cone") );	// default name is "default_cone"
 
 	// get the divisions
 	vector<string> vDivisions = BZWParser::getValuesByKey("divisions", header, coneData);
@@ -116,23 +151,24 @@ int cone::update(string& data) {
 	if(!bz2object::update(data))
 		return 0;
 
-	// set the data
-	setName( names[0] );
 
 	// see if the divisions changed (if so, then update the geometry)
 	int oldDivisions = divisions;
-	divisions = atoi( vDivisions[0].c_str() );
+	if (vDivisions.size() > 0) 
+		divisions = atoi( vDivisions[0].c_str() );
+	
 
 	float oldSweepAngle = sweepAngle;
-	sweepAngle = atof( sweepAngles[0].c_str() );
+	if (sweepAngles.size() > 0)
+		sweepAngle = atof( sweepAngles[0].c_str() );
 
 	// if the number of divisions changed or the sweep angle changed, rebuild the geometry
 	if( divisions != oldDivisions || sweepAngle != oldSweepAngle ) {
-		if( theCone.get() != NULL ) {
-			theCone->removeChild( coneNode.get() );
-			theCone->removeChild( baseNode.get() );
-		}
 		buildGeometry();
+	}
+
+	if (texsizes.size() > 0) {
+		texsize = Point2D( texsizes[0].c_str() );
 	}
 
 	flatShading = (flatShadings.size() == 0 ? false : true);
@@ -184,19 +220,70 @@ int cone::update( UpdateMessage& message ) {
 
 // toString
 string cone::toString(void) {
-	return string("cone\n") +
-				  BZWLines( this ) +
-				  "  divisions " + string(itoa(divisions)) + "\n" +
-				  (flatShading == true ? "  flatshading\n" : "") +
-				  (smoothbounce == true ? "  smoothbounce\n" : "") +
-				  "  angle " + string(ftoa(sweepAngle) ) + "\n" +
-				  "end\n";
+    string ret;
+	if (!pyramidStyle)
+		ret += "cone\n";
+	else
+		ret += "meshpyr\n";
+
+	ret += BZWLines( this );
+
+	// materials
+	for (int i = 0; i < MaterialCount; i++) {
+		osg::Group* group = (osg::Group*)getThisNode();
+		osg::StateSet* stateset = group->getChild(i)->getStateSet();
+		if (stateset->getName() != "")
+			ret += "  " + string(sideNames[i]) + " matref " + stateset->getName();
+	}
+
+	// some options shouldn't be included for a meshpyr
+	if (!pyramidStyle)
+		ret += "  divisions " + string(itoa(divisions)) + "\n" +
+			   "  angle " + string(ftoa(sweepAngle) ) + "\n";
+
+	ret += string("") +
+		   (flatShading == true ? "  flatshading\n" : "") +
+		   (smoothbounce == true ? "  smoothbounce\n" : "") +
+		   "  texsize " + texsize.toString() + "\n" +
+		   (flipz == true ? "  flipz\n" : "") +
+		   "end\n";
+
+	return ret;
+}
+
+void cone::setFlatShading(bool value) {
+	flatShading = value;
+	updateShadeModel();
+}
+
+void cone::setSweepAngle(float value) {
+	if( value != sweepAngle ) {		// refresh the geometry
+		buildGeometry();
+	}
+	
+	sweepAngle = value;
+}
+	
+void cone::setDivisions(int value) {
+	if( value != divisions ) {	// refresh the geometry
+		buildGeometry();
+	}
+		
+	divisions = value;
 }
 
 // build the cone geometry
 void cone::buildGeometry() {
 	// make the group
-	theCone = new osg::Group();
+	osg::Group* theCone = (osg::Group*)getThisNode();
+	osg::Geode* coneNode = (osg::Geode*)theCone->getChild( 0 );
+	if (coneNode->getNumDrawables() > 0) coneNode->removeDrawables( 0 );
+	osg::Geode* baseNode = (osg::Geode*)theCone->getChild( 1 );
+	if (baseNode->getNumDrawables() > 0) baseNode->removeDrawables( 0 );
+	osg::Geode* startNode = (osg::Geode*)theCone->getChild( 2 );
+	if (startNode->getNumDrawables() > 0) startNode->removeDrawables( 0 );
+	osg::Geode* endNode = (osg::Geode*)theCone->getChild( 3 );
+	if (endNode->getNumDrawables() > 0) endNode->removeDrawables( 0 );
 
 	// geometry data for the conical component
 	osg::Vec3Array* points = new osg::Vec3Array();
@@ -217,6 +304,18 @@ void cone::buildGeometry() {
    	float radius_x = 1.0;
    	float radius_y = 1.0;
    	float angle;
+
+	// build the geodes
+	osg::Geometry* coneGeometry = new osg::Geometry();
+	osg::Geometry* baseGeometry = new osg::Geometry();
+	coneNode->addDrawable( coneGeometry );
+	coneGeometry->setVertexArray( points );
+	coneGeometry->setTexCoordArray( 0, texCoords );
+	coneGeometry->addPrimitiveSet( indices );
+	baseNode->addDrawable( baseGeometry );
+	baseGeometry->setVertexArray( points );
+	baseGeometry->setTexCoordArray( 0, baseTexCoords );
+	baseGeometry->addPrimitiveSet( baseIndices );
 
    	// build a full cone if the sweep angle is >= 360.0 degrees
    	if( sweepAngle >= 360.0f ) {
@@ -291,14 +390,19 @@ void cone::buildGeometry() {
 	   	}
 
 	   	// make the cross-sections
-	   	osg::DrawElementsUInt* crossSectionIndices = new osg::DrawElementsUInt( osg::PrimitiveSet::TRIANGLE_STRIP, 0 );
+	   	osg::DrawElementsUInt* startIndices = new osg::DrawElementsUInt( osg::PrimitiveSet::TRIANGLES, 0 );
+		osg::DrawElementsUInt* endIndices = new osg::DrawElementsUInt( osg::PrimitiveSet::TRIANGLES, 0 );
+
 
 	   	// add the indices to (1) the last point in the base, (2) the center, (3) the tip, and (4) the first point in the base
-	   	crossSectionIndices->push_back( divisions + 2 );	// the (divisions+2)-th point is the last point in the base
-	   	crossSectionIndices->push_back( 1 );	// the 1st point is the center
-	   	crossSectionIndices->push_back( 0 );			// the 0th point is the tip
-	   	crossSectionIndices->push_back( 2 );			// the 2st point is the first point in the base
+	   	endIndices->push_back( divisions + 2 );	// the (divisions+2)-th point is the last point in the base
+	   	endIndices->push_back( 1 );	// the 1st point is the center
+	   	endIndices->push_back( 0 );			// the 0th point is the tip
 
+		startIndices->push_back( 2 );			// the 2st point is the first point in the base
+		startIndices->push_back( 0 );			// the 0th point is the tip
+		startIndices->push_back( 1 );	// the 1st point is the center
+	   	
 	   	// make the cross-section texture coordinates
 	   	osg::Vec2Array* crossSectionTexCoords = new osg::Vec2Array();
 
@@ -313,23 +417,17 @@ void cone::buildGeometry() {
 	   	crossSectionTexCoords->push_back( osg::Vec2( 0.0, 0.0 ) );
 
 	   	// make the crossSection geode
-	   	crossSectionNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("coneCrossSection").c_str(), points, crossSectionIndices, crossSectionTexCoords, "share/wall.png" );
-	   	theCone->addChild( crossSectionNode.get() );
+	   	osg::Geometry* startGeometry = new osg::Geometry();
+		osg::Geometry* endGeometry = new osg::Geometry();
+		startNode->addDrawable( startGeometry );
+		startGeometry->setVertexArray( points );
+		startGeometry->setTexCoordArray( 0, crossSectionTexCoords );
+		startGeometry->addPrimitiveSet( startIndices );
+		endNode->addDrawable( endGeometry );
+		endGeometry->setVertexArray( points );
+		endGeometry->setTexCoordArray( 0, crossSectionTexCoords );
+		endGeometry->addPrimitiveSet( endIndices );
    	}
-
-   	// build the geodes
-   	coneNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("cone").c_str(), points, indices, texCoords, "boxwall", osg::StateAttribute::ON );
-   	baseNode = SceneBuilder::buildGeode( SceneBuilder::nameNode("coneBase").c_str(), points, baseIndices, baseTexCoords, "roof", osg::StateAttribute::ON );
-
-   	// add the geodes to the Renderable
-   	theCone->addChild( coneNode.get() );
-   	theCone->addChild( baseNode.get() );
-
-   	setThisNode( theCone.get() );
-
-   	// enable texturing
-   	osg::StateSet* stateSet = theCone->getOrCreateStateSet();
-   	stateSet->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::ON );
 }
 
 // set the shade model based on the value of flatShading

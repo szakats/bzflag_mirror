@@ -12,6 +12,10 @@
 
 #include "objects/sphere.h"
 
+#ifndef M_PI
+#define M_PI           3.14159265358979323846
+#endif
+
 sphere::sphere() :
 bz2object("sphere", "<position><rotation><size><radius><flatshading><name><divisions><shift><shear><spin><scale><smoothbounce><phydrv><matref>" ) {
 	setDefaults();

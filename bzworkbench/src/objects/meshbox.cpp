@@ -12,6 +12,8 @@
 
 #include "objects/meshbox.h"
 
+#include "model/Primitives.h"
+
 // construct an empty box
 meshbox::meshbox() :
 	bz2object("meshbox", "<position><rotation><size><top matref><outside matref><matref><phydrv><obstacle>") {

@@ -13,38 +13,19 @@
 #ifndef MESHPYR_H_
 #define MESHPYR_H_
 
-#include "bz2object.h"
+#include "objects/cone.h"
 
-class meshpyr : public bz2object {
+class meshpyr : public cone {
 public:
 	
 	meshpyr();
-	meshpyr(string& data);
+	meshpyr(std::string& data);
 	
 	static DataEntry* init() { return new meshpyr(); }
 	static DataEntry* init(string& data) { return new meshpyr(data); }
 	
 	// restore default values
-	void setDefaults();
-
-	// getter
-	string get(void);
-	
-	// setter
-	int update(string& data);
-	int update( UpdateMessage& message );
-	
-	// tostring
-	string toString(void);
-	
-	// render
-	int render(void);
-
-	void setSize( osg::Vec3 newSize );
-	
-private:
-
-	void updateGeometry();
+	virtual void setDefaults();
 };
 
 #endif /*MESHPYR_H_*/

@@ -12,6 +12,11 @@
 
 #include "objects/material.h"
 
+#include "model/SceneBuilder.h"
+
+#include "objects/texturematrix.h"
+#include "objects/dynamicColor.h"
+
 using namespace std;
 
 // default constructor

@@ -12,6 +12,8 @@
 
 #include "dialogs/AdvancedOptionsDialog.h"
 
+#include "objects/bz2object.h"
+
 // main constructor
 AdvancedOptionsDialog::AdvancedOptionsDialog( bz2object* _obj ) :
 	ConfigurationDialog( _obj, "Advanced Options", DEFAULT_WIDTH, DEFAULT_HEIGHT ) {

@@ -14,6 +14,10 @@
 #include "model/Model.h"
 #include "commonControls.h"
 
+#include "objects/base.h"
+#include "objects/group.h"
+#include "objects/teleporter.h"
+
 void MenuBar::buildMenu(void) {
 	
 	add("File", 0, 0, 0, FL_SUBMENU);
